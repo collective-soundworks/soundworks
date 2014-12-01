@@ -1,0 +1,35 @@
+{
+  "name": "the-matrix",
+  "version": "0.1.0",
+  "description": "The Matrix is a framework that enables developers and artists to create collaborative performances with mobile phones on the web.",
+  "authors": [
+    "Sébastien Robaszkiewicz",
+    "Norbert Schnell"
+  ],
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "~4.8.6",
+    "jade": "~1.5.0",
+    "socket.io": "~1.1.0",
+    "underscore": "^1.7.0",
+    "audio-context": "git://github.com/Ircam-RnD/audio-context.git#master",
+    "loaders": "git://github.com/Ircam-RnD/loaders.git#master",
+    "simple-scheduler": "git://github.com/Ircam-RnD/simple-scheduler.git#master",
+    "granular-engine": "git://github.com/Ircam-RnD/granular-engine.git#master",
+    "segment-engine": "git://github.com/Ircam-RnD/segment-engine.git#master"
+  },
+  "devDependencies": {
+    "browserify": "~5.11.0",
+    "gulp": "~3.8.7",
+    "gulp-browserify": "^0.5.0",
+    "gulp-clean": "~0.3.1",
+    "gulp-es6-transpiler": "~1.0.0",
+    "gulp-nodemon": "~1.0.4",
+    "gulp-rename": "^1.2.0",
+    "gulp-watch": "^2.0.0",
+    "vinyl-transform": "^1.0.0"
+  }
+}
