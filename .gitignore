@@ -1,0 +1,4 @@
+**/*.js
+!**/*.es6.js
+!**/index.js
+node_modules
