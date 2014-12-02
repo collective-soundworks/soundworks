@@ -8,10 +8,9 @@ module.exports = {
  PlayerManager: require('./ServerPlayerManager'),
  PreparationManager: require('./ServerPreparationManager'),
  PreparationManagerPlacementAndSync: require('./ServerPreparationManagerPlacementAndSync'),
- Setup: require('./ServerSetup'),
  SoloistManager: require('./ServerSoloistManager'),
  SoloistManagerRandomUrn: require('./ServerSoloistManagerRandomUrn'),
  Sync: require('./ServerSync'),
- TopologyModel: require('./ServerTopologyModel'),
- TopologyModelSimpleMatrix: require('./ServerTopologyModelSimpleMatrix')
+ TopologyManager: require('./ServerTopologyManager'),
+ TopologyManagerRegularMatrix: require('./ServerTopologyManagerRegularMatrix')
 };

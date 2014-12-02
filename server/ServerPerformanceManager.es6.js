@@ -1,9 +1,9 @@
 'use strict';
 
 class ServerPerformanceManager {
-  constructor(clientManager, topologyModel) {
+  constructor(clientManager, topologyManager) {
     this.__clientManager = clientManager;
-    this.__topologyModel = topologyModel;
+    this.__topologyManager = topologyManager;
   }
 
   addParticipant(client) {
@@ -15,7 +15,7 @@ class ServerPerformanceManager {
   }
 
   removeParticipant(client) {
-    
+
   }
 }
 

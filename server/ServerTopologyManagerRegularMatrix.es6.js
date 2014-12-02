@@ -1,17 +1,17 @@
-ServerTopologyModel = require("./ServerTopologyModel");
+ServerTopologyManager = require("./ServerTopologyManager");
 
 'use strict';
 
-class ServerTopologyModelSimpleMatrix extends ServerTopologyModel {
-  constructor(matrixProperties, readyCallback) { // TODO: refactor (make it prettier), convert to private variables.
-    super(readyCallback);
+class ServerTopologyManagerRegularMatrix extends ServerTopologyManager {
+  constructor(matrixParams) { // TODO: refactor (make it prettier), convert to private variables.
+    super();
 
-    var X = matrixProperties.X,
-      Y = matrixProperties.Y,
-      spacingX = matrixProperties.spacingX || 2,
-      spacingY = matrixProperties.spacingY || 2,
-      marginX = matrixProperties.marginX || spacingX / 2,
-      marginY = matrixProperties.marginY || spacingY / 2;
+    var X = matrixParams.X,
+      Y = matrixParams.Y,
+      spacingX = matrixParams.spacingX || 2,
+      spacingY = matrixParams.spacingY || 2,
+      marginX = matrixParams.marginX || spacingX / 2,
+      marginY = matrixParams.marginY || spacingY / 2;
 
     this.height = spacingY * (Y - 1) + 2 * marginY;
     this.width = spacingX * (X - 1) + 2 * marginX;
@@ -29,8 +29,6 @@ class ServerTopologyModelSimpleMatrix extends ServerTopologyModel {
         count++;
       }
     }
-
-    this.__readyCallback();
   }
 
   getTopology() {
@@ -46,4 +44,4 @@ class ServerTopologyModelSimpleMatrix extends ServerTopologyModel {
   }
 }
 
-module.exports = ServerTopologyModelSimpleMatrix;
+module.exports = ServerTopologyManagerRegularMatrix;
