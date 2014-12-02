@@ -17,11 +17,11 @@ class ServerPlayerManager extends EventEmitter {
     this.__sockets[socket.id] = client;
     socket.join('pending');
 
-    console.log(
-      '[ServerClientManager][connect] Client ' + socket.id + ' connected.\n' +
-      'this.__pending: ' + this.__pending.map((c) => c.socket.id) + '\n' +
-      'this.__playing: ' + this.__playing.map((c) => c.socket.id)
-    );
+    // console.log(
+    //   '[ServerClientManager][connect] Client ' + socket.id + ' connected.\n' +
+    //   'this.__pending: ' + this.__pending.map((c) => c.socket.id) + '\n' +
+    //   'this.__playing: ' + this.__playing.map((c) => c.socket.id)
+    // );
 
     this.emit('connected', client);
   }
@@ -45,11 +45,11 @@ class ServerPlayerManager extends EventEmitter {
       clientArray.splice(index, 1); // remove client from pending or playing array
       delete this.__sockets[socket.id];
 
-      console.log(
-        '[ServerClientManager][disconnect] Client ' + socket.id + ' disconnected.\n' +
-        'this.__pending: ' + this.__pending.map((c) => c.socket.id) + '\n' +
-        'this.__playing: ' + this.__playing.map((c) => c.socket.id)
-      );
+      // console.log(
+      //   '[ServerClientManager][disconnect] Client ' + socket.id + ' disconnected.\n' +
+      //   'this.__pending: ' + this.__pending.map((c) => c.socket.id) + '\n' +
+      //   'this.__playing: ' + this.__playing.map((c) => c.socket.id)
+      // );
       
       this.emit('disconnected', client);
     }
@@ -72,11 +72,11 @@ class ServerPlayerManager extends EventEmitter {
       this.emit('playing', client);
     }
 
-    console.log(
-      '[ServerClientManager][clientReady] Client ' + client.socket.id + ' playing.\n' +
-      'this.__pending: ' + this.__pending.map((c) => c.socket.id) + '\n' +
-      'this.__playing: ' + this.__playing.map((c) => c.socket.id)
-    );
+    // console.log(
+    //   '[ServerClientManager][clientReady] Client ' + client.socket.id + ' playing.\n' +
+    //   'this.__pending: ' + this.__pending.map((c) => c.socket.id) + '\n' +
+    //   'this.__playing: ' + this.__playing.map((c) => c.socket.id)
+    // );
   }
 }
 

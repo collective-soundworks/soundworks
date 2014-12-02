@@ -1,5 +1,7 @@
-window.container = window.container || document.getElementById('container');
+var audioContext = require('audio-context');
 var EventEmitter = require('events').EventEmitter;
+
+window.container = window.container || document.getElementById('container');
 
 'use strict';
 

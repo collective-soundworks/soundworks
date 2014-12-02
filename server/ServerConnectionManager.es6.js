@@ -6,12 +6,12 @@ var EventEmitter = require('events').EventEmitter;
 class ServerConnectionManager extends EventEmitter {
   constructor() {
     server.io.of('/play').on('connection', (socket) => {
-      console.log('global connection', socket.id);
+      console.log('Global connection on socket \'' + socket.id + '\'');
       this.emit('connected', socket);
 
       socket.on('disconnect', () => {
         this.emit('disconnected', socket);
-      })
+      });
     });
   }
 }

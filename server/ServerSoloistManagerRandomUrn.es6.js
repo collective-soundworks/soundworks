@@ -24,9 +24,9 @@ class ServerSoloistManagerRandomUrn extends ServerSoloistManager {
   constructor(clientManager) {
     super(clientManager);
 
-    this.__idlePeriodLength = 1000; // in milliseconds
+    this.__idlePeriodLength = 5000; // in milliseconds
     this.__simultaneousSoloists = 2;
-    this.__soloistPerformanceLength = 3000; // in milliseconds
+    this.__soloistPerformanceLength = 10000; // in milliseconds
 
     this.__availableSoloists = createIdentityArray(this.__simultaneousSoloists);
 
@@ -44,9 +44,9 @@ class ServerSoloistManagerRandomUrn extends ServerSoloistManager {
     this.addSocketListener(client);
     client.socket.emit('current_soloists', this.__soloists.map((s) => s.getInfo()));
 
-    console.log(
-      '[RandomUrnServerSoloistManager][addPlayer] Player ' + client.socket.id + ' added.\n' + 'this.__urn: ' + this.__urn.map((c) => c.socket.id) + '\n' + 'this.__soloists: ' + this.__soloists.map((c) => c.socket.id) + '\n' + 'this.__unselectable: ' + this.__unselectable.map((c) => c.socket.id)
-    );
+    // console.log(
+    //   '[RandomUrnServerSoloistManager][addPlayer] Player ' + client.socket.id + ' added.\n' + 'this.__urn: ' + this.__urn.map((c) => c.socket.id) + '\n' + 'this.__soloists: ' + this.__soloists.map((c) => c.socket.id) + '\n' + 'this.__unselectable: ' + this.__unselectable.map((c) => c.socket.id)
+    // );
   }
 
   addSocketListener(player) {
@@ -74,11 +74,11 @@ class ServerSoloistManagerRandomUrn extends ServerSoloistManager {
 
       this.__soloists.push(player);
 
-      console.log(
-        '[RandomUrnServerSoloistManager][addSoloist] Soloist ' + player.socket.id + ' added.\n' + 'this.__urn: ' + this.__urn.map((c) => c.socket.id) + '\n' + 'this.__soloists: ' + this.__soloists.map((c) => c.socket.id) + '\n' + 'this.__unselectable: ' + this.__unselectable.map((c) => c.socket.id)
-      );
+      // console.log(
+      //   '[RandomUrnServerSoloistManager][addSoloist] Soloist ' + player.socket.id + ' added.\n' + 'this.__urn: ' + this.__urn.map((c) => c.socket.id) + '\n' + 'this.__soloists: ' + this.__soloists.map((c) => c.socket.id) + '\n' + 'this.__unselectable: ' + this.__unselectable.map((c) => c.socket.id)
+      // );
     } else {
-      console.log("[RandomUrnServerSoloistManager][addSoloist] No soloist to add.")
+      // console.log("[RandomUrnServerSoloistManager][addSoloist] No soloist to add.")
     }
   }
 
@@ -102,14 +102,14 @@ class ServerSoloistManagerRandomUrn extends ServerSoloistManager {
       soloist.userData.soloist = {};
       server.io.of('/play').emit('remove_soloist', soloist.getInfo());
     } else {
-      console.log('[RandomUrnServerSoloistManager][removePlayer] Player ' + client.socket.id + 'not found.');
+      // console.log('[RandomUrnServerSoloistManager][removePlayer] Player ' + client.socket.id + 'not found.');
     }
 
-    console.log("this.__availableSoloists", this.__availableSoloists);
+    // console.log("this.__availableSoloists", this.__availableSoloists);
 
-    console.log(
-      '[RandomUrnServerSoloistManager][removePlayer] Player ' + client.socket.id + ' removed.\n' + 'this.__urn: ' + this.__urn.map((c) => c.socket.id) + '\n' + 'this.__soloists: ' + this.__soloists.map((c) => c.socket.id) + '\n' + 'this.__unselectable: ' + this.__unselectable.map((c) => c.socket.id)
-    );
+    // console.log(
+    //   '[RandomUrnServerSoloistManager][removePlayer] Player ' + client.socket.id + ' removed.\n' + 'this.__urn: ' + this.__urn.map((c) => c.socket.id) + '\n' + 'this.__soloists: ' + this.__soloists.map((c) => c.socket.id) + '\n' + 'this.__unselectable: ' + this.__unselectable.map((c) => c.socket.id)
+    // );
   }
 
   removeSoloist(soloist) {
@@ -121,12 +121,12 @@ class ServerSoloistManagerRandomUrn extends ServerSoloistManager {
       this.__unselectable.push(soloist);
       server.io.of('/play').emit('remove_soloist', soloist.getInfo());
 
-      console.log(
-        '[RandomUrnServerSoloistManager][removeSoloist] Soloist ' + soloist.socket.id + ' removed.\n' + 'this.__urn: ' + this.__urn.map((c) => c.socket.id) + '\n' + 'this.__soloists: ' + this.__soloists.map((c) => c.socket.id) + '\n' + 'this.__unselectable: ' + this.__unselectable.map((c) => c.socket.id)
-      );
+      // console.log(
+      //   '[RandomUrnServerSoloistManager][removeSoloist] Soloist ' + soloist.socket.id + ' removed.\n' + 'this.__urn: ' + this.__urn.map((c) => c.socket.id) + '\n' + 'this.__soloists: ' + this.__soloists.map((c) => c.socket.id) + '\n' + 'this.__unselectable: ' + this.__unselectable.map((c) => c.socket.id)
+      // );
 
     } else {
-      console.log("[RandomUrnServerSoloistManager][removeSoloist] Player " + soloist.socket.id + "not found in this.__soloists.");
+      // console.log("[RandomUrnServerSoloistManager][removeSoloist] Player " + soloist.socket.id + "not found in this.__soloists.");
     }
   }
 
@@ -141,9 +141,9 @@ class ServerSoloistManagerRandomUrn extends ServerSoloistManager {
     // this.__urn.splice(0, 0, this.__unselectable[0]);
     // clearArray(this.__unselectable);
 
-    console.log(
-      '[RandomUrnServerSoloistManager][transferUnselectedToUrn]\n' + 'this.__urn: ' + this.__urn.map((c) => c.socket.id) + '\n' + 'this.__soloists: ' + this.__soloists.map((c) => c.socket.id) + '\n' + 'this.__unselectable: ' + this.__unselectable.map((c) => c.socket.id)
-    );
+    // console.log(
+    //   '[RandomUrnServerSoloistManager][transferUnselectedToUrn]\n' + 'this.__urn: ' + this.__urn.map((c) => c.socket.id) + '\n' + 'this.__soloists: ' + this.__soloists.map((c) => c.socket.id) + '\n' + 'this.__unselectable: ' + this.__unselectable.map((c) => c.socket.id)
+    // );
   }
 
   unselectableObserver(changes) {
