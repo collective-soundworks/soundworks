@@ -1,7 +1,7 @@
 var ClientPlacementManager = require('./ClientPlacementManager');
 var ClientDisplayInterface = require('./ClientDisplayInterface');
 var ClientInput = require('./ClientInput');
-var ClientDynamicModel = require('./ClientDynamicModel');
+var ClientPerformanceManager = require('./ClientPerformanceManager');
 // var ClientSyncModule = require('./Client.SyncModule');
 
 
@@ -13,10 +13,10 @@ class ClientMatrix {
     socket.on('topology', (topology) => {
       var input = new ClientInput();
       var placementManager = new ClientPlacementManager();
-      var dynamicModel = new ClientDynamicModel(input);
+      var performanceManager = new ClientPerformanceManager(input);
 
       placementManager.on('ready', (placeInfo) => {
-        dynamicModel.start(placeInfo);
+        performanceManager.start(placeInfo);
       });
 
     });

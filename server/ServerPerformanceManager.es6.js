@@ -1,6 +1,6 @@
 'use strict';
 
-class ServerDynamicModel {
+class ServerPerformanceManager {
   constructor(clientManager, topologyModel) {
     this.__clientManager = clientManager;
     this.__topologyModel = topologyModel;
@@ -19,4 +19,4 @@ class ServerDynamicModel {
   }
 }
 
-module.exports = ServerDynamicModel;
+module.exports = ServerPerformanceManager;

@@ -1,8 +1,24 @@
 var ServerSoloistManager = require('./ServerSoloistManager');
-var server = require('./ServerIOSingleton');
-var utils = require('./ServerUtils');
+var server = require('./ioServer');
 
 'use strict';
+
+function clearArray(a) {
+  while (a.length > 0)
+    a.pop();
+}
+
+function createIdentityArray(n) {
+  var a = [];
+  for (let i = 0; i < n; i++) {
+    a.push(i);
+  }
+  return a;
+}
+
+function getRandomInt(min, max) {
+  return min + Math.floor(Math.random() * (max - min + 1));
+}
 
 class ServerSoloistManagerRandomUrn extends ServerSoloistManager {
   constructor(clientManager) {
@@ -12,7 +28,7 @@ class ServerSoloistManagerRandomUrn extends ServerSoloistManager {
     this.__simultaneousSoloists = 2;
     this.__soloistPerformanceLength = 3000; // in milliseconds
 
-    this.__availableSoloists = utils.createIdentityArray(this.__simultaneousSoloists);
+    this.__availableSoloists = createIdentityArray(this.__simultaneousSoloists);
 
     this.__soloists = [];
     this.__unselectable = [];
@@ -29,10 +45,7 @@ class ServerSoloistManagerRandomUrn extends ServerSoloistManager {
     client.socket.emit('current_soloists', this.__soloists.map((s) => s.getInfo()));
 
     console.log(
-      '[RandomUrnServerSoloistManager][addPlayer] Player ' + client.socket.id + ' added.\n'
-      + 'this.__urn: ' + this.__urn.map((c) => c.socket.id) + '\n'
-      + 'this.__soloists: ' + this.__soloists.map((c) => c.socket.id) + '\n'
-      + 'this.__unselectable: ' + this.__unselectable.map((c) => c.socket.id)
+      '[RandomUrnServerSoloistManager][addPlayer] Player ' + client.socket.id + ' added.\n' + 'this.__urn: ' + this.__urn.map((c) => c.socket.id) + '\n' + 'this.__soloists: ' + this.__soloists.map((c) => c.socket.id) + '\n' + 'this.__unselectable: ' + this.__unselectable.map((c) => c.socket.id)
     );
   }
 
@@ -44,13 +57,13 @@ class ServerSoloistManagerRandomUrn extends ServerSoloistManager {
           this.removeSoloist(player);
         }, this.__soloistPerformanceLength);
       }
-    })
+    });
   }
 
   addSoloist() {
     if (this.needSoloist() && this.__urn.length > 0) {
       let soloistId = this.__availableSoloists.splice(0, 1)[0];
-      let index = utils.getRandomInt(0, this.__urn.length - 1);
+      let index = getRandomInt(0, this.__urn.length - 1);
       let player = this.__urn.splice(index, 1)[0];
       server.io.of('/play').emit('new_soloist', player.getInfo());
 
@@ -62,10 +75,7 @@ class ServerSoloistManagerRandomUrn extends ServerSoloistManager {
       this.__soloists.push(player);
 
       console.log(
-        '[RandomUrnServerSoloistManager][addSoloist] Soloist ' + player.socket.id + ' added.\n'
-        + 'this.__urn: ' + this.__urn.map((c) => c.socket.id) + '\n'
-        + 'this.__soloists: ' + this.__soloists.map((c) => c.socket.id) + '\n'
-        + 'this.__unselectable: ' + this.__unselectable.map((c) => c.socket.id)
+        '[RandomUrnServerSoloistManager][addSoloist] Soloist ' + player.socket.id + ' added.\n' + 'this.__urn: ' + this.__urn.map((c) => c.socket.id) + '\n' + 'this.__soloists: ' + this.__soloists.map((c) => c.socket.id) + '\n' + 'this.__unselectable: ' + this.__unselectable.map((c) => c.socket.id)
       );
     } else {
       console.log("[RandomUrnServerSoloistManager][addSoloist] No soloist to add.")
@@ -82,13 +92,13 @@ class ServerSoloistManagerRandomUrn extends ServerSoloistManager {
     var indexUnselectable = this.__unselectable.indexOf(client);
     var playerArray = null;
 
-    if (indexUrn > -1) 
+    if (indexUrn > -1)
       this.__urn.splice(indexUrn, 1);
     else if (indexUnselectable > -1)
       this.__unselectable.splice(indexUnselectable, 1);
     else if (indexSoloist > -1) {
       let soloist = this.__soloists.splice(indexSoloist, 1)[0];
-      this.__availableSoloists.push(soloist.userData.soloistId)
+      this.__availableSoloists.push(soloist.userData.soloistId);
       soloist.userData.soloist = {};
       server.io.of('/play').emit('remove_soloist', soloist.getInfo());
     } else {
@@ -98,10 +108,7 @@ class ServerSoloistManagerRandomUrn extends ServerSoloistManager {
     console.log("this.__availableSoloists", this.__availableSoloists);
 
     console.log(
-      '[RandomUrnServerSoloistManager][removePlayer] Player ' + client.socket.id + ' removed.\n'
-        + 'this.__urn: ' + this.__urn.map((c) => c.socket.id) + '\n'
-        + 'this.__soloists: ' + this.__soloists.map((c) => c.socket.id) + '\n'
-        + 'this.__unselectable: ' + this.__unselectable.map((c) => c.socket.id)
+      '[RandomUrnServerSoloistManager][removePlayer] Player ' + client.socket.id + ' removed.\n' + 'this.__urn: ' + this.__urn.map((c) => c.socket.id) + '\n' + 'this.__soloists: ' + this.__soloists.map((c) => c.socket.id) + '\n' + 'this.__unselectable: ' + this.__unselectable.map((c) => c.socket.id)
     );
   }
 
@@ -109,16 +116,13 @@ class ServerSoloistManagerRandomUrn extends ServerSoloistManager {
     var index = this.__soloists.indexOf(soloist);
     if (index > -1) {
       let soloist = this.__soloists.splice(index, 1)[0];
-      this.__availableSoloists.push(soloist.userData.soloistId)
+      this.__availableSoloists.push(soloist.userData.soloistId);
       soloist.userData.soloist = null;
       this.__unselectable.push(soloist);
       server.io.of('/play').emit('remove_soloist', soloist.getInfo());
 
       console.log(
-        '[RandomUrnServerSoloistManager][removeSoloist] Soloist ' + soloist.socket.id + ' removed.\n'
-        + 'this.__urn: ' + this.__urn.map((c) => c.socket.id) + '\n'
-        + 'this.__soloists: ' + this.__soloists.map((c) => c.socket.id) + '\n'
-        + 'this.__unselectable: ' + this.__unselectable.map((c) => c.socket.id)
+        '[RandomUrnServerSoloistManager][removeSoloist] Soloist ' + soloist.socket.id + ' removed.\n' + 'this.__urn: ' + this.__urn.map((c) => c.socket.id) + '\n' + 'this.__soloists: ' + this.__soloists.map((c) => c.socket.id) + '\n' + 'this.__unselectable: ' + this.__unselectable.map((c) => c.socket.id)
       );
 
     } else {
@@ -135,13 +139,10 @@ class ServerSoloistManagerRandomUrn extends ServerSoloistManager {
     while (this.__unselectable.length > 0) // TODO: change this push the whole array at once
       this.__urn.push(this.__unselectable.pop());
     // this.__urn.splice(0, 0, this.__unselectable[0]);
-    // utils.clearArray(this.__unselectable);
+    // clearArray(this.__unselectable);
 
     console.log(
-      '[RandomUrnServerSoloistManager][transferUnselectedToUrn]\n'
-      + 'this.__urn: ' + this.__urn.map((c) => c.socket.id) + '\n'
-      + 'this.__soloists: ' + this.__soloists.map((c) => c.socket.id) + '\n'
-      + 'this.__unselectable: ' + this.__unselectable.map((c) => c.socket.id)
+      '[RandomUrnServerSoloistManager][transferUnselectedToUrn]\n' + 'this.__urn: ' + this.__urn.map((c) => c.socket.id) + '\n' + 'this.__soloists: ' + this.__soloists.map((c) => c.socket.id) + '\n' + 'this.__unselectable: ' + this.__unselectable.map((c) => c.socket.id)
     );
   }
 

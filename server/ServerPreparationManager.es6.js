@@ -4,8 +4,6 @@ var EventEmitter = require('events').EventEmitter;
 
 class ServerPreparationManager extends EventEmitter {
   constructor() {}
-
-  
 }
 
 module.exports = ServerPreparationManager;

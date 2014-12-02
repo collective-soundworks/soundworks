@@ -1,4 +1,4 @@
-var server = require('./ServerIOSingleton');
+var server = require('./ioServer');
 var EventEmitter = require('events').EventEmitter;
 
 'use strict';

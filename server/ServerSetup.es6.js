@@ -1,6 +1,6 @@
 var ServerPlayerManager = require('./ServerPlayerManager');
 var ServerConnectionManager = require('./ServerConnectionManager');
-var ServerDynamicModel = require('./ServerDynamicModel');
+var ServerPerformanceManager = require('./ServerPerformanceManager');
 var ServerPlacementManager = require('./ServerPlacementManager');
 var ServerPreparationManager = require('./ServerPreparationManager');
 var ServerSync = require('./ServerSync');
@@ -17,7 +17,7 @@ class ServerMatrix {
     var topologyModel = this;
     var clientManager = new ServerPlayerManager();
     var connectionManager = new ServerConnectionManager();
-    var dynamicModel = new ServerDynamicModel();
+    var performanceManager = new ServerPerformanceManager();
     var placementManager = new ServerPlacementManager(topologyModel);
     var preparationManager = new ServerPreparationManager(placementManager);
 
@@ -35,7 +35,7 @@ class ServerMatrix {
     });
 
     clientManager.on('disconnected', (client) => {
-      dynamicModel.removeParticipant(client);
+      performanceManager.removeParticipant(client);
       placementManager.releasePlace(client);
     });
 
@@ -44,7 +44,7 @@ class ServerMatrix {
     });
 
     clientManager.on('playing', (client) => {
-      dynamicModel.addParticipant(client);
+      performanceManager.addParticipant(client);
     });
   }
 }

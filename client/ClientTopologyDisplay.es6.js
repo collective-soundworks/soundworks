@@ -1,6 +1,12 @@
-var utils = require('./ClientUtils');
-
 'use strict';
+
+function getMinOfArray(numArray) {
+  return Math.min.apply(null, numArray);
+}
+
+function getMaxOfArray(numArray) {
+  return Math.max.apply(null, numArray);
+}
 
 class ClientTopologyDisplay {
   constructor(topology, parent) {
@@ -14,16 +20,16 @@ class ClientTopologyDisplay {
   }
 
   getTopoHeight() {
-    var max = utils.getMaxOfArray(this.__positions.map((p) => p[1]));
-    var min = utils.getMinOfArray(this.__positions.map((p) => p[1]));
+    var max = getMaxOfArray(this.__positions.map((p) => p[1]));
+    var min = getMinOfArray(this.__positions.map((p) => p[1]));
     var height = max - min;
 
     return height;
   }
 
   getTopoWidth() {
-    var max = utils.getMaxOfArray(this.__positions.map((p) => p[0]));
-    var min = utils.getMinOfArray(this.__positions.map((p) => p[0]));
+    var max = getMaxOfArray(this.__positions.map((p) => p[0]));
+    var min = getMinOfArray(this.__positions.map((p) => p[0]));
     var width = max - min;
 
     return width;

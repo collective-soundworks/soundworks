@@ -2,7 +2,7 @@ var ClientDisplayInterface = require('./ClientDisplayInterface');
 
 'use strict';
 
-class ClientDynamicModel {
+class ClientPerformanceManager {
   constructor(input) {
     this.__label = null;
     this.__place = null;
@@ -21,4 +21,4 @@ class ClientDynamicModel {
 
 }
 
-module.exports = ClientDynamicModel;
+module.exports = ClientPerformanceManager;

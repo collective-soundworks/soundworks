@@ -1,7 +1,10 @@
 var ServerPlacementManager = require('./ServerPlacementManager');
-var utils = require('./ServerUtils');
 
 'use strict';
+
+function getRandomInt(min, max) {
+  return min + Math.floor(Math.random() * (max - min + 1));
+}
 
 class ServerPlacementManagerAssignedPlaces extends ServerPlacementManager {
   constructor(topoModel) {
@@ -13,7 +16,7 @@ class ServerPlacementManagerAssignedPlaces extends ServerPlacementManager {
 
     if (this.__availablePlaces.length > 0) {
       // Get place and position
-      var index = utils.getRandomInt(0, this.__availablePlaces.length - 1);
+      var index = getRandomInt(0, this.__availablePlaces.length - 1);
       var place = this.__availablePlaces.splice(index, 1)[0]; // TODO: handle different assignment methods (here, random).
       var label = this.__topoModel.getLabel(place);
       var position = this.__topoModel.getPosition(place);

@@ -1,13 +1,13 @@
 var IO = require('socket.io');
 
-class ServerIOSingleton {
+class SocketIoServer {
   
   constructor() {
     this.server = null;
     this.io = null;
   }
 
-  initIO(server = null) {
+  init(server = null) {
     this.server = this.server || server;
     if (!this.server) return;
     
@@ -18,4 +18,4 @@ class ServerIOSingleton {
 }
 
 // Everyone will use this instance with the same instantiated IO.
-module.exports = new ServerIOSingleton();
+module.exports = new SocketIoServer();
