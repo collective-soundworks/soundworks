@@ -29,6 +29,11 @@ class ServerTopologyManagerRegularMatrix extends ServerTopologyManager {
         count++;
       }
     }
+
+    // emit ready event asynchronously
+    setTimeout(() => {
+      this.emit('topology_ready');
+    }, 0);
   }
 
   getTopology() {

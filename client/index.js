@@ -1,11 +1,13 @@
 module.exports = {
   DisplayInterface: require('./ClientDisplayInterface'),
-  Input: require('./ClientInput'),
+  InputManager: require('./ClientInputManager'),
+  PerformanceGui: require('./ClientPerformanceGui'),
   PerformanceManager: require('./ClientPerformanceManager'),
   PlacementManager: require('./ClientPlacementManager'),
   PlacementManagerAssignedPlaces: require('./ClientPlacementManagerAssignedPlaces'),
-  PreparationManager: require('./ClientPreparationManager'),
-  Sync: require('./ClientSync'),
+  SetupManager: require('./ClientSetupManager'),
+  SetupManagerPlacementAndSync: require('./ClientSetupManagerPlacementAndSync'),
+  SyncManager: require('./ClientSyncManager'),
   TopologyDisplay: require('./ClientTopologyDisplay'),
   TopologyDisplayMatrix: require('./ClientTopologyDisplayMatrix')
 };

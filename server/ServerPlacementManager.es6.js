@@ -18,7 +18,7 @@ class ServerPlacementManager extends EventEmitter {
       client.position = this.__topoModel.__positions[place];
     }
 
-    this.emit('placement_ready', client); // Send 'ready' when the client is ready.
+    this.emit('placement_ready', client);
   }
 
   releasePlace(client) {

@@ -6,15 +6,11 @@ class ServerPerformanceManager {
     this.__topologyManager = topologyManager;
   }
 
-  addParticipant(client) {
-    this.inputListener(client.socket);
+  addPlayer(player) {
+    
   }
 
-  inputListener(socket) {
-
-  }
-
-  removeParticipant(client) {
+  removePlayer(player) {
 
   }
 }

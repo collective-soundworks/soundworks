@@ -11,8 +11,8 @@ class ServerPlacementManagerAssignedPlaces extends ServerPlacementManager {
     super(topoModel);
   }
 
-  requestPlace(client) {
-    var socket = client.socket;
+  requestPlace(player) {
+    var socket = player.socket;
 
     if (this.__availablePlaces.length > 0) {
       // Get place and position
@@ -21,15 +21,19 @@ class ServerPlacementManagerAssignedPlaces extends ServerPlacementManager {
       var label = this.__topoModel.getLabel(place);
       var position = this.__topoModel.getPosition(place);
 
-      client.place = place;
-      client.position = position;
+      player.place = place;
+      player.position = position;
 
-      // Send to client
-      socket.emit('place_available', { "label": label, "place": place, "position": position });
+      // Send to player
+      socket.emit('place_available', {
+        "label": label,
+        "place": place,
+        "position": position
+      });
 
       // Wait for callback
-      socket.on('placement_ready', () => { // TOTO placement_ready
-        this.emit('placement_ready', client);
+      socket.on('placement_ready', () => {
+        this.emit('placement_ready', player);
       });
     } else {
       socket.emit('no_place_available');

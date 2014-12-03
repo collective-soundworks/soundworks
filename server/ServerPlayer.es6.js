@@ -2,21 +2,23 @@
 
 class Player {
 	constructor(socket, place = null, position = null) {
+    // Topology
     this.place = place;
     this.position = position;
+    // States
+    this.privateState = {};
+    this.publicState = {};
+    // Connection
     this.socket = socket;
-    this.userData = {};
-    this.__userData = {};
+    this.pingLatency = 0;
   }
 
   getInfo() {
     var playerInfo = {
       place: this.place,
       position: this.position,
-      socket: {
-        id: this.socket.id
-      },
-      userData: this.userData
+      socketId: this.socket.id,
+      state: this.publicState
     };
     
     return playerInfo;

@@ -10,70 +10,70 @@ class ServerPlayerManager extends EventEmitter {
     this.__sockets = {};
   }
 
-  connect(socket) {
-    var client = new Player(socket);
+  register(socket) {
+    var player = new Player(socket);
 
-    this.__pending.push(client);
-    this.__sockets[socket.id] = client;
-    socket.join('pending');
+    this.__pending.push(player);
+    this.__sockets[socket.id] = player;
+    socket.join('setup');
 
     // console.log(
-    //   '[ServerClientManager][connect] Client ' + socket.id + ' connected.\n' +
+    //   '[ServerPlayerManager][connect] Player ' + socket.id + ' connected.\n' +
     //   'this.__pending: ' + this.__pending.map((c) => c.socket.id) + '\n' +
     //   'this.__playing: ' + this.__playing.map((c) => c.socket.id)
     // );
 
-    this.emit('connected', client);
+    this.emit('player_registered', player);
   }
 
-  disconnect(socket) {
-    var client = this.__sockets[socket.id];
-    var index = this.__pending.indexOf(client);
-    var clientArray = null;
+  unregister(socket) {
+    var player = this.__sockets[socket.id];
+    var index = this.__pending.indexOf(player);
+    var playerArray = null;
 
     if (index > -1) {
-      clientArray = this.__pending;
+      playerArray = this.__pending;
     } else {
-      index = this.__playing.indexOf(client);
+      index = this.__playing.indexOf(player);
 
       if (index >= 0)
-        clientArray = this.__playing;
+        playerArray = this.__playing;
     }
 
-    if (clientArray) {
-      client.socket.broadcast.emit('remove_player', client.getInfo());
-      clientArray.splice(index, 1); // remove client from pending or playing array
+    if (playerArray) {
+      player.socket.broadcast.emit('remove_player', player.getInfo());
+      playerArray.splice(index, 1); // remove player from pending or playing array
       delete this.__sockets[socket.id];
 
       // console.log(
-      //   '[ServerClientManager][disconnect] Client ' + socket.id + ' disconnected.\n' +
+      //   '[ServerPlayerManager][disconnect] Player ' + socket.id + ' disconnected.\n' +
       //   'this.__pending: ' + this.__pending.map((c) => c.socket.id) + '\n' +
       //   'this.__playing: ' + this.__playing.map((c) => c.socket.id)
       // );
       
-      this.emit('disconnected', client);
+      this.emit('player_unregistered', player);
     }
   }
 
-  clientReady(client) {
-    var index = this.__pending.indexOf(client);
+  playerReady(player) {
+    var index = this.__pending.indexOf(player);
 
     if (index > -1) {
       this.__pending.splice(index, 1);
-      this.__playing.push(client);
+      this.__playing.push(player);
 
       var currentState = this.__playing.map((c) => c.getInfo());
-      client.socket.emit('current_state', currentState);
-      client.socket.broadcast.emit('new_player', client.getInfo());
+      player.socket.emit('current_state', currentState);
+      player.socket.broadcast.emit('new_player', player.getInfo());
 
-      client.socket.leave('pending');
-      client.socket.join('playing');
+      player.socket.leave('setup');
+      player.socket.join('performance');
 
-      this.emit('playing', client);
+      this.emit('player_ready', player);
     }
 
     // console.log(
-    //   '[ServerClientManager][clientReady] Client ' + client.socket.id + ' playing.\n' +
+    //   '[ServerPlayerManager][playerReady] Player ' + player.socket.id + ' playing.\n' +
     //   'this.__pending: ' + this.__pending.map((c) => c.socket.id) + '\n' +
     //   'this.__playing: ' + this.__playing.map((c) => c.socket.id)
     // );

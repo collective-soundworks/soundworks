@@ -1,11 +1,12 @@
-var server = require('./ioServer');
+var ioServer = require('./ioServer');
 var EventEmitter = require('events').EventEmitter;
 
 'use strict';
 
 class ServerConnectionManager extends EventEmitter {
   constructor() {
-    server.io.of('/play').on('connection', (socket) => {
+    var io = ioServer.io;
+    io.of('/play').on('connection', (socket) => {
       console.log('Global connection on socket \'' + socket.id + '\'');
       this.emit('connected', socket);
 

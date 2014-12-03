@@ -1,5 +1,5 @@
 var ServerSoloistManager = require('./ServerSoloistManager');
-var server = require('./ioServer');
+var ioServer = require('./ioServer');
 
 'use strict';
 
@@ -21,8 +21,8 @@ function getRandomInt(min, max) {
 }
 
 class ServerSoloistManagerRandomUrn extends ServerSoloistManager {
-  constructor(clientManager) {
-    super(clientManager);
+  constructor(playerManager) {
+    super(playerManager);
 
     this.__idlePeriodLength = 5000; // in milliseconds
     this.__simultaneousSoloists = 2;
@@ -32,28 +32,31 @@ class ServerSoloistManagerRandomUrn extends ServerSoloistManager {
 
     this.__soloists = [];
     this.__unselectable = [];
-    this.__urn = clientManager.__playing.slice();
+    this.__urn = playerManager.__playing.slice();
 
     Array.observe(this.__urn, this.urnObserver.bind(this));
     Array.observe(this.__unselectable, this.unselectableObserver.bind(this));
     Array.observe(this.__soloists, this.soloistsObserver.bind(this));
   }
 
-  addPlayer(client) {
-    this.__urn.push(client);
-    this.addSocketListener(client);
-    client.socket.emit('current_soloists', this.__soloists.map((s) => s.getInfo()));
+  addPlayer(player) {
+    this.__urn.push(player);
+    this.addSocketListener(player);
+    player.socket.emit('current_soloists', this.__soloists.map((s) => s.getInfo()));
 
     // console.log(
-    //   '[RandomUrnServerSoloistManager][addPlayer] Player ' + client.socket.id + ' added.\n' + 'this.__urn: ' + this.__urn.map((c) => c.socket.id) + '\n' + 'this.__soloists: ' + this.__soloists.map((c) => c.socket.id) + '\n' + 'this.__unselectable: ' + this.__unselectable.map((c) => c.socket.id)
+    //   '[RandomUrnServerSoloistManager][addPlayer] Player ' + player.socket.id + ' added.\n' +
+    //   'this.__urn: ' + this.__urn.map((c) => c.socket.id) + '\n' +
+    //   'this.__soloists: ' + this.__soloists.map((c) => c.socket.id) + '\n' +
+    //   'this.__unselectable: ' + this.__unselectable.map((c) => c.socket.id)
     // );
   }
 
   addSocketListener(player) {
     player.socket.on('touchstart', () => {
-      if (!player.userData.hasPlayed) {
-        clearTimeout(player.__userData.timeout);
-        player.__userData.timeout = setTimeout(() => {
+      if (!player.publicState.hasPlayed) {
+        clearTimeout(player.privateState.timeout);
+        player.privateState.timeout = setTimeout(() => {
           this.removeSoloist(player);
         }, this.__soloistPerformanceLength);
       }
@@ -61,21 +64,25 @@ class ServerSoloistManagerRandomUrn extends ServerSoloistManager {
   }
 
   addSoloist() {
+    var io = ioServer.io;
     if (this.needSoloist() && this.__urn.length > 0) {
       let soloistId = this.__availableSoloists.splice(0, 1)[0];
       let index = getRandomInt(0, this.__urn.length - 1);
       let player = this.__urn.splice(index, 1)[0];
-      server.io.of('/play').emit('new_soloist', player.getInfo());
+      io.of('/play').emit('new_soloist', player.getInfo());
 
-      player.userData.soloistId = soloistId;
-      player.__userData.timeout = setTimeout(() => {
+      player.publicState.soloistId = soloistId;
+      player.privateState.timeout = setTimeout(() => {
         this.removeSoloist(player);
       }, this.__idlePeriodLength);
 
       this.__soloists.push(player);
 
       // console.log(
-      //   '[RandomUrnServerSoloistManager][addSoloist] Soloist ' + player.socket.id + ' added.\n' + 'this.__urn: ' + this.__urn.map((c) => c.socket.id) + '\n' + 'this.__soloists: ' + this.__soloists.map((c) => c.socket.id) + '\n' + 'this.__unselectable: ' + this.__unselectable.map((c) => c.socket.id)
+      //   '[RandomUrnServerSoloistManager][addSoloist] Soloist ' + player.socket.id + ' added.\n' +
+      //   'this.__urn: ' + this.__urn.map((c) => c.socket.id) + '\n' +
+      //   'this.__soloists: ' + this.__soloists.map((c) => c.socket.id) + '\n' +
+      //   'this.__unselectable: ' + this.__unselectable.map((c) => c.socket.id)
       // );
     } else {
       // console.log("[RandomUrnServerSoloistManager][addSoloist] No soloist to add.")
@@ -86,10 +93,11 @@ class ServerSoloistManagerRandomUrn extends ServerSoloistManager {
     return this.__availableSoloists.length > 0;
   }
 
-  removePlayer(client) {
-    var indexUrn = this.__urn.indexOf(client);
-    var indexSoloist = this.__soloists.indexOf(client);
-    var indexUnselectable = this.__unselectable.indexOf(client);
+  removePlayer(player) {
+    var io = ioServer.io;
+    var indexUrn = this.__urn.indexOf(player);
+    var indexSoloist = this.__soloists.indexOf(player);
+    var indexUnselectable = this.__unselectable.indexOf(player);
     var playerArray = null;
 
     if (indexUrn > -1)
@@ -98,31 +106,38 @@ class ServerSoloistManagerRandomUrn extends ServerSoloistManager {
       this.__unselectable.splice(indexUnselectable, 1);
     else if (indexSoloist > -1) {
       let soloist = this.__soloists.splice(indexSoloist, 1)[0];
-      this.__availableSoloists.push(soloist.userData.soloistId);
-      soloist.userData.soloist = {};
-      server.io.of('/play').emit('remove_soloist', soloist.getInfo());
+      this.__availableSoloists.push(soloist.publicState.soloistId);
+      soloist.publicState.soloist = null;
+      io.of('/play').emit('remove_soloist', soloist.getInfo());
     } else {
-      // console.log('[RandomUrnServerSoloistManager][removePlayer] Player ' + client.socket.id + 'not found.');
+      // console.log('[RandomUrnServerSoloistManager][removePlayer] Player ' + player.socket.id + 'not found.');
     }
 
     // console.log("this.__availableSoloists", this.__availableSoloists);
 
     // console.log(
-    //   '[RandomUrnServerSoloistManager][removePlayer] Player ' + client.socket.id + ' removed.\n' + 'this.__urn: ' + this.__urn.map((c) => c.socket.id) + '\n' + 'this.__soloists: ' + this.__soloists.map((c) => c.socket.id) + '\n' + 'this.__unselectable: ' + this.__unselectable.map((c) => c.socket.id)
+    //   '[RandomUrnServerSoloistManager][removePlayer] Player ' + player.socket.id + ' removed.\n' +
+    //   'this.__urn: ' + this.__urn.map((c) => c.socket.id) + '\n' +
+    //   'this.__soloists: ' + this.__soloists.map((c) => c.socket.id) + '\n' +
+    //   'this.__unselectable: ' + this.__unselectable.map((c) => c.socket.id)
     // );
   }
 
   removeSoloist(soloist) {
+    var io = ioServer.io;
     var index = this.__soloists.indexOf(soloist);
     if (index > -1) {
       let soloist = this.__soloists.splice(index, 1)[0];
-      this.__availableSoloists.push(soloist.userData.soloistId);
-      soloist.userData.soloist = null;
+      this.__availableSoloists.push(soloist.publicState.soloistId);
+      soloist.publicState.soloist = null;
       this.__unselectable.push(soloist);
-      server.io.of('/play').emit('remove_soloist', soloist.getInfo());
+      io.of('/play').emit('remove_soloist', soloist.getInfo());
 
       // console.log(
-      //   '[RandomUrnServerSoloistManager][removeSoloist] Soloist ' + soloist.socket.id + ' removed.\n' + 'this.__urn: ' + this.__urn.map((c) => c.socket.id) + '\n' + 'this.__soloists: ' + this.__soloists.map((c) => c.socket.id) + '\n' + 'this.__unselectable: ' + this.__unselectable.map((c) => c.socket.id)
+      //   '[RandomUrnServerSoloistManager][removeSoloist] Soloist ' + soloist.socket.id + ' removed.\n' +
+      //   'this.__urn: ' + this.__urn.map((c) => c.socket.id) + '\n' +
+      //   'this.__soloists: ' + this.__soloists.map((c) => c.socket.id) + '\n' +
+      //   'this.__unselectable: ' + this.__unselectable.map((c) => c.socket.id)
       // );
 
     } else {
@@ -142,7 +157,10 @@ class ServerSoloistManagerRandomUrn extends ServerSoloistManager {
     // clearArray(this.__unselectable);
 
     // console.log(
-    //   '[RandomUrnServerSoloistManager][transferUnselectedToUrn]\n' + 'this.__urn: ' + this.__urn.map((c) => c.socket.id) + '\n' + 'this.__soloists: ' + this.__soloists.map((c) => c.socket.id) + '\n' + 'this.__unselectable: ' + this.__unselectable.map((c) => c.socket.id)
+    //   '[RandomUrnServerSoloistManager][transferUnselectedToUrn]\n' +
+    //   'this.__urn: ' + this.__urn.map((c) => c.socket.id) + '\n' +
+    //   'this.__soloists: ' + this.__soloists.map((c) => c.socket.id) + '\n' +
+    //   'this.__unselectable: ' + this.__unselectable.map((c) => c.socket.id)
     // );
   }
 

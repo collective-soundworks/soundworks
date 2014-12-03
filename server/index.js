@@ -6,11 +6,11 @@ module.exports = {
  PlacementManagerAssignedPlaces: require('./ServerPlacementManagerAssignedPlaces'),
  Player: require('./ServerPlayer'),
  PlayerManager: require('./ServerPlayerManager'),
- PreparationManager: require('./ServerPreparationManager'),
- PreparationManagerPlacementAndSync: require('./ServerPreparationManagerPlacementAndSync'),
+ SetupManager: require('./ServerSetupManager'),
+ SetupManagerPlacementAndSync: require('./ServerSetupManagerPlacementAndSync'),
  SoloistManager: require('./ServerSoloistManager'),
  SoloistManagerRandomUrn: require('./ServerSoloistManagerRandomUrn'),
- Sync: require('./ServerSync'),
+ SyncManager: require('./ServerSyncManager'),
  TopologyManager: require('./ServerTopologyManager'),
  TopologyManagerRegularMatrix: require('./ServerTopologyManagerRegularMatrix')
 };

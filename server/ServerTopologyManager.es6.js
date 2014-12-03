@@ -3,16 +3,9 @@ var EventEmitter = require('events').EventEmitter;
 'use strict';
 
 class ServerTopologyManager extends EventEmitter {
-  constructor(emitReady = true) {
+  constructor() {
     this.__labels = [];
     this.__positions = [];
-
-    // emit ready event asynchronously
-    if (emitReady) {
-      setTimeout(() => {
-        this.emit('ready');
-      }, 0);
-    }
   }
 
   getLabel(place) {
@@ -31,7 +24,7 @@ class ServerTopologyManager extends EventEmitter {
     return topology;
   }
 
-  sendToClient(socket) {
+  send(socket) {
     socket.emit('topology', this.getTopology());
   }
 }

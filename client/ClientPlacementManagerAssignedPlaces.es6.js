@@ -1,4 +1,5 @@
 var ClientPlacementManager = require('./ClientPlacementManager');
+var ioClient = require('./ioClient');
 
 'use strict';
 
@@ -6,6 +7,7 @@ class ClientPlacementManagerAssignedPlaces extends ClientPlacementManager {
   constructor() {
     super();
 
+    var socket = ioClient.socket;
     socket.on('place_available', this.updateInstructions.bind(this));
     socket.on('no_place_available', this.updateInstructions.bind(this))
   }

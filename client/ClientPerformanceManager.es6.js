@@ -3,12 +3,13 @@ var ClientDisplayInterface = require('./ClientDisplayInterface');
 'use strict';
 
 class ClientPerformanceManager {
-  constructor(input) {
+  constructor(inputManager, performanceGui = null) {
     this.__label = null;
     this.__place = null;
     this.__position = null;
 
-    this.__input = input;
+    this.__inputManager = inputManager;
+    this.__performanceGui = performanceGui;
   }
 
   start(placeInfo) {
@@ -16,7 +17,8 @@ class ClientPerformanceManager {
     this.__place = placeInfo.place;
     this.__position = placeInfo.position;
 
-    var displayInterface = new ClientDisplayInterface();
+    if (this.__performanceGui)
+      this.__performanceGui.display();
   }
 
 }

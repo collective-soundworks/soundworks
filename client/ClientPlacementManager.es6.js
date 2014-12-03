@@ -1,5 +1,8 @@
+window.container = window.container || document.getElementById('container');
+window.preparationDiv = window.preparationDiv || document.getElementById('preparation');
 var audioContext = require('audio-context');
 var EventEmitter = require('events').EventEmitter;
+var ioClient = require('./ioClient');
 
 window.container = window.container || document.getElementById('container');
 
@@ -34,23 +37,20 @@ class ClientPlacementManager extends EventEmitter {
     this.__placementDiv = this.createPlacementDiv();
   }
 
-  clientReady() {
-    socket.emit('placement_ready');
-    this.emit('ready', this.getPlaceInfo());
-
-    beep();
-    this.hidePlacementDiv();
-  }
-
   createPlacementDiv() {
     var placementDiv = document.createElement('div');
 
     placementDiv.setAttribute('id', 'placement');
     placementDiv.classList.add('info');
+    placementDiv.classList.add('hidden');
 
-    container.appendChild(placementDiv);
+    preparationDiv.appendChild(placementDiv);
 
     return placementDiv;
+  }
+
+  displayPlacementDiv() {
+    this.__placementDiv.classList.remove('hidden');
   }
 
   getPlaceInfo() {
@@ -64,6 +64,12 @@ class ClientPlacementManager extends EventEmitter {
 
   hidePlacementDiv() {
     this.__placementDiv.classList.add('hidden');
+  }
+
+  placementReady() {
+    var socket = ioClient.socket;
+    socket.emit('placement_ready');
+    this.emit('placement_ready', this.getPlaceInfo());
   }
 
 }
