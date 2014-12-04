@@ -1,5 +1,5 @@
 module.exports = {
-  DisplayInterface: require('./ClientDisplayInterface'),
+  ioClient: require('./ioClient'),
   InputManager: require('./ClientInputManager'),
   PerformanceGui: require('./ClientPerformanceGui'),
   PerformanceManager: require('./ClientPerformanceManager'),

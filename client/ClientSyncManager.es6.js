@@ -41,6 +41,7 @@ class SyncProcess extends EventEmitter { // TODO: change EventEmitter to CustomE
     var socket = ioClient.socket;
     socket.on('sync_pong', (id, pingTime_clientTime, pongTime_serverTime) => {
       if (id === this.__id) {
+        console.log("pong");
         var now = audioContext.currentTime,
           travelTime = now - pingTime_clientTime,
           timeOffset = pongTime_serverTime - (now - travelTime / 2);
@@ -48,7 +49,7 @@ class SyncProcess extends EventEmitter { // TODO: change EventEmitter to CustomE
         this.__travelTimes.push(travelTime);
         this.__timeOffsets.push(timeOffset);
 
-        if (this.__count <= this.__iterations) {
+        if (this.__count < this.__iterations) {
           this.sendPing();
         } else {
           this.__avgTravelTime = this.__travelTimes.reduce((p, q) => p + q) / this.__travelTimes.length;
@@ -75,8 +76,17 @@ class ClientSyncManager extends EventEmitter { // TODO: change to CustomEvent?
     this.__avgTravelTimes = [];
     this.__avgTimeOffsets = [];
 
+    this.__syncDiv = this.createSyncDiv();
+
+    this.__serverReady = false
+
     // Get sync parameters from the server.
     var socket = ioClient.socket;
+
+    socket.on('init_sync', () => {
+      this.__serverReady = true;
+    });
+
     socket.on('start_sync', () => {
       this.startNewSyncProcess();
     });
@@ -93,21 +103,26 @@ class ClientSyncManager extends EventEmitter { // TODO: change to CustomEvent?
    */
 
   startNewSyncProcess(iterations = 10) {
-    var socket = ioClient.socket;
-    var sync = new SyncProcess(iterations);
+    if (this.__serverReady) {
+      var socket = ioClient.socket;
+      var sync = new SyncProcess(iterations);
 
-    this.emit('sync_started');
+      this.emit('sync_started');
 
-    sync.on('sync_stats', (maxTravelTime, avgTimeOffset, avgTravelTime) => {
-      var ready = (this.__maxTravelTimes.length === 0);
+      sync.on('sync_stats', (maxTravelTime, avgTimeOffset, avgTravelTime) => {
+        var firstSync = (this.__maxTravelTimes.length === 0);
 
-      this.__maxTravelTimes.push(maxTravelTime);
-      this.__avgTimeOffsets.push(avgTimeOffset);
-      this.__avgTravelTimes.push(avgTravelTime);
+        this.__maxTravelTimes.push(maxTravelTime);
+        this.__avgTimeOffsets.push(avgTimeOffset);
+        this.__avgTravelTimes.push(avgTravelTime);
 
-      if (ready)
-        this.emit('sync_ready');
-    });
+        //  Send 'sync_ready' event after the first sync process only
+        if (firstSync)
+          this.emit('sync_ready');
+
+        console.log("Sync process done!");
+      });
+    }
   }
 
   /*

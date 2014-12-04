@@ -7,6 +7,12 @@ class ServerSyncManager extends EventEmitter {
     this.__iterations = iterations;
   }
 
+  initSync(player) {
+    var socket = player.socket;
+    socket.emit('init_sync');
+    this.listen(player);
+  }
+
   listen(player) {
     var socket = player.socket;
 
@@ -17,14 +23,14 @@ class ServerSyncManager extends EventEmitter {
     });
 
     socket.on('sync_stats', (maxTravelTime, avgTravelTime, avgTimeOffset) => {
-      var ready = (player.pingLatency === 0);
+      var firstSync = (player.pingLatency === 0);
 
       player.pingLatency = maxTravelTime / 2;
 
-      if (ready)
-        this.emit('sync_ready');
+      //  Send 'sync_ready' event after the first sync process only
+      if (firstSync)
+        this.emit('sync_ready', player);
     });
-
 
   }
 

@@ -22,7 +22,7 @@ class ClientPlacementManagerAssignedPlaces extends ClientPlacementManager {
         "<div class='position circle'><span>" + this.__label + "</span></div>" +
         "<p class='small'>Touch the screen<br/>when you are ready.</p>";
 
-      this.__placementDiv.addEventListener('click', this.clientReady.bind(this));
+      this.__placementDiv.addEventListener('click', this.placementReady.bind(this));
     } else {
       this.__placementDiv.innerHTML = "<p>All seats are taken, please try again later! =)</p>";
     }

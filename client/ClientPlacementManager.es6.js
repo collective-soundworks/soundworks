@@ -44,8 +44,6 @@ class ClientPlacementManager extends EventEmitter {
     placementDiv.classList.add('info');
     placementDiv.classList.add('hidden');
 
-    preparationDiv.appendChild(placementDiv);
-
     return placementDiv;
   }
 

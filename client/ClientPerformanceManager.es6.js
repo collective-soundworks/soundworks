@@ -1,9 +1,7 @@
-var ClientDisplayInterface = require('./ClientDisplayInterface');
-
 'use strict';
 
 class ClientPerformanceManager {
-  constructor(inputManager, performanceGui = null) {
+  constructor(inputManager, performanceGui) {
     this.__label = null;
     this.__place = null;
     this.__position = null;

@@ -24,9 +24,9 @@ class ServerSoloistManagerRandomUrn extends ServerSoloistManager {
   constructor(playerManager) {
     super(playerManager);
 
-    this.__idlePeriodLength = 5000; // in milliseconds
+    this.__idlePeriodLength = 2000; // in milliseconds
     this.__simultaneousSoloists = 2;
-    this.__soloistPerformanceLength = 10000; // in milliseconds
+    this.__soloistPerformanceLength = 4000; // in milliseconds
 
     this.__availableSoloists = createIdentityArray(this.__simultaneousSoloists);
 

@@ -15,10 +15,12 @@ class ClientSetupManagerPlacementAndSync extends ClientSetupManager {
     this.__parentDiv.appendChild(syncManager.__syncDiv);
     this.__parentDiv.appendChild(placementManager.__placementDiv);
 
-    this.state = {
+    this.__state = {
       placed: false,
       synced: false
     }
+
+    this.__placeInfo = null;
   }
 
   start() {
@@ -31,21 +33,22 @@ class ClientSetupManagerPlacementAndSync extends ClientSetupManager {
       this.__placementManager.displayPlacementDiv();
     });
     // 3.1 When placement is ready…
-    this.__placementManager.on('placement_ready', () => {
-      this.state.placed = true;
+    this.__placementManager.on('placement_ready', (placeInfo) => {
+      this.__state.placed = true;
+      this.__placeInfo = placeInfo
       this.__placementManager.hidePlacementDiv();
-      if (!this.state.synced)
+      if (!this.__state.synced)
         this.displayStandbyDiv();
       else {
-        this.emit('setup_ready');
+        this.emit('setup_ready', this.__placeInfo);
         this.hideParentDiv();
       }
     });
     // 3.2 When sync is ready…
     this.__syncManager.on('sync_ready', () => {
-      this.state.synced = true;
-      if (this.state.placed) {
-        this.emit('setup_ready');
+      this.__state.synced = true;
+      if (this.__state.placed) {
+        this.emit('setup_ready', this.__placeInfo);
         this.hideParentDiv();
       }
     });
@@ -65,7 +68,7 @@ class ClientSetupManagerPlacementAndSync extends ClientSetupManager {
 
     standbyDiv.innerHTML = "<p>Finishing setup&hellip;</p>";
 
-    this.__parentpDiv.appendChild(standbyDiv);
+    this.__parentDiv.appendChild(standbyDiv);
 
     return standbyDiv;
   }
