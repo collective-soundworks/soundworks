@@ -7,7 +7,6 @@ class ServerConnectionManager extends EventEmitter {
   constructor() {
     var io = ioServer.io;
     io.of('/play').on('connection', (socket) => {
-      console.log('Global connection on socket \'' + socket.id + '\'');
       this.emit('connected', socket);
 
       socket.on('disconnect', () => {

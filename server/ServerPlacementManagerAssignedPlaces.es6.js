@@ -24,9 +24,6 @@ class ServerPlacementManagerAssignedPlaces extends ServerPlacementManager {
       player.place = place;
       player.position = position;
 
-      console.log("totototototootot")
-      console.log(socket.id);
-
       // Send to player
       socket.emit('place_available', {
         "label": label,

@@ -41,7 +41,6 @@ class SyncProcess extends EventEmitter { // TODO: change EventEmitter to CustomE
     var socket = ioClient.socket;
     socket.on('sync_pong', (id, pingTime_clientTime, pongTime_serverTime) => {
       if (id === this.__id) {
-        console.log("pong");
         var now = audioContext.currentTime,
           travelTime = now - pingTime_clientTime,
           timeOffset = pongTime_serverTime - (now - travelTime / 2);
