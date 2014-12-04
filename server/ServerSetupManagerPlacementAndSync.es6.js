@@ -27,8 +27,8 @@ class ServerSetupManagerPlacementAndSync extends ServerSetupManager {
     player.publicState.placed = false;
     player.publicState.synced = false;
 
-    this.__placementManager.requestPlace(player);
     this.__syncManager.initSync(player);
+    this.__placementManager.requestPlace(player);
   }
 
   removePlayer(player) {
