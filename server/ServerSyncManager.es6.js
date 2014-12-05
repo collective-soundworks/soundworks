@@ -4,7 +4,7 @@ var EventEmitter = require('events').EventEmitter;
 
 class ServerSyncManager extends EventEmitter {
   constructor(iterations = 10) {
-    this.__iterations = iterations;
+    this.iterations = iterations;
   }
 
   initSync(player) {

@@ -30,38 +30,25 @@ function beep() {
 
 class ClientPlacementManager extends EventEmitter {
   constructor() {
-    this.__label = null;
-    this.__place = null;
-    this.__position = null;
+    this.label = null;
+    this.place = null;
+    this.position = null;
 
-    this.__placementDiv = this.createPlacementDiv();
-  }
+    var div = document.createElement('div');
+    div.setAttribute('id', 'placement');
+    div.classList.add('info');
+    div.classList.add('hidden');
 
-  createPlacementDiv() {
-    var placementDiv = document.createElement('div');
-
-    placementDiv.setAttribute('id', 'placement');
-    placementDiv.classList.add('info');
-    placementDiv.classList.add('hidden');
-
-    return placementDiv;
-  }
-
-  displayPlacementDiv() {
-    this.__placementDiv.classList.remove('hidden');
+    this.parentDiv = div;
   }
 
   getPlaceInfo() {
     var placeInfo = {
-      "label": this.__label,
-      "place": this.__place,
-      "position": this.__position
+      "label": this.label,
+      "place": this.place,
+      "position": this.position
     };
     return placeInfo;
-  }
-
-  hidePlacementDiv() {
-    this.__placementDiv.classList.add('hidden');
   }
 
   placementReady() {

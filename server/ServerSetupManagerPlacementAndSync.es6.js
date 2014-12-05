@@ -3,19 +3,20 @@ var ServerSetupManager = require('./ServerSetupManager');
 'use strict';
 
 class ServerSetupManagerPlacementAndSync extends ServerSetupManager {
-  constructor(placementManager, syncManager) {
-    this.__placementManager = placementManager;
-    this.__syncManager = syncManager;
+  constructor(topologyManager, placementManager, syncManager) {
+    super(topologyManager);
 
-    // TODO: use Promises
-    this.__placementManager.on('placement_ready', (player) => {
+    this.placementManager = placementManager;
+    this.syncManager = syncManager;
+
+    this.placementManager.on('placement_ready', (player) => {
       player.publicState.placed = true;
 
       if (player.publicState.synced)
         this.setupReady(player);
     });
 
-    this.__syncManager.on('sync_ready', (player) => {
+    this.syncManager.on('sync_ready', (player) => {
       player.publicState.synced = true;
 
       if (player.publicState.placed)
@@ -27,12 +28,16 @@ class ServerSetupManagerPlacementAndSync extends ServerSetupManager {
     player.publicState.placed = false;
     player.publicState.synced = false;
 
-    this.__syncManager.initSync(player);
-    this.__placementManager.requestPlace(player);
+    this.syncManager.initSync(player);
+    this.placementManager.requestPlace(player);
   }
 
   removePlayer(player) {
-    this.__placementManager.releasePlace(player);
+    this.placementManager.releasePlace(player);
+  }
+
+  updateTopology() {
+    this.placementManager.updateTopology();
   }
 
   setupReady(player) {

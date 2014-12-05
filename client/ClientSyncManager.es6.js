@@ -20,16 +20,16 @@ function getMaxOfArray(numArray) {
 
 class SyncProcess extends EventEmitter { // TODO: change EventEmitter to CustomEvent?
   constructor(iterations) {
-    this.__id = Math.floor(Math.random() * 1000000);
+    this.id = Math.floor(Math.random() * 1000000);
 
-    this.__count = 0;
-    this.__iterations = iterations;
+    this.count = 0;
+    this.iterations = iterations;
 
-    this.__timeOffsets = [];
-    this.__travelTimes = [];
-    this.__avgTimeOffset = 0;
-    this.__avgTravelTime = 0;
-    this.__maxTravelTime = 0;
+    this.timeOffsets = [];
+    this.travelTimes = [];
+    this.avgTimeOffset = 0;
+    this.avgTravelTime = 0;
+    this.maxTravelTime = 0;
 
     // Send first ping
     this.sendPing();
@@ -40,23 +40,23 @@ class SyncProcess extends EventEmitter { // TODO: change EventEmitter to CustomE
     // Repeat as many times as needed (__iterations).
     var socket = ioClient.socket;
     socket.on('sync_pong', (id, pingTime_clientTime, pongTime_serverTime) => {
-      if (id === this.__id) {
+      if (id === this.id) {
         var now = audioContext.currentTime,
           travelTime = now - pingTime_clientTime,
           timeOffset = pongTime_serverTime - (now - travelTime / 2);
 
-        this.__travelTimes.push(travelTime);
-        this.__timeOffsets.push(timeOffset);
+        this.travelTimes.push(travelTime);
+        this.timeOffsets.push(timeOffset);
 
-        if (this.__count < this.__iterations) {
+        if (this.count < this.iterations) {
           this.sendPing();
         } else {
-          this.__avgTravelTime = this.__travelTimes.reduce((p, q) => p + q) / this.__travelTimes.length;
-          this.__avgTimeOffset = this.__timeOffsets.reduce((p, q) => p + q) / this.__timeOffsets.length;
-          this.__maxTravelTime = getMaxOfArray(this.__travelTimes);
+          this.avgTravelTime = this.travelTimes.reduce((p, q) => p + q) / this.travelTimes.length;
+          this.avgTimeOffset = this.timeOffsets.reduce((p, q) => p + q) / this.timeOffsets.length;
+          this.maxTravelTime = getMaxOfArray(this.travelTimes);
 
-          socket.emit('sync_stats', this.__maxTravelTime, this.__avgTravelTime, this.__avgTimeOffset);
-          this.emit('sync_stats', this.__maxTravelTime, this.__avgTravelTime, this.__avgTimeOffset);
+          socket.emit('sync_stats', this.maxTravelTime, this.avgTravelTime, this.avgTimeOffset);
+          this.emit('sync_stats', this.maxTravelTime, this.avgTravelTime, this.avgTimeOffset);
         }
       }
     });
@@ -64,26 +64,26 @@ class SyncProcess extends EventEmitter { // TODO: change EventEmitter to CustomE
 
   sendPing() {
     var socket = ioClient.socket;
-    this.__count++;
-    socket.emit('sync_ping', this.__id, audioContext.currentTime);
+    this.count++;
+    socket.emit('sync_ping', this.id, audioContext.currentTime);
   }
 }
 
 class ClientSyncManager extends EventEmitter { // TODO: change to CustomEvent?
   constructor() {
-    this.__maxTravelTimes = [];
-    this.__avgTravelTimes = [];
-    this.__avgTimeOffsets = [];
+    this.maxTravelTimes = [];
+    this.avgTravelTimes = [];
+    this.avgTimeOffsets = [];
 
-    this.__syncDiv = this.createSyncDiv();
+    this.parentDiv = this.createDiv();
 
-    this.__serverReady = false
+    this.serverReady = false;
 
     // Get sync parameters from the server.
     var socket = ioClient.socket;
 
     socket.on('init_sync', () => {
-      this.__serverReady = true;
+      this.serverReady = true;
     });
 
     socket.on('start_sync', () => {
@@ -102,18 +102,18 @@ class ClientSyncManager extends EventEmitter { // TODO: change to CustomEvent?
    */
 
   startNewSyncProcess(iterations = 10) {
-    if (this.__serverReady) {
+    if (this.serverReady) {
       var socket = ioClient.socket;
       var sync = new SyncProcess(iterations);
 
       this.emit('sync_started');
 
       sync.on('sync_stats', (maxTravelTime, avgTimeOffset, avgTravelTime) => {
-        var firstSync = (this.__maxTravelTimes.length === 0);
+        var firstSync = (this.maxTravelTimes.length === 0);
 
-        this.__maxTravelTimes.push(maxTravelTime);
-        this.__avgTimeOffsets.push(avgTimeOffset);
-        this.__avgTravelTimes.push(avgTravelTime);
+        this.maxTravelTimes.push(maxTravelTime);
+        this.avgTimeOffsets.push(avgTimeOffset);
+        this.avgTravelTimes.push(avgTravelTime);
 
         //  Send 'sync_ready' event after the first sync process only
         if (firstSync)
@@ -129,7 +129,7 @@ class ClientSyncManager extends EventEmitter { // TODO: change to CustomEvent?
    * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
    */
 
-  createSyncDiv() {
+  createDiv() {
     var syncDiv = document.createElement('div');
 
     syncDiv.setAttribute('id', 'sync');
@@ -142,17 +142,9 @@ class ClientSyncManager extends EventEmitter { // TODO: change to CustomEvent?
     syncDiv.addEventListener('click', () => {
       activateWebAudioAPI();
       this.startNewSyncProcess();
-    })
+    });
 
     return syncDiv;
-  }
-
-  displaySyncDiv() {
-    this.__syncDiv.classList.remove('hidden');
-  }
-
-  hideSyncDiv() {
-    this.__syncDiv.classList.add('hidden');
   }
 }
 

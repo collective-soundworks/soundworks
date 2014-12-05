@@ -1,8 +1,12 @@
 'use strict';
 
 class ServerSoloistManager {
-  constructor(playerManager) {
-    this.__playerManager = playerManager;
+  constructor() {
+    this.playerManager = null;
+  }
+
+  init(playerManger) {
+    this.playerManager = playerManger;
   }
 
   addPlayer(player) {

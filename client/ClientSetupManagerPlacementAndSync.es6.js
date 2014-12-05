@@ -7,49 +7,54 @@ class ClientSetupManagerPlacementAndSync extends ClientSetupManager {
   constructor(placementManager, syncManager) {
     super();
 
-    this.__standbyDiv = this.createStandbyDiv();
+    this.placementManager = placementManager;
+    this.syncManager = syncManager;
 
-    this.__placementManager = placementManager;
-    this.__syncManager = syncManager;
+    this.standbyDiv = this.createStandbyDiv();
 
-    this.__parentDiv.appendChild(syncManager.__syncDiv);
-    this.__parentDiv.appendChild(placementManager.__placementDiv);
+    this.parentDiv.appendChild(syncManager.parentDiv);
+    this.parentDiv.appendChild(placementManager.parentDiv);
 
-    this.__state = {
+    this.state = {
       placed: false,
       synced: false
-    }
+    };
 
-    this.__placeInfo = null;
+    this.placeInfo = null;
   }
 
   start() {
     // 1. Display screens
-    this.displayParentDiv();
-    this.__syncManager.displaySyncDiv();
+    this.parentDiv.classList.remove('hidden');
+    this.syncManager.parentDiv.classList.remove('hidden');
+    
     // 2. When sync is started…
-    this.__syncManager.on('sync_started', () => {
-      this.__syncManager.hideSyncDiv();
-      this.__placementManager.displayPlacementDiv();
+    this.syncManager.on('sync_started', () => {
+      this.syncManager.parentDiv.classList.add('hidden');
+      this.placementManager.parentDiv.classList.remove('hidden');
     });
+
     // 3.1 When placement is ready…
-    this.__placementManager.on('placement_ready', (placeInfo) => {
-      this.__state.placed = true;
-      this.__placeInfo = placeInfo
-      this.__placementManager.hidePlacementDiv();
-      if (!this.__state.synced)
-        this.displayStandbyDiv();
+    this.placementManager.on('placement_ready', (placeInfo) => {
+      this.state.placed = true;
+      this.placeInfo = placeInfo;
+
+      this.placementManager.parentDiv.classList.add('hidden');
+
+      if (!this.state.synced)
+        this.standbyDiv.classList.remove('hidden');
       else {
-        this.emit('setup_ready', this.__placeInfo);
-        this.hideParentDiv();
+        this.emit('setup_ready', this.placeInfo);
+        this.parentDiv.classList.add('hidden');
       }
     });
+
     // 3.2 When sync is ready…
-    this.__syncManager.on('sync_ready', () => {
-      this.__state.synced = true;
-      if (this.__state.placed) {
-        this.emit('setup_ready', this.__placeInfo);
-        this.hideParentDiv();
+    this.syncManager.on('sync_ready', () => {
+      this.state.synced = true;
+      if (this.state.placed) {
+        this.emit('setup_ready', this.placeInfo);
+        this.parentDiv.classList.add('hidden');
       }
     });
   }
@@ -68,20 +73,10 @@ class ClientSetupManagerPlacementAndSync extends ClientSetupManager {
 
     standbyDiv.innerHTML = "<p>Finishing setup&hellip;</p>";
 
-    this.__parentDiv.appendChild(standbyDiv);
+    this.parentDiv.appendChild(standbyDiv);
 
     return standbyDiv;
   }
-
-  displayStandbyDiv() {
-    this.__standbyDiv.classList.remove('hidden');
-  }
-
-  hideStandbyDiv() {
-    this.__standbyDiv.classList.add('hidden');
-  }
-
-
 }
 
 module.exports = ClientSetupManagerPlacementAndSync;

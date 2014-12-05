@@ -2,18 +2,27 @@ var EventEmitter = require('events').EventEmitter;
 
 'use strict';
 
-class ServerPreparationManager extends EventEmitter {
-  constructor() {
-    this.__states = {}
-  }
+class ServerSetupManager extends EventEmitter {
+	constructor(topologyManager) {
+		this.topologyManager = topologyManager;
+		this.playerManager = null;
+	}
 
-  addPlayer(player) {
+	init(playerManager) {
+		this.playerManager = playerManager;
+	}
 
-  }
+	addPlayer(player) {
 
-  removePlayer(player) {
+	}
 
-  }
+	removePlayer(player) {
+
+	}
+
+	updateTopology() {
+
+	}
 }
 
-module.exports = ServerPreparationManager;
+module.exports = ServerSetupManager;

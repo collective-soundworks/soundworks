@@ -9,22 +9,22 @@ class ClientPlacementManagerAssignedPlaces extends ClientPlacementManager {
 
     var socket = ioClient.socket;
     socket.on('place_available', this.updateInstructions.bind(this));
-    socket.on('no_place_available', this.updateInstructions.bind(this))
+    socket.on('no_place_available', this.updateInstructions.bind(this));
   }
 
   updateInstructions(placeInfo = null) {
     if (placeInfo) {
-      this.__place = placeInfo.place;
-      this.__position = placeInfo.position;
-      this.__label = placeInfo.label;
+      this.place = placeInfo.place;
+      this.position = placeInfo.position;
+      this.label = placeInfo.label;
 
-      this.__placementDiv.innerHTML = "<p>Go to position</p>" + 
-        "<div class='position circle'><span>" + this.__label + "</span></div>" +
+      this.parentDiv.innerHTML = "<p>Go to position</p>" + 
+        "<div class='position circle'><span>" + this.label + "</span></div>" +
         "<p class='small'>Touch the screen<br/>when you are ready.</p>";
 
-      this.__placementDiv.addEventListener('click', this.placementReady.bind(this));
+      this.parentDiv.addEventListener('click', this.placementReady.bind(this));
     } else {
-      this.__placementDiv.innerHTML = "<p>All seats are taken, please try again later! =)</p>";
+      this.parentDiv.innerHTML = "<p>All seats are taken, please try again later! =)</p>";
     }
   }
 

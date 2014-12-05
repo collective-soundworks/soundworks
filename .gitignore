@@ -1,6 +1,4 @@
 **/*.js
 !**/*.es6.js
-!**/index.js
-!**/noise.js
 !**/gulpfile.js
 node_modules

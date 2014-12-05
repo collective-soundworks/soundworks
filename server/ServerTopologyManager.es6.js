@@ -4,28 +4,27 @@ var EventEmitter = require('events').EventEmitter;
 
 class ServerTopologyManager extends EventEmitter {
   constructor() {
-    this.__labels = [];
-    this.__positions = [];
+    this.labels = [];
+    this.positions = [];
+  }
+
+  init() {
+
   }
 
   getLabel(place) {
-    return this.__labels[place];
+    return this.labels[place];
   }
 
   getPosition(place) {
-    return this.__positions[place];
+    return this.positions[place];
   }
 
-  getTopology() {
-    var topology = {
-      "labels": this.__labels,
-      "positions": this.__positions
-    };
-    return topology;
-  }
-
-  send(socket) {
-    socket.emit('topology', this.getTopology());
+  sendInit(socket) {
+    socket.emit('init_topology', {
+      "labels": this.labels,
+      "positions": this.positions
+    });
   }
 }
 

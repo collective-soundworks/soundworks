@@ -1,9 +1,13 @@
 'use strict';
 
 class ServerPerformanceManager {
-  constructor(clientManager, topologyManager) {
-    this.__clientManager = clientManager;
-    this.__topologyManager = topologyManager;
+  constructor(topologyManager) {
+    this.topologyManager = topologyManager;
+    this.playerManager = null;
+  }
+
+  init(playerManager) {
+  	this.playerManager = playerManager;
   }
 
   addPlayer(player) {
@@ -11,6 +15,10 @@ class ServerPerformanceManager {
   }
 
   removePlayer(player) {
+
+  }
+
+  updateTopology(player) {
 
   }
 }

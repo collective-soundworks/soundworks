@@ -10,15 +10,7 @@ class ClientSetupManager extends EventEmitter {
     parentDiv.classList.add('hidden');
     container.appendChild(parentDiv);
     
-    this.__parentDiv = parentDiv;
-  }
-
-  displayParentDiv() {
-    this.__parentDiv.classList.remove('hidden');
-  }
-
-  hideParentDiv() {
-    this.__parentDiv.classList.add('hidden');
+    this.parentDiv = parentDiv;
   }
 
   start() {

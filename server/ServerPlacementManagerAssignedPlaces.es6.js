@@ -7,19 +7,19 @@ function getRandomInt(min, max) {
 }
 
 class ServerPlacementManagerAssignedPlaces extends ServerPlacementManager {
-  constructor(topoModel) {
-    super(topoModel);
+  constructor(topologyManager) {
+    super(topologyManager);
   }
 
   requestPlace(player) {
     var socket = player.socket;
 
-    if (this.__availablePlaces.length > 0) {
+    if (this.availablePlaces.length > 0) {
       // Get place and position
-      var index = getRandomInt(0, this.__availablePlaces.length - 1);
-      var place = this.__availablePlaces.splice(index, 1)[0]; // TODO: handle different assignment methods (here, random).
-      var label = this.__topoModel.getLabel(place);
-      var position = this.__topoModel.getPosition(place);
+      var index = getRandomInt(0, this.availablePlaces.length - 1);
+      var place = this.availablePlaces.splice(index, 1)[0]; // TODO: handle different assignment methods (here, random).
+      var label = this.topologyManager.getLabel(place);
+      var position = this.topologyManager.getPosition(place);
 
       player.place = place;
       player.position = position;
