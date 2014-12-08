@@ -1,6 +1,6 @@
-var EventEmitter = require('events').EventEmitter;
+'use strict';
 
-"use strict";
+var EventEmitter = require('events').EventEmitter;
 
 class ServerSyncManager extends EventEmitter {
   constructor(iterations = 10) {
@@ -9,7 +9,7 @@ class ServerSyncManager extends EventEmitter {
 
   initSync(player) {
     var socket = player.socket;
-    socket.emit('init_sync');
+    socket.emit('sync_init');
     this.listen(player);
   }
 
@@ -36,7 +36,7 @@ class ServerSyncManager extends EventEmitter {
 
   startSync(player) {
     var socket = player.socket;
-    socket.emit('start_sync');
+    socket.emit('sync_start');
     this.listen(player);
   }
 }

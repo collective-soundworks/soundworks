@@ -1,7 +1,7 @@
+'use strict';
+
 var ServerSoloistManager = require('./ServerSoloistManager');
 var ioServer = require('./ioServer');
-
-'use strict';
 
 function clearArray(a) {
   while (a.length > 0)

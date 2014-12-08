@@ -1,3 +1,5 @@
+'use strict';
+
 var ioClient = require('./ioClient');
 
 function listenPlayerManager(performanceManager) {

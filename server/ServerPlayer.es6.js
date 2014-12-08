@@ -2,13 +2,11 @@
 
 class Player {
 	constructor(socket, place = null, position = null) {
-    // Topology
     this.place = place;
-    this.position = position;
-    // States
+
     this.privateState = {};
     this.publicState = {};
-    // Connection
+
     this.socket = socket;
     this.pingLatency = 0;
   }

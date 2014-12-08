@@ -1,6 +1,6 @@
-var EventEmitter = require('events').EventEmitter;
-
 'use strict';
+
+var EventEmitter = require('events').EventEmitter;
 
 class ServerPlacementManager extends EventEmitter {
   constructor(topologyManager) {
@@ -12,7 +12,6 @@ class ServerPlacementManager extends EventEmitter {
     if (this.availablePlaces.length > 0) {
       var place = this.availablePlaces.splice(0, 1)[0];
       player.place = place;
-      player.position = this.topologyManager.positions[place];
     }
 
     this.emit('placement_ready', player);
@@ -24,7 +23,6 @@ class ServerPlacementManager extends EventEmitter {
     if (place !== null) {
       this.availablePlaces.push(place);
       player.place = null;
-      player.position = null;
     }
   }
 

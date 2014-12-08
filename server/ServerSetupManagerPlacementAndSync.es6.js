@@ -1,6 +1,6 @@
-var ServerSetupManager = require('./ServerSetupManager');
-
 'use strict';
+
+var ServerSetupManager = require('./ServerSetupManager');
 
 class ServerSetupManagerPlacementAndSync extends ServerSetupManager {
   constructor(topologyManager, placementManager, syncManager) {

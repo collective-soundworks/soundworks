@@ -1,3 +1,5 @@
+'use strict';
+
 window.container = window.container || document.getElementById('container');
 window.preparationDiv = window.preparationDiv || document.getElementById('preparation');
 var audioContext = require('audio-context');
@@ -5,8 +7,6 @@ var EventEmitter = require('events').EventEmitter;
 var ioClient = require('./ioClient');
 
 window.container = window.container || document.getElementById('container');
-
-'use strict';
 
 function beep() {
   var time = audioContext.currentTime;
@@ -32,7 +32,6 @@ class ClientPlacementManager extends EventEmitter {
   constructor() {
     this.label = null;
     this.place = null;
-    this.position = null;
 
     var div = document.createElement('div');
     div.setAttribute('id', 'placement');
@@ -46,7 +45,6 @@ class ClientPlacementManager extends EventEmitter {
     var placeInfo = {
       "label": this.label,
       "place": this.place,
-      "position": this.position
     };
     return placeInfo;
   }

@@ -1,7 +1,7 @@
+'use strict';
+
 var Player = require('./ServerPlayer');
 var EventEmitter = require('events').EventEmitter;
-
-'use strict';
 
 class ServerPlayerManager extends EventEmitter {
   constructor(topologyManager) {

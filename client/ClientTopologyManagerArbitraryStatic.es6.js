@@ -1,7 +1,7 @@
+'use strict';
+
 var ClientTopologyManager = require('./ClientTopologyManager');
 var ioClient = require("./ioClient");
-
-'use strict';
 
 class ClientTopologyManagerArbitraryStatic extends ClientTopologyManager {
   constructor(params) {

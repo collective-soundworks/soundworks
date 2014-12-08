@@ -1,8 +1,8 @@
+'use strict';
+
 var audioContext = require('audio-context');
 var ioClient = require('./ioClient');
 var EventEmitter = require('events').EventEmitter;
-
-'use strict';
 
 function activateWebAudioAPI() {
   var o = audioContext.createOscillator();
@@ -14,12 +14,12 @@ function activateWebAudioAPI() {
   o.stop(audioContext.currentTime + 0.000001);
 }
 
-function getMaxOfArray(numArray) {
-  return Math.max.apply(null, numArray);
-}
-
 function getMinOfArray(numArray) {
   return Math.min.apply(null, numArray);
+}
+
+function getMaxOfArray(numArray) {
+  return Math.max.apply(null, numArray);
 }
 
 class SyncProcess extends EventEmitter { // TODO: change EventEmitter to CustomEvent?
@@ -91,11 +91,11 @@ class ClientSyncManager extends EventEmitter { // TODO: change to CustomEvent?
     // Get sync parameters from the server.
     var socket = ioClient.socket;
 
-    socket.on('init_sync', () => {
+    socket.on('sync_init', () => {
       this.serverReady = true;
     });
 
-    socket.on('start_sync', () => {
+    socket.on('sync_start', () => {
       this.startNewSyncProcess();
     });
 

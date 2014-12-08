@@ -1,7 +1,7 @@
+'use strict';
+
 window.container = window.container || document.getElementById('container'); // TODO: make module?
 var ClientSetupManager = require('./ClientSetupManager');
-
-'use strict';
 
 class ClientSetupManagerPlacementAndSync extends ClientSetupManager {
   constructor(placementManager, syncManager) {

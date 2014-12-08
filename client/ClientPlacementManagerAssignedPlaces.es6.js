@@ -1,7 +1,7 @@
+'use strict';
+
 var ClientPlacementManager = require('./ClientPlacementManager');
 var ioClient = require('./ioClient');
-
-'use strict';
 
 class ClientPlacementManagerAssignedPlaces extends ClientPlacementManager {
   constructor() {
@@ -15,7 +15,6 @@ class ClientPlacementManagerAssignedPlaces extends ClientPlacementManager {
   updateInstructions(placeInfo = null) {
     if (placeInfo) {
       this.place = placeInfo.place;
-      this.position = placeInfo.position;
       this.label = placeInfo.label;
 
       this.parentDiv.innerHTML = "<p>Go to position</p>" + 

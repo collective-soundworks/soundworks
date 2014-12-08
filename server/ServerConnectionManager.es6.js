@@ -1,7 +1,7 @@
+'use strict';
+
 var ioServer = require('./ioServer');
 var EventEmitter = require('events').EventEmitter;
-
-'use strict';
 
 class ServerConnectionManager extends EventEmitter {
   constructor() {

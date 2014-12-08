@@ -1,10 +1,12 @@
+'use strict';
+
 var ConnectionManager = require('./ServerConnectionManager');
 var PlayerManager = require('./ServerPlayerManager');
 
 function start(topologyManager, setupManager, performanceManager) {
   var connectionManager = new ConnectionManager();
   var playerManager = new PlayerManager();
-
+  
   setupManager.init();
   performanceManager.init(playerManager);
 

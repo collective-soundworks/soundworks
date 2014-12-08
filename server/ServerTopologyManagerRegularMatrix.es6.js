@@ -1,6 +1,6 @@
-ServerTopologyManager = require("./ServerTopologyManager");
-
 'use strict';
+
+var ServerTopologyManager = require("./ServerTopologyManager");
 
 class ServerTopologyManagerRegularMatrix extends ServerTopologyManager {
   constructor(matrixParams) {
@@ -12,6 +12,9 @@ class ServerTopologyManagerRegularMatrix extends ServerTopologyManager {
     this.spacingY = matrixParams.spacingY || 2;
     this.marginX = matrixParams.marginX || this.spacingX / 2;
     this.marginY = matrixParams.marginY || this.spacingY / 2;
+    
+    this.labels = [];
+    this.positions = [];
   }
 
   init() {
@@ -40,6 +43,10 @@ class ServerTopologyManagerRegularMatrix extends ServerTopologyManager {
       "labels": this.labels,
       "positions": this.positions,
     });
+  }
+
+  getLabel(place) {
+    return this.labels[place];
   }
 }
 

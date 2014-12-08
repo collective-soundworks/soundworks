@@ -1,6 +1,6 @@
-var EventEmitter = require('events').EventEmitter;
-
 'use strict';
+
+var EventEmitter = require('events').EventEmitter;
 
 class ServerSetupManager extends EventEmitter {
 	constructor(topologyManager) {

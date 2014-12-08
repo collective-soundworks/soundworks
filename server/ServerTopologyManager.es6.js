@@ -1,30 +1,22 @@
-var EventEmitter = require('events').EventEmitter;
-
 'use strict';
+
+var EventEmitter = require('events').EventEmitter;
 
 class ServerTopologyManager extends EventEmitter {
   constructor() {
-    this.labels = [];
-    this.positions = [];
+    
   }
 
   init() {
 
   }
 
-  getLabel(place) {
-    return this.labels[place];
-  }
-
-  getPosition(place) {
-    return this.positions[place];
-  }
-
   sendInit(socket) {
-    socket.emit('init_topology', {
-      "labels": this.labels,
-      "positions": this.positions
-    });
+
+  }
+
+  getLabel(place) {
+    return place.toString(); // by default the label is the place number
   }
 }
 

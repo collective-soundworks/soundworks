@@ -8,7 +8,6 @@ class ClientPerformanceManager {
 
     this.label = null;
     this.place = null;
-    this.position = null;
 
     // GUI parent div
     var parentDiv = document.createElement('div');
@@ -24,9 +23,8 @@ class ClientPerformanceManager {
   }
 
   start(placeInfo) {
-    this.label = placeInfo.label;
     this.place = placeInfo.place;
-    this.position = placeInfo.position;
+    this.label = placeInfo.label;
   }
 
   addPlayer(player) {
