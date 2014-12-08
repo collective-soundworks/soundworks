@@ -22,7 +22,7 @@ class ServerSyncManager extends EventEmitter {
       socket.emit('sync_pong', id, pingTime_clientTime, pongTime_serverTime);
     });
 
-    socket.on('sync_stats', (maxTravelTime, avgTravelTime, avgTimeOffset) => {
+    socket.on('sync_stats', (minTravelTime, maxTravelTime, avgTravelTime, avgTimeOffset) => {
       var firstSync = (player.pingLatency === 0);
 
       player.pingLatency = maxTravelTime / 2;

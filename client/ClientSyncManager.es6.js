@@ -18,6 +18,10 @@ function getMaxOfArray(numArray) {
   return Math.max.apply(null, numArray);
 }
 
+function getMinOfArray(numArray) {
+  return Math.min.apply(null, numArray);
+}
+
 class SyncProcess extends EventEmitter { // TODO: change EventEmitter to CustomEvent?
   constructor(iterations) {
     this.id = Math.floor(Math.random() * 1000000);
@@ -29,6 +33,7 @@ class SyncProcess extends EventEmitter { // TODO: change EventEmitter to CustomE
     this.travelTimes = [];
     this.avgTimeOffset = 0;
     this.avgTravelTime = 0;
+    this.minTravelTime = 0;
     this.maxTravelTime = 0;
 
     // Send first ping
@@ -53,10 +58,11 @@ class SyncProcess extends EventEmitter { // TODO: change EventEmitter to CustomE
         } else {
           this.avgTravelTime = this.travelTimes.reduce((p, q) => p + q) / this.travelTimes.length;
           this.avgTimeOffset = this.timeOffsets.reduce((p, q) => p + q) / this.timeOffsets.length;
+          this.minTravelTime = getMinOfArray(this.travelTimes);
           this.maxTravelTime = getMaxOfArray(this.travelTimes);
 
-          socket.emit('sync_stats', this.maxTravelTime, this.avgTravelTime, this.avgTimeOffset);
-          this.emit('sync_stats', this.maxTravelTime, this.avgTravelTime, this.avgTimeOffset);
+          socket.emit('sync_stats', this.minTravelTime, this.maxTravelTime, this.avgTravelTime, this.avgTimeOffset);
+          this.emit('sync_stats', this.minTravelTime, this.maxTravelTime, this.avgTravelTime, this.avgTimeOffset);
         }
       }
     });
@@ -71,9 +77,12 @@ class SyncProcess extends EventEmitter { // TODO: change EventEmitter to CustomE
 
 class ClientSyncManager extends EventEmitter { // TODO: change to CustomEvent?
   constructor() {
+    this.minTravelTimes = [];
     this.maxTravelTimes = [];
     this.avgTravelTimes = [];
     this.avgTimeOffsets = [];
+
+    this.timeOffset = 0;
 
     this.parentDiv = this.createDiv();
 
@@ -108,12 +117,15 @@ class ClientSyncManager extends EventEmitter { // TODO: change to CustomEvent?
 
       this.emit('sync_started');
 
-      sync.on('sync_stats', (maxTravelTime, avgTimeOffset, avgTravelTime) => {
+      sync.on('sync_stats', (minTravelTime, maxTravelTime, avgTimeOffset, avgTravelTime) => {
         var firstSync = (this.maxTravelTimes.length === 0);
 
+        this.minTravelTimes.push(minTravelTime);
         this.maxTravelTimes.push(maxTravelTime);
         this.avgTimeOffsets.push(avgTimeOffset);
         this.avgTravelTimes.push(avgTravelTime);
+
+        this.timeOffset = avgTimeOffset;
 
         //  Send 'sync_ready' event after the first sync process only
         if (firstSync)
@@ -145,6 +157,14 @@ class ClientSyncManager extends EventEmitter { // TODO: change to CustomEvent?
     });
 
     return syncDiv;
+  }
+
+  getLocalTime(serverTime) {
+    return serverTime - this.timeOffset;
+  }
+
+  getServerTime(localTime = audioContext.currentTime) {
+    return localTime + this.timeOffset;
   }
 }
 
