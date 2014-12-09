@@ -30,12 +30,15 @@ class ClientPlacementManager extends EventEmitter {
     return placeInfo;
   }
 
-  placementReady() {
+  start() {
+
+  }
+
+  ready() {
     var socket = ioClient.socket;
     socket.emit('placement_ready');
     this.emit('placement_ready', this.getPlaceInfo());
   }
-
 }
 
 module.exports = ClientPlacementManager;

@@ -4,16 +4,6 @@ var audioContext = require('audio-context');
 var ioClient = require('./ioClient');
 var EventEmitter = require('events').EventEmitter;
 
-function activateWebAudioAPI() {
-  var o = audioContext.createOscillator();
-  var g = audioContext.createGain();
-  g.gain.value = 0;
-  o.connect(g);
-  g.connect(audioContext.destination);
-  o.start(0);
-  o.stop(audioContext.currentTime + 0.000001);
-}
-
 function getMinOfArray(numArray) {
   return Math.min.apply(null, numArray);
 }
@@ -84,8 +74,6 @@ class ClientSyncManager extends EventEmitter { // TODO: change to CustomEvent?
 
     this.timeOffset = 0;
 
-    this.parentDiv = this.createDiv();
-
     this.serverReady = false;
 
     // Get sync parameters from the server.
@@ -103,6 +91,10 @@ class ClientSyncManager extends EventEmitter { // TODO: change to CustomEvent?
     // Otherwise, audioContext.currentTime is stuck
     // to 0.
     audioContext.createGain();
+  }
+
+  start() {
+    this.startNewSyncProcess();
   }
 
   /*
@@ -134,29 +126,6 @@ class ClientSyncManager extends EventEmitter { // TODO: change to CustomEvent?
         console.log("Sync process done!");
       });
     }
-  }
-
-  /*
-   * Preparation '#sync' div (HTML)
-   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-   */
-
-  createDiv() {
-    var syncDiv = document.createElement('div');
-
-    syncDiv.setAttribute('id', 'sync');
-    syncDiv.classList.add('info');
-    syncDiv.classList.add('hidden');
-
-    syncDiv.innerHTML = "<p>Before we start, we'll go through a little preparation process.</p>" +
-      "<p>Touch the screen to start!</p>";
-
-    syncDiv.addEventListener('click', () => {
-      activateWebAudioAPI();
-      this.startNewSyncProcess();
-    });
-
-    return syncDiv;
   }
 
   getLocalTime(serverTime) {

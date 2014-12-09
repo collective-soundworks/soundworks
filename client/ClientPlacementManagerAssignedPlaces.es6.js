@@ -14,21 +14,28 @@ class ClientPlacementManagerAssignedPlaces extends ClientPlacementManager {
     socket.on('place_available', (placeInfo) => {
       this.place = placeInfo.place;
       this.label = placeInfo.label;
-
-      if (this.showDialog) {
-        this.parentDiv.innerHTML = "<p>Go to position</p>" +
-          "<div class='position circle'><span>" + this.label + "</span></div>" +
-          "<p class='small'>Touch the screen<br/>when you are ready.</p>";
-
-        this.parentDiv.addEventListener('click', this.placementReady.bind(this));
-      } else {
-        this.placementReady();
-      }
     });
 
     socket.on('no_place_available', () => {
       this.parentDiv.innerHTML = "<p>All seats are taken, please try again later! =)</p>";
     });
+  }
+
+  start() {
+    if (this.showDialog) {
+      this.parentDiv.innerHTML = "<p>Go to position</p>" +
+        "<div class='position circle'><span>" + this.label + "</span></div>" +
+        "<p class='small'>Touch the screen<br/>when you are ready.</p>";
+
+      this.parentDiv.addEventListener('click', () => {
+        this.parentDiv.classList.add('hidden');
+        this.ready();
+      });
+
+      this.parentDiv.classList.remove('hidden');
+    } else {
+      this.ready();
+    }
   }
 }
 
