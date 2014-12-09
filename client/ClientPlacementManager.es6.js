@@ -8,30 +8,10 @@ var ioClient = require('./ioClient');
 
 window.container = window.container || document.getElementById('container');
 
-function beep() {
-  var time = audioContext.currentTime;
-  var duration = 0.2;
-  var attack = 0.001;
-
-  var g = audioContext.createGain();
-  g.connect(audioContext.destination);
-  g.gain.value = 0;
-  g.gain.setValueAtTime(0, time);
-  g.gain.linearRampToValueAtTime(0.5, time + attack);
-  g.gain.exponentialRampToValueAtTime(0.0000001, time + duration);
-  g.gain.setValueAtTime(0, time);
-
-  var o = audioContext.createOscillator();
-  o.connect(g);
-  o.frequency.value = 600;
-  o.start(time);
-  o.stop(time + duration);
-}
-
 class ClientPlacementManager extends EventEmitter {
   constructor() {
-    this.label = null;
     this.place = null;
+    this.label = null;
 
     var div = document.createElement('div');
     div.setAttribute('id', 'placement');
@@ -43,9 +23,10 @@ class ClientPlacementManager extends EventEmitter {
 
   getPlaceInfo() {
     var placeInfo = {
-      "label": this.label,
       "place": this.place,
+      "label": this.label
     };
+
     return placeInfo;
   }
 

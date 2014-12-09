@@ -17,10 +17,6 @@ class ServerPerformanceManager {
   removePlayer(player) {
 
   }
-
-  updateTopology(player) {
-
-  }
 }
 
 module.exports = ServerPerformanceManager;

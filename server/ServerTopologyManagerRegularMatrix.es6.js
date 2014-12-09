@@ -3,50 +3,47 @@
 var ServerTopologyManager = require("./ServerTopologyManager");
 
 class ServerTopologyManagerRegularMatrix extends ServerTopologyManager {
-  constructor(matrixParams) {
+  constructor(params) {
     super();
 
-    this.X = matrixParams.X;
-    this.Y = matrixParams.Y;
-    this.spacingX = matrixParams.spacingX || 2;
-    this.spacingY = matrixParams.spacingY || 2;
-    this.marginX = matrixParams.marginX || this.spacingX / 2;
-    this.marginY = matrixParams.marginY || this.spacingY / 2;
-    
-    this.labels = [];
-    this.positions = [];
+    this.cols = params.cols || params.X;
+    this.rows = params.rows || params.Y;
+    this.colSpacing = params.colSpacing || 2;
+    this.rowSpacing = params.rowSpacing || 2;
+    this.colMargin = params.colMargin || this.colSpacing / 2;
+    this.rowMargin = params.rowMargin || this.rowSpacing / 2;
   }
 
   init() {
-    this.height = this.spacingY * (this.Y - 1) + 2 * this.marginY;
-    this.width = this.spacingX * (this.X - 1) + 2 * this.marginX;
+    this.width = this.colSpacing * (this.cols - 1) + 2 * this.colMargin;
+    this.height = this.rowSpacing * (this.rows - 1) + 2 * this.rowMargin;
 
-    var count = 1;
+    var count = 0;
 
-    for (let j = 0; j < this.Y; j++) {
-      for (let i = 0; i < this.X; i++) {
-        this.positions.push([(this.marginX + i * this.spacingX) / this.width, (this.marginY + j * this.spacingY) / this.height]);
-        this.labels.push(count.toString());
+    for (let j = 0; j < this.rows; j++) {
+      for (let i = 0; i < this.cols; i++) {
         count++;
+
+        var label = count.toString();
+        var position = [(this.colMargin + i * this.colSpacing) / this.width, (this.rowMargin + j * this.rowSpacing) / this.height];
+
+        this.labels.push(label);
+        this.positions.push(position);
       }
     }
 
-    this.emit('topology_update');
+    this.emit('topology_init');
   }
 
   sendInit(socket) {
-    socket.emit('init_topology', {
-      "X": this.X,
-      "Y": this.Y,
-      "height": this.height,
+    socket.emit('topology_init', {
       "width": this.width,
+      "height": this.height,
+      "maxWidthDivision": this.cols,
+      "maxHeightDivision": this.rows,
       "labels": this.labels,
       "positions": this.positions,
     });
-  }
-
-  getLabel(place) {
-    return this.labels[place];
   }
 }
 

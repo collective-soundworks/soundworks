@@ -3,8 +3,7 @@
 var EventEmitter = require('events').EventEmitter;
 
 class ServerSetupManager extends EventEmitter {
-	constructor(topologyManager) {
-		this.topologyManager = topologyManager;
+	constructor() {
 		this.playerManager = null;
 	}
 
@@ -17,10 +16,6 @@ class ServerSetupManager extends EventEmitter {
 	}
 
 	removePlayer(player) {
-
-	}
-
-	updateTopology() {
 
 	}
 }

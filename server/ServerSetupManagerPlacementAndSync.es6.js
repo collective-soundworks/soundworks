@@ -3,8 +3,8 @@
 var ServerSetupManager = require('./ServerSetupManager');
 
 class ServerSetupManagerPlacementAndSync extends ServerSetupManager {
-  constructor(topologyManager, placementManager, syncManager) {
-    super(topologyManager);
+  constructor(placementManager, syncManager) {
+    super();
 
     this.placementManager = placementManager;
     this.syncManager = syncManager;
@@ -34,10 +34,6 @@ class ServerSetupManagerPlacementAndSync extends ServerSetupManager {
 
   removePlayer(player) {
     this.placementManager.releasePlace(player);
-  }
-
-  updateTopology() {
-    this.placementManager.updateTopology();
   }
 
   setupReady(player) {

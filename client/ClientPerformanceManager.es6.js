@@ -3,11 +3,9 @@
 window.container = window.container || document.getElementById('container');
 
 class ClientPerformanceManager {
-  constructor(topologyManager) {
-    this.topologyManager = topologyManager;
-
-    this.label = null;
+  constructor() {
     this.place = null;
+    this.label = null;
 
     // GUI parent div
     var parentDiv = document.createElement('div');
@@ -32,10 +30,6 @@ class ClientPerformanceManager {
   }
 
   removePlayer(player) {
-
-  }
-
-  updateTopology(topology) {
 
   }
 }

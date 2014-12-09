@@ -3,23 +3,21 @@
 var ConnectionManager = require('./ServerConnectionManager');
 var PlayerManager = require('./ServerPlayerManager');
 
-function start(topologyManager, setupManager, performanceManager) {
+function start(setupManager, performanceManager, topologyManager = null) {
   var connectionManager = new ConnectionManager();
   var playerManager = new PlayerManager();
   
-  setupManager.init();
   performanceManager.init(playerManager);
+  setupManager.init();
 
-  topologyManager.on('topology_update', () => {
-    setupManager.updateTopology();
-    performanceManager.updateTopology();
-  });
-
-  topologyManager.init();
+  if(topologyManager)
+    topologyManager.init(); // this is last and may call listeners installed by the others
 
   // when a new player connects to the server
   connectionManager.on('connected', (socket) => {
-    topologyManager.sendInit(socket);
+    if(topologyManager)
+      topologyManager.sendInit(socket);
+    
     var player = playerManager.register(socket);
     setupManager.addPlayer(player);
   });

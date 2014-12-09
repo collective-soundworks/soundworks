@@ -17,4 +17,5 @@ class ClientSetupManager extends EventEmitter {
     
   }
 }
+
 module.exports = ClientSetupManager;
