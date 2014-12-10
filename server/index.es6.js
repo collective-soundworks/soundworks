@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Matrix server side module export and start function
+ * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
+ */
 'use strict';
 
 var ConnectionManager = require('./ServerConnectionManager');

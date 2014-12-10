@@ -1,6 +1,10 @@
+/**
+ * @fileoverview Matrix client side performance manager base class
+ * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
+ */
 'use strict';
 
-window.container = window.container || document.getElementById('container');
+var container = window.container = window.container || document.getElementById('container');
 
 class ClientPerformanceManager {
   constructor() {
@@ -8,21 +12,21 @@ class ClientPerformanceManager {
     this.label = null;
 
     // GUI parent div
-    var parentDiv = document.createElement('div');
-    parentDiv.setAttribute('id', 'performance');
-    parentDiv.classList.add('hidden');
-    container.appendChild(parentDiv);
+    var div = document.createElement('div');
+    div.setAttribute('id', 'performance');
+    div.classList.add('hidden');
+    this.parentDiv = div;
 
-    this.parentDiv = parentDiv;
-  }
-
-  setPlayers(players) {
-
+    container.appendChild(this.parentDiv);
   }
 
   start(placeInfo) {
     this.place = placeInfo.place;
     this.label = placeInfo.label;
+  }
+
+  initPlayers(players) {
+
   }
 
   addPlayer(player) {

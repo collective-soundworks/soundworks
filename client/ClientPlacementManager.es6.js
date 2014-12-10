@@ -1,12 +1,12 @@
+/**
+ * @fileoverview Matrix client side placement manager base class
+ * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
+ */
 'use strict';
 
-window.container = window.container || document.getElementById('container');
-window.preparationDiv = window.preparationDiv || document.getElementById('preparation');
 var audioContext = require('audio-context');
 var EventEmitter = require('events').EventEmitter;
 var ioClient = require('./ioClient');
-
-window.container = window.container || document.getElementById('container');
 
 class ClientPlacementManager extends EventEmitter {
   constructor() {
@@ -17,7 +17,6 @@ class ClientPlacementManager extends EventEmitter {
     div.setAttribute('id', 'placement');
     div.classList.add('info');
     div.classList.add('hidden');
-
     this.parentDiv = div;
   }
 

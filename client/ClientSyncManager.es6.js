@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Matrix client side syncronization manager
+ * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
+ */
 'use strict';
 
 var audioContext = require('audio-context');

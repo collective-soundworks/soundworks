@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Matrix server side soloist manager randomly assigning soloists using an urn
+ * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
+ */
 'use strict';
 
 var ServerSoloistManager = require('./ServerSoloistManager');

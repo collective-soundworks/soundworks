@@ -1,42 +1,42 @@
+/**
+ * @fileoverview Matrix client side setup manager base class
+ * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
+ */
 'use strict';
 
 var EventEmitter = require('events').EventEmitter;
 var audioContext = require('audio-context');
 
-window.container = window.container || document.getElementById('container');
+var container = window.container = window.container || document.getElementById('container');
 
 class ClientSetupManager extends EventEmitter {
   constructor() {
-    var parentDiv = document.createElement('div');
-    parentDiv.setAttribute('id', 'setup');
-    parentDiv.classList.add('hidden');
-    container.appendChild(parentDiv);
+    var div;
 
-    this.parentDiv = parentDiv;
-    this.welcomeDiv = this.createWelcomeDiv();
-  }
+    // creat parent div
+    div = document.createElement('div');
+    div.setAttribute('id', 'setup');
+    div.classList.add('hidden');
+    this.parentDiv = div;
 
-  start() {
+    // create welcome dialog
+    div = document.createElement('div');
+    div.setAttribute('id', 'welcome');
+    div.classList.add('info');
+    div.classList.add('hidden');
+    div.innerHTML = "<p>Before we start, we'll go through a little preparation process.</p>" + "<p>Touch the screen to start!</p>";
+    this.welcomeDiv = div;
 
+    container.appendChild(this.parentDiv);
+    this.parentDiv.appendChild(this.welcomeDiv);
   }
 
   setWelcome(str) {
     this.welcomeDiv.innerHTML = "str";
   }
 
-  createWelcomeDiv() {
-    var div = document.createElement('div');
+  start() {
 
-    div.setAttribute('id', 'welcome');
-    div.classList.add('info');
-    div.classList.add('hidden');
-
-    div.innerHTML = "<p>Before we start, we'll go through a little preparation process.</p>" +
-      "<p>Touch the screen to start!</p>";
-
-    this.parentDiv.appendChild(div);
-
-    return div;
   }
 
   activateWebAudioAPI() {

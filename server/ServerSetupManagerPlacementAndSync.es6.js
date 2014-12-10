@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Matrix server side setup manager including syncronization and placement
+ * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
+ */
 'use strict';
 
 var ServerSetupManager = require('./ServerSetupManager');

@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Matrix client side placement manager automatically assigning places
+ * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
+ */
 'use strict';
 
 var ClientPlacementManager = require('./ClientPlacementManager');

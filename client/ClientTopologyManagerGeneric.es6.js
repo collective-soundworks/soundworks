@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Matrix client side topology manager displaying arbitrary static topologies
+ * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
+ */
 'use strict';
 
 var ClientTopologyManager = require('./ClientTopologyManager');

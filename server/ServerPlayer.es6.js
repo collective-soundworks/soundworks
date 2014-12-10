@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Matrix server side player class
+ * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
+ */
 'use strict';
 
 class Player {

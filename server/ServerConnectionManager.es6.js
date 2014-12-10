@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Matrix server side connection manager
+ * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
+ */
 'use strict';
 
 var ioServer = require('./ioServer');

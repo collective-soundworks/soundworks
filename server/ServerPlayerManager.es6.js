@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Matrix server side player manager
+ * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
+ */
 'use strict';
 
 var Player = require('./ServerPlayer');
@@ -64,7 +68,7 @@ class ServerPlayerManager extends EventEmitter {
       this.playing.push(player);
 
       var playerList = this.playing.map((c) => c.getInfo());
-      player.socket.emit('players_set', playerList);
+      player.socket.emit('players_init', playerList);
       player.socket.broadcast.emit('player_add', player.getInfo());
 
       player.socket.leave('setup');

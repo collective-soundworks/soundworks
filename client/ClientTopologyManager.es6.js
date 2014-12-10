@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Matrix client side topology manager
+ * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
+ */
 'use strict';
 
 var EventEmitter = require('events').EventEmitter;
@@ -8,12 +12,10 @@ class ClientTopologyManager extends EventEmitter {
     this.parentDiv = null;
 
     if (params && params.display) {
-      var div = document.createElement('div');
-      
+      var div = document.createElement('div');   
       div.setAttribute('id', 'topology');
       div.classList.add('topology');
       div.classList.add('hidden');
-
       this.parentDiv = div;
     }
   }

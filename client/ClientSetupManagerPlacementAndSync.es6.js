@@ -1,6 +1,9 @@
+/**
+ * @fileoverview Matrix client side setup manager including syncronization and placement
+ * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
+ */
 'use strict';
 
-window.container = window.container || document.getElementById('container'); // TODO: make module?
 var ClientSetupManager = require('./ClientSetupManager');
 
 class ClientSetupManagerPlacementAndSync extends ClientSetupManager {
@@ -10,7 +13,15 @@ class ClientSetupManagerPlacementAndSync extends ClientSetupManager {
     this.placementManager = placementManager;
     this.syncManager = syncManager;
 
-    this.standbyDiv = this.createStandbyDiv();
+    // create standby div
+    var div = document.createElement('div');
+    div.setAttribute('id', 'standby');
+    div.classList.add('info');
+    div.classList.add('hidden');
+    div.innerHTML = "<p>Finishing setup&hellip;</p>";
+    this.standbyDiv = div;
+
+    this.parentDiv.appendChild(this.standbyDiv);
     this.parentDiv.appendChild(placementManager.parentDiv);
 
     this.state = {
@@ -61,25 +72,6 @@ class ClientSetupManagerPlacementAndSync extends ClientSetupManager {
         this.parentDiv.classList.add('hidden');
       }
     });
-  }
-
-  /*
-   * Preparation '#standby' div (HTML)
-   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-   */
-
-  createStandbyDiv() {
-    var div = document.createElement('div');
-
-    div.setAttribute('id', 'standby');
-    div.classList.add('info');
-    div.classList.add('hidden');
-
-    div.innerHTML = "<p>Finishing setup&hellip;</p>";
-
-    this.parentDiv.appendChild(div);
-
-    return div;
   }
 }
 
