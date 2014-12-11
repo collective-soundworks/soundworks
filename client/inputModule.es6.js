@@ -6,7 +6,63 @@ var EventEmitter = require('events').EventEmitter;
 // TODO: add deviceMotion and deviceOrientation input.
 class InputModule extends EventEmitter {
   constructor() {
-    this.handleTouchEvent = this.handleTouchEvent.bind(this); // since .bind() creates a new function, we can't use it directly in the add/removeEventListener.
+    this.handleDeviceOrientationEvent = this.handleDeviceOrientationEvent.bind(this); // since .bind() creates a new function, we can't use it directly in the add/removeEventListener.
+    this.handleDeviceMotionEvent = this.handleDeviceMotionEvent.bind(this);
+    this.handleTouchEvent = this.handleTouchEvent.bind(this);
+  }
+
+  /*
+   * DeviceMotion
+   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+  enableDeviceMotion() {
+    window.addEventListener('devicemotion', this.handleDeviceMotionEvent, false);
+  }
+
+  disableDeviceMotion() {
+    window.removeEventListener('devicemotion', this.handleDeviceMotionEvent, false);
+  }
+
+  handleDeviceMotionEvent(e) {
+    var motionData = {
+      "acceleration": e.acceleration,
+      "accelerationIncludingGravity": e.accelerationIncludingGravity,
+      "rotationRate": e.rotationRate,
+      "timestamp": audioContext.currentTime
+    };
+    this.emit('devicemotion', motionData)
+  }
+
+  /*
+   * DeviceOrientation
+   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+  enableDeviceOrientation() {
+    window.addEventListener('deviceorientation', this.handleDeviceOrientationEvent, false);
+  }
+
+  disableDeviceOrientation() {
+    window.removeEventListener('deviceorientation', this.handleDeviceOrientationEvent, false);
+  }
+
+  handleDeviceOrientationEvent(e) {
+    var orientationData = {
+      "alpha": e.alpha,
+      "beta": e.beta,
+      "gamma": e.gamma,
+      "timestamp": audioContext.currentTime
+    };
+    this.emit('deviceorientation', orientationData);
+  }
+
+  /*
+   * Touch
+   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+  enableTouch(surface) {
+    surface.addEventListener('touchend', this.handleTouchEvent, false);
+    surface.addEventListener('touchmove', this.handleTouchEvent, false);
+    surface.addEventListener('touchstart', this.handleTouchEvent, false);
   }
 
   disableTouch(surface) {
@@ -15,19 +71,13 @@ class InputModule extends EventEmitter {
     surface.removeEventListener('touchstart', this.handleTouchEvent, false);
   }
 
-  enableTouch(surface) {
-    surface.addEventListener('touchend', this.handleTouchEvent, false);
-    surface.addEventListener('touchmove', this.handleTouchEvent, false);
-    surface.addEventListener('touchstart', this.handleTouchEvent, false);
-  }
-
   handleTouchEvent(e) {
     e.preventDefault(); // To prevent scrolling.
     
     var touchData = {
-      coordinates: [ e.changedTouches[0].clientX, e.changedTouches[0].clientY ],
-      currentTime: audioContext.currentTime,
-      event: e.type
+      "coordinates": [ e.changedTouches[0].clientX, e.changedTouches[0].clientY ],
+      "timestamp": audioContext.currentTime,
+      "event": e.type
     };
     
     this.emit(e.type, touchData);

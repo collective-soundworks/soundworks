@@ -117,7 +117,7 @@ class ClientSyncManager extends EventEmitter { // TODO: change to CustomEvent?
 
       this.emit('sync_started');
 
-      sync.on('sync_stats', (minTravelTime, maxTravelTime, avgTimeOffset, avgTravelTime) => {
+      sync.on('sync_stats', (minTravelTime, maxTravelTime, avgTravelTime, avgTimeOffset) => {
         var firstSync = (this.maxTravelTimes.length === 0);
 
         this.minTravelTimes.push(minTravelTime);
@@ -158,6 +158,11 @@ class ClientSyncManager extends EventEmitter { // TODO: change to CustomEvent?
 
     return syncDiv;
   }
+
+  /*
+   * Utils methods
+   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+   */
 
   getLocalTime(serverTime) {
     return serverTime - this.timeOffset;
