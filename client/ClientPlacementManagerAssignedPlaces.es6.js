@@ -1,32 +1,46 @@
+/**
+ * @fileoverview Matrix client side placement manager automatically assigning places
+ * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
+ */
 'use strict';
 
 var ClientPlacementManager = require('./ClientPlacementManager');
 var ioClient = require('./ioClient');
 
 class ClientPlacementManagerAssignedPlaces extends ClientPlacementManager {
-  constructor() {
+  constructor(params) {
     super();
 
-    var socket = ioClient.socket;
-    socket.on('place_available', this.updateInstructions.bind(this));
-    socket.on('no_place_available', this.updateInstructions.bind(this));
-  }
+    this.showDialog = (params && params.dialog);
 
-  updateInstructions(placeInfo = null) {
-    if (placeInfo) {
+    var socket = ioClient.socket;
+
+    socket.on('place_available', (placeInfo) => {
       this.place = placeInfo.place;
       this.label = placeInfo.label;
+    });
 
-      this.parentDiv.innerHTML = "<p>Go to position</p>" + 
+    socket.on('no_place_available', () => {
+      this.parentDiv.innerHTML = "<p>All seats are taken, please try again later! =)</p>";
+    });
+  }
+
+  start() {
+    if (this.showDialog) {
+      this.parentDiv.innerHTML = "<p>Go to position</p>" +
         "<div class='position circle'><span>" + this.label + "</span></div>" +
         "<p class='small'>Touch the screen<br/>when you are ready.</p>";
 
-      this.parentDiv.addEventListener('click', this.placementReady.bind(this));
+      this.parentDiv.addEventListener('click', () => {
+        this.parentDiv.classList.add('hidden');
+        this.ready();
+      });
+
+      this.parentDiv.classList.remove('hidden');
     } else {
-      this.parentDiv.innerHTML = "<p>All seats are taken, please try again later! =)</p>";
+      this.ready();
     }
   }
-
 }
 
 module.exports = ClientPlacementManagerAssignedPlaces;

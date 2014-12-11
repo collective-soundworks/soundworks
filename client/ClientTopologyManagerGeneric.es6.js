@@ -1,20 +1,24 @@
+/**
+ * @fileoverview Matrix client side topology manager displaying arbitrary static topologies
+ * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
+ */
 'use strict';
 
 var ClientTopologyManager = require('./ClientTopologyManager');
 var ioClient = require("./ioClient");
 
-class ClientTopologyManagerArbitraryStatic extends ClientTopologyManager {
+class ClientTopologyManagerGeneric extends ClientTopologyManager {
   constructor(params) {
-    super();
-
-    var useDisplay = (params && params.display);
+    super(params);
 
     var socket = ioClient.socket;
-    socket.on('init_topology', (topology) => {
+
+    socket.on('topology_init', (topology) => {
       this.topology = topology;
 
-      if (useDisplay) {
-        var div = this.parentDiv;
+      var div = this.parentDiv;
+
+      if (div) {
         var topologyRatio = topology.height / topology.width;
         var screenHeight = window.innerHeight;
         var screenWidth = window.innerWidth;
@@ -30,7 +34,10 @@ class ClientTopologyManagerArbitraryStatic extends ClientTopologyManager {
           topologyWidthPx = screenHeight / topologyRatio;
         }
 
-        var tileSize = topologyWidthPx / this.topology.X;
+        var xTileSize = topologyWidthPx / this.topology.maxWidthDivision;
+        var yTileSize = topologyHeightPx / this.topology.maxHeightDivision;
+        var tileSize = Math.min(xTileSize, yTileSize);
+
         var tileMargin = tileSize / 10;
 
         div.style.height = topologyHeightPx + "px";
@@ -52,31 +59,34 @@ class ClientTopologyManagerArbitraryStatic extends ClientTopologyManager {
         }
       }
 
-      this.emit("topology_update", topology);
+      this.emit("topology_init", topology);
     });
   }
 
   getTileByPlace(place) {
     var tiles = Array.prototype.slice.call(this.parentDiv.childNodes); // .childNode returns a NodeList
     var index = tiles.map((t) => parseInt(t.dataset.place)).indexOf(place);
+
     return tiles[index];
   }
 
   addClassToTile(tilePlace, className) {
-    var tile = this.getTileByPlace(tilePlace);
-    if (tile)
-      tile.classList.add(className);
-    else
-      console.log("Error: tile " + tilePlace + " not found.");
+    if (this.parentDiv) {
+      var tile = this.getTileByPlace(tilePlace);
+
+      if (tile)
+        tile.classList.add(className);
+    }
   }
 
   removeClassFromTile(tilePlace, className) {
-    var tile = this.getTileByPlace(tilePlace);
-    if (tile)
-      tile.classList.remove(className);
-    else
-      console.log("Error: tile " + tilePlace + " not found.");
+    if (this.parentDiv) {
+      var tile = this.getTileByPlace(tilePlace);
+
+      if (tile)
+        tile.classList.remove(className);
+    }
   }
 }
 
-module.exports = ClientTopologyManagerArbitraryStatic;
+module.exports = ClientTopologyManagerGeneric;

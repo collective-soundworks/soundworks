@@ -1,34 +1,24 @@
+/**
+ * @fileoverview Matrix server side placement manager base class
+ * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
+ */
 'use strict';
 
 var EventEmitter = require('events').EventEmitter;
 
+// this placement manager simply returns increasing place numbers and reuses released place numbers
+
 class ServerPlacementManager extends EventEmitter {
-  constructor(topologyManager) {
-    this.topologyManager = topologyManager;
-    this.availablePlaces = [];
+  constructor() {
+
   }
 
   requestPlace(player) {
-    if (this.availablePlaces.length > 0) {
-      var place = this.availablePlaces.splice(0, 1)[0];
-      player.place = place;
-    }
 
-    this.emit('placement_ready', player);
   }
 
   releasePlace(player) {
-    var place = player.place;
 
-    if (place !== null) {
-      this.availablePlaces.push(place);
-      player.place = null;
-    }
-  }
-
-  updateTopology() {
-    for (let i = 0; i < this.topologyManager.labels.length; i++)
-      this.availablePlaces.push(i);
   }
 }
 

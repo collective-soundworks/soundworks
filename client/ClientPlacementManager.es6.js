@@ -1,40 +1,43 @@
+/**
+ * @fileoverview Matrix client side placement manager base class
+ * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
+ */
 'use strict';
 
-window.container = window.container || document.getElementById('container');
-window.preparationDiv = window.preparationDiv || document.getElementById('preparation');
 var audioContext = require('audio-context');
 var EventEmitter = require('events').EventEmitter;
 var ioClient = require('./ioClient');
 
-window.container = window.container || document.getElementById('container');
-
 class ClientPlacementManager extends EventEmitter {
   constructor() {
-    this.label = null;
     this.place = null;
+    this.label = null;
 
     var div = document.createElement('div');
     div.setAttribute('id', 'placement');
     div.classList.add('info');
     div.classList.add('hidden');
-
     this.parentDiv = div;
   }
 
   getPlaceInfo() {
     var placeInfo = {
-      "label": this.label,
       "place": this.place,
+      "label": this.label
     };
+
     return placeInfo;
   }
 
-  placementReady() {
+  start() {
+
+  }
+
+  ready() {
     var socket = ioClient.socket;
     socket.emit('placement_ready');
     this.emit('placement_ready', this.getPlaceInfo());
   }
-
 }
 
 module.exports = ClientPlacementManager;

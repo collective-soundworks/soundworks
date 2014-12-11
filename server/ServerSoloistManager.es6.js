@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Matrix server side soloist manager base class
+ * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
+ */
 'use strict';
 
 class ServerSoloistManager {

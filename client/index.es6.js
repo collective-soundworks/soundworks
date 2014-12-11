@@ -1,12 +1,16 @@
+/**
+ * @fileoverview Matrix client side exported modules and start function
+ * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
+ */
 'use strict';
 
 var ioClient = require('./ioClient');
 
 function listenPlayerManager(performanceManager) {
-  var socket  = ioClient.socket;
+  var socket = ioClient.socket;
 
-  socket.on('players_set', (playerList) => {
-    performanceManager.setPlayers(playerList);
+  socket.on('players_init', (playerList) => {
+    performanceManager.initPlayers(playerList);
   });
 
   socket.on('player_add', (player) => {
@@ -18,24 +22,14 @@ function listenPlayerManager(performanceManager) {
   });
 }
 
-function start(topologyManager, setupManager, performanceManager) {
+function start(setupManager, performanceManager, topologyManager = null) {
   listenPlayerManager(performanceManager);
 
-  if (setupManager)
-    setupManager.start();
-
-  if (topologyManager) {
-    topologyManager.on('topology_update', (topology) => {
-      performanceManager.updateTopology();
-    });
-  }
-
-  if (setupManager) {
-    setupManager.on('setup_ready', (placeInfo) => {
-      performanceManager.start(placeInfo);
-    });
-  } else
+  setupManager.on('setup_ready', (placeInfo) => {
     performanceManager.start(placeInfo);
+  });
+
+  setupManager.start();
 }
 
 module.exports = {
@@ -48,6 +42,6 @@ module.exports = {
   SetupManagerPlacementAndSync: require('./ClientSetupManagerPlacementAndSync'),
   SyncManager: require('./ClientSyncManager'),
   TopologyManager: require('./ClientTopologyManager'),
-  TopologyManagerArbitraryStatic: require('./ClientTopologyManagerArbitraryStatic'),
+  TopologyManagerGeneric: require('./ClientTopologyManagerGeneric'),
   start: start
 };

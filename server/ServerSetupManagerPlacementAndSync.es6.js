@@ -1,10 +1,14 @@
+/**
+ * @fileoverview Matrix server side setup manager including syncronization and placement
+ * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
+ */
 'use strict';
 
 var ServerSetupManager = require('./ServerSetupManager');
 
 class ServerSetupManagerPlacementAndSync extends ServerSetupManager {
-  constructor(topologyManager, placementManager, syncManager) {
-    super(topologyManager);
+  constructor(placementManager, syncManager) {
+    super();
 
     this.placementManager = placementManager;
     this.syncManager = syncManager;

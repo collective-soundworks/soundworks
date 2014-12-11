@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Matrix client side sensor input module (singleton)
+ * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
+ */
 'use strict';
 
 var audioContext = require('audio-context');

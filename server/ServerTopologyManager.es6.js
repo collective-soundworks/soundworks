@@ -1,10 +1,15 @@
+/**
+ * @fileoverview Matrix server side topology manager base class
+ * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
+ */
 'use strict';
 
 var EventEmitter = require('events').EventEmitter;
 
 class ServerTopologyManager extends EventEmitter {
   constructor() {
-    
+    this.labels = [];
+    this.positions = [];
   }
 
   init() {
@@ -15,8 +20,15 @@ class ServerTopologyManager extends EventEmitter {
 
   }
 
+  getMaxPlaces() {
+    return this.labels.length;
+  }
+
   getLabel(place) {
-    return place.toString(); // by default the label is the place number
+    if(place < this.labels.length)
+      return this.labels[place];
+
+    return (place + 1).toString();
   }
 }
 
