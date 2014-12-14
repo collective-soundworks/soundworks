@@ -4,9 +4,10 @@
  */
 'use strict';
 
-var audioContext = require('audio-context');
-var ioClient = require('./ioClient');
 var EventEmitter = require('events').EventEmitter;
+var audioContext = require('audio-context');
+var ClientSetup = require('./ClientSetup');
+var ioClient = require('./ioClient');
 
 function getMinOfArray(numArray) {
   return Math.min.apply(null, numArray);
@@ -17,11 +18,11 @@ function getMaxOfArray(numArray) {
 }
 
 class SyncProcess extends EventEmitter { // TODO: change EventEmitter to CustomEvent?
-  constructor(iterations) {
+  constructor(params = {}) {
     this.id = Math.floor(Math.random() * 1000000);
 
+    this.iterations = params.iterations || 10;
     this.count = 0;
-    this.iterations = iterations;
 
     this.timeOffsets = [];
     this.travelTimes = [];
@@ -31,7 +32,7 @@ class SyncProcess extends EventEmitter { // TODO: change EventEmitter to CustomE
     this.maxTravelTime = 0;
 
     // Send first ping
-    this.sendPing();
+    this.__sendPing();
 
     // When the client receives a 'pong' from the
     // server, calculate the travel time and the
@@ -48,7 +49,7 @@ class SyncProcess extends EventEmitter { // TODO: change EventEmitter to CustomE
         this.timeOffsets.push(timeOffset);
 
         if (this.count < this.iterations) {
-          this.sendPing();
+          this.__sendPing();
         } else {
           this.avgTravelTime = this.travelTimes.reduce((p, q) => p + q) / this.travelTimes.length;
           this.avgTimeOffset = this.timeOffsets.reduce((p, q) => p + q) / this.timeOffsets.length;
@@ -62,74 +63,53 @@ class SyncProcess extends EventEmitter { // TODO: change EventEmitter to CustomE
     });
   }
 
-  sendPing() {
-    var socket = ioClient.socket;
+  __sendPing() {
     this.count++;
+
+    var socket = ioClient.socket;
     socket.emit('sync_ping', this.id, audioContext.currentTime);
   }
 }
 
-class ClientSyncManager extends EventEmitter { // TODO: change to CustomEvent?
-  constructor() {
+class ClientSetupSync extends ClientSetup {
+  constructor(params) {
+    super(params);
+
     this.minTravelTimes = [];
     this.maxTravelTimes = [];
     this.avgTravelTimes = [];
     this.avgTimeOffsets = [];
 
     this.timeOffset = 0;
-
     this.serverReady = false;
 
-    // Get sync parameters from the server.
-    var socket = ioClient.socket;
-
-    socket.on('sync_init', () => {
-      this.serverReady = true;
-    });
-
-    socket.on('sync_start', () => {
-      this.startNewSyncProcess();
-    });
-
-    // Required to start audioContext timer in Safari.
-    // Otherwise, audioContext.currentTime is stuck
-    // to 0.
-    audioContext.createGain();
+    if (this.displayDiv) {
+      this.displayDiv.setAttribute('id', 'sync');
+      this.displayDiv.classList.add('sync');
+      this.displayDiv.style.zIndex = -10;
+      this.displayDiv.innerHTML = "<p>Synchronization in progress...</p>";
+    }
   }
 
   start() {
-    this.startNewSyncProcess();
-  }
+    super.start();
 
-  /*
-   * Sync process
-   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-   */
+    var sync = new SyncProcess(this.iterations);
 
-  startNewSyncProcess(iterations = 10) {
-    if (this.serverReady) {
-      var socket = ioClient.socket;
-      var sync = new SyncProcess(iterations);
+    sync.on('sync_stats', (minTravelTime, maxTravelTime, avgTimeOffset, avgTravelTime) => {
+      var firstSync = (this.maxTravelTimes.length === 0);
 
-      this.emit('sync_started');
+      this.minTravelTimes.push(minTravelTime);
+      this.maxTravelTimes.push(maxTravelTime);
+      this.avgTimeOffsets.push(avgTimeOffset);
+      this.avgTravelTimes.push(avgTravelTime);
 
-      sync.on('sync_stats', (minTravelTime, maxTravelTime, avgTimeOffset, avgTravelTime) => {
-        var firstSync = (this.maxTravelTimes.length === 0);
+      this.timeOffset = avgTimeOffset;
 
-        this.minTravelTimes.push(minTravelTime);
-        this.maxTravelTimes.push(maxTravelTime);
-        this.avgTimeOffsets.push(avgTimeOffset);
-        this.avgTravelTimes.push(avgTravelTime);
-
-        this.timeOffset = avgTimeOffset;
-
-        //  Send 'sync_ready' event after the first sync process only
-        if (firstSync)
-          this.emit('sync_ready');
-
-        console.log("Sync process done!");
-      });
-    }
+      // is done after the first sync process only
+      if (firstSync)
+        this.done();
+    });
   }
 
   getLocalTime(serverTime) {
@@ -141,4 +121,4 @@ class ClientSyncManager extends EventEmitter { // TODO: change to CustomEvent?
   }
 }
 
-module.exports = ClientSyncManager;
+module.exports = ClientSetupSync;

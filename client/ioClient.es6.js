@@ -7,10 +7,29 @@
 class SocketIoClient {
   constructor() {
     this.socket = null;
+
+    this.ready = false;
+    this.starter = null;
   }
 
   init(namespace) {
-    this.socket = io(namespace);
+    var socket = io(namespace);
+
+    socket.on('client_start', () => {
+      this.ready = true;
+
+      if(this.starter)
+        this.starter();
+    });
+
+    this.socket = socket;
+  }
+
+  start(starter) {
+    this.starter = starter;
+
+    if(this.ready)
+      starter();
   }
 }
 

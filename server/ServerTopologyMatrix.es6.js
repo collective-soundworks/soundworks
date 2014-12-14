@@ -4,9 +4,9 @@
  */
 'use strict';
 
-var ServerTopologyManager = require("./ServerTopologyManager");
+var ServerTopology = require("./ServerTopology");
 
-class ServerTopologyManagerRegularMatrix extends ServerTopologyManager {
+class ServerTopologyMatrix extends ServerTopology {
   constructor(params) {
     super();
 
@@ -39,16 +39,16 @@ class ServerTopologyManagerRegularMatrix extends ServerTopologyManager {
     this.emit('topology_init');
   }
 
-  sendInit(socket) {
-    socket.emit('topology_init', {
+  getinfo() {
+    return {
+      "labels": this.labels,
+      "positions": this.positions,
       "width": this.width,
       "height": this.height,
       "maxWidthDivision": this.cols,
-      "maxHeightDivision": this.rows,
-      "labels": this.labels,
-      "positions": this.positions,
-    });
+      "maxHeightDivision": this.rows
+    };
   }
 }
 
-module.exports = ServerTopologyManagerRegularMatrix;
+module.exports = ServerTopologyMatrix;
