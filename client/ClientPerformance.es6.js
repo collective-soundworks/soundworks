@@ -14,7 +14,7 @@ class ClientPerformance {
     if (params.display !== false) {
       var div = document.createElement('div');
       div.setAttribute('id', 'performance');
-      div.classList.add('fullscreen');
+      div.classList.add('performance');
       div.classList.add('hidden');
       container.appendChild(div);
       this.displayDiv = div;

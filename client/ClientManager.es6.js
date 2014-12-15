@@ -22,8 +22,7 @@ class ClientManager {
     if (params.display !== false) {
       var div = document.createElement('div');
       div.setAttribute('id', 'welcome');
-      div.classList.add('info');
-      div.classList.add('fullscreen');
+      div.classList.add('welcome');
       div.classList.add('hidden');
       container.appendChild(div);
       div.innerHTML = params.welcome || defaultWelcome;

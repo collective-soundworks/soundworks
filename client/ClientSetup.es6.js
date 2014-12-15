@@ -14,8 +14,7 @@ class ClientSetup extends EventEmitter {
     if (params.display !== false) {
       var div = document.createElement('div');
       div.setAttribute('id', 'setup');
-      div.classList.add('info');
-      div.classList.add('fullscreen');
+      div.classList.add('setup');
       div.classList.add('hidden');
       container.appendChild(div);
       this.displayDiv = div;
