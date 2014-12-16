@@ -19,6 +19,8 @@ function getMaxOfArray(numArray) {
 
 class SyncProcess extends EventEmitter { // TODO: change EventEmitter to CustomEvent?
   constructor(params = {}) {
+    super();
+
     this.id = Math.floor(Math.random() * 1000000);
 
     this.iterations = params.iterations || 10;

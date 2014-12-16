@@ -10,6 +10,8 @@ var EventEmitter = require('events').EventEmitter;
 // TODO: add deviceMotion and deviceOrientation input.
 class InputModule extends EventEmitter {
   constructor() {
+    super();
+
     this.handleDeviceOrientationEvent = this.handleDeviceOrientationEvent.bind(this); // since .bind() creates a new function, we can't use it directly in the add/removeEventListener.
     this.handleDeviceMotionEvent = this.handleDeviceMotionEvent.bind(this);
     this.handleTouchEvent = this.handleTouchEvent.bind(this);

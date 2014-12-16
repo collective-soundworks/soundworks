@@ -17,9 +17,6 @@ class ServerManager {
     this.setup = setup;
     this.performance = performance;
 
-    if (topology)
-      topology.init();
-
     performance.manager = this;
 
     var io = ioServer.io;

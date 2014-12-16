@@ -8,6 +8,8 @@ var EventEmitter = require('events').EventEmitter;
 
 class ServerTopology extends EventEmitter {
   constructor() {
+    super();
+
     this.labels = [];
     this.positions = [];
     this.width = 1;
