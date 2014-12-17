@@ -8,11 +8,11 @@ var ServerSetup = require('./ServerSetup');
 
 class ServerSetupSync extends ServerSetup {
   constructor() {
+
   }
 
   connect(socket, player) {
     socket.on('sync_ping', (id, pingTime_clientTime) => {
-      // console.log('ping', id, pingTime_clientTime);
       var pongTime_serverTime = Date.now() / 1000;
       socket.emit('sync_pong', id, pingTime_clientTime, pongTime_serverTime);
     });
