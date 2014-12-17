@@ -36,7 +36,8 @@ class InputModule extends EventEmitter {
       "rotationRate": e.rotationRate,
       "timestamp": audioContext.currentTime
     };
-    this.emit('devicemotion', motionData)
+
+    this.emit('devicemotion', motionData);
   }
 
   /*
@@ -58,6 +59,7 @@ class InputModule extends EventEmitter {
       "gamma": e.gamma,
       "timestamp": audioContext.currentTime
     };
+    
     this.emit('deviceorientation', orientationData);
   }
 
