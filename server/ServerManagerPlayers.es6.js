@@ -12,6 +12,7 @@ class ServerPlayerManager extends ServerManager {
   constructor(setup, performance, topology) {
     this.pending = [];
     this.playing = [];
+    this.sockets = {};
 
     super('/play', setup, performance, topology);
   }
@@ -52,6 +53,7 @@ class ServerPlayerManager extends ServerManager {
     var player = new Player(socket);
 
     this.pending.push(player);
+    this.sockets[socket.id] = player;
 
     return player;
   }
@@ -68,7 +70,7 @@ class ServerPlayerManager extends ServerManager {
 
       var playerList = this.playing.map((c) => c.getInfo());
       socket.emit('players_init', playerList);
-      socket.emit('player_add', player.getInfo()); // ('/play' namespace)
+      socket.broadcast.emit('player_add', player.getInfo()); // ('/play' namespace)
       io.of('/env').emit('player_add', player.getInfo()); // TODO: generalize with list of namespaces Object.keys(io.nsps)
 
       return true;
@@ -96,6 +98,8 @@ class ServerPlayerManager extends ServerManager {
       io.of('/env').emit('player_remove', player.getInfo()); // TODO: generalize with list of namespaces Object.keys(io.nsps)
 
       playerArray.splice(index, 1); // remove player from pending or playing array
+      delete this.sockets[socket.id];
+
     }
   }
 }
