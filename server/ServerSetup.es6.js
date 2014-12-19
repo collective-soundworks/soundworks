@@ -11,11 +11,11 @@ class ServerSetup extends EventEmitter {
 
   }
 
-  connect(socket, player) {
+  connect(socket, client) {
 
   }
 
-  disconnect(socket, player) {
+  disconnect(socket, client) {
 
   }
 }

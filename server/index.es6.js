@@ -5,6 +5,7 @@
 'use strict';
 
 module.exports = {
+  Client: require('./ServerClient'),
   ioServer: require('./ioServer'),
   Manager: require('./ServerManager'),
   ManagerPlayers: require('./ServerManagerPlayers'),

@@ -4,15 +4,16 @@
  */
 'use strict';
 
-class Player {
+var Client = require('./ServerClient');
+
+class Player extends Client {
 	constructor(socket, place = null, position = null) {
+    super(socket);
+
     this.place = place;
 
     this.privateState = {};
     this.publicState = {};
-
-    this.socket = socket;
-    this.pingLatency = 0;
   }
 
   getInfo() {

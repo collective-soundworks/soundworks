@@ -24,6 +24,7 @@ class ServerTopologyMatrix extends ServerTopology {
 
     var count = 0;
 
+    console.log("cols, row,", this.cols, this.rows);
     for (let j = 0; j < this.rows; j++) {
       for (let i = 0; i < this.cols; i++) {
         count++;
@@ -35,7 +36,6 @@ class ServerTopologyMatrix extends ServerTopology {
         this.positions.push(position);
       }
     }
-
     this.emit('topology_init');
   }
 
