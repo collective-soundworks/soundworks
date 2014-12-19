@@ -9,6 +9,8 @@ var container = window.container = window.container || document.getElementById('
 
 class ClientSetup extends EventEmitter {
   constructor(params = {}) {
+    super();
+    
     this.displayDiv = null;
 
     if (params.display !== false) {

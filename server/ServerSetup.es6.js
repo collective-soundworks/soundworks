@@ -8,6 +8,7 @@ var EventEmitter = require('events').EventEmitter;
 
 class ServerSetup extends EventEmitter {
   constructor() {
+    super();
 
   }
 

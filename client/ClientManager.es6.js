@@ -22,8 +22,8 @@ class ClientManager {
     if (params.display !== false) {
       var div = document.createElement('div');
       div.setAttribute('id', 'welcome');
-      div.classList.add('welcome');
       div.classList.add('hidden');
+      div.classList.add('welcome');
       container.appendChild(div);
       div.innerHTML = params.welcome || defaultWelcome;
       this.displayDiv = div;

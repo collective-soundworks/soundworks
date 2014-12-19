@@ -9,6 +9,8 @@ var ioClient = require('./ioClient');
 
 class ClientTopology extends EventEmitter {
   constructor(params = {}) {
+    super();
+
     this.topology = null;
     this.displayDiv = null;
 

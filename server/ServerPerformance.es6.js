@@ -10,7 +10,7 @@ class ServerPerformance {
   constructor() {
     this.managers = {};
   }
-  
+
   connect(socket, player) {
 
   }
