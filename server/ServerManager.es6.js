@@ -17,8 +17,6 @@ class ServerManager {
     this.setup = setup;
     this.performance = performance;
 
-    performance.manager = this;
-
     var io = ioServer.io;
     io.of(link).on('connection', (socket) => {
       var client = this.connect(socket);
