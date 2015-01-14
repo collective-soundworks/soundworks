@@ -17,13 +17,12 @@ function getMaxOfArray(numArray) {
   return Math.max.apply(null, numArray);
 }
 
-class SyncProcess extends EventEmitter { // TODO: change EventEmitter to CustomEvent?
+class SyncProcess extends EventEmitter {
   constructor(params = {}) {
-    super();
-
     this.id = Math.floor(Math.random() * 1000000);
 
-    this.iterations = params.iterations || 10;
+    this.interval = params.interval || 500;
+    this.iterations = params.iterations || 5;
     this.count = 0;
 
     this.timeOffsets = [];
@@ -43,15 +42,17 @@ class SyncProcess extends EventEmitter { // TODO: change EventEmitter to CustomE
     var socket = ioClient.socket;
     socket.on('sync_pong', (id, pingTime_clientTime, pongTime_serverTime) => {
       if (id === this.id) {
-        var now = audioContext.currentTime,
-          travelTime = now - pingTime_clientTime,
-          timeOffset = pongTime_serverTime - (now - travelTime / 2);
+        var now = audioContext.currentTime;
+        var travelTime = now - pingTime_clientTime;
+        var timeOffset = pongTime_serverTime - (now - travelTime / 2);
 
         this.travelTimes.push(travelTime);
         this.timeOffsets.push(timeOffset);
 
         if (this.count < this.iterations) {
-          this.__sendPing();
+          setTimeout(() => {
+            this.__sendPing();
+          }, this.interval);
         } else {
           this.avgTravelTime = this.travelTimes.reduce((p, q) => p + q) / this.travelTimes.length;
           this.avgTimeOffset = this.timeOffsets.reduce((p, q) => p + q) / this.timeOffsets.length;
@@ -95,6 +96,11 @@ class ClientSetupSync extends ClientSetup {
 
   start() {
     super.start();
+    this.__syncLoop();
+  }
+
+  __syncLoop() {
+    var timeout = Math.random() * 10000 + 10000;
 
     var sync = new SyncProcess(this.iterations);
 
@@ -112,6 +118,10 @@ class ClientSetupSync extends ClientSetup {
       if (firstSync)
         this.done();
     });
+
+    setTimeout(() => {
+      this.__syncLoop();
+    }, timeout);
   }
 
   getLocalTime(serverTime) {
