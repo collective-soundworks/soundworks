@@ -21,6 +21,10 @@ class ServerSetupSync extends ServerSetup {
       player.pingLatency = maxTravelTime / 2;
     });
   }
+
+  disconnect() {
+    
+  }
 }
 
 module.exports = ServerSetupSync;

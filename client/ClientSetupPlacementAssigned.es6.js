@@ -41,6 +41,7 @@ class ClientSetupPlacementAssigned extends ClientSetupPlacement {
     if (this.displayDiv) {
       socket.on('placement_unavailable', () => {
         this.displayDiv.innerHTML = "<p>All seats are taken, please try again later! =)</p>";
+        this.displayDiv.classList.remove('hidden');
       });
     }
 

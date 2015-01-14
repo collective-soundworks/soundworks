@@ -35,7 +35,7 @@ class ClientPerformance {
     });
   }
 
-  initPlayers(players) {
+  initPlayers(playerList) {
 
   }
 

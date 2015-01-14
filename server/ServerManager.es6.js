@@ -8,7 +8,7 @@ var ServerSetupMulti = require('./ServerSetupMulti');
 var ioServer = require('./ioServer');
 
 class ServerManager {
-  constructor(link, setup, performance, topology) {
+  constructor(namespace, setup, performance, topology) {
 
     if (Array.isArray(setup))
       setup = new ServerSetupMulti(setup);
@@ -17,8 +17,10 @@ class ServerManager {
     this.setup = setup;
     this.performance = performance;
 
+    performance.managers[namespace] = this;
+
     var io = ioServer.io;
-    io.of(link).on('connection', (socket) => {
+    io.of(namespace).on('connection', (socket) => {
       var client = this.connect(socket);
 
       socket.on('client_ready', () => {

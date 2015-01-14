@@ -18,7 +18,7 @@ class ServerPlayerManager extends ServerManager {
   }
 
   connect(socket) {
-    socket.join('setingup');
+    socket.join('settingup');
 
     var player = this.__registerPlayer(socket);
 
@@ -28,28 +28,16 @@ class ServerPlayerManager extends ServerManager {
     if (this.setup)
       this.setup.connect(socket, player);
 
-    // console.log(
-    //   '[ServerPlayerManager][connect] Player ' + socket.id + ' connected.\n' +
-    //   'this.pending: ' + this.pending.map((c) => c.socket.id) + '\n' +
-    //   'this.playing: ' + this.playing.map((c) => c.socket.id)
-    // );
-
     return player;
   }
 
   ready(socket, player) {
-    socket.leave('setingup');
+    socket.leave('settingup');
 
     if (this.__promotePlayer(player)) {
       socket.join('performing');
       this.performance.connect(socket, player);
     }
-
-    // console.log(
-    //   '[ServerPlayerManager][ready] Player ' + player.socket.id + ' playing.\n' +
-    //   'this.pending: ' + this.pending.map((c) => c.socket.id) + '\n' +
-    //   'this.playing: ' + this.playing.map((c) => c.socket.id)
-    // );
   }
 
   disconnect(socket, player) {
@@ -59,12 +47,6 @@ class ServerPlayerManager extends ServerManager {
       this.setup.disconnect(socket, player);
 
     this.performance.disconnect(socket, player);
-
-    // console.log(
-    //   '[ServerPlayerManager][disconnect] Player ' + socket.id + ' disconnected.\n' +
-    //   'this.pending: ' + this.pending.map((c) => c.socket.id) + '\n' +
-    //   'this.playing: ' + this.playing.map((c) => c.socket.id)
-    // );
   }
 
   __registerPlayer(socket) {
@@ -77,6 +59,7 @@ class ServerPlayerManager extends ServerManager {
   }
 
   __promotePlayer(player) {
+    var io = ioServer.io;
     var index = this.pending.indexOf(player);
 
     if (index > -1) {
@@ -87,7 +70,8 @@ class ServerPlayerManager extends ServerManager {
 
       var playerList = this.playing.map((c) => c.getInfo());
       socket.emit('players_init', playerList);
-      socket.broadcast.emit('player_add', player.getInfo());
+      socket.broadcast.emit('player_add', player.getInfo()); // ('/play' namespace)
+      io.of('/env').emit('player_add', player.getInfo()); // TODO: generalize with list of namespaces Object.keys(io.nsps)
 
       return true;
     }
@@ -96,6 +80,7 @@ class ServerPlayerManager extends ServerManager {
   }
 
   __unregisterPlayer(socket, player) {
+    var io = ioServer.io;
     var index = this.pending.indexOf(player);
     var playerArray = null;
 
@@ -109,12 +94,22 @@ class ServerPlayerManager extends ServerManager {
     }
 
     if (playerArray) {
-      socket.broadcast.emit('player_remove', player.getInfo());
+      socket.broadcast.emit('player_remove', player.getInfo()); // ('/play' namespace)
+      io.of('/env').emit('player_remove', player.getInfo()); // TODO: generalize with list of namespaces Object.keys(io.nsps)
 
       playerArray.splice(index, 1); // remove player from pending or playing array
       delete this.sockets[socket.id];
+
     }
   }
 }
+
+// Logging boilerplate
+// -------------------
+// console.log(
+//   '[ServerPlayerManager][method name] Player ' + socket.id + ' disconnected.\n' +
+//   'this.pending: ' + this.pending.map((c) => c.socket.id) + '\n' +
+//   'this.playing: ' + this.playing.map((c) => c.socket.id)
+// );
 
 module.exports = ServerPlayerManager;

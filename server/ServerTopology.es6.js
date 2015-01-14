@@ -20,13 +20,13 @@ class ServerTopology extends EventEmitter {
 
   }
 
-  connect(socket, player) {
+  connect(socket, player = {}) {
     socket.on('topology_request', () => {
       socket.emit('topology_init', this.getinfo());
     });
   }
 
-  disconnect(socket, player) {
+  disconnect(socket, player = {}) {
 
   }
 
