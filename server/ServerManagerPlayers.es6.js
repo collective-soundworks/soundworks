@@ -43,10 +43,10 @@ class ServerPlayerManager extends ServerManager {
   disconnect(socket, player) {
     this.__unregisterPlayer(socket, player);
 
+    this.performance.disconnect(socket, player);
+
     if (this.setup)
       this.setup.disconnect(socket, player);
-
-    this.performance.disconnect(socket, player);
   }
 
   __registerPlayer(socket) {
