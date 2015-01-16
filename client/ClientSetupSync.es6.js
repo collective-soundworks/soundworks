@@ -90,7 +90,7 @@ class ClientSetupSync extends ClientSetup {
       this.displayDiv.setAttribute('id', 'sync');
       this.displayDiv.classList.add('sync');
       this.displayDiv.style.zIndex = -10;
-      this.displayDiv.innerHTML = "<p>Synchronization in progress...</p>";
+      this.displayDiv.innerHTML = "<p>Please stand by while synchronizing clock....</p>";
     }
   }
 
