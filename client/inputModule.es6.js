@@ -17,9 +17,11 @@ class InputModule extends EventEmitter {
     this.handleTouchEvent = this.handleTouchEvent.bind(this);
   }
 
-  /*
-   * DeviceMotion
-   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+  /********************************
+   *
+   *  DeviceMotion
+   *
+   **/
 
   enableDeviceMotion() {
     window.addEventListener('devicemotion', this.handleDeviceMotionEvent, false);
@@ -40,9 +42,11 @@ class InputModule extends EventEmitter {
     this.emit('devicemotion', motionData);
   }
 
-  /*
-   * DeviceOrientation
-   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+  /********************************
+   *
+   *  DeviceOrientation
+   *
+   **/
 
   enableDeviceOrientation() {
     window.addEventListener('deviceorientation', this.handleDeviceOrientationEvent, false);
@@ -59,13 +63,15 @@ class InputModule extends EventEmitter {
       "gamma": e.gamma,
       "timestamp": audioContext.currentTime
     };
-    
+
     this.emit('deviceorientation', orientationData);
   }
 
-  /*
-   * Touch
-   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+  /********************************
+   *
+   *  (Multi)Touch
+   *
+   **/
 
   enableTouch(surface) {
     surface.addEventListener('touchend', this.handleTouchEvent, false);
@@ -81,14 +87,16 @@ class InputModule extends EventEmitter {
 
   handleTouchEvent(e) {
     e.preventDefault(); // To prevent scrolling.
-    
-    var touchData = {
-      "coordinates": [ e.changedTouches[0].clientX, e.changedTouches[0].clientY ],
-      "timestamp": audioContext.currentTime,
-      "event": e.type
-    };
-    
-    this.emit(e.type, touchData);
+
+    for (let i = 0; i < e.changedTouches.length; i++) {
+      var touchData = {
+        "event": e.type,
+        "timestamp": audioContext.currentTime,
+        "coordinates": [e.changedTouches[i].clientX, e.changedTouches[i].clientY]
+      };
+
+      this.emit(e.type, touchData);
+    }
   }
 }
 
