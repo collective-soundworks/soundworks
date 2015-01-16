@@ -7,11 +7,10 @@
 var Client = require('./ServerClient');
 
 class Player extends Client {
-	constructor(socket, place = null, position = null) {
+	constructor(socket) {
     super(socket);
 
-    this.place = place;
-
+    this.place = null;
     this.privateState = {};
     this.publicState = {};
   }
@@ -19,7 +18,6 @@ class Player extends Client {
   getInfo() {
     var playerInfo = {
       place: this.place,
-      position: this.position,
       socketId: this.socket.id,
       state: this.publicState
     };
@@ -28,5 +26,4 @@ class Player extends Client {
   }
 }
   
-
 module.exports = Player;
