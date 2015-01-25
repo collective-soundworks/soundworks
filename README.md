@@ -63,9 +63,28 @@ Extends `Client`. Object used to keep track of a `player` (and it's data) that c
 
 #### ServerManager
 
-#### ServerPerformance
+The `ServerManager` module manages the whole scenario on the server side for all connections coming from a particular namespace.
 
-#### ServerPlayerManager
+##### Attributes
+ * `topology {ServerTopology}`: the `ServerTopology` from the `constructor`.
+ * `setup {ServerSetup}`: the `ServerSetup` from the `constructor`.
+ * `performance {ServerPerformance}`: the `ServerPerformance` from the `constructor`.
+
+##### Methods
+ * `constructor(namespace {String}, setup {ServerSetup}, performance {ServerPerformance}, topology {ServerTopology})`:
+   * `namespace` represents the namespace from which the connections are coming from (*e.g.* `player`, `admin`, `env`).
+   * `setup` is the global `ServerSetup` of the scenario.
+   * `performance` is the global `ServerPerformance` of the scenario.
+   * `topology` is the `Topology` of the scenario.
+ * `connect(socket {Socket})`:  method invoked when the socket `socket` connects to the server. It creates the corresponding `Client` object.
+ * `ready(socket {Socket}, client {Client})`: method invoked when the client `client` (corresponding to the socket `socket`) finishes its *setup* process.
+ * `disconnect(socket {Socket}, client {Client})`: method invoked when the client `client` (corresponding to the socket `socket`) disconnects from the server.
+
+#### ServerManagerPlayers
+
+Extends `ServerManager`. Manages the whole scenario for all the `players`.
+
+#### ServerPerformance
 
 #### ServerSetup
 
