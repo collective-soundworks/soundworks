@@ -86,19 +86,81 @@ Extends `ServerManager`. Manages the whole scenario for all the `players`.
 
 #### ServerPerformance
 
+The `ServerPerformance` module manages the all of the *performance* on the server side. This is a base class meant to be extended for each scenario. Each scenario should have a specific `ServerPerformance` module.
+
+##### Attributes
+ * `managers {Object}`: contains all the managers of the scenario.
+
+##### Methods
+ * `constructor()`: contains everything needed for the creation of the *performance*.
+ * `connect(socket {Socket}, player {Player})`: handles the connection of the player `player` in the `performance`.
+ * `disconnect(socket {Socket}, player {Player})`: handles the disconnection of the player `player` in the `performance`.
+
 #### ServerSetup
+
+The `ServerSetup`module is a base classe meant to be extended for each setup process that happens in the general `setup` part of the scenario, before the `performance` can start. See `ServerSetupPlacement` or `ServerSetupSync`for examples. See also `ClientSetup` for a complete overview of how setup modules work.
+
+##### Methods
+ * `constructor()`: contains everything needed for the initialization of this particular setup process.
+ * `connect(socket {Socket}, client {Client})`: does what is needed when the client `client` connects to the server.
+ * `disconnect(socket {Socket}, client {Client})`: handles the disconnection of the client `client` from the server.
 
 #### ServerSetupMulti
 
+[TBD]
+
 #### ServerSetupPlacement
+
+[TBD]
 
 #### ServerSetupPlacementAssigned
 
+Extends `ServerSetupPlacement`. The `ServerSetupPlacementAssigned` assigns a place to every incoming `player` connection. Two modes are available: `random` where positions available in the topology are chose at random, and `ascending` where positions in the topology are chosen in ascending order.
+
+##### Attributes
+ * `topology {Topology}`: the topology of the scenario, as passed in by the `params` in the `constructor`.
+ * `order = 'random|ascending'`: the way of assigning the places, as passed in by the `params` in the `constructor`.
+ * `availablePlaces`: array of places available, based on the `topology`.
+
+##### Methods
+ * `constructor(params {Object})`:
+   * `params {Object}`:
+      * `topology {Topology}`: the topology used in the scenario.
+      * `order = 'random'|'ascending'`: determines the way the places are assigned.
+ * `connect(socket {Socket}, player {Player})`: does what is needed when the client `client` connects to the server.
+ * `disconnect(socket {Socket}, player {Player})`: handles the disconnection of the player `player`, *i.e.* releases
+
 #### ServerSetupSync
+
+Extends `ServerSetup`. Manages the synchronization of any connected client with the server.
+
+##### Methods
+
+Inherited. [to complete]
 
 #### ServerTopology
 
+The `ServerTopology` contains all the information about the topology of a scenario. A topology contains a certain number of places that may or may not be associated to a physical location in the venue where the scenario takes place. Places are also labelled, so that the players can find their places.
+
+##### Attributes
+
+ * `labels {Array}`: array of `label {String}]`. Labels allow the players to find their place in the venue (for instance, a label could be the seat number `'C36'`). `labels[i]` corresponds to the label of place `i`.
+ * `positions {Array}`: array of `[x {Number}, y {Number}]` normalized between 0 and 1. `positions[i]` corresponds to the position of place `i`.
+ * `width {Number}`: total width of the topology (not normalized).
+ * `height {Number}`: total height of the topology (not normalized).
+
+##### Methods
+ * `constructor()`.
+ * `init()`: creates the topology algorithmically.
+ * `connect(socket {Socket}, player {Player} = {})`: handles a connection (of the socket `socket` or the player `player`) to the server.
+ * `disconnect(socket {Socket}, player {Player} = {})`: handles a disconnection (of the socket `socket` or the player `player`) from the server.
+ * `getInfo()`: returns an object with the information about the topology [to be completed].
+ * `getMaxPlaces()`: returns the number of places in the topology.
+ * `getLabel(place {Number})`: returns the label of the place `place`.
+
 #### ServerTopologyMatrix
+
+[TBD]
 
 #### SocketIoServer
 
