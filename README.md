@@ -1,3 +1,5 @@
+## [Note on 2015/01/28: The documentation will be ready within the next few days]
+
 # Soundworks
 
 *Soundworks* is a Javascript framework that enables artists and developers to create collaborative music performances where a group of participants distributed in space use their smartphones to generate sound and light through touch and motion.
@@ -176,6 +178,17 @@ The `ServerTopology` contains all the information about the topology of a scenar
 ### Client side
 
 #### ClientManager
+
+The `ClientManager` module manages the whole scenario on the client side.
+
+##### Attributes
+ * `topology = null {ClientTopology}`: the topology of the scenario, as passed in by the `constructor`.
+ * `setup {ClientSetup|ClientSetupMulti}`: the *setup* manager of the scenario.
+ * `performance {ClientPerformance}`: 
+ * `params = {} {Object}`: 
+ * `displayDiv {Element}`: 
+
+##### Methods
 
 #### ClientPerformance
 
