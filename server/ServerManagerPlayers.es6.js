@@ -8,7 +8,7 @@ var Player = require('./ServerPlayer');
 var ServerManager = require('./ServerManager');
 var ioServer = require('./ioServer');
 
-class ServerPlayerManager extends ServerManager {
+class ServerManagerPlayers extends ServerManager {
   constructor(setup, performance, topology) {
     this.pending = [];
     this.playing = [];
@@ -112,4 +112,4 @@ class ServerPlayerManager extends ServerManager {
 //   'this.playing: ' + this.playing.map((c) => c.socket.id)
 // );
 
-module.exports = ServerPlayerManager;
+module.exports = ServerManagerPlayers;
