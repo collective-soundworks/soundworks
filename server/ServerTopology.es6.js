@@ -30,7 +30,7 @@ class ServerTopology extends EventEmitter {
 
   }
 
-  getinfo() {
+  getInfo() {
     return {
       "labels": this.labels,
       "positions": this.positions,
