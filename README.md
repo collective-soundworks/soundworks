@@ -257,16 +257,19 @@ TODO: explain what it does, when to use it, …
 #### SyncProcess
 
 ##### Attributes
- * `id {Number}`:
- * `interval {Number}`:
- * `count {Number}`:
- * `timeOffsets {Array}`:
- * `travelTimes {Array}`:
- * `avgTimeOffset {Number}`:
- * `avgTimeOffset {Number}`:
- * `avgTimeOffset {Number}`:
+ * `id {Number}`: identification number of the sync process, randomly generated (used to check the origin of the ping on the server).
+ * `interval {Number}`: time interval between each ping.
+ * `iterations {Number}`:  total number of pings to send for this sync process.
+ * `count {Number}`: current number of pings already sent.
+ * `timeOffsets {Array}`: stores the time offsets of each ping-pong exchange.
+ * `travelTimes {Array}`: stores the travel times of each ping-pong exchange.
+ * `avgTimeOffset {Number}`: average time offset calculated from `this.timeOffsets` at the end of the `SyncProcess`.
+ * `avgTravelTime {Number}`: average travel time calculated from `this.travelTimes` at the end of the `SyncProcess`.
+ * `minTravelTime {Number}`: minimum travel time calculated from `this.travelTimes` at the end of the `SyncProcess`.
+ * `maxTravelTime {Number}`: maximum travel time calculated from `this.travelTimes` at the end of the `SyncProcess`.
 
 ##### Methods
+ * No public methods.
 
 #### ClientSetupSync
 
