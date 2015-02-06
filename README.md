@@ -183,34 +183,110 @@ The `ClientManager` module manages the whole scenario on the client side.
 
 ##### Attributes
  * `topology = null {ClientTopology}`: the topology of the scenario, as passed in by the `constructor`.
- * `setup {ClientSetup|ClientSetupMulti}`: the *setup* manager of the scenario.
- * `performance {ClientPerformance}`: 
- * `params = {} {Object}`: 
- * `displayDiv {Element}`: 
+ * `setup {ClientSetup|ClientSetupMulti}`: the *setup* manager of the scenario, as passed in by the `constructor`.
+ * `performance {ClientPerformance}`: the performance logic of the scenario, as passed in by the `constructor`.
+ * `params = {} {Object}`: the parameters, as passed in by the `constructor`.
+   * `display {Boolean}`: if set to `true`, display the `params.welcome` message before anything else starts.
+   * `welcome {String}`: welcome message to be displayed.
+ * `displayDiv {Element}`: `div`in which the welcome mesage is displayed.
 
 ##### Methods
+ * `constructor(setup {ClientSetup|ClientSetupMulti}, performance {ClientPerformance}, topology = null {ClientTopology}, params = {} {Object})`: creates an instance of the `ClientManager`(singleton)
+ * `start()`: starts the scenario.
 
 #### ClientPerformance
 
+##### Attributes
+ * `displayDiv {Element}`: `div`in which the performance gra^hics are displayed
+
+##### Methods
+ * `constructor(params = {} {Object})`: sets up the performance, and listens for incoming server messages.
+ * `initPlayers(playerList {Array})`: initializes that client with the players already in the performance.
+ * `addPlayer(player {Object})`: actions to take when the player `player` connects to the server and joins the performance.
+ * `removePlayer(player {Object})`: actions to take when the player `player` disconnects from the server and leaves the performance.
+ * `start()`: method called to start the performance.
+ * `done()`: method called when the performance is over.
+
 #### ClientPerformanceSoloists
+TBD
 
 #### ClientSetup
 
+##### Attributes
+ * `displayDiv {Element}`: the `div` in which the information about this setup process are displayed to the user.
+ * `ok {Boolean}`: set to `true` when this setup process is done.
+
+##### Methods
+ * `constructor(params = {} {Object})`: `params.display = true` would display the `displayDiv`.
+ * `start()`: method invoked to start this setup process.
+ * `done()`: method invoked to indicate that this setup process is finished.
+
 #### ClientSetupMulti
+
+##### Attributes
+ * `setupArray {Array}`: array of all the setups parts involved.
+ * `doneCount {Number}`: counter for the number of finished setup components.
+ 
+##### Methods
+ * `start()`: starts the global setup process.
 
 #### ClientSetupPlacement
 
+Extends `ClientSetup`.
+
+##### Attributes
+ * 
+
+##### Methods
+ * 
+
 #### ClientSetupPlacementAssigned
+
+##### Attributes
+ * 
+
+##### Methods
+ * 
 
 #### ClientSetupSync
 
+##### Attributes
+ * 
+
+##### Methods
+ * 
+
 #### ClientTopology
+
+##### Attributes
+ * 
+
+##### Methods
+ * 
 
 #### ClientTopologyGeneric
 
+##### Attributes
+ * 
+
+##### Methods
+ * 
+
 #### InputModule
 
+##### Attributes
+ * 
+
+##### Methods
+ * 
+
 #### SocketIoClient
+
+##### Attributes
+ * 
+
+##### Methods
+ * 
 
 ## Example
 
