@@ -173,7 +173,7 @@ The `ServerTopology` contains all the information about the topology of a scenar
 
 ##### Methods
 
- * `.init(app)`: creates the server of the Express application `app`, launches that server, and creates the corresponding `socket.io` server.
+ * `.init(app {Object})`: creates the server of the Express application `app`, launches that server, and creates the corresponding `socket.io` server.
 
 ### Client side
 
@@ -289,34 +289,41 @@ TODO: explain what it does, when to use it, …
 #### ClientTopology
 
 ##### Attributes
- * 
+ * `topology {Object}`: topology object as sent by the server.
+ * `displayDiv {Element}`: `div`in which the topology may be displayed. (This `div`can be inserted anywhere.)
 
 ##### Methods
- * 
+ * `constructor(params = {} {Object})`: `params.display = true` to display the topology.
+ * `request()`: method invoked to request the topology information from the server, when the client is ready.
+ * `init(topology)`: method that draws the topology `topology` in the `displayDiv`.
 
 #### ClientTopologyGeneric
 
+Extends `ClientTopology`.
+
 ##### Attributes
- * 
+ * Inherited from base class.
 
 ##### Methods
- * 
+ * Methods inherited from base class.
 
 #### InputModule
 
 ##### Attributes
- * 
+ * None.
 
 ##### Methods
- * 
+ * TODO: revise with the latest version of this module.
 
 #### SocketIoClient
 
 ##### Attributes
- * 
+ * `socket {Socket}`: the socket associated with this client.
+ * `ready {Boolean}`: 
 
 ##### Methods
- * 
+ * `init(namespace {String})`: method invoked to create a socket in the `socket.io` namespace `namespace`.
+ * `start(starter {function})`: method invoked to start the scenario.
 
 ## Example
 
