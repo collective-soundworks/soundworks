@@ -235,26 +235,53 @@ TBD
 Extends `ClientSetup`.
 
 ##### Attributes
- * 
+ * `super(params)`.
+ * `place {Number}`: the place of the player.
+ * `label {String}`: the label of the place of the player.
 
 ##### Methods
- * 
+ * Inherited methods.
+ * `getPlaceInfo()`: returns an object with the information about the place.
 
 #### ClientSetupPlacementAssigned
 
+Extends `ClientSetupPlacement`.
+TODO: explain what it does, when to use it, …
+
 ##### Attributes
- * 
+ * Inherited.
 
 ##### Methods
- * 
+ * Inherited.
+
+#### SyncProcess
+
+##### Attributes
+ * `id {Number}`:
+ * `interval {Number}`:
+ * `count {Number}`:
+ * `timeOffsets {Array}`:
+ * `travelTimes {Array}`:
+ * `avgTimeOffset {Number}`:
+ * `avgTimeOffset {Number}`:
+ * `avgTimeOffset {Number}`:
+
+##### Methods
 
 #### ClientSetupSync
 
 ##### Attributes
- * 
+ * `super(params)`.
+ * `minTravelTimes {Array}`: stores the minimal travel time of each `SyncProcess`.
+ * `maxTravelTimes {Array}`: stores the maximal travel time of each `SyncProcess`.
+ * `avgTravelTimes {Array}`: stores the average travel time of each `SyncProcess`.
+ * `avgTimeOffsets {Array}`: stores the average time offset of each `SyncProcess`.
+ * `timeOffset {Number}`: average time offset of the latest `SyncProcess`.
 
 ##### Methods
- * 
+ * Inherited methods.
+ * `getLocalTime(serverTime {Number})`: 
+ * `getServerTime(localTime = audioContext.currentTime {Number})`: 
 
 #### ClientTopology
 
