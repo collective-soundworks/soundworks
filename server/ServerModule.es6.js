@@ -6,19 +6,19 @@
 
 var EventEmitter = require('events').EventEmitter;
 
-class ServerSetup extends EventEmitter {
-  constructor() {
+class ServerModule extends EventEmitter {
+  constructor(namespaces) {
     super();
 
   }
 
-  connect(socket, client) {
+  connect(client) {
 
   }
 
-  disconnect(socket, client) {
+  disconnect(client) {
 
   }
 }
 
-module.exports = ServerSetup;
+module.exports = ServerModule;

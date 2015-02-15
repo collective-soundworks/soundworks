@@ -4,20 +4,24 @@
  */
 'use strict';
 
-class Client {
+class ServerClient {
 	constructor(socket) {
     this.socket = socket;
-    this.pingLatency = 0;
+    this.index = null;
+
+    this.privateState = {};
+    this.publicState = {};
   }
 
   getInfo() {
     var clientInfo = {
-      socketId: this.socket.id
+      socketId: this.socket.id,
+      index: this.index,
+      state: this.publicState
     };
     
     return clientInfo;
   }
 }
-  
 
-module.exports = Client;
+module.exports = ServerClient;

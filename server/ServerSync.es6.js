@@ -4,27 +4,29 @@
  */
 'use strict';
 
-var ServerSetup = require('./ServerSetup');
+var ServerModule = require('./ServerModule');
 
-class ServerSetupSync extends ServerSetup {
-  constructor() {
-
+class ServerSync extends ServerModule {
+  constructor(namespaces) {
+    super(namespaces);
   }
 
-  connect(socket, player) {
+  connect(client) {
+    var socket = client.socket;
+
     socket.on('sync_ping', (id, pingTime_clientTime) => {
       var pongTime_serverTime = Date.now() / 1000;
       socket.emit('sync_pong', id, pingTime_clientTime, pongTime_serverTime);
     });
 
     socket.on('sync_stats', (minTravelTime, maxTravelTime, avgTravelTime, avgTimeOffset) => {
-      player.pingLatency = maxTravelTime / 2;
+      client.privateState.pingLatency = maxTravelTime / 2;
     });
   }
 
-  disconnect() {
+  disconnect(client) {
     
   }
 }
 
-module.exports = ServerSetupSync;
+module.exports = ServerSync;

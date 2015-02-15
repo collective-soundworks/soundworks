@@ -5,16 +5,11 @@
 'use strict';
 
 module.exports = {
-  ioClient: require('./ioClient'),
-  inputModule: require('./inputModule'),
-  Manager: require('./ClientManager'),
+  client: require('./client'),
+  input: require('./input'),
+  Module: require('./ClientModule'),
+  Dialog: require('./ClientDialog'),
+  Placement: require('./ClientPlacement'),
+  Sync: require('./ClientSync'),
   Topology: require('./ClientTopology'),
-  TopologyGeneric: require('./ClientTopologyGeneric'),
-  Setup: require('./ClientSetup'),
-  SetupMulti: require('./ClientSetupMulti'),
-  SetupSync: require('./ClientSetupSync'),
-  SetupPlacement: require('./ClientSetupPlacement'),
-  SetupPlacementAssigned: require('./ClientSetupPlacementAssigned'),
-  Performance: require('./ClientPerformance'),
-  PerformanceSoloists: require('./ClientPerformanceSoloists')
 };

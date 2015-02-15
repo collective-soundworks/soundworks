@@ -6,8 +6,8 @@
 
 var EventEmitter = require('events').EventEmitter;
 var audioContext = require('audio-context');
-var ClientSetup = require('./ClientSetup');
-var ioClient = require('./ioClient');
+var ClientModule = require('./ClientModule');
+var client = require('./client');
 
 function getMinOfArray(numArray) {
   return Math.min.apply(null, numArray);
@@ -39,7 +39,7 @@ class SyncProcess extends EventEmitter {
     // server, calculate the travel time and the
     // time offset.
     // Repeat as many times as needed (__iterations).
-    var socket = ioClient.socket;
+    var socket = client.socket;
     socket.on('sync_pong', (id, pingTime_clientTime, pongTime_serverTime) => {
       if (id === this.id) {
         var now = audioContext.currentTime;
@@ -69,14 +69,14 @@ class SyncProcess extends EventEmitter {
   __sendPing() {
     this.count++;
 
-    var socket = ioClient.socket;
+    var socket = client.socket;
     socket.emit('sync_ping', this.id, audioContext.currentTime);
   }
 }
 
-class ClientSetupSync extends ClientSetup {
-  constructor(params) {
-    super(params);
+class ClientSync extends ClientModule {
+  constructor(params = {}) {
+    super('sync', true);
 
     this.minTravelTimes = [];
     this.maxTravelTimes = [];
@@ -87,8 +87,6 @@ class ClientSetupSync extends ClientSetup {
     this.serverReady = false;
 
     if (this.displayDiv) {
-      this.displayDiv.setAttribute('id', 'sync');
-      this.displayDiv.classList.add('sync');
       this.displayDiv.style.zIndex = -10;
       this.displayDiv.innerHTML = "<p>Please stand by while synchronizing clock...</p>";
     }
@@ -125,7 +123,10 @@ class ClientSetupSync extends ClientSetup {
   }
 
   getLocalTime(serverTime) {
-    return serverTime - this.timeOffset;
+    if(serverTime)
+      return serverTime - this.timeOffset;
+
+    return audioContext.currentTime;
   }
 
   getServerTime(localTime = audioContext.currentTime) {
@@ -133,4 +134,4 @@ class ClientSetupSync extends ClientSetup {
   }
 }
 
-module.exports = ClientSetupSync;
+module.exports = ClientSync;

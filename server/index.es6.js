@@ -5,18 +5,10 @@
 'use strict';
 
 module.exports = {
-  ioServer: require('./ioServer'),
+  server: require('./server'),
   Client: require('./ServerClient'),
-  Player: require('./ServerPLayer'),
-  Manager: require('./ServerManager'),
-  ManagerPlayers: require('./ServerManagerPlayers'),
+  Module: require('./ServerModule'),
   Topology: require('./ServerTopology'),
-  TopologyMatrix: require('./ServerTopologyMatrix'),
-  Setup: require('./ServerSetup'),
-  SetupMulti: require('./ServerSetupMulti'),
-  SetupSync: require('./ServerSetupSync'),
-  SetupPlacement: require('./ServerSetupPlacement'),
-  SetupPlacementAssigned: require('./ServerSetupPlacementAssigned'),
-  Performance: require('./ServerPerformance'),
-  PerformanceSoloists: require('./ServerPerformanceSoloists')
+  Sync: require('./ServerSync'),
+  Placement: require('./ServerPlacement'),
 };

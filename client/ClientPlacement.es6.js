@@ -4,22 +4,24 @@
  */
 'use strict';
 
-var ClientSetupPlacement = require('./ClientSetupPlacement');
-var ioClient = require('./ioClient');
+var ClientModule = require('./ClientModule');
+var client = require('./client');
 
-class ClientSetupPlacementAssigned extends ClientSetupPlacement {
-  constructor(params) {
-    super(params);
+class ClientPlacement extends ClientModule {
+  constructor(params = {}) {
+    super('placement', false);
 
-    if (this.displayDiv)
-      this.displayDiv.classList.add('hidden');
+    this.index = null;
+    this.label = null;
   }
 
   start() {
-    var socket = ioClient.socket;
+    super.start();
+    
+    var socket = client.socket;
 
     socket.on('placement_available', (placeInfo) => {
-      this.place = placeInfo.place;
+      this.index = placeInfo.index;
       this.label = placeInfo.label;
 
       if (this.displayDiv) {
@@ -47,6 +49,15 @@ class ClientSetupPlacementAssigned extends ClientSetupPlacement {
 
     socket.emit('placement_request');
   }
+
+  getPlaceInfo() {
+    var placeInfo = {
+      "index": this.index,
+      "label": this.label
+    };
+
+    return placeInfo;
+  }
 }
 
-module.exports = ClientSetupPlacementAssigned;
+module.exports = ClientPlacement;
