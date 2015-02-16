@@ -7,8 +7,9 @@
 module.exports = {
   client: require('./client'),
   input: require('./input'),
-  Module: require('./ClientModule'),
   Dialog: require('./ClientDialog'),
+  Module: require('./ClientModule'),
+  Parameters: require('./ClientParameters'),
   Placement: require('./ClientPlacement'),
   Sync: require('./ClientSync'),
   Topology: require('./ClientTopology'),

@@ -8,7 +8,8 @@ module.exports = {
   server: require('./server'),
   Client: require('./ServerClient'),
   Module: require('./ServerModule'),
+  Parameters: require('./ServerParameters'),
+  Placement: require('./ServerPlacement'),
   Topology: require('./ServerTopology'),
   Sync: require('./ServerSync'),
-  Placement: require('./ServerPlacement'),
 };

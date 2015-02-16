@@ -9,7 +9,7 @@ var ClientModule = require('./ClientModule');
 
 class ClientDialog extends ClientModule {
   constructor(params = {}) {
-    super(params.id || 'dialog', true);
+    super(params.id || 'gui', true);
 
     this.text = params.text;
     this.__mustActivateAudio = params.activateAudio || false;
