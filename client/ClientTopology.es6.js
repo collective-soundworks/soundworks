@@ -19,20 +19,17 @@ class ClientTopology extends ClientModule {
 
     var socket = client.socket;
     socket.on('topology_init', (topology) => {
-      this.__init(topology);
-      this.emit("topology_init", topology);
+      this.topology = topology;
+      // this.emit("topology_init", topology); // TODO: remove when sure it's not needed
+      this.done();
     });
 
     socket.emit('topology_request');
   }
 
-  __init(topology) {
-    this.topology = topology;
-
-    var div = this.displayDiv;
-
-    if (div) {
-      var topologyRatio = topology.height / topology.width;
+  displayTopology(div) {
+    if (this.topology) {
+      var topologyRatio = this.topology.height / this.topology.width;
       var screenHeight = window.innerHeight;
       var screenWidth = window.innerWidth;
       var screenRatio = screenHeight / screenWidth;
@@ -56,7 +53,7 @@ class ClientTopology extends ClientModule {
       div.style.height = topologyHeightPx + "px";
       div.style.width = topologyWidthPx + "px";
 
-      var positions = topology.positions;
+      var positions = this.topology.positions;
 
       for (let i = 0; i < positions.length; i++) {
         let tile = document.createElement('div');
@@ -73,18 +70,16 @@ class ClientTopology extends ClientModule {
     }
   }
 
-  displayPlayer(index, visible = true, className = 'player') {
-    if (this.displayDiv) {
-      var tiles = Array.prototype.slice.call(this.displayDiv.childNodes); // .childNode returns a NodeList
-      var tileIndex = tiles.map((t) => parseInt(t.dataset.index)).indexOf(index);
-      var tile = tiles[tileIndex];
+  changeTileClass(topologyDisplay, index, visible = true, className = 'player') {
+    var tiles = Array.prototype.slice.call(topologyDisplay.childNodes); // .childNode returns a NodeList
+    var tileIndex = tiles.map((t) => parseInt(t.dataset.index)).indexOf(index);
+    var tile = tiles[tileIndex];
 
-      if (tile) {
-        if (visible)
-          tile.classList.add(className);
-        else
-          tile.classList.remove(className);
-      }
+    if (tile) {
+      if (visible)
+        tile.classList.add(className);
+      else
+        tile.classList.remove(className);
     }
   }
 }

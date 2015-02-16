@@ -9,7 +9,7 @@ var client = require('./client');
 
 class ClientPlacement extends ClientModule {
   constructor(params = {}) {
-    super('placement', false);
+    super('placement', params.display || false);
 
     this.index = null;
     this.label = null;
@@ -17,22 +17,29 @@ class ClientPlacement extends ClientModule {
 
   start() {
     super.start();
-    
+
     var socket = client.socket;
+    var contentDiv = null;
+
+    if (this.displayDiv) {
+      contentDiv = document.createElement('div');
+      contentDiv.classList.add('centered-content');
+      this.displayDiv.appendChild(contentDiv);
+    }
+
 
     socket.on('placement_available', (placeInfo) => {
       this.index = placeInfo.index;
       this.label = placeInfo.label;
 
-      if (this.displayDiv) {
-        this.displayDiv.innerHTML = "<p>Go to position</p>" +
-          "<div class='position circle'><span>" + this.label + "</span></div>" +
+      if (contentDiv) {
+        contentDiv.innerHTML = "<p>Go to position</p>" +
+          "<div class='placement-label circled'><span>" + this.label + "</span></div>" +
           "<p class='small'>Touch the screen<br/>when you are ready.</p>";
 
         this.displayDiv.classList.remove('hidden');
 
         this.displayDiv.addEventListener('click', () => {
-          this.displayDiv.classList.add('hidden');
           this.done();
         });
       } else {
@@ -40,12 +47,12 @@ class ClientPlacement extends ClientModule {
       }
     });
 
-    if (this.displayDiv) {
-      socket.on('placement_unavailable', () => {
-        this.displayDiv.innerHTML = "<p>All seats are taken, please try again later! =)</p>";
+    socket.on('placement_unavailable', () => {
+      if (contentDiv) {
+        content.innerHTML = "<p>All seats are taken, please try again later! =)</p>";
         this.displayDiv.classList.remove('hidden');
-      });
-    }
+      }
+    });
 
     socket.emit('placement_request');
   }

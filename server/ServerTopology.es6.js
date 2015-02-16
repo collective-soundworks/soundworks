@@ -7,8 +7,8 @@
 var ServerModule = require("./ServerModule");
 
 class ServerTopology extends ServerModule {
-  constructor(namespaces, params = {}) {
-    super(namespaces);
+  constructor(params = {}) {
+    super();
 
     this.type = params.type || 'matrix';
 
@@ -17,15 +17,12 @@ class ServerTopology extends ServerModule {
     this.width = 1;
     this.height = 1;
 
-    if (this.type === 'matrix')
+    if (this.type === 'matrix') {
       this.__initMatrixParams(params);
-  }
-
-  init() {
-    if (this.type === 'matrix')
       this.__initMatrix();
-
-    this.emit('topology_init');
+    }
+    
+    // this.emit('topology_init');
   }
 
   connect(client) {

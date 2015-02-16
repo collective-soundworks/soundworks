@@ -16,7 +16,11 @@ class ClientDialog extends ClientModule {
   }
 
   start() {
-    this.displayDiv.innerHTML = this.text;
+    var contentDiv = document.createElement('div');
+    contentDiv.classList.add('centered-content');
+    this.displayDiv.appendChild(contentDiv);
+
+    contentDiv.innerHTML = this.text;
     super.start();
 
     if (this.displayDiv) {
