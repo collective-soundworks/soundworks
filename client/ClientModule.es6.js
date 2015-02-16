@@ -14,10 +14,11 @@ class ClientModule extends EventEmitter {
     this.displayDiv = null;
 
     if (display) {
-      var div = document.createElement('div');
-      div.setAttribute('id', id);
-      div.classList.add('module');
-      this.displayDiv = div;
+      var moduleWrapper = document.createElement('div');
+      moduleWrapper.setAttribute('id', id);
+      moduleWrapper.classList.add('module');
+      
+      this.displayDiv = moduleWrapper;
     }
 
     this.isDone = false;

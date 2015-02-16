@@ -10,22 +10,9 @@ var ServerClient = require('./ServerClient');
 
 var __expressApp = null;
 var __httpServer = null;
-//var __clients = [];
-
-// function __arrayRemove(array, value) {
-//   var index = array.indexOf(value);
-
-//   if (index >= 0) {
-//     array.splice(index, 1);
-//     return true;
-//   }
-
-//   return false;
-// }
 
 var server = {
   io: null,
-
   start: start,
   map: map
 };
@@ -55,15 +42,11 @@ function map(url, title, ...modules) {
   });
 
   server.io.of(namespace).on('connection', (socket) => {
-    // __clients.push(client);
-
     var client = new ServerClient(socket);
 
     socket.on('disconnect', () => {
       for (let mod of modules)
         mod.disconnect(client);
-
-      // __arrayRemove(__clients, client);
     });
 
     // client/server handshake: send "start" when client is "ready"

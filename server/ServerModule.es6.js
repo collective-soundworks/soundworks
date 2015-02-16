@@ -7,7 +7,7 @@
 var EventEmitter = require('events').EventEmitter;
 
 class ServerModule extends EventEmitter {
-  constructor(namespaces) {
+  constructor() {
     super();
 
   }

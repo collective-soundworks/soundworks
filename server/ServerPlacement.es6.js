@@ -18,19 +18,12 @@ class ServerPlacement extends ServerModule {
     this.order = params.order || 'random';
     this.availableIndices = [];
 
-    if (this.topology) {
-      this.topology.on('topology_init', () => {
-        var numPlaces = this.topology.getNumPlaces();
+    var numPlaces = params.numPlaces || 9999;
+    if (this.topology)
+      numPlaces = this.topology.getNumPlaces();
 
-        for (let i = 0; i < numPlaces; i++)
-          this.availableIndices.push(i);
-      });
-    } else {
-      var numPlaces = params.numPlaces || 99;
-
-      for (let i = 0; i < numPlaces; i++)
+    for (let i = 0; i < numPlaces; i++)
         this.availableIndices.push(i);
-    }
   }
 
   connect(client) {
