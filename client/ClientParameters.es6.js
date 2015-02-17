@@ -1,5 +1,5 @@
 /**
- * @fileoverview Matrix client side conductor module
+ * @fileoverview Matrix client side parameters module
  * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
  */
 'use strict';
@@ -24,19 +24,11 @@ class ControlNumber {
       box.setAttribute('min', this.min);
       box.setAttribute('max', this.max);
       box.setAttribute('step', this.step);
-      box.setAttribute('size', '4');
+      box.setAttribute('size', 16);
 
       box.onchange = (() => {
         var val = Number(box.value);
         this.set(val, true);
-      });
-
-      var decrButton = document.createElement('button');
-      decrButton.setAttribute('id', this.name + '-descr');
-      decrButton.style.width = '0.5em';
-      decrButton.innerHTML = '<';
-      decrButton.onclick = decrButton.ontouchstart = (() => {
-        this.incr(-this.step, true);
       });
 
       var incrButton = document.createElement('button');
@@ -44,17 +36,28 @@ class ControlNumber {
       incrButton.setAttribute('width', '0.5em');
       incrButton.innerHTML = '>';
       incrButton.onclick = incrButton.ontouchstart = (() => {
-        this.incr(this.step, true);
+        this.incr(true);
+      });
+
+      var decrButton = document.createElement('button');
+      decrButton.setAttribute('id', this.name + '-descr');
+      decrButton.style.width = '0.5em';
+      decrButton.innerHTML = '<';
+      decrButton.onclick = decrButton.ontouchstart = (() => {
+        this.decr(true);
       });
 
       var label = document.createElement('span');
       label.innerHTML = this.label + ': ';
 
-      view.appendChild(label);
-      view.appendChild(decrButton);
-      view.appendChild(box);
-      view.appendChild(incrButton);
-      view.appendChild(document.createElement('br'));
+      var div = document.createElement('div');
+      div.appendChild(label);
+      div.appendChild(decrButton);
+      div.appendChild(box);
+      div.appendChild(incrButton);
+      div.appendChild(document.createElement('br'));
+
+      view.appendChild(div);
     }
 
     this.set(control.value);
@@ -67,11 +70,17 @@ class ControlNumber {
       this.box.value = val;
 
     if (send)
-      client.socket.emit('conductor_control', this.name, this.value);
+      client.socket.emit('parameters_control', this.name, this.value);
   }
 
-  incr(val, send = false) {
-    this.set(this.value + val, send);
+  incr(send = false) {
+    var steps = Math.floor(this.value / this.step + 0.5);
+    this.set(this.step * (steps + 1), send);
+  }
+
+  decr(send = false) {
+    var steps = Math.floor(this.value / this.step + 0.5);
+    this.set(this.step * (steps - 1), send);
   }
 }
 
@@ -98,12 +107,33 @@ class ControlSelect {
         this.set(box.value, true);
       });
 
+      var incrButton = document.createElement('button');
+      incrButton.setAttribute('id', this.name + '-incr');
+      incrButton.setAttribute('width', '0.5em');
+      incrButton.innerHTML = '>';
+      incrButton.onclick = incrButton.ontouchstart = (() => {
+        this.incr(true);
+      });
+
+      var decrButton = document.createElement('button');
+      decrButton.setAttribute('id', this.name + '-descr');
+      decrButton.style.width = '0.5em';
+      decrButton.innerHTML = '<';
+      decrButton.onclick = decrButton.ontouchstart = (() => {
+        this.decr(true);
+      });
+
       var label = document.createElement('span');
       label.innerHTML = this.label + ': ';
 
-      view.appendChild(label);
-      view.appendChild(box);
-      view.appendChild(document.createElement('br'));
+      var div = document.createElement('div');
+      div.appendChild(label);
+      div.appendChild(decrButton);
+      div.appendChild(box);
+      div.appendChild(incrButton);
+      div.appendChild(document.createElement('br'));
+
+      view.appendChild(div);
     }
 
     this.set(control.value);
@@ -120,12 +150,17 @@ class ControlSelect {
         this.box.value = val;
 
       if (send)
-        client.socket.emit('conductor_control', this.name, val);
+        client.socket.emit('parameters_control', this.name, val);
     }
   }
 
-  incr(val, send = false) {
+  incr(send = false) {
     this.index = (this.index + 1) % this.options.length;
+    this.set(this.options[this.index], send);
+  }
+
+  decr(send = false) {
+    this.index = (this.index + this.options.length - 1) % this.options.length;
     this.set(this.options[this.index], send);
   }
 }
@@ -143,9 +178,12 @@ class Display {
       var label = document.createElement('span');
       label.innerHTML = this.label + ': ';
 
-      view.appendChild(label);
-      view.appendChild(box);
-      view.appendChild(document.createElement('br'));
+      var div = document.createElement('div');
+      div.appendChild(label);
+      div.appendChild(box);
+      div.appendChild(document.createElement('br'));
+
+      view.appendChild(div);
     }
 
     this.set(display.value);
@@ -165,23 +203,24 @@ class Command {
     this.label = command.label;
 
     if (view) {
-      var button = document.createElement('div');
-      button.setAttribute('id', this.name + '-btn');
-      button.innerHTML = this.label;
+      var div = document.createElement('div');
+      div.setAttribute('id', this.name + '-btn');
+      div.classList.add('command');
+      div.innerHTML = this.label;
 
-      button.onclick = button.ontouchstart = (() => {
-        client.socket.emit('conductor_command', this.name);
+      div.onclick = div.ontouchstart = (() => {
+        client.socket.emit('parameters_command', this.name);
       });
 
-      view.appendChild(button);
+      view.appendChild(div);
       view.appendChild(document.createElement('br'));
     }
   }
 }
 
-class ClientConductor extends ClientModule {
+class ClientParameters extends ClientModule {
   constructor(params = {}) {
-    super('conductor', params.gui);
+    super('parameters', params.gui);
     var view = null;
 
     if (params.gui)
@@ -192,20 +231,17 @@ class ClientConductor extends ClientModule {
     this.displays = {};
     this.commands = {};
 
-    client.socket.on('conductor_init', (controls, displays, commands) => {
+    client.socket.on('parameters_init', (controls, displays, commands) => {
       if (view) {
         var title = document.createElement('h1');
         title.innerHTML = 'Conductor';
         view.appendChild(title);
-      }
 
-      if (displays) {
         for (let key of Object.keys(displays)) {
           this.displays[key] = new Display(displays[key], view);
         }
 
-        if (view)
-          view.appendChild(document.createElement('hr'));
+        view.appendChild(document.createElement('hr'));
       }
 
       for (let key of Object.keys(controls)) {
@@ -222,9 +258,8 @@ class ClientConductor extends ClientModule {
         }
       }
 
-      if (commands) {
-        if (view)
-          view.appendChild(document.createElement('hr'));
+      if (view) {
+        view.appendChild(document.createElement('hr'));
 
         for (let key of Object.keys(commands)) {
           this.commands[key] = new Command(commands[key], view);
@@ -233,34 +268,34 @@ class ClientConductor extends ClientModule {
     });
 
     // listen to control changes
-    client.socket.on('conductor_control', (name, val) => {
+    client.socket.on('parameters_control', (name, val) => {
       var control = this.controls[name];
 
       if (control) {
         control.set(val);
-        this.emit('conductor_control', name, val);
+        this.emit('parameters_control', name, val);
       } else
-        console.log('received unknown conductor control: ', name);
+        console.log('received unknown control parameter: ', name);
     });
 
     // listen to display changes
-    client.socket.on('conductor_display', (name, val) => {
+    client.socket.on('parameters_display', (name, val) => {
       var display = this.displays[name];
 
       if (display) {
         display.set(val);
-        this.emit('conductor_display', name, val);
+        this.emit('parameters_display', name, val);
       } else
-        console.log('received unknown conductor display: ', name);
+        console.log('received unknown display parameter: ', name);
     });
   }
 
   start() {
     super.start();
 
-    if(!this.hasGui)
+    if (!this.hasGui)
       this.done();
   }
 }
 
-module.exports = ClientConductor;
+module.exports = ClientParameters;

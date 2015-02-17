@@ -1,5 +1,5 @@
 /**
- * @fileoverview Soundworks server side conductor module
+ * @fileoverview Soundworks server side parameter module
  * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
  */
 'use strict';
@@ -7,11 +7,12 @@
 var ServerModule = require('./ServerModule');
 var server = require('./server');
 
-class ServerConductor extends ServerModule {
+class ServerParameters extends ServerModule {
   constructor() {
     this.controls = {};
     this.commands = {};
     this.displays = {};
+    this.namespaces = [];
   }
 
   addControlNumber(name, label, min, max, step, init) {
@@ -54,30 +55,28 @@ class ServerConductor extends ServerModule {
 
   connect(client) {
     var socket = client.socket;
+    var namespace = socket.nsp;
 
-    // listen to conductor parameters
-    for (let key of Object.keys(this.controls)) {
-      socket.on('conductor_control', (name, val) => {
-        this.controls[name].value = val;
+    if (this.namespaces.indexOf(namespace) < 0)
+      this.namespaces.push(namespace);
 
-        // send conductor control parameter to conductor clients
-        socket.broadcast.emit('conductor_control', name, val);
+    // listen to control parameters
+    socket.on('parameters_control', (name, val) => {
+      this.controls[name].value = val;
 
-        // propagate control parameter to players
-        server.io.of('/player').emit('conductor_control', name, val);
-      });
-    }
+      // send control parameter to other clients
+      for(let namespace of this.namespaces)
+        namespace.emit('parameters_control', name, val);
+    });
 
     // listen to conductor commands
-    for (let key of Object.keys(this.commands)) {
-      socket.on('conductor_command', (name) => {
-        this.commands[name].fun();
-      });
-    }
+    socket.on('parameters_command', (name) => {
+      this.commands[name].fun();
+    });
 
-    // init conductor controls, displays, and commands at conductor client
-    socket.emit("conductor_init", this.controls, this.displays, this.commands);
+    // init parameters controls, displays, and commands at client
+    socket.emit("parameters_init", this.controls, this.displays, this.commands);
   }
 }
 
-module.exports = ServerConductor;
+module.exports = ServerParameters;
