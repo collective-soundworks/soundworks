@@ -1,5 +1,5 @@
 /**
- * @fileoverview Matrix client side performance manager base class
+ * @fileoverview Soundworks client side dialog module
  * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
  */
 'use strict';

@@ -1,5 +1,5 @@
 /**
- * @fileoverview Matrix client side socket i/o (singleton)
+ * @fileoverview Soundworks client side socket i/o (singleton)
  * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
  */
 "use strict";
