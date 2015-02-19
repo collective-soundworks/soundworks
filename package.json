@@ -15,7 +15,8 @@
     "jade": "~1.5.0",
     "socket.io": "~1.1.0",
     "underscore": "^1.7.0",
-    "audio-context": "git://github.com/Ircam-RnD/audio-context.git#master"
+    "audio-context": "Ircam-RnD/audio-context.git",
+    "sync": "collective-soundworks/soundworks.git"
   },
   "devDependencies": {
     "browserify": "~5.11.0",
