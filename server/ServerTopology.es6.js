@@ -38,10 +38,6 @@ class ServerTopology extends ServerModule {
     });
   }
 
-  disconnect(client) {
-
-  }
-
   getNumPlaces() {
     return this.labels.length;
   }
