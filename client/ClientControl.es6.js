@@ -1,5 +1,5 @@
 /**
- * @fileoverview Matrix client side parameters module
+ * @fileoverview SOundworks client side control module
  * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
  */
 'use strict';
@@ -70,7 +70,7 @@ class ControlNumber {
       this.box.value = val;
 
     if (send)
-      client.socket.emit('parameters_control', this.name, this.value);
+      client.socket.emit('control_parameter', this.name, this.value);
   }
 
   incr(send = false) {
@@ -150,7 +150,7 @@ class ControlSelect {
         this.box.value = val;
 
       if (send)
-        client.socket.emit('parameters_control', this.name, val);
+        client.socket.emit('control_parameter', this.name, val);
     }
   }
 
@@ -209,7 +209,7 @@ class Command {
       div.innerHTML = this.label;
 
       div.onclick = div.ontouchstart = (() => {
-        client.socket.emit('parameters_command', this.name);
+        client.socket.emit('control_command', this.name);
       });
 
       view.appendChild(div);
@@ -218,9 +218,9 @@ class Command {
   }
 }
 
-class ClientParameters extends ClientModule {
+class ClientControl extends ClientModule {
   constructor(params = {}) {
-    super('parameters', params.gui);
+    super('control', params.gui);
     var view = null;
 
     if (params.gui)
@@ -231,7 +231,7 @@ class ClientParameters extends ClientModule {
     this.displays = {};
     this.commands = {};
 
-    client.socket.on('parameters_init', (controls, displays, commands) => {
+    client.socket.on('control_init', (controls, displays, commands) => {
       if (view) {
         var title = document.createElement('h1');
         title.innerHTML = 'Conductor';
@@ -268,23 +268,23 @@ class ClientParameters extends ClientModule {
     });
 
     // listen to control changes
-    client.socket.on('parameters_control', (name, val) => {
+    client.socket.on('control_parameter', (name, val) => {
       var control = this.controls[name];
 
       if (control) {
         control.set(val);
-        this.emit('parameters_control', name, val);
+        this.emit('control_parameter', name, val);
       } else
         console.log('received unknown control parameter: ', name);
     });
 
     // listen to display changes
-    client.socket.on('parameters_display', (name, val) => {
+    client.socket.on('control_display', (name, val) => {
       var display = this.displays[name];
 
       if (display) {
         display.set(val);
-        this.emit('parameters_display', name, val);
+        this.emit('control_display', name, val);
       } else
         console.log('received unknown display parameter: ', name);
     });
@@ -298,4 +298,4 @@ class ClientParameters extends ClientModule {
   }
 }
 
-module.exports = ClientParameters;
+module.exports = ClientControl;

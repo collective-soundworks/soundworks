@@ -7,7 +7,7 @@
 var ServerModule = require('./ServerModule');
 var server = require('./server');
 
-class ServerParameters extends ServerModule {
+class ServerControl extends ServerModule {
   constructor() {
     this.controls = {};
     this.commands = {};
@@ -61,22 +61,22 @@ class ServerParameters extends ServerModule {
       this.namespaces.push(namespace);
 
     // listen to control parameters
-    socket.on('parameters_control', (name, val) => {
+    socket.on('control_parameter', (name, val) => {
       this.controls[name].value = val;
 
       // send control parameter to other clients
       for(let namespace of this.namespaces)
-        namespace.emit('parameters_control', name, val);
+        namespace.emit('control_parameter', name, val);
     });
 
     // listen to conductor commands
-    socket.on('parameters_command', (name) => {
+    socket.on('control_command', (name) => {
       this.commands[name].fun();
     });
 
-    // init parameters controls, displays, and commands at client
-    socket.emit("parameters_init", this.controls, this.displays, this.commands);
+    // init control parameters, displays, and commands at client
+    socket.emit("control_init", this.controls, this.displays, this.commands);
   }
 }
 
-module.exports = ServerParameters;
+module.exports = ServerControl;

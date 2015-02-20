@@ -6,9 +6,9 @@
 
 module.exports = {
   server: require('./server'),
+  Control: require('./ServerControl'),
   Client: require('./ServerClient'),
   Module: require('./ServerModule'),
-  Parameters: require('./ServerParameters'),
   Placement: require('./ServerPlacement'),
   Topology: require('./ServerTopology'),
   Sync: require('./ServerSync'),
