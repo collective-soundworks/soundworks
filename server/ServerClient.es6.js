@@ -1,5 +1,5 @@
 /**
- * @fileoverview Matrix server side player class
+ * @fileoverview Soundworks server side client class
  * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
  */
 'use strict';

@@ -1,5 +1,5 @@
 /**
- * @fileoverview Matrix client side sensor input module (singleton)
+ * @fileoverview Soundworks (client side) sensor input module (singleton)
  * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
  */
 'use strict';

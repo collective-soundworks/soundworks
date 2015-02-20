@@ -1,5 +1,5 @@
 /**
- * @fileoverview Matrix client side exported modules and start function
+ * @fileoverview Soundworks client side exported modules
  * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
  */
 'use strict';

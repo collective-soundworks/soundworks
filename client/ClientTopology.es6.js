@@ -1,5 +1,5 @@
 /**
- * @fileoverview Matrix client side topology manager displaying arbitrary static topologies
+ * @fileoverview Soundworks client side topology module
  * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
  */
 'use strict';

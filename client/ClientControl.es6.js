@@ -1,5 +1,5 @@
 /**
- * @fileoverview SOundworks client side control module
+ * @fileoverview Soundworks client side control module
  * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
  */
 'use strict';

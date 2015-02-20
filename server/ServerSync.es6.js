@@ -1,5 +1,5 @@
 /**
- * @fileoverview Matrix server side synchronization manager
+ * @fileoverview Soundworks server side time synchronization module
  * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
  */
 'use strict';

@@ -1,5 +1,5 @@
 /**
- * @fileoverview Matrix server side setup manager base class
+ * @fileoverview Soundworks server side module base class
  * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
  */
 'use strict';

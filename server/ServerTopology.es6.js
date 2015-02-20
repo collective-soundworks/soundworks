@@ -1,5 +1,5 @@
 /**
- * @fileoverview Matrix server side topology manager creating regular matrices
+ * @fileoverview Soundworks server side topology module
  * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
  */
 'use strict';

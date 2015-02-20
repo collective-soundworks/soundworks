@@ -1,0 +1,105 @@
+Searching 17 files for "SoundWorks"
+
+/Users/schnell/Development/web/soundworks/client/client.es6.js:
+    1  /**
+    2:  * @fileoverview SoundWorks client side socket i/o (singleton)
+    3   * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
+    4   */
+
+/Users/schnell/Development/web/soundworks/client/ClientControl.es6.js:
+    1  /**
+    2:  * @fileoverview SoundWorks client side control module
+    3   * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
+    4   */
+
+/Users/schnell/Development/web/soundworks/client/ClientDialog.es6.js:
+    1  /**
+    2:  * @fileoverview Soundworks (client side) dialog module
+    3   * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
+    4   */
+
+/Users/schnell/Development/web/soundworks/client/ClientModule.es6.js:
+    1  /**
+    2:  * @fileoverview SoundWorks client side module base class
+    3   * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
+    4   */
+
+/Users/schnell/Development/web/soundworks/client/ClientPlacement.es6.js:
+    1  /**
+    2:  * @fileoverview SoundWorks client side placement module
+    3   * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
+    4   */
+
+/Users/schnell/Development/web/soundworks/client/ClientSync.es6.js:
+    1  /**
+    2:  * @fileoverview SoundWorks client side time syncronization module
+    3   * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
+    4   */
+
+/Users/schnell/Development/web/soundworks/client/ClientTopology.es6.js:
+    1  /**
+    2:  * @fileoverview SoundWorks client side topology module
+    3   * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
+    4   */
+
+/Users/schnell/Development/web/soundworks/client/index.es6.js:
+    1  /**
+    2:  * @fileoverview SoundWorks client side exported modules
+    3   * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
+    4   */
+
+/Users/schnell/Development/web/soundworks/client/input.es6.js:
+    1  /**
+    2:  * @fileoverview SoundWorks (client side) sensor input module (singleton)
+    3   * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
+    4   */
+
+/Users/schnell/Development/web/soundworks/server/index.es6.js:
+    1  /**
+    2:  * @fileoverview SoundWorks server side module export
+    3   * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
+    4   */
+
+/Users/schnell/Development/web/soundworks/server/server.es6.js:
+    1  /**
+    2:  * @fileoverview SoundWorks server side socket i/o (singleton)
+    3   * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
+    4   */
+
+/Users/schnell/Development/web/soundworks/server/ServerClient.es6.js:
+    1  /**
+    2:  * @fileoverview SoundWorks server side client class
+    3   * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
+    4   */
+
+/Users/schnell/Development/web/soundworks/server/ServerControl.es6.js:
+    1  /**
+    2:  * @fileoverview SoundWorks server side control module
+    3   * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
+    4   */
+
+/Users/schnell/Development/web/soundworks/server/ServerModule.es6.js:
+    1  /**
+    2:  * @fileoverview SoundWorks server side module base class
+    3   * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
+    4   */
+
+/Users/schnell/Development/web/soundworks/server/ServerPlacement.es6.js:
+    1  /**
+    2:  * @fileoverview SoundWorks server side placement module
+    3   * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
+    4   */
+
+/Users/schnell/Development/web/soundworks/server/ServerSync.es6.js:
+    1  /**
+    2:  * @fileoverview SoundWorks server side time synchronization module
+    3   * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
+    4   */
+
+/Users/schnell/Development/web/soundworks/server/ServerTopology.es6.js:
+    1  /**
+    2:  * @fileoverview SoundWorks server side topology module
+    3   * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
+    4   */
+
+17 matches across 17 files
