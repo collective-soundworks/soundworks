@@ -7,14 +7,14 @@
 var ClientModule = require('./ClientModule');
 var client = require('./client');
 
-class ControlNumber {
-  constructor(control, view = null) {
+class ParameterNumber {
+  constructor(parameter, view = null) {
     this.type = 'number';
-    this.name = control.name;
-    this.label = control.label;
-    this.min = control.min;
-    this.max = control.max;
-    this.step = control.step;
+    this.name = parameter.name;
+    this.label = parameter.label;
+    this.min = parameter.min;
+    this.max = parameter.max;
+    this.step = parameter.step;
     this.box = null;
 
     if (view) {
@@ -60,7 +60,7 @@ class ControlNumber {
       view.appendChild(div);
     }
 
-    this.set(control.value);
+    this.set(parameter.value);
   }
 
   set(val, send = false) {
@@ -84,12 +84,12 @@ class ControlNumber {
   }
 }
 
-class ControlSelect {
-  constructor(control, view = null) {
+class ParameterSelect {
+  constructor(parameter, view = null) {
     this.type = 'select';
-    this.name = control.name;
-    this.label = control.label;
-    this.options = control.options;
+    this.name = parameter.name;
+    this.label = parameter.label;
+    this.options = parameter.options;
     this.box = null;
 
     if (view) {
@@ -136,7 +136,7 @@ class ControlSelect {
       view.appendChild(div);
     }
 
-    this.set(control.value);
+    this.set(parameter.value);
   }
 
   set(val, send = false) {
@@ -227,11 +227,11 @@ class ClientControl extends ClientModule {
       view = this.displayDiv;
 
     this.hasGui = params.gui;
-    this.controls = {};
+    this.parameters = {};
     this.displays = {};
     this.commands = {};
 
-    client.socket.on('control_init', (controls, displays, commands) => {
+    client.socket.on('control_init', (parameters, displays, commands) => {
       if (view) {
         var title = document.createElement('h1');
         title.innerHTML = 'Conductor';
@@ -244,16 +244,16 @@ class ClientControl extends ClientModule {
         view.appendChild(document.createElement('hr'));
       }
 
-      for (let key of Object.keys(controls)) {
-        var control = controls[key];
+      for (let key of Object.keys(parameters)) {
+        var parameter = parameters[key];
 
-        switch (control.type) {
+        switch (parameter.type) {
           case 'number':
-            this.controls[key] = new ControlNumber(control, view);
+            this.parameters[key] = new ParameterNumber(parameter, view);
             break;
 
           case 'select':
-            this.controls[key] = new ControlSelect(control, view);
+            this.parameters[key] = new ParameterSelect(parameter, view);
             break;
         }
       }
@@ -267,12 +267,12 @@ class ClientControl extends ClientModule {
       }
     });
 
-    // listen to control changes
+    // listen to parameter changes
     client.socket.on('control_parameter', (name, val) => {
-      var control = this.controls[name];
+      var parameter = this.parameters[name];
 
-      if (control) {
-        control.set(val);
+      if (parameter) {
+        parameter.set(val);
         this.emit('control_parameter', name, val);
       } else
         console.log('received unknown control parameter: ', name);

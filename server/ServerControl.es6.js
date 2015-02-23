@@ -9,14 +9,14 @@ var server = require('./server');
 
 class ServerControl extends ServerModule {
   constructor() {
-    this.controls = {};
+    this.parameters = {};
     this.commands = {};
     this.displays = {};
     this.namespaces = [];
   }
 
-  addControlNumber(name, label, min, max, step, init) {
-    this.controls[name] = {
+  addParameterNumber(name, label, min, max, step, init) {
+    this.parameters[name] = {
       type: 'number',
       name: name,
       label: label,
@@ -27,8 +27,8 @@ class ServerControl extends ServerModule {
     };
   }
 
-  addControlSelect(name, label, options, init) {
-    this.controls[name] = {
+  addParameterSelect(name, label, options, init) {
+    this.parameters[name] = {
       type: 'select',
       name: name,
       label: label,
@@ -62,7 +62,7 @@ class ServerControl extends ServerModule {
 
     // listen to control parameters
     socket.on('control_parameter', (name, val) => {
-      this.controls[name].value = val;
+      this.parameters[name].value = val;
 
       // send control parameter to other clients
       for(let namespace of this.namespaces)
@@ -75,7 +75,7 @@ class ServerControl extends ServerModule {
     });
 
     // init control parameters, displays, and commands at client
-    socket.emit("control_init", this.controls, this.displays, this.commands);
+    socket.emit("control_init", this.parameters, this.displays, this.commands);
   }
 }
 
