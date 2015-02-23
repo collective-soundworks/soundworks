@@ -14,7 +14,7 @@ class ServerPlacement extends ServerModule {
   constructor(params) {
     super();
 
-    this.topology = params.topology;
+    this.topology = params.topology || null;
     this.order = params.order || 'random';
     this.availableIndices = [];
 

@@ -7,8 +7,8 @@
 var ServerModule = require('./ServerModule');
 
 class ServerSync extends ServerModule {
-  constructor(namespaces) {
-    super(namespaces);
+  constructor() {
+    super();
   }
 
   connect(client) {

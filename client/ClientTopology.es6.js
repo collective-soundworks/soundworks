@@ -70,17 +70,35 @@ class ClientTopology extends ClientModule {
     }
   }
 
-  changeTileClass(topologyDisplay, index, visible = true, className = 'player') {
+  // changeTileClass(topologyDisplay, index, visible = true, className = 'player') {
+  //   var tiles = Array.prototype.slice.call(topologyDisplay.childNodes); // .childNode returns a NodeList
+  //   var tileIndex = tiles.map((t) => parseInt(t.dataset.index)).indexOf(index);
+  //   var tile = tiles[tileIndex];
+
+  //   if (tile) {
+  //     if (visible)
+  //       tile.classList.add(className);
+  //     else
+  //       tile.classList.remove(className);
+  //   }
+  // }
+
+  addClassToTile(topologyDisplay, index, className = 'player') {
     var tiles = Array.prototype.slice.call(topologyDisplay.childNodes); // .childNode returns a NodeList
     var tileIndex = tiles.map((t) => parseInt(t.dataset.index)).indexOf(index);
     var tile = tiles[tileIndex];
 
-    if (tile) {
-      if (visible)
-        tile.classList.add(className);
-      else
-        tile.classList.remove(className);
-    }
+    if (tile)
+      tile.classList.add(className);
+  }
+
+  removeClassFromTile(topologyDisplay, index, className = 'player') {
+    var tiles = Array.prototype.slice.call(topologyDisplay.childNodes); // .childNode returns a NodeList
+    var tileIndex = tiles.map((t) => parseInt(t.dataset.index)).indexOf(index);
+    var tile = tiles[tileIndex];
+
+    if (tile)
+      tile.classList.remove(className);
   }
 }
 
