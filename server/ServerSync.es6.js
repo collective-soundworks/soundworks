@@ -1,31 +1,22 @@
 /**
- * @fileoverview Matrix server side synchronization manager
+ * @fileoverview Soundworks server side time synchronization module
  * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
  */
 'use strict';
 
 var ServerModule = require('./ServerModule');
+var Sync = require('sync/server');
 
 class ServerSync extends ServerModule {
-  constructor() {
+  constructor(params = {}) {
     super();
+    this.sync = new Sync(params);
   }
 
   connect(client) {
-    var socket = client.socket;
-
-    socket.on('sync_ping', (id, pingTime_clientTime) => {
-      var pongTime_serverTime = Date.now() / 1000;
-      socket.emit('sync_pong', id, pingTime_clientTime, pongTime_serverTime);
+    this.sync.start(client.socket, (stats) => {
+      client.privateState.pingLatency = stats.maxTravelTime / 2;
     });
-
-    socket.on('sync_stats', (minTravelTime, maxTravelTime, avgTravelTime, avgTimeOffset) => {
-      client.privateState.pingLatency = maxTravelTime / 2;
-    });
-  }
-
-  disconnect(client) {
-    
   }
 }
 

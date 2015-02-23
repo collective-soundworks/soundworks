@@ -1,5 +1,5 @@
 /**
- * @fileoverview Matrix client side performance manager base class
+ * @fileoverview Soundworks (client side) dialog module
  * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
  */
 'use strict';
@@ -9,7 +9,7 @@ var ClientModule = require('./ClientModule');
 
 class ClientDialog extends ClientModule {
   constructor(params = {}) {
-    super(params.id || 'dialog', true);
+    super(params.id || 'gui', true);
 
     this.text = params.text;
     this.__mustActivateAudio = params.activateAudio || false;

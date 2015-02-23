@@ -1,5 +1,5 @@
 /**
- * @fileoverview Matrix server side placement manager automatically assigning places
+ * @fileoverview Soundworks server side placement module
  * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
  */
 'use strict';

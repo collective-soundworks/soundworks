@@ -1,5 +1,5 @@
 /**
- * @fileoverview Matrix server side socket i/o (singleton)
+ * @fileoverview Soundworks server side socket i/o (singleton)
  * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
  */
 'use strict';
@@ -32,7 +32,7 @@ function start(app) {
 function map(url, title, ...modules) {
   var namespace = url.substr(1);
 
-  if (url == '/player')
+  if (url === '/player')
     url = '/';
 
   __expressApp.get(url, function(req, res) {
