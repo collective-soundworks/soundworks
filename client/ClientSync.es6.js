@@ -38,7 +38,7 @@ class ClientSync extends ClientModule {
   }
 
   getServerTime(localTime) {
-    return this.sync.getLocalTime(localTime);
+    return this.sync.getServerTime(localTime);
   }
 }
 
