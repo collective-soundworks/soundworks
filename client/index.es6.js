@@ -10,7 +10,9 @@ module.exports = {
   Control: require('./ClientControl'),
   Dialog: require('./ClientDialog'),
   Module: require('./ClientModule'),
+  Loader: require('./ClientLoader'),
   Placement: require('./ClientPlacement'),
+  Platform: require('./ClientPlatform'),
   Sync: require('./ClientSync'),
-  Topology: require('./ClientTopology'),
+  Topology: require('./ClientTopology')
 };

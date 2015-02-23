@@ -25,6 +25,8 @@ class ParallelModule extends ClientModule {
   start() {
     super.start();
 
+    var zIndex = this.modules.length * 100;
+
     // start all setups
     for (let mod of this.modules) {
       mod.on('done', () => {
@@ -34,6 +36,10 @@ class ParallelModule extends ClientModule {
           this.done();
       });
 
+      if (mod.displayDiv) {
+        mod.displayDiv.style.zIndex = zIndex;
+        zIndex -= 100;
+      }
       mod.start();
     }
   }
@@ -50,19 +56,21 @@ class SerialModule extends ClientModule {
 
     var lastModule = null;
 
-    // start all setups
+    // start all module listeners
     for (let mod of this.modules) {
       if (lastModule) {
         lastModule.on('done', () => {
           mod.start();
         });
-      } else {
-        mod.start();
       }
 
       lastModule = mod;
     }
 
+    // start first module of the sequence
+    this.modules[0].start();
+
+    // when last module of sequence is done, the sequence is done
     lastModule.on('done', () => {
       this.done();
     });
