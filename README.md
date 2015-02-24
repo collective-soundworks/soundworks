@@ -2,12 +2,12 @@
 
 ## Table of contents
 
-- [Overview](#overview)
+- [**Overview**](#overview)
   - [Server / client architecture](#server--client-architecture)
   - [A *Soundworks* scenario is made of a succession of modules](#a-soundworks-scenario-is-made-of-a-succession-of-modules)
   - [How to write a module?](#how-to-write-a-module)
   - [How to write a scenario?](#how-to-write-a-scenario)
-- [API](#api)
+- [**API**](#api)
   - [Client (server side)](#client-server-side)
   - [Dialog (client side)](#dialog-client-side)
   - [Placement](#placement)
