@@ -1,5 +1,19 @@
 # SOUNDWORKS
 
+## Table of contents
+
+- [Overview](#overview)
+  - [Server / client architecture](#server--client-architecture)
+  - [A *Soundworks* scenario is made of a succession of modules](#a-soundworks-scenario-is-made-of-a-succession-of-modules)
+  - [How to write a module?](#how-to-write-a-module)
+  - [How to write a scenario?](#how-to-write-a-scenario)
+- [API](#api)
+  - [Client (server side)](#client-server-side)
+  - [Dialog (client side)](#dialog-client-side)
+  - [Placement](#placement)
+  - …
+
+
 ## Overview
 
 *Soundworks* is a Javascript framework that enables artists and developers to create collaborative music performances where a group of participants distributed in space use their smartphones to generate sound and light through touch and motion.
