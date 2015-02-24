@@ -15,8 +15,11 @@ class ClientSync extends ClientModule {
     this.sync = new Sync();
 
     if (this.displayDiv) {
-      this.displayDiv.style.zIndex = -10;
-      this.displayDiv.innerHTML = "<p>Please stand by while synchronizing clock...</p>";
+      var contentDiv = document.createElement('div');
+      contentDiv.classList.add('centered-content');
+      this.displayDiv.appendChild(contentDiv);
+
+      contentDiv.innerHTML = "<p>Clock syncing, stand by…</p>";
     }
   }
 
