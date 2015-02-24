@@ -53,6 +53,30 @@ class ServerControl extends ServerModule {
     };
   }
 
+  setParameter(name, value) {
+    var parameter = this.parameters[name];
+
+    if (parameter) {
+      parameter.value = value;
+
+      // send display to other clients
+      for (let namespace of this.namespaces)
+        namespace.emit('control_parameter', name, value);
+    }
+  }
+
+  setDisplay(name, value) {
+    var display = this.displays[name];
+
+    if (display) {
+      display.value = value;
+
+      // send display to other clients
+      for (let namespace of this.namespaces)
+        namespace.emit('control_display', name, value);
+    }
+  }
+
   connect(client) {
     var socket = client.socket;
     var namespace = socket.nsp;
@@ -61,12 +85,12 @@ class ServerControl extends ServerModule {
       this.namespaces.push(namespace);
 
     // listen to control parameters
-    socket.on('control_parameter', (name, val) => {
-      this.parameters[name].value = val;
+    socket.on('control_parameter', (name, value) => {
+      this.parameters[name].value = value;
 
       // send control parameter to other clients
-      for(let namespace of this.namespaces)
-        namespace.emit('control_parameter', name, val);
+      for (let namespace of this.namespaces)
+        namespace.emit('control_parameter', name, value);
     });
 
     // listen to conductor commands
