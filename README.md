@@ -13,7 +13,6 @@
   - [Placement](#placement)
   - …
 
-
 ## Overview
 
 *Soundworks* is a Javascript framework that enables artists and developers to create collaborative music performances where a group of participants distributed in space use their smartphones to generate sound and light through touch and motion.
@@ -132,7 +131,6 @@ class ClientTopology extends ClientModule {
   ...
 }
 ```
-
 
 ##### .done()
 
@@ -270,12 +268,6 @@ server.map('/env', 'My Scenario — Environment', topology, envPerformance);
 
 Indeed, on the client side, the `player` clients initialized the modules `welcome` (that does not require a communication with the server), `topology`, `placement` and `performance`, so we set up the servers corresponding to these modules on the namespace `/player`. Similarly, the `/env` clients initialized the modules `topology` and `performance` (which both require communication with the server), so we set up the servers corresponding to these modules on the namespace `/env`.
 
-
-
-
-
-
-
 ## API
 
 This sections explains how to use the classes of the library: how to initialize them, what arguments to pass in to the constructors, how to use the public methods, etc.
@@ -295,11 +287,11 @@ And some of them are only present on the client side:
 
 - [`Dialog`](#api-dialog)
 
-## Client (server side)
+### Client (server side)
 
 The `Client` module is used to keep track of the connected clients.
 
-### Attributes
+#### Attributes
 
 {% assign attribute = 'publicState' %}
 {% assign type = 'Object' %}
@@ -315,7 +307,7 @@ This object can be used by any module to store any useful information that might
 
 This object can be used by any module to store any useful information that has to be reused afterwards on the server side.
 
-### Methods
+#### Methods
 
 {% assign method = 'getInfo' %}
 {% assign argument = '' %}
@@ -334,7 +326,7 @@ Returns information about the client in an object having the following propertie
 - `state:Object`    
   The public state of the client (`this.publicState`).
 
-## Dialog (client side)
+### Dialog (client side)
 
 The `Dialog` module displays a dialog on the screen, and requires the user to click the screen to make the module disappear.
 
@@ -372,7 +364,7 @@ Returns information about the client in an object having the following propertie
 - `state:Object`    
   The public state of the client (`this.publicState`).
 
-## Placement
+### Placement
 
 The `Placement` module is responsible for keeping track of the connected clients by assigning them indices within the range of the available places in the scenario.
 
@@ -382,7 +374,7 @@ Similarly, if the scenario takes place in a theater where seats are numbered, th
 
 Or, if the scenario doesn't require the players to sit at particular locations, the `Placement` module would just assign them indices within the range of total number of users this scenario supports.
 
-### Client side
+#### Client side
 
 {% assign method = 'constuctor' %}
 {% assign argument = 'params' %}
@@ -417,7 +409,7 @@ This method returns an object with the placement information. The object returne
 - `label:String`    
   The label of the place corresponding to that index.
 
-### Server side
+#### Server side
 
 {% assign method = 'constuctor' %}
 {% assign argument = 'params' %}
@@ -454,13 +446,13 @@ var placement = new serverSide.Placement({ topology: toplogy });
 var placement = new serverSide.Placement({ numPlaces: 500, order: 'ascending' });
 ```
 
-## Sync
+### Sync
 
 The `Sync` module is responsible for synchronizing the clients' clocks on the server clock, so that the server and all the clients share a common clock.
 
 For instance, this allows all (or part of) the clients to trigger an event at the same time, such as displaying a color on the screen or playing a drum kick in a synchronized manner.
 
-### Client side
+#### Client side
 
 {% assign method = 'constuctor' %}
 {% assign argument = 'params' %}
@@ -496,7 +488,7 @@ This method returns the time in the client clock (`audioContext` clock) when the
 
 This method returns the time on the server when the client clock reaches `localTime`. If no arguments are provided, the method returns the time on the server when the method is called. The time returned is in seconds.
 
-### Server side
+#### Server side
 
 {% assign method = 'constuctor' %}
 {% assign argument = '' %}
@@ -513,7 +505,7 @@ var serverSide = require('soundworks/server');
 var sync = new serverSide.Sync();
 ```
 
-## Topology
+### Topology
 
 The `Topology` module contains the information about the physical locations of the available places in the scenario. The location is fixed and determined in advances.
 
@@ -523,7 +515,7 @@ Similarly, if the scenario takes place in a theater where seats are numbered, th
 
 I the placement of the users in the scenario doesn't matter, the `Topology`module is not needed.
 
-### Client side
+#### Client side
 
 {% assign method = 'constuctor' %}
 {% assign argument = 'params' %}
@@ -576,7 +568,7 @@ topology.displayTopology(topologyGUI);
 topology.addClassToTile(topologyGUI, 3, 'red-highlight');
 ```
 
-### Server side
+#### Server side
 
 {% assign method = 'constuctor' %}
 {% assign argument = 'params' %}
@@ -867,3 +859,5 @@ var performance = new BeatsPerformance()
 server.start(app);
 server.map('/player', 'Beats', sync, performance);
 ```
+
+
