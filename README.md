@@ -11,7 +11,9 @@
   - [Client (server side)](#client-server-side)
   - [Dialog (client side)](#dialog-client-side)
   - [Placement](#placement)
-  - …
+  - [Sync](#sync)
+  - [Topology](#topology)
+- [**Examples**](#examples)
 
 ## Overview
 
