@@ -20,6 +20,10 @@ class ServerSync extends ServerModule {
       client.data.sync.latency = stats.maxTravelTime / 2;
     });
   }
+
+  getLocalTime() {
+    return this.sync.getLocalTime();
+  }
 }
 
 module.exports = ServerSync;

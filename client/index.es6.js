@@ -7,12 +7,13 @@
 module.exports = {
   client: require('./client'),
   input: require('./input'),
+  Checkin: require('./ClientCheckin'),
   Control: require('./ClientControl'),
   Dialog: require('./ClientDialog'),
-  Module: require('./ClientModule'),
   Loader: require('./ClientLoader'),
-  Checkin: require('./ClientCheckin'),
+  Module: require('./ClientModule'),
+  Orientation: require('./ClientOrientation'),
   Platform: require('./ClientPlatform'),
-  Sync: require('./ClientSync'),
-  Seatmap: require('./ClientSeatmap')
+  Seatmap: require('./ClientSeatmap'),
+  Sync: require('./ClientSync')
 };
