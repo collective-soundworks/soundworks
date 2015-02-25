@@ -24,6 +24,8 @@ class ServerSeatmap extends ServerModule {
   }
 
   connect(client) {
+    super.connect();
+
     client.socket.on('seatmap_request', () => {
       client.socket.emit('seatmap_init', {
         "labels": this.labels,
@@ -45,6 +47,13 @@ class ServerSeatmap extends ServerModule {
       return this.labels[index];
 
     return (index + 1).toString();
+  }
+
+  getPosition(index) {
+    if (index < this.positions.length)
+      return this.positions[index];
+
+    return null;
   }
 
   __initMatrixParams(options) {

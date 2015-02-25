@@ -8,30 +8,30 @@ var EventEmitter = require('events').EventEmitter;
 var container = window.container || (window.container = document.getElementById('container'));
 
 class ClientModule extends EventEmitter {
-  constructor(id, display = true) {
+  constructor(id, hasDisplay = true) {
     super();
 
-    this.displayDiv = null;
+    this.view = null;
 
-    if (display) {
-      var moduleWrapper = document.createElement('div');
-      moduleWrapper.setAttribute('id', id);
-      moduleWrapper.classList.add('module');
+    if (hasDisplay) {
+      var div = document.createElement('div');
+      div.setAttribute('id', id);
+      div.classList.add('module');
       
-      this.displayDiv = moduleWrapper;
+      this.view = div;
     }
 
     this.isDone = false;
   }
 
   start() {
-    if (this.displayDiv)
-      container.appendChild(this.displayDiv);
+    if (this.view)
+      container.appendChild(this.view);
   }
 
   done() {
-    if (this.displayDiv)
-      container.removeChild(this.displayDiv);
+    if (this.view)
+      container.removeChild(this.view);
 
     if (!this.isDone) {
       this.isDone = true;

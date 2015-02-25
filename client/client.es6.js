@@ -36,10 +36,11 @@ class ParallelModule extends ClientModule {
           this.done();
       });
 
-      if (mod.displayDiv) {
-        mod.displayDiv.style.zIndex = zIndex;
+      if (mod.view) {
+        mod.view.style.zIndex = zIndex;
         zIndex -= 100;
       }
+
       mod.start();
     }
   }
@@ -54,26 +55,26 @@ class SerialModule extends ClientModule {
   start() {
     super.start();
 
-    var lastModule = null;
+    var prevModule = null;
 
     // start all module listeners
     for (let mod of this.modules) {
-      if (lastModule) {
-        lastModule.on('done', () => {
+      if (prevModule) {
+        prevModule.on('done', () => {
           mod.start();
         });
       }
 
-      lastModule = mod;
+      prevModule = mod;
     }
+
+    // when last module of sequence is done, the sequence is done
+    prevModule.on('done', () => {
+      this.done();
+    });
 
     // start first module of the sequence
     this.modules[0].start();
-
-    // when last module of sequence is done, the sequence is done
-    lastModule.on('done', () => {
-      this.done();
-    });
   }
 }
 
@@ -90,6 +91,9 @@ function start(theModule) {
   // ... wait for server's "start" ("server ready") to start modules
   socket.on('server_ready', () => {
     theModule.start();
+  });
+
+  socket.on('disconnect', () => {
   });
 }
 

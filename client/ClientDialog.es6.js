@@ -17,22 +17,19 @@ class ClientDialog extends ClientModule {
 
   start() {
     super.start();
+    
+    var contentDiv = document.createElement('div');
+    contentDiv.classList.add('centered-content');
+    contentDiv.innerHTML = this.text;
+    this.view.appendChild(contentDiv);
 
-    if (this.displayDiv) {
-      var contentDiv = document.createElement('div');
-      contentDiv.classList.add('centered-content');
-      this.displayDiv.appendChild(contentDiv);
+    // install click listener
+    this.view.addEventListener('click', () => {
+      if (this.__mustActivateAudio)
+        this.__activateAudio();
 
-      contentDiv.innerHTML = this.text;
-
-      // install click listener
-      this.displayDiv.addEventListener('click', () => {
-        if (this.__mustActivateAudio)
-          this.__activateAudio();
-
-        this.done();
-      });
-    }
+      this.done();
+    });
   }
 
   __activateAudio() {

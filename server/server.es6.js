@@ -49,15 +49,15 @@ function map(url, title, ...modules) {
   server.io.of(namespace).on('connection', (socket) => {
     var client = new ServerClient(socket);
 
-    socket.on('disconnect', () => {
-      for (let mod of modules)
-        mod.disconnect(client);
-    });
-
     // client/server handshake: send "start" when client is "ready"
     socket.on('client_ready', () => {
       for (let mod of modules)
         mod.connect(client);
+
+      socket.on('disconnect', () => {
+        for (let mod of modules)
+          mod.disconnect(client);
+      });
 
       socket.emit('server_ready');
     });

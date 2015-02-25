@@ -9,7 +9,6 @@ var EventEmitter = require('events').EventEmitter;
 class ServerModule extends EventEmitter {
   constructor() {
     super();
-
   }
 
   connect(client) {
