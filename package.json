@@ -16,7 +16,7 @@
     "express": "^4.12.0",
     "loaders": "Ircam-RnD/loaders.git",
     "platform": "^1.3.0",
-    "socket.io": "^1.3.4",
+    "socket.io": "1.1.0",
     "sync": "collective-soundworks/sync.git"
   },
   "devDependencies": {
