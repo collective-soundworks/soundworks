@@ -9,7 +9,7 @@ module.exports = {
   Control: require('./ServerControl'),
   Client: require('./ServerClient'),
   Module: require('./ServerModule'),
-  Placement: require('./ServerPlacement'),
-  Topology: require('./ServerTopology'),
+  Checkin: require('./ServerCheckin'),
+  Seatmap: require('./ServerSeatmap'),
   Sync: require('./ServerSync'),
 };

@@ -8,19 +8,7 @@ class ServerClient {
 	constructor(socket) {
     this.socket = socket;
     this.index = null;
-
-    this.privateState = {};
-    this.publicState = {};
-  }
-
-  getInfo() {
-    var clientInfo = {
-      socketId: this.socket.id,
-      index: this.index,
-      state: this.publicState
-    };
-    
-    return clientInfo;
+    this.data = {};
   }
 }
 

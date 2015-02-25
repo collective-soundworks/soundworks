@@ -9,7 +9,7 @@ var Sync = require('sync/client');
 var client = require('./client');
 
 class ClientSync extends ClientModule {
-  constructor(params = {}) {
+  constructor(options = {}) {
     super('sync', true);
 
     this.sync = new Sync();

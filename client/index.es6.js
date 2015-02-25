@@ -11,8 +11,8 @@ module.exports = {
   Dialog: require('./ClientDialog'),
   Module: require('./ClientModule'),
   Loader: require('./ClientLoader'),
-  Placement: require('./ClientPlacement'),
+  Checkin: require('./ClientCheckin'),
   Platform: require('./ClientPlatform'),
   Sync: require('./ClientSync'),
-  Topology: require('./ClientTopology')
+  Seatmap: require('./ClientSeatmap')
 };

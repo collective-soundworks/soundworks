@@ -8,11 +8,11 @@ var audioContext = require('audio-context');
 var ClientModule = require('./ClientModule');
 
 class ClientDialog extends ClientModule {
-  constructor(params = {}) {
-    super(params.id || 'gui', true);
+  constructor(options = {}) {
+    super(options.id || 'gui', true);
 
-    this.text = params.text;
-    this.__mustActivateAudio = params.activateAudio || false;
+    this.text = options.text;
+    this.__mustActivateAudio = options.activateAudio || false;
   }
 
   start() {

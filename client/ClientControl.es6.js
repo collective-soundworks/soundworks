@@ -219,14 +219,14 @@ class Command {
 }
 
 class ClientControl extends ClientModule {
-  constructor(params = {}) {
-    super('control', params.gui);
+  constructor(options = {}) {
+    super('control', options.gui);
     var view = null;
 
-    if (params.gui)
+    if (options.gui)
       view = this.displayDiv;
 
-    this.hasGui = params.gui;
+    this.hasGui = options.gui;
     this.parameters = {};
     this.displays = {};
     this.commands = {};

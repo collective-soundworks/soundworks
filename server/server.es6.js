@@ -4,12 +4,13 @@
  */
 'use strict';
 
+var express = require('express');
 var http = require('http');
 var IO = require('socket.io');
 var ServerClient = require('./ServerClient');
 
-var __expressApp = null;
-var __httpServer = null;
+var expressApp = null;
+var httpServer = null;
 
 var server = {
   io: null,
@@ -17,16 +18,20 @@ var server = {
   map: map
 };
 
-function start(app) {
-  __httpServer = http.createServer(app);
-  __expressApp = app;
+function start(app, path, port) {
+  app.set('port', port || process.env.PORT || 8000);
+  app.set('view engine', 'jade');
+  app.use(express.static(path));
 
-  __httpServer.listen(app.get('port'), function() {
+  httpServer = http.createServer(app);
+  expressApp = app;
+
+  httpServer.listen(app.get('port'), function() {
     console.log('Server listening on port', app.get('port'));
   });
 
-  if (__httpServer)
-    server.io = new IO(__httpServer);
+  if (httpServer)
+    server.io = new IO(httpServer);
 }
 
 function map(url, title, ...modules) {
@@ -35,7 +40,7 @@ function map(url, title, ...modules) {
   if (url === '/player')
     url = '/';
 
-  __expressApp.get(url, function(req, res) {
+  expressApp.get(url, function(req, res) {
     res.render(namespace, {
       title: title
     });

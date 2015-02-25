@@ -1,16 +1,16 @@
 /**
- * @fileoverview Soundworks server side topology module
+ * @fileoverview Soundworks server side seat map module
  * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
  */
 'use strict';
 
 var ServerModule = require("./ServerModule");
 
-class ServerTopology extends ServerModule {
-  constructor(params = {}) {
+class ServerSeatmap extends ServerModule {
+  constructor(options = {}) {
     super();
 
-    this.type = params.type || 'matrix';
+    this.type = options.type || 'matrix';
 
     this.labels = [];
     this.positions = [];
@@ -18,16 +18,14 @@ class ServerTopology extends ServerModule {
     this.height = 1;
 
     if (this.type === 'matrix') {
-      this.__initMatrixParams(params);
+      this.__initMatrixParams(options);
       this.__initMatrix();
     }
-    
-    // this.emit('topology_init');
   }
 
   connect(client) {
-    client.socket.on('topology_request', () => {
-      client.socket.emit('topology_init', {
+    client.socket.on('seatmap_request', () => {
+      client.socket.emit('seatmap_init', {
         "labels": this.labels,
         "positions": this.positions,
         "width": this.width,
@@ -49,13 +47,13 @@ class ServerTopology extends ServerModule {
     return (index + 1).toString();
   }
 
-  __initMatrixParams(params) {
-    this.cols = params.cols || 3;
-    this.rows = params.rows || 4;
-    this.colSpacing = params.colSpacing || 2;
-    this.rowSpacing = params.rowSpacing || 2;
-    this.colMargin = params.colMargin || this.colSpacing / 2;
-    this.rowMargin = params.rowMargin || this.rowSpacing / 2;
+  __initMatrixParams(options) {
+    this.cols = options.cols || 3;
+    this.rows = options.rows || 4;
+    this.colSpacing = options.colSpacing || 2;
+    this.rowSpacing = options.rowSpacing || 2;
+    this.colMargin = options.colMargin || this.colSpacing / 2;
+    this.rowMargin = options.rowMargin || this.rowSpacing / 2;
   }
 
   __initMatrix() {
@@ -78,4 +76,4 @@ class ServerTopology extends ServerModule {
   }
 }
 
-module.exports = ServerTopology;
+module.exports = ServerSeatmap;

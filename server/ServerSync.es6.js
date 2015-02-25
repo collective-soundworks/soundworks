@@ -8,14 +8,16 @@ var ServerModule = require('./ServerModule');
 var Sync = require('sync/server');
 
 class ServerSync extends ServerModule {
-  constructor(params = {}) {
+  constructor(options = {}) {
     super();
-    this.sync = new Sync(params);
+    this.sync = new Sync(options);
   }
 
   connect(client) {
+    client.data.sync = {};
+
     this.sync.start(client.socket, (stats) => {
-      client.privateState.pingLatency = stats.maxTravelTime / 2;
+      client.data.sync.latency = stats.maxTravelTime / 2;
     });
   }
 }
