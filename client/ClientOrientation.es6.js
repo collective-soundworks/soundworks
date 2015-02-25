@@ -14,29 +14,28 @@ class ClientOrientation extends ClientModule {
     this.angle = 0;
     this.angleZero = 0;
 
-    this.text = options.text || "<p>Point the phone exactly in front of you, and click this screen.</p>";
+    this.text = options.text || "<p>Point the phone exactly in front of you, and touch the screen.</p>";
 
     input.enableDeviceOrientation();
+
     input.on('deviceorientation', (orientationData) => {
       this.angle = orientationData.alpha;
-    })
+    });
   }
 
   start() {
     super.start();
 
-    if (this.displayDiv) {
-      var contentDiv = document.createElement('div');
-      contentDiv.classList.add('centered-content');
-      this.displayDiv.appendChild(contentDiv);
+    var contentDiv = document.createElement('div');
+    contentDiv.classList.add('centered-content');
+    this.view.appendChild(contentDiv);
 
-      contentDiv.innerHTML = this.text;
+    contentDiv.innerHTML = this.text;
 
-      this.displayDiv.addEventListener('click', () => {
-        this.angleZero = this.angle;
-        this.done();
-      });
-    }
+    this.view.addEventListener('click', () => {
+      this.angleZero = this.angle;
+      this.done();
+    });
   }
 }
 
