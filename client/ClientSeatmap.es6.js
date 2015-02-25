@@ -28,7 +28,7 @@ class ClientSeatmap extends ClientModule {
   }
 
   display(div) {
-    if (this.seatmap) {
+    if (this.map) {
       var mapRatio = this.map.height / this.map.width;
       var screenHeight = window.innerHeight;
       var screenWidth = window.innerWidth;
