@@ -9,29 +9,27 @@ var ClientModule = require('./ClientModule');
 
 class ClientDialog extends ClientModule {
   constructor(options = {}) {
-    super(options.id || 'gui', true);
+    super(options.id || 'dialog', true);
 
     this.text = options.text;
     this.__mustActivateAudio = options.activateAudio || false;
   }
 
   start() {
+    super.start();
+    
     var contentDiv = document.createElement('div');
     contentDiv.classList.add('centered-content');
+    contentDiv.innerHTML = this.text;
     this.view.appendChild(contentDiv);
 
-    contentDiv.innerHTML = this.text;
-    super.start();
+    // install click listener
+    this.view.addEventListener('click', () => {
+      if (this.__mustActivateAudio)
+        this.__activateAudio();
 
-    if (this.view) {
-      // install click listener
-      this.view.addEventListener('click', () => {
-        if (this.__mustActivateAudio)
-          this.__activateAudio();
-
-        this.done();
-      });
-    }
+      this.done();
+    });
   }
 
   __activateAudio() {

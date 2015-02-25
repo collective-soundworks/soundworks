@@ -18,10 +18,10 @@ var server = {
   map: map
 };
 
-function start(app, path, port) {
+function start(app, publicPath, port) {
   app.set('port', port || process.env.PORT || 8000);
-  app.set('view engine', 'jade');
-  app.use(express.static(path));
+  app.set('view engine', 'ejs');
+  app.use(express.static(publicPath));
 
   httpServer = http.createServer(app);
   expressApp = app;
