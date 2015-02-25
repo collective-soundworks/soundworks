@@ -220,29 +220,29 @@ class Command {
 
 class ClientControl extends ClientModule {
   constructor(options = {}) {
-    super('control', options.gui);
-    var view = null;
+    var hasGui = (options.gui === true);
 
-    if (options.gui)
-      view = this.displayDiv;
+    super('control', hasGui);
 
-    this.hasGui = options.gui;
+    this.hasGui = hasGui;
     this.parameters = {};
     this.displays = {};
     this.commands = {};
+
+    var view = hasGui? this.view: null;
 
     client.socket.on('control_init', (parameters, displays, commands) => {
       if (view) {
         var title = document.createElement('h1');
         title.innerHTML = 'Conductor';
         view.appendChild(title);
-
-        for (let key of Object.keys(displays)) {
-          this.displays[key] = new Display(displays[key], view);
-        }
-
-        view.appendChild(document.createElement('hr'));
       }
+
+      for (let key of Object.keys(displays))
+        this.displays[key] = new Display(displays[key], view);
+
+      if (view)
+        view.appendChild(document.createElement('hr'));
 
       for (let key of Object.keys(parameters)) {
         var parameter = parameters[key];
@@ -258,13 +258,11 @@ class ClientControl extends ClientModule {
         }
       }
 
-      if (view) {
+      if (view)
         view.appendChild(document.createElement('hr'));
 
-        for (let key of Object.keys(commands)) {
-          this.commands[key] = new Command(commands[key], view);
-        }
-      }
+      for (let key of Object.keys(commands))
+        this.commands[key] = new Command(commands[key], view);
     });
 
     // listen to parameter changes

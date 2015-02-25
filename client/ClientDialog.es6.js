@@ -18,14 +18,14 @@ class ClientDialog extends ClientModule {
   start() {
     var contentDiv = document.createElement('div');
     contentDiv.classList.add('centered-content');
-    this.displayDiv.appendChild(contentDiv);
+    this.view.appendChild(contentDiv);
 
     contentDiv.innerHTML = this.text;
     super.start();
 
-    if (this.displayDiv) {
+    if (this.view) {
       // install click listener
-      this.displayDiv.addEventListener('click', () => {
+      this.view.addEventListener('click', () => {
         if (this.__mustActivateAudio)
           this.__activateAudio();
 

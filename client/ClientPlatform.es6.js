@@ -50,7 +50,7 @@ class ClientPlatform extends ClientModule {
     if (msg !== null) {
       var contentDiv = document.createElement('div');
       contentDiv.classList.add('centered-content');
-      this.displayDiv.appendChild(contentDiv);
+      this.view.appendChild(contentDiv);
       contentDiv.innerHTML = msg;
     } else {
       this.done();

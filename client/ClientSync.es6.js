@@ -14,10 +14,10 @@ class ClientSync extends ClientModule {
 
     this.sync = new Sync();
 
-    if (this.displayDiv) {
+    if (this.view) {
       var contentDiv = document.createElement('div');
       contentDiv.classList.add('centered-content');
-      this.displayDiv.appendChild(contentDiv);
+      this.view.appendChild(contentDiv);
 
       contentDiv.innerHTML = "<p>Clock syncing, stand by…</p>";
     }

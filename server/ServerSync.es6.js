@@ -14,6 +14,8 @@ class ServerSync extends ServerModule {
   }
 
   connect(client) {
+    super.connect();
+
     client.data.sync = {};
 
     this.sync.start(client.socket, (stats) => {

@@ -19,7 +19,7 @@ class ClientLoader extends ClientModule {
 
     var contentDiv = document.createElement('div');
     contentDiv.classList.add('centered-content');
-    this.displayDiv.appendChild(contentDiv);
+    this.view.appendChild(contentDiv);
 
     var loadingText = document.createElement('p');
     loadingText.classList.add('loading-text');

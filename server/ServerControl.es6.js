@@ -9,6 +9,8 @@ var server = require('./server');
 
 class ServerControl extends ServerModule {
   constructor() {
+    super();
+
     this.parameters = {};
     this.commands = {};
     this.displays = {};
@@ -78,6 +80,8 @@ class ServerControl extends ServerModule {
   }
 
   connect(client) {
+    super.connect();
+
     var socket = client.socket;
     var namespace = socket.nsp;
 
