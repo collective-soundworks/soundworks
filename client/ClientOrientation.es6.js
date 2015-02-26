@@ -11,15 +11,15 @@ class ClientOrientation extends ClientModule {
   constructor(options = {}) {
     super('orientation', true);
 
-    this.angle = 0;
-    this.angleZero = 0;
+    this.angleReference = 0;
 
-    this.text = options.text || "<p>Point the phone exactly in front of you, and touch the screen.</p>";
+    this.__angle = 0;
+    this.__text = options.text || "<p>Point the phone exactly in front of you, and touch the screen.</p>";
 
     input.enableDeviceOrientation();
 
     input.on('deviceorientation', (orientationData) => {
-      this.angle = orientationData.alpha;
+      this.__angle = orientationData.alpha;
     });
   }
 
@@ -30,10 +30,10 @@ class ClientOrientation extends ClientModule {
     contentDiv.classList.add('centered-content');
     this.view.appendChild(contentDiv);
 
-    contentDiv.innerHTML = this.text;
+    contentDiv.innerHTML = this.__text;
 
     this.view.addEventListener('click', () => {
-      this.angleZero = this.angle;
+      this.angleReference = this.__angle;
       this.done();
     });
   }
