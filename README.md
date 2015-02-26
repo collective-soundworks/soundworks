@@ -4,13 +4,15 @@
 
 - [**Overview**](#overview)
   - [Server / client architecture](#server--client-architecture)
-  - [A *Soundworks* scenario is made of a succession of modules](#a-soundworks-scenario-is-made-of-a-succession-of-modules)
+  - [A *Soundworks* scenario is exclusively made of modules](#a-soundworks-scenario-is-exclusively-made-of-modules)
   - [How to write a module?](#how-to-write-a-module)
   - [How to write a scenario?](#how-to-write-a-scenario)
 - [**API**](#api)
   - [Client (server side)](#client-server-side)
   - [Dialog (client side)](#dialog-client-side)
-  - [Placement](#placement)
+  - [Loader (client side)](#loader-client-side)
+  - [Orientation (client side)](#orientation-client-side)
+  - [Checkin](#checkin)
   - [Sync](#sync)
   - [Topology](#topology)
 - [**Examples**](#examples)
@@ -19,30 +21,26 @@
 
 *Soundworks* is a Javascript framework that enables artists and developers to create collaborative music performances where a group of participants distributed in space use their smartphones to generate sound and light through touch and motion.
 
-The framework is modular to make it easy to implement different performance scenarios, using a server / client architecture supported by `Node.js` and `socket.io`: the boilerplate provided allows anyone to bootstrap a scenario for *Soundworks* and focus on its audiovisual and interaction design instead of the infrastructure.
+The framework is modular to make it easy to implement different performance scenarios, using a server / client architecture supported by `Node.js` and Web Sockets: the boilerplate provided allows anyone to bootstrap a scenario for *Soundworks* and focus on its audiovisual and interaction design instead of the infrastructure.
 
 ### Server / client architecture 
 
-In order to connect the smartphones with each other, *Soundworks* implements a server / client architecture using a `Node.js` server and the `socket.io` library to pass messages between the server and the clients.
+In order to connect the smartphones with each other, *Soundworks* implements a server / client architecture using a `Node.js` server and Web Sockets to pass messages between the server and the clients (currently with the `socket.io` library).
 
 The word “client” represents any entity that connects to the server. For instance, this can be:
 
 - The smartphone of a player who takes part in the collaborative performance (we would refer to this type of client as a `player`);
-
 - A laptop that provides an interface for the artist to control some parameters of the performance in real time (we would refer to this type of client as `conductor`);
-
 - A computer that controls the sound and light effects in the room in sync with the players' performance, such as lasers, a global visualization or ambient sounds on external loudspeakers (we would refer to this type of client as `env`, standing for “environment”).
 
-### A *Soundworks* scenario is made of a succession of modules
+### A *Soundworks* scenario is exclusively made of modules
 
-A scenario built with *Soundworks* consists in a succession of modules, each of them corresponding to one step of the scenario. Each module has a `.start()` and a `.done()` method: we launch the process corresponding to that module by calling the method `.start()`, and we call the method `.done()` when the duty of the module is done.
+A scenario built with *Soundworks* consists in a succession and combination of modules, each of them corresponding to one step of the scenario. Each module has a `.start()` and a `.done()` method: we launch the process corresponding to that module by calling the method `.start()`, and we call the method `.done()` when the duty of the module is done.
 
 As an example, let's say that a scenario works as follows when a `player` connects to the server:
 
 - The player gets a `welcome` message (*e.g.* “Welcome to the performance!”). When the player clicks on the screen…
-
-- … the player receives some `placement` instructions while in the meantime, the smartphone has to `sync` its clock with the server. Finally, when these are done…
-
+- … the player receives some `checkin` instructions while in the meantime, the smartphone has to `sync` its clock with the server. Finally, when these are done…
 - … the player joins the `performance`.
 
 Each of these steps corresponds to a module. Thus, on the client side, this scenario would be implemented as follows.
@@ -56,15 +54,15 @@ var clientSide = require('soundworks/client');
 // Initialize the modules (the methods' arguments are explained in the documentation)
 var welcome = new clientSide.Dialog(...);
 var sync = new clientSide.Sync(...);
-var placement = new clientSide.Placement(...);
-var performance = new Performance(...); // This class has te bo written by you
+var checkin = new clientSide.Checkin(...);
+var performance = new Performance(...); // This class has to be written by you
 
 // Launch the scenario!
 client.start(
   client.serial(
     welcome,
     client.parallel(
-      placement,
+      checkin,
       sync
     ),
     performance
@@ -87,31 +85,31 @@ var app = express();
 
 // Initialize the modules (the methods' arguments are explained in the documentation)
 var sync = new serverSide.Sync(...);
-var placement = new serverSide.Placement(...);
-var performance = new Performance(...); // This class has te bo written by you
+var checkin = new serverSide.Checkin(...);
+var performance = new Performance(...); // This class has to be written by you
 
 // Launch the server and the scenario!
 server.start(app);
-server.map('/player', 'My Scenario', sync, placement, performance);
+server.map('/player', 'My Scenario', sync, checkin, performance);
 ```
 
-That way, the `sync`, `placement` and `performance` modules of a `player` (who connects to the server via the namespace `'/player') would be able to dialog with the corresponding modules on the server side.
+That way, the `sync`, `checkin` and `performance` modules of a `player` (who connects to the server via the namespace `'/player') would be able to dialog with the corresponding modules on the server side.
 
 ### How to write a module?
 
 #### Client side
 
-On the client side, a module extends the `ClientModule` base class and must have a method `.start()` and a method `.done()`.
+On the client side, a module extends the `ClientModule` base class and must have a method `.start()` and a method `.done()`. **A module should call the method `.done()` when the whole process of the module is completed.**
 
 ##### .start()
 
-The `.start()` method is called to start the module. I should handle the logic and the steps that lead to the completion of the module. **The module should call the method `this.done()` when the whole process of the module is completed.**
+The `.start()` method is called to start the module. It should handle the logic and the steps that lead to the completion of the module.
 
 For instance, the purpose of the `ClientTopology` module is to get the topology from the server. Therefore, the `.start()` method of the `ClientTopology` module does the following:
 
-- It sends a request to the `ServerTopology` module via `socket.io`, asking the server to send the `topology` object.
-
-- When it receives the response from the server with the `topology` object, it stores the `topology` as an attribute, and finally calls the method `.done()`: the module has done its duty.
+- It sends a request to the `ServerTopology` module via Web Sockets, asking the server to send the `topology` object.
+- When it receives the response from the server with the `topology` object, it stores the `topology` as an attribute.
+- Finally, since the module has done its duty, it calls the method `.done()`.
 
 In Javascript, it looks like the following.
 
@@ -120,13 +118,13 @@ class ClientTopology extends ClientModule {
   ...
 
   start() {
-    super.start();
+    super.start(); // Don't forget this line!
 
-    socket.emit('topology_request');
+    socket.emit('topology_request'); // Request the topology to the server
     
     socket.on('topology_init', (topology) => {
-      this.topology = topology;
-      this.done();
+      this.topology = topology; // Stores the response in an attribute
+      this.done(); // Call the method .done()
     });
   }
 
@@ -134,19 +132,59 @@ class ClientTopology extends ClientModule {
 }
 ```
 
+This method must include the inherited method from the base class before any code you write (`super.start()`).
+
 ##### .done()
 
-The `.done()` method should rarely change from the method inherited from the base class. If you have to rewrite it though, **the one important thing this method has to do is to emit a `'done'` event associated with the module**. Put differently, this method **must** include the following line.
+The `.done()` method should rarely change from the method inherited from the base class. If you have to rewrite it though, **don't forget to include the inherited method of the base class**. (Its purpose is to emit a `'done'` event associated with the module, which makes the whole module logic work.) Put differently, if you customize the `.done()` method, it must look like the following template.
 
 ```javascript
-this.emit('done', this);
+clientSide = require(soundworks/client);
+
+class MyModule extends clientSide.Module {
+...
+
+  done() {
+    ... // any code you want
+
+    super.done(); // Don't forget this line!
+  }
+
+...
+}
 ```
 
 #### Server side
 
 On the server side, a module extends the `ServerModule` base class and must have a method `.connect(client:ServerClient)` and `.disconnect(client:ServerClient)`.
 
-... TODO
+##### .connect(client)
+
+The `.connect(client)` is called whenever the client `client` connects to the server. I should set up the listeners of the Web Socket messages sent after the `.start()` method on the client side is started, and handle the logic of the module.
+
+For instance, say that the module you are writing needs to keep track of all the connected clients. Then you could write the following.
+
+```javascript
+connect(client) {
+  this.clients.push(clients);
+
+  ... // the rest of the method
+}
+```
+
+##### .disconnect(client)
+
+Similarly, the `.disconnect(client)` is called whenever the client `client` disconnects from the server. It handles all the actions that are necessary in that case.
+
+In our previous example, where the module keeps track of the connected clients, we would then write the following, where the function `removeFromArray(a, el)` removes the element `el` from the array `a`.
+
+```javascript
+disconnect(client) {
+  removeFromArray(this.clients, client);
+
+  ... // the rest of the method
+}
+```
 
 ### How to write a scenario?
 
@@ -167,9 +205,9 @@ my-scenario/
 │   ├── ...
 │   └── server/
 ├── views/
-│   ├── conductor.jade
-│   ├── env.jade
-│   ├── player.jade
+│   ├── conductor.ejs
+│   ├── env.ejs
+│   ├── player.ejs
 │   └── ...
 ├── gulpfile.js
 ├── package.json
@@ -181,9 +219,9 @@ For instance:
 - The `public/` folder should contain any resource your clients may need to load (except the javascripts, that will be generated with our `gulp` file from the `src/` folder).
 - The `src/` folder contains your source code for the different clients and the server. Each subfolder should contain and `index.es6.js` file, with the code to be exectued for that entity.
   - The default client is called `player` and the code to be exectuted for that type of client is in `src/player/index.es6.js`. This is the code that is executed when a user connects to the root URL. (`http://root-url:port/`)
-  - You can add as many other types of clients as you want. The source code should lie in a folder with that name (*e.g.* `conductor/`), and have a the corresponding file in the `views/` folder (see below). Any new type of client you create will be accessible from the URL `http://root-url:port/client-type` (*e.g.* `http://root-url:port/conductor` in the case of the `conductor`). Any client that accesses the server through that URL will join the namespace `'/client-type'` in `socket.io` (*e.g.* `'/conductor'`).
+  - You can add as many other types of clients as you want. The source code should lie in a folder with that name (*e.g.* `conductor/`), and have a the corresponding file in the `views/` folder (see below). Any new type of client you create will be accessible from the URL `http://root-url:port/client-type` (*e.g.* `http://root-url:port/conductor` in the case of the `conductor`). Any client that accesses the server through that URL will join the Web Socket namespace `'/client-type'` (*e.g.* `'/conductor'`).
   - Finally, the `src/` folder should also contain the source code of your server in the `server/` subfolder, in an `index.es6.js` file.
-- The `views/` folder contains a `*.jade` file for each client type. In other words, all the subfolders in `src/` — except `server/` — should have their corresponding Jade file.
+- The `views/` folder contains a `*.ejs` file for each client type. In other words, all the subfolders in `src/` — except `server/` — should have their corresponding EJS file.
 
 To compile the files, just run the command `gulp` in the Terminal: it will convert the files from es6 to es5, browserify the files on the client side, and launch the scenario with a `Node.js` server.
 
@@ -196,7 +234,7 @@ On the client side, the `src/player/index.es6.js` in a should look like this.
 var clientSide = require('soundworks/client');
 var client = clientSide.client;
 
-// Initialize the socket.io namespace depending on the client type
+// Initialize the Web Socket namespace depending on the client type
 client.init('/player');
 
 // Write the performance module
@@ -209,7 +247,7 @@ window.addEventListener('load', () => {
   // Initialize the modules
   var welcome = new clientSide.Dialog(...);
   var topology = new clientSide.Topology(...);
-  var placement = new clientSide.Placement(...);
+  var checkin = new clientSide.Checkin(...);
   var performance = new MyPerformance(...);
   
 
@@ -220,14 +258,14 @@ window.addEventListener('load', () => {
         welcome,
         topology
       ),
-      placement,
+      checkin,
       performance
     )
   );
 });
 ```
 
-For a `env` client, the file would look the same except that the socket.io namespace initialization would be `client.init('/env')`, and the modules might be different (for instance, one could imagine that the `env` clients only require a `topology` and a `performance` module).
+For a `env` client, the file would look the same except that the Web Socket namespace initialization would be `client.init('/env')`, and the modules might be different (for instance, one could imagine that the `env` clients only require a `topology` and a `performance` module).
 
 #### Server side
 
@@ -243,7 +281,7 @@ var app = express();
 
 // Configuration of the Express app
 app.set('port', process.env.PORT || 3000);
-app.set('view engine', 'jade');
+app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, '../../public')));
 
 // Write the player and env performance modules
@@ -256,19 +294,19 @@ class MyEnvPerformance extends serverSide.Module {
 
 // Initialize the modules
 var topology = new serverSide.Topology(...);
-var placement = new serverSide.Placement(...);
+var checkin = new serverSide.Checkin(...);
 var playerPerformance = new MyPlayerPerformance(...);
 var envPerformance = new MyEnvPerformance(...);
 
 // Start the scenario
 server.start(app);
 // Set up the module servers for the 'player' clients
-server.map('/player', 'My scenario', topology, placement, playerPerformance);
+server.map('/player', 'My scenario', topology, checkin, playerPerformance);
 // Set up the module servers for the 'env' clients
 server.map('/env', 'My Scenario — Environment', topology, envPerformance);
 ```
 
-Indeed, on the client side, the `player` clients initialized the modules `welcome` (that does not require a communication with the server), `topology`, `placement` and `performance`, so we set up the servers corresponding to these modules on the namespace `/player`. Similarly, the `/env` clients initialized the modules `topology` and `performance` (which both require communication with the server), so we set up the servers corresponding to these modules on the namespace `/env`.
+Indeed, on the client side, the `player` clients initialized the modules `welcome` (that does not require a communication with the server), `topology`, `checkin` and `performance`, so we set up the servers corresponding to these modules on the namespace `/player`. Similarly, the `/env` clients initialized the modules `topology` and `performance` (which both require communication with the server), so we set up the servers corresponding to these modules on the namespace `/env`.
 
 ## API
 
@@ -276,18 +314,20 @@ This sections explains how to use the classes of the library: how to initialize 
 
 Most of the classes have a module on the server **and** client sides:
 
-- [`Module`](#api-module)
-- [`Placement`](#api-placement)
-- [`Sync`](#api-sync)
-- [`Topology`](#api-topology)
+- [`Module`](#module)
+- [`Checkin`](#checkin)
+- [`Sync`](#sync)
+- [`Topology`](#topology)
 
 However, some classes only have a server side:
 
-- [`Client`](#api-client)
+- [`Client`](#client)
 
 And some of them are only present on the client side:
 
-- [`Dialog`](#api-dialog)
+- [`Dialog`](#dialog)
+- [`Loader`](#loader)
+- [`Orientation`](#orientation)
 
 ### Client (server side)
 
@@ -321,10 +361,8 @@ Returns information about the client in an object having the following propertie
 
 - `socketID:String`     
   The ID of the client's socket.
-
 - `index:Number`    
-  The index of the client's index (as set by the `Placement` module).
-
+  The index of the client's index (as set by the `Checkin` module).
 - `state:Object`    
   The public state of the client (`this.publicState`).
 
@@ -361,20 +399,66 @@ Returns information about the client in an object having the following propertie
   The ID of the client's socket.
 
 - `index:Number`    
-  The index of the client's index (as set by the `Placement` module).
+  The index of the client's index (as set by the `Checkin` module).
 
 - `state:Object`    
   The public state of the client (`this.publicState`).
 
-### Placement
+### Loader (client side)
 
-The `Placement` module is responsible for keeping track of the connected clients by assigning them indices within the range of the available places in the scenario.
+The `Loader` module allows to load audio files that can be used in other modules (for instance, the performance module). The `Loader` module displays a loading bar that indicates the progress of the loading.
 
-For instance, say that the scenario requires 12 players who sit on a grid of 3 ⨉ 4 seats: when a client connects to the server, the `Placement` module will assign a seat whithin the remaining places of this grid.
+#### Attributes
 
-Similarly, if the scenario takes place in a theater where seats are numbered, the `Placement` module would allow the users to indicate what their seats are.
+{% assign attribute = 'audioBuffers' %}
+{% assign type = 'Array' %}
+{% assign default = '[]' %}
+{% include includes/attribute.md %}
 
-Or, if the scenario doesn't require the players to sit at particular locations, the `Placement` module would just assign them indices within the range of total number of users this scenario supports.
+The `audioBuffers` array contains the audio buffers created from the audio files passed in the `constructor`.
+
+#### Methods
+
+{% assign method = 'constructor' %}
+{% assign argument = audiofiles %}
+{% assign type = Array' %}
+{% include includes/method.md %}
+
+The constructor method takes the `audiofiles` array as an argument. The `audiofiles` array contains the links to the audio files you want to load.
+
+### Orientation (client side)
+
+The `Orientation` module allows to calibrate the compass and get and angle reference. It displays the view, that the user clicks on when he / she points at the right direction for the calibration.
+
+#### Attributes
+
+{% assign attribute = angleReference %}
+{% assign type = 'Number' %}
+{% assign default = '[]' %}
+{% include includes/attribute.md %}
+
+The `angleReference` attribute is the value of the angle when the user clicks on the screen while the Orientation module is displayed. It serves as a calibration / reference of the angle.
+#### Methods
+
+{% assign method = 'constructor' %}
+{% assign argument = 'options' %}
+{% assign type = '{}' %}
+{% include includes/method.md %}
+
+The constructor method takes the `options` object as an argument, whose properties are:
+
+- `text:String`
+  The text to be displayed on the dialog. If nothing is specified, defaults to "Point the phone exactly in front of you, and touch the screen.".
+
+### Checkin
+
+The `Checkin` module is responsible for keeping track of the connected clients by assigning them indices within the range of the available places in the scenario.
+
+For instance, say that the scenario requires 12 players who sit on a grid of 3 ⨉ 4 seats: when a client connects to the server, the `Checkin` module will assign a seat whithin the remaining places of this grid.
+
+Similarly, if the scenario takes place in a theater where seats are numbered, the `Checkin` module would allow the users to indicate what their seats are.
+
+Or, if the scenario doesn't require the players to sit at particular locations, the `Checkin` module would just assign them indices within the range of total number of users this scenario supports.
 
 #### Client side
 
@@ -387,14 +471,14 @@ Or, if the scenario doesn't require the players to sit at particular locations, 
 The constructor method takes the `params` object as an argument. The only currently supported property is:
 
 - `display:Boolean = false`     
-  When set to `true`, the module displays a dialog with the placement information for the user. The user has to click on the dialog to indicate that the placement process is `"done"`.
+  When set to `true`, the module displays a dialog with the checkin information for the user. The user has to click on the dialog to indicate that the checkin process is `"done"`.
 
-Below is an example of an instantiation of the `placement` module that displays the dialog.
+Below is an example of an instantiation of the `Checkin` module that displays the dialog.
 
 ```javascript
 var clientSide = require('soundworks/client');
 
-var placement = new clientSide.Placement({ display: true });
+var checkin = new clientSide.Checkin({ display: true });
 ```
 
 {% assign method = 'getPlaceInfo' %}
@@ -403,7 +487,7 @@ var placement = new clientSide.Placement({ display: true });
 {% assign return = 'Object' %}
 {% include includes/method.md %}
 
-This method returns an object with the placement information. The object returned has two properties:
+This method returns an object with the checkin information. The object returned has two properties:
 
 - `index:Number`    
   The index of the client.
@@ -414,17 +498,17 @@ This method returns an object with the placement information. The object returne
 #### Server side
 
 {% assign method = 'constuctor' %}
-{% assign argument = 'params' %}
+{% assign argument = options %}
 {% assign type = 'Object' %}
 {% include includes/method.md %}
 
-The constructor method takes the `params` object as an argument, **that must have either a `topology` or a `numPlaces` property**. The properties supported by `params` are:
+The constructor method takes the `params` object as an argument, **that must have either a `topology` or a `numPlaces` property: these options are mutually exclusive, but one of them is required**. The properties supported by `options` are:
 
 - `topology:ServerTopology = null`  
   The topology associated with the scenario. If a topology is provided (for instance because the venue where the scenario is taking place provides seats with predetermined locations), this module assigns places among the places available in the `topology`. Otherwise (no topology provided), the user must indicate the maximum number of players allowed in this scenario with the property `numPlaces`.
 
 - `numPlaces:Number = 9999`     
-  If `params` has no `topology` attribute, it must have a `numPlaces` attribute that indicates the maximum number of players allowed in the performance. In that case, the module allocates indices to each client that connects, until the total number of connected clients reaches `numPlaces`.
+  If `options` has no `topology` attribute, it must have a `numPlaces` attribute that indicates the maximum number of players allowed in the performance. In that case, the module allocates indices to each client that connects, until the total number of connected clients reaches `numPlaces`.
 
 - `order:String = 'random'`    
   Order in which places indices are assigned. Currently supports two values:
@@ -435,17 +519,17 @@ The constructor method takes the `params` object as an argument, **that must hav
   - `'ascending'`   
     Places are chosen in ascending order among the available indices.
 
-Below is an example of the instantiation of the `placement` module on the server side.
+Below is an example of the instantiation of the `Checkin` module on the server side.
 
 ```javascript
 var serverSide = require('soundworks/server');
 
 // Case 1: the scenario has a topology
-var toplogy = new serverSide.Topology({ cols: 3, rows: 4 });
-var placement = new serverSide.Placement({ topology: toplogy });
+var topology = new serverSide.Topology({ cols: 3, rows: 4 });
+var checkin = new serverSide.Checkin({ topology: toplogy });
 
 // Case 2: the scenario does not have a topology
-var placement = new serverSide.Placement({ numPlaces: 500, order: 'ascending' });
+var checkin = new serverSide.Checkin({ numPlaces: 500, order: 'ascending' });
 ```
 
 ### Sync
@@ -457,14 +541,14 @@ For instance, this allows all (or part of) the clients to trigger an event at th
 #### Client side
 
 {% assign method = 'constuctor' %}
-{% assign argument = 'params' %}
+{% assign argument = options %}
 {% assign default = '{}' %}  
 {% assign type = 'Object' %}
 {% include includes/method.md %}
 
-The constructor method takes the `params` object as an argument. It doesn't currently support any option.
+The constructor method takes the `options` object as an argument. It doesn't currently support any option.
 
-Below is an example of an instantiation of the `placement` module that displays the dialog.
+Below is an example of an instantiation of the `Sync` module.
 
 ```javascript
 var clientSide = require('soundworks/client');
@@ -515,7 +599,7 @@ For instance, say that the scenario requires 12 players who sit on a grid of 3 �
 
 Similarly, if the scenario takes place in a theater where seats are numbered, the `Topology` module would contain information about where the seats are physically, and what their numbers (`label`) are.
 
-I the placement of the users in the scenario doesn't matter, the `Topology`module is not needed.
+If the placement of the users in the scenario doesn't matter, the `Topology` module is not needed.
 
 #### Client side
 
@@ -645,7 +729,7 @@ beats/
 │   └── server/
 │       └── index.es6.js
 ├── views/
-│   └── player.jade
+│   └── player.ejs
 ├── gulpfile.js
 ├── package.json
 └── README.md
@@ -653,30 +737,43 @@ beats/
 
 ### 2. Client side
 
-On the client side, there are two things we need to do: write the Javascript code, and set up the Jade file that will generate the HTML.
+On the client side, there are two things we need to do: write the Javascript code, and set up the EJS file that will generate the HTML.
 
-#### Setting up the Jade file
+#### Setting up the EJS file
 
-Let's start with the easy part, the Jade file located in `beats/views/player.jade`.
+Let's start with the easy part, the EJS file located in `beats/views/player.ejs`.
 
-```jade
-doctype
-html
-  head
-    meta(charset="utf-8")
-    meta(name="viewport",
-         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no")
-    title #{title}
-    script(src="/socket.io/socket.io.js")
-    link(rel='stylesheet', href='/stylesheets/style.css')
-  body
-    #container.container
-    script(src="/javascripts/player.js")
+```ejs
+<!doctype html5>
+<html>
+  <head>
+    <!-- settings -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <!-- title -->
+    <title><% title %></title>
+
+    <!-- stylesheets -->
+    <link rel="stylesheet" href="stylesheets/boilerplate.css">
+    <link rel="stylesheet" href="stylesheets/normalize.css">
+    <link rel="stylesheet" href="stylesheets/style.css">
+    
+    <!-- scripts -->
+    <script src="/socket.io/socket.io.js"></script>
+  </head>
+
+  <body>
+    <div id="container" class="container"></div>
+    <script src="javascripts/player.js"></script>
+  </body>
+</html>
+
 ```
 
 The most important things here are:
 
-- To load the `socket.io` library with `script(src="/socket.io/socket.io.js")`,
+- To load the `socket.io` library with `script(src="/socket.io/socket.io.js")`, since this is what we currently use to handle the Web Sockets,
 - To have a `<div>` element in the `body` that has the ID `#container` and a class `.container`,
 - And to load the Javascript file `/javascripts/player.js`.
 
@@ -690,14 +787,14 @@ Step by step, this is how the scenario will look like when a user connects to th
 - There is a synchronization process so that the client and the server shares a common clock,
 - Finally, the user enters the performance where the smartphone emits a sound a regular invervals, synced with the other smartphones of the performance.
 
-First of all, let's load the library and initialize our `socket.io` namespace.
+First of all, let's load the library and initialize our Web Sockets namespace (currently with `socket.io`).
 
 ```javascript
 // Loading the libraries
 var clientSide = require('soundworks/client');
 var client = clientSide.client;
 
-// Initiliazing the socket.io namespace
+// Initiliazing the Web Socket namespace
 client.init('/player');
 ```
 
@@ -820,7 +917,7 @@ var app = express();
 
 // Configuration of the Express app
 app.set('port', process.env.PORT || 3000);
-app.set('view engine', 'jade');
+app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, '../../public')));
 ```
 
