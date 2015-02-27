@@ -338,16 +338,16 @@ And some of them are only present on the client side:
 
 ### Client only modules
 
-#### ClientDialog
+##### ClientDialog
 
 The `ClientDialog` module displays a dialog on the screen, and requires the user to click the screen to make the module disappear.
 
-##### Attributes
+###### Attributes
 
 - `view:Element`  
   The view is the div in which the content of the module is displayed.
 
-##### Methods
+###### Methods
 
 - `constructor(options:Object = {})`  
   The constructor method takes the `options` object as an argument, whose properties are:
@@ -358,16 +358,16 @@ The `ClientDialog` module displays a dialog on the screen, and requires the user
   - `activateAudio:Boolean = false`  
     If set to `true`, the module with activate the Web Audio API when the user clicks the screen (useful on iOS, where sound is muted until a user action triggers some audio commands).
 
-#### ClientLoader
+##### ClientLoader
 
 The `ClientLoader` module allows to load audio files that can be used in other modules (for instance, the performance module). The `Loader` module displays a loading bar that indicates the progress of the loading.
 
-##### Attributes
+###### Attributes
 
 - `audioBuffers:Array = []`  
   The `audioBuffers` array contains the audio buffers created from the audio files passed in the `constructor`.
 
-##### Methods
+###### Methods
 
 - `constructor(audioFiles:Array)`  
   The constructor method takes the `audiofiles` array as an argument. The `audiofiles` array contains the links (`String`) to the audio files you want to load.
