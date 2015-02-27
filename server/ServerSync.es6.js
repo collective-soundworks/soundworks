@@ -23,9 +23,14 @@ class ServerSync extends ServerModule {
     });
   }
 
-  getLocalTime() {
-    return this.sync.getLocalTime();
+  getLocalTime(masterTime) {
+    return this.sync.getLocalTime(masterTime);
   }
-}
+
+  getMasterTime(localTime) {
+    return this.sync.getMasterTime(localTime);
+  }
+
+} // class ServerSync
 
 module.exports = ServerSync;

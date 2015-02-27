@@ -36,12 +36,12 @@ class ClientSync extends ClientModule {
     });
   }
 
-  getLocalTime(serverTime) {
-    return this.sync.getLocalTime(serverTime);
+  getLocalTime(masterTime) {
+    return this.sync.getLocalTime(masterTime);
   }
 
-  getServerTime(localTime) {
-    return this.sync.getServerTime(localTime);
+  getMasterTime(localTime) {
+    return this.sync.getMasterTime(localTime);
   }
 }
 
