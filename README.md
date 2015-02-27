@@ -21,23 +21,24 @@
 
 *Soundworks* is a Javascript framework that enables artists and developers to create collaborative music performances where a group of participants distributed in space use their smartphones to generate sound and light through touch and motion.
 
-The framework is modular to make it easy to implement different performance scenarios, using a server / client architecture supported by `Node.js` and Web Sockets: the boilerplate provided allows anyone to bootstrap a scenario for *Soundworks* and focus on its audiovisual and interaction design instead of the infrastructure.
+The framework is based on a server / client architecture supported by `Node.js` and WebSockets, and uses modules to make it easy to implement different performance scenarios: the provided template allows anyone to bootstrap a *Soundworks*-based scenario and focus on its audiovisual and interaction design instead of the infrastructure.
 
 ### Server / client architecture 
 
-In order to connect the smartphones with each other, *Soundworks* implements a server / client architecture using a `Node.js` server and Web Sockets to pass messages between the server and the clients (currently with the `socket.io` library).
+In order to connect the smartphones with each other, *Soundworks* implements a server / client architecture using a `Node.js` server and WebSockets to pass messages between the server and the clients (currently with the `socket.io` library).
 
 The word “client” represents any entity that connects to the server. For instance, this can be:
 
-- The smartphone of a player who takes part in the collaborative performance (we would refer to this type of client as a `player`);
-- A laptop that provides an interface for the artist to control some parameters of the performance in real time (we would refer to this type of client as `conductor`);
-- A computer that controls the sound and light effects in the room in sync with the players' performance, such as lasers, a global visualization or ambient sounds on external loudspeakers (we would refer to this type of client as `env`, standing for “environment”).
+- The smartphone of a player who takes part in the collaborative performance (we would refer to this type of client as a `player`: these clients connect to the server through the root URL `http://your-url:port/`);
+- A laptop that provides an interface for the artist to control some parameters of the performance in real time (we would refer to this type of client as `conductor`; these clients would connect to the server through the URL `http://your-url:port/conductor`);
+- A computer that controls the sound and light effects in the room in sync with the players' performance, such as lasers, a global visualization or ambient sounds on external loudspeakers (we would refer to this type of client as `env`, standing for “environment”; these clients would connect to the server through the URL `http://your-url:port/env`);
+- And so on…
 
 ### A *Soundworks* scenario is exclusively made of modules
 
 A scenario built with *Soundworks* consists in a succession and combination of modules, each of them corresponding to one step of the scenario. Each module has a `.start()` and a `.done()` method: we launch the process corresponding to that module by calling the method `.start()`, and we call the method `.done()` when the duty of the module is done.
 
-As an example, let's say that a scenario works as follows when a `player` connects to the server:
+As an example, let's say that a scenario works as follows when a `player` connects to the server (through the URL `http://your-url:port/`):
 
 - The player gets a `welcome` message (*e.g.* “Welcome to the performance!”). When the player clicks on the screen…
 - … the player receives some `checkin` instructions while in the meantime, the smartphone has to `sync` its clock with the server. Finally, when these are done…
@@ -70,9 +71,9 @@ client.start(
 );
 ```
 
-To run a sequence of modules in serial, we use `client.serial(module1, module2, ...)`. A module would `.start()` only after the previous one is `.done()`. On the other hand, if some modules need to be run in parallel, we use `client.parallel(module1, module2, ...)`. This triggers a `.done()` method when all of these modules run in parallel are `.done()`.
+To run a sequence of modules in serial, we use `client.serial(module1, module2, ...)`. A module would `.start()` only after the previous one is `.done()`. On the other hand, if some modules need to be run in parallel, we use `client.parallel(module1, module2, ...)`. The parallel process triggers a global `.done()` method when all of its modules are `.done()`.
 
-Some of these modules need an interaction with the server (for instance, the `sync` process requires a dialog between the server and the client to synchronize the clocks). Thus, we activate all the modules that each `player` will need to talk to: on the server side, we would write the following code.
+Some of these modules need an interaction with the server (for instance, the `sync` process requires a dialog between the server and the client to synchronize the clocks). Thus, we activate all the modules that each `player` will need to talk to thanks to the `server.map()` method: on the server side, we would write the following code.
 
 ```javascript
 /* Server side */
@@ -88,12 +89,13 @@ var sync = new serverSide.Sync(...);
 var checkin = new serverSide.Checkin(...);
 var performance = new Performance(...); // This class has to be written by you
 
-// Launch the server and the scenario!
+// Launch the server
 server.start(app);
+// Map the `/player` namespace with the modules needed by the client side
 server.map('/player', 'My Scenario', sync, checkin, performance);
 ```
 
-That way, the `sync`, `checkin` and `performance` modules of a `player` (who connects to the server via the namespace `'/player') would be able to dialog with the corresponding modules on the server side.
+That way, the `sync`, `checkin` and `performance` modules of a `player` (who connects to the server via the URL `http://your-url:port/` which maps to the namespace `'/player'`, more information on that below) would be able to dialog with the corresponding modules on the server side.
 
 ### How to write a module?
 
@@ -101,13 +103,15 @@ That way, the `sync`, `checkin` and `performance` modules of a `player` (who con
 
 On the client side, a module extends the `ClientModule` base class and must have a method `.start()` and a method `.done()`. **A module should call the method `.done()` when the whole process of the module is completed.**
 
+For instance, if the purpose of the module is to load files, the module should call the method `.done()` when the files are loaded. Similarly, if the purpose of the module is to synchronize the clocks, the module should call the method `.done()` when the clocks are synced.
+
 ##### .start()
 
 The `.start()` method is called to start the module. It should handle the logic and the steps that lead to the completion of the module.
 
 For instance, the purpose of the `ClientTopology` module is to get the topology from the server. Therefore, the `.start()` method of the `ClientTopology` module does the following:
 
-- It sends a request to the `ServerTopology` module via Web Sockets, asking the server to send the `topology` object.
+- It sends a request to the `ServerTopology` module via WebSockets, asking the server to send the `topology` object.
 - When it receives the response from the server with the `topology` object, it stores the `topology` as an attribute.
 - Finally, since the module has done its duty, it calls the method `.done()`.
 
@@ -124,7 +128,7 @@ class ClientTopology extends ClientModule {
     
     socket.on('topology_init', (topology) => {
       this.topology = topology; // Stores the response in an attribute
-      this.done(); // Call the method .done()
+      this.done(); // Call the method .done(), since the purpose of the module is met
     });
   }
 
@@ -136,7 +140,9 @@ This method must include the inherited method from the base class before any cod
 
 ##### .done()
 
-The `.done()` method should rarely change from the method inherited from the base class. If you have to rewrite it though, **don't forget to include the inherited method of the base class**. (Its purpose is to emit a `'done'` event associated with the module, which makes the whole module logic work.) Put differently, if you customize the `.done()` method, it must look like the following template.
+The `.done()` method should rarely change from the method inherited from the base class. If you have to rewrite it though, **don't forget to include the inherited method of the base class**. (Its purpose is to emit a `'done'` event associated with the module, which makes the whole module logic work.)
+
+Put differently, if you customize the `.done()` method, it must look like the following template.
 
 ```javascript
 clientSide = require(soundworks/client);
@@ -158,9 +164,9 @@ class MyModule extends clientSide.Module {
 
 On the server side, a module extends the `ServerModule` base class and must have a method `.connect(client:ServerClient)` and `.disconnect(client:ServerClient)`.
 
-##### .connect(client)
+##### .connect(client:ServerClient)
 
-The `.connect(client)` is called whenever the client `client` connects to the server. I should set up the listeners of the Web Socket messages sent after the `.start()` method on the client side is started, and handle the logic of the module.
+The `.connect(client)` is called whenever the client `client` connects to the server. I should set up the listeners of the WebSocket messages sent after the `.start()` method on the client side is started, and handle the logic of the module.
 
 For instance, say that the module you are writing needs to keep track of all the connected clients. Then you could write the following.
 
@@ -172,7 +178,7 @@ connect(client) {
 }
 ```
 
-##### .disconnect(client)
+##### .disconnect(client:ServerClient)
 
 Similarly, the `.disconnect(client)` is called whenever the client `client` disconnects from the server. It handles all the actions that are necessary in that case.
 
@@ -188,7 +194,7 @@ disconnect(client) {
 
 ### How to write a scenario?
 
-Since *Soundworks* is built on Express, any scenario you write using *Soundworks* should roughly follow the organization of an Express app, as shown in the example below.
+Since *Soundworks* is built on Express, any scenario you write using *Soundworks* should follow the organization of an Express app (using the EJS rendering engine), as shown in the example below.
 
 ```
 my-scenario/
@@ -216,29 +222,30 @@ my-scenario/
 
 For instance:
 
-- The `public/` folder should contain any resource your clients may need to load (except the javascripts, that will be generated with our `gulp` file from the `src/` folder).
-- The `src/` folder contains your source code for the different clients and the server. Each subfolder should contain and `index.es6.js` file, with the code to be exectued for that entity.
-  - The default client is called `player` and the code to be exectuted for that type of client is in `src/player/index.es6.js`. This is the code that is executed when a user connects to the root URL. (`http://root-url:port/`)
-  - You can add as many other types of clients as you want. The source code should lie in a folder with that name (*e.g.* `conductor/`), and have a the corresponding file in the `views/` folder (see below). Any new type of client you create will be accessible from the URL `http://root-url:port/client-type` (*e.g.* `http://root-url:port/conductor` in the case of the `conductor`). Any client that accesses the server through that URL will join the Web Socket namespace `'/client-type'` (*e.g.* `'/conductor'`).
-  - Finally, the `src/` folder should also contain the source code of your server in the `server/` subfolder, in an `index.es6.js` file.
+- The `public/` folder should contain any resource your clients may need to load (for instance, the stylesheets, the sounds, the images, etc. — note: the javascripts will be automatically generated with our `gulp` file from the `src/` folder).
+- The `src/` folder contains your source code for the different type of clients and for the server. Each subfolder (`server/`, `/player`, and any other type of client) should contain and `index.es6.js` file, with the code to be executed for that entity.
 - The `views/` folder contains a `*.ejs` file for each client type. In other words, all the subfolders in `src/` — except `server/` — should have their corresponding EJS file.
 
 To compile the files, just run the command `gulp` in the Terminal: it will convert the files from es6 to es5, browserify the files on the client side, and launch the scenario with a `Node.js` server.
 
+A scenario should contain at least a `src/server/` and a `src/player/` folder. The `src/server/` folder contains all the files that constitute the server. The `src/player/` folder contains all the files of the default client, which we name `player`. Any client connecting to the server through the root url (`http://your-url:port`) would be a `player`, and belong to the namespace `'/player'`.
+
+You can add any other type of client (`clientType`). For that, you should create a subfolder `src/clientType/` folder with the name of that other type of client (for instance `src/conductor/` or `src/env/`) and put and `index.es6.js` inside. This type of client would join the corresponding namespace `'/clientType`' (*e.g.* `'/conductor'` or `'/env'`), and be accessed through the URL `http://your-url:port/clientType` (*e.g.* `http://your-url:port/conductor` or `http://your-url:port/env`).
+
 #### Client side
 
-On the client side, the `src/player/index.es6.js` in a should look like this.
+On the client side, the `src/player/index.es6.js` file (or any other type of client's index file) should look like this.
 
 ```javascript
 // Require the library
 var clientSide = require('soundworks/client');
 var client = clientSide.client;
 
-// Initialize the Web Socket namespace depending on the client type
+// Initialize the WebSocket namespace depending on the client type
 client.init('/player');
 
 // Write the performance module
-class MyPerformance extends clientSide.module {
+class MyPerformance extends clientSide.Module {
   ...
 }
 
@@ -265,7 +272,7 @@ window.addEventListener('load', () => {
 });
 ```
 
-For a `env` client, the file would look the same except that the Web Socket namespace initialization would be `client.init('/env')`, and the modules might be different (for instance, one could imagine that the `env` clients only require a `topology` and a `performance` module).
+For a `env` (or a `conductor`) client, the file would look the same except that the WebSocket namespace initialization would be `client.init('/env');` (or `client.init('/env');`), and the modules might be different. For instance, one could imagine that the `env` clients only require a `topology` and a `performance` module).
 
 #### Server side
 
@@ -301,7 +308,7 @@ var envPerformance = new MyEnvPerformance(...);
 // Start the scenario
 server.start(app);
 // Set up the module servers for the 'player' clients
-server.map('/player', 'My scenario', topology, checkin, playerPerformance);
+server.map('/player', 'My Scenario', topology, checkin, playerPerformance);
 // Set up the module servers for the 'env' clients
 server.map('/env', 'My Scenario — Environment', topology, envPerformance);
 ```
@@ -310,7 +317,7 @@ Indeed, on the client side, the `player` clients initialized the modules `welcom
 
 ## API
 
-This sections explains how to use the classes of the library: how to initialize them, what arguments to pass in to the constructors, how to use the public methods, etc.
+This sections explains how to use the classes of the library: how to initialize them, what arguments to pass to the constructors, how to use the public methods, etc.
 
 Most of the classes have a module on the server **and** client sides:
 
@@ -329,128 +336,81 @@ And some of them are only present on the client side:
 - [`Loader`](#loader)
 - [`Orientation`](#orientation)
 
-### Client (server side)
+### Client only modules
 
-The `Client` module is used to keep track of the connected clients.
+#### ClientDialog
 
-#### Attributes
+The `ClientDialog` module displays a dialog on the screen, and requires the user to click the screen to make the module disappear.
 
-{% assign attribute = 'publicState' %}
-{% assign type = 'Object' %}
-{% assign default = '{}' %}
-{% include includes/attribute.md %}
+##### Attributes
 
-This object can be used by any module to store any useful information that might have to be sent to the clients at some point.
+- **`view:Element`**
+  The view is the div in which the content of the module is displayed.
 
-{% assign attribute = 'privateState' %}
-{% assign type = 'Object' %}
-{% assign default = '{}' %}
-{% include includes/attribute.md %}
+##### Methods
 
-This object can be used by any module to store any useful information that has to be reused afterwards on the server side.
+- **`constructor(options:Object = {})`**
+  The constructor method takes the `options` object as an argument, whose properties are:
+  - `id:String = 'dialog'`  
+    The ID of the dialog, that will be used as the `id` HTML attribute of the `this.view`.
+  - `text:String`  
+    The text to be displayed in the dialog.
+  - `activateAudio:Boolean = false`  
+    If set to `true`, the module with activate the Web Audio API when the user clicks the screen (useful on iOS, where sound is muted until a user action triggers some audio commands).
 
-#### Methods
+#### ClientLoader
 
-{% assign method = 'getInfo' %}
-{% assign argument = '' %}
-{% assign type = '' %}
-{% assign return = 'Object' %}
-{% include includes/method.md %}
+The `ClientLoader` module allows to load audio files that can be used in other modules (for instance, the performance module). The `Loader` module displays a loading bar that indicates the progress of the loading.
 
-Returns information about the client in an object having the following properties:
+##### Attributes
 
-- `socketID:String`     
-  The ID of the client's socket.
-- `index:Number`    
-  The index of the client's index (as set by the `Checkin` module).
-- `state:Object`    
-  The public state of the client (`this.publicState`).
+- **`audioBuffers:Array = []`**
+  The `audioBuffers` array contains the audio buffers created from the audio files passed in the `constructor`.
 
-### Dialog (client side)
+##### Methods
 
-The `Dialog` module displays a dialog on the screen, and requires the user to click the screen to make the module disappear.
+- **`constructor(audioFiles:Array)`**
+  The constructor method takes the `audiofiles` array as an argument. The `audiofiles` array contains the links (`String`) to the audio files you want to load.
 
-{% assign method = 'constructor' %}
-{% assign argument = 'params' %}
-{% assign type = 'Object' %}
-{% assign default = '{}' %}
-{% include includes/method.md %}
+#### ClientOrientation
 
-The constructor method takes the `params` object as an argument, whose properties are:
+The `ClientOrientation` module allows to calibrate the compass and get and angle reference. It displays the view, that the user clicks on when he / she points at the right direction for the calibration.
 
-- `id:String = 'dialog'`  
-  The ID of the dialog, that will be used as the `id` HTML attribute of the corresponding `div`.
+##### Attributes
 
-- `text:String`  
-  The text to be displayed on the dialog.
+- **`angleReference:Number`**
+  The `angleReference` attribute is the value of the alpha angle (as in `deviceOrientation`) when the user clicks on the screen while the Orientation module is displayed. It serves as a calibration / reference of the compass.
+- **`view:Element`**
+  The view is the div in which the content of the module is displayed.
+##### Methods
 
-- `activateAudio:Boolean = false`  
-  If set to `true`, the module with activate the Web Audio API when the user clicks the screen (useful on iOS, where sound is muted until a user action triggers some audio commands).
+- **`constructor(options:Object = {})`**
+  The constructor method takes the `options` object as an argument, whose properties are:
+  - `text:String = "Point the phone exactly in front of you, and touch the screen."`
+    The text to be displayed on the dialog.
 
-{% assign method = 'getInfo' %}
-{% assign argument = '' %}
-{% assign type = '' %}
-{% assign return = 'Object' %}
-{% include includes/method.md %}
+### Server only modules
 
-Returns information about the client in an object having the following properties:
+#### ServerClient
 
-- `socketID:String`     
-  The ID of the client's socket.
+The `ServerClient` module is used to keep track of the connected clients. Each time a client connects to the server, *Soundworks* creates an instance of `ServerClient`.
 
-- `index:Number`    
-  The index of the client's index (as set by the `Checkin` module).
+##### Attributes
 
-- `state:Object`    
-  The public state of the client (`this.publicState`).
+- **`data:Object = {}`**  
+  The `data` attribute can be used by any module to store any useful information that any module might need at some point, or that might need to be sent to the clients. The convention is to create a property for each module that writes into this attribute. For instance, if the `sync` module keeps track of the time offset between this client's clock and the server clock, it would store the information in `this.data.sync.timeOffset`. Similarly, if the `performance` module needs some kind of flag for each client, it would store this information in `this.data.performance.flag`.
+- **`index:Number`**  
+  The `index` attribute stores the index of the client as set by the `ServerCheckin` module. See `ServerCheckin` for more information.
+- **`socket:Socket`**
+  The `socket` attribute stores the socket that sets the communication channel between the server and this client, as passed in by the `constructor`.
 
-### Loader (client side)
+### Client and server modules
 
-The `Loader` module allows to load audio files that can be used in other modules (for instance, the performance module). The `Loader` module displays a loading bar that indicates the progress of the loading.
 
-#### Attributes
 
-{% assign attribute = 'audioBuffers' %}
-{% assign type = 'Array' %}
-{% assign default = '[]' %}
-{% include includes/attribute.md %}
 
-The `audioBuffers` array contains the audio buffers created from the audio files passed in the `constructor`.
 
-#### Methods
-
-{% assign method = 'constructor' %}
-{% assign argument = audiofiles %}
-{% assign type = Array' %}
-{% include includes/method.md %}
-
-The constructor method takes the `audiofiles` array as an argument. The `audiofiles` array contains the links to the audio files you want to load.
-
-### Orientation (client side)
-
-The `Orientation` module allows to calibrate the compass and get and angle reference. It displays the view, that the user clicks on when he / she points at the right direction for the calibration.
-
-#### Attributes
-
-{% assign attribute = angleReference %}
-{% assign type = 'Number' %}
-{% assign default = '[]' %}
-{% include includes/attribute.md %}
-
-The `angleReference` attribute is the value of the angle when the user clicks on the screen while the Orientation module is displayed. It serves as a calibration / reference of the angle.
-#### Methods
-
-{% assign method = 'constructor' %}
-{% assign argument = 'options' %}
-{% assign type = '{}' %}
-{% include includes/method.md %}
-
-The constructor method takes the `options` object as an argument, whose properties are:
-
-- `text:String`
-  The text to be displayed on the dialog. If nothing is specified, defaults to "Point the phone exactly in front of you, and touch the screen.".
-
-### Checkin
+#### Checkin
 
 The `Checkin` module is responsible for keeping track of the connected clients by assigning them indices within the range of the available places in the scenario.
 
@@ -532,7 +492,7 @@ var checkin = new serverSide.Checkin({ topology: toplogy });
 var checkin = new serverSide.Checkin({ numPlaces: 500, order: 'ascending' });
 ```
 
-### Sync
+#### Sync
 
 The `Sync` module is responsible for synchronizing the clients' clocks on the server clock, so that the server and all the clients share a common clock.
 
@@ -773,7 +733,7 @@ Let's start with the easy part, the EJS file located in `beats/views/player.ejs`
 
 The most important things here are:
 
-- To load the `socket.io` library with `script(src="/socket.io/socket.io.js")`, since this is what we currently use to handle the Web Sockets,
+- To load the `socket.io` library with `script(src="/socket.io/socket.io.js")`, since this is what we currently use to handle the WebSockets,
 - To have a `<div>` element in the `body` that has the ID `#container` and a class `.container`,
 - And to load the Javascript file `/javascripts/player.js`.
 
@@ -787,14 +747,14 @@ Step by step, this is how the scenario will look like when a user connects to th
 - There is a synchronization process so that the client and the server shares a common clock,
 - Finally, the user enters the performance where the smartphone emits a sound a regular invervals, synced with the other smartphones of the performance.
 
-First of all, let's load the library and initialize our Web Sockets namespace (currently with `socket.io`).
+First of all, let's load the library and initialize our WebSockets namespace (currently with `socket.io`).
 
 ```javascript
 // Loading the libraries
 var clientSide = require('soundworks/client');
 var client = clientSide.client;
 
-// Initiliazing the Web Socket namespace
+// Initiliazing the WebSocket namespace
 client.init('/player');
 ```
 
