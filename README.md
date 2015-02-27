@@ -14,7 +14,7 @@
   - [Orientation (client side)](#orientation-client-side)
   - [Checkin](#checkin)
   - [Sync](#sync)
-  - [Topology](#topology)
+  - [Seatmap](#seatmap)
 - [**Examples**](#examples)
 
 ## Overview
@@ -109,25 +109,25 @@ For instance, if the purpose of the module is to load files, the module should c
 
 The `.start()` method is called to start the module. It should handle the logic and the steps that lead to the completion of the module.
 
-For instance, the purpose of the `ClientTopology` module is to get the topology from the server. Therefore, the `.start()` method of the `ClientTopology` module does the following:
+For instance, the purpose of the `ClientSeatmap` module is to get the seatmap from the server. Therefore, the `.start()` method of the `ClientSeatmap` module does the following:
 
-- It sends a request to the `ServerTopology` module via WebSockets, asking the server to send the `topology` object.
-- When it receives the response from the server with the `topology` object, it stores the `topology` as an attribute.
+- It sends a request to the `ServerSeatmap` module via WebSockets, asking the server to send the `seatmap` object.
+- When it receives the response from the server with the `seatmap` object, it stores the `seatmap` as an attribute.
 - Finally, since the module has done its duty, it calls the method `.done()`.
 
 In Javascript, it looks like the following.
 
 ```javascript
-class ClientTopology extends ClientModule {
+class ClientSeatmap extends ClientModule {
   ...
 
   start() {
     super.start(); // Don't forget this line!
 
-    socket.emit('topology_request'); // Request the topology to the server
+    socket.emit('seatmap_request'); // Request the seatmap to the server
     
-    socket.on('topology_init', (topology) => {
-      this.topology = topology; // Stores the response in an attribute
+    socket.on('seatmap_init', (seatmap) => {
+      this.seatmap = seatmap; // Stores the response in an attribute
       this.done(); // Call the method .done(), since the purpose of the module is met
     });
   }
@@ -253,7 +253,7 @@ class MyPerformance extends clientSide.Module {
 window.addEventListener('load', () => {
   // Initialize the modules
   var welcome = new clientSide.Dialog(...);
-  var topology = new clientSide.Topology(...);
+  var seatmap = new clientSide.Seatmap(...);
   var checkin = new clientSide.Checkin(...);
   var performance = new MyPerformance(...);
   
@@ -263,7 +263,7 @@ window.addEventListener('load', () => {
     client.serial(
       client.parallel(
         welcome,
-        topology
+        seatmap
       ),
       checkin,
       performance
@@ -272,7 +272,7 @@ window.addEventListener('load', () => {
 });
 ```
 
-For a `env` (or a `conductor`) client, the file would look the same except that the WebSocket namespace initialization would be `client.init('/env');` (or `client.init('/env');`), and the modules might be different. For instance, one could imagine that the `env` clients only require a `topology` and a `performance` module).
+For a `env` (or a `conductor`) client, the file would look the same except that the WebSocket namespace initialization would be `client.init('/env');` (or `client.init('/env');`), and the modules might be different. For instance, one could imagine that the `env` clients only require a `seatmap` and a `performance` module).
 
 #### Server side
 
@@ -300,7 +300,7 @@ class MyEnvPerformance extends serverSide.Module {
 }
 
 // Initialize the modules
-var topology = new serverSide.Topology(...);
+var seatmap = new serverSide.Seatmap(...);
 var checkin = new serverSide.Checkin(...);
 var playerPerformance = new MyPlayerPerformance(...);
 var envPerformance = new MyEnvPerformance(...);
@@ -308,12 +308,12 @@ var envPerformance = new MyEnvPerformance(...);
 // Start the scenario
 server.start(app);
 // Set up the module servers for the 'player' clients
-server.map('/player', 'My Scenario', topology, checkin, playerPerformance);
+server.map('/player', 'My Scenario', seatmap, checkin, playerPerformance);
 // Set up the module servers for the 'env' clients
-server.map('/env', 'My Scenario — Environment', topology, envPerformance);
+server.map('/env', 'My Scenario — Environment', seatmap, envPerformance);
 ```
 
-Indeed, on the client side, the `player` clients initialized the modules `welcome` (that does not require a communication with the server), `topology`, `checkin` and `performance`, so we set up the servers corresponding to these modules on the namespace `/player`. Similarly, the `/env` clients initialized the modules `topology` and `performance` (which both require communication with the server), so we set up the servers corresponding to these modules on the namespace `/env`.
+Indeed, on the client side, the `player` clients initialized the modules `welcome` (that does not require a communication with the server), `seatmap`, `checkin` and `performance`, so we set up the servers corresponding to these modules on the namespace `/player`. Similarly, the `/env` clients initialized the modules `seatmap` and `performance` (which both require communication with the server), so we set up the servers corresponding to these modules on the namespace `/env`.
 
 ## API
 
@@ -324,7 +324,7 @@ Most of the classes have a module on the server **and** client sides:
 - [`Module`](#module)
 - [`Checkin`](#checkin)
 - [`Sync`](#sync)
-- [`Topology`](#topology)
+- [`Seatmap`](#seatmap)
 
 However, some classes only have a server side:
 
@@ -342,15 +342,15 @@ And some of them are only present on the client side:
 
 The `ClientDialog` module displays a dialog on the screen, and requires the user to click the screen to make the module disappear.
 
-##### Attributes
+###### Attributes
 
 - `view:Element`  
   The view is the div in which the content of the module is displayed.
 
-##### Methods
+###### Methods
 
 - `constructor(options:Object = {})`  
-  The constructor method takes the `options` object as an argument, whose properties are:
+  The constructor method instantiates the `ClientDialog` module on the client side. It takes the `options` object as an argument, whose properties are:
   - `id:String = 'dialog'`  
     The ID of the dialog, that will be used as the `id` HTML attribute of the `this.view`.
   - `text:String`  
@@ -370,7 +370,7 @@ The `ClientLoader` module allows to load audio files that can be used in other m
 ###### Methods
 
 - `constructor(audioFiles:Array)`  
-  The constructor method takes the `audiofiles` array as an argument. The `audiofiles` array contains the links (`String`) to the audio files you want to load.
+  The constructor method instantiates the `ClientLoader` module on the client side. It takes the `audiofiles` array as an argument. The `audiofiles` array contains the links (`String`) to the audio files you want to load.
 
 #### ClientOrientation
 
@@ -386,7 +386,7 @@ The `ClientOrientation` module allows to calibrate the compass and get and angle
 ###### Methods
 
 - `constructor(options:Object = {})`  
-  The constructor method takes the `options` object as an argument, whose optional property is:
+  The constructor method instantiates the `ClientOrientation` module on the client side. It takes the `options` object as an argument, whose optional property is:
   - `text:String = "Point the phone exactly in front of you, and touch the screen."`
     The text to be displayed on the dialog.
 
@@ -411,7 +411,7 @@ The `ServerClient` module is used to keep track of the connected clients. Each t
 
 The `Checkin` module is responsible for keeping track of the connected clients by assigning them indices within the range of the available places in the scenario.
 
-For instance, say that the scenario requires 12 players who sit on a grid of 3 ⨉ 4 seats: when a client connects to the server, the `Checkin` module will assign a seat whithin the remaining places of this grid.
+For instance, say that the scenario requires 12 players who sit on a grid of 3 ⨉ 4 seats: when a client connects to the server, the `Checkin` module will assign a seat within the remaining places of this grid.
 
 Similarly, if the scenario takes place in a theater where seats are numbered, the `Checkin` module would allow the users to indicate what their seats are.
 
@@ -424,18 +424,9 @@ The `ClientCheckin` takes care of the checkin on the client side.
 ###### Methods
 
 - `constructor(options:Object = {})`  
-  The `constructor` method takes the `options` object as an argument, whose optional property is:
+  The `constructor` method instantiates the `ClientCheckin` module on the client side. It takes the `options` object as an argument, whose optional property is:
   - `display:Boolean = false`  
     When set to `true`, the module displays a dialog with the checkin information for the user. The user has to click on the dialog to indicate that the checkin process is `"done"`.
-
-Below is an example of an instantiation of the `ClientCheckin` module that displays the dialog on the client side.
-
-```javascript
-var clientSide = require('soundworks/client');
-
-var checkin = new clientSide.Checkin({ display: true });
-```
-
 - `getPlaceInfo() : Object`  
   The `getPlaceInfo` method returns an object with the checkin information. The returned object returned has two properties:
   - `index:Number`
@@ -443,16 +434,25 @@ var checkin = new clientSide.Checkin({ display: true });
   - `label:String`  
     The label of the place corresponding to that index.
 
+Below is an example of an instantiation of the `ClientCheckin` module that displays the dialog on the client side.
+
+```javascript
+/* Client side */
+
+var clientSide = require('soundworks/client');
+var checkin = new clientSide.Checkin({ display: true });
+```
+
 ##### ServerCheckin
 
 The `ServerCheckin` takes care of the checkin on the server side.
 
 - `constructor(options:Object = {})`  
-  The `constructor` method takes the `options` object as an argument, **that must have either a `topology` or a `numPlaces` property: these options are mutually exclusive, but one of them is required**. The properties supported by `options` are:
-  - `topology:ServerTopology = null`  
-    The topology associated with the scenario. If a topology is provided (for instance because the venue where the scenario is taking place provides seats with predetermined locations), this module assigns places among the places available in the `topology`. Otherwise (no topology provided), the user must indicate the maximum number of players allowed in this scenario with the property `numPlaces`.
+  The `constructor` method instantiates the `ServerCheckin` module on the server side. It takes the `options` object as an argument, **that must have either a `seatmap` or a `numPlaces` property: these options are mutually exclusive, but one of them is required**. The properties supported by `options` are:
+  - `seatmap:ServerSeatmap = null`  
+    The seatmap associated with the scenario. If a seatmap is provided (for instance because the venue where the scenario is taking place provides seats with predetermined locations), this module assigns places among the places available in the `seatmap`. Otherwise (no seatmap provided), the user must indicate the maximum number of players allowed in this scenario with the property `numPlaces`.
   - `numPlaces:Number = 9999`  
-    If `options` has no `topology` attribute, it must have a `numPlaces` attribute that indicates the maximum number of players allowed in the performance. In that case, the module allocates indices to each client that connects, until the total number of connected clients reaches `numPlaces`.
+    If `options` has no `seatmap` attribute, it must have a `numPlaces` attribute that indicates the maximum number of players allowed in the performance. In that case, the module allocates indices to each client that connects, until the total number of connected clients reaches `numPlaces`.
   - `order:String = 'random'`  
     Order in which places indices are assigned. Currently supports two values:
     - `'random'`  
@@ -463,13 +463,15 @@ The `ServerCheckin` takes care of the checkin on the server side.
 Below is an example of the instantiation of the `ServerCheckin` module on the server side.
 
 ```javascript
+/* Server side */
+
 var serverSide = require('soundworks/server');
 
-// Case 1: the scenario has a topology
-var topology = new serverSide.Topology({ cols: 3, rows: 4 });
-var checkin = new serverSide.Checkin({ topology: toplogy });
+// Case 1: the scenario has a seatmap
+var seatmap = new serverSide.Seatmap({ cols: 3, rows: 4 });
+var checkin = new serverSide.Checkin({ seatmap: toplogy });
 
-// Case 2: the scenario does not have a topology
+// Case 2: the scenario does not have a seatmap
 var checkin = new serverSide.Checkin({ numPlaces: 500, order: 'ascending' });
 ```
 
@@ -477,179 +479,137 @@ var checkin = new serverSide.Checkin({ numPlaces: 500, order: 'ascending' });
 
 The `Sync` module is responsible for synchronizing the clients' clocks on the server clock, so that the server and all the clients share a common clock.
 
-For instance, this allows all (or part of) the clients to trigger an event at the same time, such as displaying a color on the screen or playing a drum kick in a synchronized manner.
+For instance, this allows all the clients to do something exactly at the same time, such as displaying a color on the screen or playing a snare sound in a synchronized manner.
 
-#### Client side
+The `Sync` module does a first synchronization process after which the `ClientSync` emits the `"done"` event. Later on, the `Sync` module keeps resynchronizing the client and server clocks at random intervals to compensate the clock drift.
 
-{% assign method = 'constuctor' %}
-{% assign argument = options %}
-{% assign default = '{}' %}  
-{% assign type = 'Object' %}
-{% include includes/method.md %}
+On the client side, `ClientSync` uses the `audioContext` clock. On the server side, `ServerSync` uses the `process.hrtime()` clock. All times are in seconds (method arguments and returned values). **All time calculations and exchanges should be expressed in the server clock time.** The client clock time should be used only at the very end on the client, with the `audioContext`.
 
-The constructor method takes the `options` object as an argument. It doesn't currently support any option.
+##### ClientSync
+
+The `ClientSync` modules takes care of the synchronization process on the client side. It displays a `view` that indicates “Clock syncing, stand by…” until the very first synchronization process is `"done"`.
+
+###### Methods
+
+- `constructor()`  
+  The `constructor` method instantiates the `ClientSync` modules on the client side. it doesn't take any arguments.
+- `getLocalTime(serverTime:Number = undefined) : Number`  
+  The `getLocalTime` method returns the time in the client clock when the server clock reaches `serverTime`. If no arguments are provided, the method returns the time is is when the method is called, in the client clock (*i.e.* `audioContext.currentTime`). The returned time is a `Number`, in seconds.
+- `getServerTime(localTime:Number = audioContext.currentTime) : Number`  
+  The `getServerTime` method returns the time in the server clock when the client clock reaches `clientTime`. If no arguments are provided, the method returns the time is is when the method is called, in the server clock. The returned time is a `Number`, in seconds.
 
 Below is an example of an instantiation of the `Sync` module.
 
 ```javascript
+/* Client side */
+
 var clientSide = require('soundworks/client');
-
 var sync = new clientSide.Sync();
+
+var nowClient = sync.getLocalTime(); // current time in client clock time
+var nowServer = sync.getServerTime(); // current time in server clock time
 ```
+##### ServerSync
 
-{% assign method = 'getLocalTime' %}
-{% assign argument = 'serverTime' %}
-{% assign default = 'null' %}
-{% assign type = 'Number' %}
-{% assign return = 'Number' %}
-{% include includes/method.md %}
+###### Methods
 
-This method returns the time in the client clock (`audioContext` clock) when the server clock reaches `serverTime`. If no arguments are provided, the method returns `audioContext.currentTime`. The time returned is in seconds.
-
-{% assign method = 'getServerTime' %}
-{% assign argument = 'localTime' %}
-{% assign default = 'audioContext.currentTime' %}
-{% assign type = 'Number' %}
-{% assign return = 'Number' %}
-{% include includes/method.md %}
-
-This method returns the time on the server when the client clock reaches `localTime`. If no arguments are provided, the method returns the time on the server when the method is called. The time returned is in seconds.
-
-#### Server side
-
-{% assign method = 'constuctor' %}
-{% assign argument = '' %}
-{% assign type = '' %}
-{% include includes/method.md %}
-
-The constructor method takes instantiates the `Sync` module on the server side.
+- `constructor()`  
+  The `constructor` method instantiates the `ServerSync` module on the server side. It takes no arguments.
+- `getLocalTime()`  
+  The `getLocalTime` method returns the current time in the server clock (*i.e.* a conversion of `process.hrtime()` in seconds). The returned time is a `Number`, in seconds.  
 
 Below is an example of the instantiation of the `Sync` module on the server side.
 
 ```javascript
-var serverSide = require('soundworks/server');
+/* Server side */
 
+var serverSide = require('soundworks/server');
 var sync = new serverSide.Sync();
+
+var now = sync.getLocalTime() // current time in the server clock time
 ```
 
-### Topology
+#### Seatmap
 
-The `Topology` module contains the information about the physical locations of the available places in the scenario. The location is fixed and determined in advances.
+The `Seatmap` module contains the information about the physical locations of the available places in the scenario. The location is fixed and determined in advance.
 
-For instance, say that the scenario requires 12 players who sit on a grid of 3 ⨉ 4 seats: the `Topology` module would contain the information about that grid of seats, including their physical location and their name (`label`).
+For instance, say that the scenario requires 12 players who sit on a grid of 3 ⨉ 4 seats: the `Seatmap` module would contain the information about that grid of seats, including their physical location and their name (`label`).
 
-Similarly, if the scenario takes place in a theater where seats are numbered, the `Topology` module would contain information about where the seats are physically, and what their numbers (`label`) are.
+Similarly, if the scenario takes place in a theater where seats are numbered, the `Seatmap` module would contain information about where the seats are physically, and what their references (`label`) are.
 
-If the placement of the users in the scenario doesn't matter, the `Topology` module is not needed.
+If the placement of the users in the scenario doesn't matter, the `Seatmap` module is not needed.
 
-#### Client side
+##### ClientSeatmap
 
-{% assign method = 'constuctor' %}
-{% assign argument = 'params' %}
-{% assign default = '{}' %}  
-{% assign type = 'Object' %}
-{% include includes/method.md %}
+The `ClientSeatmap` modules takes care of the seatmap on the client side.
 
-The constructor method takes the `params` object as an argument. The only currently supported property is:
+###### Methods
 
-- `display:Boolean = false`     
-  When set to `true`, the module displays a dialog with the topology.
+- `constructor()`  
+  The `constructor` method instantiates the `ClientSeatmap` module on the client side. It doesn't take any argument.
+- `displaySeatmap(div:Element)`  
+  The `displaySeatmap` method displays a graphical representation of the seatmap in the `div` DOM element provided as an argument.
+- `addClassToTile(seatmapDisplay:Element, index: Number, className:String = 'player')`  
+  In the `Seatmap` graphical representation that lies in the `seatmapDisplay` DOM element (which had to be created by the `.displaySeatmap(div)` method), this method adds the class `className` to the tile corresponding to the index `index` in the seatmap.
+- `removeClassFromTile(seatmapDisplay:Element, index: Number, className:String = 'player')`  
+  In the `Seatmap` graphical representation that lies in the `seatmapDisplay` DOM element (which had to be created by the `.displaySeatmap(div)` method), this method removes the class `className` from the tile corresponding to the index `index` in the seatmap.
 
-{% assign method = 'displayTopology' %}
-{% assign argument = 'div' %}
-{% assign type = 'Element' %}
-{% include includes/method.md %}
-
-This method displays a graphical representation of the topology in the `div` element provided as an argument.
-
-{% assign method = 'addClassToTile' %}
-{% assign argument = 'topologyDisplay,index,className' %}
-{% assign default = ',,"player"' %}
-{% assign type = 'Element,Number,String' %}
-{% include includes/method.md %}
-
-In the `Topology` graphical representation that lies in the `topologyDisplay` DOM element (which had to be created by the `.displayTopology(div)` method), this method adds the class `className` to the tile corresponding to the index `index` in the topology.
-
-{% assign method = 'removeClassFromTile' %}
-{% assign argument = 'topologyDisplay,index,className' %}
-{% assign default = ',,"player"' %}
-{% assign type = 'Element,Number,String' %}
-{% include includes/method.md %}
-
-In the `Topology` graphical representation that lies in the `topologyDisplay` DOM element (which had to be created by the `.displayTopology(div)` method), this method removes the class `className` from the tile corresponding to the index `index` in the topology.
-
-Below is an example of the `Topology` module in use.
+Below is an example of the `ClientSeatmap` module in use.
 
 ```javascript
+/* Client side */
+
 // 1. Require the Soundworks library
 var clientSide = require('soundworks/client');
 
 // 2. Instantiate the class
-var topology = new clientSide.Topology();
+var seatmap = new clientSide.Seatmap();
 
-// 3. Display a graphical representation of the topology in a div of the DOM
-var topologyGUI = document.getElementById('topology-container');
-topology.displayTopology(topologyGUI);
+// 3. Display a graphical representation of the seatmap in a div of the DOM
+var seatmapGUI = document.getElementById('seatmap-container');
+seatmap.displaySeatmap(seatmapGUI);
 
-// 4. Add the class 'red-highlight' of tile #3 in this graphical representation
-topology.addClassToTile(topologyGUI, 3, 'red-highlight');
+// 4. Add the class 'red-highlight' to tile #3 in this graphical representation
+seatmap.addClassToTile(seatmapGUI, 3, 'red-highlight');
 ```
 
-#### Server side
+#### ServerSeatmap
 
-{% assign method = 'constuctor' %}
-{% assign argument = 'params' %}
-{% assign type = 'Object' %}
-{% include includes/method.md %}
+The `ServerSeatmap` modules takes care of the seatmap on the server side.
 
-The constructor method takes the `params` object as an argument with the following properties:
+- `constructor(options:Object)`  
+  The `constructor` method instantiates the `ServerSeatmap` module on the client side. It takes the `options` (mandatory) object as an argument, whose properties are:
+  - `type:String = 'matrix'`  
+    This parameter indicates the type of seatmap to generate. The currently supported values are:
+    - `'matrix'`: creates a grid of `params.cols` columns and `params.rows` rows.
+    - (will probably add `'csv'` soon)
+  - `cols:Number = 3`  
+    In the case where the seatmap type is a `'matrix'`, this parameter indicates the number of columns the matrix has.
+  - `rows:Number = 4`  
+    In the case where the seatmap type is a `'matrix'`, this parameter indicates the number of rows the matrix has.
+  - `colSpacing:Number = 2`  
+    In the case where the seatmap type is a `'matrix'`, this parameter indicates the physical distance between 2 columns of the matrix, in meters.
+  - `rowSpacing:Number = 2`  
+    In the case where the seatmap type is a `'matrix'`, this parameter indicates the physical distance between 2 rows of the matrix, in meters.
+  - `colMargin:Number = colSpacing / 2`  
+    In the case where the seatmap type is a `'matrix'`, this parameter indicates the physical distance between the venue space and the edge of the matrix (horizontally).
+  - `rowMargin:Number = rowSpacing / 2`  
+    In the case where the seatmap type is a `'matrix'`, this parameter indicates the physical distance between the venue space and the edge of the matrix (vertically).
+- `getNumPlaces() : Number`  
+  The `getNumPlaces` method returns a `Number` corresponding to the number of places of the seatmap. For instance, if the seatmap is a 4 ⨉ 5 matrix, this would return the number `20` (which is the result of 4 ⨉ 5). It doesn't get any argument.
+- `getLabel(index:Number) : String`  
+  The `getLabel` returns a `String` corresponding to the label of the place associated with the index `index` in the seatmap.
 
-- `type:String = 'matrix'`  
-  This parameter indicates the type of topology to generate. The currently supported values are:
-  - `'matrix'`: creates a grid of `params.cols` columns and `params.rows` rows.
-  - (will probably add `'csv'` soon)
-
-- `cols:Number = 3`  
-  In the case where the topology type is a `'matrix'`, this parameter indicates the number of columns the matrix has.
-
-- `rows:Number = 4`  
-  In the case where the topology type is a `'matrix'`, this parameter indicates the number of rows the matrix has.
-
-- `colSpacing:Number = 2`  
-  In the case where the topology type is a `'matrix'`, this parameter indicates the physical distance between 2 columns of the matrix, in meters.
-
-- `rowSpacing:Number = 2`  
-  In the case where the topology type is a `'matrix'`, this parameter indicates the physical distance between 2 rows of the matrix, in meters.
-
-- `colMargin:Number = colSpacing / 2`  
-  In the case where the topology type is a `'matrix'`, this parameter indicates the physical distance between the venue space and the edge of the matrix (horizontally).
-
-- `rowMargin:Number = rowSpacing / 2`  
-  In the case where the topology type is a `'matrix'`, this parameter indicates the physical distance between the venue space and the edge of the matrix (vertically).
-
-Below is an example of the instantiation of the `Topology` module on the server side.
+Below is an example of the instantiation of the `ServerSeatmap` module on the server side.
 
 ```javascript
+/* Server side */
+
 var serverSide = require('soundworks/server');
 
-// Creating a matrix topology with 4 columns and 5 rows
-var toplogy = new serverSide.Topology({ cols: 4, rows: 5 });
+// Creating a matrix seatmap with 4 columns and 5 rows
+var toplogy = new serverSide.Seatmap({ type: 'matrix', cols: 4, rows: 5 });
 ```
-
-{% assign method = 'getNumPlaces' %}
-{% assign argument = '' %}
-{% assign type = '' %}
-{% include includes/method.md %}
-
-This method returns the number (type `:Number`) of places of the topology. For instance, if the topology is a 4 ⨉ 5 matrix, this would return the number `20` (which is the result of 4 ⨉ 5).
-
-{% assign method = 'getLabel' %}
-{% assign argument = 'index' %}
-{% assign type = 'Number' %}
-{% include includes/method.md %}
-
-This method returns the label of the place associated with the index `index` in the topology.
-
 ## Examples
 
 Let's build a simple scenario using *Soundworks*, that we'll call *Beats*. In *Beats*, all the players regularly emit a (high pitched) sound at the same time.
