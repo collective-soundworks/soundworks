@@ -8,13 +8,16 @@
   - [How to write a module?](#how-to-write-a-module)
   - [How to write a scenario?](#how-to-write-a-scenario)
 - [**API**](#api)
-  - [Client (server side)](#client-server-side)
-  - [Dialog (client side)](#dialog-client-side)
-  - [Loader (client side)](#loader-client-side)
-  - [Orientation (client side)](#orientation-client-side)
-  - [Checkin](#checkin)
-  - [Sync](#sync)
-  - [Seatmap](#seatmap)
+  - [Client only modules](#client-only-modules)
+    - [ClientDialog](#clientdialog)
+    - [ClientLoader](#clientloader)
+    - [ClientOrientation](#clientorientation)
+  - [Server only modules](#slient-only-modules)
+    - [ServerClient](#serverclient)
+  - [Client and server modules](#client-and-server-modules)
+    - [Checkin](#checkin)
+    - [Sync](#sync)
+    - [Seatmap](#seatmap)
 - [**Examples**](#examples)
 
 ## Overview
@@ -317,24 +320,24 @@ Indeed, on the client side, the `player` clients initialized the modules `welcom
 
 ## API
 
-This sections explains how to use the classes of the library: how to initialize them, what arguments to pass to the constructors, how to use the public methods, etc.
+This sections explains how to use the classes of the library. In particular, we list here all the methods and attributes you may need to use at some point.
 
-Most of the classes have a module on the server **and** client sides:
-
-- [`Module`](#module)
-- [`Checkin`](#checkin)
-- [`Sync`](#sync)
-- [`Seatmap`](#seatmap)
-
-However, some classes only have a server side:
-
-- [`Client`](#client)
-
-And some of them are only present on the client side:
+Some classes are only present on the [client side](#client-only-modules):
 
 - [`Dialog`](#dialog)
 - [`Loader`](#loader)
 - [`Orientation`](#orientation)
+
+Others are only present on the [server side](#server-only-modules):
+
+- [`Client`](#client)
+
+The rest of the classes require both the [client **and** server sides](#client-and-server-modules):
+
+- [`Checkin`](#checkin)
+- [`Module`](#module)
+- [`Seatmap`](#seatmap)
+- [`Sync`](#sync)
 
 ### Client only modules
 
@@ -370,7 +373,7 @@ The `ClientLoader` module allows to load audio files that can be used in other m
 ###### Methods
 
 - `constructor(audioFiles:Array)`  
-  The constructor method instantiates the `ClientLoader` module on the client side. It takes the `audiofiles` array as an argument. The `audiofiles` array contains the links (`String`) to the audio files you want to load.
+  The constructor method instantiates the `ClientLoader` module on the client side. It takes the `audiofiles` array as an argument. The `audiofiles` array contains the links (`String`) to the audio files to be loaded.
 
 #### ClientOrientation
 
@@ -475,60 +478,6 @@ var checkin = new serverSide.Checkin({ seatmap: toplogy });
 var checkin = new serverSide.Checkin({ numPlaces: 500, order: 'ascending' });
 ```
 
-#### Sync
-
-The `Sync` module is responsible for synchronizing the clients' clocks on the server clock, so that the server and all the clients share a common clock.
-
-For instance, this allows all the clients to do something exactly at the same time, such as displaying a color on the screen or playing a snare sound in a synchronized manner.
-
-The `Sync` module does a first synchronization process after which the `ClientSync` emits the `"done"` event. Later on, the `Sync` module keeps resynchronizing the client and server clocks at random intervals to compensate the clock drift.
-
-On the client side, `ClientSync` uses the `audioContext` clock. On the server side, `ServerSync` uses the `process.hrtime()` clock. All times are in seconds (method arguments and returned values). **All time calculations and exchanges should be expressed in the server clock time.** The client clock time should be used only at the very end on the client, with the `audioContext`.
-
-##### ClientSync
-
-The `ClientSync` modules takes care of the synchronization process on the client side. It displays a `view` that indicates “Clock syncing, stand by…” until the very first synchronization process is `"done"`.
-
-###### Methods
-
-- `constructor()`  
-  The `constructor` method instantiates the `ClientSync` modules on the client side. it doesn't take any arguments.
-- `getLocalTime(serverTime:Number = undefined) : Number`  
-  The `getLocalTime` method returns the time in the client clock when the server clock reaches `serverTime`. If no arguments are provided, the method returns the time is is when the method is called, in the client clock (*i.e.* `audioContext.currentTime`). The returned time is a `Number`, in seconds.
-- `getServerTime(localTime:Number = audioContext.currentTime) : Number`  
-  The `getServerTime` method returns the time in the server clock when the client clock reaches `clientTime`. If no arguments are provided, the method returns the time is is when the method is called, in the server clock. The returned time is a `Number`, in seconds.
-
-Below is an example of an instantiation of the `Sync` module.
-
-```javascript
-/* Client side */
-
-var clientSide = require('soundworks/client');
-var sync = new clientSide.Sync();
-
-var nowClient = sync.getLocalTime(); // current time in client clock time
-var nowServer = sync.getServerTime(); // current time in server clock time
-```
-##### ServerSync
-
-###### Methods
-
-- `constructor()`  
-  The `constructor` method instantiates the `ServerSync` module on the server side. It takes no arguments.
-- `getLocalTime()`  
-  The `getLocalTime` method returns the current time in the server clock (*i.e.* a conversion of `process.hrtime()` in seconds). The returned time is a `Number`, in seconds.  
-
-Below is an example of the instantiation of the `Sync` module on the server side.
-
-```javascript
-/* Server side */
-
-var serverSide = require('soundworks/server');
-var sync = new serverSide.Sync();
-
-var now = sync.getLocalTime() // current time in the server clock time
-```
-
 #### Seatmap
 
 The `Seatmap` module contains the information about the physical locations of the available places in the scenario. The location is fixed and determined in advance.
@@ -546,7 +495,7 @@ The `ClientSeatmap` modules takes care of the seatmap on the client side.
 ###### Methods
 
 - `constructor()`  
-  The `constructor` method instantiates the `ClientSeatmap` module on the client side. It doesn't take any argument.
+  The `constructor` method instantiates the `ClientSeatmap` module on the client side.
 - `displaySeatmap(div:Element)`  
   The `displaySeatmap` method displays a graphical representation of the seatmap in the `div` DOM element provided as an argument.
 - `addClassToTile(seatmapDisplay:Element, index: Number, className:String = 'player')`  
@@ -573,12 +522,14 @@ seatmap.displaySeatmap(seatmapGUI);
 seatmap.addClassToTile(seatmapGUI, 3, 'red-highlight');
 ```
 
-#### ServerSeatmap
+##### ServerSeatmap
+
+###### Methods
 
 The `ServerSeatmap` modules takes care of the seatmap on the server side.
 
 - `constructor(options:Object)`  
-  The `constructor` method instantiates the `ServerSeatmap` module on the client side. It takes the `options` (mandatory) object as an argument, whose properties are:
+  The `constructor` method instantiates the `ServerSeatmap` module on the client side. It takes the `options` object as a mandatory argument, whose properties are:
   - `type:String = 'matrix'`  
     This parameter indicates the type of seatmap to generate. The currently supported values are:
     - `'matrix'`: creates a grid of `params.cols` columns and `params.rows` rows.
@@ -610,6 +561,61 @@ var serverSide = require('soundworks/server');
 // Creating a matrix seatmap with 4 columns and 5 rows
 var toplogy = new serverSide.Seatmap({ type: 'matrix', cols: 4, rows: 5 });
 ```
+
+#### Sync
+
+The `Sync` module is based on [`sync`](https://github.com/collective-soundworks/sync) and is responsible for synchronizing the clients' clocks on the server clock, so that the server and all the clients share a common clock.
+
+For instance, this allows all the clients to do something exactly at the same time, such as displaying a color on the screen or playing a snare sound in a synchronized manner.
+
+The `Sync` module does a first synchronization process after which the `ClientSync` emits the `"done"` event. Later on, the `Sync` module keeps resynchronizing the client and server clocks at random intervals to compensate the clock drift.
+
+On the client side, `ClientSync` uses the `audioContext` clock. On the server side, `ServerSync` uses the `process.hrtime()` clock. All times are in seconds (method arguments and returned values). **All time calculations and exchanges should be expressed in the server clock time.** The client clock time should be used only at the very end on the client, with the `audioContext`.
+
+##### ClientSync
+
+The `ClientSync` modules takes care of the synchronization process on the client side. It displays a `view` that indicates “Clock syncing, stand by…” until the very first synchronization process is `"done"`.
+
+###### Methods
+
+- `constructor()`  
+  The `constructor` method instantiates the `ClientSync` modules on the client side.
+- `getLocalTime(serverTime:Number = undefined) : Number`  
+  The `getLocalTime` method returns the time in the client clock when the server clock reaches `serverTime`. If no arguments are provided, the method returns the time is is when the method is called, in the client clock (*i.e.* `audioContext.currentTime`). The returned time is a `Number`, in seconds.
+- `getServerTime(localTime:Number = audioContext.currentTime) : Number`  
+  The `getServerTime` method returns the time in the server clock when the client clock reaches `clientTime`. If no arguments are provided, the method returns the time is is when the method is called, in the server clock. The returned time is a `Number`, in seconds.
+
+Below is an example of an instantiation of the `Sync` module.
+
+```javascript
+/* Client side */
+
+var clientSide = require('soundworks/client');
+var sync = new clientSide.Sync();
+
+var nowClient = sync.getLocalTime(); // current time in client clock time
+var nowServer = sync.getServerTime(); // current time in server clock time
+```
+##### ServerSync
+
+###### Methods
+
+- `constructor()`  
+  The `constructor` method instantiates the `ServerSync` module on the server side.
+- `getLocalTime()`  
+  The `getLocalTime` method returns the current time in the server clock (*i.e.* a conversion of `process.hrtime()` in seconds). The returned time is a `Number`, in seconds.  
+
+Below is an example of the instantiation of the `Sync` module on the server side.
+
+```javascript
+/* Server side */
+
+var serverSide = require('soundworks/server');
+var sync = new serverSide.Sync();
+
+var now = sync.getLocalTime() // current time in the server clock time
+```
+
 ## Examples
 
 Let's build a simple scenario using *Soundworks*, that we'll call *Beats*. In *Beats*, all the players regularly emit a (high pitched) sound at the same time.
