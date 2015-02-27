@@ -338,16 +338,16 @@ And some of them are only present on the client side:
 
 ### Client only modules
 
-##### ClientDialog
+#### ClientDialog
 
 The `ClientDialog` module displays a dialog on the screen, and requires the user to click the screen to make the module disappear.
 
-###### Attributes
+##### Attributes
 
 - `view:Element`  
   The view is the div in which the content of the module is displayed.
 
-###### Methods
+##### Methods
 
 - `constructor(options:Object = {})`  
   The constructor method takes the `options` object as an argument, whose properties are:
@@ -358,7 +358,7 @@ The `ClientDialog` module displays a dialog on the screen, and requires the user
   - `activateAudio:Boolean = false`  
     If set to `true`, the module with activate the Web Audio API when the user clicks the screen (useful on iOS, where sound is muted until a user action triggers some audio commands).
 
-##### ClientLoader
+#### ClientLoader
 
 The `ClientLoader` module allows to load audio files that can be used in other modules (for instance, the performance module). The `Loader` module displays a loading bar that indicates the progress of the loading.
 
@@ -376,16 +376,17 @@ The `ClientLoader` module allows to load audio files that can be used in other m
 
 The `ClientOrientation` module allows to calibrate the compass and get and angle reference. It displays the view, that the user clicks on when he / she points at the right direction for the calibration.
 
-##### Attributes
+###### Attributes
 
 - `angleReference:Number`  
   The `angleReference` attribute is the value of the alpha angle (as in `deviceOrientation`) when the user clicks on the screen while the Orientation module is displayed. It serves as a calibration / reference of the compass.
 - `view:Element`  
   The view is the div in which the content of the module is displayed.
-##### Methods
+
+###### Methods
 
 - `constructor(options:Object = {})`  
-  The constructor method takes the `options` object as an argument, whose properties are:
+  The constructor method takes the `options` object as an argument, whose optional property is:
   - `text:String = "Point the phone exactly in front of you, and touch the screen."`
     The text to be displayed on the dialog.
 
@@ -395,7 +396,7 @@ The `ClientOrientation` module allows to calibrate the compass and get and angle
 
 The `ServerClient` module is used to keep track of the connected clients. Each time a client connects to the server, *Soundworks* creates an instance of `ServerClient`.
 
-##### Attributes
+###### Attributes
 
 - `data:Object = {}`  
   The `data` attribute can be used by any module to store any useful information that any module might need at some point, or that might need to be sent to the clients. The convention is to create a property for each module that writes into this attribute. For instance, if the `sync` module keeps track of the time offset between this client's clock and the server clock, it would store the information in `this.data.sync.timeOffset`. Similarly, if the `performance` module needs some kind of flag for each client, it would store this information in `this.data.performance.flag`.
@@ -405,10 +406,6 @@ The `ServerClient` module is used to keep track of the connected clients. Each t
   The `socket` attribute stores the socket that sets the communication channel between the server and this client, as passed in by the `constructor`.
 
 ### Client and server modules
-
-
-
-
 
 #### Checkin
 
@@ -420,20 +417,18 @@ Similarly, if the scenario takes place in a theater where seats are numbered, th
 
 Or, if the scenario doesn't require the players to sit at particular locations, the `Checkin` module would just assign them indices within the range of total number of users this scenario supports.
 
-#### Client side
+##### ClientCheckin
 
-{% assign method = 'constuctor' %}
-{% assign argument = 'params' %}
-{% assign default = '{}' %}  
-{% assign type = 'Object' %}
-{% include includes/method.md %}
+The `ClientCheckin` takes care of the checkin on the client side.
 
-The constructor method takes the `params` object as an argument. The only currently supported property is:
+###### Methods
 
-- `display:Boolean = false`     
-  When set to `true`, the module displays a dialog with the checkin information for the user. The user has to click on the dialog to indicate that the checkin process is `"done"`.
+- `constructor(options:Object = {})`  
+  The `constructor` method takes the `options` object as an argument, whose optional property is:
+  - `display:Boolean = false`  
+    When set to `true`, the module displays a dialog with the checkin information for the user. The user has to click on the dialog to indicate that the checkin process is `"done"`.
 
-Below is an example of an instantiation of the `Checkin` module that displays the dialog.
+Below is an example of an instantiation of the `ClientCheckin` module that displays the dialog on the client side.
 
 ```javascript
 var clientSide = require('soundworks/client');
@@ -441,45 +436,31 @@ var clientSide = require('soundworks/client');
 var checkin = new clientSide.Checkin({ display: true });
 ```
 
-{% assign method = 'getPlaceInfo' %}
-{% assign argument = '' %}
-{% assign type = '' %}
-{% assign return = 'Object' %}
-{% include includes/method.md %}
+- `getPlaceInfo() : Object`  
+  The `getPlaceInfo` method returns an object with the checkin information. The returned object returned has two properties:
+  - `index:Number`
+    The index of the client.
+  - `label:String`  
+    The label of the place corresponding to that index.
 
-This method returns an object with the checkin information. The object returned has two properties:
+##### ServerCheckin
 
-- `index:Number`    
-  The index of the client.
+The `ServerCheckin` takes care of the checkin on the server side.
 
-- `label:String`    
-  The label of the place corresponding to that index.
+- `constructor(options:Object = {})`  
+  The `constructor` method takes the `options` object as an argument, **that must have either a `topology` or a `numPlaces` property: these options are mutually exclusive, but one of them is required**. The properties supported by `options` are:
+  - `topology:ServerTopology = null`  
+    The topology associated with the scenario. If a topology is provided (for instance because the venue where the scenario is taking place provides seats with predetermined locations), this module assigns places among the places available in the `topology`. Otherwise (no topology provided), the user must indicate the maximum number of players allowed in this scenario with the property `numPlaces`.
+  - `numPlaces:Number = 9999`  
+    If `options` has no `topology` attribute, it must have a `numPlaces` attribute that indicates the maximum number of players allowed in the performance. In that case, the module allocates indices to each client that connects, until the total number of connected clients reaches `numPlaces`.
+  - `order:String = 'random'`  
+    Order in which places indices are assigned. Currently supports two values:
+    - `'random'`  
+      Places are chosen randomly among the available indices.
+    - `'ascending'`   
+      Places are chosen in ascending order among the available indices.
 
-#### Server side
-
-{% assign method = 'constuctor' %}
-{% assign argument = options %}
-{% assign type = 'Object' %}
-{% include includes/method.md %}
-
-The constructor method takes the `params` object as an argument, **that must have either a `topology` or a `numPlaces` property: these options are mutually exclusive, but one of them is required**. The properties supported by `options` are:
-
-- `topology:ServerTopology = null`  
-  The topology associated with the scenario. If a topology is provided (for instance because the venue where the scenario is taking place provides seats with predetermined locations), this module assigns places among the places available in the `topology`. Otherwise (no topology provided), the user must indicate the maximum number of players allowed in this scenario with the property `numPlaces`.
-
-- `numPlaces:Number = 9999`     
-  If `options` has no `topology` attribute, it must have a `numPlaces` attribute that indicates the maximum number of players allowed in the performance. In that case, the module allocates indices to each client that connects, until the total number of connected clients reaches `numPlaces`.
-
-- `order:String = 'random'`    
-  Order in which places indices are assigned. Currently supports two values:
-
-  - `'random'`  
-    Places are chosen randomly among the available indices.
-
-  - `'ascending'`   
-    Places are chosen in ascending order among the available indices.
-
-Below is an example of the instantiation of the `Checkin` module on the server side.
+Below is an example of the instantiation of the `ServerCheckin` module on the server side.
 
 ```javascript
 var serverSide = require('soundworks/server');
