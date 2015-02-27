@@ -344,12 +344,12 @@ The `ClientDialog` module displays a dialog on the screen, and requires the user
 
 ##### Attributes
 
-- **`view:Element`**
+- `view:Element`  
   The view is the div in which the content of the module is displayed.
 
 ##### Methods
 
-- **`constructor(options:Object = {})`**
+- `constructor(options:Object = {})`  
   The constructor method takes the `options` object as an argument, whose properties are:
   - `id:String = 'dialog'`  
     The ID of the dialog, that will be used as the `id` HTML attribute of the `this.view`.
@@ -364,12 +364,12 @@ The `ClientLoader` module allows to load audio files that can be used in other m
 
 ##### Attributes
 
-- **`audioBuffers:Array = []`**
+- `audioBuffers:Array = []`  
   The `audioBuffers` array contains the audio buffers created from the audio files passed in the `constructor`.
 
 ##### Methods
 
-- **`constructor(audioFiles:Array)`**
+- `constructor(audioFiles:Array)`  
   The constructor method takes the `audiofiles` array as an argument. The `audiofiles` array contains the links (`String`) to the audio files you want to load.
 
 #### ClientOrientation
@@ -378,13 +378,13 @@ The `ClientOrientation` module allows to calibrate the compass and get and angle
 
 ##### Attributes
 
-- **`angleReference:Number`**
+- `angleReference:Number`  
   The `angleReference` attribute is the value of the alpha angle (as in `deviceOrientation`) when the user clicks on the screen while the Orientation module is displayed. It serves as a calibration / reference of the compass.
-- **`view:Element`**
+- `view:Element`  
   The view is the div in which the content of the module is displayed.
 ##### Methods
 
-- **`constructor(options:Object = {})`**
+- `constructor(options:Object = {})`  
   The constructor method takes the `options` object as an argument, whose properties are:
   - `text:String = "Point the phone exactly in front of you, and touch the screen."`
     The text to be displayed on the dialog.
@@ -397,11 +397,11 @@ The `ServerClient` module is used to keep track of the connected clients. Each t
 
 ##### Attributes
 
-- **`data:Object = {}`**  
+- `data:Object = {}`  
   The `data` attribute can be used by any module to store any useful information that any module might need at some point, or that might need to be sent to the clients. The convention is to create a property for each module that writes into this attribute. For instance, if the `sync` module keeps track of the time offset between this client's clock and the server clock, it would store the information in `this.data.sync.timeOffset`. Similarly, if the `performance` module needs some kind of flag for each client, it would store this information in `this.data.performance.flag`.
-- **`index:Number`**  
+- `index:Number`  
   The `index` attribute stores the index of the client as set by the `ServerCheckin` module. See `ServerCheckin` for more information.
-- **`socket:Socket`**
+- `socket:Socket`  
   The `socket` attribute stores the socket that sets the communication channel between the server and this client, as passed in by the `constructor`.
 
 ### Client and server modules
