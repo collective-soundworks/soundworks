@@ -2,7 +2,7 @@
 
 ## Table of contents
 
-- [**Overview**](#overview)
+- [**Overview & how to get started**](#overview--how-to-get-started)
   - [Server / client architecture](#server--client-architecture)
   - [A *Soundworks* scenario is exclusively made of modules](#a-soundworks-scenario-is-exclusively-made-of-modules)
   - [How to write a module?](#how-to-write-a-module)
@@ -20,7 +20,7 @@
     - [Seatmap](#seatmap)
 - [**Examples**](#examples)
 
-## Overview
+## Overview & how to get started
 
 *Soundworks* is a Javascript framework that enables artists and developers to create collaborative music performances where a group of participants distributed in space use their smartphones to generate sound and light through touch and motion.
 
@@ -74,7 +74,9 @@ client.start(
 );
 ```
 
-To run a sequence of modules in serial, we use `client.serial(module1, module2, ...)`. A module would `.start()` only after the previous one is `.done()`. On the other hand, if some modules need to be run in parallel, we use `client.parallel(module1, module2, ...)`. The parallel process triggers a global `.done()` method when all of its modules are `.done()`.
+To run a sequence of modules in serial, we use `client.serial(module1, module2, ...)`. A module would `.start()` only after the previous one is `.done()`.
+
+On the other hand, if some modules need to be run in parallel, we use `client.parallel(module1, module2, ...)`. The parallel process triggers a global `.done()` method when all of its modules are `.done()`. If the modules have a `view` (*i.e.* if they display some information on the screen), the `view` of a module is created in the DOM when the `.start()` method is called, and is removed from the DOM when the `.done()` method is called. The `view` of a module is always full screen, so in the case of modules run in parallel, the views are stacked on top of each other (using the `z-index` CSS property) in the order of the modules (`module1` is on top of `module2` which is on top of `module3`, etc.). For instance, say `module3` triggers its `.done()` method before `module2`: its `view` would be removed before the one of `module2`, so the user would never see the `view` of `module3` (the full screen views would directly pass from `module2` to `module4`).
 
 Some of these modules need an interaction with the server (for instance, the `sync` process requires a dialog between the server and the client to synchronize the clocks). Thus, we activate all the modules that each `player` will need to talk to thanks to the `server.map()` method: on the server side, we would write the following code.
 
@@ -476,6 +478,88 @@ var checkin = new serverSide.Checkin({ seatmap: toplogy });
 
 // Case 2: the scenario does not have a seatmap
 var checkin = new serverSide.Checkin({ numPlaces: 500, order: 'ascending' });
+```
+
+#### Module
+
+The `Module` server and client classes are the base classes that any *Soundworks* module is based on.
+
+##### ClientModule
+
+The `ClientModule` extends the `EventEmitter` class. Each module should have a `.start()` and a `.done()` method, as explained in [How to write a module](#how-to-write-a-module). The `.done()` method must be called when the module has done its duty.
+
+###### Attributes
+
+- `view`  
+  The `view` attribute of the module is the DOM element (a full screen `div`) in which the content is displayed. A module may or may not have a `view`, as indicated by the argument `hasDisplay:Boolean` of the `constructor`.
+
+###### Methods
+
+- `constructor(id:String, hasDisplay:Boolean = true)`  
+  The `constructor` method instantiates the `ClientModule` module on the client side. It takes two arguments:
+  - `id:String`  
+    The `id` of the the `this.view` DOM element.
+  - `hasDisplay:Boolean = true`  
+    When set to `true`, the module creates the `this.view` DOM element with the id `id`.  
+- `start()`  
+  The `.start()` method is automatically called to start the module, and should handle the logic of the module on the client side. For instance, it takes care of the communication with the module on the server side by sending WebSocket messages and setting up WebSocket message listeners.
+- `done()`  
+  The `.done()` method should be called when the module has done its duty (for instance at the end of the `.start()` method you write). You should not have to modify this method, but if you do, don't forget to include `super.done()` at the end.
+
+In practice, here is how you would extend this class to create a module on the client side.
+
+```javascript
+/* Client side */
+
+var clientSide = require('soundworks/client');
+
+class MyModule extends clientSide.Module {
+  constructor() {
+    super('my-module', true); // here, MyModule would always have a view, with the id 'my-module'
+
+    ... // anything the constructor needs
+  }
+
+  start() {
+    super.start();
+
+    ... // what the module has to do (communication with the server, etc.)
+    this.done(); // call this method when the duty of the module is done
+  }
+}
+```
+
+##### ServerModule
+
+The `ServerModule` extends the `EventEmitter` class.
+
+###### Methods
+
+- `constructor()`  
+  The `constructor` method instantiates the `ServerModule` module on the server side.
+- `connect(client:ServerClient)`  
+  The `connect` method is automatically called when the client `client` connects to the server, and should handle the logic of the module on the server side. For instance, it takes care of the communication with the module on the client side by setting up WebSocket message listeners and sending WebSocket messages, or adds the client to a client's list to keep track of all the connected clients.
+- `disconnect(client:ServerClient)`  
+  The `disconnect` method is automatically called when the client `client` disconnects from the server, and should do the necessary when that happens. For instance, it removes the client from the client's list of the connected clients.
+
+```javascript
+/* Server side */
+
+var serverSide = require('soundworks/server);
+
+class MyModule extends serverSide.Module {
+  constructor() {
+    ... // anything the constructor needs
+  }
+
+  connect() {
+    ... // what the module has to do when a client connects to the server
+  }
+
+  disconnect() {
+    ... // what the module has to do when a client disconnects from the server
+  }
+}
 ```
 
 #### Seatmap
