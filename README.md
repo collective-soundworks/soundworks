@@ -16,8 +16,9 @@
     - [ServerClient](#serverclient)
   - [Client and server modules](#client-and-server-modules)
     - [Checkin](#checkin)
-    - [Sync](#sync)
+    - [Module](#module)
     - [Seatmap](#seatmap)
+    - [Sync](#sync)
 - [**Examples**](#examples)
 
 ## Overview & how to get started
@@ -196,6 +197,8 @@ disconnect(client) {
   ... // the rest of the method
 }
 ```
+
+You will find [additional information about the `Module` classes in the API section](#module).
 
 ### How to write a scenario?
 
@@ -473,8 +476,8 @@ Below is an example of the instantiation of the `ServerCheckin` module on the se
 var serverSide = require('soundworks/server');
 
 // Case 1: the scenario has a seatmap
-var seatmap = new serverSide.Seatmap({ cols: 3, rows: 4 });
-var checkin = new serverSide.Checkin({ seatmap: toplogy });
+var seatmap = new serverSide.Seatmap({ type: 'matrix', cols: 3, rows: 4 });
+var checkin = new serverSide.Checkin({ seatmap: seatmap });
 
 // Case 2: the scenario does not have a seatmap
 var checkin = new serverSide.Checkin({ numPlaces: 500, order: 'ascending' });
@@ -541,6 +544,8 @@ The `ServerModule` extends the `EventEmitter` class.
   The `connect` method is automatically called when the client `client` connects to the server, and should handle the logic of the module on the server side. For instance, it takes care of the communication with the module on the client side by setting up WebSocket message listeners and sending WebSocket messages, or adds the client to a client's list to keep track of all the connected clients.
 - `disconnect(client:ServerClient)`  
   The `disconnect` method is automatically called when the client `client` disconnects from the server, and should do the necessary when that happens. For instance, it removes the client from the client's list of the connected clients.
+
+In practice, here is how you would extend this class to create a module on the server side.
 
 ```javascript
 /* Server side */
