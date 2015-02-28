@@ -19,7 +19,7 @@
     - [Module](#module)
     - [Seatmap](#seatmap)
     - [Sync](#sync)
-- [**Examples**](#examples)
+- [**Example**](#example)
 
 ## Overview & how to get started
 
@@ -741,7 +741,7 @@ On the client side, there are two things we need to do: write the Javascript cod
 
 Let's start with the easy part, the EJS file located in `beats/views/player.ejs`.
 
-```ejs
+```html
 <!doctype html5>
 <html>
   <head>
@@ -882,7 +882,7 @@ class MyPerformance extends clientSide.Module {
 
 Then, we write the `.start()` method that is called when the performance starts. We want that method to tell the server that the client just started the performance (`client.socket.emit('perf_start');`), and to play a sound on the server's command (`client.socket.on('play_sound', callback)`). (Note: we could directly play the sound in the start method, but we show some client / server communication here for the the purpose of the tutorial.) In theory, we would also need to call the '.done()' method when the purpose of this module is done, but since the performance is the last thing that happens in *My Scenario*, we don't need to do it.
 
-```javacript
+```javascript
 class MyPerformance extends clientSide.Module {
   ... // the constructor
 
@@ -948,55 +948,52 @@ window.addEventListener('load', () => {
 On the server side, we now edit the file `src/serv/index.es6.js`. First, we require the libraries and set up the Express app.
 
 ```javascript
-// Require the libraries and setup the Express app
+// Soundworks library
 var serverSide = require('soundworks/server');
 var server = serverSide.server;
-var path = require('path');
+
+// Express application
 var express = require('express');
 var app = express();
-
-// Configuration of the Express app
-app.set('port', process.env.PORT || 3000);
-app.set('view engine', 'ejs');
-app.use(express.static(path.join(__dirname, '../../public')));
+var path = require('path');
+var dir = path.join(__dirname, '../../public');
 ```
 
-Then, we setup the modules that the client needs to communicate with. In this example, there is only the `Sync` module.
+Then, we setup the modules that the client needs to communicate with. In this example, there is the `Checkin` module, and the performance module we'll need to write ourselves.
+
+For the `Checkin` module, since we don't need a map of the seats or anything like that, we just indicate the maximum number of players this performance allows, and the order in which the module assigns the indices.
 
 ```javascript
-var sync = new serverSide.Sync();
+var checkin = new serverSide.Checkin(
+  numPlaces: 1000, // we accept a maximum of 1000 players
+  order: 'ascending' // we assign the indices in ascending order
+);
 ```
 
-Finally, we have to write the performance module. There we go.
+Finally, we have to write the performance module. The `.connect(client)` method is called when the client `client` connects to the server: when that happens, we simply send a WebSocket message back when the server receives a message from the client indicating that it started the performance. In this example, nothing needs to be done when the client disconnects from the server.
 
 ```javascript
-class BeatsPerformance extends serverSide.Module {
-  constructor() {
-    var now = process.hrtime();
-    this.startTime =  now[0] + now[1] * 0.000000001; // in seconds
-  }
+class MyPerformance extends serverSide.Module {
+  constructor() {}
 
   connect(client) {
-    var socket = client.socket;
-
-    socket.on('perf_start', () => {
-      socket.emit('beat_start', this.startTime);
+    client.socket.on('perf_start', () => {
+      client.socket.emit('play_sound');
     });
   }
 
   disconnect(client) {}
 }
+
 ```
 
-When the server get the client message indicating that the client is starting the performance, the server send back the beat loop start time.
-
-Finally, we instantiate the module, and start the server and map the `/player`namespace to the module we just set up.
+We can now instantiate the performance module, and start the server and map the `/player` namespace to the modules we just set up: this last command indicates that all clients connecting to the `/player` namespace (through the root URL) will need to communicate with the `checkin` and `performance` modules on the server side.
 
 ```javascript
-var performance = new BeatsPerformance()
+var performance = new MyPerformance()
 
-server.start(app);
-server.map('/player', 'Beats', sync, performance);
+server.start(app, dir, 8000); // start the application app, with the public directory dir, on port 8000
+server.map('/player', 'My Scenario', checkin, performance);
 ```
 
-
+Congratulations, you just created your first scenario! You will find the source code in the [`soundworks-template` repository](https://github.com/collective-soundworks/soundworks-template).
