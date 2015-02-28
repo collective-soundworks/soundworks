@@ -705,9 +705,9 @@ var sync = new serverSide.Sync();
 var now = sync.getLocalTime() // current time in the server clock time
 ```
 
-## Examples
+## Example
 
-Let's build a simple scenario using *Soundworks*, that we'll call *Beats*. In *Beats*, all the players regularly emit a (high pitched) sound at the same time.
+In this section, we will build a simple scenario using *Soundworks*, that we'll call *My Scenario*. In *My Scenario*, any client that connects to the server plays a sound when joining the performance.
 
 ### 1. Create a new *Soundworks* project
 
@@ -717,6 +717,8 @@ Let's create a new *Soundworks* project. It should have the basic structure of a
 beats/
 ├── public/
 │   ├── javascripts/
+│   ├── sounds/
+│       └── sound.mp3
 │   └── stylesheets/
 │       └── style.css
 ├── src/
@@ -775,15 +777,15 @@ The most important things here are:
 
 #### Writing our scenario in Javascript
 
-Now let's write the core of our scenario in the `src/player/index.es6.js` file.
+Now let's write the core of our scenario in the `src/player/index.es6.js` file. This is the file that is loaded by any client who connects to the server through the root URL `http://my-scenario-url:port/` (for instance, `http://localhost:8000` during the development).
 
-Step by step, this is how the scenario will look like when a user connects to the server:
+Step by step, this is how the scenario will look like when a user connects to the server through that URL:
 
-- The screen displays a welcome message that the user has to click on to enter the scenario,
-- There is a synchronization process so that the client and the server shares a common clock,
-- Finally, the user enters the performance where the smartphone emits a sound a regular invervals, synced with the other smartphones of the performance.
+- The screen displays a `welcome` message that the user has to click on to enter the scenario,
+- The clients has a `checkin` process with the server while a `loader` process loads the audio file to play,
+- Finally, the user enters the `performance` where the smartphone emits a recorded sound.
 
-First of all, let's load the library and initialize our WebSockets namespace (currently with `socket.io`).
+First of all, let's load the library and initialize our WebSockets namespace (currently, with `socket.io`).
 
 ```javascript
 // Loading the libraries
@@ -812,10 +814,15 @@ We can now initialize all the modules in this callback function. Let's review th
 The `welcome` module displays a text to welcome the users who connect to the server. We also ask the users to click on the screen to hide this screen and start the scenario. Under the hood, we use this click to activate the Web Audio API on iOS devices (on iOS, sound is muted until a user action triggers some audio commands). This is exactly what the `Dialog` module does.
 
 ```javascript
-var welcome = new clientSide.Dialog({
-  id: 'welcome',
-  text: "<p>Welcome to <b>Wandering Sound</b>.</p> <p>Touch the screen to join!</p>",
-  activateAudio: true
+window.addEventListener('load', () => {
+
+  var welcome = new clientSide.Dialog({
+    id: 'welcome',
+    text: "<p>Welcome to <b>My Scenario</b>.</p> <p>Touch the screen to join!</p>",
+    activateAudio: true
+  });
+
+  ... // the rest of the scenario logic
 });
 ```
 
@@ -827,58 +834,81 @@ Here:
 
 ***This step is required in almost any scenario you could imagine, at least to activate the Web Audio.***
 
-##### Sync module
+##### Checkin module
 
-The `sync` module synchronizes the client's clock on a clock shared by the server and all the other clients.
+The `Checkin` module allows the client to register on the server and to get an index that we can refer to later (like an ID). In some cases, the `Checkin` module could also assign a physical place to the client (for instance if the performance takes place in a theater and that the user has a precise seat), but this is not the case in this example. Thus, there are no informations to display, which is why we use the option `dialog: false`.
 
 ```javascript
-var sync = new clientSide.Sync();
+window.addEventListener('load', () => {
+  ... // what we've done already
+
+  var checkin = new clientSide.Checkin({ dialog: false });
+
+  ... // the rest of the scenario logic
+});
 ```
 
-Here too, there is nothing to configure.
+##### Loader module
+
+The `Loader` module allows the client to load audio files that are stored in a `audioBuffers` array.
+
+```javascript
+var file = ['sounds/sound.mp3']; // the path to the audio file in the public folder
+
+window.addEventListener('load', () => {
+  ... // what we've done already
+
+  var loader = new clientSide.Loader(file);
+
+  ... // the rest of the scenario logic
+});
+```
 
 ##### Performance module
 
-To create the performance, we will have to write our own module. Say we created a `Synth` class that has a method `.play(startTime, period)`: calling this method would trigger a sound when the Web Audio time (AudioContext.currentTime) reaches startTime, and call that method again So here we go.
+To create the performance, we have to write our own module `MyPerformance`. Let's start with the constructor. Since we want the performance to display something on the screen, we call `super('performance', true)`: this indicates that we want to create the `view` DOM element in a `<div>` with the `id` attribute being `'performance'` (please refer to [*How to write a module*](#how-to-write-a-module) and [*Module*](#module) for more information).
 
 ```javascript
-class BeatsPerformance extends clientSide.Module {
-  constructor(sync) {
-    this.sync = sync; // the sync module
-    this.beatPeriod = 0.5 // in seconds
-    this.synth = new Synth(); // a Web Audio synth that makes sound
+class MyPerformance extends clientSide.Module {
+  constructor(loader) {
+    super('performance', true);
 
-    // When the server sends the beat loop start time
-    client.on('beatStart', (startTime) => {
-      // Calculate the next beat trigger time in local time
-      var startTimeLocal = this.sync.getLocalTime(startTime);
-      var now = audioContext.currentTime;
-      var elapsedBeats = Math.floor((now - startTimeLocal) / this.beatPeriod);
-      var nextBeatTime = startTimeLocal + this.beatPeriod * elapsedBeats;
-
-      // Launch the synth at that time
-      this.synth.play(nextBeatTime, this.beatPeriod);
-    })
+    this.loader = loader; // the loader module
   }
+
+  ... // the rest of the class
+}
+```
+
+Then, we write the `.start()` method that is called when the performance starts. We want that method to tell the server that the client just started the performance (`client.socket.emit('perf_start');`), and to play a sound on the server's command (`client.socket.on('play_sound', callback)`). (Note: we could directly play the sound in the start method, but we show some client / server communication here for the the purpose of the tutorial.) In theory, we would also need to call the '.done()' method when the purpose of this module is done, but since the performance is the last thing that happens in *My Scenario*, we don't need to do it.
+
+```javacript
+class MyPerformance extends clientSide.Module {
+  ... // the constructor
 
   start() {
-    super.start();
+    super.start(); // mandatory
 
-    // Send a message to the server indicating that the user entered the performance
-    client.socket.emit('perf_start'); // 
-  }
-}
+    // Send a message to the server indicating that we started the performance
+    client.socket.emit('perf_start');
 
-class Synth {
-  constructor() {}
+    // Play a sound when we receive a message from the server
+    client.socket.on('play_sound', () => {
+      let bufferSource = audioContext.createBufferSource();
+      bufferSource.buffer = this.loader.audioBuffers[0]; // get the audioBuffers from the loader
+      bufferSource.connect(audioContext.destination);
+      bufferSource.start(audioContext.currentTime);
 
-  play(startTime, period) {
-    this.triggerSound(startTime);
-    this.play(startTime + period, period);
-  }
+      this.view.innerHTML = '<div class="centered-content">'
+        + 'Contratulations, you just played a sound!'
+        + </div>'; // display some feedback text in the view
 
-  triggerSound(startTime) {
-    // plays a sound when the Web Audio clock reaches startTime
+      /* We would usually call the .done() method when the module has done its duty,
+       * however since the performance is the last module to be called in this scenario,
+       * we don't need it.
+       */
+      // this.done(); 
+    });
   }
 }
 ```
@@ -886,17 +916,31 @@ class Synth {
 Now let's glue everything together.
 
 ```javascript
-// Instantiate the performance module
-var performance = new BeatsPerformance();
+window.addEventListener('load', () => {
+  // Instantiate the modules
+  var welcome = new clientSide.Dialog({
+    id: 'welcome',
+    text: "<p>Welcome to <b>My Scenario</b>.</p> <p>Touch the screen to join!</p>",
+    activateAudio: true
+  });
+  var checkin = new clientSide.Checkin({
+    dialog: false
+  });
+  var loader = new clientSide.Loader(file);
+  var performance = new MyPerformance(loader);
 
-// Start the scenario and link the modules
-client.start(
-  client.serial(
-    welcome,
-    sync,
-    performance
-  )
-);
+  // Start the scenario and link the modules
+  client.start(
+    client.serial(
+      client.parallel( // we launch in parallel the welcome module, the loading of the files, and the checkin
+        welcome,
+        loader,
+        checkin
+      ),
+      performance // when all of them are done, we launch the performance
+    )
+  );
+}
 ```
 
 #### 3. Server side
