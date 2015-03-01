@@ -996,4 +996,4 @@ server.start(app, dir, 8000); // start the application app, with the public dire
 server.map('/player', 'My Scenario', checkin, performance);
 ```
 
-Congratulations, you just created your first scenario! You will find the source code in the [`soundworks-template` repository](https://github.com/collective-soundworks/soundworks-template).
+Congratulations, you just created your first scenario! You will find the source code in the [`soundworks-template` repository](https://github.com/collective-soundworks/soundworks-template). To compile the files, just run the `gulp` command in the project folder in the Terminal, and you can access the scenario by going to the URL `http://localhost:8000/`.
