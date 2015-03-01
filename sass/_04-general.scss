@@ -1,0 +1,48 @@
+html, body {
+  height: 100%;
+}
+
+body {
+  background-color: $wet-asphalt;
+  color: rgba(255, 255, 255, 0.9);
+  font-family: 'Quicksand', 'Lato', 'Helvetica Neue', 'Helvetica', sans-serif;
+  font-size: 2rem;
+  line-height: 1.2rem;
+}
+
+.container {
+  min-height: 100%;
+  position: relative;
+}
+
+.module {
+  background-color: $wet-asphalt;
+  height: 100%;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
+  
+  .centered-content {
+    width: 80%;
+    margin: 1rem auto;
+    text-align: center;
+  }
+
+  p {
+    margin-bottom: 1rem;
+  }
+
+  p.small {
+    font-size: 0.5rem;
+    line-height: 1.2rem;
+  }
+}
+
+@each $value in $color-list {
+
+  .module.#{nth($value, 1)} {
+    background-color: nth($value, 2);
+  }
+
+}
