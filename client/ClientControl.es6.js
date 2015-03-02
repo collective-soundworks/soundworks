@@ -222,7 +222,7 @@ class ClientControl extends ClientModule {
   constructor(options = {}) {
     var hasGui = (options.gui === true);
 
-    super('control', hasGui);
+    super('control', hasGui, options.color || 'black');
 
     this.hasGui = hasGui;
     this.parameters = {};

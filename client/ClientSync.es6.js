@@ -10,17 +10,12 @@ var client = require('./client');
 
 class ClientSync extends ClientModule {
   constructor(options = {}) {
-    super('sync', true);
+    super('sync', true, options.color || 'black');
 
     this.sync = new Sync();
 
-    if (this.view) {
-      var contentDiv = document.createElement('div');
-      contentDiv.classList.add('centered-content');
-      this.view.appendChild(contentDiv);
-
-      contentDiv.innerHTML = "<p>Clock syncing, stand by…</p>";
-    }
+    super.createViewContent();
+    this.viewContent.innerHTML = "<p class='soft-blink'>Clock syncing, stand by…</p>";
   }
 
   start() {

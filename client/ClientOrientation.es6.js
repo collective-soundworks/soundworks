@@ -9,7 +9,7 @@ var input = require('./input');
 
 class ClientOrientation extends ClientModule {
   constructor(options = {}) {
-    super('orientation', true);
+    super('orientation', true, options.color || 'black');
 
     this.angleReference = 0;
 
@@ -25,10 +25,7 @@ class ClientOrientation extends ClientModule {
 
   start() {
     super.start();
-
-    var contentDiv = document.createElement('div');
-    contentDiv.classList.add('centered-content');
-    this.view.appendChild(contentDiv);
+    super.createViewContent();
 
     contentDiv.innerHTML = this.__text;
 

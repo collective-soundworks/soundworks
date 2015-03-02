@@ -1,6 +1,11 @@
+/* =======================================================
+ * COLORS
+ * ======================================================= */
+
 /**
- *  These color swatches were inspired by the swatches found in
- *  Flat UI Free, by designmodo. http://designmodo.com/flat-free/
+ * These color swatches were inspired by the swatches
+ * found in Flat UI, by designmodo.
+ * http://designmodo.com/flat-free/
  */
 
 $color-list: (
@@ -23,7 +28,9 @@ $color-list: (
   clouds           #ecf0f1,
   silver           #bdc3c7,
   concrete         #95a5a6,
-  asbestos         #7f8c8d
+  asbestos         #7f8c8d,
+  black            #000000,
+  white            #ffffff
 );
 
 $turquoise: #1abc9c;
@@ -46,3 +53,5 @@ $clouds: #ecf0f1;
 $silver: #bdc3c7;
 $concrete: #95a5a6;
 $asbestos: #7f8c8d;
+$black: #000000;
+$white: #ffffff;

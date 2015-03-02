@@ -9,26 +9,24 @@ var client = require('./client');
 var AudioBufferLoader = require('loaders').AudioBufferLoader;
 
 class ClientLoader extends ClientModule {
-  constructor(audioFiles) {
-    super('loader', true);
+  constructor(audioFiles, options = {}) {
+    super('loader', true, options.color || 'black');
 
-    this.audioFiles = audioFiles;
+    this.__audioFiles = audioFiles;
+    this.__fileProgress = [];
+
     this.audioBuffers = null;
-    this.fileProgress = [];
-    this.progress = 0
 
-    var contentDiv = document.createElement('div');
-    contentDiv.classList.add('centered-content');
-    this.view.appendChild(contentDiv);
+    super.createViewContent();
 
     var loadingText = document.createElement('p');
-    loadingText.classList.add('loading-text');
+    loadingText.classList.add('soft-blink');
     loadingText.innerHTML = "Loading files…";
-    contentDiv.appendChild(loadingText);
+    this.viewContent.appendChild(loadingText);
 
     var progressWrap = document.createElement('div');
     progressWrap.classList.add('progress-wrap');
-    contentDiv.appendChild(progressWrap);
+    this.viewContent.appendChild(progressWrap);
 
     var progressBar = document.createElement('div');
     progressBar.classList.add('progress-bar');
@@ -43,7 +41,7 @@ class ClientLoader extends ClientModule {
     var loader = new AudioBufferLoader();
     loader.progressCallback = this.__progressCallback.bind(this);
     
-    loader.load(this.audioFiles)
+    loader.load(this.__audioFiles)
       .then(
         (audioBuffers) => {
           this.audioBuffers = audioBuffers;
@@ -56,10 +54,10 @@ class ClientLoader extends ClientModule {
 
   __progressCallback(obj) {
     var progress = 0;
-    this.fileProgress[obj.index] = obj.value;
+    this.__fileProgress[obj.index] = obj.value;
 
-    for (let i = 0; i < this.fileProgress.length; i++) {
-      progress += this.fileProgress[i] / this.audioFiles.length;
+    for (let i = 0; i < this.__fileProgress.length; i++) {
+      progress += this.__fileProgress[i] / this.__audioFiles.length;
     }
 
     progress = Math.ceil(progress * 100);

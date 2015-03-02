@@ -1,8 +1,12 @@
+/* =======================================================
+ * FONTS
+ * ======================================================= */
+
 @mixin font-face($family, $weight, $file) {
   $filepath: "../fonts/" + $file;
   @font-face {
     font-family: "#{$family}";
-     weight: 
+    font-weight: $weight;
     src: url($filepath + ".ttf")  format('truetype');
   }
 }
