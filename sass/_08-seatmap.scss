@@ -6,16 +6,16 @@
   position: relative;
 
   .tile {
-    background-color: #333;
+    background-color: rgba($white, 0.1);
     border-radius: 50%;
     position: absolute;
 
     &.player {
-      background-color: #428BCA;
+      background-color: $belize-hole;
     }
 
     &.soloist, &.me {
-      background-color: #e74c3c;
+      background-color: $pomegranate;
     }
   }
 }

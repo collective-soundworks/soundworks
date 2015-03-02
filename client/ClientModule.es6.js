@@ -42,18 +42,12 @@ class ClientModule extends EventEmitter {
     }
   }
 
-  createViewContent() {
+  __createViewContent() {
     if (this.view) {
       let centeredDiv = document.createElement('div');
       centeredDiv.classList.add('centered-content');
       this.view.appendChild(centeredDiv);
       this.viewContent = centeredDiv;
-    }
-  }
-
-  setViewColor(color) {
-    if (this.view) {
-      this.view.classList.add(color);
     }
   }
 }

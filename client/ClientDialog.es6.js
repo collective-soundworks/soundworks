@@ -17,7 +17,7 @@ class ClientDialog extends ClientModule {
 
   start() {
     super.start();
-    super.createViewContent();
+    this.__createViewContent();
 
     this.viewContent.innerHTML = this.__text;
 

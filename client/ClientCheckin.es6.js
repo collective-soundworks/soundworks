@@ -26,7 +26,7 @@ class ClientCheckin extends ClientModule {
       this.label = info.label;
 
       if (this.view) {
-        super.createViewContent();
+        this.__createViewContent();
         this.viewContent.innerHTML = "<p>Go to position</p>" +
           "<div class='checkin-label circled'><span>" + this.label + "</span></div>" +
           "<p><small>Touch the screen<br/>when you are ready.</small></p>";

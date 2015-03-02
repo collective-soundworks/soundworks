@@ -25,7 +25,7 @@ class ClientOrientation extends ClientModule {
 
   start() {
     super.start();
-    super.createViewContent();
+    this.__createViewContent();
 
     contentDiv.innerHTML = this.__text;
 

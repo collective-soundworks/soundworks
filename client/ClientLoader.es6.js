@@ -17,7 +17,7 @@ class ClientLoader extends ClientModule {
 
     this.audioBuffers = null;
 
-    super.createViewContent();
+    this.__createViewContent();
 
     var loadingText = document.createElement('p');
     loadingText.classList.add('soft-blink');
