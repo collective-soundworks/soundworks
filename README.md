@@ -365,12 +365,14 @@ The `ClientDialog` module displays a dialog on the screen, and requires the user
 
 - `constructor(options:Object = {})`  
   The constructor method instantiates the `ClientDialog` module on the client side. It takes the `options` object as an argument, whose properties are:
-  - `id:String = 'dialog'`  
-    The ID of the dialog, that will be used as the `id` HTML attribute of the `this.view`.
-  - `text:String`  
-    The text to be displayed in the dialog.
   - `activateAudio:Boolean = false`  
     If set to `true`, the module with activate the Web Audio API when the user clicks the screen (useful on iOS, where sound is muted until a user action triggers some audio commands).
+  - `color:String = 'black'`  
+    Sets the background color of the view to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library's `sass/_03-colors.scss` file.
+  - `name:String = 'dialog'`  
+    The name of the dialog, that will be used as the `id` HTML attribute of the `this.view` and the associated class.
+  - `text:String`  
+    The text to be displayed in the dialog.
 
 #### ClientLoader
 
@@ -385,8 +387,14 @@ The `ClientLoader` module requires the SASS partial `sass/_07-loader.scss`.
 
 ###### Methods
 
-- `constructor(audioFiles:Array)`  
-  The constructor method instantiates the `ClientLoader` module on the client side. It takes the `audiofiles` array as an argument. The `audiofiles` array contains the links (`String`) to the audio files to be loaded.
+- `constructor(audioFiles:Array, options = {})`  
+  The constructor method instantiates the `ClientLoader` module on the client side. It takes up to two arguments:
+  - `audioFiles:Array`  
+     The `audiofiles` array contains the links (`String`) to the audio files to be loaded.
+  - `options:Object = {}`  
+    The optional `options` argument customizes the configuration of the module. Its properties can be:
+    - `color:String = 'black'`  
+      Sets the background color of the view to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library's `sass/_03-colors.scss` file.
 
 #### ClientOrientation
 
@@ -402,7 +410,9 @@ The `ClientOrientation` module allows to calibrate the compass and get and angle
 ###### Methods
 
 - `constructor(options:Object = {})`  
-  The constructor method instantiates the `ClientOrientation` module on the client side. It takes the `options` object as an argument, whose optional property is:
+  The constructor method instantiates the `ClientOrientation` module on the client side. It takes the `options` object as an argument, whose optional properties are:
+  - `color:String = 'black'`  
+    Sets the background color of the view to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library's `sass/_03-colors.scss` file.
   - `text:String = "Point the phone exactly in front of you, and touch the screen."`
     The text to be displayed on the dialog.
 
@@ -442,9 +452,11 @@ The `ClientCheckin` takes care of the checkin on the client side.
 ###### Methods
 
 - `constructor(options:Object = {})`  
-  The `constructor` method instantiates the `ClientCheckin` module on the client side. It takes the `options` object as an argument, whose optional property is:
-  - `display:Boolean = false`  
-    When set to `true`, the module displays a dialog with the checkin information for the user. The user has to click on the dialog to indicate that the checkin process is `"done"`.
+  The `constructor` method instantiates the `ClientCheckin` module on the client side. It takes the `options` object as an argument, whose optional properties are:
+  - `color:String = 'black'`  
+    Sets the background color of the view to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library's `sass/_03-colors.scss` file.
+  - `dialog:Boolean = false`  
+    When set to `true`, the module displays a dialog (`this.view`) with the checkin information for the user. The user has to click on the dialog to indicate that the checkin process is `"done"`.
 - `getPlaceInfo() : Object`  
   The `getPlaceInfo` method returns an object with the checkin information. The returned object returned has two properties:
   - `index:Number`
@@ -512,12 +524,14 @@ Any module that extends the `ClientModule` class requires the SASS partial `sass
 
 ###### Methods
 
-- `constructor(id:String, hasDisplay:Boolean = true)`  
-  The `constructor` method instantiates the `ClientModule` module on the client side. It takes two arguments:
-  - `id:String`  
-    The `id` of the the `this.view` DOM element.
+- `constructor(name:String, hasDisplay:Boolean = true, viewColor:String = 'black')`  
+  The `constructor` method instantiates the `ClientModule` module on the client side. It takes up to three arguments:
+  - `name:String`  
+    The `name` of the the `this.view` DOM element, that is used both as an the ID of that element and as a class. (`this.view` would look like `<div id='name' class='name'></div>`.)
   - `hasDisplay:Boolean = true`  
-    When set to `true`, the module creates the `this.view` DOM element with the id `id`.  
+    When set to `true`, the module creates the `this.view` DOM element with the id `id`.
+  - `viewColor`  
+    The `viewColor` argument should be a class name as defined in the library's `sass/_03-colors.scss` file, and changes the background color of the view to that color.
 - `start()`  
   The `.start()` method is automatically called to start the module, and should handle the logic of the module on the client side. For instance, it takes care of the communication with the module on the server side by sending WebSocket messages and setting up WebSocket message listeners.
 - `done()`  
@@ -525,7 +539,7 @@ Any module that extends the `ClientModule` class requires the SASS partial `sass
 - `__createViewContent()`  
   When `this.view` exists, the `.__createViewContent()` method creates a `<div>` with the class `centered-text` and appends it to `this.view`. 
 
-In practice, here is how you would extend this class to create a module on the client side.
+In practice, here is an example of how you would extend this class to create a module on the client side.
 
 ```javascript
 /* Client side */
@@ -533,8 +547,10 @@ In practice, here is how you would extend this class to create a module on the c
 var clientSide = require('soundworks/client');
 
 class MyModule extends clientSide.Module {
-  constructor() {
-    super('my-module', true); // here, MyModule would always have a view, with the id 'my-module'
+  constructor(options = {}) {
+    // Here, MyModule would always have a view, with the id 'my-module',
+    // and possibly the background color defined by the argument options.
+    super('my-module', true, options.color || 'alizarin');
 
     ... // anything the constructor needs
   }
@@ -685,8 +701,12 @@ The `ClientSync` modules takes care of the synchronization process on the client
 
 ###### Methods
 
-- `constructor()`  
-  The `constructor` method instantiates the `ClientSync` modules on the client side.
+- `constructor(options:Object = {})`  
+  The `constructor` method instantiates the `ClientSync` modules on the client side, and takes one optional argument:
+  - `options:Object = {}`  
+    The optional `options` argument customizes the configuration of the module. Its properties can be:
+    - `color:String = 'black'`  
+      Sets the background color of the view to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library's `sass/_03-colors.scss` file.
 - `getLocalTime(serverTime:Number = undefined) : Number`  
   The `getLocalTime` method returns the time in the client clock when the server clock reaches `serverTime`. If no arguments are provided, the method returns the time is is when the method is called, in the client clock (*i.e.* `audioContext.currentTime`). The returned time is a `Number`, in seconds.
 - `getServerTime(localTime:Number = audioContext.currentTime) : Number`  
