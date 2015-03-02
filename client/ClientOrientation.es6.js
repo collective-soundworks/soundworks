@@ -27,7 +27,7 @@ class ClientOrientation extends ClientModule {
     super.start();
     this.__createViewContent();
 
-    contentDiv.innerHTML = this.__text;
+    this.viewContent.innerHTML = this.__text;
 
     this.view.addEventListener('click', () => {
       this.angleReference = this.__angle;
