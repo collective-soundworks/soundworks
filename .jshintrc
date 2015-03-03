@@ -1,6 +1,0 @@
-{
-  "enforceall": true,
-  "nocomma": false, // bug in 2.6.0
-  "singleGroups" : false, // bug in 2.6.0
-  "node": true
-}
