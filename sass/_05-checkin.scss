@@ -1,0 +1,19 @@
+/* =======================================================
+ * CHECKIN
+ * ======================================================= */
+
+.checkin-label {
+  display: block;
+  font-size: 3em;
+  font-weight: 700;
+  height: 2em;
+  line-height: 2em;
+  margin: 0 auto;
+  text-align: center;
+  width: 2em;
+}
+.checkin-label.circled {
+  background-color: $belize-hole;
+  border-radius: 50%;
+  margin: 0 auto 0.5em;
+}

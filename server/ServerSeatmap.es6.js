@@ -26,8 +26,8 @@ class ServerSeatmap extends ServerModule {
   connect(client) {
     super.connect();
 
-    client.socket.on('seatmap_request', () => {
-      client.socket.emit('seatmap_init', {
+    client.receive('seatmap_request', () => {
+      client.send('seatmap_init', {
         "labels": this.labels,
         "positions": this.positions,
         "width": this.width,

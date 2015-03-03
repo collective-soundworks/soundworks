@@ -82,14 +82,13 @@ class ServerControl extends ServerModule {
   connect(client) {
     super.connect();
 
-    var socket = client.socket;
-    var namespace = socket.nsp;
+    var namespace = client.namespace;
 
     if (this.namespaces.indexOf(namespace) < 0)
       this.namespaces.push(namespace);
 
     // listen to control parameters
-    socket.on('control_parameter', (name, value) => {
+    client.receive('control_parameter', (name, value) => {
       this.parameters[name].value = value;
 
       // send control parameter to other clients
@@ -98,12 +97,12 @@ class ServerControl extends ServerModule {
     });
 
     // listen to conductor commands
-    socket.on('control_command', (name) => {
+    client.receive('control_command', (name) => {
       this.commands[name].fun();
     });
 
     // init control parameters, displays, and commands at client
-    socket.emit("control_init", this.parameters, this.displays, this.commands);
+    client.send('control_init', this.parameters, this.displays, this.commands);
   }
 }
 

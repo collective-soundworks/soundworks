@@ -70,7 +70,7 @@ class ParameterNumber {
       this.box.value = val;
 
     if (send)
-      client.socket.emit('control_parameter', this.name, this.value);
+      client.send('control_parameter', this.name, this.value);
   }
 
   incr(send = false) {
@@ -150,7 +150,7 @@ class ParameterSelect {
         this.box.value = val;
 
       if (send)
-        client.socket.emit('control_parameter', this.name, val);
+        client.send('control_parameter', this.name, val);
     }
   }
 
@@ -209,7 +209,7 @@ class Command {
       div.innerHTML = this.label;
 
       div.onclick = div.ontouchstart = (() => {
-        client.socket.emit('control_command', this.name);
+        client.send('control_command', this.name);
       });
 
       view.appendChild(div);
@@ -222,7 +222,7 @@ class ClientControl extends ClientModule {
   constructor(options = {}) {
     var hasGui = (options.gui === true);
 
-    super('control', hasGui);
+    super('control', hasGui, options.color || 'black');
 
     this.hasGui = hasGui;
     this.parameters = {};
@@ -231,7 +231,7 @@ class ClientControl extends ClientModule {
 
     var view = hasGui? this.view: null;
 
-    client.socket.on('control_init', (parameters, displays, commands) => {
+    client.receive('control_init', (parameters, displays, commands) => {
       if (view) {
         var title = document.createElement('h1');
         title.innerHTML = 'Conductor';
@@ -266,7 +266,7 @@ class ClientControl extends ClientModule {
     });
 
     // listen to parameter changes
-    client.socket.on('control_parameter', (name, val) => {
+    client.receive('control_parameter', (name, val) => {
       var parameter = this.parameters[name];
 
       if (parameter) {
@@ -277,7 +277,7 @@ class ClientControl extends ClientModule {
     });
 
     // listen to display changes
-    client.socket.on('control_display', (name, val) => {
+    client.receive('control_display', (name, val) => {
       var display = this.displays[name];
 
       if (display) {

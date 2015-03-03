@@ -1,5 +1,5 @@
 /**
- * @fileoverview Soundworks client side socket i/o (singleton)
+ * @fileoverview Soundworks client side
  * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
  */
 "use strict";
@@ -8,6 +8,8 @@ var client = {
   init: init,
   start: start,
   socket: null,
+  send: send,
+  receive: receive,
   serial: serial,
   parallel: parallel
 };
@@ -83,18 +85,24 @@ function init(namespace) {
 }
 
 function start(theModule) {
-  var socket = client.socket;
-
   // client/server handshake: send "ready" to server ...
-  socket.emit('client_ready');
+  client.send('client_ready');
 
   // ... wait for server's "start" ("server ready") to start modules
-  socket.on('server_ready', () => {
+  client.receive('server_ready', () => {
     theModule.start();
   });
 
-  socket.on('disconnect', () => {
+  client.receive('disconnect', () => {
   });
+}
+
+function send(msg, ...args) {
+  client.socket.emit(msg, ...args);
+}
+
+function receive(msg, callback) {
+  client.socket.on(msg, callback);
 }
 
 function serial(...modules) {

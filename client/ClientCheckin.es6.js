@@ -9,32 +9,26 @@ var client = require('./client');
 
 class ClientCheckin extends ClientModule {
   constructor(options = {}) {
-    super('checkin', true);
+    super('checkin', options.dialog || false, options.color || 'black');
 
     this.index = null;
     this.label = null;
-    this.dialog = (options.dialog === true);
   }
 
   start() {
     super.start();
 
-    var contentDiv = document.createElement('div');
-    contentDiv.classList.add('centered-content');
-    this.view.appendChild(contentDiv);
+    client.send('checkin_request');
 
-    var socket = client.socket;
-    socket.emit('checkin_request');
-
-    socket.on('checkin_info', (info) => {
+    client.receive('checkin_info', (info) => {
       this.index = info.index;
       this.label = info.label;
 
-      if (this.dialog) {
-        contentDiv.innerHTML = "<p>Go to position</p>" +
+      if (this.view) {
+        textDiv = this.setViewText();
+        textDiv.innerHTML = "<p>Go to position</p>" +
           "<div class='checkin-label circled'><span>" + this.label + "</span></div>" +
-          "<p class='small'>Touch the screen<br/>when you are ready.</p>";
-
+          "<p><small>Touch the screen<br/>when you are ready.</small></p>";
         this.view.addEventListener('click', () => {
           this.done();
         });
@@ -43,8 +37,8 @@ class ClientCheckin extends ClientModule {
       }
     });
 
-    socket.on('checkin_failed', () => {
-      contentDiv.innerHTML = "<p>All seats are taken, please try again later.</p>";
+    client.receive('checkin_failed', () => {
+      this.setViewText("All seats are taken, please try again later.");
     });
   }
 }

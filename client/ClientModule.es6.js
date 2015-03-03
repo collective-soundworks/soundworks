@@ -8,16 +8,18 @@ var EventEmitter = require('events').EventEmitter;
 var container = window.container || (window.container = document.getElementById('container'));
 
 class ClientModule extends EventEmitter {
-  constructor(id, hasDisplay = true) {
+  constructor(name, hasView = true, viewColor = 'black') {
     super();
 
     this.view = null;
 
-    if (hasDisplay) {
+    if (hasView) {
       var div = document.createElement('div');
-      div.setAttribute('id', id);
+      div.setAttribute('id', name);
+      div.classList.add(name);
       div.classList.add('module');
-      
+      div.classList.add(viewColor);
+
       this.view = div;
     }
 
@@ -36,6 +38,27 @@ class ClientModule extends EventEmitter {
     if (!this.isDone) {
       this.isDone = true;
       this.emit('done', this);
+    }
+  }
+
+  setViewText(text, ...cssClasses) {
+    if (this.view) {
+      let textDiv = document.createElement('div');
+      textDiv.classList.add('centered-content');
+
+      if (text) {
+        var paragraph = document.createElement('p');
+        
+        for (let cssClass of cssClasses)
+          paragraph.classList.add(cssClass);
+
+        paragraph.innerHTML = text;
+        textDiv.appendChild(paragraph);
+      }
+
+      this.view.appendChild(textDiv);
+
+      return textDiv;
     }
   }
 }

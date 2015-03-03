@@ -1,0 +1,16 @@
+/* =======================================================
+ * FONTS
+ * ======================================================= */
+
+@mixin font-face($family, $weight, $file) {
+  $filepath: "../fonts/" + $file;
+  @font-face {
+    font-family: "#{$family}";
+    font-weight: $weight;
+    src: url($filepath + ".ttf")  format('truetype');
+  }
+}
+
+@include font-face('Quicksand', 100, 'Quicksand-Light');
+@include font-face('Quicksand', 400, 'Quicksand-Regular');
+@include font-face('Quicksand', 700, 'Quicksand-Bold');

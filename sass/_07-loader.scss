@@ -1,0 +1,16 @@
+/* =======================================================
+ * LOADER
+ * ======================================================= */
+
+.loader {
+  .progress-wrap {
+    border: solid 3px white;
+    border-radius: 8px;
+    margin: 0.75em auto;
+  }
+  .progress-bar {
+    background-color: white;
+    height: 10px;
+    width: 0%; // adjust with Javascript in the code
+  }
+}

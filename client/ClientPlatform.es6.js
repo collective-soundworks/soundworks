@@ -22,8 +22,8 @@ function parseVersionString(string) {
 }
 
 class ClientPlatform extends ClientModule {
-  constructor() {
-    super('platform-check', true);
+  constructor(options = {}) {
+    super('platform-check', true, options.color || 'black');
   }
 
   start() {
@@ -48,10 +48,7 @@ class ClientPlatform extends ClientModule {
     }
 
     if (msg !== null) {
-      var contentDiv = document.createElement('div');
-      contentDiv.classList.add('centered-content');
-      this.view.appendChild(contentDiv);
-      contentDiv.innerHTML = msg;
+      this.setViewText(msg);
     } else {
       this.done();
     }

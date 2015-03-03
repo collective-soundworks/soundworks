@@ -1,0 +1,96 @@
+/* =======================================================
+ * GENERAL
+ * ======================================================= */
+
+@mixin keyframes($animation-name) {
+  @-webkit-keyframes $animation-name {
+    @content;
+  }
+  @-moz-keyframes $animation-name {
+    @content;
+  }  
+  @-ms-keyframes $animation-name {
+    @content;
+  }
+  @-o-keyframes $animation-name {
+    @content;
+  }  
+  @keyframes $animation-name {
+    @content;
+  }
+}
+
+@mixin animation($str) {
+  -webkit-animation: #{$str};
+     -moz-animation: #{$str};
+      -ms-animation: #{$str};
+       -o-animation: #{$str};
+          animation: #{$str};      
+}
+
+@include keyframes(soft-blink) {
+  0% { opacity: 1.0; }
+  50% { opacity: 0.3; }
+  100% { opacity: 1.0; }
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  background-color: $black;
+  color: rgba(255, 255, 255, 0.9);
+  font-family: 'Quicksand', 'Lato', 'Helvetica Neue', 'Helvetica', sans-serif;
+  font-size: 2rem;
+  line-height: auto;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: bold;
+}
+
+.container {
+  min-height: 100%;
+  position: relative;
+}
+
+.module {
+  background-color: $black;
+  height: 100%;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
+
+  @each $value in $color-list {
+    &.#{nth($value, 1)} {
+      background-color: nth($value, 2);
+    }
+  }
+
+  .centered-content {
+    width: 80%;
+    margin: 15% auto;
+    text-align: center;
+  }
+
+  p {
+    margin-bottom: 1rem;
+    line-height: 2.5rem;
+  }
+
+  small {
+    font-size: 1rem;
+    line-height: 1.2rem;
+  }
+}
+
+.soft-blink {
+  @include animation('soft-blink 3.6s ease-in-out infinite');
+}
+
+.hidden {
+  display: none !important;
+  visibility: hidden;
+}

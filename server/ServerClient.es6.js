@@ -7,8 +7,21 @@
 class ServerClient {
 	constructor(socket) {
     this.socket = socket;
+    this.namespace = socket.nsp;
     this.index = null;
     this.data = {};
+  }
+
+  send(msg, ...args) {
+    this.socket.emit(msg, ...args);
+  }
+
+  receive(msg, callback) {
+    this.socket.on(msg, callback);
+  }
+
+  broadcast(msg, ...args) {
+    this.socket.broadcast.emit(msg, ...args);
   }
 }
 
