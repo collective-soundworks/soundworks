@@ -4,6 +4,8 @@
  */
 'use strict';
 
+const debug = require('debug')('soundworks:client:sync');
+
 var ClientModule = require('./ClientModule');
 var Sync = require('sync/client');
 var client = require('./client');
@@ -26,14 +28,17 @@ class ClientSync extends ClientModule {
   start() {
     super.start();
 
-    var ready = false;
-
-    this.sync.start(client.socket, (stats) => {
-      if (!ready) {
-        ready = true;
-        this.done();
-      }
-    });
+    debug('start');
+    this.sync.start(client.socket);
+    debug('started');
+    
+    let ready = false;
+    if (!ready) {
+      ready = true;
+      debug('ready');
+      this.done();
+    }
+    
   }
 
   getLocalTime(masterTime) {

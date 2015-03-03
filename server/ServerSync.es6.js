@@ -4,6 +4,8 @@
  */
 'use strict';
 
+const debug = require('debug')('soundworks:server:sync');
+
 var ServerModule = require('./ServerModule');
 var Sync = require('sync/server');
 
@@ -11,16 +13,14 @@ class ServerSync extends ServerModule {
   constructor(options = {}) {
     super();
     this.sync = new Sync(options);
+    debug('new sync');
   }
 
   connect(client) {
     super.connect();
 
-    client.data.sync = {};
-
-    this.sync.start(client.socket, (stats) => {
-      client.data.sync.latency = stats.maxTravelTime / 2;
-    });
+    this.sync.start(client.socket);
+    debug('started');
   }
 
   getLocalTime(masterTime) {
