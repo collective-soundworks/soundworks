@@ -25,7 +25,7 @@
 
 *Soundworks* is a Javascript framework that enables artists and developers to create collaborative music performances where a group of participants distributed in space use their smartphones to generate sound and light through touch and motion.
 
-The framework is based on a server / client architecture supported by `Node.js` and WebSockets, and uses modules to make it easy to implement different performance scenarios: the provided template allows anyone to bootstrap a *Soundworks*-based scenario and focus on its audiovisual and interaction design instead of the infrastructure.
+The framework is based on a server / client architecture supported by `Node.js` (v0.12.0 or later) and WebSockets, and uses modules to make it easy to implement different performance scenarios: the provided template allows anyone to bootstrap a *Soundworks*-based scenario and focus on its audiovisual and interaction design instead of the infrastructure.
 
 ### Server / client architecture 
 
@@ -868,7 +868,7 @@ Here:
 - The `text` parameter contains the text to display on the screen when the module is displayed.
 - Finally, we set the property `activateAudio` to `true` to enable the sound on iOS devices as well as to start the Web Audio clock (that will be required for the synchronization process).
 
-***This step is required in almost any scenario you could imagine, at least to activate the Web Audio.***
+*This step is required in almost any scenario you could imagine, at least to activate the Web Audio on iOS devices.*
 
 ##### Checkin module
 
