@@ -1,0 +1,17 @@
+/* =======================================================
+ * CONTROL
+ * ======================================================= */
+
+.control {
+  margin: 0 auto;
+  padding: 1em 0;
+  text-align: center;
+  button, input, option, select {
+    background-color: transparent;
+    border: 0;
+    color: rgba(255, 255, 255, 0.9);
+    cursor: pointer;
+    padding: 0;
+    text-align: center;
+  }
+}

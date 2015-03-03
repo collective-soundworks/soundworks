@@ -9,19 +9,17 @@ var ClientModule = require('./ClientModule');
 
 class ClientDialog extends ClientModule {
   constructor(options = {}) {
-    super(options.id || 'dialog', true);
+    super(options.id || 'dialog', true, options.color || 'black');
 
-    this.text = options.text;
     this.__mustActivateAudio = options.activateAudio || false;
+    this.__text = options.text;
   }
 
   start() {
     super.start();
-    
-    var contentDiv = document.createElement('div');
-    contentDiv.classList.add('centered-content');
-    contentDiv.innerHTML = this.text;
-    this.view.appendChild(contentDiv);
+    this.__createViewContent();
+
+    this.viewContent.innerHTML = this.__text;
 
     // install click listener
     this.view.addEventListener('click', () => {
