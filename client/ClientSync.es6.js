@@ -15,9 +15,9 @@ class ClientSync extends ClientModule {
 
     this.sync = new Sync(
       () => audioContext.currentTime, (cmd, ...args) => {
-        client.socket.emit(cmd, ...args);
+        client.send(cmd, ...args);
       }, (cmd, callback) => {
-        client.socket.on(cmd, callback);
+        client.receive(cmd, callback);
       });
 
     this.setViewText('Clock syncing, stand by…', 'soft-blink');
@@ -26,17 +26,13 @@ class ClientSync extends ClientModule {
   start() {
     super.start();
 
-    debug('start');
     this.sync.start(client.socket);
-    debug('started');
     
     let ready = false;
     if (!ready) {
       ready = true;
-      debug('ready');
       this.done();
-    }
-    
+    }    
   }
 
   getLocalTime(masterTime) {
