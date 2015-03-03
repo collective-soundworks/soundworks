@@ -35,19 +35,21 @@ function start(app, publicPath, port) {
     server.io = new IO(httpServer);
 }
 
-function map(url, title, ...modules) {
-  var namespace = url.substr(1);
+function map(namespace, title, ...modules) {
+  var ioNamespace = namespace.substr(1);
+  var view = namespace.substr(1);
+  var url = namespace;
 
   if (url === '/player')
     url = '/';
 
   expressApp.get(url, function(req, res) {
-    res.render(namespace, {
+    res.render(view, {
       title: title
     });
   });
 
-  server.io.of(namespace).on('connection', (socket) => {
+  server.io.of(ioNamespace).on('connection', (socket) => {
     var client = new ServerClient(socket);
 
     // client/server handshake: send "start" when client is "ready"
