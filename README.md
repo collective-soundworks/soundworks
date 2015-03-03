@@ -331,7 +331,9 @@ Finally, in the `src/sass/` folder, you would add all the SASS partials you need
 
 ## API
 
-This sections explains how to use the classes of the library. In particular, we list here all the methods and attributes you may need to use at some point.
+This sections explains how to use the objects and classes of the library. In particular, we list here all the methods and attributes you may need to use at some point.
+
+We start with the core elements on the client side ([`client` object](#client-side-the-client-object)) and on the server side ([`server` object](#server-side-the-server-object)) before focusing on the module classes.
 
 Some classes are only present on the [client side](#client-only-modules):
 
@@ -351,6 +353,26 @@ The rest of the classes require both the [client **and** server sides](#client-a
 - [`Sync`](#sync)
 
 Some modules on the client side are also associated with some styling information. When that is the case, we added in the library's `sass/` folder a `_xx-moduleName.scss` SASS partial: don't forget to include them in your `*.scss` files when you write your scenario. We indicate in the sections below which modules do require these SASS partials.
+
+### Core objects
+
+#### Client side: the client object
+
+
+
+#### Server side: the server object
+
+The `server` object has the following attributes.
+
+- `broadcast:Function`  
+  The `broadcast` attribute contains the `broadcast` function that is defined as `broadcast(namespace:String, msg:String, ...args)`. The `broadcast` function sends the message `msg` and any number of values `...args` (of any type) to all the clients that belong to the namespace `namespace` through WebSockets. Note: on the client side, the clients receive the message with the command `client.receive(msg:String, callback:Function)`, where the `callback` function would takes `...args` as arguments (for more information, see ).
+- `io:Object`  
+  The `io` attribute contains `socket.io` server, created in the `server.start` method. (Might change in the future)
+- `map:Function`  
+  The `map` attribute contains the `map` function that is defined as `map(namespace:String, title:String, ...modules:ServerModule)`. , where the arguments are: 
+  The `map` function is used to indicate that the clients who connect to the namespace `namespace` need the modules `...modules` to be activated (via their `.connect(client)` method) and listen for the WebSocket messages from the client side. Additionally, it sets the title of the page (used in the <title> tag in the HTML <head> element) to `title` and routes the connections from the URL path `namespace` to the corresponding view (except for the namespace `'/player'`, that uses the URL `/` instead of `/player`).
+- `start:Function`  
+The `start` attribute contains the `start` function that is defined as `start(app:Object, publicPath:String, port:Number)`. The `start` function starts the server with the Express application `app` that uses `publicPath` as the public static directory, and listens to the port `port`.
 
 ### Client only modules
 
@@ -427,13 +449,22 @@ The `ServerClient` module is used to keep track of the connected clients. Each t
 ###### Attributes
 
 - `data:Object = {}`  
-  The `data` attribute can be used by any module to store any useful information that any module might need at some point, or that might need to be sent to the clients. The convention is to create a property for each module that writes into this attribute. For instance, if the `sync` module keeps track of the time offset between this client's clock and the server clock, it would store the information in `this.data.sync.timeOffset`. Similarly, if the `performance` module needs some kind of flag for each client, it would store this information in `this.data.performance.flag`.
+  The `data` attribute can be used by any module to store any useful information that any module might need at some point, or that might need to be sent to the clients. The convention is to create a property for each module that writes into this attribute. For instance, if the `sync` module keeps track of the time offset between this client's clock and the sync clock, it would store the information in `this.data.sync.timeOffset`. Similarly, if the `performance` module needs some kind of flag for each client, it would store this information in `this.data.performance.flag`.
 - `index:Number`  
   The `index` attribute stores the index of the client as set by the `ServerCheckin` module. See `ServerCheckin` for more information.
 - `namespace:String`  
   The `namespace` attribute stores the namespace of the client (as defined in `socket.io` for now). This is the namespace that is specified on the client side, while initiating the `client` object with `client.init(namespace);` (generally at the very beginning of the file your write).
 - `socket:Socket`  
   The `socket` attribute stores the socket that sets the communication channel between the server and this client, as passed in by the `constructor`.
+
+###### Methods
+
+- `send(msg:String, ...args)`  
+  The `send` method sends the message `msg` and any number of values `...args` (of any type) to that client through WebSockets. Note: on the client side, the client receives the message with the command `client.receive(msg:String, callback:Function)` where the `callback` function would take `...args` as arguments (for more information, see ).
+- `receive(msg:String, callback:Function)`  
+  The `receive` method executes the callback function `callback` when the message `msg` sent by that client is received. Note: on the client side, the client sends the message with the command `client(msg:String, ...args)` (for more information, see ). Here, the `callback` function takes `...args` as arguments.
+- `broadcast(msg:String, ...args)`  
+  The `broadcast` method sends the message `msg` and any number of values `...args` (of any type) to all the clients of the client's namespace — except that client — through WebSockets. Note: on the client side, the clients receive the message with the command `client.receive(msg:String, callback:Function)` where the `callback` function would take `...args` as arguments (for more information, see ).
 
 ### Client and server modules
 
@@ -689,13 +720,13 @@ var toplogy = new serverSide.Seatmap({ type: 'matrix', cols: 4, rows: 5 });
 
 #### Sync
 
-The `Sync` module is based on [`sync`](https://github.com/collective-soundworks/sync) and is responsible for synchronizing the clients' clocks on the server clock, so that the server and all the clients share a common clock.
+The `Sync` module is based on [`sync`](https://github.com/collective-soundworks/sync) and is responsible for synchronizing the clients' clocks and the server clock on a common clock, that we call “sync clock”. That way, the clients and the server can both use this shared clock as their common time reference.
 
 For instance, this allows all the clients to do something exactly at the same time, such as displaying a color on the screen or playing a snare sound in a synchronized manner.
 
-The `Sync` module does a first synchronization process after which the `ClientSync` emits the `"done"` event. Later on, the `Sync` module keeps resynchronizing the client and server clocks at random intervals to compensate the clock drift.
+The `Sync` module does a first synchronization process after which the `ClientSync` emits the `"done"` event. Later on, the `Sync` module keeps resynchronizing the client and server clocks on the sync clock at random intervals to compensate the clock drift.
 
-On the client side, `ClientSync` uses the `audioContext` clock. On the server side, `ServerSync` uses the `process.hrtime()` clock. All times are in seconds (method arguments and returned values). **All time calculations and exchanges should be expressed in the server clock time.** The client clock time should be used only at the very end on the client, with the `audioContext`.
+On the client side, `ClientSync` uses the `audioContext` clock. On the server side, `ServerSync` uses the `process.hrtime()` clock. All times are in seconds (method arguments and returned values). **All time calculations and exchanges should be expressed in the sync clock time.**
 
 ##### ClientSync
 
@@ -709,10 +740,10 @@ The `ClientSync` modules takes care of the synchronization process on the client
     The optional `options` argument customizes the configuration of the module. Its properties can be:
     - `color:String = 'black'`  
       Sets the background color of the view to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library's `sass/_03-colors.scss` file.
-- `getLocalTime(serverTime:Number = undefined) : Number`  
-  The `getLocalTime` method returns the time in the client clock when the server clock reaches `serverTime`. If no arguments are provided, the method returns the time is is when the method is called, in the client clock (*i.e.* `audioContext.currentTime`). The returned time is a `Number`, in seconds.
-- `getServerTime(localTime:Number = audioContext.currentTime) : Number`  
-  The `getServerTime` method returns the time in the server clock when the client clock reaches `clientTime`. If no arguments are provided, the method returns the time is is when the method is called, in the server clock. The returned time is a `Number`, in seconds.
+- `getLocalTime(syncTime:Number) : Number`  
+  The `getLocalTime` method returns the time in the client clock when the sync clock reaches `syncTime`. If no arguments are provided, the method returns the time is when the method is called, in the client clock (*i.e.* `audioContext.currentTime`). The returned time is a `Number`, in seconds.
+- `getSyncTime(localTime:Number = audioContext.currentTime) : Number`  
+  The `getSyncTime` method returns the time in the sync clock when the client clock reaches `localTime`. If no arguments are provided, the method returns the time it is when the method is called, in the sync clock. The returned time is a `Number`, in seconds.
 
 Below is an example of an instantiation of the `Sync` module.
 
@@ -723,7 +754,7 @@ var clientSide = require('soundworks/client');
 var sync = new clientSide.Sync();
 
 var nowClient = sync.getLocalTime(); // current time in client clock time
-var nowServer = sync.getServerTime(); // current time in server clock time
+var nowSync = sync.getSyncTime(); // current time in sync clock time
 ```
 ##### ServerSync
 
@@ -731,8 +762,12 @@ var nowServer = sync.getServerTime(); // current time in server clock time
 
 - `constructor()`  
   The `constructor` method instantiates the `ServerSync` module on the server side.
-- `getLocalTime()`  
-  The `getLocalTime` method returns the current time in the server clock (*i.e.* a conversion of `process.hrtime()` in seconds). The returned time is a `Number`, in seconds.  
+- `getLocalTime(syncTime:Number) : Number`  
+  The `getLocalTime` method returns the time in the server clock when the sync clock reaches `syncTime`. If no arguments are provided, the method returns the time is when the method is called, in the server clock (*i.e.* a conversion of `process.hrtime()` in seconds). The returned time is a `Number`, in seconds.
+- `getSyncTime(localTime:Number) : Number`  
+  The `getSyncTime` method returns the time in the sync clock when the server clock reaches `localTime`. If no arguments are provided, the method returns the time it is when the method is called, in the sync clock. The returned time is a `Number`, in seconds.
+
+Note: in practice, the sync clock used by the [`sync` module](https://github.com/collective-soundworks/sync) is the server clock.
 
 Below is an example of the instantiation of the `Sync` module on the server side.
 
@@ -742,7 +777,8 @@ Below is an example of the instantiation of the `Sync` module on the server side
 var serverSide = require('soundworks/server');
 var sync = new serverSide.Sync();
 
-var now = sync.getLocalTime() // current time in the server clock time
+var nowServer = sync.getLocalTime() // current time in the server clock time
+var nowSync = sync.getSyncTime() // current time in the sync clock time
 ```
 
 ## Example
