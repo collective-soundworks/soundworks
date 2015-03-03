@@ -36,8 +36,7 @@ class ServerCheckin extends ServerModule {
   connect(client) {
     super.connect();
 
-    var socket = client.socket;
-    socket.on('checkin_request', () => {
+    client.receive('checkin_request', () => {
       var index = null;
 
       switch (this.order) {
@@ -74,12 +73,12 @@ class ServerCheckin extends ServerModule {
         else
           label = (index + 1).toString();
 
-        socket.emit('checkin_info', {
+        client.send('checkin_info', {
           index: index,
           label: label
         });
       } else {
-        socket.emit('checkin_failed');
+        client.send('checkin_failed');
       }
     });
   }

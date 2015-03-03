@@ -17,16 +17,18 @@ class ClientLoader extends ClientModule {
 
     this.audioBuffers = null;
 
-    this.__createViewContent();
+    var viewContent = document.createElement('div');
+    viewContent.classList.add('centered-content');
+    this.view.appendChild(viewContent);
 
     var loadingText = document.createElement('p');
     loadingText.classList.add('soft-blink');
     loadingText.innerHTML = "Loading files…";
-    this.viewContent.appendChild(loadingText);
+    viewContent.appendChild(loadingText);
 
     var progressWrap = document.createElement('div');
     progressWrap.classList.add('progress-wrap');
-    this.viewContent.appendChild(progressWrap);
+    viewContent.appendChild(progressWrap);
 
     var progressBar = document.createElement('div');
     progressBar.classList.add('progress-bar');

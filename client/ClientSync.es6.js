@@ -14,8 +14,7 @@ class ClientSync extends ClientModule {
 
     this.sync = new Sync();
 
-    this.__createViewContent();
-    this.viewContent.innerHTML = "<p class='soft-blink'>Clock syncing, stand by…</p>";
+    this.setViewText('Clock syncing, stand by…', 'soft-blink');
   }
 
   start() {

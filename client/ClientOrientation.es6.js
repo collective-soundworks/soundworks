@@ -14,7 +14,7 @@ class ClientOrientation extends ClientModule {
     this.angleReference = 0;
 
     this.__angle = 0;
-    this.__text = options.text || "<p>Point the phone exactly in front of you, and touch the screen.</p>";
+    this.__text = options.text || "Point the phone exactly in front of you, and touch the screen.";
 
     input.enableDeviceOrientation();
 
@@ -25,9 +25,7 @@ class ClientOrientation extends ClientModule {
 
   start() {
     super.start();
-    this.__createViewContent();
-
-    this.viewContent.innerHTML = this.__text;
+    this.setViewText(this.__text);
 
     this.view.addEventListener('click', () => {
       this.angleReference = this.__angle;

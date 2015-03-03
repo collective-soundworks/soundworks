@@ -17,9 +17,7 @@ class ClientDialog extends ClientModule {
 
   start() {
     super.start();
-    this.__createViewContent();
-
-    this.viewContent.innerHTML = this.__text;
+    this.setViewText(this.__text);
 
     // install click listener
     this.view.addEventListener('click', () => {

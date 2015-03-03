@@ -5,7 +5,7 @@
 'use strict';
 
 var ClientModule = require('./ClientModule');
-var client = require("./client");
+var client = require('./client');
 
 class ClientSeatmap extends ClientModule {
   constructor(options = {}) {
@@ -17,11 +17,9 @@ class ClientSeatmap extends ClientModule {
   start() {
     super.start();
 
-    var socket = client.socket;
+    client.send('seatmap_request');
 
-    socket.emit('seatmap_request');
-
-    socket.on('seatmap_init', (map) => {
+    client.receive('seatmap_init', (map) => {
       this.map = map;
       this.done();
     });

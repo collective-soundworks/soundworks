@@ -15,7 +15,8 @@ var httpServer = null;
 var server = {
   io: null,
   start: start,
-  map: map
+  map: map,
+  broadcast: broadcast
 };
 
 function start(app, publicPath, port) {
@@ -50,18 +51,23 @@ function map(url, title, ...modules) {
     var client = new ServerClient(socket);
 
     // client/server handshake: send "start" when client is "ready"
-    socket.on('client_ready', () => {
+    client.receive('client_ready', () => {
       for (let mod of modules)
         mod.connect(client);
 
-      socket.on('disconnect', () => {
+      client.receive('disconnect', () => {
         for (let mod of modules)
           mod.disconnect(client);
       });
 
-      socket.emit('server_ready');
+      client.send('server_ready');
     });
   });
+}
+
+function broadcast(namespace, msg, ...args) {
+  if (server.io)
+    server.io.of(namespace).emit(msg, ...args);
 }
 
 module.exports = server;

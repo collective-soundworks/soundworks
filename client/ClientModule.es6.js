@@ -12,7 +12,6 @@ class ClientModule extends EventEmitter {
     super();
 
     this.view = null;
-    this.viewContent = null;
 
     if (hasView) {
       var div = document.createElement('div');
@@ -42,12 +41,24 @@ class ClientModule extends EventEmitter {
     }
   }
 
-  __createViewContent() {
+  setViewText(text, ...cssClasses) {
     if (this.view) {
-      let centeredDiv = document.createElement('div');
-      centeredDiv.classList.add('centered-content');
-      this.view.appendChild(centeredDiv);
-      this.viewContent = centeredDiv;
+      let textDiv = document.createElement('div');
+      textDiv.classList.add('centered-content');
+
+      if (text) {
+        var paragraph = document.createElement('p');
+        
+        for (let cssClass of cssClasses)
+          paragraph.classList.add(cssClass);
+
+        paragraph.innerHTML = text;
+        textDiv.appendChild(paragraph);
+      }
+
+      this.view.appendChild(textDiv);
+
+      return textDiv;
     }
   }
 }

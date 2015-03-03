@@ -48,8 +48,7 @@ class ClientPlatform extends ClientModule {
     }
 
     if (msg !== null) {
-      this.__createViewContent();
-      this.viewContent.innerHTML = msg;
+      this.setViewText(msg);
     } else {
       this.done();
     }
