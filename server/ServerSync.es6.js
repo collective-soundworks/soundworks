@@ -10,12 +10,18 @@ var Sync = require('sync/server');
 class ServerSync extends ServerModule {
   constructor(options = {}) {
     super();
-    this.sync = new Sync(options);
+    this.sync = new Sync(() => {
+      let time = process.hrtime();
+      return time[0] + time[1] * 1e-9;
+    }, (cmd, ...args) => {
+        client.send(cmd, ...args);
+      }, (cmd, callback) => {
+        client.receive(cmd, callback);
+      });
   }
 
   connect(client) {
     super.connect();
-    
     this.sync.start(client.socket);
   }
 
