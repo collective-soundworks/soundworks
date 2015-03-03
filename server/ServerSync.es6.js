@@ -4,8 +4,6 @@
  */
 'use strict';
 
-const debug = require('debug')('soundworks:server:sync');
-
 var ServerModule = require('./ServerModule');
 var Sync = require('sync/server');
 
