@@ -4,8 +4,6 @@
  */
 'use strict';
 
-const debug = require('debug')('soundworks:client:sync');
-
 var ClientModule = require('./ClientModule');
 var Sync = require('sync/client');
 var client = require('./client');
