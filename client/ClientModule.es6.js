@@ -21,6 +21,7 @@ class ClientModule extends EventEmitter {
       div.classList.add(viewColor);
 
       this.view = div;
+      this.textParagraph = null;
     }
 
     this.isDone = false;
@@ -43,22 +44,26 @@ class ClientModule extends EventEmitter {
 
   setViewText(text, ...cssClasses) {
     if (this.view) {
-      let textDiv = document.createElement('div');
-      textDiv.classList.add('centered-content');
+      if (!this.textParagraph) {
+        let textDiv = document.createElement('div');
+
+        textDiv.classList.add('centered-content');
+        this.view.appendChild(textDiv);
+
+        this.textParagraph = document.createElement('p');
+        textDiv.appendChild(this.textParagraph);
+      }
 
       if (text) {
-        var paragraph = document.createElement('p');
-        
+        let paragraph = this.textParagraph;
+
+        paragraph.className = "";
+
         for (let cssClass of cssClasses)
           paragraph.classList.add(cssClass);
 
         paragraph.innerHTML = text;
-        textDiv.appendChild(paragraph);
       }
-
-      this.view.appendChild(textDiv);
-
-      return textDiv;
     }
   }
 }
