@@ -11,22 +11,20 @@ class ServerSync extends ServerModule {
   constructor(options = {}) {
     super();
     this.sync = new Sync(options);
-    debug('new sync');
   }
 
   connect(client) {
     super.connect();
-
+    
     this.sync.start(client.socket);
-    debug('started');
   }
 
-  getLocalTime(masterTime) {
-    return this.sync.getLocalTime(masterTime);
+  getLocalTime(syncTime) {
+    return this.sync.getLocalTime(syncTime);
   }
 
-  getMasterTime(localTime) {
-    return this.sync.getMasterTime(localTime);
+  getSyncTime(localTime) {
+    return this.sync.getSyncTime(localTime);
   }
 
 } // class ServerSync
