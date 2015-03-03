@@ -7,12 +7,18 @@
 var ClientModule = require('./ClientModule');
 var Sync = require('sync/client');
 var client = require('./client');
+var audioContext = require('audio-context');
 
 class ClientSync extends ClientModule {
   constructor(options = {}) {
     super('sync', true);
 
-    this.sync = new Sync();
+    this.sync = new Sync(
+      () => audioContext.currentTime, (cmd, ...args) => {
+        client.socket.emit(cmd, ...args);
+      }, (cmd, callback) => {
+        client.socket.on(cmd, callback);
+      });
 
     if (this.view) {
       var contentDiv = document.createElement('div');
