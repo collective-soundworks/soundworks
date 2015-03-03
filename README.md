@@ -126,15 +126,17 @@ For instance, the purpose of the `ClientSeatmap` module is to get the seatmap fr
 In Javascript, it looks like the following.
 
 ```javascript
+var client = require('./client');
+
 class ClientSeatmap extends ClientModule {
   ...
 
   start() {
     super.start(); // Don't forget this line!
 
-    socket.emit('seatmap_request'); // Request the seatmap to the server
+    client.send('seatmap_request'); // Request the seatmap to the server
     
-    socket.on('seatmap_init', (seatmap) => {
+    client.receive('seatmap_init', (seatmap) => {
       this.seatmap = seatmap; // Stores the response in an attribute
       this.done(); // Call the method .done(), since the purpose of the module is met
     });
@@ -414,7 +416,7 @@ The `ClientOrientation` module allows to calibrate the compass and get and angle
   - `color:String = 'black'`  
     Sets the background color of the view to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library's `sass/_03-colors.scss` file.
   - `text:String = "Point the phone exactly in front of you, and touch the screen."`
-    The text to be displayed on the dialog.
+    The text to be displayed in the dialog.
 
 ### Server only modules
 
@@ -428,6 +430,8 @@ The `ServerClient` module is used to keep track of the connected clients. Each t
   The `data` attribute can be used by any module to store any useful information that any module might need at some point, or that might need to be sent to the clients. The convention is to create a property for each module that writes into this attribute. For instance, if the `sync` module keeps track of the time offset between this client's clock and the server clock, it would store the information in `this.data.sync.timeOffset`. Similarly, if the `performance` module needs some kind of flag for each client, it would store this information in `this.data.performance.flag`.
 - `index:Number`  
   The `index` attribute stores the index of the client as set by the `ServerCheckin` module. See `ServerCheckin` for more information.
+- `namespace:String`  
+  The `namespace` attribute stores the namespace of the client (as defined in `socket.io` for now). This is the namespace that is specified on the client side, while initiating the `client` object with `client.init(namespace);` (generally at the very beginning of the file your write).
 - `socket:Socket`  
   The `socket` attribute stores the socket that sets the communication channel between the server and this client, as passed in by the `constructor`.
 
@@ -519,8 +523,6 @@ Any module that extends the `ClientModule` class requires the SASS partial `sass
 
 - `view = null`  
   The `view` attribute of the module is the DOM element (a full screen `div`) in which the content is displayed. A module may or may not have a `view`, as indicated by the argument `hasDisplay:Boolean` of the `constructor`.
-- `viewContent = null`  
-  The `viewContent` attribute of the module is a child element of `this.view` that centers its content (it is used mostly if you need to display some centered text). You need to use the `.__createViewContent()` method to create it (only if `this.view` exists).
 
 ###### Methods
 
@@ -536,8 +538,8 @@ Any module that extends the `ClientModule` class requires the SASS partial `sass
   The `.start()` method is automatically called to start the module, and should handle the logic of the module on the client side. For instance, it takes care of the communication with the module on the server side by sending WebSocket messages and setting up WebSocket message listeners.
 - `done()`  
   The `.done()` method should be called when the module has done its duty (for instance at the end of the `.start()` method you write). You should not have to modify this method, but if you do, don't forget to include `super.done()` at the end.
-- `__createViewContent()`  
-  When `this.view` exists, the `.__createViewContent()` method creates a `<div>` with the class `centered-text` and appends it to `this.view`. 
+- `setViewText(text:String, ...cssClasses:String):Element`  
+  When `this.view` exists, the `.setViewText` method creates a `<div class='centered-text'></div>` and appends it to `this.view`. If `text` is specified, the method adds a paragraph element `<p>` to the `div`, with the `text` inside. Finally, any `cssClasses` you would specify would be added to that paragraph element. The method returns the `div` with the `centered-text` class.
 
 In practice, here is an example of how you would extend this class to create a module on the client side.
 
@@ -914,7 +916,7 @@ class MyPerformance extends clientSide.Module {
 }
 ```
 
-Then, we write the `.start()` method that is called when the performance starts. We want that method to tell the server that the client just started the performance (`client.socket.emit('perf_start');`), and to play a sound on the server's command (`client.socket.on('play_sound', callback)`). (Note: we could directly play the sound in the start method, but we show some client / server communication here for the the purpose of the tutorial.) In theory, we would also need to call the '.done()' method when the purpose of this module is done, but since the performance is the last thing that happens in *My Scenario*, we don't need to do it.
+Then, we write the `.start()` method that is called when the performance starts. We want that method to tell the server that the client just started the performance (`client.send('perf_start');`), and to play a sound on the server's command (`client.receive('play_sound', callback)`). (Note: we could directly play the sound in the start method, but we show some client / server communication here for the the purpose of the tutorial.) In theory, we would also need to call the '.done()' method when the purpose of this module is done, but since the performance is the last thing that happens in *My Scenario*, we don't need to do it.
 
 ```javascript
 class MyPerformance extends clientSide.Module {
@@ -924,18 +926,16 @@ class MyPerformance extends clientSide.Module {
     super.start(); // mandatory
 
     // Send a message to the server indicating that we started the performance
-    client.socket.emit('perf_start');
+    client.send('perf_start');
 
     // Play a sound when we receive a message from the server
-    client.socket.on('play_sound', () => {
+    client.receive('play_sound', () => {
       let bufferSource = audioContext.createBufferSource();
       bufferSource.buffer = this.loader.audioBuffers[0]; // get the audioBuffers from the loader
       bufferSource.connect(audioContext.destination);
       bufferSource.start(audioContext.currentTime);
 
-      this.view.innerHTML = '<div class="centered-content">'
-        + 'Congratulations, you just played a sound!'
-        + </div>'; // display some feedback text in the view
+      this.setViewText('Congratulations, you just played a sound!'); // display some feedback text in the view
 
       /* We would usually call the .done() method when the module has done its duty,
        * however since the performance is the last module to be called in this scenario,
@@ -1038,8 +1038,8 @@ class MyPerformance extends serverSide.Module {
   constructor() {}
 
   connect(client) {
-    client.socket.on('perf_start', () => {
-      client.socket.emit('play_sound');
+    client.receive('perf_start', () => {
+      client.send('play_sound');
     });
   }
 
