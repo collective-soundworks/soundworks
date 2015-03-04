@@ -9,19 +9,19 @@
   - [How to write a scenario?](#how-to-write-a-scenario)
 - [**API**](#api)
   - [Core objects](#core-objects)
-    - [Client side: the client object](#client-side-the-client-object)
-    - [Server side: the server object](#server-side-the-server-object)
+    - [Client side: the `client` object](#client-side-the-client-object)
+    - [Server side: the `server` object](#server-side-the-server-object)
   - [Client only modules](#client-only-modules)
-    - [ClientDialog](#clientdialog)
-    - [ClientLoader](#clientloader)
-    - [ClientOrientation](#clientorientation)
+    - [`ClientDialog`](#clientdialog)
+    - [`ClientLoader`](#clientloader)
+    - [`ClientOrientation`](#clientorientation)
   - [Server only modules](#slient-only-modules)
-    - [ServerClient](#serverclient)
+    - [`ServerClient`](#serverclient)
   - [Client and server modules](#client-and-server-modules)
-    - [Checkin](#checkin)
-    - [Module](#module)
-    - [Seatmap](#seatmap)
-    - [Sync](#sync)
+    - [`Checkin`](#checkin)
+    - [`Module`](#module)
+    - [`Seatmap`](#seatmap)
+    - [`Sync`](#sync)
 - [**Example**](#example)
 
 ## Overview & how to get started
@@ -328,9 +328,9 @@ server.map('/env', 'My Scenario — Environment', seatmap, envPerformance);
 
 Indeed, on the client side, the `player` clients initialized the modules `welcome` (that does not require a communication with the server), `seatmap`, `checkin` and `performance`, so we set up the servers corresponding to these modules on the namespace `/player`. Similarly, the `/env` clients initialized the modules `seatmap` and `performance` (which both require communication with the server), so we set up the servers corresponding to these modules on the namespace `/env`.
 
-#### SASS
+#### Styling with SASS
 
-Finally, in the `src/sass/` folder, you would add all the SASS partials you need for the modules from the library, and include them all in a `player.scss` file. If you have other types of clients in your scenario (such as `conductor` or `env`), you would add the corresponding `*scss` files as well, such as `conductor.scss` or `env.scss`.
+Finally, in the `src/sass/` folder, you would add all the SASS partials you need for the modules from the library, and include them all in a `player.scss` file. If you have other types of clients in your scenario (such as `conductor` or `env`), you would add the corresponding `*.scss` files as well, such as `conductor.scss` or `env.scss`.
 
 ## API
 
@@ -359,23 +359,47 @@ Some modules on the client side are also associated with some styling informatio
 
 ### Core objects
 
-#### Client side: the client object
+#### Client side: the `client` object
 
+The `client` object has the following attributes, which we regroup by purpose for clarity.
 
+##### Initialization and WebSocket communication
+
+- `init:Function`  
+  The `init` attribute contains the `init` function that is defined as `init(namespace:String)`. The `init` function initializes a WebSocket connection with the server in the namespace `namespace`.
+- `socket:Object`  
+  The `socket` attribute contains the `socket` object that communicates with the server through WebSockets, created in the `client.init(namespace:String)` method. The socket is associated with the namespace `namespace`. (Might change in the future.)
+- `send:Function`  
+  The `send` attribute contains the `send` function that is defined as `send(msg:Object, ...args:*)`. The `send` function  sends the message `msg` and any number of values `...args` (of any type) to the server through WebSockets. Note: on the server side, the server receives the message with the command `ServerClient.receive(msg:String, callback:Function)` where the `callback` function would take `...args` as arguments (for more information, see the [`ServerClient` module methods](#serverclient) below).
+- `receive:Function`  
+  The `receive` attribute contains the `receive` function that is defined as `receive(msg:Object, callback:Function)`. The `receive` function executes the callback function `callback` when it receives the message `msg` sent by the server. Note: on the server side, the server sends the message with the command `server.send(msg:String, ...args:*)` (for more information, see the [`server` object WebSocket communication](#websocket-communication) below). On the client side, the `callback` function takes `...args` as arguments.
+
+##### Modules logic
+
+- `start:Function`  
+  The `start` attribute contains the `start` function that is defined as `start(module:ClientModule)`. The `start` function starts the client's module logic with the module `module`. The argument `module` can either be a module from the library or a module you wrote (if your scenario has only one module), or a `client.serial(...modules:ClientModule)` sequence of modules, or a `client.parallel(...modules:ClientModule)` combination of modules.
+- `parallel:Function`  
+  The `parallel` attribute contains the `parallel` function that is defined as `parallel(...modules:ClientModule):ClientModule`. The `parallel` function starts all the modules in `...module` in parallel, and triggers a `'done'` event when all the modules triggered their `.done()` function (*i.e.* emitted their own `'done'` event). The `parallel` function returns a `ClientModule` (namely, a `ParallelModule`). Because of this, you can combine parallel module combinations with serial module sequences (*e.g.* `client.parallel(module1, client.serial(module2, module3), module4);`).
+- `serial:Function`  
+  The `serial` attribute contains the `serial` function that is defined as `serial(...modules:ClientModule):ClientModule`. The `serial` function starts the modules in `...module` in serial: it starts the module *n*+1 (via its `.start()`) method only after the module *n* triggered a `'done'` event (via its *.done()* method). When the last module calls its `.done()` method, this function emits a global `'done'` event. The `serial` function returns a `ClientModule` (namely, a `SerialModule`). Because of this, you can combine parallel module combinations with serial module sequences (*e.g.* `client.serial(module1, client.parallel(module2, module3), module4);`).
 
 #### Server side: the server object
 
-The `server` object has the following attributes.
+The `server` object has the following attributes, which we regroup by purpose for clarity.
 
-- `broadcast:Function`  
-  The `broadcast` attribute contains the `broadcast` function that is defined as `broadcast(namespace:String, msg:String, ...args)`. The `broadcast` function sends the message `msg` and any number of values `...args` (of any type) to all the clients that belong to the namespace `namespace` through WebSockets. Note: on the client side, the clients receive the message with the command `client.receive(msg:String, callback:Function)`, where the `callback` function would takes `...args` as arguments (for more information, see ).
-- `io:Object`  
-  The `io` attribute contains `socket.io` server, created in the `server.start` method. (Might change in the future)
-- `map:Function`  
-  The `map` attribute contains the `map` function that is defined as `map(namespace:String, title:String, ...modules:ServerModule)`. , where the arguments are: 
-  The `map` function is used to indicate that the clients who connect to the namespace `namespace` need the modules `...modules` to be activated (via their `.connect(client)` method) and listen for the WebSocket messages from the client side. Additionally, it sets the title of the page (used in the <title> tag in the HTML <head> element) to `title` and routes the connections from the URL path `namespace` to the corresponding view (except for the namespace `'/player'`, that uses the URL `/` instead of `/player`).
+##### Initialization and module logic
+
 - `start:Function`  
-The `start` attribute contains the `start` function that is defined as `start(app:Object, publicPath:String, port:Number)`. The `start` function starts the server with the Express application `app` that uses `publicPath` as the public static directory, and listens to the port `port`.
+  The `start` attribute contains the `start` function that is defined as `start(app:Object, publicPath:String, port:Number)`. The `start` function starts the server with the Express application `app` that uses `publicPath` as the public static directory, and listens to the port `port`.
+- `map:Function`  
+  The `map` function is used to indicate that the clients who connect to the namespace `namespace` need the modules `...modules` to be activated (via their `.connect(client)` method) and listen for the WebSocket messages from the client side. Additionally, it sets the title of the page (used in the <title> tag in the HTML <head> element) to `title` and routes the connections from the URL path `namespace` to the corresponding view (except for the namespace `'/player'`, that uses the URL `/` instead of `/player`).
+
+##### WebSocket communication
+
+- `io:Object`  
+  The `io` attribute contains the `socket.io` server, created in the `server.start(app:Object, publicPath:String, port:Number)` method. (Might change in the future.)
+- `broadcast:Function`  
+  The `broadcast` attribute contains the `broadcast` function that is defined as `broadcast(namespace:String, msg:String, ...args:*)`. The `broadcast` function sends the message `msg` and any number of values `...args` (of any type) to all the clients that belong to the namespace `namespace` through WebSockets. Note: on the client side, the clients receive the message with the command `client.receive(msg:String, callback:Function)`, where the `callback` function would takes `...args` as arguments (for more information, see the [`client` object WebSocket communication](#initialization-and-websocket-communication) above).
 
 ### Client only modules
 
@@ -454,7 +478,7 @@ The `ServerClient` module is used to keep track of the connected clients. Each t
 - `data:Object = {}`  
   The `data` attribute can be used by any module to store any useful information that any module might need at some point, or that might need to be sent to the clients. The convention is to create a property for each module that writes into this attribute. For instance, if the `sync` module keeps track of the time offset between this client's clock and the sync clock, it would store the information in `this.data.sync.timeOffset`. Similarly, if the `performance` module needs some kind of flag for each client, it would store this information in `this.data.performance.flag`.
 - `index:Number`  
-  The `index` attribute stores the index of the client as set by the `ServerCheckin` module. See `ServerCheckin` for more information.
+  The `index` attribute stores the index of the client as set by the `ServerCheckin` module. See the [`ServerCheckin` module](#servercheckin) for more information.
 - `namespace:String`  
   The `namespace` attribute stores the namespace of the client (as defined in `socket.io` for now). This is the namespace that is specified on the client side, while initiating the `client` object with `client.init(namespace);` (generally at the very beginning of the file your write).
 - `socket:Socket`  
@@ -462,11 +486,11 @@ The `ServerClient` module is used to keep track of the connected clients. Each t
 
 ###### Methods
 
-- `send(msg:String, ...args)`  
-  The `send` method sends the message `msg` and any number of values `...args` (of any type) to that client through WebSockets. Note: on the client side, the client receives the message with the command `client.receive(msg:String, callback:Function)` where the `callback` function would take `...args` as arguments (for more information, see ).
+- `send(msg:String, ...args:*)`  
+  The `send` method sends the message `msg` and any number of values `...args` (of any type) to that client through WebSockets. Note: on the client side, the client receives the message with the command `client.receive(msg:String, callback:Function)` where the `callback` function would take `...args` as arguments (for more information, see the [`client` object WebSocket communication](#initialization-and-websocket-communication) above).
 - `receive(msg:String, callback:Function)`  
-  The `receive` method executes the callback function `callback` when the message `msg` sent by that client is received. Note: on the client side, the client sends the message with the command `client(msg:String, ...args)` (for more information, see ). Here, the `callback` function takes `...args` as arguments.
-- `broadcast(msg:String, ...args)`  
+  The `receive` method executes the callback function `callback` when it receives the message `msg` sent by that instantiated client. Note: on the client side, the client sends the message with the command `client.send(msg:String, ...args:*)` (for more information, see the [`client` object WebSocket communication](#initialization-and-websocket-communication) above). In the `ServerClient.receive(msg:String, callback:Function)` method, the `callback` function takes `...args` as arguments.
+- `broadcast(msg:String, ...args:*)`  
   The `broadcast` method sends the message `msg` and any number of values `...args` (of any type) to all the clients of the client's namespace — except that client — through WebSockets. Note: on the client side, the clients receive the message with the command `client.receive(msg:String, callback:Function)` where the `callback` function would take `...args` as arguments (for more information, see ).
 
 ### Client and server modules
