@@ -80,13 +80,9 @@ client.start(
 );
 ```
 
-To run a sequence of modules in serial, we use `client.serial(module1, module2, ...)`. A module would `.start()` only after the previous one is `.done()`.
+To run a sequence of modules in serial, we use `client.serial(module1, module2, ...)`. A module would `.start()` only after the previous one is `.done()`. On the other hand, if some modules need to be run in parallel, we use `client.parallel(module1, module2, ...)`. The parallel process triggers a global `.done()` method when all of its modules are `.done()`. For more information about the `serial` and `parallel` module processes, see the [`client` object modules logic](#modules-logic) in the API section.
 
-On the other hand, if some modules need to be run in parallel, we use `client.parallel(module1, module2, ...)`. The parallel process triggers a global `.done()` method when all of its modules are `.done()`.
-
-For more information about the `serial` and `parallel` module processes, see the [`client` object modules logic](#modules-logic) in the API section.
-
-Some of these modules need an interaction with the server (for instance, the `sync` process requires a dialog between the server and the client to synchronize the clocks). Thus, we activate all the modules that each `player` will need to talk to thanks to the `server.map()` method: on the server side, we would write the following code.
+Some of these modules need an interaction with the server (for instance, the `sync` process requires a dialog between the server and the client to synchronize the clocks). Thus, on the server side, we would write the following code that 1) instantiates the server side modules, and 2) maps them to the `'/player'` namespace.
 
 ```javascript
 /* Server side */
@@ -104,11 +100,11 @@ var performance = new Performance(...); // This class has to be written by you
 
 // Launch the server
 server.start(app);
-// Map the `/player` namespace with the modules needed by the client side
+// Map the '/player' namespace with the modules needed by the client side
 server.map('/player', 'My Scenario', sync, checkin, performance);
 ```
 
-That way, the `sync`, `checkin` and `performance` modules of a `player` (who connects to the server via the URL `http://my.domain.name:port/` which maps to the namespace `'/player'`, more information on that below) would be able to dialog with the corresponding modules on the server side.
+That way, the `sync`, `checkin` and `performance` modules of a `player` (who belongs to the namespace `'/player', see below for more information) would be able to dialog with the corresponding modules on the server side.
 
 ### How to write a module?
 
