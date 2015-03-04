@@ -15,7 +15,7 @@
     - [`ClientDialog`](#clientdialog)
     - [`ClientLoader`](#clientloader)
     - [`ClientOrientation`](#clientorientation)
-  - [Server only modules](#slient-only-modules)
+  - [Server only modules](#server-only-modules)
     - [`ServerClient`](#serverclient)
   - [Client and server modules](#client-and-server-modules)
     - [`Checkin`](#checkin)
@@ -28,7 +28,7 @@
 
 *Soundworks* is a Javascript framework that enables artists and developers to create collaborative music performances where a group of participants distributed in space use their smartphones to generate sound and light through touch and motion.
 
-The framework is based on a server / client architecture supported by `Node.js` (v0.12.0 or later) and WebSockets, and uses modules to make it easy to implement different performance scenarios: the provided template allows anyone to bootstrap a *Soundworks*-based scenario and focus on its audiovisual and interaction design instead of the infrastructure.
+The framework is based on a server / client architecture supported by `Node.js` (`v0.12.0` or later) and WebSockets, and uses a modular design to make it easy to implement different performance scenarios: the [*Soundworks* template](https://github.com/collective-soundworks/soundworks-template) allows anyone to bootstrap a *Soundworks*-based scenario and focus on its audiovisual and interaction design instead of the infrastructure.
 
 ### Server / client architecture 
 
@@ -36,12 +36,12 @@ In order to connect the smartphones with each other, *Soundworks* implements a s
 
 The word “client” represents any entity that connects to the server. For instance, this can be:
 
-- The smartphone of a player who takes part in the collaborative performance (we would refer to this type of client as a `player`: these clients connect to the server through the domain name URL `http://my.domain.name:port/`);
+- The smartphone of a player who takes part in the collaborative performance (we would refer to this type of client as a `player`: these clients connect to the server through the root URL `http://my.domain.name:port/`);
 - A laptop that provides an interface for the artist to control some parameters of the performance in real time (we would refer to this type of client as `conductor`; these clients would connect to the server through the URL `http://my.domain.name:port/conductor`);
 - A computer that controls the sound and light effects in the room in sync with the players' performance, such as lasers, a global visualization or ambient sounds on external loudspeakers (we would refer to this type of client as `env`, standing for “environment”; these clients would connect to the server through the URL `http://my.domain.name:port/env`);
 - And so on…
 
-As you may have noticed, a client who connects to the domain name URL is called a `player`: this is the default client type. All the other types of client access the server through a URL that concatenates the domain name and the name of the client type.
+As you may have noticed, a client who connects to the root URL is called a `player`: this is the default client type. All the other types of client access the server through a URL that concatenates the domain name and the name of the client type.
 
 ### A *Soundworks* scenario is exclusively made of modules
 
@@ -82,7 +82,9 @@ client.start(
 
 To run a sequence of modules in serial, we use `client.serial(module1, module2, ...)`. A module would `.start()` only after the previous one is `.done()`.
 
-On the other hand, if some modules need to be run in parallel, we use `client.parallel(module1, module2, ...)`. The parallel process triggers a global `.done()` method when all of its modules are `.done()`. If the modules have a `view` (*i.e.* if they display some information on the screen), the `view` of a module is created in the DOM when the `.start()` method is called, and is removed from the DOM when the `.done()` method is called. The `view` of a module is always full screen, so in the case of modules run in parallel, the views are stacked on top of each other (using the `z-index` CSS property) in the order of the modules (`module1` is on top of `module2` which is on top of `module3`, etc.). For instance, say `module3` triggers its `.done()` method before `module2`: its `view` would be removed before the one of `module2`, so the user would never see the `view` of `module3` (the full screen views would directly pass from `module2` to `module4`).
+On the other hand, if some modules need to be run in parallel, we use `client.parallel(module1, module2, ...)`. The parallel process triggers a global `.done()` method when all of its modules are `.done()`.
+
+For more information about the `serial` and `parallel` module processes, see the [`client` object modules logic](#modules-logic) in the API section.
 
 Some of these modules need an interaction with the server (for instance, the `sync` process requires a dialog between the server and the client to synchronize the clocks). Thus, we activate all the modules that each `player` will need to talk to thanks to the `server.map()` method: on the server side, we would write the following code.
 
@@ -242,7 +244,7 @@ For instance:
 
 To compile the files, just run the command `gulp` in the Terminal: it will generate the `*.css` files from the SASS files, and convert the Javascript files from ES6 to ES5, browserify the files on the client side, and launch the scenario with a `Node.js` server.
 
-A scenario should contain at least a `src/server/`, `src/player/` and `src/sass/` folder. The `src/server/` folder contains all the files that constitute the server. The `src/player/` folder contains all the files of the default client, which we name `player`. Any client connecting to the server through the domain name URL (`http://my.domain.name:port`) would be a `player`, and belongs to the namespace `'/player'`. Finally, the `src/sass/` folder contains the SASS files to generate the CSS.
+A scenario should contain at least a `src/server/`, `src/player/` and `src/sass/` folder. The `src/server/` folder contains all the files that constitute the server. The `src/player/` folder contains all the files of the default client, which we name `player`. Any client connecting to the server through the root URL (`http://my.domain.name:port`) would be a `player`, and belongs to the namespace `'/player'`. Finally, the `src/sass/` folder contains the SASS files to generate the CSS.
 
 You can add any other type of client (let's name it generically `clientType`). For that, you should create a subfolder `src/clientType/` (for instance `src/conductor/` or `src/env/`) and write an `index.es6.js` file inside. This type of client would join the corresponding namespace `'/clientType`' (*e.g.* `'/conductor'` or `'/env'`), and be accessed through the URL `http://my.domain.name:port/clientType` (*e.g.* `http://my.domain.name:port/conductor` or `http://my.domain.name:port/env`).
 
@@ -379,11 +381,11 @@ The `client` object has the following attributes, which we regroup by purpose fo
 - `start:Function`  
   The `start` attribute contains the `start` function that is defined as `start(module:ClientModule)`. The `start` function starts the client's module logic with the module `module`. The argument `module` can either be a module from the library or a module you wrote (if your scenario has only one module), or a `client.serial(...modules:ClientModule)` sequence of modules, or a `client.parallel(...modules:ClientModule)` combination of modules.
 - `parallel:Function`  
-  The `parallel` attribute contains the `parallel` function that is defined as `parallel(...modules:ClientModule):ClientModule`. The `parallel` function starts all the modules in `...module` in parallel, and triggers a `'done'` event when all the modules triggered their `.done()` function (*i.e.* emitted their own `'done'` event). The `parallel` function returns a `ClientModule` (namely, a `ParallelModule`). Because of this, you can combine parallel module combinations with serial module sequences (*e.g.* `client.parallel(module1, client.serial(module2, module3), module4);`).
+  The `parallel` attribute contains the `parallel` function that is defined as `parallel(...modules:ClientModule):ClientModule`. The `parallel` function starts all the modules in `...module` in parallel, and triggers a `'done'` event when all the modules triggered their `.done()` function (*i.e.* emitted their own `'done'` event). The `parallel` function returns a `ClientModule` (namely, a `ParallelModule`). Because of this, you can combine parallel module combinations with serial module sequences (*e.g.* `client.parallel(module1, client.serial(module2, module3), module4);`).  The `view` of a module is always full screen, so in the case of modules run in parallel, the views are stacked on top of each other (using the `z-index` CSS property) in the order of the modules (`module1` is on top of `module2` which is on top of `module3`, etc.). For instance, say `module3` triggers its `.done()` method before `module2`: its `view` would be removed before the one of `module2`, so the user would never see the `view` of `module3` (the full screen views would directly pass from `module2` to `module4`).
 - `serial:Function`  
   The `serial` attribute contains the `serial` function that is defined as `serial(...modules:ClientModule):ClientModule`. The `serial` function starts the modules in `...module` in serial: it starts the module *n*+1 (via its `.start()`) method only after the module *n* triggered a `'done'` event (via its *.done()* method). When the last module calls its `.done()` method, this function emits a global `'done'` event. The `serial` function returns a `ClientModule` (namely, a `SerialModule`). Because of this, you can combine parallel module combinations with serial module sequences (*e.g.* `client.serial(module1, client.parallel(module2, module3), module4);`).
 
-#### Server side: the server object
+#### Server side: the `server` object
 
 The `server` object has the following attributes, which we regroup by purpose for clarity.
 
@@ -580,7 +582,7 @@ Any module that extends the `ClientModule` class requires the SASS partial `sass
 ###### Attributes
 
 - `view = null`  
-  The `view` attribute of the module is the DOM element (a full screen `div`) in which the content is displayed. A module may or may not have a `view`, as indicated by the argument `hasDisplay:Boolean` of the `constructor`.
+  The `view` attribute of the module is the DOM element (a full screen `div`) in which the content of the module is displayed. This element is a child of the main container (`<div id='container' class='container'></div>), which is the only child of the `body` element. A module may or may not have a `view`, as indicated by the argument `hasDisplay:Boolean` of the `constructor`. When that is the case, the `view` is created in the DOM when the `.start()` method is called, and is removed from the DOM when the `.done()` method is called.
 
 ###### Methods
 
@@ -593,9 +595,9 @@ Any module that extends the `ClientModule` class requires the SASS partial `sass
   - `viewColor`  
     The `viewColor` argument should be a class name as defined in the library's `sass/_03-colors.scss` file, and changes the background color of the view to that color.
 - `start()`  
-  The `.start()` method is automatically called to start the module, and should handle the logic of the module on the client side. For instance, it takes care of the communication with the module on the server side by sending WebSocket messages and setting up WebSocket message listeners.
+  The `.start()` method is automatically called to start the module, and should handle the logic of the module on the client side. For instance, it takes care of the communication with the module on the server side by sending WebSocket messages and setting up WebSocket message listeners. If the module has a `view`, the `.start()` method creates the corresponding HTML element and appends it to the DOM's main container.
 - `done()`  
-  The `.done()` method should be called when the module has done its duty (for instance at the end of the `.start()` method you write). You should not have to modify this method, but if you do, don't forget to include `super.done()` at the end.
+  The `.done()` method should be called when the module has done its duty (for instance at the end of the `.start()` method you write). You should not have to modify this method, but if you do, don't forget to include `super.done()` at the end. If the module has a `view`, the `.done()` method removes it from the DOM.
 - `setViewText(text:String, ...cssClasses:String):Element`  
   When `this.view` exists, the `.setViewText` method creates a `<div class='centered-text'></div>` and appends it to `this.view`. If `text` is specified, the method adds a paragraph element `<p>` to the `div`, with the `text` inside. Finally, any `cssClasses` you would specify would be added to that paragraph element. The method returns the `div` with the `centered-text` class.
 
@@ -876,7 +878,7 @@ The most important things here are:
 
 #### Writing our scenario in Javascript
 
-Now let's write the core of our scenario in the `src/player/index.es6.js` file. This is the file that is loaded by any client who connects to the server through the domain name URL `http://my.domain.name:port/` (for instance, `http://localhost:8000` during the development).
+Now let's write the core of our scenario in the `src/player/index.es6.js` file. This is the file that is loaded by any client who connects to the server through the root URL `http://my.domain.name:port/` (for instance, `http://localhost:8000` during the development).
 
 Step by step, this is how the scenario will look like when a user connects to the server through that URL:
 
@@ -1111,7 +1113,7 @@ class MyPerformance extends serverSide.Module {
 
 ```
 
-We can now instantiate the performance module, and start the server and map the `/player` namespace to the modules we just set up: this last command indicates that all clients connecting to the `/player` namespace (through the domain name URL) will need to communicate with the `checkin` and `performance` modules on the server side.
+We can now instantiate the performance module, and start the server and map the `/player` namespace to the modules we just set up: this last command indicates that all clients connecting to the `/player` namespace (through the root URL) will need to communicate with the `checkin` and `performance` modules on the server side.
 
 ```javascript
 var performance = new MyPerformance()
