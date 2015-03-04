@@ -114,8 +114,6 @@ On the client side, a module extends the `ClientModule` base class and must have
 
 For instance, if the purpose of the module is to load files, the module should call the method `.done()` when the files are loaded. Similarly, if the purpose of the module is to synchronize the clocks, the module should call the method `.done()` when the clocks are synced.
 
-You will find [more information on the `ClientModule` base class in the API section](#clientmodule).
-
 ##### .start()
 
 The `.start()` method is called to start the module. It should handle the logic and the steps that lead to the completion of the module.
@@ -135,13 +133,13 @@ class ClientSeatmap extends ClientModule {
   ...
 
   start() {
-    super.start(); // Don't forget this line!
+    super.start(); // don't forget this line!
 
-    client.send('seatmap_request'); // Request the seatmap to the server
+    client.send('seatmap_request'); // request the seatmap to the server
     
     client.receive('seatmap_init', (seatmap) => {
-      this.seatmap = seatmap; // Stores the response in an attribute
-      this.done(); // Call the method .done(), since the purpose of the module is met
+      this.seatmap = seatmap; // store the response in an attribute
+      this.done(); // call the method .done(), since the purpose of the module is done
     });
   }
 
@@ -149,13 +147,13 @@ class ClientSeatmap extends ClientModule {
 }
 ```
 
-This method must include the inherited method from the base class before any code you write (`super.start()`).
+This method must include the inherited method from the base class before any code you write (`super.start();`).
 
 ##### .done()
 
 The `.done()` method should rarely change from the method inherited from the base class. If you have to rewrite it though, **don't forget to include the inherited method of the base class**. (Its purpose is to emit a `'done'` event associated with the module, which makes the whole module logic work.)
 
-Put differently, if you customize the `.done()` method, it must look like the following template.
+Put differently, if you customize the `.done()` method, it must follow this template.
 
 ```javascript
 clientSide = require(soundworks/client);
@@ -166,18 +164,18 @@ class MyModule extends clientSide.Module {
   done() {
     ... // any code you want
 
-    super.done(); // Don't forget this line!
+    super.done(); // don't forget this line!
   }
 
 ...
 }
 ```
 
+You will find [more information on the `ClientModule` base class in the API section](#clientmodule).
+
 #### Server side
 
 On the server side, a module extends the `ServerModule` base class and must have a method `.connect(client:ServerClient)` and `.disconnect(client:ServerClient)`.
-
-You will find [more information on the `ServerModule` base class in the API section](#servermodule).
 
 ##### .connect(client:ServerClient)
 
@@ -207,7 +205,7 @@ disconnect(client) {
 }
 ```
 
-You will find [additional information about the `Module` classes in the API section](#module).
+You will find [more information on the `ServerModule` base class in the API section](#servermodule).
 
 ### How to write a scenario?
 
@@ -238,13 +236,18 @@ my-scenario/
 
 For instance:
 
-- The `public/` folder should contain any resource your clients may need to load: for instance, the sounds, the images, the fonts, etc. **Note:** the Javascript and CSS files will be automatically generated with our `gulp` file from the `src/` folder, so you shouldn't have any `javascript/` or `stylesheets/` here.
-- The `src/` folder contains your source code for the different type of clients and for the server. Each subfolder (`server/`, `/player`, and any other type of client) should contain and `index.es6.js` file, with the code to be executed for that entity. It also contains the SASS files to generate the CSS.
-- The `views/` folder contains a `*.ejs` file for each client type. In other words, all the subfolders in `src/` — except `server/` and `sass/` — should have their corresponding EJS file.
+- The `public/` folder should contain any resource your clients may need to load: for instance, the sounds, the images, the fonts, etc.  
+  **Note:** the Javascript and CSS files will be automatically generated with our `gulp` file from the `src/` folder, so you shouldn't have any `javascript/` or `stylesheets/` folder here (they will be deleted by `gulp` anyway).
+- The `src/` folder contains your source code for the server and the different types of clients. Each subfolder (`server/`, `/player`, and any other type of client) should contain and `index.es6.js` file, with the code to be executed for that entity. The `src/` folder also contains the SASS files to generate the CSS in the `sass/` subfolder.
+- The `views/` folder contains a `*.ejs` file for each type of client. In other words, all the subfolders in `src/` — except `server/` and `sass/` — should have their corresponding EJS file.
 
-To compile the files, just run the command `gulp` in the Terminal: it will generate the `*.css` files from the SASS files, and convert the Javascript files from ES6 to ES5, browserify the files on the client side, and launch the scenario with a `Node.js` server.
+To compile the files, just run the command `gulp` in the Terminal: it will generate the `*.css` files from the SASS files, convert the Javascript files from ES6 to ES5, browserify the files on the client side, and launch a `Node.js` server to start the scenario.
 
-A scenario should contain at least a `src/server/`, `src/player/` and `src/sass/` folder. The `src/server/` folder contains all the files that constitute the server. The `src/player/` folder contains all the files of the default client, which we name `player`. Any client connecting to the server through the root URL (`http://my.domain.name:port`) would be a `player`, and belongs to the namespace `'/player'`. Finally, the `src/sass/` folder contains the SASS files to generate the CSS.
+A scenario should contain at least a `src/server/`, `src/player/` and `src/sass/` folder.
+
+- The `src/server/` folder contains all the files that constitute the server.
+- The `src/player/` folder contains all the files of the default client, which we name `player`. (Any client connecting to the server through the root URL `http://my.domain.name:port` would be a `player`, and belongs to the namespace `'/player'`.)
+- Finally, the `src/sass/` folder contains the SASS files to generate the CSS.
 
 You can add any other type of client (let's name it generically `clientType`). For that, you should create a subfolder `src/clientType/` (for instance `src/conductor/` or `src/env/`) and write an `index.es6.js` file inside. This type of client would join the corresponding namespace `'/clientType`' (*e.g.* `'/conductor'` or `'/env'`), and be accessed through the URL `http://my.domain.name:port/clientType` (*e.g.* `http://my.domain.name:port/conductor` or `http://my.domain.name:port/env`).
 
@@ -253,11 +256,13 @@ You can add any other type of client (let's name it generically `clientType`). F
 On the client side, the `src/player/index.es6.js` file (or any other type of client's index file) should look like this.
 
 ```javascript
+/* Client side */
+
 // Require the library
 var clientSide = require('soundworks/client');
 var client = clientSide.client;
 
-// Initialize the WebSocket namespace depending on the client type
+// Initialize the WebSocket namespace depending on the client type (here, '/player')
 client.init('/player');
 
 // Write the performance module
@@ -287,24 +292,22 @@ window.addEventListener('load', () => {
 });
 ```
 
-For a `conductor` (or an `env`) client, the file would look the same except that the WebSocket namespace initialization would be `client.init('/conductor);` (or `client.init('/env');`) and the modules might be different. For instance, one could imagine that the `env` clients only require a `seatmap` and a `performance` module).
+For another type of client (*e.g* `conductor` or `env`), the file would look the same except that the WebSocket namespace initialization correspond to that type of client (*e.g.* `client.init('/conductor);`, or `client.init('/env');`) and the modules might be different (for instance, one could imagine that the `env` clients only require a `seatmap` and a `performance` module).
 
 #### Server side
 
 On the server side, the `src/server/index.es6.js` would look like this.
 
 ```javascript
+/* Server side */
+
 // Require the libraries and setup the Express app
 var serverSide = require('soundworks/server');
 var server = serverSide.server;
-var path = require('path');
 var express = require('express');
 var app = express();
-
-// Configuration of the Express app
-app.set('port', process.env.PORT || 3000);
-app.set('view engine', 'ejs');
-app.use(express.static(path.join(__dirname, '../../public')));
+var path = require('path');
+var dir = path.join(__dirname, '../../public');
 
 // Write the player and env performance modules
 class MyPlayerPerformance extends serverSide.Module {
@@ -321,18 +324,18 @@ var playerPerformance = new MyPlayerPerformance(...);
 var envPerformance = new MyEnvPerformance(...);
 
 // Start the scenario
-server.start(app);
-// Set up the module servers for the 'player' clients
+server.start(app, dir, 3000);
+// Set up the server modules required by the 'player' clients
 server.map('/player', 'My Scenario', seatmap, checkin, playerPerformance);
-// Set up the module servers for the 'env' clients
+// Set up the server modules required by the 'env' clients
 server.map('/env', 'My Scenario — Environment', seatmap, envPerformance);
 ```
 
-Indeed, on the client side, the `player` clients initialized the modules `welcome` (that does not require a communication with the server), `seatmap`, `checkin` and `performance`, so we set up the servers corresponding to these modules on the namespace `/player`. Similarly, the `/env` clients initialized the modules `seatmap` and `performance` (which both require communication with the server), so we set up the servers corresponding to these modules on the namespace `/env`.
+Indeed, on the client side, the `player` clients use the modules `welcome` (that does not require a communication with the server), `seatmap`, `checkin` and `performance`, so we set up the corresponding server modules and map them to the namespace `/player`. Similarly, say the `/env` clients use the modules `seatmap` and `performance` (which both require communication with the server), so we set up the corresponding server modules and map them to the namespace `/env`.
 
 #### Styling with SASS
 
-Finally, in the `src/sass/` folder, you would add all the SASS partials you need for the modules from the library, and include them all in a `player.scss` file. If you have other types of clients in your scenario (such as `conductor` or `env`), you would add the corresponding `*.scss` files as well, such as `conductor.scss` or `env.scss`.
+Finally, the `src/sass/` folder would contain all the SASS partials we need for the modules from the library, and include them all in a `player.scss` file. If there are other types of clients in the scenario (*e.g.* `conductor` or `env`), we would add the corresponding `*.scss` files as well (*e.g.* `conductor.scss` or `env.scss`).
 
 ## API
 
