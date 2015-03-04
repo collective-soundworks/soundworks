@@ -13,16 +13,12 @@ class ServerSync extends ServerModule {
     this.sync = new Sync(() => {
       let time = process.hrtime();
       return time[0] + time[1] * 1e-9;
-    }, (cmd, ...args) => {
-        client.send(cmd, ...args);
-      }, (cmd, callback) => {
-        client.receive(cmd, callback);
-      });
+    });
   }
 
   connect(client) {
     super.connect();
-    this.sync.start(client.socket);
+    this.sync.start((cmd, ...args) => client.send(cmd, ...args), (cmd, callback) => client.receive(cmd, callback));
   }
 
   getLocalTime(syncTime) {
@@ -32,7 +28,6 @@ class ServerSync extends ServerModule {
   getSyncTime(localTime) {
     return this.sync.getSyncTime(localTime);
   }
-
-} // class ServerSync
+}
 
 module.exports = ServerSync;
