@@ -104,15 +104,17 @@ server.start(app);
 server.map('/player', 'My Scenario', sync, checkin, performance);
 ```
 
-That way, the `sync`, `checkin` and `performance` modules of a `player` (who belongs to the namespace `'/player', see below for more information) would be able to dialog with the corresponding modules on the server side.
+That way, the `sync`, `checkin` and `performance` modules of a `player` (who belongs to the namespace `'/player'`, see below for more information) would be able to dialog with the corresponding modules on the server side.
 
 ### How to write a module?
 
 #### Client side
 
-On the client side, a module extends the `ClientModule` base class and must have a method `.start()` and a method `.done()`. **A module should call the method `.done()` when the whole process of the module is completed.**
+On the client side, a module extends the `ClientModule` base class and must have a method `.start()` and a method `.done()`. **A module should call its `.done()` method when the whole process of the module is completed.**
 
 For instance, if the purpose of the module is to load files, the module should call the method `.done()` when the files are loaded. Similarly, if the purpose of the module is to synchronize the clocks, the module should call the method `.done()` when the clocks are synced.
+
+You will find [more information on the `ClientModule` base class in the API section](#clientmodule).
 
 ##### .start()
 
@@ -174,6 +176,8 @@ class MyModule extends clientSide.Module {
 #### Server side
 
 On the server side, a module extends the `ServerModule` base class and must have a method `.connect(client:ServerClient)` and `.disconnect(client:ServerClient)`.
+
+You will find [more information on the `ServerModule` base class in the API section](#servermodule).
 
 ##### .connect(client:ServerClient)
 
