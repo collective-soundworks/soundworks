@@ -13,21 +13,23 @@ class ClientSync extends ClientModule {
   constructor(options = {}) {
     super('sync', true, options.color || 'black');
 
-    this.sync = new Sync(() => audioContext.currentTime);
+    this.ready = false;
+
+    this.sync = new Sync(
+      () => audioContext.currentTime, (cmd, ...args) => client.send(cmd, ...args), (cmd, callback) => client.receive(cmd, callback), () => {
+        if (!this.ready) {
+          this.ready = true;
+          this.done();
+        }
+      }
+    );
 
     this.setViewText('Clock syncing, stand by…', 'soft-blink');
   }
 
   start() {
     super.start();
-
-    this.sync.start((cmd, ...args) => client.send(cmd, ...args), (cmd, callback) => client.receive(cmd, callback));
-
-    let ready = false;
-    if (!ready) {
-      ready = true;
-      this.done();
-    }
+    this.sync.start();
   }
 
   getLocalTime(syncTime) {
