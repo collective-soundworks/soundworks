@@ -34,7 +34,7 @@ class ServerCheckin extends ServerModule {
   }
 
   connect(client) {
-    super.connect();
+    super.connect(client);
 
     client.receive('checkin_request', () => {
       var index = null;

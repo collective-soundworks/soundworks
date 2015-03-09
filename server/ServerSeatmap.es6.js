@@ -24,7 +24,7 @@ class ServerSeatmap extends ServerModule {
   }
 
   connect(client) {
-    super.connect();
+    super.connect(client);
 
     client.receive('seatmap_request', () => {
       client.send('seatmap_init', {

@@ -80,7 +80,7 @@ class ServerControl extends ServerModule {
   }
 
   connect(client) {
-    super.connect();
+    super.connect(client);
 
     var namespace = client.namespace;
 

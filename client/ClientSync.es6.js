@@ -22,16 +22,14 @@ class ClientSync extends ClientModule {
 
   start() {
     super.start();
-    this.sync.start(
-      (cmd, ...args) => client.send(cmd, ...args),
-      (cmd, callback) => client.receive(cmd, callback),
-      () => {
-        if (!this.ready) {
-          this.ready = true;
-          this.done();
-        }
+
+    this.sync.start(client.send, client.receive);
+    this.sync.on('sync:stats', () => {
+      if (!this.ready) {
+        this.ready = true;
+        this.done();
       }
-    );
+    });
   }
 
   getLocalTime(syncTime) {

@@ -18,7 +18,7 @@ class ServerSync extends ServerModule {
   }
 
   connect(client) {
-    super.connect();
+    super.connect(client);
     this.sync.start((cmd, ...args) => client.send(cmd, ...args), (cmd, callback) => client.receive(cmd, callback));
   }
 
