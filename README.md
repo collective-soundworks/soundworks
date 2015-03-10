@@ -111,11 +111,11 @@ That way, the `sync`, `checkin` and `performance` modules of a `player` (who bel
 
 #### Client side
 
-On the client side, a module extends the `ClientModule` base class and must have a method `.start()` and a method `.done()`. **A module should call its `.done()` method when the whole process of the module is completed.**
+On the client side, a module extends the `ClientModule` base class and must have a `.start()` method and a `.done()` method. **A module should call its `.done()` method when the whole process of the module is completed.**
 
 For instance, if the purpose of the module is to load files, the module should call the method `.done()` when the files are loaded. Similarly, if the purpose of the module is to synchronize the clocks, the module should call the method `.done()` when the clocks are synced.
 
-##### `.start()`
+##### The `.start()` method
 
 The `.start()` method is called to start the module. It should handle the logic and the steps that lead to the completion of the module.
 
@@ -150,7 +150,7 @@ class ClientSeatmap extends ClientModule {
 
 This method must include the inherited method from the base class before any code you write (`super.start();`).
 
-##### `.done()`
+##### The `.done()` method
 
 The `.done()` method should rarely change from the method inherited from the base class. If you have to rewrite it though, **don't forget to include the inherited method of the base class**. (Its purpose is to emit a `'done'` event associated with the module, which makes the whole module logic work.)
 
@@ -176,9 +176,9 @@ You will find [more information on the `ClientModule` base class in the API sect
 
 #### Server side
 
-On the server side, a module extends the `ServerModule` base class and must have a method `.connect(client:ServerClient)` and `.disconnect(client:ServerClient)`.
+On the server side, a module extends the `ServerModule` base class and must have a `.connect(client:ServerClient)` method and a `.disconnect(client:ServerClient)` method.
 
-##### `.connect(client:ServerClient)`
+##### The `.connect(client:ServerClient)` method
 
 The `.connect(client)` is called whenever the client `client` connects to the server. I should set up the listeners of the WebSocket messages sent after the `.start()` method on the client side is started, and handle the logic of the module.
 
@@ -192,7 +192,7 @@ connect(client) {
 }
 ```
 
-##### `.disconnect(client:ServerClient)`
+##### The `.disconnect(client:ServerClient)` method
 
 Similarly, the `.disconnect(client)` is called whenever the client `client` disconnects from the server. It handles all the actions that are necessary in that case.
 
