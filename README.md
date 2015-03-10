@@ -19,6 +19,7 @@
     - [`ServerClient`](#serverclient)
   - [Client and server modules](#client-and-server-modules)
     - [`Checkin`](#checkin)
+    - [`Control`](#control)
     - [`Module`](#module)
     - [`Seatmap`](#seatmap)
     - [`Sync`](#sync)
@@ -114,7 +115,7 @@ On the client side, a module extends the `ClientModule` base class and must have
 
 For instance, if the purpose of the module is to load files, the module should call the method `.done()` when the files are loaded. Similarly, if the purpose of the module is to synchronize the clocks, the module should call the method `.done()` when the clocks are synced.
 
-##### .start()
+##### `.start()`
 
 The `.start()` method is called to start the module. It should handle the logic and the steps that lead to the completion of the module.
 
@@ -149,7 +150,7 @@ class ClientSeatmap extends ClientModule {
 
 This method must include the inherited method from the base class before any code you write (`super.start();`).
 
-##### .done()
+##### `.done()`
 
 The `.done()` method should rarely change from the method inherited from the base class. If you have to rewrite it though, **don't forget to include the inherited method of the base class**. (Its purpose is to emit a `'done'` event associated with the module, which makes the whole module logic work.)
 
@@ -177,7 +178,7 @@ You will find [more information on the `ClientModule` base class in the API sect
 
 On the server side, a module extends the `ServerModule` base class and must have a method `.connect(client:ServerClient)` and `.disconnect(client:ServerClient)`.
 
-##### .connect(client:ServerClient)
+##### `.connect(client:ServerClient)`
 
 The `.connect(client)` is called whenever the client `client` connects to the server. I should set up the listeners of the WebSocket messages sent after the `.start()` method on the client side is started, and handle the logic of the module.
 
@@ -191,7 +192,7 @@ connect(client) {
 }
 ```
 
-##### .disconnect(client:ServerClient)
+##### `.disconnect(client:ServerClient)`
 
 Similarly, the `.disconnect(client)` is called whenever the client `client` disconnects from the server. It handles all the actions that are necessary in that case.
 
@@ -420,7 +421,7 @@ The `ClientDialog` module displays a dialog on the screen, and requires the user
 ###### Methods
 
 - `constructor(options:Object = {})`  
-  The constructor method instantiates the `ClientDialog` module on the client side. It takes the `options` object as an argument, whose properties are:
+  The `constructor` method instantiates the `ClientDialog` module on the client side. It takes the `options` object as an argument, whose properties are:
   - `activateAudio:Boolean = false`  
     If set to `true`, the module with activate the Web Audio API when the user clicks the screen (useful on iOS, where sound is muted until a user action triggers some audio commands).
   - `color:String = 'black'`  
@@ -444,7 +445,7 @@ The `ClientLoader` module requires the SASS partial `sass/_07-loader.scss`.
 ###### Methods
 
 - `constructor(audioFiles:Array, options = {})`  
-  The constructor method instantiates the `ClientLoader` module on the client side. It takes up to two arguments:
+  The `constructor` method instantiates the `ClientLoader` module on the client side. It takes up to two arguments:
   - `audioFiles:Array`  
      The `audiofiles` array contains the links (`String`) to the audio files to be loaded.
   - `options:Object = {}`  
@@ -466,7 +467,7 @@ The `ClientOrientation` module allows to calibrate the compass and get and angle
 ###### Methods
 
 - `constructor(options:Object = {})`  
-  The constructor method instantiates the `ClientOrientation` module on the client side. It takes the `options` object as an argument, whose optional properties are:
+  The `constructor` method instantiates the `ClientOrientation` module on the client side. It takes the `options` object as an argument, whose optional properties are:
   - `color:String = 'black'`  
     Sets the background color of the view to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library's `sass/_03-colors.scss` file.
   - `text:String = "Point the phone exactly in front of you, and touch the screen."`
@@ -572,6 +573,40 @@ var checkin = new serverSide.Checkin({ seatmap: seatmap });
 var checkin = new serverSide.Checkin({ numPlaces: 500, order: 'ascending' });
 ```
 
+#### Control
+
+##### ClientControl
+
+###### Methods
+
+- `constructor(options:Object = {})`    
+  The `constructor` method instantiates the `ClientControl` module on the client side. It takes the `options` object as an argument, whose supported property is:
+  - `gui:Boolean = false`  
+    When set to `true` , the `gui` property makes the ClientControl display the Graphical User Interface (GUI) on the screen of the client. The GUI allows to edit the controls.
+
+##### ServerControl
+
+###### Attributes
+
+- 
+
+###### Methods
+
+- `constructor()`  
+  
+- `addParameterNumber(name:String, label:String, min:Number, max:Number, step:Number, init:Number)`  
+  
+- `addParameterSelect(name:String, label:String, options:Object, init:)`  
+  
+- `addCommand(name:, label:, fun:)`  
+  
+- `addDisplay(name:, label:, init:)`  
+  
+- `setParameter(name:, value:)`  
+  
+- `setDisplay(name:, value:)`  
+  
+
 #### Module
 
 The `Module` server and client classes are the base classes that any *Soundworks* module is based on.
@@ -598,9 +633,9 @@ Any module that extends the `ClientModule` class requires the SASS partial `sass
   - `viewColor`  
     The `viewColor` argument should be a class name as defined in the library's `sass/_03-colors.scss` file, and changes the background color of the view to that color.
 - `start()`  
-  The `.start()` method is automatically called to start the module, and should handle the logic of the module on the client side. For instance, it takes care of the communication with the module on the server side by sending WebSocket messages and setting up WebSocket message listeners. If the module has a `view`, the `.start()` method creates the corresponding HTML element and appends it to the DOM's main container.
+  The `start` method is automatically called to start the module, and should handle the logic of the module on the client side. For instance, it takes care of the communication with the module on the server side by sending WebSocket messages and setting up WebSocket message listeners. If the module has a `view`, the `.start()` method creates the corresponding HTML element and appends it to the DOM's main container.
 - `done()`  
-  The `.done()` method should be called when the module has done its duty (for instance at the end of the `.start()` method you write). You should not have to modify this method, but if you do, don't forget to include `super.done()` at the end. If the module has a `view`, the `.done()` method removes it from the DOM.
+  The `done` method should be called when the module has done its duty (for instance at the end of the `.start()` method you write). You should not have to modify this method, but if you do, don't forget to include `super.done()` at the end. If the module has a `view`, the `.done()` method removes it from the DOM.
 - `setViewText(text:String, ...cssClasses:String):Element`  
   When `this.view` exists, the `.setViewText` method creates a `<div class='centered-text'></div>` and appends it to `this.view`. If `text` is specified, the method adds a paragraph element `<p>` to the `div`, with the `text` inside. Finally, any `cssClasses` you would specify would be added to that paragraph element. The method returns the `div` with the `centered-text` class.
 
@@ -756,7 +791,7 @@ The `Sync` module is based on [`sync`](https://github.com/collective-soundworks/
 
 For instance, this allows all the clients to do something exactly at the same time, such as displaying a color on the screen or playing a snare sound in a synchronized manner.
 
-The `Sync` module does a first synchronization process after which the `ClientSync` emits the `"done"` event. Later on, the `Sync` module keeps resynchronizing the client and server clocks on the sync clock at random intervals to compensate the clock drift.
+The `Sync` module does a first synchronization process after which the `ClientSync` emits the `'done'` event. Later on, the `Sync` module keeps resynchronizing the client and server clocks on the sync clock at random intervals to compensate the clock drift.
 
 On the client side, `ClientSync` uses the `audioContext` clock. On the server side, `ServerSync` uses the `process.hrtime()` clock. All times are in seconds (method arguments and returned values). **All time calculations and exchanges should be expressed in the sync clock time.**
 
@@ -799,7 +834,7 @@ var nowSync = sync.getSyncTime(); // current time in sync clock time
 - `getSyncTime(localTime:Number) : Number`  
   The `getSyncTime` method returns the time in the sync clock when the server clock reaches `localTime`. If no arguments are provided, the method returns the time it is when the method is called, in the sync clock. The returned time is a `Number`, in seconds.
 
-Note: in practice, the sync clock used by the [`sync` module](https://github.com/collective-soundworks/sync) is the server clock.
+Note: in practice, the sync clock used by the [`sync` module](https://github.com/collective-soundworks/sync) is the `process.hrtime()` server clock.
 
 Below is an example of the instantiation of the `Sync` module on the server side.
 
