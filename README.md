@@ -305,6 +305,7 @@ On the server side, the `src/server/index.es6.js` would look like this.
 // Require the libraries and setup the Express app
 var serverSide = require('soundworks/server');
 var server = serverSide.server;
+
 var express = require('express');
 var app = express();
 var path = require('path');
@@ -336,7 +337,24 @@ Indeed, on the client side, the `player` clients use the modules `welcome` (that
 
 #### Styling with SASS
 
-Finally, the `src/sass/` folder would contain all the SASS partials we need for the modules from the library, and include them all in a `player.scss` file. If there are other types of clients in the scenario (*e.g.* `conductor` or `env`), we would add the corresponding `*.scss` files as well (*e.g.* `conductor.scss` or `env.scss`).
+Finally, the `src/sass/` folder would contain all the SASS partials we need for the modules from the library, and include them all in a `clientType.scss` file, where `clientType` can be `player`, `conductor`, `env`, or any other type of client you create. Since the `player` is the default client in any *Soundworks*-based scenario, the `src/sass/` should at least contain the `player.scss` file.
+
+For instance, in our previous example where the client has a `welcome`, `seatmap`, `checkin` and `performance` module, the `player.scss` file could look like this.
+
+```sass
+// General styling: these partials should be included in every clientType.scss file
+@import '01-reset';
+@import '02-fonts';
+@import '03-colors';
+@import '04-general';
+
+// Module specific partials: check in the documentation which modules have an associated SASS file
+@import '05-checkin';
+@import '08-seatmap';
+
+// Your own partials
+@import 'performance'
+```
 
 ## API
 
