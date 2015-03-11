@@ -42,19 +42,19 @@ In addition to the players, a scenario can include other kinds of clients such a
 - A laptop that provides an interface to control some parameters of the performance in real time. We would refer to this type of client as `conductor`. These clients would connect to the server through the URL `http://my.server.address:port/conductor`.
 - A computer that controls the sound and/or light effects in the room in sync with the players' performance, such as lasers, a global visualization or ambient sounds on external loudspeakers. We would refer to this type of client as `env`, standing for “environment”. These clients would connect to the server through the URL `http://my.server.address:port/env`.
 
-In summary, a client that connects to the root URL of the application is called a `player`, the default namespace. All other types of clients access the server through a URL that concatenates the root URL of the application and the namespace of the client type.
+We refer to the URL extensions corresponding to the different kinds of clients as `namespaces`. The `/player` namespace is the default namespace of the application. All other types of clients access the server through a URL that concatenates the root URL of the application and the namespace of the client type such as `conductor` and `env`.
 
 ### A *Soundworks* scenario is exclusively made of modules
 
-A scenario built with *Soundworks* consists in a succession and combination of modules, each of them corresponding to one step of the scenario. On the client side, each module implements a `.start()` and a `.done()` method. We launch the process corresponding to that module by calling the method `.start()`, and we call the method `.done()` when the duty of the module is done.
+A scenario built with *Soundworks* consists in a succession and combination of modules, each of them corresponding to one step of the scenario. On the client side, each module implements a `.start()` and a `.done()` method. We launch the process corresponding to that module by calling the method `.start()`, and we call the method `.done()` to hand over the control the following module. This way, modules can be executed in series and/or in parallel according to a given application scenario.
 
-As an example, let's say that a scenario works as follows when a `player` connects to the server (through the URL `http://my.server.address:port/`):
+As an example, a scenario could provide the following interactions when a `player` connects to the server through the root URL:
 
-- The player gets a `welcome` message (*e.g.* “Welcome to the performance!”). When the player clicks on the screen…
-- … the player receives some `checkin` instructions while in the meantime, the smartphone has to `sync` its clock with the server. Finally, when these are done…
-- … the player joins the `performance`.
+- The player’s smartphone displays a `welcome` message (*e.g.* “Welcome to the performance!”). When the player clicks on the screen…
+- the player receives some `checkin` instructions while in the meantime, the smartphone has to `sync` its clock with the server. Finally, when these are done…
+- the player joins the `performance`.
 
-Each of these steps corresponds to a module. Thus, on the client side, this scenario would be implemented as follows.
+Each of these steps corresponds to a module. On the client side, this scenario would be implemented as follows.
 
 ```javascript
 /* Client side */
@@ -85,7 +85,7 @@ To run a sequence of modules in serial, we use `client.serial(module1, module2, 
 
 Some of these modules need an interaction with the server (for instance, the `sync` process requires a dialog between the client and the server to synchronize the clocks). On the client side, each module implements a `.connect()` and a `.disconnect()` method that is called when a client connects or disconnects the application through one of the provided client URLs. A mapping determines which kind of client (i.e. a connection to which client URL) would `connect` to which module.
 
-The following code 1) instantiates three server side modules, 2) launches the server, and 3) maps the `'/player'` clients to the three modules.
+The following code 1) instantiates three server side modules – `sync`, `checkin` and `performance` –, 2) launches the server, and 3) maps the `'/player'` clients to the three modules.
 
 ```javascript
 /* Server side */
@@ -113,7 +113,7 @@ That way, the `sync`, `checkin` and `performance` modules of a `player` (who bel
 
 #### Client side
 
-On the client side, a module extends the `ClientModule` base class and must have a `.start()` method and a `.done()` method. **A module should call its `.done()` method when the whole process of the module is completed.**
+On the client side, a module extends the `ClientModule` base class. The module has to implement a `.start()` method and has to call its `.done()` method to hand over the control to the next module. While most modules would have completed their process when they call done, some modules continue processing in the background afterwards. This is for example the case for the `sync` module that hands over the control after a first synchronization with the server, but may continue re-synchronizing clocks afterwards.
 
 For instance, if the purpose of the module is to load files, the module should call the method `.done()` when the files are loaded. Similarly, if the purpose of the module is to synchronize the clocks, the module should call the method `.done()` when the clocks are synced.
 
@@ -389,7 +389,7 @@ The core objects on the client side and the server side contain generic function
 
 #### Client side: the `client` object
 
-The `client` object contains all the information and helper functions that are associated with the client you are writing. For instance, this object allows to specify what type of client this is (*i.e.* which namespace this client belongs to, thanks to the function `init`) and to establish WebSocket communications with the server thanks to the functions `send` and `receive`. It also allows to start the scenario and organize the modules with the functions `start`, `parallel` and `serial`.
+The `client` object contains all the information and helper functions that are associated with the client you are writing. For instance, this object allows to specify what type of client this is (*i.e.* which namespace this client belongs to, thanks to the function `init`) and to establish WebSocket communications with the server thanks to the functions `send` and `receive`. It also allows to start the scenario and organize the modules with the functions `start`, `serial` and `parallel`.
 
 The `client` object has the following attributes, which we split into two groups for the sake of clarity.
 
@@ -487,7 +487,7 @@ would generate the following `view`, appended to the main container `<div>` when
 
 #### ClientLoader
 
-The `ClientLoader` module allows to load audio files that can be used in other modules (for instance, the performance module). The `Loader` module displays a loading bar that indicates the progress of the loading.
+The `ClientLoader` module allows to load audio files that can be used in the scenario (for instance, by the performance module). The `Loader` module has a `view` that displays a loading bar indicating the progress of the loading. The `ClientLoader` module triggers its `'done'` event when all the files are loaded.
 
 The `ClientLoader` module requires the SASS partial `sass/_07-loader.scss`.
 
@@ -501,22 +501,35 @@ The `ClientLoader` module requires the SASS partial `sass/_07-loader.scss`.
 - `constructor(audioFiles:Array, options = {})`  
   The `constructor` method instantiates the `ClientLoader` module on the client side. It takes up to two arguments:
   - `audioFiles:Array`  
-     The `audiofiles` array contains the links (`String`) to the audio files to be loaded.
+     The `audiofiles` array contains the links (`String`) to the audio files to be loaded. (The audio files should be in the `/public` folder of your project, or one of its subfolders.)
   - `options:Object = {}`  
     The optional `options` argument customizes the configuration of the module. Its properties can be:
     - `color:String = 'black'`  
       Sets the background color of the view to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library's `sass/_03-colors.scss` file.
 
+For instance, the following code:
+
+```javascript
+var loader = ClientLoader('sounds/kick.mp3', 'sounds/snare.mp3');
+```
+
+would allow to access the kick and snare audio buffers created from the mp3 files with:
+
+```javascript
+var kickBuffer = loader.audioBuffers[0];
+var snareBuffer = loader.audioBuffers[1];
+```
+
 #### ClientOrientation
 
-The `ClientOrientation` module allows to calibrate the compass and get and angle reference. It displays the view, that the user clicks on when he / she points at the right direction for the calibration.
+The `ClientOrientation` module allows to calibrate the compass and get an angle reference. It displays a `view` with some instruction text: when the user points at the right direction for the calibration, tapping on the screen of the phone (*i.e.* on the `view`) would set the current compass value as the angle reference and trigger the `'done'` event.
 
 ###### Attributes
 
 - `angleReference:Number`  
-  The `angleReference` attribute is the value of the alpha angle (as in `deviceOrientation`) when the user clicks on the screen while the Orientation module is displayed. It serves as a calibration / reference of the compass.
+  The `angleReference` attribute is the value of the `alpha` angle (as in the `deviceOrientation` HTML5 API) when the user clicks on the screen while the `ClientOrientation` module is displayed. It serves as a calibration / reference of the compass.
 - `view:Element`  
-  The view is the div in which the content of the module is displayed.
+  The view is the `<div>` in which the content of the module is displayed.
 
 ###### Methods
 
@@ -524,8 +537,8 @@ The `ClientOrientation` module allows to calibrate the compass and get and angle
   The `constructor` method instantiates the `ClientOrientation` module on the client side. It takes the `options` object as an argument, whose optional properties are:
   - `color:String = 'black'`  
     Sets the background color of the view to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library's `sass/_03-colors.scss` file.
-  - `text:String = "Point the phone exactly in front of you, and touch the screen."`
-    The text to be displayed in the dialog.
+  - `text:String = 'Point the phone exactly in front of you, and touch the screen.'`  
+    The text to be displayed in the `view`.
 
 ### Server only modules
 
@@ -572,7 +585,7 @@ The `ClientCheckin` module requires the SASS partial `sass/_05-checkin.scss`.
 
 ##### ClientCheckin
 
-The `ClientCheckin` takes care of the checkin on the client side.
+The `ClientCheckin` module takes care of the check in on the client side. The `ClientCheckin` module triggers its `'done'` event when the user is checked in.
 
 ###### Methods
 
@@ -632,7 +645,11 @@ var checkin = new serverSide.Checkin({ numPlaces: 500, order: 'ascending' });
 
 #### Control
 
+Blah
+
 ##### ClientControl
+
+Blah
 
 ###### Methods
 
@@ -642,6 +659,8 @@ var checkin = new serverSide.Checkin({ numPlaces: 500, order: 'ascending' });
     When set to `true` , the `gui` property makes the ClientControl display the Graphical User Interface (GUI) on the screen of the client. The GUI allows to edit the controls.
 
 ##### ServerControl
+
+Blah
 
 ###### Attributes
 
@@ -768,7 +787,7 @@ If the placement of the users in the scenario doesn't matter, the `Seatmap` modu
 
 ##### ClientSeatmap
 
-The `ClientSeatmap` modules takes care of the seatmap on the client side.
+The `ClientSeatmap` modules takes care of receiving the seatmap on the client side, and provides helper functions to display the seatmap on screen. The `ClientSeatmap` triggers its `'done'` event when it receives the seatmap from the server.
 
 The `ClientCheckin` module requires the SASS partial `sass/_08-seatmap.scss`.
 
@@ -854,7 +873,7 @@ On the client side, `ClientSync` uses the `audioContext` clock. On the server si
 
 ##### ClientSync
 
-The `ClientSync` modules takes care of the synchronization process on the client side. It displays a `view` that indicates “Clock syncing, stand by…” until the very first synchronization process is `"done"`.
+The `ClientSync` modules takes care of the synchronization process on the client side. It displays a `view` that indicates “Clock syncing, stand by…” until the very first synchronization process is done. The `ClientSync` module triggers its `'done'` event as soon as the client clock is in sync with the sync clock. Then, the synchronization process keeps running in the background to resynchronize the clocks from times to times. When such a resynchronization happens, the `ClientSync` module triggers a `'sync:stats'` event associated with statistics about the synchronization.
 
 ###### Methods
 
@@ -880,6 +899,18 @@ var sync = new clientSide.Sync();
 var nowClient = sync.getLocalTime(); // current time in client clock time
 var nowSync = sync.getSyncTime(); // current time in sync clock time
 ```
+
+###### Events
+
+- `'sync:stats' : stats:Object`  
+  The `ClientSync` module emits the `'sync:stats'` event each time it resynchronizes the local clock on the sync clock. In particular, the first time this event is fired indicates that the clock is now in sync with the sync clock. The `'sync:stats'` event is associated with the `stats` object, whose properties are:
+  - `timeOffset`  
+    The `timeOffset` property contains the average time offset between the client clock and the sync clock, based on the latest ping-pong exchanges.
+  - `travelTime`  
+    The `travelTime` property contains the average travel time for a message to go from the client to the server and back, based on the latest ping-pong exchanges.
+  - `travelTimeMax`  
+    The `travelTimeMax` property contains the maximum travel time for a message to go from the client to the server and back, among the latest ping-pong exchanges.
+
 ##### ServerSync
 
 ###### Methods
