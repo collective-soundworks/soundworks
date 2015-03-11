@@ -383,9 +383,13 @@ Some modules on the client side are also associated with some styling informatio
 
 ### Core objects
 
+The core objects on the client side and the server side contain generic functions and objects that help setting a scenario up, or that are used throughout all the components of a scenario.
+
 #### Client side: the `client` object
 
-The `client` object has the following attributes, which we regroup by purpose for clarity.
+The `client` object contains all the information and helper functions that are associated with the client you are writing. For instance, this object allows to specify what type of client it is (*i.e.* which namespace this client belongs to, thanks to the function `init`) and to establish WebSocket communications with the server thanks to the functions `send` and `receive`. It also allows to start and organize the modules with the functions `start`, `parallel` and `serial`.
+
+The `client` object has the following attributes, which we split into two groups for the sake of clarity.
 
 ##### Initialization and WebSocket communication
 
@@ -398,34 +402,44 @@ The `client` object has the following attributes, which we regroup by purpose fo
   **Note:** on the server side, the server receives the message with the command `ServerClient.receive(msg:String, callback:Function)` where the `callback` function would take `...args` as arguments (for more information, see the [`ServerClient` module methods](#serverclient) below).
 - `receive:Function`  
   The `receive` attribute contains the `receive` function that is defined as `receive(msg:Object, callback:Function)`. The `receive` function executes the callback function `callback` when it receives the message `msg` sent by the server.  
-  **Note:** on the server side, the server sends the message with the command `server.send(msg:String, ...args:*)` (for more information, see the [`server` object WebSocket communication](#websocket-communication) below). On the client side, the `callback` function takes `...args` as arguments.
+  **Note:** on the server side, the server sends the message with the command `server.send(msg:String, ...args:*)` (for more information, see the [`server` object WebSocket communication](#websocket-communication) below). Hence, in the `client.receive(msg:Object, callback:Function)` method on the client side, the `callback` function takes `...args` as arguments.
 
 ##### Modules logic
 
 - `start:Function`  
-  The `start` attribute contains the `start` function that is defined as `start(module:ClientModule)`. The `start` function starts the client's module logic with the module `module`. The argument `module` can either be a module from the library or a module you wrote (if your scenario has only one module), or a `client.serial(...modules:ClientModule)` sequence of modules, or a `client.parallel(...modules:ClientModule)` combination of modules.
+  The `start` attribute contains the `start` function that is defined as `start(module:ClientModule)`. The `start` function starts the client's module logic with the module `module`. The argument `module` can either be:
+    - a module from the library or a module you wrote (if your scenario has only one module),
+    - a `client.serial(...modules:ClientModule)` sequence of modules,
+    - or a `client.parallel(...modules:ClientModule)` combination of modules.
 - `parallel:Function`  
-  The `parallel` attribute contains the `parallel` function that is defined as `parallel(...modules:ClientModule):ClientModule`. The `parallel` function starts all the modules in `...module` in parallel, and triggers a `'done'` event when all the modules triggered their `.done()` function (*i.e.* emitted their own `'done'` event). The `parallel` function returns a `ClientModule` (namely, a `ParallelModule`). Because of this, you can combine parallel module combinations with serial module sequences (*e.g.* `client.parallel(module1, client.serial(module2, module3), module4);`).  The `view` of a module is always full screen, so in the case of modules run in parallel, the views are stacked on top of each other (using the `z-index` CSS property) in the order of the modules (`module1` is on top of `module2` which is on top of `module3`, etc.). For instance, say `module3` triggers its `.done()` method before `module2`: its `view` would be removed before the one of `module2`, so the user would never see the `view` of `module3` (the full screen views would directly pass from `module2` to `module4`).
+  The `parallel` attribute contains the `parallel` function that is defined as `parallel(...modules:ClientModule) : ClientModule`. The `parallel` function starts all the modules of `...modules` in parallel (via their `.start()` methods), and triggers a `'done'` event when all the modules emitted their own `'done'` events (via their `.done()` methods).  
+  The `parallel` function returns a `ClientModule` (namely, a `ParallelModule`). Hence, you can compound parallel module combinations with serial module sequences (*e.g.* `client.parallel(module1, client.serial(module2, module3), module4);`).  
+  **Note:** The `view` of a module is always full screen, so in the case of modules run in parallel, the `view`s of all the modules are added to the DOM when the parallel module starts, and they are stacked on top of each other in the order of the arguments using the `z-index` CSS property (*i.e.* `module1` is on top of `module2`, which is on top of `module3`, etc.). The `view` of a module is removed from the DOM when the module triggers its `.done()` method (for more information, see the [`ClientModule` API](#clientmodule)).
 - `serial:Function`  
-  The `serial` attribute contains the `serial` function that is defined as `serial(...modules:ClientModule):ClientModule`. The `serial` function starts the modules in `...module` in serial: it starts the module *n*+1 (via its `.start()`) method only after the module *n* triggered a `'done'` event (via its *.done()* method). When the last module calls its `.done()` method, this function emits a global `'done'` event. The `serial` function returns a `ClientModule` (namely, a `SerialModule`). Because of this, you can combine parallel module combinations with serial module sequences (*e.g.* `client.serial(module1, client.parallel(module2, module3), module4);`).
+  The `serial` attribute contains the `serial` function that is defined as `serial(...modules:ClientModule) : ClientModule`. The `serial` function starts the modules of `...module` in serial: it starts the module *n*+1 (via its `.start()` method) only after the module *n* triggered a `'done'` event (via its *.done()* method). When the last module calls its `.done()` method, the `serial` function emits a global `'done'` event.  
+  The `serial` function returns a `ClientModule` (namely, a `SerialModule`). Hence, you can compound serial module sequences with parallel module combinations (*e.g.* `client.serial(module1, client.parallel(module2, module3), module4);`).
 
 #### Server side: the `server` object
 
-The `server` object has the following attributes, which we regroup by purpose for clarity.
+The `server` object contains all the information and helper functions that are associated with the server. For instance, this object allows to setup, configure and start the server with the function `start`. It also allows to manage the mapping between types of clients (*i.e.* namespaces) and the modules they need with the function `map`. Finally, it allows to set up the WebSocket server and communications with the clients.
+
+The `server` object has the following attributes, which we split into two groups for the sake of clarity.
 
 ##### Initialization and module logic
 
 - `start:Function`  
   The `start` attribute contains the `start` function that is defined as `start(app:Object, publicPath:String, port:Number)`. The `start` function starts the server with the Express application `app` that uses `publicPath` as the public static directory, and listens to the port `port`.
 - `map:Function`  
-  The `map` function is used to indicate that the clients who connect to the namespace `namespace` need the modules `...modules` to be activated (via their `.connect(client)` method) and listen for the WebSocket messages from the client side. Additionally, it sets the title of the page (used in the <title> tag in the HTML <head> element) to `title` and routes the connections from the URL path `namespace` to the corresponding view (except for the namespace `'/player'`, that uses the URL `/` instead of `/player`).
+  The `map` function is used to indicate that the clients who connect to the namespace `namespace` need the modules `...modules` to be activated (it starts the modules' `.connect(client)` methods) and listen for the WebSocket messages from the client side. Additionally, it sets the title of the page (used in the <title> tag in the HTML <head> element) to `title` and routes the connections from the URL path `namespace` to the corresponding view (except for the namespace `'/player'`, that uses the root URL `/` instead of `/player`). More specifically:
+  - a client connecting to the server through the URL `http://my.domain.name:port/` would belong to the namespace `'/player'` and be mapped to the view `player.ejs`;
+  - a client connecting to the server through the URL `http://my.domain.name:port/clientType` would belong to the namespace `'/clientType'` and be mapped to the view `clientType.ejs`.
 
 ##### WebSocket communication
 
 - `io:Object`  
   The `io` attribute contains the `socket.io` server, created in the `server.start(app:Object, publicPath:String, port:Number)` method. (Might change in the future.)
 - `broadcast:Function`  
-  The `broadcast` attribute contains the `broadcast` function that is defined as `broadcast(namespace:String, msg:String, ...args:*)`. The `broadcast` function sends the message `msg` and any number of values `...args` (of any type) to all the clients that belong to the namespace `namespace` through WebSockets.
+  The `broadcast` attribute contains the `broadcast` function that is defined as `broadcast(namespace:String, msg:String, ...args:*)`. The `broadcast` function sends the message `msg` and any number of values `...args` (of any type) to all the clients that belong to the namespace `namespace` through WebSockets.  
   **Note:** on the client side, the clients receive the message with the command `client.receive(msg:String, callback:Function)`, where the `callback` function would takes `...args` as arguments (for more information, see the [`client` object WebSocket communication](#initialization-and-websocket-communication) above).
 
 ### Client only modules
@@ -437,7 +451,7 @@ The `ClientDialog` module displays a dialog on the screen, and requires the user
 ###### Attributes
 
 - `view:Element`  
-  The view is the div in which the content of the module is displayed.
+  The view is the `<div>` in which the content of the module is displayed.
 
 ###### Methods
 
@@ -518,7 +532,7 @@ The `ServerClient` module is used to keep track of the connected clients. Each t
   **Note:** on the client side, the client receives the message with the command `client.receive(msg:String, callback:Function)` where the `callback` function would take `...args` as arguments (for more information, see the [`client` object WebSocket communication](#initialization-and-websocket-communication) above).
 - `receive(msg:String, callback:Function)`  
   The `receive` method executes the callback function `callback` when it receives the message `msg` sent by that instantiated client.  
-  **Note:** on the client side, the client sends the message with the command `client.send(msg:String, ...args:*)` (for more information, see the [`client` object WebSocket communication](#initialization-and-websocket-communication) above). In the `ServerClient.receive(msg:String, callback:Function)` method, the `callback` function takes `...args` as arguments.
+  **Note:** on the client side, the client sends the message with the command `client.send(msg:String, ...args:*)` (for more information, see the [`client` object WebSocket communication](#initialization-and-websocket-communication) above). Hence, in the `ServerClient.receive(msg:String, callback:Function)` method on the server side, the `callback` function takes `...args` as arguments.
 - `broadcast(msg:String, ...args:*)`  
   The `broadcast` method sends the message `msg` and any number of values `...args` (of any type) to all the clients of the client's namespace — except that client — through WebSockets.  
   **Note:** on the client side, the clients receive the message with the command `client.receive(msg:String, callback:Function)` where the `callback` function would take `...args` as arguments (for more information, see ).
@@ -644,7 +658,7 @@ Any module that extends the `ClientModule` class requires the SASS partial `sass
 ###### Attributes
 
 - `view = null`  
-  The `view` attribute of the module is the DOM element (a full screen `div`) in which the content of the module is displayed. This element is a child of the main container (`<div id='container' class='container'></div>), which is the only child of the `body` element. A module may or may not have a `view`, as indicated by the argument `hasDisplay:Boolean` of the `constructor`. When that is the case, the `view` is created in the DOM when the `.start()` method is called, and is removed from the DOM when the `.done()` method is called.
+  The `view` attribute of the module is the DOM element (a full screen `div`) in which the content of the module is displayed. This element is a child of the main container (`<div id='container' class='container'></div>`), which is the only child of the `body` element. A module may or may not have a `view`, as indicated by the argument `hasDisplay:Boolean` of the `constructor`. When that is the case, the `view` is created in the DOM when the `.start()` method is called, and is removed from the DOM when the `.done()` method is called.
 
 ###### Methods
 
