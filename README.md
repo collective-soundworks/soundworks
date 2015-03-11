@@ -239,18 +239,18 @@ For instance:
 
 - The `public/` folder should contain any resource your clients may need to load: for instance, the sounds, the images, the fonts, etc.  
   **Note:** the Javascript and CSS files will be automatically generated with our `gulp` file from the `src/` folder, so you shouldn't have any `javascript/` or `stylesheets/` folder here (they will be deleted by `gulp` anyway).
-- The `src/` folder contains your source code for the server and the different types of clients. Each subfolder (`server/`, `/player`, and any other type of client) should contain and `index.es6.js` file, with the code to be executed for that entity. The `src/` folder also contains the SASS files to generate the CSS in the `sass/` subfolder.
+- The `src/` folder contains your source code for the server and the different types of clients. Each subfolder (`server/`, `player/`, and any other type of client) should contain an `index.es6.js` file, with the code to be executed for that entity. The `src/` folder also contains the SASS files to generate the CSS in the `sass/` subfolder.
 - The `views/` folder contains a `*.ejs` file for each type of client. In other words, all the subfolders in `src/` — except `server/` and `sass/` — should have their corresponding EJS file.
 
 To compile the files, just run the command `gulp` in the Terminal: it will generate the `*.css` files from the SASS files, convert the Javascript files from ES6 to ES5, browserify the files on the client side, and launch a `Node.js` server to start the scenario.
 
 A scenario should contain at least a `src/server/`, `src/player/` and `src/sass/` folder.
 
-- The `src/server/` folder contains all the files that constitute the server.
-- The `src/player/` folder contains all the files of the default client, which we name `player`. (Any client connecting to the server through the root URL `http://my.domain.name:port` would be a `player`, and belongs to the namespace `'/player'`.)
+- The `src/server/` folder contains all the Javascript files that compose the server.
+- The `src/player/` folder contains all the files that compose the default client, which we name `player`. (Any client connecting to the server through the root URL `http://my.domain.name:port` would be a `player`, and belongs to the namespace `'/player'`.)
 - Finally, the `src/sass/` folder contains the SASS files to generate the CSS.
 
-You can add any other type of client (let's name it generically `clientType`). For that, you should create a subfolder `src/clientType/` (for instance `src/conductor/` or `src/env/`) and write an `index.es6.js` file inside. This type of client would join the corresponding namespace `'/clientType`' (*e.g.* `'/conductor'` or `'/env'`), and be accessed through the URL `http://my.domain.name:port/clientType` (*e.g.* `http://my.domain.name:port/conductor` or `http://my.domain.name:port/env`).
+You can add any other type of client (let's name it generically `clientType`). For that, you should create a subfolder `src/clientType/` (*e.g.* `src/conductor/` or `src/env/`) and write an `index.es6.js` file inside. This type of client would join the corresponding namespace `'/clientType'` (*e.g.* `'/conductor'` or `'/env'`) — for this, add the line `client.init('/clientType');` in the `index.es6.js` file (*e.g.* `client.init('/conductor');` or `client.init('/env');`) — and be accessed through the URL `http://my.domain.name:port/clientType` (*e.g.* `http://my.domain.name:port/conductor` or `http://my.domain.name:port/env`).
 
 #### Client side
 
