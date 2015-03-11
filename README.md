@@ -83,9 +83,9 @@ client.start(
 
 To run a sequence of modules in serial, we use `client.serial(module1, module2, ...)`. A module would `.start()` only after the previous one is `.done()`. On the other hand, if some modules need to be run in parallel, we use `client.parallel(module1, module2, ...)`. The parallel process triggers a global `.done()` method when all of its modules are `.done()`. For more information about the `serial` and `parallel` module processes, see the [`client` object modules logic](#modules-logic) in the API section.
 
-Some of these modules need an interaction with the server (for instance, the `sync` process requires a dialog between the client and the server to synchronize the clocks). On the client side, each module implements a `.connect()` and a `.disconnect()` method that is called when a client connects or disconnects the application through one of the provided client URLs. A mapping determines which kind of client (i.e. a connection to which client URL) calles the 
+Some of these modules need an interaction with the server (for instance, the `sync` process requires a dialog between the client and the server to synchronize the clocks). On the client side, each module implements a `.connect()` and a `.disconnect()` method that is called when a client connects or disconnects the application through one of the provided client URLs. A mapping determines which kind of client (i.e. a connection to which client URL) would call the connect method of which module.
 
-Thus, on the server side, we would write the following code that 1) instantiates the server side modules, and 2) maps them to the `'/player'` namespace.
+The following code 1) instantiates three server side modules, 2) launches the server, and 3) maps the `'/player'` clients to the three modules.
 
 ```javascript
 /* Server side */
@@ -418,13 +418,13 @@ The `client` object has the following attributes, which we split into two groups
   The `serial` function returns a `ClientModule` (namely, a `SerialModule`). Hence, you can compound serial module sequences with parallel module combinations (*e.g.* `client.serial(module1, client.parallel(module2, module3), module4);`).
 - `parallel:Function`  
   The `parallel` attribute contains the `parallel` function that is defined as `parallel(...modules:ClientModule) : ClientModule`. The `parallel` function starts all the modules of `...modules` in parallel (via their `.start()` methods), and triggers a `'done'` event when all the modules emitted their own `'done'` events (via their `.done()` methods).  
-  The `parallel` function returns a `ClientModule` (namely, a `ParallelModule`). Hence, you can compound parallel module combinations with serial module sequences. (*e.g.*
- ```javascript
+  The `parallel` function returns a `ClientModule` (namely, a `ParallelModule`). Hence, you can compound parallel module combinations with serial module sequences. *e.g.*
+```javascript
 client.parallel(moduleP1,
-  , client.serial(moduleS2, moduleS3),
-   moduleP4);
-````).  
-  **Note:** The `view` of a module is always full screen, so in the case of modules run in parallel, the `view`s of all the modules are added to the DOM when the parallel module starts, and they are stacked on top of each other in the order of the arguments using the `z-index` CSS property (*i.e.* on the previous example `moduleP1` is on top of (`moduleS2` and `moduleS3`), which areis on top of `moduleP43`, etc.). The `view` of a module is removed from the DOM when the module triggers its `.done()` method (for more information, see the [`ClientModule` API](#clientmodule)).
+  client.serial(moduleS2, moduleS3),
+  moduleP4);
+```  
+  **Note:** The `view` of a module is always full screen, so in the case of modules run in parallel, the `view`s of all the modules are added to the DOM when the parallel module starts, and they are stacked on top of each other in the order of the arguments using the `z-index` CSS property (*i.e.* in the previous example `moduleP1` is on top of (`moduleS2` and `moduleS3`), which are on top of `moduleP4`.). The `view` of a module is removed from the DOM when the module triggers its `.done()` method (for more information, see the [`ClientModule` API](#clientmodule)).
 
 #### Server side: the `server` object
 
@@ -482,7 +482,7 @@ var welcomeDialog = new ClientDialog({
 });
 ```
 
-would generate the following HTML code, appended to the main container `<div>`:
+would generate the following `view`, appended to the main container `<div>` when the module starts:
 
 ```html
 <div id='welcome' class='module welcome'>
