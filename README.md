@@ -1043,7 +1043,7 @@ class MyPerformance extends clientSide.Module {
 }
 ```
 
-Then, we write the `.start()` method that is called when the performance starts. We want that method to tell the server that the client just started the performance (`client.send('perf_start');`), and to play a sound on the server's command (`client.receive('play_sound', callback)`). (Note: we could directly play the sound in the start method, but we show some client / server communication here for the the purpose of the tutorial.) In theory, we would also need to call the '.done()' method when the purpose of this module is done, but since the performance is the last thing that happens in *My Scenario*, we don't need to do it.
+Then, we write the `.start()` method that is called when the performance starts. We want that method to tell the server that the client just started the performance (`client.send('perf_start');`), and to play a sound on the server's command (`client.receive('play_sound', callback)`).
 
 ```javascript
 class MyPerformance extends clientSide.Module {
@@ -1073,6 +1073,8 @@ class MyPerformance extends clientSide.Module {
   }
 }
 ```
+
+**Note:** we could directly play the sound in the start method, but we show some client / server communication here for the the purpose of the tutorial. In theory, we would also need to call the '.done()' method when the purpose of this module is done, but since the performance is the last thing that happens in *My Scenario*, we don't need to do it.
 
 Now let's glue everything together.
 
