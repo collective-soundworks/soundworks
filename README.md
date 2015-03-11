@@ -383,11 +383,11 @@ Some modules on the client side are also associated with some styling informatio
 
 ### Core objects
 
-The core objects on the client side and the server side contain generic functions and objects that help setting a scenario up, or that are used throughout all the components of a scenario.
+The core objects on the client side and the server side contain generic functions and objects that help setting up a scenario, or that are used throughout all the parts of a scenario.
 
 #### Client side: the `client` object
 
-The `client` object contains all the information and helper functions that are associated with the client you are writing. For instance, this object allows to specify what type of client it is (*i.e.* which namespace this client belongs to, thanks to the function `init`) and to establish WebSocket communications with the server thanks to the functions `send` and `receive`. It also allows to start and organize the modules with the functions `start`, `parallel` and `serial`.
+The `client` object contains all the information and helper functions that are associated with the client you are writing. For instance, this object allows to specify what type of client this is (*i.e.* which namespace this client belongs to, thanks to the function `init`) and to establish WebSocket communications with the server thanks to the functions `send` and `receive`. It also allows to start the scenario and organize the modules with the functions `start`, `parallel` and `serial`.
 
 The `client` object has the following attributes, which we split into two groups for the sake of clarity.
 
@@ -421,7 +421,7 @@ The `client` object has the following attributes, which we split into two groups
 
 #### Server side: the `server` object
 
-The `server` object contains all the information and helper functions that are associated with the server. For instance, this object allows to setup, configure and start the server with the function `start`. It also allows to manage the mapping between types of clients (*i.e.* namespaces) and the modules they need with the function `map`. Finally, it allows to set up the WebSocket server and communications with the clients.
+The `server` object contains all the information and helper functions that are associated with the server. For instance, this object allows to setup, configure and start the server with the function `start`. With the function `map`, it also allows to manage the mapping between types of clients (*i.e.* namespaces) and the modules they need. Finally, it allows to set up the WebSocket server and communications with the clients.
 
 The `server` object has the following attributes, which we split into two groups for the sake of clarity.
 
@@ -430,7 +430,7 @@ The `server` object has the following attributes, which we split into two groups
 - `start:Function`  
   The `start` attribute contains the `start` function that is defined as `start(app:Object, publicPath:String, port:Number)`. The `start` function starts the server with the Express application `app` that uses `publicPath` as the public static directory, and listens to the port `port`.
 - `map:Function`  
-  The `map` function is used to indicate that the clients who connect to the namespace `namespace` need the modules `...modules` to be activated (it starts the modules' `.connect(client)` methods) and listen for the WebSocket messages from the client side. Additionally, it sets the title of the page (used in the <title> tag in the HTML <head> element) to `title` and routes the connections from the URL path `namespace` to the corresponding view (except for the namespace `'/player'`, that uses the root URL `/` instead of `/player`). More specifically:
+  The `map` function is used to indicate that the clients who connect to the namespace `namespace` need the modules `...modules` to be activated (it starts the modules' `.connect(client)` methods) and listen for the WebSocket messages from the client side. Additionally, it sets the title of the page (used in the `<title>` tag in the HTML `<head>` element) to `title` and routes the connections from the URL path `namespace` to the corresponding view (except for the namespace `'/player'`, that uses the root URL `/` instead of `/player`). More specifically:
   - a client connecting to the server through the URL `http://my.domain.name:port/` would belong to the namespace `'/player'` and be mapped to the view `player.ejs`;
   - a client connecting to the server through the URL `http://my.domain.name:port/clientType` would belong to the namespace `'/clientType'` and be mapped to the view `clientType.ejs`.
 
@@ -440,7 +440,7 @@ The `server` object has the following attributes, which we split into two groups
   The `io` attribute contains the `socket.io` server, created in the `server.start(app:Object, publicPath:String, port:Number)` method. (Might change in the future.)
 - `broadcast:Function`  
   The `broadcast` attribute contains the `broadcast` function that is defined as `broadcast(namespace:String, msg:String, ...args:*)`. The `broadcast` function sends the message `msg` and any number of values `...args` (of any type) to all the clients that belong to the namespace `namespace` through WebSockets.  
-  **Note:** on the client side, the clients receive the message with the command `client.receive(msg:String, callback:Function)`, where the `callback` function would takes `...args` as arguments (for more information, see the [`client` object WebSocket communication](#initialization-and-websocket-communication) above).
+  **Note:** on the client side, the clients receive the message with the command `client.receive(msg:String, callback:Function)`, where the `callback` function would take `...args` as arguments (for more information, see the [`client` object WebSocket communication](#initialization-and-websocket-communication) above).
 
 ### Client only modules
 
