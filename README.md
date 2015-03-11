@@ -36,14 +36,15 @@ The framework is based on a client/server architecture supported by `Node.js` (`
 In order to connect the smartphones with each other, *Soundworks* implements a client/server architecture using a `Node.js` server and WebSockets to pass messages between the server and the clients (currently based on the `socket.io` library).
 
 In general, a *Soundworks* scenario allows different types of clients to connect to the server through different URLs. The most important kind clients are the smartphones of the players who take part in the performance.
-For convenience, the players connect to the server through the root URL of the application, `http://my.server.address:port/`.
+For convenience, a player connects to the server through the root URL of the application, `http://my.server.address:port/`.
 
 In addition to the players a scenario can include other kinds of clients such as:
 - A laptop that provides an interface to control some parameters of the performance in real time. We would refer to this type of client as `conductor`. These clients would connect to the server through the URL `http://my.server.address:port/conductor`.
 - A computer that controls the sound and/or light effects in the room in sync with the players' performance, such as lasers, a global visualization or ambient sounds on external loudspeakers. We would refer to this type of client as `env`, standing for “environment”. These clients would connect to the server through the URL `http://my.server.address:port/env`.
-- And so on…
 
-As you may have noticed, a client who connects to the root URL is called a `player`: this is the default client type. All the other types of client access the server through a URL that concatenates the domain name and the name of the client type.
+In the case that the participants 
+
+As you may have noticed, a client who connects to the root URL is called a `player`: this is the default client type. All the other types of client access the server through a URL that concatenates the root URL of the application and the name of the client type.
 
 ### A *Soundworks* scenario is exclusively made of modules
 
@@ -414,13 +415,13 @@ The `client` object has the following attributes, which we split into two groups
     - or a `client.parallel(...modules:ClientModule)` combination of modules.
 - `parallel:Function`  
   The `parallel` attribute contains the `parallel` function that is defined as `parallel(...modules:ClientModule) : ClientModule`. The `parallel` function starts all the modules of `...modules` in parallel (via their `.start()` methods), and triggers a `'done'` event when all the modules emitted their own `'done'` events (via their `.done()` methods).  
-  The `parallel` function returns a `ClientModule` (namely, a `ParallelModule`). Hence, you can compound parallel module combinations with serial module sequences, like:
- (*e.g.* ```javascript
+  The `parallel` function returns a `ClientModule` (namely, a `ParallelModule`). Hence, you can compound parallel module combinations with serial module sequences. (*e.g.*
+ ```javascript
 client.parallel(moduleP1,
   , client.serial(moduleS2, moduleS3),
    moduleP4);
 ````).  
-  **Note:** The `view` of a module is always full screen, so in the case of modules run in parallel, the `view`s of all the modules are added to the DOM when the parallel module starts, and they are stacked on top of each other in the order of the arguments using the `z-index` CSS property (*i.e.* on the previous example `moduleP1` is on top of (`moduleS2` and `moduleS3`), which is on top of `moduleP43`, etc.). The `view` of a module is removed from the DOM when the module triggers its `.done()` method (for more information, see the [`ClientModule` API](#clientmodule)).
+  **Note:** The `view` of a module is always full screen, so in the case of modules run in parallel, the `view`s of all the modules are added to the DOM when the parallel module starts, and they are stacked on top of each other in the order of the arguments using the `z-index` CSS property (*i.e.* on the previous example `moduleP1` is on top of (`moduleS2` and `moduleS3`), which areis on top of `moduleP43`, etc.). The `view` of a module is removed from the DOM when the module triggers its `.done()` method (for more information, see the [`ClientModule` API](#clientmodule)).
 - `serial:Function`  
   The `serial` attribute contains the `serial` function that is defined as `serial(...modules:ClientModule) : ClientModule`. The `serial` function starts the modules of `...module` in serial: it starts the module *n*+1 (via its `.start()` method) only after the module *n* triggered a `'done'` event (via its *.done()* method). When the last module calls its `.done()` method, the `serial` function emits a global `'done'` event.  
   The `serial` function returns a `ClientModule` (namely, a `SerialModule`). Hence, you can compound serial module sequences with parallel module combinations (*e.g.* `client.serial(module1, client.parallel(module2, module3), module4);`).
