@@ -394,10 +394,11 @@ The `client` object has the following attributes, which we regroup by purpose fo
 - `socket:Object`  
   The `socket` attribute contains the `socket` object that communicates with the server through WebSockets, created in the `client.init(namespace:String)` method. The socket is associated with the namespace `namespace`. (Might change in the future.)
 - `send:Function`  
-  The `send` attribute contains the `send` function that is defined as `send(msg:Object, ...args:*)`. The `send` function  sends the message `msg` and any number of values `...args` (of any type) to the server through WebSockets.
+  The `send` attribute contains the `send` function that is defined as `send(msg:Object, ...args:*)`. The `send` function  sends the message `msg` and any number of values `...args` (of any type) to the server through WebSockets.  
   **Note:** on the server side, the server receives the message with the command `ServerClient.receive(msg:String, callback:Function)` where the `callback` function would take `...args` as arguments (for more information, see the [`ServerClient` module methods](#serverclient) below).
 - `receive:Function`  
-  The `receive` attribute contains the `receive` function that is defined as `receive(msg:Object, callback:Function)`. The `receive` function executes the callback function `callback` when it receives the message `msg` sent by the server. Note: on the server side, the server sends the message with the command `server.send(msg:String, ...args:*)` (for more information, see the [`server` object WebSocket communication](#websocket-communication) below). On the client side, the `callback` function takes `...args` as arguments.
+  The `receive` attribute contains the `receive` function that is defined as `receive(msg:Object, callback:Function)`. The `receive` function executes the callback function `callback` when it receives the message `msg` sent by the server.  
+  **Note:** on the server side, the server sends the message with the command `server.send(msg:String, ...args:*)` (for more information, see the [`server` object WebSocket communication](#websocket-communication) below). On the client side, the `callback` function takes `...args` as arguments.
 
 ##### Modules logic
 
@@ -513,13 +514,14 @@ The `ServerClient` module is used to keep track of the connected clients. Each t
 ###### Methods
 
 - `send(msg:String, ...args:*)`  
-  The `send` method sends the message `msg` and any number of values `...args` (of any type) to that client through WebSockets.
+  The `send` method sends the message `msg` and any number of values `...args` (of any type) to that client through WebSockets.  
   **Note:** on the client side, the client receives the message with the command `client.receive(msg:String, callback:Function)` where the `callback` function would take `...args` as arguments (for more information, see the [`client` object WebSocket communication](#initialization-and-websocket-communication) above).
 - `receive(msg:String, callback:Function)`  
-  The `receive` method executes the callback function `callback` when it receives the message `msg` sent by that instantiated client.
+  The `receive` method executes the callback function `callback` when it receives the message `msg` sent by that instantiated client.  
   **Note:** on the client side, the client sends the message with the command `client.send(msg:String, ...args:*)` (for more information, see the [`client` object WebSocket communication](#initialization-and-websocket-communication) above). In the `ServerClient.receive(msg:String, callback:Function)` method, the `callback` function takes `...args` as arguments.
 - `broadcast(msg:String, ...args:*)`  
-  The `broadcast` method sends the message `msg` and any number of values `...args` (of any type) to all the clients of the client's namespace — except that client — through WebSockets. Note: on the client side, the clients receive the message with the command `client.receive(msg:String, callback:Function)` where the `callback` function would take `...args` as arguments (for more information, see ).
+  The `broadcast` method sends the message `msg` and any number of values `...args` (of any type) to all the clients of the client's namespace — except that client — through WebSockets.  
+  **Note:** on the client side, the clients receive the message with the command `client.receive(msg:String, callback:Function)` where the `callback` function would take `...args` as arguments (for more information, see ).
 
 ### Client and server modules
 
