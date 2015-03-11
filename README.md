@@ -3,7 +3,7 @@
 ## Table of contents
 
 - [**Overview & how to get started**](#overview--how-to-get-started)
-  - [Server / client architecture](#server--client-architecture)
+  - [Client/server architecture](#server--client-architecture)
   - [A *Soundworks* scenario is exclusively made of modules](#a-soundworks-scenario-is-exclusively-made-of-modules)
   - [How to write a module?](#how-to-write-a-module)
   - [How to write a scenario?](#how-to-write-a-scenario)
@@ -25,21 +25,22 @@
     - [`Sync`](#sync)
 - [**Example**](#example)
 
-## Overview & how to get started
+## Overview & getting started
 
 *Soundworks* is a Javascript framework that enables artists and developers to create collaborative music performances where a group of participants distributed in space use their smartphones to generate sound and light through touch and motion.
 
-The framework is based on a server / client architecture supported by `Node.js` (`v0.12.0` or later) and WebSockets, and uses a modular design to make it easy to implement different performance scenarios: the [*Soundworks* template](https://github.com/collective-soundworks/soundworks-template) allows anyone to bootstrap a *Soundworks*-based scenario and focus on its audiovisual and interaction design instead of the infrastructure.
+The framework is based on a client/server architecture supported by `Node.js` (`v0.12.0` or later) and WebSockets, and uses a modular design to make it easy to implement different performance scenarios: the [*Soundworks* template](https://github.com/collective-soundworks/soundworks-template) allows anyone to bootstrap a *Soundworks*-based scenario and focus on its audiovisual and interaction design instead of the infrastructure.
 
-### Server / client architecture 
+### Client/server architecture 
 
-In order to connect the smartphones with each other, *Soundworks* implements a server / client architecture using a `Node.js` server and WebSockets to pass messages between the server and the clients (currently with the `socket.io` library).
+In order to connect the smartphones with each other, *Soundworks* implements a client/server architecture using a `Node.js` server and WebSockets to pass messages between the server and the clients (currently based on the `socket.io` library).
 
-The word “client” represents any entity that connects to the server. For instance, this can be:
+In general, a *Soundworks* scenario allows different types of clients to connect to the server through different URLs. The most important kind clients are the smartphones of the players who take part in the performance.
+For convenience, the players connect to the server through the root URL of the application, `http://my.server.address:port/`.
 
-- The smartphone of a player who takes part in the collaborative performance (we would refer to this type of client as a `player`: these clients connect to the server through the root URL `http://my.domain.name:port/`);
-- A laptop that provides an interface for the artist to control some parameters of the performance in real time (we would refer to this type of client as `conductor`; these clients would connect to the server through the URL `http://my.domain.name:port/conductor`);
-- A computer that controls the sound and light effects in the room in sync with the players' performance, such as lasers, a global visualization or ambient sounds on external loudspeakers (we would refer to this type of client as `env`, standing for “environment”; these clients would connect to the server through the URL `http://my.domain.name:port/env`);
+In addition to the players a scenario can include other kinds of clients such as:
+- A laptop that provides an interface to control some parameters of the performance in real time. We would refer to this type of client as `conductor`. These clients would connect to the server through the URL `http://my.server.address:port/conductor`.
+- A computer that controls the sound and/or light effects in the room in sync with the players' performance, such as lasers, a global visualization or ambient sounds on external loudspeakers. We would refer to this type of client as `env`, standing for “environment”. These clients would connect to the server through the URL `http://my.server.address:port/env`.
 - And so on…
 
 As you may have noticed, a client who connects to the root URL is called a `player`: this is the default client type. All the other types of client access the server through a URL that concatenates the domain name and the name of the client type.
@@ -48,7 +49,7 @@ As you may have noticed, a client who connects to the root URL is called a `play
 
 A scenario built with *Soundworks* consists in a succession and combination of modules, each of them corresponding to one step of the scenario. Each module has a `.start()` and a `.done()` method: we launch the process corresponding to that module by calling the method `.start()`, and we call the method `.done()` when the duty of the module is done.
 
-As an example, let's say that a scenario works as follows when a `player` connects to the server (through the URL `http://my.domain.name:port/`):
+As an example, let's say that a scenario works as follows when a `player` connects to the server (through the URL `http://my.server.address:port/`):
 
 - The player gets a `welcome` message (*e.g.* “Welcome to the performance!”). When the player clicks on the screen…
 - … the player receives some `checkin` instructions while in the meantime, the smartphone has to `sync` its clock with the server. Finally, when these are done…
@@ -247,10 +248,10 @@ To compile the files, just run the command `gulp` in the Terminal: it will gener
 A scenario should contain at least a `src/server/`, `src/player/` and `src/sass/` folder.
 
 - The `src/server/` folder contains all the Javascript files that compose the server.
-- The `src/player/` folder contains all the files that compose the default client, which we name `player`. (Any client connecting to the server through the root URL `http://my.domain.name:port` would be a `player`, and belongs to the namespace `'/player'`.)
+- The `src/player/` folder contains all the files that compose the default client, which we name `player`. (Any client connecting to the server through the root URL `http://my.server.address:port` would be a `player`, and belongs to the namespace `'/player'`.)
 - Finally, the `src/sass/` folder contains the SASS files to generate the CSS.
 
-You can add any other type of client (let's name it generically `clientType`). For that, you should create a subfolder `src/clientType/` (*e.g.* `src/conductor/` or `src/env/`) and write an `index.es6.js` file inside. This type of client would join the corresponding namespace `'/clientType'` (*e.g.* `'/conductor'` or `'/env'`) — for this, add the line `client.init('/clientType');` in the `index.es6.js` file (*e.g.* `client.init('/conductor');` or `client.init('/env');`) — and be accessed through the URL `http://my.domain.name:port/clientType` (*e.g.* `http://my.domain.name:port/conductor` or `http://my.domain.name:port/env`).
+You can add any other type of client (let's name it generically `clientType`). For that, you should create a subfolder `src/clientType/` (*e.g.* `src/conductor/` or `src/env/`) and write an `index.es6.js` file inside. This type of client would join the corresponding namespace `'/clientType'` (*e.g.* `'/conductor'` or `'/env'`) — for this, add the line `client.init('/clientType');` in the `index.es6.js` file (*e.g.* `client.init('/conductor');` or `client.init('/env');`) — and be accessed through the URL `http://my.server.address:port/clientType` (*e.g.* `http://my.server.address:port/conductor` or `http://my.server.address:port/env`).
 
 #### Client side
 
@@ -413,8 +414,13 @@ The `client` object has the following attributes, which we split into two groups
     - or a `client.parallel(...modules:ClientModule)` combination of modules.
 - `parallel:Function`  
   The `parallel` attribute contains the `parallel` function that is defined as `parallel(...modules:ClientModule) : ClientModule`. The `parallel` function starts all the modules of `...modules` in parallel (via their `.start()` methods), and triggers a `'done'` event when all the modules emitted their own `'done'` events (via their `.done()` methods).  
-  The `parallel` function returns a `ClientModule` (namely, a `ParallelModule`). Hence, you can compound parallel module combinations with serial module sequences (*e.g.* `client.parallel(module1, client.serial(module2, module3), module4);`).  
-  **Note:** The `view` of a module is always full screen, so in the case of modules run in parallel, the `view`s of all the modules are added to the DOM when the parallel module starts, and they are stacked on top of each other in the order of the arguments using the `z-index` CSS property (*i.e.* `module1` is on top of `module2`, which is on top of `module3`, etc.). The `view` of a module is removed from the DOM when the module triggers its `.done()` method (for more information, see the [`ClientModule` API](#clientmodule)).
+  The `parallel` function returns a `ClientModule` (namely, a `ParallelModule`). Hence, you can compound parallel module combinations with serial module sequences, like:
+ (*e.g.* ```javascript
+client.parallel(moduleP1,
+  , client.serial(moduleS2, moduleS3),
+   moduleP4);
+````).  
+  **Note:** The `view` of a module is always full screen, so in the case of modules run in parallel, the `view`s of all the modules are added to the DOM when the parallel module starts, and they are stacked on top of each other in the order of the arguments using the `z-index` CSS property (*i.e.* on the previous example `moduleP1` is on top of (`moduleS2` and `moduleS3`), which is on top of `moduleP43`, etc.). The `view` of a module is removed from the DOM when the module triggers its `.done()` method (for more information, see the [`ClientModule` API](#clientmodule)).
 - `serial:Function`  
   The `serial` attribute contains the `serial` function that is defined as `serial(...modules:ClientModule) : ClientModule`. The `serial` function starts the modules of `...module` in serial: it starts the module *n*+1 (via its `.start()` method) only after the module *n* triggered a `'done'` event (via its *.done()* method). When the last module calls its `.done()` method, the `serial` function emits a global `'done'` event.  
   The `serial` function returns a `ClientModule` (namely, a `SerialModule`). Hence, you can compound serial module sequences with parallel module combinations (*e.g.* `client.serial(module1, client.parallel(module2, module3), module4);`).
@@ -431,8 +437,8 @@ The `server` object has the following attributes, which we split into two groups
   The `start` attribute contains the `start` function that is defined as `start(app:Object, publicPath:String, port:Number)`. The `start` function starts the server with the Express application `app` that uses `publicPath` as the public static directory, and listens to the port `port`.
 - `map:Function`  
   The `map` function is used to indicate that the clients who connect to the namespace `namespace` need the modules `...modules` to be activated (it starts the modules' `.connect(client)` methods) and listen for the WebSocket messages from the client side. Additionally, it sets the title of the page (used in the `<title>` tag in the HTML `<head>` element) to `title` and routes the connections from the URL path `namespace` to the corresponding view (except for the namespace `'/player'`, that uses the root URL `/` instead of `/player`). More specifically:
-  - a client connecting to the server through the URL `http://my.domain.name:port/` would belong to the namespace `'/player'` and be mapped to the view `player.ejs`;
-  - a client connecting to the server through the URL `http://my.domain.name:port/clientType` would belong to the namespace `'/clientType'` and be mapped to the view `clientType.ejs`.
+  - a client connecting to the server through the URL `http://my.server.address:port/` would belong to the namespace `'/player'` and be mapped to the view `player.ejs`;
+  - a client connecting to the server through the URL `http://my.server.address:port/clientType` would belong to the namespace `'/clientType'` and be mapped to the view `clientType.ejs`.
 
 ##### WebSocket communication
 
@@ -954,7 +960,7 @@ The most important things here are:
 
 #### Writing our scenario in Javascript
 
-Now let's write the core of our scenario in the `src/player/index.es6.js` file. This is the file that is loaded by any client who connects to the server through the root URL `http://my.domain.name:port/` (for instance, `http://localhost:8000` during the development).
+Now let's write the core of our scenario in the `src/player/index.es6.js` file. This is the file that is loaded by any client who connects to the server through the root URL `http://my.server.address:port/` (for instance, `http://localhost:8000` during the development).
 
 Step by step, this is how the scenario will look like when a user connects to the server through that URL:
 
