@@ -38,11 +38,11 @@ In order to connect the smartphones with each other, *Soundworks* implements a c
 In general, a *Soundworks* scenario allows different types of clients to connect to the server through different URLs. The most important kind clients are the smartphones of the players who take part in the performance.
 For convenience, a player connects to the server through the root URL of the application, `http://my.server.address:port/`.
 
-In addition to the players a scenario can include other kinds of clients such as:
+In addition to the players, a scenario can include other kinds of clients such as:
 - A laptop that provides an interface to control some parameters of the performance in real time. We would refer to this type of client as `conductor`. These clients would connect to the server through the URL `http://my.server.address:port/conductor`.
 - A computer that controls the sound and/or light effects in the room in sync with the players' performance, such as lasers, a global visualization or ambient sounds on external loudspeakers. We would refer to this type of client as `env`, standing for “environment”. These clients would connect to the server through the URL `http://my.server.address:port/env`.
 
-In summary, a client who connects to the root URL of the application is called a `player`. This is the default client type. All other types of clients access the server through a URL that concatenates the root URL of the application and the name of the client type.
+In summary, a client that connects to the root URL of the application is called a `player`, the default namespace. All other types of clients access the server through a URL that concatenates the root URL of the application and the namespace of the client type.
 
 ### A *Soundworks* scenario is exclusively made of modules
 
@@ -83,7 +83,7 @@ client.start(
 
 To run a sequence of modules in serial, we use `client.serial(module1, module2, ...)`. A module would `.start()` only after the previous one is `.done()`. On the other hand, if some modules need to be run in parallel, we use `client.parallel(module1, module2, ...)`. The parallel process triggers a global `.done()` method when all of its modules are `.done()`. For more information about the `serial` and `parallel` module processes, see the [`client` object modules logic](#modules-logic) in the API section.
 
-Some of these modules need an interaction with the server (for instance, the `sync` process requires a dialog between the client and the server to synchronize the clocks). On the client side, each module implements a `.connect()` and a `.disconnect()` method that is called when a client connects or disconnects the application through one of the provided client URLs. A mapping determines which kind of client (i.e. a connection to which client URL) would call the connect method of which module.
+Some of these modules need an interaction with the server (for instance, the `sync` process requires a dialog between the client and the server to synchronize the clocks). On the client side, each module implements a `.connect()` and a `.disconnect()` method that is called when a client connects or disconnects the application through one of the provided client URLs. A mapping determines which kind of client (i.e. a connection to which client URL) would `connect` to which module.
 
 The following code 1) instantiates three server side modules, 2) launches the server, and 3) maps the `'/player'` clients to the three modules.
 
@@ -414,17 +414,12 @@ The `client` object has the following attributes, which we split into two groups
     - a `client.serial(...modules:ClientModule)` sequence of modules,
     - or a `client.parallel(...modules:ClientModule)` combination of modules.
 - `serial:Function`  
-  The `serial` attribute contains the `serial` function that is defined as `serial(...modules:ClientModule) : ClientModule`. The `serial` function starts the modules of `...module` in serial: it starts the module *n*+1 (via its `.start()` method) only after the module *n* triggered a `'done'` event (via its *.done()* method). When the last module calls its `.done()` method, the `serial` function emits a global `'done'` event.  
-  The `serial` function returns a `ClientModule` (namely, a `SerialModule`). Hence, you can compound serial module sequences with parallel module combinations (*e.g.* `client.serial(module1, client.parallel(module2, module3), module4);`).
+  The `serial` attribute contains the `serial` function that is defined as `serial(...modules:ClientModule) : ClientModule`. The `serial` function starts the modules of `...module` in serial: it starts the module *n*+1 (via its `.start()` method) only after the module *n* triggered a `'done'` event (via its `.done()` method). When the last module calls its `.done()` method, the `serial` function emits a global `'done'` event.  
+  The `serial` function returns a `ClientModule` (namely, a `SerialModule`). Hence, you can compound serial module sequences with parallel module combinations (*e.g.* `client.serial(moduleS1, client.parallel(moduleP2, moduleP3), moduleS4);`).
 - `parallel:Function`  
   The `parallel` attribute contains the `parallel` function that is defined as `parallel(...modules:ClientModule) : ClientModule`. The `parallel` function starts all the modules of `...modules` in parallel (via their `.start()` methods), and triggers a `'done'` event when all the modules emitted their own `'done'` events (via their `.done()` methods).  
-  The `parallel` function returns a `ClientModule` (namely, a `ParallelModule`). Hence, you can compound parallel module combinations with serial module sequences. *e.g.*
-```javascript
-client.parallel(moduleP1,
-  client.serial(moduleS2, moduleS3),
-  moduleP4);
-```  
-  **Note:** The `view` of a module is always full screen, so in the case of modules run in parallel, the `view`s of all the modules are added to the DOM when the parallel module starts, and they are stacked on top of each other in the order of the arguments using the `z-index` CSS property (*i.e.* in the previous example `moduleP1` is on top of (`moduleS2` and `moduleS3`), which are on top of `moduleP4`.). The `view` of a module is removed from the DOM when the module triggers its `.done()` method (for more information, see the [`ClientModule` API](#clientmodule)).
+  The `parallel` function returns a `ClientModule` (namely, a `ParallelModule`). Hence, you can compound parallel module combinations with serial module sequences (*e.g.* `client.parallel(moduleP1, client.serial(moduleS2, moduleS3), moduleP4)`);  
+  **Note:** The `view` of a module is always full screen, so in the case of modules run in parallel, the `view`s of all the modules are added to the DOM when the parallel module starts, and they are stacked on top of each other in the order of the arguments using the `z-index` CSS property. In the previous example, the `view` of `moduleP1` is layered on top of the `view`s of `moduleS2` and `moduleS3` (which would be displayed sequentially, because these modules are in serial), which are layered on top of the `view` of `moduleP4`. The `view` of a module is removed from the DOM when the module triggers its `.done()` method (for more information, see the [`ClientModule` API](#clientmodule)).
 
 #### Server side: the `server` object
 
