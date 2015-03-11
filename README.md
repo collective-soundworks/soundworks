@@ -352,25 +352,25 @@ For instance, in our previous example where the client has a `welcome`, `seatmap
 @import '05-checkin';
 @import '08-seatmap';
 
-// Your own partials
+// Your own partials for the modules you wrote
 @import 'performance'
 ```
 
 ## API
 
-This sections explains how to use the objects and classes of the library. In particular, we list here all the methods and attributes you may need to use at some point.
+This section explains how to use the objects and classes of the library. In particular, we list here all the methods and attributes you may need to use at some point.
 
-We start with the core elements on the client side ([`client` object](#client-side-the-client-object)) and on the server side ([`server` object](#server-side-the-server-object)) before focusing on the module classes.
+We start with the core elements on the client side ([`client` object](#client-side-the-client-object)) and on the server side ([`server` object](#server-side-the-server-object)) before focusing on the classes that form the modules.
 
 Some classes are only present on the [client side](#client-only-modules):
 
-- [`Dialog`](#dialog)
-- [`Loader`](#loader)
-- [`Orientation`](#orientation)
+- [`Dialog`](#clientdialog)
+- [`Loader`](#clientloader)
+- [`Orientation`](#clientorientation)
 
 Others are only present on the [server side](#server-only-modules):
 
-- [`Client`](#client)
+- [`Client`](#serverclient)
 
 The rest of the classes require both the [client **and** server sides](#client-and-server-modules):
 
@@ -379,7 +379,7 @@ The rest of the classes require both the [client **and** server sides](#client-a
 - [`Seatmap`](#seatmap)
 - [`Sync`](#sync)
 
-Some modules on the client side are also associated with some styling information. When that is the case, we added in the library's `sass/` folder a `_xx-moduleName.scss` SASS partial: don't forget to include them in your `*.scss` files when you write your scenario. We indicate in the sections below which modules do require these SASS partials.
+Some modules on the client side are also associated with some styling information. When that is the case, we added in the library's `sass/` folder a `_xx-moduleName.scss` SASS partial: don't forget to include them in your `*.scss` files when you write your scenario. We indicate in the sections below which modules require their corresponding SASS partials.
 
 ### Core objects
 
@@ -394,7 +394,8 @@ The `client` object has the following attributes, which we regroup by purpose fo
 - `socket:Object`  
   The `socket` attribute contains the `socket` object that communicates with the server through WebSockets, created in the `client.init(namespace:String)` method. The socket is associated with the namespace `namespace`. (Might change in the future.)
 - `send:Function`  
-  The `send` attribute contains the `send` function that is defined as `send(msg:Object, ...args:*)`. The `send` function  sends the message `msg` and any number of values `...args` (of any type) to the server through WebSockets. Note: on the server side, the server receives the message with the command `ServerClient.receive(msg:String, callback:Function)` where the `callback` function would take `...args` as arguments (for more information, see the [`ServerClient` module methods](#serverclient) below).
+  The `send` attribute contains the `send` function that is defined as `send(msg:Object, ...args:*)`. The `send` function  sends the message `msg` and any number of values `...args` (of any type) to the server through WebSockets.
+  **Note:** on the server side, the server receives the message with the command `ServerClient.receive(msg:String, callback:Function)` where the `callback` function would take `...args` as arguments (for more information, see the [`ServerClient` module methods](#serverclient) below).
 - `receive:Function`  
   The `receive` attribute contains the `receive` function that is defined as `receive(msg:Object, callback:Function)`. The `receive` function executes the callback function `callback` when it receives the message `msg` sent by the server. Note: on the server side, the server sends the message with the command `server.send(msg:String, ...args:*)` (for more information, see the [`server` object WebSocket communication](#websocket-communication) below). On the client side, the `callback` function takes `...args` as arguments.
 
@@ -423,7 +424,8 @@ The `server` object has the following attributes, which we regroup by purpose fo
 - `io:Object`  
   The `io` attribute contains the `socket.io` server, created in the `server.start(app:Object, publicPath:String, port:Number)` method. (Might change in the future.)
 - `broadcast:Function`  
-  The `broadcast` attribute contains the `broadcast` function that is defined as `broadcast(namespace:String, msg:String, ...args:*)`. The `broadcast` function sends the message `msg` and any number of values `...args` (of any type) to all the clients that belong to the namespace `namespace` through WebSockets. Note: on the client side, the clients receive the message with the command `client.receive(msg:String, callback:Function)`, where the `callback` function would takes `...args` as arguments (for more information, see the [`client` object WebSocket communication](#initialization-and-websocket-communication) above).
+  The `broadcast` attribute contains the `broadcast` function that is defined as `broadcast(namespace:String, msg:String, ...args:*)`. The `broadcast` function sends the message `msg` and any number of values `...args` (of any type) to all the clients that belong to the namespace `namespace` through WebSockets.
+  **Note:** on the client side, the clients receive the message with the command `client.receive(msg:String, callback:Function)`, where the `callback` function would takes `...args` as arguments (for more information, see the [`client` object WebSocket communication](#initialization-and-websocket-communication) above).
 
 ### Client only modules
 
@@ -511,9 +513,11 @@ The `ServerClient` module is used to keep track of the connected clients. Each t
 ###### Methods
 
 - `send(msg:String, ...args:*)`  
-  The `send` method sends the message `msg` and any number of values `...args` (of any type) to that client through WebSockets. Note: on the client side, the client receives the message with the command `client.receive(msg:String, callback:Function)` where the `callback` function would take `...args` as arguments (for more information, see the [`client` object WebSocket communication](#initialization-and-websocket-communication) above).
+  The `send` method sends the message `msg` and any number of values `...args` (of any type) to that client through WebSockets.
+  **Note:** on the client side, the client receives the message with the command `client.receive(msg:String, callback:Function)` where the `callback` function would take `...args` as arguments (for more information, see the [`client` object WebSocket communication](#initialization-and-websocket-communication) above).
 - `receive(msg:String, callback:Function)`  
-  The `receive` method executes the callback function `callback` when it receives the message `msg` sent by that instantiated client. Note: on the client side, the client sends the message with the command `client.send(msg:String, ...args:*)` (for more information, see the [`client` object WebSocket communication](#initialization-and-websocket-communication) above). In the `ServerClient.receive(msg:String, callback:Function)` method, the `callback` function takes `...args` as arguments.
+  The `receive` method executes the callback function `callback` when it receives the message `msg` sent by that instantiated client.
+  **Note:** on the client side, the client sends the message with the command `client.send(msg:String, ...args:*)` (for more information, see the [`client` object WebSocket communication](#initialization-and-websocket-communication) above). In the `ServerClient.receive(msg:String, callback:Function)` method, the `callback` function takes `...args` as arguments.
 - `broadcast(msg:String, ...args:*)`  
   The `broadcast` method sends the message `msg` and any number of values `...args` (of any type) to all the clients of the client's namespace — except that client — through WebSockets. Note: on the client side, the clients receive the message with the command `client.receive(msg:String, callback:Function)` where the `callback` function would take `...args` as arguments (for more information, see ).
 
@@ -852,7 +856,7 @@ var nowSync = sync.getSyncTime(); // current time in sync clock time
 - `getSyncTime(localTime:Number) : Number`  
   The `getSyncTime` method returns the time in the sync clock when the server clock reaches `localTime`. If no arguments are provided, the method returns the time it is when the method is called, in the sync clock. The returned time is a `Number`, in seconds.
 
-Note: in practice, the sync clock used by the [`sync` module](https://github.com/collective-soundworks/sync) is the `process.hrtime()` server clock.
+**Note:** in practice, the sync clock used by the [`sync` module](https://github.com/collective-soundworks/sync) is the `process.hrtime()` server clock.
 
 Below is an example of the instantiation of the `Sync` module on the server side.
 
