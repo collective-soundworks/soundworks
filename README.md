@@ -84,10 +84,7 @@ To run a sequence of modules in serial, we use `client.serial(module1, module2, 
 
 Some of these modules need to communicate with the server (for instance, the `sync` process requires a dialog between the client and the server to synchronize the clocks). On the client side, each module implements a `.connect(client)` and a `.disconnect(client)` method that is called when a `client` connects or disconnects the application through one of the provided client URLs. A mapping of client namespaces determines the set of modules to which a certain type of client (*i.e.* a particular client URL) would actually connect on the server side.
 
-The following code:
-- (1) creates three server side modules – `sync`, `checkin` and `performance`,
-- (2) launches the server,
-- and (3) maps the `'/player'` namespace to the three modules.
+The following code (1) creates three server side modules – `sync`, `checkin` and `performance` —, (2) launches the server, and (3) maps the three modules to the `'/player'` namespace.
 
 ```javascript
 /* Server side */
@@ -122,18 +119,17 @@ On the client side, a module extends the `ClientModule` base class. The module h
 
 For instance, if the purpose of the module is to load files, the module should call the method `.done()` when the files are loaded. Similarly, if the purpose of the module is to synchronize the clocks, the module should call the method `.done()` when the clocks are synced.
 
+You will find [more information on the `ClientModule` base class in the API section](#clientmodule).
 ##### The `.start()` method
 
 The `.start()` method is called to start the module. It should handle the logic and the steps that lead to the completion of the module.
 
-For instance, the purpose of the `ClientCheckin` module is to actually add a client connected to the player namespace to the list of active players. Optionally, the module can assign a position associated to a predefined seat or area to the player. When the module is configured with a predefined seating plan, it would simply request an available seat and display it to the player. The client will be added to the list of active players once the participant acknowledges the seat by touching the screen.
+For instance, the purpose of the `ClientCheckin` module is handle assign an available player index to a client connected via the player namespace. Optionally, the module can assign a position associated to a predefined seat or area to the player. When the module is configured with a predefined `seating` plan, it would request an available seat and display it to the player.
 In detail, the `.start()` method of the module does the following:
 
 - It sends a request to the `ServerCheckin` module via WebSockets, asking the server to send the label of an available seat.
 - When it receives the response from the server, it displays the label on the screen (e.g. “Please go to C5 and touch the screen.”) and waits for the participant’s acknowledgement.
-- In meantime, the server has already added the client to the list of active players and when the participant touches the screen, the module calls the method `.done()`.
-
-
+- When the participant touches the screen, the client module simply calls the method `.done()`. In many scenarios, this would hand over the control to the performance module.
 
 In Javascript, it looks like the following.
 
@@ -146,14 +142,17 @@ class ClientSeatmap extends ClientModule {
   start() {
     super.start(); // don't forget this line!
 
-    client.send('checkin:request'); // request the seatmap to the server
+    ...
+
+    // request an available seat from the server
+    client.send('checkin:request');
     
     client.receive('checkin:label, (label) => {
-      this.label = label; // store the response in an attribute
-	
-      // call the method .done(), since the purpose of the module is done
-	this._displayDialog().then(this.done());
-    });
+      // display the label in a dialog
+      this.setViewText("Please go to " + label + " and touch the screen.");
+
+      // call .done() when the participant acknowledges the dialog
+      this.view.addEventListener('click', () => this.done());
   }
 
   ...
@@ -164,43 +163,30 @@ This method must include the inherited method from the base class before any cod
 
 ##### The `.done()` method
 
-The `.done()` method should rarely change from the method inherited from the base class. If you have to rewrite it though, **don't forget to include the inherited method of the base class**. (Its purpose is to emit a `'done'` event associated with the module, which makes the whole module logic work.)
-
-Put differently, if you customize the `.done()` method, it must follow this template.
-
-```javascript
-clientSide = require(soundworks/client);
-
-class MyModule extends clientSide.Module {
-...
-
-  done() {
-    ... // any code you want
-
-    super.done(); // don't forget this line!
-  }
-
-...
-}
-```
-
-You will find [more information on the `ClientModule` base class in the API section](#clientmodule).
+The `.done()` method implemented by the `ClientModule` base class should be called by the derived client module (as an exception, a performance module may not call the method and keep the control until the client disconnects). A derived client module must not override the `.done()` method provided by 
 
 #### Server side
 
 On the server side, a module extends the `ServerModule` base class and must have a `.connect(client:ServerClient)` method and a `.disconnect(client:ServerClient)` method.
+While the sequence of user interactions and exchanges between client and server is determined on the client side, the server side modules are ready to receive requests from the corresponding client side modules as soon as a client has been connected.
+
+You will find [more information on the `ServerModule` base class in the API section](#servermodule).
 
 ##### The `.connect(client:ServerClient)` method
 
-The `.connect(client)` is called whenever the client `client` connects to the server. I should set up the listeners of the WebSocket messages sent after the `.start()` method on the client side is started, and handle the logic of the module.
+The `.connect(client)` is called on a server module mapped to a particular namespace as soon as a `client` connects to the server via this namespace. In the `.connect()` method, the module should set up the listeners of the WebSocket messages that are sent after starting the corresponding client side module to serve incoming requests.
 
-For instance, say that the module you are writing needs to keep track of all the connected clients. Then you could write the following.
+For instance, say that the module you are writing needs to keep track of the connected clients and serve requests for the number of connected clients. Then you could write the following.
 
 ```javascript
 connect(client) {
   this.clients.push(clients);
 
-  ... // the rest of the method
+  client.receive(‘mymodule:requestNumConnections’, () => {
+    client.send(‘mymodule:numConnections’, this.clients.length);  
+  });
+
+  ...
 }
 ```
 
@@ -217,8 +203,6 @@ disconnect(client) {
   ... // the rest of the method
 }
 ```
-
-You will find [more information on the `ServerModule` base class in the API section](#servermodule).
 
 ### How to write a scenario?
 
@@ -414,7 +398,7 @@ The `client` object has the following attributes, which we split into two groups
   **Note:** on the server side, the server receives the message with the command `ServerClient.receive(msg:String, callback:Function)` where the `callback` function would take `...args` as arguments (for more information, see the [`ServerClient` module methods](#serverclient) below).
 - `receive:Function`  
   The `receive` attribute contains the `receive` function that is defined as `receive(msg:Object, callback:Function)`. The `receive` function executes the callback function `callback` when it receives the message `msg` sent by the server.  
-  **Note:** on the server side, the server sends the message with the command `server.send(msg:String, ...args:*)` (for more information, see the [`server` object WebSocket communication](#websocket-communication) below). Hence, in the `client.receive(msg:Object, callback:Function)` method on the client side, the `callback` function takes `...args` as arguments.
+  **Note:** on the server side, the server sends the message with the command `server.send(msg:String, ...args:*)` (for more information, see the [`server` object WebSocket communication](#websocket-communication) section below). Hence, in the `client.receive(msg:Object, callback:Function)` method on the client side, the `callback` function takes `...args` as arguments.
 
 ##### Modules logic
 
@@ -424,10 +408,10 @@ The `client` object has the following attributes, which we split into two groups
     - a `client.serial(...modules:ClientModule)` sequence of modules,
     - or a `client.parallel(...modules:ClientModule)` combination of modules.
 - `serial:Function`  
-  The `serial` attribute contains the `serial` function that is defined as `serial(...modules:ClientModule) : ClientModule`. The `serial` function starts the modules of `...module` in serial: it starts the module *n*+1 (via its `.start()` method) only after the module *n* triggered a `'done'` event (via its `.done()` method). When the last module calls its `.done()` method, the `serial` function emits a global `'done'` event.  
+  The `serial` attribute contains the `serial` function that is defined as `serial(...modules:ClientModule) : ClientModule`. The `serial` function starts the modules of `...module` in serial: it starts the module *n*+1 (via its `.start()` method) only after the module *n* called its `.done()` method. When the last module calls its `.done()` method, the `serial` function emits calls its own `.done()` method.  
   The `serial` function returns a `ClientModule` (namely, a `SerialModule`). Hence, you can compound serial module sequences with parallel module combinations (*e.g.* `client.serial(moduleS1, client.parallel(moduleP2, moduleP3), moduleS4);`).
 - `parallel:Function`  
-  The `parallel` attribute contains the `parallel` function that is defined as `parallel(...modules:ClientModule) : ClientModule`. The `parallel` function starts all the modules of `...modules` in parallel (via their `.start()` methods), and triggers a `'done'` event when all the modules emitted their own `'done'` events (via their `.done()` methods).  
+  The `parallel` attribute contains the `parallel` function that is defined as `parallel(...modules:ClientModule) : ClientModule`. The `parallel` function starts all the modules of `...modules` in parallel (via their `.start()` methods), and calls its `.done()` method after all the modules called their own `.done()` methods.  
   The `parallel` function returns a `ClientModule` (namely, a `ParallelModule`). Hence, you can compound parallel module combinations with serial module sequences (*e.g.* `client.parallel(moduleP1, client.serial(moduleS2, moduleS3), moduleP4)`);  
   **Note:** The `view` of a module is always full screen, so in the case of modules run in parallel, the `view`s of all the modules are added to the DOM when the parallel module starts, and they are stacked on top of each other in the order of the arguments using the `z-index` CSS property. In the previous example, the `view` of `moduleP1` is layered on top of the `view`s of `moduleS2` and `moduleS3` (which would be displayed sequentially, because these modules are in serial), which are layered on top of the `view` of `moduleP4`. The `view` of a module is removed from the DOM when the module triggers its `.done()` method (for more information, see the [`ClientModule` API](#clientmodule)).
 
@@ -442,7 +426,7 @@ The `server` object has the following attributes, which we split into two groups
 - `start:Function`  
   The `start` attribute contains the `start` function that is defined as `start(app:Object, publicPath:String, port:Number)`. The `start` function starts the server with the Express application `app` that uses `publicPath` as the public static directory, and listens to the port `port`.
 - `map:Function`  
-  The `map` function is used to indicate that the clients who connect to the namespace `namespace` need the modules `...modules` to be activated (it starts the modules' `.connect(client)` methods) and listen for the WebSocket messages from the client side. Additionally, it sets the title of the page (used in the `<title>` tag in the HTML `<head>` element) to `title` and routes the connections from the URL path `namespace` to the corresponding view (except for the namespace `'/player'`, that uses the root URL `/` instead of `/player`). More specifically:
+  The `map` attribute contains the `map` function that is defined as `map(namespace:String, title:String, ...modules:ServerModule)`. The `map` function is used to indicate that the clients who connect to the namespace `namespace` need the modules `...modules` to be activated (it starts the modules' `.connect(client)` methods) and listen for the WebSocket messages from the client side. Additionally, it sets the title of the page (used in the `<title>` tag in the HTML `<head>` element) to `title` and routes the connections from the URL path `namespace` to the corresponding view (except for the namespace `'/player'`, that uses the root URL `/` instead of `/player`). More specifically:
   - a client connecting to the server through the URL `http://my.server.address:port/` would belong to the namespace `'/player'` and be mapped to the view `player.ejs`;
   - a client connecting to the server through the URL `http://my.server.address:port/clientType` would belong to the namespace `'/clientType'` and be mapped to the view `clientType.ejs`.
 
@@ -452,27 +436,27 @@ The `server` object has the following attributes, which we split into two groups
   The `io` attribute contains the `socket.io` server, created in the `server.start(app:Object, publicPath:String, port:Number)` method. (Might change in the future.)
 - `broadcast:Function`  
   The `broadcast` attribute contains the `broadcast` function that is defined as `broadcast(namespace:String, msg:String, ...args:*)`. The `broadcast` function sends the message `msg` and any number of values `...args` (of any type) to all the clients that belong to the namespace `namespace` through WebSockets.  
-  **Note:** on the client side, the clients receive the message with the command `client.receive(msg:String, callback:Function)`, where the `callback` function would take `...args` as arguments (for more information, see the [`client` object WebSocket communication](#initialization-and-websocket-communication) above).
+  **Note:** on the client side, the clients receive the message with the command `client.receive(msg:String, callback:Function)`, where the `callback` function would take `...args` as arguments (for more information, see the [`client` object WebSocket communication](#initialization-and-websocket-communication) section above).
 
 ### Client only modules
 
 #### ClientDialog
 
-The `ClientDialog` module displays a dialog on the screen, and requires the user to click the screen to make the module disappear.
+The `ClientDialog` module displays a full screen dialog, and requires the participant to tap the screen to make the `view` disappear. In particular, this can be used at the very beginning of a scenario to activate the Web Audio API on iOS devices (where sound is muted until a user action triggers some audio commands) thanks to the option `activateWebAudio = true`. The `ClientDialog` module calls its `.done()` method when the participant taps on the screen.
 
 ###### Attributes
 
 - `view:Element`  
-  The view is the `<div>` in which the content of the module is displayed.
+  The view is the `div` in which the content of the module is displayed.
 
 ###### Methods
 
 - `constructor(options:Object = {})`  
   The `constructor` method instantiates the `ClientDialog` module on the client side. It takes the `options` object as an argument, whose properties are:
   - `activateAudio:Boolean = false`  
-    If set to `true`, the module with activate the Web Audio API when the user clicks the screen (useful on iOS, where sound is muted until a user action triggers some audio commands).
+    When set to `true`, the module activates the Web Audio API when the participant clicks the screen (useful on iOS, where sound is muted until a user action triggers some audio commands).
   - `color:String = 'black'`  
-    Sets the background color of the view to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library's `sass/_03-colors.scss` file.
+    The `color` property sets the background color of the view to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library's `sass/_03-colors.scss` file.
   - `name:String = 'dialog'`  
     The name of the dialog, that will be used as the `id` HTML attribute of the `this.view` and the associated class.
   - `text:String`  
@@ -487,7 +471,7 @@ var welcomeDialog = new ClientDialog({
 });
 ```
 
-would generate the following `view`, appended to the main container `<div>` when the module starts:
+would generate the following `view` (appended to the main container `div`) when the module starts:
 
 ```html
 <div id='welcome' class='module welcome'>
@@ -497,7 +481,7 @@ would generate the following `view`, appended to the main container `<div>` when
 
 #### ClientLoader
 
-The `ClientLoader` module allows to load audio files that can be used in the scenario (for instance, by the performance module). The `Loader` module has a `view` that displays a loading bar indicating the progress of the loading. The `ClientLoader` module triggers its `'done'` event when all the files are loaded.
+The `ClientLoader` module allows to load audio files that can be used in the scenario (for instance, by the `performance` module). The `Loader` module has a `view` that displays a loading bar indicating the progress of the loading. The `ClientLoader` module calls its `.done()` method when all the files are loaded.
 
 The `ClientLoader` module requires the SASS partial `sass/_07-loader.scss`.
 
@@ -515,7 +499,7 @@ The `ClientLoader` module requires the SASS partial `sass/_07-loader.scss`.
   - `options:Object = {}`  
     The optional `options` argument customizes the configuration of the module. Its properties can be:
     - `color:String = 'black'`  
-      Sets the background color of the view to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library's `sass/_03-colors.scss` file.
+      The `color` property sets the background color of the view to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library's `sass/_03-colors.scss` file.
 
 For instance, the following code:
 
@@ -532,23 +516,23 @@ var snareBuffer = loader.audioBuffers[1];
 
 #### ClientOrientation
 
-The `ClientOrientation` module allows to calibrate the compass and get an angle reference. It displays a `view` with some instruction text: when the user points at the right direction for the calibration, tapping on the screen of the phone (*i.e.* on the `view`) would set the current compass value as the angle reference and trigger the `'done'` event.
+The `ClientOrientation` module allows to calibrate the compass and get an angle reference. It displays a `view` with some instruction text: when the user points at the right direction for the calibration, tapping on the screen of the phone (*i.e.* on the `view`) would set the current compass value as the angle reference. The `ClientOrientation` module calls its `.done()` method when the participant taps on the `view` (*i.e.* on the screen).
 
 ###### Attributes
 
 - `angleReference:Number`  
   The `angleReference` attribute is the value of the `alpha` angle (as in the `deviceOrientation` HTML5 API) when the user clicks on the screen while the `ClientOrientation` module is displayed. It serves as a calibration / reference of the compass.
 - `view:Element`  
-  The view is the `<div>` in which the content of the module is displayed.
+  The view attribute is the `div` in which the content of the module is displayed.
 
 ###### Methods
 
 - `constructor(options:Object = {})`  
   The `constructor` method instantiates the `ClientOrientation` module on the client side. It takes the `options` object as an argument, whose optional properties are:
   - `color:String = 'black'`  
-    Sets the background color of the view to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library's `sass/_03-colors.scss` file.
+    The `color` property sets the background color of the `view` to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library's `sass/_03-colors.scss` file.
   - `text:String = 'Point the phone exactly in front of you, and touch the screen.'`  
-    The text to be displayed in the `view`.
+    The `text` property sets the instruction text to be displayed in the `view`.
 
 ### Server only modules
 
@@ -559,11 +543,11 @@ The `ServerClient` module is used to keep track of the connected clients. Each t
 ###### Attributes
 
 - `data:Object = {}`  
-  The `data` attribute can be used by any module to store any useful information that any module might need at some point, or that might need to be sent to the clients. The convention is to create a property for each module that writes into this attribute. For instance, if the `sync` module keeps track of the time offset between this client's clock and the sync clock, it would store the information in `this.data.sync.timeOffset`. Similarly, if the `performance` module needs some kind of flag for each client, it would store this information in `this.data.performance.flag`.
+  The `data` attribute can be used by any module to store any useful information that any module might need at some point, or that might need to be sent to the clients. When a module writes into the `data` attribute, the convention is to create a property with the name of the module. For instance, if the `sync` module keeps track of the time offset between this client's clock and the sync clock, it would store the information in `this.data.sync.timeOffset`. Similarly, if the `performance` module needs some kind of flag for each client, it would store this information in `this.data.performance.flag`.
 - `index:Number`  
   The `index` attribute stores the index of the client as set by the `ServerCheckin` module. See the [`ServerCheckin` module](#servercheckin) for more information.
 - `namespace:String`  
-  The `namespace` attribute stores the namespace of the client (as defined in `socket.io` for now). This is the namespace that is specified on the client side, while initiating the `client` object with `client.init(namespace);` (generally at the very beginning of the file your write).
+  The `namespace` attribute stores the namespace of the client (as defined in `socket.io` for now). This is the namespace that is specified on the client side, while initiating the `client` object with `client.init(namespace);` (generally at the very beginning of the Javascript file your write).
 - `socket:Socket`  
   The `socket` attribute stores the socket that sets the communication channel between the server and this client, as passed in by the `constructor`.
 
@@ -571,13 +555,13 @@ The `ServerClient` module is used to keep track of the connected clients. Each t
 
 - `send(msg:String, ...args:*)`  
   The `send` method sends the message `msg` and any number of values `...args` (of any type) to that client through WebSockets.  
-  **Note:** on the client side, the client receives the message with the command `client.receive(msg:String, callback:Function)` where the `callback` function would take `...args` as arguments (for more information, see the [`client` object WebSocket communication](#initialization-and-websocket-communication) above).
+  **Note:** on the client side, the client receives the message with the command `client.receive(msg:String, callback:Function)` where the `callback` function would take `...args` as arguments (for more information, see the [`client` object WebSocket communication](#initialization-and-websocket-communication) section above).
 - `receive(msg:String, callback:Function)`  
   The `receive` method executes the callback function `callback` when it receives the message `msg` sent by that instantiated client.  
-  **Note:** on the client side, the client sends the message with the command `client.send(msg:String, ...args:*)` (for more information, see the [`client` object WebSocket communication](#initialization-and-websocket-communication) above). Hence, in the `ServerClient.receive(msg:String, callback:Function)` method on the server side, the `callback` function takes `...args` as arguments.
+  **Note:** on the client side, the client sends the message with the command `client.send(msg:String, ...args:*)` (for more information, see the [`client` object WebSocket communication](#initialization-and-websocket-communication) section above). Hence, in the `ServerClient.receive(msg:String, callback:Function)` method on the server side, the `callback` function takes `...args` as arguments.
 - `broadcast(msg:String, ...args:*)`  
   The `broadcast` method sends the message `msg` and any number of values `...args` (of any type) to all the clients of the client's namespace — except that client — through WebSockets.  
-  **Note:** on the client side, the clients receive the message with the command `client.receive(msg:String, callback:Function)` where the `callback` function would take `...args` as arguments (for more information, see ).
+  **Note:** on the client side, the clients receive the message with the command `client.receive(msg:String, callback:Function)` where the `callback` function would take `...args` as arguments (for more information, see the [`client` object WebSocket communication](#initialization-and-websocket-communication) section above).
 
 ### Client and server modules
 
@@ -595,14 +579,14 @@ The `ClientCheckin` module requires the SASS partial `sass/_05-checkin.scss`.
 
 ##### ClientCheckin
 
-The `ClientCheckin` module takes care of the check in on the client side. The `ClientCheckin` module triggers its `'done'` event when the user is checked in.
+The `ClientCheckin` module takes care of the check in on the client side. The `ClientCheckin` module calls its `.done()` method when the user is checked in.
 
 ###### Methods
 
 - `constructor(options:Object = {})`  
   The `constructor` method instantiates the `ClientCheckin` module on the client side. It takes the `options` object as an argument, whose optional properties are:
   - `color:String = 'black'`  
-    Sets the background color of the view to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library's `sass/_03-colors.scss` file.
+    The `color` property sets the background color of the view to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library's `sass/_03-colors.scss` file.
   - `dialog:Boolean = false`  
     When set to `true`, the module displays a dialog (`this.view`) with the checkin information for the user. The user has to click on the dialog to indicate that the checkin process is `"done"`.
 - `getPlaceInfo() : Object`  
@@ -715,11 +699,11 @@ Any module that extends the `ClientModule` class requires the SASS partial `sass
   - `name:String`  
     The `name` of the the `this.view` DOM element, that is used both as an the ID of that element and as a class. (`this.view` would look like `<div id='name' class='name'></div>`.)
   - `hasDisplay:Boolean = true`  
-    When set to `true`, the module creates the `this.view` DOM element with the id `id`.
+    When set to `true`, the module creates the `this.view` DOM element with the id `name` and the classes `'module'` and `'name'`.
   - `viewColor`  
     The `viewColor` argument should be a class name as defined in the library's `sass/_03-colors.scss` file, and changes the background color of the view to that color.
 - `start()`  
-  The `start` method is automatically called to start the module, and should handle the logic of the module on the client side. For instance, it takes care of the communication with the module on the server side by sending WebSocket messages and setting up WebSocket message listeners. If the module has a `view`, the `.start()` method creates the corresponding HTML element and appends it to the DOM's main container.
+  The `start` method is automatically called to start the module, and should handle the logic of the module on the client side. For instance, it can take care of the communication with the module on the server side by sending WebSocket messages and setting up WebSocket message listeners. If the module has a `view`, the `.start()` method creates the corresponding HTML element and appends it to the DOM's main container `div`.
 - `done()`  
   The `done` method should be called when the module has done its duty (for instance at the end of the `.start()` method you write). You should not have to modify this method, but if you do, don't forget to include `super.done()` at the end. If the module has a `view`, the `.done()` method removes it from the DOM.
 - `setViewText(text:String, ...cssClasses:String):Element`  
@@ -734,8 +718,8 @@ var clientSide = require('soundworks/client');
 
 class MyModule extends clientSide.Module {
   constructor(options = {}) {
-    // Here, MyModule would always have a view, with the id 'my-module',
-    // and possibly the background color defined by the argument options.
+    // Here, MyModule would always have a view, with the id and class 'my-module',
+    // and possibly the background color defined by the argument 'options'.
     super('my-module', true, options.color || 'alizarin');
 
     ... // anything the constructor needs
@@ -752,34 +736,34 @@ class MyModule extends clientSide.Module {
 
 ##### ServerModule
 
-The `ServerModule` extends the `EventEmitter` class.
+The `ServerModule` extends the `EventEmitter` class. Each module should have a `.connect(client:ServerClient)` and a `.disconnect(client:ServerClient)` method, as explained in [How to write a module](#how-to-write-a-module).
 
 ###### Methods
 
 - `constructor()`  
   The `constructor` method instantiates the `ServerModule` module on the server side.
 - `connect(client:ServerClient)`  
-  The `connect` method is automatically called when the client `client` connects to the server, and should handle the logic of the module on the server side. For instance, it takes care of the communication with the module on the client side by setting up WebSocket message listeners and sending WebSocket messages, or adds the client to a client's list to keep track of all the connected clients.
+  The `connect` method is automatically called when the client `client` connects to the server, and should handle the logic of the module on the server side. For instance, it can take care of the communication with the module on the client side by setting up WebSocket message listeners and sending WebSocket messages, or it can add the client to a client's list to keep track of all the connected clients.
 - `disconnect(client:ServerClient)`  
-  The `disconnect` method is automatically called when the client `client` disconnects from the server, and should do the necessary when that happens. For instance, it removes the client from the client's list of the connected clients.
+  The `disconnect` method is automatically called when the client `client` disconnects from the server, and should do the necessary when that happens. For instance, it can remove the client from the client's list of the connected clients.
 
 In practice, here is how you would extend this class to create a module on the server side.
 
 ```javascript
 /* Server side */
 
-var serverSide = require('soundworks/server);
+var serverSide = require('soundworks/server');
 
 class MyModule extends serverSide.Module {
   constructor() {
     ... // anything the constructor needs
   }
 
-  connect() {
+  connect(client) {
     ... // what the module has to do when a client connects to the server
   }
 
-  disconnect() {
+  disconnect(client) {
     ... // what the module has to do when a client disconnects from the server
   }
 }
@@ -797,7 +781,7 @@ If the placement of the users in the scenario doesn't matter, the `Seatmap` modu
 
 ##### ClientSeatmap
 
-The `ClientSeatmap` modules takes care of receiving the seatmap on the client side, and provides helper functions to display the seatmap on screen. The `ClientSeatmap` triggers its `'done'` event when it receives the seatmap from the server.
+The `ClientSeatmap` modules takes care of receiving the seatmap on the client side, and provides helper functions to display the seatmap on screen. The `ClientSeatmap` calls its `.done()` method when it receives the seatmap from the server.
 
 The `ClientCheckin` module requires the SASS partial `sass/_08-seatmap.scss`.
 
@@ -823,7 +807,7 @@ var clientSide = require('soundworks/client');
 // 2. Instantiate the class
 var seatmap = new clientSide.Seatmap();
 
-// 3. Display a graphical representation of the seatmap in a div of the DOM
+// 3. Display a graphical representation of the seatmap in a `div` of the DOM
 var seatmapGUI = document.getElementById('seatmap-container');
 seatmap.displaySeatmap(seatmapGUI);
 
@@ -877,13 +861,13 @@ The `Sync` module is based on [`sync`](https://github.com/collective-soundworks/
 
 For instance, this allows all the clients to do something exactly at the same time, such as displaying a color on the screen or playing a snare sound in a synchronized manner.
 
-The `Sync` module does a first synchronization process after which the `ClientSync` emits the `'done'` event. Later on, the `Sync` module keeps resynchronizing the client and server clocks on the sync clock at random intervals to compensate the clock drift.
+The `Sync` module does a first synchronization process after which the `ClientSync` calls its `.done()` method. Later on, the `Sync` module keeps resynchronizing the client and server clocks on the sync clock at random intervals to compensate the clock drift.
 
 On the client side, `ClientSync` uses the `audioContext` clock. On the server side, `ServerSync` uses the `process.hrtime()` clock. All times are in seconds (method arguments and returned values). **All time calculations and exchanges should be expressed in the sync clock time.**
 
 ##### ClientSync
 
-The `ClientSync` modules takes care of the synchronization process on the client side. It displays a `view` that indicates “Clock syncing, stand by…” until the very first synchronization process is done. The `ClientSync` module triggers its `'done'` event as soon as the client clock is in sync with the sync clock. Then, the synchronization process keeps running in the background to resynchronize the clocks from times to times. When such a resynchronization happens, the `ClientSync` module triggers a `'sync:stats'` event associated with statistics about the synchronization.
+The `ClientSync` modules takes care of the synchronization process on the client side. It displays a `view` that indicates “Clock syncing, stand by…” until the very first synchronization process is done. The `ClientSync` module calls its `.done()` method as soon as the client clock is in sync with the sync clock. Then, the synchronization process keeps running in the background to resynchronize the clocks from times to times. When such a resynchronization happens, the `ClientSync` module triggers a `'sync:stats'` event associated with statistics about the synchronization.
 
 ###### Methods
 
@@ -892,7 +876,7 @@ The `ClientSync` modules takes care of the synchronization process on the client
   - `options:Object = {}`  
     The optional `options` argument customizes the configuration of the module. Its properties can be:
     - `color:String = 'black'`  
-      Sets the background color of the view to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library's `sass/_03-colors.scss` file.
+      The `color` property sets the background color of the view to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library's `sass/_03-colors.scss` file.
 - `getLocalTime(syncTime:Number) : Number`  
   The `getLocalTime` method returns the time in the client clock when the sync clock reaches `syncTime`. If no arguments are provided, the method returns the time is when the method is called, in the client clock (*i.e.* `audioContext.currentTime`). The returned time is a `Number`, in seconds.
 - `getSyncTime(localTime:Number = audioContext.currentTime) : Number`  
@@ -1009,7 +993,7 @@ The most important things here are:
 
 - To load the `stylesheets/player.css` stylesheet that will be generated by the SASS file we'll write later,
 - To load the `socket.io` library with `script(src="/socket.io/socket.io.js")`, since this is what we currently use to handle the WebSockets,
-- To have a `<div>` element in the `body` that has the ID `#container` and a class `.container`,
+- To have a `div` element in the `body` that has the ID `#container` and a class `.container`,
 - And to load the Javascript file `/javascripts/player.js`.
 
 #### Writing our scenario in Javascript
