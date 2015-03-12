@@ -3,7 +3,7 @@
 ## Table of contents
 
 - [**Overview & getting started**](#overview--getting-started)
-  - [Client/server architecture](#server--client-architecture)
+  - [Client/server architecture](#client--server-architecture)
   - [A *Soundworks* scenario is exclusively made of modules](#a-soundworks-scenario-is-exclusively-made-of-modules)
   - [How to write a module?](#how-to-write-a-module)
   - [How to write a scenario?](#how-to-write-a-scenario)
@@ -84,7 +84,10 @@ To run a sequence of modules in serial, we use `client.serial(module1, module2, 
 
 Some of these modules need to communicate with the server (for instance, the `sync` process requires a dialog between the client and the server to synchronize the clocks). On the client side, each module implements a `.connect(client)` and a `.disconnect(client)` method that is called when a `client` connects or disconnects the application through one of the provided client URLs. A mapping of client namespaces determines the set of modules to which a certain type of client (*i.e.* a particular client URL) would actually connect on the server side.
 
-The following code (1) creates three server side modules – `sync`, `checkin` and `performance` –, (2) launches the server, and (3) maps the `'/player'` namespace to the three modules.
+The following code:
+- (1) creates three server side modules – `sync`, `checkin` and `performance`,
+- (2) launches the server,
+- and (3) maps the `'/player'` namespace to the three modules.
 
 ```javascript
 /* Server side */
@@ -146,8 +149,10 @@ class ClientSeatmap extends ClientModule {
     client.send('checkin:request'); // request the seatmap to the server
     
     client.receive('checkin:label, (label) => {
-      this.seatmap = seatmap; // store the response in an attribute
-      this.done(); // call the method .done(), since the purpose of the module is done
+      this.label = label; // store the response in an attribute
+	
+      // call the method .done(), since the purpose of the module is done
+	this._displayDialog().then(this.done());
     });
   }
 
