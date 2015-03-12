@@ -24,11 +24,12 @@ class ClientSync extends ClientModule {
     super.start();
 
     this.sync.start(client.send, client.receive);
-    this.sync.on('sync:stats', () => {
+    this.sync.on('sync:stats', (stats) => {
       if (!this.ready) {
         this.ready = true;
         this.done();
       }
+      this.emit('sync:stats', stats);
     });
   }
 
