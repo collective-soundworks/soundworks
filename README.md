@@ -2,7 +2,7 @@
 
 ## Table of contents
 
-- [**Overview & how to get started**](#overview--how-to-get-started)
+- [**Overview & getting started**](#overview--getting-started)
   - [Client/server architecture](#server--client-architecture)
   - [A *Soundworks* scenario is exclusively made of modules](#a-soundworks-scenario-is-exclusively-made-of-modules)
   - [How to write a module?](#how-to-write-a-module)
@@ -33,26 +33,25 @@ The framework is based on a client/server architecture supported by `Node.js` (`
 
 ### Client/server architecture 
 
-In order to connect the smartphones with each other, *Soundworks* implements a client/server architecture using a `Node.js` server and WebSockets to pass messages between the server and the clients (currently based on the `socket.io` library).
+In order to connect the smartphones with each other, *Soundworks* implements a client/server architecture using a `Node.js` server and WebSockets to pass messages between the server and the clients (currently with the `socket.io` library).
 
-In general, a *Soundworks* scenario allows different types of clients to connect to the server through different URLs. The most important kind clients are the smartphones of the players who take part in the performance.
-For convenience, a player connects to the server through the root URL of the application, `http://my.server.address:port/`.
+In general, a *Soundworks* scenario allows different types of clients to connect to the server through different URLs. The most important kind clients are the smartphones of the players who take part in the performance (we refer to this type of client as `player`). For convenience, a player connects to the server through the root URL of the application, `http://my.server.address:port/`.
 
 In addition to the players, a scenario can include other kinds of clients such as:
 - A laptop that provides an interface to control some parameters of the performance in real time. We would refer to this type of client as `conductor`. These clients would connect to the server through the URL `http://my.server.address:port/conductor`.
 - A computer that controls the sound and/or light effects in the room in sync with the players' performance, such as lasers, a global visualization or ambient sounds on external loudspeakers. We would refer to this type of client as `env`, standing for “environment”. These clients would connect to the server through the URL `http://my.server.address:port/env`.
 
-We refer to the URL extensions corresponding to the different kinds of clients as `namespaces`. The `/player` namespace is the default namespace of the application. All other types of clients access the server through a URL that concatenates the root URL of the application and the namespace of the client type such as `conductor` and `env`.
+We refer to the URL extensions corresponding to the different kinds of clients as `namespaces`. The `'/player'` namespace is the default namespace of the application, and is accessed through the root URL (*e.g* `http://my.server.address:port/`). All other types of clients access the server through a URL that concatenates the root URL of the application and the namespace of the client type (*e.g* `http://my.server.address:port/conductor` for a `conductor` client who belongs to the namespace `'/conductor'`, or ``http://my.server.address:port/env` for an `env` client who belongs to the namespace `'/env'`).
 
 ### A *Soundworks* scenario is exclusively made of modules
 
-A scenario built with *Soundworks* consists in a succession and combination of modules, each of them corresponding to one step of the scenario. On the client side, each module implements a `.start()` and a `.done()` method. We launch the process corresponding to that module by calling the method `.start()`, and we call the method `.done()` to hand over the control the following module. This way, modules can be executed in series and/or in parallel according to a given application scenario.
+A scenario built with *Soundworks* consists in a succession and combination of modules, each of them corresponding to one step of the scenario. On the client side, each module implements a `.start()` and a `.done()` method. We launch the process corresponding to that module by calling the method `.start()`, and we call the method `.done()` to hand over the control to the following module. This way, modules can be executed in series and/or in parallel according to a given application scenario. While the library provides most of the modules to setup a client for participation, the essential part of a scenario — the `performance` itself — usually has to be implemented by a custom module.
 
 As an example, a scenario could provide the following interactions when a `player` connects to the server through the root URL:
 
-- The player’s smartphone displays a `welcome` message (*e.g.* “Welcome to the performance!”). When the player clicks on the screen…
-- the player receives some `checkin` instructions while in the meantime, the smartphone has to `sync` its clock with the server. Finally, when these are done…
-- the player joins the `performance`.
+- The player’s smartphone displays a `welcome` message (*e.g.* “Welcome to the performance!”). When the player clicks on the screen… 
+- … the player receives some `checkin` instructions while in the meantime, the smartphone has to `sync` its clock with the server. Finally, when these are done… 
+- … the player joins the `performance`.
 
 Each of these steps corresponds to a module. On the client side, this scenario would be implemented as follows.
 
@@ -68,7 +67,7 @@ var sync = new clientSide.Sync(...);
 var checkin = new clientSide.Checkin(...);
 var performance = new Performance(...); // This class has to be written by you
 
-// Launch the scenario!
+// Launch the scenario
 client.start(
   client.serial(
     welcome,
@@ -81,11 +80,11 @@ client.start(
 );
 ```
 
-To run a sequence of modules in serial, we use `client.serial(module1, module2, ...)`. A module would `.start()` only after the previous one is `.done()`. On the other hand, if some modules need to be run in parallel, we use `client.parallel(module1, module2, ...)`. The parallel process triggers a global `.done()` method when all of its modules are `.done()`. For more information about the `serial` and `parallel` module processes, see the [`client` object modules logic](#modules-logic) in the API section.
+To run a sequence of modules in serial, we use `client.serial(module1, module2, ...)`. A module would `.start()` only after the previous one is `.done()`. On the other hand, if some modules need to be run in parallel, we use `client.parallel(module1, module2, ...)`. The parallel process triggers a global `.done()` method when all of its modules called `.done()`. For more information about the `serial` and `parallel` module processes, see the [`client` object modules logic](#modules-logic) in the API section.
 
-Some of these modules need an interaction with the server (for instance, the `sync` process requires a dialog between the client and the server to synchronize the clocks). On the client side, each module implements a `.connect()` and a `.disconnect()` method that is called when a client connects or disconnects the application through one of the provided client URLs. A mapping determines which kind of client (i.e. a connection to which client URL) would `connect` to which module.
+Some of these modules need to communicate with the server (for instance, the `sync` process requires a dialog between the client and the server to synchronize the clocks). On the client side, each module implements a `.connect(client)` and a `.disconnect(client)` method that is called when a `client` connects or disconnects the application through one of the provided client URLs. A mapping of client namespaces determines the set of modules to which a certain type of client (*i.e.* a particular client URL) would actually connect on the server side.
 
-The following code 1) instantiates three server side modules – `sync`, `checkin` and `performance` –, 2) launches the server, and 3) maps the `'/player'` clients to the three modules.
+The following code (1) creates three server side modules – `sync`, `checkin` and `performance` –, (2) launches the server, and (3) maps the `'/player'` namespace to the three modules.
 
 ```javascript
 /* Server side */
@@ -95,25 +94,28 @@ var serverSide = require('soundworks/server');
 var server = serverSide.server;
 var express = require('express');
 var app = express();
+var path = require('path');
+var dir = path.join(__dirname, '../../public');
 
-// Initialize the modules (the methods' arguments are explained in the documentation)
+// (1) Create the modules (the methods' arguments are explained in the documentation)
 var sync = new serverSide.Sync(...);
 var checkin = new serverSide.Checkin(...);
 var performance = new Performance(...); // This class has to be written by you
 
-// Launch the server
-server.start(app);
-// Map the '/player' namespace with the modules needed by the client side
-server.map('/player', 'My Scenario', sync, checkin, performance);
+// (2) Launch the server on port 8000 with the public directory 'dir'
+server.start(app, dir, 8000);
+
+// (3) Map the '/player' namespace with the modules needed by the 'player' clients on the client side
+server.map('/player', 'My Scenario Title', sync, checkin, performance);
 ```
 
-That way, the `sync`, `checkin` and `performance` modules of a `player` (who belongs to the namespace `'/player'`, see below for more information) would be able to dialog with the corresponding modules on the server side.
+After this initialization, the `sync`, `checkin` and `performance` modules of a `player` are be able to dialog with the corresponding modules on the server side.
 
 ### How to write a module?
 
 #### Client side
 
-On the client side, a module extends the `ClientModule` base class. The module has to implement a `.start()` method and has to call its `.done()` method to hand over the control to the next module. While most modules would have completed their process when they call done, some modules continue processing in the background afterwards. This is for example the case for the `sync` module that hands over the control after a first synchronization with the server, but may continue re-synchronizing clocks afterwards.
+On the client side, a module extends the `ClientModule` base class. The module has to implement a `.start()` method and has to call its `.done()` method to hand over the control to the next module. While most modules would complete their process before calling done, some modules continue processing in the background afterwards. This is for example the case for the `sync` module that hands over the control after a first synchronization with the server, but may continue re-synchronizing clocks afterwards.
 
 For instance, if the purpose of the module is to load files, the module should call the method `.done()` when the files are loaded. Similarly, if the purpose of the module is to synchronize the clocks, the module should call the method `.done()` when the clocks are synced.
 
@@ -121,11 +123,14 @@ For instance, if the purpose of the module is to load files, the module should c
 
 The `.start()` method is called to start the module. It should handle the logic and the steps that lead to the completion of the module.
 
-For instance, the purpose of the `ClientSeatmap` module is to get the seatmap from the server. Therefore, the `.start()` method of the `ClientSeatmap` module does the following:
+For instance, the purpose of the `ClientCheckin` module is to actually add a client connected to the player namespace to the list of active players. Optionally, the module can assign a position associated to a predefined seat or area to the player. When the module is configured with a predefined seating plan, it would simply request an available seat and display it to the player. The client will be added to the list of active players once the participant acknowledges the seat by touching the screen.
+In detail, the `.start()` method of the module does the following:
 
-- It sends a request to the `ServerSeatmap` module via WebSockets, asking the server to send the `seatmap` object.
-- When it receives the response from the server with the `seatmap` object, it stores the `seatmap` as an attribute.
-- Finally, since the module has done its duty, it calls the method `.done()`.
+- It sends a request to the `ServerCheckin` module via WebSockets, asking the server to send the label of an available seat.
+- When it receives the response from the server, it displays the label on the screen (e.g. “Please go to C5 and touch the screen.”) and waits for the participant’s acknowledgement.
+- In meantime, the server has already added the client to the list of active players and when the participant touches the screen, the module calls the method `.done()`.
+
+
 
 In Javascript, it looks like the following.
 
@@ -138,9 +143,9 @@ class ClientSeatmap extends ClientModule {
   start() {
     super.start(); // don't forget this line!
 
-    client.send('seatmap_request'); // request the seatmap to the server
+    client.send('checkin:request'); // request the seatmap to the server
     
-    client.receive('seatmap_init', (seatmap) => {
+    client.receive('checkin:label, (label) => {
       this.seatmap = seatmap; // store the response in an attribute
       this.done(); // call the method .done(), since the purpose of the module is done
     });
