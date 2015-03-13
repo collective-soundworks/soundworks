@@ -23,18 +23,28 @@ class ServerPerformance extends ServerModule {
     super.connect(client);
 
     client.receive('performance:start', () => {
-      this.players.push(client);
+      this.addPlayer(client);
     });
 
     client.receive('performance:done', () => {
-      arrayRemove(this.players, client);
+      this.removePlayer(client);
     });
   }
 
   disconnect(client) {
-    arrayRemove(this.players, client);
+    this.removePlayer(client);
 
     super.disconnect(client);
+  }
+
+  addPlayer(client) {
+    this.players.push(client);
+  }
+
+  removePlayer(client) {
+    let index = this.players.indexOf(value);
+    if (index >= 0)
+      this.players.splice(index, 1);
   }
 }
 
