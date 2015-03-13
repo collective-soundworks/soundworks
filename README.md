@@ -1150,7 +1150,7 @@ class MyPerformance extends clientSide.Performance {
   start() {
     super.start(); // don't forget this
 
-    // Play a sound when we receive a message from the server
+    // Play a sound when we receive a WebSocket message from the server
     client.receive('performance:play', () => {
       let bufferSource = audioContext.createBufferSource();
       bufferSource.buffer = this.loader.audioBuffers[0]; // get the audio buffer from the loader
