@@ -122,22 +122,19 @@ You will find [more information on the `ClientModule` base class in the API sect
 
 The `.start()` method is called to start the module. It should handle the logic and the steps that lead to the completion of the module.
 
-For instance, `.start()` method of the performance module that implements the main part of an application inherits the `.start()` method from the `ClientPerformance` base class. The method the base class sends a message to the server to add the client to the list of active player clients that is maintained in the `ServerPerformance` base class and that can be used by the derived performance class.
-
-that usually is inherited by  scenario, provides a basic exchange with the server
-purpose of the `ClientCheckin` module is handle assign an available player index to a client connected via the player namespace. Optionally, the module can assign a position associated to a predefined seat or area to the player. When the module is configured with a predefined `seating` plan, it would request an available seat and display it to the player.
+For instance, the purpose of the `ClientCheckin` module is to request an available player identifier (index) for a client connected via the player namespace and to setup the client as player. When the module is configured with a predefined `seating` plan, it could automatically request an available seat and display its label to the player (in other configurations the participants could also enter a chosen seat or indicate their approximate position on a map).
 In detail, the `.start()` method of the module does the following:
 
 - It sends a request to the `ServerCheckin` module via WebSockets, asking the server to send the label of an available seat.
 - When it receives the response from the server, it displays the label on the screen (e.g. “Please go to C5 and touch the screen.”) and waits for the participant’s acknowledgement.
-- When the participant touches the screen, the client module simply calls the method `.done()`. In many scenarios, this would hand over the control to the performance module.
+- When the participant touches the screen, the client module calls the method `.done()`. In many scenarios, this would hand over the control to the performance module.
 
-In Javascript, it looks like the following.
+A slightly simplified version of the `ClientCheckin` module looks like the following:
 
 ```javascript
 var client = require('./client');
 
-class ClientSeatmap extends ClientModule {
+class ClientCheckin extends ClientModule {
   ...
 
   start() {
@@ -147,24 +144,38 @@ class ClientSeatmap extends ClientModule {
 
     // request an available seat from the server
     client.send('checkin:request');
-    
-    client.receive('checkin:label, (label) => {
-      // display the label in a dialog
-      this.setViewText("Please go to " + label + " and touch the screen.");
 
-      // call .done() when the participant acknowledges the dialog
-      this.view.addEventListener('click', () => this.done());
+    // receive acknowledgement with player index and optional seat description
+    client.receive('checkin:acknowledge, (playerIndex, seatDescription) => {
+      this.playerIndex = playerIndex;
+      
+      if(seat)     
+        // display the seat description in a dialog
+        this.setCenteredViewContent("<p>Please go to " + seatDescription + " and touch the screen.<p>");
+
+        // call .done() when the participant acknowledges the dialog
+        this.view.addEventListener('click', () => this.done());
+      } else {
+        // check-in without further dialog
+        this.done();
+      }
+  }
+
+    // no player index / seat available
+    client.receive('checkin:unavailable, () => {
+      this.setCenteredViewContent("Sorry, we cannot accept more players at the moment, please try again later.");
+    });
   }
 
   ...
 }
 ```
 
-This method must include the inherited method from the base class before any code you write (`super.start();`).
+Note, that this method must include the inherited method from the base class (`super.start();`) before anything else.
 
 ##### The `.done()` method
 
-The `.done()` method implemented by the `ClientModule` base class should be called by the derived client module (as an exception, a performance module may not call the method and keep the control until the client disconnects). A derived client module must not override the `.done()` method provided by 
+The `.done()` method implemented by the `ClientModule` base class is called by the derived client module to hand over control to the next module. As an exception, a performance module may not call the method and keep the control until the client disconnects from the server. A derived client module must not override the `.done()` method provided by the base class.
 
 #### Server side
 
@@ -177,14 +188,39 @@ You will find [more information on the `ServerModule` base class in the API sect
 
 The `.connect(client)` is called on a server module mapped to a particular namespace as soon as a `client` connects to the server via this namespace. In the `.connect()` method, the module should set up the listeners of the WebSocket messages that are sent after starting the corresponding client side module to serve incoming requests.
 
-For instance, say that the module you are writing needs to keep track of the connected clients and serve requests for the number of connected clients. Then you could write the following.
+The server side of the simplified `Checkin` module described above looks as follows:
 
 ```javascript
 connect(client) {
-  this.clients.push(clients);
+  ...
 
-  client.receive(‘mymodule:requestNumConnections’, () => {
-    client.send(‘mymodule:numConnections’, this.clients.length);  
+  // setup client as player
+  client.player = {};
+
+  client.receive(checkin:request’, () => {
+    var playerIndex = this._getPlayerIndex();
+
+    if(index >= 0) {
+      client.player.index = playerIndex;
+
+      var seatDescription = undefined;
+
+      // retrieve additional player information from setup
+      if(this.setup && this.setup.seats) {
+        // get player position according to a given seating plan
+        client.player.position = getSeatPosition(this.setup.seats, playerIndex);
+
+
+        // get a seat label
+        label = getSeatDescription(this.setup.seats, playerIndex);
+      }
+
+      // acknowledge check-in to client
+      client.send(‘checkin:acknowledge’, playerIndex, seatDescription);
+    } else {
+      // no player indices available
+      client.send(checkin:unavailable);
+    }
   });
 
   ...
@@ -199,9 +235,9 @@ In our previous example, where the module keeps track of the connected clients, 
 
 ```javascript
 disconnect(client) {
-  removeFromArray(this.clients, client);
-
-  ... // the rest of the method
+  // release 
+  this._releasePlayerIndex(client.player.index);
+  delete client.player;
 }
 ```
 
@@ -934,14 +970,14 @@ var nowSync = sync.getSyncTime(); // current time in the sync clock time
 
 ## Example
 
-In this section, we will build a simple scenario using *Soundworks*, that we'll call *My Scenario*. In *My Scenario*, any client that connects to the server plays a sound when joining the performance.
+In this section, we will build a simple scenario using *Soundworks*, that we'll call *My Scenario*. In *My Scenario*, any client that connects to the server through the root URL (`http://my.server.address:port/`) plays a sound when joining the performance. Consequently, we will focus on *Soundworks*' default client type `player`, which is the type of any client that connect to the server through the root URL.
 
 ### 1. Create a new *Soundworks* project
 
 Let's create a new *Soundworks* project. It should have the basic structure of an Express app, as shown below.
 
 ```
-beats/
+my-scenario/
 ├── public/
 │   └── sounds/
 │       └── sound.mp3
@@ -959,11 +995,11 @@ beats/
 
 ### 2. Client side
 
-On the client side, there are three things we need to do: set up the EJS file that will generate the HTML, write the Javascript code, and write the SASS files for styling.
+On the client side, there are three things we need to do: set up the EJS file that will generate the HTML, write the Javascript code, and write the SASS files that will generate the CSS.
 
 #### Setting up the EJS file
 
-Let's start with the easy part, the EJS file located in `beats/views/player.ejs`.
+Let's start with the easy part, the EJS file located in `my-scenario/views/player.ejs`.
 
 ```html
 <!doctype html5>
@@ -996,17 +1032,17 @@ The most important things here are:
 - To load the `stylesheets/player.css` stylesheet that will be generated by the SASS file we'll write later,
 - To load the `socket.io` library with `script(src="/socket.io/socket.io.js")`, since this is what we currently use to handle the WebSockets,
 - To have a `div` element in the `body` that has the ID `#container` and a class `.container`,
-- And to load the Javascript file `/javascripts/player.js`.
+- And to load the `javascripts/player.js` Javascript file.
 
 #### Writing our scenario in Javascript
 
-Now let's write the core of our scenario in the `src/player/index.es6.js` file. This is the file that is loaded by any client who connects to the server through the root URL `http://my.server.address:port/` (for instance, `http://localhost:8000` during the development).
+Now let's write the core of our scenario in the `src/player/index.es6.js` file. This is the file that is loaded by any client who connects to the server through the root URL `http://my.server.address:port/`. Such a client is called `player`.
 
-Step by step, this is how the scenario will look like when a user connects to the server through that URL:
+Step by step, this is how the scenario will look like when a participant connects to the server through that URL:
 
-- The screen displays a `welcome` message that the user has to click on to enter the scenario,
-- The clients has a `checkin` process with the server while a `loader` process loads the audio file to play,
-- Finally, the user enters the `performance` where the smartphone emits a recorded sound.
+- The screen displays a `welcome` screen that the user has to click to enter the scenario,
+- The clients gos through a `checkin` process with the server while a `loader` loads the audio file to play,
+- Finally, the user enters the `performance`, in which the smartphone plays the loaded audio file.
 
 First of all, let's load the library and initialize our WebSockets namespace (currently, with `socket.io`).
 
@@ -1019,7 +1055,7 @@ var client = clientSide.client;
 client.init('/player');
 ```
 
-The namespace here is set to `'/player'` because we are editing the Javascript file for the `player` clients.
+The namespace here is set to `'/player'` because we are editing the Javascript file for the `player` clients who connect to the server through the root URL.
 
 Then, all the scenario will happen when the HTML document is ready, so let's wrap all the scenario logic in a callback function.
 
@@ -1034,13 +1070,13 @@ We can now initialize all the modules in this callback function. Let's review th
 
 ##### Welcome module
 
-The `welcome` module displays a text to welcome the users who connect to the server. We also ask the users to click on the screen to hide this screen and start the scenario. Under the hood, we use this click to activate the Web Audio API on iOS devices (on iOS, sound is muted until a user action triggers some audio commands). This is exactly what the `Dialog` module does.
+The `welcome` module displays a text to welcome the users who connect to the server. We also ask the users to click on the screen to hide this screen and start the scenario. Under the hood, we use this click to activate the Web Audio API on iOS devices (on iOS, sound is muted until a user action triggers some audio commands). This is exactly what the [`ClientDialog`](#clientdialog) module is made for.
 
 ```javascript
 window.addEventListener('load', () => {
 
   var welcome = new clientSide.Dialog({
-    id: 'welcome',
+    name: 'welcome',
     text: "<p>Welcome to <b>My Scenario</b>.</p> <p>Touch the screen to join!</p>",
     activateAudio: true
   });
@@ -1051,11 +1087,11 @@ window.addEventListener('load', () => {
 
 Here:
 
-- The `id` parameter corresponds to the `id` attribute of the HTML element in which the content of the module is displayed.
+- The `name` parameter corresponds to the `id` attribute and a class of the HTML element in which the content of the module is displayed (the `view`).
 - The `text` parameter contains the text to display on the screen when the module is displayed.
-- Finally, we set the property `activateAudio` to `true` to enable the sound on iOS devices as well as to start the Web Audio clock (that will be required for the synchronization process).
+- Finally, the property `activateAudio` is set to `true` to enable the sound on iOS devices as well as to start the Web Audio clock (that will be required for the synchronization process).
 
-*This step is required in almost any scenario you could imagine, at least to activate the Web Audio on iOS devices.*
+**Note:* this step is required in almost any scenario you could imagine, at least to activate the Web Audio on iOS devices.
 
 ##### Checkin module
 
@@ -1073,10 +1109,10 @@ window.addEventListener('load', () => {
 
 ##### Loader module
 
-The `Loader` module allows the client to load audio files that are stored in a `audioBuffers` array.
+The `Loader` module allows the client to load audio files from the public folder, and that are then stored in an `audioBuffers` array attribute.
 
 ```javascript
-var file = ['sounds/sound.mp3']; // the path to the audio file in the public folder
+var file = ['sounds/sound.mp3']; // the path to the audio file in the public folder (can contain multiple files)
 
 window.addEventListener('load', () => {
   ... // what we've done already
@@ -1089,12 +1125,14 @@ window.addEventListener('load', () => {
 
 ##### Performance module
 
-To create the performance, we have to write our own module `MyPerformance`. Let's start with the constructor. Since we want the performance to display something on the screen, we call `super('performance', true)`: this indicates that we want to create the `view` DOM element in a `<div>` with the `id` attribute being `'performance'` (please refer to [*How to write a module*](#how-to-write-a-module) and [*Module*](#module) for more information).
+To create the performance, we have to write our own module `MyPerformance`. For this, we simply extend the `Performance` server and client classes.
+
+In the constructor, we keep the `options` argument from the base class, and we also pass in the `loader` module since we'll have to access the `audioBuffers` attribute to play the file in the performance.
 
 ```javascript
-class MyPerformance extends clientSide.Module {
-  constructor(loader) {
-    super('performance', true);
+class MyPerformance extends clientSide.Performance {
+  constructor(loader, options = {}) {
+    super(options); // same behavior as the base class
 
     this.loader = loader; // the loader module
   }
@@ -1103,30 +1141,27 @@ class MyPerformance extends clientSide.Module {
 }
 ```
 
-Then, we write the `.start()` method that is called when the performance starts. We want that method to tell the server that the client just started the performance (`client.send('perf_start');`), and to play a sound on the server's command (`client.receive('play_sound', callback)`).
+Then, we write the `.start()` method that is called when the performance starts. We want that method to play a sound on the server's command (`client.receive('play_sound', callback);`).
 
 ```javascript
-class MyPerformance extends clientSide.Module {
+class MyPerformance extends clientSide.Performance {
   ... // the constructor
 
   start() {
-    super.start(); // mandatory
-
-    // Send a message to the server indicating that we started the performance
-    client.send('perf_start');
+    super.start(); // don't forget this
 
     // Play a sound when we receive a message from the server
-    client.receive('play_sound', () => {
+    client.receive('performance:play', () => {
       let bufferSource = audioContext.createBufferSource();
-      bufferSource.buffer = this.loader.audioBuffers[0]; // get the audioBuffers from the loader
+      bufferSource.buffer = this.loader.audioBuffers[0]; // get the audio buffer from the loader
       bufferSource.connect(audioContext.destination);
       bufferSource.start(audioContext.currentTime);
 
       this.setViewText('Congratulations, you just played a sound!'); // display some feedback text in the view
 
-      /* We would usually call the .done() method when the module has done its duty,
+      /* We would usually call the .done() method when the module can hand off the control,
        * however since the performance is the last module to be called in this scenario,
-       * we don't need it.
+       * this is not necessary here.
        */
       // this.done(); 
     });
@@ -1134,7 +1169,7 @@ class MyPerformance extends clientSide.Module {
 }
 ```
 
-**Note:** we could directly play the sound in the start method, but we show some client / server communication here for the the purpose of the tutorial. In theory, we would also need to call the '.done()' method when the purpose of this module is done, but since the performance is the last thing that happens in *My Scenario*, we don't need to do it.
+**Note:** we could directly play the sound in the start method, but we show some client / server communication here for the purpose of the tutorial. In theory, we would also need to call the '.done()' method when the module handles the control to the following modules, but since the `performance` is the last thing that happens in *My Scenario*, we don't need to do it in this specific case.
 
 Now let's glue everything together.
 
@@ -1191,7 +1226,7 @@ So there we go, let's write our `src/sass/player.css` file by requiring the part
 @import '07-loader';
 ```
 
-You could also add your own SASS code (that goes along the `MyPerformance` module, for example) if needed.
+We could also add our own SASS code (that goes along the `MyPerformance` module, for example) if we had to customize some of the appearance.
 
 ### 3. Server side
 
@@ -1209,7 +1244,7 @@ var path = require('path');
 var dir = path.join(__dirname, '../../public');
 ```
 
-Then, we setup the modules that the client needs to communicate with. In this example, there is the `Checkin` module, and the performance module we'll need to write ourselves.
+Then, we set up the modules that the client needs to communicate with. In this example, there is the `Checkin` module, and the `Performance` module we'll need to write ourselves.
 
 For the `Checkin` module, since we don't need a map of the seats or anything like that, we just indicate the maximum number of players this performance allows, and the order in which the module assigns the indices.
 
@@ -1220,29 +1255,27 @@ var checkin = new serverSide.Checkin(
 );
 ```
 
-Finally, we have to write the performance module. The `.connect(client)` method is called when the client `client` connects to the server: when that happens, we simply send a WebSocket message back when the server receives a message from the client indicating that it started the performance. In this example, nothing needs to be done when the client disconnects from the server.
+Finally, we have to write the performance module. The `.connect(client)` method is called when the client `client` connects to the server: when that happens, we simply send a WebSocket message back to tell the client to play a sound (`client.send('performance:play');`). In this example, nothing needs to be done when the client disconnects from the server apart from what the `ServerPerformance` base class already does.
 
 ```javascript
-class MyPerformance extends serverSide.Module {
+class MyPerformance extends serverSide.Performance {
   constructor() {}
 
   connect(client) {
-    client.receive('perf_start', () => {
-      client.send('play_sound');
-    });
-  }
+    super(client); // don't forget this
 
-  disconnect(client) {}
+    client.send('performance:play'); // send WebSocket message to the client
+  }
 }
 
 ```
 
-We can now instantiate the performance module, and start the server and map the `/player` namespace to the modules we just set up: this last command indicates that all clients connecting to the `/player` namespace (through the root URL) will need to communicate with the `checkin` and `performance` modules on the server side.
+We can now instantiate the performance module, and start the server and map the `'/player'` namespace to the modules we just set up: this last command indicates that all clients connecting to the `'/player'` namespace (through the root URL) will need to communicate with the `checkin` and `performance` modules on the server side.
 
 ```javascript
 var performance = new MyPerformance()
 
-server.start(app, dir, 8000); // start the application app, with the public directory dir, on port 8000
+server.start(app, dir, 8000); // start the application 'app', with the public directory 'dir', on port 8000
 server.map('/player', 'My Scenario', checkin, performance);
 ```
 
