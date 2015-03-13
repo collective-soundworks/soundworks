@@ -115,16 +115,17 @@ After this initialization, the `sync`, `checkin` and `performance` modules of a 
 
 #### Client side
 
-On the client side, a module extends the `ClientModule` base class. The module has to implement a `.start()` method and has to call its `.done()` method to hand over the control to the next module. While most modules would complete their process before calling done, some modules continue processing in the background afterwards. This is for example the case for the `sync` module that hands over the control after a first synchronization with the server, but may continue re-synchronizing clocks afterwards.
-
-For instance, if the purpose of the module is to load files, the module should call the method `.done()` when the files are loaded. Similarly, if the purpose of the module is to synchronize the clocks, the module should call the method `.done()` when the clocks are synced.
+On the client side, a module extends the `ClientModule` base class. The module has to implement a `.start()` method and has to call its `.done()` method to hand over the control to the next module. Most modules would call their `.done()` method when their process is complete. For instance, if the purpose of the module is to load files, the module should call the method `.done()` when the files are loaded. However, some modules continue processing in the background afterwards. For example, this is the case of the `sync` module that calls its `.done()` method after the very first synchronization with the server is done, but that also continues to run in the background afterwards to keep re-synchronizing the clocks regularly during the rest of the scenario.
 
 You will find [more information on the `ClientModule` base class in the API section](#clientmodule).
 ##### The `.start()` method
 
 The `.start()` method is called to start the module. It should handle the logic and the steps that lead to the completion of the module.
 
-For instance, the purpose of the `ClientCheckin` module is handle assign an available player index to a client connected via the player namespace. Optionally, the module can assign a position associated to a predefined seat or area to the player. When the module is configured with a predefined `seating` plan, it would request an available seat and display it to the player.
+For instance, `.start()` method of the performance module that implements the main part of an application inherits the `.start()` method from the `ClientPerformance` base class. The method the base class sends a message to the server to add the client to the list of active player clients that is maintained in the `ServerPerformance` base class and that can be used by the derived performance class.
+
+that usually is inherited by  scenario, provides a basic exchange with the server
+purpose of the `ClientCheckin` module is handle assign an available player index to a client connected via the player namespace. Optionally, the module can assign a position associated to a predefined seat or area to the player. When the module is configured with a predefined `seating` plan, it would request an available seat and display it to the player.
 In detail, the `.start()` method of the module does the following:
 
 - It sends a request to the `ServerCheckin` module via WebSockets, asking the server to send the label of an available seat.
@@ -679,25 +680,25 @@ Blah
 
 #### Module
 
-The `Module` server and client classes are the base classes that any *Soundworks* module is based on.
+The `Module` server and client classes are the base classes that any *Soundworks* module should extend.
 
 ##### ClientModule
 
-The `ClientModule` extends the `EventEmitter` class. Each module should have a `.start()` and a `.done()` method, as explained in [How to write a module](#how-to-write-a-module). The `.done()` method must be called when the module has done its duty.
+The `ClientModule` extends the `EventEmitter` class. Each module should have a `.start()` and a `.done()` method, as explained in the [How to write a module?](#how-to-write-a-module) section. The `.done()` method must be called when the module can hand over the control to the subsequent modules (*i.e.* when the module has done its duty, or when it has to run in the background for the rest of the scenario after it finished its initialization process).
 
 Any module that extends the `ClientModule` class requires the SASS partial `sass/general.scss`.
 
 ###### Attributes
 
 - `view = null`  
-  The `view` attribute of the module is the DOM element (a full screen `div`) in which the content of the module is displayed. This element is a child of the main container (`<div id='container' class='container'></div>`), which is the only child of the `body` element. A module may or may not have a `view`, as indicated by the argument `hasDisplay:Boolean` of the `constructor`. When that is the case, the `view` is created in the DOM when the `.start()` method is called, and is removed from the DOM when the `.done()` method is called.
+  The `view` attribute of the module is the DOM element (a full screen `div`) in which the content of the module is displayed. This element is a child of the main container (`<div id='container' class='container'></div>`), which is the only child of the `body` element. A module may or may not have a `view`, as indicated by the argument `hasDisplay:Boolean` of the `constructor`. When that is the case, the `view` is created and added to the DOM when the `.start()` method is called, and is removed from the DOM when the `.done()` method is called.
 
 ###### Methods
 
 - `constructor(name:String, hasDisplay:Boolean = true, viewColor:String = 'black')`  
   The `constructor` method instantiates the `ClientModule` module on the client side. It takes up to three arguments:
   - `name:String`  
-    The `name` of the the `this.view` DOM element, that is used both as an the ID of that element and as a class. (`this.view` would look like `<div id='name' class='name'></div>`.)
+    The `name` of the the `this.view` DOM element, that is used both as an the ID of that element and as a class. (`this.view` would look like `<div id='name' class='module name'></div>`.)
   - `hasDisplay:Boolean = true`  
     When set to `true`, the module creates the `this.view` DOM element with the id `name` and the classes `'module'` and `'name'`.
   - `viewColor`  
@@ -706,8 +707,8 @@ Any module that extends the `ClientModule` class requires the SASS partial `sass
   The `start` method is automatically called to start the module, and should handle the logic of the module on the client side. For instance, it can take care of the communication with the module on the server side by sending WebSocket messages and setting up WebSocket message listeners. If the module has a `view`, the `.start()` method creates the corresponding HTML element and appends it to the DOM's main container `div`.
 - `done()`  
   The `done` method should be called when the module has done its duty (for instance at the end of the `.start()` method you write). You should not have to modify this method, but if you do, don't forget to include `super.done()` at the end. If the module has a `view`, the `.done()` method removes it from the DOM.
-- `setViewText(text:String, ...cssClasses:String):Element`  
-  When `this.view` exists, the `.setViewText` method creates a `<div class='centered-text'></div>` and appends it to `this.view`. If `text` is specified, the method adds a paragraph element `<p>` to the `div`, with the `text` inside. Finally, any `cssClasses` you would specify would be added to that paragraph element. The method returns the `div` with the `centered-text` class.
+- `setViewText(text:String, ...cssClasses:String) : Element`  
+  When `this.view` exists, the `.setViewText` method creates a `<div class='centered-text'></div>` and appends it to `this.view`. If `text` is specified, the method adds a paragraph element `<p>` to the `div.centered-text`, with the `text` inside. Finally, any `cssClasses` you would specify would be added to that paragraph element. The method returns the `div` with the `centered-text` class.
 
 In practice, here is an example of how you would extend this class to create a module on the client side.
 
@@ -729,6 +730,7 @@ class MyModule extends clientSide.Module {
     super.start();
 
     ... // what the module has to do (communication with the server, etc.)
+
     this.done(); // call this method when the duty of the module is done
   }
 }
@@ -736,16 +738,16 @@ class MyModule extends clientSide.Module {
 
 ##### ServerModule
 
-The `ServerModule` extends the `EventEmitter` class. Each module should have a `.connect(client:ServerClient)` and a `.disconnect(client:ServerClient)` method, as explained in [How to write a module](#how-to-write-a-module).
+The `ServerModule` extends the `EventEmitter` class. Each module should have a `.connect(client:ServerClient)` and a `.disconnect(client:ServerClient)` method, as explained in the [How to write a module?](#how-to-write-a-module) section.
 
 ###### Methods
 
 - `constructor()`  
   The `constructor` method instantiates the `ServerModule` module on the server side.
 - `connect(client:ServerClient)`  
-  The `connect` method is automatically called when the client `client` connects to the server, and should handle the logic of the module on the server side. For instance, it can take care of the communication with the module on the client side by setting up WebSocket message listeners and sending WebSocket messages, or it can add the client to a client's list to keep track of all the connected clients.
+  The `connect` method is automatically called when the client `client` connects to the server, and should handle the logic of the module on the server side. For instance, it can take care of the communication with the client side module by setting up WebSocket message listeners and sending WebSocket messages, or it can add the client to a list to keep track of all the connected clients.
 - `disconnect(client:ServerClient)`  
-  The `disconnect` method is automatically called when the client `client` disconnects from the server, and should do the necessary when that happens. For instance, it can remove the client from the client's list of the connected clients.
+  The `disconnect` method is automatically called when the client `client` disconnects from the server, and should do the necessary when that happens. For instance, it can remove the client from the list of the connected clients.
 
 In practice, here is how you would extend this class to create a module on the server side.
 
@@ -857,11 +859,11 @@ var toplogy = new serverSide.Seatmap({ type: 'matrix', cols: 4, rows: 5 });
 
 #### Sync
 
-The `Sync` module is based on [`sync`](https://github.com/collective-soundworks/sync) and is responsible for synchronizing the clients' clocks and the server clock on a common clock, that we call “sync clock”. That way, the clients and the server can both use this shared clock as their common time reference.
+The `Sync` module is based on [`sync`](https://github.com/collective-soundworks/sync) and is responsible for synchronizing the clients' clocks and the server clock on a common clock called “sync clock”. That way, both the clients and the server can use this shared clock as a common time reference.
 
-For instance, this allows all the clients to do something exactly at the same time, such as displaying a color on the screen or playing a snare sound in a synchronized manner.
+For instance, this allows all the clients to do something exactly at the same time, such as blinking the screen or playing a sound in a synchronized manner.
 
-The `Sync` module does a first synchronization process after which the `ClientSync` calls its `.done()` method. Later on, the `Sync` module keeps resynchronizing the client and server clocks on the sync clock at random intervals to compensate the clock drift.
+The `Sync` module does a first synchronization process after which the `ClientSync` calls its `.done()` method. Afterwards, the `Sync` module keeps running in the background for the rest of the scenario to resynchronize the client and server clocks regularly, to compensate the clock drift.
 
 On the client side, `ClientSync` uses the `audioContext` clock. On the server side, `ServerSync` uses the `process.hrtime()` clock. All times are in seconds (method arguments and returned values). **All time calculations and exchanges should be expressed in the sync clock time.**
 
@@ -878,7 +880,7 @@ The `ClientSync` modules takes care of the synchronization process on the client
     - `color:String = 'black'`  
       The `color` property sets the background color of the view to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library's `sass/_03-colors.scss` file.
 - `getLocalTime(syncTime:Number) : Number`  
-  The `getLocalTime` method returns the time in the client clock when the sync clock reaches `syncTime`. If no arguments are provided, the method returns the time is when the method is called, in the client clock (*i.e.* `audioContext.currentTime`). The returned time is a `Number`, in seconds.
+  The `getLocalTime` method returns the time in the client clock when the sync clock reaches `syncTime`. If no arguments are provided, the method returns the time it is when the method is called, in the client clock (*i.e.* with `audioContext.currentTime`). The returned time is a `Number`, in seconds.
 - `getSyncTime(localTime:Number = audioContext.currentTime) : Number`  
   The `getSyncTime` method returns the time in the sync clock when the client clock reaches `localTime`. If no arguments are provided, the method returns the time it is when the method is called, in the sync clock. The returned time is a `Number`, in seconds.
 
@@ -897,7 +899,7 @@ var nowSync = sync.getSyncTime(); // current time in sync clock time
 ###### Events
 
 - `'sync:stats' : stats:Object`  
-  The `ClientSync` module emits the `'sync:stats'` event each time it resynchronizes the local clock on the sync clock. In particular, the first time this event is fired indicates that the clock is now in sync with the sync clock. The `'sync:stats'` event is associated with the `stats` object, whose properties are:
+  The `ClientSync` module emits the `'sync:stats'` event each time it resynchronizes the local clock on the sync clock. In particular, the first time this event is fired indicates that the clock is now in sync with the sync clock (and we call the `.done()` method). The `'sync:stats'` event is associated with the `stats` object, whose properties are:
   - `timeOffset`  
     The `timeOffset` property contains the average time offset between the client clock and the sync clock, based on the latest ping-pong exchanges.
   - `travelTime`  
@@ -916,7 +918,7 @@ var nowSync = sync.getSyncTime(); // current time in sync clock time
 - `getSyncTime(localTime:Number) : Number`  
   The `getSyncTime` method returns the time in the sync clock when the server clock reaches `localTime`. If no arguments are provided, the method returns the time it is when the method is called, in the sync clock. The returned time is a `Number`, in seconds.
 
-**Note:** in practice, the sync clock used by the [`sync` module](https://github.com/collective-soundworks/sync) is the `process.hrtime()` server clock.
+**Note:** in practice, the sync clock used by [`sync`](https://github.com/collective-soundworks/sync) is the server clock. In *Soundworks*' `Sync` module, it is the the `process.hrtime()` server clock.
 
 Below is an example of the instantiation of the `Sync` module on the server side.
 
@@ -926,8 +928,8 @@ Below is an example of the instantiation of the `Sync` module on the server side
 var serverSide = require('soundworks/server');
 var sync = new serverSide.Sync();
 
-var nowServer = sync.getLocalTime() // current time in the server clock time
-var nowSync = sync.getSyncTime() // current time in the sync clock time
+var nowServer = sync.getLocalTime(); // current time in the server clock time
+var nowSync = sync.getSyncTime(); // current time in the sync clock time
 ```
 
 ## Example
