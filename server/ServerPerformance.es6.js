@@ -42,7 +42,7 @@ class ServerPerformance extends ServerModule {
   }
 
   removePlayer(client) {
-    let index = this.players.indexOf(value);
+    let index = this.players.indexOf(client);
     if (index >= 0)
       this.players.splice(index, 1);
   }

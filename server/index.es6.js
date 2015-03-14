@@ -6,10 +6,11 @@
 
 module.exports = {
   server: require('./server'),
-  Control: require('./ServerControl'),
-  Client: require('./ServerClient'),
-  Module: require('./ServerModule'),
   Checkin: require('./ServerCheckin'),
+  Client: require('./ServerClient'),
+  Control: require('./ServerControl'),
+  Module: require('./ServerModule'),
+  Performance: require('./ServerPerformance'),
   Seatmap: require('./ServerSeatmap'),
-  Sync: require('./ServerSync'),
+  Sync: require('./ServerSync')
 };

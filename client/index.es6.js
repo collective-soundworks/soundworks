@@ -13,6 +13,7 @@ module.exports = {
   Loader: require('./ClientLoader'),
   Module: require('./ClientModule'),
   Orientation: require('./ClientOrientation'),
+  Performance: require('./ClientPerformance'),
   Platform: require('./ClientPlatform'),
   Seatmap: require('./ClientSeatmap'),
   Sync: require('./ClientSync')
