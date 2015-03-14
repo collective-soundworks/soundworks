@@ -122,7 +122,7 @@ You will find [more information on the `ClientModule` base class in the API sect
 
 The `.start()` method is called to start the module. It should handle the logic and the steps that lead to the completion of the module.
 
-For instance, the purpose of the `ClientCheckin` module is to request an available player identifier (index) for a client connected via the player namespace and to setup the client as player. When the module is configured with a predefined `seating` plan, it could automatically request an available seat and display its label to the player (in other configurations the participants could also enter a chosen seat or indicate their approximate position on a map).
+For instance, the purpose of the `ClientCheckin` module is to request an available player identifier (index) for a client connected via the player namespace and to setup the client as player. When the module is configured with a predefined `seating` plan, it could automatically request an available seat label and display it to the player (in other configurations the participants could also enter a chosen seat or indicate their approximate position on a map).
 In detail, the `.start()` method of the module does the following:
 
 - It sends a request to the `ServerCheckin` module via WebSockets, asking the server to send the label of an available seat.
@@ -142,16 +142,16 @@ class ClientCheckin extends ClientModule {
 
     ...
 
-    // request an available seat from the server
+    // request an available player index from the server
     client.send('checkin:request');
 
-    // receive acknowledgement with player index and optional seat description
-    client.receive('checkin:acknowledge, (playerIndex, seatDescription) => {
-      this.playerIndex = playerIndex;
+    // receive acknowledgement with player index and optional label
+    client.receive('checkin:acknowledge, (index, label) => {
+      this.index = index;
       
-      if(seat)     
-        // display the seat description in a dialog
-        this.setCenteredViewContent("<p>Please go to " + seatDescription + " and touch the screen.<p>");
+      if(label)     
+        // display the label in a dialog
+        this.setCenteredViewContent("<p>Please go to " + label + " and touch the screen.<p>");
 
         // call .done() when the participant acknowledges the dialog
         this.view.addEventListener('click', () => this.done());
@@ -161,7 +161,7 @@ class ClientCheckin extends ClientModule {
       }
   }
 
-    // no player index / seat available
+    // no player index available
     client.receive('checkin:unavailable, () => {
       this.setCenteredViewContent("Sorry, we cannot accept more players at the moment, please try again later.");
     });
@@ -198,25 +198,25 @@ connect(client) {
   client.player = {};
 
   client.receive(checkin:request’, () => {
-    var playerIndex = this._getPlayerIndex();
+    var index = this._getPlayerIndex();
 
     if(index >= 0) {
-      client.player.index = playerIndex;
+      client.player.index = index;
 
-      var seatDescription = undefined;
+      var label = undefined;
 
       // retrieve additional player information from setup
-      if(this.setup && this.setup.seats) {
+      if(this.setup) {
         // get player position according to a given seating plan
-        client.player.position = getSeatPosition(this.setup.seats, playerIndex);
+        client.player.position = this.setup.positions[index]);
 
 
         // get a seat label
-        label = getSeatDescription(this.setup.seats, playerIndex);
+        label = this.setup.labels[index].name;
       }
 
       // acknowledge check-in to client
-      client.send(‘checkin:acknowledge’, playerIndex, seatDescription);
+      client.send(‘checkin:acknowledge’, index, label);
     } else {
       // no player indices available
       client.send(checkin:unavailable);
@@ -231,7 +231,7 @@ connect(client) {
 
 Similarly, the `.disconnect(client)` is called whenever the client `client` disconnects from the server. It handles all the actions that are necessary in that case.
 
-In our previous example, where the module keeps track of the connected clients, we would then write the following, where the function `removeFromArray(a, el)` removes the element `el` from the array `a`.
+The `disconnect` method of the `ServerCheckin` module has to release the player index – so that it can be reused by another client that connects to the server – and reset the client’s player data.
 
 ```javascript
 disconnect(client) {
@@ -270,7 +270,7 @@ my-scenario/
 
 For instance:
 
-- The `public/` folder should contain any resource your clients may need to load: for instance, the sounds, the images, the fonts, etc.  
+- The `public/` folder should contain any resource your clients may need to load such as sounds, images, fonts, etc.  
   **Note:** the Javascript and CSS files will be automatically generated with our `gulp` file from the `src/` folder, so you shouldn't have any `javascript/` or `stylesheets/` folder here (they will be deleted by `gulp` anyway).
 - The `src/` folder contains your source code for the server and the different types of clients. Each subfolder (`server/`, `player/`, and any other type of client) should contain an `index.es6.js` file, with the code to be executed for that entity. The `src/` folder also contains the SASS files to generate the CSS in the `sass/` subfolder.
 - The `views/` folder contains a `*.ejs` file for each type of client. In other words, all the subfolders in `src/` — except `server/` and `sass/` — should have their corresponding EJS file.
@@ -409,6 +409,7 @@ The rest of the classes require both the [client **and** server sides](#client-a
 
 - [`Checkin`](#checkin)
 - [`Module`](#module)
+- [`Performance`](#performance)
 - [`Seatmap`](#seatmap)
 - [`Sync`](#sync)
 
@@ -743,8 +744,10 @@ Any module that extends the `ClientModule` class requires the SASS partial `sass
   The `start` method is automatically called to start the module, and should handle the logic of the module on the client side. For instance, it can take care of the communication with the module on the server side by sending WebSocket messages and setting up WebSocket message listeners. If the module has a `view`, the `.start()` method creates the corresponding HTML element and appends it to the DOM's main container `div`.
 - `done()`  
   The `done` method should be called when the module has done its duty (for instance at the end of the `.start()` method you write). You should not have to modify this method, but if you do, don't forget to include `super.done()` at the end. If the module has a `view`, the `.done()` method removes it from the DOM.
-- `setViewText(text:String, ...cssClasses:String) : Element`  
-  When `this.view` exists, the `.setViewText` method creates a `<div class='centered-text'></div>` and appends it to `this.view`. If `text` is specified, the method adds a paragraph element `<p>` to the `div.centered-text`, with the `text` inside. Finally, any `cssClasses` you would specify would be added to that paragraph element. The method returns the `div` with the `centered-text` class.
+- `setCenteredViewContent(htmlContent:String)`  
+  The first time it is called, the `setCenteredViewContent` method creates a `<div class='centered-text'></div>` in a new private attribute `this.__viewContent`, and appends it to `this.view`. Each time the method is called, `htmlContent` is added into `this.__viewContent`. The `.setCenteredViewContent` method should be called only if `this.view` exists.
+- `removeCenteredViewContent()`  
+  If `this.__viewContent` exists, the `removeCenteredViewContent` method removes it from the DOM and deletes this attribute from the module.
 
 In practice, here is an example of how you would extend this class to create a module on the client side.
 
@@ -1148,7 +1151,7 @@ class MyPerformance extends clientSide.Performance {
   ... // the constructor
 
   start() {
-    super.start(); // don't forget this
+    super.start(); // don't forget this (in particular, it sends the 'performance:start' message)
 
     // Play a sound when we receive a WebSocket message from the server
     client.receive('performance:play', () => {
@@ -1157,7 +1160,7 @@ class MyPerformance extends clientSide.Performance {
       bufferSource.connect(audioContext.destination);
       bufferSource.start(audioContext.currentTime);
 
-      this.setViewText('Congratulations, you just played a sound!'); // display some feedback text in the view
+      this.setCenteredViewContent('Congratulations, you just played a sound!'); // display some feedback text in the view
 
       /* We would usually call the .done() method when the module can hand off the control,
        * however since the performance is the last module to be called in this scenario,
@@ -1262,9 +1265,11 @@ class MyPerformance extends serverSide.Performance {
   constructor() {}
 
   connect(client) {
-    super(client); // don't forget this
+    super.connect(client); // don't forget this
 
-    client.send('performance:play'); // send WebSocket message to the client
+    client.receive('performance:start', () => { // when the client joins the performance...
+        client.send('performance:play'); // ... send a WebSocket message instruction to the client
+    });
   }
 }
 
