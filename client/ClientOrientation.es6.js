@@ -25,7 +25,7 @@ class ClientOrientation extends ClientModule {
 
   start() {
     super.start();
-    this.setViewText(this.__text);
+    this.setCenteredViewContent('<p>' + this.__text + '</p>');
 
     this.view.addEventListener('click', () => {
       this.angleReference = this.__angle;

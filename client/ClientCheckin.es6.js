@@ -25,10 +25,12 @@ class ClientCheckin extends ClientModule {
       this.label = info.label;
 
       if (this.view) {
-        textDiv = this.setViewText();
-        textDiv.innerHTML = "<p>Go to position</p>" +
+        htmlContent = "<p>Go to position</p>" +
           "<div class='checkin-label circled'><span>" + this.label + "</span></div>" +
           "<p><small>Touch the screen<br/>when you are ready.</small></p>";
+
+        this.setCenteredViewContent(htmlContent);
+        
         this.view.addEventListener('click', () => {
           this.done();
         });
@@ -38,7 +40,7 @@ class ClientCheckin extends ClientModule {
     });
 
     client.receive('checkin_failed', () => {
-      this.setViewText("All seats are taken, please try again later.");
+      this.setCenteredViewContent("<p>All seats are taken, please try again later.</p>");
     });
   }
 }

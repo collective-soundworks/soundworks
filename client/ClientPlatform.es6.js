@@ -48,7 +48,7 @@ class ClientPlatform extends ClientModule {
     }
 
     if (msg !== null) {
-      this.setViewText(msg);
+      this.setCenteredViewContent('<p>' + msg + '</p>');
     } else {
       this.done();
     }

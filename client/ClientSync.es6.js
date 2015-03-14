@@ -17,7 +17,7 @@ class ClientSync extends ClientModule {
 
     this.sync = new Sync(() => audioContext.currentTime);
 
-    this.setViewText('Clock syncing, stand by…', 'soft-blink');
+    this.setCenteredViewContent('<p class="soft-blink">Clock syncing, stand by…</p>');
   }
 
   start() {
