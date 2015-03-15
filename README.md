@@ -21,6 +21,7 @@
     - [`Checkin`](#checkin)
     - [`Control`](#control)
     - [`Module`](#module)
+    - [`Module`](#performance)
     - [`Seatmap`](#seatmap)
     - [`Sync`](#sync)
 - [**Example**](#example)
@@ -745,9 +746,9 @@ Any module that extends the `ClientModule` class requires the SASS partial `sass
 - `done()`  
   The `done` method should be called when the module has done its duty (for instance at the end of the `.start()` method you write). You should not have to modify this method, but if you do, don't forget to include `super.done()` at the end. If the module has a `view`, the `.done()` method removes it from the DOM.
 - `setCenteredViewContent(htmlContent:String)`  
-  The first time it is called, the `setCenteredViewContent` method creates a `<div class='centered-text'></div>` in a new private attribute `this.__viewContent`, and appends it to `this.view`. Each time the method is called, `htmlContent` is added into `this.__viewContent`. The `.setCenteredViewContent` method should be called only if `this.view` exists.
+  The first time it is called, the `setCenteredViewContent` method creates a `<div class='centered-text'></div>` in a new private attribute `this.__centeredViewContent`, and appends it to `this.view`. Each time the method is called, `htmlContent` is added into `this.__centeredViewContent`. The `.setCenteredViewContent` method should be called only if `this.view` exists.
 - `removeCenteredViewContent()`  
-  If `this.__viewContent` exists, the `removeCenteredViewContent` method removes it from the DOM and deletes this attribute from the module.
+  If `this.__centeredViewContent` exists, the `removeCenteredViewContent` method removes it from the DOM and deletes this attribute from the module.
 
 In practice, here is an example of how you would extend this class to create a module on the client side.
 
@@ -809,6 +810,18 @@ class MyModule extends serverSide.Module {
   }
 }
 ```
+
+#### `Performance`
+
+
+
+##### `ClientPerformance`
+
+
+
+##### `ServerPerformance`
+
+
 
 #### Seatmap
 
