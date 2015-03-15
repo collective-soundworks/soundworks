@@ -21,7 +21,7 @@
     - [`Checkin`](#checkin)
     - [`Control`](#control)
     - [`Module`](#module)
-    - [`Module`](#performance)
+    - [`Performance`](#performance)
     - [`Seatmap`](#seatmap)
     - [`Sync`](#sync)
 - [**Example**](#example)
@@ -823,7 +823,7 @@ class MyModule extends serverSide.Module {
 
 
 
-#### Seatmap
+#### `Seatmap`
 
 The `Seatmap` module contains the information about the physical locations of the available places in the scenario. The location is fixed and determined in advance.
 
@@ -833,7 +833,7 @@ Similarly, if the scenario takes place in a theater where seats are numbered, th
 
 If the placement of the users in the scenario doesn't matter, the `Seatmap` module is not needed.
 
-##### ClientSeatmap
+##### `ClientSeatmap`
 
 The `ClientSeatmap` modules takes care of receiving the seatmap on the client side, and provides helper functions to display the seatmap on screen. The `ClientSeatmap` calls its `.done()` method when it receives the seatmap from the server.
 
@@ -869,7 +869,7 @@ seatmap.displaySeatmap(seatmapGUI);
 seatmap.addClassToTile(seatmapGUI, 3, 'red-highlight');
 ```
 
-##### ServerSeatmap
+##### `ServerSeatmap`
 
 ###### Methods
 
