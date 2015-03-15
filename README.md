@@ -495,7 +495,7 @@ The `ClientDialog` module extends the `ClientModule` base class and displays a f
   - `activateAudio:Boolean = false`  
     When set to `true`, the module activates the Web Audio API when the participant clicks the screen (useful on iOS, where sound is muted until a user action triggers some audio commands).
   - `color:String = 'black'`  
-    The `color` property sets the background color of the view to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library's `sass/_03-colors.scss` file.
+    The `color` property sets the background color of `this.view` to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library's `sass/_03-colors.scss` file.
   - `name:String = 'dialog'`  
     The name of the dialog, that will be used as the `id` HTML attribute of the `this.view` and the associated class.
   - `text:String`  
@@ -538,7 +538,7 @@ The `ClientLoader` module requires the SASS partial `sass/_07-loader.scss`.
   - `options:Object = {}`  
     The optional `options` argument customizes the configuration of the module. Its properties can be:
     - `color:String = 'black'`  
-      The `color` property sets the background color of the view to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library's `sass/_03-colors.scss` file.
+      The `color` property sets the background color of `this.view` to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library's `sass/_03-colors.scss` file.
 
 For instance, the following code:
 
@@ -625,7 +625,7 @@ The `ClientCheckin` module extends the `ClientModule` base class and takes care 
 - `constructor(options:Object = {})`  
   The `constructor` method instantiates the `ClientCheckin` module on the client side. It takes the `options` object as an argument, whose optional properties are:
   - `color:String = 'black'`  
-    The `color` property sets the background color of the view to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library's `sass/_03-colors.scss` file.
+    The `color` property sets the background color of `this.view` to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library's `sass/_03-colors.scss` file.
   - `dialog:Boolean = false`  
     When set to `true`, the module displays a dialog (`this.view`) with the checkin information for the user. The user has to click on the dialog to indicate that the checkin process is `"done"`.
 - `getPlaceInfo() : Object`  
@@ -813,9 +813,9 @@ class MyModule extends serverSide.Module {
 
 #### Performance
 
-The `Performance` module is a base class meant to be extended when you write the performance code of your scenario. It is a regular `Module`, and its particularity is to keep track of the clients who start the performance by maintaining an array `this.players` on the server side.
+The `Performance` module is a base class meant to be extended when you write the performance code of your scenario. It is a regular `Module`, and its particularity is to keep track of the clients who are currently in the performance by maintaining an array `this.players` on the server side.
 
-**Note:** this base class is provided for convenience only, you can also write your performance by extending a `Module` rather than this `Performance` class.
+**Note:** this base class is provided for convenience only. You can also write your performance by extending a regular `Module` rather than extending this class.
 
 ##### ClientPerformance
 
@@ -833,11 +833,11 @@ The `ClientPerformance` module extends the `ClientModule` base class and constit
   - `name:String = 'performance'`  
     The `name` of the `this.view` DOM element, that is used both as an the ID of that element and as a class (cf. [`ClientModule`](#clientmodule) for more information).
   - `color:String = 'black'`  
-    The `color` property sets the background color of the view to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library's `sass/_03-colors.scss` file.
+    The `color` property sets the background color of `this.view` to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library's `sass/_03-colors.scss` file.
 - `start()`  
   The `start` method extends the `ClientModule`'s `start` method and is automatically called to start the performance on the client side. It sends the message `'performance:start'` via WebSockets to the server.
 - `done()`  
-  The `start` method extends the `ClientModule`'s `done` method and is automatically called to when the performance can hand over the control to a subsequent module on the client side. It sends the message `'performance:done'` via WebSockets to the server.
+  The `done` method extends the `ClientModule`'s `done` method and is automatically called to when the performance can hand over the control to a subsequent module on the client side. It sends the message `'performance:done'` via WebSockets to the server.
 
 ##### ServerPerformance
 
@@ -965,7 +965,7 @@ The `ClientSync` module extends the `ClientModule` base class and takes care of 
   - `options:Object = {}`  
     The optional `options` argument customizes the configuration of the module. Its properties can be:
     - `color:String = 'black'`  
-      The `color` property sets the background color of the view to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library's `sass/_03-colors.scss` file.
+      The `color` property sets the background color of `this.view` to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library's `sass/_03-colors.scss` file.
 - `getLocalTime(syncTime:Number) : Number`  
   The `getLocalTime` method returns the time in the client clock when the sync clock reaches `syncTime`. If no arguments are provided, the method returns the time it is when the method is called, in the client clock (*i.e.* with `audioContext.currentTime`). The returned time is a `Number`, in seconds.
 - `getSyncTime(localTime:Number = audioContext.currentTime) : Number`  
