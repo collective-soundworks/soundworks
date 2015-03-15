@@ -43,24 +43,25 @@ class ClientModule extends EventEmitter {
 
   setCenteredViewContent(htmlContent) {
     if (this.view) {
-      if (!this.__viewContentDiv) {
+      if (!this.__centeredViewContent) {
         let contentDiv = document.createElement('div');
 
         contentDiv.classList.add('centered-content');
         this.view.appendChild(contentDiv);
 
-        this.__viewContentDiv = contentDiv;
+        this.__centeredViewContent = contentDiv;
       }
 
       if (htmlContent) {
-        this.__viewContentDiv.innerHTML = htmlContent;
+        this.__centeredViewContent.innerHTML = htmlContent;
       }
     }
   }
 
   removeCenteredViewContent() {
-    if (this.view && this.__viewContentDiv) {
-      this.view.removeChild(this.__viewContentDiv);
+    if (this.view && this.__centeredViewContent) {
+      this.view.removeChild(this.__centeredViewContent);
+      delete this.__centeredViewContent;
     }
   }
 }
