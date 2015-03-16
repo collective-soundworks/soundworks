@@ -301,7 +301,7 @@ var client = clientSide.client;
 client.init('/player');
 
 // Write the performance module
-class MyPerformance extends clientSide.Module {
+class MyPerformance extends clientSide.Performance {
   ...
 }
 
@@ -309,25 +309,25 @@ class MyPerformance extends clientSide.Module {
 window.addEventListener('load', () => {
   // Initialize the modules
   var welcome = new clientSide.Dialog(...);
-  var seatmap = new clientSide.Seatmap(...);
+  var sync = new clientSide.Sync(...);
   var checkin = new clientSide.Checkin(...);
   var performance = new MyPerformance(...);
   
   // Scenario logic
   client.start(
     client.serial(
+      welcome,
       client.parallel(
-        welcome,
-        seatmap
+        checkin,
+        sync
       ),
-      checkin,
       performance
     )
   );
 });
 ```
 
-For another type of client (*e.g* `conductor` or `env`), the file would look the same except that the WebSocket namespace initialization correspond to that type of client (*e.g.* `client.init('/conductor);`, or `client.init('/env');`) and the modules might be different (for instance, one could imagine that the `env` clients only require a `seatmap` and a `performance` module).
+For another type of client (*e.g* `conductor` or `env`), the file would look the same except that the WebSocket namespace initialization correspond to that type of client (*e.g.* `client.init('/conductor);`, or `client.init('/env');`) and the modules might be different (for instance, one could imagine that the `env` clients only require a `sync` and a `performance` module).
 
 #### Server side
 
@@ -346,34 +346,34 @@ var path = require('path');
 var dir = path.join(__dirname, '../../public');
 
 // Write the player and env performance modules
-class MyPlayerPerformance extends serverSide.Module {
+class MyPlayerPerformance extends serverSide.Performance {
   ...
 }
-class MyEnvPerformance extends serverSide.Module {
+class MyEnvPerformance extends serverSide.Performance {
   ...
 }
 
 // Initialize the modules
-var seatmap = new serverSide.Seatmap(...);
 var checkin = new serverSide.Checkin(...);
+var sync = new serverSide.Sync(...);
 var playerPerformance = new MyPlayerPerformance(...);
 var envPerformance = new MyEnvPerformance(...);
 
 // Start the scenario
 server.start(app, dir, 3000);
 // Set up the server modules required by the 'player' clients
-server.map('/player', 'My Scenario', seatmap, checkin, playerPerformance);
+server.map('/player', 'My Scenario', sync, checkin, playerPerformance);
 // Set up the server modules required by the 'env' clients
-server.map('/env', 'My Scenario — Environment', seatmap, envPerformance);
+server.map('/env', 'My Scenario — Environment', sync, envPerformance);
 ```
 
-Indeed, on the client side, the `player` clients use the modules `welcome` (that does not require a communication with the server), `seatmap`, `checkin` and `performance`, so we set up the corresponding server modules and map them to the namespace `/player`. Similarly, say the `/env` clients use the modules `seatmap` and `performance` (which both require communication with the server), so we set up the corresponding server modules and map them to the namespace `/env`.
+Indeed, on the client side, the `player` clients use the modules `welcome` (that does not require a communication with the server), `checkin`, `sync`, and `performance`, so we set up the corresponding server modules and map them to the namespace `/player`. Similarly, say the `/env` clients use the modules `sync` and `performance` (which both require communication with the server), so we set up the corresponding server modules and map them to the namespace `/env`.
 
 #### Styling with SASS
 
 Finally, the `src/sass/` folder would contain all the SASS partials we need for the modules from the library, and include them all in a `clientType.scss` file, where `clientType` can be `player`, `conductor`, `env`, or any other type of client you create. Since the `player` is the default client in any *Soundworks*-based scenario, the `src/sass/` should at least contain the `player.scss` file.
 
-For instance, in our previous example where the client has a `welcome`, `seatmap`, `checkin` and `performance` module, the `player.scss` file could look like this.
+For instance, in our previous example where the client has a `welcome`, `sync`, `checkin` and `performance` module, the `player.scss` file could look like this.
 
 ```sass
 // General styling: these partials should be included in every clientType.scss file
@@ -384,7 +384,6 @@ For instance, in our previous example where the client has a `welcome`, `seatmap
 
 // Module specific partials: check in the documentation which modules have an associated SASS file
 @import '05-checkin';
-@import '08-seatmap';
 
 // Your own partials for the modules you wrote
 @import 'performance'
@@ -409,9 +408,9 @@ Others are only present on the [server side](#server-only-modules):
 The rest of the classes require both the [client **and** server sides](#client-and-server-modules):
 
 - [`Checkin`](#checkin)
+- [`Control`](#control)
 - [`Module`](#module)
 - [`Performance`](#performance)
-- [`Seatmap`](#seatmap)
 - [`Sync`](#sync)
 
 Some modules on the client side are also associated with some styling information. When that is the case, we added in the library's `sass/` folder a `_xx-moduleName.scss` SASS partial: don't forget to include them in your `*.scss` files when you write your scenario. We indicate in the sections below which modules require their corresponding SASS partials.
@@ -678,43 +677,101 @@ var checkin = new serverSide.Checkin({ numPlaces: 500, order: 'ascending' });
 
 #### Control
 
-Blah
+The `Control` module is responsible for controlling some parameters, displaying some information, or sending some commands to the performance in real time through a client that runs in the browser. 
 
 ##### ClientControl
 
-Blah
+The `ClientControl` module extends the `ClientModule` base class and takes care of the parameters, pieces of information, and commands on the client side.
+
+You can use the `ClientControl` module in two different ways.
+- If `option.gui` is set to `true` in the `constructor`, the `ClientControl` module allows to control and monitor the scenario in real time: it displays the interface to control the parameters, display the information and send commands to all the clients who set up a `ClientControl` receiver. For example, this is how the `ClientControl` would be used in a `conductor` client. In that case, the `ClientControl` does not call its `.done()` method since the GUI is displayed during the entire scenario on that type of client.
+- If `option.gui` is set to `false` in the `constructor`, the `ClientControl` module receives all the commands that are sent by the GUI client (*e.g.* the `conductor`). For example, this is how the `ClientControl` module would be used in a `player` client: it would allow to edit the parameters of the performance in real time. In that use case, the `ClientControl` module calls its `.done()` method immediately after it starts.
+
+###### Attributes
+
+- `parameters:Object = {}`  
+   The `parameters` attribute contains all the editable parameters of the scenario. Each key of the `parameters` object corresponds to the `name` property of each parameter. You can access the value of the parameter at any time with `parameters.name.value`.
+- `informations:Object = {}`  
+   The `informations` attribute contains all displayable pieces of information about the scenario.  Each key of the `informations` object corresponds to the `name` property of each piece of information. You can access the value of the piece of information at any time with `information.name.value`.
 
 ###### Methods
 
 - `constructor(options:Object = {})`    
-  The `constructor` method instantiates the `ClientControl` module on the client side. It takes the `options` object as an argument, whose supported property is:
+  The `constructor` method instantiates the `ClientControl` module on the client side. It takes the `options` object as an argument, whose supported properties are:
+ - `color:String = 'black'`  
+    The `color` property sets the background color of `this.view` to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library's `sass/_03-colors.scss` file. (This option should only be specified only `options.gui = true`, *i.e.* if the `ClientControl` has a `view`.)
   - `gui:Boolean = false`  
-    When set to `true` , the `gui` property makes the ClientControl display the Graphical User Interface (GUI) on the screen of the client. The GUI allows to edit the controls.
+    When set to `true` , the `gui` property makes the ClientControl create `this.view` to display a Graphical User Interface (GUI) on the screen of the client. The GUI allows to edit the controls.
+
+###### Events
+
+- `'control:parameter' : name:String, val:*`  
+  The `ClientControl` module emits the `'control:parameter'` event each time a parameter is updated. The `'control:parameter'` event is associated with two arguments:
+  - `name:String`  
+    The `name` argument indicates the name of the parameter that changed.
+  - `val:*`  
+    The `val` argument indicates the new value of that parameter.
+- `'control:information' : name:String, val:*`  
+  The `ClientControl` module emits the `'control:information'` event each time an information is updated. The `'control:information'` event is associated with two arguments:
+  - `name:String`  
+    The `name` argument indicates the name of the information that changed.
+  - `val:*`  
+    The `val` argument indicates the new value of that information.
 
 ##### ServerControl
 
-Blah
+The `ServerControl` module extends the `ServerModule` base class and takes care of the parameters, pieces of information, and commands on the server side. To set up controls in a scenario, you should extend this class on the server side and add the controls specific to that scenario with the `addParameterNumber`, `addParameterSelect`, `addCommand`, and `addDisplay methods.
 
 ###### Attributes
-
-- 
 
 ###### Methods
 
 - `constructor()`  
-  
+  The `constructor` method instantiates the `ServerControl` module on the server side.
 - `addParameterNumber(name:String, label:String, min:Number, max:Number, step:Number, init:Number)`  
-  
-- `addParameterSelect(name:String, label:String, options:Object, init:)`  
-  
-- `addCommand(name:, label:, fun:)`  
-  
-- `addDisplay(name:, label:, init:)`  
-  
-- `setParameter(name:, value:)`  
-  
-- `setDisplay(name:, value:)`  
-  
+  The `addParameterNumber` method allows to add a number control parameter. Its arguments are:
+  - `name:String`  
+    The `name` argument determines name of the parameter. The name should be unique across all parameters since this is what is sent to the client to identify the parameter when there is a change.
+  - `label:String`  
+    The `label` argument determines the label of the parameter in the GUI on the client side.
+  - `min:Number`  
+    The `min` argument determines the minimum value of the parameter.
+  - `max:Number`  
+    The `max` argument determines the maximum value of the parameter.
+  - `step:Number`  
+    The `step` argument determines the step to increase or decrease the value of the parameter using the buttons of the GUI.
+  - `init:Number`  
+    The `init` argument determines the initial value of the parameter.
+- `addParameterSelect(name:String, label:String, options:Array, init:String)`  
+  The `addParameterSelect` method allows to add a select control parameter. In the GUI on the client side, the select parameter displays a select form with the options `options`. Its arguments are:
+  - `name:String`  
+    The `name` argument determines name of the parameter. The name should be unique across all parameters since this is what is sent to the client to identify the parameter when there is a change.
+  - `label:String`  
+    The `label` argument determines the label of the parameter in the GUI on the client side.
+  - `options:Array`  
+    The `options` argument determines the possible options of the select parameter. These are the options among which the user can choose from in the GUI on the client side. It should contains `String` values only.
+  - `init:String`  
+    The `init` argument determines the initial value of the parameter. The value of `init` should be present in the `options` array.
+- `addCommand(name:String, label:String, fun:Function)`  
+  The `addCommand` method allows to add a command. Its arguments are:
+  - `name:String`  
+    The `name` argument determines name of the command. The name should be unique across all commands since this is what is sent to the client to identify the command when it is called.
+  - `label:String`  
+    The `label` argument determines the label of the command in the GUI on the client side.
+  - `fun:Function`  
+    The `fun` argument determine the function to be executed when the command is called.
+- `addInformation(name:String, label:String, init:*)`  
+   The `addInformation` method allows to add an information to be displayed on the client side. Its arguments are:
+  - `name:String`  
+    The `name` argument determines name of the information to display. The name should be unique across all pieces of information since this is what is sent to the client to identify the piece of information when there is a change.
+  - `label:String`  
+    The `label` argument determines the label of the information in the GUI on the client side.
+  - `init:*`  
+    The `init` argument determines the initial value of the information to display. It is usually a `Number` or a `String`.
+- `setParameter(name:String, value:*)`  
+  The `setParameter` method allows set the value of the parameter `name` to `value`. The argument `value` is either a `Number` or a `String` depending on the type of the parameter you are updating.
+- `setInformation(name:String, value:*)`  
+  The `setInformation` method allows set the value of the information `name` to `value`. The argument `value` is usually either a `Number` or a `String`.
 
 #### Module
 
