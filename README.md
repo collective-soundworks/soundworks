@@ -116,21 +116,25 @@ After this initialization, the `sync`, `checkin` and `performance` modules of a 
 
 #### Client side
 
-On the client side, a module extends the `ClientModule` base class. The module has to implement a `.start()` method and has to call its `.done()` method to hand over the control to the next module. Most modules would call their `.done()` method when their process is complete. For instance, if the purpose of the module is to load files, the module should call the method `.done()` when the files are loaded. However, some modules continue processing in the background afterwards. For example, this is the case of the `sync` module that calls its `.done()` method after the very first synchronization with the server is done, but that also continues to run in the background afterwards to keep re-synchronizing the clocks regularly during the rest of the scenario.
+On the client side, a module extends the `ClientModule` base class. The module has to implement a `.start()` method and has to call its `.done()` method to hand over the control to the next module.
+
+Most modules would call their `.done()` method when their process is complete. For instance, if the purpose of a module is to load files, the module would call its `.done()` method when the files are loaded.
+
+However, some modules continue processing in the background even after calling that method. This is for example the case of the `sync` module: it calls its `.done()` method after the client clock is synchronized with the sync clock for the the very first time, and keeps running in the background afterwards to re-synchronize the clocks regularly during the rest of the scenario.
 
 You will find [more information on the `ClientModule` base class in the API section](#clientmodule).
 ##### The `.start()` method
 
 The `.start()` method is called to start the module. It should handle the logic and the steps that lead to the completion of the module.
 
-For instance, the purpose of the `ClientCheckin` module is to request an available player identifier (index) for a client connected via the player namespace and to setup the client as player. When the module is configured with a predefined `seating` plan, it could automatically request an available seat label and display it to the player (in other configurations the participants could also enter a chosen seat or indicate their approximate position on a map).
-In detail, the `.start()` method of the module does the following:
+For instance, the purpose of the `ClientCheckin` module is the following: each time a client connects to the server via the `'/player'` namespace, the module assigns an available player identifier (`index`) and sets up the client as `player`. When the module is configured with a predefined `seating` plan, it could automatically request an available seat and display the seat `label` to the player. In other configurations, the participants could also enter their chosen seat, or indicate their approximate position on a map).
 
+In detail, the `.start()` method of the module does the following:
 - It sends a request to the `ServerCheckin` module via WebSockets, asking the server to send the label of an available seat.
-- When it receives the response from the server, it displays the label on the screen (e.g. “Please go to C5 and touch the screen.”) and waits for the participant’s acknowledgement.
+- When it receives the response from the server, it displays the label on the screen (*e.g.* “Please go to seat C5 and touch the screen.”) and waits for the participant’s acknowledgement.
 - When the participant touches the screen, the client module calls the method `.done()`. In many scenarios, this would hand over the control to the performance module.
 
-A slightly simplified version of the `ClientCheckin` module looks like the following:
+Hence, a slightly simplified version of the `ClientCheckin` module looks like the following:
 
 ```javascript
 var client = require('./client');
@@ -147,12 +151,12 @@ class ClientCheckin extends ClientModule {
     client.send('checkin:request');
 
     // receive acknowledgement with player index and optional label
-    client.receive('checkin:acknowledge, (index, label) => {
+    client.receive('checkin:acknowledge', (index, label) => {
       this.index = index;
       
       if(label)     
         // display the label in a dialog
-        this.setCenteredViewContent("<p>Please go to " + label + " and touch the screen.<p>");
+        this.setCenteredViewContent("<p>Please go to seat " + label + " and touch the screen.<p>");
 
         // call .done() when the participant acknowledges the dialog
         this.view.addEventListener('click', () => this.done());
@@ -684,8 +688,8 @@ The `Control` module is responsible for controlling some parameters, displaying 
 The `ClientControl` module extends the `ClientModule` base class and takes care of the parameters, pieces of information, and commands on the client side.
 
 You can use the `ClientControl` module in two different ways.
-- If `option.gui` is set to `true` in the `constructor`, the `ClientControl` module allows to control and monitor the scenario in real time: it displays the interface to control the parameters, display the information and send commands to all the clients who set up a `ClientControl` receiver. For example, this is how the `ClientControl` would be used in a `conductor` client. In that case, the `ClientControl` does not call its `.done()` method since the GUI is displayed during the entire scenario on that type of client.
-- If `option.gui` is set to `false` in the `constructor`, the `ClientControl` module receives all the commands that are sent by the GUI client (*e.g.* the `conductor`). For example, this is how the `ClientControl` module would be used in a `player` client: it would allow to edit the parameters of the performance in real time. In that use case, the `ClientControl` module calls its `.done()` method immediately after it starts.
+- If `option.gui` is set to `true` (in the `constructor`), the `ClientControl` module allows to control and monitor the scenario in real time: it displays the interface to control the parameters, display the information and send commands to all the clients who set up a `ClientControl` receiver. For example, this is how the `ClientControl` would be used in a `conductor` client. In that case, the `ClientControl` does not call its `.done()` method since the GUI is displayed during the entire scenario on that type of client.
+- If `option.gui` is set to `false` (in the `constructor`), the `ClientControl` module receives all the commands that are sent by the GUI client (*e.g.* the `conductor`). For example, this is how the `ClientControl` module would be used in a `player` client: it would allow to edit the parameters of the performance in real time. In that use case, the `ClientControl` module calls its `.done()` method immediately after it starts.
 
 ###### Attributes
 
