@@ -50,7 +50,7 @@ A scenario built with *Soundworks* consists in a succession and combination of m
 
 As an example, a scenario could provide the following interactions when a `player` connects to the server through the root URL:
 
-- The player’s smartphone displays a `welcome` message (*e.g.* “Welcome to the performance!”). When the player clicks on the screen… 
+- The player's smartphone displays a `welcome` message (*e.g.* “Welcome to the performance!”). When the player clicks on the screen… 
 - … the player receives some `checkin` instructions while in the meantime, the smartphone has to `sync` its clock with the server. Finally, when these are done… 
 - … the player joins the `performance`.
 
@@ -132,12 +132,14 @@ For instance, the purpose of the `ClientCheckin` module is the following: each t
 In detail, the `.start()` method of the module does the following:
 
 - It sends a request to the `ServerCheckin` module via WebSockets, asking the server to send the label of an available seat.
-- When it receives the response from the server, it displays the label on the screen (*e.g.* “Please go to seat C5 and touch the screen.”) and waits for the participant’s acknowledgement.
+- When it receives the response from the server, it displays the label on the screen (*e.g.* “Please go to seat C5 and touch the screen.”) and waits for the participant's acknowledgement.
 - When the participant touches the screen, the client module calls the method `.done()` to hand over the control to a subsequent module (in many scenarios, the `performance` itself).
 
 Hence, a slightly simplified version of the `ClientCheckin` module would look like the following:
 
 ```javascript
+/* Client side */
+
 var client = require('./client');
 
 class ClientCheckin extends ClientModule {
@@ -189,44 +191,47 @@ You will find [more information on the `ServerModule` base class in the API sect
 
 ##### The `.connect(client:ServerClient)` method
 
-When a client `client` connects to the server via a namespace, all the modules mapped to that namespace call their `.connect(client)` methods (for more information on mapping, cf. the `map` function of [the `server` object](#server-side-the-server-object) in the API section). In the `connect` method, the module should be ready to receive WebSocket messages to serve incoming requests from the corresponding client side module.
+When a client `client` connects to the server via a namespace, all the modules mapped to that namespace call their `.connect(client)` methods (for more information on mapping, cf. the `map` function of [the `server` object](#server-side-the-server-object) in the API section). In the `connect` method, the module should set up WebSocket messages listeners, in order to serve incoming requests from the corresponding client side module.
 
 The server side of the simplified `Checkin` module described above looks as follows:
 
 ```javascript
-connect(client) {
-  ...
+/* Server side */
 
-  // setup client as player
-  client.player = {};
+var serverSide = require('soundworks/server');
 
-  client.receive(checkin:request’, () => {
-    var index = this._getPlayerIndex();
+class ServerCheckin extends serverSide.Module {
+  ... // the constructor, that may set up the 'this.setup' attribute
 
-    if(index >= 0) {
-      client.player.index = index;
+  connect(client) {
+    // setup client as player
+    client.player = {};
 
-      var label = undefined;
+    // listen for incoming WebSocket messages from the client side
+    client.receive('checkin:request', () => {
+      let index = this._getPlayerIndex();
 
-      // retrieve additional player information from setup
-      if(this.setup) {
-        // get player position according to a given seating plan
-        client.player.position = this.setup.positions[index]);
+      if (index >= 0) {
+        client.player.index = index;
 
+        // retrieve additional player information from 'this.setup'
+        if (this.setup) {
+          // get player position according to a given seating plan
+          client.player.position = this.setup.positions[index]);
 
-        // get a seat label
-        label = this.setup.labels[index].name;
+          // get a seat label
+          let label = this.setup.labels[index].name;
+        }
+
+        // acknowledge check-in to client
+        client.send('checkin:acknowledge', index, label);
+      } else {
+        // no player indices available
+        client.send(checkin:unavailable);
       }
+    });
 
-      // acknowledge check-in to client
-      client.send(‘checkin:acknowledge’, index, label);
-    } else {
-      // no player indices available
-      client.send(checkin:unavailable);
-    }
-  });
-
-  ...
+  ... // the rest of the module (e.g. the '_getPlayerIndex', '_releasePlayerIndex' and 'disconnect' methods)
 }
 ```
 
@@ -234,7 +239,7 @@ connect(client) {
 
 Similarly, the `.disconnect(client)` is called whenever the client `client` disconnects from the server. It handles all the actions that are necessary in that case.
 
-The `disconnect` method of the `ServerCheckin` module has to release the player index – so that it can be reused by another client that connects to the server – and reset the client’s player data.
+In our simplified `ServerCheckin` module example, the `disconnect` method has to release the player index — so that it can be reused by another client that connects to the server — and reset the client's player data.
 
 ```javascript
 disconnect(client) {
