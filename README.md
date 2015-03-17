@@ -173,6 +173,8 @@ class ClientCheckin extends ClientModule {
     });
   }
 
+  ... // the rest of the module
+
 }
 ```
 
@@ -227,7 +229,7 @@ class ServerCheckin extends serverSide.Module {
         client.send('checkin:acknowledge', index, label);
       } else {
         // no player indices available
-        client.send(checkin:unavailable);
+        client.send('checkin:unavailable');
       }
     });
 
@@ -288,10 +290,14 @@ To compile the files, just run the command `gulp` in the Terminal: it will gener
 A scenario should contain at least a `src/server/`, `src/player/` and `src/sass/` folder.
 
 - The `src/server/` folder contains all the Javascript files that compose the server.
-- The `src/player/` folder contains all the files that compose the default client, which we name `player`. (Any client connecting to the server through the root URL `http://my.server.address:port` would be a `player`, and belongs to the namespace `'/player'`.)
+- The `src/player/` folder contains all the files that compose the default client, which we name `player`. (Any client connecting to the server through the root URL `http://my.server.address:port/` would be a `player`, and belongs to the namespace `'/player'`.)
 - Finally, the `src/sass/` folder contains the SASS files to generate the CSS.
 
-You can add any other type of client (let's name it generically `clientType`). For that, you should create a subfolder `src/clientType/` (*e.g.* `src/conductor/` or `src/env/`) and write an `index.es6.js` file inside. This type of client would join the corresponding namespace `'/clientType'` (*e.g.* `'/conductor'` or `'/env'`) — for this, add the line `client.init('/clientType');` in the `index.es6.js` file (*e.g.* `client.init('/conductor');` or `client.init('/env');`) — and be accessed through the URL `http://my.server.address:port/clientType` (*e.g.* `http://my.server.address:port/conductor` or `http://my.server.address:port/env`).
+You can add any other type of client (let's name it generically `clientType`). For that:
+
+- You should create a subfolder `src/clientType/` (*e.g.* `src/conductor/` or `src/env/`) and write an `index.es6.js` file inside.
+- This type of client would join the corresponding namespace `'/clientType'` (*e.g.* `'/conductor'` or `'/env'`) — for this, add the line `client.init('/clientType');` in the `index.es6.js` file (*e.g.* `client.init('/conductor');` or `client.init('/env');`).
+- This type of client would connect to the server through the URL `http://my.server.address:port/clientType` (*e.g.* `http://my.server.address:port/conductor` or `http://my.server.address:port/env`).
 
 #### Client side
 
