@@ -130,22 +130,21 @@ The `.start()` method is called to start the module. It should handle the logic 
 For instance, the purpose of the `ClientCheckin` module is the following: each time a client connects to the server via the `'/player'` namespace, the module assigns an available player identifier (`index`) and sets up the client as `player`. When the module is configured with a predefined `seating` plan, it could automatically request an available seat and display the seat `label` to the player. In other configurations, the participants could also enter their chosen seat, or indicate their approximate position on a map).
 
 In detail, the `.start()` method of the module does the following:
+
 - It sends a request to the `ServerCheckin` module via WebSockets, asking the server to send the label of an available seat.
 - When it receives the response from the server, it displays the label on the screen (*e.g.* “Please go to seat C5 and touch the screen.”) and waits for the participant’s acknowledgement.
-- When the participant touches the screen, the client module calls the method `.done()`. In many scenarios, this would hand over the control to the performance module.
+- When the participant touches the screen, the client module calls the method `.done()` to hand over the control to a subsequent module (in many scenarios, the `performance` itself).
 
-Hence, a slightly simplified version of the `ClientCheckin` module looks like the following:
+Hence, a slightly simplified version of the `ClientCheckin` module would look like the following:
 
 ```javascript
 var client = require('./client');
 
 class ClientCheckin extends ClientModule {
-  ...
+  ... // the constructor
 
   start() {
     super.start(); // don't forget this line!
-
-    ...
 
     // request an available player index from the server
     client.send('checkin:request');
@@ -154,7 +153,7 @@ class ClientCheckin extends ClientModule {
     client.receive('checkin:acknowledge', (index, label) => {
       this.index = index;
       
-      if(label)     
+      if (label) {
         // display the label in a dialog
         this.setCenteredViewContent("<p>Please go to seat " + label + " and touch the screen.<p>");
 
@@ -164,34 +163,33 @@ class ClientCheckin extends ClientModule {
         // check-in without further dialog
         this.done();
       }
-  }
+    }
 
     // no player index available
-    client.receive('checkin:unavailable, () => {
-      this.setCenteredViewContent("Sorry, we cannot accept more players at the moment, please try again later.");
+    client.receive('checkin:unavailable', () => {
+      this.setCenteredViewContent("<p>Sorry, we cannot accept more players at the moment, please try again later.</p>");
     });
   }
 
-  ...
 }
 ```
 
-Note, that this method must include the inherited method from the base class (`super.start();`) before anything else.
+Note, that the `start` method must include the inherited method from the base class (`super.start();`) before anything else.
 
 ##### The `.done()` method
 
-The `.done()` method implemented by the `ClientModule` base class is called by the derived client module to hand over control to the next module. As an exception, a performance module may not call the method and keep the control until the client disconnects from the server. A derived client module must not override the `.done()` method provided by the base class.
+The `.done()` method implemented by the `ClientModule` base class is called by the derived client module to hand over control to the next module. As an exception, the last module of the scenario (usually the `performance` module) may not call that method and keep the control until the client disconnects from the server. A derived client module must not override the `.done()` method provided by the base class.
 
 #### Server side
 
 On the server side, a module extends the `ServerModule` base class and must have a `.connect(client:ServerClient)` method and a `.disconnect(client:ServerClient)` method.
-While the sequence of user interactions and exchanges between client and server is determined on the client side, the server side modules are ready to receive requests from the corresponding client side modules as soon as a client has been connected.
+While the sequence of user interactions and exchanges between client and server is determined on the client side, the server side modules are ready to receive requests from the corresponding client side modules as soon as a client is connected to the server.
 
 You will find [more information on the `ServerModule` base class in the API section](#servermodule).
 
 ##### The `.connect(client:ServerClient)` method
 
-The `.connect(client)` is called on a server module mapped to a particular namespace as soon as a `client` connects to the server via this namespace. In the `.connect()` method, the module should set up the listeners of the WebSocket messages that are sent after starting the corresponding client side module to serve incoming requests.
+When a client `client` connects to the server via a namespace, all the modules mapped to that namespace call their `.connect(client)` methods (for more information on mapping, cf. the `map` function of [the `server` object](#server-side-the-server-object) in the API section). In the `connect` method, the module should be ready to receive WebSocket messages to serve incoming requests from the corresponding client side module.
 
 The server side of the simplified `Checkin` module described above looks as follows:
 
