@@ -301,7 +301,7 @@ var client = clientSide.client;
 client.init('/player');
 
 // Write the performance module
-class MyPerformance extends clientSide.Module {
+class MyPerformance extends clientSide.Performance {
   ...
 }
 
@@ -309,25 +309,25 @@ class MyPerformance extends clientSide.Module {
 window.addEventListener('load', () => {
   // Initialize the modules
   var welcome = new clientSide.Dialog(...);
-  var seatmap = new clientSide.Seatmap(...);
+  var sync = new clientSide.Sync(...);
   var checkin = new clientSide.Checkin(...);
   var performance = new MyPerformance(...);
   
   // Scenario logic
   client.start(
     client.serial(
+      welcome,
       client.parallel(
-        welcome,
-        seatmap
+        checkin,
+        sync
       ),
-      checkin,
       performance
     )
   );
 });
 ```
 
-For another type of client (*e.g* `conductor` or `env`), the file would look the same except that the WebSocket namespace initialization correspond to that type of client (*e.g.* `client.init('/conductor);`, or `client.init('/env');`) and the modules might be different (for instance, one could imagine that the `env` clients only require a `seatmap` and a `performance` module).
+For another type of client (*e.g* `conductor` or `env`), the file would look the same except that the WebSocket namespace initialization correspond to that type of client (*e.g.* `client.init('/conductor);`, or `client.init('/env');`) and the modules might be different (for instance, one could imagine that the `env` clients only require a `sync` and a `performance` module).
 
 #### Server side
 
@@ -346,34 +346,34 @@ var path = require('path');
 var dir = path.join(__dirname, '../../public');
 
 // Write the player and env performance modules
-class MyPlayerPerformance extends serverSide.Module {
+class MyPlayerPerformance extends serverSide.Performance {
   ...
 }
-class MyEnvPerformance extends serverSide.Module {
+class MyEnvPerformance extends serverSide.Performance {
   ...
 }
 
 // Initialize the modules
-var seatmap = new serverSide.Seatmap(...);
 var checkin = new serverSide.Checkin(...);
+var sync = new serverSide.Sync(...);
 var playerPerformance = new MyPlayerPerformance(...);
 var envPerformance = new MyEnvPerformance(...);
 
 // Start the scenario
 server.start(app, dir, 3000);
 // Set up the server modules required by the 'player' clients
-server.map('/player', 'My Scenario', seatmap, checkin, playerPerformance);
+server.map('/player', 'My Scenario', sync, checkin, playerPerformance);
 // Set up the server modules required by the 'env' clients
-server.map('/env', 'My Scenario — Environment', seatmap, envPerformance);
+server.map('/env', 'My Scenario — Environment', sync, envPerformance);
 ```
 
-Indeed, on the client side, the `player` clients use the modules `welcome` (that does not require a communication with the server), `seatmap`, `checkin` and `performance`, so we set up the corresponding server modules and map them to the namespace `/player`. Similarly, say the `/env` clients use the modules `seatmap` and `performance` (which both require communication with the server), so we set up the corresponding server modules and map them to the namespace `/env`.
+Indeed, on the client side, the `player` clients use the modules `welcome` (that does not require a communication with the server), `checkin`, `sync`, and `performance`, so we set up the corresponding server modules and map them to the namespace `/player`. Similarly, say the `/env` clients use the modules `sync` and `performance` (which both require communication with the server), so we set up the corresponding server modules and map them to the namespace `/env`.
 
 #### Styling with SASS
 
 Finally, the `src/sass/` folder would contain all the SASS partials we need for the modules from the library, and include them all in a `clientType.scss` file, where `clientType` can be `player`, `conductor`, `env`, or any other type of client you create. Since the `player` is the default client in any *Soundworks*-based scenario, the `src/sass/` should at least contain the `player.scss` file.
 
-For instance, in our previous example where the client has a `welcome`, `seatmap`, `checkin` and `performance` module, the `player.scss` file could look like this.
+For instance, in our previous example where the client has a `welcome`, `sync`, `checkin` and `performance` module, the `player.scss` file could look like this.
 
 ```sass
 // General styling: these partials should be included in every clientType.scss file
@@ -384,7 +384,6 @@ For instance, in our previous example where the client has a `welcome`, `seatmap
 
 // Module specific partials: check in the documentation which modules have an associated SASS file
 @import '05-checkin';
-@import '08-seatmap';
 
 // Your own partials for the modules you wrote
 @import 'performance'
@@ -409,9 +408,9 @@ Others are only present on the [server side](#server-only-modules):
 The rest of the classes require both the [client **and** server sides](#client-and-server-modules):
 
 - [`Checkin`](#checkin)
+- [`Control`](#control)
 - [`Module`](#module)
 - [`Performance`](#performance)
-- [`Seatmap`](#seatmap)
 - [`Sync`](#sync)
 
 Some modules on the client side are also associated with some styling information. When that is the case, we added in the library's `sass/` folder a `_xx-moduleName.scss` SASS partial: don't forget to include them in your `*.scss` files when you write your scenario. We indicate in the sections below which modules require their corresponding SASS partials.
@@ -481,7 +480,7 @@ The `server` object has the following attributes, which we split into two groups
 
 #### ClientDialog
 
-The `ClientDialog` module displays a full screen dialog, and requires the participant to tap the screen to make the `view` disappear. In particular, this can be used at the very beginning of a scenario to activate the Web Audio API on iOS devices (where sound is muted until a user action triggers some audio commands) thanks to the option `activateWebAudio = true`. The `ClientDialog` module calls its `.done()` method when the participant taps on the screen.
+The `ClientDialog` module extends the `ClientModule` base class and displays a full screen dialog, and requires the participant to tap the screen to make the `view` disappear. In particular, this can be used at the very beginning of a scenario to activate the Web Audio API on iOS devices (where sound is muted until a user action triggers some audio commands) thanks to the option `activateWebAudio = true`. The `ClientDialog` module calls its `.done()` method when the participant taps on the screen.
 
 ###### Attributes
 
@@ -495,7 +494,7 @@ The `ClientDialog` module displays a full screen dialog, and requires the partic
   - `activateAudio:Boolean = false`  
     When set to `true`, the module activates the Web Audio API when the participant clicks the screen (useful on iOS, where sound is muted until a user action triggers some audio commands).
   - `color:String = 'black'`  
-    The `color` property sets the background color of the view to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library's `sass/_03-colors.scss` file.
+    The `color` property sets the background color of `this.view` to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library's `sass/_03-colors.scss` file.
   - `name:String = 'dialog'`  
     The name of the dialog, that will be used as the `id` HTML attribute of the `this.view` and the associated class.
   - `text:String`  
@@ -520,7 +519,7 @@ would generate the following `view` (appended to the main container `div`) when 
 
 #### ClientLoader
 
-The `ClientLoader` module allows to load audio files that can be used in the scenario (for instance, by the `performance` module). The `Loader` module has a `view` that displays a loading bar indicating the progress of the loading. The `ClientLoader` module calls its `.done()` method when all the files are loaded.
+The `ClientLoader` module extends the `ClientModule` base class and allows to load audio files that can be used in the scenario (for instance, by the `performance` module). The `Loader` module has a `view` that displays a loading bar indicating the progress of the loading. The `ClientLoader` module calls its `.done()` method when all the files are loaded.
 
 The `ClientLoader` module requires the SASS partial `sass/_07-loader.scss`.
 
@@ -538,7 +537,7 @@ The `ClientLoader` module requires the SASS partial `sass/_07-loader.scss`.
   - `options:Object = {}`  
     The optional `options` argument customizes the configuration of the module. Its properties can be:
     - `color:String = 'black'`  
-      The `color` property sets the background color of the view to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library's `sass/_03-colors.scss` file.
+      The `color` property sets the background color of `this.view` to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library's `sass/_03-colors.scss` file.
 
 For instance, the following code:
 
@@ -555,7 +554,7 @@ var snareBuffer = loader.audioBuffers[1];
 
 #### ClientOrientation
 
-The `ClientOrientation` module allows to calibrate the compass and get an angle reference. It displays a `view` with some instruction text: when the user points at the right direction for the calibration, tapping on the screen of the phone (*i.e.* on the `view`) would set the current compass value as the angle reference. The `ClientOrientation` module calls its `.done()` method when the participant taps on the `view` (*i.e.* on the screen).
+The `ClientOrientation` module extends the `ClientModule` base class and allows to calibrate the compass and get an angle reference. It displays a `view` with some instruction text: when the user points at the right direction for the calibration, tapping on the screen of the phone (*i.e.* on the `view`) would set the current compass value as the angle reference. The `ClientOrientation` module calls its `.done()` method when the participant taps on the `view` (*i.e.* on the screen).
 
 ###### Attributes
 
@@ -618,14 +617,14 @@ The `ClientCheckin` module requires the SASS partial `sass/_05-checkin.scss`.
 
 ##### ClientCheckin
 
-The `ClientCheckin` module takes care of the check in on the client side. The `ClientCheckin` module calls its `.done()` method when the user is checked in.
+The `ClientCheckin` module extends the `ClientModule` base class and takes care of the check in on the client side. The `ClientCheckin` module calls its `.done()` method when the user is checked in.
 
 ###### Methods
 
 - `constructor(options:Object = {})`  
   The `constructor` method instantiates the `ClientCheckin` module on the client side. It takes the `options` object as an argument, whose optional properties are:
   - `color:String = 'black'`  
-    The `color` property sets the background color of the view to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library's `sass/_03-colors.scss` file.
+    The `color` property sets the background color of `this.view` to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library's `sass/_03-colors.scss` file.
   - `dialog:Boolean = false`  
     When set to `true`, the module displays a dialog (`this.view`) with the checkin information for the user. The user has to click on the dialog to indicate that the checkin process is `"done"`.
 - `getPlaceInfo() : Object`  
@@ -646,7 +645,7 @@ var checkin = new clientSide.Checkin({ display: true });
 
 ##### ServerCheckin
 
-The `ServerCheckin` takes care of the checkin on the server side.
+The `ServerCheckin` extends the `ServerModule` base class and takes care of the checkin on the server side.
 
 - `constructor(options:Object = {})`  
   The `constructor` method instantiates the `ServerCheckin` module on the server side. It takes the `options` object as an argument, **that must have either a `seatmap` or a `numPlaces` property: these options are mutually exclusive, but one of them is required**. The properties supported by `options` are:
@@ -678,43 +677,101 @@ var checkin = new serverSide.Checkin({ numPlaces: 500, order: 'ascending' });
 
 #### Control
 
-Blah
+The `Control` module is responsible for controlling some parameters, displaying some information, or sending some commands to the performance in real time through a client that runs in the browser. 
 
 ##### ClientControl
 
-Blah
+The `ClientControl` module extends the `ClientModule` base class and takes care of the parameters, pieces of information, and commands on the client side.
+
+You can use the `ClientControl` module in two different ways.
+- If `option.gui` is set to `true` in the `constructor`, the `ClientControl` module allows to control and monitor the scenario in real time: it displays the interface to control the parameters, display the information and send commands to all the clients who set up a `ClientControl` receiver. For example, this is how the `ClientControl` would be used in a `conductor` client. In that case, the `ClientControl` does not call its `.done()` method since the GUI is displayed during the entire scenario on that type of client.
+- If `option.gui` is set to `false` in the `constructor`, the `ClientControl` module receives all the commands that are sent by the GUI client (*e.g.* the `conductor`). For example, this is how the `ClientControl` module would be used in a `player` client: it would allow to edit the parameters of the performance in real time. In that use case, the `ClientControl` module calls its `.done()` method immediately after it starts.
+
+###### Attributes
+
+- `parameters:Object = {}`  
+   The `parameters` attribute contains all the editable parameters of the scenario. Each key of the `parameters` object corresponds to the `name` property of each parameter. You can access the value of the parameter at any time with `parameters.name.value`.
+- `informations:Object = {}`  
+   The `informations` attribute contains all displayable pieces of information about the scenario.  Each key of the `informations` object corresponds to the `name` property of each piece of information. You can access the value of the piece of information at any time with `information.name.value`.
 
 ###### Methods
 
 - `constructor(options:Object = {})`    
-  The `constructor` method instantiates the `ClientControl` module on the client side. It takes the `options` object as an argument, whose supported property is:
+  The `constructor` method instantiates the `ClientControl` module on the client side. It takes the `options` object as an argument, whose supported properties are:
+ - `color:String = 'black'`  
+    The `color` property sets the background color of `this.view` to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library's `sass/_03-colors.scss` file. (This option should only be specified only `options.gui = true`, *i.e.* if the `ClientControl` has a `view`.)
   - `gui:Boolean = false`  
-    When set to `true` , the `gui` property makes the ClientControl display the Graphical User Interface (GUI) on the screen of the client. The GUI allows to edit the controls.
+    When set to `true` , the `gui` property makes the ClientControl create `this.view` to display a Graphical User Interface (GUI) on the screen of the client. The GUI allows to edit the controls.
+
+###### Events
+
+- `'control:parameter' : name:String, val:*`  
+  The `ClientControl` module emits the `'control:parameter'` event each time a parameter is updated. The `'control:parameter'` event is associated with two arguments:
+  - `name:String`  
+    The `name` argument indicates the name of the parameter that changed.
+  - `val:*`  
+    The `val` argument indicates the new value of that parameter.
+- `'control:information' : name:String, val:*`  
+  The `ClientControl` module emits the `'control:information'` event each time an information is updated. The `'control:information'` event is associated with two arguments:
+  - `name:String`  
+    The `name` argument indicates the name of the information that changed.
+  - `val:*`  
+    The `val` argument indicates the new value of that information.
 
 ##### ServerControl
 
-Blah
+The `ServerControl` module extends the `ServerModule` base class and takes care of the parameters, pieces of information, and commands on the server side. To set up controls in a scenario, you should extend this class on the server side and add the controls specific to that scenario with the `addParameterNumber`, `addParameterSelect`, `addCommand`, and `addDisplay methods.
 
 ###### Attributes
-
-- 
 
 ###### Methods
 
 - `constructor()`  
-  
+  The `constructor` method instantiates the `ServerControl` module on the server side.
 - `addParameterNumber(name:String, label:String, min:Number, max:Number, step:Number, init:Number)`  
-  
-- `addParameterSelect(name:String, label:String, options:Object, init:)`  
-  
-- `addCommand(name:, label:, fun:)`  
-  
-- `addDisplay(name:, label:, init:)`  
-  
-- `setParameter(name:, value:)`  
-  
-- `setDisplay(name:, value:)`  
-  
+  The `addParameterNumber` method allows to add a number control parameter. Its arguments are:
+  - `name:String`  
+    The `name` argument determines name of the parameter. The name should be unique across all parameters since this is what is sent to the client to identify the parameter when there is a change.
+  - `label:String`  
+    The `label` argument determines the label of the parameter in the GUI on the client side.
+  - `min:Number`  
+    The `min` argument determines the minimum value of the parameter.
+  - `max:Number`  
+    The `max` argument determines the maximum value of the parameter.
+  - `step:Number`  
+    The `step` argument determines the step to increase or decrease the value of the parameter using the buttons of the GUI.
+  - `init:Number`  
+    The `init` argument determines the initial value of the parameter.
+- `addParameterSelect(name:String, label:String, options:Array, init:String)`  
+  The `addParameterSelect` method allows to add a select control parameter. In the GUI on the client side, the select parameter displays a select form with the options `options`. Its arguments are:
+  - `name:String`  
+    The `name` argument determines name of the parameter. The name should be unique across all parameters since this is what is sent to the client to identify the parameter when there is a change.
+  - `label:String`  
+    The `label` argument determines the label of the parameter in the GUI on the client side.
+  - `options:Array`  
+    The `options` argument determines the possible options of the select parameter. These are the options among which the user can choose from in the GUI on the client side. It should contains `String` values only.
+  - `init:String`  
+    The `init` argument determines the initial value of the parameter. The value of `init` should be present in the `options` array.
+- `addCommand(name:String, label:String, fun:Function)`  
+  The `addCommand` method allows to add a command. Its arguments are:
+  - `name:String`  
+    The `name` argument determines name of the command. The name should be unique across all commands since this is what is sent to the client to identify the command when it is called.
+  - `label:String`  
+    The `label` argument determines the label of the command in the GUI on the client side.
+  - `fun:Function`  
+    The `fun` argument determine the function to be executed when the command is called.
+- `addInformation(name:String, label:String, init:*)`  
+   The `addInformation` method allows to add an information to be displayed on the client side. Its arguments are:
+  - `name:String`  
+    The `name` argument determines name of the information to display. The name should be unique across all pieces of information since this is what is sent to the client to identify the piece of information when there is a change.
+  - `label:String`  
+    The `label` argument determines the label of the information in the GUI on the client side.
+  - `init:*`  
+    The `init` argument determines the initial value of the information to display. It is usually a `Number` or a `String`.
+- `setParameter(name:String, value:*)`  
+  The `setParameter` method allows set the value of the parameter `name` to `value`. The argument `value` is either a `Number` or a `String` depending on the type of the parameter you are updating.
+- `setInformation(name:String, value:*)`  
+  The `setInformation` method allows set the value of the information `name` to `value`. The argument `value` is usually either a `Number` or a `String`.
 
 #### Module
 
@@ -736,7 +793,7 @@ Any module that extends the `ClientModule` class requires the SASS partial `sass
 - `constructor(name:String, hasDisplay:Boolean = true, viewColor:String = 'black')`  
   The `constructor` method instantiates the `ClientModule` module on the client side. It takes up to three arguments:
   - `name:String`  
-    The `name` of the the `this.view` DOM element, that is used both as an the ID of that element and as a class. (`this.view` would look like `<div id='name' class='module name'></div>`.)
+    The `name` of the `this.view` DOM element, that is used both as an the ID of that element and as a class. (`this.view` would look like `<div id='name' class='module name'></div>`.)
   - `hasDisplay:Boolean = true`  
     When set to `true`, the module creates the `this.view` DOM element with the id `name` and the classes `'module'` and `'name'`.
   - `viewColor`  
@@ -811,19 +868,55 @@ class MyModule extends serverSide.Module {
 }
 ```
 
-#### `Performance`
+#### Performance
 
+The `Performance` module is a base class meant to be extended when you write the performance code of your scenario. It is a regular `Module`, and its particularity is to keep track of the clients who are currently in the performance by maintaining an array `this.players` on the server side.
 
+**Note:** this base class is provided for convenience only. You can also write your performance by extending a regular `Module` rather than extending this class.
 
-##### `ClientPerformance`
+##### ClientPerformance
 
+The `ClientPerformance` module extends the `ClientModule` base class and constitutes a basis on which to build a performance on the client side. It always has the `view` attribute.
 
+###### Attribute
 
-##### `ServerPerformance`
+- `view`  
+  The `view` attribute is the DOM element (a full screen `div`) in which the content of the module is displayed. This element is a child of the main container (`<div id='container' class='container'></div>`), which is the only child of the `body` element (cf. [`ClientModule`](#clientmodule) for more information).
 
+###### Methods
 
+- `constructor(options:Object = {})`  
+  The `constructor` method instantiates the `ClientPerformance` module on the client side. It takes the `options` object as an argument, whose optional properties are:
+  - `name:String = 'performance'`  
+    The `name` of the `this.view` DOM element, that is used both as an the ID of that element and as a class (cf. [`ClientModule`](#clientmodule) for more information).
+  - `color:String = 'black'`  
+    The `color` property sets the background color of `this.view` to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library's `sass/_03-colors.scss` file.
+- `start()`  
+  The `start` method extends the `ClientModule`'s `start` method and is automatically called to start the performance on the client side. It sends the message `'performance:start'` via WebSockets to the server.
+- `done()`  
+  The `done` method extends the `ClientModule`'s `done` method and is automatically called to when the performance can hand over the control to a subsequent module on the client side. It sends the message `'performance:done'` via WebSockets to the server.
 
-#### `Seatmap`
+##### ServerPerformance
+
+The `ServerPerformance` module extends the `ServerModule` base class and constitutes a basis on which to build a performance on the client side.
+
+###### Attributes
+
+- `players:Array = []`  
+  The `players` attribute is an array that contains the list of all the clients who are currently in the performance on the client side.
+
+###### Methods
+
+- `constructor()`  
+  The `constructor` method instantiates the `ServerPerformance` module on the server side.
+- `connect(client:ServerClient)`  
+  The `connect` method extends the `ServerModule`'s `connect` method. It adds the client `client` to the array `this.players` when it receives the WebSocket message `'performance:start'`, and removes it from that array when it receives the WebSocket message `'performance:done'`.
+- `disconnect(client:ServerClient)`
+   The `disconnect` method extends the `ServerModule`'s `disconnect` method. It removes the client `client` from the array `this.players`.
+- `addPlayer(client:ServerClient)`  
+- `removePlayer(client:ServerClient)`  
+
+#### Seatmap
 
 The `Seatmap` module contains the information about the physical locations of the available places in the scenario. The location is fixed and determined in advance.
 
@@ -833,9 +926,9 @@ Similarly, if the scenario takes place in a theater where seats are numbered, th
 
 If the placement of the users in the scenario doesn't matter, the `Seatmap` module is not needed.
 
-##### `ClientSeatmap`
+##### ClientSeatmap
 
-The `ClientSeatmap` modules takes care of receiving the seatmap on the client side, and provides helper functions to display the seatmap on screen. The `ClientSeatmap` calls its `.done()` method when it receives the seatmap from the server.
+The `ClientSeatmap` modules extends the `ClientModule` base class and takes care of receiving the seatmap on the client side, and provides helper functions to display the seatmap on screen. The `ClientSeatmap` calls its `.done()` method when it receives the seatmap from the server.
 
 The `ClientCheckin` module requires the SASS partial `sass/_08-seatmap.scss`.
 
@@ -869,11 +962,10 @@ seatmap.displaySeatmap(seatmapGUI);
 seatmap.addClassToTile(seatmapGUI, 3, 'red-highlight');
 ```
 
-##### `ServerSeatmap`
+##### ServerSeatmap
 
+The `ServerSeatmap` extends the `ServerModule` base class and takes care of the seatmap on the server side.
 ###### Methods
-
-The `ServerSeatmap` modules takes care of the seatmap on the server side.
 
 - `constructor(options:Object)`  
   The `constructor` method instantiates the `ServerSeatmap` module on the client side. It takes the `options` object as a mandatory argument, whose properties are:
@@ -921,7 +1013,7 @@ On the client side, `ClientSync` uses the `audioContext` clock. On the server si
 
 ##### ClientSync
 
-The `ClientSync` modules takes care of the synchronization process on the client side. It displays a `view` that indicates “Clock syncing, stand by…” until the very first synchronization process is done. The `ClientSync` module calls its `.done()` method as soon as the client clock is in sync with the sync clock. Then, the synchronization process keeps running in the background to resynchronize the clocks from times to times. When such a resynchronization happens, the `ClientSync` module triggers a `'sync:stats'` event associated with statistics about the synchronization.
+The `ClientSync` module extends the `ClientModule` base class and takes care of the synchronization process on the client side. It displays a `view` that indicates “Clock syncing, stand by…” until the very first synchronization process is done. The `ClientSync` module calls its `.done()` method as soon as the client clock is in sync with the sync clock. Then, the synchronization process keeps running in the background to resynchronize the clocks from times to times. When such a resynchronization happens, the `ClientSync` module triggers a `'sync:stats'` event associated with statistics about the synchronization.
 
 ###### Methods
 
@@ -930,7 +1022,7 @@ The `ClientSync` modules takes care of the synchronization process on the client
   - `options:Object = {}`  
     The optional `options` argument customizes the configuration of the module. Its properties can be:
     - `color:String = 'black'`  
-      The `color` property sets the background color of the view to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library's `sass/_03-colors.scss` file.
+      The `color` property sets the background color of `this.view` to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library's `sass/_03-colors.scss` file.
 - `getLocalTime(syncTime:Number) : Number`  
   The `getLocalTime` method returns the time in the client clock when the sync clock reaches `syncTime`. If no arguments are provided, the method returns the time it is when the method is called, in the client clock (*i.e.* with `audioContext.currentTime`). The returned time is a `Number`, in seconds.
 - `getSyncTime(localTime:Number = audioContext.currentTime) : Number`  
@@ -960,6 +1052,8 @@ var nowSync = sync.getSyncTime(); // current time in sync clock time
     The `travelTimeMax` property contains the maximum travel time for a message to go from the client to the server and back, among the latest ping-pong exchanges.
 
 ##### ServerSync
+
+The `ServerSync` module extends the `ServerModule` base class and takes care of the synchronization process on the client side.
 
 ###### Methods
 
