@@ -40,7 +40,7 @@ In general, a *Soundworks* scenario allows different types of clients to connect
 
 In addition to the players, a scenario can include other kinds of clients such as:
 - A laptop that provides an interface to control some parameters of the performance in real time. We would refer to this type of client as `conductor`. These clients would connect to the server through the URL `http://my.server.address:port/conductor`.
-- A computer that controls the sound and/or light effects in the room in sync with the players' performance, such as lasers, a global visualization or ambient sounds on external loudspeakers. We would refer to this type of client as `env`, standing for “environment”. These clients would connect to the server through the URL `http://my.server.address:port/env`.
+- A computer that controls the sound and/or light effects in the room in sync with the players’ performance, such as lasers, a global visualization or ambient sounds on external loudspeakers. We would refer to this type of client as `env`, standing for “environment”. These clients would connect to the server through the URL `http://my.server.address:port/env`.
 
 We refer to the URL extensions corresponding to the different kinds of clients as `namespaces`. The `'/player'` namespace is the default namespace of the application, and is accessed through the root URL (*e.g* `http://my.server.address:port/`). All other types of clients access the server through a URL that concatenates the root URL of the application and the namespace of the client type (*e.g* `http://my.server.address:port/conductor` for a `conductor` client who belongs to the namespace `'/conductor'`, or ``http://my.server.address:port/env` for an `env` client who belongs to the namespace `'/env'`).
 
@@ -50,7 +50,7 @@ A scenario built with *Soundworks* consists in a succession and combination of m
 
 As an example, a scenario could provide the following interactions when a `player` connects to the server through the root URL:
 
-- The player's smartphone displays a `welcome` message (*e.g.* “Welcome to the performance!”). When the player clicks on the screen… 
+- The player’s smartphone displays a `welcome` message (*e.g.* “Welcome to the performance!”). When the player clicks on the screen… 
 - … the player receives some `checkin` instructions while in the meantime, the smartphone has to `sync` its clock with the server. Finally, when these are done… 
 - … the player joins the `performance`.
 
@@ -62,7 +62,7 @@ Each of these steps corresponds to a module. On the client side, this scenario w
 // Load the library
 var clientSide = require('soundworks/client');
 
-// Initialize the modules (the methods' arguments are explained in the documentation)
+// Initialize the modules (the methods’ arguments are explained in the documentation)
 var welcome = new clientSide.Dialog(...);
 var sync = new clientSide.Sync(...);
 var checkin = new clientSide.Checkin(...);
@@ -98,7 +98,7 @@ var app = express();
 var path = require('path');
 var dir = path.join(__dirname, '../../public');
 
-// (1) Create the modules (the methods' arguments are explained in the documentation)
+// (1) Create the modules (the methods’ arguments are explained in the documentation)
 var sync = new serverSide.Sync(...);
 var checkin = new serverSide.Checkin(...);
 var performance = new Performance(...); // This class has to be written by you
@@ -132,7 +132,7 @@ For instance, the purpose of the `ClientCheckin` module is the following: each t
 In detail, the `.start()` method of the module does the following:
 
 - It sends a request to the `ServerCheckin` module via WebSockets, asking the server to send the label of an available seat.
-- When it receives the response from the server, it displays the label on the screen (*e.g.* “Please go to seat C5 and touch the screen.”) and waits for the participant's acknowledgement.
+- When it receives the response from the server, it displays the label on the screen (*e.g.* “Please go to seat C5 and touch the screen.”) and waits for the participant’s acknowledgement.
 - When the participant touches the screen, the client module calls the method `.done()` to hand over the control to a subsequent module (in many scenarios, the `performance` itself).
 
 Hence, a slightly simplified version of the `ClientCheckin` module would look like the following:
@@ -241,7 +241,7 @@ class ServerCheckin extends serverSide.Module {
 
 Similarly, the `.disconnect(client)` is called whenever the client `client` disconnects from the server. It handles all the actions that are necessary in that case.
 
-In our simplified `ServerCheckin` module example, the `disconnect` method has to release the player index — so that it can be reused by another client that connects to the server — and reset the client's player data.
+In our simplified `ServerCheckin` module example, the `disconnect` method has to release the player index — so that it can be reused by another client that connects to the server — and reset the client’s player data.
 
 ```javascript
 disconnect(client) {
@@ -281,7 +281,7 @@ my-scenario/
 For instance:
 
 - The `public/` folder should contain any resource your clients may need to load such as sounds, images, fonts, etc.  
-  **Note:** the Javascript and CSS files will be automatically generated with our `gulp` file from the `src/` folder, so you shouldn't have any `javascript/` or `stylesheets/` folder here (they will be deleted by `gulp` anyway).
+  **Note:** the Javascript and CSS files will be automatically generated with our `gulp` file from the `src/` folder, so you shouldn’t have any `javascript/` or `stylesheets/` folder here (they will be deleted by `gulp` anyway).
 - The `src/` folder contains your source code for the server and the different types of clients. Each subfolder (`server/`, `player/`, and any other type of client) should contain an `index.es6.js` file, with the code to be executed for that entity. The `src/` folder also contains the SASS files to generate the CSS in the `sass/` subfolder.
 - The `views/` folder contains a `*.ejs` file for each type of client. In other words, all the subfolders in `src/` — except `server/` and `sass/` — should have their corresponding EJS file.
 
@@ -293,7 +293,7 @@ A scenario should contain at least a `src/server/`, `src/player/` and `src/sass/
 - The `src/player/` folder contains all the files that compose the default client, which we name `player`. (Any client connecting to the server through the root URL `http://my.server.address:port/` would be a `player`, and belongs to the namespace `'/player'`.)
 - Finally, the `src/sass/` folder contains the SASS files to generate the CSS.
 
-You can add any other type of client (let's name it generically `clientType`). For that:
+You can add any other type of client (let’s name it generically `clientType`). For that:
 
 - You should create a subfolder `src/clientType/` (*e.g.* `src/conductor/` or `src/env/`) and write an `index.es6.js` file inside.
 - This type of client would join the namespace `'/clientType'` thanks to the line `client.init('/clientType');` in the `index.es6.js` file (*e.g.* the namespace `'/conductor'` with the line `client.init('/conductor');`, or `'/env'` with the line `client.init('/env');`).
@@ -301,7 +301,7 @@ You can add any other type of client (let's name it generically `clientType`). F
 
 #### Client side
 
-On the client side, the `src/player/index.es6.js` file (or any other type of client's index file) should look like this.
+On the client side, the `src/player/index.es6.js` file (or any other type of client’s index file) should look like this.
 
 ```javascript
 /* Client side */
@@ -426,7 +426,7 @@ The rest of the classes require both the [client **and** server sides](#client-a
 - [`Performance`](#performance)
 - [`Sync`](#sync)
 
-Some modules on the client side are also associated with some styling information. When that is the case, we added in the library's `sass/` folder a `_xx-moduleName.scss` SASS partial: don't forget to include them in your `*.scss` files when you write your scenario. We indicate in the sections below which modules require their corresponding SASS partials.
+Some modules on the client side are also associated with some styling information. When that is the case, we added in the library’s `sass/` folder a `_xx-moduleName.scss` SASS partial: don’t forget to include them in your `*.scss` files when you write your scenario. We indicate in the sections below which modules require their corresponding SASS partials.
 
 ### Core objects
 
@@ -454,7 +454,7 @@ The `client` object has the following attributes, which we split into two groups
 ##### Modules logic
 
 - `start:Function`  
-  The `start` attribute contains the `start` function that is defined as `start(module:ClientModule)`. The `start` function starts the client's module logic with the module `module`. The argument `module` can either be:
+  The `start` attribute contains the `start` function that is defined as `start(module:ClientModule)`. The `start` function starts the client’s module logic with the module `module`. The argument `module` can either be:
     - a module from the library or a module you wrote (if your scenario has only one module),
     - a `client.serial(...modules:ClientModule)` sequence of modules,
     - or a `client.parallel(...modules:ClientModule)` combination of modules.
@@ -477,7 +477,7 @@ The `server` object has the following attributes, which we split into two groups
 - `start:Function`  
   The `start` attribute contains the `start` function that is defined as `start(app:Object, publicPath:String, port:Number)`. The `start` function starts the server with the Express application `app` that uses `publicPath` as the public static directory, and listens to the port `port`.
 - `map:Function`  
-  The `map` attribute contains the `map` function that is defined as `map(namespace:String, title:String, ...modules:ServerModule)`. The `map` function is used to indicate that the clients who connect to the namespace `namespace` need the modules `...modules` to be activated (it starts the modules' `.connect(client)` methods) and listen for the WebSocket messages from the client side. Additionally, it sets the title of the page (used in the `<title>` tag in the HTML `<head>` element) to `title` and routes the connections from the URL path `namespace` to the corresponding view (except for the namespace `'/player'`, that uses the root URL `/` instead of `/player`). More specifically:
+  The `map` attribute contains the `map` function that is defined as `map(namespace:String, title:String, ...modules:ServerModule)`. The `map` function is used to indicate that the clients who connect to the namespace `namespace` need the modules `...modules` to be activated (it starts the modules’ `.connect(client)` methods) and listen for the WebSocket messages from the client side. Additionally, it sets the title of the page (used in the `<title>` tag in the HTML `<head>` element) to `title` and routes the connections from the URL path `namespace` to the corresponding view (except for the namespace `'/player'`, that uses the root URL `/` instead of `/player`). More specifically:
   - a client connecting to the server through the URL `http://my.server.address:port/` would belong to the namespace `'/player'` and be mapped to the view `player.ejs`;
   - a client connecting to the server through the URL `http://my.server.address:port/clientType` would belong to the namespace `'/clientType'` and be mapped to the view `clientType.ejs`.
 
@@ -507,7 +507,7 @@ The `ClientDialog` module extends the `ClientModule` base class and displays a f
   - `activateAudio:Boolean = false`  
     When set to `true`, the module activates the Web Audio API when the participant clicks the screen (useful on iOS, where sound is muted until a user action triggers some audio commands).
   - `color:String = 'black'`  
-    The `color` property sets the background color of `this.view` to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library's `sass/_03-colors.scss` file.
+    The `color` property sets the background color of `this.view` to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library’s `sass/_03-colors.scss` file.
   - `name:String = 'dialog'`  
     The name of the dialog, that will be used as the `id` HTML attribute of the `this.view` and the associated class.
   - `text:String`  
@@ -550,7 +550,7 @@ The `ClientLoader` module requires the SASS partial `sass/_07-loader.scss`.
   - `options:Object = {}`  
     The optional `options` argument customizes the configuration of the module. Its properties can be:
     - `color:String = 'black'`  
-      The `color` property sets the background color of `this.view` to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library's `sass/_03-colors.scss` file.
+      The `color` property sets the background color of `this.view` to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library’s `sass/_03-colors.scss` file.
 
 For instance, the following code:
 
@@ -581,7 +581,7 @@ The `ClientOrientation` module extends the `ClientModule` base class and allows 
 - `constructor(options:Object = {})`  
   The `constructor` method instantiates the `ClientOrientation` module on the client side. It takes the `options` object as an argument, whose optional properties are:
   - `color:String = 'black'`  
-    The `color` property sets the background color of the `view` to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library's `sass/_03-colors.scss` file.
+    The `color` property sets the background color of the `view` to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library’s `sass/_03-colors.scss` file.
   - `text:String = 'Point the phone exactly in front of you, and touch the screen.'`  
     The `text` property sets the instruction text to be displayed in the `view`.
 
@@ -594,7 +594,7 @@ The `ServerClient` module is used to keep track of the connected clients. Each t
 ###### Attributes
 
 - `data:Object = {}`  
-  The `data` attribute can be used by any module to store any useful information that any module might need at some point, or that might need to be sent to the clients. When a module writes into the `data` attribute, the convention is to create a property with the name of the module. For instance, if the `sync` module keeps track of the time offset between this client's clock and the sync clock, it would store the information in `this.data.sync.timeOffset`. Similarly, if the `performance` module needs some kind of flag for each client, it would store this information in `this.data.performance.flag`.
+  The `data` attribute can be used by any module to store any useful information that any module might need at some point, or that might need to be sent to the clients. When a module writes into the `data` attribute, the convention is to create a property with the name of the module. For instance, if the `sync` module keeps track of the time offset between this client’s clock and the sync clock, it would store the information in `this.data.sync.timeOffset`. Similarly, if the `performance` module needs some kind of flag for each client, it would store this information in `this.data.performance.flag`.
 - `index:Number`  
   The `index` attribute stores the index of the client as set by the `ServerCheckin` module. See the [`ServerCheckin` module](#servercheckin) for more information.
 - `namespace:String`  
@@ -611,7 +611,7 @@ The `ServerClient` module is used to keep track of the connected clients. Each t
   The `receive` method executes the callback function `callback` when it receives the message `msg` sent by that instantiated client.  
   **Note:** on the client side, the client sends the message with the command `client.send(msg:String, ...args:*)` (for more information, see the [`client` object WebSocket communication](#initialization-and-websocket-communication) section above). Hence, in the `ServerClient.receive(msg:String, callback:Function)` method on the server side, the `callback` function takes `...args` as arguments.
 - `broadcast(msg:String, ...args:*)`  
-  The `broadcast` method sends the message `msg` and any number of values `...args` (of any type) to all the clients of the client's namespace — except that client — through WebSockets.  
+  The `broadcast` method sends the message `msg` and any number of values `...args` (of any type) to all the clients of the client’s namespace — except that client — through WebSockets.  
   **Note:** on the client side, the clients receive the message with the command `client.receive(msg:String, callback:Function)` where the `callback` function would take `...args` as arguments (for more information, see the [`client` object WebSocket communication](#initialization-and-websocket-communication) section above).
 
 ### Client and server modules
@@ -624,7 +624,7 @@ For instance, say that the scenario requires 12 players who sit on a grid of 3 �
 
 Similarly, if the scenario takes place in a theater where seats are numbered, the `Checkin` module would allow the users to indicate what their seats are.
 
-Or, if the scenario doesn't require the players to sit at particular locations, the `Checkin` module would just assign them indices within the range of total number of users this scenario supports.
+Or, if the scenario doesn’t require the players to sit at particular locations, the `Checkin` module would just assign them indices within the range of total number of users this scenario supports.
 
 The `ClientCheckin` module requires the SASS partial `sass/_05-checkin.scss`.
 
@@ -637,7 +637,7 @@ The `ClientCheckin` module extends the `ClientModule` base class and takes care 
 - `constructor(options:Object = {})`  
   The `constructor` method instantiates the `ClientCheckin` module on the client side. It takes the `options` object as an argument, whose optional properties are:
   - `color:String = 'black'`  
-    The `color` property sets the background color of `this.view` to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library's `sass/_03-colors.scss` file.
+    The `color` property sets the background color of `this.view` to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library’s `sass/_03-colors.scss` file.
   - `dialog:Boolean = false`  
     When set to `true`, the module displays a dialog (`this.view`) with the checkin information for the user. The user has to click on the dialog to indicate that the checkin process is `"done"`.
 - `getPlaceInfo() : Object`  
@@ -712,7 +712,7 @@ You can use the `ClientControl` module in two different ways.
 - `constructor(options:Object = {})`    
   The `constructor` method instantiates the `ClientControl` module on the client side. It takes the `options` object as an argument, whose supported properties are:
  - `color:String = 'black'`  
-    The `color` property sets the background color of `this.view` to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library's `sass/_03-colors.scss` file. (This option should only be specified only `options.gui = true`, *i.e.* if the `ClientControl` has a `view`.)
+    The `color` property sets the background color of `this.view` to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library’s `sass/_03-colors.scss` file. (This option should only be specified only `options.gui = true`, *i.e.* if the `ClientControl` has a `view`.)
   - `gui:Boolean = false`  
     When set to `true` , the `gui` property makes the ClientControl create `this.view` to display a Graphical User Interface (GUI) on the screen of the client. The GUI allows to edit the controls.
 
@@ -810,11 +810,11 @@ Any module that extends the `ClientModule` class requires the SASS partial `sass
   - `hasDisplay:Boolean = true`  
     When set to `true`, the module creates the `this.view` DOM element with the id `name` and the classes `'module'` and `'name'`.
   - `viewColor`  
-    The `viewColor` argument should be a class name as defined in the library's `sass/_03-colors.scss` file, and changes the background color of the view to that color.
+    The `viewColor` argument should be a class name as defined in the library’s `sass/_03-colors.scss` file, and changes the background color of the view to that color.
 - `start()`  
-  The `start` method is automatically called to start the module, and should handle the logic of the module on the client side. For instance, it can take care of the communication with the module on the server side by sending WebSocket messages and setting up WebSocket message listeners. If the module has a `view`, the `.start()` method creates the corresponding HTML element and appends it to the DOM's main container `div`.
+  The `start` method is automatically called to start the module, and should handle the logic of the module on the client side. For instance, it can take care of the communication with the module on the server side by sending WebSocket messages and setting up WebSocket message listeners. If the module has a `view`, the `.start()` method creates the corresponding HTML element and appends it to the DOM’s main container `div`.
 - `done()`  
-  The `done` method should be called when the module has done its duty (for instance at the end of the `.start()` method you write). You should not have to modify this method, but if you do, don't forget to include `super.done()` at the end. If the module has a `view`, the `.done()` method removes it from the DOM.
+  The `done` method should be called when the module has done its duty (for instance at the end of the `.start()` method you write). You should not have to modify this method, but if you do, don’t forget to include `super.done()` at the end. If the module has a `view`, the `.done()` method removes it from the DOM.
 - `setCenteredViewContent(htmlContent:String)`  
   The first time it is called, the `setCenteredViewContent` method creates a `<div class='centered-text'></div>` in a new private attribute `this.__centeredViewContent`, and appends it to `this.view`. Each time the method is called, `htmlContent` is added into `this.__centeredViewContent`. The `.setCenteredViewContent` method should be called only if `this.view` exists.
 - `removeCenteredViewContent()`  
@@ -903,11 +903,11 @@ The `ClientPerformance` module extends the `ClientModule` base class and constit
   - `name:String = 'performance'`  
     The `name` of the `this.view` DOM element, that is used both as an the ID of that element and as a class (cf. [`ClientModule`](#clientmodule) for more information).
   - `color:String = 'black'`  
-    The `color` property sets the background color of `this.view` to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library's `sass/_03-colors.scss` file.
+    The `color` property sets the background color of `this.view` to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library’s `sass/_03-colors.scss` file.
 - `start()`  
-  The `start` method extends the `ClientModule`'s `start` method and is automatically called to start the performance on the client side. It sends the message `'performance:start'` via WebSockets to the server.
+  The `start` method extends the `ClientModule`’s `start` method and is automatically called to start the performance on the client side. It sends the message `'performance:start'` via WebSockets to the server.
 - `done()`  
-  The `done` method extends the `ClientModule`'s `done` method and is automatically called to when the performance can hand over the control to a subsequent module on the client side. It sends the message `'performance:done'` via WebSockets to the server.
+  The `done` method extends the `ClientModule`’s `done` method and is automatically called to when the performance can hand over the control to a subsequent module on the client side. It sends the message `'performance:done'` via WebSockets to the server.
 
 ##### ServerPerformance
 
@@ -923,9 +923,9 @@ The `ServerPerformance` module extends the `ServerModule` base class and constit
 - `constructor()`  
   The `constructor` method instantiates the `ServerPerformance` module on the server side.
 - `connect(client:ServerClient)`  
-  The `connect` method extends the `ServerModule`'s `connect` method. It adds the client `client` to the array `this.players` when it receives the WebSocket message `'performance:start'`, and removes it from that array when it receives the WebSocket message `'performance:done'`.
+  The `connect` method extends the `ServerModule`’s `connect` method. It adds the client `client` to the array `this.players` when it receives the WebSocket message `'performance:start'`, and removes it from that array when it receives the WebSocket message `'performance:done'`.
 - `disconnect(client:ServerClient)`
-   The `disconnect` method extends the `ServerModule`'s `disconnect` method. It removes the client `client` from the array `this.players`.
+   The `disconnect` method extends the `ServerModule`’s `disconnect` method. It removes the client `client` from the array `this.players`.
 - `addPlayer(client:ServerClient)`  
 - `removePlayer(client:ServerClient)`  
 
@@ -937,7 +937,7 @@ For instance, say that the scenario requires 12 players who sit on a grid of 3 �
 
 Similarly, if the scenario takes place in a theater where seats are numbered, the `Seatmap` module would contain information about where the seats are physically, and what their references (`label`) are.
 
-If the placement of the users in the scenario doesn't matter, the `Seatmap` module is not needed.
+If the placement of the users in the scenario doesn’t matter, the `Seatmap` module is not needed.
 
 ##### ClientSeatmap
 
@@ -999,7 +999,7 @@ The `ServerSeatmap` extends the `ServerModule` base class and takes care of the 
   - `rowMargin:Number = rowSpacing / 2`  
     In the case where the seatmap type is a `'matrix'`, this parameter indicates the physical distance between the venue space and the edge of the matrix (vertically).
 - `getNumPlaces() : Number`  
-  The `getNumPlaces` method returns a `Number` corresponding to the number of places of the seatmap. For instance, if the seatmap is a 4 ⨉ 5 matrix, this would return the number `20` (which is the result of 4 ⨉ 5). It doesn't get any argument.
+  The `getNumPlaces` method returns a `Number` corresponding to the number of places of the seatmap. For instance, if the seatmap is a 4 ⨉ 5 matrix, this would return the number `20` (which is the result of 4 ⨉ 5). It doesn’t get any argument.
 - `getLabel(index:Number) : String`  
   The `getLabel` returns a `String` corresponding to the label of the place associated with the index `index` in the seatmap.
 
@@ -1016,7 +1016,7 @@ var toplogy = new serverSide.Seatmap({ type: 'matrix', cols: 4, rows: 5 });
 
 #### Sync
 
-The `Sync` module is based on [`sync`](https://github.com/collective-soundworks/sync) and is responsible for synchronizing the clients' clocks and the server clock on a common clock called “sync clock”. That way, both the clients and the server can use this shared clock as a common time reference.
+The `Sync` module is based on [`sync`](https://github.com/collective-soundworks/sync) and is responsible for synchronizing the clients’ clocks and the server clock on a common clock called “sync clock”. That way, both the clients and the server can use this shared clock as a common time reference.
 
 For instance, this allows all the clients to do something exactly at the same time, such as blinking the screen or playing a sound in a synchronized manner.
 
@@ -1035,7 +1035,7 @@ The `ClientSync` module extends the `ClientModule` base class and takes care of 
   - `options:Object = {}`  
     The optional `options` argument customizes the configuration of the module. Its properties can be:
     - `color:String = 'black'`  
-      The `color` property sets the background color of `this.view` to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library's `sass/_03-colors.scss` file.
+      The `color` property sets the background color of `this.view` to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library’s `sass/_03-colors.scss` file.
 - `getLocalTime(syncTime:Number) : Number`  
   The `getLocalTime` method returns the time in the client clock when the sync clock reaches `syncTime`. If no arguments are provided, the method returns the time it is when the method is called, in the client clock (*i.e.* with `audioContext.currentTime`). The returned time is a `Number`, in seconds.
 - `getSyncTime(localTime:Number = audioContext.currentTime) : Number`  
@@ -1077,7 +1077,7 @@ The `ServerSync` module extends the `ServerModule` base class and takes care of 
 - `getSyncTime(localTime:Number) : Number`  
   The `getSyncTime` method returns the time in the sync clock when the server clock reaches `localTime`. If no arguments are provided, the method returns the time it is when the method is called, in the sync clock. The returned time is a `Number`, in seconds.
 
-**Note:** in practice, the sync clock used by [`sync`](https://github.com/collective-soundworks/sync) is the server clock. In *Soundworks*' `Sync` module, it is the the `process.hrtime()` server clock.
+**Note:** in practice, the sync clock used by [`sync`](https://github.com/collective-soundworks/sync) is the server clock. In *Soundworks*’ `Sync` module, it is the the `process.hrtime()` server clock.
 
 Below is an example of the instantiation of the `Sync` module on the server side.
 
@@ -1093,11 +1093,11 @@ var nowSync = sync.getSyncTime(); // current time in the sync clock time
 
 ## Example
 
-In this section, we will build a simple scenario using *Soundworks*, that we'll call *My Scenario*. In *My Scenario*, any client that connects to the server through the root URL (`http://my.server.address:port/`) plays a sound when joining the performance. Consequently, we will focus on *Soundworks*' default client type `player`, which is the type of any client that connect to the server through the root URL.
+In this section, we will build a simple scenario using *Soundworks*, that we’ll call *My Scenario*. In *My Scenario*, any client that connects to the server through the root URL (`http://my.server.address:port/`) plays a sound when joining the performance. Consequently, we will focus on *Soundworks*’ default client type `player`, which is the type of any client that connect to the server through the root URL.
 
 ### 1. Create a new *Soundworks* project
 
-Let's create a new *Soundworks* project. It should have the basic structure of an Express app, as shown below.
+Let’s create a new *Soundworks* project. It should have the basic structure of an Express app, as shown below.
 
 ```
 my-scenario/
@@ -1122,7 +1122,7 @@ On the client side, there are three things we need to do: set up the EJS file th
 
 #### Setting up the EJS file
 
-Let's start with the easy part, the EJS file located in `my-scenario/views/player.ejs`.
+Let’s start with the easy part, the EJS file located in `my-scenario/views/player.ejs`.
 
 ```html
 <!doctype html5>
@@ -1152,14 +1152,14 @@ Let's start with the easy part, the EJS file located in `my-scenario/views/playe
 
 The most important things here are:
 
-- To load the `stylesheets/player.css` stylesheet that will be generated by the SASS file we'll write later,
+- To load the `stylesheets/player.css` stylesheet that will be generated by the SASS file we’ll write later,
 - To load the `socket.io` library with `script(src="/socket.io/socket.io.js")`, since this is what we currently use to handle the WebSockets,
 - To have a `div` element in the `body` that has the ID `#container` and a class `.container`,
 - And to load the `javascripts/player.js` Javascript file.
 
 #### Writing our scenario in Javascript
 
-Now let's write the core of our scenario in the `src/player/index.es6.js` file. This is the file that is loaded by any client who connects to the server through the root URL `http://my.server.address:port/`. Such a client is called `player`.
+Now let’s write the core of our scenario in the `src/player/index.es6.js` file. This is the file that is loaded by any client who connects to the server through the root URL `http://my.server.address:port/`. Such a client is called `player`.
 
 Step by step, this is how the scenario will look like when a participant connects to the server through that URL:
 
@@ -1167,7 +1167,7 @@ Step by step, this is how the scenario will look like when a participant connect
 - The clients gos through a `checkin` process with the server while a `loader` loads the audio file to play,
 - Finally, the user enters the `performance`, in which the smartphone plays the loaded audio file.
 
-First of all, let's load the library and initialize our WebSockets namespace (currently, with `socket.io`).
+First of all, let’s load the library and initialize our WebSockets namespace (currently, with `socket.io`).
 
 ```javascript
 // Loading the libraries
@@ -1180,7 +1180,7 @@ client.init('/player');
 
 The namespace here is set to `'/player'` because we are editing the Javascript file for the `player` clients who connect to the server through the root URL.
 
-Then, all the scenario will happen when the HTML document is ready, so let's wrap all the scenario logic in a callback function.
+Then, all the scenario will happen when the HTML document is ready, so let’s wrap all the scenario logic in a callback function.
 
 ```javascript
 window.addEventListener('load', () => {
@@ -1189,7 +1189,7 @@ window.addEventListener('load', () => {
 });
 ```
 
-We can now initialize all the modules in this callback function. Let's review the modules one by one.
+We can now initialize all the modules in this callback function. Let’s review the modules one by one.
 
 ##### Welcome module
 
@@ -1250,7 +1250,7 @@ window.addEventListener('load', () => {
 
 To create the performance, we have to write our own module `MyPerformance`. For this, we simply extend the `Performance` server and client classes.
 
-In the constructor, we keep the `options` argument from the base class, and we also pass in the `loader` module since we'll have to access the `audioBuffers` attribute to play the file in the performance.
+In the constructor, we keep the `options` argument from the base class, and we also pass in the `loader` module since we’ll have to access the `audioBuffers` attribute to play the file in the performance.
 
 ```javascript
 class MyPerformance extends clientSide.Performance {
@@ -1264,7 +1264,7 @@ class MyPerformance extends clientSide.Performance {
 }
 ```
 
-Then, we write the `.start()` method that is called when the performance starts. We want that method to play a sound on the server's command (`client.receive('play_sound', callback);`).
+Then, we write the `.start()` method that is called when the performance starts. We want that method to play a sound on the server’s command (`client.receive('play_sound', callback);`).
 
 ```javascript
 class MyPerformance extends clientSide.Performance {
@@ -1292,9 +1292,9 @@ class MyPerformance extends clientSide.Performance {
 }
 ```
 
-**Note:** we could directly play the sound in the start method, but we show some client / server communication here for the purpose of the tutorial. In theory, we would also need to call the '.done()' method when the module handles the control to the following modules, but since the `performance` is the last thing that happens in *My Scenario*, we don't need to do it in this specific case.
+**Note:** we could directly play the sound in the start method, but we show some client / server communication here for the purpose of the tutorial. In theory, we would also need to call the '.done()' method when the module handles the control to the following modules, but since the `performance` is the last thing that happens in *My Scenario*, we don’t need to do it in this specific case.
 
-Now let's glue everything together.
+Now let’s glue everything together.
 
 ```javascript
 window.addEventListener('load', () => {
@@ -1328,9 +1328,9 @@ window.addEventListener('load', () => {
 
 The last thing we have to do on the client side is to write the SASS file(s) that will generate the `public/player.css` file.
 
-To do that, let's first copy all the library's SASS partials (that you'll find in `sass/` in the `src/sass/lib/` folder of our project.
+To do that, let’s first copy all the library’s SASS partials (that you’ll find in `sass/` in the `src/sass/lib/` folder of our project.
 
-Among them, there are four SASS partials that we'll always need in any scenario:
+Among them, there are four SASS partials that we’ll always need in any scenario:
 - `_01-reset.scss`, that resets the CSS rules of several DOM elements,
 - `_02-fonts.scss`, that sets up the Quicksand font,
 - `_03-colors.scss`, that sets up some color SASS variables,
@@ -1338,7 +1338,7 @@ Among them, there are four SASS partials that we'll always need in any scenario:
 
 Then, we notice that in `player/index.es6.js`, we used 3 different modules from the library: `ClientDialog` for the `welcome` module, `ClientCheckin` for the `checkin` module, and `ClientLoader` for the `loader` module. Among these, the `Loader` and the `Checkin` require a SASS partial (cf. the [API section](#api) above).
 
-So there we go, let's write our `src/sass/player.css` file by requiring the partials we need.
+So there we go, let’s write our `src/sass/player.css` file by requiring the partials we need.
 
 ```sass
 @import '01-reset';
@@ -1367,9 +1367,9 @@ var path = require('path');
 var dir = path.join(__dirname, '../../public');
 ```
 
-Then, we set up the modules that the client needs to communicate with. In this example, there is the `Checkin` module, and the `Performance` module we'll need to write ourselves.
+Then, we set up the modules that the client needs to communicate with. In this example, there is the `Checkin` module, and the `Performance` module we’ll need to write ourselves.
 
-For the `Checkin` module, since we don't need a map of the seats or anything like that, we just indicate the maximum number of players this performance allows, and the order in which the module assigns the indices.
+For the `Checkin` module, since we don’t need a map of the seats or anything like that, we just indicate the maximum number of players this performance allows, and the order in which the module assigns the indices.
 
 ```javascript
 var checkin = new serverSide.Checkin(
