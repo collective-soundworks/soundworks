@@ -296,7 +296,7 @@ A scenario should contain at least a `src/server/`, `src/player/` and `src/sass/
 You can add any other type of client (let's name it generically `clientType`). For that:
 
 - You should create a subfolder `src/clientType/` (*e.g.* `src/conductor/` or `src/env/`) and write an `index.es6.js` file inside.
-- This type of client would join the corresponding namespace `'/clientType'` (*e.g.* `'/conductor'` or `'/env'`) — for this, add the line `client.init('/clientType');` in the `index.es6.js` file (*e.g.* `client.init('/conductor');` or `client.init('/env');`).
+- This type of client would join the namespace `'/clientType'` thanks to the line `client.init('/clientType');` in the `index.es6.js` file (*e.g.* the namespace `'/conductor'` with the line `client.init('/conductor');`, or `'/env'` with the line `client.init('/env');`).
 - This type of client would connect to the server through the URL `http://my.server.address:port/clientType` (*e.g.* `http://my.server.address:port/conductor` or `http://my.server.address:port/env`).
 
 #### Client side
