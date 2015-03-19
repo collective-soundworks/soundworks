@@ -4,8 +4,8 @@
  */
 'use strict';
 
-var audioContext = require('audio-context');
 var EventEmitter = require('events').EventEmitter;
+var audioContext = require('waves-audio').audioContext;
 
 // TODO: add deviceMotion and deviceOrientation input.
 class InputModule extends EventEmitter {

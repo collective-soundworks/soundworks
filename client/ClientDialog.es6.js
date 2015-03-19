@@ -4,8 +4,8 @@
  */
 'use strict';
 
-var audioContext = require('audio-context');
 var ClientModule = require('./ClientModule');
+var audioContext = require('waves-audio').audioContext;
 
 class ClientDialog extends ClientModule {
   constructor(options = {}) {

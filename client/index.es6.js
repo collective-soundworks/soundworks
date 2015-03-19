@@ -5,6 +5,7 @@
 'use strict';
 
 module.exports = {
+  audioContext: require('waves-audio').audioContext,
   client: require('./client'),
   input: require('./input'),
   Checkin: require('./ClientCheckin'),
@@ -15,6 +16,6 @@ module.exports = {
   Orientation: require('./ClientOrientation'),
   Performance: require('./ClientPerformance'),
   Platform: require('./ClientPlatform'),
-  Seatmap: require('./ClientSeatmap'),
+  Setup: require('./ClientSetup'),
   Sync: require('./ClientSync')
 };

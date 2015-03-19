@@ -4,7 +4,6 @@
  */
 'use strict';
 
-var audioContext = require('audio-context');
 var ClientModule = require('./ClientModule');
 var platform = require('platform');
 

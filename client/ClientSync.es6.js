@@ -7,7 +7,7 @@
 var ClientModule = require('./ClientModule');
 var Sync = require('sync/client');
 var client = require('./client');
-var audioContext = require('audio-context');
+var audioContext = require('waves-audio').audioContext;
 
 class ClientSync extends ClientModule {
   constructor(options = {}) {

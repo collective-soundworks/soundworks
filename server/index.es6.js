@@ -11,6 +11,6 @@ module.exports = {
   Control: require('./ServerControl'),
   Module: require('./ServerModule'),
   Performance: require('./ServerPerformance'),
-  Seatmap: require('./ServerSeatmap'),
+  Setup: require('./ServerSetup'),
   Sync: require('./ServerSync')
 };

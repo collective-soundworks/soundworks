@@ -6,7 +6,7 @@
 
 var ClientModule = require('./ClientModule');
 var client = require('./client');
-var AudioBufferLoader = require('loaders').AudioBufferLoader;
+var AudioBufferLoader = require('waves-loaders').AudioBufferLoader;
 
 class ClientLoader extends ClientModule {
   constructor(audioFiles, options = {}) {
