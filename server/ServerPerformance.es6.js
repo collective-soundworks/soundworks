@@ -30,6 +30,8 @@ class ServerPerformance extends ServerModule {
   disconnect(client) {
     this.exit(client);
 
+    delete client.modules.performance;
+
     super.disconnect(client);
   }
 
@@ -39,7 +41,7 @@ class ServerPerformance extends ServerModule {
 
   exit(client) {
     let index = this.players.indexOf(client);
-    
+
     if (index >= 0)
       this.players.splice(index, 1);
   }
