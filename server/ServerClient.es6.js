@@ -8,8 +8,8 @@ class ServerClient {
 	constructor(socket) {
     this.socket = socket;
     this.namespace = socket.nsp;
-    this.index = null;
-    this.data = {};
+    this.modules = {};
+    this.player = null;
   }
 
   send(msg, ...args) {
