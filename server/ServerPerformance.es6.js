@@ -6,12 +6,6 @@
 
 var ServerModule = require('./ServerModule');
 
-function arrayRemove(array, value) {
-  let index = array.indexOf(value);
-  if (index >= 0)
-    array.splice(index, 1);
-}
-
 class ServerPerformance extends ServerModule {
   constructor() {
     super();
@@ -43,6 +37,7 @@ class ServerPerformance extends ServerModule {
 
   removePlayer(client) {
     let index = this.players.indexOf(client);
+    
     if (index >= 0)
       this.players.splice(index, 1);
   }
