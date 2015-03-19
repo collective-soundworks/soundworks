@@ -13,7 +13,7 @@ class ServerControl extends ServerModule {
 
     this.parameters = {};
     this.commands = {};
-    this.displays = {};
+    this.infos = {};
     this.namespaces = [];
   }
 
@@ -47,8 +47,8 @@ class ServerControl extends ServerModule {
     };
   }
 
-  addDisplay(name, label, init) {
-    this.displays[name] = {
+  addInfo(name, label, init) {
+    this.infos[name] = {
       name: name,
       label: label,
       value: init
@@ -61,21 +61,21 @@ class ServerControl extends ServerModule {
     if (parameter) {
       parameter.value = value;
 
-      // send display to other clients
+      // send parameter to other clients
       for (let namespace of this.namespaces)
-        namespace.emit('control_parameter', name, value);
+        namespace.emit('control:parameter', name, value);
     }
   }
 
-  setDisplay(name, value) {
-    var display = this.displays[name];
+  setInfo(name, value) {
+    var info = this.infos[name];
 
-    if (display) {
-      display.value = value;
+    if (info) {
+      info.value = value;
 
-      // send display to other clients
+      // send info to other clients
       for (let namespace of this.namespaces)
-        namespace.emit('control_display', name, value);
+        namespace.emit('control:info', name, value);
     }
   }
 
@@ -88,21 +88,21 @@ class ServerControl extends ServerModule {
       this.namespaces.push(namespace);
 
     // listen to control parameters
-    client.receive('control_parameter', (name, value) => {
+    client.receive('control:parameter', (name, value) => {
       this.parameters[name].value = value;
 
       // send control parameter to other clients
       for (let namespace of this.namespaces)
-        namespace.emit('control_parameter', name, value);
+        namespace.emit('control:parameter', name, value);
     });
 
     // listen to conductor commands
-    client.receive('control_command', (name) => {
+    client.receive('control:command', (name) => {
       this.commands[name].fun();
     });
 
-    // init control parameters, displays, and commands at client
-    client.send('control_init', this.parameters, this.displays, this.commands);
+    // init control parameters, infos, and commands at client
+    client.send('control:init', this.parameters, this.infos, this.commands);
   }
 }
 

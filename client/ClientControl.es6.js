@@ -70,7 +70,7 @@ class ParameterNumber {
       this.box.value = val;
 
     if (send)
-      client.send('control_parameter', this.name, this.value);
+      client.send('control:parameter', this.name, this.value);
   }
 
   incr(send = false) {
@@ -150,7 +150,7 @@ class ParameterSelect {
         this.box.value = val;
 
       if (send)
-        client.send('control_parameter', this.name, val);
+        client.send('control:parameter', this.name, val);
     }
   }
 
@@ -165,10 +165,10 @@ class ParameterSelect {
   }
 }
 
-class Display {
-  constructor(display, view = null) {
-    this.name = display.name;
-    this.label = display.label;
+class Info {
+  constructor(info, view = null) {
+    this.name = info.name;
+    this.label = info.label;
     this.box = null;
 
     if (view) {
@@ -186,7 +186,7 @@ class Display {
       view.appendChild(div);
     }
 
-    this.set(display.value);
+    this.set(info.value);
   }
 
   set(val) {
@@ -209,7 +209,7 @@ class Command {
       div.innerHTML = this.label;
 
       div.onclick = div.ontouchstart = (() => {
-        client.send('control_command', this.name);
+        client.send('control:command', this.name);
       });
 
       view.appendChild(div);
@@ -226,20 +226,20 @@ class ClientControl extends ClientModule {
 
     this.hasGui = hasGui;
     this.parameters = {};
-    this.displays = {};
+    this.infos = {};
     this.commands = {};
 
-    var view = hasGui? this.view: null;
+    var view = hasGui ? this.view : null;
 
-    client.receive('control_init', (parameters, displays, commands) => {
+    client.receive('control:init', (parameters, infos, commands) => {
       if (view) {
         var title = document.createElement('h1');
         title.innerHTML = 'Conductor';
         view.appendChild(title);
       }
 
-      for (let key of Object.keys(displays))
-        this.displays[key] = new Display(displays[key], view);
+      for (let key of Object.keys(infos))
+        this.infos[key] = new Info(infos[key], view);
 
       if (view)
         view.appendChild(document.createElement('hr'));
@@ -266,25 +266,25 @@ class ClientControl extends ClientModule {
     });
 
     // listen to parameter changes
-    client.receive('control_parameter', (name, val) => {
+    client.receive('control:parameter', (name, val) => {
       var parameter = this.parameters[name];
 
       if (parameter) {
         parameter.set(val);
-        this.emit('control_parameter', name, val);
+        this.emit('control:parameter', name, val);
       } else
         console.log('received unknown control parameter: ', name);
     });
 
-    // listen to display changes
-    client.receive('control_display', (name, val) => {
-      var display = this.displays[name];
+    // listen to info changes
+    client.receive('control:info', (name, val) => {
+      var info = this.infos[name];
 
-      if (display) {
-        display.set(val);
-        this.emit('control_display', name, val);
+      if (info) {
+        info.set(val);
+        this.emit('control:info', name, val);
       } else
-        console.log('received unknown display parameter: ', name);
+        console.log('received unknown info parameter: ', name);
     });
   }
 
