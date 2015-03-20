@@ -15,6 +15,8 @@ class ServerSetup extends ServerModule {
     this.spacing = 1;
     this.labels = [];
     this.positions = [];
+
+    this.specific = {};
   }
 
   connect(client) {
@@ -26,15 +28,16 @@ class ServerSetup extends ServerModule {
         "height": this.height,
         "spacing": this.spacing,
         "labels": this.labels,
-        "positions": this.positions,
-        "maxWidthDivision": this.cols,
-        "maxHeightDivision": this.rows
+        "positions": this.positions
       });
     });
   }
 
   getNumPlaces() {
-    return this.labels.length;
+    var numLabels = this.labels.length || Infinity;
+    var numPositions = this.positions.length || Infinity;
+
+    return Math.min(numLabels, numPositions);
   }
 
   getLabel(index) {
@@ -58,17 +61,21 @@ class ServerSetup extends ServerModule {
         var rows = options.rows || 4;
         var colSpacing = options.colSpacing || 1;
         var rowSpacing = options.rowSpacing || 1;
-        var colMargin = options.colMargin || this.colSpacing / 2;
-        var rowMargin = options.rowMargin || this.rowSpacing / 2;
+        var colMargin = options.colMargin || colSpacing / 2;
+        var rowMargin = options.rowMargin || rowSpacing / 2;
 
-        this.width = colSpacing * (this.cols - 1) + 2 * colMargin;
-        this.height = rowSpacing * (this.rows - 1) + 2 * rowMargin;
+        this.specific.matrix = {};
+        this.specific.matrix.cols = cols;
+        this.specific.matrix.rows = rows;
+
+        this.width = colSpacing * (cols - 1) + 2 * colMargin;
+        this.height = rowSpacing * (rows - 1) + 2 * rowMargin;
         this.spacing = Math.min(colSpacing, rowSpacing);
 
         var count = 0;
 
-        for (let j = 0; j < this.rows; j++) {
-          for (let i = 0; i < this.cols; i++) {
+        for (let j = 0; j < rows; j++) {
+          for (let i = 0; i < cols; i++) {
             count++;
 
             var label = count.toString();

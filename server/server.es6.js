@@ -58,8 +58,10 @@ function map(namespace, title, ...modules) {
         mod.connect(client);
 
       client.receive('disconnect', () => {
-        for (let mod of modules)
+        for (let i = modules.length - 1; i >= 0; i--) {
+          var mod = modules[i];
           mod.disconnect(client);
+        }
       });
 
       client.send('server_ready');
