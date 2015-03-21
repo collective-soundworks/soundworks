@@ -13,7 +13,10 @@ class ServerCheckin extends ServerModule {
     super();
 
     this.setup = options.setup || null;
-    this.maxPlayers = options.maxPlayers || 10000;
+    this.maxPlayers = options.maxPlayers || Infinity;
+
+    if (this.maxPlayers > Number.MAX_SAFE_INTEGER)
+      this.maxPlayers = Number.MAX_SAFE_INTEGER;
 
     if (this.setup) {
       var numPlaces = this.setup.getNumPlaces();
@@ -21,9 +24,6 @@ class ServerCheckin extends ServerModule {
       if (this.maxPlayers > numPlaces)
         this.maxPlayers = numPlaces;
     }
-
-    if (this.maxPlayers > Number.MAX_SAFE_INTEGER)
-      this.maxPlayers = Number.MAX_SAFE_INTEGER;
 
     this._availableIndices = [];
     this._nextAscendingIndex = 0;
@@ -115,6 +115,7 @@ class ServerCheckin extends ServerModule {
   }
 
   _requestSelectLabel(client) {
+    throw new Error("Checkin with label selection not yet implemented");
     // var options = this.setup.getOptions();
     // client.send('checkin:label:options', options);
     // client.receive('checkin:label:set', this.label);
@@ -122,6 +123,7 @@ class ServerCheckin extends ServerModule {
   }
 
   _requestSelectPosition(client) {
+    throw new Error("Checkin with position selection not yet implemented");
     // var surface = this.setup.getSurface();
     // client.send('checkin:position:acknowledge', index, surface);
     // client.receive('checkin:position:set', this.position);
