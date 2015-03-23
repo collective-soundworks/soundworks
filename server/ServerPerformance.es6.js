@@ -28,12 +28,10 @@ class ServerPerformance extends ServerModule {
   }
 
   disconnect(client) {
-    if (client.modules.performance) {
-      this.exit(client);
-      delete client.modules.performance;
-    }
-
     super.disconnect(client);
+
+    if (client.modules.performance)
+      this.exit(client);
   }
 
   enter(client) {

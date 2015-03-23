@@ -53,10 +53,11 @@ class ServerCheckin extends ServerModule {
   }
 
   disconnect(client) {
+    super.disconnect();
+
     if (client.player && client.player.index >= 0) {
       this._releaseIndex(client.player.index);
       delete client.player;
-      super.disconnect();
     }
   }
 
