@@ -15,6 +15,7 @@
     - [`ClientDialog`](#clientdialog)
     - [`ClientLoader`](#clientloader)
     - [`ClientOrientation`](#clientorientation)
+    - [`ClientPlatform`](#clientplatform)
   - [Server only modules](#server-only-modules)
     - [`ServerClient`](#serverclient)
   - [Client and server modules](#client-and-server-modules)
@@ -22,7 +23,7 @@
     - [`Control`](#control)
     - [`Module`](#module)
     - [`Performance`](#performance)
-    - [`Seatmap`](#seatmap)
+    - [`Setup`](#setup)
     - [`Sync`](#sync)
 - [**Example**](#example)
 
@@ -36,7 +37,7 @@ The framework is based on a client/server architecture supported by `Node.js` (`
 
 In order to connect the smartphones with each other, *Soundworks* implements a client/server architecture using a `Node.js` server and WebSockets to pass messages between the server and the clients (currently with the `socket.io` library).
 
-In general, a *Soundworks* scenario allows different types of clients to connect to the server through different URLs. The most important kind clients are the smartphones of the players who take part in the performance (we refer to this type of client as `player`). For convenience, a player connects to the server through the root URL of the application, `http://my.server.address:port/`.
+In general, a *Soundworks* scenario allows different types of clients to connect to the server through different URLs. The most important kind clients are the smartphones of the participants who take part in the performance (we refer to this type of client as `player`). For convenience, a player connects to the server through the root URL of the application, `http://my.server.address:port/`.
 
 In addition to the players, a scenario can include other kinds of clients such as:
 - A laptop that provides an interface to control some parameters of the performance in real time. We would refer to this type of client as `conductor`. These clients would connect to the server through the URL `http://my.server.address:port/conductor`.
@@ -44,74 +45,7 @@ In addition to the players, a scenario can include other kinds of clients such a
 
 We refer to the URL extensions corresponding to the different kinds of clients as `namespaces`. The `'/player'` namespace is the default namespace of the application, and is accessed through the root URL (*e.g* `http://my.server.address:port/`). All other types of clients access the server through a URL that concatenates the root URL of the application and the namespace of the client type (*e.g* `http://my.server.address:port/conductor` for a `conductor` client who belongs to the namespace `'/conductor'`, or ``http://my.server.address:port/env` for an `env` client who belongs to the namespace `'/env'`).
 
-### A *Soundworks* scenario is exclusively made of modules
-
-A scenario built with *Soundworks* consists in a succession and combination of modules, each of them corresponding to one step of the scenario. On the client side, each module implements a `.start()` and a `.done()` method. We launch the process corresponding to that module by calling the method `.start()`, and we call the method `.done()` to hand over the control to the following module. This way, modules can be executed in series and/or in parallel according to a given application scenario. While the library provides most of the modules to setup a client for participation, the essential part of a scenario — the `performance` itself — usually has to be implemented by a custom module.
-
-As an example, a scenario could provide the following interactions when a `player` connects to the server through the root URL:
-
-- The player’s smartphone displays a `welcome` message (*e.g.* “Welcome to the performance!”). When the player clicks on the screen… 
-- … the player receives some `checkin` instructions while in the meantime, the smartphone has to `sync` its clock with the server. Finally, when these are done… 
-- … the player joins the `performance`.
-
-Each of these steps corresponds to a module. On the client side, this scenario would be implemented as follows.
-
-```javascript
-/* Client side */
-
-// Load the library
-var clientSide = require('soundworks/client');
-
-// Initialize the modules (the methods’ arguments are explained in the documentation)
-var welcome = new clientSide.Dialog(...);
-var sync = new clientSide.Sync(...);
-var checkin = new clientSide.Checkin(...);
-var performance = new Performance(...); // This class has to be written by you
-
-// Launch the scenario
-client.start(
-  client.serial(
-    welcome,
-    client.parallel(
-      checkin,
-      sync
-    ),
-    performance
-  )
-);
-```
-
-To run a sequence of modules in serial, we use `client.serial(module1, module2, ...)`. A module would `.start()` only after the previous one is `.done()`. On the other hand, if some modules need to be run in parallel, we use `client.parallel(module1, module2, ...)`. The parallel process triggers a global `.done()` method when all of its modules called `.done()`. For more information about the `serial` and `parallel` module processes, see the [`client` object modules logic](#modules-logic) in the API section.
-
-Some of these modules need to communicate with the server (for instance, the `sync` process requires a dialog between the client and the server to synchronize the clocks). On the client side, each module implements a `.connect(client)` and a `.disconnect(client)` method that is called when a `client` connects or disconnects the application through one of the provided client URLs. A mapping of client namespaces determines the set of modules to which a certain type of client (*i.e.* a particular client URL) would actually connect on the server side.
-
-The following code (1) creates three server side modules – `sync`, `checkin` and `performance` —, (2) launches the server, and (3) maps the three modules to the `'/player'` namespace.
-
-```javascript
-/* Server side */
-
-// Load the libraries and setup the Express app
-var serverSide = require('soundworks/server');
-var server = serverSide.server;
-var express = require('express');
-var app = express();
-var path = require('path');
-var dir = path.join(__dirname, '../../public');
-
-// (1) Create the modules (the methods’ arguments are explained in the documentation)
-var sync = new serverSide.Sync(...);
-var checkin = new serverSide.Checkin(...);
-var performance = new Performance(...); // This class has to be written by you
-
-// (2) Launch the server on port 8000 with the public directory 'dir'
-server.start(app, dir, 8000);
-
-// (3) Map the '/player' namespace with the modules needed by the 'player' clients on the client side
-server.map('/player', 'My Scenario Title', sync, checkin, performance);
-```
-
-After this initialization, the `sync`, `checkin` and `performance` modules of a `player` are be able to dialog with the corresponding modules on the server side.
-### How to write a scenario?
+### Express app structure
 
 Since *Soundworks* is built on Express, any scenario you write using *Soundworks* should follow the organization of an Express app (using the EJS rendering engine), as shown in the example below.
 
@@ -140,28 +74,42 @@ my-scenario/
 
 For instance:
 
-- The `public/` folder should contain any resource your clients may need to load such as sounds, images, fonts, etc.  
-  **Note:** the Javascript and CSS files will be automatically generated with our `gulp` file from the `src/` folder, so you shouldn’t have any `javascript/` or `stylesheets/` folder here (they will be deleted by `gulp` anyway).
-- The `src/` folder contains your source code for the server and the different types of clients. Each subfolder (`server/`, `player/`, and any other type of client) should contain an `index.es6.js` file, with the code to be executed for that entity. The `src/` folder also contains the SASS files to generate the CSS in the `sass/` subfolder.
+- The `public/` folder should contain any resources the clients may need to load such as sounds, images, fonts, etc.  
+  **Note:** the Javascript and CSS files will be automatically generated with the `gulp` file from the `src/` folder, so there shouldn’t be any `javascript/` or `stylesheets/` folder here (they will be deleted by `gulp` anyway).
+- The `src/` folder contains the source code for the server and the different types of clients. Each subfolder (`server/`, `player/`, and any other type of client) should contain an `index.es6.js` file, with the code to be executed for that entity. The `src/` folder also contains the SASS files to generate the CSS in the `sass/` subfolder.
 - The `views/` folder contains a `*.ejs` file for each type of client. In other words, all the subfolders in `src/` — except `server/` and `sass/` — should have their corresponding EJS file.
 
 To compile the files, just run the command `gulp` in the Terminal: it will generate the `*.css` files from the SASS files, convert the Javascript files from ES6 to ES5, browserify the files on the client side, and launch a `Node.js` server to start the scenario.
 
-A scenario should contain at least a `src/server/`, `src/player/` and `src/sass/` folder.
+A scenario should contain at least the `src/server/`, `src/player/` and `src/sass/` folders:
 
-- The `src/server/` folder contains all the Javascript files that compose the server.
-- The `src/player/` folder contains all the files that compose the `player` default client. As already mentioned above, any client connecting to the server through the root URL `http://my.server.address:port/` belongs to the namespace `'/player'`.
+- The `src/server/` folder contains all Javascript files that compose the server.
+- The `src/player/` folder contains all the files that compose the `player` client that is associated to the `'/player'` namespace, accessible through the root URL `http://my.server.address:port/` (default client).
 - Finally, the `src/sass/` folder contains the SASS files to generate the CSS.
 
-As mentioned above, you may want to add a further clients, for example to create a  (let’s name it generically `auxClient`). For that:
+As mentioned above, you may want to add further types of clients. For example:
+- a device connected to a namespace `'/env'` could generate “environmental” audiovisual rendering for the venue (in addition to the rendering on the participants’ smartphones),
+- or you could control the parameters of the scenario in real time from a device connected to a namespace  `'/conductor'`.
+Apart from the `'/player'` default namespace, none of these namespaces is predefined by the library: you can use any string you want to refer to this new type of client and its associated namespace.
 
-- You should create a subfolder `src/auxClient/` (*e.g.* `src/conductor/` or `src/env/`) and write an `index.es6.js` file inside.
-- This type of client would join the namespace `'/auxClient'` thanks to the line `client.init('/auxClient');` in the `index.es6.js` file (*e.g.* the namespace `'/conductor'` with the line `client.init('/conductor');`, or `'/env'` with the line `client.init('/env');`).
-- This type of client would connect to the server through the URL `http://my.server.address:port/auxClient` (*e.g.* `http://my.server.address:port/conductor` or `http://my.server.address:port/env`).
+To add an additional namespace you have to create a subfolder `src/env/` (or `src/conductor/`) that contains a file `index.es6.js`. The command `client.init('/env');` (respectively '/conductor') in this file associates the client to the desired namespace. The client is accessible via the URL `http://my.server.address:port/env` (respectively `http://my.server.address:port/conductor`).
 
+### Client and server modules
+
+A scenario built with *Soundworks* consists in a succession and combination of modules, each of them corresponding to one step of the scenario. 
 #### Client side
 
-On the client side, the `src/player/index.es6.js` file (or any other type of client’s index file) should look like this.
+On the client side, modules can be executed in a particular order according to a given application scenario and the involved interactions with the user.
+As an example, a scenario could provide the following interactions when a participant opens the application’s root URL and a new client connects to the `\player` namespace:
+
+- The smartphone displays a *welcome* message (*e.g.* “Welcome to the performance!”). When the participant clicks on the screen…
+- the client goes through a *check-in* procedure to register as player and the smartphone may display some instructions. In the meantime, …
+- the client *synchronizes* its clock with the server. Finally, when these are done… 
+- the client – now a `player` – joins the *performance*.
+
+Each of these steps corresponds to a module. While most of the modules are provided by the library, you have to write a module that implements the most important part of your application – the performance. 
+
+The client side code corresponding to the above example (in `src/player/index.es6.js`) would look like this:
 
 ```javascript
 /* Client side */
@@ -170,7 +118,7 @@ On the client side, the `src/player/index.es6.js` file (or any other type of cli
 var clientSide = require('soundworks/client');
 var client = clientSide.client;
 
-// Initialize the WebSocket namespace depending on the client type (here, '/player')
+// Initialize client with the associated namespace (here, '/player')
 client.init('/player');
 
 // Write the performance module
@@ -186,7 +134,7 @@ window.addEventListener('load', () => {
   var checkin = new clientSide.Checkin(...);
   var performance = new MyPerformance(...);
   
-  // Scenario logic
+  // Launch the modules in a particular order
   client.start(
     client.serial(
       welcome,
@@ -200,56 +148,70 @@ window.addEventListener('load', () => {
 });
 ```
 
-For another type of client (*e.g* `conductor` or `env`), the file would look the same except that the WebSocket namespace initialization correspond to that type of client (*e.g.* `client.init('/conductor);`, or `client.init('/env');`) and the modules might be different (for instance, one could imagine that the `env` clients only require a `sync` and a `performance` module).
+To run a sequence of modules in serial, we use `client.serial(module1, module2, ...)`. On the other hand, if some modules need to be run in parallel, we use `client.parallel(module1, module2, ...)`. For more information about the `serial` and `parallel` module processes, see the [`client` object modules logic](#modules-logic) in the API section.
+
+For any other type of client such as `env` or `conductor`, the file would look very similar except that the client would be initialized with the corresponding namespace and the included modules might be different. The `env` clients, for example, may require a `sync` and `performance` module, but do not need a `welcome` screen nor a player `checkin`.
+
+Some of the modules on the client side need to communicate with the server. The `sync` process, for example, requires a dialog between the client and the server to synchronize the clocks.
 
 #### Server side
 
-On the server side, the `src/server/index.es6.js` would look like this.
+The server side of the application has to provide the server modules responding to the client side modules. The server side code (in `src/server/index.es6.js`) corresponding to this example would look like this:
 
 ```javascript
 /* Server side */
 
-// Require the libraries and setup the Express app
+// Require the libraries
 var serverSide = require('soundworks/server');
 var server = serverSide.server;
 
+// Setup the Express app
 var express = require('express');
 var app = express();
+
+// Start the server with a given public directory and port
 var path = require('path');
 var dir = path.join(__dirname, '../../public');
+server.start(app, dir, 3000);
 
-// Write the player and env performance modules
+// Implement the player and env performance modules
 class MyPlayerPerformance extends serverSide.Performance {
   ...
 }
+
 class MyEnvPerformance extends serverSide.Performance {
   ...
 }
 
-// Initialize the modules
+// Create the modules
 var checkin = new serverSide.Checkin(...);
 var sync = new serverSide.Sync(...);
 var playerPerformance = new MyPlayerPerformance(...);
 var envPerformance = new MyEnvPerformance(...);
 
-// Start the scenario
-server.start(app, dir, 3000);
-// Set up the server modules required by the 'player' clients
+// Map the server modules to the '/player' namespace
 server.map('/player', 'My Scenario', sync, checkin, playerPerformance);
-// Set up the server modules required by the 'env' clients
+
+// Map the server modules to the '/env' namespace
 server.map('/env', 'My Scenario — Environment', sync, envPerformance);
 ```
 
-Indeed, on the client side, the `player` clients use the modules `welcome` (that does not require a communication with the server), `checkin`, `sync`, and `performance`, so we set up the corresponding server modules and map them to the namespace `/player`. Similarly, say the `/env` clients use the modules `sync` and `performance` (which both require communication with the server), so we set up the corresponding server modules and map them to the namespace `/env`.
+After having set up the Express app and started the server, this code sequence creates the server side modules `checkin`, `sync`, and `performance` that respond client side modules of the example above. All three modules are mapped to the `/player` default namespace and consequently respond to the `player` clients connected to this namespace via the root URL of the application. In addition, the `sync` module is mapped to the `/env` namespace together with a `performance` module for the `env` client(s).
+
+While all modules of this code sequence have a client and a server component, some modules might occur only on the client side. This is, for instance, the case for the `welcome` module in the player client setup above. The module only displays a welcome dialog to the participant that does not involve any interaction between the client and server.
+
+#### The performance module
+
+In many applications, the only module you will have to implement yourself is the performance module. As in the example above, a `player` client usually enters the performance through a `checkin` module that assigns it an player id (*i.e.* an index) and, optionally, a position. 
 
 #### Styling with SASS
 
-Finally, the `src/sass/` folder would contain all the SASS partials we need for the modules from the library, and include them all in a `auxClient.scss` file, where `auxClient` can be `player`, `conductor`, `env`, or any other type of client you create. Since the `player` is the default client in any *Soundworks*-based scenario, the `src/sass/` should at least contain the `player.scss` file.
+Finally, the `src/sass/` folder would contain all the SASS partials we need for the modules from the library, and include them all in a `env.scss` file, where `env` can be `player`, `conductor`, `env`, or any other type of client you create. Since the `player` is the default client in any *Soundworks*-based scenario, the `src/sass/` should at least contain the `player.scss` file.
 
 For instance, in our previous example where the client has a `welcome`, `sync`, `checkin` and `performance` module, the `player.scss` file could look like this.
 
 ```sass
-// General styling: these partials should be included in every auxClient.scss file
+// General styling: these partials should be included in every env.scss file
 @import '01-reset';
 @import '02-fonts';
 @import '03-colors';
@@ -412,6 +374,7 @@ Some classes are only present on the [client side](#client-only-modules):
 - [`Dialog`](#clientdialog)
 - [`Loader`](#clientloader)
 - [`Orientation`](#clientorientation)
+- [`Platform`](#clientplatform)
 
 Others are only present on the [server side](#server-only-modules):
 
@@ -478,7 +441,7 @@ The `server` object has the following attributes, which we split into two groups
 - `map:Function`  
   The `map` attribute contains the `map` function that is defined as `map(namespace:String, title:String, ...modules:ServerModule)`. The `map` function is used to indicate that the clients who connect to the namespace `namespace` need the modules `...modules` to be activated (it starts the modules’ `.connect(client)` methods) and listen for the WebSocket messages from the client side. Additionally, it sets the title of the page (used in the `<title>` tag in the HTML `<head>` element) to `title` and routes the connections from the URL path `namespace` to the corresponding view (except for the namespace `'/player'`, that uses the root URL `/` instead of `/player`). More specifically:
   - a client connecting to the server through the URL `http://my.server.address:port/` would belong to the namespace `'/player'` and be mapped to the view `player.ejs`;
-  - a client connecting to the server through the URL `http://my.server.address:port/auxClient` would belong to the namespace `'/auxClient'` and be mapped to the view `auxClient.ejs`.
+  - a client connecting to the server through the URL `http://my.server.address:port/env` would belong to the namespace `'/env` and be mapped to the view `env.ejs`.
 
 ##### WebSocket communication
 
@@ -497,7 +460,7 @@ The `ClientDialog` module extends the `ClientModule` base class and displays a f
 ###### Attributes
 
 - `view:Element`  
-  The view is the `div` in which the content of the module is displayed.
+  The `view` attribute is the `div` in which the content of the module is displayed.
 
 ###### Methods
 
@@ -539,10 +502,12 @@ The `ClientLoader` module requires the SASS partial `sass/_07-loader.scss`.
 
 - `audioBuffers:Array = []`  
   The `audioBuffers` array contains the audio buffers created from the audio files passed in the `constructor`.
+- `view:Element`  
+  The `view` attribute is the `div` in which the content of the module is displayed.
 
 ###### Methods
 
-- `constructor(audioFiles:Array, options = {})`  
+- `constructor(audioFiles:Array, options:Object = {})`  
   The `constructor` method instantiates the `ClientLoader` module on the client side. It takes up to two arguments:
   - `audioFiles:Array`  
      The `audiofiles` array contains the links (`String`) to the audio files to be loaded. (The audio files should be in the `/public` folder of your project, or one of its subfolders.)
@@ -573,7 +538,7 @@ The `ClientOrientation` module extends the `ClientModule` base class and allows 
 - `angleReference:Number`  
   The `angleReference` attribute is the value of the `alpha` angle (as in the `deviceOrientation` HTML5 API) when the user clicks on the screen while the `ClientOrientation` module is displayed. It serves as a calibration / reference of the compass.
 - `view:Element`  
-  The view attribute is the `div` in which the content of the module is displayed.
+  The `view` attribute is the `div` in which the content of the module is displayed.
 
 ###### Methods
 
@@ -583,6 +548,22 @@ The `ClientOrientation` module extends the `ClientModule` base class and allows 
     The `color` property sets the background color of the `view` to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library’s `sass/_03-colors.scss` file.
   - `text:String = 'Point the phone exactly in front of you, and touch the screen.'`  
     The `text` property sets the instruction text to be displayed in the `view`.
+
+#### ClientPlatform
+
+The `ClientPlatform` module extends the `ClientModule` base class and checks if the device is compatible with the technologies used in Soundworks. Such devices are running on iOS 7 or above, or on Android 4.2 or above with the Chrome browser in version 35 or above. In all other cases, this module displays a blocking screen and prevents the participant to go any further in the scenario. The `ClientPlatform` module calls its `.done()` method immediately if the phone passes the platform test, or never otherwise.
+
+###### Attributes
+
+- `view:Element`  
+  The `view` attribute is the `div` in which the content of the module is displayed.
+
+###### Methods
+
+- `constructor(options:Object = {})`  
+  The `constructor` method instantiates the `ClientPlatform` module on the client side. It takes the `options` object as an argument, whose optional property is:
+  - `color:String = 'black'`  
+    The `color` property sets the background color of `this.view` to `color` thanks to a CSS class of the same name. `color` should be the name of a class as defined in the library’s `sass/_03-colors.scss` file.
 
 ### Server only modules
 
