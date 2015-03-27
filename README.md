@@ -503,7 +503,7 @@ For the sake of clarity, the methods of the `client` object are split into two g
 - `parallel(...modules:ClientModule) : ClientModule`
   The `ClientModule` returned by the `parallel` method starts the given `...modules` in parallel, and calls its `done` method after all modules are  `done`.
   **Note:** The view of a module is always full screen, so in the case of modules run in parallel, the view of all the modules are added to the DOM when the parallel module starts, and they are stacked on top of each other in the order of the arguments using the `z-index` CSS property.
-  You can compound parallel module combinations with serial module sequences (*e.g.* `client.parallel(module1, client.serial(module2, module3), module4)`);  
+  You can compound parallel module combinations with serial module sequences (*e.g.* `client.parallel(module1, client.serial(module2, module3), module4);`)  
 
 #### Server side: the `server` object
 
