@@ -32,7 +32,7 @@
 
 ## Overview & getting started
 
-*Soundworks* is a Javascript framework that enables artists and developers to create collaborative music performances where a group of players distributed in space use their mobile devices to generate sound and light through touch and motion.
+*Soundworks* is a Javascript framework that enables artists and developers to create collaborative music performances where a group of participants distributed in space use their mobile devices to generate sound and light through touch and motion.
 
 The framework is based on a client/server architecture supported by `Node.js` (`v0.12.0` or later) and WebSockets, and uses a modular design to make it easy to implement different performance scenarios: the [*Soundworks* template](https://github.com/collective-soundworks/soundworks-template) allows anyone to bootstrap a *Soundworks*-based scenario and focus on its audiovisual and interaction design instead of the infrastructure.
 
@@ -40,13 +40,13 @@ The framework is based on a client/server architecture supported by `Node.js` (`
 
 In order to connect the mobile devices with each other, *Soundworks* implements a client/server architecture using a `Node.js` server and WebSockets to pass messages between the server and the clients (currently with the `socket.io` library).
 
-In general, a *Soundworks* scenario allows different types of clients to connect to the server through different URLs. The most important kind clients are the mobile devices of the players who take part in the performance (we refer to this type of client as `player`). For convenience, a player connects to the server through the root URL of the application, `http://my.server.address:port/`.
+In general, a *Soundworks* scenario allows different types of clients to connect to the server through different URLs. The most important kind clients are the mobile devices of the participants who take part in the performance (we refer to this type of client as `player`). For convenience, a `player` client connects to the server through the root URL of the application, `http://my.server.address:port/`.
 
-In addition to the players, a scenario can include other kinds of clients such as:
+In addition to the `player` clients, a scenario can include other kinds of clients such as:
 - A device that provides an interface to control some parameters of the performance in real time. We would refer to this type of client as `conductor`. These clients would connect to the server through the URL `http://my.server.address:port/conductor`.
-- A device that generates "environmental" sound and/or light effects projected into the performance in sync with the players’ performance, such as lasers, a global visualization or ambient sounds on external loudspeakers. We would refer to this type of client as `env`. These clients would connect to the server through the URL `http://my.server.address:port/env`.
+- A device that generates "environmental" sound and/or light effects projected into the performance in sync with the participants’ performance, such as lasers, a global visualization or ambient sounds on external loudspeakers. We would refer to this type of client as `env`. These clients would connect to the server through the URL `http://my.server.address:port/env`.
 
-Clients that connect through the root URL (*e.g* `http://my.server.address:port/`) are considered as `player` clients. All other types of clients access the server through a URL that concatenates the root URL of the application and the name of the client type (*e.g* `http://my.server.address:port/conductor or `http://my.server.address:port/env``).
+Clients that connect through the root URL (*e.g* `http://my.server.address:port/`) are considered as `player` clients. All other types of clients access the server through a URL that concatenates the root URL of the application and the name of the client type (*e.g* `http://my.server.address:port/conductor or http://my.server.address:port/env`).
 
 ### Express app structure
 
@@ -88,9 +88,9 @@ A scenario should contain at least the `src/server/`, `src/player/` and `src/sas
 - The `src/player/` folder contains all the files that compose the `player` clients.
 - Finally, the `src/sass/` folder contains the SASS files to generate the CSS.
 
-To add an additional client type you have to create a subfolder (*e.g.* `src/env/` or `src/conductor/`) that contains a file `index.es6.js`. The command `client.init('env');` (respectively 'conductor') declares the client type and associates it to the URL `http://my.server.address:port/env` (respectively `http://my.server.address:port/conductor`).
+To add an additional client type you have to create a subfolder (*e.g.* `src/env/` or `src/conductor/`) that contains a file `index.es6.js`. The commands `client.init('env');` (or `client.init('conductor');`) declares the client type and associates it to the URL `http://my.server.address:port/env` (respectively `http://my.server.address:port/conductor`).
 
-To each client type corresponds an JS view file in `my-scenario/views’. The view file of the `player` clients (`my-scenario/views/player.ejs`) would look as follows:
+To each client type corresponds an JS view file in `my-scenario/views`. The view file of the `player` clients (`my-scenario/views/player.ejs`) would look as follows:
 
 ```html
 <!doctype html5>
@@ -127,7 +127,7 @@ A scenario built with *Soundworks* consists in a succession and combination of m
 
 On the client side, modules can be executed in a particular order according to a given application scenario and the involved interactions with the user. As an example, a scenario could provide the following interactions when a participant connects as `player` client to the application’s root URL:
 - The mobile devices displays a *welcome* message (*e.g.* "Welcome to the performance!"). When the participant clicks on the screen…
-- the client goes through a *check-in* procedure to register as player and the device may display some instructions. In the meantime, …
+- the client goes through a *check-in* procedure and the device may display some instructions. In the meantime, …
 - the client *synchronizes* its clock with the server. Finally, when these are done… 
 - the client joins the *performance*.
 
@@ -172,7 +172,7 @@ window.addEventListener('load', () => {
 
 To run a sequence of modules in series, we use `client.serial(module1, module2, ...)`. On the other hand, if some modules need to be run in parallel, we use `client.parallel(module1, module2, ...)`. (see [`client` object module logic](#module-logic)).
 
-For any other type of client such as `env` or `conductor`, the file would look very similar except that the client would be initialized with the corresponding client type and the included modules might be different. The `env` clients, for example, may require a `sync` and `performance` module, but do not need a `welcome` screen nor a player `checkin`.
+For any other type of client such as `env` or `conductor`, the file would look very similar except that the client would be initialized with the corresponding client type and the included modules might be different. The `env` clients, for example, may require a `sync` and `performance` module, but do not need a `welcome` screen nor a `checkin`.
 
 Some of the modules on the client side need to communicate with the server. The `sync` process, for example, requires a dialog between the client and the server to synchronize the clocks.
 
@@ -218,7 +218,7 @@ server.map('env', sync, envPerformance);
 
 After having set up the Express app and started the server, this code sequence creates the server side modules `checkin`, `sync`, and `performance` that respond client side modules of the example above. All three modules are mapped to the `player` (default) client type and consequently respond to the `player` clients connected via the root URL of the application. In addition, the `sync` module is mapped to the `env` client type together with a `performance` module for the `env` client(s).
 
-While all modules in this code sequence have a client and a server component, some modules might occur only on the client side. This is, for instance, the case for the `dialog` module in the player client setup above. The module only displays a welcome dialog to the participant that does not involve any interaction between the client and server.
+While all modules in this code sequence have a client and a server component, some modules might occur only on the client side. This is, for instance, the case for the `dialog` module in the example above. The module only displays a welcome dialog to the participant that does not involve any interaction between the client and server.
 
 ### Modules provided by the library
 
@@ -227,9 +227,9 @@ The *Soundworks* library provides a set of modules that are used in many scenari
 - [`loader`](#clientloader), pre-load a set of audio files required by the application (client side only)
 - [`orientation`](#clientorientation), compass calibration in interaction with the participant (client side only)
 - [`platform`](#clientplatform), check whether the client device and browser is capable to properly run the application and display a blocking dialog if not (client side only)
-- [`checkin`](#checkin), obtain a client index and, optionally, a position in a static setup
+- [`checkin`](#checkin), obtain a client index and, optionally, a set of coordinates in a static setup
 - [`control`](#control), synchronize the client clock to the server
-- [`setup`](#setup), load or generate the setup of a performance space including a surface (*i.e.* dimensions and outlines) and predefined positions (*e.g.* seats or labels on the floor)
+- [`setup`](#setup), load or generate the setup of a performance space including a surface (*i.e.* dimensions and outlines) and predefined positions (*i.e.* coordinates and labels)
 - [`sync`](#sync), synchronize the client clock to the server
 
 ### Implementing a module
@@ -249,9 +249,9 @@ The `start` method is called to start the module. It should handle the logic and
 
 The `done` method implemented by the `ClientModule` base class is called by the derived client module to hand over control to the next module. As an exception, the last module of the scenario (usually the `performance` module) may not call that method and keep the control until the client disconnects from the server. A derived client module must not override the `done` method provided by the base class.
 
-The purpose of the `ClientCheckin` module in the code example below is to assign an available client identifier (*i.e.* an index) each time a client connects to the server. When the module is configured with a `setup` that includes predefined positions and labels, it can automatically request an available positions and display the associated `label` to the player (in other configurations, the players alternatively could select their seat, or indicate their approximate position on a map).
+The purpose of the `ClientCheckin` module in the code example below is to assign an available client identifier (*i.e.* an index) each time a client connects to the server. When the module is configured with a `setup` that includes predefined positions (*i.e.* coordinates and labels), it can automatically request an available position and display the associated `label` to the participant (in other configurations, the participants alternatively could select a label, or indicate their approximate location on a map).
 
-In detail, the `start` method of the module sends a request to the `ServerCheckin` module via WebSockets, asking the server to send an available index and, optionally, a label of the corresponding seat. When it receives the response from the server, it either displays the label on the screen (*e.g.* "Please go to seat C5 and touch the screen.") and waits for the participant’s acknowledgement or immediately calls the method `done` to hand over the control to a subsequent module (generally the `performance`). The server may send an `unavailable` message in case that no more clients can be admitted to the performance, for example when all seats are taken. In this case, the applications ends on a blocking dialog ("Sorry, we cannot accept more players at the moment, ...") without calling the `done` method.
+In detail, the `start` method of the module sends a request to the `ServerCheckin` module via WebSockets, asking the server to send an available index and, optionally, the label of a corresponding prodefined position. When it receives the response from the server, it either displays the label on the screen (*e.g.* "Please go to C5 and touch the screen.") and waits for the participant’s acknowledgement or immediately calls the method `done` to hand over the control to a subsequent module (generally the `performance`). The server may send an `unavailable` message in case that no more clients can be admitted to the performance, for example when all predefined positions are taken. In this case, the applications ends on a blocking dialog ("Sorry, we cannot accept more players at the moment, ...") without calling the `done` method.
 
 ```javascript
 // Client side (get client object)
@@ -275,7 +275,7 @@ class ClientCheckin extends ClientModule {
       
       if(label) {
         // display the label in a dialog
-        this.setCenteredViewContent("<p>Please go to seat " + label + " and touch the screen.<p>");
+        this.setCenteredViewContent("<p>Please go to " + label + " and touch the screen.<p>");
 
         // call done when the participant acknowledges the dialog
         this.view.addEventListener('click', () => this.done());
@@ -286,7 +286,7 @@ class ClientCheckin extends ClientModule {
 
     // no player index available
     client.receive('checkin:unavailable', () => {
-      this.setCenteredViewContent("<p>Sorry, we cannot accept more players at the moment, please try again later.</p>");
+      this.setCenteredViewContent("<p>Sorry, we cannot accept more connections at the moment, please try again later.</p>");
     });
   }
 
@@ -307,9 +307,9 @@ When a client `client` of a particular type connects to the server via the corre
 
 Similarly, the `disconnect` method is called whenever the client `client` disconnects from the server. It handles all the actions that are necessary in that case.
 
-In our simplified `ServerCheckin` module example, the `connect` method has to install a listener that – on the request of the client – would obtain an available player index and send it back to the client. If the module has been configured with a setup predefining a number of seats, the server additionally sends the label of the seat corresponding to the index. In this case, the maximum number of players is determined by the number of seas defined by the setup. 
+In our simplified `ServerCheckin` module example, the `connect` method has to install a listener that – on the request of the client – would obtain an available client index and send it back to the client. If the module has been configured with a setup predefining a certain number of positions, the server additionally sends the label of the position corresponding to the index. In this case, the maximum number of clients is determined by the number of seas defined by the setup. 
 
-The `disconnect` method has to release the player index so that it can be reused by another client that connects to the server.
+The `disconnect` method has to release the client index so that it can be reused by another client that connects to the server.
 
 ```javascript
 // Server side (require the Soundworks library server side)
@@ -321,14 +321,14 @@ class ServerCheckin extends serverSide.Module {
     
     // store setup
     this.setup = options.setup || null;
-    this.maxPlayers = options.maxPlayers || Infinity;
+    this.maxClients = options.maxClients || Infinity;
 
-    // clip max number of players 
+    // clip max number of clients 
     if(setup) {
-      var numPlaces = setup.numPlaces;
+      var numPositions = setup.getNumPositions();
 
-      if(this.maxPlayers > numPlaces)
-        this.maxPlayers = numPlaces;
+      if(this.maxClients > numPositions)
+        this.maxClients = numPositions;
     }
   }
 
@@ -344,22 +344,22 @@ class ServerCheckin extends serverSide.Module {
         var label = undefined;
 
         if(this.setup) {
-          // get a seat label
+          // get a label@
           let label = this.setup.getLabel(index);
 
-          // get player position according to the setup
-          client.position = this.setup.getPosition(index);
+          // get client coordinates according to the setup
+          client.coordinates = this.setup.getCoordinates(index);
         }
 
         // acknowledge check-in to client
         client.send('checkin:acknowledge', index, label);
       } else {
-        // no player indices available
+        // no client indices available
         client.send('checkin:unavailable');
       }
 
     disconnect(client) {
-      // release player index
+      // release client index
       this._releaseIndex(client.index);
     });
   }
@@ -377,7 +377,7 @@ The *Soundworks* library provides the base classes `ClientPerformance` and `Serv
 
 On the client side, the `start` method of the `performance` module derived from `ClientPerformance` is called when the client enters the performance. On the server side, the `ServerPerformance` class provides the methods `enter` and `exit` that are called when a client enters or exits the performance. The `exit` method is called when the client side module of a given client calls the `done` method or if a client disconnects from the application. In addition, `ServerPerformance` maintains an array of clients that entered the performance as the `clients` attribute.
 
-In the following example of a *very* simple performance module. In this scenario, the player's device plays a welcome sound when it joins the performance and another sound when another player joins.
+In the following example of a *very* simple performance module. In this scenario, the participant's device plays a welcome sound when it joins the performance and another sound when another participant joins the performance.
 
 ```javascript
 class MyPerformance extends clientSide.Performance {
@@ -405,7 +405,7 @@ class MyPerformance extends clientSide.Performance {
       src.connect(audioContext.destination);
       src.start(audioContext.currentTime);
 
-      // Since the performance does not end before the player disconnects,
+      // Since the performance does not end before the client disconnects,
          this module does not call the .done() method.
     });
   }
@@ -422,7 +422,7 @@ class MyPerformance extends serverSide.Performance {
   enter(client) {
     super.enter(client); // don't forget this
 
-    // send a play message to all other player clients
+    // send a play message to all other clients
     client.broadcast('performance:play'); 
   }
 }
@@ -547,8 +547,8 @@ The `ServerClient` module is used to keep track of the connected clients and to 
   The `type` attribute stores the type of the client. This is the client type that is specified when initializing the `client` object  on the client side with `client.init(clientType);` (generally at the very beginning of the Javascript file your write).
 - `index:Number = 0`
   The `index` attribute stores the index of the client as set by the `ServerCheckin` module (see [`ServerCheckin` module](#servercheckin)).
-- `position:Array = null`
-  The `position` attribute stores the position of the client as an [x, y] array (see [`ServerCheckin` module](#servercheckin)).
+- `coordinates:Array = null`
+  The `coordinates` attribute stores the coordinates of the client as an [x, y] array (see [`ServerCheckin` module](#servercheckin)).
 - `modules:Object = {}`  
   The `modules` property is used by any module to associate data to a particular client. Each module prefixes the properties that it associates to a client by the module's name (the prefix is created by the 'ServerModule' base class – see [`ServerModule`](#servermodule)). For instance, if the `sync` module keeps track of the time offset between the client’s and the server's clock, it would store the information in `this.modules.sync.timeOffset`. Similarly, if the `performance` module needs some kind of flag for each client, it would store this information in `this.modules.performance.flag`.
 
@@ -784,11 +784,11 @@ The `ClientPlatform` module checks whether the device is compatible with the tec
 
 #### Checkin
 
-The `Checkin` module is responsible for keeping track of the connected clients by assigning them indices within the range of the available places in the scenario and, optionally, a position in the performance space. In case that the scenario is based on predefined positions (*i.e.* a `setup`), the indices correspond to the indices of seats that are either automatically assigned or selected by the participants.
+The `Checkin` module is responsible for keeping track of the connected clients by assigning them indices. In case that the scenario is based on predefined positions (*i.e.* a `setup`), the indices correspond to the indices of positions that can be either assigned automatically or selected by the participants.
 
-For instance, say that the scenario requires 12 players who sit on a grid of 3 ⨉ 4 predefined positions. When a client connects to the server, the `Checkin` module could assign the client a position on the grid that is not occupied yet. The application can indicate the participant a label that is associated with the assigned position. Similarly, if the scenario takes place in a theater with labeled seats, the `Checkin` module would allow the participants to indicate their seat by its label (*e.g.* a row and a number). If the scenario does not require the players to sit at particular locations, the `Checkin` module would just assign them arbitrary indices within the range of total number of users this scenario supports.
+For instance, say that the scenario requires 12 participants who sit on a grid of 3 ⨉ 4 predefined positions. When a client connects to the server, the `Checkin` module could assign the client a position on the grid that is not occupied yet. The application can indicate the participant a label that is associated with the assigned position. Similarly, if the scenario takes place in a theater with labeled seats, the `Checkin` module would allow the participants to indicate their seat by its label (*e.g.* a row and a number). If the scenario does not require the participants to sit at particular locations, the `Checkin` module would just assign them arbitrary indices within the range of total number of users this scenario supports.
 
-Alternatively, when configuring the module adequately, the module can assign arbitrary indices to the the participants and request that they indicate their approximate positions in the performance space on a map.
+Alternatively, when configuring the module adequately, the module can assign arbitrary indices to the the participants and request that they indicate their approximate location in the performance space on a map.
 
 The `ClientCheckin` module requires the SASS partial `sass/_05-checkin.scss`.
 
@@ -804,8 +804,8 @@ The `ClientCheckin` module extends the `ClientModule` base class and takes care 
   - `color:String = 'black'`, the `viewColor` of the module
   - `select:String = 'automatic'`, mode of index and position selection, the following values are accepted:
     - 'automatic', the index is selected automatically, no position is attributed, in case that the index is associated with a label (requires a predefined `setup` on the server side), the label is indicated to the participant via a dialog
-    - 'label', the participant can select a label associated with an index and a position via a dialog (requires a predefined `setup` on the server side)
-    - 'position', the index is attributed automatically, the participant can indicate an approximate position on a map via a dialog
+    - 'label', the participant can select a label associated with a predefined position via a dialog (requires a predefined `setup` on the server side)
+    - 'location', the index is attributed automatically, the participant can indicate an approximate location on a map via a dialog
   - `order:String = 'ascending'`, order of automatic index selection
     - 'ascending', available indices are selected in ascending order
     - 'random', available indices are selected in random order (not available when the maximum number of clients exceeds 1000)
@@ -826,7 +826,7 @@ The `ServerCheckin` extends the `ServerModule` base class and takes care of the 
 - `constructor(options:Object = {})`  
   The `constructor` accepts the following `options`:
   - `setup:ServerSetup = null`, predefined setup of the performance space (see [`ServerSetup` class])
-  - `maxPlayers:Number = Infinity`, maximum number of players supported by the scenario (the acutal maximum number of players might be limited to the number of predefined positions or labels of a given `setup`)
+  - `maxClients:Number = Infinity`, maximum number of clients supported by the scenario (the actual maximum number of clients might be limited to the number of predefined positions of a given `setup`)
 
 Below is an example of the instantiation of the `ServerCheckin` module on the server side.
 
@@ -839,15 +839,15 @@ var setup = new serverSide.Setup();
 setup.generate('matrix', { cols: 3, rows: 4 }).
 var checkin = new serverSide.Checkin({ setup: setup });
 
-// Case 2: the scenario does not have a predefined setup, but specifies a maximum number of players
-var checkin = new serverSide.Checkin({ numPlaces: 500 });
+// Case 2: the scenario does not have a predefined setup, but specifies a maximum number of clients
+var checkin = new serverSide.Checkin({ maxClients: 500 });
 ```
 
 #### Control
 
 The `Control` module is used to control an application through a dedicated client that we usually call `conductor`. The module allows for declaring `parameters`, `infos`, and `commands`, through which the `conductor` can control and monitor the state of the application:
 - `parameters` are values that are changed by a client, send to the server, and propagated to the other connected clients (*e.g.* the tempo of a musical application)
-- `infos` are values that are changed by the server and propagated to the connected clients,to inform about the current state of the application (*e.g.* the number of connected players)
+- `infos` are values that are changed by the server and propagated to the connected clients, to inform about the current state of the application (*e.g.* the number of connected `player` clients)
 - `commands` are messages (without arguments) that are send from the client to the server (*e.g.* `start`, `stop` or `clear` – whatever they would mean for a given application)
 
 A `ClientControl` module, optionally, can automatically construct a simple interface from the list of declared controls that permits to change `parameters`, display `infos`, and to send `commands` to the server:
@@ -927,7 +927,7 @@ The `ServerControl` module extends the `ServerModule` base class and takes care 
 
 The `Setup` module contains the information about the setup of the performance space in terms of it surface (*i.e.* dimensions and outlines) and predefined positions (*e.g.* seats or labels on the floor) where the scenario takes place.
 
-For instance, say that the scenario requires 12 players who sitting on teh floor on a grid of 3 ⨉ 4 pillows, the `Setup` module would contain the information about the grid, including the pillows' locations in space and labels. Similarly, if the scenario takes place in a theater where seats are numbered, the `Setup` module would contain the seating plan.
+For instance, say that the scenario requires 12 participants sitting on the floor on a grid of 3 ⨉ 4 positions, the `Setup` module would contain the information about the grid, including the positions' coordinates in space and labels. Similarly, if the scenario takes place in a theater where seats are numbered, the `Setup` module would contain the seating plan.
 
 If the topography of the performance space does not matter for a given scenario, the `Setup` module is not needed.
 
@@ -986,8 +986,8 @@ The `ServerSetup` extends the `ServerModule` base class and takes care of the se
   The `getNumPositions` method returns the total number of predefined positions and/or labels of the setup. For instance, if the setup is a 4 ⨉ 5 matrix the method would return *20*
 - `getLabel(index:Number) : String`  
   The `getLabel` method returns a `String` corresponding to the label associated with the predefined position at the given index in the setup.
-- `getPosition(index:Number) : Array`  
-  The `getPosition` returns an array with the coordinates of the predefined predefined position at the given index in the setup.
+- `getCoordinates(index:Number) : Array`  
+  The `getCoordinates` returns an array with the coordinates of the predefined position at the given index in the setup.
 
 Below is an example of the instantiation of the `ServerSetup` module on the server side.
 
@@ -1071,4 +1071,3 @@ var sync = new serverSide.Sync();
 // get sync time
 var nowSync = sync.getSyncTime(); // current time in the sync clock time
 ```
-
