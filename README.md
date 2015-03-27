@@ -16,8 +16,8 @@
     - [Server side: the `server` object](#server-side-the-server-object)
     - [`ServerClient`](#serverclient)
   - [Base classes](#base-classes)
-    - [`Module`](#module)
-    - [`Performance`](#performance)
+    - [The `Module` base class](#the-module-base-class)
+    - [The `Performance` base class](#the-performance-base-class)
   - [Client only modules](#client-only-modules)
     - [`ClientDialog`](#clientdialog)
     - [`ClientLoader`](#clientloader)
@@ -502,7 +502,7 @@ For the sake of clarity, the methods of the `client` object are split into two g
   The `serial` method returns a `ClientModule` that starts the given `...modules` in series. After having started the first module, the next module in the series is started when the last module called its `done` method. When the last module calls `done`, the returned serial module calls its own `done` method.
 - `parallel(...modules:ClientModule) : ClientModule`
   The `ClientModule` returned by the `parallel` method starts the given `...modules` in parallel, and calls its `done` method after all modules are  `done`.
-  **Note:** The `view` of a module is always full screen, so in the case of modules run in parallel, the `view`s of all the modules are added to the DOM when the parallel module starts, and they are stacked on top of each other in the order of the arguments using the `z-index` CSS property.
+  **Note:** The view of a module is always full screen, so in the case of modules run in parallel, the view of all the modules are added to the DOM when the parallel module starts, and they are stacked on top of each other in the order of the arguments using the `z-index` CSS property.
   You can compound parallel module combinations with serial module sequences (*e.g.* `client.parallel(module1, client.serial(module2, module3), module4)`);  
 
 #### Server side: the `server` object
@@ -558,7 +558,7 @@ The `Module` server and client classes are the base classes that any *Soundworks
 
 ##### ClientModule
 
-The `ClientModule` extends the `EventEmitter` class. Each module should have a `start` and a `done` method, as explained in the [Implementing a module](#implementing-a-module) section. The `done` method must be called when the module can hand over the control to the subsequent modules (*i.e.* when the module has done its duty, or when it has to run in the background for the rest of the scenario after it finished its initialization process). The base class optionally creates a `view` – a fullscreen DOM element (*i.e.* a `div`) accessible through the `view` attribute – that is added to the DOM when the module is started and removed when the module calls done.
+The `ClientModule` extends the `EventEmitter` class. Each module should have a `start` and a `done` method, as explained in the [Implementing a module](#implementing-a-module) section. The `done` method must be called when the module can hand over the control to the subsequent modules (*i.e.* when the module has done its duty, or when it has to run in the background for the rest of the scenario after it finished its initialization process). The base class optionally creates a view – a fullscreen DOM element (*i.e.* a `div`) accessible through the `view` attribute – that is added to the DOM when the module is started and removed when the module calls done.
 
 Any module that extends the `ClientModule` class requires the SASS partial `sass/general.scss`.
 
@@ -570,18 +570,18 @@ Any module that extends the `ClientModule` class requires the SASS partial `sass
   - `hasView:Boolean = true`, determines whether the module creates the `view` DOM element
   - `viewColor`, background color of the module's view (class name defined in the library’s `sass/_03-colors.scss` file)
 - `start()`  
-  The `start` method is called to start the module, and should handle the logic of the module on the client side. For instance, it takes care of the communication with the module on the server side by sending WebSocket messages and setting up WebSocket message listeners. If the module has a `view`, the `start` method creates the corresponding HTML element and appends it to the DOM’s main container `div`.
+  The `start` method is called to start the module, and should handle the logic of the module on the client side. For instance, it takes care of the communication with the module on the server side by sending WebSocket messages and setting up WebSocket message listeners. If the module has a view, the `start` method creates the corresponding HTML element and appends it to the DOM’s main container `div`.
 - `done()`  
-  The `done` method should be called when the module has done its duty (for instance at the end of the `start` method you write). You should not have to modify this method, but if you do, don’t forget to include `super.done()` at the beginning of the method. If the module has a `view`, the `done` method removes it from the DOM.
+  The `done` method should be called when the module has done its duty (for instance at the end of the `start` method you write). You should not have to modify this method, but if you do, don’t forget to include `super.done()` at the beginning of the method. If the module has a view, the `done` method removes it from the DOM.
 - `setCenteredViewContent(htmlContent:String)`  
-  The `setCenteredViewContent` set an arbitrary centered HTM content to the module's view. The method should be called only if the module has a `view`.
+  The `setCenteredViewContent` set an arbitrary centered HTM content to the module's view. The method should be called only if the module has a view.
 - `removeCenteredViewContent()`  
   The `removeCenteredViewContent` method removes the centered HTML content set by `setCenteredViewContent` from the DOM.
 
 ###### Attributes
 
 - `view = null`  
-  The `view` attribute of the module is the DOM element (a full screen `div`) in which the content of the module is displayed. This element is a child of the main container (`<div id='container' class='container'></div>`), which is the only child of the `body` element. A module may or may not have a `view`, as indicated by the argument `hasView:Boolean` of the `constructor`. When that is the case, the `view` is created and added to the DOM when the `start` method is called, and is removed from the DOM when the `done` method is called.
+  The `view` attribute of the module is the DOM element (a full screen `div`) in which the content of the module is displayed. This element is a child of the main container (`<div id='container' class='container'></div>`), which is the only child of the `body` element. A module may or may not have a view, as indicated by the argument `hasView:Boolean` of the `constructor`. When that is the case, the view is created and added to the DOM when the `start` method is called, and is removed from the DOM when the `done` method is called.
 
 In practice, here is an example of how you would extend this class to create a module on the client side.
 
@@ -692,7 +692,7 @@ The `ServerPerformance` module extends the `ServerModule` base class and constit
 
 #### ClientDialog
 
-The `ClientDialog` displays a full screen dialog. It requires the participant to tap the screen to make the `view` disappear. The module is also used at the very beginning of a scenario to activate the Web Audio API on iOS devices (option `activateWebAudio). The `ClientDialog` module calls its `done` method when the participant taps on the screen.
+The `ClientDialog` displays a full screen dialog. It requires the participant to tap the screen to make the view disappear. The module is also used at the very beginning of a scenario to activate the Web Audio API on iOS devices (option `activateWebAudio). The `ClientDialog` module calls its `done` method when the participant taps on the screen.
 
 ###### Methods
 
@@ -703,7 +703,7 @@ The `ClientDialog` displays a full screen dialog. It requires the participant to
   - `text:String` = "Hello!", text to be displayed in the dialog.
   - `activateAudio:Boolean = false`, whether the module activates the Web Audio API when the participant touches the screen (useful on iOS devices)
 
-For instance, the following code would generate the `view` HTML content shown below when the module starts:
+For instance, the following code would generate the HTML content shown below in the module's view when the module starts:
 
 ```javascript
 var welcomeDialog = new ClientDialog({
@@ -721,7 +721,7 @@ var welcomeDialog = new ClientDialog({
 
 #### ClientLoader
 
-The `ClientLoader` module allows for loading audio files that can be used in the scenario (for instance, by the `performance` module). The `Loader` module has a `view` that displays a loading bar indicating the progress of the loading. The `ClientLoader` module calls its `done` method when all the files are loaded.
+The `ClientLoader` module allows for loading audio files that can be used in the scenario (for instance, by the `performance` module). The `Loader` module has a view that displays a loading bar indicating the progress of the loading. The `ClientLoader` module calls its `done` method when all the files are loaded.
 
 The `ClientLoader` module requires the SASS partial `sass/_07-loader.scss`.
 
@@ -753,7 +753,7 @@ var snareBuffer = loader.audioBuffers[1];
 
 #### ClientOrientation
 
-The `ClientOrientation` module extends the `ClientModule` base class and allows for calibrating the compass and get an angle reference. It displays a `view` with an instruction text. When the user points at the right direction for the calibration, touching the screen of the phone (*i.e.* on the `view`) would set the current compass value as the angle reference. The `ClientOrientation` module calls its `done` method when the participant touches the screen.
+The `ClientOrientation` module extends the `ClientModule` base class and allows for calibrating the compass and get an angle reference. It displays a view with an instruction text. When the user points at the right direction for the calibration, touching the screen of the phone (*i.e.* on the view) would set the current compass value as the angle reference. The `ClientOrientation` module calls its `done` method when the participant touches the screen.
 
 ###### Methods
 
@@ -864,7 +864,7 @@ The `ClientControl` module extends the `ClientModule` base class and takes care 
   - `name:String = 'control'`, the name of the module
   - `color:String = 'black'`, the `viewColor` of the module
   - `gui:Boolean = false`  
-    When set to `true` , the `gui` property makes the `ClientControl` to create a `view` with a graphical control interface that is automatically built from a list of controls sent by the client.
+    When set to `true` , the `gui` property makes the `ClientControl` to create a view with a graphical control interface that is automatically built from a list of controls sent by the client.
 
 ###### Attributes
 
@@ -1012,7 +1012,7 @@ On the client side, `ClientSync` uses the `audioContext` clock. On the server si
 
 ##### ClientSync
 
-The `ClientSync` module extends the `ClientModule` base class and takes care of the synchronization process on the client side. It displays a `view` that indicates "Clock syncing, stand by…" until the very first synchronization process is done. The `ClientSync` module calls its `done` method as soon as the client clock is in sync with the sync clock. Then, the synchronization process keeps running in the background to resynchronize the clocks from times to times. When such a resynchronization happens, the `ClientSync` module emits a `'sync:stats'` event associated with information about the synchronization.
+The `ClientSync` module extends the `ClientModule` base class and takes care of the synchronization process on the client side. It displays a view that indicates "Clock syncing, stand by…" until the very first synchronization process is done. The `ClientSync` module calls its `done` method as soon as the client clock is in sync with the sync clock. Then, the synchronization process keeps running in the background to resynchronize the clocks from times to times. When such a resynchronization happens, the `ClientSync` module emits a `'sync:stats'` event associated with information about the synchronization.
 
 ###### Methods
 
@@ -1071,3 +1071,4 @@ var sync = new serverSide.Sync();
 // get sync time
 var nowSync = sync.getSyncTime(); // current time in the sync clock time
 ```
+
