@@ -15,7 +15,7 @@
     - [Client side: the `client` object](#client-side-the-client-object)
     - [Server side: the `server` object](#server-side-the-server-object)
   - [Basic/base classes](#basicbase-classes)
-    - [The `ServerClient` class](#serverclient)
+    - [The `ServerClient` class](#the-serverclient-class)
     - [The `Module` base class](#the-module-base-class)
     - [The `Performance` base class](#the-performance-base-class)
   - [Client only modules](#client-only-modules)
