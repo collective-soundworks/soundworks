@@ -566,7 +566,7 @@ Any module that extends the `ClientModule` class requires the SASS partial `sass
 
 - `constructor(name:String, hasView:Boolean = true, viewColor:String = 'black')`  
   The `constructor` accepts up to three arguments:
-  - `name:String`, name of the module that is also the identifier and class of the module's `view` DOM element. (<div id='name' class='module name'></div>`)
+  - `name:String`, name of the module that is also the identifier and class of the module's `view` DOM element. (`<div id='name' class='module name'></div>`)
   - `hasView:Boolean = true`, determines whether the module creates the `view` DOM element
   - `viewColor`, background color of the module's view (class name defined in the library’s `sass/_03-colors.scss` file)
 - `start()`  
