@@ -1002,7 +1002,7 @@ setup.generate('matrix', { cols: 4, rows: 5 });
 
 #### Sync
 
-The `Sync` module is based on the class [`github.com/collective-soundworks/sync`](https://github.com/collective-soundworks/sync) and is responsible for synchronizing the clients’ clocks and the server clock on a common clock called "sync clock". Both, the clients and the server, can use this shared clock as a common time reference.
+The `Sync` module is based on [`github.com/collective-soundworks/sync`](https://github.com/collective-soundworks/sync) and is responsible for synchronizing the clients’ clocks and the server clock on a common clock called "sync clock". Both, the clients and the server, can use this shared clock as a common time reference.
 
 For instance, this allows all the clients to do something exactly at the same time, such as blinking the screen or playing a sound in a synchronized manner.
 
