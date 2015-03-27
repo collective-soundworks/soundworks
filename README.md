@@ -566,9 +566,9 @@ Any module that extends the `ClientModule` class requires the SASS partial `sass
 
 - `constructor(name:String, hasView:Boolean = true, viewColor:String = 'black')`  
   The `constructor` accepts up to three arguments:
-  - `name:String`, name of the module that is also the identifier and class of the module's `view` DOM element (`<div id='name' class='module name'></div>`).
+  - `name:String`, name of the module that is also the identifier and class of the module's `view` DOM element (`<div id='name' class='module name'></div>`)
   - `hasView:Boolean = true`, determines whether the module creates the `view` DOM element
-  - `viewColor`, background color of the module's view (class name defined in the library’s `sass/_03-colors.scss` file)
+  - `viewColor = 'black'`, background color of the module's view (class name defined in the library’s `sass/_03-colors.scss` file)
 - `start()`  
   The `start` method is called to start the module, and should handle the logic of the module on the client side. For instance, it takes care of the communication with the module on the server side by sending WebSocket messages and setting up WebSocket message listeners. If the module has a view, the `start` method creates the corresponding HTML element and appends it to the DOM’s main container `div`.
 - `done()`  
