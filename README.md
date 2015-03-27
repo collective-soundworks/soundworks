@@ -14,8 +14,8 @@
   - [Core objects](#core-objects)
     - [Client side: the `client` object](#client-side-the-client-object)
     - [Server side: the `server` object](#server-side-the-server-object)
-    - [`ServerClient`](#serverclient)
-  - [Base classes](#base-classes)
+  - [Basic/base classes](#basicbase-classes)
+    - [The `ServerClient` class](#serverclient)
     - [The `Module` base class](#the-module-base-class)
     - [The `Performance` base class](#the-performance-base-class)
   - [Client only modules](#client-only-modules)
@@ -526,7 +526,9 @@ For the sake of clarity, the methods of `server` are split into two groups.
   The `broadcast` method sends the message `msg` and any number of values `...args` (of any type) to all the clients of the given type through WebSockets.  
   **Note:** on the client side, the clients receive the message with the command `client.receive(msg:String, callback:Function)`, where the `callback` function would take `...args` as arguments (see the [`client` object WebSocket communication](#initialization-and-websocket-communication) section above).
 
-#### ServerClient
+### Basic/base classes
+
+#### The ServerClient class
 
 The `ServerClient` module is used to keep track of the connected clients and to communicate with the corresponding client via WebSockets (see the [`client` object WebSocket communication](#initialization-and-websocket-communication) section above). Each time a client connects to the server, *Soundworks* creates an instance of `ServerClient`. 
 
@@ -549,8 +551,6 @@ The `ServerClient` module is used to keep track of the connected clients and to 
   The `position` attribute stores the position of the client as an [x, y] array (see [`ServerCheckin` module](#servercheckin)).
 - `modules:Object = {}`  
   The `modules` property is used by any module to associate data to a particular client. Each module prefixes the properties that it associates to a client by the module's name (the prefix is created by the 'ServerModule' base class – see [`ServerModule`](#servermodule)). For instance, if the `sync` module keeps track of the time offset between the client’s and the server's clock, it would store the information in `this.modules.sync.timeOffset`. Similarly, if the `performance` module needs some kind of flag for each client, it would store this information in `this.modules.performance.flag`.
-
-### Module base classes
 
 #### The `Module` base class
 
