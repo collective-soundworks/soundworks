@@ -1057,8 +1057,6 @@ The `ServerSync` module extends the `ServerModule` base class and takes care of 
 - `getSyncTime() : Number`  
   The `getSyncTime` method returns the current sync time (in seconds, derived from process.hrtime).
 
-**Note:** in practice, the sync clock used by [`sync`](https://github.com/collective-soundworks/sync) is the server clock. In *Soundworks*’ `Sync` module, it is the the `` server clock.
-
 Below is an example of the instantiation of the `Sync` module on the server side.
 
 ```javascript
