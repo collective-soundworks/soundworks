@@ -453,16 +453,13 @@ This section explains how to use the objects and classes of the library. In part
 
 We start with the core elements on the client side ([`client` object](#client-side-the-client-object)) and on the server side ([`server` object](#server-side-the-server-object)) before focusing on the classes that form the modules.
 
-Some classes are only present on the [client side](#client-only-modules):
+Some modules are only present on the [client side](#client-only-modules):
 - [`Dialog`](#clientdialog)
 - [`Platform`](#clientplatform)
 - [`Loader`](#clientloader)
 - [`Orientation`](#clientorientation)
 
-Others are only present on the [server side](#server-only-modules):
-- [`Client`](#serverclient)
-
-The rest of the classes require both the [client **and** server sides](#client-and-server-modules):
+Others require both the [client **and** server sides](#client-and-server-modules):
 - [`Checkin`](#checkin)
 - [`Control`](#control)
 - [`Module`](#module)
@@ -487,7 +484,7 @@ For the sake of clarity, the methods of the `client` object are split into two g
   The `init` method sets the client type and initializes a WebSocket connection associated with the given type.
 - `send(msg:Object, ...args:Any)`  
   The `send` method  sends the message `msg` and any number of values `...args` (of any type) to the server through WebSockets.  
-  **Note:** on the server side, the server receives the message with the command `ServerClient.receive(msg:String, callback:Function)` (see the [`ServerClient` module methods](#serverclient) below).
+  **Note:** on the server side, the server receives the message with the command `ServerClient.receive(msg:String, callback:Function)` (see the [`ServerClient` module methods](#the-serverclient-class) below).
 - `receive(msg:Object, callback:Function)`  
   The `receive` method executes the callback function `callback` when it receives the message `msg` sent by the server.  
   **Note:** on the server side, the server sends the message with the command `server.send(msg:String, ...args:Any)` (see the [`server` object WebSocket communication](#websocket-communication) section below).
@@ -530,7 +527,7 @@ For the sake of clarity, the methods of `server` are split into two groups.
 
 #### The ServerClient class
 
-The `ServerClient` module is used to keep track of the connected clients and to communicate with the corresponding client via WebSockets (see the [`client` object WebSocket communication](#initialization-and-websocket-communication) section above). Each time a client connects to the server, *Soundworks* creates an instance of `ServerClient`. 
+The `ServerClient` module is used to keep track of the connected clients and to communicate with the corresponding client via WebSockets (see the [`client` object WebSocket communication](#initialization-and-websocket-communication) section above). Each time a client connects to the server, *Soundworks* creates an instance of `ServerClient`. An instance of the class is passed to the `connect` and `disconnect` of the server side modules as well as to the `enter` and `exit` method of the `performance` class.
 
 ###### Methods
 
