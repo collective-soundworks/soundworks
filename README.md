@@ -809,6 +809,7 @@ The `ClientCheckin` module extends the `ClientModule` base class and takes care 
   - `order:String = 'ascending'`, order of automatic index selection
     - 'ascending', available indices are selected in ascending order
     - 'random', available indices are selected in random order (not available when the maximum number of clients exceeds 1000)
+  - `instructions:Function = defaultInstructions`, function(label:String) : String, that generates the HTML code of the instructions displayed to the participant, called when the index is selected automatically and the selection uses a setup with predefined positions (see [`ServerCheckin`](#servercheckin)), with the `label` associated to the selected position as argument
 
 Below is an example of an instantiation of the `ClientCheckin` module that displays the dialog on the client side.
 
