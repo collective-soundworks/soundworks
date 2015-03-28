@@ -249,9 +249,9 @@ The `start` method is called to start the module. It should handle the logic and
 
 The `done` method implemented by the `ClientModule` base class is called by the derived client module to hand over control to the next module. As an exception, the last module of the scenario (usually the `performance` module) may not call that method and keep the control until the client disconnects from the server. A derived client module must not override the `done` method provided by the base class.
 
-The purpose of the `ClientCheckin` module in the code example below is to assign an available client identifier (*i.e.* an index) each time a client connects to the server. When the module is configured with a `setup` that includes predefined positions (*i.e.* coordinates and labels), it can automatically request an available position and display the associated `label` to the participant (in other configurations, the participants alternatively could select a label, or indicate their approximate location on a map).
+The purpose of the `ClientCheckin` module in the code example below is to assign an available index to a client each time a new client connects to the server. When the module is configured with a `setup` that includes predefined positions (*i.e.* coordinates and labels), it can automatically request an available position and display the associated `label` to the participant (in other configurations, the participants alternatively could select a label, or indicate their approximate location on a map).
 
-In detail, the `start` method of the module sends a request to the `ServerCheckin` module via WebSockets, asking the server to send an available index and, optionally, the label of a corresponding prodefined position. When it receives the response from the server, it either displays the label on the screen (*e.g.* "Please go to C5 and touch the screen.") and waits for the participant’s acknowledgement or immediately calls the method `done` to hand over the control to a subsequent module (generally the `performance`). The server may send an `unavailable` message in case that no more clients can be admitted to the performance, for example when all predefined positions are taken. In this case, the applications ends on a blocking dialog ("Sorry, we cannot accept more players at the moment, ...") without calling the `done` method.
+In detail, the `start` method of the module sends a request to the `ServerCheckin` module via WebSockets, asking the server to send an available client index and, optionally, the label of a corresponding prodefined position. When it receives the response from the server, it either displays the label on the screen (*e.g.* "Please go to C5 and touch the screen.") and waits for the participant’s acknowledgement or immediately calls the method `done` to hand over the control to a subsequent module (generally the `performance`). The server may send an `unavailable` message in case that no more clients can be admitted to the performance, for example when all predefined positions are taken. In this case, the applications ends on a blocking dialog ("Sorry, we cannot accept more players at the moment, ...") without calling the `done` method.
 
 ```javascript
 // Client side (get client object)
@@ -266,10 +266,10 @@ class ClientCheckin extends ClientModule {
   start() {
     super.start(); // call base class start method (don’t forget!)
 
-    // request an available player index from the server
+    // request an available client index from the server
     client.send('checkin:request');
 
-    // receive acknowledgement with player index and optional label
+    // receive acknowledgement with client index and optional label
     client.receive('checkin:acknowledge', (index, label) => {
       client.index = index;
       
@@ -284,7 +284,7 @@ class ClientCheckin extends ClientModule {
       }
     }
 
-    // no player index available
+    // no client index available
     client.receive('checkin:unavailable', () => {
       this.setCenteredViewContent("<p>Sorry, we cannot accept more connections at the moment, please try again later.</p>");
     });
@@ -307,7 +307,7 @@ When a client `client` of a particular type connects to the server via the corre
 
 Similarly, the `disconnect` method is called whenever the client `client` disconnects from the server. It handles all the actions that are necessary in that case.
 
-In our simplified `ServerCheckin` module example, the `connect` method has to install a listener that – on the request of the client – would obtain an available client index and send it back to the client. If the module has been configured with a setup predefining a certain number of positions, the server additionally sends the label of the position corresponding to the index. In this case, the maximum number of clients is determined by the number of seas defined by the setup. 
+In our simplified `ServerCheckin` module example, the `connect` method has to install a listener that – on the request of the client – would obtain an available client index and send it back to the client. If the module has been configured with a setup predefining a certain number of positions, the server additionally sends the label of the position corresponding to the client index. In this case, the maximum number of clients is determined by the number of seas defined by the setup. 
 
 The `disconnect` method has to release the client index so that it can be reused by another client that connects to the server.
 
@@ -335,7 +335,7 @@ class ServerCheckin extends serverSide.Module {
   connect(client) {
     // listen for incoming WebSocket messages from the client side
     client.receive('checkin:request', () => {
-      // get an available index
+      // get an available client index
       let index = this._getIndex();
 
       if (index >= 0) {
@@ -371,7 +371,7 @@ class ServerCheckin extends serverSide.Module {
 
 ### The *performance* module
 
-In many applications, the only module you will have to implement yourself is the performance module. As in the example above, a `player` client usually enters the performance through a `checkin` module that assigns it an index and, optionally, a position. If no further setup is required after the `checkin` the client side control is usually handed over to the `performance` module.
+In many applications, the only module you will have to implement yourself is the performance module. As in the example above, a `player` client usually enters the performance through a `checkin` module that assigns it a cilent index and, optionally, a position. If no further setup is required after the `checkin` the client side control is usually handed over to the `performance` module.
 
 The *Soundworks* library provides the base classes `ClientPerformance` and `ServerPerformance` that you would extend to implement the `performance` of your application.
 
@@ -503,7 +503,7 @@ For the sake of clarity, the methods of the `client` object are split into two g
 - `parallel(...modules:ClientModule) : ClientModule`
   The `ClientModule` returned by the `parallel` method starts the given `...modules` in parallel, and calls its `done` method after all modules are  `done`.
   **Note:** The view of a module is always full screen, so in the case of modules run in parallel, the view of all the modules are added to the DOM when the parallel module starts, and they are stacked on top of each other in the order of the arguments using the `z-index` CSS property.
-  You can compound parallel module combinations with serial module sequences (*e.g.* `client.parallel(module1, client.serial(module2, module3), module4);`)  
+  You can compound parallel module combinations with serial module sequences (*e.g.* `client.parallel(module1, client.serial(module2, module3), module4);`).  
 
 #### Server side: the `server` object
 
@@ -802,14 +802,14 @@ The `ClientCheckin` module extends the `ClientModule` base class and takes care 
   The `constructor` accepts the following `options`:
   - `name:String = 'checkin'`, the name of the module
   - `color:String = 'black'`, the `viewColor` of the module
-  - `select:String = 'automatic'`, mode of index and position selection, the following values are accepted:
-    - 'automatic', the index is selected automatically, no position is attributed, in case that the index is associated with a label (requires a predefined `setup` on the server side), the label is indicated to the participant via a dialog
+  - `select:String = 'automatic'`, mode of client index and position selection, the following values are accepted:
+    - 'automatic', the client index is selected automatically, no position is attributed, in case that the client index is associated with a label (requires a predefined `setup` on the server side), the label is indicated to the participant via a dialog
     - 'label', the participant can select a label associated with a predefined position via a dialog (requires a predefined `setup` on the server side)
-    - 'location', the index is attributed automatically, the participant can indicate an approximate location on a map via a dialog
-  - `order:String = 'ascending'`, order of automatic index selection
+    - 'location', the client index is attributed automatically, the participant can indicate an approximate location on a map via a dialog
+  - `order:String = 'ascending'`, order of automatic client index selection
     - 'ascending', available indices are selected in ascending order
     - 'random', available indices are selected in random order (not available when the maximum number of clients exceeds 1000)
-  - `instructions:Function = defaultInstructions`, function(label:String) : String, that generates the HTML code of the instructions displayed to the participant, called when the index is selected automatically and the selection uses a setup with predefined positions (see [`ServerCheckin`](#servercheckin)), with the `label` associated to the selected position as argument
+  - `instructions:Function = defaultInstructions`, function defined as `instructions(label:String) : String` that generates the HTML code of the instructions displayed to the participant, called when the index is selected automatically and the selection uses a setup with predefined positions (see [`ServerCheckin`](#servercheckin)), with the `label` associated to the selected position as argument
 
 Below is an example of an instantiation of the `ClientCheckin` module that displays the dialog on the client side.
 
@@ -946,9 +946,9 @@ The `ClientSetup` module requires the SASS partial `sass/_08-setup.scss`.
 - `display(div:Element)`  
   The `display` method displays a graphical representation of the setup in the `div` DOM element provided as an argument.
 - `addClassToPosition(setupDisplay:Element, index: Number, className:String = 'player')`  
-  In the `Setup` graphical representation that lies in the `setupDisplay` DOM element (which had to be created by the `.displaySetup(div)` method), this method adds the class `className` to the position corresponding to the index `index` in the setup.
+  In the `Setup` graphical representation that lies in the `setupDisplay` DOM element (which had to be created by the `.displaySetup(div)` method), this method adds the class `className` to the position corresponding to the index in the setup.
 - `removeClassFromPosition(setupDisplay:Element, index: Number, className:String = 'player')`  
-  In the `Setup` graphical representation that lies in the `setupDisplay` DOM element (which had to be created by the `.displaySetup(div)` method), this method removes the class `className` from the position corresponding to the index `index` in the setup.
+  In the `Setup` graphical representation that lies in the `setupDisplay` DOM element (which had to be created by the `.displaySetup(div)` method), this method removes the class `className` from the position corresponding to the index in the setup.
 
 Below is an example of the `ClientSetup` module in use.
 
@@ -1070,3 +1070,4 @@ var sync = new serverSide.Sync();
 // get sync time
 var nowSync = sync.getSyncTime(); // current time in the sync clock time
 ```
+
