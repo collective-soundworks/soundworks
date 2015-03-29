@@ -10,7 +10,7 @@ var AudioBufferLoader = require('waves-loaders').AudioBufferLoader;
 
 class ClientLoader extends ClientModule {
   constructor(audioFiles, options = {}) {
-    super('loader', true, options.color || 'black');
+    super(options.name || 'loader', true, options.color);
 
     this.__audioFiles = audioFiles;
     this.__fileProgress = [];

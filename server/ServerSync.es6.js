@@ -9,7 +9,7 @@ var Sync = require('sync/server');
 
 class ServerSync extends ServerModule {
   constructor(options = {}) {
-    super();
+    super(options.name || 'sync');
     
     this.sync = new Sync(() => {
       let time = process.hrtime();
@@ -22,12 +22,8 @@ class ServerSync extends ServerModule {
     this.sync.start((cmd, ...args) => client.send(cmd, ...args), (cmd, callback) => client.receive(cmd, callback));
   }
 
-  getLocalTime(syncTime) {
-    return this.sync.getLocalTime(syncTime);
-  }
-
-  getSyncTime(localTime) {
-    return this.sync.getSyncTime(localTime);
+  getSyncTime() {
+    return this.sync.getSyncTime();
   }
 }
 

@@ -9,7 +9,7 @@ var input = require('./input');
 
 class ClientOrientation extends ClientModule {
   constructor(options = {}) {
-    super('orientation', true, options.color || 'black');
+    super(options.name || 'orientation', true, options.color);
 
     this.angleReference = 0;
 

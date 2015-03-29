@@ -22,7 +22,7 @@ function parseVersionString(string) {
 
 class ClientPlatform extends ClientModule {
   constructor(options = {}) {
-    super('platform-check', true, options.color || 'black');
+    super(options.name || 'platform-check', true, options.color);
   }
 
   start() {

@@ -35,27 +35,24 @@ function start(app, publicPath, port) {
     server.io = new IO(httpServer);
 }
 
-function map(namespace, title, ...modules) {
-  var ioNamespace = namespace.substr(1);
-  var view = namespace.substr(1);
-  var url = namespace;
+function map(clientType, ...modules) {
+  var url = '/';
 
-  if (url === '/player')
-    url = '/';
+  if (clientType !== 'player')
+    url += clientType;
 
   expressApp.get(url, function(req, res) {
-    res.render(view, {
-      title: title
-    });
+    res.render(clientType, {});
   });
 
-  server.io.of(ioNamespace).on('connection', (socket) => {
-    var client = new ServerClient(socket);
+  server.io.of(clientType).on('connection', (socket) => {
+    var client = new ServerClient(clientType, socket);
 
     // client/server handshake: send "start" when client is "ready"
-    client.receive('client_ready', () => {
-      for (let mod of modules)
+    client.receive('client:ready', () => {
+      for (let mod of modules) {
         mod.connect(client);
+      }
 
       client.receive('disconnect', () => {
         for (let i = modules.length - 1; i >= 0; i--) {
@@ -64,14 +61,14 @@ function map(namespace, title, ...modules) {
         }
       });
 
-      client.send('server_ready');
+      client.send('server:ready');
     });
   });
 }
 
-function broadcast(namespace, msg, ...args) {
+function broadcast(clientType, msg, ...args) {
   if (server.io)
-    server.io.of(namespace).emit(msg, ...args);
+    server.io.of('/' + clientType).emit(msg, ...args);
 }
 
 module.exports = server;

@@ -5,11 +5,13 @@
 'use strict';
 
 class ServerClient {
-	constructor(socket) {
-    this.socket = socket;
-    this.namespace = socket.nsp;
+	constructor(clientType, socket) {
+    this.type = clientType;
+    this.index = -1;
+    this.coordinates = null;
+
     this.modules = {};
-    this.player = null;
+    this.socket = socket;
   }
 
   send(msg, ...args) {

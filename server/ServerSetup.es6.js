@@ -8,13 +8,13 @@ var ServerModule = require("./ServerModule");
 
 class ServerSetup extends ServerModule {
   constructor(options = {}) {
-    super();
+    super(options.name || 'setup');
 
     this.width = 1;
     this.height = 1;
     this.spacing = 1;
     this.labels = [];
-    this.positions = [];
+    this.coordinates = [];
 
     this.specific = {};
   }
@@ -28,16 +28,20 @@ class ServerSetup extends ServerModule {
         "height": this.height,
         "spacing": this.spacing,
         "labels": this.labels,
-        "positions": this.positions
+        "coordinates": this.coordinates
       });
     });
   }
 
-  getNumPlaces() {
-    var numLabels = this.labels.length || Infinity;
-    var numPositions = this.positions.length || Infinity;
+  getNumPositions() {
+    if(this.labels.length || this.coordinates.length) {
+      var numLabels = this.labels.length || Infinity;
+      var numPositions = this.coordinates.length || Infinity;
 
-    return Math.min(numLabels, numPositions);
+      return Math.min(numLabels, numPositions);
+    }
+    
+    return 0;
   }
 
   getLabel(index) {
@@ -47,22 +51,22 @@ class ServerSetup extends ServerModule {
     return (index + 1).toString();
   }
 
-  getPosition(index) {
-    if (index < this.positions.length)
-      return this.positions[index];
+  getCoordinates(index) {
+    if (index < this.coordinates.length)
+      return this.coordinates[index];
 
     return null;
   }
 
-  generate(type, options = {}) {
+  generate(type, params = {}) {
     switch (type) {
       case 'matrix':
-        var cols = options.cols || 3;
-        var rows = options.rows || 4;
-        var colSpacing = options.colSpacing || 1;
-        var rowSpacing = options.rowSpacing || 1;
-        var colMargin = options.colMargin || colSpacing / 2;
-        var rowMargin = options.rowMargin || rowSpacing / 2;
+        var cols = params.cols || 3;
+        var rows = params.rows || 4;
+        var colSpacing = params.colSpacing || 1;
+        var rowSpacing = params.rowSpacing || 1;
+        var colMargin = params.colMargin || colSpacing / 2;
+        var rowMargin = params.rowMargin || rowSpacing / 2;
 
         this.specific.matrix = {};
         this.specific.matrix.cols = cols;
@@ -79,10 +83,10 @@ class ServerSetup extends ServerModule {
             count++;
 
             var label = count.toString();
-            var position = [(colMargin + i * colSpacing) / this.width, (rowMargin + j * rowSpacing) / this.height];
+            var coordinates = [(colMargin + i * colSpacing) / this.width, (rowMargin + j * rowSpacing) / this.height];
 
             this.labels.push(label);
-            this.positions.push(position);
+            this.coordinates.push(coordinates);
           }
         }
 

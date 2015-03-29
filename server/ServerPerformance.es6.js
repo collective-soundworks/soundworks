@@ -7,10 +7,10 @@
 var ServerModule = require('./ServerModule');
 
 class ServerPerformance extends ServerModule {
-  constructor() {
-    super();
+  constructor(options = {}) {
+    super(options.name || 'performance');
 
-    this.players = [];
+    this.clients = [];
   }
 
   connect(client) {
@@ -35,14 +35,14 @@ class ServerPerformance extends ServerModule {
   }
 
   enter(client) {
-    this.players.push(client);
+    this.clients.push(client);
   }
 
   exit(client) {
-    let index = this.players.indexOf(client);
+    let index = this.clients.indexOf(client);
 
     if (index >= 0)
-      this.players.splice(index, 1);
+      this.clients.splice(index, 1);
   }
 }
 
