@@ -9,13 +9,13 @@ var client = require('./client');
 
 class ClientSetup extends ClientModule {
   constructor(options = {}) {
-    super('setup', false);
+    super(options.name || 'setup', false);
 
     this.width = 1;
     this.height = 1;
     this.spacing = 1;
     this.labels = [];
-    this.positions = [];
+    this.coordinates = [];
   }
 
   start() {
@@ -28,7 +28,7 @@ class ClientSetup extends ClientModule {
       this.height = setup.height;
       this.spacing = setup.spacing;
       this.labels = setup.labels;
-      this.positions = setup.positions;
+      this.coordinates = setup.coordinates;
 
       this.done();
     });
@@ -60,25 +60,25 @@ class ClientSetup extends ClientModule {
     div.style.height = heightPx + "px";
     div.style.width = widthPx + "px";
 
-    var positions = this.positions;
+    var coordinates = this.coordinates;
 
-    for (let i = 0; i < positions.length; i++) {
+    for (let i = 0; i < coordinates.length; i++) {
       let tile = document.createElement('div');
       tile.classList.add('tile');
 
       tile.setAttribute('data-index', i);
-      tile.setAttribute('data-x', positions[i][0]);
-      tile.setAttribute('data-y', positions[i][1]);
+      tile.setAttribute('data-x', coordinates[i][0]);
+      tile.setAttribute('data-y', coordinates[i][1]);
       tile.style.height = tileSize - 2 * tileMargin + "px";
       tile.style.width = tileSize - 2 * tileMargin + "px";
-      tile.style.left = positions[i][0] * widthPx - (tileSize - 2 * tileMargin) / 2 + "px";
-      tile.style.top = positions[i][1] * heightPx - (tileSize - 2 * tileMargin) / 2 + "px";
+      tile.style.left = coordinates[i][0] * widthPx - (tileSize - 2 * tileMargin) / 2 + "px";
+      tile.style.top = coordinates[i][1] * heightPx - (tileSize - 2 * tileMargin) / 2 + "px";
 
       div.appendChild(tile);
     }
   }
 
-  addClassToTile(div, index, className) {
+  addClassToPosition(div, index, className) {
     var tiles = Array.prototype.slice.call(div.childNodes); // .childNode returns a NodeList
     var tileIndex = tiles.map((t) => parseInt(t.dataset.index)).indexOf(index);
     var tile = tiles[tileIndex];
@@ -87,7 +87,7 @@ class ClientSetup extends ClientModule {
       tile.classList.add(className);
   }
 
-  removeClassFromTile(div, index, className) {
+  removeClassFromPosition(div, index, className) {
     var tiles = Array.prototype.slice.call(div.childNodes); // .childNode returns a NodeList
     var tileIndex = tiles.map((t) => parseInt(t.dataset.index)).indexOf(index);
     var tile = tiles[tileIndex];

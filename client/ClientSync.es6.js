@@ -11,7 +11,7 @@ var audioContext = require('waves-audio').audioContext;
 
 class ClientSync extends ClientModule {
   constructor(options = {}) {
-    super('sync', true, options.color || 'black');
+    super(options.name || 'sync', true, options.color || 'black');
 
     this.ready = false;
 

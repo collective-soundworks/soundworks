@@ -7,11 +7,18 @@
 var ClientModule = require('./ClientModule');
 var client = require('./client');
 
+function instructions(label) {
+  return "<p>Go to</p>" +
+          "<div class='checkin-label circled'><span>" + label + "</span></div>" +
+          "<p><small>Touch the screen<br/>when you are ready.</small></p>";
+}
+
 class ClientCheckin extends ClientModule {
   constructor(options = {}) {
-    super('checkin', true, options.color);
+    super(options.name || 'checkin', true, options.color);
 
-    this.select = options.select || 'automatic'; // 'automatic' | 'label' | 'position'
+    this.select = options.select || 'automatic'; // 'automatic' | 'label' | 'location'
+    this.instructions = options.instructions || instructions;
 
     switch (this.select) {
       case 'automatic':
@@ -21,11 +28,10 @@ class ClientCheckin extends ClientModule {
       case 'label':
         break;
 
-      case 'position':
+      case 'location':
         break;
     }
 
-    this.index = null;
     this.label = null;
   }
 
@@ -41,8 +47,8 @@ class ClientCheckin extends ClientModule {
         this._startSelectLabel();
         break;
 
-      case 'position':
-        this._startSelectPosition();
+      case 'location':
+        this._startSelectLocation();
         break;
     }
   }
@@ -50,15 +56,16 @@ class ClientCheckin extends ClientModule {
   _startSelectAutomatic() {
     client.send('checkin:automatic:request', this.order);
 
-    client.receive('checkin:automatic:acknowledge', (index, label) => {
-      this.index = index;
+    client.receive('checkin:automatic:acknowledge', (index, label, coordinates) => {
+      client.index = index;
+
+      if(coordinates)
+        client.coordinates = coordinates;
 
       if (label) {
         this.label = label;
 
-        let htmlContent = "<p>Go to</p>" +
-          "<div class='checkin-label circled'><span>" + this.label + "</span></div>" +
-          "<p><small>Touch the screen<br/>when you are ready.</small></p>";
+        let htmlContent = this.instructions(label);
 
         this.setCenteredViewContent(htmlContent);
 
@@ -71,7 +78,7 @@ class ClientCheckin extends ClientModule {
     });
 
     client.receive('checkin:automatic:unavailable', () => {
-      this.setCenteredViewContent("<p>Sorry, we cannot accept any more players at the moment, please try again later.</p>");
+      this.setCenteredViewContent("<p>Sorry, we cannot accept any more connections at the moment, please try again later.</p>");
     });
   }
 
@@ -80,34 +87,34 @@ class ClientCheckin extends ClientModule {
 
     // not yet implemented
     client.receive('checkin:label:options', (options) => {
-      // TODO: construct selection from options and let the user select a label
+      // TODO: construct selection from options and let the participant select a label
       this.label = null;
 
       client.send('checkin:label:set', this.label);
     });
 
     client.receive('checkin:label:acknowledge', (index) => {
-      this.index = index;
+      client.index = index;
       this.done();
     });
   }
 
-  _startSelectPosition() {
-    client.send('checkin:position:request');
+  _startSelectLocation() {
+    client.send('checkin:location:request');
 
     // not yet implemented
-    client.receive('checkin:position:acknowledge', (index, surface) => {
-      this.index = index;
+    client.receive('checkin:location:acknowledge', (index, surface) => {
+      client.index = index;
 
-      // TODO: display surface and let the user select a position
-      this.position = null;
+      // TODO: display surface and let the participant select his or her location
+      client.coordinates = null;
 
-      // send selected position to server
-      client.send('checkin:position:set', this.position);
+      // send the coordinates of the selected location to server
+      client.send('checkin:location:set', client.coordinates);
     });
 
-    client.receive('checkin:position:unavailable', () => {
-      this.setCenteredViewContent("<p>Sorry, we cannot accept any more players at the moment, please try again later.</p>");
+    client.receive('checkin:location:unavailable', () => {
+      this.setCenteredViewContent("<p>Sorry, we cannot accept any more connections at the moment, please try again later.</p>");
     });
   }
 }

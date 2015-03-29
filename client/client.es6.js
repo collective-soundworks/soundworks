@@ -5,6 +5,9 @@
 "use strict";
 
 var client = {
+  tyoe: null,
+  index: 0,
+  coordinates: null,
   init: init,
   start: start,
   socket: null,
@@ -16,6 +19,7 @@ var client = {
 
 var EventEmitter = require('events').EventEmitter;
 var ClientModule = require('./ClientModule');
+var io = require('socket.io-client');
 
 class ParallelModule extends ClientModule {
   constructor(modules) {
@@ -80,16 +84,17 @@ class SerialModule extends ClientModule {
   }
 }
 
-function init(namespace) {
-  client.socket = io(namespace);
+function init(clientTyppe) {
+  client.type = clientTyppe;
+  client.socket = io('/' + clientTyppe);
 }
 
 function start(theModule) {
   // client/server handshake: send "ready" to server ...
-  client.send('client_ready');
+  client.send('client:ready');
 
   // ... wait for server's "start" ("server ready") to start modules
-  client.receive('server_ready', () => {
+  client.receive('server:ready', () => {
     theModule.start();
   });
 

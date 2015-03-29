@@ -6,38 +6,36 @@
 
 var ServerModule = require('./ServerModule');
 
-var maxRandomPlayers = 10000;
+var maxRandomClients = 1000;
 
 class ServerCheckin extends ServerModule {
   constructor(options = {}) {
-    super();
+    super(options.name || 'checkin');
 
     this.setup = options.setup || null;
-    this.maxPlayers = options.maxPlayers || Infinity;
+    this.maxClients = options.maxClients || Infinity;
 
-    if (this.maxPlayers > Number.MAX_SAFE_INTEGER)
-      this.maxPlayers = Number.MAX_SAFE_INTEGER;
+    if (this.maxClients > Number.MAX_SAFE_INTEGER)
+      this.maxClients = Number.MAX_SAFE_INTEGER;
 
     if (this.setup) {
-      var numPlaces = this.setup.getNumPlaces();
+      var numPlaces = this.setup.getNumPositions();
 
-      if (this.maxPlayers > numPlaces)
-        this.maxPlayers = numPlaces;
+      if (this.maxClients > numPlaces)
+        this.maxClients = numPlaces;
     }
 
     this._availableIndices = [];
     this._nextAscendingIndex = 0;
 
-    if (this.maxPlayers <= maxRandomPlayers) {
-      for (let i = 0; i < this.maxPlayers; i++)
+    if (this.maxClients <= maxRandomClients) {
+      for (let i = 0; i < this.maxClients; i++)
         this._availableIndices.push(i);
     }
   }
 
   connect(client) {
     super.connect(client);
-
-    client.player = {};
 
     client.receive('checkin:automatic:request', (order) => {
       this._requestSelectAutomatic(client, order);
@@ -47,17 +45,16 @@ class ServerCheckin extends ServerModule {
       this._requestSelectLabel(client);
     });
 
-    client.receive('checkin:position:request', () => {
-      this._requestSelectPosition(client);
+    client.receive('checkin:location:request', () => {
+      this._requestSelectLocation(client);
     });
   }
 
   disconnect(client) {
-    if (client.player && client.player.index >= 0) {
-      this._releaseIndex(client.player.index);
-      delete client.player;
-      super.disconnect();
-    }
+    super.disconnect(client);
+
+    if (client.index >= 0)
+      this._releaseIndex(client.index);
   }
 
   _getRandomIndex() {
@@ -78,7 +75,7 @@ class ServerCheckin extends ServerModule {
       });
 
       return this._availableIndices.splice(0, 1)[0];
-    } else if (this._nextAscendingIndex < this.maxPlayers) {
+    } else if (this._nextAscendingIndex < this.maxClients) {
       return this._nextAscendingIndex++;
     }
 
@@ -92,7 +89,7 @@ class ServerCheckin extends ServerModule {
   _requestSelectAutomatic(client, order) {
     var index = -1;
 
-    if (this.maxPlayers > maxRandomPlayers)
+    if (this.maxClients > maxRandomClients)
       order = 'ascending';
 
     if (order === 'random')
@@ -101,14 +98,20 @@ class ServerCheckin extends ServerModule {
       index = this._getAscendingIndex();
 
     if (index >= 0) {
-      client.player.index = index;
+      client.index = index;
 
       var label = null;
+      var coordinates = null;
 
-      if (this.setup)
+      if (this.setup) {
         label = this.setup.getLabel(index);
+        coordinates = this.setup.getCoordinates(index);
+      }
 
-      client.send('checkin:automatic:acknowledge', index, label);
+      client.modules.checkin.label = label;
+      client.coordinates = coordinates;
+
+      client.send('checkin:automatic:acknowledge', index, label, coordinates);
     } else {
       client.send('checkin:automatic:unavailable');      
     }
@@ -118,15 +121,15 @@ class ServerCheckin extends ServerModule {
     throw new Error("Checkin with label selection not yet implemented");
     // var options = this.setup.getOptions();
     // client.send('checkin:label:options', options);
-    // client.receive('checkin:label:set', this.label);
+    // client.receive('checkin:label:set', label);
     // client.send('checkin:label:acknowledge', index);
   }
 
-  _requestSelectPosition(client) {
-    throw new Error("Checkin with position selection not yet implemented");
+  _requestSelectLocation(client) {
+    throw new Error("Checkin with location selection not yet implemented");
     // var surface = this.setup.getSurface();
-    // client.send('checkin:position:acknowledge', index, surface);
-    // client.receive('checkin:position:set', this.position);
+    // client.send('checkin:location:acknowledge', index, surface);
+    // client.receive('checkin:location:set', coordinates);
   }
 }
 

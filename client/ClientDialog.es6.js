@@ -9,10 +9,10 @@ var audioContext = require('waves-audio').audioContext;
 
 class ClientDialog extends ClientModule {
   constructor(options = {}) {
-    super(options.id || 'dialog', true, options.color || 'black');
+    super(options.name || 'dialog', true, options.color);
 
     this.__mustActivateAudio = options.activateAudio || false;
-    this.__text = options.text;
+    this.__text = options.text || "Hello!";
   }
 
   start() {

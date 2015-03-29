@@ -8,13 +8,13 @@ var ServerModule = require('./ServerModule');
 var server = require('./server');
 
 class ServerControl extends ServerModule {
-  constructor() {
-    super();
+  constructor(options = {}) {
+    super(options.name || 'control');
 
     this.parameters = {};
     this.commands = {};
     this.infos = {};
-    this.namespaces = [];
+    this.clientTypes = [];
   }
 
   addParameterNumber(name, label, min, max, step, init) {
@@ -62,8 +62,8 @@ class ServerControl extends ServerModule {
       parameter.value = value;
 
       // send parameter to other clients
-      for (let namespace of this.namespaces)
-        namespace.emit('control:parameter', name, value);
+      for (let clientType of this.clientTypes)
+        server.broadcast(clientType, 'control:parameter', name, value);
     }
   }
 
@@ -74,26 +74,27 @@ class ServerControl extends ServerModule {
       info.value = value;
 
       // send info to other clients
-      for (let namespace of this.namespaces)
-        namespace.emit('control:info', name, value);
+      for (let clientType of this.clientTypes)
+        server.broadcast(clientType, 'control:info', name, value);
     }
   }
 
   connect(client) {
     super.connect(client);
 
-    var namespace = client.namespace;
+    var clientType = client.type;
 
-    if (this.namespaces.indexOf(namespace) < 0)
-      this.namespaces.push(namespace);
+    if (this.clientTypes.indexOf(clientType) < 0)
+      this.clientTypes.push(clientType);
 
     // listen to control parameters
     client.receive('control:parameter', (name, value) => {
       this.parameters[name].value = value;
 
       // send control parameter to other clients
-      for (let namespace of this.namespaces)
-        namespace.emit('control:parameter', name, value);
+      for (let clientType of this.clientTypes) {
+        server.broadcast(clientType, 'control:parameter', name, value);
+      }
     });
 
     // listen to conductor commands
