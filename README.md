@@ -28,7 +28,6 @@
     - [`Control`](#control)
     - [`Setup`](#setup)
     - [`Sync`](#sync)
-- [**Example**](#example)
 
 ## Overview & Getting Started
 
