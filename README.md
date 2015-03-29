@@ -2,7 +2,7 @@
 
 ## Table of contents
 
-- [**Overview & getting started**](#overview--getting-started)
+- [**Overview & Getting Started**](#overview--getting-started)
   - [Client/server architecture](#clientserver-architecture)
   - [Express app structure](#express-app-structure)
   - [Composing a scenario from modules](#composing-a-scenario-from-modules)
@@ -30,7 +30,7 @@
     - [`Sync`](#sync)
 - [**Example**](#example)
 
-## Overview & getting started
+## Overview & Getting Started
 
 *Soundworks* is a Javascript framework that enables artists and developers to create collaborative music performances where a group of participants distributed in space use their mobile devices to generate sound and light through touch and motion.
 
