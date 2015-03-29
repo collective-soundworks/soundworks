@@ -612,8 +612,9 @@ The connect method of the module creates a
 
 ###### Methods
 
-- `constructor()`  
-  The `constructor` does not accept any arguments or options.
+- `constructor(name = 'unnamed')`  
+  The `constructor` accepts the following arguments:
+  - `name:String`, name of the module
 - `connect(client:ServerClient)`  
   The `connect` method is called when the client `client` connects to the server, and should handle the logic of the module on the server side. For instance, it can take care of the communication with the client side module by setting up WebSocket message listeners and sending WebSocket messages, or it can add the client to a list to keep track of all the connected clients.
 - `disconnect(client:ServerClient)`  
@@ -667,8 +668,9 @@ The `ServerPerformance` module extends the `ServerModule` base class and constit
 
 ###### Methods
 
-- `constructor()`  
-  The `constructor` does not accept any arguments or options.
+- `constructor(options:Object = {})`  
+  The `constructor` accepts the following `options`:
+  - `name:String`, name of the module
 - `connect(client:ServerClient)`  
   The `connect` method extends the `ServerModule`’s `connect` method. It adds the client `client` to the array `this.clients` when it receives the WebSocket message `'performance:start'`, and removes it from that array when it receives the WebSocket message `'performance:done'`.
 - `disconnect(client:ServerClient)`
@@ -823,6 +825,7 @@ The `ServerCheckin` extends the `ServerModule` base class and takes care of the 
 
 - `constructor(options:Object = {})`  
   The `constructor` accepts the following `options`:
+  - `name:String`, name of the module
   - `setup:ServerSetup = null`, predefined setup of the performance space (see [`ServerSetup` class])
   - `maxClients:Number = Infinity`, maximum number of clients supported by the scenario (the actual maximum number of clients might be limited to the number of predefined positions of a given `setup`)
 
@@ -890,8 +893,9 @@ The `ServerControl` module extends the `ServerModule` base class and takes care 
 
 ###### Methods
 
-- `constructor()`  
-  The `constructor` does not accept any arguments or options.
+- `constructor(options:Object = {})`  
+  The `constructor` accepts the following `options`:
+  - `name:String`, name of the module
 - `addParameterNumber(name:String, label:String, min:Number, max:Number, step:Number, init:Number)`  
   The `addParameterNumber` method is used to add a number control parameter. Its arguments are:
   - `name:String`, name of the parameter
@@ -969,8 +973,9 @@ setup.addClassToPosition(setupGUI, 3, 'red-highlight');
 The `ServerSetup` extends the `ServerModule` base class and takes care of the setup on the server side.
 ###### Methods
 
-- `constructor()`  
-  The `constructor` does not accept any argument or options.
+- `constructor(options:Object = {})`  
+  The `constructor` accepts the following `options`:
+  - `name:String`, name of the module
 - `generate(type:String = 'matrix', params = {}) : Number`  
   The `generate` method generates a surface and/or predefined positions according to a given type of geometry and corresponding options. The following geometries are available: 
     - 'matrix', a matrix setup with the following parameters:
@@ -1050,8 +1055,9 @@ The `ServerSync` module extends the `ServerModule` base class and takes care of 
 
 ###### Methods
 
-- `constructor()`  
-  The `constructor` does not accept any arguments or options.
+- `constructor(options:Object = {})`  
+  The `constructor` accepts the following `options`:
+  - `name:String`, name of the module
 - `getSyncTime() : Number`  
   The `getSyncTime` method returns the current sync time (in seconds, derived from process.hrtime).
 
@@ -1067,4 +1073,3 @@ var sync = new serverSide.Sync();
 // get sync time
 var nowSync = sync.getSyncTime(); // current time in the sync clock time
 ```
-
