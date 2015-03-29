@@ -1,6 +1,6 @@
 # SOUNDWORKS
 
-## Table of contents
+## Table of Contents
 
 - [**Overview & Getting Started**](#overview--getting-started)
   - [Client/server architecture](#clientserver-architecture)
