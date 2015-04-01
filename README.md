@@ -28,7 +28,6 @@
     - [`Control`](#control)
     - [`Setup`](#setup)
     - [`Sync`](#sync)
-
 ## Overview & Getting Started
 
 *Soundworks* is a Javascript framework that enables artists and developers to create collaborative music performances where a group of participants distributed in space use their mobile devices to generate sound and light through touch and motion.
@@ -39,13 +38,13 @@ The framework is based on a client/server architecture supported by `Node.js` (`
 
 In order to connect the mobile devices with each other, *Soundworks* implements a client/server architecture using a `Node.js` server and WebSockets to pass messages between the server and the clients (currently with the `socket.io` library).
 
-In general, a *Soundworks* scenario allows different types of clients to connect to the server through different URLs. The most important kind clients are the mobile devices of the participants who take part in the performance (we refer to this type of client as `player`). For convenience, a `player` client connects to the server through the root URL of the application, `http://my.server.address:port/`.
+In general, a *Soundworks* scenario allows different types of clients to connect to the server through different URLs. The most important type of clients are the mobile devices of the participants who take part in the performance (we refer to this type of client as `player`). For convenience, a `player` client connects to the server through the root URL of the application, `http://my.server.address:port/`.
 
-In addition to the `player` clients, a scenario can include other kinds of clients such as:
-- A device that provides an interface to control some parameters of the performance in real time. We would refer to this type of client as `conductor`. These clients would connect to the server through the URL `http://my.server.address:port/conductor`.
-- A device that generates "environmental" sound and/or light effects projected into the performance in sync with the participants’ performance, such as lasers, a global visualization or ambient sounds on external loudspeakers. We would refer to this type of client as `env`. These clients would connect to the server through the URL `http://my.server.address:port/env`.
+In addition to the `player` clients, a scenario can include other types of clients such as:
+- A device that provides an interface to control some parameters of the performance in real time — we would refer to this type of client as `conductor`. These clients would connect to the server through the URL `http://my.server.address:port/conductor`.
+- A device that generates “environmental” sound and/or light effects projected into the performance in sync with the participants’ performance (*e.g.* lasers, a global visualization or ambient sounds on external loudspeakers) — we would refer to this type of client as `env`. These clients would connect to the server through the URL `http://my.server.address:port/env`.
 
-Clients that connect through the root URL (*e.g* `http://my.server.address:port/`) are considered as `player` clients. All other types of clients access the server through a URL that concatenates the root URL of the application and the name of the client type (*e.g* `http://my.server.address:port/conductor or http://my.server.address:port/env`).
+In general, all other types of clients than `player` access the server through a URL that concatenates the root URL of the application, and the name of the client type (*e.g* `http://my.server.address:port/conductor or http://my.server.address:port/env`).
 
 ### Express app structure
 
@@ -1066,9 +1065,9 @@ Below is an example of the instantiation of the `Sync` module on the server side
 // Server side (require the Soundworks library server side)
 var serverSide = require('soundworks/server');
 
-// create Syn module
+// Create sync module
 var sync = new serverSide.Sync();
 
-// get sync time
+// Get sync time
 var nowSync = sync.getSyncTime(); // current time in the sync clock time
 ```
