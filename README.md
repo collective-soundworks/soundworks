@@ -2,13 +2,13 @@
 
 ## Table of Contents
 
-- [**Overview & Getting Started**](#overview--getting-started)
+- [**Overview & getting Started**](#overview--getting-started)
   - [Client/server architecture](#clientserver-architecture)
   - [Express app structure](#express-app-structure)
   - [Composing a scenario from modules](#composing-a-scenario-from-modules)
   - [Modules provided by the library](#modules-provided-by-the-library)
   - [Implementing a module](#implementing-a-module)
-  - [The performance module](#the-performance-module)
+  - [The `performance` module](#the-performance-module)
   - [Styling with SASS](#styling-with-sass)
 - [**API**](#api)
   - [Core objects](#core-objects)
@@ -28,27 +28,28 @@
     - [`Control`](#control)
     - [`Setup`](#setup)
     - [`Sync`](#sync)
-## Overview & Getting Started
+
+## Overview & getting Started
 
 *Soundworks* is a Javascript framework that enables artists and developers to create collaborative music performances where a group of participants distributed in space use their mobile devices to generate sound and light through touch and motion.
 
-The framework is based on a client/server architecture supported by `Node.js` (`v0.12.0` or later) and WebSockets, and uses a modular design to make it easy to implement different performance scenarios: the [*Soundworks* template](https://github.com/collective-soundworks/soundworks-template) allows anyone to bootstrap a *Soundworks*-based scenario and focus on its audiovisual and interaction design instead of the infrastructure.
+The framework is based on a client/server architecture supported by `Node.js` (`v0.12.0` or later) and WebSockets. It uses a modular design to make it easy to implement different performance scenarios: the [*Soundworks* template](https://github.com/collective-soundworks/soundworks-template) allows anyone to bootstrap a *Soundworks*-based scenario and focus on its audiovisual and interaction design instead of the infrastructure.
 
 ### Client/server architecture 
 
 In order to connect the mobile devices with each other, *Soundworks* implements a client/server architecture using a `Node.js` server and WebSockets to pass messages between the server and the clients (currently with the `socket.io` library).
 
-In general, a *Soundworks* scenario allows different types of clients to connect to the server through different URLs. The most important type of clients are the mobile devices of the participants who take part in the performance (we refer to this type of client as `player`). For convenience, a `player` client connects to the server through the root URL of the application, `http://my.server.address:port/`.
+*Soundworks*-based scenarios allow different types of clients to connect to the server through different URLs. The most common type of clients is constituted of the participant's mobile devices who take part in the performance. We refer to this type of client as a `player`. For convenience, a `player` client connects to the server through the root URL of the application `http://my.server.address:port/`.
 
-In addition to the `player` clients, a scenario can include other types of clients such as:
-- A device that provides an interface to control some parameters of the performance in real time — we would refer to this type of client as `conductor`. These clients would connect to the server through the URL `http://my.server.address:port/conductor`.
-- A device that generates “environmental” sound and/or light effects projected into the performance in sync with the participants’ performance (*e.g.* lasers, a global visualization or ambient sounds on external loudspeakers) — we would refer to this type of client as `env`. These clients would connect to the server through the URL `http://my.server.address:port/env`.
+In addition to the `player` clients, a scenario can include as many other types of clients as you want. For instance, one could imagine that:
+- A device provides an interface to control some parameters of the performance in real time. We would refer to this type of client as `conductor` and these clients would connect to the server through the URL `http://my.server.address:port/conductor`.
+- A device generates “environmental” sound and/or light effects projected into the performance in sync with the participants’ performance (*e.g.* lasers, a global visualization or ambient sounds on external loudspeakers). We would refer to this type of client as `env` and these clients would connect to the server through the URL `http://my.server.address:port/env`.
 
-In general, all other types of clients than `player` access the server through a URL that concatenates the root URL of the application, and the name of the client type (*e.g* `http://my.server.address:port/conductor or http://my.server.address:port/env`).
+All types of clients (except `player`) access the server through a URL that concatenates the root URL of the application, and the name of the client type (*e.g* `http://my.server.address:port/conductor or http://my.server.address:port/env`).
 
 ### Express app structure
 
-Since *Soundworks* is built on Express, any scenario you write using *Soundworks* should follow the organization of an Express app (using the EJS rendering engine), as shown in the example below.
+Since *Soundworks* is built on Express, *Soundworks*-based scenario should follow the organization of an Express app (using the EJS rendering engine), as shown in the following example.
 
 ```
 my-scenario/
@@ -57,66 +58,32 @@ my-scenario/
 │   ├── sounds/
 │   └── ...
 ├── src/
-│   ├── player/
 │   ├── conductor/
 │   ├── env/
+│   ├── player/
 │   ├── ...
 │   ├── sass/
 │   └── server/
 ├── views/
-│   ├── player.ejs
 │   ├── conductor.ejs
 │   ├── env.ejs
+│   ├── player.ejs
 │   └── ...
 ├── gulpfile.js
 ├── package.json
 └── README.md
 ```
 
-For instance:
-- The `public/` folder should contain any resources the clients may need to load such as sounds, images, fonts, etc.  
-  **Note:** the Javascript and CSS files will be automatically generated with the `gulp` file from the `src/` folder, so there shouldn’t be any `javascript/` or `stylesheets/` folder here (they will be deleted by `gulp` anyway).
-- The `src/` folder contains the source code for the server and the different types of clients. Each subfolder (`server/`, `player/`, and any other type of client) should contain an `index.es6.js` file, with the code to be executed for that entity. The `src/` folder also contains the SASS files to generate the CSS in the `sass/` subfolder.
-- The `views/` folder contains a `*.ejs` file for each client type. In other words, all the subfolders in `src/` — except `server/` and `sass/` — should have their corresponding EJS file.
+In particular:
 
-To compile the files, just run the command `gulp` in the Terminal: it will generate the `*.css` files from the SASS files, convert the Javascript files from ES6 to ES5, browserify the files on the client side, and launch a `Node.js` server to start the scenario.
+- The `public/` folder contains all the resources the clients may need to load, such as sounds, images, fonts, etc.  
+  **Note:** the Javascript and CSS files will be automatically generated from the `src/` folder, so there shouldn’t be any `javascript/` or `stylesheets/` folder here (they will be deleted by `gulp` anyway).
+- The `src/` folder contains the source code for the server and the different types of clients. Each subfolder (`server/`, `player/`, and any other type of client such as `conductor/` or `env/`) should contain an `index.es6.js` file, with the code to be executed for that entity. The `src/` folder also contains the `sass/` subfolder, with the SASS files used to generate the CSS.
+- The `views/` folder contains a `*.ejs` file for each type of client. In other words, all the subfolders in `src/` — except `server/` and `sass/` — should have their corresponding EJS file.
 
-A scenario should contain at least the `src/server/`, `src/player/` and `src/sass/` folders:
-- The `src/server/` folder contains all Javascript files that compose the server.
-- The `src/player/` folder contains all the files that compose the `player` clients.
-- Finally, the `src/sass/` folder contains the SASS files to generate the CSS.
+To compile the files from the `src/` folder and launch the server, simply run the command `gulp` in a Terminal window: it will generate the `*.css` files from the SASS files, convert the Javascript files from ES6 to ES5, browserify the files on the client side, and launch a `Node.js` server to start the scenario.
 
-To add an additional client type you have to create a subfolder (*e.g.* `src/env/` or `src/conductor/`) that contains a file `index.es6.js`. The commands `client.init('env');` (or `client.init('conductor');`) declares the client type and associates it to the URL `http://my.server.address:port/env` (respectively `http://my.server.address:port/conductor`).
-
-To each client type corresponds an JS view file in `my-scenario/views`. The view file of the `player` clients (`my-scenario/views/player.ejs`) would look as follows:
-
-```html
-<!doctype html5>
-<html>
-  <head>
-    <!-- settings -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
-    <!-- title -->
-    <title>My Scenario – Player</title>
-
-    <!-- stylesheets -->
-    <link rel="stylesheet" href="stylesheets/player.css">
-  </head>
-
-  <body>
-    <div id="container" class="container"></div>
-    <script src="javascripts/player.js"></script>
-  </body>
-</html>
-```
-
-The most important things here are:
-- loading the `stylesheets/player.css` stylesheet that will be generated by the SASS file we’ll write later,
-- having a `div` element in the `body` that has the ID `#container` and a class `.container`, and
-- loading load the `javascripts/player.js` Javascript file.
-- setting the title of the page
+To help you get started, you will find a *Soundworks* template in the `[soundworks-template](https://github.com/collective-soundworks/soundworks-template)` GitHub repository.
 
 ### Composing a scenario from modules
 
@@ -367,9 +334,9 @@ class ServerCheckin extends serverSide.Module {
 }
 ```
 
-### The *performance* module
+### The `Performance` module
 
-In many applications, the only module you will have to implement yourself is the performance module. As in the example above, a `player` client usually enters the performance through a `checkin` module that assigns it a cilent index and, optionally, a position. If no further setup is required after the `checkin` the client side control is usually handed over to the `performance` module.
+In many applications, the only module you will have to implement yourself is the performance module. As in the example above, a `player` client usually enters the performance through a `checkin` module that assigns it a client index and, optionally, a position. If no further setup is required after the `checkin` the client side control is usually handed over to the `performance` module.
 
 The *Soundworks* library provides the base classes `ClientPerformance` and `ServerPerformance` that you would extend to implement the `performance` of your application.
 
@@ -976,13 +943,13 @@ The `ServerSetup` extends the `ServerModule` base class and takes care of the se
   - `name:String`, name of the module
 - `generate(type:String = 'matrix', params = {}) : Number`  
   The `generate` method generates a surface and/or predefined positions according to a given type of geometry and corresponding options. The following geometries are available: 
-    - 'matrix', a matrix setup with the following parameters:
-      - cols = 3, number of columns
-      - rows = 4, number of row
-      - colSpacing = 1, spacing between columns
-      - rowSpacing = 1, spacing between rows
-      - colMargin = colSpacing / 2, (*horizontal*) margins between the borders of the performance space and the first or last column
-      - rowMargin = rowSpacing / 2, (*vertical*) margins between the borders of the performance space and the first or last row
+    - `'matrix'`, a matrix setup with the following parameters (in the `params` object):
+      - `cols = 3`, number of columns
+      - `rows = 4`, number of row
+      - `colSpacing = 1`, spacing between columns
+      - `rowSpacing = 1`, spacing between rows
+      - `colMargin = colSpacing / 2`, (*horizontal*) margins between the borders of the performance space and the first or last column
+      - `rowMargin = rowSpacing / 2`, (*vertical*) margins between the borders of the performance space and the first or last row
 - `getNumPositions() : Number`  
   The `getNumPositions` method returns the total number of predefined positions and/or labels of the setup. For instance, if the setup is a 4 ⨉ 5 matrix the method would return *20*
 - `getLabel(index:Number) : String`  
@@ -1032,7 +999,7 @@ Below is an example of an instantiation of the `Sync` module.
 // Client side (require the Soundworks library client side)
 var clientSide = require('soundworks/client');
 
-// create Sync module
+// Create Sync module
 var sync = new clientSide.Sync();
 
 var nowClient = sync.getLocalTime(); // current time in client clock time
@@ -1062,10 +1029,10 @@ The `ServerSync` module extends the `ServerModule` base class and takes care of 
 Below is an example of the instantiation of the `Sync` module on the server side.
 
 ```javascript
-// Server side (require the Soundworks library server side)
+// Server side (require the server side of the Soundworks library)
 var serverSide = require('soundworks/server');
 
-// Create sync module
+// Create Sync module
 var sync = new serverSide.Sync();
 
 // Get sync time
