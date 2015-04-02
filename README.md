@@ -59,11 +59,20 @@ my-scenario/
 │   └── ...
 ├── src/
 │   ├── conductor/
+│   │   └── index.es6.js
 │   ├── env/
+│   │   └── index.es6.js
 │   ├── player/
+│   │   └── index.es6.js
 │   ├── ...
+│   │   └── ...
 │   ├── sass/
+│   │   ├── conductor.scss
+│   │   ├── env.scss
+│   │   ├── player.scss
+│   │   └── ...
 │   └── server/
+│       └── index.es6.js
 ├── views/
 │   ├── conductor.ejs
 │   ├── env.ejs
@@ -76,13 +85,14 @@ my-scenario/
 
 In particular:
 
-- The `public/` folder contains all the resources the clients may need to load, such as sounds, images, fonts, etc.  
+- The `public/` folder contains all the resources the clients may need to load, such as sounds, images, fonts…  
   **Note:** the Javascript and CSS files will be automatically generated from the `src/` folder, so there shouldn’t be any `javascript/` or `stylesheets/` folder here (they will be deleted by `gulp` anyway).
 - The `src/` folder contains:
-  - The source code for the server in the `server/` subfolder, that should contain at least an `index.es6.js` file;
-  - The source code for the different types of client in the corresponding subfolders (`player/`, and any other type of client such as `conductor/` or `env/`). Each of these subfolders should contain at least an `index.es6.js` file, with the code to be executed for that type of client. In particular, this Javascript file should contains the line `client.init(<type-of-client>);` to indicate the type of client (*e.g.* `client.init('player');`, or `client.init('conductor');`, or `client.init('env');`).
-  - The `src/` folder also contains the `sass/` subfolder, with the SASS files used to generate the CSS.
-- The `views/` folder contains a `*.ejs` file for each type of client. In other words, all the subfolders in `src/` — except `server/` and `sass/` — should have their corresponding EJS file.
+  - The `server/` subfolder that contains at least an `index.es6.js` with the source code of the server;
+  - The `player/` subfolder that contains at least an `index.es6.js` with the source code of the `player` clients;
+  - A subfolder for each other type of client (*e.g.* `conductor/` or `env/`). Each of these subfolders should contain at least an `index.es6.js` file with the source code to be executed for that type of client.
+  - The `sass/` subfolder, with the SASS partials used to generate the CSS. In particular, each type of client (including `player`) should have its corresponding SASS partial (*e.g.* `player.scss`, `conductor.scss` or `env.scss`).
+- The `views/` folder contains a `*.ejs` file for each type of client. In other words, all the subfolders in `src/` (except `server/` and `sass/`) should have their corresponding EJS file.
 
 To compile the files from the `src/` folder and launch the server, simply run the command `gulp` in a Terminal window: it will generate the `*.css` files from the SASS files, convert the Javascript files from ES6 to ES5, browserify the files on the client side, and launch a `Node.js` server to start the scenario.
 
