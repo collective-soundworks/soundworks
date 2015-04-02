@@ -90,35 +90,39 @@ In particular:
 - The `src/` folder contains:
   - The `server/` subfolder that contains at least an `index.es6.js` with the source code of the server;
   - The `player/` subfolder that contains at least an `index.es6.js` with the source code of the `player` clients;
-  - A subfolder for each other type of client (*e.g.* `conductor/` or `env/`). Each of these subfolders should contain at least an `index.es6.js` file with the source code to be executed for that type of client.
+  - A subfolder for each other type of client (*e.g.* `conductor/` or `env/`). Each of these subfolders should contain at least an `index.es6.js` file with the source code to be executed for that type of client;
   - The `sass/` subfolder, with the SASS partials used to generate the CSS. In particular, each type of client (including `player`) should have its corresponding SASS partial (*e.g.* `player.scss`, `conductor.scss` or `env.scss`).
-- The `views/` folder contains a `*.ejs` file for each type of client. In other words, all the subfolders in `src/` (except `server/` and `sass/`) should have their corresponding EJS file.
+- The `views/` folder contains a `*.ejs` file for each type of client. In other words, all the subfolders in `src/` (except `server/` and `sass/`) should have their corresponding EJS file (*e.g.* `player.ejs`, `conductor.ejs` or `env.ejs`).
 
 To compile the files from the `src/` folder and launch the server, simply run the command `gulp` in a Terminal window: it will generate the `*.css` files from the SASS files, convert the Javascript files from ES6 to ES5, browserify the files on the client side, and launch a `Node.js` server to start the scenario.
 
-To help you get started, you will find a *Soundworks* template in the `[soundworks-template](https://github.com/collective-soundworks/soundworks-template)` GitHub repository.
+To help you get started, you will find a *Soundworks* template in the [`soundworks-template`](https://github.com/collective-soundworks/soundworks-template) GitHub repository.
 
 ### Composing a scenario from modules
 
-A scenario built with *Soundworks* consists in a succession and combination of modules, each of them corresponding to a step of the scenario. 
+A scenario built with *Soundworks* consists in a succession and combination of modules, each of them corresponding to a step of the scenario.
+
 #### Client side
 
-On the client side, modules can be executed in a particular order according to a given application scenario and the involved interactions with the user. As an example, a scenario could provide the following interactions when a participant connects as `player` client to the application’s root URL:
-- The mobile devices displays a *welcome* message (*e.g.* "Welcome to the performance!"). When the participant clicks on the screen…
-- the client goes through a *check-in* procedure and the device may display some instructions. In the meantime, …
-- the client *synchronizes* its clock with the server. Finally, when these are done… 
-- the client joins the *performance*.
+On the client side, modules can be executed in a particular order according to a given scenario. As an example, a scenario could provide the following interactions when a participant connects to the application’s root URL (as a `player`):
+- The mobile devices displays a **welcome** message (*e.g.* “Welcome to the performance!”). When the participant clicks on the screen…
+- The client goes through a **checkin** procedure for which the device may display some instructions. In the meantime, …
+- The client **synchronizes** its clock with the server. Finally, when these are done… 
+- The client joins the **performance**.
 
-Each of these steps corresponds to a module. While most of the modules are provided by the library, generally, you will have to implement a module that implements the most important part of your application – the `performance`. 
+Each of these steps corresponds to a module. While most of the modules are provided by the library (cf. the [Modules provided by the library](#modules-provided-by-the-library) section for more information), you will generally have to write the module that implements the most important part of your application, the `performance`. 
 
-The client side code corresponding to the above example of a `player` client (in `src/player/index.es6.js`) would look like this:
+Following the example above, the client side code corresponding to the `player` client (in `src/player/index.es6.js`) would look like this:
 
 ```javascript
-// Client side (require the Soundworks library and client object)
+/* Client side */
+
+// Require the Soundworks library and the 'client' object
 var clientSide = require('soundworks/client');
 var client = clientSide.client;
 
-// Initialize client with a given client type and associate it to the corresponding URL ('player' clients connect via the root URL)
+// Initialize the type of client to associate it to the corresponding URL
+// ('player' clients connect via the root URL)
 client.init('player');
 
 // Write the performance module
@@ -126,12 +130,12 @@ class MyPerformance extends clientSide.Performance {
   ...
 }
 
-// Scenario
+// Scenario logic
 window.addEventListener('load', () => {
   // Initialize the modules
   var welcome = new clientSide.Dialog(...);
-  var sync = new clientSide.Sync(...);
   var checkin = new clientSide.Checkin(...);
+  var sync = new clientSide.Sync(...);
   var performance = new MyPerformance(...);
   
   // Launch the modules in a particular order
@@ -148,18 +152,22 @@ window.addEventListener('load', () => {
 });
 ```
 
-To run a sequence of modules in series, we use `client.serial(module1, module2, ...)`. On the other hand, if some modules need to be run in parallel, we use `client.parallel(module1, module2, ...)`. (see [`client` object module logic](#module-logic)).
+To run a sequence of modules in series, we use `client.serial(module1, module2, ...)`. On the other hand, if some modules need to be run in parallel, we use `client.parallel(module1, module2, ...)`. (For more information about this, please refer to the [`client` object module logic](#module-logic) section).
 
-For any other type of client such as `env` or `conductor`, the file would look very similar except that the client would be initialized with the corresponding client type and the included modules might be different. The `env` clients, for example, may require a `sync` and `performance` module, but do not need a `welcome` screen nor a `checkin`.
+For any other type of client (*e.g.* `conductor` or `env`), the file would be very similar, except for:
+- The initialization of the client, that would correspond to the type of client (*e.g.* `client.init('conductor')` or `client.init('env')`);
+- The included modules: the `env` clients, for example, may require a `sync` and `performance` module, but may not need a `welcome` screen nor a `checkin`.
 
-Some of the modules on the client side need to communicate with the server. The `sync` process, for example, requires a dialog between the client and the server to synchronize the clocks.
+As some of the modules on the client side need to communicate with the server (for instance the `sync` process requires a dialog between the client and the server to synchronize the clocks), let's now have a look at the server side.
 
 #### Server side
 
-The server side of the application has to provide the server modules responding to the client side modules. The server side code (in `src/server/index.es6.js`) corresponding to this example would look like this:
+The server side of the application has to provide the server modules responding to the client side modules. The server side code (in `src/server/index.es6.js`) corresponding to the example above would look like this:
 
 ```javascript
-// Server side (require the Soundworks library and server object)
+/* Server side */
+
+// Require the Soundworks library and the 'server' object
 var serverSide = require('soundworks/server');
 var server = serverSide.server;
 
@@ -181,22 +189,22 @@ class MyEnvPerformance extends serverSide.Performance {
   ...
 }
 
-// Create the modules
+// Initialize the modules (needed by the client side)
 var checkin = new serverSide.Checkin(...);
 var sync = new serverSide.Sync(...);
 var playerPerformance = new MyPlayerPerformance(...);
 var envPerformance = new MyEnvPerformance(...);
 
-// Map the server modules to the 'player' client type (and root URL)
+// Map the server modules to the 'player' client type (and root URL):
 server.map('player', sync, checkin, playerPerformance);
 
 // Map the server modules to the 'env' client type (and /env URL)
 server.map('env', sync, envPerformance);
 ```
 
-After having set up the Express app and started the server, this code sequence creates the server side modules `checkin`, `sync`, and `performance` that respond client side modules of the example above. All three modules are mapped to the `player` (default) client type and consequently respond to the `player` clients connected via the root URL of the application. In addition, the `sync` module is mapped to the `env` client type together with a `performance` module for the `env` client(s).
+Among the modules used by the `player` clients, three of them need to communicate with the server (`checkin`, `sync` and `performance` — the `dialog` module only displays a welcome message to the participant and does not involve any interaction between the client and server. For more information about the modules that have a client and server side, please refer to the [Client/server modules](#clientserver-modules) section in the API). Hence, after setting up the Express app and starting the server, we instantiate the `checkin`, `sync`, and `playerPerformance` server side modules and map them to the `'player'` client type. Consequently, these modules can dialog with the corresponding client side modules, and respond to the `player` clients connected via the root URL of the application.
 
-While all modules in this code sequence have a client and a server component, some modules might occur only on the client side. This is, for instance, the case for the `dialog` module in the example above. The module only displays a welcome dialog to the participant that does not involve any interaction between the client and server.
+Similarly, we map the `sync` module and the 'envPerformance' module to the `'env'` client type, provided that these are the modules the `env` clients need to dialog with.
 
 ### Modules provided by the library
 
