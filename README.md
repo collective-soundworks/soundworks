@@ -209,14 +209,14 @@ Similarly, we map the `sync` module and the `envPerformance` module to the `'env
 ### Modules provided by the library
 
 The *Soundworks* library provides a set of modules that are used in many scenarios:  
-- [`dialog`](#clientdialog), display a dialog and wait for the participant touching the screen (client side only)
-- [`loader`](#clientloader), pre-load a set of audio files required by the application (client side only)
-- [`orientation`](#clientorientation), compass calibration in interaction with the participant (client side only)
-- [`platform`](#clientplatform), check whether the client device and browser is capable to properly run the application and display a blocking dialog if not (client side only)
-- [`checkin`](#checkin), obtain a client index and, optionally, a set of coordinates in a static setup
-- [`control`](#control), synchronize the client clock to the server
-- [`setup`](#setup), load or generate the setup of a performance space including a surface (*i.e.* dimensions and outlines) and predefined positions (*i.e.* coordinates and labels)
-- [`sync`](#sync), synchronize the client clock to the server
+- [`dialog`](#clientdialog), displays a dialog and waits for the participant to touch the screen (client side only);
+- [`loader`](#clientloader), pre-loads a set of audio files required by the application (client side only);
+- [`orientation`](#clientorientation), calibrates the compass in interaction with the participant (client side only);
+- [`platform`](#clientplatform), checks whether the client device and browser are capable to run the application properly, and displays a blocking dialog if not (client side only);
+- [`checkin`](#checkin), obtains a client index and, optionally, a set of spatial coordinates in a static setup;
+- [`control`](#control), allows to control some parameters of the performance in real time;
+- [`setup`](#setup), loads or generates the setup of a performance space including a surface (*i.e.* dimensions and outlines) and predefined positions (*i.e.* coordinates and labels);
+- [`sync`](#sync), synchronizes the client clock to the server.
 
 ### Implementing a module
 
