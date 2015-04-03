@@ -1,6 +1,6 @@
 {
   "name": "soundworks",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Soundworks is a framework that enables developers and artists to create collaborative performances with mobile phones on the web.",
   "authors": [
     "Sébastien Robaszkiewicz",
@@ -16,7 +16,7 @@
     "platform": "^1.3.0",
     "socket.io": "1.1.0",
     "socket.io-client": "1.1.0",
-    "sync": "collective-soundworks/sync#v0.3.4",
+    "sync": "collective-soundworks/sync#v0.5.0",
     "waves-loaders": "wavesjs/loaders",
     "waves-audio": "wavesjs/audio"
   },

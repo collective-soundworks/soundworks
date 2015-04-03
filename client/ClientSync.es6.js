@@ -22,14 +22,8 @@ class ClientSync extends ClientModule {
 
   start() {
     super.start();
-
-    this.sync.start(client.send, client.receive);
-    this.sync.on('sync:stats', (stats) => {
-      if (!this.ready) {
-        this.ready = true;
-        this.done();
-      }
-      this.emit('sync:stats', stats);
+    this.sync.start(client.send, client.receive, (status, report) => {
+      this.syncStatusReport(status, report);
     });
   }
 
@@ -39,6 +33,16 @@ class ClientSync extends ClientModule {
 
   getSyncTime(localTime) {
     return this.sync.getSyncTime(localTime);
+  }
+
+  syncStatusReport(message, report) {
+    if(message === 'sync:status') {
+      if (!this.ready) {
+        this.ready = true;
+        this.done();
+      }
+      this.emit('sync:status', report);
+    }
   }
 }
 
