@@ -5,8 +5,8 @@
 - [**Overview & getting started**](#overview--getting-started)
   - [Client/server architecture](#client--server-architecture)
   - [A *Soundworks* scenario is exclusively made of modules](#a-soundworks-scenario-is-exclusively-made-of-modules)
-  - [How to write a module?](#how-to-write-a-module)
   - [How to write a scenario?](#how-to-write-a-scenario)
+  - [How to write a module?](#how-to-write-a-module)
 - [**API**](#api)
   - [Core objects](#core-objects)
     - [Client side: the `client` object](#client-side-the-client-object)
@@ -111,6 +111,156 @@ server.map('/player', 'My Scenario Title', sync, checkin, performance);
 ```
 
 After this initialization, the `sync`, `checkin` and `performance` modules of a `player` are be able to dialog with the corresponding modules on the server side.
+### How to write a scenario?
+
+Since *Soundworks* is built on Express, any scenario you write using *Soundworks* should follow the organization of an Express app (using the EJS rendering engine), as shown in the example below.
+
+```
+my-scenario/
+├── public/
+│   ├── fonts/
+│   ├── sounds/
+│   └── ...
+├── src/
+│   ├── conductor/
+│   ├── env/
+│   ├── player/
+│   ├── ...
+│   ├── sass/
+│   └── server/
+├── views/
+│   ├── conductor.ejs
+│   ├── env.ejs
+│   ├── player.ejs
+│   └── ...
+├── gulpfile.js
+├── package.json
+└── README.md
+```
+
+For instance:
+
+- The `public/` folder should contain any resource your clients may need to load such as sounds, images, fonts, etc.  
+  **Note:** the Javascript and CSS files will be automatically generated with our `gulp` file from the `src/` folder, so you shouldn’t have any `javascript/` or `stylesheets/` folder here (they will be deleted by `gulp` anyway).
+- The `src/` folder contains your source code for the server and the different types of clients. Each subfolder (`server/`, `player/`, and any other type of client) should contain an `index.es6.js` file, with the code to be executed for that entity. The `src/` folder also contains the SASS files to generate the CSS in the `sass/` subfolder.
+- The `views/` folder contains a `*.ejs` file for each type of client. In other words, all the subfolders in `src/` — except `server/` and `sass/` — should have their corresponding EJS file.
+
+To compile the files, just run the command `gulp` in the Terminal: it will generate the `*.css` files from the SASS files, convert the Javascript files from ES6 to ES5, browserify the files on the client side, and launch a `Node.js` server to start the scenario.
+
+A scenario should contain at least a `src/server/`, `src/player/` and `src/sass/` folder.
+
+- The `src/server/` folder contains all the Javascript files that compose the server.
+- The `src/player/` folder contains all the files that compose the `player` default client. As already mentioned above, any client connecting to the server through the root URL `http://my.server.address:port/` belongs to the namespace `'/player'`.
+- Finally, the `src/sass/` folder contains the SASS files to generate the CSS.
+
+As mentioned above, you may want to add a further clients, for example to create a  (let’s name it generically `auxClient`). For that:
+
+- You should create a subfolder `src/auxClient/` (*e.g.* `src/conductor/` or `src/env/`) and write an `index.es6.js` file inside.
+- This type of client would join the namespace `'/auxClient'` thanks to the line `client.init('/auxClient');` in the `index.es6.js` file (*e.g.* the namespace `'/conductor'` with the line `client.init('/conductor');`, or `'/env'` with the line `client.init('/env');`).
+- This type of client would connect to the server through the URL `http://my.server.address:port/auxClient` (*e.g.* `http://my.server.address:port/conductor` or `http://my.server.address:port/env`).
+
+#### Client side
+
+On the client side, the `src/player/index.es6.js` file (or any other type of client’s index file) should look like this.
+
+```javascript
+/* Client side */
+
+// Require the library
+var clientSide = require('soundworks/client');
+var client = clientSide.client;
+
+// Initialize the WebSocket namespace depending on the client type (here, '/player')
+client.init('/player');
+
+// Write the performance module
+class MyPerformance extends clientSide.Performance {
+  ...
+}
+
+// Scenario
+window.addEventListener('load', () => {
+  // Initialize the modules
+  var welcome = new clientSide.Dialog(...);
+  var sync = new clientSide.Sync(...);
+  var checkin = new clientSide.Checkin(...);
+  var performance = new MyPerformance(...);
+  
+  // Scenario logic
+  client.start(
+    client.serial(
+      welcome,
+      client.parallel(
+        checkin,
+        sync
+      ),
+      performance
+    )
+  );
+});
+```
+
+For another type of client (*e.g* `conductor` or `env`), the file would look the same except that the WebSocket namespace initialization correspond to that type of client (*e.g.* `client.init('/conductor);`, or `client.init('/env');`) and the modules might be different (for instance, one could imagine that the `env` clients only require a `sync` and a `performance` module).
+
+#### Server side
+
+On the server side, the `src/server/index.es6.js` would look like this.
+
+```javascript
+/* Server side */
+
+// Require the libraries and setup the Express app
+var serverSide = require('soundworks/server');
+var server = serverSide.server;
+
+var express = require('express');
+var app = express();
+var path = require('path');
+var dir = path.join(__dirname, '../../public');
+
+// Write the player and env performance modules
+class MyPlayerPerformance extends serverSide.Performance {
+  ...
+}
+class MyEnvPerformance extends serverSide.Performance {
+  ...
+}
+
+// Initialize the modules
+var checkin = new serverSide.Checkin(...);
+var sync = new serverSide.Sync(...);
+var playerPerformance = new MyPlayerPerformance(...);
+var envPerformance = new MyEnvPerformance(...);
+
+// Start the scenario
+server.start(app, dir, 3000);
+// Set up the server modules required by the 'player' clients
+server.map('/player', 'My Scenario', sync, checkin, playerPerformance);
+// Set up the server modules required by the 'env' clients
+server.map('/env', 'My Scenario — Environment', sync, envPerformance);
+```
+
+Indeed, on the client side, the `player` clients use the modules `welcome` (that does not require a communication with the server), `checkin`, `sync`, and `performance`, so we set up the corresponding server modules and map them to the namespace `/player`. Similarly, say the `/env` clients use the modules `sync` and `performance` (which both require communication with the server), so we set up the corresponding server modules and map them to the namespace `/env`.
+
+#### Styling with SASS
+
+Finally, the `src/sass/` folder would contain all the SASS partials we need for the modules from the library, and include them all in a `auxClient.scss` file, where `auxClient` can be `player`, `conductor`, `env`, or any other type of client you create. Since the `player` is the default client in any *Soundworks*-based scenario, the `src/sass/` should at least contain the `player.scss` file.
+
+For instance, in our previous example where the client has a `welcome`, `sync`, `checkin` and `performance` module, the `player.scss` file could look like this.
+
+```sass
+// General styling: these partials should be included in every auxClient.scss file
+@import '01-reset';
+@import '02-fonts';
+@import '03-colors';
+@import '04-general';
+
+// Module specific partials: check in the documentation which modules have an associated SASS file
+@import '05-checkin';
+
+// Your own partials for the modules you wrote
+@import 'performance'
+```
 
 ### How to write a module?
 
@@ -251,157 +401,6 @@ disconnect(client) {
 }
 ```
 
-### How to write a scenario?
-
-Since *Soundworks* is built on Express, any scenario you write using *Soundworks* should follow the organization of an Express app (using the EJS rendering engine), as shown in the example below.
-
-```
-my-scenario/
-├── public/
-│   ├── fonts/
-│   ├── sounds/
-│   └── ...
-├── src/
-│   ├── conductor/
-│   ├── env/
-│   ├── player/
-│   ├── ...
-│   ├── sass/
-│   └── server/
-├── views/
-│   ├── conductor.ejs
-│   ├── env.ejs
-│   ├── player.ejs
-│   └── ...
-├── gulpfile.js
-├── package.json
-└── README.md
-```
-
-For instance:
-
-- The `public/` folder should contain any resource your clients may need to load such as sounds, images, fonts, etc.  
-  **Note:** the Javascript and CSS files will be automatically generated with our `gulp` file from the `src/` folder, so you shouldn’t have any `javascript/` or `stylesheets/` folder here (they will be deleted by `gulp` anyway).
-- The `src/` folder contains your source code for the server and the different types of clients. Each subfolder (`server/`, `player/`, and any other type of client) should contain an `index.es6.js` file, with the code to be executed for that entity. The `src/` folder also contains the SASS files to generate the CSS in the `sass/` subfolder.
-- The `views/` folder contains a `*.ejs` file for each type of client. In other words, all the subfolders in `src/` — except `server/` and `sass/` — should have their corresponding EJS file.
-
-To compile the files, just run the command `gulp` in the Terminal: it will generate the `*.css` files from the SASS files, convert the Javascript files from ES6 to ES5, browserify the files on the client side, and launch a `Node.js` server to start the scenario.
-
-A scenario should contain at least a `src/server/`, `src/player/` and `src/sass/` folder.
-
-- The `src/server/` folder contains all the Javascript files that compose the server.
-- The `src/player/` folder contains all the files that compose the default client, which we name `player`. (Any client connecting to the server through the root URL `http://my.server.address:port/` would be a `player`, and belongs to the namespace `'/player'`.)
-- Finally, the `src/sass/` folder contains the SASS files to generate the CSS.
-
-You can add any other type of client (let’s name it generically `clientType`). For that:
-
-- You should create a subfolder `src/clientType/` (*e.g.* `src/conductor/` or `src/env/`) and write an `index.es6.js` file inside.
-- This type of client would join the namespace `'/clientType'` thanks to the line `client.init('/clientType');` in the `index.es6.js` file (*e.g.* the namespace `'/conductor'` with the line `client.init('/conductor');`, or `'/env'` with the line `client.init('/env');`).
-- This type of client would connect to the server through the URL `http://my.server.address:port/clientType` (*e.g.* `http://my.server.address:port/conductor` or `http://my.server.address:port/env`).
-
-#### Client side
-
-On the client side, the `src/player/index.es6.js` file (or any other type of client’s index file) should look like this.
-
-```javascript
-/* Client side */
-
-// Require the library
-var clientSide = require('soundworks/client');
-var client = clientSide.client;
-
-// Initialize the WebSocket namespace depending on the client type (here, '/player')
-client.init('/player');
-
-// Write the performance module
-class MyPerformance extends clientSide.Performance {
-  ...
-}
-
-// Scenario
-window.addEventListener('load', () => {
-  // Initialize the modules
-  var welcome = new clientSide.Dialog(...);
-  var sync = new clientSide.Sync(...);
-  var checkin = new clientSide.Checkin(...);
-  var performance = new MyPerformance(...);
-  
-  // Scenario logic
-  client.start(
-    client.serial(
-      welcome,
-      client.parallel(
-        checkin,
-        sync
-      ),
-      performance
-    )
-  );
-});
-```
-
-For another type of client (*e.g* `conductor` or `env`), the file would look the same except that the WebSocket namespace initialization correspond to that type of client (*e.g.* `client.init('/conductor);`, or `client.init('/env');`) and the modules might be different (for instance, one could imagine that the `env` clients only require a `sync` and a `performance` module).
-
-#### Server side
-
-On the server side, the `src/server/index.es6.js` would look like this.
-
-```javascript
-/* Server side */
-
-// Require the libraries and setup the Express app
-var serverSide = require('soundworks/server');
-var server = serverSide.server;
-
-var express = require('express');
-var app = express();
-var path = require('path');
-var dir = path.join(__dirname, '../../public');
-
-// Write the player and env performance modules
-class MyPlayerPerformance extends serverSide.Performance {
-  ...
-}
-class MyEnvPerformance extends serverSide.Performance {
-  ...
-}
-
-// Initialize the modules
-var checkin = new serverSide.Checkin(...);
-var sync = new serverSide.Sync(...);
-var playerPerformance = new MyPlayerPerformance(...);
-var envPerformance = new MyEnvPerformance(...);
-
-// Start the scenario
-server.start(app, dir, 3000);
-// Set up the server modules required by the 'player' clients
-server.map('/player', 'My Scenario', sync, checkin, playerPerformance);
-// Set up the server modules required by the 'env' clients
-server.map('/env', 'My Scenario — Environment', sync, envPerformance);
-```
-
-Indeed, on the client side, the `player` clients use the modules `welcome` (that does not require a communication with the server), `checkin`, `sync`, and `performance`, so we set up the corresponding server modules and map them to the namespace `/player`. Similarly, say the `/env` clients use the modules `sync` and `performance` (which both require communication with the server), so we set up the corresponding server modules and map them to the namespace `/env`.
-
-#### Styling with SASS
-
-Finally, the `src/sass/` folder would contain all the SASS partials we need for the modules from the library, and include them all in a `clientType.scss` file, where `clientType` can be `player`, `conductor`, `env`, or any other type of client you create. Since the `player` is the default client in any *Soundworks*-based scenario, the `src/sass/` should at least contain the `player.scss` file.
-
-For instance, in our previous example where the client has a `welcome`, `sync`, `checkin` and `performance` module, the `player.scss` file could look like this.
-
-```sass
-// General styling: these partials should be included in every clientType.scss file
-@import '01-reset';
-@import '02-fonts';
-@import '03-colors';
-@import '04-general';
-
-// Module specific partials: check in the documentation which modules have an associated SASS file
-@import '05-checkin';
-
-// Your own partials for the modules you wrote
-@import 'performance'
-```
-
 ## API
 
 This section explains how to use the objects and classes of the library. In particular, we list here all the methods and attributes you may need to use at some point.
@@ -479,7 +478,7 @@ The `server` object has the following attributes, which we split into two groups
 - `map:Function`  
   The `map` attribute contains the `map` function that is defined as `map(namespace:String, title:String, ...modules:ServerModule)`. The `map` function is used to indicate that the clients who connect to the namespace `namespace` need the modules `...modules` to be activated (it starts the modules’ `.connect(client)` methods) and listen for the WebSocket messages from the client side. Additionally, it sets the title of the page (used in the `<title>` tag in the HTML `<head>` element) to `title` and routes the connections from the URL path `namespace` to the corresponding view (except for the namespace `'/player'`, that uses the root URL `/` instead of `/player`). More specifically:
   - a client connecting to the server through the URL `http://my.server.address:port/` would belong to the namespace `'/player'` and be mapped to the view `player.ejs`;
-  - a client connecting to the server through the URL `http://my.server.address:port/clientType` would belong to the namespace `'/clientType'` and be mapped to the view `clientType.ejs`.
+  - a client connecting to the server through the URL `http://my.server.address:port/auxClient` would belong to the namespace `'/auxClient'` and be mapped to the view `auxClient.ejs`.
 
 ##### WebSocket communication
 
@@ -704,8 +703,8 @@ You can use the `ClientControl` module in two different ways.
 
 - `parameters:Object = {}`  
    The `parameters` attribute contains all the editable parameters of the scenario. Each key of the `parameters` object corresponds to the `name` property of each parameter. You can access the value of the parameter at any time with `parameters.name.value`.
-- `informations:Object = {}`  
-   The `informations` attribute contains all displayable pieces of information about the scenario.  Each key of the `informations` object corresponds to the `name` property of each piece of information. You can access the value of the piece of information at any time with `information.name.value`.
+- `infos:Object = {}`  
+   The `infos` attribute contains all displayable pieces of information (info) about the scenario. Each key of the `infos` object corresponds to the `name` property of each info. At any time, you can access the value of the info identifies by `name` with `this.infos.name.value`.
 
 ###### Methods
 
@@ -724,12 +723,12 @@ You can use the `ClientControl` module in two different ways.
     The `name` argument indicates the name of the parameter that changed.
   - `val:*`  
     The `val` argument indicates the new value of that parameter.
-- `'control:information' : name:String, val:*`  
-  The `ClientControl` module emits the `'control:information'` event each time an information is updated. The `'control:information'` event is associated with two arguments:
+- `'control:info' : name:String, val:*`  
+  The `ClientControl` module emits the `'control:info'` event each time an info is updated. The `'control:info'` event is associated with two arguments:
   - `name:String`  
-    The `name` argument indicates the name of the information that changed.
+    The `name` argument indicates the name of the info that changed.
   - `val:*`  
-    The `val` argument indicates the new value of that information.
+    The `val` argument indicates the new value of that info.
 
 ##### ServerControl
 
@@ -773,18 +772,18 @@ The `ServerControl` module extends the `ServerModule` base class and takes care 
     The `label` argument determines the label of the command in the GUI on the client side.
   - `fun:Function`  
     The `fun` argument determine the function to be executed when the command is called.
-- `addInformation(name:String, label:String, init:*)`  
-   The `addInformation` method allows to add an information to be displayed on the client side. Its arguments are:
+- `addInfo(name:String, label:String, init:*)`  
+   The `addInfo` method allows to add an info to be displayed on the client side. Its arguments are:
   - `name:String`  
-    The `name` argument determines name of the information to display. The name should be unique across all pieces of information since this is what is sent to the client to identify the piece of information when there is a change.
+    The `name` argument determines name of the info to display. The name should be unique across all infos since this is what is sent to the client to identify the info when there is a change.
   - `label:String`  
-    The `label` argument determines the label of the information in the GUI on the client side.
+    The `label` argument determines the label of the info in the GUI on the client side.
   - `init:*`  
-    The `init` argument determines the initial value of the information to display. It is usually a `Number` or a `String`.
+    The `init` argument determines the initial value of the info to display. It is usually a `Number` or a `String`.
 - `setParameter(name:String, value:*)`  
   The `setParameter` method allows set the value of the parameter `name` to `value`. The argument `value` is either a `Number` or a `String` depending on the type of the parameter you are updating.
-- `setInformation(name:String, value:*)`  
-  The `setInformation` method allows set the value of the information `name` to `value`. The argument `value` is usually either a `Number` or a `String`.
+- `setInfo(name:String, value:*)`  
+  The `setInfo` method allows set the value of the info `name` to `value`. The argument `value` is usually either a `Number` or a `String`.
 
 #### Module
 
@@ -926,8 +925,12 @@ The `ServerPerformance` module extends the `ServerModule` base class and constit
   The `connect` method extends the `ServerModule`’s `connect` method. It adds the client `client` to the array `this.players` when it receives the WebSocket message `'performance:start'`, and removes it from that array when it receives the WebSocket message `'performance:done'`.
 - `disconnect(client:ServerClient)`
    The `disconnect` method extends the `ServerModule`’s `disconnect` method. It removes the client `client` from the array `this.players`.
-- `addPlayer(client:ServerClient)`  
-- `removePlayer(client:ServerClient)`  
+- `enter(client:ServerClient)`  
+  The `enter` method is called when the client `client` starts the performance (*i.e.* when `ClientPerformance` calls its `.start()` method).
+- `exit(client:ServerClient)`  
+  The `exit` method is called when the client `client` leaves the performance (for instance if `ClientPerformance` calls its `.done()` method, or if the client disconnects from the server).  
+
+**Note:** in practice, you will mostly override the `enter` and `exit` methods when you write your performance.
 
 #### Seatmap
 
@@ -1248,7 +1251,7 @@ window.addEventListener('load', () => {
 
 ##### Performance module
 
-To create the performance, we have to write our own module `MyPerformance`. For this, we simply extend the `Performance` server and client classes.
+To create the performance, we have to write our own module `MyPerformance`. For this, we simply extend the `Performance` client and server classes.
 
 In the constructor, we keep the `options` argument from the base class, and we also pass in the `loader` module since we’ll have to access the `audioBuffers` attribute to play the file in the performance.
 
@@ -1378,18 +1381,16 @@ var checkin = new serverSide.Checkin(
 );
 ```
 
-Finally, we have to write the performance module. The `.connect(client)` method is called when the client `client` connects to the server: when that happens, we simply send a WebSocket message back to tell the client to play a sound (`client.send('performance:play');`). In this example, nothing needs to be done when the client disconnects from the server apart from what the `ServerPerformance` base class already does.
+Finally, we have to write the performance module. The `.enter(client)` method is called when the client `client` calls its `.start()` method (*i.e.* when it enters the performance). When that happens, we simply send a WebSocket message back to tell the client to play a sound (`client.send('performance:play');`). In this example, nothing needs to be done when the client connects to the server, disconnects from the server, or exists the performance (apart from what the `ServerPerformance` base class already does), so we don't have to override these methods.
 
 ```javascript
 class MyPerformance extends serverSide.Performance {
   constructor() {}
 
-  connect(client) {
-    super.connect(client); // don't forget this
+  enter(client) { // when the client enters the performance...
+    super.enter(client); // don't forget this
 
-    client.receive('performance:start', () => { // when the client joins the performance...
-        client.send('performance:play'); // ... send a WebSocket message instruction to the client
-    });
+    client.send('performance:play'); // ... send a WebSocket message instruction to the client
   }
 }
 
