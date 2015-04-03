@@ -226,23 +226,23 @@ Let's now review the specificities of the client and server sides when writing a
 
 #### Client side
 
-On the client side, a module extends the `ClientModule` base class. The module has to implement a `.start()` method and has to call its `.done()` method to hand over the control to the next module.
+On the client side, a module extends the `ClientModule` base class. The module has to implement a `start` method and has to call its `done` method to hand over the control to the next module.
 
-##### The `.start()` method
+##### The `start` method
 
-The `.start()` method is called to start the module. It should handle the logic and the steps that lead to the completion of the module.
+The `start` method is called to start the module. It should handle the logic and the steps that lead to the completion of the module.
 
-##### The `.done()` method
+##### The `done` method
 
-The `.done()` method (implemented by the `ClientModule` base class) is called by the client module to hand over control to the next module. As an exception, the last module of the scenario (usually the `performance` module) may not call that method and keep the control until the client disconnects from the server. A derived client module must not override the `.done()` method provided by the base class.
+The `done` method (implemented by the `ClientModule` base class) is called by the client module to hand over control to the next module. As an exception, the last module of the scenario (usually the `performance` module) may not call that method and keep the control until the client disconnects from the server. A derived client module must not override the `done` method provided by the base class.
 
-Most modules would call their `.done()` method when their process is complete. For instance, if the purpose of a module is to load files, the module would call its `.done()` method when the files are loaded. However, some modules continue processing in the background even after calling that method. This is for example the case of the `sync` module. The module calls its `done` method after the client clock is synchronized with the sync clock for the the very first time, and keeps running in the background afterwards to re-synchronize the clocks regularly during the rest of the scenario.
+Most modules would call their `done` method when their process is complete. For instance, if the purpose of a module is to load files, the module would call its `done` method when the files are loaded. However, some modules continue processing in the background even after calling that method. This is for example the case of the `sync` module. The module calls its `done` method after the client clock is synchronized with the sync clock for the the very first time, and keeps running in the background afterwards to re-synchronize the clocks regularly during the rest of the scenario.
 
 ##### Example (a simplified version of the `ClientCheckin` module)
 
 The purpose of the `ClientCheckin` module in the code example below is to assign an available index to a client each time a new client connects to the server. When the module is configured with a `setup` that includes predefined positions (*i.e.* coordinates and labels), it can automatically request an available position and display the associated `label` to the participant (in other configurations, the participants alternatively could select a label, or indicate their approximate location on a map).
 
-In detail, the `.start()` method of the module sends a request to the `ServerCheckin` module via WebSockets, asking the server to send an available client index and, optionally, the label of a corresponding predefined position. When it receives the response from the server, it either displays the label on the screen (*e.g.* “Please go to C5 and touch the screen.”) and waits for the participant’s acknowledgement, or immediately calls the `.done()` method to hand over the control to a subsequent module (generally the `performance`). The server may send an `unavailable` message in the case where no more clients can be admitted to the performance (for example when all predefined positions are occupied). In this case, the applications ends on a blocking dialog (“Sorry, we cannot accept more players at the moment, …”) without calling the `.done()` method.
+In detail, the `start` method of the module sends a request to the `ServerCheckin` module via WebSockets, asking the server to send an available client index and, optionally, the label of a corresponding predefined position. When it receives the response from the server, it either displays the label on the screen (*e.g.* “Please go to C5 and touch the screen.”) and waits for the participant’s acknowledgement, or immediately calls the `done` method to hand over the control to a subsequent module (generally the `performance`). The server may send an `unavailable` message in the case where no more clients can be admitted to the performance (for example when all predefined positions are occupied). In this case, the applications ends on a blocking dialog (“Sorry, we cannot accept more players at the moment, …”) without calling the `done` method.
 
 ```javascript
 /* Client side */
@@ -272,7 +272,7 @@ class ClientCheckin extends ClientModule {
         // Display the label in a dialog
         this.setCenteredViewContent("<p>Please go to " + label + " and touch the screen.<p>");
 
-        // Call .done() when the participant acknowledges the dialog
+        // Call 'done' when the participant acknowledges the dialog
         this.view.addEventListener('click', () => this.done());
       } else {
         this.done();
@@ -285,12 +285,13 @@ class ClientCheckin extends ClientModule {
     });
   }
 
-  ... // the rest of the module
+  // The rest of the module
+  ...
 
 }
 ```
 
-As shown in this code example, the `ClientModule` base class may provide a `view` (*i.e.* an HTML `div`) that is added to the window (actually to a `#container` element) when the module starts, and removed from the DOM when the module calls its `.done()` method. The boolean that is passed as second argument to the `constructor` of the base class determines whether the module actually creates a view or not.
+As shown in this code example, the `ClientModule` base class may provide a `view` (*i.e.* an HTML `div`) that is added to the window (actually to a `#container` element) when the module starts, and removed from the DOM when the module calls its `done` method. The boolean that is passed as second argument to the `constructor` of the base class determines whether the module actually creates a view or not.
 The method `setCenteredViewContent` allows for adding an arbitrary centered content (*e.g.* a paragraph of text) to the view.
 
 #### Server side
@@ -298,9 +299,15 @@ The method `setCenteredViewContent` allows for adding an arbitrary centered cont
 On the server side, a module extends the `ServerModule` base class and has to implement a `connect` and a `disconnect` method.
 While the sequence of user interactions and exchanges between client and server is determined on the client side, the server side modules are ready to receive requests from the corresponding client side modules as soon as a client is connected to the server.
 
-When a client `client` of a particular type connects to the server via the corresponding URL, the server calls the `connect` method of all modules that are mapped to that client type. In the `connect` method, the module should set up WebSocket listeners, in order to serve incoming requests from the corresponding client side module.
+##### The `connect` method
+
+When a client of a particular type connects to the server via the corresponding URL (*e.g.* a `player` through the root URL, or an `env` client through the `/env` URL), the server calls the `connect` method of all the modules that are mapped to that type of client. In the `connect` method, the module should set up WebSocket listeners in order to serve incoming requests from the corresponding client side module.
+
+##### The `disconnect` method
 
 Similarly, the `disconnect` method is called whenever the client `client` disconnects from the server. It handles all the actions that are necessary in that case.
+
+##### Example (a simplified version of the `ServerCheckin` module)
 
 In our simplified `ServerCheckin` module example, the `connect` method has to install a listener that – on the request of the client – would obtain an available client index and send it back to the client. If the module has been configured with a setup predefining a certain number of positions, the server additionally sends the label of the position corresponding to the client index. In this case, the maximum number of clients is determined by the number of seas defined by the setup. 
 
