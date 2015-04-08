@@ -547,11 +547,11 @@ For clarity, the methods of the `client` object are split into two groups.
     - A `parallel` combination of modules.
 - `serial(...modules:ClientModule) : ClientModule`  
   The `serial` method returns a `ClientModule` that starts the given `...modules` in series. After starting the first module (by calling its `start` method), the next module in the series is started (with its `start` method) when the last module called its `done` method. When the last module calls `done`, the returned serial module calls its own `done` method.  
-  **Note:** You can compound serial module sequences with parallel module combinations (*e.g.* `client.serial(module1, client.parallel(module2, module3), module4);`).
+  **Note:** you can compound serial module sequences with parallel module combinations (*e.g.* `client.serial(module1, client.parallel(module2, module3), module4);`).
 - `parallel(...modules:ClientModule) : ClientModule`  
   The `ClientModule` returned by the `parallel` method starts the given `...modules` in parallel (with their `start` methods), and calls its `done` method after all modules called their own `done` methods.  
-  **Note:** You can compound parallel module combinations with serial module sequences (*e.g.* `client.parallel(module1, client.serial(module2, module3), module4);`).  
-  **Note:** The `view` of a module is always full screen, so in the case where modules run in parallel, their `view`s are stacked on top of each other using the `z-index` CSS property. We use the order of the `parallel` method's arguments to determine the order of the stack (*e.g.* in `client.parallel(module1, module2, module3)`, the `view` of `module1` is displayed on top of the `view` of `module2`, which is displayed on top of the `view` of `module3`). 
+  **Note:** you can compound parallel module combinations with serial module sequences (*e.g.* `client.parallel(module1, client.serial(module2, module3), module4);`).  
+  **Note:** the `view` of a module is always full screen, so in the case where modules run in parallel, their `view`s are stacked on top of each other using the `z-index` CSS property. We use the order of the `parallel` method's arguments to determine the order of the stack (*e.g.* in `client.parallel(module1, module2, module3)`, the `view` of `module1` is displayed on top of the `view` of `module2`, which is displayed on top of the `view` of `module3`). 
 
 #### Server side: the `server` object
 
@@ -578,7 +578,7 @@ For clarity, the methods of `server` are split into two groups.
 
 #### The ServerClient class
 
-The `ServerClient` module is used to keep track of the connected clients and to communicate with the corresponding client via WebSockets (see the [`client` object WebSocket communication](#initialization-and-websocket-communication) section above). Each time a client connects to the server, *Soundworks* creates an instance of `ServerClient`. An instance of the class is passed to the `connect` and `disconnect` of the server side modules as well as to the `enter` and `exit` method of the `performance` class.
+The `ServerClient` module is used to keep track of each connected client and to communicate with it via WebSockets (see the [`client` object WebSocket communication](#initialization-and-websocket-communication) section above). Each time a client of type `clientType` connects to the server, *Soundworks* creates an instance of `ServerClient`. An instance of the class is passed to the `connect` and `disconnect` methods of all the server side modules that are mapped to the `clientType` clients, as well as to the `enter` and `exit` methods of any `performance` class mapped to that same client type.
 
 ###### Methods
 
@@ -592,13 +592,13 @@ The `ServerClient` module is used to keep track of the connected clients and to 
 ###### Attributes
 
 - `type:String`  
-  The `type` attribute stores the type of the client. This is the client type that is specified when initializing the `client` object  on the client side with `client.init(clientType);` (generally at the very beginning of the Javascript file your write).
-- `index:Number = 0`
-  The `index` attribute stores the index of the client as set by the `ServerCheckin` module (see [`ServerCheckin` module](#servercheckin)).
-- `coordinates:Array = null`
-  The `coordinates` attribute stores the coordinates of the client as an [x, y] array (see [`ServerCheckin` module](#servercheckin)).
+  The `type` attribute stores the type of the client. This is the client type that is specified when initializing the `client` object on the client side with `client.init(clientType);` (generally at the very beginning of the `index.es6.js` file your write).
+- `index:Number = 0`  
+  The `index` attribute stores the index of the client as set by the `ServerCheckin` module (for more information, see [`ServerCheckin` module](#servercheckin)).
+- `coordinates:Array = null`  
+  The `coordinates` attribute stores the coordinates of the client as an `[x, y]` array (for more information, see [`ServerCheckin` module](#servercheckin)).
 - `modules:Object = {}`  
-  The `modules` property is used by any module to associate data to a particular client. Each module prefixes the properties that it associates to a client by the module's name (the prefix is created by the 'ServerModule' base class – see [`ServerModule`](#servermodule)). For instance, if the `sync` module keeps track of the time offset between the client’s and the server's clock, it would store the information in `this.modules.sync.timeOffset`. Similarly, if the `performance` module needs some kind of flag for each client, it would store this information in `this.modules.performance.flag`.
+  The `modules` property is used by any module to associate data to a particular client. All the data associated with a module whose `name` is `moduleName` is accessible through the key `moduleName` (for more information, see [`ServerModule`](#servermodule)). For instance, the `sync` module keeps track of the time offset between the client and the sync clocks in `this.modules.sync.timeOffset`. Similarly, the `performance` module could keep track of each client's status in `this.modules.performance.status`.
 
 #### The `Module` base class
 
