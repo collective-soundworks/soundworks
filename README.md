@@ -1089,7 +1089,7 @@ The `ClientSync` module extends the `ClientModule` base class and takes care of 
 - `getSyncTime(localTime:Number = audioContext.currentTime) : Number`  
   The `getSyncTime` method returns the time of the sync clock (in seconds) corresponding to the given local (client) time. If no arguments are provided, the method returns the current sync time.
 
-Below is an example of an instantiation of the `Sync` module.
+Below is an example of an instantiation of the `Sync` module on the client side.
 
 ```javascript
 /* Client side */
