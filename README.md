@@ -123,7 +123,7 @@ In the example described above, the client side code corresponding to the `playe
 ```javascript
 /* Client side */
 
-// Require the Soundworks library and the 'client' object
+// Require the Soundworks library (client side) and the 'client' object
 var clientSide = require('soundworks/client');
 var client = clientSide.client;
 
@@ -173,7 +173,7 @@ The server side of the application must provide the server modules that respond 
 ```javascript
 /* Server side */
 
-// Require the Soundworks library and the 'server' object
+// Require the Soundworks library (server side) and the 'server' object
 var serverSide = require('soundworks/server');
 var server = serverSide.server;
 
@@ -272,7 +272,7 @@ In detail, the `start` method of the module sends a request to the `ServerChecki
 ```javascript
 /* Client side */
 
-// Load the client side Soundworks library
+// Require the Soundworks library (client side) and the 'client' object
 var clientSide = require('soundworks/client');
 var client = clientSide.client;
 
@@ -329,7 +329,7 @@ The `disconnect` method has to release the client index so that it can be reused
 ```javascript
 /* Server side */
 
-// Require the server side Soundworks library
+// Require the Soundworks library (server side)
 var serverSide = require('soundworks/server');
 
 // Write the module
@@ -400,7 +400,7 @@ The following example shows a simple performance module. In this scenario, the p
 ```javascript
 /* Client side */
 
-// Require the client object
+// Require the 'client' object
 var client = require('./client');
 
 // Write the performance module
@@ -440,7 +440,7 @@ class MyPerformance extends clientSide.Performance {
 ```javascript
 /* Server side */
 
-// Require the server side Soundworks library
+// Require the Soundworks library (server side)
 var serverSide = require('soundworks/server');
 
 // Write the performance module
@@ -500,8 +500,8 @@ We start with the [core objects](#core-objects):
 
 Then we review the [basic/base module classes](#basicbase-classes):
 - [`ServerClient`](#the-serverclient-class)
-- [`Module`](#the-module-base-class)
-- [`Performance`](#the-performance-base-class)
+- [`Module`](#the-module-base-class) (base class)
+- [`Performance`](#the-performance-base-class) (base class)
 
 Finally, we focus on the modules implemented in the library. Some modules are only present on the [client side](#client-only-modules):
 - [`Dialog`](#clientdialog)
@@ -512,7 +512,7 @@ Finally, we focus on the modules implemented in the library. Some modules are on
 Others require both the [client **and** server sides](#client-and-server-modules):
 - [`Checkin`](#checkin)
 - [`Control`](#control)
-- [`Performance`](#performance)
+- [`Setup`](#setup)
 - [`Sync`](#sync)
 
 Some modules on the client side are associated with dedicated styling information. When that is the case, we added in the [`soundworks-template`](https://github.com/collective-soundworks/soundworks-template)’s [`src/sass/`](https://github.com/collective-soundworks/soundworks-template/tree/master/src/sass) folder the corresponding `_77-moduleName.scss` SASS partial. Don't forget to include them in your `*.scss` files when you write your scenario (for more information, cf. the [Styling with SASS](#styling-with-sass) section). We indicate in the module descriptions below which of them require custom SASS partials.
@@ -616,7 +616,7 @@ Any module that extends the `ClientModule` class requires the four generic SASS 
   The `constructor` accepts up to three arguments:
   - `name:String`, name of the module that is also the identifier and class of the module's `view` DOM element (`<div id='name' class='module name'></div>`);
   - `hasView:Boolean = true`, determines whether the module creates the `view` DOM element or not;
-  - `viewColor = 'black'`, background color of the module's view (class name defined in the library’s `sass/_03-colors.scss` file).
+  - `viewColor = 'black'`, background color of the module's view (the class names suitable for this option are defined in the library’s `sass/_03-colors.scss` file).
 - `start()`  
   The `start` method is called to start the module, and should handle the logic of the module on the client side. For instance, it takes care of the communication with the module on the server side by sending WebSocket messages and setting up WebSocket message listeners. Additionally, if the module has a `view`, the `start` method creates the corresponding HTML element and appends it to the DOM’s main container element (`div#container`).
 - `done()`  
@@ -632,10 +632,12 @@ Any module that extends the `ClientModule` class requires the four generic SASS 
 - `view = null`  
   The `view` attribute of the module is the DOM element (a full screen `div`) in which the content of the module is displayed. This element is a child of the main container (`<div id='container' class='container'></div>`), which is the only child of the `body` element. A module may or may not have a view, as indicated by the argument `hasView:Boolean` of the `constructor`. When that is the case, the view is created and added to the DOM when the `start` method is called, and is removed from the DOM when the `done` method is called.
 
-In practice, here is an example of how you would extend this class to create a module on the client side (for a more thorough description, please refer to the [How to write a module?](#how-to-write-a-module) section).
+In practice, here is an example of how you would extend this class to create a module on the client side (for a more thorough example, please refer to the [Implementing a module](#implementing-a-module) section).
 
 ```javascript
-// Client side (require the Soundworks library client side)
+/* Client side */ 
+
+// Require the Soundworks library (client side)
 var clientSide = require('soundworks/client');
 
 class MyModule extends clientSide.Module {
@@ -659,23 +661,24 @@ class MyModule extends clientSide.Module {
 
 ##### ServerModule
 
-The `ServerModule` extends the `EventEmitter` class. Each module should have a `.connect(client:ServerClient)` and a `.disconnect(client:ServerClient)` method, as explained in the [Implementing a module](#implementing-a-module) section.
-The connect method of the module creates a 
-
+The `ServerModule` extends the `EventEmitter` class. Each module should have a `connect` and a `disconnect` method, as explained in the [Implementing a module](#implementing-a-module) section.
+Any module mapped to the type of client `clientType` (thanks to the `server.map` method, see the [`server` core object](#server-side-the-server-object) for more information) would call its `connect` method when such a client connects to the server, and its `disconnect` method when such a client disconnects from the server.
 ###### Methods
 
 - `constructor(name = 'unnamed')`  
   The `constructor` accepts the following arguments:
-  - `name:String`, name of the module
+  - `name:String`, name of the module.
 - `connect(client:ServerClient)`  
   The `connect` method is called when the client `client` connects to the server, and should handle the logic of the module on the server side. For instance, it can take care of the communication with the client side module by setting up WebSocket message listeners and sending WebSocket messages, or it can add the client to a list to keep track of all the connected clients.
 - `disconnect(client:ServerClient)`  
-  The `disconnect` method is called when the client `client` disconnects from the server, and should do the necessary when that happens. For instance, it can remove the client from a list of connected clients.
+  The `disconnect` method is called when the client `client` disconnects from the server, and should do the necessary when that happens. For instance, if the module keeps track of the connected clients, it should remove the client from that list.
 
-In practice, here is how you would extend this class to create a module on the server side.
+In practice, here is how you would extend this class to create a module on the server side (for a more thorough example, please refer to the [Implementing a module](#implementing-a-module) section).
 
 ```javascript
-// Server side (require the Soundworks library server side)
+/* Server side */
+
+// Require the Soundworks library (server side)
 var serverSide = require('soundworks/server');
 
 class MyModule extends serverSide.Module {
@@ -695,7 +698,7 @@ class MyModule extends serverSide.Module {
 
 #### The `Performance` base class
 
-The `Performance` module is a base class meant to be extended when you write the performance code of your scenario. It is a regular `Module`, and its particularity is to keep track of the clients who are currently in the performance by maintaining an array `this.clients` on the server side.
+The `Performance` module is a base class meant to be extended when you write the performance code of your scenario. It is a regular `Module`, and its particularity is to keep track of the clients who are currently in the performance by maintaining the array `this.clients` on the server side, and to have the `enter` and `exit` methods on the server side that inform the module when the client entered the performance (*i.e.* when the `performance` on the client side called its `start` method) and left it (*i.e.* when the `performance` on the client side called its `done` method, or if the client disconnected from the server).
 
 **Note:** this base class is provided for convenience only. You can also write your performance by extending a regular `Module` rather than extending this class.
 
@@ -707,8 +710,8 @@ The `ClientPerformance` module extends the `ClientModule` base class and constit
 
 - `constructor(options:Object = {})`  
   The `constructor` accepts the following `options`:
-  - `name:String = 'performance'`, the name of the module
-  - `color:String = 'black'`, the `viewColor` of the module
+  - `name:String = 'performance'`, the name of the module;
+  - `color:String = 'black'`, the `viewColor` of the module.
 - `start()`  
   The `start` method extends the `ClientModule`’s `start` method and is automatically called to start the performance on the client side.
 - `done()`  
@@ -716,13 +719,13 @@ The `ClientPerformance` module extends the `ClientModule` base class and constit
 
 ##### ServerPerformance
 
-The `ServerPerformance` module extends the `ServerModule` base class and constitutes a basis on which to build a performance on the client side.
+The `ServerPerformance` module extends the `ServerModule` base class and constitutes a basis on which to build a performance on the server side.
 
 ###### Methods
 
 - `constructor(options:Object = {})`  
   The `constructor` accepts the following `options`:
-  - `name:String`, name of the module
+  - `name:String`, name of the module.
 - `connect(client:ServerClient)`  
   The `connect` method extends the `ServerModule`’s `connect` method. It adds the client `client` to the array `this.clients` when it receives the WebSocket message `'performance:start'`, and removes it from that array when it receives the WebSocket message `'performance:done'`.
 - `disconnect(client:ServerClient)`
@@ -730,42 +733,42 @@ The `ServerPerformance` module extends the `ServerModule` base class and constit
 - `enter(client:ServerClient)`  
   The `enter` method is called when the client `client` starts the performance.
 - `exit(client:ServerClient)`  
-  The `exit` method is called when the client `client` leaves the performance (*i.e. when the `ClientPerformance` calls its `done` method, or if the client disconnects from the server).  
+  The `exit` method is called when the client `client` leaves the performance (*i.e.* when the `ClientPerformance` calls its `done` method, or if the client disconnects from the server).  
 
 **Note:** in practice, you will mostly override the `enter` and `exit` methods when you write your performance.
 
 ###### Attributes
 
 - `clients:Array = []`  
-  The `clients` attribute is an array that contains the list of the clients who currently joined the performance.
+  The `clients` attribute is an array that contains the list of the clients who are currently in the performance (*i.e* who started it and have not left it yet).
 
 ### Client only modules
 
 #### ClientDialog
 
-The `ClientDialog` displays a full screen dialog. It requires the participant to tap the screen to make the view disappear. The module is also used at the very beginning of a scenario to activate the Web Audio API on iOS devices (option `activateWebAudio). The `ClientDialog` module calls its `done` method when the participant taps on the screen.
+The `ClientDialog` displays a full screen dialog. It requires the participant to tap the screen to make the view disappear. The module is also used at the very beginning of a scenario to activate the Web Audio API on iOS devices (with the option `activateWebAudio`). The `ClientDialog` module calls its `done` method when the participant taps on the screen.
 
 ###### Methods
 
 - `constructor(options:Object = {})`  
   The `constructor` accepts the following `options`:
-  - `name:String = dialog`, `name` of the module
-  - `color:String = 'black'`, `viewColor` of the module
-  - `text:String` = "Hello!", text to be displayed in the dialog.
-  - `activateAudio:Boolean = false`, whether the module activates the Web Audio API when the participant touches the screen (useful on iOS devices)
+  - `name:String = dialog`, `name` of the module;
+  - `color:String = 'black'`, `viewColor` of the module;
+  - `text:String = "Hello!"`, text to be displayed in the dialog;
+  - `activateAudio:Boolean = false`, whether the module activates the Web Audio API when the participant touches the screen (useful on iOS devices).
 
-For instance, the following code would generate the HTML content shown below in the module's view when the module starts:
+For instance, the following code would generate the HTML content shown below and append it to the `div#container` when the module starts:
 
 ```javascript
 var welcomeDialog = new ClientDialog({
   name: 'welcome',
-  text: 'Welcome to this awesome scenario!'
+  text: 'Welcome to this awesome scenario!',
+  color: 'alizarin' // the list of available colors is in 'src/sass/_03-colors.scss'
 });
 ```
 
-
 ```html
-<div id='welcome' class='module welcome'>
+<div id='welcome' class='module welcome alizarin'>
   <p>Welcome to this awesome scenario!</p>
 </div>
 ```
