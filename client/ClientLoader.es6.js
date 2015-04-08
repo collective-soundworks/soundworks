@@ -12,8 +12,8 @@ class ClientLoader extends ClientModule {
   constructor(audioFiles, options = {}) {
     super(options.name || 'loader', true, options.color);
 
-    this.__audioFiles = audioFiles;
-    this.__fileProgress = [];
+    this._audioFiles = audioFiles;
+    this._fileProgress = [];
 
     this.audioBuffers = null;
 
@@ -40,9 +40,9 @@ class ClientLoader extends ClientModule {
     super.start();
 
     var loader = new AudioBufferLoader();
-    loader.progressCallback = this.__progressCallback.bind(this);
+    loader.progressCallback = this._progressCallback.bind(this);
     
-    loader.load(this.__audioFiles)
+    loader.load(this._audioFiles)
       .then(
         (audioBuffers) => {
           this.audioBuffers = audioBuffers;
@@ -53,12 +53,12 @@ class ClientLoader extends ClientModule {
       );
   }
 
-  __progressCallback(obj) {
+  _progressCallback(obj) {
     var progress = 0;
-    this.__fileProgress[obj.index] = obj.value;
+    this._fileProgress[obj.index] = obj.value;
 
-    for (let i = 0; i < this.__fileProgress.length; i++) {
-      progress += this.__fileProgress[i] / this.__audioFiles.length;
+    for (let i = 0; i < this._fileProgress.length; i++) {
+      progress += this._fileProgress[i] / this._audioFiles.length;
     }
 
     progress = Math.ceil(progress * 100);

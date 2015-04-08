@@ -11,24 +11,24 @@ class ClientDialog extends ClientModule {
   constructor(options = {}) {
     super(options.name || 'dialog', true, options.color);
 
-    this.__mustActivateAudio = options.activateAudio || false;
-    this.__text = options.text || "Hello!";
+    this._mustActivateAudio = options.activateAudio || false;
+    this._text = options.text || "Hello!";
   }
 
   start() {
     super.start();
-    this.setCenteredViewContent('<p>' + this.__text + '</p>');
+    this.setCenteredViewContent('<p>' + this._text + '</p>');
 
     // install click listener
     this.view.addEventListener('click', () => {
-      if (this.__mustActivateAudio)
-        this.__activateAudio();
+      if (this._mustActivateAudio)
+        this._activateAudio();
 
       this.done();
     });
   }
 
-  __activateAudio() {
+  _activateAudio() {
     var o = audioContext.createOscillator();
     var g = audioContext.createGain();
     g.gain.value = 0;
