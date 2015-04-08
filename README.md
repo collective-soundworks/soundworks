@@ -546,14 +546,16 @@ For clarity, the methods of the `client` object are split into two groups.
     - A `serial` sequence of modules;
     - A `parallel` combination of modules.
 - `serial(...modules:ClientModule) : ClientModule`  
-  The `serial` method returns a `ClientModule` that starts the given `...modules` in series. After starting the first module (by calling its `start` method), the next module in the series is started (with its `start` method) when the last module called its `done` method. When the last module calls `done`, the returned serial module calls its own `done` method. You can compound serial module sequences with parallel module combinations (*e.g.* `client.serial(module1, client.parallel(module2, module3), module4);`).
+  The `serial` method returns a `ClientModule` that starts the given `...modules` in series. After starting the first module (by calling its `start` method), the next module in the series is started (with its `start` method) when the last module called its `done` method. When the last module calls `done`, the returned serial module calls its own `done` method.  
+  **Note:** You can compound serial module sequences with parallel module combinations (*e.g.* `client.serial(module1, client.parallel(module2, module3), module4);`).
 - `parallel(...modules:ClientModule) : ClientModule`  
-  The `ClientModule` returned by the `parallel` method starts the given `...modules` in parallel (with their `start` methods), and calls its `done` method after all modules called their own `done` methods. You can compound parallel module combinations with serial module sequences (*e.g.* `client.parallel(module1, client.serial(module2, module3), module4);`).  
-  **Note:** The `view` of a module is always full screen, so in the case where modules run in parallel, their `view`s are stacked on top of each other using the `z-index` CSS property. We use the order of the `parallel` method's arguments to determine the order of the stack (*e.g.* in `client.parallel(module1, module2, module3)`, the `view` of `module1` is displayed on top of the `view` of `module2`, which is displayed on top of the view of `module3`). 
+  The `ClientModule` returned by the `parallel` method starts the given `...modules` in parallel (with their `start` methods), and calls its `done` method after all modules called their own `done` methods.  
+  **Note:** You can compound parallel module combinations with serial module sequences (*e.g.* `client.parallel(module1, client.serial(module2, module3), module4);`).  
+  **Note:** The `view` of a module is always full screen, so in the case where modules run in parallel, their `view`s are stacked on top of each other using the `z-index` CSS property. We use the order of the `parallel` method's arguments to determine the order of the stack (*e.g.* in `client.parallel(module1, module2, module3)`, the `view` of `module1` is displayed on top of the `view` of `module2`, which is displayed on top of the `view` of `module3`). 
 
 #### Server side: the `server` object
 
-The `server` object contains the basic state and methods of the server. For instance, this object allows setting up, configure and start the server with the method `start`. The method `map`, allows for managing the mapping between different types of clients and their required server modules.
+The `server` object contains the basic methods of the server. For instance, this object allows setting up, configuring and starting the server with the method `start` while the method `map` allows for managing the mapping between different types of clients and their required server modules. Additionally, the method `broadcast` allows to send messages to all connected clients.
 
 For clarity, the methods of `server` are split into two groups.
 
@@ -562,14 +564,14 @@ For clarity, the methods of `server` are split into two groups.
 - `start(app:Object, publicPath:String, port:Number)`  
   The `start` method starts the server with the Express application `app` that uses `publicPath` as the public static directory, and listens to the port `port`.
 - `map(clientType:String, ...modules:ServerModule)`  
-  The `map` method is used to indicate that the clients of this type require the given server modules `...modules` and routes the connections from the corresponding URL the corresponding view (except for the `player` clients that are mapped to the root URL `/` instead of `/player`). More specifically:
-  - a client connecting to the server through the root URL `http://my.server.address:port/` is considered as a `player` client and displays the view `player.ejs`
-  - a client connecting to the server through the URL `http://my.server.address:port/env` would be considered as an `env` client display the view `env.ejs`.
+  The `map` method is used to indicate that the clients of type `clientType` (as initialized by `client.init` on the client side) require the server modules `...modules`. Additionally, this method routes the connections from the corresponding URL to the corresponding view. More specifically:
+  - A client connecting to the server through the root URL `http://my.server.address:port/` is considered as a `player` client and displays the view `player.ejs`;
+  - A client connecting to the server through the URL `http://my.server.address:port/clientType` would be considered as a `clientType` client, and display the view `clientType.ejs`.
 
 ##### WebSocket communication
 
 - `broadcast(clientType:String, msg:String, ...args:Any)`  
-  The `broadcast` method sends the message `msg` and any number of values `...args` (of any type) to all the clients of the given type through WebSockets.  
+  The `broadcast` method sends the message `msg` and any number of values `...args` (of any type) to all the clients of type `clientType` (as initialized by `client.init` on the client side) through WebSockets.  
   **Note:** on the client side, the clients receive the message with the command `client.receive(msg:String, callback:Function)`, where the `callback` function would take `...args` as arguments (see the [`client` object WebSocket communication](#initialization-and-websocket-communication) section above).
 
 ### Basic/base classes
