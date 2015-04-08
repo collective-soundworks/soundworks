@@ -266,8 +266,9 @@ In detail, the `start` method of the module sends a request to the `ServerChecki
 ```javascript
 /* Client side */
 
-// Require the client object
-var client = require('./client');
+// Load the client side Soundworks library
+var clientSide = require('soundworks/client');
+var client = clientSide.client;
 
 // Write the module
 class ClientCheckin extends ClientModule {
@@ -459,12 +460,19 @@ class MyPerformance extends serverSide.Performance {
 
 ### Styling with SASS
 
-Finally, the `src/sass/` folder would contain all the SASS partials we need for the modules from the library, and include them all in a `env.scss` file, where `env` can be `player`, `conductor`, `env`, or any other type of client you create. Since the `player` is the default client in any *Soundworks*-based scenario, the `src/sass/` should at least contain the `player.scss` file.
+The *Soundworks* library uses SASS to generate the CSS files. You will find the SASS files associated with the Soundworks library in [the `soundworks-template` repository]() (in the `src/sass/`.
 
-For instance, in our previous example where the client has a `welcome`, `sync`, `checkin` and `performance` module, the `player.scss` file could look like this.
+When you write a scenario, the `src/sass/` folder should contain:
+
+- The four generic SASS partials from the library (`_01-reset.scss`, `_02-fonts.scss`, `_03-colors.scss`, `_04-general.scss`);
+- All the SASS partials required by any module of the library you use (*e.g.* `_77-checkin.scss`, `_77-loader.scss`, etc.) — the client side modules that need a custom SASS partial are indicated in [the API section](#API);
+- Your own SASS partials for the modules you wrote (in particular, for the `performance`);
+- One file for each type of client `clientType.scss` (*e.g.* `player.scss`, `conductor.scss`, `env.scss`, etc.) that includes all the partials needed by that type of client. Since the `player` is the default client in any *Soundworks*-based scenario, the `src/sass/` should at least contain the `player.scss` file.
+
+For instance, in the scenario example shown in [Composing a scenario from modules](##composing-a-scenario-from-modules), the `player` client uses the `welcome` (`dialog`), `sync` and `checkin` modules from the library. Among them, only the `checkin` module requires a custom SASS partial so the `player.scss` file could look like the following:
 
 ```sass
-// General styling: these partials should be included in every env.scss file
+// General styling: these partials should be included in every clientType.scss file
 @import '01-reset';
 @import '02-fonts';
 @import '03-colors';
