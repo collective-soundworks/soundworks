@@ -602,36 +602,37 @@ The `ServerClient` module is used to keep track of each connected client and to 
 
 #### The `Module` base class
 
-The `Module` server and client classes are the base classes that any *Soundworks* module should extend. The base classes define interfaces to be implemented by the derived modules as well as they provide a set of attributes and methods that facilitate the implementation of modules.
+The `Module` server and client classes are the base classes that any *Soundworks* module should extend. These base classes define interfaces to be implemented by the derived modules, and provide a set of attributes and methods that facilitate the implementation of modules.
 
 ##### ClientModule
 
-The `ClientModule` extends the `EventEmitter` class. Each module should have a `start` and a `done` method, as explained in the [Implementing a module](#implementing-a-module) section. The `done` method must be called when the module can hand over the control to the subsequent modules (*i.e.* when the module has done its duty, or when it has to run in the background for the rest of the scenario after it finished its initialization process). The base class optionally creates a view – a fullscreen DOM element (*i.e.* a `div`) accessible through the `view` attribute – that is added to the DOM when the module is started and removed when the module calls done.
+The `ClientModule` extends the `EventEmitter` class. Each module should have a `start` and a `done` method, as explained in the [Implementing a module](#implementing-a-module) section. The `done` method must be called when the module can hand over the control to the subsequent modules (*i.e.* when the module has done its duty, or when it may run in the background for the rest of the scenario after it finished its initialization process). The base class optionally creates a view — a fullscreen `div` accessible through the `view` attribute — that is added to the DOM when the module is started and removed when the module calls done. (Specifically, the `view` element is added to the `#container` element.)
 
-Any module that extends the `ClientModule` class requires the SASS partial `sass/general.scss`.
+Any module that extends the `ClientModule` class requires the four generic SASS partials listed in [Styling with SASS](#styling-with-sass).
 
 ###### Methods
 
 - `constructor(name:String, hasView:Boolean = true, viewColor:String = 'black')`  
   The `constructor` accepts up to three arguments:
-  - `name:String`, name of the module that is also the identifier and class of the module's `view` DOM element (`<div id='name' class='module name'></div>`)
-  - `hasView:Boolean = true`, determines whether the module creates the `view` DOM element
-  - `viewColor = 'black'`, background color of the module's view (class name defined in the library’s `sass/_03-colors.scss` file)
+  - `name:String`, name of the module that is also the identifier and class of the module's `view` DOM element (`<div id='name' class='module name'></div>`);
+  - `hasView:Boolean = true`, determines whether the module creates the `view` DOM element or not;
+  - `viewColor = 'black'`, background color of the module's view (class name defined in the library’s `sass/_03-colors.scss` file).
 - `start()`  
-  The `start` method is called to start the module, and should handle the logic of the module on the client side. For instance, it takes care of the communication with the module on the server side by sending WebSocket messages and setting up WebSocket message listeners. If the module has a view, the `start` method creates the corresponding HTML element and appends it to the DOM’s main container `div`.
+  The `start` method is called to start the module, and should handle the logic of the module on the client side. For instance, it takes care of the communication with the module on the server side by sending WebSocket messages and setting up WebSocket message listeners. Additionally, if the module has a `view`, the `start` method creates the corresponding HTML element and appends it to the DOM’s main container element (`div#container`).
 - `done()`  
-  The `done` method should be called when the module has done its duty (for instance at the end of the `start` method you write). You should not have to modify this method, but if you do, don’t forget to include `super.done()` at the beginning of the method. If the module has a view, the `done` method removes it from the DOM.
+  The `done` method should be called when the module can hand over the control to a subsequent module (for instance at the end of the `start` method you write). If the module has a `view`, the `done` method removes it from the DOM.  
+  **Note:** you should not override this method.
 - `setCenteredViewContent(htmlContent:String)`  
-  The `setCenteredViewContent` set an arbitrary centered HTM content to the module's view. The method should be called only if the module has a view.
+  The `setCenteredViewContent` method set an arbitrary centered HTML content `htmlContent` to the module's `view`. The method should be called only if the module has a `view`.
 - `removeCenteredViewContent()`  
-  The `removeCenteredViewContent` method removes the centered HTML content set by `setCenteredViewContent` from the DOM.
+  The `removeCenteredViewContent` method removes the centered HTML content (set by `setCenteredViewContent`) from the `view`.
 
 ###### Attributes
 
 - `view = null`  
   The `view` attribute of the module is the DOM element (a full screen `div`) in which the content of the module is displayed. This element is a child of the main container (`<div id='container' class='container'></div>`), which is the only child of the `body` element. A module may or may not have a view, as indicated by the argument `hasView:Boolean` of the `constructor`. When that is the case, the view is created and added to the DOM when the `start` method is called, and is removed from the DOM when the `done` method is called.
 
-In practice, here is an example of how you would extend this class to create a module on the client side.
+In practice, here is an example of how you would extend this class to create a module on the client side (for a more thorough description, please refer to the [How to write a module?](#how-to-write-a-module) section).
 
 ```javascript
 // Client side (require the Soundworks library client side)
@@ -651,7 +652,7 @@ class MyModule extends clientSide.Module {
 
     ... // what the module has to do (communication with the server, etc.)
 
-    this.done(); // call this method when the duty of the module is done
+    this.done(); // call this method when the module can hand over the control to a subsequent module
   }
 }
 ```
