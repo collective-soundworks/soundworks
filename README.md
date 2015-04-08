@@ -33,7 +33,13 @@
 
 *Soundworks* is a Javascript framework that enables artists and developers to create collaborative music performances where a group of participants distributed in space use their mobile devices to generate sound and light through touch and motion.
 
-The framework is based on a client/server architecture supported by `Node.js` (`v0.12.0` or later) and WebSockets. It uses a modular design to make it easy to implement different performance scenarios: the [*Soundworks* template](https://github.com/collective-soundworks/soundworks-template) allows anyone to bootstrap a *Soundworks*-based scenario and focus on its audiovisual and interaction design instead of the infrastructure.
+The framework is based on a client/server architecture supported by `Node.js` (`v0.12.0` or later) and WebSockets, and uses a modular design to make it easy to implement different performance scenarios: the [`soudnworks-template`](https://github.com/collective-soundworks/soundworks-template) allows anyone to bootstrap a scenario based on *Soundworks* and focus on its audiovisual and interaction design instead of the infrastructure.
+
+#### Quick, I want to get started!
+
+The most direct way for you to get started is to go straight to [the `soundworks-template` repository](https://github.com/collective-soundworks/soundworks-template) and hack in. Additionally, you'll find a few scenario examples in the [Collective Soundworks](https://github.com/collective-soundworks) organization, such as [*Beats*](https://github.com/collective-soundworks/beats), [*Drops*](https://github.com/collective-soundworks/soundworks-drops), [*Paths*](https://github.com/collective-soundworks/soundworks-paths) or [*Wandering Sound*](https://github.com/collective-soundworks/soundworks-wanderingsound). Don't hesitate to have a look at them!
+
+However, if you want to have a better understanding of how the machinery works, let's now deep dive in the doc…
 
 ### Client/server architecture 
 
@@ -460,7 +466,7 @@ class MyPerformance extends serverSide.Performance {
 
 ### Styling with SASS
 
-The *Soundworks* library uses SASS to generate the CSS files. You will find the SASS files associated with the Soundworks library in [the `soundworks-template` repository](https://github.com/collective-soundworks/soundworks-template) (in [the `src/sass/` subfolder](https://github.com/collective-soundworks/soundworks-template/tree/master/src/sass)).
+The *Soundworks* library uses SASS to generate the CSS files. You will find the SASS files associated with the Soundworks library in [the `soundworks-template` repository](https://github.com/collective-soundworks/soundworks-template) (in the [`src/sass/`](https://github.com/collective-soundworks/soundworks-template/tree/master/src/sass) subfolder).
 
 When you write a scenario, the `src/sass/` folder should contain:
 
