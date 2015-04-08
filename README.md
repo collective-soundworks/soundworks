@@ -492,24 +492,30 @@ For instance, in the scenario example shown in the [Composing a scenario from mo
 ```
 ## API
 
-This section explains how to use the objects and classes of the library. In particular, we list here all the methods and attributes you may need to use at some point.
+This section explains how to use the objects and classes of the library. In particular, we list here all the methods and attributes you may need to use at some point while implementing a scenario.
 
-We start with the core elements on the client side ([`client` object](#client-side-the-client-object)) and on the server side ([`server` object](#server-side-the-server-object)) before focusing on the classes that form the modules.
+We start with the [core objects](#core-objects):
+- The ([`client` object](#client-side-the-client-object)) on the client side,
+- And the ([`server` object](#server-side-the-server-object)) on the server side.
 
-Some modules are only present on the [client side](#client-only-modules):
+Then we review the [basic/base module classes](#basicbase-classes):
+- [`ServerClient`](#the-serverclient-class)
+- [`Module`](#the-module-base-class)
+- [`Performance`](#the-performance-base-class)
+
+Finally, we focus on the modules implemented in the library. Some modules are only present on the [client side](#client-only-modules):
 - [`Dialog`](#clientdialog)
-- [`Platform`](#clientplatform)
 - [`Loader`](#clientloader)
 - [`Orientation`](#clientorientation)
+- [`Platform`](#clientplatform)
 
 Others require both the [client **and** server sides](#client-and-server-modules):
 - [`Checkin`](#checkin)
 - [`Control`](#control)
-- [`Module`](#module)
 - [`Performance`](#performance)
 - [`Sync`](#sync)
 
-Some modules on the client side are associated with dedicated styling information. When that is the case, we added in the library’s `sass/` folder a `_77-moduleName.scss` SASS partial. You should not forget to include them in your `*.scss` files when you write your scenario. We indicate in the sections below which modules require their corresponding SASS partials.
+Some modules on the client side are associated with dedicated styling information. When that is the case, we added in the [`soundworks-template`](https://github.com/collective-soundworks/soundworks-template)’s [`src/sass/`](https://github.com/collective-soundworks/soundworks-template/tree/master/src/sass) folder the corresponding `_77-moduleName.scss` SASS partial. You should not forget to include them in your `*.scss` files when you write your scenario (for more information, cf. the [Styling with SASS](#styling-with-sass) section). We indicate in the module descriptions below which of them require custom SASS partials.
 
 ### Core objects
 
