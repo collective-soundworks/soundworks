@@ -220,13 +220,13 @@ The *Soundworks* library provides a set of modules that are used in many scenari
 
 ### Implementing a module
 
-As mentioned above, a scenario implemented with the *Soundworks* library is essentially composed of a set of modules. In general, a module consists of a client and a server part that exchange messages (however, some modules may for example have a client side only).
+As mentioned above, a scenario implemented with the *Soundworks* library is essentially composed of a set of modules. In general, a module consists of a client and a server part that exchange messages (however, some modules may only have a client side, for example).
 
-Let's now review the specificities of the client and server sides when writing a module. To be more concrete, the code snippets below will take the example of a simplified version of the `checkin` module. (For the complete documentation about the module base classes, please refer to [`ClientModule`](#clientmodule) and [`ServerModule`](#servermodule) sections in the API section below.)
+Let's now review the specificities of implementing a module on the client and server sides, as well as the example of a simplified version of the `checkin` module for code excerpts. (For the complete documentation about the module base classes, please refer to [`ClientModule`](#clientmodule) and [`ServerModule`](#servermodule) sections in the API section below.)
 
 #### Client side
 
-On the client side, a module extends the `ClientModule` base class. The module has to implement a `start` method and has to call its `done` method to hand over the control to the next module.
+On the client side, a module extends the `ClientModule` base class. The module must implement a `start` method and has to call its `done` method to hand over the control to the next module.
 
 ##### The `start` method
 
@@ -234,15 +234,34 @@ The `start` method is called to start the module. It should handle the logic and
 
 ##### The `done` method
 
-The `done` method (implemented by the `ClientModule` base class) is called by the client module to hand over control to the next module. As an exception, the last module of the scenario (usually the `performance` module) may not call that method and keep the control until the client disconnects from the server. A derived client module must not override the `done` method provided by the base class.
+The `done` method (implemented by the `ClientModule` base class) is called by the client module to hand over control to the next module. Most modules would call their `done` method when their process is complete. For instance, if the purpose of a module is to load files, the module would call its `done` method when the files are loaded.
 
-Most modules would call their `done` method when their process is complete. For instance, if the purpose of a module is to load files, the module would call its `done` method when the files are loaded. However, some modules continue processing in the background even after calling that method. This is for example the case of the `sync` module. The module calls its `done` method after the client clock is synchronized with the sync clock for the the very first time, and keeps running in the background afterwards to re-synchronize the clocks regularly during the rest of the scenario.
+However, some modules continue processing in the background even after calling that method. This is for example the case of the `sync` module. The module calls its `done` method after the client clock is synchronized with the sync clock for the first time, and keeps running in the background afterwards to re-synchronize the clocks regularly during the rest of the scenario.
 
-##### Example (a simplified version of the `ClientCheckin` module)
+As an exception, the last module of the scenario (usually the `performance` module) may not call its `done` method and keep the control until the client disconnects from the server.
 
-The purpose of the `ClientCheckin` module in the code example below is to assign an available index to a client each time a new client connects to the server. When the module is configured with a `setup` that includes predefined positions (*i.e.* coordinates and labels), it can automatically request an available position and display the associated `label` to the participant (in other configurations, the participants alternatively could select a label, or indicate their approximate location on a map).
+A derived client module **must not** override the `done` method provided by the base class.
 
-In detail, the `start` method of the module sends a request to the `ServerCheckin` module via WebSockets, asking the server to send an available client index and, optionally, the label of a corresponding predefined position. When it receives the response from the server, it either displays the label on the screen (*e.g.* “Please go to C5 and touch the screen.”) and waits for the participant’s acknowledgement, or immediately calls the `done` method to hand over the control to a subsequent module (generally the `performance`). The server may send an `unavailable` message in the case where no more clients can be admitted to the performance (for example when all predefined positions are occupied). In this case, the applications ends on a blocking dialog (“Sorry, we cannot accept more players at the moment, …”) without calling the `done` method.
+#### Server side
+
+On the server side, a module extends the `ServerModule` base class and has to implement a `connect` and a `disconnect` method.
+While the sequence of user interactions and exchanges between client and server is determined on the client side, the server side modules are ready to receive requests from the corresponding client side modules as soon as a client is connected to the server (*i.e.* when the module's `.connect(client)` is called).
+
+##### The `connect` method
+
+When a client of a particular type connects to the server via the corresponding URL (*e.g.* a `player` through the root URL, or an `env` client through the `/env` URL), the server calls the `connect` method of all the modules that are mapped to that client type. In particular, the module should take advantage of the `connect` method to set up WebSocket listeners in order to serve incoming requests from the corresponding client side module.
+
+##### The `disconnect` method
+
+Similarly, the `disconnect` method is called whenever the client disconnects from the server. It handles all the actions that are necessary in that case.
+
+#### Example: a simplified version of the `checkin` module
+
+The purpose of that simplified version of the `checkin` module is the following: each time a new client connects to the server, the `checkin` module assigns an available index to it. On the server side, the module can be configured with a `setup` object that lists predefined positions (*i.e.* coordinates and labels): in that case, the module on the client side can automatically request an available position from the `setup` and display the associated `label` to the participant. (In other configurations which we won't review in this example, the participants could alternatively select a label, or indicate their approximate location on a map). When no indices are available anymore, the `checkin` module informs the participant with a message on the screen (on the client side).
+
+##### Client Side
+
+In detail, the `start` method of the module sends a request to the `ServerCheckin` module via WebSockets, asking the server to send an available client index and, optionally, the label of a corresponding predefined position. When it receives the response from the server, it either displays the label on the screen (*e.g.* “Please go to C5 and touch the screen.”) and waits for the participant’s acknowledgement, or immediately calls the `done` method to hand over the control to a subsequent module (generally the `performance`). The server may send an `unavailable` message in the case where no more clients can be admitted to the performance (for example when all predefined positions are occupied). In this case, the applications ends on a blocking dialog (“Sorry, we cannot accept more players at the moment, please try again later”) without calling the `done` method.
 
 ```javascript
 /* Client side */
@@ -279,65 +298,54 @@ class ClientCheckin extends ClientModule {
       }
     }
 
-    // Receive message from the server with no client index available
+    // If there are no more indices available, display a message on screen
+    // and DO NOT call the 'done' method
     client.receive('checkin:unavailable', () => {
       this.setCenteredViewContent("<p>Sorry, we cannot accept more connections at the moment, please try again later.</p>");
     });
   }
 
-  // The rest of the module
-  ...
+  ... // the rest of the module
 
 }
 ```
 
-As shown in this code example, the `ClientModule` base class may provide a `view` (*i.e.* an HTML `div`) that is added to the window (actually to a `#container` element) when the module starts, and removed from the DOM when the module calls its `done` method. The boolean that is passed as second argument to the `constructor` of the base class determines whether the module actually creates a view or not.
+As shown in this code example, the `ClientModule` base class may provide a `view` (*i.e.* an HTML `div`) that is added to the DOM (specifically to the `#container` element) when the module starts, and removed from the DOM when the module calls its `done` method. The boolean that is passed as second argument to the `constructor` of the base class determines whether the module actually creates its `view` or not.
 The method `setCenteredViewContent` allows for adding an arbitrary centered content (*e.g.* a paragraph of text) to the view.
 
-#### Server side
+##### Server side
 
-On the server side, a module extends the `ServerModule` base class and has to implement a `connect` and a `disconnect` method.
-While the sequence of user interactions and exchanges between client and server is determined on the client side, the server side modules are ready to receive requests from the corresponding client side modules as soon as a client is connected to the server.
-
-##### The `connect` method
-
-When a client of a particular type connects to the server via the corresponding URL (*e.g.* a `player` through the root URL, or an `env` client through the `/env` URL), the server calls the `connect` method of all the modules that are mapped to that type of client. In the `connect` method, the module should set up WebSocket listeners in order to serve incoming requests from the corresponding client side module.
-
-##### The `disconnect` method
-
-Similarly, the `disconnect` method is called whenever the client `client` disconnects from the server. It handles all the actions that are necessary in that case.
-
-##### Example (a simplified version of the `ServerCheckin` module)
-
-In our simplified `ServerCheckin` module example, the `connect` method has to install a listener that – on the request of the client – would obtain an available client index and send it back to the client. If the module has been configured with a setup predefining a certain number of positions, the server additionally sends the label of the position corresponding to the client index. In this case, the maximum number of clients is determined by the number of seas defined by the setup. 
+In our simplified `ServerCheckin` module example, the `connect` method has to install a listener that — upon request of the client — obtains an available client `index` and sends it back to the client. If the module has been configured with a `setup` (that predefines a certain number of spatial positions, associated with a `label`), the server additionally sends the `label` of the position corresponding to the client `index`. In this case, the maximum number of clients is determined by the number of seats defined by the `setup`.
 
 The `disconnect` method has to release the client index so that it can be reused by another client that connects to the server.
 
 ```javascript
-// Server side (require the Soundworks library server side)
+/* Server side */
+
+// Require the server side Soundworks library
 var serverSide = require('soundworks/server');
 
 class ServerCheckin extends serverSide.Module {
   constructor(options = {}) {
     super();
     
-    // store setup
+    // Store setup
     this.setup = options.setup || null;
     this.maxClients = options.maxClients || Infinity;
 
-    // clip max number of clients 
-    if(setup) {
+    // Clip max number of clients 
+    if (setup) {
       var numPositions = setup.getNumPositions();
 
-      if(this.maxClients > numPositions)
+      if (this.maxClients > numPositions)
         this.maxClients = numPositions;
     }
   }
 
   connect(client) {
-    // listen for incoming WebSocket messages from the client side
+    // Listen for incoming WebSocket messages from the client side
     client.receive('checkin:request', () => {
-      // get an available client index
+      // Get an available client index
       let index = this._getIndex();
 
       if (index >= 0) {
@@ -345,18 +353,18 @@ class ServerCheckin extends serverSide.Module {
 
         var label = undefined;
 
-        if(this.setup) {
-          // get a label@
+        if (this.setup) {
+          // Get a label
           let label = this.setup.getLabel(index);
 
-          // get client coordinates according to the setup
+          // Get client coordinates according to the setup
           client.coordinates = this.setup.getCoordinates(index);
         }
 
-        // acknowledge check-in to client
+        // Acknowledge check-in to client
         client.send('checkin:acknowledge', index, label);
       } else {
-        // no client indices available
+        // No client indices available
         client.send('checkin:unavailable');
       }
 
