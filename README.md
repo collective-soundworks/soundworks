@@ -882,9 +882,9 @@ The `ServerCheckin` extends the `ServerModule` base class and takes care of the 
 
 - `constructor(options:Object = {})`  
   The `constructor` accepts the following `options`:
-  - `name:String = checkin`, `name` of the module
-  - `setup:ServerSetup = null`, predefined setup of the performance space (see [`ServerSetup` class](#serversetup))
-  - `maxClients:Number = Infinity`, maximum number of clients supported by the scenario (if a `setup` is provided, the maximum number of clients the number of predefined positions of that `setup`)
+  - `name:String = checkin`, `name` of the module;
+  - `setup:ServerSetup = null`, predefined setup of the performance space (see [`ServerSetup` class](#serversetup));
+  - `maxClients:Number = Infinity`, maximum number of clients supported by the scenario (if a `setup` is provided, the maximum number of clients the number of predefined positions of that `setup`).
 
 Below is an example of the instantiation of the `ServerCheckin` module on the server side.
 
@@ -905,33 +905,33 @@ var checkin = new serverSide.Checkin({ maxClients: 500 });
 
 #### Control
 
-The `Control` module is used to control an application through a dedicated client that we usually call `conductor`. The module allows for declaring `parameters`, `infos`, and `commands`, through which the `conductor` can control and monitor the state of the application:
-- `parameters` are values that are changed by a client, send to the server, and propagated to the other connected clients (*e.g.* the tempo of a musical application)
-- `infos` are values that are changed by the server and propagated to the connected clients, to inform about the current state of the application (*e.g.* the number of connected `player` clients)
-- `commands` are messages (without arguments) that are send from the client to the server (*e.g.* `start`, `stop` or `clear` – whatever they would mean for a given application)
+The `Control` module is used to control an application through a dedicated client (that we usually call `conductor`). The module allows for declaring `parameters`, `infos`, and `commands`, through which the `conductor` can control and monitor the state of the application:
+- `parameters` are values that are changed by a client, sent to the server, and propagated to the other connected clients (*e.g.* the tempo of a musical application);
+- `infos` are values that are changed by the server and propagated to the connected clients, to inform about the current state of the application (*e.g.* the number of connected `player` clients);
+- `commands` are messages (without arguments) that are send from the client to the server (*e.g.* `start`, `stop` or `clear` — whatever they would mean for a given application) which does the necessary upon reception.
 
-A `ClientControl` module, optionally, can automatically construct a simple interface from the list of declared controls that permits to change `parameters`, display `infos`, and to send `commands` to the server:
+Optionally, the `ClientControl` module can automatically construct a simple interface from the list of declared controls that allows to change `parameters`, display `infos`, and send `commands` to the server.
+
 The controls of different types are declared on the server side and propagated to the client side when a client is set up.
 
 ##### ClientControl
 
-The `ClientControl` module extends the `ClientModule` base class and takes care of the `parameters`, `info` values, and `commands` on the client side. If the module is instantiated with the option `gui` set to `true`, it constructs the graphical control interface, otherwise it simply receives the values that are propagated through or emitted by the server (usually by the `performance` module). The `ClientModule` calls `done` immediately after having set up the controls and, optionally, the graphical user interface.
+The `ClientControl` module extends the `ClientModule` base class and takes care of the `parameters`, `infos`, and `commands` on the client side. If the module is instantiated with the `gui` option set to `true`, it constructs the graphical control interface. Otherwise it simply receives the values that are emitted by the server (usually by through the `performance` module). The `ClientModule` calls its `done` method immediately after having set up the controls and, optionally, the graphical user interface.
 
 ###### Methods
 
 - `constructor(options:Object = {})`    
   The `constructor` accepts the following `options`:
-  - `name:String = 'control'`, the name of the module
-  - `color:String = 'black'`, the `viewColor` of the module
-  - `gui:Boolean = false`  
-    When set to `true` , the `gui` property makes the `ClientControl` to create a view with a graphical control interface that is automatically built from a list of controls sent by the client.
+  - `name:String = 'control'`, `name` of the module;
+  - `color:String = 'black'`, `viewColor` of the module;
+  - `gui:Boolean = false`, indicates whether the `ClientControl` creates a view with the graphical control interface (automatically built from a list of controls sent by the server).
 
 ###### Attributes
 
 - `parameters:Object = {}`  
-   The `parameters` object contains the global parameters of the scenario. To each key of the object is associated a parameter object. You can access the value of the parameter `'myparam'` as `parameters.myparam.value`.
+   The `parameters` object contains the global parameters of the scenario. Each key of the object is associated with a parameter object. You can access the value of the parameter `'myparam'` with `this.parameters.myparam.value`.
 - `infos:Object = {}`  
-   The `infos` attribute contains info values that inform the client about the state of scenario on the server side. You can access the value of the info `'myinfo'` as `this.infos.myinfo.value`.
+   The `infos` attribute contains info values that inform the client about the state of scenario on the server side. You can access the value of the info `'myinfo'` with `this.infos.myinfo.value`.
 - `commands:Object = {}`  
    The `commands` attribute contains the declared commands.
 
@@ -939,12 +939,12 @@ The `ClientControl` module extends the `ClientModule` base class and takes care 
 
 - `'control:parameter' : name:String, val:Any`  
   Each time a parameter is updated, the `ClientControl` module emits the `'control:parameter'` event with two arguments:
-  - `name:String`, name of the parameter that changed
-  - `val:Any`, new parameter value
+  - `name:String`, name of the parameter that changed;
+  - `val:Any`, new parameter value.
 - `'control:info' : name:String, val:Number|String`  
   Each time a parameter is updated, the `ClientControl` module emits the `'control:info'` event with two arguments:
-  - `name:String`, name of the info value that changed
-  - `val:Any`, new info value
+  - `name:String`, name of the info value that changed;
+  - `val:Any`, new info value.
 
 ##### ServerControl
 
@@ -954,31 +954,31 @@ The `ServerControl` module extends the `ServerModule` base class and takes care 
 
 - `constructor(options:Object = {})`  
   The `constructor` accepts the following `options`:
-  - `name:String`, name of the module
+  - `name:String`, `name` of the module.
 - `addParameterNumber(name:String, label:String, min:Number, max:Number, step:Number, init:Number)`  
   The `addParameterNumber` method is used to add a number control parameter. Its arguments are:
-  - `name:String`, name of the parameter
-  - `label:String`, label of the parameter in the GUI on the client side
-  - `min:Number`, minimum value of the parameter
-  - `max:Number`, maximum value of the parameter
-  - `step:Number`, step to increment or decrement the value of the parameter
-  - `init:Number`, initial value of the parameter
+  - `name:String`, name of the parameter;
+  - `label:String`, label of the parameter in the GUI on the client side;
+  - `min:Number`, minimum value of the parameter;
+  - `max:Number`, maximum value of the parameter;
+  - `step:Number`, step to increment or decrement the value of the parameter;
+  - `init:Number`, initial value of the parameter.
 - `addParameterSelect(name:String, label:String, options:Array, init:String)`  
   The `addParameterSelect` method is used to add a select control parameter. In the GUI on the client side, the select parameter displays a select form with the options `options`. Its arguments are:
-  - `name:String`, name of the parameter
-  - `label:String`, label of the parameter in the GUI on the client side
-  - `options:Array`, options of the select parameter the user can choose from in the GUI on the client side (of `String`)
-  - `init:String`, initial value of the parameter (present in the `options` array)
+  - `name:String`, name of the parameter;
+  - `label:String`, label of the parameter in the GUI on the client side;
+  - `options:Array`, options of the select parameter the user can choose from in the GUI on the client side (the array contains `String` elements);
+  - `init:String`, initial value of the parameter (present in the `options` array).
 - `addCommand(name:String, label:String, fun:Function)`  
   The `addCommand` method allows for adding a command. Its arguments are:
-  - `name:String`, name of the command
-  - `label:String`, label of the command in the GUI on the client side
-  - `fun:Function`, function to be executed when the command is called
+  - `name:String`, name of the command;
+  - `label:String`, label of the command in the GUI on the client side;
+  - `fun:Function`, function to be executed when the command is called.
 - `addInfo(name:String, label:String, init:Number|String)`  
    The `addInfo` method allows for adding an info to be displayed on the client side. Its arguments are:
-  - `name:String`, name of the info to display
-  - `label:String`, label of the info in the GUI on the client side
-  - `init:Number|String`, initial value of the info to display
+  - `name:String`, name of the info to display;
+  - `label:String`, label of the info in the GUI on the client side;
+  - `init:Number|String`, initial value of the info to display.
 - `setParameter(name:String, value:Number|String)`  
   The `setParameter` method allows set the value of the parameter `name` to `value`. The argument `value` is either of `Number` or `String` depending on whether you update a number or select parameter.
 - `setInfo(name:String, value:Number|String)`  
@@ -986,9 +986,9 @@ The `ServerControl` module extends the `ServerModule` base class and takes care 
 
 #### Setup
 
-The `Setup` module contains the information about the setup of the performance space in terms of it surface (*i.e.* dimensions and outlines) and predefined positions (*e.g.* seats or labels on the floor) where the scenario takes place.
+The `Setup` module contains the information about the setup of the performance space in terms of its surface (*i.e.* dimensions and outlines) and predefined positions (*e.g.* seats or labels on the floor).
 
-For instance, say that the scenario requires 12 participants sitting on the floor on a grid of 3 ⨉ 4 positions, the `Setup` module would contain the information about the grid, including the positions' coordinates in space and labels. Similarly, if the scenario takes place in a theater where seats are numbered, the `Setup` module would contain the seating plan.
+For instance, say that the scenario requires 12 participants sitting on the floor on a grid of 3 ⨉ 4 positions, the `Setup` module would contain the information about the grid, including the positions' coordinates in space and their labels. Similarly, if the scenario takes place in a theater where seats are numbered, the `Setup` module would contain the seating plan.
 
 If the topography of the performance space does not matter for a given scenario, the `Setup` module is not needed.
 
@@ -996,32 +996,34 @@ If the topography of the performance space does not matter for a given scenario,
 
 The `ClientSetup` modules extends the `ClientModule` base class and takes care of receiving the setup on the client side, and provides helper functions to display the setup on screen. The `ClientSetup` calls its `done` method when it receives the setup from the server.
 
-The `ClientSetup` module requires the SASS partial `sass/_08-setup.scss`.
+The `ClientSetup` module requires the SASS partial `sass/_77-setup.scss`.
 
 ###### Methods
 
-- `constructor()`  
+- `constructor(options:Object = {})`  
   The `constructor` accepts the following `options`:
-  - `name:String = setup`, the name of the module
+  - `name:String = setup`, `name` of the module.
 - `display(div:Element)`  
   The `display` method displays a graphical representation of the setup in the `div` DOM element provided as an argument.
 - `addClassToPosition(setupDisplay:Element, index: Number, className:String = 'player')`  
-  In the `Setup` graphical representation that lies in the `setupDisplay` DOM element (which had to be created by the `.displaySetup(div)` method), this method adds the class `className` to the position corresponding to the index in the setup.
+  The `addClassToPosition` method adds the class `className` to the position `index` in the `setupDisplay` DOM element (this graphical representation of the setup had to be created with the `display` method).
 - `removeClassFromPosition(setupDisplay:Element, index: Number, className:String = 'player')`  
-  In the `Setup` graphical representation that lies in the `setupDisplay` DOM element (which had to be created by the `.displaySetup(div)` method), this method removes the class `className` from the position corresponding to the index in the setup.
+  The `removeClassFromPosition` method removes the class `className` from the position `index` in the `setupDisplay` DOM element (this graphical representation of the setup had to be created with the `display` method).
 
 Below is an example of the `ClientSetup` module in use.
 
 ```javascript
-// Client side (require the Soundworks library)
+/* Client side */
+
+// Require the Soundworks library (client side)
 var clientSide = require('soundworks/client');
 
-// Create Setup module
+// Instantiate the module
 var setup = new clientSide.Setup();
 
 // Display a graphical representation of the setup in a `div` of the DOM
 var setupGUI = document.getElementById('setup-container');
-setup.displaySetup(setupGUI);
+setup.display(setupGUI);
 
 // Add the class 'red-highlight' to position #3 in this graphical representation
 setup.addClassToPosition(setupGUI, 3, 'red-highlight');
@@ -1029,32 +1031,34 @@ setup.addClassToPosition(setupGUI, 3, 'red-highlight');
 
 ##### ServerSetup
 
-The `ServerSetup` extends the `ServerModule` base class and takes care of the setup on the server side.
+The `ServerSetup` extends the `ServerModule` base class and takes care of the setup on the server side. In particular, the module provides helper functions that can generate a setup automatically from some parameters.
 ###### Methods
 
 - `constructor(options:Object = {})`  
   The `constructor` accepts the following `options`:
-  - `name:String`, name of the module
-- `generate(type:String = 'matrix', params = {}) : Number`  
-  The `generate` method generates a surface and/or predefined positions according to a given type of geometry and corresponding options. The following geometries are available: 
+  - `name:String`, `name` of the module.
+- `generate(type:String = 'matrix', params = {})`  
+  The `generate` method generates a surface and/or predefined positions according to a given type of geometry `type` and the corresponding parameters `params`. The following geometries are available: 
     - `'matrix'`, a matrix setup with the following parameters (in the `params` object):
-      - `cols = 3`, number of columns
-      - `rows = 4`, number of row
-      - `colSpacing = 1`, spacing between columns
-      - `rowSpacing = 1`, spacing between rows
-      - `colMargin = colSpacing / 2`, (*horizontal*) margins between the borders of the performance space and the first or last column
-      - `rowMargin = rowSpacing / 2`, (*vertical*) margins between the borders of the performance space and the first or last row
+      - `cols = 3`, number of columns;
+      - `rows = 4`, number of rows;
+      - `colSpacing = 1`, spacing between columns;
+      - `rowSpacing = 1`, spacing between rows;
+      - `colMargin = colSpacing / 2`, (horizontal) margins between the borders of the performance space and the first or last column;
+      - `rowMargin = rowSpacing / 2`, (vertical) margins between the borders of the performance space and the first or last row.
 - `getNumPositions() : Number`  
-  The `getNumPositions` method returns the total number of predefined positions and/or labels of the setup. For instance, if the setup is a 4 ⨉ 5 matrix the method would return *20*
+  The `getNumPositions` method returns the total number of predefined positions and/or labels of the setup. For instance, if the setup is a 4 ⨉ 5 matrix the method would return 20.
 - `getLabel(index:Number) : String`  
-  The `getLabel` method returns a `String` corresponding to the label associated with the predefined position at the given index in the setup.
+  The `getLabel` method returns a `String` corresponding to the label associated with the predefined position of the setup whose index is `index`.
 - `getCoordinates(index:Number) : Array`  
-  The `getCoordinates` returns an array with the coordinates of the predefined position at the given index in the setup.
+  The `getCoordinates` returns an array with the coordinates of the predefined position of the setup whose index is `index`.
 
 Below is an example of the instantiation of the `ServerSetup` module on the server side.
 
 ```javascript
-// Server side (require the Soundworks library server side)
+/* Server side */
+
+// Require the Soundworks library (server side)
 var serverSide = require('soundworks/server');
 
 // Creating a matrix setup with 4 columns and 5 rows
@@ -1064,9 +1068,7 @@ setup.generate('matrix', { cols: 4, rows: 5 });
 
 #### Sync
 
-The `Sync` module is based on [`github.com/collective-soundworks/sync`](https://github.com/collective-soundworks/sync) and is responsible for synchronizing the clients’ clocks and the server clock on a common clock called "sync clock". Both, the clients and the server, can use this shared clock as a common time reference.
-
-For instance, this allows all the clients to do something exactly at the same time, such as blinking the screen or playing a sound in a synchronized manner.
+The `Sync` module is based on [`github.com/collective-soundworks/sync`](https://github.com/collective-soundworks/sync) and is responsible for synchronizing the clients’ clocks and the server clock on a common clock called *sync clock*. Both the clients and the server can use this shared clock as a common time reference. For instance, this allows all the clients to do something exactly at the same time, such as blinking the screen or playing a sound in a synchronized manner.
 
 The `Sync` module does a first synchronization process after which the `ClientSync` calls its `done` method. Afterwards, the `Sync` module keeps running in the background for the rest of the scenario to resynchronize the client and server clocks regularly, to compensate for clock drifts.
 
@@ -1080,8 +1082,8 @@ The `ClientSync` module extends the `ClientModule` base class and takes care of 
 
 - `constructor(options:Object = {})`  
   The `constructor` accepts the following `options`:
-  - `name:String = 'sync'`, the name of the module
-  - `color:String = 'black'`, the `viewColor` of the module
+  - `name:String = 'sync'`, `name` of the module;
+  - `color:String = 'black'`, `viewColor` of the module.
 - `getLocalTime(syncTime:Number) : Number`  
   The `getLocalTime` method returns the time of the local (client) clock (in seconds) corresponding to the given sync time. If no arguments are provided, the method returns the current local (client) time (*i.e.* using `audioContext.currentTime`).
 - `getSyncTime(localTime:Number = audioContext.currentTime) : Number`  
@@ -1090,12 +1092,15 @@ The `ClientSync` module extends the `ClientModule` base class and takes care of 
 Below is an example of an instantiation of the `Sync` module.
 
 ```javascript
-// Client side (require the Soundworks library client side)
+/* Client side */
+
+// Require the Soundworks library (client side)
 var clientSide = require('soundworks/client');
 
 // Create Sync module
 var sync = new clientSide.Sync();
 
+// Get times
 var nowClient = sync.getLocalTime(); // current time in client clock time
 var nowSync = sync.getSyncTime(); // current time in sync clock time
 ```
@@ -1104,9 +1109,9 @@ var nowSync = sync.getSyncTime(); // current time in sync clock time
 
 - `'sync:stats' : stats:Object`  
   The `ClientSync` module emits the `'sync:stats'` event each time it resynchronizes the local clock on the sync clock. In particular, the first time this event is fired indicates that the clock has been synchronized with the sync clock (*i.e.* we have a first estimation of the clock synchronization) and the `done` method is called. The `'sync:stats'` event has a single object argument with the following properties:
-  - `timeOffset`, current estimation of the time offset between the client clock and the sync clock
-  - `travelTime`, current estimation of the travel time for a message to go from the client to the server and back
-  - `travelTimeMax`, current estimation of the maximum travel time for a message to go from the client to the server and back
+  - `timeOffset`, current estimation of the time offset between the client clock and the sync clock;
+  - `travelTime`, current estimation of the travel time for a message to go from the client to the server and back;
+  - `travelTimeMax`, current estimation of the maximum travel time for a message to go from the client to the server and back.
 
 ##### ServerSync
 
@@ -1116,14 +1121,16 @@ The `ServerSync` module extends the `ServerModule` base class and takes care of 
 
 - `constructor(options:Object = {})`  
   The `constructor` accepts the following `options`:
-  - `name:String`, name of the module
+  - `name:String`, `name` of the module.
 - `getSyncTime() : Number`  
-  The `getSyncTime` method returns the current sync time (in seconds, derived from process.hrtime).
+  The `getSyncTime` method returns the current sync time (in seconds, derived from `process.hrtime` method).
 
 Below is an example of the instantiation of the `Sync` module on the server side.
 
 ```javascript
-// Server side (require the server side of the Soundworks library)
+/* Server side */
+
+// Require the Soundworks library (server side)
 var serverSide = require('soundworks/server');
 
 // Create Sync module
