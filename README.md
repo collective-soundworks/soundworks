@@ -201,7 +201,7 @@ var sync = new serverSide.Sync(...);
 var playerPerformance = new MyPlayerPerformance(...);
 var envPerformance = new MyEnvPerformance(...);
 
-// Map the server modules to the 'player' client type (and root URL):
+// Map the server modules to the 'player' client type (and root URL)
 server.map('player', sync, checkin, playerPerformance);
 
 // Map the server modules to the 'env' client type (and /env URL)
@@ -414,16 +414,15 @@ class MyPerformance extends clientSide.Performance {
   start() {
     super.start(); // call base class constructor (don't forget this)
 
-    // Play welcome sound (first sound loaded)
+    // Play the welcome sound immediately
     let src = audioContext.createBufferSource();
     src.buffer = this.loader.audioBuffers[0]; 
     src.connect(audioContext.destination);
     src.start(audioContext.currentTime);
 
-    // Display some feedback text in the view
-    this.setCenteredViewContent('Let’s go!');
+    this.setCenteredViewContent('Let’s go!'); // display some feedback text in the view
     
-    // Play another sound when receiving the 'play' message
+    // Play another sound when we receive the 'play' message from the server
     client.receive('performance:play', () => {
       let src = audioContext.createBufferSource();
       src.buffer = this.loader.audioBuffers[1];
@@ -453,7 +452,7 @@ class MyPerformance extends serverSide.Performance {
   enter(client) {
     super.enter(client); // call base class constructor (don't forget this)
 
-    // Send a play message to all other clients
+    // Send a 'play' message to all other clients
     client.broadcast('performance:play'); 
   }
 
