@@ -495,8 +495,8 @@ For instance, in the scenario example shown in the [Composing a scenario from mo
 This section explains how to use the objects and classes of the library. In particular, we list here all the methods and attributes you may need to use at some point while implementing a scenario.
 
 We start with the [core objects](#core-objects):
-- The ([`client` object](#client-side-the-client-object)) on the client side,
-- And the ([`server` object](#server-side-the-server-object)) on the server side.
+- [`client`](#client-side-the-client-object) (client side)
+- [`server`](#server-side-the-server-object) (server side)
 
 Then we review the [basic/base module classes](#basicbase-classes):
 - [`ServerClient`](#the-serverclient-class)
@@ -515,17 +515,17 @@ Others require both the [client **and** server sides](#client-and-server-modules
 - [`Performance`](#performance)
 - [`Sync`](#sync)
 
-Some modules on the client side are associated with dedicated styling information. When that is the case, we added in the [`soundworks-template`](https://github.com/collective-soundworks/soundworks-template)’s [`src/sass/`](https://github.com/collective-soundworks/soundworks-template/tree/master/src/sass) folder the corresponding `_77-moduleName.scss` SASS partial. You should not forget to include them in your `*.scss` files when you write your scenario (for more information, cf. the [Styling with SASS](#styling-with-sass) section). We indicate in the module descriptions below which of them require custom SASS partials.
+Some modules on the client side are associated with dedicated styling information. When that is the case, we added in the [`soundworks-template`](https://github.com/collective-soundworks/soundworks-template)’s [`src/sass/`](https://github.com/collective-soundworks/soundworks-template/tree/master/src/sass) folder the corresponding `_77-moduleName.scss` SASS partial. Don't forget to include them in your `*.scss` files when you write your scenario (for more information, cf. the [Styling with SASS](#styling-with-sass) section). We indicate in the module descriptions below which of them require custom SASS partials.
 
 ### Core objects
 
-The core objects on the client side and the server side are singletons that contain the methods and state used to set up a scenario and to exchange messages between the client and the server.
+The core objects on the client side and the server side are singletons that contain the methods used to set up a scenario and to exchange messages between the client and the server.
 
 #### Client side: the `client` object
 
-The `client` object contains the basic state and methods of the client. For instance, the object initializes the client with a given type and to establish WebSocket communications with the server through to the methods `send` and `receive`. It starts the scenario and sequences the modules using the methods `start`, `serial` and `parallel`.
+The `client` object contains the basic methods of the client. For instance, the object initializes the client type with `init` and establishes WebSocket communications with the server through the methods `send` and `receive`. Additionally, it starts the scenario and sequences the modules using the methods `start`, `serial` and `parallel`.
 
-For the sake of clarity, the methods of the `client` object are split into two groups.
+For clarity, the methods of the `client` object are split into two groups.
 
 ##### Initialization and WebSocket communication
 
@@ -537,9 +537,10 @@ For the sake of clarity, the methods of the `client` object are split into two g
 - `receive(msg:Object, callback:Function)`  
   The `receive` method executes the callback function `callback` when it receives the message `msg` sent by the server.  
   **Note:** on the server side, the server sends the message with the command `server.send(msg:String, ...args:Any)` (see the [`server` object WebSocket communication](#websocket-communication) section below).
+
 ##### Module logic
 
-- `start(module:ClientModule)` 
+- `start(module:ClientModule)`  
   The `start` method starts the client’s module logic with the module `module`. The argument `module` can either be:
     - a module from the library or a module you wrote (in case that your scenario has only one module)
     - a `serial` sequence of modules
@@ -555,7 +556,7 @@ For the sake of clarity, the methods of the `client` object are split into two g
 
 The `server` object contains the basic state and methods of the server. For instance, this object allows setting up, configure and start the server with the method `start`. The method `map`, allows for managing the mapping between different types of clients and their required server modules.
 
-For the sake of clarity, the methods of `server` are split into two groups.
+For clarity, the methods of `server` are split into two groups.
 
 ##### Initialization and module logic
 
