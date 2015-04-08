@@ -542,15 +542,14 @@ For clarity, the methods of the `client` object are split into two groups.
 
 - `start(module:ClientModule)`  
   The `start` method starts the client’s module logic with the module `module`. The argument `module` can either be:
-    - a module from the library or a module you wrote (in case that your scenario has only one module)
-    - a `serial` sequence of modules
-    - a `parallel` combination of modules
+    - A module from the library or a module you wrote (in the case where your scenario has only one module);
+    - A `serial` sequence of modules;
+    - A `parallel` combination of modules.
 - `serial(...modules:ClientModule) : ClientModule`  
-  The `serial` method returns a `ClientModule` that starts the given `...modules` in series. After having started the first module, the next module in the series is started when the last module called its `done` method. When the last module calls `done`, the returned serial module calls its own `done` method.
-- `parallel(...modules:ClientModule) : ClientModule`
-  The `ClientModule` returned by the `parallel` method starts the given `...modules` in parallel, and calls its `done` method after all modules are  `done`.
-  **Note:** The view of a module is always full screen, so in the case of modules run in parallel, the view of all the modules are added to the DOM when the parallel module starts, and they are stacked on top of each other in the order of the arguments using the `z-index` CSS property.
-  You can compound parallel module combinations with serial module sequences (*e.g.* `client.parallel(module1, client.serial(module2, module3), module4);`).  
+  The `serial` method returns a `ClientModule` that starts the given `...modules` in series. After starting the first module (by calling its `start` method), the next module in the series is started (with its `start` method) when the last module called its `done` method. When the last module calls `done`, the returned serial module calls its own `done` method. You can compound serial module sequences with parallel module combinations (*e.g.* `client.serial(module1, client.parallel(module2, module3), module4);`).
+- `parallel(...modules:ClientModule) : ClientModule`  
+  The `ClientModule` returned by the `parallel` method starts the given `...modules` in parallel (with their `start` methods), and calls its `done` method after all modules called their own `done` methods. You can compound parallel module combinations with serial module sequences (*e.g.* `client.parallel(module1, client.serial(module2, module3), module4);`).  
+  **Note:** The `view` of a module is always full screen, so in the case where modules run in parallel, their `view`s are stacked on top of each other using the `z-index` CSS property. We use the order of the `parallel` method's arguments to determine the order of the stack (*e.g.* in `client.parallel(module1, module2, module3)`, the `view` of `module1` is displayed on top of the `view` of `module2`, which is displayed on top of the view of `module3`). 
 
 #### Server side: the `server` object
 
