@@ -259,7 +259,7 @@ Similarly, the `disconnect` method is called whenever the client disconnects fro
 
 The purpose of that simplified version of the `checkin` module is the following: each time a new client connects to the server, the `checkin` module assigns an available index to it. On the server side, the module can be configured with a `setup` object that lists predefined positions (*i.e.* coordinates and labels): in that case, the module on the client side can automatically request an available position from the `setup` and display the associated `label` to the participant. (In other configurations which we won't review in this example, the participants could alternatively select a label, or indicate their approximate location on a map). When no indices are available anymore, the `checkin` module informs the participant with a message on the screen (on the client side).
 
-##### Client Side
+##### Client side: the `ClientCheckin` module
 
 In detail, the `start` method of the module sends a request to the `ServerCheckin` module via WebSockets, asking the server to send an available client index and, optionally, the label of a corresponding predefined position. When it receives the response from the server, it either displays the label on the screen (*e.g.* “Please go to C5 and touch the screen.”) and waits for the participant’s acknowledgement, or immediately calls the `done` method to hand over the control to a subsequent module (generally the `performance`). The server may send an `unavailable` message in the case where no more clients can be admitted to the performance (for example when all predefined positions are occupied). In this case, the applications ends on a blocking dialog (“Sorry, we cannot accept more players at the moment, please try again later”) without calling the `done` method.
 
@@ -313,7 +313,7 @@ class ClientCheckin extends ClientModule {
 As shown in this code example, the `ClientModule` base class may provide a `view` (*i.e.* an HTML `div`) that is added to the DOM (specifically to the `#container` element) when the module starts, and removed from the DOM when the module calls its `done` method. The boolean that is passed as second argument to the `constructor` of the base class determines whether the module actually creates its `view` or not.
 The method `setCenteredViewContent` allows for adding an arbitrary centered content (*e.g.* a paragraph of text) to the view.
 
-##### Server side
+##### Server side: the `ServerCheckin` module
 
 In our simplified `ServerCheckin` module example, the `connect` method has to install a listener that — upon request of the client — obtains an available client `index` and sends it back to the client. If the module has been configured with a `setup` (that predefines a certain number of spatial positions, associated with a `label`), the server additionally sends the `label` of the position corresponding to the client `index`. In this case, the maximum number of clients is determined by the number of seats defined by the `setup`.
 
@@ -325,6 +325,7 @@ The `disconnect` method has to release the client index so that it can be reused
 // Require the server side Soundworks library
 var serverSide = require('soundworks/server');
 
+// Write the module
 class ServerCheckin extends serverSide.Module {
   constructor(options = {}) {
     super();
@@ -369,7 +370,7 @@ class ServerCheckin extends serverSide.Module {
       }
 
     disconnect(client) {
-      // release client index
+      // Release client index
       this._releaseIndex(client.index);
     });
   }
@@ -379,17 +380,23 @@ class ServerCheckin extends serverSide.Module {
 }
 ```
 
-### The `Performance` module
+### The `performance` module
 
-In many applications, the only module you will have to implement yourself is the performance module. As in the example above, a `player` client usually enters the performance through a `checkin` module that assigns it a client index and, optionally, a position. If no further setup is required after the `checkin` the client side control is usually handed over to the `performance` module.
+In most applications, the only module you will have to implement is the `performance` module. The *Soundworks* library provides the `ClientPerformance` and `ServerPerformance` base classes that you would extend to implement the `performance` of your application.
 
-The *Soundworks* library provides the base classes `ClientPerformance` and `ServerPerformance` that you would extend to implement the `performance` of your application.
+The `ClientPerformance` and `ServerPerformance` modules respectively extend the `ClientModule` and `ServerModule` base classes, so they provide the `start`, `connect` and `disconnect` methods seen above. On the client side, the `start` method is called when the client enters the performance. On the server side, the `connect` method is called when a client connects to the server, and the `disconnect` method is called when a client disconnects from the server.
 
-On the client side, the `start` method of the `performance` module derived from `ClientPerformance` is called when the client enters the performance. On the server side, the `ServerPerformance` class provides the methods `enter` and `exit` that are called when a client enters or exits the performance. The `exit` method is called when the client side module of a given client calls the `done` method or if a client disconnects from the application. In addition, `ServerPerformance` maintains an array of clients that entered the performance as the `clients` attribute.
+Additionally, the `ServerPerformance` class provides the `enter` and `exit` methods, that are called when a client enters or exits the performance. In other words, the `ServerPerformance`'s `enter` method is called when a particular client calls the `ClientPerformance`'s `start` method. On the other hand, the `exit` method is called either when a client calls the `ClientPerformance`'s `done` method, or if a client disconnects from the server. In order to keep track of the clients who participate in the performance (*i.e.* who entered the performance and have not exited yet), `ServerPerformance` module  maintains an array of performing clients in its `clients` attribute.
 
-In the following example of a *very* simple performance module. In this scenario, the participant's device plays a welcome sound when it joins the performance and another sound when another participant joins the performance.
+The following example shows a simple performance module. In this scenario, the participant's device plays a welcome sound when it joins the performance, and it also play another sound when another participant joins the performance.
 
 ```javascript
+/* Client side */
+
+// Require the client object
+var client = require('./client');
+
+// Write the performance module
 class MyPerformance extends clientSide.Performance {
   constructor(loader, options = {}) {
     super(options); // same behavior as the base class
@@ -406,38 +413,50 @@ class MyPerformance extends clientSide.Performance {
     src.connect(audioContext.destination);
     src.start(audioContext.currentTime);
 
-    this.setCenteredViewContent('Let’s go!'); // display some feedback text in the view
-
-    // Play sound when receiving the play message (second sound loaded)
+    // Display some feedback text in the view
+    this.setCenteredViewContent('Let’s go!');
+    
+    // Play another sound when receiving the 'play' message
     client.receive('performance:play', () => {
       let src = audioContext.createBufferSource();
       src.buffer = this.loader.audioBuffers[1];
       src.connect(audioContext.destination);
       src.start(audioContext.currentTime);
-
-      // Since the performance does not end before the client disconnects,
-         this module does not call the .done() method.
     });
+
+    // Since the performance does not end unless the client disconnects,
+    // this module does not call its 'done' method.
   }
 }
 ```
 
 ```javascript
+/* Server side */
+
+// Require the server side Soundworks library
+var serverSide = require('soundworks/server');
+
+// Write the performance module
 class MyPerformance extends serverSide.Performance {
   constructor() {
     super();
   }
   
-  // when the client enters the performance...
+  // When the client enters the performance...
   enter(client) {
-    super.enter(client); // don't forget this
+    super.enter(client); // call base class constructor (don't forget this)
 
-    // send a play message to all other clients
+    // Send a play message to all other clients
     client.broadcast('performance:play'); 
   }
-}
 
+  // In this scenario, when a client connects to the server,
+  // disconnects from the server, or exits the performance in this scenario,
+  // there is nothing more we have to do than what the base class already does,
+  // so we don't even have to implement these methods here.
+}
 ```
+
 ### Styling with SASS
 
 Finally, the `src/sass/` folder would contain all the SASS partials we need for the modules from the library, and include them all in a `env.scss` file, where `env` can be `player`, `conductor`, `env`, or any other type of client you create. Since the `player` is the default client in any *Soundworks*-based scenario, the `src/sass/` should at least contain the `player.scss` file.
