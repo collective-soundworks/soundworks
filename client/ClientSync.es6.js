@@ -37,9 +37,11 @@ class ClientSync extends ClientModule {
 
   syncStatusReport(message, report) {
     if(message === 'sync:status') {
-      if (!this.ready) {
-        this.ready = true;
-        this.done();
+      if(report.status === 'training' || report.status === 'sync') {
+        if(!this.ready) {
+          this.ready = true;
+          this.done();
+        }
       }
       this.emit('sync:status', report);
     }
