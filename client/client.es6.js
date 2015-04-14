@@ -5,8 +5,8 @@
 "use strict";
 
 var client = {
-  tyoe: null,
-  index: 0,
+  type: null,
+  index: -1,
   coordinates: null,
   init: init,
   start: start,
