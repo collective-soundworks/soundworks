@@ -87,10 +87,11 @@ function init(clientType = 'player', options = {}) {
   client.type = clientType;
   client.io = null;
 
-  if (options.io !== false)
-    client.io = require('socket.io-client');
-
-  client.socket = client.io('/' + clientType);
+  if (options.io !== false) {
+    var io = require('socket.io-client');
+    client.io = io;
+    client.socket = client.io('/' + clientType);
+  }
 }
 
 function start(theModule) {
