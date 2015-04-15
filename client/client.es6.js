@@ -10,16 +10,15 @@ var client = {
   coordinates: null,
   init: init,
   start: start,
+  serial: serial,
+  parallel: parallel,
+  io: null,
   socket: null,
   send: send,
-  receive: receive,
-  serial: serial,
-  parallel: parallel
+  receive: receive
 };
 
-var EventEmitter = require('events').EventEmitter;
 var ClientModule = require('./ClientModule');
-var io = require('socket.io-client');
 
 class ParallelModule extends ClientModule {
   constructor(modules) {
@@ -84,30 +83,31 @@ class SerialModule extends ClientModule {
   }
 }
 
-function init(clientTyppe) {
-  client.type = clientTyppe;
-  client.socket = io('/' + clientTyppe);
+function init(clientType = 'player', options = {}) {
+  client.type = clientType;
+  client.io = null;
+
+  if (options.io !== false)
+    client.io = require('socket.io-client');
+
+  client.socket = client.io('/' + clientType);
 }
 
 function start(theModule) {
-  // client/server handshake: send "ready" to server ...
-  client.send('client:ready');
 
-  // ... wait for server's "start" ("server ready") to start modules
-  client.receive('server:ready', () => {
-    theModule.start();
-  });
+  if (client.io) {
+    // client/server handshake: send "ready" to server ...
+    client.send('client:ready');
 
-  client.receive('disconnect', () => {
-  });
-}
+    // ... wait for server's "start" ("server ready") to start modules
+    client.receive('server:ready', () => {
+      theModule.start();
+    });
 
-function send(msg, ...args) {
-  client.socket.emit(msg, ...args);
-}
-
-function receive(msg, callback) {
-  client.socket.on(msg, callback);
+    client.receive('disconnect', () => {});
+  } else {
+    theModule.start();    
+  }
 }
 
 function serial(...modules) {
@@ -116,6 +116,16 @@ function serial(...modules) {
 
 function parallel(...modules) {
   return new ParallelModule(modules);
+}
+
+function send(msg, ...args) {
+  if(client.socket)
+    client.socket.emit(msg, ...args);
+}
+
+function receive(msg, callback) {
+  if(client.socket)
+    client.socket.on(msg, callback);
 }
 
 module.exports = client;
