@@ -17,7 +17,7 @@ class ClientDialog extends ClientModule {
 
   start() {
     super.start();
-    this.setCenteredViewContent('<p>' + this._text + '</p>');
+    this.setCenteredViewContent(this._text);
 
     // install click listener
     this.view.addEventListener('click', () => {
