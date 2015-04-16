@@ -9,28 +9,30 @@ var client = require('./client');
 var AudioBufferLoader = require('waves-loaders').AudioBufferLoader;
 
 class ClientLoader extends ClientModule {
-  constructor(audioFiles, options = {}) {
+  constructor(options = {}) {
     super(options.name || 'loader', true, options.color);
 
-    this._audioFiles = audioFiles;
+    this._requestServer = options.server || false;
+    this._subfolder = options.subfolder || '';
+    this._audioFiles = options.audioFiles || null;
     this._fileProgress = [];
 
     this.audioBuffers = null;
 
-    var viewContent = document.createElement('div');
+    let viewContent = document.createElement('div');
     viewContent.classList.add('centered-content');
     viewContent.classList.add('soft-blink');
     this.view.appendChild(viewContent);
 
-    var loadingText = document.createElement('p');
+    let loadingText = document.createElement('p');
     loadingText.innerHTML = "Loading sounds…";
     viewContent.appendChild(loadingText);
 
-    var progressWrap = document.createElement('div');
+    let progressWrap = document.createElement('div');
     progressWrap.classList.add('progress-wrap');
     viewContent.appendChild(progressWrap);
 
-    var progressBar = document.createElement('div');
+    let progressBar = document.createElement('div');
     progressBar.classList.add('progress-bar');
     progressWrap.appendChild(progressBar);
 
@@ -40,9 +42,27 @@ class ClientLoader extends ClientModule {
   start() {
     super.start();
 
-    var loader = new AudioBufferLoader();
+    if (this._requestServer) {
+      client.send('loader:request', this._subfolder);
+
+      client.receive('loader:files', (files) => {
+        let filePaths = [];
+
+        for (let i = 0; i < files.length; i++)
+          filePaths.push(this._subfolder + '/' + files[i]);
+        
+        this._audioFiles = filePaths;
+        this._load();
+      });
+    } else {
+      this._load();
+    }
+  }
+
+  _load() {
+    let loader = new AudioBufferLoader();
     loader.progressCallback = this._progressCallback.bind(this);
-    
+
     loader.load(this._audioFiles)
       .then(
         (audioBuffers) => {
@@ -55,7 +75,7 @@ class ClientLoader extends ClientModule {
   }
 
   _progressCallback(obj) {
-    var progress = 0;
+    let progress = 0;
     this._fileProgress[obj.index] = obj.value;
 
     for (let i = 0; i < this._fileProgress.length; i++) {
