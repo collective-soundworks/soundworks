@@ -49,13 +49,15 @@ class ClientModule extends EventEmitter {
   }
 
   done() {
-    if (this.view)
-      container.removeChild(this.view);
+    if (typeof this.isDone !== 'undefined') {
+      if (this.view)
+        container.removeChild(this.view);
 
-    if (!this.isDone) {
-      this.isDone = true;
-      this.removeAllClientListeners();
-      this.emit('done', this);
+      if (!this.isDone) {
+        this.isDone = true;
+        this.removeAllClientListeners();
+        this.emit('done', this);
+      }
     }
   }
 

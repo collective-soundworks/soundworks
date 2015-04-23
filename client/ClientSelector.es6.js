@@ -34,8 +34,10 @@ class ClientSelector extends ClientModule {
     if (typeof options.maxSelected !== 'undefined')
       this.maxSelected = options.maxSelected;
 
-    if(options.view)
+    if(options.view) {
       this.view = options.view;
+      this.isDone = undefined; // skip super.done()
+    }
 
     this._buttons = [];
     this._listeners = [];
