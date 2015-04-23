@@ -5,6 +5,7 @@
 'use strict';
 
 var EventEmitter = require('events').EventEmitter;
+var client = require('./client');
 var container = window.container || (window.container = document.getElementById('container'));
 
 class ClientModule extends EventEmitter {
@@ -23,7 +24,23 @@ class ClientModule extends EventEmitter {
       this.view = div;
     }
 
+    this.clientListeners = [];
     this.isDone = false;
+  }
+
+  addClientListener(msg, callback) {
+    this.clientListeners.push({
+      msg: msg,
+      callback: callback
+    });
+  }
+
+  removeAllClientListeners() {
+    for (let listener of this.clientListeners) {
+      client.removeListener(listener.msg, listener.callback);
+    }
+
+    this.clientListeners = [];
   }
 
   start() {
@@ -37,6 +54,7 @@ class ClientModule extends EventEmitter {
 
     if (!this.isDone) {
       this.isDone = true;
+      this.removeAllClientListeners();
       this.emit('done', this);
     }
   }

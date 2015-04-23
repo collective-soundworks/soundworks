@@ -4,6 +4,8 @@
  */
 "use strict";
 
+var EventEmitter = require('events').EventEmitter;
+
 var client = {
   type: null,
   index: -1,
@@ -15,21 +17,18 @@ var client = {
   io: null,
   socket: null,
   send: send,
-  receive: receive
+  receive: receive,
+  removeListener: removeListener
 };
 
-var ClientModule = require('./ClientModule');
-
-class ParallelModule extends ClientModule {
+class ParallelModule extends EventEmitter {
   constructor(modules) {
-    super('parallel', false);
+    super();
     this.modules = modules;
     this.doneCount = 0;
   }
 
   start() {
-    super.start();
-
     var zIndex = this.modules.length * 100;
 
     // start all setups
@@ -49,17 +48,19 @@ class ParallelModule extends ClientModule {
       mod.start();
     }
   }
+
+  done() {
+    this.emit('done', this);
+  }
 }
 
-class SerialModule extends ClientModule {
+class SerialModule extends EventEmitter {
   constructor(modules) {
-    super('serial', false);
+    super();
     this.modules = modules;
   }
 
   start() {
-    super.start();
-
     var prevModule = null;
 
     // start all module listeners
@@ -80,6 +81,10 @@ class SerialModule extends ClientModule {
 
     // start first module of the sequence
     this.modules[0].start();
+  }
+
+  done() {
+    this.emit('done', this);
   }
 }
 
@@ -107,7 +112,7 @@ function start(theModule) {
 
     client.receive('disconnect', () => {});
   } else {
-    theModule.start();    
+    theModule.start();
   }
 }
 
@@ -120,13 +125,22 @@ function parallel(...modules) {
 }
 
 function send(msg, ...args) {
-  if(client.socket)
+  if (client.socket)
     client.socket.emit(msg, ...args);
 }
 
-function receive(msg, callback) {
-  if(client.socket)
+function receive(msg, callback, module = null) {
+  if (client.socket) {
     client.socket.on(msg, callback);
+
+    if (module)
+      module.addClientListener(msg, callback);
+  }
+}
+
+function removeListener(msg, callback) {
+  if (client.socket)
+    client.socket.removeListener(msg, callback);
 }
 
 module.exports = client;
