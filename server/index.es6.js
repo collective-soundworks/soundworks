@@ -9,7 +9,7 @@ module.exports = {
   Checkin: require('./ServerCheckin'),
   Client: require('./ServerClient'),
   Control: require('./ServerControl'),
-  Loader: require('./ServerLoader'),
+  Filelist: require('./ServerFilelist'),
   Module: require('./ServerModule'),
   Performance: require('./ServerPerformance'),
   Setup: require('./ServerSetup'),

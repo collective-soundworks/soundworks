@@ -11,11 +11,13 @@ module.exports = {
   Checkin: require('./ClientCheckin'),
   Control: require('./ClientControl'),
   Dialog: require('./ClientDialog'),
+  Filelist: require('./ClientFilelist'),
   Loader: require('./ClientLoader'),
   Module: require('./ClientModule'),
   Orientation: require('./ClientOrientation'),
   Performance: require('./ClientPerformance'),
   Platform: require('./ClientPlatform'),
+  Selector: require('./ClientSelector'),
   Setup: require('./ClientSetup'),
   Sync: require('./ClientSync')
 };
