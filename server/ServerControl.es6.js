@@ -95,11 +95,14 @@ class ServerControl extends ServerModule {
       for (let clientType of this.clientTypes) {
         server.broadcast(clientType, 'control:parameter', name, value);
       }
+
+      this.emit('control:parameter', name, value);
     });
 
     // listen to conductor commands
     client.receive('control:command', (name) => {
       this.commands[name].fun();
+      this.emit('control:command', name);
     });
 
     // init control parameters, infos, and commands at client
