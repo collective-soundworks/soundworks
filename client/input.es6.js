@@ -92,7 +92,8 @@ class InputModule extends EventEmitter {
       var touchData = {
         "event": e.type,
         "timestamp": audioContext.currentTime,
-        "coordinates": [e.changedTouches[i].clientX, e.changedTouches[i].clientY]
+        "coordinates": [e.changedTouches[i].clientX, e.changedTouches[i].clientY],
+        "identifier": e.changedTouches[i].identifier
       };
 
       this.emit(e.type, touchData);

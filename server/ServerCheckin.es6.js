@@ -15,13 +15,14 @@ class ServerCheckin extends ServerModule {
     this.setup = options.setup || null;
     this.maxClients = options.maxClients || Infinity;
 
+
     if (this.maxClients > Number.MAX_SAFE_INTEGER)
       this.maxClients = Number.MAX_SAFE_INTEGER;
 
     if (this.setup) {
       var numPlaces = this.setup.getNumPositions();
 
-      if (this.maxClients > numPlaces)
+      if (this.maxClients > numPlaces && numPlaces > 0)
         this.maxClients = numPlaces;
     }
 
@@ -113,7 +114,7 @@ class ServerCheckin extends ServerModule {
 
       client.send('checkin:automatic:acknowledge', index, label, coordinates);
     } else {
-      client.send('checkin:automatic:unavailable');      
+      client.send('checkin:automatic:unavailable');
     }
   }
 
@@ -126,10 +127,24 @@ class ServerCheckin extends ServerModule {
   }
 
   _requestSelectLocation(client) {
-    throw new Error("Checkin with location selection not yet implemented");
-    // var surface = this.setup.getSurface();
-    // client.send('checkin:location:acknowledge', index, surface);
-    // client.receive('checkin:location:set', coordinates);
+    if (this.setup !== null) {
+      let surface = this.setup.getSurface();
+      let index = this._getAscendingIndex();
+
+      if (index >= 0) {
+        client.index = index;
+        client.send('checkin:location:acknowledge', index, surface);
+      } else {
+        client.send('checkin:location:unavailable');
+      }
+
+      client.receive('checkin:location:set', (coordinates) => {
+        client.coordinates = coordinates;
+      });
+    } else {
+
+      throw new Error("Checkin with location selection requires a Setup module.");
+    }
   }
 }
 
