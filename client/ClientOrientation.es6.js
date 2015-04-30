@@ -13,22 +13,22 @@ class ClientOrientation extends ClientModule {
 
     this.angleReference = 0;
 
-    this.__angle = 0;
-    this.__text = options.text || "Point the phone exactly in front of you, and touch the screen.";
+    this._angle = 0;
+    this._text = options.text || "Point the phone exactly in front of you, and touch the screen.";
 
     input.enableDeviceOrientation();
 
     input.on('deviceorientation', (orientationData) => {
-      this.__angle = orientationData.alpha;
+      this._angle = orientationData.alpha;
     });
   }
 
   start() {
     super.start();
-    this.setCenteredViewContent('<p>' + this.__text + '</p>');
+    this.setCenteredViewContent('<p>' + this._text + '</p>');
 
     this.view.addEventListener('click', () => {
-      this.angleReference = this.__angle;
+      this.angleReference = this._angle;
       this.done();
     });
   }

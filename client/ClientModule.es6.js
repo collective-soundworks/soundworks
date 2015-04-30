@@ -5,6 +5,7 @@
 'use strict';
 
 var EventEmitter = require('events').EventEmitter;
+var client = require('./client');
 var container = window.container || (window.container = document.getElementById('container'));
 
 class ClientModule extends EventEmitter {
@@ -23,7 +24,23 @@ class ClientModule extends EventEmitter {
       this.view = div;
     }
 
+    this.clientListeners = [];
     this.isDone = false;
+  }
+
+  addClientListener(msg, callback) {
+    this.clientListeners.push({
+      msg: msg,
+      callback: callback
+    });
+  }
+
+  removeAllClientListeners() {
+    for (let listener of this.clientListeners) {
+      client.removeListener(listener.msg, listener.callback);
+    }
+
+    this.clientListeners = [];
   }
 
   start() {
@@ -32,36 +49,39 @@ class ClientModule extends EventEmitter {
   }
 
   done() {
-    if (this.view)
-      container.removeChild(this.view);
+    if (typeof this.isDone !== 'undefined') {
+      if (this.view)
+        container.removeChild(this.view);
 
-    if (!this.isDone) {
-      this.isDone = true;
-      this.emit('done', this);
+      if (!this.isDone) {
+        this.isDone = true;
+        this.removeAllClientListeners();
+        this.emit('done', this);
+      }
     }
   }
 
   setCenteredViewContent(htmlContent) {
     if (this.view) {
-      if (!this.__centeredViewContent) {
+      if (!this._centeredViewContent) {
         let contentDiv = document.createElement('div');
 
         contentDiv.classList.add('centered-content');
         this.view.appendChild(contentDiv);
 
-        this.__centeredViewContent = contentDiv;
+        this._centeredViewContent = contentDiv;
       }
 
       if (htmlContent) {
-        this.__centeredViewContent.innerHTML = htmlContent;
+        this._centeredViewContent.innerHTML = htmlContent;
       }
     }
   }
 
   removeCenteredViewContent() {
-    if (this.view && this.__centeredViewContent) {
-      this.view.removeChild(this.__centeredViewContent);
-      delete this.__centeredViewContent;
+    if (this.view && this._centeredViewContent) {
+      this.view.removeChild(this._centeredViewContent);
+      delete this._centeredViewContent;
     }
   }
 }
