@@ -8,18 +8,22 @@ var ClientModule = require('./ClientModule');
 var client = require('./client');
 
 class ClientPerformance extends ClientModule {
-  constructor(options = {}) {
-    super(options.name || 'performance', true, options.color);
+  constructor(name = 'performance', master = true, viewColor = 'black') {
+    super(name, true, viewColor);
+
+    this.master = master;
   }
 
   start() {
     super.start();
 
-    client.send('performance:start');
+    if(this.master)
+      client.send('performance:start');
   }
 
   done() {
-    client.send('performance:done');
+    if(this.master)
+      client.send('performance:done');
 
     super.done();
   }
