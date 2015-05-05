@@ -15,11 +15,11 @@
     "ejs": "^2.3.1",
     "express": "^4.12.0",
     "platform": "^1.3.0",
-    "socket.io": "1.1.0",
+    "socket.io": "^1.1.0",
     "socket.io-client": "1.1.0",
     "sync": "collective-soundworks/sync#0.6.0",
-    "waves-loaders": "wavesjs/loaders",
-    "waves-audio": "wavesjs/audio"
+    "waves-audio": "wavesjs/audio",
+    "waves-loaders": "wavesjs/loaders"
   },
   "devDependencies": {
     "browserify": "~5.11.0",
