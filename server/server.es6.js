@@ -48,8 +48,6 @@ function start(app, publicPath, port) {
   }
 }
 
-var logIndex = 0;
-
 function map(clientType, ...modules) {
   var url = '/';
 
@@ -61,7 +59,6 @@ function map(clientType, ...modules) {
   });
 
   server.io.of(clientType).on('connection', (socket) => {
-    console.log(logIndex++, 'connection');
     var client = new ServerClient(clientType, socket);
 
     // client/server handshake: send "start" when client is "ready"
