@@ -7,7 +7,7 @@
 var EventEmitter = require('events').EventEmitter;
 
 // debug - http://socket.io/docs/logging-and-debugging/#available-debugging-scopes
-localStorage.debug = '*';
+// localStorage.debug = '*';
 
 var client = {
   type: null,
