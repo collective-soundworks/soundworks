@@ -31,9 +31,24 @@ function start(app, publicPath, port) {
     console.log('Server listening on port', app.get('port'));
   });
 
-  if (httpServer)
-    server.io = new IO(httpServer);
+  // Engine IO defaults
+  // this.pingTimeout = opts.pingTimeout || 60000;
+  // this.pingInterval = opts.pingInterval || 25000;
+  // this.upgradeTimeout = opts.upgradeTimeout || 10000;
+  // this.maxHttpBufferSize = opts.maxHttpBufferSize || 10E7;
+
+  if (httpServer) {
+    server.io = new IO(httpServer, {
+      transports: ['websocket'],
+      pingTimeout: 60000,
+      pingInterval: 50000
+      // pingTimeout: 3000,
+      // pingInterval: 1000
+    });
+  }
 }
+
+var logIndex = 0;
 
 function map(clientType, ...modules) {
   var url = '/';
@@ -46,23 +61,24 @@ function map(clientType, ...modules) {
   });
 
   server.io.of(clientType).on('connection', (socket) => {
+    console.log(logIndex++, 'connection');
     var client = new ServerClient(clientType, socket);
 
     // client/server handshake: send "start" when client is "ready"
-    client.receive('client:ready', () => {
-      for (let mod of modules) {
-        mod.connect(client);
+    // client.receive('client:ready', () => {
+    for (let mod of modules) {
+      mod.connect(client);
+    }
+
+    client.receive('disconnect', () => {
+      for (let i = modules.length - 1; i >= 0; i--) {
+        var mod = modules[i];
+        mod.disconnect(client);
       }
-
-      client.receive('disconnect', () => {
-        for (let i = modules.length - 1; i >= 0; i--) {
-          var mod = modules[i];
-          mod.disconnect(client);
-        }
-      });
-
-      client.send('server:ready');
     });
+
+    client.send('server:ready');
+    // });
   });
 }
 

@@ -6,6 +6,9 @@
 
 var EventEmitter = require('events').EventEmitter;
 
+// debug - http://socket.io/docs/logging-and-debugging/#available-debugging-scopes
+localStorage.debug = '*';
+
 var client = {
   type: null,
   index: -1,
@@ -16,6 +19,8 @@ var client = {
   parallel: parallel,
   io: null,
   socket: null,
+  serverReady: false,
+  modulesStarted: false,
   send: send,
   receive: receive,
   removeListener: removeListener
@@ -94,25 +99,47 @@ function init(clientType = 'player', options = {}) {
 
   if (options.io !== false) {
     var io = require('socket.io-client');
+
     client.io = io;
-    client.socket = client.io('/' + clientType);
+    client.socket = client.io('/' + clientType, {
+      transports: ['websocket']
+    });
+
+    client.receive('server:ready', () => {
+      client.serverReady = true;
+    });
+
+    // https://github.com/Automattic/socket.io-client#events
   }
 }
 
-function start(theModule) {
+function startModules(theModules) {
+  if (!client.modulesStarted) {
+    theModules.start();
+    client.modulesStarted = true;
+  } else {
+    // client reconnection
 
+    console.log('reconnection');
+  }
+}
+
+function start(theModules) {
   if (client.io) {
-    // client/server handshake: send "ready" to server ...
-    client.send('client:ready');
-
-    // ... wait for server's "start" ("server ready") to start modules
-    client.receive('server:ready', () => {
-      theModule.start();
-    });
+    if (client.serverReady) {
+      // server is already ready
+      startModules(theModules);
+    } else {
+      // wait for server ready
+      client.receive('server:ready', () => {
+        startModules(theModules);
+      });
+    }
 
     client.receive('disconnect', () => {});
   } else {
-    theModule.start();
+    // no server
+    startModules(theModules);
   }
 }
 
