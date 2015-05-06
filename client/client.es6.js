@@ -46,7 +46,7 @@ class ParallelModule extends EventEmitter {
       });
 
       if (mod.view) {
-        mod.view.style.zIndex = zIndex;
+        mod.setZIndex(zIndex);
         zIndex -= 100;
       }
 
@@ -56,6 +56,11 @@ class ParallelModule extends EventEmitter {
 
   done() {
     this.emit('done', this);
+  }
+
+  setZIndex(zIndex) {
+    for (let mod of this.modules)
+      mod.view.style.zIndex = zIndex;
   }
 }
 
@@ -90,6 +95,11 @@ class SerialModule extends EventEmitter {
 
   done() {
     this.emit('done', this);
+  }
+
+  setZIndex(zIndex) {
+    for (let mod of this.modules)
+      mod.view.style.zIndex = zIndex;
   }
 }
 

@@ -61,6 +61,10 @@ class ClientModule extends EventEmitter {
     }
   }
 
+  setZIndex(zIndex) {
+    this.view.style.zIndex = zIndex;
+  }
+
   setCenteredViewContent(htmlContent) {
     if (this.view) {
       if (!this._centeredViewContent) {
