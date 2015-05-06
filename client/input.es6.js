@@ -74,12 +74,14 @@ class InputModule extends EventEmitter {
    **/
 
   enableTouch(surface) {
+    surface.addEventListener('touchcancel', this.handleTouchEvent, false);
     surface.addEventListener('touchend', this.handleTouchEvent, false);
     surface.addEventListener('touchmove', this.handleTouchEvent, false);
     surface.addEventListener('touchstart', this.handleTouchEvent, false);
   }
 
   disableTouch(surface) {
+    surface.removeEventListener('touchcancel', this.handleTouchEvent, false);
     surface.removeEventListener('touchend', this.handleTouchEvent, false);
     surface.removeEventListener('touchmove', this.handleTouchEvent, false);
     surface.removeEventListener('touchstart', this.handleTouchEvent, false);
@@ -89,14 +91,19 @@ class InputModule extends EventEmitter {
     e.preventDefault(); // To prevent scrolling.
 
     for (let i = 0; i < e.changedTouches.length; i++) {
+      var type = e.type;
+
+      if(type === 'touchcancel')
+        type = 'touchend';
+
       var touchData = {
-        "event": e.type,
+        "event": type,
         "timestamp": audioContext.currentTime,
         "coordinates": [e.changedTouches[i].clientX, e.changedTouches[i].clientY],
         "identifier": e.changedTouches[i].identifier
       };
 
-      this.emit(e.type, touchData);
+      this.emit(type, touchData);
     }
   }
 }
