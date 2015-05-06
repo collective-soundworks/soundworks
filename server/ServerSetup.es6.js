@@ -15,6 +15,7 @@ class ServerSetup extends ServerModule {
     this.spacing = 1;
     this.labels = [];
     this.coordinates = [];
+    this.background = null;
 
     this.specific = {};
 
@@ -28,6 +29,7 @@ class ServerSetup extends ServerModule {
       client.send('setup:init', {
         "width": this.width,
         "height": this.height,
+        "background": this.background,
         "spacing": this.spacing,
         "labels": this.labels,
         "coordinates": this.coordinates,
@@ -57,7 +59,7 @@ class ServerSetup extends ServerModule {
 
       return Math.min(numLabels, numPositions);
     }
-    
+
     return 0;
   }
 
@@ -110,9 +112,11 @@ class ServerSetup extends ServerModule {
       case 'surface':
         let height = params.height || 4;
         let width = params.width || 6;
+        let background = params.background || null;
 
         this.height = height;
         this.width = width;
+        this.background = background;
 
         // TODO: allow other shapes
         break;

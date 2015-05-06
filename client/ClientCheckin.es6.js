@@ -20,6 +20,8 @@ class ClientCheckin extends ClientModule {
 
     this.select = options.select || 'automatic'; // 'automatic' | 'label' | 'location'
     this.instructions = options.instructions || instructions;
+    this.setup = options.setup || null;
+    this.showBackground = options.showBackground || false;
 
     switch (this.select) {
       case 'automatic':
@@ -39,7 +41,7 @@ class ClientCheckin extends ClientModule {
     this._touchMoveHandler = this._touchMoveHandler.bind(this);
     this._touchEndHandler = this._touchEndHandler.bind(this);
 
-    this._positionRadius = 50;
+    this._positionRadius = 20;
   }
 
   start() {
@@ -130,9 +132,13 @@ class ClientCheckin extends ClientModule {
 
       surfaceDiv.setAttribute('id', 'surface');
       surfaceDiv.classList.add('surface');
-      surfaceDiv.style.height = heightPx + "px";
-      surfaceDiv.style.width = widthPx + "px";
+      // surfaceDiv.style.height = heightPx + "px";
+      // surfaceDiv.style.width = widthPx + "px";
       this._surfaceDiv = surfaceDiv;
+
+      this.setup.display(surfaceDiv, {
+        showBackground: this.showBackground
+      });
 
       this.view.appendChild(surfaceDiv);
 

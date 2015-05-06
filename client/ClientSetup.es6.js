@@ -34,6 +34,9 @@ class ClientSetup extends ClientModule {
       this.labels = setup.labels;
       this.coordinates = setup.coordinates;
       this.type = setup.type;
+      this.background = setup.background;
+
+      console.log(this);
 
       this.done();
     });
@@ -64,7 +67,7 @@ class ClientSetup extends ClientModule {
           div.setAttribute('data-yfactor', 1);
           break;
       }
-    } 
+    }
 
     let heightWidthRatio = this.height / this.width;
     let screenHeight = window.innerHeight;
@@ -82,6 +85,14 @@ class ClientSetup extends ClientModule {
 
     div.style.height = heightPx + "px";
     div.style.width = widthPx + "px";
+
+    // add background
+    if (options.showBackground) {
+      div.style.backgroundImage = `url(${this.background})`;
+      div.style.backgroundPosition = '50% 50%';
+      div.style.backgroundRepeat = 'no-repeat';
+      div.style.backgroundSize = 'contain';
+    }
 
     switch (this.type) {
       case 'matrix':
