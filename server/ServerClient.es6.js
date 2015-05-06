@@ -18,6 +18,10 @@ class ServerClient {
     this.socket.emit(msg, ...args);
   }
 
+  sendVolatile(msg, ...args) {
+    this.socket.volatile.emit(msg, ...args);
+  }
+
   receive(msg, callback) {
     this.socket.on(msg, callback);
   }

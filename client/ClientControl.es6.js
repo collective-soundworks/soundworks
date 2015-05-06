@@ -263,6 +263,9 @@ class ClientControl extends ClientModule {
 
       for (let key of Object.keys(commands))
         this.commands[key] = new Command(commands[key], view);
+
+      if (!view)
+        this.done();
     });
 
     // listen to parameter changes
@@ -291,8 +294,7 @@ class ClientControl extends ClientModule {
   start() {
     super.start();
 
-    if (!this.hasGui)
-      this.done();
+    client.send('control:request');
   }
 }
 

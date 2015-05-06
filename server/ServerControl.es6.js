@@ -87,6 +87,11 @@ class ServerControl extends ServerModule {
     if (this.clientTypes.indexOf(clientType) < 0)
       this.clientTypes.push(clientType);
 
+    // init control parameters, infos, and commands at client
+    client.receive('control:request', () => {
+      client.send('control:init', this.parameters, this.infos, this.commands);
+    });
+
     // listen to control parameters
     client.receive('control:parameter', (name, value) => {
       this.parameters[name].value = value;
@@ -104,9 +109,6 @@ class ServerControl extends ServerModule {
       this.commands[name].fun();
       this.emit('control:command', name);
     });
-
-    // init control parameters, infos, and commands at client
-    client.send('control:init', this.parameters, this.infos, this.commands);
   }
 }
 
