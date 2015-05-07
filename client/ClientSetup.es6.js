@@ -36,8 +36,6 @@ class ClientSetup extends ClientModule {
       this.type = setup.type;
       this.background = setup.background;
 
-      console.log(this);
-
       this.done();
     });
   }
