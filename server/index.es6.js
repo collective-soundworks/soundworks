@@ -10,6 +10,7 @@ module.exports = {
   Client: require('./ServerClient'),
   Control: require('./ServerControl'),
   Filelist: require('./ServerFilelist'),
+  Locator: require('./ServerLocator'),
   Module: require('./ServerModule'),
   Performance: require('./ServerPerformance'),
   Setup: require('./ServerSetup'),

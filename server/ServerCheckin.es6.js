@@ -6,7 +6,7 @@
 
 var ServerModule = require('./ServerModule');
 
-var maxRandomClients = 1000;
+var maxRandomClients = 9999;
 
 class ServerCheckin extends ServerModule {
   constructor(options = {}) {
@@ -14,7 +14,7 @@ class ServerCheckin extends ServerModule {
 
     this.setup = options.setup || null;
     this.maxClients = options.maxClients || Infinity;
-
+    this.order = options.order || 'ascending'; // 'ascending' | 'random'
 
     if (this.maxClients > Number.MAX_SAFE_INTEGER)
       this.maxClients = Number.MAX_SAFE_INTEGER;
@@ -29,40 +29,19 @@ class ServerCheckin extends ServerModule {
     this._availableIndices = [];
     this._nextAscendingIndex = 0;
 
-    if (this.maxClients <= maxRandomClients) {
+    if (this.order === 'random' && this.maxClients <= maxRandomClients) {
+      this._nextAscendingIndex = this.maxClients;
+
       for (let i = 0; i < this.maxClients; i++)
         this._availableIndices.push(i);
     }
-  }
-
-  connect(client) {
-    super.connect(client);
-
-    client.receive('checkin:automatic:request', (order) => {
-      this._requestSelectAutomatic(client, order);
-    });
-
-    client.receive('checkin:label:request', () => {
-      this._requestSelectLabel(client);
-    });
-
-    client.receive('checkin:location:request', () => {
-      this._requestSelectLocation(client);
-    });
-  }
-
-  disconnect(client) {
-    super.disconnect(client);
-
-    if (client.index >= 0)
-      this._releaseIndex(client.index);
   }
 
   _getRandomIndex() {
     var numAvailable = this._availableIndices.length;
 
     if (numAvailable > 0) {
-      let random = Math.floor(Math.random() * numAvailable); // pick randomly an available index
+      let random = Math.floor(Math.random() * numAvailable);
       return this._availableIndices.splice(random, 1)[0];
     }
 
@@ -70,6 +49,8 @@ class ServerCheckin extends ServerModule {
   }
 
   _getAscendingIndex() {
+    console.log('_availableIndices', this._availableIndices);
+
     if (this._availableIndices.length > 0) {
       this._availableIndices.sort(function(a, b) {
         return a - b;
@@ -87,64 +68,50 @@ class ServerCheckin extends ServerModule {
     this._availableIndices.push(index);
   }
 
-  _requestSelectAutomatic(client, order) {
-    var index = -1;
+  connect(client) {
+    super.connect(client);
 
-    if (this.maxClients > maxRandomClients)
-      order = 'ascending';
+    client.receive('checkin:request', (order) => {
+      var index = -1;
 
-    if (order === 'random')
-      index = this._getRandomIndex();
-    else // if (order === 'acsending')
-      index = this._getAscendingIndex();
+      if (this.maxClients > maxRandomClients)
+        order = 'ascending';
 
-    if (index >= 0) {
-      client.index = index;
+      if (order === 'random')
+        index = this._getRandomIndex();
+      else // if (order === 'acsending')
+        index = this._getAscendingIndex();
 
-      var label = null;
-      var coordinates = null;
-
-      if (this.setup) {
-        label = this.setup.getLabel(index);
-        coordinates = this.setup.getCoordinates(index);
-      }
-
-      client.modules.checkin.label = label;
-      client.coordinates = coordinates;
-
-      client.send('checkin:automatic:acknowledge', index, label, coordinates);
-    } else {
-      client.send('checkin:automatic:unavailable');
-    }
-  }
-
-  _requestSelectLabel(client) {
-    throw new Error("Checkin with label selection not yet implemented");
-    // var options = this.setup.getOptions();
-    // client.send('checkin:label:options', options);
-    // client.receive('checkin:label:set', label);
-    // client.send('checkin:label:acknowledge', index);
-  }
-
-  _requestSelectLocation(client) {
-    if (this.setup !== null) {
-      let surface = this.setup.getSurface();
-      let index = this._getAscendingIndex();
+      console.log('index', index);
 
       if (index >= 0) {
-        client.index = index;
-        client.send('checkin:location:acknowledge', index, surface);
-      } else {
-        client.send('checkin:location:unavailable');
-      }
+        client.modules.checkin.index = index;
 
-      client.receive('checkin:location:set', (coordinates) => {
+        var label = null;
+        var coordinates = null;
+
+        if (this.setup) {
+          label = this.setup.getLabel(index);
+          coordinates = this.setup.getCoordinates(index);
+        }
+
+        client.modules.checkin.label = label;
         client.coordinates = coordinates;
-      });
-    } else {
 
-      throw new Error("Checkin with location selection requires a Setup module.");
-    }
+        client.send('checkin:acknowledge', index, label, coordinates);
+      } else {
+        client.send('checkin:unavailable');
+      }
+    });
+  }
+
+  disconnect(client) {
+    super.disconnect(client);
+
+    var index = client.modules.checkin.index;
+
+    if (index >= 0)
+      this._releaseIndex(index);
   }
 }
 
