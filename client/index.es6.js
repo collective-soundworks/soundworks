@@ -14,6 +14,7 @@ module.exports = {
   Dialog: require('./ClientDialog'),
   Filelist: require('./ClientFilelist'),
   Loader: require('./ClientLoader'),
+  Locator: require('./ClientLocator'),
   Module: require('./ClientModule'),
   Orientation: require('./ClientOrientation'),
   Performance: require('./ClientPerformance'),
