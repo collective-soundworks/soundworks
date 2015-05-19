@@ -49,8 +49,6 @@ class ServerCheckin extends ServerModule {
   }
 
   _getAscendingIndex() {
-    console.log('_availableIndices', this._availableIndices);
-
     if (this._availableIndices.length > 0) {
       this._availableIndices.sort(function(a, b) {
         return a - b;
@@ -81,8 +79,6 @@ class ServerCheckin extends ServerModule {
         index = this._getRandomIndex();
       else // if (order === 'acsending')
         index = this._getAscendingIndex();
-
-      console.log('index', index);
 
       if (index >= 0) {
         client.modules.checkin.index = index;
