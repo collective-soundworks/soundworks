@@ -19,6 +19,29 @@ var server = {
   broadcast: broadcast
 };
 
+var availableClientIndices = [];
+var nextClientIndex = 0;
+
+function getClientIndex() {
+  var index = -1;
+
+  if (availableClientIndices.length > 0) {
+    availableClientIndices.sort(function(a, b) {
+      return a - b;
+    });
+
+    index = availableClientIndices.splice(0, 1)[0];
+  } else {
+    index = nextClientIndex++;
+  }
+
+  return index;
+}
+
+function releaseClientIndex(index) {
+  availableClientIndices.push(index);
+}
+
 function start(app, publicPath, port) {
   app.set('port', port || process.env.PORT || 8000);
   app.set('view engine', 'ejs');
@@ -42,8 +65,8 @@ function start(app, publicPath, port) {
       transports: ['websocket'],
       pingTimeout: 60000,
       pingInterval: 50000
-      // pingTimeout: 3000,
-      // pingInterval: 1000
+        // pingTimeout: 3000,
+        // pingInterval: 1000
     });
   }
 }
@@ -61,8 +84,6 @@ function map(clientType, ...modules) {
   server.io.of(clientType).on('connection', (socket) => {
     var client = new ServerClient(clientType, socket);
 
-    // client/server handshake: send "start" when client is "ready"
-    // client.receive('client:ready', () => {
     for (let mod of modules) {
       mod.connect(client);
     }
@@ -72,10 +93,15 @@ function map(clientType, ...modules) {
         var mod = modules[i];
         mod.disconnect(client);
       }
+
+      releaseClientIndex(client.index);
+      client.index = -1;
     });
 
-    client.send('server:ready');
-    // });
+    var index = getClientIndex();
+
+    client.index = index;
+    client.send('client:start', index);
   });
 }
 

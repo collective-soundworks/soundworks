@@ -19,7 +19,6 @@ var client = {
   parallel: parallel,
   io: null,
   socket: null,
-  serverReady: false,
   modulesStarted: false,
   send: send,
   receive: receive,
@@ -115,11 +114,9 @@ function init(clientType = 'player', options = {}) {
       transports: ['websocket']
     });
 
-    client.receive('server:ready', () => {
-      client.serverReady = true;
+    client.receive('client:start', (index) => {
+      client.index = index;
     });
-
-    // https://github.com/Automattic/socket.io-client#events
   }
 }
 
@@ -136,12 +133,13 @@ function startModules(theModules) {
 
 function start(theModules) {
   if (client.io) {
-    if (client.serverReady) {
+    if (client.index >= 0) {
       // server is already ready
       startModules(theModules);
     } else {
       // wait for server ready
-      client.receive('server:ready', () => {
+      client.receive('client:start', (index) => {
+        client.index = index;
         startModules(theModules);
       });
     }
