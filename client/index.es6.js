@@ -8,6 +8,7 @@ module.exports = {
   audioContext: require('waves-audio').audioContext,
   client: require('./client'),
   input: require('./input'),
+  Calibration: require('./ClientCalibration'),
   Checkin: require('./ClientCheckin'),
   Control: require('./ClientControl'),
   Dialog: require('./ClientDialog'),

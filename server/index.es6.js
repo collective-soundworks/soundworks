@@ -6,6 +6,7 @@
 
 module.exports = {
   server: require('./server'),
+  Calibration: require('./ServerCalibration'),
   Checkin: require('./ServerCheckin'),
   Client: require('./ServerClient'),
   Control: require('./ServerControl'),
