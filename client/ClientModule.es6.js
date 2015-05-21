@@ -9,7 +9,7 @@ var client = require('./client');
 var container = window.container || (window.container = document.getElementById('container'));
 
 class ClientModule extends EventEmitter {
-  constructor(name, hasView = true, viewColor = 'black') {
+  constructor(name, hasView = true, color = 'black') {
     super();
 
     this.view = null;
@@ -19,7 +19,7 @@ class ClientModule extends EventEmitter {
       div.setAttribute('id', name);
       div.classList.add(name);
       div.classList.add('module');
-      div.classList.add(viewColor);
+      div.classList.add(color);
 
       this.view = div;
     }
