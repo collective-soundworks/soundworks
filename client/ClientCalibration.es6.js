@@ -28,19 +28,25 @@ class ClientCalibration extends ClientModule {
    * @param {String} [params.name='calibration'] name of module
    * @param {String} [params.color='black'] background
    * @param {ClientCalibration~updateFunction} [params.updateFunction]
-   * if defined, called whenever the calibration changed, which is
-   * specially useful if the calibration is restored from the server,
-   * because this is asynchronous, then.
+   * Called whenever the calibration changed. First to complete the
+   * start, by calling done, and then each time the calibration is
+   * restored from the server, because this is asynchronous.
    */
   constructor(params = {}) {
     super(params.name || 'calibration', true, params.color || 'black');
+    const that = this;
 
     this.ready = false;
+    this.started = false;
 
     // undefined is fine
     this.updateFunction = params.updateFunction;
 
-    this.calibration = new Calibration();
+    this.calibration = new Calibration({
+      sendFunction: client.send,
+      receiveFunction: client.receive,
+      updateFunction: () => { that.__calibrationUpdated(); }
+    });
 
     this.setCenteredViewContent('<p class="soft-blink">Calibration, stand by…</p>');
   }
@@ -53,17 +59,9 @@ class ClientCalibration extends ClientModule {
    */
   start() {
     super.start();
-
-    client.receive('calibration:set', (params) => {
-      this.set(params);
-    });
-
     // load previous calibration on start.
     this.load();
-
-    // we might still wait from the server response at this point
-    // for the calibration to be restored.
-    this.done();
+    // done when actually loaded
   }
 
   /**
@@ -73,33 +71,20 @@ class ClientCalibration extends ClientModule {
    */
   save() {
     this.calibration.save();
-    client.send('calibration:save', {
-      id: this.calibration.getId(),
-      calibration: this.calibration.get()
-    });
   }
 
   /**
    * Load calibration locally, or from the server.
    *
    * The calibration is loaded from the server when no local
-   * configuration is found. Note that the server answers is
+   * configuration is found. Note that loading from the server is
    * asynchronous. See {@linkcode ClientCalibration~updateFunction}
    * passed to the constructor.
    *
    * @function ClientCalibration~load
    */
   load() {
-    // local data to try first
-    let calibration = this.calibration.load();
-
-    if(calibration.hasOwnProperty('audio') ) {
-      // restore from local
-      this.set(calibration);
-    } else {
-      // restore from server
-      client.send('calibration:load', { id: this.calibration.getId() } );
-    }
+    this.calibration.load();
   }
 
   /**
@@ -110,13 +95,10 @@ class ClientCalibration extends ClientModule {
    */
   set(params) {
     this.calibration.set(params);
-    if(typeof this.updateFunction !== 'undefined') {
-      this.updateFunction();
-    }
   }
 
   /**
-   * Locally get the local calibrated values.
+   * Locally get the calibrated values.
    *
    * Note that {@linkcode CalibrationClient~load} method must be
    * called to restore a previous calibration.
@@ -127,6 +109,16 @@ class ClientCalibration extends ClientModule {
    */
   get() {
     return this.calibration.get();
+  }
+
+  __calibrationUpdated() {
+    if(!this.started) {
+      this.started = true;
+      this.done();
+    }
+    if(typeof this.updateFunction !== 'undefined') {
+      this.updateFunction();
+    }
   }
 }
 

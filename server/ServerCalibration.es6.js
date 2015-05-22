@@ -15,12 +15,12 @@ class ServerCalibration extends ServerModule {
    * ServerCalibration~connect}.
    *
    * @constructs ServerCalibration
-   * @param {Object} params
-   * @param {Object} params.persistent
-   * @param {Object} params.persistent.path where to store the
-   * persistent file, '../../data' if undefined.
-   * @param {Object} params.persistent.file name of the persistent
-   * file, 'calibration.json' if undefined.
+   * @param {Object} [params]
+   * @param {Object} [params.persistent]
+   * @param {Object} [params.persistent.path='../../data'] where to
+   * store the persistent file
+   * @param {Object} [params.persistent.file='calibration.json'] name
+   * of the persistent file
    */
   constructor(params = {
     persistent: {
@@ -40,17 +40,8 @@ class ServerCalibration extends ServerModule {
   connect(client) {
     super.connect(client);
 
-    // register receive functions
-    client.receive('calibration:load', (params) => {
-      const {calibration, distance} = this.calibration.load(params);
-      if(distance < Infinity) {
-        client.send('calibration:set', calibration);
-      }
-    });
-
-    client.receive('calibration:save', (params) => {
-      this.calibration.save(params);
-    });
+    this.calibration.start( (cmd, ...args) => { client.send(cmd, ...args); },
+                            (cmd, callback) => { client.receive(cmd, callback); } );
   }
 
 } // class ServerCalibration
