@@ -4,6 +4,7 @@
  */
 'use strict';
 
+var client = require('./client');
 var ClientModule = require('./ClientModule');
 var platform = require('platform');
 
@@ -20,9 +21,21 @@ function parseVersionString(string) {
   return null;
 }
 
+var defaultMessages = {
+  iosVersion: "This application requires at least iOS 7.",
+  androidVersion: "This application requires at least Android 4.2.",
+  useChrome: "You have to use Chrome to run this application on an Android device.",
+  updateChrome: "Please update Chrome to a more recent version to run this application.",
+  wrongOS: "This application is designed for iOS and Android mobile devices."
+};
+
 class ClientPlatform extends ClientModule {
   constructor(options = {}) {
     super(options.name || 'platform-check', true, options.color);
+
+    this.prefix = options.prefix ||  '';
+    this.postfix = options.postfix ||  '';
+    this.messages = options.messages || defaultMessages;
   }
 
   start() {
@@ -32,27 +45,28 @@ class ClientPlatform extends ClientModule {
     var browserVersion = parseVersionString(platform.version);
     var msg = null;
 
-    if (platform.os.family == "iOS") {
-      if (osVersion < 7)
-        msg = "This application requires at least iOS 7.<br/>You have iOS " + platform.os.version + ".";
-    } else if (platform.os.family == "Android") {
-      if (osVersion < 4.2)
-        msg = "This application requires at least Android 4.2.<br/>You have Android " + platform.os.version + ".";
-      else if (platform.name != 'Chrome Mobile')
-        msg = "You have to use Chrome to run this application on an Android device.";
-      else if (browserVersion < 35)
-        msg = "Consider updating Chrome to a more recent version to run this application.";
-    } else {
-      msg = "This application is designed for mobile devices and currently runs on iOS or Android only.";
+    if (!client.audioContext) {
+      if (platform.os.family == "iOS") {
+        if (osVersion < 7)
+          msg = this.messages.iosVersion;
+      } else if (platform.os.family == "Android") {
+        if (osVersion < 4.2)
+          msg = this.messages.androidVersion;
+        else if (platform.name != 'Chrome Mobile')
+          msg = this.messages.useChrome;
+        else if (browserVersion < 35)
+          msg = this.messages.updateChrome;
+      } else {
+        msg = this.messages.wrongOS;
+      }
     }
 
     if (msg !== null) {
-      this.setCenteredViewContent('<p>' + msg + '</p>');
+      this.setCenteredViewContent(this.prefix + '<p>' + msg + '</p>' + this.postfix);
     } else {
       this.done();
     }
   }
-
 }
 
 module.exports = ClientPlatform;
