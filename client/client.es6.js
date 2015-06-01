@@ -5,7 +5,7 @@
 "use strict";
 
 var EventEmitter = require('events').EventEmitter;
-
+const MobileDetect = require('mobile-detect');
 // debug - http://socket.io/docs/logging-and-debugging/#available-debugging-scopes
 // localStorage.debug = '*';
 
@@ -22,8 +22,28 @@ var client = {
   modulesStarted: false,
   send: send,
   receive: receive,
-  removeListener: removeListener
+  removeListener: removeListener,
+  platform: {
+    os: null,
+    isMobile: null
+  }
 };
+
+// get informations about client
+const md = new MobileDetect(window.navigator.userAgent);
+client.platform.isMobile = (md.mobile() !== null); // true if phone or tablet
+client.platform.os = (() => {
+  let os = md.os();
+
+  if (os === 'AndroidOS') {
+    return 'android';
+  } else if (os === 'iOS') {
+    return 'ios';
+  } else {
+    return 'other';
+  }
+})();
+
 
 class ParallelModule extends EventEmitter {
   constructor(modules) {
