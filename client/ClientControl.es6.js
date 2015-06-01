@@ -35,7 +35,7 @@ class ParameterNumber {
       incrButton.setAttribute('id', this.name + '-incr');
       incrButton.setAttribute('width', '0.5em');
       incrButton.innerHTML = '>';
-      incrButton.onclick = incrButton.ontouchstart = (() => {
+      incrButton.onclick = (() => {
         this.incr(true);
       });
 
@@ -43,7 +43,7 @@ class ParameterNumber {
       decrButton.setAttribute('id', this.name + '-descr');
       decrButton.style.width = '0.5em';
       decrButton.innerHTML = '<';
-      decrButton.onclick = decrButton.ontouchstart = (() => {
+      decrButton.onclick = (() => {
         this.decr(true);
       });
 
@@ -111,7 +111,7 @@ class ParameterSelect {
       incrButton.setAttribute('id', this.name + '-incr');
       incrButton.setAttribute('width', '0.5em');
       incrButton.innerHTML = '>';
-      incrButton.onclick = incrButton.ontouchstart = (() => {
+      incrButton.onclick = (() => {
         this.incr(true);
       });
 
@@ -119,7 +119,7 @@ class ParameterSelect {
       decrButton.setAttribute('id', this.name + '-descr');
       decrButton.style.width = '0.5em';
       decrButton.innerHTML = '<';
-      decrButton.onclick = decrButton.ontouchstart = (() => {
+      decrButton.onclick = (() => {
         this.decr(true);
       });
 
@@ -208,7 +208,7 @@ class Command {
       div.classList.add('command');
       div.innerHTML = this.label;
 
-      div.onclick = div.ontouchstart = (() => {
+      div.onclick = (() => {
         client.send('control:command', this.name);
       });
 
