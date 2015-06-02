@@ -25,7 +25,8 @@ var client = {
   removeListener: removeListener,
   platform: {
     os: null,
-    isMobile: null
+    isMobile: null,
+    soundFileExt: ''
   }
 };
 
@@ -43,7 +44,16 @@ client.platform.os = (() => {
     return 'other';
   }
 })();
-
+// soudn file extention
+const _a = document.createElement('audio');
+// http://diveintohtml5.info/everything.html
+if (!!(a.canPlayType && a.canPlayType('audio/mpeg;'))) {
+  client.platform.soundFileExt = '.mp3';
+} else if (!!(a.canPlayType && a.canPlayType('audio/ogg; codecs="vorbis"'))) {
+  client.platform.soundFileExt = '.ogg';
+} else {
+  client.platform.soundFileExt = '.wav';
+}
 
 class ParallelModule extends EventEmitter {
   constructor(modules) {
