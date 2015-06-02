@@ -26,7 +26,7 @@ var client = {
   platform: {
     os: null,
     isMobile: null,
-    soundFileExt: ''
+    audioFileExt: ''
   }
 };
 
@@ -48,11 +48,11 @@ client.platform.os = (() => {
 const a = document.createElement('audio');
 // http://diveintohtml5.info/everything.html
 if (!!(a.canPlayType && a.canPlayType('audio/mpeg;'))) {
-  client.platform.soundFileExt = '.mp3';
+  client.platform.audioFileExt = '.mp3';
 } else if (!!(a.canPlayType && a.canPlayType('audio/ogg; codecs="vorbis"'))) {
-  client.platform.soundFileExt = '.ogg';
+  client.platform.audioFileExt = '.ogg';
 } else {
-  client.platform.soundFileExt = '.wav';
+  client.platform.audioFileExt = '.wav';
 }
 
 console.log(client.platform);
