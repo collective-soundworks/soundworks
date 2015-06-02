@@ -42,7 +42,13 @@ function releaseClientIndex(index) {
   availableClientIndices.push(index);
 }
 
-function start(app, publicPath, port) {
+function start(app, publicPath, port, socketOptions = {}) {
+  const socketConfig = {
+    transports: socketOptions.transports || ['websocket'],
+    pingTimeout: socketOptions.pingTimeout || 60000,
+    pingInterval: socketOptions.pingInterval || 50000
+  };
+
   app.set('port', port || process.env.PORT || 8000);
   app.set('view engine', 'ejs');
   app.use(express.static(publicPath));
@@ -55,19 +61,13 @@ function start(app, publicPath, port) {
   });
 
   // Engine IO defaults
-  // this.pingTimeout = opts.pingTimeout || 60000;
-  // this.pingInterval = opts.pingInterval || 25000;
+  // this.pingTimeout = opts.pingTimeout || 3000;
+  // this.pingInterval = opts.pingInterval || 1000;
   // this.upgradeTimeout = opts.upgradeTimeout || 10000;
   // this.maxHttpBufferSize = opts.maxHttpBufferSize || 10E7;
 
   if (httpServer) {
-    server.io = new IO(httpServer, {
-      transports: ['websocket'],
-      pingTimeout: 60000,
-      pingInterval: 50000
-        // pingTimeout: 3000,
-        // pingInterval: 1000
-    });
+    server.io = new IO(httpServer, socketConfig);
   }
 }
 
