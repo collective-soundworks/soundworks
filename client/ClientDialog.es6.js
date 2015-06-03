@@ -56,13 +56,12 @@ class ClientDialog extends ClientModule {
     o.stop(audioContext.currentTime + 0.000001);
   }
 
-  << << << < HEAD
   _clickHandler() {
     if (this._mustActivateAudio)
       this._activateAudio();
 
     this.view.removeEventListener('click', this._clickHandler);
-    this.done(); === === =
+    this.done();
     // cf. https://github.com/borismus/webvr-boilerplate/blob/8abbc74cfa5976b9ab0c388cb0c51944008c6989/js/webvr-manager.js#L268-L289
     _initWakeLock() {
       this._wakeLockVideo = document.createElement('video');
@@ -102,7 +101,7 @@ class ClientDialog extends ClientModule {
       } else if (os === 'android') {
         this._wakeLockVideo.pause();
         this._wakeLockVideo.src = '';
-      } >>> >>> > 0794814 a4a240a654cf4cab10c7b4fffc7f432a0
+      }
     }
   }
 
