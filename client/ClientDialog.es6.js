@@ -13,19 +13,19 @@ class ClientDialog extends ClientModule {
 
     this._mustActivateAudio = options.activateAudio || false;
     this._text = options.text || "Hello!";
+
+    this._clickHandler = this._clickHandler.bind(this);
   }
 
   start() {
     super.start();
     this.setCenteredViewContent(this._text);
+    this.view.addEventListener('click', this._clickHandler);
+  }
 
-    // install click listener
-    this.view.addEventListener('click', () => {
-      if (this._mustActivateAudio)
-        this._activateAudio();
-
-      this.done();
-    });
+  restart() {
+    super.restart();
+    this.done();
   }
 
   _activateAudio() {
@@ -36,6 +36,14 @@ class ClientDialog extends ClientModule {
     g.connect(audioContext.destination);
     o.start(0);
     o.stop(audioContext.currentTime + 0.000001);
+  }
+
+  _clickHandler() {
+    if (this._mustActivateAudio)
+      this._activateAudio();
+
+    this.view.removeEventListener('click', this._clickHandler);
+    this.done();
   }
 }
 

@@ -40,6 +40,12 @@ class ClientSetup extends ClientModule {
     });
   }
 
+  restart() {
+    super.restart();
+
+    this.done();
+  }
+
   display(div, options = {}) {
     div.classList.add('setup');
 
@@ -161,6 +167,13 @@ class ClientSetup extends ClientModule {
       let positionDiv = document.querySelector('[data-index="' + position.index + '"]');
       if (!!positionDiv)
         positionDiv.parentNode.removeChild(positionDiv);
+    }
+  }
+
+  removeAllPositions(div) {
+    let positions = div.querySelectorAll('.player');
+    for (let i = 0; i < positions.length; i++) {
+      div.removeChild(positions[i]);
     }
   }
 

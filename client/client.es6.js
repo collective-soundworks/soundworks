@@ -28,32 +28,42 @@ var client = {
 class ParallelModule extends EventEmitter {
   constructor(modules) {
     super();
+
     this.modules = modules;
     this.doneCount = 0;
+    this.isStarted = false;
+    this.isDone = false;
   }
 
-  start() {
+  launch() {
+    this.doneCount = 0;
     var zIndex = this.modules.length * 100;
 
-    // start all setups
+    // Start all setups
     for (let mod of this.modules) {
-      mod.on('done', () => {
-        this.doneCount++;
 
-        if (this.doneCount === this.modules.length)
-          this.done();
-      });
+      if (!mod.isStarted) {
+        mod.on('done', () => {
+          this.doneCount++;
 
-      if (mod.view) {
-        mod.setZIndex(zIndex);
-        zIndex -= 100;
+          if (this.doneCount === this.modules.length)
+            this.done();
+        });
+
+        if (mod.view) {
+          mod.setZIndex(zIndex);
+          zIndex -= 100;
+        }
       }
 
-      mod.start();
+      mod.launch();
     }
+
+    this.isStarted = true;
   }
 
   done() {
+    this.isDone = true;
     this.emit('done', this);
   }
 
@@ -67,29 +77,32 @@ class SerialModule extends EventEmitter {
   constructor(modules) {
     super();
     this.modules = modules;
+
+    this.isStarted = false;
+    this.isDone = false;
   }
 
-  start() {
+  launch() {
     var prevModule = null;
 
-    // start all module listeners
+    // Start all module listeners
     for (let mod of this.modules) {
-      if (prevModule) {
+      if (prevModule && !prevModule.isStarted) {
         prevModule.on('done', () => {
-          mod.start();
+          mod.launch();
         });
       }
 
       prevModule = mod;
     }
 
-    // when last module of sequence is done, the sequence is done
+    // When last module of sequence is done, the sequence is done
     prevModule.on('done', () => {
       this.done();
     });
 
-    // start first module of the sequence
-    this.modules[0].start();
+    // Launch first module of the sequence
+    this.modules[0].launch();
   }
 
   done() {
@@ -120,34 +133,29 @@ function init(clientType = 'player', options = {}) {
   }
 }
 
-function startModules(theModules) {
-  if (!client.modulesStarted) {
-    theModules.start();
-    client.modulesStarted = true;
-  } else {
-    // client reconnection
-
-    console.log('reconnection');
-  }
-}
-
-function start(theModules) {
+function start(mod) {
   if (client.io) {
     if (client.index >= 0) {
       // server is already ready
-      startModules(theModules);
+      mod.launch();
     } else {
       // wait for server ready
       client.receive('client:start', (index) => {
         client.index = index;
-        startModules(theModules);
+        mod.launch();
       });
     }
 
-    client.receive('disconnect', () => {});
+    client.receive('disconnect', () => {
+      console.log('disconnect', client.index)
+    });
+
+    client.receive('reconnect', () => {
+      console.log('reconnect', client.index);
+    });
   } else {
     // no server
-    startModules(theModules);
+    mod.launch();
   }
 }
 
@@ -164,12 +172,10 @@ function send(msg, ...args) {
     client.socket.emit(msg, ...args);
 }
 
-function receive(msg, callback, module = null) {
+function receive(msg, callback) {
   if (client.socket) {
+    client.socket.removeListener(msg, callback);
     client.socket.on(msg, callback);
-
-    if (module)
-      module.addClientListener(msg, callback);
   }
 }
 

@@ -69,8 +69,9 @@ class ServerCheckin extends ServerModule {
   connect(client) {
     super.connect(client);
 
-    client.receive('checkin:request', (order) => {
+    client.receive('checkin:request', () => {
       var index = -1;
+      var order = this.order;
 
       if (this.maxClients > maxRandomClients)
         order = 'ascending';
@@ -99,6 +100,30 @@ class ServerCheckin extends ServerModule {
         client.send('checkin:unavailable');
       }
     });
+
+    client.receive('checkin:restart', (index, label, coordinates) => {
+      // TODO: check if that's ok on random mode
+      if (index > this._nextAscendingIndex) {
+        for (let i = this._nextAscendingIndex; i < index; i++)
+          this._availableIndices.push(i);
+
+        this._nextAscendingIndex = index + 1;
+      } else if (index === this._nextAscendingIndex) {
+        this._nextAscendingIndex++;
+      } else {
+        let i = this._availableIndices.indexOf(index);
+
+        if (i > -1)
+          this._availableIndices.splice(i, 1);
+      }
+
+      client.modules.checkin.index = index;
+
+      if (this.setup) {
+        client.modules.checkin.label = label;
+        client.coordinates = coordinates;
+      }
+    })
   }
 
   disconnect(client) {

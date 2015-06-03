@@ -293,9 +293,14 @@ class ClientControl extends ClientModule {
 
   start() {
     super.start();
-
     client.send('control:request');
   }
+
+  restart() {
+    super.restart();
+    client.send('control:request'); 
+  }
+  
 }
 
 module.exports = ClientControl;

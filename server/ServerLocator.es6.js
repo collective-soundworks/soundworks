@@ -19,15 +19,18 @@ class ServerLocator extends ServerModule {
     client.receive('locator:request', () => {
       if (this.setup) {
         let surface = this.setup.getSurface();
-
         client.send('locator:surface', surface);
-
-        client.receive('locator:coordinates', (coordinates) => {
-          client.coordinates = coordinates;
-        });
       } else {
         throw new Error("Locator requires a setup.");
       }
+    });
+
+    client.receive('locator:coordinates', (coordinates) => {
+      client.coordinates = coordinates;
+    });    
+
+    client.receive('locator:restart', (coordinates) => {
+      client.coordinates = coordinates;
     });
   }
 

@@ -50,6 +50,11 @@ class ClientLoader extends ClientModule {
     this._load(this.files);
   }
 
+  restart() {
+    super.restart();
+    this.done();
+  }
+
   _loadFile(index, file) {
     let loader = new AudioBufferLoader();
 
