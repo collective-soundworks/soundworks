@@ -104,7 +104,7 @@ function map(clientType, ...modules) {
     var index = getClientIndex();
 
     client.index = index;
-    client.send('client:start', index);
+    client.send('client:start', index); // the server is ready
   });
 }
 

@@ -16,20 +16,57 @@ function instructions(label) {
 
 class ClientLocator extends ClientModule {
   constructor(options = {}) {
-    super(options.name || 'checkin', true, options.color);
+    super(options.name || 'locator', true, options.color);
 
     this.select = options.select || 'automatic'; // 'automatic' | 'label' | 'location'
     this.instructions = options.instructions || instructions;
     this.setup = options.setup || null;
-    this.showBackground = options.showBackground || false;
+    this.showBackground = options.showBackground ||  false;
 
     this.label = null;
 
     this._touchStartHandler = this._touchStartHandler.bind(this);
     this._touchMoveHandler = this._touchMoveHandler.bind(this);
     this._touchEndHandler = this._touchEndHandler.bind(this);
+    this._sendCoordinates = this._sendCoordinates.bind(this);
+    this._surfaceHandler = this._surfaceHandler.bind(this);
 
+    this._currentCoordinates = null;
     this._positionRadius = 20;
+
+    // Explanatory text
+    let textDiv = document.createElement('div');
+    textDiv.classList.add('centered-content');
+    let text = document.createElement('p');
+    text.innerHTML = "<small>Indicate your location on the map and click &ldquo;OK&rdquo;.</small>";
+    this._textDiv = textDiv;
+    this._text = text;
+
+    // Button
+    let button = document.createElement('div');
+    button.classList.add('btn');
+    button.classList.add('disabled');
+    button.innerHTML = "OK";
+    this._button = button;
+
+    // Position circle
+    let positionDiv = document.createElement('div');
+    positionDiv.setAttribute('id', 'position');
+    positionDiv.classList.add('position');
+    positionDiv.classList.add('hidden');
+    positionDiv.style.width = this._positionRadius * 2 + "px";
+    positionDiv.style.height = this._positionRadius * 2 + "px";
+    this._positionDiv = positionDiv;
+
+    // Surface div
+    let surfaceDiv = document.createElement('div');
+    surfaceDiv.setAttribute('id', 'surface');
+    surfaceDiv.classList.add('surface');
+    this._surfaceDiv = surfaceDiv;
+    
+    this._textDiv.appendChild(this._text);
+    this._textDiv.appendChild(this._button);
+    this._surfaceDiv.appendChild(this._positionDiv);
   }
 
   start() {
@@ -37,83 +74,82 @@ class ClientLocator extends ClientModule {
 
     client.send('locator:request');
 
-    client.receive('locator:surface', (surface) => {
-      // Display surface
-      let surfaceDiv = document.createElement('div');
-      let heightWidthRatio = surface.height / surface.width;
-      let screenHeight = window.innerHeight;
-      let screenWidth = window.innerWidth;
-      let screenRatio = screenHeight / screenWidth;
-      let heightPx, widthPx;
+    client.receive('locator:surface', this._surfaceHandler, false);
+  }
 
-      if (screenRatio > heightWidthRatio) { // TODO: refine sizes, with container, etc.
-        heightPx = screenWidth * heightWidthRatio;
-        widthPx = screenWidth;
-      } else {
-        heightPx = screenHeight;
-        widthPx = screenHeight / heightWidthRatio;
-      }
+  reset() {
+    client.coordinates = null;
+    
+    this._positionDiv.classList.add('hidden');
+    this._button.classList.add('disabled');
 
-      surfaceDiv.setAttribute('id', 'surface');
-      surfaceDiv.classList.add('surface');
-      // surfaceDiv.style.height = heightPx + "px";
-      // surfaceDiv.style.width = widthPx + "px";
-      this._surfaceDiv = surfaceDiv;
+    this._button.removeEventListener('click', this._sendCoordinates, false);
+    this._surfaceDiv.removeEventListener('touchstart', this._touchStartHandler, false);
+    this._surfaceDiv.removeEventListener('touchmove', this._touchMoveHandler, false);
+    this._surfaceDiv.removeEventListener('touchend', this._touchEndHandler, false);
 
-      this.setup.display(surfaceDiv, {
-        showBackground: this.showBackground
-      });
+    // TODO: clean surface properly
+  }
 
-      this.view.appendChild(surfaceDiv);
+  restart() {
+    super.restart();
+    client.send('locator:restart', client.coordinates);
+    this._button.removeEventListener('click', this._sendCoordinates, false);
+    this.done();
+  }
 
-      // Let the participant select his or her location
-      surfaceDiv.addEventListener('touchstart', this._touchStartHandler, false);
-      // surfaceDiv.addEventListener('mousedown', this._touchStartHandler, false);
-      surfaceDiv.addEventListener('touchmove', this._touchMoveHandler, false);
-      // surfaceDiv.addEventListener('mousemove', this._touchMoveHandler, false);
-      surfaceDiv.addEventListener('touchend', this._touchEndHandler, false);
-      // surfaceDiv.addEventListener('mouseup', this._touchEndHandler, false);
+  _surfaceHandler(surface) {
+    let heightWidthRatio = surface.height / surface.width;
+    let screenHeight = window.innerHeight;
+    let screenWidth = window.innerWidth;
+    let screenRatio = screenHeight / screenWidth;
+    let heightPx, widthPx;
 
-      // Display explanatory text
-      let textDiv = document.createElement('div');
-      textDiv.classList.add('centered-content');
+    if (screenRatio > heightWidthRatio) { // TODO: refine sizes, with container, etc.
+      heightPx = screenWidth * heightWidthRatio;
+      widthPx = screenWidth;
+    } else {
+      heightPx = screenHeight;
+      widthPx = screenHeight / heightWidthRatio;
+    }
 
-      let text = document.createElement('p');
-      text.innerHTML = "<small>Indicate your location on the map and click &ldquo;OK&rdquo;.</small>";
+    // this._surfaceDiv.style.height = heightPx + "px";
+    // this._surfaceDiv.style.width = widthPx + "px";
 
-      let button = document.createElement('div');
-      button.classList.add('btn');
-      button.classList.add('disabled');
-      button.innerHTML = "OK";
-      this._button = button;
-
-      textDiv.appendChild(text);
-      textDiv.appendChild(button);
-      this.view.appendChild(textDiv);
-
-      // Send the coordinates of the selected location to server
-      button.addEventListener('click', () => {
-        if (client.coordinates !== null) {
-          button.classList.add('selected');
-          client.send('locator:coordinates', client.coordinates);
-          this.done();
-        }
-      }, false);
+    this.setup.display(this._surfaceDiv, {
+      showBackground: this.showBackground
     });
+
+    // Let the participant select his or her location
+    this._surfaceDiv.addEventListener('touchstart', this._touchStartHandler, false);
+    // surfaceDiv.addEventListener('mousedown', this._touchStartHandler, false);
+    this._surfaceDiv.addEventListener('touchmove', this._touchMoveHandler, false);
+    // surfaceDiv.addEventListener('mousemove', this._touchMoveHandler, false);
+    this._surfaceDiv.addEventListener('touchend', this._touchEndHandler, false);
+    // surfaceDiv.addEventListener('mouseup', this._touchEndHandler, false);
+
+    // Build text & button interface after receiving and displaying the surface
+    this.view.appendChild(this._surfaceDiv);
+    this.view.appendChild(this._textDiv);
+
+    // Send the coordinates of the selected location to server
+    this._button.addEventListener('click', this._sendCoordinates, false);
+  }
+
+  _sendCoordinates() {
+    if (this._currentCoordinates !== null) {
+      this._button.classList.add('selected');
+      client.coordinates = this._currentCoordinates;
+      client.send('locator:coordinates', client.coordinates);
+      this.done();
+    }
   }
 
   _touchStartHandler(e) {
     e.preventDefault();
 
-    if (!this._positionDiv) {
-      let positionDiv = document.createElement('div');
-      positionDiv.setAttribute('id', 'position');
-      positionDiv.classList.add('position');
-      positionDiv.style.width = this._positionRadius * 2 + "px";
-      positionDiv.style.height = this._positionRadius * 2 + "px";
-      this._positionDiv = positionDiv;
-      this._surfaceDiv.appendChild(this._positionDiv);
-
+    if (this._positionDiv.classList.contains('hidden')) {
+      this._positionDiv.classList.remove('hidden');
       this._button.classList.remove('disabled');
     }
 
@@ -142,7 +178,7 @@ class ClientLocator extends ClientModule {
     let x = (e.changedTouches[0].clientX - this._surfaceDiv.offsetLeft) / this._surfaceDiv.offsetWidth;
     let y = (e.changedTouches[0].clientY - this._surfaceDiv.offsetTop) / this._surfaceDiv.offsetHeight;
 
-    client.coordinates = [x, y];
+    this._currentCoordinates = [x, y];
 
     // TODO: handle out-of-bounds
   }

@@ -48,6 +48,12 @@ class ClientPlatform extends ClientModule {
       this.done();
     }
   }
+
+  restart() {
+    super.restart();
+
+    this.done();
+  }
 }
 
 module.exports = ClientPlatform;

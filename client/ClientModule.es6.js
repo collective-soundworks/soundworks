@@ -12,7 +12,9 @@ class ClientModule extends EventEmitter {
   constructor(name, hasView = true, viewColor = 'black') {
     super();
 
+    this.hasView = hasView;
     this.view = null;
+    this.name = name;
 
     if (hasView) {
       var div = document.createElement('div');
@@ -24,40 +26,48 @@ class ClientModule extends EventEmitter {
       this.view = div;
     }
 
-    this.clientListeners = [];
+    this.isStarted = false;
     this.isDone = false;
-  }
-
-  addClientListener(msg, callback) {
-    this.clientListeners.push({
-      msg: msg,
-      callback: callback
-    });
-  }
-
-  removeAllClientListeners() {
-    for (let listener of this.clientListeners) {
-      client.removeListener(listener.msg, listener.callback);
-    }
-
-    this.clientListeners = [];
+    this.isRestarted = false;
   }
 
   start() {
+    this.isStarted = true;
+
     if (this.view)
       container.appendChild(this.view);
   }
 
-  done() {
-    if (typeof this.isDone !== 'undefined') {
-      if (this.view)
-        container.removeChild(this.view);
+  reset() {
+    if (this.isStarted && !this.isDone && this.view && !!this.view.parentNode)
+      container.removeChild(this.view);
 
-      if (!this.isDone) {
-        this.isDone = true;
-        this.removeAllClientListeners();
-        this.emit('done', this);
-      }
+    this.isStarted = false;
+  }
+
+  restart() {
+    this.isDone = false;
+    this.isRestarted = true;
+  }
+
+  launch() {
+    if (this.isDone === true) {
+      this.restart();
+    } else {
+      if (this.isStarted === true)
+        this.reset();
+
+      this.start();
+    }
+  }
+
+  done() {
+    if (this.hasView && this.view && !this.isRestarted)
+      container.removeChild(this.view);
+
+    if (!this.isDone) {
+      this.isDone = true;
+      this.emit('done', this);
     }
   }
 

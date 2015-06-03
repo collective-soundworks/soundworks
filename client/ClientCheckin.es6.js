@@ -22,37 +22,61 @@ class ClientCheckin extends ClientModule {
 
     this.index = -1;
     this.label = null;
+
+    this._acknowledgementHandler = this._acknowledgementHandler.bind(this);
+    this._unavailableHandler = this._unavailableHandler.bind(this);
+    this._viewClickHandler = this._viewClickHandler.bind(this);
   }
 
   start() {
     super.start();
 
-    client.send('checkin:request', this.order);
+    client.send('checkin:request');
 
-    client.receive('checkin:acknowledge', (index, label, coordinates) => {
-      this.index = index;
+    client.receive('checkin:acknowledge', this._acknowledgementHandler);
+    client.receive('checkin:unavailable', this._unavailableHandler);
+  }
 
-      if (coordinates)
-        client.coordinates = coordinates;
+  reset() {
+    super.reset();
 
-      if (label) {
-        this.label = label;
+    client.removeListener('checkin:acknowledge', this._acknowledgementHandler);
+    client.removeListener('checkin:unavailable', this._unavailableHandler);
+    this.view.removeEventListener('click', this._viewClickHandler, false);
+  }
 
-        let htmlContent = this.instructions(label);
+  restart() {
+    super.restart();
 
-        this.setCenteredViewContent(htmlContent);
+    client.send('checkin:restart', this.index, this.label, client.coordinates);
+    this.done();
+  }
 
-        this.view.addEventListener('click', () => {
-          this.done();
-        });
-      } else {
-        this.done();
-      }
-    });
+  _acknowledgementHandler(index, label, coordinates) {
+    this.index = index;
 
-    client.receive('checkin:unavailable', () => {
-      this.setCenteredViewContent("<p>Sorry, we cannot accept any more connections at the moment, please try again later.</p>");
-    });
+    if (coordinates)
+      client.coordinates = coordinates;
+
+    if (label) {
+      this.label = label;
+
+      let htmlContent = this.instructions(label);
+
+      this.setCenteredViewContent(htmlContent);
+
+      this.view.addEventListener('click', this._viewClickHandler, false);
+    } else {
+      this.done();
+    }
+  }
+
+  _unavailableHandler() {
+    this.setCenteredViewContent("<p>Sorry, we cannot accept any more connections at the moment, please try again later.</p>");
+  }
+
+  _viewClickHandler() {
+    this.done();
   }
 }
 

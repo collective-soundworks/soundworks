@@ -17,13 +17,16 @@ class ClientDialog extends ClientModule {
     super(options.name || 'dialog', true, options.color);
 
     this._mustActivateAudio = options.activateAudio || false;
-    this._mustWakeLock = options.wakeLock || true;
+    this._mustWakeLock = options.wakeLock ||  true;
     this._text = options.text || "Hello!";
+
+    this._clickHandler = this._clickHandler.bind(this);
   }
 
   start() {
     super.start();
     this.setCenteredViewContent(this._text);
+
     // initialize video element for wakeLocking
     this._initWakeLock();
     // install click listener
@@ -38,6 +41,11 @@ class ClientDialog extends ClientModule {
     });
   }
 
+  restart() {
+    super.restart();
+    this.done();
+  }
+
   _activateAudio() {
     var o = audioContext.createOscillator();
     var g = audioContext.createGain();
@@ -46,6 +54,14 @@ class ClientDialog extends ClientModule {
     g.connect(audioContext.destination);
     o.start(0);
     o.stop(audioContext.currentTime + 0.000001);
+  }
+
+  _clickHandler() {
+    if (this._mustActivateAudio)
+      this._activateAudio();
+
+    this.view.removeEventListener('click', this._clickHandler);
+    this.done();
   }
 
   // cf. https://github.com/borismus/webvr-boilerplate/blob/8abbc74cfa5976b9ab0c388cb0c51944008c6989/js/webvr-manager.js#L268-L289
