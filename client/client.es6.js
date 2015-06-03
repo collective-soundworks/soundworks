@@ -44,7 +44,7 @@ client.platform.os = (() => {
     return 'other';
   }
 })();
-// soudn file extention
+// audio file extention
 const a = document.createElement('audio');
 // http://diveintohtml5.info/everything.html
 if (!!(a.canPlayType && a.canPlayType('audio/mpeg;'))) {
@@ -54,8 +54,6 @@ if (!!(a.canPlayType && a.canPlayType('audio/mpeg;'))) {
 } else {
   client.platform.audioFileExt = '.wav';
 }
-
-console.log(client.platform);
 
 class ParallelModule extends EventEmitter {
   constructor(modules) {

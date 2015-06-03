@@ -8,6 +8,7 @@ var express = require('express');
 var http = require('http');
 var IO = require('socket.io');
 var ServerClient = require('./ServerClient');
+const log = require('./logger');
 
 var expressApp = null;
 var httpServer = null;
@@ -82,6 +83,7 @@ function map(clientType, ...modules) {
   });
 
   server.io.of(clientType).on('connection', (socket) => {
+    log.info({ socket: socket, clientType: clientType }, 'connection');
     var client = new ServerClient(clientType, socket);
 
     for (let mod of modules) {
@@ -89,6 +91,7 @@ function map(clientType, ...modules) {
     }
 
     client.receive('disconnect', () => {
+      log.info({ socket: socket, clientType: clientType }, 'disconnect');
       for (let i = modules.length - 1; i >= 0; i--) {
         var mod = modules[i];
         mod.disconnect(client);
@@ -106,8 +109,10 @@ function map(clientType, ...modules) {
 }
 
 function broadcast(clientType, msg, ...args) {
-  if (server.io)
+  if (server.io) {
+    log.info({ clientType: clientType, channel: msg, arguments: args }, 'broadcast');
     server.io.of('/' + clientType).emit(msg, ...args);
+  }
 }
 
 module.exports = server;
