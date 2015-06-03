@@ -62,47 +62,49 @@ class ClientDialog extends ClientModule {
 
     this.view.removeEventListener('click', this._clickHandler);
     this.done();
-    // cf. https://github.com/borismus/webvr-boilerplate/blob/8abbc74cfa5976b9ab0c388cb0c51944008c6989/js/webvr-manager.js#L268-L289
-    _initWakeLock() {
-      this._wakeLockVideo = document.createElement('video');
+  }
 
-      this._wakeLockVideo.addEventListener('ended', () => {
-        this._wakeLockVideo.play();
-      });
-    }
+  // cf. https://github.com/borismus/webvr-boilerplate/blob/8abbc74cfa5976b9ab0c388cb0c51944008c6989/js/webvr-manager.js#L268-L289
+  _initWakeLock() {
+    this._wakeLockVideo = document.createElement('video');
 
-    _requestWakeLock() {
-      const os = client.platform.os;
-      this._releaseWakeClock();
+    this._wakeLockVideo.addEventListener('ended', () => {
+      this._wakeLockVideo.play();
+    });
+  }
 
-      if (os === 'ios') {
-        if (this._wakeLockTimer) return;
+  _requestWakeLock() {
+    const os = client.platform.os;
+    this._releaseWakeClock();
 
-        this._wakeLockTimer = setInterval(() => {
-          window.location = window.location;
-          setTimeout(window.stop, 0);
-        }, 30000);
-      } else if (os === 'android') {
-        if (this._wakeLockVideo.paused === false) return;
+    if (os === 'ios') {
+      if (this._wakeLockTimer) return;
 
-        this._wakeLockVideo.src = base64('video/webm', 'GkXfowEAAAAAAAAfQoaBAUL3gQFC8oEEQvOBCEKChHdlYm1Ch4ECQoWBAhhTgGcBAAAAAAACWxFNm3RALE27i1OrhBVJqWZTrIHfTbuMU6uEFlSua1OsggEuTbuMU6uEHFO7a1OsggI+7AEAAAAAAACkAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAVSalmAQAAAAAAAEMq17GDD0JATYCMTGF2ZjU2LjQuMTAxV0GMTGF2ZjU2LjQuMTAxc6SQ20Yv/Elws73A/+KfEjM11ESJiEBkwAAAAAAAFlSuawEAAAAAAABHrgEAAAAAAAA+14EBc8WBAZyBACK1nIN1bmSGhVZfVlA4g4EBI+ODhAT3kNXgAQAAAAAAABKwgRC6gRBTwIEBVLCBEFS6gRAfQ7Z1AQAAAAAAALHngQCgAQAAAAAAAFyho4EAAIAQAgCdASoQABAAAEcIhYWIhYSIAgIADA1gAP7/q1CAdaEBAAAAAAAALaYBAAAAAAAAJO6BAaWfEAIAnQEqEAAQAABHCIWFiIWEiAICAAwNYAD+/7r/QKABAAAAAAAAQKGVgQBTALEBAAEQEAAYABhYL/QACAAAdaEBAAAAAAAAH6YBAAAAAAAAFu6BAaWRsQEAARAQABgAGFgv9AAIAAAcU7trAQAAAAAAABG7j7OBALeK94EB8YIBgfCBAw==');
-        this._wakeLockVideo.play();
-      }
-    }
+      this._wakeLockTimer = setInterval(() => {
+        window.location = window.location;
+        setTimeout(window.stop, 0);
+      }, 30000);
+    } else if (os === 'android') {
+      if (this._wakeLockVideo.paused === false) return;
 
-    _releaseWakeClock() {
-      const os = client.platform.os;
-
-      if (os === 'ios') {
-        if (this._wakeLockTimer) {
-          clearInterval(this._wakeLockTimer);
-          this._wakeLockTimer = null;
-        }
-      } else if (os === 'android') {
-        this._wakeLockVideo.pause();
-        this._wakeLockVideo.src = '';
-      }
+      this._wakeLockVideo.src = base64('video/webm', 'GkXfowEAAAAAAAAfQoaBAUL3gQFC8oEEQvOBCEKChHdlYm1Ch4ECQoWBAhhTgGcBAAAAAAACWxFNm3RALE27i1OrhBVJqWZTrIHfTbuMU6uEFlSua1OsggEuTbuMU6uEHFO7a1OsggI+7AEAAAAAAACkAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAVSalmAQAAAAAAAEMq17GDD0JATYCMTGF2ZjU2LjQuMTAxV0GMTGF2ZjU2LjQuMTAxc6SQ20Yv/Elws73A/+KfEjM11ESJiEBkwAAAAAAAFlSuawEAAAAAAABHrgEAAAAAAAA+14EBc8WBAZyBACK1nIN1bmSGhVZfVlA4g4EBI+ODhAT3kNXgAQAAAAAAABKwgRC6gRBTwIEBVLCBEFS6gRAfQ7Z1AQAAAAAAALHngQCgAQAAAAAAAFyho4EAAIAQAgCdASoQABAAAEcIhYWIhYSIAgIADA1gAP7/q1CAdaEBAAAAAAAALaYBAAAAAAAAJO6BAaWfEAIAnQEqEAAQAABHCIWFiIWEiAICAAwNYAD+/7r/QKABAAAAAAAAQKGVgQBTALEBAAEQEAAYABhYL/QACAAAdaEBAAAAAAAAH6YBAAAAAAAAFu6BAaWRsQEAARAQABgAGFgv9AAIAAAcU7trAQAAAAAAABG7j7OBALeK94EB8YIBgfCBAw==');
+      this._wakeLockVideo.play();
     }
   }
 
-  module.exports = ClientDialog;
+  _releaseWakeClock() {
+    const os = client.platform.os;
+
+    if (os === 'ios') {
+      if (this._wakeLockTimer) {
+        clearInterval(this._wakeLockTimer);
+        this._wakeLockTimer = null;
+      }
+    } else if (os === 'android') {
+      this._wakeLockVideo.pause();
+      this._wakeLockVideo.src = '';
+    }
+  }
+}
+
+module.exports = ClientDialog;
