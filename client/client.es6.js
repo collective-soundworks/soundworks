@@ -5,7 +5,7 @@
 "use strict";
 
 var EventEmitter = require('events').EventEmitter;
-
+const MobileDetect = require('mobile-detect');
 // debug - http://socket.io/docs/logging-and-debugging/#available-debugging-scopes
 // localStorage.debug = '*';
 
@@ -22,8 +22,40 @@ var client = {
   modulesStarted: false,
   send: send,
   receive: receive,
-  removeListener: removeListener
+  removeListener: removeListener,
+  platform: {
+    os: null,
+    isMobile: null,
+    audioFileExt: ''
+  }
 };
+
+// get informations about client
+const md = new MobileDetect(window.navigator.userAgent);
+client.platform.isMobile = (md.mobile() !== null); // true if phone or tablet
+client.platform.os = (() => {
+  let os = md.os();
+
+  if (os === 'AndroidOS') {
+    return 'android';
+  } else if (os === 'iOS') {
+    return 'ios';
+  } else {
+    return 'other';
+  }
+})();
+// soudn file extention
+const a = document.createElement('audio');
+// http://diveintohtml5.info/everything.html
+if (!!(a.canPlayType && a.canPlayType('audio/mpeg;'))) {
+  client.platform.audioFileExt = '.mp3';
+} else if (!!(a.canPlayType && a.canPlayType('audio/ogg; codecs="vorbis"'))) {
+  client.platform.audioFileExt = '.ogg';
+} else {
+  client.platform.audioFileExt = '.wav';
+}
+
+console.log(client.platform);
 
 class ParallelModule extends EventEmitter {
   constructor(modules) {

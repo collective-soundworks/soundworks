@@ -29,7 +29,9 @@ class ServerCheckin extends ServerModule {
     this._availableIndices = [];
     this._nextAscendingIndex = 0;
 
-    if (this.order === 'random' && this.maxClients <= maxRandomClients) {
+    if (this.maxClients > maxRandomClients)
+      order = 'ascending';
+    else if (this.order === 'random') {
       this._nextAscendingIndex = this.maxClients;
 
       for (let i = 0; i < this.maxClients; i++)
@@ -73,10 +75,7 @@ class ServerCheckin extends ServerModule {
       var index = -1;
       var order = this.order;
 
-      if (this.maxClients > maxRandomClients)
-        order = 'ascending';
-
-      if (order === 'random')
+      if (this.order === 'random')
         index = this._getRandomIndex();
       else // if (order === 'acsending')
         index = this._getAscendingIndex();

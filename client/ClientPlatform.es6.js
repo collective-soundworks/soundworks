@@ -6,26 +6,11 @@
 
 var client = require('./client');
 var ClientModule = require('./ClientModule');
-var platform = require('platform');
-
-function parseVersionString(string) {
-  if (string) {
-    var a = string.split('.');
-
-    if (a[1] >= 0)
-      return parseFloat(a[0] + "." + a[1]);
-
-    return parseFloat(a[0]);
-  }
-
-  return null;
-}
+const audioContext = require('waves-audio').audioContext;
 
 var defaultMessages = {
   iosVersion: "This application requires at least iOS 7.",
   androidVersion: "This application requires at least Android 4.2.",
-  useChrome: "You have to use Chrome to run this application on an Android device.",
-  updateChrome: "Please update Chrome to a more recent version to run this application.",
   wrongOS: "This application is designed for iOS and Android mobile devices."
 };
 
@@ -41,24 +26,20 @@ class ClientPlatform extends ClientModule {
   start() {
     super.start();
 
-    var osVersion = parseVersionString(platform.os.version);
-    var browserVersion = parseVersionString(platform.version);
-    var msg = null;
+    let msg = null;
+    const os = client.platform.os;
+    const isMobile = client.platform.isMobile;
 
-    if (!client.audioContext) {
-      if (platform.os.family == "iOS") {
-        if (osVersion < 7)
-          msg = this.messages.iosVersion;
-      } else if (platform.os.family == "Android") {
-        if (osVersion < 4.2)
-          msg = this.messages.androidVersion;
-        else if (platform.name != 'Chrome Mobile')
-          msg = this.messages.useChrome;
-        else if (browserVersion < 35)
-          msg = this.messages.updateChrome;
+    if (!audioContext) {
+      if (os === 'ios') {
+        msg = this.messages.iosVersion;
+      } else if (os === 'android') {
+        msg = this.messages.androidVersion;
       } else {
         msg = this.messages.wrongOS;
       }
+    } else if (!isMobile) {
+      msg = this.messages.wrongOS;
     }
 
     if (msg !== null) {
