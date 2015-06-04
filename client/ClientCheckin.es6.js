@@ -16,12 +16,13 @@ function instructions(label) {
 
 class ClientCheckin extends ClientModule {
   constructor(options = {}) {
-    super(options.name || 'checkin', true, options.color);
+    super(options.name || 'checkin', options.hasView || true, options.color);
 
     this.instructions = options.instructions || instructions;
 
     this.index = -1;
     this.label = null;
+    this._bypassView = options.bypassView || false;
 
     this._acknowledgementHandler = this._acknowledgementHandler.bind(this);
     this._unavailableHandler = this._unavailableHandler.bind(this);
@@ -31,24 +32,24 @@ class ClientCheckin extends ClientModule {
   start() {
     super.start();
 
-    client.send('checkin:request');
+    client.send(this.name + ':request');
 
-    client.receive('checkin:acknowledge', this._acknowledgementHandler);
-    client.receive('checkin:unavailable', this._unavailableHandler);
+    client.receive(this.name + ':acknowledge', this._acknowledgementHandler);
+    client.receive(this.name + ':unavailable', this._unavailableHandler);
   }
 
   reset() {
     super.reset();
 
-    client.removeListener('checkin:acknowledge', this._acknowledgementHandler);
-    client.removeListener('checkin:unavailable', this._unavailableHandler);
+    client.removeListener(this.name + ':acknowledge', this._acknowledgementHandler);
+    client.removeListener(this.name + ':unavailable', this._unavailableHandler);
     this.view.removeEventListener('click', this._viewClickHandler, false);
   }
 
   restart() {
     super.restart();
 
-    client.send('checkin:restart', this.index, this.label, client.coordinates);
+    client.send(this.name + ':restart', this.index, this.label, client.coordinates);
     this.done();
   }
 
@@ -61,11 +62,14 @@ class ClientCheckin extends ClientModule {
     if (label) {
       this.label = label;
 
-      let htmlContent = this.instructions(label);
+      if (!this._bypassView) {
+        let htmlContent = this.instructions(label);
+        this.setCenteredViewContent(htmlContent);
+        this.view.addEventListener('click', this._viewClickHandler, false);
+      } else {
+        this.done();
+      }
 
-      this.setCenteredViewContent(htmlContent);
-
-      this.view.addEventListener('click', this._viewClickHandler, false);
     } else {
       this.done();
     }

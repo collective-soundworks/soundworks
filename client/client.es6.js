@@ -177,11 +177,11 @@ function start(mod) {
     }
 
     client.receive('disconnect', () => {
-      console.log('disconnect', client.index)
+      // console.log('disconnect', client.index);
     });
 
     client.receive('reconnect', () => {
-      console.log('reconnect', client.index);
+      // console.log('reconnect', client.index);
     });
   } else {
     // no server

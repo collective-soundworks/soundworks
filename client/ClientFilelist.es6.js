@@ -15,8 +15,8 @@ class Filelist extends ClientModule {
   start() {
     super.start();
 
-    client.send('filelist:request', this.folder, this.extensions);
-    client.receive('filelist:files', (files) => {
+    client.send(this.name + ':request', this.folder, this.extensions);
+    client.receive(this.name + ':files', (files) => {
       this.files = files;
       this.emit('filelist:files', files);
       this.done();

@@ -25,9 +25,9 @@ class ClientSetup extends ClientModule {
   start() {
     super.start();
 
-    client.send('setup:request');
+    client.send(this.name + ':request');
 
-    client.receive('setup:init', (setup) => {
+    client.receive(this.name + ':init', (setup) => {
       this.width = setup.width;
       this.height = setup.height;
       this.spacing = setup.spacing;
