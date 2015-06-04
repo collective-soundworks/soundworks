@@ -25,7 +25,7 @@ class ServerFilelist extends ServerModule {
   connect(client) {
     super.connect(client);
 
-    client.receive('filelist:request', (subfolder, extensions) => {
+    client.receive(this.name + ':request', (subfolder, extensions) => {
       let filesList = [];
 
       fs.readdir('./public/' + subfolder, (err, files) => {
@@ -36,7 +36,7 @@ class ServerFilelist extends ServerModule {
             filesList.push(file);
         }
 
-        client.send('filelist:files', filesList);
+        client.send(this.name + ':files', filesList);
       });
     });
   }

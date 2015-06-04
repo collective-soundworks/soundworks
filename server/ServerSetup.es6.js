@@ -25,8 +25,8 @@ class ServerSetup extends ServerModule {
   connect(client) {
     super.connect(client);
 
-    client.receive('setup:request', () => {
-      client.send('setup:init', {
+    client.receive(this.name + ':request', () => {
+      client.send(this.name + ':init', {
         "width": this.width,
         "height": this.height,
         "background": this.background,
@@ -55,9 +55,9 @@ class ServerSetup extends ServerModule {
   getNumPositions() {
     if(this.labels.length || this.coordinates.length) {
       var numLabels = this.labels.length || Infinity;
-      var numPositions = this.coordinates.length || Infinity;
+      var numCoordinates = this.coordinates.length || Infinity;
 
-      return Math.min(numLabels, numPositions);
+      return Math.min(numLabels, numCoordinates);
     }
 
     return 0;

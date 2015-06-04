@@ -72,9 +72,9 @@ class ClientLocator extends ClientModule {
   start() {
     super.start();
 
-    client.send('locator:request');
+    client.send(this.name + ':request');
 
-    client.receive('locator:surface', this._surfaceHandler, false);
+    client.receive(this.name + ':surface', this._surfaceHandler, false);
   }
 
   reset() {
@@ -93,7 +93,7 @@ class ClientLocator extends ClientModule {
 
   restart() {
     super.restart();
-    client.send('locator:restart', client.coordinates);
+    client.send(this.name + ':restart', client.coordinates);
     this._button.removeEventListener('click', this._sendCoordinates, false);
     this.done();
   }
@@ -140,7 +140,7 @@ class ClientLocator extends ClientModule {
     if (this._currentCoordinates !== null) {
       this._button.classList.add('selected');
       client.coordinates = this._currentCoordinates;
-      client.send('locator:coordinates', client.coordinates);
+      client.send(this.name + ':coordinates', client.coordinates);
       this.done();
     }
   }
