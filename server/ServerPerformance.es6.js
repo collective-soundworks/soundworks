@@ -16,11 +16,11 @@ class ServerPerformance extends ServerModule {
   connect(client) {
     super.connect(client);
 
-    client.receive('performance:start', () => {
+    client.receive(this.name + ':start', () => {
       this.enter(client);
     });
 
-    client.receive('performance:done', () => {
+    client.receive(this.name + ':done', () => {
       this.exit(client);
     });
   }
