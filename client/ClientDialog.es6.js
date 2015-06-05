@@ -16,8 +16,8 @@ class ClientDialog extends ClientModule {
   constructor(options = {}) {
     super(options.name || 'dialog', true, options.color);
 
-    this._mustActivateAudio = options.activateAudio || false;
-    this._mustWakeLock = options.wakeLock || true;
+    this._mustActivateAudio = !!options.activateAudio;
+    this._mustWakeLock = !!options.wakeLock;
     this._text = options.text || "Hello!";
   }
 
