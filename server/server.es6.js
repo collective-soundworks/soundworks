@@ -20,7 +20,7 @@ var server = {
 };
 
 function start(app, publicPath, port) {
-  app.set('port', port || process.env.PORT || 8000);
+  app.set('port', process.env.PORT || port || 8000);
   app.set('view engine', 'ejs');
   app.use(express.static(publicPath));
 
