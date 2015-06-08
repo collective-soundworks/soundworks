@@ -38,7 +38,8 @@ class ClientLocator extends ClientModule {
     let textDiv = document.createElement('div');
     textDiv.classList.add('centered-content');
     let text = document.createElement('p');
-    text.innerHTML = "<small>Indicate your location on the map and click &ldquo;OK&rdquo;.</small>";
+    // text.innerHTML = "<small>Indicate your location on the map and click &ldquo;OK&rdquo;.</small>";
+    text.innerHTML = "<small>Indiquez votre position sur le plan et cliquez sur &ldquo;OK&rdquo;.</small>";
     this._textDiv = textDiv;
     this._text = text;
 
