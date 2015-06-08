@@ -209,12 +209,16 @@ class Command {
       div.innerHTML = this.label;
 
       div.onclick = (() => {
-        client.send('control' + ':command', this.name);
+        this.send();
       });
 
       view.appendChild(div);
       view.appendChild(document.createElement('br'));
     }
+  }
+
+  send() {
+    client.send('control' + ':command', this.name);
   }
 }
 
