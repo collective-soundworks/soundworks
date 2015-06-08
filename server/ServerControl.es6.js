@@ -63,7 +63,7 @@ class ServerControl extends ServerModule {
 
       // send parameter to other clients
       for (let clientType of this.clientTypes)
-        server.broadcast(clientType, this.name + ':parameter', name, value);
+        server.broadcast(clientType, 'control' + ':parameter', name, value);
     }
   }
 
@@ -75,7 +75,7 @@ class ServerControl extends ServerModule {
 
       // send info to other clients
       for (let clientType of this.clientTypes)
-        server.broadcast(clientType, this.name + ':info', name, value);
+        server.broadcast(clientType, 'control' + ':info', name, value);
     }
   }
 
@@ -88,24 +88,24 @@ class ServerControl extends ServerModule {
       this.clientTypes.push(clientType);
 
     // init control parameters, infos, and commands at client
-    client.receive(this.name + ':request', () => {
-      client.send(this.name + ':init', this.parameters, this.infos, this.commands);
+    client.receive('control' + ':request', () => {
+      client.send('control' + ':init', this.parameters, this.infos, this.commands);
     });
 
     // listen to control parameters
-    client.receive(this.name + ':parameter', (name, value) => {
+    client.receive('control' + ':parameter', (name, value) => {
       this.parameters[name].value = value;
 
       // send control parameter to other clients
       for (let clientType of this.clientTypes) {
-        server.broadcast(clientType, this.name + ':parameter', name, value);
+        server.broadcast(clientType, 'control' + ':parameter', name, value);
       }
 
       this.emit('control:parameter', name, value);
     });
 
     // listen to conductor commands
-    client.receive(this.name + ':command', (name) => {
+    client.receive('control' + ':command', (name) => {
       this.commands[name].fun();
       this.emit('control:command', name);
     });
