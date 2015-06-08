@@ -84,7 +84,7 @@ class ClientLoader extends ClientModule {
       let loader = new AudioBufferLoader();
 
       this._fileProgress = [];
-      
+
       for(let i = 0; i < fileList.length; i++)
         this._fileProgress[i] = 0;
 

@@ -9,6 +9,9 @@ var http = require('http');
 var IO = require('socket.io');
 var ServerClient = require('./ServerClient');
 const log = require('./logger');
+const ejs = require('ejs');
+const path = require('path');
+const fs = require('fs');
 
 var expressApp = null;
 var httpServer = null;
@@ -17,7 +20,8 @@ var server = {
   io: null,
   start: start,
   map: map,
-  broadcast: broadcast
+  broadcast: broadcast,
+  envConfig: {} // host env config informations (dev / prod)
 };
 
 var availableClientIndices = [];
@@ -43,12 +47,14 @@ function releaseClientIndex(index) {
   availableClientIndices.push(index);
 }
 
-function start(app, publicPath, port, socketOptions = {}) {
+function start(app, publicPath, port, socketOptions = {}, envConfig = {}) {
   const socketConfig = {
     transports: socketOptions.transports || ['websocket'],
     pingTimeout: socketOptions.pingTimeout || 60000,
     pingInterval: socketOptions.pingInterval || 50000
   };
+
+  server.envConfig = envConfig;
 
   app.set('port', port || process.env.PORT || 8000);
   app.set('view engine', 'ejs');
@@ -72,14 +78,21 @@ function start(app, publicPath, port, socketOptions = {}) {
   }
 }
 
+const clientTypeTemplateMap = new Map();
+
 function map(clientType, ...modules) {
   var url = '/';
+
+  // cache compiled template
+  const tmplPath= path.join(process.cwd(), 'views', clientType + '.ejs');
+  const tmplString = fs.readFileSync(tmplPath, { encoding: 'utf8' });
+  const tmpl = ejs.compile(tmplString);
 
   if (clientType !== 'player')
     url += clientType;
 
   expressApp.get(url, function(req, res) {
-    res.render(clientType, {});
+    res.send(tmpl({ envConfig: JSON.stringify(server.envConfig) }));
   });
 
   server.io.of(clientType).on('connection', (socket) => {
