@@ -99,6 +99,9 @@ function map(clientType, ...modules) {
     log.info({ socket: socket, clientType: clientType }, 'connection');
     var client = new ServerClient(clientType, socket);
 
+    var index = getClientIndex();
+    client.index = index;
+
     for (let mod of modules) {
       mod.connect(client);
     }
@@ -114,9 +117,6 @@ function map(clientType, ...modules) {
       client.index = -1;
     });
 
-    var index = getClientIndex();
-
-    client.index = index;
     client.send('client:start', index); // the server is ready
   });
 }
