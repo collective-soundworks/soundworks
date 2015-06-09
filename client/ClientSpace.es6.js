@@ -15,22 +15,26 @@ class ClientSpace extends ClientModule {
 
     this._xFactor = 1;
     this._yFactor = 1;
+
+    this._onSetupInit = this._onSetupInit.bind(this);
+  }
+
+  _onSetupInit(setup) {
+    this.width = setup.width;
+    this.height = setup.height;
+    // this.spacing = setup.spacing;
+    // this.labels = setup.labels;
+    // this.coordinates = setup.coordinates;
+    this.type = setup.type;
+    this.background = setup.background;
+
+    this.done();
   }
 
   start() {
     super.start();
 
-    client.receive('setup:init', (setup) => {
-      this.width = setup.width;
-      this.height = setup.height;
-      // this.spacing = setup.spacing;
-      // this.labels = setup.labels;
-      // this.coordinates = setup.coordinates;
-      this.type = setup.type;
-      this.background = setup.background;
-
-      this.done();
-    });
+    client.receive('setup:init', this._onSetupInit);
 
     client.send('setup:request');
   }
@@ -38,6 +42,11 @@ class ClientSpace extends ClientModule {
   restart() {
     super.restart();
     this.done();
+  }
+
+  reset() {
+    client.removeListener('setup:init', this._onSetupInit);
+    this.container.innerHTML = '';
   }
 
   display(container, options = {}) {

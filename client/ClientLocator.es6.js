@@ -36,10 +36,10 @@ class ClientLocator extends ClientModule {
 
     // Explanatory text
     let textDiv = document.createElement('div');
-    textDiv.classList.add('centered-content');
+    textDiv.classList.add('message');
     let text = document.createElement('p');
     // text.innerHTML = "<small>Indicate your location on the map and click &ldquo;OK&rdquo;.</small>";
-    text.innerHTML = "<small>Indiquez votre position sur le plan et cliquez sur &ldquo;OK&rdquo;.</small>";
+    text.innerHTML = "<small>Indiquez votre position sur le plan</small>";
     this._textDiv = textDiv;
     this._text = text;
 
@@ -47,7 +47,7 @@ class ClientLocator extends ClientModule {
     let button = document.createElement('div');
     button.classList.add('btn');
     button.classList.add('disabled');
-    button.innerHTML = "OK";
+    button.innerHTML = "VALIDER";
     this._button = button;
 
     // Position circle
@@ -64,23 +64,31 @@ class ClientLocator extends ClientModule {
     surfaceDiv.setAttribute('id', 'surface');
     surfaceDiv.classList.add('surface');
     this._surfaceDiv = surfaceDiv;
-    
+
     this._textDiv.appendChild(this._text);
     this._textDiv.appendChild(this._button);
     this._surfaceDiv.appendChild(this._positionDiv);
+
+    this._resize = this._resize.bind(this);
   }
 
   start() {
     super.start();
 
     client.send(this.name + ':request');
-
     client.receive(this.name + ':surface', this._surfaceHandler, false);
+
+    window.addEventListener('resize', this._resize);
+  }
+
+  done() {
+    window.removeEventListener('resize', this._resize);
+    super.done();
   }
 
   reset() {
     client.coordinates = null;
-    
+
     this._positionDiv.classList.add('hidden');
     this._button.classList.add('disabled');
 
@@ -90,6 +98,8 @@ class ClientLocator extends ClientModule {
     this._surfaceDiv.removeEventListener('touchend', this._touchEndHandler, false);
 
     // TODO: clean surface properly
+    if (this.setup)
+      this.setup.reset();
   }
 
   restart() {
@@ -114,27 +124,47 @@ class ClientLocator extends ClientModule {
       widthPx = screenHeight / heightWidthRatio;
     }
 
-    // this._surfaceDiv.style.height = heightPx + "px";
-    // this._surfaceDiv.style.width = widthPx + "px";
-
     this.setup.display(this._surfaceDiv, {
       showBackground: this.showBackground
     });
 
     // Let the participant select his or her location
     this._surfaceDiv.addEventListener('touchstart', this._touchStartHandler, false);
-    // surfaceDiv.addEventListener('mousedown', this._touchStartHandler, false);
     this._surfaceDiv.addEventListener('touchmove', this._touchMoveHandler, false);
-    // surfaceDiv.addEventListener('mousemove', this._touchMoveHandler, false);
     this._surfaceDiv.addEventListener('touchend', this._touchEndHandler, false);
-    // surfaceDiv.addEventListener('mouseup', this._touchEndHandler, false);
 
     // Build text & button interface after receiving and displaying the surface
     this.view.appendChild(this._surfaceDiv);
     this.view.appendChild(this._textDiv);
 
+    this._resize();
     // Send the coordinates of the selected location to server
     this._button.addEventListener('click', this._sendCoordinates, false);
+  }
+
+  _resize() {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
+    const orientation = width > height ? 'landscape' : 'portrait';
+    this.view.classList.remove('landscape', 'portrait');
+    this.view.classList.add(orientation);
+
+    const min = Math.min(width, height);
+
+    this._surfaceDiv.style.width = `${min}px`;
+    this._surfaceDiv.style.height = `${min}px`;
+
+    switch (orientation) {
+      case 'landscape' :
+        this._textDiv.style.height = `${height}px`;
+        this._textDiv.style.width = `${width - height}px`;
+        break;
+      case 'portrait':
+        this._textDiv.style.height = `${height - width}px`;
+        this._textDiv.style.width = `${width}px`;
+        break;
+    }
   }
 
   _sendCoordinates() {
