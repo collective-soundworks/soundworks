@@ -62,7 +62,8 @@ class ClientSpace extends ClientModule {
     this.group = group;
 
     this.resize(this.container);
-    this.positionIndexElementMap = new Map();
+    // this.positionIndexElementMap = new Map();
+    this.positionIndexElementMap = {};
   }
 
   resize() {
@@ -129,11 +130,13 @@ class ClientSpace extends ClientModule {
     dot.style.fill = 'steelblue';
 
     this.group.appendChild(dot);
-    this.positionIndexElementMap.set(index, dot);
+    // this.positionIndexElementMap.set(index, dot);
+    this.positionIndexElementMap[index] = dot;
   }
 
   removePosition(position) {
-    const el = this.positionIndexElementMap.get(position.index);
+    // const el = this.positionIndexElementMap.get(position.index);
+    const el = this.positionIndexElementMap[position.index];
     this.group.removeChild(el);
   }
 
