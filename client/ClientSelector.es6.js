@@ -1,5 +1,6 @@
 'use strict';
 
+var client = require('./client');
 var ClientModule = require('./ClientModule');
 
 function toTitleCase(str) {
@@ -162,7 +163,10 @@ class ClientSelector extends ClientModule {
 
       let button = this._buttons[index];
       button.classList.remove('disabled');
-      button.addEventListener('click', listener, false);
+      if (client.platform.isMobile)
+        button.addEventListener('touchstart', listener, false);  
+      else
+        button.addEventListener('click', listener, false);
     }
   }
 
@@ -178,7 +182,10 @@ class ClientSelector extends ClientModule {
       let button = this._buttons[index];
       let listener = this._listeners[index];
       button.classList.add('disabled');
-      button.removeListener('click', listener);
+      if (client.platform.isMobile)
+        button.removeListener('touchstart', listener);
+      else
+        button.removeListener('click', listener);
     }
   }
 
