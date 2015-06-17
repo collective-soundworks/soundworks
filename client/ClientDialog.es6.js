@@ -30,15 +30,10 @@ class ClientDialog extends ClientModule {
     // initialize video element for wakeLocking
     this._initWakeLock();
     // install click listener
-    this.view.addEventListener('click', () => {
-      if (this._mustActivateAudio)
-        this._activateAudio();
-
-      if (this._mustWakeLock)
-        this._requestWakeLock();
-
-      this.done();
-    });
+    if (client.platform.isMobile)
+      this.view.addEventListener('touchstart', this._clickHandler);
+    else
+      this.view.addEventListener('click', this._clickHandler);
   }
 
   restart() {
@@ -59,6 +54,9 @@ class ClientDialog extends ClientModule {
   _clickHandler() {
     if (this._mustActivateAudio)
       this._activateAudio();
+
+    if (this._mustWakeLock)
+      this._requestWakeLock();
 
     this.view.removeEventListener('click', this._clickHandler);
     this.done();
