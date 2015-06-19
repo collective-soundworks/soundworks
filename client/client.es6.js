@@ -50,8 +50,8 @@ client.platform.os = (() => {
 
 client.platform.isForbidden = (() => {
   if (client.platform.os === 'ios') {
-    const version = platform.os.version;
-    return version[0] < 4 ? true : false;
+    const version = platform.os.version.split('.');
+    return version[0] < 7 ? true : false;
   } else {
     return false;
   }
