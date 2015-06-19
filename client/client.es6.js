@@ -6,6 +6,7 @@
 
 var EventEmitter = require('events').EventEmitter;
 const MobileDetect = require('mobile-detect');
+const platform = require('platform');
 // debug - http://socket.io/docs/logging-and-debugging/#available-debugging-scopes
 // localStorage.debug = '*';
 
@@ -26,12 +27,14 @@ var client = {
   platform: {
     os: null,
     isMobile: null,
-    audioFileExt: ''
+    audioFileExt: '',
+    isForbidden: false
   }
 };
 
 // get informations about client
-const md = new MobileDetect(window.navigator.userAgent);
+const ua = window.navigator.userAgent
+const md = new MobileDetect(ua);
 client.platform.isMobile = (md.mobile() !== null); // true if phone or tablet
 client.platform.os = (() => {
   let os = md.os();
@@ -44,6 +47,16 @@ client.platform.os = (() => {
     return 'other';
   }
 })();
+
+client.platform.isForbidden = (() => {
+  if (client.platform.os === 'ios') {
+    const version = platform.os.version;
+    return version[0] < 4 ? true : false;
+  } else {
+    return false;
+  }
+})();
+
 // audio file extention
 const a = document.createElement('audio');
 // http://diveintohtml5.info/everything.html

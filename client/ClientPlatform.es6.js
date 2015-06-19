@@ -43,6 +43,8 @@ class ClientPlatform extends ClientModule {
       }
     } else if (!isMobile) {
       msg = this.messages.wrongOS;
+    } else if (client.platform.isForbidden) {
+      msg = this.messages.wrongOS;
     }
 
     if (msg !== null) {
