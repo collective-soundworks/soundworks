@@ -21,6 +21,7 @@ class ClientPlatform extends ClientModule {
     this.prefix = options.prefix ||  '';
     this.postfix = options.postfix ||  '';
     this.messages = options.messages || defaultMessages;
+    this.bypass = options.bypass || false;
   }
 
   start() {
@@ -29,6 +30,8 @@ class ClientPlatform extends ClientModule {
     let msg = null;
     const os = client.platform.os;
     const isMobile = client.platform.isMobile;
+
+    if (this.bypass) { return this.done(); }
 
     if (!audioContext) {
       if (os === 'ios') {
@@ -51,7 +54,6 @@ class ClientPlatform extends ClientModule {
 
   restart() {
     super.restart();
-
     this.done();
   }
 }

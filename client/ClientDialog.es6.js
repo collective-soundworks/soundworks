@@ -19,7 +19,7 @@ class ClientDialog extends ClientModule {
     this._mustActivateAudio = !!options.activateAudio;
     this._mustWakeLock = !!options.wakeLock;
     this._text = options.text || "Hello!";
-    
+
     this._clickHandler = this._clickHandler.bind(this);
   }
 
@@ -59,6 +59,7 @@ class ClientDialog extends ClientModule {
       this._requestWakeLock();
 
     this.view.removeEventListener('click', this._clickHandler);
+    this.view.removeEventListener('touchstart', this._clickHandler);
     this.done();
   }
 
