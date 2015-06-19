@@ -7,10 +7,11 @@
 var client = require('./client');
 var ClientModule = require('./ClientModule');
 const audioContext = require('waves-audio').audioContext;
+const platform = require('platform');
 
 var defaultMessages = {
-  iosVersion: "This application requires at least iOS 7.",
-  androidVersion: "This application requires at least Android 4.2.",
+  iosVersion: "This application requires at least iOS 7 with Safari or Chrome.",
+  androidVersion: "This application requires at least Android 4.2 with Chrome.",
   wrongOS: "This application is designed for iOS and Android mobile devices."
 };
 
@@ -31,7 +32,8 @@ class ClientPlatform extends ClientModule {
     const os = client.platform.os;
     const isMobile = client.platform.isMobile;
 
-    if (this.bypass) { return this.done(); }
+    if (this.bypass) 
+      return this.done();
 
     if (!audioContext) {
       if (os === 'ios') {
@@ -41,10 +43,13 @@ class ClientPlatform extends ClientModule {
       } else {
         msg = this.messages.wrongOS;
       }
-    } else if (!isMobile) {
+    } else if (!isMobile || client.platform.os === 'other') {
       msg = this.messages.wrongOS;
-    } else if (client.platform.isForbidden) {
-      msg = this.messages.wrongOS;
+    } else if (client.platform.os === 'ios') {
+      let version = platform.os.version.split('.');
+
+      if(version[0] < 7)
+        msg = this.messages.iosVersion;
     }
 
     if (msg !== null) {

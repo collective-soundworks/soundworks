@@ -6,7 +6,7 @@
 
 var EventEmitter = require('events').EventEmitter;
 const MobileDetect = require('mobile-detect');
-const platform = require('platform');
+
 // debug - http://socket.io/docs/logging-and-debugging/#available-debugging-scopes
 // localStorage.debug = '*';
 
@@ -45,15 +45,6 @@ client.platform.os = (() => {
     return 'ios';
   } else {
     return 'other';
-  }
-})();
-
-client.platform.isForbidden = (() => {
-  if (client.platform.os === 'ios') {
-    const version = platform.os.version.split('.');
-    return version[0] < 7 ? true : false;
-  } else {
-    return false;
   }
 })();
 
