@@ -45,11 +45,10 @@ class ClientPlatform extends ClientModule {
       }
     } else if (!isMobile || client.platform.os === 'other') {
       msg = this.messages.wrongOS;
-    } else if (client.platform.os === 'ios') {
-      let version = platform.os.version.split('.');
-
-      if(version[0] < 7)
-        msg = this.messages.iosVersion;
+    } else if (client.platform.os === 'ios' && platform.os.version < '7') {
+      msg = this.messages.iosVersion;
+    } else if (client.platform.os === 'android' && platform.os.version < '4.2') {
+      msg = this.messages.androidVersion;
     }
 
     if (msg !== null) {
