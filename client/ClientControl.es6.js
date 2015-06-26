@@ -70,7 +70,7 @@ class ParameterNumber {
       this.box.value = val;
 
     if (send)
-      client.send('control:parameter', this.name, this.value);
+      client.send('control' + ':parameter', this.name, this.value);
   }
 
   incr(send = false) {
@@ -150,7 +150,7 @@ class ParameterSelect {
         this.box.value = val;
 
       if (send)
-        client.send('control:parameter', this.name, val);
+        client.send('control' + ':parameter', this.name, val);
     }
   }
 
@@ -209,12 +209,16 @@ class Command {
       div.innerHTML = this.label;
 
       div.onclick = (() => {
-        client.send('control:command', this.name);
+        this.send();
       });
 
       view.appendChild(div);
       view.appendChild(document.createElement('br'));
     }
+  }
+
+  send() {
+    client.send('control' + ':command', this.name);
   }
 }
 
@@ -231,7 +235,7 @@ class ClientControl extends ClientModule {
 
     var view = hasGui ? this.view : null;
 
-    client.receive('control:init', (parameters, infos, commands) => {
+    client.receive('control' + ':init', (parameters, infos, commands) => {
       if (view) {
         var title = document.createElement('h1');
         title.innerHTML = 'Conductor';
@@ -269,7 +273,7 @@ class ClientControl extends ClientModule {
     });
 
     // listen to parameter changes
-    client.receive('control:parameter', (name, val) => {
+    client.receive('control' + ':parameter', (name, val) => {
       var parameter = this.parameters[name];
 
       if (parameter) {
@@ -280,7 +284,7 @@ class ClientControl extends ClientModule {
     });
 
     // listen to info changes
-    client.receive('control:info', (name, val) => {
+    client.receive('control' + ':info', (name, val) => {
       var info = this.infos[name];
 
       if (info) {
@@ -293,9 +297,14 @@ class ClientControl extends ClientModule {
 
   start() {
     super.start();
-
-    client.send('control:request');
+    client.send('control' + ':request');
   }
+
+  restart() {
+    super.restart();
+    client.send('control' + ':request'); 
+  }
+  
 }
 
 module.exports = ClientControl;

@@ -50,6 +50,11 @@ class ClientLoader extends ClientModule {
     this._load(this.files);
   }
 
+  restart() {
+    super.restart();
+    this.done();
+  }
+
   _loadFile(index, file) {
     let loader = new AudioBufferLoader();
 
@@ -79,7 +84,7 @@ class ClientLoader extends ClientModule {
       let loader = new AudioBufferLoader();
 
       this._fileProgress = [];
-      
+
       for(let i = 0; i < fileList.length; i++)
         this._fileProgress[i] = 0;
 

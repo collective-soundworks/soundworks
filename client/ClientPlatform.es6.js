@@ -7,10 +7,11 @@
 var client = require('./client');
 var ClientModule = require('./ClientModule');
 const audioContext = require('waves-audio').audioContext;
+const platform = require('platform');
 
 var defaultMessages = {
-  iosVersion: "This application requires at least iOS 7.",
-  androidVersion: "This application requires at least Android 4.2.",
+  iosVersion: "This application requires at least iOS 7 with Safari or Chrome.",
+  androidVersion: "This application requires at least Android 4.2 with Chrome.",
   wrongOS: "This application is designed for iOS and Android mobile devices."
 };
 
@@ -21,6 +22,7 @@ class ClientPlatform extends ClientModule {
     this.prefix = options.prefix ||  '';
     this.postfix = options.postfix ||  '';
     this.messages = options.messages || defaultMessages;
+    this.bypass = options.bypass || false;
   }
 
   start() {
@@ -30,6 +32,9 @@ class ClientPlatform extends ClientModule {
     const os = client.platform.os;
     const isMobile = client.platform.isMobile;
 
+    if (this.bypass) 
+      return this.done();
+
     if (!audioContext) {
       if (os === 'ios') {
         msg = this.messages.iosVersion;
@@ -38,8 +43,12 @@ class ClientPlatform extends ClientModule {
       } else {
         msg = this.messages.wrongOS;
       }
-    } else if (!isMobile) {
+    } else if (!isMobile || client.platform.os === 'other') {
       msg = this.messages.wrongOS;
+    } else if (client.platform.os === 'ios' && platform.os.version < '7') {
+      msg = this.messages.iosVersion;
+    } else if (client.platform.os === 'android' && platform.os.version < '4.2') {
+      msg = this.messages.androidVersion;
     }
 
     if (msg !== null) {
@@ -47,6 +56,11 @@ class ClientPlatform extends ClientModule {
     } else {
       this.done();
     }
+  }
+
+  restart() {
+    super.restart();
+    this.done();
   }
 }
 

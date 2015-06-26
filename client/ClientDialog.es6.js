@@ -16,26 +16,29 @@ class ClientDialog extends ClientModule {
   constructor(options = {}) {
     super(options.name || 'dialog', true, options.color);
 
-    this._mustActivateAudio = options.activateAudio || false;
-    this._mustWakeLock = options.wakeLock || true;
+    this._mustActivateAudio = !!options.activateAudio;
+    this._mustWakeLock = !!options.wakeLock;
     this._text = options.text || "Hello!";
+
+    this._clickHandler = this._clickHandler.bind(this);
   }
 
   start() {
     super.start();
     this.setCenteredViewContent(this._text);
+
     // initialize video element for wakeLocking
     this._initWakeLock();
     // install click listener
-    this.view.addEventListener('click', () => {
-      if (this._mustActivateAudio)
-        this._activateAudio();
+    if (client.platform.isMobile)
+      this.view.addEventListener('touchstart', this._clickHandler);
+    else
+      this.view.addEventListener('click', this._clickHandler);
+  }
 
-      if (this._mustWakeLock)
-        this._requestWakeLock();
-
-      this.done();
-    });
+  restart() {
+    super.restart();
+    this.done();
   }
 
   _activateAudio() {
@@ -46,6 +49,18 @@ class ClientDialog extends ClientModule {
     g.connect(audioContext.destination);
     o.start(0);
     o.stop(audioContext.currentTime + 0.000001);
+  }
+
+  _clickHandler() {
+    if (this._mustActivateAudio)
+      this._activateAudio();
+
+    if (this._mustWakeLock)
+      this._requestWakeLock();
+
+    this.view.removeEventListener('click', this._clickHandler);
+    this.view.removeEventListener('touchstart', this._clickHandler);
+    this.done();
   }
 
   // cf. https://github.com/borismus/webvr-boilerplate/blob/8abbc74cfa5976b9ab0c388cb0c51944008c6989/js/webvr-manager.js#L268-L289

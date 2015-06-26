@@ -20,6 +20,7 @@ module.exports = {
   Performance: require('./ClientPerformance'),
   Platform: require('./ClientPlatform'),
   Selector: require('./ClientSelector'),
-  Setup: require('./ClientSetup'),
+  Setup: require('./ClientSetup'), // to be removed
+  Space: require('./ClientSpace'),
   Sync: require('./ClientSync')
 };

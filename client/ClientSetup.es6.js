@@ -25,9 +25,9 @@ class ClientSetup extends ClientModule {
   start() {
     super.start();
 
-    client.send('setup:request');
+    client.send(this.name + ':request');
 
-    client.receive('setup:init', (setup) => {
+    client.receive(this.name + ':init', (setup) => {
       this.width = setup.width;
       this.height = setup.height;
       this.spacing = setup.spacing;
@@ -38,6 +38,12 @@ class ClientSetup extends ClientModule {
 
       this.done();
     });
+  }
+
+  restart() {
+    super.restart();
+
+    this.done();
   }
 
   display(div, options = {}) {
@@ -161,6 +167,13 @@ class ClientSetup extends ClientModule {
       let positionDiv = document.querySelector('[data-index="' + position.index + '"]');
       if (!!positionDiv)
         positionDiv.parentNode.removeChild(positionDiv);
+    }
+  }
+
+  removeAllPositions(div) {
+    let positions = div.querySelectorAll('.player');
+    for (let i = 0; i < positions.length; i++) {
+      div.removeChild(positions[i]);
     }
   }
 

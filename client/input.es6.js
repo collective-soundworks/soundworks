@@ -12,6 +12,27 @@ class InputModule extends EventEmitter {
   constructor() {
     super();
 
+    this.motionData = {
+      timestamp: 0,
+      acceleration: 0,
+      accelerationIncludingGravity: 0,
+      rotationRate: 0,
+    };
+
+    this.touchData = {
+      timestamp: 0,
+      identifier: 0,
+      event: '',
+      coordinates: [0, 0]
+    };
+
+    this.orientationData = {
+      alpha: 0,
+      beta: 0,
+      gamma: 0,
+      timestamp: 0
+    };
+
     this.handleDeviceOrientationEvent = this.handleDeviceOrientationEvent.bind(this); // since .bind() creates a new function, we can't use it directly in the add/removeEventListener.
     this.handleDeviceMotionEvent = this.handleDeviceMotionEvent.bind(this);
     this.handleTouchEvent = this.handleTouchEvent.bind(this);
@@ -32,12 +53,11 @@ class InputModule extends EventEmitter {
   }
 
   handleDeviceMotionEvent(e) {
-    var motionData = {
-      "acceleration": e.acceleration,
-      "accelerationIncludingGravity": e.accelerationIncludingGravity,
-      "rotationRate": e.rotationRate,
-      "timestamp": audioContext.currentTime
-    };
+    var motionData = this.motionData;
+    motionData.timestamp = audioContext.currentTime;
+    motionData.acceleration = e.acceleration;
+    motionData.accelerationIncludingGravity = e.accelerationIncludingGravity;
+    motionData.rotationRate = e.rotationRate;
 
     this.emit('devicemotion', motionData);
   }
@@ -57,12 +77,11 @@ class InputModule extends EventEmitter {
   }
 
   handleDeviceOrientationEvent(e) {
-    var orientationData = {
-      "alpha": e.alpha,
-      "beta": e.beta,
-      "gamma": e.gamma,
-      "timestamp": audioContext.currentTime
-    };
+    var orientationData = this.orientationData;
+    orientationData.timestamp = audioContext.currentTime;
+    orientationData.alpha = e.alpha;
+    orientationData.beta = e.beta;
+    orientationData.gamma = e.gamma;
 
     this.emit('deviceorientation', orientationData);
   }
@@ -93,15 +112,15 @@ class InputModule extends EventEmitter {
     for (let i = 0; i < e.changedTouches.length; i++) {
       var type = e.type;
 
-      if(type === 'touchcancel')
+      if (type === 'touchcancel')
         type = 'touchend';
 
-      var touchData = {
-        "event": type,
-        "timestamp": audioContext.currentTime,
-        "coordinates": [e.changedTouches[i].clientX, e.changedTouches[i].clientY],
-        "identifier": e.changedTouches[i].identifier
-      };
+      var touchData = this.touchData;
+      touchData.timestamp = audioContext.currentTime;
+      touchData.identifier = e.changedTouches[i].identifier;
+      touchData.event = type;
+      touchData.coordinates[0] = e.changedTouches[i].clientX;
+      touchData.coordinates[1] = e.changedTouches[i].clientY;
 
       this.emit(type, touchData);
     }

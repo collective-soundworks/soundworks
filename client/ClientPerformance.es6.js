@@ -14,11 +14,11 @@ class ClientPerformance extends ClientModule {
 
   start() {
     super.start();
-    client.send('performance:start');
+    client.send(this.name + ':start');
   }
 
   done() {
-    client.send('performance:done');
+    client.send(this.name + ':done');
     super.done();
   }
 }
