@@ -4,23 +4,26 @@
  */
 "use strict";
 
-var EventEmitter = require('events').EventEmitter;
 const MobileDetect = require('mobile-detect');
+const ClientModule = require('./ClientModule');
 
 // debug - http://socket.io/docs/logging-and-debugging/#available-debugging-scopes
 // localStorage.debug = '*';
 
 var client = {
   type: null,
+  ready: null,
   index: -1,
   coordinates: null,
   init: init,
   start: start,
+
+  // deprecated functions
   serial: serial,
   parallel: parallel,
+
   io: null,
   socket: null,
-  modulesStarted: false,
   send: send,
   receive: receive,
   removeListener: removeListener,
@@ -59,96 +62,6 @@ if (!!(a.canPlayType && a.canPlayType('audio/mpeg;'))) {
   client.platform.audioFileExt = '.wav';
 }
 
-class ParallelModule extends EventEmitter {
-  constructor(modules) {
-    super();
-
-    this.modules = modules;
-    this.doneCount = 0;
-    this.isStarted = false;
-    this.isDone = false;
-  }
-
-  launch() {
-    this.doneCount = 0;
-    var zIndex = this.modules.length * 100;
-
-    // Start all setups
-    for (let mod of this.modules) {
-
-      if (!mod.isStarted) {
-        mod.on('done', () => {
-          this.doneCount++;
-
-          if (this.doneCount === this.modules.length)
-            this.done();
-        });
-
-        if (mod.view) {
-          mod.setZIndex(zIndex);
-          zIndex -= 100;
-        }
-      }
-
-      mod.launch();
-    }
-
-    this.isStarted = true;
-  }
-
-  done() {
-    this.isDone = true;
-    this.emit('done', this);
-  }
-
-  setZIndex(zIndex) {
-    for (let mod of this.modules)
-      mod.view.style.zIndex = zIndex;
-  }
-}
-
-class SerialModule extends EventEmitter {
-  constructor(modules) {
-    super();
-    this.modules = modules;
-
-    this.isStarted = false;
-    this.isDone = false;
-  }
-
-  launch() {
-    var prevModule = null;
-
-    // Start all module listeners
-    for (let mod of this.modules) {
-      if (prevModule && !prevModule.isStarted) {
-        prevModule.on('done', () => {
-          mod.launch();
-        });
-      }
-
-      prevModule = mod;
-    }
-
-    // When last module of sequence is done, the sequence is done
-    prevModule.on('done', () => {
-      this.done();
-    });
-
-    // Launch first module of the sequence
-    this.modules[0].launch();
-  }
-
-  done() {
-    this.emit('done', this);
-  }
-
-  setZIndex(zIndex) {
-    for (let mod of this.modules)
-      mod.view.style.zIndex = zIndex;
-  }
-}
-
 function init(clientType = 'player', options = {}) {
   client.type = clientType;
   client.io = null;
@@ -161,24 +74,26 @@ function init(clientType = 'player', options = {}) {
       transports: ['websocket']
     });
 
-    client.receive('client:start', (index) => {
-      client.index = index;
+    client.ready = new Promise((resolve) => {
+      client.receive('client:start', (index) => {
+        client.index = index;
+        resolve();
+      });
     });
   }
 }
 
-function start(mod) {
+function start(startFun) {
+  let module = startFun; // be compatible with previous version
+
+  if(typeof startFun === 'function')
+    module = startFun(ClientModule.sequential, ClientModule.parallel);
+
+  let promise = module.createPromise();
+
   if (client.io) {
-    if (client.index >= 0) {
-      // server is already ready
-      mod.launch();
-    } else {
-      // wait for server ready
-      client.receive('client:start', (index) => {
-        client.index = index;
-        mod.launch();
-      });
-    }
+    client.ready
+      .then(() => module.launch());
 
     client.receive('disconnect', () => {
       // console.log('disconnect', client.index);
@@ -188,17 +103,21 @@ function start(mod) {
       // console.log('reconnect', client.index);
     });
   } else {
-    // no server
-    mod.launch();
+    // no client i/o, no server
+    module.launch();
   }
+
+  return promise;
 }
 
-function serial(...modules) {
-  return new SerialModule(modules);
+function serial() {
+  console.log('The function "client.serial" is deprecated. Please use the new API instead.', client.index);
+  return ClientModule.sequential;
 }
 
-function parallel(...modules) {
-  return new ParallelModule(modules);
+function parallel() {
+  console.log('The function "client.parallel" is deprecated. Please use the new API instead.', client.index);
+  return ClientModule.parallel;
 }
 
 function send(msg, ...args) {
