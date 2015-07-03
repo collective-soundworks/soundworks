@@ -4,110 +4,95 @@
  */
 'use strict';
 
-var ServerModule = require('./ServerModule');
-var server = require('./server');
+const ServerModule = require('./ServerModule');
+const server = require('./server');
 
 class ServerControl extends ServerModule {
   constructor(options = {}) {
-    super(options.name || 'control');
+    super('control');
 
-    this.parameters = {};
-    this.commands = {};
-    this.infos = {};
+    this.events = {};
     this.clientTypes = [];
   }
 
-  addParameterNumber(name, label, min, max, step, init) {
-    this.parameters[name] = {
+  addNumber(name, label, min, max, step, init, clientTypes = null) {
+    this.events[name] = {
       type: 'number',
       name: name,
       label: label,
       min: min,
       max: max,
       step: step,
-      value: init
+      value: init,
+      clientTypes: clientTypes
     };
   }
 
-  addParameterSelect(name, label, options, init) {
-    this.parameters[name] = {
+  addSelect(name, label, options, init, clientTypes = null) {
+    this.events[name] = {
       type: 'select',
       name: name,
       label: label,
       options: options,
-      value: init
+      value: init,
+      clientTypes: clientTypes
     };
   }
 
-  addCommand(name, label, fun) {
-    this.commands[name] = {
+  addInfo(name, label, init, clientTypes = null) {
+    this.events[name] = {
+      type: 'info',
       name: name,
       label: label,
-      fun: fun
+      value: init,
+      clientTypes: clientTypes
     };
   }
 
-  addInfo(name, label, init) {
-    this.infos[name] = {
+  addCommand(name, label, fun, clientTypes = null) {
+    this.events[name] = {
+      type: 'command',
       name: name,
       label: label,
-      value: init
+      value: undefined,
+      clientTypes: clientTypes
     };
   }
 
-  setParameter(name, value) {
-    var parameter = this.parameters[name];
+  broadcast(name, value) {
+    let event = this.events[name];
 
-    if (parameter) {
-      parameter.value = value;
+    if (event) {
+      event.value = value;
 
-      // send parameter to other clients
-      for (let clientType of this.clientTypes)
-        server.broadcast(clientType, 'control' + ':parameter', name, value);
-    }
-  }
+      let clientTypes = event.clientTypes || this.clientTypes;
 
-  setInfo(name, value) {
-    var info = this.infos[name];
+      // propagate parameter to clients
+      for (let clientType of clientTypes)
+        server.broadcast(clientType, 'control:event', name, value);
 
-    if (info) {
-      info.value = value;
-
-      // send info to other clients
-      for (let clientType of this.clientTypes)
-        server.broadcast(clientType, 'control' + ':info', name, value);
+      this.emit('control:event', name, value);
+    } else {
+      console.log('server control: received unknown event "' + name + '"');      
     }
   }
 
   connect(client) {
     super.connect(client);
 
-    var clientType = client.type;
+    let clientType = client.type;
 
     if (this.clientTypes.indexOf(clientType) < 0)
       this.clientTypes.push(clientType);
 
     // init control parameters, infos, and commands at client
-    client.receive('control' + ':request', () => {
-      client.send('control' + ':init', this.parameters, this.infos, this.commands);
+    client.receive('control:request', () => {
+      client.send('control:init', this.events);
     });
 
     // listen to control parameters
-    client.receive('control' + ':parameter', (name, value) => {
-      this.parameters[name].value = value;
-
-      // send control parameter to other clients
-      for (let clientType of this.clientTypes) {
-        server.broadcast(clientType, 'control' + ':parameter', name, value);
-      }
-
-      this.emit('control:parameter', name, value);
-    });
-
-    // listen to conductor commands
-    client.receive('control' + ':command', (name) => {
-      this.commands[name].fun();
-      this.emit('control:command', name);
+    client.receive('control:event', (name, value) => {
+      this.broadcast(name, value);
     });
   }
 }
