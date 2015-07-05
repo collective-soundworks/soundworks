@@ -4,8 +4,8 @@
  */
 'use strict';
 
-var ClientModule = require('./ClientModule');
-var client = require('./client');
+const ClientModule = require('./ClientModule');
+const client = require('./client');
 
 class ControlEvent {
   constructor(type, name, label) {
@@ -33,7 +33,7 @@ class ControlNumber extends ControlEvent {
     this.box = null;
 
     if (view) {
-      var box = this.box = document.createElement('input');
+      let box = this.box = document.createElement('input');
       box.setAttribute('id', this.name + '-box');
       box.setAttribute('type', 'number');
       box.setAttribute('min', this.min);
@@ -42,12 +42,12 @@ class ControlNumber extends ControlEvent {
       box.setAttribute('size', 16);
 
       box.onchange = (() => {
-        var val = Number(box.value);
+        let val = Number(box.value);
         this.set(val);
         this.send();
       });
 
-      var incrButton = document.createElement('button');
+      let incrButton = document.createElement('button');
       incrButton.setAttribute('id', this.name + '-incr');
       incrButton.setAttribute('width', '0.5em');
       incrButton.innerHTML = '>';
@@ -56,7 +56,7 @@ class ControlNumber extends ControlEvent {
         this.send();
       });
 
-      var decrButton = document.createElement('button');
+      let decrButton = document.createElement('button');
       decrButton.setAttribute('id', this.name + '-descr');
       decrButton.style.width = '0.5em';
       decrButton.innerHTML = '<';
@@ -65,10 +65,10 @@ class ControlNumber extends ControlEvent {
         this.send();
       });
 
-      var label = document.createElement('span');
+      let label = document.createElement('span');
       label.innerHTML = this.label + ': ';
 
-      var div = document.createElement('div');
+      let div = document.createElement('div');
       div.appendChild(label);
       div.appendChild(decrButton);
       div.appendChild(box);
@@ -89,12 +89,12 @@ class ControlNumber extends ControlEvent {
   }
 
   incr() {
-    var steps = Math.floor(this.value / this.step + 0.5);
+    let steps = Math.floor(this.value / this.step + 0.5);
     this.set(this.step * (steps + 1));
   }
 
   decr() {
-    var steps = Math.floor(this.value / this.step + 0.5);
+    let steps = Math.floor(this.value / this.step + 0.5);
     this.set(this.step * (steps - 1));
   }
 }
@@ -106,11 +106,11 @@ class ControlSelect extends ControlEvent {
     this.box = null;
 
     if (view) {
-      var box = this.box = document.createElement('select');
+      let box = this.box = document.createElement('select');
       box.setAttribute('id', this.name + '-box');
 
       for (let option of this.options) {
-        var optElem = document.createElement("option");
+        let optElem = document.createElement("option");
         optElem.value = option;
         optElem.text = option;
         box.appendChild(optElem);
@@ -121,7 +121,7 @@ class ControlSelect extends ControlEvent {
         this.send();
       });
 
-      var incrButton = document.createElement('button');
+      let incrButton = document.createElement('button');
       incrButton.setAttribute('id', this.name + '-incr');
       incrButton.setAttribute('width', '0.5em');
       incrButton.innerHTML = '>';
@@ -130,7 +130,7 @@ class ControlSelect extends ControlEvent {
         this.send();
       });
 
-      var decrButton = document.createElement('button');
+      let decrButton = document.createElement('button');
       decrButton.setAttribute('id', this.name + '-descr');
       decrButton.style.width = '0.5em';
       decrButton.innerHTML = '<';
@@ -139,10 +139,10 @@ class ControlSelect extends ControlEvent {
         this.send();
       });
 
-      var label = document.createElement('span');
+      let label = document.createElement('span');
       label.innerHTML = this.label + ': ';
 
-      var div = document.createElement('div');
+      let div = document.createElement('div');
       div.appendChild(label);
       div.appendChild(decrButton);
       div.appendChild(box);
@@ -156,7 +156,7 @@ class ControlSelect extends ControlEvent {
   }
 
   set(val, send = false) {
-    var index = this.options.indexOf(val);
+    let index = this.options.indexOf(val);
 
     if (index >= 0) {
       this.value = val;
@@ -184,13 +184,13 @@ class ControlInfo extends ControlEvent {
     this.box = null;
 
     if (view) {
-      var box = this.box = document.createElement('span');
+      let box = this.box = document.createElement('span');
       box.setAttribute('id', this.name + '-box');
 
-      var label = document.createElement('span');
+      let label = document.createElement('span');
       label.innerHTML = this.label + ': ';
 
-      var div = document.createElement('div');
+      let div = document.createElement('div');
       div.appendChild(label);
       div.appendChild(box);
       div.appendChild(document.createElement('br'));
@@ -214,7 +214,7 @@ class ControlCommand extends ControlEvent {
     super('command', init.name, init.label);
 
     if (view) {
-      var div = document.createElement('div');
+      let div = document.createElement('div');
       div.setAttribute('id', this.name + '-btn');
       div.classList.add('command');
       div.innerHTML = this.label;
@@ -231,24 +231,24 @@ class ControlCommand extends ControlEvent {
 
 class ClientControl extends ClientModule {
   constructor(options = {}) {
-    var hasGui = (options.gui === true);
+    let hasGui = (options.gui === true);
 
     super(options.name || 'control', hasGui, options.color);
 
     this.hasGui = hasGui;
     this.events = {};
 
-    var view = hasGui ? this.view : null;
+    let view = hasGui ? this.view : null;
 
     client.receive('control:init', (events) => {
       if (view) {
-        var title = document.createElement('h1');
+        let title = document.createElement('h1');
         title.innerHTML = 'Conductor';
         view.appendChild(title);
       }
 
       for (let key of Object.keys(events)) {
-        var event = events[key];
+        let event = events[key];
 
         switch (event.type) {
           case 'number':
@@ -275,7 +275,7 @@ class ClientControl extends ClientModule {
 
     // listen to events
     client.receive('control:event', (name, val) => {
-      var event = this.events[name];
+      let event = this.events[name];
 
       if (event) {
         event.set(val);
@@ -296,8 +296,16 @@ class ClientControl extends ClientModule {
     client.send('control:request'); 
   }
   
-  set(name, val) {
-    var event = this.events[name];
+  send(name) {
+    let event = this.events[name];
+
+    if (event) {
+      event.send();
+    }
+  }
+  
+  update(name, val) {
+    let event = this.events[name];
 
     if (event) {
       event.set(val);

@@ -59,21 +59,34 @@ class ServerControl extends ServerModule {
     };
   }
 
-  broadcast(name, value) {
+  _broadcastEvent(event) {
+    let clientTypes = event.clientTypes || this.clientTypes;
+
+    // propagate parameter to clients
+    for (let clientType of clientTypes)
+      server.broadcast(clientType, 'control:event', event.name, event.value);
+
+    this.emit('control:event', event.name, event.value);
+  }
+
+  send(name) {
+    let event = this.events[name];
+
+    if (event) {
+      this._broadcastEvent(event);
+    } else {
+      console.log('server control: send unknown event "' + name + '"');      
+    }
+  }
+
+  update(name, value) {
     let event = this.events[name];
 
     if (event) {
       event.value = value;
-
-      let clientTypes = event.clientTypes || this.clientTypes;
-
-      // propagate parameter to clients
-      for (let clientType of clientTypes)
-        server.broadcast(clientType, 'control:event', name, value);
-
-      this.emit('control:event', name, value);
+      this._broadcastEvent(event);
     } else {
-      console.log('server control: received unknown event "' + name + '"');      
+      console.log('server control: update unknown event "' + name + '"');      
     }
   }
 
@@ -92,7 +105,7 @@ class ServerControl extends ServerModule {
 
     // listen to control parameters
     client.receive('control:event', (name, value) => {
-      this.broadcast(name, value);
+      this.update(name, value);
     });
   }
 }
