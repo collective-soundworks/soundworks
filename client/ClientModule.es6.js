@@ -135,7 +135,8 @@ class ClientModule extends Promised {
       this.showsView = false;
     }
 
-    this.resolvePromised();
+    if(this.resolvePromised)
+      this.resolvePromised();
   }
 
   setCenteredViewContent(htmlContent) {
