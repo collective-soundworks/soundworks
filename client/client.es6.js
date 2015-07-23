@@ -110,14 +110,14 @@ function start(startFun) {
   return promise;
 }
 
-function serial() {
-  console.log('The function "client.serial" is deprecated. Please use the new API instead.', client.index);
-  return ClientModule.sequential;
+function serial(...modules) {
+  console.log('The function "client.serial" is deprecated. Please use the new API instead.');
+  return ClientModule.sequential(modules);
 }
 
-function parallel() {
-  console.log('The function "client.parallel" is deprecated. Please use the new API instead.', client.index);
-  return ClientModule.parallel;
+function parallel(...modules) {
+  console.log('The function "client.parallel" is deprecated. Please use the new API instead.');
+  return ClientModule.parallel(modules);
 }
 
 function send(msg, ...args) {

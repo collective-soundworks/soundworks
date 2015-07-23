@@ -29,15 +29,15 @@ class Sequential extends Promised {
   }
 
   createPromise() {
-    let module = null;
+    let mod = null;
     let promise = null;
 
     for(let next of this.modules) {
-      if(module !== null) 
+      if(mod !== null) 
         promise.then(() => next.launch());
 
-      module = next;
-      promise = module.createPromise();
+      mod = next;
+      promise = mod.createPromise();
     }
 
     return promise;
@@ -135,7 +135,8 @@ class ClientModule extends Promised {
       this.showsView = false;
     }
 
-    this.resolvePromised();
+    if(this.resolvePromised)
+      this.resolvePromised();
   }
 
   setCenteredViewContent(htmlContent) {
