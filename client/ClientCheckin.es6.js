@@ -43,7 +43,11 @@ class ClientCheckin extends ClientModule {
 
     client.removeListener(this.name + ':acknowledge', this._acknowledgementHandler);
     client.removeListener(this.name + ':unavailable', this._unavailableHandler);
-    this.view.removeEventListener('click', this._viewClickHandler, false);
+
+    if (client.platform.isMobile)
+      this.view.removeEventListener('touchstart', this._viewClickHandler);
+    else
+      this.view.removeEventListener('click', this._viewClickHandler, false);
   }
 
   restart() {
@@ -65,7 +69,11 @@ class ClientCheckin extends ClientModule {
       if (!this._bypassView) {
         let htmlContent = this.instructions(label);
         this.setCenteredViewContent(htmlContent);
-        this.view.addEventListener('click', this._viewClickHandler, false);
+
+        if (client.platform.isMobile)
+          this.view.addEventListener('touchstart', this._viewClickHandler);
+        else
+          this.view.addEventListener('click', this._viewClickHandler, false);
       } else {
         this.done();
       }
