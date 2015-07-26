@@ -30,7 +30,7 @@ class ServerCheckin extends ServerModule {
     this._nextAscendingIndex = 0;
 
     if (this.maxClients > maxRandomClients)
-      order = 'ascending';
+      this.order = 'ascending';
     else if (this.order === 'random') {
       this._nextAscendingIndex = this.maxClients;
 
