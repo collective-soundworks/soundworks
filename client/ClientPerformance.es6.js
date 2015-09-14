@@ -9,18 +9,16 @@ var client = require('./client');
 
 class ClientPerformance extends ClientModule {
   constructor(options = {}) {
-    super(options.name || 'performance', true, options.color);
+    super(options.name || 'performance', true, options.color || 'black');
   }
 
   start() {
     super.start();
-
-    client.send('performance:start');
+    client.send(this.name + ':start');
   }
 
   done() {
-    client.send('performance:done');
-
+    client.send(this.name + ':done');
     super.done();
   }
 }

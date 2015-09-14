@@ -6,7 +6,7 @@
 
 var ServerModule = require('./ServerModule');
 
-var maxRandomClients = 1000;
+var maxRandomClients = 9999;
 
 class ServerCheckin extends ServerModule {
   constructor(options = {}) {
@@ -14,6 +14,7 @@ class ServerCheckin extends ServerModule {
 
     this.setup = options.setup || null;
     this.maxClients = options.maxClients || Infinity;
+    this.order = options.order || 'ascending'; // 'ascending' | 'random'
 
     if (this.maxClients > Number.MAX_SAFE_INTEGER)
       this.maxClients = Number.MAX_SAFE_INTEGER;
@@ -21,47 +22,28 @@ class ServerCheckin extends ServerModule {
     if (this.setup) {
       var numPlaces = this.setup.getNumPositions();
 
-      if (this.maxClients > numPlaces)
+      if (this.maxClients > numPlaces && numPlaces > 0)
         this.maxClients = numPlaces;
     }
 
     this._availableIndices = [];
     this._nextAscendingIndex = 0;
 
-    if (this.maxClients <= maxRandomClients) {
+    if (this.maxClients > maxRandomClients)
+      this.order = 'ascending';
+    else if (this.order === 'random') {
+      this._nextAscendingIndex = this.maxClients;
+
       for (let i = 0; i < this.maxClients; i++)
         this._availableIndices.push(i);
     }
-  }
-
-  connect(client) {
-    super.connect(client);
-
-    client.receive('checkin:automatic:request', (order) => {
-      this._requestSelectAutomatic(client, order);
-    });
-
-    client.receive('checkin:label:request', () => {
-      this._requestSelectLabel(client);
-    });
-
-    client.receive('checkin:location:request', () => {
-      this._requestSelectLocation(client);
-    });
-  }
-
-  disconnect(client) {
-    super.disconnect(client);
-
-    if (client.index >= 0)
-      this._releaseIndex(client.index);
   }
 
   _getRandomIndex() {
     var numAvailable = this._availableIndices.length;
 
     if (numAvailable > 0) {
-      let random = Math.floor(Math.random() * numAvailable); // pick randomly an available index
+      let random = Math.floor(Math.random() * numAvailable);
       return this._availableIndices.splice(random, 1)[0];
     }
 
@@ -86,50 +68,70 @@ class ServerCheckin extends ServerModule {
     this._availableIndices.push(index);
   }
 
-  _requestSelectAutomatic(client, order) {
-    var index = -1;
+  connect(client) {
+    super.connect(client);
 
-    if (this.maxClients > maxRandomClients)
-      order = 'ascending';
+    client.receive(this.name + ':request', () => {
+      var index = -1;
+      var order = this.order;
 
-    if (order === 'random')
-      index = this._getRandomIndex();
-    else // if (order === 'acsending')
-      index = this._getAscendingIndex();
+      if (this.order === 'random')
+        index = this._getRandomIndex();
+      else // if (order === 'acsending')
+        index = this._getAscendingIndex();
 
-    if (index >= 0) {
-      client.index = index;
+      if (index >= 0) {
+        client.modules.checkin.index = index;
 
-      var label = null;
-      var coordinates = null;
+        var label = null;
+        var coordinates = null;
 
-      if (this.setup) {
-        label = this.setup.getLabel(index);
-        coordinates = this.setup.getCoordinates(index);
+        if (this.setup) {
+          label = this.setup.getLabel(index);
+          coordinates = this.setup.getCoordinates(index);
+        }
+
+        client.modules.checkin.label = label;
+        client.coordinates = coordinates;
+
+        client.send(this.name + ':acknowledge', index, label, coordinates);
+      } else {
+        client.send(this.name + ':unavailable');
+      }
+    });
+
+    client.receive(this.name + ':restart', (index, label, coordinates) => {
+      // TODO: check if that's ok on random mode
+      if (index > this._nextAscendingIndex) {
+        for (let i = this._nextAscendingIndex; i < index; i++)
+          this._availableIndices.push(i);
+
+        this._nextAscendingIndex = index + 1;
+      } else if (index === this._nextAscendingIndex) {
+        this._nextAscendingIndex++;
+      } else {
+        let i = this._availableIndices.indexOf(index);
+
+        if (i > -1)
+          this._availableIndices.splice(i, 1);
       }
 
-      client.modules.checkin.label = label;
-      client.coordinates = coordinates;
+      client.modules.checkin.index = index;
 
-      client.send('checkin:automatic:acknowledge', index, label, coordinates);
-    } else {
-      client.send('checkin:automatic:unavailable');      
-    }
+      if (this.setup) {
+        client.modules.checkin.label = label;
+        client.coordinates = coordinates;
+      }
+    })
   }
 
-  _requestSelectLabel(client) {
-    throw new Error("Checkin with label selection not yet implemented");
-    // var options = this.setup.getOptions();
-    // client.send('checkin:label:options', options);
-    // client.receive('checkin:label:set', label);
-    // client.send('checkin:label:acknowledge', index);
-  }
+  disconnect(client) {
+    super.disconnect(client);
 
-  _requestSelectLocation(client) {
-    throw new Error("Checkin with location selection not yet implemented");
-    // var surface = this.setup.getSurface();
-    // client.send('checkin:location:acknowledge', index, surface);
-    // client.receive('checkin:location:set', coordinates);
+    var index = client.modules.checkin.index;
+
+    if (index >= 0)
+      this._releaseIndex(index);
   }
 }
 

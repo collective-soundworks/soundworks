@@ -1,5 +1,6 @@
 'use strict';
 
+var client = require('./client');
 var ClientModule = require('./ClientModule');
 
 function toTitleCase(str) {
@@ -22,7 +23,7 @@ function convertName(name) {
 
 class ClientSelector extends ClientModule {
   constructor(options = {}) {
-    super(options.name || 'choice', !options.view);
+    super(options.name || 'selector', !options.view);
 
     this.labels = options.labels || [];
     this.states = options.states || [];
@@ -45,13 +46,13 @@ class ClientSelector extends ClientModule {
 
   _setupButton(index, label, state) {
     let button = document.createElement('div');
-
+    button.classList.add('btn');
     button.innerHTML = convertName(label);
     this._buttons[index] = button;
 
     switch (state) {
       case 'disabled':
-        button.className = 'btn disabled';
+        button.classList.add('disabled');
         break;
 
       case 'unselected':
@@ -83,6 +84,20 @@ class ClientSelector extends ClientModule {
     }
   }
 
+  reset() {
+    let buttons = this.view.querySelectorAll('.btn');
+    for (let i = 0; i < buttons.length; i++)
+      this.view.removeChild(buttons[i]);
+     
+    this.selected = [];
+    this._buttons = [];
+    this._listeners = []; 
+  }
+
+  restart() {
+    // TODO
+  }
+
   select(index) {
     let state = this.states[index];
 
@@ -93,7 +108,7 @@ class ClientSelector extends ClientModule {
 
       let button = this._buttons[index];
 
-      button.className = 'btn selected';
+      button.classList.add('selected');
       this.states[index] = 'selected';
 
       // add to list of selected buttons
@@ -103,7 +118,7 @@ class ClientSelector extends ClientModule {
       this.emit('selector:select', index, label);
 
       if (this.selected.length === this.maxSelected)
-        this.done();
+        this.done(); // TODO: beware, might cause problems with the launch thing
 
       return true;
     }
@@ -117,7 +132,7 @@ class ClientSelector extends ClientModule {
     if (state === 'selected') {
       let button = this._buttons[index];
 
-      button.className = 'btn';
+      button.classList.remove('selected');
       this.states[index] = 'unselected';
 
       // unselect oldest selected button
@@ -147,8 +162,11 @@ class ClientSelector extends ClientModule {
       this._listeners[index] = listener;
 
       let button = this._buttons[index];
-      button.className = 'btn';
-      button.addEventListener('click', listener, false);
+      button.classList.remove('disabled');
+      if (client.platform.isMobile)
+        button.addEventListener('touchstart', listener, false);  
+      else
+        button.addEventListener('click', listener, false);
     }
   }
 
@@ -163,8 +181,11 @@ class ClientSelector extends ClientModule {
 
       let button = this._buttons[index];
       let listener = this._listeners[index];
-      button.className = 'btn disabled';
-      button.removeListener('click', listener);
+      button.classList.add('disabled');
+      if (client.platform.isMobile)
+        button.removeListener('touchstart', listener);
+      else
+        button.removeListener('click', listener);
     }
   }
 

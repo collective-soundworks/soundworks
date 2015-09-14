@@ -4,55 +4,64 @@
  */
 'use strict';
 
+var client = require('./client');
 var ClientModule = require('./ClientModule');
-var platform = require('platform');
+const audioContext = require('waves-audio').audioContext;
+const platform = require('platform');
 
-function parseVersionString(string) {
-  if (string) {
-    var a = string.split('.');
-
-    if (a[1] >= 0)
-      return parseFloat(a[0] + "." + a[1]);
-
-    return parseFloat(a[0]);
-  }
-
-  return null;
-}
+var defaultMessages = {
+  iosVersion: "This application requires at least iOS 7 with Safari or Chrome.",
+  androidVersion: "This application requires at least Android 4.2 with Chrome.",
+  wrongOS: "This application is designed for iOS and Android mobile devices."
+};
 
 class ClientPlatform extends ClientModule {
   constructor(options = {}) {
     super(options.name || 'platform-check', true, options.color);
+
+    this.prefix = options.prefix ||  '';
+    this.postfix = options.postfix ||  '';
+    this.messages = options.messages || defaultMessages;
+    this.bypass = options.bypass || false;
   }
 
   start() {
     super.start();
 
-    var osVersion = parseVersionString(platform.os.version);
-    var browserVersion = parseVersionString(platform.version);
-    var msg = null;
+    let msg = null;
+    const os = client.platform.os;
+    const isMobile = client.platform.isMobile;
 
-    if (platform.os.family == "iOS") {
-      if (osVersion < 7)
-        msg = "This application requires at least iOS 7.<br/>You have iOS " + platform.os.version + ".";
-    } else if (platform.os.family == "Android") {
-      if (osVersion < 4.2)
-        msg = "This application requires at least Android 4.2.<br/>You have Android " + platform.os.version + ".";
-      else if (platform.name != 'Chrome Mobile')
-        msg = "You have to use Chrome to run this application on an Android device.";
-      else if (browserVersion < 35)
-        msg = "Consider updating Chrome to a more recent version to run this application.";
-    } else {
-      msg = "This application is designed for mobile devices and currently runs on iOS or Android only.";
+    if (this.bypass) 
+      return this.done();
+
+    if (!audioContext) {
+      if (os === 'ios') {
+        msg = this.messages.iosVersion;
+      } else if (os === 'android') {
+        msg = this.messages.androidVersion;
+      } else {
+        msg = this.messages.wrongOS;
+      }
+    } else if (!isMobile || client.platform.os === 'other') {
+      msg = this.messages.wrongOS;
+    } else if (client.platform.os === 'ios' && platform.os.version < '7') {
+      msg = this.messages.iosVersion;
+    } else if (client.platform.os === 'android' && platform.os.version < '4.2') {
+      msg = this.messages.androidVersion;
     }
 
     if (msg !== null) {
-      this.setCenteredViewContent('<p>' + msg + '</p>');
+      this.setCenteredViewContent(this.prefix + '<p>' + msg + '</p>' + this.postfix);
     } else {
       this.done();
     }
   }
 
+  restart() {
+    super.restart();
+    this.done();
+  }
 }
 
 module.exports = ClientPlatform;

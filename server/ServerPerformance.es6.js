@@ -11,17 +11,16 @@ class ServerPerformance extends ServerModule {
     super(options.name || 'performance');
 
     this.clients = [];
-    this.entered = false;
   }
 
   connect(client) {
     super.connect(client);
 
-    client.receive('performance:start', () => {
+    client.receive(this.name + ':start', () => {
       this.enter(client);
     });
 
-    client.receive('performance:done', () => {
+    client.receive(this.name + ':done', () => {
       this.exit(client);
     });
   }
@@ -29,19 +28,19 @@ class ServerPerformance extends ServerModule {
   disconnect(client) {
     super.disconnect(client);
 
-    if (this.entered)
+    if (client.modules.performance.entered)
       this.exit(client);
   }
 
   enter(client) {
     this.clients.push(client);
-    this.entered = true;
+    client.modules.performance.entered = true;
   }
 
   exit(client) {
     let index = this.clients.indexOf(client);
 
-    this.entered = false;
+    client.modules.performance.entered = false;
 
     if (index >= 0)
       this.clients.splice(index, 1);

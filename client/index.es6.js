@@ -8,16 +8,19 @@ module.exports = {
   audioContext: require('waves-audio').audioContext,
   client: require('./client'),
   input: require('./input'),
+  Calibration: require('./ClientCalibration'),
   Checkin: require('./ClientCheckin'),
   Control: require('./ClientControl'),
   Dialog: require('./ClientDialog'),
   Filelist: require('./ClientFilelist'),
   Loader: require('./ClientLoader'),
+  Locator: require('./ClientLocator'),
   Module: require('./ClientModule'),
   Orientation: require('./ClientOrientation'),
   Performance: require('./ClientPerformance'),
   Platform: require('./ClientPlatform'),
   Selector: require('./ClientSelector'),
-  Setup: require('./ClientSetup'),
+  Setup: require('./ClientSetup'), // to be removed
+  Space: require('./ClientSpace'),
   Sync: require('./ClientSync')
 };

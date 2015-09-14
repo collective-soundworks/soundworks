@@ -15,40 +15,27 @@ class ServerSetup extends ServerModule {
     this.spacing = 1;
     this.labels = [];
     this.coordinates = [];
+    this.background = null;
 
     this.specific = {};
+
+    this.type = undefined;
   }
 
   connect(client) {
     super.connect(client);
 
-    client.receive('setup:request', () => {
-      client.send('setup:init', {
+    client.receive(this.name + ':request', () => {
+      client.send(this.name + ':init', {
         "width": this.width,
         "height": this.height,
+        "background": this.background,
         "spacing": this.spacing,
         "labels": this.labels,
-        "coordinates": this.coordinates
+        "coordinates": this.coordinates,
+        "type": this.type
       });
     });
-  }
-
-  getNumPositions() {
-    if(this.labels.length || this.coordinates.length) {
-      var numLabels = this.labels.length || Infinity;
-      var numPositions = this.coordinates.length || Infinity;
-
-      return Math.min(numLabels, numPositions);
-    }
-    
-    return 0;
-  }
-
-  getLabel(index) {
-    if (index < this.labels.length)
-      return this.labels[index];
-
-    return (index + 1).toString();
   }
 
   getCoordinates(index) {
@@ -58,15 +45,45 @@ class ServerSetup extends ServerModule {
     return null;
   }
 
+  getLabel(index) {
+    if (index < this.labels.length)
+      return this.labels[index];
+
+    return (index + 1).toString();
+  }
+
+  getNumPositions() {
+    if(this.labels.length || this.coordinates.length) {
+      var numLabels = this.labels.length || Infinity;
+      var numCoordinates = this.coordinates.length || Infinity;
+
+      return Math.min(numLabels, numCoordinates);
+    }
+
+    return 0;
+  }
+
+  getSurface() {
+    let surface = {
+      height: this.height,
+      width: this.width
+      // TODO: allow other shapes
+    }
+
+    return surface;
+  }
+
   generate(type, params = {}) {
+    this.type = type;
+
     switch (type) {
       case 'matrix':
-        var cols = params.cols || 3;
-        var rows = params.rows || 4;
-        var colSpacing = params.colSpacing || 1;
-        var rowSpacing = params.rowSpacing || 1;
-        var colMargin = params.colMargin || colSpacing / 2;
-        var rowMargin = params.rowMargin || rowSpacing / 2;
+        let cols = params.cols || 3;
+        let rows = params.rows || 4;
+        let colSpacing = params.colSpacing || 1;
+        let rowSpacing = params.rowSpacing || 1;
+        let colMargin = params.colMargin || colSpacing / 2;
+        let rowMargin = params.rowMargin || rowSpacing / 2;
 
         this.specific.matrix = {};
         this.specific.matrix.cols = cols;
@@ -76,20 +93,32 @@ class ServerSetup extends ServerModule {
         this.height = rowSpacing * (rows - 1) + 2 * rowMargin;
         this.spacing = Math.min(colSpacing, rowSpacing);
 
-        var count = 0;
+        let count = 0;
 
         for (let j = 0; j < rows; j++) {
           for (let i = 0; i < cols; i++) {
             count++;
 
-            var label = count.toString();
-            var coordinates = [(colMargin + i * colSpacing) / this.width, (rowMargin + j * rowSpacing) / this.height];
+            let label = count.toString();
+            let coordinates = [(colMargin + i * colSpacing) / this.width, (rowMargin + j * rowSpacing) / this.height];
 
             this.labels.push(label);
             this.coordinates.push(coordinates);
           }
         }
 
+        break;
+
+      case 'surface':
+        let height = params.height || 4;
+        let width = params.width || 6;
+        let background = params.background || null;
+
+        this.height = height;
+        this.width = width;
+        this.background = background;
+
+        // TODO: allow other shapes
         break;
 
       default:
