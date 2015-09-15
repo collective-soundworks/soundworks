@@ -28,19 +28,19 @@ class ServerPerformance extends ServerModule {
   disconnect(client) {
     super.disconnect(client);
 
-    if (client.modules.performance.entered)
+    if (client.modules[this.name].entered)
       this.exit(client);
   }
 
   enter(client) {
     this.clients.push(client);
-    client.modules.performance.entered = true;
+    client.modules[this.name].entered = true;
   }
 
   exit(client) {
     let index = this.clients.indexOf(client);
 
-    client.modules.performance.entered = false;
+    client.modules[this.name].entered = false;
 
     if (index >= 0)
       this.clients.splice(index, 1);

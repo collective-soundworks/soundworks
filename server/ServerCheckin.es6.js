@@ -81,7 +81,7 @@ class ServerCheckin extends ServerModule {
         index = this._getAscendingIndex();
 
       if (index >= 0) {
-        client.modules.checkin.index = index;
+        client.modules[this.name].index = index;
 
         var label = null;
         var coordinates = null;
@@ -91,7 +91,7 @@ class ServerCheckin extends ServerModule {
           coordinates = this.setup.getCoordinates(index);
         }
 
-        client.modules.checkin.label = label;
+        client.modules[this.name].label = label;
         client.coordinates = coordinates;
 
         client.send(this.name + ':acknowledge', index, label, coordinates);
@@ -116,10 +116,10 @@ class ServerCheckin extends ServerModule {
           this._availableIndices.splice(i, 1);
       }
 
-      client.modules.checkin.index = index;
+      client.modules[this.name].index = index;
 
       if (this.setup) {
-        client.modules.checkin.label = label;
+        client.modules[this.name].label = label;
         client.coordinates = coordinates;
       }
     })
@@ -128,7 +128,7 @@ class ServerCheckin extends ServerModule {
   disconnect(client) {
     super.disconnect(client);
 
-    var index = client.modules.checkin.index;
+    var index = client.modules[this.name].index;
 
     if (index >= 0)
       this._releaseIndex(index);
