@@ -193,13 +193,13 @@ class ClientPlacer extends ClientModule {
     this.label = null;
     client.coordinates = null;
     // remove listener
-    this.selector.removeAllListener('select');
+    this.selector.removeAllListeners('select');
   }
 
   done() {
     super.done();
     window.removeEventListener('resize', this._resizeSelector, false);
-    this.selector.removeAllListener('select');
+    this.selector.removeAllListeners('select');
   }
 }
 
