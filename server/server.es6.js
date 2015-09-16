@@ -4,28 +4,31 @@
  */
 'use strict';
 
-var express = require('express');
-var http = require('http');
-var IO = require('socket.io');
-var ServerClient = require('./ServerClient');
-const log = require('./logger');
 const ejs = require('ejs');
-const path = require('path');
+const express = require('express');
 const fs = require('fs');
-
-var expressApp = null;
-var httpServer = null;
-
-var server = {
+const http = require('http');
+const log = require('./logger');
+const IO = require('socket.io');
+const osc = require('osc');
+const path = require('path');
+const ServerClient = require('./ServerClient');
+const server = {
   io: null,
   start: start,
   map: map,
   broadcast: broadcast,
-  envConfig: {} // host env config informations (dev / prod)
+  envConfig: {}, // host env config informations (dev / prod)
+  osc: null,
+  sendOSC: sendOSC,
+  receiveOSC: receiveOSC
 };
 
-var availableClientIndices = [];
-var nextClientIndex = 0;
+let availableClientIndices = [];
+let nextClientIndex = 0;
+let oscListeners = [];
+let expressApp = null;
+let httpServer = null;
 
 function getClientIndex() {
   var index = -1;
@@ -47,14 +50,14 @@ function releaseClientIndex(index) {
   availableClientIndices.push(index);
 }
 
-function start(app, publicPath, port, socketOptions = {}, envConfig = {}) {
+function start(app, publicPath, port, options = {}) {
   const socketConfig = {
-    transports: socketOptions.transports || ['websocket'],
-    pingTimeout: socketOptions.pingTimeout || 60000,
-    pingInterval: socketOptions.pingInterval || 50000
+    transports: options.socketIO.transports || ['websocket'],
+    pingTimeout: options.socketIO.pingTimeout || 60000,
+    pingInterval: options.socketIO.pingInterval || 50000
   };
 
-  server.envConfig = envConfig;
+  server.envConfig = options.env;
 
   app.set('port', process.env.PORT || port || 8000);
   app.set('view engine', 'ejs');
@@ -76,9 +79,35 @@ function start(app, publicPath, port, socketOptions = {}, envConfig = {}) {
   if (httpServer) {
     server.io = new IO(httpServer, socketConfig);
   }
-}
 
-const clientTypeTemplateMap = new Map();
+  // OSC
+  if (options.osc) {
+    server.osc = new osc.UDPPort({
+      // This is the port we're listening on.
+      localAddress: options.osc.localAddress || '127.0.0.1',
+      localPort: options.osc.localPort || 57121,
+
+      // This is the port we use to send messages.
+      remoteAddress: options.osc.remoteAddress || '127.0.0.1',
+      remotePort: options.osc.remotePort || 57120
+    });
+
+    server.osc.on('ready', () => {
+      console.log('Listening for OSC over UDP on port ' + options.osc.localPort + '.');
+    });
+
+    server.osc.on('message', (oscMsg) => {
+      const address = oscMsg.address;
+
+      for (let i = 0; i < oscListeners.length; i++) {
+        if (address === oscListeners[i].wildcard)
+          oscListeners[i].callback(oscMsg);
+      }
+    });
+
+    server.osc.open();
+  }
+}
 
 function map(clientType, ...modules) {
   var url = '/';
@@ -126,6 +155,27 @@ function broadcast(clientType, msg, ...args) {
     log.info({ clientType: clientType, channel: msg, arguments: args }, 'broadcast');
     server.io.of('/' + clientType).emit(msg, ...args);
   }
+}
+
+function sendOSC(address, args, url = null, port = null) {
+  const oscMsg = {
+    address: address,
+    args: args
+  };
+
+  if (url && port)
+    server.osc.send(oscMsg, url, port);
+  else
+    server.osc.send(oscMsg); // use defaults (as defined in the config)
+}
+
+function receiveOSC(wildcard, callback) {
+  const oscListener = {
+    wildcard: wildcard,
+    callback: callback
+  };
+
+  oscListeners.push(oscListener);
 }
 
 module.exports = server;

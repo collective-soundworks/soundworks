@@ -22,7 +22,7 @@ class ClientCheckin extends ClientModule {
 
     this.index = -1;
     this.label = null;
-    this._bypassView = options.bypassView || false;
+    this.showDialog = options.showDialog || false;
 
     this._acknowledgementHandler = this._acknowledgementHandler.bind(this);
     this._unavailableHandler = this._unavailableHandler.bind(this);
@@ -66,7 +66,7 @@ class ClientCheckin extends ClientModule {
     if (label) {
       this.label = label;
 
-      if (!this._bypassView) {
+      if (this.showDialog) {
         let htmlContent = this.instructions(label);
         this.setCenteredViewContent(htmlContent);
 
