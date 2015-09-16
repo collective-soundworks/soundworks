@@ -27,7 +27,7 @@ class ServerLocator extends ServerModule {
 
     client.receive(this.name + ':coordinates', (coordinates) => {
       client.coordinates = coordinates;
-    });    
+    });
 
     client.receive(this.name + ':restart', (coordinates) => {
       client.coordinates = coordinates;

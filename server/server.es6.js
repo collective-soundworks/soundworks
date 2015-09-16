@@ -51,10 +51,11 @@ function releaseClientIndex(index) {
 }
 
 function start(app, publicPath, port, options = {}) {
+  const socketIOOptions = (options.socketIO || {});
   const socketConfig = {
-    transports: options.socketIO.transports || ['websocket'],
-    pingTimeout: options.socketIO.pingTimeout || 60000,
-    pingInterval: options.socketIO.pingInterval || 50000
+    transports: socketIOOptions.transports || ['websocket'],
+    pingTimeout: socketIOOptions.pingTimeout || 60000,
+    pingInterval: socketIOOptions.pingInterval || 50000,
   };
 
   server.envConfig = options.env;
@@ -89,7 +90,7 @@ function start(app, publicPath, port, options = {}) {
 
       // This is the port we use to send messages.
       remoteAddress: options.osc.remoteAddress || '127.0.0.1',
-      remotePort: options.osc.remotePort || 57120
+      remotePort: options.osc.remotePort || 57120,
     });
 
     server.osc.on('ready', () => {

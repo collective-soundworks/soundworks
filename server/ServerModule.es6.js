@@ -18,7 +18,7 @@ class ServerModule extends EventEmitter {
   }
 
   disconnect(client) {
-
+    // delete client.modules[this.name] // ?
   }
 }
 

@@ -17,7 +17,6 @@ var client = {
   coordinates: null,
   init: init,
   start: start,
-
   // deprecated functions
   serial: serial,
   parallel: parallel,

@@ -7,7 +7,6 @@ const EventEmitter = require('events').EventEmitter;
 // display strategies for placer
 class ListSelector extends EventEmitter {
   constructor(options) {
-
     this._indexPositionMap = new Map();
     this._onSelect = this._onSelect.bind(this);
   }
@@ -33,11 +32,12 @@ class ListSelector extends EventEmitter {
     this.el.appendChild(this.button);
     this.container.appendChild(this.el);
 
-    this.button.addEventListener('click', this._onSelect, false);
+    this.button.addEventListener('touchstart', this._onSelect, false);
     this.resize();
   }
 
   resize() {
+    if (!this.container) { return; } // if called before `display`
     const containerWidth = this.container.getBoundingClientRect().width;
     const containerHeight = this.container.getBoundingClientRect().height;
 
@@ -70,10 +70,13 @@ class ListSelector extends EventEmitter {
 class ClientPlacer extends ClientModule {
   constructor(options = {}) {
     super(options.name || 'placer', true);
-    this.setup = options.setup;
-    this.type = options.type || 'list';
 
-    switch (this.type) {
+    this.setup = options.setup;
+    this.mode = options.mode || 'list';
+    this.persist = options.persist || false;
+    this.localStorageId = options.localStorageId || 'soundworks';
+
+    switch (this.mode) {
       case 'graphic':
         this.selector = new ClientSpace({
           fitContainer: true,
@@ -86,47 +89,117 @@ class ClientPlacer extends ClientModule {
     }
 
     this._resizeSelector = this._resizeSelector.bind(this);
+    window.addEventListener('resize', this._resizeSelector, false);
+    // allow to reset localStorage
+    client.receive(`${this.name}:reset`, this._deleteInformation);
+
+    // DEBUG
+    // this._deleteInformation();
   }
 
   _resizeSelector() {
     this.selector.resize();
   }
 
+  _getStorageKey() {
+    return `${this.localStorageId}:${this.name}`;
+  }
+
+  _persistInformation(position) {
+    // if options.expire add th timestamp to the position object
+    const key = this._getStorageKey();
+    window.localStorage.setItem(key, JSON.stringify(position));
+  }
+
+  _retrieveInformation() {
+    const key = this._getStorageKey();
+    const position = window.localStorage.getItem(key);
+
+    // check for expires entry
+    // delete if now > expires
+    return JSON.parse(position);
+  }
+
+  _deleteInformation() {
+    const key = this._getStorageKey();
+    window.localStorage.removeItem(key);
+    // window.localStorage.clear(); // remove everything for the domain
+  }
+
+  _sendInformation(position = null) {
+    if (position !== null) {
+      this.index = position.index;
+      this.label = position.label;
+      client.coordinates = position.coordinates;
+    }
+
+    client.send(
+      `${this.name}:information`,
+      this.index,
+      this.label,
+      client.coordinates
+    );
+  }
+
   start() {
     super.start();
 
-    this.selector.display(this.setup, this.view, {});
-    // listen for selection
-    this.selector.on('select', (position) => {
-      console.log(position);
-      // launch to server
-      // store in local storage if options
-      // this.done();
-    });
-
-    // prepare position to display
-    const positions = this.setup.coordinates.map((coord, index) => {
+    // prepare positions
+    this.positions = this.setup.coordinates.map((coord, index) => {
       return {
-        coordinates: coord,
-        label: this.setup.labels[index],
         index: index,
+        label: this.setup.labels[index],
+        coordinates: coord,
       };
     });
 
-    // make sure the DOM is ready
-    setTimeout(() => {
-      this.selector.displayPositions(positions, 20);
-    }, 0);
+    // check for informations in local storage
+    if (this.persist) {
+      const position = this._retrieveInformation();
 
-    window.addEventListener('resize', this._resizeSelector, false);
+      if (position !== null) {
+        this._sendInformation(position);
+        return this.done();
+      }
+    }
+
+    // listen for selection
+    this.selector.on('select', (position) => {
+      // optionally store in local storage
+      if (this.persist) {
+        this._persistInformation(position);
+      }
+      // send to server
+      this._sendInformation(position);
+      this.done();
+    });
+
+    this.selector.display(this.setup, this.view, {});
+    // make sure the DOM is ready (needed on ipods)
+    setTimeout(() => {
+      this.selector.displayPositions(this.positions, 20);
+    }, 0);
   }
 
-  // restart() {}
-  // reset() {}
+  restart() {
+    super.restart();
+    this._sendInformation();
+  }
+
+  reset() {
+    super.reset();
+    // reset client
+    this.index = null;
+    this.label = null;
+    client.coordinates = null;
+    // remove listener
+    this.selector.removeAllListener('select');
+  }
 
   done() {
     super.done();
     window.removeEventListener('resize', this._resizeSelector, false);
+    this.selector.removeAllListener('select');
   }
 }
 

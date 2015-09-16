@@ -14,6 +14,7 @@ module.exports = {
   Locator: require('./ServerLocator'),
   Module: require('./ServerModule'),
   Performance: require('./ServerPerformance'),
+  Placer: require('./ServerPlacer'),
   Setup: require('./ServerSetup'),
   Sync: require('./ServerSync')
 };
