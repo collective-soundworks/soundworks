@@ -117,7 +117,7 @@ class ClientSpace extends ClientModule {
         case 'rotate180':
           this.container.setAttribute('data-xfactor', -1);
           this.container.setAttribute('data-yfactor', -1);
-          const transform = `rotate(180, ${this.width / 2}, ${this.height / 2})`;
+          const transform = `rotate(180, ${svgWidth / 2}, ${svgHeight / 2})`;
           this.group.setAttributeNS(null, 'transform', transform);
           break;
       }
@@ -188,5 +188,3 @@ class ClientSpace extends ClientModule {
 }
 
 module.exports = ClientSpace;
-
-
