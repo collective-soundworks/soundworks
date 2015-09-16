@@ -18,6 +18,7 @@ module.exports = {
   Module: require('./ClientModule'),
   Orientation: require('./ClientOrientation'),
   Performance: require('./ClientPerformance'),
+  Placer: require('./ClientPlacer'),
   Platform: require('./ClientPlatform'),
   Selector: require('./ClientSelector'),
   Setup: require('./ClientSetup'), // to be removed
