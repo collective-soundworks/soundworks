@@ -8,13 +8,13 @@
   }
   @-moz-keyframes $animation-name {
     @content;
-  }  
+  }
   @-ms-keyframes $animation-name {
     @content;
   }
   @-o-keyframes $animation-name {
     @content;
-  }  
+  }
   @keyframes $animation-name {
     @content;
   }
@@ -25,7 +25,7 @@
      -moz-animation: #{$str};
       -ms-animation: #{$str};
        -o-animation: #{$str};
-          animation: #{$str};      
+          animation: #{$str};
 }
 
 @include keyframes(soft-blink) {
@@ -92,5 +92,9 @@ h1, h2, h3, h4, h5, h6 {
 
 .hidden {
   display: none !important;
+  visibility: hidden;
+}
+
+.invisible {
   visibility: hidden;
 }
