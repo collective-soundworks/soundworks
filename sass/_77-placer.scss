@@ -1,0 +1,29 @@
+.placer {
+  .btn {
+    background: none;
+    border-radius: 3em;
+    border: 0.15em solid #fff;
+    cursor: pointer;
+    display: block;
+    font-weight: 700;
+    font-size: 20px;
+    letter-spacing: 0.09em;
+    margin: 30px 0 0 0;
+    outline: none;
+    overflow: hidden;
+    padding: 1em;
+    -webkit-tap-highlight-color: transparent;
+    text-align: center;
+    text-transform: uppercase;
+    color: #ffffff;
+    -webkit-transition: all 0.3s;
+       -moz-transition: all 0.3s;
+        -ms-transition: all 0.3s;
+         -o-transition: all 0.3s;
+            transition: all 0.3s;
+
+    &:active {
+      background-color: #ffffff;
+    }
+  }
+}

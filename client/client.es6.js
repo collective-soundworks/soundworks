@@ -17,7 +17,6 @@ var client = {
   coordinates: null,
   init: init,
   start: start,
-
   // deprecated functions
   serial: serial,
   parallel: parallel,
@@ -51,7 +50,7 @@ client.platform.os = (() => {
   }
 })();
 
-// audio file extention
+// audio file extention check
 const a = document.createElement('audio');
 // http://diveintohtml5.info/everything.html
 if (!!(a.canPlayType && a.canPlayType('audio/mpeg;'))) {
@@ -86,7 +85,7 @@ function init(clientType = 'player', options = {}) {
 function start(startFun) {
   let module = startFun; // be compatible with previous version
 
-  if(typeof startFun === 'function')
+  if (typeof startFun === 'function')
     module = startFun(ClientModule.sequential, ClientModule.parallel);
 
   let promise = module.createPromise();

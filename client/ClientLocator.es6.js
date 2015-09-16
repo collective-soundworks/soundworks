@@ -6,7 +6,7 @@
 
 var ClientModule = require('./ClientModule');
 var client = require('./client');
-var input = require('./input');
+// var input = require('./input');
 
 function instructions(label) {
   return "<p>Go to</p>" +
@@ -20,7 +20,7 @@ class ClientLocator extends ClientModule {
 
     this.select = options.select || 'automatic'; // 'automatic' | 'label' | 'location'
     this.instructions = options.instructions || instructions;
-    this.setup = options.setup || null;
+    this.space = options.space || null;
     this.showBackground = options.showBackground ||  false;
 
     this.label = null;
@@ -98,8 +98,8 @@ class ClientLocator extends ClientModule {
     this._surfaceDiv.removeEventListener('touchend', this._touchEndHandler, false);
 
     // TODO: clean surface properly
-    if (this.setup)
-      this.setup.reset();
+    if (this.space)
+      this.space.reset();
   }
 
   restart() {
@@ -124,7 +124,7 @@ class ClientLocator extends ClientModule {
       widthPx = screenHeight / heightWidthRatio;
     }
 
-    this.setup.display(this._surfaceDiv, {
+    this.space.display(this._surfaceDiv, {
       showBackground: this.showBackground
     });
 

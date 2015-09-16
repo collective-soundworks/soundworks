@@ -8,6 +8,8 @@ class ClientSpace extends ClientModule {
 
     this.width = 1;
     this.height = 1;
+    this.fitContainer = (options.fitContainer || false);
+    this.listenTouchEvent = (options.listenTouchEvent || false);
     // this.spacing = 1;
     // this.labels = [];
     // this.coordinates = [];
@@ -16,10 +18,13 @@ class ClientSpace extends ClientModule {
     this._xFactor = 1;
     this._yFactor = 1;
 
-    this._onSetupInit = this._onSetupInit.bind(this);
+    // map between shapes and their related positions
+    this.shapePositionMap = new Map();
+    this.positionIndexShapeMap = {};
   }
 
-  _onSetupInit(setup) {
+  // note -> modfiy here
+  initSetup(setup) {
     this.width = setup.width;
     this.height = setup.height;
     // this.spacing = setup.spacing;
@@ -33,10 +38,9 @@ class ClientSpace extends ClientModule {
 
   start() {
     super.start();
-
-    client.receive('setup:init', this._onSetupInit);
-
-    client.send('setup:request');
+    this.done();
+    // client.receive('setup:init', this._onSetupInit);
+    // client.send('setup:request');
   }
 
   restart() {
@@ -45,11 +49,14 @@ class ClientSpace extends ClientModule {
   }
 
   reset() {
-    client.removeListener('setup:init', this._onSetupInit);
+    this.shapePositionMap.clear();
+    this.positionIndexShapeMap = {};
+    // client.removeListener('setup:init', this._onSetupInit);
     this.container.innerHTML = '';
   }
 
-  display(container, options = {}) {
+  display(setup, container, options = {}) {
+    this.initSetup(setup);
     this.container = container;
     this.container.classList.add('space');
     this.renderingOptions = options;
@@ -71,21 +78,27 @@ class ClientSpace extends ClientModule {
     this.group = group;
 
     this.resize(this.container);
-    // this.positionIndexElementMap = new Map();
-    this.positionIndexElementMap = {};
   }
 
   resize() {
     const boundingRect = this.container.getBoundingClientRect();
     const containerWidth = boundingRect.width;
     const containerHeight = boundingRect.height;
+    // force adaptation to container size
+    if (this.fitContainer) {
+      this.width = containerWidth;
+      this.height = containerHeight;
+    }
+
     const ratio = (() => {
       return (this.width > this.height) ?
         containerWidth / this.width :
         containerHeight / this.height;
     })();
+
     const svgWidth = this.width * ratio;
     const svgHeight = this.height * ratio;
+
     const offsetLeft = (containerWidth - svgWidth) / 2;
     const offsetTop = (containerHeight - svgHeight) / 2;
 
@@ -98,7 +111,7 @@ class ClientSpace extends ClientModule {
     this.svg.style.left = `${offsetLeft}px`;
     this.svg.style.top = `${offsetTop}px`;
 
-        // apply rotations
+    // apply rotations
     if (this.renderingOptions.transform) {
       switch (this.renderingOptions.transform) {
         case 'rotate180':
@@ -125,6 +138,24 @@ class ClientSpace extends ClientModule {
     positions.forEach((position) => {
       this.addPosition(position, size);
     });
+
+    // add listeners
+    if (this.listenTouchEvent) {
+      this.container.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        const dots = Array.from(this.shapePositionMap.keys());
+        let target = e.target;
+
+        while (target !== this.container) {
+          if (dots.indexOf(target) !== -1) {
+            const position = this.shapePositionMap.get(target);
+            this.emit('select', position);
+          }
+
+          target = target.parentNode;
+        }
+      });
+    }
   }
 
   addPosition(position, size) {
@@ -139,13 +170,12 @@ class ClientSpace extends ClientModule {
     dot.style.fill = 'steelblue';
 
     this.group.appendChild(dot);
-    // this.positionIndexElementMap.set(index, dot);
-    this.positionIndexElementMap[index] = dot;
+    this.shapePositionMap.set(dot, position);
+    this.positionIndexShapeMap[index] = dot;
   }
 
   removePosition(position) {
-    // const el = this.positionIndexElementMap.get(position.index);
-    const el = this.positionIndexElementMap[position.index];
+    const el = this. positionIndexShapeMap[position.index];
     this.group.removeChild(el);
   }
 

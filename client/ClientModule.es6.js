@@ -33,7 +33,7 @@ class Sequential extends Promised {
     let promise = null;
 
     for(let next of this.modules) {
-      if(mod !== null) 
+      if(mod !== null)
         promise.then(() => next.launch());
 
       mod = next;
@@ -109,7 +109,7 @@ class ClientModule extends Promised {
   }
 
   reset() {
-    this.isStarted = false;    
+    this.isStarted = false;
   }
 
   restart() {
@@ -135,7 +135,7 @@ class ClientModule extends Promised {
       this.showsView = false;
     }
 
-    if(this.resolvePromised)
+    if (this.resolvePromised)
       this.resolvePromised();
   }
 
