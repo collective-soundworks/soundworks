@@ -56,6 +56,17 @@ class ClientSetup extends ClientModule {
     client.removeListener(this.name + ':init', this._init);
   }
 
+  getNumPositions() {
+    if (this.labels.length || this.coordinates.length) {
+      var numLabels = this.labels.length || Infinity;
+      var numCoordinates = this.coordinates.length || Infinity;
+
+      return Math.min(numLabels, numCoordinates);
+    }
+
+    return 0;
+  }
+
   // display(div, options = {}) {
   //   div.classList.add('setup');
 
