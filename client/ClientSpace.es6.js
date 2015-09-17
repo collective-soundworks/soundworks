@@ -85,10 +85,6 @@ class ClientSpace extends ClientModule {
     const containerWidth = boundingRect.width;
     const containerHeight = boundingRect.height;
     // force adaptation to container size
-    if (this.fitContainer) {
-      this.width = containerWidth;
-      this.height = containerHeight;
-    }
 
     const ratio = (() => {
       return (this.width > this.height) ?
@@ -96,8 +92,13 @@ class ClientSpace extends ClientModule {
         containerHeight / this.height;
     })();
 
-    const svgWidth = this.width * ratio;
-    const svgHeight = this.height * ratio;
+    let svgWidth = this.width * ratio;
+    let svgHeight = this.height * ratio;
+
+    if (this.fitContainer) {
+      svgWidth = containerWidth;
+      svgHeight = containerHeight;
+    }
 
     const offsetLeft = (containerWidth - svgWidth) / 2;
     const offsetTop = (containerHeight - svgHeight) / 2;
