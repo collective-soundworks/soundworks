@@ -31,7 +31,7 @@ class ClientDialog extends ClientModule {
     this._initWakeLock();
 
     // install click listener
-    // if (client.platform.isMobile)
+    // if (client.platform.isMobile) // TODO: remove completely?
     //   this.view.addEventListener('touchend', this._clickHandler);
     // else
       this.view.addEventListener('click', this._clickHandler);
@@ -60,7 +60,7 @@ class ClientDialog extends ClientModule {
       this._requestWakeLock();
 
     this.view.removeEventListener('click', this._clickHandler);
-    this.view.removeEventListener('touchstart', this._clickHandler);
+    // this.view.removeEventListener('touchstart', this._clickHandler); TODO: remove completely?
     this.done();
   }
 
