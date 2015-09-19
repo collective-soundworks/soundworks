@@ -29,11 +29,11 @@ class ClientDialog extends ClientModule {
 
     // initialize video element for wakeLocking
     this._initWakeLock();
-    
+
     // install click listener
-    if (client.platform.isMobile)
-      this.view.addEventListener('touchstart', this._clickHandler);
-    else
+    // if (client.platform.isMobile)
+    //   this.view.addEventListener('touchend', this._clickHandler);
+    // else
       this.view.addEventListener('click', this._clickHandler);
   }
 
