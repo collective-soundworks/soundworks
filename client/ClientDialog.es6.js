@@ -29,7 +29,7 @@ class ClientDialog extends ClientModule {
 
     // initialize video element for wakeLocking
     this._initWakeLock();
-    
+
     // install click listener
     if (client.platform.isMobile)
       this.view.addEventListener('touchstart', this._clickHandler);
@@ -49,7 +49,7 @@ class ClientDialog extends ClientModule {
     o.connect(g);
     g.connect(audioContext.destination);
     o.start(0);
-    o.stop(audioContext.currentTime + 0.000001);
+    o.stop(audioContext.currentTime + 0.01);
   }
 
   _clickHandler() {
