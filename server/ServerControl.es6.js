@@ -75,7 +75,7 @@ class ServerControl extends ServerModule {
     if (event) {
       this._broadcastEvent(event);
     } else {
-      console.log('server control: send unknown event "' + name + '"');      
+      console.log('server control: send unknown event "' + name + '"');
     }
   }
 
@@ -86,7 +86,7 @@ class ServerControl extends ServerModule {
       event.value = value;
       this._broadcastEvent(event);
     } else {
-      console.log('server control: update unknown event "' + name + '"');      
+      console.log('server control: update unknown event "' + name + '"');
     }
   }
 
