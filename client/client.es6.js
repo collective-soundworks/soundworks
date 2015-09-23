@@ -65,11 +65,14 @@ function init(clientType = 'player', options = {}) {
   client.type = clientType;
   client.io = null;
 
+  if (options.io === undefined) { options.io = true; }
+  if (options.socketUrl === undefined) { options.socketUrl = ''; }
+
   if (options.io !== false) {
     var io = require('socket.io-client');
 
     client.io = io;
-    client.socket = client.io('/' + clientType, {
+    client.socket = client.io(options.socketUrl + '/' + clientType, {
       transports: ['websocket']
     });
 

@@ -6,7 +6,7 @@
 
 var ClientModule = require('./ClientModule');
 var client = require('./client');
-var AudioBufferLoader = require('waves-loaders').AudioBufferLoader;
+var SuperLoader = require('waves-loaders').SuperLoader;
 
 class ClientLoader extends ClientModule {
   constructor(options = {}) {
@@ -56,7 +56,7 @@ class ClientLoader extends ClientModule {
   }
 
   _loadFile(index, file) {
-    let loader = new AudioBufferLoader();
+    let loader = new SuperLoader();
 
     loader
       .load([file])
@@ -81,7 +81,7 @@ class ClientLoader extends ClientModule {
 
       this.done();
     } else {
-      let loader = new AudioBufferLoader();
+      let loader = new SuperLoader();
 
       this._fileProgress = [];
 
