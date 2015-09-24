@@ -56,7 +56,7 @@ class ClientDialog extends ClientModule {
       this._requestWakeLock();
 
     this.view.removeEventListener('click', this._clickHandler);
-    // this.view.removeEventListener('touchstart', this._clickHandler); TODO: remove completely?
+
     this.done();
   }
 
