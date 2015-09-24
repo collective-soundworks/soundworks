@@ -16,5 +16,6 @@ module.exports = {
   Performance: require('./ServerPerformance'),
   Placer: require('./ServerPlacer'),
   Setup: require('./ServerSetup'),
+  Survey: require('./ServerSurvey'),
   Sync: require('./ServerSync')
 };

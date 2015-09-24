@@ -1,43 +1,51 @@
 const ClientModule = require('./ClientModule');
 const client = require('./client');
 
-class RadioQuestion {
-  constructor(label, answers) {
+// renderers
+class AbstractSelectorQuestion {
+    constructor(label, answers) {
     this.label = label;
     this.answers = answers;
 
     this._onSelect = this._onSelect.bind(this);
   }
 
-  render() {
-    let title = `<p class="question">${this.label}</p>`;
+  render(container) {
+    this.container = container;
+
+    let title = `<p class="label">${this.label}</p>`;
     let answers = '';
 
     for (let key in this.answers) {
       let value = this.answers[key];
-      answers += `<p class="answer" data-key="${key}">${value}</p>`;
+      answers += `<p class="answer ${this.type}" data-key="${key}">${value}</p>`;
     }
 
     return `<div>${title}${answers}</div>`;
   }
 
   destroy() {
-    // unbind events
     this.unbindEvents();
   }
 
-  bindEvents(container) {
-    this.answersEl = Array.from(container.querySelectorAll('.answer'));
-    container.addEventListener('click', this._onSelect, false);
+  bindEvents() {
+    this.answersEl = Array.from(this.container.querySelectorAll('.answer'));
+    this.container.addEventListener('click', this._onSelect, false);
   }
 
   unbindEvents() {
-    container.removeEventListener('click', this._onSelect, false);
+    this.container.removeEventListener('click', this._onSelect, false);
+  }
+}
+
+class RadioQuestion extends AbstractSelectorQuestion {
+  constructor(label, answers) {
+    super(label, answers);
+    this.type = 'radio'
   }
 
   _onSelect(e) {
     const target = e.target;
-
     if (!target.classList.contains('answer')) { return; }
 
     this.answersEl.forEach((el) => { el.classList.remove('selected'); });
@@ -56,6 +64,94 @@ class RadioQuestion {
   }
 }
 
+class CheckboxQuestion extends AbstractSelectorQuestion {
+  constructor(label, answers) {
+    super(label, answers);
+    this.type = 'checkbox'
+  }
+
+  _onSelect(e) {
+    const target = e.target;
+    if (!target.classList.contains('answer')) { return; }
+
+    const method = target.classList.contains('selected') ? 'remove' : 'add';
+    target.classList[method]('selected');
+  }
+
+  getAnswer() {
+    const answers = [];
+
+    for (let i = 0; i < this.answersEl.length; i++) {
+      let el = this.answersEl[i];
+      if (el.classList.contains('selected')) {
+        answers.push(el.getAttribute('data-key'));
+      }
+    };
+
+    return answers.length === 0 ? null : answers;
+  }
+}
+
+class RangeQuestion {
+  constructor(label, min = 0, max = 10, step = 1, defaultValue = 5) {
+    this.label = label;
+    this.min = min;
+    this.max = max;
+    this.step = step;
+    this.defaultValue = defaultValue;
+
+    this._onInput = this._onInput.bind(this);
+  }
+
+  render(container) {
+    this.container = container;
+
+    const label = document.createElement('p');
+    label.classList.add('label');
+    label.textContent = this.label;
+
+    this._range = document.createElement('input');
+    this._range.setAttribute('type', 'range');
+    this._range.setAttribute('min', this.min);
+    this._range.setAttribute('max', this.max);
+    this._range.setAttribute('step', this.step);
+    this._range.setAttribute('value', this.defaultValue);
+    this._range.classList.add('slider', 'answer');
+
+    this._number = document.createElement('span');
+    this._number.classList.add('feedback');
+    this._number.textContent = this.defaultValue;
+
+    const div = document.createElement('div');
+    div.appendChild(label);
+    div.appendChild(this._range);
+    div.appendChild(this._number);
+
+    return div;
+  }
+
+  destroy() {
+    this.unbindEvents();
+  }
+
+  bindEvents() {
+    this._range.addEventListener('input', this._onInput, false);
+  }
+
+  unbindEvents() {
+    this._range.removeEventListener('input', this._onInput, false);
+  }
+
+  _onInput(e) {
+    this._number.textContent = this._range.value;
+  }
+
+  getAnswer() {
+    return parseFloat(this._range.value);
+  }
+}
+
+// module
 class ClientSurvey extends ClientModule {
   constructor(surveyConfig, options = {}) {
     super(options.name || 'survey', true, options.color);
@@ -66,7 +162,7 @@ class ClientSurvey extends ClientModule {
 
     this.survey = surveyConfig;
     this.contents = [];
-    this.answers = [];
+    this.answers = {};
 
     this.createRenderers();
     this.currentQuestionIndex = 0;
@@ -100,21 +196,22 @@ class ClientSurvey extends ClientModule {
   }
 
   createRenderers() {
-    this.renderers = this.survey.map((question) => {
+    this.renderers = this.survey.map((q, index) => {
       let renderer;
 
-      switch (question.type) {
+      switch (q.type) {
         case 'radio':
-          renderer = new RadioQuestion(question.label, question.answers);
+          renderer = new RadioQuestion(q.label, q.answers);
           break;
         case 'checkbox':
-
+          renderer = new CheckboxQuestion(q.label, q.answers);
           break;
-        case 'slider':
-
+        case 'range':
+          renderer = new RangeQuestion(q.label, q.min, q.max, q.step, q.defaultValue);
           break;
       }
 
+      renderer.id = q.id || `question-${index}`;
       return renderer;
     });
   }
@@ -124,8 +221,7 @@ class ClientSurvey extends ClientModule {
       const answer = this.currentRenderer.getAnswer();
       if (answer === null) { return; }
 
-      this.answers.push(answer);
-      console.log(this.answers);
+      this.answers[this.currentRenderer.id] = answer;
       this.currentRenderer.destroy();
     }
 
@@ -133,9 +229,9 @@ class ClientSurvey extends ClientModule {
     if (this.currentRenderer) {
       // update counter
       this._currentQuestionCounter.textContent = this.currentQuestionIndex + 1;
-      const htmlContent = this.currentRenderer.render();
+      const htmlContent = this.currentRenderer.render(this.view);
       this.setCenteredViewContent(htmlContent);
-      this.currentRenderer.bindEvents(this.view);
+      this.currentRenderer.bindEvents();
 
       this.currentQuestionIndex += 1;
     } else {
@@ -145,7 +241,8 @@ class ClientSurvey extends ClientModule {
       // display thanks
       this.setCenteredViewContent(this.survey.thanksContent);
       // send informations to server
-      console.log('send', this.answers, 'to server');
+      this.answers.timestamp = new Date().getTime();
+      client.send(`${this.name}:answers`, JSON.stringify(this.answers));
       // this.done(); // when should we call this ?
     }
   }

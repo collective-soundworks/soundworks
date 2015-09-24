@@ -151,7 +151,16 @@ class ClientModule extends Promised {
       }
 
       if (htmlContent) {
-        this._centeredViewContent.innerHTML = htmlContent;
+        if (htmlContent instanceof HTMLElement) {
+          if (this._centeredViewContent.firstChild) {
+            this._centeredViewContent.removeChild(this._centeredViewContent.firstChild);
+          }
+
+          this._centeredViewContent.appendChild(htmlContent);
+        } else {
+          // is a string
+          this._centeredViewContent.innerHTML = htmlContent;
+        }
       }
     }
   }

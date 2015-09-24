@@ -1,4 +1,4 @@
-var ServerModule = require('./ServerModule');
+const ServerModule = require('./ServerModule');
 
 
 class ServerPlacer extends ServerModule {

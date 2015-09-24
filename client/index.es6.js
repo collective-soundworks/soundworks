@@ -4,6 +4,8 @@
  */
 'use strict';
 
+// fix some kind of bug with Traceur...
+// should be retested and hopefully removed with Babel
 if (!window.Promise) {
   window.Promise = require('es6-promise').Promise;
 }
