@@ -4,6 +4,10 @@
  */
 'use strict';
 
+if (!window.Promise) {
+  window.Promise = require('es6-promise');
+}
+
 module.exports = {
   audioContext: require('waves-audio').audioContext,
   client: require('./client'),
@@ -23,5 +27,6 @@ module.exports = {
   Selector: require('./ClientSelector'),
   Setup: require('./ClientSetup'), // to be removed
   Space: require('./ClientSpace'),
+  Survey: require('./ClientSurvey'),
   Sync: require('./ClientSync')
 };
