@@ -4,10 +4,6 @@
  */
 'use strict';
 
-if (!window.Promise) {
-  window.Promise = require('es6-promise');
-}
-
 module.exports = {
   audioContext: require('waves-audio').audioContext,
   client: require('./client'),
