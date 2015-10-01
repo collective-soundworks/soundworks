@@ -8,18 +8,12 @@ var ClientModule = require('./ClientModule');
 var client = require('./client');
 var input = require('./input');
 
-function instructions(label) {
-  return "<p>Go to</p>" +
-    "<div class='checkin-label circled'><span>" + label + "</span></div>" +
-    "<p><small>Touch the screen<br/>when you are ready.</small></p>";
-}
-
 class ClientLocator extends ClientModule {
   constructor(options = {}) {
     super(options.name || 'locator', true, options.color);
 
     this.select = options.select || 'automatic'; // 'automatic' | 'label' | 'location'
-    this.instructions = options.instructions || instructions;
+    this.instructions = options.instructions || '<small>Indiquez votre position dans la salle</small>';
     this.setup = options.setup || null;
     this.showBackground = options.showBackground ||  false;
 
@@ -38,16 +32,15 @@ class ClientLocator extends ClientModule {
     let textDiv = document.createElement('div');
     textDiv.classList.add('message');
     let text = document.createElement('p');
-    // text.innerHTML = "<small>Indicate your location on the map and click &ldquo;OK&rdquo;.</small>";
-    text.innerHTML = "<small>Indiquez votre position sur le plan</small>";
+    text.innerHTML = this.instructions;
     this._textDiv = textDiv;
     this._text = text;
 
     // Button
     let button = document.createElement('div');
     button.classList.add('btn');
-    button.classList.add('disabled');
-    button.innerHTML = "VALIDER";
+    button.classList.add('hidden');
+    button.innerHTML = "Valider";
     this._button = button;
 
     // Position circle
@@ -90,7 +83,8 @@ class ClientLocator extends ClientModule {
     client.coordinates = null;
 
     this._positionDiv.classList.add('hidden');
-    this._button.classList.add('disabled');
+    this._text.classList.remove('hidden');
+    this._button.classList.add('hidden');
 
     this._button.removeEventListener('click', this._sendCoordinates, false);
     this._surfaceDiv.removeEventListener('touchstart', this._touchStartHandler, false);
@@ -181,7 +175,8 @@ class ClientLocator extends ClientModule {
 
     if (this._positionDiv.classList.contains('hidden')) {
       this._positionDiv.classList.remove('hidden');
-      this._button.classList.remove('disabled');
+      this._button.classList.remove('hidden');
+      this._text.classList.add('hidden');
     }
 
     // TODO: handle mirror
