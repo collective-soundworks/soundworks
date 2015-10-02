@@ -317,6 +317,7 @@ class ClientSurvey extends ClientModule {
       this.setCenteredViewContent(this.options.thanksContent);
       // send informations to server
       this.answers.timestamp = new Date().getTime();
+      this.answers.userAgent = navigator.userAgent;
       client.send(`${this.name}:answers`, JSON.stringify(this.answers));
     }
   }

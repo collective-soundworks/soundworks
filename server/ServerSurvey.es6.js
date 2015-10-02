@@ -1,16 +1,22 @@
 const ServerModule = require('./ServerModule');
 const fs = require('fs');
 
+function padLeft(str, value, length) {
+  str = str + '';
+  while (str.length < length) { str = value + str; }
+  return str;
+}
+
 class ServerSurvey extends ServerModule {
   constructor(options = {}) {
     super(options.name || 'survey');
     // prepare file name
     const now = new Date();
-    const year = now.getFullYear();
-    const month = now.getMonth();
-    const day = now.getDate();
-    const hour = now.getHours();
-    const minutes = now.getMinutes();
+    const year = padLeft(now.getFullYear(), 0, 2);
+    const month = padLeft(now.getMonth() + 1, 0, 2);
+    const day = padLeft(now.getDate(), 0, 2);
+    const hour = padLeft(now.getHours(), 0, 2);
+    const minutes = padLeft(now.getMinutes(), 0, 2);
     const fileName = `survey-${year}-${month}-${day}_${hour}-${minutes}`;
 
     // @TODO allow to change folder name (aka `surveys`)
