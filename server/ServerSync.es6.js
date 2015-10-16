@@ -10,9 +10,10 @@ var Sync = require('sync/server');
 class ServerSync extends ServerModule {
   constructor(options = {}) {
     super(options.name || 'sync');
-    
+
+    this.hrtimeStart = process.hrtime();
     this.sync = new Sync(() => {
-      let time = process.hrtime();
+      const time = process.hrtime(this.hrtimeStart);
       return time[0] + time[1] * 1e-9;
     });
   }
