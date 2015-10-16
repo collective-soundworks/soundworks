@@ -13,7 +13,6 @@ class ClientLoader extends ClientModule {
     super(options.name || 'loader', true, options.color);
 
     this.extensions = options.extensions ||  ['.wav', '.mp3'];
-
     this.files = options.files || null;
     this.buffers = [];
 
@@ -22,8 +21,10 @@ class ClientLoader extends ClientModule {
     this._fileProgress = null;
     this._progressBar = null;
     this._numFilesLoaded = 0;
+    this._showProgress = (options.showProgress !== undefined) ?
+      options.showProgress : true;
 
-    if (!this._asynchronous) {
+    if (!this._asynchronous && this._showProgress) {
       let viewContent = document.createElement('div');
       viewContent.classList.add('centered-content');
       viewContent.classList.add('soft-blink');
@@ -111,8 +112,10 @@ class ClientLoader extends ClientModule {
       progress += this._fileProgress[i] / this._fileProgress.length;
     }
 
-    progress = Math.ceil(progress * 100);
-    this._progressBar.style.width = progress + "%";
+    if (this._progressBar) {
+      progress = Math.ceil(progress * 100);
+      this._progressBar.style.width = progress + '%';
+    }
   }
 }
 
