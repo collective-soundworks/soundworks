@@ -38,6 +38,7 @@ class ListSelector extends EventEmitter {
 
   resize() {
     if (!this.container) { return; } // if called before `display`
+
     const containerWidth = this.container.getBoundingClientRect().width;
     const containerHeight = this.container.getBoundingClientRect().height;
 
@@ -47,12 +48,12 @@ class ListSelector extends EventEmitter {
     const top = (containerHeight - height) / 2;
 
     this.el.style.position = 'absolute';
-    this.el.style.width = width;
-    this.el.style.top = top;
-    this.el.style.left = left;
+    this.el.style.width = width + 'px';
+    this.el.style.top = top + 'px';
+    this.el.style.left = left + 'px';
 
-    this.select.style.width = width;
-    this.button.style.width = width;
+    this.select.style.width = width + 'px';
+    this.button.style.width = width + 'px';
   }
 
   displayPositions(positions) {
