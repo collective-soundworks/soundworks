@@ -41,7 +41,7 @@ If you want to hack in right away, your best best is to go straight to the [`sou
 
 However, if you want to have a better understanding of how the machinery works, let's now deep dive in the doc…
 
-### Client/server architecture 
+### Client/server architecture
 
 In order to connect the mobile devices with each other, *Soundworks* implements a client/server architecture using a `Node.js` server and WebSockets to pass messages between the server and the clients (currently with the `socket.io` library).
 
@@ -113,10 +113,10 @@ A scenario built with *Soundworks* consists in a succession and combination of m
 On the client side, modules can be executed in a particular order according to a given scenario. As an example, a scenario could provide the following interactions when a participant connects to the application’s root URL (as a `player`):
 - The mobile devices displays a **welcome** message (*e.g.* “Welcome to the performance!”). When the participant clicks on the screen…
 - The client goes through a **check-in** procedure for which the device may display some instructions. In the meantime, …
-- The client **synchronizes** its clock with the server. Finally, when these are done… 
+- The client **synchronizes** its clock with the server. Finally, when these are done…
 - The client joins the **performance**.
 
-Each of these steps corresponds to a module. While most of the modules are provided by the library (cf. the [Modules provided by the library](#modules-provided-by-the-library) section), you will generally have to write the module that implements the most important part of your scenario: the `performance`. 
+Each of these steps corresponds to a module. While most of the modules are provided by the library (cf. the [Modules provided by the library](#modules-provided-by-the-library) section), you will generally have to write the module that implements the most important part of your scenario: the `performance`.
 
 In the example described above, the client side code corresponding to the `player` client (in `src/player/index.es6.js`) would look like this:
 
@@ -143,7 +143,7 @@ window.addEventListener('load', () => {
   var checkin = new clientSide.Checkin(...);
   var sync = new clientSide.Sync(...);
   var performance = new MyPerformance(...);
-  
+
   // Launch the modules in a particular order
   client.start(
     client.serial(
@@ -293,7 +293,7 @@ class ClientCheckin extends ClientModule {
     // Receive acknowledgement from the server with client index and optional label
     client.receive('checkin:acknowledge', (index, label) => {
       client.index = index;
-      
+
       if(label) {
         // Display the label in a dialog
         this.setCenteredViewContent("<p>Please go to " + label + " and touch the screen.<p>");
@@ -336,12 +336,12 @@ var serverSide = require('soundworks/server');
 class ServerCheckin extends serverSide.Module {
   constructor(options = {}) {
     super();
-    
+
     // Store setup
     this.setup = options.setup || null;
     this.maxClients = options.maxClients || Infinity;
 
-    // Clip max number of clients 
+    // Clip max number of clients
     if (setup) {
       var numPositions = setup.getNumPositions();
 
@@ -416,12 +416,12 @@ class MyPerformance extends clientSide.Performance {
 
     // Play the welcome sound immediately
     let src = audioContext.createBufferSource();
-    src.buffer = this.loader.audioBuffers[0]; 
+    src.buffer = this.loader.audioBuffers[0];
     src.connect(audioContext.destination);
     src.start(audioContext.currentTime);
 
     this.setCenteredViewContent('Let’s go!'); // display some feedback text in the view
-    
+
     // Play another sound when we receive the 'play' message from the server
     client.receive('performance:play', () => {
       let src = audioContext.createBufferSource();
@@ -447,13 +447,13 @@ class MyPerformance extends serverSide.Performance {
   constructor() {
     super();
   }
-  
+
   // When the client enters the performance...
   enter(client) {
     super.enter(client); // call base class constructor (don't forget this)
 
     // Send a 'play' message to all other clients
-    client.broadcast('performance:play'); 
+    client.broadcast('performance:play');
   }
 
   // In this scenario, when a client connects to the server,
@@ -550,7 +550,7 @@ For clarity, the methods of the `client` object are split into two groups.
 - `parallel(...modules:ClientModule) : ClientModule`  
   The `ClientModule` returned by the `parallel` method starts the given `...modules` in parallel (with their `start` methods), and calls its `done` method after all modules called their own `done` methods.  
   **Note:** you can compound parallel module combinations with serial module sequences (*e.g.* `client.parallel(module1, client.serial(module2, module3), module4);`).  
-  **Note:** the `view` of a module is always full screen, so in the case where modules run in parallel, their `view`s are stacked on top of each other using the `z-index` CSS property. We use the order of the `parallel` method's arguments to determine the order of the stack (*e.g.* in `client.parallel(module1, module2, module3)`, the `view` of `module1` is displayed on top of the `view` of `module2`, which is displayed on top of the `view` of `module3`). 
+  **Note:** the `view` of a module is always full screen, so in the case where modules run in parallel, their `view`s are stacked on top of each other using the `z-index` CSS property. We use the order of the `parallel` method's arguments to determine the order of the stack (*e.g.* in `client.parallel(module1, module2, module3)`, the `view` of `module1` is displayed on top of the `view` of `module2`, which is displayed on top of the `view` of `module3`).
 
 #### Server side: the `server` object
 
@@ -634,7 +634,7 @@ Any module that extends the `ClientModule` class requires the four generic SASS 
 In practice, here is an example of how you would extend this class to create a module on the client side (for a more thorough example, please refer to the [Implementing a module](#implementing-a-module) section).
 
 ```javascript
-/* Client side */ 
+/* Client side */
 
 // Require the Soundworks library (client side)
 var clientSide = require('soundworks/client');
@@ -662,8 +662,9 @@ class MyModule extends clientSide.Module {
 
 The `ServerModule` extends the `EventEmitter` class. Each module should have a `connect` and a `disconnect` method, as explained in the [Implementing a module](#implementing-a-module) section.
 Any module mapped to the type of client `clientType` (thanks to the `server.map` method, see the [`server` core object](#server-side-the-server-object) for more information) would call its `connect` method when such a client connects to the server, and its `disconnect` method when such a client disconnects from the server.
-###### Methods
 
+###### Methods
+++
 - `constructor(name = 'unnamed')`  
   The `constructor` accepts the following arguments:
   - `name:String`, name of the module.
@@ -671,6 +672,8 @@ Any module mapped to the type of client `clientType` (thanks to the `server.map`
   The `connect` method is called when the client `client` connects to the server, and should handle the logic of the module on the server side. For instance, it can take care of the communication with the client side module by setting up WebSocket message listeners and sending WebSocket messages, or it can add the client to a list to keep track of all the connected clients.
 - `disconnect(client:ServerClient)`  
   The `disconnect` method is called when the client `client` disconnects from the server, and should do the necessary when that happens. For instance, if the module keeps track of the connected clients, it should remove the client from that list.
+
+
 
 In practice, here is how you would extend this class to create a module on the server side (for a more thorough example, please refer to the [Implementing a module](#implementing-a-module) section).
 
@@ -702,11 +705,11 @@ The `Performance` module is a base class meant to be extended when you write the
 **Note:** this base class is provided for convenience only. You can also write your performance by extending a regular `Module` rather than extending this class.
 
 ##### ClientPerformance
-
+++
 The `ClientPerformance` module extends the `ClientModule` base class and constitutes a basis on which to build a performance on the client side. It always has the `view` attribute.
 
 ###### Methods
-
+++
 - `constructor(options:Object = {})`  
   The `constructor` accepts the following `options`:
   - `name:String = 'performance'`, the name of the module;
@@ -721,7 +724,7 @@ The `ClientPerformance` module extends the `ClientModule` base class and constit
 The `ServerPerformance` module extends the `ServerModule` base class and constitutes a basis on which to build a performance on the server side.
 
 ###### Methods
-
+++
 - `constructor(options:Object = {})`  
   The `constructor` accepts the following `options`:
   - `name:String`, name of the module.
@@ -737,7 +740,7 @@ The `ServerPerformance` module extends the `ServerModule` base class and constit
 **Note:** in practice, you will mostly override the `enter` and `exit` methods when you write your performance.
 
 ###### Attributes
-
+++
 - `clients:Array = []`  
   The `clients` attribute is an array that contains the list of the clients who are currently in the performance (*i.e* who started it and have not left it yet).
 
@@ -1037,7 +1040,7 @@ The `ServerSetup` extends the `ServerModule` base class and takes care of the se
   The `constructor` accepts the following `options`:
   - `name:String`, `name` of the module.
 - `generate(type:String = 'matrix', params = {})`  
-  The `generate` method generates a surface and/or predefined positions according to a given type of geometry `type` and the corresponding parameters `params`. The following geometries are available: 
+  The `generate` method generates a surface and/or predefined positions according to a given type of geometry `type` and the corresponding parameters `params`. The following geometries are available:
     - `'matrix'`, a matrix setup with the following parameters (in the `params` object):
       - `cols = 3`, number of columns;
       - `rows = 4`, number of rows;

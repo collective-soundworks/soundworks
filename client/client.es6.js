@@ -1,8 +1,4 @@
-/**
- * @fileoverview Soundworks client side
- * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
- */
-"use strict";
+'use strict';
 
 const MobileDetect = require('mobile-detect');
 const ClientModule = require('./ClientModule');
@@ -10,7 +6,7 @@ const ClientModule = require('./ClientModule');
 // debug - http://socket.io/docs/logging-and-debugging/#available-debugging-scopes
 // localStorage.debug = '*';
 
-var client = {
+exports default client = {
   type: null,
   ready: null,
   index: -1,
@@ -138,5 +134,3 @@ function removeListener(msg, callback) {
   if (client.socket)
     client.socket.removeListener(msg, callback);
 }
-
-module.exports = client;

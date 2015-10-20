@@ -1,11 +1,7 @@
-/**
- * @fileoverview Soundworks client side module base class
- * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
- */
 'use strict';
 
-var EventEmitter = require('events').EventEmitter;
-var container = window.container || (window.container = document.getElementById('container'));
+const EventEmitter = require('events').EventEmitter;
+const container = window.container || (window.container = document.getElementById('container'));
 
 class Promised extends EventEmitter {
   constructor() {
@@ -72,8 +68,8 @@ class Parallel extends Promised {
   }
 }
 
-class ClientModule extends Promised {
-  constructor(name, createView = true, color = 'black') {
+export default class ClientModule extends Promised {
+  constructor(name, createView = true, color = 'black') { // TODO: change to colorClass?
     super();
 
     this.name = name;
