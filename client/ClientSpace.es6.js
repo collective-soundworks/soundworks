@@ -19,7 +19,7 @@ class ClientSpace extends ClientModule {
     this._yFactor = 1;
 
     // map between shapes and their related positions
-    this.shapePositionMap = new Map();
+    this.shapePositionMap = [];
     this.positionIndexShapeMap = {};
   }
 
@@ -49,7 +49,7 @@ class ClientSpace extends ClientModule {
   }
 
   reset() {
-    this.shapePositionMap.clear();
+    this.shapePositionMap = [];
     this.positionIndexShapeMap = {};
     // client.removeListener('setup:init', this._onSetupInit);
     this.container.innerHTML = '';
@@ -144,13 +144,19 @@ class ClientSpace extends ClientModule {
     if (this.listenTouchEvent) {
       this.container.addEventListener('touchstart', (e) => {
         e.preventDefault();
-        const dots = Array.from(this.shapePositionMap.keys());
+        const dots = this.shapePositionMap.map((entry) => { return entry.dot });
         let target = e.target;
 
+        // Could probably be simplified...
         while (target !== this.container) {
           if (dots.indexOf(target) !== -1) {
-            const position = this.shapePositionMap.get(target);
-            this.emit('select', position);
+            for (let i = 0; i < this.shapePositionMap; i++) {
+              const entry = this.shapePositionMap[i];
+              if (target === entry.dot) {
+                const position = entry.position;
+                this.emit('select', position);
+              }
+            }
           }
 
           target = target.parentNode;
@@ -171,7 +177,7 @@ class ClientSpace extends ClientModule {
     dot.style.fill = 'steelblue';
 
     this.group.appendChild(dot);
-    this.shapePositionMap.set(dot, position);
+    this.shapePositionMap.push({ dot, position });
     this.positionIndexShapeMap[index] = dot;
   }
 
