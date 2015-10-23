@@ -164,10 +164,14 @@ function sendOSC(address, args, url = null, port = null) {
     args: args
   };
 
-  if (url && port)
-    server.osc.send(oscMsg, url, port);
-  else
-    server.osc.send(oscMsg); // use defaults (as defined in the config)
+  try {
+    if (url && port)
+      server.osc.send(oscMsg, url, port);
+    else
+      server.osc.send(oscMsg); // use defaults (as defined in the config)
+  } catch (e) {
+    console.log('Error while sending OSC message:', e);
+  }
 }
 
 function receiveOSC(wildcard, callback) {
