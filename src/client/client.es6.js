@@ -1,11 +1,8 @@
-/**
- * @fileoverview Soundworks client side
- * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
- */
 "use strict";
 
 const MobileDetect = require('mobile-detect');
-const ClientModule = require('./ClientModule');
+
+import ClientModule from './ClientModule.es6.js';
 
 // debug - http://socket.io/docs/logging-and-debugging/#available-debugging-scopes
 // localStorage.debug = '*';
@@ -67,12 +64,12 @@ if (!!(a.canPlayType && a.canPlayType('audio/mpeg;'))) {
 
 /**
  * The `init` method sets the client type and initializes a WebSocket connection associated with the given type.
- * @param {string} [clientType = 'player'] The client type.
+ * @param {String} [clientType = 'player'] The client type.
  * @todo clarify clientType.
  * @param {Object} [options = {}] The options to initialize a client
- * @param {boolean} [options.io] By default, a Soundworks application has a client and a server side. For a standalone application (client side only), use `options.io = false`.
+ * @param {Boolean} [options.io] By default, a Soundworks application has a client and a server side. For a standalone application (client side only), use `options.io = false`.
  * @todo use default value for options.io in the documentation?
- * @param {string} [options.socketUrl] The URL of the WebSocket server.
+ * @param {String} [options.socketUrl] The URL of the WebSocket server.
  */
 function init(clientType = 'player', options = {}) {
   client.type = clientType;
@@ -100,7 +97,7 @@ function init(clientType = 'player', options = {}) {
 
 /**
  * Starts the module logic (*i.e.* the application).
- * @param {function} startFun [todo]
+ * @param {Function} startFun [todo]
  * @todo Clarify the param.
  * @return {Promise} The Promise return value.
  * @todo Clarify return value (promise).
@@ -151,7 +148,7 @@ The `ClientModule` returned by the `parallel` method starts the given `...module
 **Note:** you can compound parallel module combinations with serial module sequences (*e.g.* `client.parallel(module1, client.serial(module2, module3), module4);`).
 **Note:** the `view` of a module is always full screen, so in the case where modules run in parallel, their `view`s are stacked on top of each other using the `z-index` CSS property. We use the order of the `parallel` method's arguments to determine the order of the stack (*e.g.* in `client.parallel(module1, module2, module3)`, the `view` of `module1` is displayed on top of the `view` of `module2`, which is displayed on top of the `view` of `module3`).
  * @deprecated Use the new API with the {@link start} method.
- * @param {...ClientModule} ...modules The modules to run in parallel.
+ * @param {...ClientModule} modules The modules to run in parallel.
  * @return {Promise} [description]
  * @todo Clarify return value
  */
@@ -161,11 +158,11 @@ function parallel(...modules) {
 }
 
 /**
- * Sends a message via WebSockets to the server.
+ * Sends a WebSocket message to the server.
+ *
  * **Note:** on the server side, the server receives the message with the command {@link ServerClient#receive}.
- * @param {string} msg The message name.
- * @param {...*} ...args The values to send with the message.
- * @todo Check how to make arguments of any type.
+ * @param {String} msg Name of the message to send.
+ * @param {...*} args Arguments of the message (as many as needed, of any type).
  */
 function send(msg, ...args) {
   if (client.socket)
@@ -173,10 +170,11 @@ function send(msg, ...args) {
 }
 
 /**
- * Executes a callback function when it receives a message from the server.
+ * Executes a callback function when it receives a WebSocket message from the server.
+ *
  * **Note:** on the server side, the server sends the message with the command {@link server.send}`.
- * @param {string} msg The name of the received message.
- * @param {function} callback The function called when the message is received.
+ * @param {String} msg Name of the received message.
+ * @param {Function} callback Callback function executed when the message is received.
  */
 function receive(msg, callback) {
   if (client.socket) {
@@ -197,4 +195,4 @@ function removeListener(msg, callback) {
     client.socket.removeListener(msg, callback);
 }
 
-module.exports = client;
+export default client;

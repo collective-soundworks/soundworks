@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../">
+  <title data-ice="title">Tutorial</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  
+  
+  <script src="script/manual.js"></script>
+</head>
+<body class="layout-container manual-root" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  <a href="./manual/index.html" data-ice="manualHeaderLink">Manual</a>
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  
+  <a data-ice="repoURL" href="https://github.com/collective-soundworks/soundworks" class="repo-url-github">Repository</a>
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div class="manual-toc-root">
+  
+<div data-ice="manual" data-toc-name="overview">
+    <h1 class="manual-toc-title"><a href="manual/overview.html" data-ice="title">Overview</a></h1>
+    <ul class="manual-toc">
+      
+    <li data-ice="manualNav" class="indent-h1"><span class="manual-dot"></span><a href="manual/overview.html#presentation" data-ice="link">Presentation</a></li>
+<li data-ice="manualNav" class="indent-h1"><span class="manual-dot"></span><a href="manual/overview.html#quick-i-want-to-get-started-" data-ice="link">Quick, I want to get started!</a></li>
+<li data-ice="manualNav" class="indent-h1"><span class="manual-dot"></span><a href="manual/overview.html#modules-provided-by-the-library" data-ice="link">Modules provided by the library</a></li>
+</ul>
+  </div>
+<div data-ice="manual" data-toc-name="tutorial">
+    <h1 class="manual-toc-title"><a href="manual/tutorial.html" data-ice="title">Tutorial</a></h1>
+    <ul class="manual-toc">
+      
+    <li data-ice="manualNav" class="indent-h1"><span class="manual-dot"></span><a href="manual/tutorial.html#composing-a-scenario-from-modules" data-ice="link">Composing a scenario from modules</a></li>
+<li data-ice="manualNav" class="indent-h2"><span class="manual-dot"></span><a href="manual/tutorial.html#client-side" data-ice="link">Client side</a></li>
+<li data-ice="manualNav" class="indent-h2"><span class="manual-dot"></span><a href="manual/tutorial.html#server-side" data-ice="link">Server side</a></li>
+<li data-ice="manualNav" class="indent-h1"><span class="manual-dot"></span><a href="manual/tutorial.html#implementing-a-module" data-ice="link">Implementing a module</a></li>
+<li data-ice="manualNav" class="indent-h2"><span class="manual-dot"></span><a href="manual/tutorial.html#client-side" data-ice="link">Client side</a></li>
+<li data-ice="manualNav" class="indent-h3"><span class="manual-dot"></span><a href="manual/tutorial.html#the-start-method" data-ice="link">The start method</a></li>
+<li data-ice="manualNav" class="indent-h3"><span class="manual-dot"></span><a href="manual/tutorial.html#the-done-method" data-ice="link">The done method</a></li>
+<li data-ice="manualNav" class="indent-h2"><span class="manual-dot"></span><a href="manual/tutorial.html#server-side" data-ice="link">Server side</a></li>
+<li data-ice="manualNav" class="indent-h3"><span class="manual-dot"></span><a href="manual/tutorial.html#the-connect-method" data-ice="link">The connect method</a></li>
+<li data-ice="manualNav" class="indent-h3"><span class="manual-dot"></span><a href="manual/tutorial.html#the-disconnect-method" data-ice="link">The disconnect method</a></li>
+<li data-ice="manualNav" class="indent-h1"><span class="manual-dot"></span><a href="manual/tutorial.html#writing-the-performance-module" data-ice="link">Writing the Performance module</a></li>
+<li data-ice="manualNav" class="indent-h1"><span class="manual-dot"></span><a href="manual/tutorial.html#styling-with-sass" data-ice="link">Styling with SASS</a></li>
+</ul>
+  </div>
+<div data-ice="manual" data-toc-name="usage">
+    <h1 class="manual-toc-title"><a href="manual/usage.html" data-ice="title">Usage</a></h1>
+    <ul class="manual-toc">
+      
+    <li data-ice="manualNav" class="indent-h1"><span class="manual-dot"></span><a href="manual/usage.html#client-server-architecture" data-ice="link">Client/server architecture</a></li>
+<li data-ice="manualNav" class="indent-h1"><span class="manual-dot"></span><a href="manual/usage.html#express-app-structure" data-ice="link">Express app structure</a></li>
+</ul>
+  </div>
+<div data-ice="manual" data-toc-name="example">
+    <h1 class="manual-toc-title"><a href="manual/example.html" data-ice="title">Example</a></h1>
+    <ul class="manual-toc">
+      
+    <li data-ice="manualNav" class="indent-h1"><span class="manual-dot"></span><a href="manual/example.html#example-a-simplified-version-of-the-checkin-module" data-ice="link">Example: a simplified version of the checkin module</a></li>
+<li data-ice="manualNav" class="indent-h2"><span class="manual-dot"></span><a href="manual/example.html#client-side-the-clientcheckin-module" data-ice="link">Client side: the ClientCheckin module</a></li>
+<li data-ice="manualNav" class="indent-h2"><span class="manual-dot"></span><a href="manual/example.html#server-side-the-servercheckin-module" data-ice="link">Server side: the ServerCheckin module</a></li>
+</ul>
+  </div>
+<div data-ice="manual" data-toc-name="reference">
+    <h1 class="manual-toc-title"><a href="identifiers.html" data-ice="title">Reference</a></h1>
+    <ul class="manual-toc">
+      
+    <li data-ice="manualNav" class="indent-h1"><span class="manual-dot"></span><a href="identifiers.html#class" data-ice="link">Class</a></li>
+<li data-ice="manualNav" class="indent-h1"><span class="manual-dot"></span><a href="identifiers.html#variable" data-ice="link">Variable</a></li>
+</ul>
+  </div>
+<div data-ice="manual" data-toc-name="changelog">
+    <h1 class="manual-toc-title"><a href="manual/changelog.html" data-ice="title">Changelog</a></h1>
+    <ul class="manual-toc">
+      
+    </ul>
+  </div>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><div class="github-markdown">
+  <div class="manual-breadcrumb-list">
+    <a href="./manual/./index.html">Manual</a>
+    <span>&#xBB;</span>
+    <span data-ice="title">Tutorial</span>
+  </div>
+  <div data-ice="content"><h1 id="composing-a-scenario-from-modules">Composing a scenario from modules</h1>
+<p>A scenario built with <em>Soundworks</em> consists in a succession and combination of modules, each of them corresponding to a step of the scenario.</p>
+<h2 id="client-side">Client side</h2>
+<p>On the client side, modules can be executed in a particular order according to a given scenario. As an example, a scenario could provide the following interactions when a participant connects to the application&#x2019;s root URL (as a <code>player</code>):</p>
+<ul>
+<li>The mobile devices displays a <strong>welcome</strong> message (<em>e.g.</em> &#x201C;Welcome to the performance!&#x201D;). When the participant clicks on the screen&#x2026;</li>
+<li>The client goes through a <strong>check-in</strong> procedure for which the device may display some instructions. In the meantime, &#x2026;</li>
+<li>The client <strong>synchronizes</strong> its clock with the server. Finally, when these are done&#x2026;</li>
+<li>The client joins the <strong>performance</strong>.</li>
+</ul>
+<p>Each of these steps corresponds to a module. While most of the modules are provided by the library (cf. the <a href="#modules-provided-by-the-library">Modules provided by the library</a> section), you will generally have to write the module that implements the most important part of your scenario: the <code>performance</code>.</p>
+<p>In the example described above, the client side code corresponding to the <code>player</code> client (in <code>src/player/index.es6.js</code>) would look like this:</p>
+<pre><code class="lang-javascript"><code class="source-code prettyprint">/* Client side */
+
+// Require the Soundworks library (client side) and the &apos;client&apos; object
+var clientSide = require(&apos;soundworks/client&apos;);
+var client = clientSide.client;
+
+// Initialize the type of client to associate it to the corresponding URL
+// (&apos;player&apos; clients connect via the root URL)
+client.init(&apos;player&apos;);
+
+// Write the performance module
+class MyPerformance extends clientSide.Performance {
+  ...
+}
+
+// Scenario logic
+window.addEventListener(&apos;load&apos;, () =&gt; {
+  // Initialize the modules
+  var welcome = new clientSide.Dialog(...);
+  var checkin = new clientSide.Checkin(...);
+  var sync = new clientSide.Sync(...);
+  var performance = new MyPerformance(...);
+
+  // Launch the modules in a particular order
+  client.start(
+    client.serial(
+      welcome,
+      client.parallel(
+        checkin,
+        sync
+      ),
+      performance
+    )
+  );
+});</code>
+</code></pre>
+<p>To run a sequence of modules in series, we use <code>client.serial(module1, module2, ...)</code>. On the other hand, if some modules need to be run in parallel, we use <code>client.parallel(module1, module2, ...)</code>. (For more information about this, please refer to the <a href="#module-logic"><code>client</code> object module logic</a> section.)</p>
+<p>For any other type of client (<em>e.g.</em> <code>conductor</code> or <code>env</code>), the file would be very similar, except for:</p>
+<ul>
+<li>The initialization of the client, that would correspond to the type of client (<em>e.g.</em> <code>client.init(&apos;conductor&apos;);</code> or <code>client.init(&apos;env&apos;);</code>);</li>
+<li>The modules used by that type of client. For instance, the <code>env</code> clients may require a <code>sync</code> and <code>performance</code> module but may not need a <code>welcome</code> screen nor a <code>checkin</code>.</li>
+</ul>
+<p>As some of the modules on the client side need to communicate with the server (for instance the <code>sync</code> process requires a dialog between the client and the server to synchronize the clocks), let&apos;s now have a look at the server side.</p>
+<h2 id="server-side">Server side</h2>
+<p>The server side of the application must provide the server modules that respond to the client side modules. The server side code (in <code>src/server/index.es6.js</code>) corresponding to the example above would look like this:</p>
+<pre><code class="lang-javascript"><code class="source-code prettyprint">/* Server side */
+
+// Require the Soundworks library (server side) and the &apos;server&apos; object
+var serverSide = require(&apos;soundworks/server&apos;);
+var server = serverSide.server;
+
+// Setup the Express app
+var express = require(&apos;express&apos;);
+var app = express();
+
+// Start the server with a given public directory and port
+var path = require(&apos;path&apos;);
+var dir = path.join(__dirname, &apos;../../public&apos;);
+server.start(app, dir, 3000);
+
+// Implement the player and env performance modules
+class MyPlayerPerformance extends serverSide.Performance {
+  ...
+}
+
+class MyEnvPerformance extends serverSide.Performance {
+  ...
+}
+
+// Initialize the modules (needed by the client side for some dialog)
+var checkin = new serverSide.Checkin(...);
+var sync = new serverSide.Sync(...);
+var playerPerformance = new MyPlayerPerformance(...);
+var envPerformance = new MyEnvPerformance(...);
+
+// Map the server modules to the &apos;player&apos; client type (and root URL)
+server.map(&apos;player&apos;, sync, checkin, playerPerformance);
+
+// Map the server modules to the &apos;env&apos; client type (and /env URL)
+server.map(&apos;env&apos;, sync, envPerformance);</code>
+</code></pre>
+<p>Among the modules used by the <code>player</code> clients, three of them need to communicate with the server: <code>checkin</code>, <code>sync</code> and <code>performance</code>. (The <code>dialog</code> module only displays a welcome message to the participant and does not involve any interaction between the client and server. For more information about the modules that have a both a client and a server side, please refer to the <a href="#clientserver-modules">Client/server modules</a> section in the API.) Hence, after setting up the Express app and starting the server, we instantiate the <code>checkin</code>, <code>sync</code>, and <code>playerPerformance</code> server side modules and map them to the <code>&apos;player&apos;</code> client type. Consequently, these modules can dialog with the corresponding client side modules, and respond to the <code>player</code> clients connected via the root URL of the application.</p>
+<p>Similarly, we map the <code>sync</code> module and the <code>envPerformance</code> module to the <code>&apos;env&apos;</code> client type, provided that these are the modules the <code>env</code> clients need to dialog with.</p>
+<h1 id="implementing-a-module">Implementing a module</h1>
+<p>As mentioned above, a scenario implemented with the <em>Soundworks</em> library is essentially composed of a set of modules. In general, a module consists of a client and a server part that exchange messages (however, some modules may only have a client side, for example).</p>
+<p>Let&apos;s now review the specificities of implementing a module on the client and server sides, as well as the example of a simplified version of the <code>checkin</code> module for code excerpts. (For the complete documentation about the module base classes, please refer to <a href="#clientmodule"><code>ClientModule</code></a> and <a href="#servermodule"><code>ServerModule</code></a> sections in the API section below.)</p>
+<h2 id="client-side">Client side</h2>
+<p>On the client side, a module extends the <code>ClientModule</code> base class. The module must implement a <code>start</code> method and has to call its <code>done</code> method to hand over the control to the next module.</p>
+<h3 id="the-start-method">The <code>start</code> method</h3>
+<p>The <code>start</code> method is called to start the module. It should handle the logic and the steps that lead to the completion of the module.</p>
+<h3 id="the-done-method">The <code>done</code> method</h3>
+<p>The <code>done</code> method (implemented by the <code>ClientModule</code> base class) is called by the client module to hand over control to the next module. Most modules would call their <code>done</code> method when their process is complete. For instance, if the purpose of a module is to load files, the module would call its <code>done</code> method when the files are loaded.</p>
+<p>However, some modules continue processing in the background even after calling that method. This is for example the case of the <code>sync</code> module. The module calls its <code>done</code> method after the client clock is synchronized with the sync clock for the first time, and keeps running in the background afterwards to re-synchronize the clocks regularly during the rest of the scenario.</p>
+<p>As an exception, the last module of the scenario (usually the <code>performance</code> module) may not call its <code>done</code> method and keep the control until the client disconnects from the server.</p>
+<p>A derived client module <strong>must not</strong> override the <code>done</code> method provided by the base class.</p>
+<h2 id="server-side">Server side</h2>
+<p>On the server side, a module extends the <code>ServerModule</code> base class and has to implement a <code>connect</code> and a <code>disconnect</code> method.
+While the sequence of user interactions and exchanges between client and server is determined on the client side, the server side modules are ready to receive requests from the corresponding client side modules as soon as a client is connected to the server (<em>i.e.</em> when the module&apos;s <code>.connect(client)</code> is called).</p>
+<h3 id="the-connect-method">The <code>connect</code> method</h3>
+<p>When a client of a particular type connects to the server via the corresponding URL (<em>e.g.</em> a <code>player</code> through the root URL, or an <code>env</code> client through the <code>/env</code> URL), the server calls the <code>connect</code> method of all the modules that are mapped to that client type. In particular, the module should take advantage of the <code>connect</code> method to set up WebSocket listeners in order to serve incoming requests from the corresponding client side module.</p>
+<h3 id="the-disconnect-method">The <code>disconnect</code> method</h3>
+<p>Similarly, the <code>disconnect</code> method is called whenever the client disconnects from the server. It handles all the actions that are necessary in that case.</p>
+<h1 id="writing-the-performance-module">Writing the <code>Performance</code> module</h1>
+<p>In most applications, the only module you will have to implement is the <code>performance</code> module. The <em>Soundworks</em> library provides the <code>ClientPerformance</code> and <code>ServerPerformance</code> base classes that you would extend to implement the <code>performance</code> of your application.</p>
+<p>The <code>ClientPerformance</code> and <code>ServerPerformance</code> modules respectively extend the <code>ClientModule</code> and <code>ServerModule</code> base classes, so they provide the <code>start</code>, <code>connect</code> and <code>disconnect</code> methods seen above. On the client side, the <code>start</code> method is called when the client enters the performance. On the server side, the <code>connect</code> method is called when a client connects to the server, and the <code>disconnect</code> method is called when a client disconnects from the server.</p>
+<p>Additionally, the <code>ServerPerformance</code> class provides the <code>enter</code> and <code>exit</code> methods, that are called when a client enters or exits the performance. In other words, the <code>ServerPerformance</code>&apos;s <code>enter</code> method is called when a particular client calls the <code>ClientPerformance</code>&apos;s <code>start</code> method. On the other hand, the <code>exit</code> method is called either when a client calls the <code>ClientPerformance</code>&apos;s <code>done</code> method, or if a client disconnects from the server. In order to keep track of the clients who participate in the performance (<em>i.e.</em> who entered the performance and have not exited yet), <code>ServerPerformance</code> module  maintains an array of performing clients in its <code>clients</code> attribute.</p>
+<p>The following example shows a simple performance module. In this scenario, the participant&apos;s device plays a welcome sound when it joins the performance, and it also play another sound when another participant joins the performance.</p>
+<pre><code class="lang-javascript"><code class="source-code prettyprint">/* Client side */
+
+// Require the &apos;client&apos; object
+var client = require(&apos;./client&apos;);
+
+// Write the performance module
+class MyPerformance extends clientSide.Performance {
+  constructor(loader, options = {}) {
+    super(options); // same behavior as the base class
+
+    this.loader = loader; // the loader module
+  }
+
+  start() {
+    super.start(); // call base class constructor (don&apos;t forget this)
+
+    // Play the welcome sound immediately
+    let src = audioContext.createBufferSource();
+    src.buffer = this.loader.audioBuffers[0];
+    src.connect(audioContext.destination);
+    src.start(audioContext.currentTime);
+
+    this.setCenteredViewContent(&apos;Let&#x2019;s go!&apos;); // display some feedback text in the view
+
+    // Play another sound when we receive the &apos;play&apos; message from the server
+    client.receive(&apos;performance:play&apos;, () =&gt; {
+      let src = audioContext.createBufferSource();
+      src.buffer = this.loader.audioBuffers[1];
+      src.connect(audioContext.destination);
+      src.start(audioContext.currentTime);
+    });
+
+    // Since the performance does not end unless the client disconnects,
+    // this module does not call its &apos;done&apos; method.
+  }
+}</code>
+</code></pre>
+<pre><code class="lang-javascript"><code class="source-code prettyprint">/* Server side */
+
+// Require the Soundworks library (server side)
+var serverSide = require(&apos;soundworks/server&apos;);
+
+// Write the performance module
+class MyPerformance extends serverSide.Performance {
+  constructor() {
+    super();
+  }
+
+  // When the client enters the performance...
+  enter(client) {
+    super.enter(client); // call base class constructor (don&apos;t forget this)
+
+    // Send a &apos;play&apos; message to all other clients
+    client.broadcast(&apos;performance:play&apos;);
+  }
+
+  // In this scenario, when a client connects to the server,
+  // disconnects from the server, or exits the performance in this scenario,
+  // there is nothing more we have to do than what the base class already does,
+  // so we don&apos;t even have to implement these methods here.
+}</code>
+</code></pre>
+<h1 id="styling-with-sass">Styling with SASS</h1>
+<p>The <em>Soundworks</em> library uses SASS to generate the CSS files. You will find the SASS files associated with the Soundworks library in <a href="https://github.com/collective-soundworks/soundworks-template">the <code>soundworks-template</code> repository</a> (in the <a href="https://github.com/collective-soundworks/soundworks-template/tree/master/src/sass"><code>src/sass/</code></a> subfolder).</p>
+<p>When you write a scenario, the <code>src/sass/</code> folder should contain:</p>
+<ul>
+<li>The four generic SASS partials from the library (<code>_01-reset.scss</code>, <code>_02-fonts.scss</code>, <code>_03-colors.scss</code>, <code>_04-general.scss</code>);</li>
+<li>All the SASS partials required by any module of the library you use (<em>e.g.</em> <code>_77-checkin.scss</code>, <code>_77-loader.scss</code>, etc.) &#x2014; the client side modules that need a custom SASS partial are indicated in <a href="#api">the API section</a>;</li>
+<li>Your own SASS partials for the modules you wrote (in particular, for the <code>performance</code>);</li>
+<li>One file for each type of client <code>clientType.scss</code> (<em>e.g.</em> <code>player.scss</code>, <code>conductor.scss</code>, <code>env.scss</code>, etc.) that includes all the partials needed by that type of client. Since the <code>player</code> is the default client in any <em>Soundworks</em>-based scenario, the <code>src/sass/</code> should at least contain the <code>player.scss</code> file.</li>
+</ul>
+<p>For instance, in the scenario example shown in the <a href="#composing-a-scenario-from-modules">Composing a scenario from modules</a> section, the <code>player</code> client uses the <code>dialog</code>, <code>sync</code> and <code>checkin</code> modules from the library, among which only the <code>checkin</code> module requires a custom SASS partial. Hence, the <code>player.scss</code> file would look like the following:</p>
+<pre><code class="lang-sass"><code class="source-code prettyprint">// General styling: these partials should be included in every clientType.scss file
+@import &apos;01-reset&apos;;
+@import &apos;02-fonts&apos;;
+@import &apos;03-colors&apos;;
+@import &apos;04-general&apos;;
+
+// Module specific partials: check in the documentation which modules have an associated SASS file
+@import &apos;77-checkin&apos;;
+
+// Your own partials for the modules you wrote
+@import &apos;performance&apos;</code>
+</code></pre>
+</div>
+</div>
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.4.1)</span></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>

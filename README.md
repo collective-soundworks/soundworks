@@ -30,33 +30,33 @@
     - [`Sync`](#sync)
 
 ## Overview & getting Started
-
+++
 *Soundworks* is a Javascript framework that enables artists and developers to create collaborative music performances where a group of participants distributed in space use their mobile devices to generate sound and light through touch and motion.
-
+++
 The framework is based on a client/server architecture supported by `Node.js` (`v0.12.0` or later) and WebSockets, and uses a modular design to make it easy to implement different performance scenarios: the [`soundworks-template`](https://github.com/collective-soundworks/soundworks-template) allows anyone to bootstrap a scenario based on *Soundworks* and focus on its audiovisual and interaction design instead of the infrastructure.
 
 #### Quick, I want to get started!
-
+++
 If you want to hack in right away, your best best is to go straight to the [`soundworks-template`](https://github.com/collective-soundworks/soundworks-template) repository. Additionally, you'll find a few scenario examples in the [Collective Soundworks](https://github.com/collective-soundworks) organization, such as [*Beats*](https://github.com/collective-soundworks/soundworks-beats), [*Drops*](https://github.com/collective-soundworks/soundworks-drops), [*Paths*](https://github.com/collective-soundworks/soundworks-paths) or [*Wandering Sound*](https://github.com/collective-soundworks/soundworks-wanderingsound). Don't hesitate to have a look at them!
-
+++
 However, if you want to have a better understanding of how the machinery works, let's now deep dive in the doc…
 
 ### Client/server architecture
-
+++
 In order to connect the mobile devices with each other, *Soundworks* implements a client/server architecture using a `Node.js` server and WebSockets to pass messages between the server and the clients (currently with the `socket.io` library).
-
+++
 *Soundworks*-based scenarios allow different types of clients to connect to the server through different URLs. The most common type of clients is constituted of the participant's mobile devices who take part in the performance. We refer to this type of client as a `player`. For convenience, a `player` client connects to the server through the root URL of the application `http://my.server.address:port/`.
-
+++
 In addition to the `player` clients, a scenario can include as many other types of clients as you want. For instance, one could imagine that:
 - A device provides an interface to control some parameters of the performance in real time. We would refer to this type of client as `conductor` and these clients would connect to the server through the URL `http://my.server.address:port/conductor`.
 - A device generates “environmental” sound and/or light effects projected into the performance in sync with the participants’ performance (*e.g.* lasers, a global visualization or ambient sounds on external loudspeakers). We would refer to this type of client as `env` and these clients would connect to the server through the URL `http://my.server.address:port/env`.
-
+++
 All types of clients (except `player`) access the server through a URL that concatenates the root URL of the application, and the name of the client type (*e.g* `http://my.server.address:port/conductor` or `http://my.server.address:port/env`).
 
 ### Express app structure
-
+++
 Since *Soundworks* uses Express, scenarios built on *Soundworks* should follow the organization of an Express app (using the EJS rendering engine), as shown in the following example.
-
+++
 ```
 my-scenario/
 ├── public/
@@ -88,9 +88,9 @@ my-scenario/
 ├── package.json
 └── README.md
 ```
-
+++
 In particular:
-
+++
 - The `public/` folder contains all the resources the clients may need to load, such as sounds, images, fonts…  
   **Note:** the Javascript and CSS files will be automatically generated from the `src/` folder, so there shouldn’t be any `javascript/` or `stylesheets/` folder here (they will be deleted by `gulp` anyway).
 - The `src/` folder contains:
@@ -99,27 +99,27 @@ In particular:
   - A subfolder for each other type of client (*e.g.* `conductor/` or `env/`). Each of these subfolders should contain at least an `index.es6.js` file with the source code to be executed for that type of client;
   - The `sass/` subfolder, with the SASS partials used to generate the CSS. In particular, each type of client (including `player`) should have its corresponding SASS partial (*e.g.* `player.scss`, `conductor.scss` or `env.scss`).
 - The `views/` folder contains a `*.ejs` file for each type of client. In other words, all the subfolders in `src/` (except `server/` and `sass/`) should have their corresponding EJS file (*e.g.* `player.ejs`, `conductor.ejs` or `env.ejs`).
-
+++
 To compile the files from the `src/` folder and launch the server, simply run the command `gulp` in a Terminal window: it will generate the `*.css` files from the SASS files, convert the Javascript files from ES6 to ES5, browserify the files on the client side, and launch a `Node.js` server to start the scenario.
-
+++
 To help you get started, you will find a *Soundworks* template in the [`soundworks-template`](https://github.com/collective-soundworks/soundworks-template) GitHub repository.
 
 ### Composing a scenario from modules
-
+++
 A scenario built with *Soundworks* consists in a succession and combination of modules, each of them corresponding to a step of the scenario.
 
 #### Client side
-
+++
 On the client side, modules can be executed in a particular order according to a given scenario. As an example, a scenario could provide the following interactions when a participant connects to the application’s root URL (as a `player`):
 - The mobile devices displays a **welcome** message (*e.g.* “Welcome to the performance!”). When the participant clicks on the screen…
 - The client goes through a **check-in** procedure for which the device may display some instructions. In the meantime, …
 - The client **synchronizes** its clock with the server. Finally, when these are done…
 - The client joins the **performance**.
-
+++
 Each of these steps corresponds to a module. While most of the modules are provided by the library (cf. the [Modules provided by the library](#modules-provided-by-the-library) section), you will generally have to write the module that implements the most important part of your scenario: the `performance`.
-
+++
 In the example described above, the client side code corresponding to the `player` client (in `src/player/index.es6.js`) would look like this:
-
+++
 ```javascript
 /* Client side */
 
@@ -157,19 +157,19 @@ window.addEventListener('load', () => {
   );
 });
 ```
-
+++
 To run a sequence of modules in series, we use `client.serial(module1, module2, ...)`. On the other hand, if some modules need to be run in parallel, we use `client.parallel(module1, module2, ...)`. (For more information about this, please refer to the [`client` object module logic](#module-logic) section.)
-
+++
 For any other type of client (*e.g.* `conductor` or `env`), the file would be very similar, except for:
 - The initialization of the client, that would correspond to the type of client (*e.g.* `client.init('conductor');` or `client.init('env');`);
 - The modules used by that type of client. For instance, the `env` clients may require a `sync` and `performance` module but may not need a `welcome` screen nor a `checkin`.
-
+++
 As some of the modules on the client side need to communicate with the server (for instance the `sync` process requires a dialog between the client and the server to synchronize the clocks), let's now have a look at the server side.
-
+++
 #### Server side
-
+++
 The server side of the application must provide the server modules that respond to the client side modules. The server side code (in `src/server/index.es6.js`) corresponding to the example above would look like this:
-
+++
 ```javascript
 /* Server side */
 
@@ -207,13 +207,13 @@ server.map('player', sync, checkin, playerPerformance);
 // Map the server modules to the 'env' client type (and /env URL)
 server.map('env', sync, envPerformance);
 ```
-
+++
 Among the modules used by the `player` clients, three of them need to communicate with the server: `checkin`, `sync` and `performance`. (The `dialog` module only displays a welcome message to the participant and does not involve any interaction between the client and server. For more information about the modules that have a both a client and a server side, please refer to the [Client/server modules](#clientserver-modules) section in the API.) Hence, after setting up the Express app and starting the server, we instantiate the `checkin`, `sync`, and `playerPerformance` server side modules and map them to the `'player'` client type. Consequently, these modules can dialog with the corresponding client side modules, and respond to the `player` clients connected via the root URL of the application.
-
+++
 Similarly, we map the `sync` module and the `envPerformance` module to the `'env'` client type, provided that these are the modules the `env` clients need to dialog with.
 
 ### Modules provided by the library
-
+++
 The *Soundworks* library provides a set of modules that are used in many scenarios:  
 - [`dialog`](#clientdialog), displays a dialog and waits for the participant to touch the screen (client side only);
 - [`loader`](#clientloader), pre-loads a set of audio files required by the application (client side only);
@@ -225,48 +225,48 @@ The *Soundworks* library provides a set of modules that are used in many scenari
 - [`sync`](#sync), synchronizes the client clock to the server.
 
 ### Implementing a module
-
+++
 As mentioned above, a scenario implemented with the *Soundworks* library is essentially composed of a set of modules. In general, a module consists of a client and a server part that exchange messages (however, some modules may only have a client side, for example).
-
+++
 Let's now review the specificities of implementing a module on the client and server sides, as well as the example of a simplified version of the `checkin` module for code excerpts. (For the complete documentation about the module base classes, please refer to [`ClientModule`](#clientmodule) and [`ServerModule`](#servermodule) sections in the API section below.)
 
 #### Client side
-
+++
 On the client side, a module extends the `ClientModule` base class. The module must implement a `start` method and has to call its `done` method to hand over the control to the next module.
 
 ##### The `start` method
-
+++
 The `start` method is called to start the module. It should handle the logic and the steps that lead to the completion of the module.
 
 ##### The `done` method
-
+++
 The `done` method (implemented by the `ClientModule` base class) is called by the client module to hand over control to the next module. Most modules would call their `done` method when their process is complete. For instance, if the purpose of a module is to load files, the module would call its `done` method when the files are loaded.
-
+++
 However, some modules continue processing in the background even after calling that method. This is for example the case of the `sync` module. The module calls its `done` method after the client clock is synchronized with the sync clock for the first time, and keeps running in the background afterwards to re-synchronize the clocks regularly during the rest of the scenario.
-
+++
 As an exception, the last module of the scenario (usually the `performance` module) may not call its `done` method and keep the control until the client disconnects from the server.
-
+++
 A derived client module **must not** override the `done` method provided by the base class.
 
 #### Server side
-
+++
 On the server side, a module extends the `ServerModule` base class and has to implement a `connect` and a `disconnect` method.
 While the sequence of user interactions and exchanges between client and server is determined on the client side, the server side modules are ready to receive requests from the corresponding client side modules as soon as a client is connected to the server (*i.e.* when the module's `.connect(client)` is called).
 
 ##### The `connect` method
-
+++
 When a client of a particular type connects to the server via the corresponding URL (*e.g.* a `player` through the root URL, or an `env` client through the `/env` URL), the server calls the `connect` method of all the modules that are mapped to that client type. In particular, the module should take advantage of the `connect` method to set up WebSocket listeners in order to serve incoming requests from the corresponding client side module.
 
 ##### The `disconnect` method
-
+++
 Similarly, the `disconnect` method is called whenever the client disconnects from the server. It handles all the actions that are necessary in that case.
 
 #### Example: a simplified version of the `checkin` module
-
+++
 The purpose of that simplified version of the `checkin` module is the following: each time a new client connects to the server, the `checkin` module assigns an available index to it. On the server side, the module can be configured with a `setup` object that lists predefined positions (*i.e.* coordinates and labels): in that case, the module on the client side can automatically request an available position from the `setup` and display the associated `label` to the participant. (In other configurations which we won't review in this example, the participants could alternatively select a label, or indicate their approximate location on a map). When no indices are available anymore, the `checkin` module informs the participant with a message on the screen (on the client side).
 
 ##### Client side: the `ClientCheckin` module
-
+++
 In detail, the `start` method of the module sends a request to the `ServerCheckin` module via WebSockets, asking the server to send an available client index and, optionally, the label of a corresponding predefined position. When it receives the response from the server, it either displays the label on the screen (*e.g.* “Please go to C5 and touch the screen.”) and waits for the participant’s acknowledgement, or immediately calls the `done` method to hand over the control to a subsequent module (generally the `performance`). The server may send an `unavailable` message in the case where no more clients can be admitted to the performance (for example when all predefined positions are occupied). In this case, the applications ends on a blocking dialog (“Sorry, we cannot accept more players at the moment, please try again later”) without calling the `done` method.
 
 ```javascript
@@ -321,9 +321,9 @@ As shown in this code example, the `ClientModule` base class may provide a `view
 The method `setCenteredViewContent` allows for adding an arbitrary centered content (*e.g.* a paragraph of text) to the view.
 
 ##### Server side: the `ServerCheckin` module
-
+++
 In our simplified `ServerCheckin` module example, the `connect` method has to install a listener that — upon request of the client — obtains an available client `index` and sends it back to the client. If the module has been configured with a `setup` (that predefines a certain number of spatial positions, associated with a `label`), the server additionally sends the `label` of the position corresponding to the client `index`. In this case, the maximum number of clients is determined by the number of seats defined by the `setup`.
-
+++
 The `disconnect` method has to release the client index so that it can be reused by another client that connects to the server.
 
 ```javascript
@@ -388,13 +388,13 @@ class ServerCheckin extends serverSide.Module {
 ```
 
 ### The `performance` module
-
+++
 In most applications, the only module you will have to implement is the `performance` module. The *Soundworks* library provides the `ClientPerformance` and `ServerPerformance` base classes that you would extend to implement the `performance` of your application.
-
+++
 The `ClientPerformance` and `ServerPerformance` modules respectively extend the `ClientModule` and `ServerModule` base classes, so they provide the `start`, `connect` and `disconnect` methods seen above. On the client side, the `start` method is called when the client enters the performance. On the server side, the `connect` method is called when a client connects to the server, and the `disconnect` method is called when a client disconnects from the server.
-
+++
 Additionally, the `ServerPerformance` class provides the `enter` and `exit` methods, that are called when a client enters or exits the performance. In other words, the `ServerPerformance`'s `enter` method is called when a particular client calls the `ClientPerformance`'s `start` method. On the other hand, the `exit` method is called either when a client calls the `ClientPerformance`'s `done` method, or if a client disconnects from the server. In order to keep track of the clients who participate in the performance (*i.e.* who entered the performance and have not exited yet), `ServerPerformance` module  maintains an array of performing clients in its `clients` attribute.
-
+++
 The following example shows a simple performance module. In this scenario, the participant's device plays a welcome sound when it joins the performance, and it also play another sound when another participant joins the performance.
 
 ```javascript
@@ -464,16 +464,16 @@ class MyPerformance extends serverSide.Performance {
 ```
 
 ### Styling with SASS
-
+++
 The *Soundworks* library uses SASS to generate the CSS files. You will find the SASS files associated with the Soundworks library in [the `soundworks-template` repository](https://github.com/collective-soundworks/soundworks-template) (in the [`src/sass/`](https://github.com/collective-soundworks/soundworks-template/tree/master/src/sass) subfolder).
-
+++
 When you write a scenario, the `src/sass/` folder should contain:
-
+++
 - The four generic SASS partials from the library (`_01-reset.scss`, `_02-fonts.scss`, `_03-colors.scss`, `_04-general.scss`);
 - All the SASS partials required by any module of the library you use (*e.g.* `_77-checkin.scss`, `_77-loader.scss`, etc.) — the client side modules that need a custom SASS partial are indicated in [the API section](#api);
 - Your own SASS partials for the modules you wrote (in particular, for the `performance`);
 - One file for each type of client `clientType.scss` (*e.g.* `player.scss`, `conductor.scss`, `env.scss`, etc.) that includes all the partials needed by that type of client. Since the `player` is the default client in any *Soundworks*-based scenario, the `src/sass/` should at least contain the `player.scss` file.
-
+++
 For instance, in the scenario example shown in the [Composing a scenario from modules](#composing-a-scenario-from-modules) section, the `player` client uses the `dialog`, `sync` and `checkin` modules from the library, among which only the `checkin` module requires a custom SASS partial. Hence, the `player.scss` file would look like the following:
 
 ```sass
@@ -489,6 +489,9 @@ For instance, in the scenario example shown in the [Composing a scenario from mo
 // Your own partials for the modules you wrote
 @import 'performance'
 ```
+
+====================== Everything above this is integrated
+
 ## API
 
 This section explains how to use the objects and classes of the library. In particular, we list here all the methods and attributes you may need to use at some point while implementing a scenario.
@@ -521,13 +524,13 @@ Some modules on the client side are associated with dedicated styling informatio
 The core objects on the client side and the server side are singletons that contain the methods used to set up a scenario and to exchange messages between the client and the server.
 
 #### Client side: the `client` object
-
+++
 The `client` object contains the basic methods of the client. For instance, the object initializes the client type with `init` and establishes WebSocket communications with the server through the methods `send` and `receive`. Additionally, it starts the scenario and sequences the modules using the methods `start`, `serial` and `parallel`.
 
 For clarity, the methods of the `client` object are split into two groups.
 
 ##### Initialization and WebSocket communication
-
+++
 - `init(clientType:String)`  
   The `init` method sets the client type and initializes a WebSocket connection associated with the given type.
 - `send(msg:Object, ...args:Any)`  
@@ -538,7 +541,7 @@ For clarity, the methods of the `client` object are split into two groups.
   **Note:** on the server side, the server sends the message with the command `server.send(msg:String, ...args:Any)` (see the [`server` object WebSocket communication](#websocket-communication) section below).
 
 ##### Module logic
-
+++
 - `start(module:ClientModule)`  
   The `start` method starts the client’s module logic with the module `module`. The argument `module` can either be:
     - A module from the library or a module you wrote (in the case where your scenario has only one module);
@@ -568,7 +571,7 @@ For clarity, the methods of `server` are split into two groups.
   - A client connecting to the server through the URL `http://my.server.address:port/clientType` would be considered as a `clientType` client, and display the view `clientType.ejs`.
 
 ##### WebSocket communication
-
+++
 - `broadcast(clientType:String, msg:String, ...args:Any)`  
   The `broadcast` method sends the message `msg` and any number of values `...args` (of any type) to all the clients of type `clientType` (as initialized by `client.init` on the client side) through WebSockets.  
   **Note:** on the client side, the clients receive the message with the command `client.receive(msg:String, callback:Function)`, where the `callback` function would take `...args` as arguments (see the [`client` object WebSocket communication](#initialization-and-websocket-communication) section above).
@@ -589,7 +592,7 @@ The `ServerClient` module is used to keep track of each connected client and to 
   The `broadcast` method sends the message `msg` and a list of arbitrary arguments `...args` to all other clients of the same type (*i.e.* excluding the given client itself) through WebSockets.
 
 ###### Attributes
-
+++
 - `type:String`  
   The `type` attribute stores the type of the client. This is the client type that is specified when initializing the `client` object on the client side with `client.init(clientType);` (generally at the very beginning of the `index.es6.js` file your write).
 - `index:Number = 0`  
@@ -699,9 +702,9 @@ class MyModule extends serverSide.Module {
 ```
 
 #### The `Performance` base class
-
+++
 The `Performance` module is a base class meant to be extended when you write the performance code of your scenario. It is a regular `Module`, and its particularity is to keep track of the clients who are currently in the performance by maintaining the array `this.clients` on the server side, and to have the `enter` and `exit` methods on the server side that inform the module when the client entered the performance (*i.e.* when the `performance` on the client side called its `start` method) and left it (*i.e.* when the `performance` on the client side called its `done` method, or if the client disconnected from the server).
-
+++
 **Note:** this base class is provided for convenience only. You can also write your performance by extending a regular `Module` rather than extending this class.
 
 ##### ClientPerformance
@@ -747,20 +750,20 @@ The `ServerPerformance` module extends the `ServerModule` base class and constit
 ### Client only modules
 
 #### ClientDialog
-
+++
 The `ClientDialog` extends the `ClientModule` base class and displays a full screen dialog. It requires the participant to tap the screen to make the view disappear. The module is also used at the very beginning of a scenario to activate the Web Audio API on iOS devices (with the option `activateWebAudio`). The `ClientDialog` module calls its `done` method when the participant taps on the screen.
 
 ###### Methods
-
+++
 - `constructor(options:Object = {})`  
   The `constructor` accepts the following `options`:
   - `name:String = dialog`, `name` of the module;
   - `color:String = 'black'`, `viewColor` of the module;
   - `text:String = "Hello!"`, text to be displayed in the dialog;
   - `activateAudio:Boolean = false`, whether the module activates the Web Audio API when the participant touches the screen (useful on iOS devices).
-
+++
 For instance, the following code would generate the HTML content shown below and append it to the `div#container` when the module starts:
-
+++
 ```javascript
 var welcomeDialog = new ClientDialog({
   name: 'welcome',
@@ -768,7 +771,7 @@ var welcomeDialog = new ClientDialog({
   color: 'alizarin' // the list of available colors is in soundworks-template's 'src/sass/_03-colors.scss' folder
 });
 ```
-
+++
 ```html
 <div id='welcome' class='module welcome alizarin'>
   <p>Welcome to this awesome scenario!</p>
@@ -776,13 +779,13 @@ var welcomeDialog = new ClientDialog({
 ```
 
 #### ClientLoader
-
+++
 The `ClientLoader` module extends the `ClientModule` base class and allows for loading audio files that can be used in the scenario (for instance, by the `performance` module). The `Loader` module has a view that displays a loading bar indicating the progress of the loading. The `ClientLoader` module calls its `done` method when all the files are loaded.
-
+++
 The `ClientLoader` module requires the SASS partial `_77-loader.scss`.
 
 ###### Methods
-
+++
 - `constructor(audioFiles:Array, options:Object = {})`  
   The `constructor` accepts one mandatory argument:
   - `audioFiles:Array`  
@@ -790,9 +793,9 @@ The `ClientLoader` module requires the SASS partial `_77-loader.scss`.
   In addition, it accepts the following `options`:
   - `name:String = loader`, `name` of the module;
   - `color:String = 'black'`, `viewColor` of the module.
-
+++
 For instance, the following code would allow to access the kick and snare audio buffers created from the mp3 files as shown below:
-
+++
 ```javascript
 // Instantiate the module with the files to load
 var loader = ClientLoader(['sounds/kick.mp3', 'sounds/snare.mp3']);
@@ -803,16 +806,16 @@ var snareBuffer = loader.audioBuffers[1];
 ```
 
 ###### Attributes
-
+++
 - `audioBuffers:Array = []`  
   The `audioBuffers` array contains the audio buffers created from the audio files passed in the `constructor`.
 
 #### ClientOrientation
-
+++
 The `ClientOrientation` module extends the `ClientModule` base class and allows for calibrating the compass by getting an angle reference. It displays a view with an instruction text: the user is asked to tap the screen when the phone points at the desired direction for the calibration. WHen that happens, the current compass value is set as the angle reference. The `ClientOrientation` module calls its `done` method when the participant taps the screen.
 
 ###### Methods
-
+++
 - `constructor(options:Object = {})`  
   The `constructor` accepts the following `options`:
   - `name:String = orientation`, `name` of the module;
@@ -820,16 +823,16 @@ The `ClientOrientation` module extends the `ClientModule` base class and allows 
   - `text:String = 'Point the phone exactly in front of you, and touch the screen.'`, instruction text to be displayed.
 
 ###### Attributes
-
+++
 - `angleReference:Number`  
   The `angleReference` attribute is the value of the `alpha` angle (as in the [`deviceOrientation` HTML5 API](http://www.w3.org/TR/orientation-event/)) when the user touches the screen while the `ClientOrientation` module is displayed. It serves as a calibration / reference of the compass.
 
 #### ClientPlatform
-
+++
 The `ClientPlatform` module extends the `ClientModule` base class and checks whether the device is compatible with the technologies used in the *Soundworks* library. (Compatible devices are running on iOS 7 or above, or on Android 4.2 or above with the Chrome browser in version 35 or above.) If that is not the case, the module displays a blocking view and prevents the participant to go any further in the scenario. The `ClientPlatform` module calls its `done` method immediately if the phone passes the platform test, or never otherwise.
 
 ###### Methods
-
+++
 - `constructor(options:Object = {})`  
   The `constructor` accepts the following `options`:
   - `name:String = platform`, `name` of the module;
@@ -917,11 +920,11 @@ Optionally, the `ClientControl` module can automatically construct a simple inte
 The controls of different types are declared on the server side and propagated to the client side when a client is set up.
 
 ##### ClientControl
-
+++
 The `ClientControl` module extends the `ClientModule` base class and takes care of the `parameters`, `infos`, and `commands` on the client side. If the module is instantiated with the `gui` option set to `true`, it constructs the graphical control interface. Otherwise it simply receives the values that are emitted by the server (usually by through the `performance` module). The `ClientModule` calls its `done` method immediately after having set up the controls and, optionally, the graphical user interface.
 
 ###### Methods
-
+++
 - `constructor(options:Object = {})`    
   The `constructor` accepts the following `options`:
   - `name:String = 'control'`, `name` of the module;
@@ -929,7 +932,7 @@ The `ClientControl` module extends the `ClientModule` base class and takes care 
   - `gui:Boolean = false`, indicates whether the `ClientControl` creates a view with the graphical control interface (automatically built from a list of controls sent by the server).
 
 ###### Attributes
-
+++
 - `parameters:Object = {}`  
    The `parameters` object contains the global parameters of the scenario. Each key of the object is associated with a parameter object. You can access the value of the parameter `'myparam'` with `this.parameters.myparam.value`.
 - `infos:Object = {}`  
@@ -938,7 +941,7 @@ The `ClientControl` module extends the `ClientModule` base class and takes care 
    The `commands` attribute contains the declared commands.
 
 ###### Events
-
+++
 - `'control:parameter' : name:String, val:Any`  
   Each time a parameter is updated, the `ClientControl` module emits the `'control:parameter'` event with two arguments:
   - `name:String`, name of the parameter that changed;
@@ -949,11 +952,11 @@ The `ClientControl` module extends the `ClientModule` base class and takes care 
   - `val:Any`, new info value.
 
 ##### ServerControl
-
+++
 The `ServerControl` module extends the `ServerModule` base class and takes care of the `parameters`, `infos`, and `commands` on the server side. To set up controls in a scenario, you should extend this class on the server side and declare the controls specific to that scenario with the `addParameterNumber`, `addParameterSelect`, `addCommand`, and `addDisplay methods.
 
 ###### Methods
-
+++
 - `constructor(options:Object = {})`  
   The `constructor` accepts the following `options`:
   - `name:String`, `name` of the module.
@@ -1077,11 +1080,11 @@ The `Sync` module does a first synchronization process after which the `ClientSy
 On the client side, `ClientSync` uses the `audioContext` clock. On the server side, `ServerSync` uses the `process.hrtime()` clock. All times are in seconds (method arguments and returned values). **All time calculations and exchanges should be expressed in the sync clock time.**
 
 ##### ClientSync
-
+++
 The `ClientSync` module extends the `ClientModule` base class and takes care of the synchronization process on the client side. It displays a view that indicates "Clock syncing, stand by…" until the very first synchronization process is done. The `ClientSync` module calls its `done` method as soon as the client clock is in sync with the sync clock. Then, the synchronization process keeps running in the background to resynchronize the clocks from times to times. When such a resynchronization happens, the `ClientSync` module emits a `'sync:stats'` event associated with information about the synchronization.
 
 ###### Methods
-
+++
 - `constructor(options:Object = {})`  
   The `constructor` accepts the following `options`:
   - `name:String = 'sync'`, `name` of the module;
@@ -1090,9 +1093,9 @@ The `ClientSync` module extends the `ClientModule` base class and takes care of 
   The `getLocalTime` method returns the time of the local (client) clock (in seconds) corresponding to the given sync time. If no arguments are provided, the method returns the current local (client) time (*i.e.* using `audioContext.currentTime`).
 - `getSyncTime(localTime:Number = audioContext.currentTime) : Number`  
   The `getSyncTime` method returns the time of the sync clock (in seconds) corresponding to the given local (client) time. If no arguments are provided, the method returns the current sync time.
-
+++
 Below is an example of an instantiation of the `Sync` module on the client side.
-
+++
 ```javascript
 /* Client side */
 
@@ -1116,19 +1119,19 @@ var nowSync = sync.getSyncTime(); // current time in sync clock time
   - `travelTimeMax`, current estimation of the maximum travel time for a message to go from the client to the server and back.
 
 ##### ServerSync
-
-The `ServerSync` module extends the `ServerModule` base class and takes care of the synchronization process on the client side.
+++
+The `ServerSync` module extends the `ServerModule` base class and takes care of the synchronization process on the server side.
 
 ###### Methods
-
+++
 - `constructor(options:Object = {})`  
   The `constructor` accepts the following `options`:
   - `name:String`, `name` of the module.
 - `getSyncTime() : Number`  
   The `getSyncTime` method returns the current sync time (in seconds, derived from `process.hrtime` method).
-
+++
 Below is an example of the instantiation of the `Sync` module on the server side.
-
+++
 ```javascript
 /* Server side */
 

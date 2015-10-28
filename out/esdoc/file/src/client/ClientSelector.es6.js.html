@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../../">
+  <title data-ice="title">src/client/ClientSelector.es6.js | API Document</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  
+  
+  <script src="script/manual.js"></script>
+</head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  <a href="./manual/index.html" data-ice="manualHeaderLink">Manual</a>
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  
+  <a data-ice="repoURL" href="https://github.com/collective-soundworks/soundworks" class="repo-url-github">Repository</a>
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">client</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientCalibration.es6.js~ClientCalibration.html">ClientCalibration</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientControl.es6.js~ClientControl.html">ClientControl</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientDialog.es6.js~ClientDialog.html">ClientDialog</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientLoader.es6.js~ClientLoader.html">ClientLoader</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientModule.es6.js~ClientModule.html">ClientModule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientOrientation.es6.js~ClientOrientation.html">ClientOrientation</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientPerformance.es6.js~ClientPerformance.html">ClientPerformance</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientPlatform.es6.js~ClientPlatform.html">ClientPlatform</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientSync.es6.js~ClientSync.html">ClientSync</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-ClientModule">ClientModule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-EventEmitter">EventEmitter</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-client">client</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">server</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerCalibration.es6.js~ServerCalibration.html">ServerCalibration</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerClient.es6.js~ServerClient.html">ServerClient</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerControl.es6.js~ServerControl.html">ServerControl</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerModule.es6.js~ServerModule.html">ServerModule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerSync.es6.js~ServerSync.html">ServerSync</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-server">server</a></span></span></li>
+</ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">src/client/ClientSelector.es6.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">&apos;use strict&apos;;
+
+var client = require(&apos;./client&apos;);
+var ClientModule = require(&apos;./ClientModule&apos;);
+
+function toTitleCase(str) {
+  return str.replace(/\w\S*/g, function(txt) {
+    return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+  });
+}
+
+function convertName(name) {
+  var a = name.split(&quot;_&quot;);
+  var n = &quot;&quot;;
+  for (var i = 0; i &lt; a.length; i++) {
+    if (i === 0)
+      n += toTitleCase(a[i]);
+    else
+      n += &quot; &quot; + a[i];
+  }
+  return n;
+}
+
+class ClientSelector extends ClientModule {
+  constructor(options = {}) {
+    super(options.name || &apos;selector&apos;, !options.view);
+
+    this.labels = options.labels || [];
+    this.states = options.states || [];
+    this.defaultState = options.defaultState || &apos;unselected&apos;;
+
+    this.maxSelected = 1;
+    this.selected = [];
+
+    if (typeof options.maxSelected !== &apos;undefined&apos;)
+      this.maxSelected = options.maxSelected;
+
+    if(options.view) {
+      this.view = options.view;
+      this.isDone = undefined; // skip super.done()
+    }
+
+    this._buttons = [];
+    this._listeners = [];
+  }
+
+  _setupButton(index, label, state) {
+    let button = document.createElement(&apos;div&apos;);
+    button.classList.add(&apos;btn&apos;);
+    button.innerHTML = convertName(label);
+    this._buttons[index] = button;
+
+    switch (state) {
+      case &apos;disabled&apos;:
+        button.classList.add(&apos;disabled&apos;);
+        break;
+
+      case &apos;unselected&apos;:
+        this.enable(index);
+        break;
+
+      case &apos;selected&apos;:
+        this.enable(index);
+        this.select(index);
+        break;
+    }
+
+    this.view.appendChild(button);
+  }
+
+  start() {
+    super.start();
+
+    for (let i = 0; i &lt; this._labels.length; i++) {
+      let label = this._labels[i];
+      let state = this.defaultState;
+
+      if (i &lt; this.states.length)
+        state = this.states[i];
+
+      this.states[i] = &apos;disabled&apos;;
+      this._listeners[i] = null;
+      this._setupButton(i, label, state);
+    }
+  }
+
+  reset() {
+    let buttons = this.view.querySelectorAll(&apos;.btn&apos;);
+    for (let i = 0; i &lt; buttons.length; i++)
+      this.view.removeChild(buttons[i]);
+     
+    this.selected = [];
+    this._buttons = [];
+    this._listeners = []; 
+  }
+
+  restart() {
+    // TODO
+  }
+
+  select(index) {
+    let state = this.states[index];
+
+    if (state === &apos;unselected&apos;) {
+      // steal oldest selected
+      if (this.selected.length === this.maxSelected)
+        this.unselect(this.selected[0]);
+
+      let button = this._buttons[index];
+
+      button.classList.add(&apos;selected&apos;);
+      this.states[index] = &apos;selected&apos;;
+
+      // add to list of selected buttons
+      this.selected.push(index);
+
+      let label = this.labels[index];
+      this.emit(&apos;selector:select&apos;, index, label);
+
+      if (this.selected.length === this.maxSelected)
+        this.done(); // TODO: beware, might cause problems with the launch thing
+
+      return true;
+    }
+
+    return false;
+  }
+
+  unselect(index) {
+    let state = this.states[index];
+
+    if (state === &apos;selected&apos;) {
+      let button = this._buttons[index];
+
+      button.classList.remove(&apos;selected&apos;);
+      this.states[index] = &apos;unselected&apos;;
+
+      // unselect oldest selected button
+      let selectedIndex = this.selected.indexOf(index);
+      this.selected.splice(selectedIndex, 1);
+
+      let label = this.labels[index];
+      this.emit(&apos;selector:unselect&apos;, index, label);
+
+      return false;
+    }
+
+    return true;
+  }
+
+  toggle(index) {
+    return this.select(index) || this.unselect(index);
+  }
+
+  enable(index) {
+    let state = this.states[index];
+
+    if (state === &apos;disabled&apos;) {
+      this.states[index] = &apos;unselected&apos;;
+
+      let listener = (() =&gt; this.toggle(index));
+      this._listeners[index] = listener;
+
+      let button = this._buttons[index];
+      button.classList.remove(&apos;disabled&apos;);
+      if (client.platform.isMobile)
+        button.addEventListener(&apos;touchstart&apos;, listener, false);  
+      else
+        button.addEventListener(&apos;click&apos;, listener, false);
+    }
+  }
+
+  disable(index) {
+    let state = this.states[index];
+
+    if (state === &apos;selected&apos;)
+      this.unselect(index);
+
+    if (state === &apos;unselected&apos;) {
+      this.states[index] = &apos;disabled&apos;;
+
+      let button = this._buttons[index];
+      let listener = this._listeners[index];
+      button.classList.add(&apos;disabled&apos;);
+      if (client.platform.isMobile)
+        button.removeListener(&apos;touchstart&apos;, listener);
+      else
+        button.removeListener(&apos;click&apos;, listener);
+    }
+  }
+
+  set labels(list) {
+    this._labels = list;
+  }
+
+  get labels() {
+    return this._labels;
+  }
+}
+
+module.exports = ClientSelector;</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.4.1)</span></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>

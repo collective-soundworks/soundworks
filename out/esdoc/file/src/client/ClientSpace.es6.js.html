@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../../">
+  <title data-ice="title">src/client/ClientSpace.es6.js | API Document</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  
+  
+  <script src="script/manual.js"></script>
+</head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  <a href="./manual/index.html" data-ice="manualHeaderLink">Manual</a>
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  
+  <a data-ice="repoURL" href="https://github.com/collective-soundworks/soundworks" class="repo-url-github">Repository</a>
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">client</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientCalibration.es6.js~ClientCalibration.html">ClientCalibration</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientControl.es6.js~ClientControl.html">ClientControl</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientDialog.es6.js~ClientDialog.html">ClientDialog</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientLoader.es6.js~ClientLoader.html">ClientLoader</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientModule.es6.js~ClientModule.html">ClientModule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientOrientation.es6.js~ClientOrientation.html">ClientOrientation</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientPerformance.es6.js~ClientPerformance.html">ClientPerformance</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientPlatform.es6.js~ClientPlatform.html">ClientPlatform</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientSync.es6.js~ClientSync.html">ClientSync</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-ClientModule">ClientModule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-EventEmitter">EventEmitter</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-client">client</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">server</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerCalibration.es6.js~ServerCalibration.html">ServerCalibration</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerClient.es6.js~ServerClient.html">ServerClient</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerControl.es6.js~ServerControl.html">ServerControl</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerModule.es6.js~ServerModule.html">ServerModule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerSync.es6.js~ServerSync.html">ServerSync</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-server">server</a></span></span></li>
+</ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">src/client/ClientSpace.es6.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">const ClientModule = require(&apos;./ClientModule&apos;);
+const client = require(&apos;./client&apos;);
+const ns = &apos;http://www.w3.org/2000/svg&apos;;
+
+class ClientSpace extends ClientModule {
+  constructor(options = {}) {
+    super(options.name ||&#xA0;&apos;space&apos;);
+
+    this.width = 1;
+    this.height = 1;
+    this.fitContainer = (options.fitContainer ||&#xA0;false);
+    this.listenTouchEvent = (options.listenTouchEvent || false);
+    // this.spacing = 1;
+    // this.labels = [];
+    // this.coordinates = [];
+    this.type = undefined;
+
+    this._xFactor = 1;
+    this._yFactor = 1;
+
+    // map between shapes and their related positions
+    this.shapePositionMap = new Map();
+    this.positionIndexShapeMap = {};
+  }
+
+  // note -&gt; modfiy here
+  initSetup(setup) {
+    this.width = setup.width;
+    this.height = setup.height;
+    // this.spacing = setup.spacing;
+    // this.labels = setup.labels;
+    // this.coordinates = setup.coordinates;
+    this.type = setup.type;
+    this.background = setup.background;
+
+    this.done();
+  }
+
+  start() {
+    super.start();
+    this.done();
+    // client.receive(&apos;setup:init&apos;, this._onSetupInit);
+    // client.send(&apos;setup:request&apos;);
+  }
+
+  restart() {
+    super.restart();
+    this.done();
+  }
+
+  reset() {
+    this.shapePositionMap.clear();
+    this.positionIndexShapeMap = {};
+    // client.removeListener(&apos;setup:init&apos;, this._onSetupInit);
+    this.container.innerHTML = &apos;&apos;;
+  }
+
+  display(setup, container, options = {}) {
+    this.initSetup(setup);
+    this.container = container;
+    this.container.classList.add(&apos;space&apos;);
+    this.renderingOptions = options;
+
+    if (options.showBackground) {
+      this.container.style.backgroundImage = `url(${this.background})`;
+      this.container.style.backgroundPosition = &apos;50% 50%&apos;;
+      this.container.style.backgroundRepeat = &apos;no-repeat&apos;;
+      this.container.style.backgroundSize = &apos;contain&apos;;
+    }
+
+    const svg = document.createElementNS(ns, &apos;svg&apos;);
+    const group = document.createElementNS(ns, &apos;g&apos;);
+
+    svg.appendChild(group);
+    this.container.appendChild(svg);
+
+    this.svg = svg;
+    this.group = group;
+
+    this.resize(this.container);
+  }
+
+  resize() {
+    const boundingRect = this.container.getBoundingClientRect();
+    const containerWidth = boundingRect.width;
+    const containerHeight = boundingRect.height;
+    // force adaptation to container size
+
+    const ratio = (() =&gt; {
+      return (this.width &gt; this.height) ?
+        containerWidth / this.width :
+        containerHeight / this.height;
+    })();
+
+    let svgWidth = this.width * ratio;
+    let svgHeight = this.height * ratio;
+
+    if (this.fitContainer) {
+      svgWidth = containerWidth;
+      svgHeight = containerHeight;
+    }
+
+    const offsetLeft = (containerWidth - svgWidth) / 2;
+    const offsetTop = (containerHeight - svgHeight) / 2;
+
+    this.svg.setAttributeNS(null, &apos;width&apos;, svgWidth);
+    this.svg.setAttributeNS(null, &apos;height&apos;, svgHeight);
+     // use setup coordinates
+    this.svg.setAttributeNS(null, &apos;viewBox&apos;, `0 0 ${this.width} ${this.height}`);
+    // center svg in container
+    this.svg.style.position = &apos;absolute&apos;;
+    this.svg.style.left = `${offsetLeft}px`;
+    this.svg.style.top = `${offsetTop}px`;
+
+    // apply rotations
+    if (this.renderingOptions.transform) {
+      switch (this.renderingOptions.transform) {
+        case &apos;rotate180&apos;:
+          this.container.setAttribute(&apos;data-xfactor&apos;, -1);
+          this.container.setAttribute(&apos;data-yfactor&apos;, -1);
+          const transform = `rotate(180, ${svgWidth / 2}, ${svgHeight / 2})`;
+          this.group.setAttributeNS(null, &apos;transform&apos;, transform);
+          break;
+      }
+    }
+
+    this.svgOffsetLeft = offsetLeft;
+    this.svgOffsetTop = offsetTop;
+    this.svgWidth = svgWidth;
+    this.svgHeight = svgHeight;
+
+    this.ratio = ratio;
+  }
+
+  displayPositions(positions, size) {
+    // clean surface
+    this.removeAllPositions();
+
+    positions.forEach((position) =&gt; {
+      this.addPosition(position, size);
+    });
+
+    // add listeners
+    if (this.listenTouchEvent) {
+      this.container.addEventListener(&apos;touchstart&apos;, (e) =&gt; {
+        e.preventDefault();
+        const dots = Array.from(this.shapePositionMap.keys());
+        let target = e.target;
+
+        while (target !== this.container) {
+          if (dots.indexOf(target) !== -1) {
+            const position = this.shapePositionMap.get(target);
+            this.emit(&apos;select&apos;, position);
+          }
+
+          target = target.parentNode;
+        }
+      });
+    }
+  }
+
+  addPosition(position, size) {
+    const radius = size / 2;
+    const coordinates = position.coordinates;
+    const index = position.index;
+
+    const dot = document.createElementNS(ns, &apos;circle&apos;);
+    dot.setAttributeNS(null, &apos;r&apos;, radius / this.ratio);
+    dot.setAttributeNS(null, &apos;cx&apos;, coordinates[0] * this.width);
+    dot.setAttributeNS(null, &apos;cy&apos;, coordinates[1] * this.height);
+    dot.style.fill = &apos;steelblue&apos;;
+
+    this.group.appendChild(dot);
+    this.shapePositionMap.set(dot, position);
+    this.positionIndexShapeMap[index] = dot;
+  }
+
+  removePosition(position) {
+    const el = this. positionIndexShapeMap[position.index];
+    this.group.removeChild(el);
+  }
+
+  removeAllPositions() {
+    while (this.group.firstChild) {
+      this.group.removeChild(this.group.firstChild);
+    }
+  }
+
+}
+
+module.exports = ClientSpace;
+</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.4.1)</span></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>

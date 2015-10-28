@@ -3,8 +3,17 @@
 const EventEmitter = require('events').EventEmitter;
 const container = window.container || (window.container = document.getElementById('container'));
 
+/**
+ * @private
+ */
 class Promised extends EventEmitter {
   constructor() {
+    /**
+     * [resolvePromised description]
+     * @todo description
+     * @type {function}
+     * @private
+     */
     this.resolvePromised = null;
   }
 
@@ -17,6 +26,9 @@ class Promised extends EventEmitter {
   }
 }
 
+/**
+ * @private
+ */
 class Sequential extends Promised {
   constructor(modules) {
     super();
@@ -44,6 +56,9 @@ class Sequential extends Promised {
   }
 }
 
+/**
+ * @private
+ */
 class Parallel extends Promised {
   constructor(modules) {
     super();
@@ -67,7 +82,6 @@ class Parallel extends Promised {
       mod.launch();
   }
 }
-
 
 export default class ClientModule extends Promised {
   constructor(name, createView = true, color = 'black') { // TODO: change to colorClass?

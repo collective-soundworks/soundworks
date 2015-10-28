@@ -1,0 +1,12 @@
+{
+  "source": "./src",
+  "destination": "./out/esdoc",
+  "includes": ["\\.es6.js$"],
+  "manual": {
+    "overview": ["./manual/overview.md"],
+    "usage": ["./manual/usage.md"],
+    "tutorial": ["./manual/tutorial.md"],
+    "example": ["./manual/example.md"],
+    "changelog": ["./CHANGELOG.md"]
+  }
+}

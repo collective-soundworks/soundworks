@@ -1,0 +1,136 @@
+{
+  "coverage": "65.3%",
+  "expectCount": 98,
+  "actualCount": 64,
+  "files": {
+    "src/client/ClientCalibration.es6.js": {
+      "expectCount": 11,
+      "actualCount": 6,
+      "undocumentLines": [
+        8,
+        42,
+        36,
+        37,
+        40
+      ]
+    },
+    "src/client/ClientControl.es6.js": {
+      "expectCount": 7,
+      "actualCount": 7,
+      "undocumentLines": []
+    },
+    "src/client/ClientDialog.es6.js": {
+      "expectCount": 4,
+      "actualCount": 2,
+      "undocumentLines": [
+        57,
+        44
+      ]
+    },
+    "src/client/ClientLoader.es6.js": {
+      "expectCount": 5,
+      "actualCount": 3,
+      "undocumentLines": [
+        75,
+        70
+      ]
+    },
+    "src/client/ClientModule.es6.js": {
+      "expectCount": 17,
+      "actualCount": 0,
+      "undocumentLines": [
+        86,
+        3,
+        87,
+        141,
+        108,
+        107,
+        130,
+        90,
+        93,
+        179,
+        122,
+        126,
+        153,
+        94,
+        111,
+        92,
+        186
+      ]
+    },
+    "src/client/ClientCheckin.es6.js": {
+      "expectCount": 1,
+      "actualCount": 0,
+      "undocumentLines": [
+        7
+      ]
+    },
+    "src/client/ClientOrientation.es6.js": {
+      "expectCount": 4,
+      "actualCount": 3,
+      "undocumentLines": [
+        42
+      ]
+    },
+    "src/client/ClientPerformance.es6.js": {
+      "expectCount": 4,
+      "actualCount": 4,
+      "undocumentLines": []
+    },
+    "src/client/ClientPlatform.es6.js": {
+      "expectCount": 4,
+      "actualCount": 2,
+      "undocumentLines": [
+        81,
+        48
+      ]
+    },
+    "src/client/ClientSync.es6.js": {
+      "expectCount": 6,
+      "actualCount": 5,
+      "undocumentLines": [
+        55
+      ]
+    },
+    "src/server/ServerCalibration.es6.js": {
+      "expectCount": 4,
+      "actualCount": 2,
+      "undocumentLines": [
+        7,
+        28
+      ]
+    },
+    "src/server/ServerClient.es6.js": {
+      "expectCount": 11,
+      "actualCount": 11,
+      "undocumentLines": []
+    },
+    "src/server/ServerControl.es6.js": {
+      "expectCount": 10,
+      "actualCount": 9,
+      "undocumentLines": [
+        161
+      ]
+    },
+    "src/server/ServerModule.es6.js": {
+      "expectCount": 5,
+      "actualCount": 5,
+      "undocumentLines": []
+    },
+    "src/server/ServerSync.es6.js": {
+      "expectCount": 3,
+      "actualCount": 3,
+      "undocumentLines": []
+    },
+    "src/client/client.es6.js": {
+      "expectCount": 1,
+      "actualCount": 1,
+      "undocumentLines": []
+    },
+    "src/server/server.es6.js": {
+      "expectCount": 1,
+      "actualCount": 1,
+      "undocumentLines": []
+    }
+  }
+}
