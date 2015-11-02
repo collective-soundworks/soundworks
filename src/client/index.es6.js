@@ -1,7 +1,3 @@
-/**
- * @fileoverview Soundworks client side exported modules
- * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
- */
 'use strict';
 
 // fix some kind of bug with Traceur...

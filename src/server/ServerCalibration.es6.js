@@ -32,7 +32,7 @@ export default class ServerCalibration extends ServerModule {
    * Register the receive functions.
    *
    * @function ServerCalibration~connect
-   * @param {Object} client
+   * @param {ServerClient} client
    */
   connect(client) {
     super.connect(client);

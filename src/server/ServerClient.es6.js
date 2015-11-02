@@ -3,7 +3,7 @@
 const log = require('./logger');
 
 /**
- * The `ServerClient` module is used to keep track of each connected client and to communicate with it via WebSockets.
+ * The {@link ServerClient} module is used to keep track of each connected client and to communicate with it via WebSockets.
  * Each time a client of type `clientType` connects to the server, *Soundworks* creates a new instance of `ServerClient`.
  * An instance of the class is passed to the `connect` and `disconnect` methods of all the server side modules that are mapped to the `clientType` clients (see {@link server.map}), as well as to the `enter` and `exit` methods of any {@link ServerPerformance} class mapped to that same client type.
  */

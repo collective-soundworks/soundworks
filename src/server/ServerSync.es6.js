@@ -1,10 +1,11 @@
 'use strict';
 
 const Sync = require('sync/server');
+
 import ServerModule from './ServerModule.es6.js';
 
 /**
- * The `ServerSync` module takes care of the synchronization process on the server side.
+ * The {@link ServerSync} module takes care of the synchronization process on the server side.
  * @example
  * // Require the Soundworks library (server side)
  * const serverSide = require('soundworks/server'); // TODO

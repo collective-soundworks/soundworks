@@ -150,10 +150,10 @@
       "trailingComments": [
         {
           "type": "Block",
-          "value": "*\n * The `ServerClient` module is used to keep track of each connected client and to communicate with it via WebSockets.\n * Each time a client of type `clientType` connects to the server, *Soundworks* creates a new instance of `ServerClient`.\n * An instance of the class is passed to the `connect` and `disconnect` methods of all the server side modules that are mapped to the `clientType` clients (see {@link server.map}), as well as to the `enter` and `exit` methods of any {@link ServerPerformance} class mapped to that same client type.\n ",
+          "value": "*\n * The {@link ServerClient} module is used to keep track of each connected client and to communicate with it via WebSockets.\n * Each time a client of type `clientType` connects to the server, *Soundworks* creates a new instance of `ServerClient`.\n * An instance of the class is passed to the `connect` and `disconnect` methods of all the server side modules that are mapped to the `clientType` clients (see {@link server.map}), as well as to the `enter` and `exit` methods of any {@link ServerPerformance} class mapped to that same client type.\n ",
           "range": [
             49,
-            595
+            601
           ],
           "loc": {
             "start": {
@@ -176,8 +176,8 @@
           "type": "Identifier",
           "name": "ServerClient",
           "range": [
-            617,
-            629
+            623,
+            635
           ],
           "loc": {
             "start": {
@@ -200,8 +200,8 @@
                 "type": "Identifier",
                 "name": "constructor",
                 "range": [
-                  826,
-                  837
+                  832,
+                  843
                 ],
                 "loc": {
                   "start": {
@@ -222,8 +222,8 @@
                     "type": "Identifier",
                     "name": "clientType",
                     "range": [
-                      838,
-                      848
+                      844,
+                      854
                     ],
                     "loc": {
                       "start": {
@@ -240,8 +240,8 @@
                     "type": "Identifier",
                     "name": "socket",
                     "range": [
-                      850,
-                      856
+                      856,
+                      862
                     ],
                     "loc": {
                       "start": {
@@ -269,8 +269,8 @@
                           "object": {
                             "type": "ThisExpression",
                             "range": [
-                              1014,
-                              1018
+                              1020,
+                              1024
                             ],
                             "loc": {
                               "start": {
@@ -287,8 +287,8 @@
                             "type": "Identifier",
                             "name": "type",
                             "range": [
-                              1019,
-                              1023
+                              1025,
+                              1029
                             ],
                             "loc": {
                               "start": {
@@ -302,8 +302,8 @@
                             }
                           },
                           "range": [
-                            1014,
-                            1023
+                            1020,
+                            1029
                           ],
                           "loc": {
                             "start": {
@@ -320,8 +320,8 @@
                           "type": "Identifier",
                           "name": "clientType",
                           "range": [
-                            1026,
-                            1036
+                            1032,
+                            1042
                           ],
                           "loc": {
                             "start": {
@@ -335,8 +335,8 @@
                           }
                         },
                         "range": [
-                          1014,
-                          1036
+                          1020,
+                          1042
                         ],
                         "loc": {
                           "start": {
@@ -350,8 +350,8 @@
                         }
                       },
                       "range": [
-                        1014,
-                        1037
+                        1020,
+                        1043
                       ],
                       "loc": {
                         "start": {
@@ -368,8 +368,8 @@
                           "type": "Block",
                           "value": "*\n\t\t * Client type (specified when initializing the {@link client} object on the client side with {@link client.init}).\n\t\t * @type {String}\n\t\t ",
                           "range": [
-                            862,
-                            1009
+                            868,
+                            1015
                           ],
                           "loc": {
                             "start": {
@@ -388,8 +388,8 @@
                           "type": "Block",
                           "value": "*\n\t\t * Index of the client as set by the {@link ServerCheckin} module.\n\t\t * @type {Number}\n\t\t ",
                           "range": [
-                            1041,
-                            1139
+                            1047,
+                            1145
                           ],
                           "loc": {
                             "start": {
@@ -415,8 +415,8 @@
                           "object": {
                             "type": "ThisExpression",
                             "range": [
-                              1144,
-                              1148
+                              1150,
+                              1154
                             ],
                             "loc": {
                               "start": {
@@ -433,8 +433,8 @@
                             "type": "Identifier",
                             "name": "index",
                             "range": [
-                              1149,
-                              1154
+                              1155,
+                              1160
                             ],
                             "loc": {
                               "start": {
@@ -448,8 +448,8 @@
                             }
                           },
                           "range": [
-                            1144,
-                            1154
+                            1150,
+                            1160
                           ],
                           "loc": {
                             "start": {
@@ -470,8 +470,8 @@
                             "value": 1,
                             "raw": "1",
                             "range": [
-                              1158,
-                              1159
+                              1164,
+                              1165
                             ],
                             "loc": {
                               "start": {
@@ -486,8 +486,8 @@
                           },
                           "prefix": true,
                           "range": [
-                            1157,
-                            1159
+                            1163,
+                            1165
                           ],
                           "loc": {
                             "start": {
@@ -501,8 +501,8 @@
                           }
                         },
                         "range": [
-                          1144,
-                          1159
+                          1150,
+                          1165
                         ],
                         "loc": {
                           "start": {
@@ -516,8 +516,8 @@
                         }
                       },
                       "range": [
-                        1144,
-                        1160
+                        1150,
+                        1166
                       ],
                       "loc": {
                         "start": {
@@ -534,8 +534,8 @@
                           "type": "Block",
                           "value": "*\n\t\t * Index of the client as set by the {@link ServerCheckin} module.\n\t\t * @type {Number}\n\t\t ",
                           "range": [
-                            1041,
-                            1139
+                            1047,
+                            1145
                           ],
                           "loc": {
                             "start": {
@@ -554,8 +554,8 @@
                           "type": "Block",
                           "value": "*\n\t\t * Coordinates of the client in the space, stored as an `[x, y]` array.\n\t\t * @type {Number[]}\n\t\t ",
                           "range": [
-                            1164,
-                            1269
+                            1170,
+                            1275
                           ],
                           "loc": {
                             "start": {
@@ -581,8 +581,8 @@
                           "object": {
                             "type": "ThisExpression",
                             "range": [
-                              1274,
-                              1278
+                              1280,
+                              1284
                             ],
                             "loc": {
                               "start": {
@@ -599,8 +599,8 @@
                             "type": "Identifier",
                             "name": "coordinates",
                             "range": [
-                              1279,
-                              1290
+                              1285,
+                              1296
                             ],
                             "loc": {
                               "start": {
@@ -614,8 +614,8 @@
                             }
                           },
                           "range": [
-                            1274,
-                            1290
+                            1280,
+                            1296
                           ],
                           "loc": {
                             "start": {
@@ -633,8 +633,8 @@
                           "value": null,
                           "raw": "null",
                           "range": [
-                            1293,
-                            1297
+                            1299,
+                            1303
                           ],
                           "loc": {
                             "start": {
@@ -648,8 +648,8 @@
                           }
                         },
                         "range": [
-                          1274,
-                          1297
+                          1280,
+                          1303
                         ],
                         "loc": {
                           "start": {
@@ -663,8 +663,8 @@
                         }
                       },
                       "range": [
-                        1274,
-                        1298
+                        1280,
+                        1304
                       ],
                       "loc": {
                         "start": {
@@ -681,8 +681,8 @@
                           "type": "Block",
                           "value": "*\n\t\t * Coordinates of the client in the space, stored as an `[x, y]` array.\n\t\t * @type {Number[]}\n\t\t ",
                           "range": [
-                            1164,
-                            1269
+                            1170,
+                            1275
                           ],
                           "loc": {
                             "start": {
@@ -701,8 +701,8 @@
                           "type": "Block",
                           "value": "*\n\t\t * Used by any {@link ServerModule} to associate data to a particular client.\n\t\t * All the data associated with a module whose `name` is `moduleName` is accessible through the key `moduleName`.\n\t\t * For instance, the {@link ServerSync} module keeps track of the time offset between the client and the sync clocks in `this.modules.sync.timeOffset`.\n\t\t * Similarly, a {@link ServerPerformance} module could keep track of each client's status in `this.modules.myPerformanceName.status`.\n\t\t * @type {Object}\n\t\t ",
                           "range": [
-                            1302,
-                            1817
+                            1308,
+                            1823
                           ],
                           "loc": {
                             "start": {
@@ -728,8 +728,8 @@
                           "object": {
                             "type": "ThisExpression",
                             "range": [
-                              1822,
-                              1826
+                              1828,
+                              1832
                             ],
                             "loc": {
                               "start": {
@@ -746,8 +746,8 @@
                             "type": "Identifier",
                             "name": "modules",
                             "range": [
-                              1827,
-                              1834
+                              1833,
+                              1840
                             ],
                             "loc": {
                               "start": {
@@ -761,8 +761,8 @@
                             }
                           },
                           "range": [
-                            1822,
-                            1834
+                            1828,
+                            1840
                           ],
                           "loc": {
                             "start": {
@@ -779,8 +779,8 @@
                           "type": "ObjectExpression",
                           "properties": [],
                           "range": [
-                            1837,
-                            1839
+                            1843,
+                            1845
                           ],
                           "loc": {
                             "start": {
@@ -794,8 +794,8 @@
                           }
                         },
                         "range": [
-                          1822,
-                          1839
+                          1828,
+                          1845
                         ],
                         "loc": {
                           "start": {
@@ -809,8 +809,8 @@
                         }
                       },
                       "range": [
-                        1822,
-                        1840
+                        1828,
+                        1846
                       ],
                       "loc": {
                         "start": {
@@ -827,8 +827,8 @@
                           "type": "Block",
                           "value": "*\n\t\t * Used by any {@link ServerModule} to associate data to a particular client.\n\t\t * All the data associated with a module whose `name` is `moduleName` is accessible through the key `moduleName`.\n\t\t * For instance, the {@link ServerSync} module keeps track of the time offset between the client and the sync clocks in `this.modules.sync.timeOffset`.\n\t\t * Similarly, a {@link ServerPerformance} module could keep track of each client's status in `this.modules.myPerformanceName.status`.\n\t\t * @type {Object}\n\t\t ",
                           "range": [
-                            1302,
-                            1817
+                            1308,
+                            1823
                           ],
                           "loc": {
                             "start": {
@@ -847,8 +847,8 @@
                           "type": "Block",
                           "value": "*\n\t\t * Socket used to communicate with the client.\n\t\t * @type {Socket}\n\t\t * @todo make private?\n\t\t ",
                           "range": [
-                            1844,
-                            1947
+                            1850,
+                            1953
                           ],
                           "loc": {
                             "start": {
@@ -874,8 +874,8 @@
                           "object": {
                             "type": "ThisExpression",
                             "range": [
-                              1952,
-                              1956
+                              1958,
+                              1962
                             ],
                             "loc": {
                               "start": {
@@ -892,8 +892,8 @@
                             "type": "Identifier",
                             "name": "socket",
                             "range": [
-                              1957,
-                              1963
+                              1963,
+                              1969
                             ],
                             "loc": {
                               "start": {
@@ -907,8 +907,8 @@
                             }
                           },
                           "range": [
-                            1952,
-                            1963
+                            1958,
+                            1969
                           ],
                           "loc": {
                             "start": {
@@ -925,8 +925,8 @@
                           "type": "Identifier",
                           "name": "socket",
                           "range": [
-                            1966,
-                            1972
+                            1972,
+                            1978
                           ],
                           "loc": {
                             "start": {
@@ -940,8 +940,8 @@
                           }
                         },
                         "range": [
-                          1952,
-                          1972
+                          1958,
+                          1978
                         ],
                         "loc": {
                           "start": {
@@ -955,8 +955,8 @@
                         }
                       },
                       "range": [
-                        1952,
-                        1973
+                        1958,
+                        1979
                       ],
                       "loc": {
                         "start": {
@@ -973,8 +973,8 @@
                           "type": "Block",
                           "value": "*\n\t\t * Socket used to communicate with the client.\n\t\t * @type {Socket}\n\t\t * @todo make private?\n\t\t ",
                           "range": [
-                            1844,
-                            1947
+                            1850,
+                            1953
                           ],
                           "loc": {
                             "start": {
@@ -991,8 +991,8 @@
                     }
                   ],
                   "range": [
-                    858,
-                    1977
+                    864,
+                    1983
                   ],
                   "loc": {
                     "start": {
@@ -1008,8 +1008,8 @@
                 "generator": false,
                 "expression": false,
                 "range": [
-                  837,
-                  1977
+                  843,
+                  1983
                 ],
                 "loc": {
                   "start": {
@@ -1025,8 +1025,8 @@
               "kind": "constructor",
               "computed": false,
               "range": [
-                826,
-                1977
+                832,
+                1983
               ],
               "loc": {
                 "start": {
@@ -1043,8 +1043,8 @@
                   "type": "Block",
                   "value": "*\n\t * Creates an instance of the class.\n\t * @param {String} clientType Client type of the connected client.\n\t * @param {Socket} socket Socket object used to comminuate with the client.\n\t ",
                   "range": [
-                    633,
-                    824
+                    639,
+                    830
                   ],
                   "loc": {
                     "start": {
@@ -1063,8 +1063,8 @@
                   "type": "Block",
                   "value": "*\n\t * Sends a WebSocket message to the client.\n\t * @param {String} msg Name of the message.\n\t * @param {...*} args Arguments of the message (as many as needed, of any type).\n\t ",
                   "range": [
-                    1980,
-                    2160
+                    1986,
+                    2166
                   ],
                   "loc": {
                     "start": {
@@ -1086,8 +1086,8 @@
                 "type": "Identifier",
                 "name": "send",
                 "range": [
-                  2163,
-                  2167
+                  2169,
+                  2173
                 ],
                 "loc": {
                   "start": {
@@ -1108,8 +1108,8 @@
                     "type": "Identifier",
                     "name": "msg",
                     "range": [
-                      2168,
-                      2171
+                      2174,
+                      2177
                     ],
                     "loc": {
                       "start": {
@@ -1128,8 +1128,8 @@
                       "type": "Identifier",
                       "name": "args",
                       "range": [
-                        2176,
-                        2180
+                        2182,
+                        2186
                       ],
                       "loc": {
                         "start": {
@@ -1143,8 +1143,8 @@
                       }
                     },
                     "range": [
-                      2173,
-                      2180
+                      2179,
+                      2186
                     ],
                     "loc": {
                       "start": {
@@ -1172,8 +1172,8 @@
                             "type": "Identifier",
                             "name": "log",
                             "range": [
-                              2188,
-                              2191
+                              2194,
+                              2197
                             ],
                             "loc": {
                               "start": {
@@ -1190,8 +1190,8 @@
                             "type": "Identifier",
                             "name": "trace",
                             "range": [
-                              2192,
-                              2197
+                              2198,
+                              2203
                             ],
                             "loc": {
                               "start": {
@@ -1205,8 +1205,8 @@
                             }
                           },
                           "range": [
-                            2188,
-                            2197
+                            2194,
+                            2203
                           ],
                           "loc": {
                             "start": {
@@ -1229,8 +1229,8 @@
                                   "type": "Identifier",
                                   "name": "socket",
                                   "range": [
-                                    2200,
-                                    2206
+                                    2206,
+                                    2212
                                   ],
                                   "loc": {
                                     "start": {
@@ -1249,8 +1249,8 @@
                                   "object": {
                                     "type": "ThisExpression",
                                     "range": [
-                                      2208,
-                                      2212
+                                      2214,
+                                      2218
                                     ],
                                     "loc": {
                                       "start": {
@@ -1267,8 +1267,8 @@
                                     "type": "Identifier",
                                     "name": "socket",
                                     "range": [
-                                      2213,
-                                      2219
+                                      2219,
+                                      2225
                                     ],
                                     "loc": {
                                       "start": {
@@ -1282,8 +1282,8 @@
                                     }
                                   },
                                   "range": [
-                                    2208,
-                                    2219
+                                    2214,
+                                    2225
                                   ],
                                   "loc": {
                                     "start": {
@@ -1301,8 +1301,8 @@
                                 "shorthand": false,
                                 "computed": false,
                                 "range": [
-                                  2200,
-                                  2219
+                                  2206,
+                                  2225
                                 ],
                                 "loc": {
                                   "start": {
@@ -1321,8 +1321,8 @@
                                   "type": "Identifier",
                                   "name": "clientType",
                                   "range": [
-                                    2221,
-                                    2231
+                                    2227,
+                                    2237
                                   ],
                                   "loc": {
                                     "start": {
@@ -1341,8 +1341,8 @@
                                   "object": {
                                     "type": "ThisExpression",
                                     "range": [
-                                      2233,
-                                      2237
+                                      2239,
+                                      2243
                                     ],
                                     "loc": {
                                       "start": {
@@ -1359,8 +1359,8 @@
                                     "type": "Identifier",
                                     "name": "type",
                                     "range": [
-                                      2238,
-                                      2242
+                                      2244,
+                                      2248
                                     ],
                                     "loc": {
                                       "start": {
@@ -1374,8 +1374,8 @@
                                     }
                                   },
                                   "range": [
-                                    2233,
-                                    2242
+                                    2239,
+                                    2248
                                   ],
                                   "loc": {
                                     "start": {
@@ -1393,8 +1393,8 @@
                                 "shorthand": false,
                                 "computed": false,
                                 "range": [
-                                  2221,
-                                  2242
+                                  2227,
+                                  2248
                                 ],
                                 "loc": {
                                   "start": {
@@ -1413,8 +1413,8 @@
                                   "type": "Identifier",
                                   "name": "channel",
                                   "range": [
-                                    2244,
-                                    2251
+                                    2250,
+                                    2257
                                   ],
                                   "loc": {
                                     "start": {
@@ -1431,8 +1431,8 @@
                                   "type": "Identifier",
                                   "name": "msg",
                                   "range": [
-                                    2253,
-                                    2256
+                                    2259,
+                                    2262
                                   ],
                                   "loc": {
                                     "start": {
@@ -1450,8 +1450,8 @@
                                 "shorthand": false,
                                 "computed": false,
                                 "range": [
-                                  2244,
-                                  2256
+                                  2250,
+                                  2262
                                 ],
                                 "loc": {
                                   "start": {
@@ -1470,8 +1470,8 @@
                                   "type": "Identifier",
                                   "name": "arguments",
                                   "range": [
-                                    2258,
-                                    2267
+                                    2264,
+                                    2273
                                   ],
                                   "loc": {
                                     "start": {
@@ -1488,8 +1488,8 @@
                                   "type": "Identifier",
                                   "name": "args",
                                   "range": [
-                                    2269,
-                                    2273
+                                    2275,
+                                    2279
                                   ],
                                   "loc": {
                                     "start": {
@@ -1507,8 +1507,8 @@
                                 "shorthand": false,
                                 "computed": false,
                                 "range": [
-                                  2258,
-                                  2273
+                                  2264,
+                                  2279
                                 ],
                                 "loc": {
                                   "start": {
@@ -1523,8 +1523,8 @@
                               }
                             ],
                             "range": [
-                              2198,
-                              2275
+                              2204,
+                              2281
                             ],
                             "loc": {
                               "start": {
@@ -1542,8 +1542,8 @@
                             "value": "socket.send",
                             "raw": "'socket.send'",
                             "range": [
-                              2277,
-                              2290
+                              2283,
+                              2296
                             ],
                             "loc": {
                               "start": {
@@ -1558,8 +1558,8 @@
                           }
                         ],
                         "range": [
-                          2188,
-                          2291
+                          2194,
+                          2297
                         ],
                         "loc": {
                           "start": {
@@ -1573,8 +1573,8 @@
                         }
                       },
                       "range": [
-                        2188,
-                        2292
+                        2194,
+                        2298
                       ],
                       "loc": {
                         "start": {
@@ -1600,8 +1600,8 @@
                             "object": {
                               "type": "ThisExpression",
                               "range": [
-                                2297,
-                                2301
+                                2303,
+                                2307
                               ],
                               "loc": {
                                 "start": {
@@ -1618,8 +1618,8 @@
                               "type": "Identifier",
                               "name": "socket",
                               "range": [
-                                2302,
-                                2308
+                                2308,
+                                2314
                               ],
                               "loc": {
                                 "start": {
@@ -1633,8 +1633,8 @@
                               }
                             },
                             "range": [
-                              2297,
-                              2308
+                              2303,
+                              2314
                             ],
                             "loc": {
                               "start": {
@@ -1651,8 +1651,8 @@
                             "type": "Identifier",
                             "name": "emit",
                             "range": [
-                              2309,
-                              2313
+                              2315,
+                              2319
                             ],
                             "loc": {
                               "start": {
@@ -1666,8 +1666,8 @@
                             }
                           },
                           "range": [
-                            2297,
-                            2313
+                            2303,
+                            2319
                           ],
                           "loc": {
                             "start": {
@@ -1685,8 +1685,8 @@
                             "type": "Identifier",
                             "name": "msg",
                             "range": [
-                              2314,
-                              2317
+                              2320,
+                              2323
                             ],
                             "loc": {
                               "start": {
@@ -1705,8 +1705,8 @@
                               "type": "Identifier",
                               "name": "args",
                               "range": [
-                                2322,
-                                2326
+                                2328,
+                                2332
                               ],
                               "loc": {
                                 "start": {
@@ -1720,8 +1720,8 @@
                               }
                             },
                             "range": [
-                              2319,
-                              2326
+                              2325,
+                              2332
                             ],
                             "loc": {
                               "start": {
@@ -1736,8 +1736,8 @@
                           }
                         ],
                         "range": [
-                          2297,
-                          2327
+                          2303,
+                          2333
                         ],
                         "loc": {
                           "start": {
@@ -1751,8 +1751,8 @@
                         }
                       },
                       "range": [
-                        2297,
-                        2328
+                        2303,
+                        2334
                       ],
                       "loc": {
                         "start": {
@@ -1767,8 +1767,8 @@
                     }
                   ],
                   "range": [
-                    2182,
-                    2332
+                    2188,
+                    2338
                   ],
                   "loc": {
                     "start": {
@@ -1784,8 +1784,8 @@
                 "generator": false,
                 "expression": false,
                 "range": [
-                  2167,
-                  2332
+                  2173,
+                  2338
                 ],
                 "loc": {
                   "start": {
@@ -1801,8 +1801,8 @@
               "kind": "method",
               "computed": false,
               "range": [
-                2163,
-                2332
+                2169,
+                2338
               ],
               "loc": {
                 "start": {
@@ -1819,8 +1819,8 @@
                   "type": "Block",
                   "value": "*\n\t * Sends a WebSocket message to the client.\n\t * @param {String} msg Name of the message.\n\t * @param {...*} args Arguments of the message (as many as needed, of any type).\n\t ",
                   "range": [
-                    1980,
-                    2160
+                    1986,
+                    2166
                   ],
                   "loc": {
                     "start": {
@@ -1839,8 +1839,8 @@
                   "type": "Block",
                   "value": "*\n\t * Sends a volatile WebSocket message to the client, *i.e.* a non-blocking WebSocket message.\n\t * @param {String} msg Name of the message to send.\n\t * @param {...*} args Arguments of the message (as many as needed, of any type).\n\t ",
                   "range": [
-                    2335,
-                    2573
+                    2341,
+                    2579
                   ],
                   "loc": {
                     "start": {
@@ -1862,8 +1862,8 @@
                 "type": "Identifier",
                 "name": "sendVolatile",
                 "range": [
-                  2576,
-                  2588
+                  2582,
+                  2594
                 ],
                 "loc": {
                   "start": {
@@ -1884,8 +1884,8 @@
                     "type": "Identifier",
                     "name": "msg",
                     "range": [
-                      2589,
-                      2592
+                      2595,
+                      2598
                     ],
                     "loc": {
                       "start": {
@@ -1904,8 +1904,8 @@
                       "type": "Identifier",
                       "name": "args",
                       "range": [
-                        2597,
-                        2601
+                        2603,
+                        2607
                       ],
                       "loc": {
                         "start": {
@@ -1919,8 +1919,8 @@
                       }
                     },
                     "range": [
-                      2594,
-                      2601
+                      2600,
+                      2607
                     ],
                     "loc": {
                       "start": {
@@ -1948,8 +1948,8 @@
                             "type": "Identifier",
                             "name": "log",
                             "range": [
-                              2609,
-                              2612
+                              2615,
+                              2618
                             ],
                             "loc": {
                               "start": {
@@ -1966,8 +1966,8 @@
                             "type": "Identifier",
                             "name": "trace",
                             "range": [
-                              2613,
-                              2618
+                              2619,
+                              2624
                             ],
                             "loc": {
                               "start": {
@@ -1981,8 +1981,8 @@
                             }
                           },
                           "range": [
-                            2609,
-                            2618
+                            2615,
+                            2624
                           ],
                           "loc": {
                             "start": {
@@ -2005,8 +2005,8 @@
                                   "type": "Identifier",
                                   "name": "socket",
                                   "range": [
-                                    2621,
-                                    2627
+                                    2627,
+                                    2633
                                   ],
                                   "loc": {
                                     "start": {
@@ -2025,8 +2025,8 @@
                                   "object": {
                                     "type": "ThisExpression",
                                     "range": [
-                                      2629,
-                                      2633
+                                      2635,
+                                      2639
                                     ],
                                     "loc": {
                                       "start": {
@@ -2043,8 +2043,8 @@
                                     "type": "Identifier",
                                     "name": "socket",
                                     "range": [
-                                      2634,
-                                      2640
+                                      2640,
+                                      2646
                                     ],
                                     "loc": {
                                       "start": {
@@ -2058,8 +2058,8 @@
                                     }
                                   },
                                   "range": [
-                                    2629,
-                                    2640
+                                    2635,
+                                    2646
                                   ],
                                   "loc": {
                                     "start": {
@@ -2077,8 +2077,8 @@
                                 "shorthand": false,
                                 "computed": false,
                                 "range": [
-                                  2621,
-                                  2640
+                                  2627,
+                                  2646
                                 ],
                                 "loc": {
                                   "start": {
@@ -2097,8 +2097,8 @@
                                   "type": "Identifier",
                                   "name": "clientType",
                                   "range": [
-                                    2642,
-                                    2652
+                                    2648,
+                                    2658
                                   ],
                                   "loc": {
                                     "start": {
@@ -2117,8 +2117,8 @@
                                   "object": {
                                     "type": "ThisExpression",
                                     "range": [
-                                      2654,
-                                      2658
+                                      2660,
+                                      2664
                                     ],
                                     "loc": {
                                       "start": {
@@ -2135,8 +2135,8 @@
                                     "type": "Identifier",
                                     "name": "type",
                                     "range": [
-                                      2659,
-                                      2663
+                                      2665,
+                                      2669
                                     ],
                                     "loc": {
                                       "start": {
@@ -2150,8 +2150,8 @@
                                     }
                                   },
                                   "range": [
-                                    2654,
-                                    2663
+                                    2660,
+                                    2669
                                   ],
                                   "loc": {
                                     "start": {
@@ -2169,8 +2169,8 @@
                                 "shorthand": false,
                                 "computed": false,
                                 "range": [
-                                  2642,
-                                  2663
+                                  2648,
+                                  2669
                                 ],
                                 "loc": {
                                   "start": {
@@ -2189,8 +2189,8 @@
                                   "type": "Identifier",
                                   "name": "channel",
                                   "range": [
-                                    2665,
-                                    2672
+                                    2671,
+                                    2678
                                   ],
                                   "loc": {
                                     "start": {
@@ -2207,8 +2207,8 @@
                                   "type": "Identifier",
                                   "name": "msg",
                                   "range": [
-                                    2674,
-                                    2677
+                                    2680,
+                                    2683
                                   ],
                                   "loc": {
                                     "start": {
@@ -2226,8 +2226,8 @@
                                 "shorthand": false,
                                 "computed": false,
                                 "range": [
-                                  2665,
-                                  2677
+                                  2671,
+                                  2683
                                 ],
                                 "loc": {
                                   "start": {
@@ -2246,8 +2246,8 @@
                                   "type": "Identifier",
                                   "name": "arguments",
                                   "range": [
-                                    2679,
-                                    2688
+                                    2685,
+                                    2694
                                   ],
                                   "loc": {
                                     "start": {
@@ -2264,8 +2264,8 @@
                                   "type": "Identifier",
                                   "name": "args",
                                   "range": [
-                                    2690,
-                                    2694
+                                    2696,
+                                    2700
                                   ],
                                   "loc": {
                                     "start": {
@@ -2283,8 +2283,8 @@
                                 "shorthand": false,
                                 "computed": false,
                                 "range": [
-                                  2679,
-                                  2694
+                                  2685,
+                                  2700
                                 ],
                                 "loc": {
                                   "start": {
@@ -2299,8 +2299,8 @@
                               }
                             ],
                             "range": [
-                              2619,
-                              2696
+                              2625,
+                              2702
                             ],
                             "loc": {
                               "start": {
@@ -2318,8 +2318,8 @@
                             "value": "socket.sendVolatile",
                             "raw": "'socket.sendVolatile'",
                             "range": [
-                              2698,
-                              2719
+                              2704,
+                              2725
                             ],
                             "loc": {
                               "start": {
@@ -2334,8 +2334,8 @@
                           }
                         ],
                         "range": [
-                          2609,
-                          2720
+                          2615,
+                          2726
                         ],
                         "loc": {
                           "start": {
@@ -2349,8 +2349,8 @@
                         }
                       },
                       "range": [
-                        2609,
-                        2721
+                        2615,
+                        2727
                       ],
                       "loc": {
                         "start": {
@@ -2379,8 +2379,8 @@
                               "object": {
                                 "type": "ThisExpression",
                                 "range": [
-                                  2726,
-                                  2730
+                                  2732,
+                                  2736
                                 ],
                                 "loc": {
                                   "start": {
@@ -2397,8 +2397,8 @@
                                 "type": "Identifier",
                                 "name": "socket",
                                 "range": [
-                                  2731,
-                                  2737
+                                  2737,
+                                  2743
                                 ],
                                 "loc": {
                                   "start": {
@@ -2412,8 +2412,8 @@
                                 }
                               },
                               "range": [
-                                2726,
-                                2737
+                                2732,
+                                2743
                               ],
                               "loc": {
                                 "start": {
@@ -2430,8 +2430,8 @@
                               "type": "Identifier",
                               "name": "volatile",
                               "range": [
-                                2738,
-                                2746
+                                2744,
+                                2752
                               ],
                               "loc": {
                                 "start": {
@@ -2445,8 +2445,8 @@
                               }
                             },
                             "range": [
-                              2726,
-                              2746
+                              2732,
+                              2752
                             ],
                             "loc": {
                               "start": {
@@ -2463,8 +2463,8 @@
                             "type": "Identifier",
                             "name": "emit",
                             "range": [
-                              2747,
-                              2751
+                              2753,
+                              2757
                             ],
                             "loc": {
                               "start": {
@@ -2478,8 +2478,8 @@
                             }
                           },
                           "range": [
-                            2726,
-                            2751
+                            2732,
+                            2757
                           ],
                           "loc": {
                             "start": {
@@ -2497,8 +2497,8 @@
                             "type": "Identifier",
                             "name": "msg",
                             "range": [
-                              2752,
-                              2755
+                              2758,
+                              2761
                             ],
                             "loc": {
                               "start": {
@@ -2517,8 +2517,8 @@
                               "type": "Identifier",
                               "name": "args",
                               "range": [
-                                2760,
-                                2764
+                                2766,
+                                2770
                               ],
                               "loc": {
                                 "start": {
@@ -2532,8 +2532,8 @@
                               }
                             },
                             "range": [
-                              2757,
-                              2764
+                              2763,
+                              2770
                             ],
                             "loc": {
                               "start": {
@@ -2548,8 +2548,8 @@
                           }
                         ],
                         "range": [
-                          2726,
-                          2765
+                          2732,
+                          2771
                         ],
                         "loc": {
                           "start": {
@@ -2563,8 +2563,8 @@
                         }
                       },
                       "range": [
-                        2726,
-                        2766
+                        2732,
+                        2772
                       ],
                       "loc": {
                         "start": {
@@ -2579,8 +2579,8 @@
                     }
                   ],
                   "range": [
-                    2603,
-                    2770
+                    2609,
+                    2776
                   ],
                   "loc": {
                     "start": {
@@ -2596,8 +2596,8 @@
                 "generator": false,
                 "expression": false,
                 "range": [
-                  2588,
-                  2770
+                  2594,
+                  2776
                 ],
                 "loc": {
                   "start": {
@@ -2613,8 +2613,8 @@
               "kind": "method",
               "computed": false,
               "range": [
-                2576,
-                2770
+                2582,
+                2776
               ],
               "loc": {
                 "start": {
@@ -2631,8 +2631,8 @@
                   "type": "Block",
                   "value": "*\n\t * Sends a volatile WebSocket message to the client, *i.e.* a non-blocking WebSocket message.\n\t * @param {String} msg Name of the message to send.\n\t * @param {...*} args Arguments of the message (as many as needed, of any type).\n\t ",
                   "range": [
-                    2335,
-                    2573
+                    2341,
+                    2579
                   ],
                   "loc": {
                     "start": {
@@ -2651,8 +2651,8 @@
                   "type": "Block",
                   "value": "*\n\t * Executes a callback function when it receives a WebSocket message from the client.\n\t * @param {String} msg Name of the received message.\n\t * @param {Function} callback Callback function executed when the message is received.\n\t ",
                   "range": [
-                    2773,
-                    3010
+                    2779,
+                    3016
                   ],
                   "loc": {
                     "start": {
@@ -2674,8 +2674,8 @@
                 "type": "Identifier",
                 "name": "receive",
                 "range": [
-                  3013,
-                  3020
+                  3019,
+                  3026
                 ],
                 "loc": {
                   "start": {
@@ -2696,8 +2696,8 @@
                     "type": "Identifier",
                     "name": "msg",
                     "range": [
-                      3021,
-                      3024
+                      3027,
+                      3030
                     ],
                     "loc": {
                       "start": {
@@ -2714,8 +2714,8 @@
                     "type": "Identifier",
                     "name": "callback",
                     "range": [
-                      3026,
-                      3034
+                      3032,
+                      3040
                     ],
                     "loc": {
                       "start": {
@@ -2741,8 +2741,8 @@
                             "type": "Identifier",
                             "name": "_callback",
                             "range": [
-                              3046,
-                              3055
+                              3052,
+                              3061
                             ],
                             "loc": {
                               "start": {
@@ -2770,8 +2770,8 @@
                                       "type": "Identifier",
                                       "name": "args",
                                       "range": [
-                                        3071,
-                                        3075
+                                        3077,
+                                        3081
                                       ],
                                       "loc": {
                                         "start": {
@@ -2785,8 +2785,8 @@
                                       }
                                     },
                                     "range": [
-                                      3068,
-                                      3075
+                                      3074,
+                                      3081
                                     ],
                                     "loc": {
                                       "start": {
@@ -2814,8 +2814,8 @@
                                             "type": "Identifier",
                                             "name": "log",
                                             "range": [
-                                              3085,
-                                              3088
+                                              3091,
+                                              3094
                                             ],
                                             "loc": {
                                               "start": {
@@ -2832,8 +2832,8 @@
                                             "type": "Identifier",
                                             "name": "trace",
                                             "range": [
-                                              3089,
-                                              3094
+                                              3095,
+                                              3100
                                             ],
                                             "loc": {
                                               "start": {
@@ -2847,8 +2847,8 @@
                                             }
                                           },
                                           "range": [
-                                            3085,
-                                            3094
+                                            3091,
+                                            3100
                                           ],
                                           "loc": {
                                             "start": {
@@ -2871,8 +2871,8 @@
                                                   "type": "Identifier",
                                                   "name": "socket",
                                                   "range": [
-                                                    3097,
-                                                    3103
+                                                    3103,
+                                                    3109
                                                   ],
                                                   "loc": {
                                                     "start": {
@@ -2891,8 +2891,8 @@
                                                   "object": {
                                                     "type": "ThisExpression",
                                                     "range": [
-                                                      3105,
-                                                      3109
+                                                      3111,
+                                                      3115
                                                     ],
                                                     "loc": {
                                                       "start": {
@@ -2909,8 +2909,8 @@
                                                     "type": "Identifier",
                                                     "name": "socket",
                                                     "range": [
-                                                      3110,
-                                                      3116
+                                                      3116,
+                                                      3122
                                                     ],
                                                     "loc": {
                                                       "start": {
@@ -2924,8 +2924,8 @@
                                                     }
                                                   },
                                                   "range": [
-                                                    3105,
-                                                    3116
+                                                    3111,
+                                                    3122
                                                   ],
                                                   "loc": {
                                                     "start": {
@@ -2943,8 +2943,8 @@
                                                 "shorthand": false,
                                                 "computed": false,
                                                 "range": [
-                                                  3097,
-                                                  3116
+                                                  3103,
+                                                  3122
                                                 ],
                                                 "loc": {
                                                   "start": {
@@ -2963,8 +2963,8 @@
                                                   "type": "Identifier",
                                                   "name": "clientType",
                                                   "range": [
-                                                    3118,
-                                                    3128
+                                                    3124,
+                                                    3134
                                                   ],
                                                   "loc": {
                                                     "start": {
@@ -2983,8 +2983,8 @@
                                                   "object": {
                                                     "type": "ThisExpression",
                                                     "range": [
-                                                      3130,
-                                                      3134
+                                                      3136,
+                                                      3140
                                                     ],
                                                     "loc": {
                                                       "start": {
@@ -3001,8 +3001,8 @@
                                                     "type": "Identifier",
                                                     "name": "type",
                                                     "range": [
-                                                      3135,
-                                                      3139
+                                                      3141,
+                                                      3145
                                                     ],
                                                     "loc": {
                                                       "start": {
@@ -3016,8 +3016,8 @@
                                                     }
                                                   },
                                                   "range": [
-                                                    3130,
-                                                    3139
+                                                    3136,
+                                                    3145
                                                   ],
                                                   "loc": {
                                                     "start": {
@@ -3035,8 +3035,8 @@
                                                 "shorthand": false,
                                                 "computed": false,
                                                 "range": [
-                                                  3118,
-                                                  3139
+                                                  3124,
+                                                  3145
                                                 ],
                                                 "loc": {
                                                   "start": {
@@ -3055,8 +3055,8 @@
                                                   "type": "Identifier",
                                                   "name": "channel",
                                                   "range": [
-                                                    3141,
-                                                    3148
+                                                    3147,
+                                                    3154
                                                   ],
                                                   "loc": {
                                                     "start": {
@@ -3073,8 +3073,8 @@
                                                   "type": "Identifier",
                                                   "name": "msg",
                                                   "range": [
-                                                    3150,
-                                                    3153
+                                                    3156,
+                                                    3159
                                                   ],
                                                   "loc": {
                                                     "start": {
@@ -3092,8 +3092,8 @@
                                                 "shorthand": false,
                                                 "computed": false,
                                                 "range": [
-                                                  3141,
-                                                  3153
+                                                  3147,
+                                                  3159
                                                 ],
                                                 "loc": {
                                                   "start": {
@@ -3112,8 +3112,8 @@
                                                   "type": "Identifier",
                                                   "name": "arguments",
                                                   "range": [
-                                                    3155,
-                                                    3164
+                                                    3161,
+                                                    3170
                                                   ],
                                                   "loc": {
                                                     "start": {
@@ -3130,8 +3130,8 @@
                                                   "type": "Identifier",
                                                   "name": "args",
                                                   "range": [
-                                                    3166,
-                                                    3170
+                                                    3172,
+                                                    3176
                                                   ],
                                                   "loc": {
                                                     "start": {
@@ -3149,8 +3149,8 @@
                                                 "shorthand": false,
                                                 "computed": false,
                                                 "range": [
-                                                  3155,
-                                                  3170
+                                                  3161,
+                                                  3176
                                                 ],
                                                 "loc": {
                                                   "start": {
@@ -3165,8 +3165,8 @@
                                               }
                                             ],
                                             "range": [
-                                              3095,
-                                              3172
+                                              3101,
+                                              3178
                                             ],
                                             "loc": {
                                               "start": {
@@ -3184,8 +3184,8 @@
                                             "value": "socket.receive",
                                             "raw": "'socket.receive'",
                                             "range": [
-                                              3174,
-                                              3190
+                                              3180,
+                                              3196
                                             ],
                                             "loc": {
                                               "start": {
@@ -3200,8 +3200,8 @@
                                           }
                                         ],
                                         "range": [
-                                          3085,
-                                          3191
+                                          3091,
+                                          3197
                                         ],
                                         "loc": {
                                           "start": {
@@ -3215,8 +3215,8 @@
                                         }
                                       },
                                       "range": [
-                                        3085,
-                                        3192
+                                        3091,
+                                        3198
                                       ],
                                       "loc": {
                                         "start": {
@@ -3240,8 +3240,8 @@
                                             "type": "Identifier",
                                             "name": "callback",
                                             "range": [
-                                              3199,
-                                              3207
+                                              3205,
+                                              3213
                                             ],
                                             "loc": {
                                               "start": {
@@ -3258,8 +3258,8 @@
                                             "type": "Identifier",
                                             "name": "apply",
                                             "range": [
-                                              3208,
-                                              3213
+                                              3214,
+                                              3219
                                             ],
                                             "loc": {
                                               "start": {
@@ -3273,8 +3273,8 @@
                                             }
                                           },
                                           "range": [
-                                            3199,
-                                            3213
+                                            3205,
+                                            3219
                                           ],
                                           "loc": {
                                             "start": {
@@ -3294,8 +3294,8 @@
                                             "object": {
                                               "type": "ThisExpression",
                                               "range": [
-                                                3214,
-                                                3218
+                                                3220,
+                                                3224
                                               ],
                                               "loc": {
                                                 "start": {
@@ -3312,8 +3312,8 @@
                                               "type": "Identifier",
                                               "name": "socket",
                                               "range": [
-                                                3219,
-                                                3225
+                                                3225,
+                                                3231
                                               ],
                                               "loc": {
                                                 "start": {
@@ -3327,8 +3327,8 @@
                                               }
                                             },
                                             "range": [
-                                              3214,
-                                              3225
+                                              3220,
+                                              3231
                                             ],
                                             "loc": {
                                               "start": {
@@ -3345,8 +3345,8 @@
                                             "type": "Identifier",
                                             "name": "args",
                                             "range": [
-                                              3227,
-                                              3231
+                                              3233,
+                                              3237
                                             ],
                                             "loc": {
                                               "start": {
@@ -3361,8 +3361,8 @@
                                           }
                                         ],
                                         "range": [
-                                          3199,
-                                          3232
+                                          3205,
+                                          3238
                                         ],
                                         "loc": {
                                           "start": {
@@ -3376,8 +3376,8 @@
                                         }
                                       },
                                       "range": [
-                                        3199,
-                                        3233
+                                        3205,
+                                        3239
                                       ],
                                       "loc": {
                                         "start": {
@@ -3392,8 +3392,8 @@
                                     }
                                   ],
                                   "range": [
-                                    3077,
-                                    3239
+                                    3083,
+                                    3245
                                   ],
                                   "loc": {
                                     "start": {
@@ -3409,8 +3409,8 @@
                                 "generator": false,
                                 "expression": false,
                                 "range": [
-                                  3059,
-                                  3239
+                                  3065,
+                                  3245
                                 ],
                                 "loc": {
                                   "start": {
@@ -3427,8 +3427,8 @@
                                 "type": "Identifier",
                                 "name": "bind",
                                 "range": [
-                                  3241,
-                                  3245
+                                  3247,
+                                  3251
                                 ],
                                 "loc": {
                                   "start": {
@@ -3442,8 +3442,8 @@
                                 }
                               },
                               "range": [
-                                3058,
-                                3245
+                                3064,
+                                3251
                               ],
                               "loc": {
                                 "start": {
@@ -3460,8 +3460,8 @@
                               {
                                 "type": "ThisExpression",
                                 "range": [
-                                  3246,
-                                  3250
+                                  3252,
+                                  3256
                                 ],
                                 "loc": {
                                   "start": {
@@ -3476,8 +3476,8 @@
                               }
                             ],
                             "range": [
-                              3058,
-                              3251
+                              3064,
+                              3257
                             ],
                             "loc": {
                               "start": {
@@ -3491,8 +3491,8 @@
                             }
                           },
                           "range": [
-                            3046,
-                            3251
+                            3052,
+                            3257
                           ],
                           "loc": {
                             "start": {
@@ -3508,8 +3508,8 @@
                       ],
                       "kind": "var",
                       "range": [
-                        3042,
-                        3252
+                        3048,
+                        3258
                       ],
                       "loc": {
                         "start": {
@@ -3535,8 +3535,8 @@
                             "object": {
                               "type": "ThisExpression",
                               "range": [
-                                3258,
-                                3262
+                                3264,
+                                3268
                               ],
                               "loc": {
                                 "start": {
@@ -3553,8 +3553,8 @@
                               "type": "Identifier",
                               "name": "socket",
                               "range": [
-                                3263,
-                                3269
+                                3269,
+                                3275
                               ],
                               "loc": {
                                 "start": {
@@ -3568,8 +3568,8 @@
                               }
                             },
                             "range": [
-                              3258,
-                              3269
+                              3264,
+                              3275
                             ],
                             "loc": {
                               "start": {
@@ -3586,8 +3586,8 @@
                             "type": "Identifier",
                             "name": "on",
                             "range": [
-                              3270,
-                              3272
+                              3276,
+                              3278
                             ],
                             "loc": {
                               "start": {
@@ -3601,8 +3601,8 @@
                             }
                           },
                           "range": [
-                            3258,
-                            3272
+                            3264,
+                            3278
                           ],
                           "loc": {
                             "start": {
@@ -3620,8 +3620,8 @@
                             "type": "Identifier",
                             "name": "msg",
                             "range": [
-                              3273,
-                              3276
+                              3279,
+                              3282
                             ],
                             "loc": {
                               "start": {
@@ -3638,8 +3638,8 @@
                             "type": "Identifier",
                             "name": "_callback",
                             "range": [
-                              3278,
-                              3287
+                              3284,
+                              3293
                             ],
                             "loc": {
                               "start": {
@@ -3654,8 +3654,8 @@
                           }
                         ],
                         "range": [
-                          3258,
-                          3288
+                          3264,
+                          3294
                         ],
                         "loc": {
                           "start": {
@@ -3669,8 +3669,8 @@
                         }
                       },
                       "range": [
-                        3258,
-                        3289
+                        3264,
+                        3295
                       ],
                       "loc": {
                         "start": {
@@ -3685,8 +3685,8 @@
                     }
                   ],
                   "range": [
-                    3036,
-                    3293
+                    3042,
+                    3299
                   ],
                   "loc": {
                     "start": {
@@ -3702,8 +3702,8 @@
                 "generator": false,
                 "expression": false,
                 "range": [
-                  3020,
-                  3293
+                  3026,
+                  3299
                 ],
                 "loc": {
                   "start": {
@@ -3719,8 +3719,8 @@
               "kind": "method",
               "computed": false,
               "range": [
-                3013,
-                3293
+                3019,
+                3299
               ],
               "loc": {
                 "start": {
@@ -3737,8 +3737,8 @@
                   "type": "Block",
                   "value": "*\n\t * Executes a callback function when it receives a WebSocket message from the client.\n\t * @param {String} msg Name of the received message.\n\t * @param {Function} callback Callback function executed when the message is received.\n\t ",
                   "range": [
-                    2773,
-                    3010
+                    2779,
+                    3016
                   ],
                   "loc": {
                     "start": {
@@ -3757,8 +3757,8 @@
                   "type": "Block",
                   "value": "*\n\t * Sends a WebSocket message to all the other clients of the same type (*i.e.* all the clients of type `this.clientType`, excluding this client).\n\t * @param {String} msg Name of the message to broadcast.\n\t * @param {...*} args Arguments of the message (as many as needed, of any type).\n\t ",
                   "range": [
-                    3296,
-                    3591
+                    3302,
+                    3597
                   ],
                   "loc": {
                     "start": {
@@ -3780,8 +3780,8 @@
                 "type": "Identifier",
                 "name": "broadcast",
                 "range": [
-                  3594,
-                  3603
+                  3600,
+                  3609
                 ],
                 "loc": {
                   "start": {
@@ -3802,8 +3802,8 @@
                     "type": "Identifier",
                     "name": "msg",
                     "range": [
-                      3604,
-                      3607
+                      3610,
+                      3613
                     ],
                     "loc": {
                       "start": {
@@ -3822,8 +3822,8 @@
                       "type": "Identifier",
                       "name": "args",
                       "range": [
-                        3612,
-                        3616
+                        3618,
+                        3622
                       ],
                       "loc": {
                         "start": {
@@ -3837,8 +3837,8 @@
                       }
                     },
                     "range": [
-                      3609,
-                      3616
+                      3615,
+                      3622
                     ],
                     "loc": {
                       "start": {
@@ -3866,8 +3866,8 @@
                             "type": "Identifier",
                             "name": "log",
                             "range": [
-                              3624,
-                              3627
+                              3630,
+                              3633
                             ],
                             "loc": {
                               "start": {
@@ -3884,8 +3884,8 @@
                             "type": "Identifier",
                             "name": "trace",
                             "range": [
-                              3628,
-                              3633
+                              3634,
+                              3639
                             ],
                             "loc": {
                               "start": {
@@ -3899,8 +3899,8 @@
                             }
                           },
                           "range": [
-                            3624,
-                            3633
+                            3630,
+                            3639
                           ],
                           "loc": {
                             "start": {
@@ -3923,8 +3923,8 @@
                                   "type": "Identifier",
                                   "name": "socket",
                                   "range": [
-                                    3636,
-                                    3642
+                                    3642,
+                                    3648
                                   ],
                                   "loc": {
                                     "start": {
@@ -3943,8 +3943,8 @@
                                   "object": {
                                     "type": "ThisExpression",
                                     "range": [
-                                      3644,
-                                      3648
+                                      3650,
+                                      3654
                                     ],
                                     "loc": {
                                       "start": {
@@ -3961,8 +3961,8 @@
                                     "type": "Identifier",
                                     "name": "socket",
                                     "range": [
-                                      3649,
-                                      3655
+                                      3655,
+                                      3661
                                     ],
                                     "loc": {
                                       "start": {
@@ -3976,8 +3976,8 @@
                                     }
                                   },
                                   "range": [
-                                    3644,
-                                    3655
+                                    3650,
+                                    3661
                                   ],
                                   "loc": {
                                     "start": {
@@ -3995,8 +3995,8 @@
                                 "shorthand": false,
                                 "computed": false,
                                 "range": [
-                                  3636,
-                                  3655
+                                  3642,
+                                  3661
                                 ],
                                 "loc": {
                                   "start": {
@@ -4015,8 +4015,8 @@
                                   "type": "Identifier",
                                   "name": "clientType",
                                   "range": [
-                                    3657,
-                                    3667
+                                    3663,
+                                    3673
                                   ],
                                   "loc": {
                                     "start": {
@@ -4035,8 +4035,8 @@
                                   "object": {
                                     "type": "ThisExpression",
                                     "range": [
-                                      3669,
-                                      3673
+                                      3675,
+                                      3679
                                     ],
                                     "loc": {
                                       "start": {
@@ -4053,8 +4053,8 @@
                                     "type": "Identifier",
                                     "name": "type",
                                     "range": [
-                                      3674,
-                                      3678
+                                      3680,
+                                      3684
                                     ],
                                     "loc": {
                                       "start": {
@@ -4068,8 +4068,8 @@
                                     }
                                   },
                                   "range": [
-                                    3669,
-                                    3678
+                                    3675,
+                                    3684
                                   ],
                                   "loc": {
                                     "start": {
@@ -4087,8 +4087,8 @@
                                 "shorthand": false,
                                 "computed": false,
                                 "range": [
-                                  3657,
-                                  3678
+                                  3663,
+                                  3684
                                 ],
                                 "loc": {
                                   "start": {
@@ -4107,8 +4107,8 @@
                                   "type": "Identifier",
                                   "name": "channel",
                                   "range": [
-                                    3680,
-                                    3687
+                                    3686,
+                                    3693
                                   ],
                                   "loc": {
                                     "start": {
@@ -4125,8 +4125,8 @@
                                   "type": "Identifier",
                                   "name": "msg",
                                   "range": [
-                                    3689,
-                                    3692
+                                    3695,
+                                    3698
                                   ],
                                   "loc": {
                                     "start": {
@@ -4144,8 +4144,8 @@
                                 "shorthand": false,
                                 "computed": false,
                                 "range": [
-                                  3680,
-                                  3692
+                                  3686,
+                                  3698
                                 ],
                                 "loc": {
                                   "start": {
@@ -4164,8 +4164,8 @@
                                   "type": "Identifier",
                                   "name": "arguments",
                                   "range": [
-                                    3694,
-                                    3703
+                                    3700,
+                                    3709
                                   ],
                                   "loc": {
                                     "start": {
@@ -4182,8 +4182,8 @@
                                   "type": "Identifier",
                                   "name": "args",
                                   "range": [
-                                    3705,
-                                    3709
+                                    3711,
+                                    3715
                                   ],
                                   "loc": {
                                     "start": {
@@ -4201,8 +4201,8 @@
                                 "shorthand": false,
                                 "computed": false,
                                 "range": [
-                                  3694,
-                                  3709
+                                  3700,
+                                  3715
                                 ],
                                 "loc": {
                                   "start": {
@@ -4217,8 +4217,8 @@
                               }
                             ],
                             "range": [
-                              3634,
-                              3711
+                              3640,
+                              3717
                             ],
                             "loc": {
                               "start": {
@@ -4236,8 +4236,8 @@
                             "value": "socket.broadcast",
                             "raw": "'socket.broadcast'",
                             "range": [
-                              3713,
-                              3731
+                              3719,
+                              3737
                             ],
                             "loc": {
                               "start": {
@@ -4252,8 +4252,8 @@
                           }
                         ],
                         "range": [
-                          3624,
-                          3732
+                          3630,
+                          3738
                         ],
                         "loc": {
                           "start": {
@@ -4267,8 +4267,8 @@
                         }
                       },
                       "range": [
-                        3624,
-                        3733
+                        3630,
+                        3739
                       ],
                       "loc": {
                         "start": {
@@ -4297,8 +4297,8 @@
                               "object": {
                                 "type": "ThisExpression",
                                 "range": [
-                                  3738,
-                                  3742
+                                  3744,
+                                  3748
                                 ],
                                 "loc": {
                                   "start": {
@@ -4315,8 +4315,8 @@
                                 "type": "Identifier",
                                 "name": "socket",
                                 "range": [
-                                  3743,
-                                  3749
+                                  3749,
+                                  3755
                                 ],
                                 "loc": {
                                   "start": {
@@ -4330,8 +4330,8 @@
                                 }
                               },
                               "range": [
-                                3738,
-                                3749
+                                3744,
+                                3755
                               ],
                               "loc": {
                                 "start": {
@@ -4348,8 +4348,8 @@
                               "type": "Identifier",
                               "name": "broadcast",
                               "range": [
-                                3750,
-                                3759
+                                3756,
+                                3765
                               ],
                               "loc": {
                                 "start": {
@@ -4363,8 +4363,8 @@
                               }
                             },
                             "range": [
-                              3738,
-                              3759
+                              3744,
+                              3765
                             ],
                             "loc": {
                               "start": {
@@ -4381,8 +4381,8 @@
                             "type": "Identifier",
                             "name": "emit",
                             "range": [
-                              3760,
-                              3764
+                              3766,
+                              3770
                             ],
                             "loc": {
                               "start": {
@@ -4396,8 +4396,8 @@
                             }
                           },
                           "range": [
-                            3738,
-                            3764
+                            3744,
+                            3770
                           ],
                           "loc": {
                             "start": {
@@ -4415,8 +4415,8 @@
                             "type": "Identifier",
                             "name": "msg",
                             "range": [
-                              3765,
-                              3768
+                              3771,
+                              3774
                             ],
                             "loc": {
                               "start": {
@@ -4435,8 +4435,8 @@
                               "type": "Identifier",
                               "name": "args",
                               "range": [
-                                3773,
-                                3777
+                                3779,
+                                3783
                               ],
                               "loc": {
                                 "start": {
@@ -4450,8 +4450,8 @@
                               }
                             },
                             "range": [
-                              3770,
-                              3777
+                              3776,
+                              3783
                             ],
                             "loc": {
                               "start": {
@@ -4466,8 +4466,8 @@
                           }
                         ],
                         "range": [
-                          3738,
-                          3778
+                          3744,
+                          3784
                         ],
                         "loc": {
                           "start": {
@@ -4481,8 +4481,8 @@
                         }
                       },
                       "range": [
-                        3738,
-                        3779
+                        3744,
+                        3785
                       ],
                       "loc": {
                         "start": {
@@ -4497,8 +4497,8 @@
                     }
                   ],
                   "range": [
-                    3618,
-                    3783
+                    3624,
+                    3789
                   ],
                   "loc": {
                     "start": {
@@ -4514,8 +4514,8 @@
                 "generator": false,
                 "expression": false,
                 "range": [
-                  3603,
-                  3783
+                  3609,
+                  3789
                 ],
                 "loc": {
                   "start": {
@@ -4531,8 +4531,8 @@
               "kind": "method",
               "computed": false,
               "range": [
-                3594,
-                3783
+                3600,
+                3789
               ],
               "loc": {
                 "start": {
@@ -4549,8 +4549,8 @@
                   "type": "Block",
                   "value": "*\n\t * Sends a WebSocket message to all the other clients of the same type (*i.e.* all the clients of type `this.clientType`, excluding this client).\n\t * @param {String} msg Name of the message to broadcast.\n\t * @param {...*} args Arguments of the message (as many as needed, of any type).\n\t ",
                   "range": [
-                    3296,
-                    3591
+                    3302,
+                    3597
                   ],
                   "loc": {
                     "start": {
@@ -4568,8 +4568,8 @@
             }
           ],
           "range": [
-            630,
-            3785
+            636,
+            3791
           ],
           "loc": {
             "start": {
@@ -4583,8 +4583,8 @@
           }
         },
         "range": [
-          611,
-          3785
+          617,
+          3791
         ],
         "loc": {
           "start": {
@@ -4599,10 +4599,10 @@
         "leadingComments": [
           {
             "type": "Block",
-            "value": "*\n * The `ServerClient` module is used to keep track of each connected client and to communicate with it via WebSockets.\n * Each time a client of type `clientType` connects to the server, *Soundworks* creates a new instance of `ServerClient`.\n * An instance of the class is passed to the `connect` and `disconnect` methods of all the server side modules that are mapped to the `clientType` clients (see {@link server.map}), as well as to the `enter` and `exit` methods of any {@link ServerPerformance} class mapped to that same client type.\n ",
+            "value": "*\n * The {@link ServerClient} module is used to keep track of each connected client and to communicate with it via WebSockets.\n * Each time a client of type `clientType` connects to the server, *Soundworks* creates a new instance of `ServerClient`.\n * An instance of the class is passed to the `connect` and `disconnect` methods of all the server side modules that are mapped to the `clientType` clients (see {@link server.map}), as well as to the `enter` and `exit` methods of any {@link ServerPerformance} class mapped to that same client type.\n ",
             "range": [
               49,
-              595
+              601
             ],
             "loc": {
               "start": {
@@ -4619,8 +4619,8 @@
         "trailingComments": []
       },
       "range": [
-        596,
-        3785
+        602,
+        3791
       ],
       "loc": {
         "start": {
@@ -4635,10 +4635,10 @@
       "leadingComments": [
         {
           "type": "Block",
-          "value": "*\n * The `ServerClient` module is used to keep track of each connected client and to communicate with it via WebSockets.\n * Each time a client of type `clientType` connects to the server, *Soundworks* creates a new instance of `ServerClient`.\n * An instance of the class is passed to the `connect` and `disconnect` methods of all the server side modules that are mapped to the `clientType` clients (see {@link server.map}), as well as to the `enter` and `exit` methods of any {@link ServerPerformance} class mapped to that same client type.\n ",
+          "value": "*\n * The {@link ServerClient} module is used to keep track of each connected client and to communicate with it via WebSockets.\n * Each time a client of type `clientType` connects to the server, *Soundworks* creates a new instance of `ServerClient`.\n * An instance of the class is passed to the `connect` and `disconnect` methods of all the server side modules that are mapped to the `clientType` clients (see {@link server.map}), as well as to the `enter` and `exit` methods of any {@link ServerPerformance} class mapped to that same client type.\n ",
           "range": [
             49,
-            595
+            601
           ],
           "loc": {
             "start": {
@@ -4657,7 +4657,7 @@
   "sourceType": "module",
   "range": [
     0,
-    3785
+    3791
   ],
   "loc": {
     "start": {
@@ -4672,10 +4672,10 @@
   "comments": [
     {
       "type": "Block",
-      "value": "*\n * The `ServerClient` module is used to keep track of each connected client and to communicate with it via WebSockets.\n * Each time a client of type `clientType` connects to the server, *Soundworks* creates a new instance of `ServerClient`.\n * An instance of the class is passed to the `connect` and `disconnect` methods of all the server side modules that are mapped to the `clientType` clients (see {@link server.map}), as well as to the `enter` and `exit` methods of any {@link ServerPerformance} class mapped to that same client type.\n ",
+      "value": "*\n * The {@link ServerClient} module is used to keep track of each connected client and to communicate with it via WebSockets.\n * Each time a client of type `clientType` connects to the server, *Soundworks* creates a new instance of `ServerClient`.\n * An instance of the class is passed to the `connect` and `disconnect` methods of all the server side modules that are mapped to the `clientType` clients (see {@link server.map}), as well as to the `enter` and `exit` methods of any {@link ServerPerformance} class mapped to that same client type.\n ",
       "range": [
         49,
-        595
+        601
       ],
       "loc": {
         "start": {
@@ -4692,8 +4692,8 @@
       "type": "Block",
       "value": "*\n\t * Creates an instance of the class.\n\t * @param {String} clientType Client type of the connected client.\n\t * @param {Socket} socket Socket object used to comminuate with the client.\n\t ",
       "range": [
-        633,
-        824
+        639,
+        830
       ],
       "loc": {
         "start": {
@@ -4710,8 +4710,8 @@
       "type": "Block",
       "value": "*\n\t\t * Client type (specified when initializing the {@link client} object on the client side with {@link client.init}).\n\t\t * @type {String}\n\t\t ",
       "range": [
-        862,
-        1009
+        868,
+        1015
       ],
       "loc": {
         "start": {
@@ -4728,8 +4728,8 @@
       "type": "Block",
       "value": "*\n\t\t * Index of the client as set by the {@link ServerCheckin} module.\n\t\t * @type {Number}\n\t\t ",
       "range": [
-        1041,
-        1139
+        1047,
+        1145
       ],
       "loc": {
         "start": {
@@ -4746,8 +4746,8 @@
       "type": "Block",
       "value": "*\n\t\t * Coordinates of the client in the space, stored as an `[x, y]` array.\n\t\t * @type {Number[]}\n\t\t ",
       "range": [
-        1164,
-        1269
+        1170,
+        1275
       ],
       "loc": {
         "start": {
@@ -4764,8 +4764,8 @@
       "type": "Block",
       "value": "*\n\t\t * Used by any {@link ServerModule} to associate data to a particular client.\n\t\t * All the data associated with a module whose `name` is `moduleName` is accessible through the key `moduleName`.\n\t\t * For instance, the {@link ServerSync} module keeps track of the time offset between the client and the sync clocks in `this.modules.sync.timeOffset`.\n\t\t * Similarly, a {@link ServerPerformance} module could keep track of each client's status in `this.modules.myPerformanceName.status`.\n\t\t * @type {Object}\n\t\t ",
       "range": [
-        1302,
-        1817
+        1308,
+        1823
       ],
       "loc": {
         "start": {
@@ -4782,8 +4782,8 @@
       "type": "Block",
       "value": "*\n\t\t * Socket used to communicate with the client.\n\t\t * @type {Socket}\n\t\t * @todo make private?\n\t\t ",
       "range": [
-        1844,
-        1947
+        1850,
+        1953
       ],
       "loc": {
         "start": {
@@ -4800,8 +4800,8 @@
       "type": "Block",
       "value": "*\n\t * Sends a WebSocket message to the client.\n\t * @param {String} msg Name of the message.\n\t * @param {...*} args Arguments of the message (as many as needed, of any type).\n\t ",
       "range": [
-        1980,
-        2160
+        1986,
+        2166
       ],
       "loc": {
         "start": {
@@ -4818,8 +4818,8 @@
       "type": "Block",
       "value": "*\n\t * Sends a volatile WebSocket message to the client, *i.e.* a non-blocking WebSocket message.\n\t * @param {String} msg Name of the message to send.\n\t * @param {...*} args Arguments of the message (as many as needed, of any type).\n\t ",
       "range": [
-        2335,
-        2573
+        2341,
+        2579
       ],
       "loc": {
         "start": {
@@ -4836,8 +4836,8 @@
       "type": "Block",
       "value": "*\n\t * Executes a callback function when it receives a WebSocket message from the client.\n\t * @param {String} msg Name of the received message.\n\t * @param {Function} callback Callback function executed when the message is received.\n\t ",
       "range": [
-        2773,
-        3010
+        2779,
+        3016
       ],
       "loc": {
         "start": {
@@ -4854,8 +4854,8 @@
       "type": "Block",
       "value": "*\n\t * Sends a WebSocket message to all the other clients of the same type (*i.e.* all the clients of type `this.clientType`, excluding this client).\n\t * @param {String} msg Name of the message to broadcast.\n\t * @param {...*} args Arguments of the message (as many as needed, of any type).\n\t ",
       "range": [
-        3296,
-        3591
+        3302,
+        3597
       ],
       "loc": {
         "start": {

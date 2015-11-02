@@ -20,10 +20,10 @@ const defaultMessages = {
 };
 
 /**
- * The `ClientPlatform` checks whether the device is compatible with the technologies used in the *Soundworks* library.
+ * The {@link ClientPlatform} checks whether the device is compatible with the technologies used in the *Soundworks* library.
  * (Compatible devices are running on iOS 7 or above, or on Android 4.2 or above with the Chrome browser in version 35 or above.)
  * If that is not the case, the module displays a blocking view and prevents the participant to go any further in the scenario.
- * The `ClientPlatform` module calls its `done` method immediately if the device passes the platform test, and never otherwise.
+ * The {@link ClientPlatform} module calls its `done` method immediately if the device passes the platform test, and never otherwise.
  */
 export default class ClientPlatform extends ClientModule {
   /**

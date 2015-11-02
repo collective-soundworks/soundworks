@@ -4,7 +4,7 @@ import client from './client.es6.js';
 import ClientModule from './ClientModule.es6.js';
 
 /**
- * The `ClientLocator`module allows to indicate the approximate physical location of the client on a map via a dialog.
+ * The {@link ClientLocator} module allows to indicate the approximate physical location of the client on a map via a dialog.
  */
 export default class ClientLocator extends ClientModule {
   /**

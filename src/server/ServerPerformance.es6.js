@@ -3,11 +3,11 @@
 import ServerModule from './ServerModule.es6.js';
 
 /**
- * The `ServerPerformance` base class constitutes a basis on which to build a performance on the server side.
+ * The {@link ServerPerformance} base class constitutes a basis on which to build a performance on the server side.
  * Its particularity is to keep track of the clients who are currently in the performance with the array `this.clients`, and to have the `enter` and `exit` methods that inform the module when the client entered the performance (*i.e.* when the `performance` on the client side called its `start` method) and left it (*i.e.* when the `performance` on the client side called its `done` method, or if the client disconnected from the server).
  *
  */
-class ServerPerformance extends ServerModule {
+export default class ServerPerformance extends ServerModule {
   /**
     * Creates an instance of the class.
     * @param {Object} [options={}] Options.
@@ -26,6 +26,7 @@ class ServerPerformance extends ServerModule {
   /**
    * Called when the client connects to the server.
    * @param {ServerClient} client The connected client.
+   * @private
    */
   connect(client) {
     super.connect(client);
@@ -44,6 +45,7 @@ class ServerPerformance extends ServerModule {
   /**
    * Called when the client disconnects from the server.
    * @param {ServerClient} client The connected client.
+   * @private
    */
   disconnect(client) {
     super.disconnect(client);

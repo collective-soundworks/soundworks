@@ -4,7 +4,7 @@ import client from './client.es6.js';
 import ClientModule from './ClientModule.es6.js';
 
 /**
- * The `ClientPerformance` base class constitutes a basis on which to build a performance on the client side.
+ * The {@link ClientPerformance} base class constitutes a basis on which to build a performance on the client side.
  */
 export default class ClientPerformance extends ClientModule {
   /**

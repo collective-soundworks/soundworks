@@ -157,31 +157,31 @@
             "type": "Identifier",
             "name": "ServerModule",
             "range": [
-              59,
-              71
+              60,
+              72
             ],
             "loc": {
               "start": {
-                "line": 4,
+                "line": 5,
                 "column": 7
               },
               "end": {
-                "line": 4,
+                "line": 5,
                 "column": 19
               }
             }
           },
           "range": [
-            59,
-            71
+            60,
+            72
           ],
           "loc": {
             "start": {
-              "line": 4,
+              "line": 5,
               "column": 7
             },
             "end": {
-              "line": 4,
+              "line": 5,
               "column": 19
             }
           }
@@ -192,49 +192,49 @@
         "value": "./ServerModule.es6.js",
         "raw": "'./ServerModule.es6.js'",
         "range": [
-          77,
-          100
+          78,
+          101
         ],
         "loc": {
           "start": {
-            "line": 4,
+            "line": 5,
             "column": 25
           },
           "end": {
-            "line": 4,
+            "line": 5,
             "column": 48
           }
         }
       },
       "range": [
-        52,
-        101
+        53,
+        102
       ],
       "loc": {
         "start": {
-          "line": 4,
+          "line": 5,
           "column": 0
         },
         "end": {
-          "line": 4,
+          "line": 5,
           "column": 49
         }
       },
       "trailingComments": [
         {
           "type": "Block",
-          "value": "*\n * The `ServerSync` module takes care of the synchronization process on the server side.\n * @example\n * // Require the Soundworks library (server side)\n * const serverSide = require('soundworks/server'); // TODO\n *\n * // Create Sync module\n * const sync = new serverSide.Sync();\n *\n * // Get sync time\n * const nowSync = sync.getSyncTime(); // current time in the sync clock time\n ",
+          "value": "*\n * The {@link ServerSync} module takes care of the synchronization process on the server side.\n * @example\n * // Require the Soundworks library (server side)\n * const serverSide = require('soundworks/server'); // TODO\n *\n * // Create Sync module\n * const sync = new serverSide.Sync();\n *\n * // Get sync time\n * const nowSync = sync.getSyncTime(); // current time in the sync clock time\n ",
           "range": [
-            103,
-            490
+            104,
+            497
           ],
           "loc": {
             "start": {
-              "line": 6,
+              "line": 7,
               "column": 0
             },
             "end": {
-              "line": 17,
+              "line": 18,
               "column": 3
             }
           }
@@ -249,16 +249,16 @@
           "type": "Identifier",
           "name": "ServerSync",
           "range": [
-            512,
-            522
+            519,
+            529
           ],
           "loc": {
             "start": {
-              "line": 18,
+              "line": 19,
               "column": 21
             },
             "end": {
-              "line": 18,
+              "line": 19,
               "column": 31
             }
           }
@@ -267,16 +267,16 @@
           "type": "Identifier",
           "name": "ServerModule",
           "range": [
-            531,
-            543
+            538,
+            550
           ],
           "loc": {
             "start": {
-              "line": 18,
+              "line": 19,
               "column": 40
             },
             "end": {
-              "line": 18,
+              "line": 19,
               "column": 52
             }
           }
@@ -290,16 +290,16 @@
                 "type": "Identifier",
                 "name": "constructor",
                 "range": [
-                  697,
-                  708
+                  704,
+                  715
                 ],
                 "loc": {
                   "start": {
-                    "line": 24,
+                    "line": 25,
                     "column": 2
                   },
                   "end": {
-                    "line": 24,
+                    "line": 25,
                     "column": 13
                   }
                 }
@@ -314,16 +314,16 @@
                       "type": "Identifier",
                       "name": "options",
                       "range": [
-                        709,
-                        716
+                        716,
+                        723
                       ],
                       "loc": {
                         "start": {
-                          "line": 24,
+                          "line": 25,
                           "column": 14
                         },
                         "end": {
-                          "line": 24,
+                          "line": 25,
                           "column": 21
                         }
                       }
@@ -332,31 +332,31 @@
                       "type": "ObjectExpression",
                       "properties": [],
                       "range": [
-                        719,
-                        721
+                        726,
+                        728
                       ],
                       "loc": {
                         "start": {
-                          "line": 24,
+                          "line": 25,
                           "column": 24
                         },
                         "end": {
-                          "line": 24,
+                          "line": 25,
                           "column": 26
                         }
                       }
                     },
                     "range": [
-                      709,
-                      721
+                      716,
+                      728
                     ],
                     "loc": {
                       "start": {
-                        "line": 24,
+                        "line": 25,
                         "column": 14
                       },
                       "end": {
-                        "line": 24,
+                        "line": 25,
                         "column": 26
                       }
                     }
@@ -372,16 +372,16 @@
                         "callee": {
                           "type": "Super",
                           "range": [
-                            729,
-                            734
+                            736,
+                            741
                           ],
                           "loc": {
                             "start": {
-                              "line": 25,
+                              "line": 26,
                               "column": 4
                             },
                             "end": {
-                              "line": 25,
+                              "line": 26,
                               "column": 9
                             }
                           }
@@ -397,16 +397,16 @@
                                 "type": "Identifier",
                                 "name": "options",
                                 "range": [
-                                  735,
-                                  742
+                                  742,
+                                  749
                                 ],
                                 "loc": {
                                   "start": {
-                                    "line": 25,
+                                    "line": 26,
                                     "column": 10
                                   },
                                   "end": {
-                                    "line": 25,
+                                    "line": 26,
                                     "column": 17
                                   }
                                 }
@@ -415,31 +415,31 @@
                                 "type": "Identifier",
                                 "name": "name",
                                 "range": [
-                                  743,
-                                  747
+                                  750,
+                                  754
                                 ],
                                 "loc": {
                                   "start": {
-                                    "line": 25,
+                                    "line": 26,
                                     "column": 18
                                   },
                                   "end": {
-                                    "line": 25,
+                                    "line": 26,
                                     "column": 22
                                   }
                                 }
                               },
                               "range": [
-                                735,
-                                747
+                                742,
+                                754
                               ],
                               "loc": {
                                 "start": {
-                                  "line": 25,
+                                  "line": 26,
                                   "column": 10
                                 },
                                 "end": {
-                                  "line": 25,
+                                  "line": 26,
                                   "column": 22
                                 }
                               }
@@ -449,62 +449,62 @@
                               "value": "sync",
                               "raw": "'sync'",
                               "range": [
-                                751,
-                                757
+                                758,
+                                764
                               ],
                               "loc": {
                                 "start": {
-                                  "line": 25,
+                                  "line": 26,
                                   "column": 26
                                 },
                                 "end": {
-                                  "line": 25,
+                                  "line": 26,
                                   "column": 32
                                 }
                               }
                             },
                             "range": [
-                              735,
-                              757
+                              742,
+                              764
                             ],
                             "loc": {
                               "start": {
-                                "line": 25,
+                                "line": 26,
                                 "column": 10
                               },
                               "end": {
-                                "line": 25,
+                                "line": 26,
                                 "column": 32
                               }
                             }
                           }
                         ],
                         "range": [
-                          729,
-                          758
+                          736,
+                          765
                         ],
                         "loc": {
                           "start": {
-                            "line": 25,
+                            "line": 26,
                             "column": 4
                           },
                           "end": {
-                            "line": 25,
+                            "line": 26,
                             "column": 33
                           }
                         }
                       },
                       "range": [
-                        729,
-                        759
+                        736,
+                        766
                       ],
                       "loc": {
                         "start": {
-                          "line": 25,
+                          "line": 26,
                           "column": 4
                         },
                         "end": {
-                          "line": 25,
+                          "line": 26,
                           "column": 34
                         }
                       }
@@ -520,16 +520,16 @@
                           "object": {
                             "type": "ThisExpression",
                             "range": [
-                              765,
-                              769
+                              772,
+                              776
                             ],
                             "loc": {
                               "start": {
-                                "line": 27,
+                                "line": 28,
                                 "column": 4
                               },
                               "end": {
-                                "line": 27,
+                                "line": 28,
                                 "column": 8
                               }
                             }
@@ -538,31 +538,31 @@
                             "type": "Identifier",
                             "name": "_hrtimeStart",
                             "range": [
-                              770,
-                              782
+                              777,
+                              789
                             ],
                             "loc": {
                               "start": {
-                                "line": 27,
+                                "line": 28,
                                 "column": 9
                               },
                               "end": {
-                                "line": 27,
+                                "line": 28,
                                 "column": 21
                               }
                             }
                           },
                           "range": [
-                            765,
-                            782
+                            772,
+                            789
                           ],
                           "loc": {
                             "start": {
-                              "line": 27,
+                              "line": 28,
                               "column": 4
                             },
                             "end": {
-                              "line": 27,
+                              "line": 28,
                               "column": 21
                             }
                           }
@@ -576,16 +576,16 @@
                               "type": "Identifier",
                               "name": "process",
                               "range": [
-                                785,
-                                792
+                                792,
+                                799
                               ],
                               "loc": {
                                 "start": {
-                                  "line": 27,
+                                  "line": 28,
                                   "column": 24
                                 },
                                 "end": {
-                                  "line": 27,
+                                  "line": 28,
                                   "column": 31
                                 }
                               }
@@ -594,77 +594,77 @@
                               "type": "Identifier",
                               "name": "hrtime",
                               "range": [
-                                793,
-                                799
+                                800,
+                                806
                               ],
                               "loc": {
                                 "start": {
-                                  "line": 27,
+                                  "line": 28,
                                   "column": 32
                                 },
                                 "end": {
-                                  "line": 27,
+                                  "line": 28,
                                   "column": 38
                                 }
                               }
                             },
                             "range": [
-                              785,
-                              799
+                              792,
+                              806
                             ],
                             "loc": {
                               "start": {
-                                "line": 27,
+                                "line": 28,
                                 "column": 24
                               },
                               "end": {
-                                "line": 27,
+                                "line": 28,
                                 "column": 38
                               }
                             }
                           },
                           "arguments": [],
                           "range": [
-                            785,
-                            801
+                            792,
+                            808
                           ],
                           "loc": {
                             "start": {
-                              "line": 27,
+                              "line": 28,
                               "column": 24
                             },
                             "end": {
-                              "line": 27,
+                              "line": 28,
                               "column": 40
                             }
                           }
                         },
                         "range": [
-                          765,
-                          801
+                          772,
+                          808
                         ],
                         "loc": {
                           "start": {
-                            "line": 27,
+                            "line": 28,
                             "column": 4
                           },
                           "end": {
-                            "line": 27,
+                            "line": 28,
                             "column": 40
                           }
                         }
                       },
                       "range": [
-                        765,
-                        802
+                        772,
+                        809
                       ],
                       "loc": {
                         "start": {
-                          "line": 27,
+                          "line": 28,
                           "column": 4
                         },
                         "end": {
-                          "line": 27,
+                          "line": 28,
                           "column": 41
                         }
                       }
@@ -680,16 +680,16 @@
                           "object": {
                             "type": "ThisExpression",
                             "range": [
-                              807,
-                              811
+                              814,
+                              818
                             ],
                             "loc": {
                               "start": {
-                                "line": 28,
+                                "line": 29,
                                 "column": 4
                               },
                               "end": {
-                                "line": 28,
+                                "line": 29,
                                 "column": 8
                               }
                             }
@@ -698,31 +698,31 @@
                             "type": "Identifier",
                             "name": "_sync",
                             "range": [
-                              812,
-                              817
+                              819,
+                              824
                             ],
                             "loc": {
                               "start": {
-                                "line": 28,
+                                "line": 29,
                                 "column": 9
                               },
                               "end": {
-                                "line": 28,
+                                "line": 29,
                                 "column": 14
                               }
                             }
                           },
                           "range": [
-                            807,
-                            817
+                            814,
+                            824
                           ],
                           "loc": {
                             "start": {
-                              "line": 28,
+                              "line": 29,
                               "column": 4
                             },
                             "end": {
-                              "line": 28,
+                              "line": 29,
                               "column": 14
                             }
                           }
@@ -733,16 +733,16 @@
                             "type": "Identifier",
                             "name": "Sync",
                             "range": [
-                              824,
-                              828
+                              831,
+                              835
                             ],
                             "loc": {
                               "start": {
-                                "line": 28,
+                                "line": 29,
                                 "column": 21
                               },
                               "end": {
-                                "line": 28,
+                                "line": 29,
                                 "column": 25
                               }
                             }
@@ -764,16 +764,16 @@
                                           "type": "Identifier",
                                           "name": "time",
                                           "range": [
-                                            849,
-                                            853
+                                            856,
+                                            860
                                           ],
                                           "loc": {
                                             "start": {
-                                              "line": 29,
+                                              "line": 30,
                                               "column": 12
                                             },
                                             "end": {
-                                              "line": 29,
+                                              "line": 30,
                                               "column": 16
                                             }
                                           }
@@ -787,16 +787,16 @@
                                               "type": "Identifier",
                                               "name": "process",
                                               "range": [
-                                                856,
-                                                863
+                                                863,
+                                                870
                                               ],
                                               "loc": {
                                                 "start": {
-                                                  "line": 29,
+                                                  "line": 30,
                                                   "column": 19
                                                 },
                                                 "end": {
-                                                  "line": 29,
+                                                  "line": 30,
                                                   "column": 26
                                                 }
                                               }
@@ -805,31 +805,31 @@
                                               "type": "Identifier",
                                               "name": "hrtime",
                                               "range": [
-                                                864,
-                                                870
+                                                871,
+                                                877
                                               ],
                                               "loc": {
                                                 "start": {
-                                                  "line": 29,
+                                                  "line": 30,
                                                   "column": 27
                                                 },
                                                 "end": {
-                                                  "line": 29,
+                                                  "line": 30,
                                                   "column": 33
                                                 }
                                               }
                                             },
                                             "range": [
-                                              856,
-                                              870
+                                              863,
+                                              877
                                             ],
                                             "loc": {
                                               "start": {
-                                                "line": 29,
+                                                "line": 30,
                                                 "column": 19
                                               },
                                               "end": {
-                                                "line": 29,
+                                                "line": 30,
                                                 "column": 33
                                               }
                                             }
@@ -841,16 +841,16 @@
                                               "object": {
                                                 "type": "ThisExpression",
                                                 "range": [
-                                                  871,
-                                                  875
+                                                  878,
+                                                  882
                                                 ],
                                                 "loc": {
                                                   "start": {
-                                                    "line": 29,
+                                                    "line": 30,
                                                     "column": 34
                                                   },
                                                   "end": {
-                                                    "line": 29,
+                                                    "line": 30,
                                                     "column": 38
                                                   }
                                                 }
@@ -859,62 +859,62 @@
                                                 "type": "Identifier",
                                                 "name": "_hrtimeStart",
                                                 "range": [
-                                                  876,
-                                                  888
+                                                  883,
+                                                  895
                                                 ],
                                                 "loc": {
                                                   "start": {
-                                                    "line": 29,
+                                                    "line": 30,
                                                     "column": 39
                                                   },
                                                   "end": {
-                                                    "line": 29,
+                                                    "line": 30,
                                                     "column": 51
                                                   }
                                                 }
                                               },
                                               "range": [
-                                                871,
-                                                888
+                                                878,
+                                                895
                                               ],
                                               "loc": {
                                                 "start": {
-                                                  "line": 29,
+                                                  "line": 30,
                                                   "column": 34
                                                 },
                                                 "end": {
-                                                  "line": 29,
+                                                  "line": 30,
                                                   "column": 51
                                                 }
                                               }
                                             }
                                           ],
                                           "range": [
-                                            856,
-                                            889
+                                            863,
+                                            896
                                           ],
                                           "loc": {
                                             "start": {
-                                              "line": 29,
+                                              "line": 30,
                                               "column": 19
                                             },
                                             "end": {
-                                              "line": 29,
+                                              "line": 30,
                                               "column": 52
                                             }
                                           }
                                         },
                                         "range": [
-                                          849,
-                                          889
+                                          856,
+                                          896
                                         ],
                                         "loc": {
                                           "start": {
-                                            "line": 29,
+                                            "line": 30,
                                             "column": 12
                                           },
                                           "end": {
-                                            "line": 29,
+                                            "line": 30,
                                             "column": 52
                                           }
                                         }
@@ -922,16 +922,16 @@
                                     ],
                                     "kind": "const",
                                     "range": [
-                                      843,
-                                      890
+                                      850,
+                                      897
                                     ],
                                     "loc": {
                                       "start": {
-                                        "line": 29,
+                                        "line": 30,
                                         "column": 6
                                       },
                                       "end": {
-                                        "line": 29,
+                                        "line": 30,
                                         "column": 53
                                       }
                                     }
@@ -948,16 +948,16 @@
                                           "type": "Identifier",
                                           "name": "time",
                                           "range": [
-                                            904,
-                                            908
+                                            911,
+                                            915
                                           ],
                                           "loc": {
                                             "start": {
-                                              "line": 30,
+                                              "line": 31,
                                               "column": 13
                                             },
                                             "end": {
-                                              "line": 30,
+                                              "line": 31,
                                               "column": 17
                                             }
                                           }
@@ -967,31 +967,31 @@
                                           "value": 0,
                                           "raw": "0",
                                           "range": [
-                                            909,
-                                            910
+                                            916,
+                                            917
                                           ],
                                           "loc": {
                                             "start": {
-                                              "line": 30,
+                                              "line": 31,
                                               "column": 18
                                             },
                                             "end": {
-                                              "line": 30,
+                                              "line": 31,
                                               "column": 19
                                             }
                                           }
                                         },
                                         "range": [
-                                          904,
-                                          911
+                                          911,
+                                          918
                                         ],
                                         "loc": {
                                           "start": {
-                                            "line": 30,
+                                            "line": 31,
                                             "column": 13
                                           },
                                           "end": {
-                                            "line": 30,
+                                            "line": 31,
                                             "column": 20
                                           }
                                         }
@@ -1006,16 +1006,16 @@
                                             "type": "Identifier",
                                             "name": "time",
                                             "range": [
-                                              914,
-                                              918
+                                              921,
+                                              925
                                             ],
                                             "loc": {
                                               "start": {
-                                                "line": 30,
+                                                "line": 31,
                                                 "column": 23
                                               },
                                               "end": {
-                                                "line": 30,
+                                                "line": 31,
                                                 "column": 27
                                               }
                                             }
@@ -1025,31 +1025,31 @@
                                             "value": 1,
                                             "raw": "1",
                                             "range": [
-                                              919,
-                                              920
+                                              926,
+                                              927
                                             ],
                                             "loc": {
                                               "start": {
-                                                "line": 30,
+                                                "line": 31,
                                                 "column": 28
                                               },
                                               "end": {
-                                                "line": 30,
+                                                "line": 31,
                                                 "column": 29
                                               }
                                             }
                                           },
                                           "range": [
-                                            914,
-                                            921
+                                            921,
+                                            928
                                           ],
                                           "loc": {
                                             "start": {
-                                              "line": 30,
+                                              "line": 31,
                                               "column": 23
                                             },
                                             "end": {
-                                              "line": 30,
+                                              "line": 31,
                                               "column": 30
                                             }
                                           }
@@ -1059,77 +1059,77 @@
                                           "value": 1e-9,
                                           "raw": "1e-9",
                                           "range": [
-                                            924,
-                                            928
+                                            931,
+                                            935
                                           ],
                                           "loc": {
                                             "start": {
-                                              "line": 30,
+                                              "line": 31,
                                               "column": 33
                                             },
                                             "end": {
-                                              "line": 30,
+                                              "line": 31,
                                               "column": 37
                                             }
                                           }
                                         },
                                         "range": [
-                                          914,
-                                          928
+                                          921,
+                                          935
                                         ],
                                         "loc": {
                                           "start": {
-                                            "line": 30,
+                                            "line": 31,
                                             "column": 23
                                           },
                                           "end": {
-                                            "line": 30,
+                                            "line": 31,
                                             "column": 37
                                           }
                                         }
                                       },
                                       "range": [
-                                        904,
-                                        928
+                                        911,
+                                        935
                                       ],
                                       "loc": {
                                         "start": {
-                                          "line": 30,
+                                          "line": 31,
                                           "column": 13
                                         },
                                         "end": {
-                                          "line": 30,
+                                          "line": 31,
                                           "column": 37
                                         }
                                       }
                                     },
                                     "range": [
-                                      897,
-                                      929
+                                      904,
+                                      936
                                     ],
                                     "loc": {
                                       "start": {
-                                        "line": 30,
+                                        "line": 31,
                                         "column": 6
                                       },
                                       "end": {
-                                        "line": 30,
+                                        "line": 31,
                                         "column": 38
                                       }
                                     }
                                   }
                                 ],
                                 "range": [
-                                  835,
-                                  935
+                                  842,
+                                  942
                                 ],
                                 "loc": {
                                   "start": {
-                                    "line": 28,
+                                    "line": 29,
                                     "column": 32
                                   },
                                   "end": {
-                                    "line": 31,
+                                    "line": 32,
                                     "column": 5
                                   }
                                 }
@@ -1137,78 +1137,78 @@
                               "generator": false,
                               "expression": false,
                               "range": [
-                                829,
-                                935
+                                836,
+                                942
                               ],
                               "loc": {
                                 "start": {
-                                  "line": 28,
+                                  "line": 29,
                                   "column": 26
                                 },
                                 "end": {
-                                  "line": 31,
+                                  "line": 32,
                                   "column": 5
                                 }
                               }
                             }
                           ],
                           "range": [
-                            820,
-                            936
+                            827,
+                            943
                           ],
                           "loc": {
                             "start": {
-                              "line": 28,
+                              "line": 29,
                               "column": 17
                             },
                             "end": {
-                              "line": 31,
+                              "line": 32,
                               "column": 6
                             }
                           }
                         },
                         "range": [
-                          807,
-                          936
+                          814,
+                          943
                         ],
                         "loc": {
                           "start": {
-                            "line": 28,
+                            "line": 29,
                             "column": 4
                           },
                           "end": {
-                            "line": 31,
+                            "line": 32,
                             "column": 6
                           }
                         }
                       },
                       "range": [
-                        807,
-                        937
+                        814,
+                        944
                       ],
                       "loc": {
                         "start": {
-                          "line": 28,
+                          "line": 29,
                           "column": 4
                         },
                         "end": {
-                          "line": 31,
+                          "line": 32,
                           "column": 7
                         }
                       }
                     }
                   ],
                   "range": [
-                    723,
-                    941
+                    730,
+                    948
                   ],
                   "loc": {
                     "start": {
-                      "line": 24,
+                      "line": 25,
                       "column": 28
                     },
                     "end": {
-                      "line": 32,
+                      "line": 33,
                       "column": 3
                     }
                   }
@@ -1216,16 +1216,16 @@
                 "generator": false,
                 "expression": false,
                 "range": [
-                  708,
-                  941
+                  715,
+                  948
                 ],
                 "loc": {
                   "start": {
-                    "line": 24,
+                    "line": 25,
                     "column": 13
                   },
                   "end": {
-                    "line": 32,
+                    "line": 33,
                     "column": 3
                   }
                 }
@@ -1233,16 +1233,16 @@
               "kind": "constructor",
               "computed": false,
               "range": [
-                697,
-                941
+                704,
+                948
               ],
               "loc": {
                 "start": {
-                  "line": 24,
+                  "line": 25,
                   "column": 2
                 },
                 "end": {
-                  "line": 32,
+                  "line": 33,
                   "column": 3
                 }
               },
@@ -1251,16 +1251,16 @@
                   "type": "Block",
                   "value": "*\n   * Creates an instance of the class.\n   * @param {Object} [options={}] Options.\n   * @param {String} [name='sync'] Name of the module.\n   ",
                   "range": [
-                    548,
-                    694
+                    555,
+                    701
                   ],
                   "loc": {
                     "start": {
-                      "line": 19,
+                      "line": 20,
                       "column": 2
                     },
                     "end": {
-                      "line": 23,
+                      "line": 24,
                       "column": 5
                     }
                   }
@@ -1271,16 +1271,16 @@
                   "type": "Block",
                   "value": "*\n   * @private\n   * @todo ?\n   ",
                   "range": [
-                    945,
-                    981
+                    952,
+                    988
                   ],
                   "loc": {
                     "start": {
-                      "line": 34,
+                      "line": 35,
                       "column": 2
                     },
                     "end": {
-                      "line": 37,
+                      "line": 38,
                       "column": 5
                     }
                   }
@@ -1294,16 +1294,16 @@
                 "type": "Identifier",
                 "name": "connect",
                 "range": [
-                  984,
-                  991
+                  991,
+                  998
                 ],
                 "loc": {
                   "start": {
-                    "line": 38,
+                    "line": 39,
                     "column": 2
                   },
                   "end": {
-                    "line": 38,
+                    "line": 39,
                     "column": 9
                   }
                 }
@@ -1316,16 +1316,16 @@
                     "type": "Identifier",
                     "name": "client",
                     "range": [
-                      992,
-                      998
+                      999,
+                      1005
                     ],
                     "loc": {
                       "start": {
-                        "line": 38,
+                        "line": 39,
                         "column": 10
                       },
                       "end": {
-                        "line": 38,
+                        "line": 39,
                         "column": 16
                       }
                     }
@@ -1344,16 +1344,16 @@
                           "object": {
                             "type": "Super",
                             "range": [
-                              1006,
-                              1011
+                              1013,
+                              1018
                             ],
                             "loc": {
                               "start": {
-                                "line": 39,
+                                "line": 40,
                                 "column": 4
                               },
                               "end": {
-                                "line": 39,
+                                "line": 40,
                                 "column": 9
                               }
                             }
@@ -1362,31 +1362,31 @@
                             "type": "Identifier",
                             "name": "connect",
                             "range": [
-                              1012,
-                              1019
+                              1019,
+                              1026
                             ],
                             "loc": {
                               "start": {
-                                "line": 39,
+                                "line": 40,
                                 "column": 10
                               },
                               "end": {
-                                "line": 39,
+                                "line": 40,
                                 "column": 17
                               }
                             }
                           },
                           "range": [
-                            1006,
-                            1019
+                            1013,
+                            1026
                           ],
                           "loc": {
                             "start": {
-                              "line": 39,
+                              "line": 40,
                               "column": 4
                             },
                             "end": {
-                              "line": 39,
+                              "line": 40,
                               "column": 17
                             }
                           }
@@ -1396,47 +1396,47 @@
                             "type": "Identifier",
                             "name": "client",
                             "range": [
-                              1020,
-                              1026
+                              1027,
+                              1033
                             ],
                             "loc": {
                               "start": {
-                                "line": 39,
+                                "line": 40,
                                 "column": 18
                               },
                               "end": {
-                                "line": 39,
+                                "line": 40,
                                 "column": 24
                               }
                             }
                           }
                         ],
                         "range": [
-                          1006,
-                          1027
+                          1013,
+                          1034
                         ],
                         "loc": {
                           "start": {
-                            "line": 39,
+                            "line": 40,
                             "column": 4
                           },
                           "end": {
-                            "line": 39,
+                            "line": 40,
                             "column": 25
                           }
                         }
                       },
                       "range": [
-                        1006,
-                        1028
+                        1013,
+                        1035
                       ],
                       "loc": {
                         "start": {
-                          "line": 39,
+                          "line": 40,
                           "column": 4
                         },
                         "end": {
-                          "line": 39,
+                          "line": 40,
                           "column": 26
                         }
                       }
@@ -1454,16 +1454,16 @@
                             "object": {
                               "type": "ThisExpression",
                               "range": [
-                                1033,
-                                1037
+                                1040,
+                                1044
                               ],
                               "loc": {
                                 "start": {
-                                  "line": 40,
+                                  "line": 41,
                                   "column": 4
                                 },
                                 "end": {
-                                  "line": 40,
+                                  "line": 41,
                                   "column": 8
                                 }
                               }
@@ -1472,31 +1472,31 @@
                               "type": "Identifier",
                               "name": "_sync",
                               "range": [
-                                1038,
-                                1043
+                                1045,
+                                1050
                               ],
                               "loc": {
                                 "start": {
-                                  "line": 40,
+                                  "line": 41,
                                   "column": 9
                                 },
                                 "end": {
-                                  "line": 40,
+                                  "line": 41,
                                   "column": 14
                                 }
                               }
                             },
                             "range": [
-                              1033,
-                              1043
+                              1040,
+                              1050
                             ],
                             "loc": {
                               "start": {
-                                "line": 40,
+                                "line": 41,
                                 "column": 4
                               },
                               "end": {
-                                "line": 40,
+                                "line": 41,
                                 "column": 14
                               }
                             }
@@ -1505,31 +1505,31 @@
                             "type": "Identifier",
                             "name": "start",
                             "range": [
-                              1044,
-                              1049
+                              1051,
+                              1056
                             ],
                             "loc": {
                               "start": {
-                                "line": 40,
+                                "line": 41,
                                 "column": 15
                               },
                               "end": {
-                                "line": 40,
+                                "line": 41,
                                 "column": 20
                               }
                             }
                           },
                           "range": [
-                            1033,
-                            1049
+                            1040,
+                            1056
                           ],
                           "loc": {
                             "start": {
-                              "line": 40,
+                              "line": 41,
                               "column": 4
                             },
                             "end": {
-                              "line": 40,
+                              "line": 41,
                               "column": 20
                             }
                           }
@@ -1543,16 +1543,16 @@
                                 "type": "Identifier",
                                 "name": "cmd",
                                 "range": [
-                                  1051,
-                                  1054
+                                  1058,
+                                  1061
                                 ],
                                 "loc": {
                                   "start": {
-                                    "line": 40,
+                                    "line": 41,
                                     "column": 22
                                   },
                                   "end": {
-                                    "line": 40,
+                                    "line": 41,
                                     "column": 25
                                   }
                                 }
@@ -1563,31 +1563,31 @@
                                   "type": "Identifier",
                                   "name": "args",
                                   "range": [
-                                    1059,
-                                    1063
+                                    1066,
+                                    1070
                                   ],
                                   "loc": {
                                     "start": {
-                                      "line": 40,
+                                      "line": 41,
                                       "column": 30
                                     },
                                     "end": {
-                                      "line": 40,
+                                      "line": 41,
                                       "column": 34
                                     }
                                   }
                                 },
                                 "range": [
-                                  1056,
-                                  1063
+                                  1063,
+                                  1070
                                 ],
                                 "loc": {
                                   "start": {
-                                    "line": 40,
+                                    "line": 41,
                                     "column": 27
                                   },
                                   "end": {
-                                    "line": 40,
+                                    "line": 41,
                                     "column": 34
                                   }
                                 }
@@ -1602,16 +1602,16 @@
                                   "type": "Identifier",
                                   "name": "client",
                                   "range": [
-                                    1068,
-                                    1074
+                                    1075,
+                                    1081
                                   ],
                                   "loc": {
                                     "start": {
-                                      "line": 40,
+                                      "line": 41,
                                       "column": 39
                                     },
                                     "end": {
-                                      "line": 40,
+                                      "line": 41,
                                       "column": 45
                                     }
                                   }
@@ -1620,31 +1620,31 @@
                                   "type": "Identifier",
                                   "name": "send",
                                   "range": [
-                                    1075,
-                                    1079
+                                    1082,
+                                    1086
                                   ],
                                   "loc": {
                                     "start": {
-                                      "line": 40,
+                                      "line": 41,
                                       "column": 46
                                     },
                                     "end": {
-                                      "line": 40,
+                                      "line": 41,
                                       "column": 50
                                     }
                                   }
                                 },
                                 "range": [
-                                  1068,
-                                  1079
+                                  1075,
+                                  1086
                                 ],
                                 "loc": {
                                   "start": {
-                                    "line": 40,
+                                    "line": 41,
                                     "column": 39
                                   },
                                   "end": {
-                                    "line": 40,
+                                    "line": 41,
                                     "column": 50
                                   }
                                 }
@@ -1654,16 +1654,16 @@
                                   "type": "Identifier",
                                   "name": "cmd",
                                   "range": [
-                                    1080,
-                                    1083
+                                    1087,
+                                    1090
                                   ],
                                   "loc": {
                                     "start": {
-                                      "line": 40,
+                                      "line": 41,
                                       "column": 51
                                     },
                                     "end": {
-                                      "line": 40,
+                                      "line": 41,
                                       "column": 54
                                     }
                                   }
@@ -1674,47 +1674,47 @@
                                     "type": "Identifier",
                                     "name": "args",
                                     "range": [
-                                      1088,
-                                      1092
+                                      1095,
+                                      1099
                                     ],
                                     "loc": {
                                       "start": {
-                                        "line": 40,
+                                        "line": 41,
                                         "column": 59
                                       },
                                       "end": {
-                                        "line": 40,
+                                        "line": 41,
                                         "column": 63
                                       }
                                     }
                                   },
                                   "range": [
-                                    1085,
-                                    1092
+                                    1092,
+                                    1099
                                   ],
                                   "loc": {
                                     "start": {
-                                      "line": 40,
+                                      "line": 41,
                                       "column": 56
                                     },
                                     "end": {
-                                      "line": 40,
+                                      "line": 41,
                                       "column": 63
                                     }
                                   }
                                 }
                               ],
                               "range": [
-                                1068,
-                                1093
+                                1075,
+                                1100
                               ],
                               "loc": {
                                 "start": {
-                                  "line": 40,
+                                  "line": 41,
                                   "column": 39
                                 },
                                 "end": {
-                                  "line": 40,
+                                  "line": 41,
                                   "column": 64
                                 }
                               }
@@ -1722,16 +1722,16 @@
                             "generator": false,
                             "expression": true,
                             "range": [
-                              1050,
-                              1093
+                              1057,
+                              1100
                             ],
                             "loc": {
                               "start": {
-                                "line": 40,
+                                "line": 41,
                                 "column": 21
                               },
                               "end": {
-                                "line": 40,
+                                "line": 41,
                                 "column": 64
                               }
                             }
@@ -1744,16 +1744,16 @@
                                 "type": "Identifier",
                                 "name": "cmd",
                                 "range": [
-                                  1096,
-                                  1099
+                                  1103,
+                                  1106
                                 ],
                                 "loc": {
                                   "start": {
-                                    "line": 40,
+                                    "line": 41,
                                     "column": 67
                                   },
                                   "end": {
-                                    "line": 40,
+                                    "line": 41,
                                     "column": 70
                                   }
                                 }
@@ -1762,16 +1762,16 @@
                                 "type": "Identifier",
                                 "name": "callback",
                                 "range": [
-                                  1101,
-                                  1109
+                                  1108,
+                                  1116
                                 ],
                                 "loc": {
                                   "start": {
-                                    "line": 40,
+                                    "line": 41,
                                     "column": 72
                                   },
                                   "end": {
-                                    "line": 40,
+                                    "line": 41,
                                     "column": 80
                                   }
                                 }
@@ -1786,16 +1786,16 @@
                                   "type": "Identifier",
                                   "name": "client",
                                   "range": [
-                                    1114,
-                                    1120
+                                    1121,
+                                    1127
                                   ],
                                   "loc": {
                                     "start": {
-                                      "line": 40,
+                                      "line": 41,
                                       "column": 85
                                     },
                                     "end": {
-                                      "line": 40,
+                                      "line": 41,
                                       "column": 91
                                     }
                                   }
@@ -1804,31 +1804,31 @@
                                   "type": "Identifier",
                                   "name": "receive",
                                   "range": [
-                                    1121,
-                                    1128
+                                    1128,
+                                    1135
                                   ],
                                   "loc": {
                                     "start": {
-                                      "line": 40,
+                                      "line": 41,
                                       "column": 92
                                     },
                                     "end": {
-                                      "line": 40,
+                                      "line": 41,
                                       "column": 99
                                     }
                                   }
                                 },
                                 "range": [
-                                  1114,
-                                  1128
+                                  1121,
+                                  1135
                                 ],
                                 "loc": {
                                   "start": {
-                                    "line": 40,
+                                    "line": 41,
                                     "column": 85
                                   },
                                   "end": {
-                                    "line": 40,
+                                    "line": 41,
                                     "column": 99
                                   }
                                 }
@@ -1838,16 +1838,16 @@
                                   "type": "Identifier",
                                   "name": "cmd",
                                   "range": [
-                                    1129,
-                                    1132
+                                    1136,
+                                    1139
                                   ],
                                   "loc": {
                                     "start": {
-                                      "line": 40,
+                                      "line": 41,
                                       "column": 100
                                     },
                                     "end": {
-                                      "line": 40,
+                                      "line": 41,
                                       "column": 103
                                     }
                                   }
@@ -1856,32 +1856,32 @@
                                   "type": "Identifier",
                                   "name": "callback",
                                   "range": [
-                                    1134,
-                                    1142
+                                    1141,
+                                    1149
                                   ],
                                   "loc": {
                                     "start": {
-                                      "line": 40,
+                                      "line": 41,
                                       "column": 105
                                     },
                                     "end": {
-                                      "line": 40,
+                                      "line": 41,
                                       "column": 113
                                     }
                                   }
                                 }
                               ],
                               "range": [
-                                1114,
-                                1143
+                                1121,
+                                1150
                               ],
                               "loc": {
                                 "start": {
-                                  "line": 40,
+                                  "line": 41,
                                   "column": 85
                                 },
                                 "end": {
-                                  "line": 40,
+                                  "line": 41,
                                   "column": 114
                                 }
                               }
@@ -1889,63 +1889,63 @@
                             "generator": false,
                             "expression": true,
                             "range": [
-                              1095,
-                              1143
+                              1102,
+                              1150
                             ],
                             "loc": {
                               "start": {
-                                "line": 40,
+                                "line": 41,
                                 "column": 66
                               },
                               "end": {
-                                "line": 40,
+                                "line": 41,
                                 "column": 114
                               }
                             }
                           }
                         ],
                         "range": [
-                          1033,
-                          1144
+                          1040,
+                          1151
                         ],
                         "loc": {
                           "start": {
-                            "line": 40,
+                            "line": 41,
                             "column": 4
                           },
                           "end": {
-                            "line": 40,
+                            "line": 41,
                             "column": 115
                           }
                         }
                       },
                       "range": [
-                        1033,
-                        1145
+                        1040,
+                        1152
                       ],
                       "loc": {
                         "start": {
-                          "line": 40,
+                          "line": 41,
                           "column": 4
                         },
                         "end": {
-                          "line": 40,
+                          "line": 41,
                           "column": 116
                         }
                       }
                     }
                   ],
                   "range": [
-                    1000,
-                    1149
+                    1007,
+                    1156
                   ],
                   "loc": {
                     "start": {
-                      "line": 38,
+                      "line": 39,
                       "column": 18
                     },
                     "end": {
-                      "line": 41,
+                      "line": 42,
                       "column": 3
                     }
                   }
@@ -1953,16 +1953,16 @@
                 "generator": false,
                 "expression": false,
                 "range": [
-                  991,
-                  1149
+                  998,
+                  1156
                 ],
                 "loc": {
                   "start": {
-                    "line": 38,
+                    "line": 39,
                     "column": 9
                   },
                   "end": {
-                    "line": 41,
+                    "line": 42,
                     "column": 3
                   }
                 }
@@ -1970,16 +1970,16 @@
               "kind": "method",
               "computed": false,
               "range": [
-                984,
-                1149
+                991,
+                1156
               ],
               "loc": {
                 "start": {
-                  "line": 38,
+                  "line": 39,
                   "column": 2
                 },
                 "end": {
-                  "line": 41,
+                  "line": 42,
                   "column": 3
                 }
               },
@@ -1988,16 +1988,16 @@
                   "type": "Block",
                   "value": "*\n   * @private\n   * @todo ?\n   ",
                   "range": [
-                    945,
-                    981
+                    952,
+                    988
                   ],
                   "loc": {
                     "start": {
-                      "line": 34,
+                      "line": 35,
                       "column": 2
                     },
                     "end": {
-                      "line": 37,
+                      "line": 38,
                       "column": 5
                     }
                   }
@@ -2008,16 +2008,16 @@
                   "type": "Block",
                   "value": "*\n   * Returns the current time in the sync clock.\n   * @return {Number} Current sync time (in seconds).\n   ",
                   "range": [
-                    1153,
-                    1265
+                    1160,
+                    1272
                   ],
                   "loc": {
                     "start": {
-                      "line": 43,
+                      "line": 44,
                       "column": 2
                     },
                     "end": {
-                      "line": 46,
+                      "line": 47,
                       "column": 5
                     }
                   }
@@ -2031,16 +2031,16 @@
                 "type": "Identifier",
                 "name": "getSyncTime",
                 "range": [
-                  1268,
-                  1279
+                  1275,
+                  1286
                 ],
                 "loc": {
                   "start": {
-                    "line": 47,
+                    "line": 48,
                     "column": 2
                   },
                   "end": {
-                    "line": 47,
+                    "line": 48,
                     "column": 13
                   }
                 }
@@ -2065,16 +2065,16 @@
                             "object": {
                               "type": "ThisExpression",
                               "range": [
-                                1295,
-                                1299
+                                1302,
+                                1306
                               ],
                               "loc": {
                                 "start": {
-                                  "line": 48,
+                                  "line": 49,
                                   "column": 11
                                 },
                                 "end": {
-                                  "line": 48,
+                                  "line": 49,
                                   "column": 15
                                 }
                               }
@@ -2083,31 +2083,31 @@
                               "type": "Identifier",
                               "name": "sync",
                               "range": [
-                                1300,
-                                1304
+                                1307,
+                                1311
                               ],
                               "loc": {
                                 "start": {
-                                  "line": 48,
+                                  "line": 49,
                                   "column": 16
                                 },
                                 "end": {
-                                  "line": 48,
+                                  "line": 49,
                                   "column": 20
                                 }
                               }
                             },
                             "range": [
-                              1295,
-                              1304
+                              1302,
+                              1311
                             ],
                             "loc": {
                               "start": {
-                                "line": 48,
+                                "line": 49,
                                 "column": 11
                               },
                               "end": {
-                                "line": 48,
+                                "line": 49,
                                 "column": 20
                               }
                             }
@@ -2116,78 +2116,78 @@
                             "type": "Identifier",
                             "name": "getSyncTime",
                             "range": [
-                              1305,
-                              1316
+                              1312,
+                              1323
                             ],
                             "loc": {
                               "start": {
-                                "line": 48,
+                                "line": 49,
                                 "column": 21
                               },
                               "end": {
-                                "line": 48,
+                                "line": 49,
                                 "column": 32
                               }
                             }
                           },
                           "range": [
-                            1295,
-                            1316
+                            1302,
+                            1323
                           ],
                           "loc": {
                             "start": {
-                              "line": 48,
+                              "line": 49,
                               "column": 11
                             },
                             "end": {
-                              "line": 48,
+                              "line": 49,
                               "column": 32
                             }
                           }
                         },
                         "arguments": [],
                         "range": [
-                          1295,
-                          1318
+                          1302,
+                          1325
                         ],
                         "loc": {
                           "start": {
-                            "line": 48,
+                            "line": 49,
                             "column": 11
                           },
                           "end": {
-                            "line": 48,
+                            "line": 49,
                             "column": 34
                           }
                         }
                       },
                       "range": [
-                        1288,
-                        1319
+                        1295,
+                        1326
                       ],
                       "loc": {
                         "start": {
-                          "line": 48,
+                          "line": 49,
                           "column": 4
                         },
                         "end": {
-                          "line": 48,
+                          "line": 49,
                           "column": 35
                         }
                       }
                     }
                   ],
                   "range": [
-                    1282,
-                    1323
+                    1289,
+                    1330
                   ],
                   "loc": {
                     "start": {
-                      "line": 47,
+                      "line": 48,
                       "column": 16
                     },
                     "end": {
-                      "line": 49,
+                      "line": 50,
                       "column": 3
                     }
                   }
@@ -2195,16 +2195,16 @@
                 "generator": false,
                 "expression": false,
                 "range": [
-                  1279,
-                  1323
+                  1286,
+                  1330
                 ],
                 "loc": {
                   "start": {
-                    "line": 47,
+                    "line": 48,
                     "column": 13
                   },
                   "end": {
-                    "line": 49,
+                    "line": 50,
                     "column": 3
                   }
                 }
@@ -2212,16 +2212,16 @@
               "kind": "method",
               "computed": false,
               "range": [
-                1268,
-                1323
+                1275,
+                1330
               ],
               "loc": {
                 "start": {
-                  "line": 47,
+                  "line": 48,
                   "column": 2
                 },
                 "end": {
-                  "line": 49,
+                  "line": 50,
                   "column": 3
                 }
               },
@@ -2230,16 +2230,16 @@
                   "type": "Block",
                   "value": "*\n   * Returns the current time in the sync clock.\n   * @return {Number} Current sync time (in seconds).\n   ",
                   "range": [
-                    1153,
-                    1265
+                    1160,
+                    1272
                   ],
                   "loc": {
                     "start": {
-                      "line": 43,
+                      "line": 44,
                       "column": 2
                     },
                     "end": {
-                      "line": 46,
+                      "line": 47,
                       "column": 5
                     }
                   }
@@ -2249,49 +2249,49 @@
             }
           ],
           "range": [
-            544,
-            1325
+            551,
+            1332
           ],
           "loc": {
             "start": {
-              "line": 18,
+              "line": 19,
               "column": 53
             },
             "end": {
-              "line": 50,
+              "line": 51,
               "column": 1
             }
           }
         },
         "range": [
-          506,
-          1325
+          513,
+          1332
         ],
         "loc": {
           "start": {
-            "line": 18,
+            "line": 19,
             "column": 15
           },
           "end": {
-            "line": 50,
+            "line": 51,
             "column": 1
           }
         },
         "leadingComments": [
           {
             "type": "Block",
-            "value": "*\n * The `ServerSync` module takes care of the synchronization process on the server side.\n * @example\n * // Require the Soundworks library (server side)\n * const serverSide = require('soundworks/server'); // TODO\n *\n * // Create Sync module\n * const sync = new serverSide.Sync();\n *\n * // Get sync time\n * const nowSync = sync.getSyncTime(); // current time in the sync clock time\n ",
+            "value": "*\n * The {@link ServerSync} module takes care of the synchronization process on the server side.\n * @example\n * // Require the Soundworks library (server side)\n * const serverSide = require('soundworks/server'); // TODO\n *\n * // Create Sync module\n * const sync = new serverSide.Sync();\n *\n * // Get sync time\n * const nowSync = sync.getSyncTime(); // current time in the sync clock time\n ",
             "range": [
-              103,
-              490
+              104,
+              497
             ],
             "loc": {
               "start": {
-                "line": 6,
+                "line": 7,
                 "column": 0
               },
               "end": {
-                "line": 17,
+                "line": 18,
                 "column": 3
               }
             }
@@ -2300,34 +2300,34 @@
         "trailingComments": []
       },
       "range": [
-        491,
-        1325
+        498,
+        1332
       ],
       "loc": {
         "start": {
-          "line": 18,
+          "line": 19,
           "column": 0
         },
         "end": {
-          "line": 50,
+          "line": 51,
           "column": 1
         }
       },
       "leadingComments": [
         {
           "type": "Block",
-          "value": "*\n * The `ServerSync` module takes care of the synchronization process on the server side.\n * @example\n * // Require the Soundworks library (server side)\n * const serverSide = require('soundworks/server'); // TODO\n *\n * // Create Sync module\n * const sync = new serverSide.Sync();\n *\n * // Get sync time\n * const nowSync = sync.getSyncTime(); // current time in the sync clock time\n ",
+          "value": "*\n * The {@link ServerSync} module takes care of the synchronization process on the server side.\n * @example\n * // Require the Soundworks library (server side)\n * const serverSide = require('soundworks/server'); // TODO\n *\n * // Create Sync module\n * const sync = new serverSide.Sync();\n *\n * // Get sync time\n * const nowSync = sync.getSyncTime(); // current time in the sync clock time\n ",
           "range": [
-            103,
-            490
+            104,
+            497
           ],
           "loc": {
             "start": {
-              "line": 6,
+              "line": 7,
               "column": 0
             },
             "end": {
-              "line": 17,
+              "line": 18,
               "column": 3
             }
           }
@@ -2338,7 +2338,7 @@
   "sourceType": "module",
   "range": [
     0,
-    1325
+    1332
   ],
   "loc": {
     "start": {
@@ -2346,25 +2346,25 @@
       "column": 0
     },
     "end": {
-      "line": 50,
+      "line": 51,
       "column": 1
     }
   },
   "comments": [
     {
       "type": "Block",
-      "value": "*\n * The `ServerSync` module takes care of the synchronization process on the server side.\n * @example\n * // Require the Soundworks library (server side)\n * const serverSide = require('soundworks/server'); // TODO\n *\n * // Create Sync module\n * const sync = new serverSide.Sync();\n *\n * // Get sync time\n * const nowSync = sync.getSyncTime(); // current time in the sync clock time\n ",
+      "value": "*\n * The {@link ServerSync} module takes care of the synchronization process on the server side.\n * @example\n * // Require the Soundworks library (server side)\n * const serverSide = require('soundworks/server'); // TODO\n *\n * // Create Sync module\n * const sync = new serverSide.Sync();\n *\n * // Get sync time\n * const nowSync = sync.getSyncTime(); // current time in the sync clock time\n ",
       "range": [
-        103,
-        490
+        104,
+        497
       ],
       "loc": {
         "start": {
-          "line": 6,
+          "line": 7,
           "column": 0
         },
         "end": {
-          "line": 17,
+          "line": 18,
           "column": 3
         }
       }
@@ -2373,16 +2373,16 @@
       "type": "Block",
       "value": "*\n   * Creates an instance of the class.\n   * @param {Object} [options={}] Options.\n   * @param {String} [name='sync'] Name of the module.\n   ",
       "range": [
-        548,
-        694
+        555,
+        701
       ],
       "loc": {
         "start": {
-          "line": 19,
+          "line": 20,
           "column": 2
         },
         "end": {
-          "line": 23,
+          "line": 24,
           "column": 5
         }
       }
@@ -2391,16 +2391,16 @@
       "type": "Block",
       "value": "*\n   * @private\n   * @todo ?\n   ",
       "range": [
-        945,
-        981
+        952,
+        988
       ],
       "loc": {
         "start": {
-          "line": 34,
+          "line": 35,
           "column": 2
         },
         "end": {
-          "line": 37,
+          "line": 38,
           "column": 5
         }
       }
@@ -2409,16 +2409,16 @@
       "type": "Block",
       "value": "*\n   * Returns the current time in the sync clock.\n   * @return {Number} Current sync time (in seconds).\n   ",
       "range": [
-        1153,
-        1265
+        1160,
+        1272
       ],
       "loc": {
         "start": {
-          "line": 43,
+          "line": 44,
           "column": 2
         },
         "end": {
-          "line": 46,
+          "line": 47,
           "column": 5
         }
       }

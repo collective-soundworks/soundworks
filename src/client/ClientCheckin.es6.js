@@ -23,12 +23,12 @@ function _instructions(label) {
  *
  * Alternatively, when configuring the module adequately, the module can assign arbitrary indices to the the participants and request that they indicate their approximate location in the performance space on a map.
  *
- * The `ClientCheckin` module takes care of the check-in on the client side.
- * The `ClientCheckin` module calls its `done` method when the user is checked in.
+ * The {@link ClientCheckin} module takes care of the check-in on the client side.
+ * The {@link ClientCheckin} module calls its `done` method when the user is checked in.
  *
- * The `ClientCheckin` module requires the SASS partial `_77-checkin.scss`.
+ * The {@link ClientCheckin} module requires the SASS partial `_77-checkin.scss`.
  */
-class ClientCheckin extends ClientModule {
+export default class ClientCheckin extends ClientModule {
   /**
    * Creates an instance of the class. Always has a view.
    * @param {Object} [options={}] Options.

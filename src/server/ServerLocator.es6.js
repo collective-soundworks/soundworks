@@ -1,18 +1,26 @@
-/**
- * @fileoverview Soundworks server side check-in module
- * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
- */
 'use strict';
 
-var ServerModule = require('./ServerModule');
+import ServerModule from './ServerModule.es6.js';
 
-class ServerLocator extends ServerModule {
+/**
+ * The {@link ServerLocator} module allows to store the coordinates of a client when the user enters an approximate location through the interfacte provided by the {@link ClientLocator}.
+ */
+export default class ServerLocator extends ServerModule {
+  /**
+   * Creates an instance of the class.
+   * @param {Object} [options={}] Options.
+   * @param {Object} [options.name='locator'] Name of the module.
+   * @param {Object} [options.setup] Setup used in the scenario, if any (cf. {@link ServerSetup}).
+   */
   constructor(options = {}) {
     super(options.name || 'locator');
 
     this.setup = options.setup || null;
   }
 
+  /**
+   * @private
+   */
   connect(client) {
     super.connect(client);
 
@@ -32,10 +40,6 @@ class ServerLocator extends ServerModule {
     client.receive(this.name + ':restart', (coordinates) => {
       client.coordinates = coordinates;
     });
-  }
-
-  disconnect(client) {
-    super.disconnect(client);
   }
 }
 

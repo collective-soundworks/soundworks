@@ -72,7 +72,7 @@ class ListSelector extends EventEmitter {
 }
 
 /**
- * The `ClientPlacer` module allows to select a place in a list of predefined places.
+ * The {@link ClientPlacer} module allows to select a place in a list of predefined places.
  */
 export default class ClientPlacer extends ClientModule {
   /**

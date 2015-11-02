@@ -4,7 +4,17 @@ import server from './server.es6.js';
 import ServerModule from './ServerModule.es6.js';
 
 /**
- * The `ServerControl` takes care of the parameters and commands on the server side.
+ * The `Control` module is used to control an application through a dedicated client (that we usually call `conductor`).
+ * The module allows for declaring `parameters`, `infos`, and `commands`, through which the `conductor` can control and monitor the state of the application:
+ * - `parameters` are values that are changed by a client, sent to the server, and propagated to the other connected clients (*e.g.* the tempo of a musical application);
+ * - `infos` are values that are changed by the server and propagated to the connected clients, to inform about the current state of the application (*e.g.* the number of connected `player` clients);
+ * - `commands` are messages (without arguments) that are send from the client to the server (*e.g.* `start`, `stop` or `clear` — whatever they would mean for a given application) which does the necessary upon reception.
+ *
+ * Optionally, the {@link ClientControl} module can automatically construct a simple interface from the list of declared controls that allows to change `parameters`, display `infos`, and send `commands` to the server.
+ *
+ * The controls of different types are declared on the server side and propagated to the client side when a client is set up.
+ *
+ * The {@link ServerControl} takes care of the parameters and commands on the server side.
  * To set up controls in a scenario, you should extend this class on the server side and declare the controls specific to that scenario with the appropriate methods.
  * @example
  * class Control extends ServerControl {

@@ -226,11 +226,11 @@ class ControlCommand extends ControlEvent {
 }
 
 /**
- * The `ClientControl` module takes care of the global `parameters`, `infos`, and `commands` on the client side.
+ * The {@link ClientControl} module takes care of the global `parameters`, `infos`, and `commands` on the client side.
  * If the module is instantiated with the `gui` option set to `true`, it constructs the graphical control interface.
  * Otherwise it simply receives the values that are emitted by the server (usually by through the `performance` module).
  *
- * The `ClientModule` calls its `done` method:
+ * The {@link ClientControl} calls its `done` method:
  * - Immediately after having set up the controls if the GUI is disabled;
  * - Never if the GUI is enabled.
  */

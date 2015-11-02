@@ -8,54 +8,34 @@
         "value": "use strict",
         "raw": "'use strict'",
         "range": [
-          132,
-          144
+          0,
+          12
         ],
         "loc": {
           "start": {
-            "line": 5,
+            "line": 1,
             "column": 0
           },
           "end": {
-            "line": 5,
+            "line": 1,
             "column": 12
           }
         }
       },
       "range": [
-        132,
-        145
+        0,
+        13
       ],
       "loc": {
         "start": {
-          "line": 5,
+          "line": 1,
           "column": 0
         },
         "end": {
-          "line": 5,
+          "line": 1,
           "column": 13
         }
-      },
-      "leadingComments": [
-        {
-          "type": "Block",
-          "value": "*\n * @fileoverview Soundworks server side module export\n * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr\n ",
-          "range": [
-            0,
-            131
-          ],
-          "loc": {
-            "start": {
-              "line": 1,
-              "column": 0
-            },
-            "end": {
-              "line": 4,
-              "column": 3
-            }
-          }
-        }
-      ]
+      }
     },
     {
       "type": "ExpressionStatement",
@@ -69,16 +49,16 @@
             "type": "Identifier",
             "name": "module",
             "range": [
-              147,
-              153
+              15,
+              21
             ],
             "loc": {
               "start": {
-                "line": 7,
+                "line": 3,
                 "column": 0
               },
               "end": {
-                "line": 7,
+                "line": 3,
                 "column": 6
               }
             }
@@ -87,31 +67,31 @@
             "type": "Identifier",
             "name": "exports",
             "range": [
-              154,
-              161
+              22,
+              29
             ],
             "loc": {
               "start": {
-                "line": 7,
+                "line": 3,
                 "column": 7
               },
               "end": {
-                "line": 7,
+                "line": 3,
                 "column": 14
               }
             }
           },
           "range": [
-            147,
-            161
+            15,
+            29
           ],
           "loc": {
             "start": {
-              "line": 7,
+              "line": 3,
               "column": 0
             },
             "end": {
-              "line": 7,
+              "line": 3,
               "column": 14
             }
           }
@@ -125,16 +105,16 @@
                 "type": "Identifier",
                 "name": "server",
                 "range": [
-                  168,
-                  174
+                  36,
+                  42
                 ],
                 "loc": {
                   "start": {
-                    "line": 8,
+                    "line": 4,
                     "column": 2
                   },
                   "end": {
-                    "line": 8,
+                    "line": 4,
                     "column": 8
                   }
                 }
@@ -145,16 +125,16 @@
                   "type": "Identifier",
                   "name": "require",
                   "range": [
-                    176,
-                    183
+                    44,
+                    51
                   ],
                   "loc": {
                     "start": {
-                      "line": 8,
+                      "line": 4,
                       "column": 10
                     },
                     "end": {
-                      "line": 8,
+                      "line": 4,
                       "column": 17
                     }
                   }
@@ -165,32 +145,32 @@
                     "value": "./server",
                     "raw": "'./server'",
                     "range": [
-                      184,
-                      194
+                      52,
+                      62
                     ],
                     "loc": {
                       "start": {
-                        "line": 8,
+                        "line": 4,
                         "column": 18
                       },
                       "end": {
-                        "line": 8,
+                        "line": 4,
                         "column": 28
                       }
                     }
                   }
                 ],
                 "range": [
-                  176,
-                  195
+                  44,
+                  63
                 ],
                 "loc": {
                   "start": {
-                    "line": 8,
+                    "line": 4,
                     "column": 10
                   },
                   "end": {
-                    "line": 8,
+                    "line": 4,
                     "column": 29
                   }
                 }
@@ -200,16 +180,16 @@
               "shorthand": false,
               "computed": false,
               "range": [
-                168,
-                195
+                36,
+                63
               ],
               "loc": {
                 "start": {
-                  "line": 8,
+                  "line": 4,
                   "column": 2
                 },
                 "end": {
-                  "line": 8,
+                  "line": 4,
                   "column": 29
                 }
               }
@@ -220,16 +200,16 @@
                 "type": "Identifier",
                 "name": "Calibration",
                 "range": [
-                  199,
-                  210
+                  67,
+                  78
                 ],
                 "loc": {
                   "start": {
-                    "line": 9,
+                    "line": 5,
                     "column": 2
                   },
                   "end": {
-                    "line": 9,
+                    "line": 5,
                     "column": 13
                   }
                 }
@@ -240,16 +220,16 @@
                   "type": "Identifier",
                   "name": "require",
                   "range": [
-                    212,
-                    219
+                    80,
+                    87
                   ],
                   "loc": {
                     "start": {
-                      "line": 9,
+                      "line": 5,
                       "column": 15
                     },
                     "end": {
-                      "line": 9,
+                      "line": 5,
                       "column": 22
                     }
                   }
@@ -260,32 +240,32 @@
                     "value": "./ServerCalibration",
                     "raw": "'./ServerCalibration'",
                     "range": [
-                      220,
-                      241
+                      88,
+                      109
                     ],
                     "loc": {
                       "start": {
-                        "line": 9,
+                        "line": 5,
                         "column": 23
                       },
                       "end": {
-                        "line": 9,
+                        "line": 5,
                         "column": 44
                       }
                     }
                   }
                 ],
                 "range": [
-                  212,
-                  242
+                  80,
+                  110
                 ],
                 "loc": {
                   "start": {
-                    "line": 9,
+                    "line": 5,
                     "column": 15
                   },
                   "end": {
-                    "line": 9,
+                    "line": 5,
                     "column": 45
                   }
                 }
@@ -295,16 +275,16 @@
               "shorthand": false,
               "computed": false,
               "range": [
-                199,
-                242
+                67,
+                110
               ],
               "loc": {
                 "start": {
-                  "line": 9,
+                  "line": 5,
                   "column": 2
                 },
                 "end": {
-                  "line": 9,
+                  "line": 5,
                   "column": 45
                 }
               }
@@ -315,16 +295,16 @@
                 "type": "Identifier",
                 "name": "Checkin",
                 "range": [
-                  246,
-                  253
+                  114,
+                  121
                 ],
                 "loc": {
                   "start": {
-                    "line": 10,
+                    "line": 6,
                     "column": 2
                   },
                   "end": {
-                    "line": 10,
+                    "line": 6,
                     "column": 9
                   }
                 }
@@ -335,16 +315,16 @@
                   "type": "Identifier",
                   "name": "require",
                   "range": [
-                    255,
-                    262
+                    123,
+                    130
                   ],
                   "loc": {
                     "start": {
-                      "line": 10,
+                      "line": 6,
                       "column": 11
                     },
                     "end": {
-                      "line": 10,
+                      "line": 6,
                       "column": 18
                     }
                   }
@@ -355,32 +335,32 @@
                     "value": "./ServerCheckin",
                     "raw": "'./ServerCheckin'",
                     "range": [
-                      263,
-                      280
+                      131,
+                      148
                     ],
                     "loc": {
                       "start": {
-                        "line": 10,
+                        "line": 6,
                         "column": 19
                       },
                       "end": {
-                        "line": 10,
+                        "line": 6,
                         "column": 36
                       }
                     }
                   }
                 ],
                 "range": [
-                  255,
-                  281
+                  123,
+                  149
                 ],
                 "loc": {
                   "start": {
-                    "line": 10,
+                    "line": 6,
                     "column": 11
                   },
                   "end": {
-                    "line": 10,
+                    "line": 6,
                     "column": 37
                   }
                 }
@@ -390,16 +370,16 @@
               "shorthand": false,
               "computed": false,
               "range": [
-                246,
-                281
+                114,
+                149
               ],
               "loc": {
                 "start": {
-                  "line": 10,
+                  "line": 6,
                   "column": 2
                 },
                 "end": {
-                  "line": 10,
+                  "line": 6,
                   "column": 37
                 }
               }
@@ -410,16 +390,16 @@
                 "type": "Identifier",
                 "name": "Client",
                 "range": [
-                  285,
-                  291
+                  153,
+                  159
                 ],
                 "loc": {
                   "start": {
-                    "line": 11,
+                    "line": 7,
                     "column": 2
                   },
                   "end": {
-                    "line": 11,
+                    "line": 7,
                     "column": 8
                   }
                 }
@@ -430,16 +410,16 @@
                   "type": "Identifier",
                   "name": "require",
                   "range": [
-                    293,
-                    300
+                    161,
+                    168
                   ],
                   "loc": {
                     "start": {
-                      "line": 11,
+                      "line": 7,
                       "column": 10
                     },
                     "end": {
-                      "line": 11,
+                      "line": 7,
                       "column": 17
                     }
                   }
@@ -450,32 +430,32 @@
                     "value": "./ServerClient",
                     "raw": "'./ServerClient'",
                     "range": [
-                      301,
-                      317
+                      169,
+                      185
                     ],
                     "loc": {
                       "start": {
-                        "line": 11,
+                        "line": 7,
                         "column": 18
                       },
                       "end": {
-                        "line": 11,
+                        "line": 7,
                         "column": 34
                       }
                     }
                   }
                 ],
                 "range": [
-                  293,
-                  318
+                  161,
+                  186
                 ],
                 "loc": {
                   "start": {
-                    "line": 11,
+                    "line": 7,
                     "column": 10
                   },
                   "end": {
-                    "line": 11,
+                    "line": 7,
                     "column": 35
                   }
                 }
@@ -485,16 +465,16 @@
               "shorthand": false,
               "computed": false,
               "range": [
-                285,
-                318
+                153,
+                186
               ],
               "loc": {
                 "start": {
-                  "line": 11,
+                  "line": 7,
                   "column": 2
                 },
                 "end": {
-                  "line": 11,
+                  "line": 7,
                   "column": 35
                 }
               }
@@ -505,16 +485,16 @@
                 "type": "Identifier",
                 "name": "Control",
                 "range": [
-                  322,
-                  329
+                  190,
+                  197
                 ],
                 "loc": {
                   "start": {
-                    "line": 12,
+                    "line": 8,
                     "column": 2
                   },
                   "end": {
-                    "line": 12,
+                    "line": 8,
                     "column": 9
                   }
                 }
@@ -525,16 +505,16 @@
                   "type": "Identifier",
                   "name": "require",
                   "range": [
-                    331,
-                    338
+                    199,
+                    206
                   ],
                   "loc": {
                     "start": {
-                      "line": 12,
+                      "line": 8,
                       "column": 11
                     },
                     "end": {
-                      "line": 12,
+                      "line": 8,
                       "column": 18
                     }
                   }
@@ -545,32 +525,32 @@
                     "value": "./ServerControl",
                     "raw": "'./ServerControl'",
                     "range": [
-                      339,
-                      356
+                      207,
+                      224
                     ],
                     "loc": {
                       "start": {
-                        "line": 12,
+                        "line": 8,
                         "column": 19
                       },
                       "end": {
-                        "line": 12,
+                        "line": 8,
                         "column": 36
                       }
                     }
                   }
                 ],
                 "range": [
-                  331,
-                  357
+                  199,
+                  225
                 ],
                 "loc": {
                   "start": {
-                    "line": 12,
+                    "line": 8,
                     "column": 11
                   },
                   "end": {
-                    "line": 12,
+                    "line": 8,
                     "column": 37
                   }
                 }
@@ -580,16 +560,16 @@
               "shorthand": false,
               "computed": false,
               "range": [
-                322,
-                357
+                190,
+                225
               ],
               "loc": {
                 "start": {
-                  "line": 12,
+                  "line": 8,
                   "column": 2
                 },
                 "end": {
-                  "line": 12,
+                  "line": 8,
                   "column": 37
                 }
               }
@@ -600,16 +580,16 @@
                 "type": "Identifier",
                 "name": "Filelist",
                 "range": [
-                  361,
-                  369
+                  229,
+                  237
                 ],
                 "loc": {
                   "start": {
-                    "line": 13,
+                    "line": 9,
                     "column": 2
                   },
                   "end": {
-                    "line": 13,
+                    "line": 9,
                     "column": 10
                   }
                 }
@@ -620,16 +600,16 @@
                   "type": "Identifier",
                   "name": "require",
                   "range": [
-                    371,
-                    378
+                    239,
+                    246
                   ],
                   "loc": {
                     "start": {
-                      "line": 13,
+                      "line": 9,
                       "column": 12
                     },
                     "end": {
-                      "line": 13,
+                      "line": 9,
                       "column": 19
                     }
                   }
@@ -640,32 +620,32 @@
                     "value": "./ServerFilelist",
                     "raw": "'./ServerFilelist'",
                     "range": [
-                      379,
-                      397
+                      247,
+                      265
                     ],
                     "loc": {
                       "start": {
-                        "line": 13,
+                        "line": 9,
                         "column": 20
                       },
                       "end": {
-                        "line": 13,
+                        "line": 9,
                         "column": 38
                       }
                     }
                   }
                 ],
                 "range": [
-                  371,
-                  398
+                  239,
+                  266
                 ],
                 "loc": {
                   "start": {
-                    "line": 13,
+                    "line": 9,
                     "column": 12
                   },
                   "end": {
-                    "line": 13,
+                    "line": 9,
                     "column": 39
                   }
                 }
@@ -675,16 +655,16 @@
               "shorthand": false,
               "computed": false,
               "range": [
-                361,
-                398
+                229,
+                266
               ],
               "loc": {
                 "start": {
-                  "line": 13,
+                  "line": 9,
                   "column": 2
                 },
                 "end": {
-                  "line": 13,
+                  "line": 9,
                   "column": 39
                 }
               }
@@ -695,16 +675,16 @@
                 "type": "Identifier",
                 "name": "Locator",
                 "range": [
-                  402,
-                  409
+                  270,
+                  277
                 ],
                 "loc": {
                   "start": {
-                    "line": 14,
+                    "line": 10,
                     "column": 2
                   },
                   "end": {
-                    "line": 14,
+                    "line": 10,
                     "column": 9
                   }
                 }
@@ -715,16 +695,16 @@
                   "type": "Identifier",
                   "name": "require",
                   "range": [
-                    411,
-                    418
+                    279,
+                    286
                   ],
                   "loc": {
                     "start": {
-                      "line": 14,
+                      "line": 10,
                       "column": 11
                     },
                     "end": {
-                      "line": 14,
+                      "line": 10,
                       "column": 18
                     }
                   }
@@ -735,32 +715,32 @@
                     "value": "./ServerLocator",
                     "raw": "'./ServerLocator'",
                     "range": [
-                      419,
-                      436
+                      287,
+                      304
                     ],
                     "loc": {
                       "start": {
-                        "line": 14,
+                        "line": 10,
                         "column": 19
                       },
                       "end": {
-                        "line": 14,
+                        "line": 10,
                         "column": 36
                       }
                     }
                   }
                 ],
                 "range": [
-                  411,
-                  437
+                  279,
+                  305
                 ],
                 "loc": {
                   "start": {
-                    "line": 14,
+                    "line": 10,
                     "column": 11
                   },
                   "end": {
-                    "line": 14,
+                    "line": 10,
                     "column": 37
                   }
                 }
@@ -770,16 +750,16 @@
               "shorthand": false,
               "computed": false,
               "range": [
-                402,
-                437
+                270,
+                305
               ],
               "loc": {
                 "start": {
-                  "line": 14,
+                  "line": 10,
                   "column": 2
                 },
                 "end": {
-                  "line": 14,
+                  "line": 10,
                   "column": 37
                 }
               }
@@ -790,16 +770,16 @@
                 "type": "Identifier",
                 "name": "Module",
                 "range": [
-                  441,
-                  447
+                  309,
+                  315
                 ],
                 "loc": {
                   "start": {
-                    "line": 15,
+                    "line": 11,
                     "column": 2
                   },
                   "end": {
-                    "line": 15,
+                    "line": 11,
                     "column": 8
                   }
                 }
@@ -810,16 +790,16 @@
                   "type": "Identifier",
                   "name": "require",
                   "range": [
-                    449,
-                    456
+                    317,
+                    324
                   ],
                   "loc": {
                     "start": {
-                      "line": 15,
+                      "line": 11,
                       "column": 10
                     },
                     "end": {
-                      "line": 15,
+                      "line": 11,
                       "column": 17
                     }
                   }
@@ -830,32 +810,32 @@
                     "value": "./ServerModule",
                     "raw": "'./ServerModule'",
                     "range": [
-                      457,
-                      473
+                      325,
+                      341
                     ],
                     "loc": {
                       "start": {
-                        "line": 15,
+                        "line": 11,
                         "column": 18
                       },
                       "end": {
-                        "line": 15,
+                        "line": 11,
                         "column": 34
                       }
                     }
                   }
                 ],
                 "range": [
-                  449,
-                  474
+                  317,
+                  342
                 ],
                 "loc": {
                   "start": {
-                    "line": 15,
+                    "line": 11,
                     "column": 10
                   },
                   "end": {
-                    "line": 15,
+                    "line": 11,
                     "column": 35
                   }
                 }
@@ -865,16 +845,16 @@
               "shorthand": false,
               "computed": false,
               "range": [
-                441,
-                474
+                309,
+                342
               ],
               "loc": {
                 "start": {
-                  "line": 15,
+                  "line": 11,
                   "column": 2
                 },
                 "end": {
-                  "line": 15,
+                  "line": 11,
                   "column": 35
                 }
               }
@@ -885,16 +865,16 @@
                 "type": "Identifier",
                 "name": "Performance",
                 "range": [
-                  478,
-                  489
+                  346,
+                  357
                 ],
                 "loc": {
                   "start": {
-                    "line": 16,
+                    "line": 12,
                     "column": 2
                   },
                   "end": {
-                    "line": 16,
+                    "line": 12,
                     "column": 13
                   }
                 }
@@ -905,16 +885,16 @@
                   "type": "Identifier",
                   "name": "require",
                   "range": [
-                    491,
-                    498
+                    359,
+                    366
                   ],
                   "loc": {
                     "start": {
-                      "line": 16,
+                      "line": 12,
                       "column": 15
                     },
                     "end": {
-                      "line": 16,
+                      "line": 12,
                       "column": 22
                     }
                   }
@@ -925,32 +905,32 @@
                     "value": "./ServerPerformance",
                     "raw": "'./ServerPerformance'",
                     "range": [
-                      499,
-                      520
+                      367,
+                      388
                     ],
                     "loc": {
                       "start": {
-                        "line": 16,
+                        "line": 12,
                         "column": 23
                       },
                       "end": {
-                        "line": 16,
+                        "line": 12,
                         "column": 44
                       }
                     }
                   }
                 ],
                 "range": [
-                  491,
-                  521
+                  359,
+                  389
                 ],
                 "loc": {
                   "start": {
-                    "line": 16,
+                    "line": 12,
                     "column": 15
                   },
                   "end": {
-                    "line": 16,
+                    "line": 12,
                     "column": 45
                   }
                 }
@@ -960,16 +940,16 @@
               "shorthand": false,
               "computed": false,
               "range": [
-                478,
-                521
+                346,
+                389
               ],
               "loc": {
                 "start": {
-                  "line": 16,
+                  "line": 12,
                   "column": 2
                 },
                 "end": {
-                  "line": 16,
+                  "line": 12,
                   "column": 45
                 }
               }
@@ -980,16 +960,16 @@
                 "type": "Identifier",
                 "name": "Placer",
                 "range": [
-                  525,
-                  531
+                  393,
+                  399
                 ],
                 "loc": {
                   "start": {
-                    "line": 17,
+                    "line": 13,
                     "column": 2
                   },
                   "end": {
-                    "line": 17,
+                    "line": 13,
                     "column": 8
                   }
                 }
@@ -1000,16 +980,16 @@
                   "type": "Identifier",
                   "name": "require",
                   "range": [
-                    533,
-                    540
+                    401,
+                    408
                   ],
                   "loc": {
                     "start": {
-                      "line": 17,
+                      "line": 13,
                       "column": 10
                     },
                     "end": {
-                      "line": 17,
+                      "line": 13,
                       "column": 17
                     }
                   }
@@ -1020,32 +1000,32 @@
                     "value": "./ServerPlacer",
                     "raw": "'./ServerPlacer'",
                     "range": [
-                      541,
-                      557
+                      409,
+                      425
                     ],
                     "loc": {
                       "start": {
-                        "line": 17,
+                        "line": 13,
                         "column": 18
                       },
                       "end": {
-                        "line": 17,
+                        "line": 13,
                         "column": 34
                       }
                     }
                   }
                 ],
                 "range": [
-                  533,
-                  558
+                  401,
+                  426
                 ],
                 "loc": {
                   "start": {
-                    "line": 17,
+                    "line": 13,
                     "column": 10
                   },
                   "end": {
-                    "line": 17,
+                    "line": 13,
                     "column": 35
                   }
                 }
@@ -1055,16 +1035,16 @@
               "shorthand": false,
               "computed": false,
               "range": [
-                525,
-                558
+                393,
+                426
               ],
               "loc": {
                 "start": {
-                  "line": 17,
+                  "line": 13,
                   "column": 2
                 },
                 "end": {
-                  "line": 17,
+                  "line": 13,
                   "column": 35
                 }
               }
@@ -1075,16 +1055,16 @@
                 "type": "Identifier",
                 "name": "Setup",
                 "range": [
-                  562,
-                  567
+                  430,
+                  435
                 ],
                 "loc": {
                   "start": {
-                    "line": 18,
+                    "line": 14,
                     "column": 2
                   },
                   "end": {
-                    "line": 18,
+                    "line": 14,
                     "column": 7
                   }
                 }
@@ -1095,16 +1075,16 @@
                   "type": "Identifier",
                   "name": "require",
                   "range": [
-                    569,
-                    576
+                    437,
+                    444
                   ],
                   "loc": {
                     "start": {
-                      "line": 18,
+                      "line": 14,
                       "column": 9
                     },
                     "end": {
-                      "line": 18,
+                      "line": 14,
                       "column": 16
                     }
                   }
@@ -1115,32 +1095,32 @@
                     "value": "./ServerSetup",
                     "raw": "'./ServerSetup'",
                     "range": [
-                      577,
-                      592
+                      445,
+                      460
                     ],
                     "loc": {
                       "start": {
-                        "line": 18,
+                        "line": 14,
                         "column": 17
                       },
                       "end": {
-                        "line": 18,
+                        "line": 14,
                         "column": 32
                       }
                     }
                   }
                 ],
                 "range": [
-                  569,
-                  593
+                  437,
+                  461
                 ],
                 "loc": {
                   "start": {
-                    "line": 18,
+                    "line": 14,
                     "column": 9
                   },
                   "end": {
-                    "line": 18,
+                    "line": 14,
                     "column": 33
                   }
                 }
@@ -1150,16 +1130,16 @@
               "shorthand": false,
               "computed": false,
               "range": [
-                562,
-                593
+                430,
+                461
               ],
               "loc": {
                 "start": {
-                  "line": 18,
+                  "line": 14,
                   "column": 2
                 },
                 "end": {
-                  "line": 18,
+                  "line": 14,
                   "column": 33
                 }
               }
@@ -1170,16 +1150,16 @@
                 "type": "Identifier",
                 "name": "Survey",
                 "range": [
-                  597,
-                  603
+                  465,
+                  471
                 ],
                 "loc": {
                   "start": {
-                    "line": 19,
+                    "line": 15,
                     "column": 2
                   },
                   "end": {
-                    "line": 19,
+                    "line": 15,
                     "column": 8
                   }
                 }
@@ -1190,16 +1170,16 @@
                   "type": "Identifier",
                   "name": "require",
                   "range": [
-                    605,
-                    612
+                    473,
+                    480
                   ],
                   "loc": {
                     "start": {
-                      "line": 19,
+                      "line": 15,
                       "column": 10
                     },
                     "end": {
-                      "line": 19,
+                      "line": 15,
                       "column": 17
                     }
                   }
@@ -1210,32 +1190,32 @@
                     "value": "./ServerSurvey",
                     "raw": "'./ServerSurvey'",
                     "range": [
-                      613,
-                      629
+                      481,
+                      497
                     ],
                     "loc": {
                       "start": {
-                        "line": 19,
+                        "line": 15,
                         "column": 18
                       },
                       "end": {
-                        "line": 19,
+                        "line": 15,
                         "column": 34
                       }
                     }
                   }
                 ],
                 "range": [
-                  605,
-                  630
+                  473,
+                  498
                 ],
                 "loc": {
                   "start": {
-                    "line": 19,
+                    "line": 15,
                     "column": 10
                   },
                   "end": {
-                    "line": 19,
+                    "line": 15,
                     "column": 35
                   }
                 }
@@ -1245,16 +1225,16 @@
               "shorthand": false,
               "computed": false,
               "range": [
-                597,
-                630
+                465,
+                498
               ],
               "loc": {
                 "start": {
-                  "line": 19,
+                  "line": 15,
                   "column": 2
                 },
                 "end": {
-                  "line": 19,
+                  "line": 15,
                   "column": 35
                 }
               }
@@ -1265,16 +1245,16 @@
                 "type": "Identifier",
                 "name": "Sync",
                 "range": [
-                  634,
-                  638
+                  502,
+                  506
                 ],
                 "loc": {
                   "start": {
-                    "line": 20,
+                    "line": 16,
                     "column": 2
                   },
                   "end": {
-                    "line": 20,
+                    "line": 16,
                     "column": 6
                   }
                 }
@@ -1285,16 +1265,16 @@
                   "type": "Identifier",
                   "name": "require",
                   "range": [
-                    640,
-                    647
+                    508,
+                    515
                   ],
                   "loc": {
                     "start": {
-                      "line": 20,
+                      "line": 16,
                       "column": 8
                     },
                     "end": {
-                      "line": 20,
+                      "line": 16,
                       "column": 15
                     }
                   }
@@ -1305,32 +1285,32 @@
                     "value": "./ServerSync",
                     "raw": "'./ServerSync'",
                     "range": [
-                      648,
-                      662
+                      516,
+                      530
                     ],
                     "loc": {
                       "start": {
-                        "line": 20,
+                        "line": 16,
                         "column": 16
                       },
                       "end": {
-                        "line": 20,
+                        "line": 16,
                         "column": 30
                       }
                     }
                   }
                 ],
                 "range": [
-                  640,
-                  663
+                  508,
+                  531
                 ],
                 "loc": {
                   "start": {
-                    "line": 20,
+                    "line": 16,
                     "column": 8
                   },
                   "end": {
-                    "line": 20,
+                    "line": 16,
                     "column": 31
                   }
                 }
@@ -1340,62 +1320,62 @@
               "shorthand": false,
               "computed": false,
               "range": [
-                634,
-                663
+                502,
+                531
               ],
               "loc": {
                 "start": {
-                  "line": 20,
+                  "line": 16,
                   "column": 2
                 },
                 "end": {
-                  "line": 20,
+                  "line": 16,
                   "column": 31
                 }
               }
             }
           ],
           "range": [
-            164,
-            665
+            32,
+            533
           ],
           "loc": {
             "start": {
-              "line": 7,
+              "line": 3,
               "column": 17
             },
             "end": {
-              "line": 21,
+              "line": 17,
               "column": 1
             }
           }
         },
         "range": [
-          147,
-          665
+          15,
+          533
         ],
         "loc": {
           "start": {
-            "line": 7,
+            "line": 3,
             "column": 0
           },
           "end": {
-            "line": 21,
+            "line": 17,
             "column": 1
           }
         }
       },
       "range": [
-        147,
-        666
+        15,
+        534
       ],
       "loc": {
         "start": {
-          "line": 7,
+          "line": 3,
           "column": 0
         },
         "end": {
-          "line": 21,
+          "line": 17,
           "column": 2
         }
       }
@@ -1403,37 +1383,18 @@
   ],
   "sourceType": "module",
   "range": [
-    132,
-    666
+    0,
+    534
   ],
   "loc": {
     "start": {
-      "line": 5,
+      "line": 1,
       "column": 0
     },
     "end": {
-      "line": 21,
+      "line": 17,
       "column": 2
     }
   },
-  "comments": [
-    {
-      "type": "Block",
-      "value": "*\n * @fileoverview Soundworks server side module export\n * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr\n ",
-      "range": [
-        0,
-        131
-      ],
-      "loc": {
-        "start": {
-          "line": 1,
-          "column": 0
-        },
-        "end": {
-          "line": 4,
-          "column": 3
-        }
-      }
-    }
-  ]
+  "comments": []
 }

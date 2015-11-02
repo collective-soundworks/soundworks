@@ -33,6 +33,7 @@
   <ul>
     
   <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">client</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientCalibration.es6.js~ClientCalibration.html">ClientCalibration</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientCheckin.es6.js~ClientCheckin.html">ClientCheckin</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientControl.es6.js~ClientControl.html">ClientControl</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientDialog.es6.js~ClientDialog.html">ClientDialog</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientFilelist.es6.js~Filelist.html">Filelist</a></span></span></li>
@@ -45,13 +46,22 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientPlatform.es6.js~ClientPlatform.html">ClientPlatform</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientSelector.es6.js~ClientSelector.html">ClientSelector</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientSetup.es6.js~ClientSetup.html">ClientSetup</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientSpace.es6.js~ClientSpace.html">ClientSpace</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientSurvey.es6.js~ClientSurvey.html">ClientSurvey</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientSync.es6.js~ClientSync.html">ClientSync</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-EventEmitter">EventEmitter</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-client">client</a></span></span></li>
 <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">server</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerCalibration.es6.js~ServerCalibration.html">ServerCalibration</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerCheckin.es6.js~ServerCheckin.html">ServerCheckin</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerClient.es6.js~ServerClient.html">ServerClient</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerControl.es6.js~ServerControl.html">ServerControl</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerFilelist.es6.js~ServerFilelist.html">ServerFilelist</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerLocator.es6.js~ServerLocator.html">ServerLocator</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerModule.es6.js~ServerModule.html">ServerModule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerPerformance.es6.js~ServerPerformance.html">ServerPerformance</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerPlacer.es6.js~ServerPlacer.html">ServerPlacer</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerSetup.es6.js~ServerSetup.html">ServerSetup</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerSurvey.es6.js~ServerSurvey.html">ServerSurvey</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerSync.es6.js~ServerSync.html">ServerSync</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-server">server</a></span></span></li>
 </ul>
@@ -73,7 +83,9 @@ const path = require(&apos;path&apos;);
 import ServerClient from &apos;./ServerClient.es6.js&apos;;
 
 /**
- * The `server` object contains the basic methods of the server. For instance, this object allows setting up, configuring and starting the server with the method `start` while the method `map` allows for managing the mapping between different types of clients and their required server modules. Additionally, the method `broadcast` allows to send messages to all connected clients.
+ * The `server` object contains the basic methods of the server.
+ * For instance, this object allows setting up, configuring and starting the server with the method `start` while the method `map` allows for managing the mapping between different types of clients and their required server modules.
+ * Additionally, the method `broadcast` allows to send messages to all connected clients via WebSockets or OSC.
  */
 const server = {
   io: null,
@@ -112,6 +124,23 @@ function _releaseClientIndex(index) {
   availableClientIndices.push(index);
 }
 
+/**
+ * Starts the server.
+ * @param {Object} app Express application.
+ * @param {String} publicPath Public static directory of the Express app.
+ * @param {Number} port Port.
+ * @param {Object} [options={}] Options.
+ * @param {Object} [options.socketIO={}] socket.io options. The socket.io config object can have the following properties:
+ * - `transports:String`: communication transport (defaults to `&apos;websocket&apos;`);
+ * - `pingTimeout:Number`: timeout (in milliseconds) before trying to reestablish a connection between a lost client and a server (defautls to `60000`);
+ * - `pingInterval:Number`: time interval (in milliseconds) to send a ping to a client to check the connection (defaults to `50000`).
+ * @param {Object} [options.osc={}] OSC options. The OSC config object can have the following properties:
+ * - `localAddress:String`: address of the local machine to receive OSC messages (defaults to `&apos;127.0.0.1&apos;`);
+ * - `localPort:Number`: port of the local machine to receive OSC messages (defaults to `57121`);
+ * - `remoteAddress:String`: address of the device to send default OSC messages to (defaults to `&apos;127.0.0.1&apos;`);
+ * - `remotePort:Number`: port of the device to send default OSC messages to (defaults to `57120`).
+ * @param {Object} [options.env={}] Environnement options (set by the user, depends on the scenario).
+ */
 function start(app, publicPath, port, options = {}) {
   const socketIOOptions = (options.socketIO ||&#xA0;{});
   const socketConfig = {
@@ -178,9 +207,8 @@ function start(app, publicPath, port, options = {}) {
  * More specifically:
  * - A client connecting to the server through the root URL `http://my.server.address:port/` is considered as a `&apos;player&apos;` client and displays the view `player.ejs`;
  * - A client connecting to the server through the URL `http://my.server.address:port/clientType` is considered as a `clientType` client, and displays the view `clientType.ejs`.
- * @param {[type]} clientType Client type (as defined by the method {@link client.init} on the client side).
- * @param {[type]} ...modules [description]
- * @return {[type]} [description]
+ * @param {String} clientType Client type (as defined by the method {@link client.init} on the client side).
+ * @param {...ClientModule} modules Modules to map to that client type.
  */
 function map(clientType, ...modules) {
   var url = &apos;/&apos;;
@@ -280,7 +308,7 @@ export default server;
 </div>
 
 <footer class="footer">
-  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.4.1)</span></a>
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.4.3)</span></a>
 </footer>
 
 <script src="script/search_index.js"></script>

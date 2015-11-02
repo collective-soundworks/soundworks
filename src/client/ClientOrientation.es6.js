@@ -5,10 +5,10 @@ const input = require('./input');
 import ClientModule from './ClientModule.es6.js';
 
 /**
- * The `ClientOrientation` module allows for calibrating the compass by getting an angle reference.
+ * The {@link ClientOrientation} module allows for calibrating the compass by getting an angle reference.
  * It displays a view with an instruction text: the user is asked to tap the screen when the phone points at the desired direction for the calibration.
  * When that happens, the current compass value is set as the angle reference.
- * The `ClientOrientation` module calls its `done` method when the participant taps the screen.
+ * The {@link ClientOrientation} module calls its `done` method when the participant taps the screen.
  */
 export default class ClientOrientation extends ClientModule {
   /**

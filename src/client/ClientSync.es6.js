@@ -7,9 +7,9 @@ import client from './client.es6.js';
 import ClientModule from './ClientModule.es6.js';
 
 /**
- * The `ClientSync` module takes care of the synchronization process on the client side.
+ * The {@link ClientSync} module takes care of the synchronization process on the client side.
  * It displays "Clock syncing, stand by…" until the very first synchronization process is done.
- * The `ClientSync` module calls its `done` method as soon as the client clock is in sync with the sync clock.
+ * The {@link ClientSync} module calls its `done` method as soon as the client clock is in sync with the sync clock.
  * Then, the synchronization process keeps running in the background to resynchronize the clocks from times to times.
  * @example
  * // Require the Soundworks library (client side)

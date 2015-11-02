@@ -12,7 +12,9 @@ const path = require('path');
 import ServerClient from './ServerClient.es6.js';
 
 /**
- * The `server` object contains the basic methods of the server. For instance, this object allows setting up, configuring and starting the server with the method `start` while the method `map` allows for managing the mapping between different types of clients and their required server modules. Additionally, the method `broadcast` allows to send messages to all connected clients.
+ * The `server` object contains the basic methods of the server.
+ * For instance, this object allows setting up, configuring and starting the server with the method `start` while the method `map` allows for managing the mapping between different types of clients and their required server modules.
+ * Additionally, the method `broadcast` allows to send messages to all connected clients via WebSockets or OSC.
  */
 const server = {
   io: null,
@@ -51,6 +53,23 @@ function _releaseClientIndex(index) {
   availableClientIndices.push(index);
 }
 
+/**
+ * Starts the server.
+ * @param {Object} app Express application.
+ * @param {String} publicPath Public static directory of the Express app.
+ * @param {Number} port Port.
+ * @param {Object} [options={}] Options.
+ * @param {Object} [options.socketIO={}] socket.io options. The socket.io config object can have the following properties:
+ * - `transports:String`: communication transport (defaults to `'websocket'`);
+ * - `pingTimeout:Number`: timeout (in milliseconds) before trying to reestablish a connection between a lost client and a server (defautls to `60000`);
+ * - `pingInterval:Number`: time interval (in milliseconds) to send a ping to a client to check the connection (defaults to `50000`).
+ * @param {Object} [options.osc={}] OSC options. The OSC config object can have the following properties:
+ * - `localAddress:String`: address of the local machine to receive OSC messages (defaults to `'127.0.0.1'`);
+ * - `localPort:Number`: port of the local machine to receive OSC messages (defaults to `57121`);
+ * - `remoteAddress:String`: address of the device to send default OSC messages to (defaults to `'127.0.0.1'`);
+ * - `remotePort:Number`: port of the device to send default OSC messages to (defaults to `57120`).
+ * @param {Object} [options.env={}] Environnement options (set by the user, depends on the scenario).
+ */
 function start(app, publicPath, port, options = {}) {
   const socketIOOptions = (options.socketIO || {});
   const socketConfig = {
@@ -117,9 +136,8 @@ function start(app, publicPath, port, options = {}) {
  * More specifically:
  * - A client connecting to the server through the root URL `http://my.server.address:port/` is considered as a `'player'` client and displays the view `player.ejs`;
  * - A client connecting to the server through the URL `http://my.server.address:port/clientType` is considered as a `clientType` client, and displays the view `clientType.ejs`.
- * @param {[type]} clientType Client type (as defined by the method {@link client.init} on the client side).
- * @param {[type]} ...modules [description]
- * @return {[type]} [description]
+ * @param {String} clientType Client type (as defined by the method {@link client.init} on the client side).
+ * @param {...ClientModule} modules Modules to map to that client type.
  */
 function map(clientType, ...modules) {
   var url = '/';

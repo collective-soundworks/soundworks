@@ -33,6 +33,7 @@
   <ul>
     
   <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">client</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientCalibration.es6.js~ClientCalibration.html">ClientCalibration</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientCheckin.es6.js~ClientCheckin.html">ClientCheckin</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientControl.es6.js~ClientControl.html">ClientControl</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientDialog.es6.js~ClientDialog.html">ClientDialog</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientFilelist.es6.js~Filelist.html">Filelist</a></span></span></li>
@@ -45,13 +46,22 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientPlatform.es6.js~ClientPlatform.html">ClientPlatform</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientSelector.es6.js~ClientSelector.html">ClientSelector</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientSetup.es6.js~ClientSetup.html">ClientSetup</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientSpace.es6.js~ClientSpace.html">ClientSpace</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientSurvey.es6.js~ClientSurvey.html">ClientSurvey</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientSync.es6.js~ClientSync.html">ClientSync</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-EventEmitter">EventEmitter</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-client">client</a></span></span></li>
 <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">server</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerCalibration.es6.js~ServerCalibration.html">ServerCalibration</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerCheckin.es6.js~ServerCheckin.html">ServerCheckin</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerClient.es6.js~ServerClient.html">ServerClient</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerControl.es6.js~ServerControl.html">ServerControl</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerFilelist.es6.js~ServerFilelist.html">ServerFilelist</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerLocator.es6.js~ServerLocator.html">ServerLocator</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerModule.es6.js~ServerModule.html">ServerModule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerPerformance.es6.js~ServerPerformance.html">ServerPerformance</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerPlacer.es6.js~ServerPlacer.html">ServerPlacer</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerSetup.es6.js~ServerSetup.html">ServerSetup</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerSurvey.es6.js~ServerSurvey.html">ServerSurvey</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerSync.es6.js~ServerSync.html">ServerSync</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-server">server</a></span></span></li>
 </ul>
@@ -88,302 +98,22 @@
 <p>Some modules on the client side are associated with dedicated styling information. When that is the case, we added in the <a href="https://github.com/collective-soundworks/soundworks-template"><code>soundworks-template</code></a>&#x2019;s <a href="https://github.com/collective-soundworks/soundworks-template/tree/master/src/sass"><code>src/sass/</code></a> folder the corresponding <code>_77-moduleName.scss</code> SASS partial. Don&apos;t forget to include them in your <code>*.scss</code> files when you write your scenario (for more information, cf. the <a href="#styling-with-sass">Styling with SASS</a> section). We indicate in the module descriptions below which of them require custom SASS partials.</p>
 <h3 id="core-objects">Core objects</h3>
 <p>The core objects on the client side and the server side are singletons that contain the methods used to set up a scenario and to exchange messages between the client and the server.</p>
-<h4 id="server-side-the-server-object">Server side: the <code>server</code> object</h4>
-<p>The <code>server</code> object contains the basic methods of the server. For instance, this object allows setting up, configuring and starting the server with the method <code>start</code> while the method <code>map</code> allows for managing the mapping between different types of clients and their required server modules. Additionally, the method <code>broadcast</code> allows to send messages to all connected clients.</p>
-<p>For clarity, the methods of <code>server</code> are split into two groups.</p>
-<h5 id="initialization-and-module-logic">Initialization and module logic</h5>
-<ul>
-<li><code>start(app:Object, publicPath:String, port:Number)</code><br>The <code>start</code> method starts the server with the Express application <code>app</code> that uses <code>publicPath</code> as the public static directory, and listens to the port <code>port</code>.</li>
-<li><code>map(clientType:String, ...modules:ServerModule)</code><br>The <code>map</code> method is used to indicate that the clients of type <code>clientType</code> (as initialized by <code>client.init</code> on the client side) require the server modules <code>...modules</code>. Additionally, this method routes the connections from the corresponding URL to the corresponding view. More specifically:<ul>
-<li>A client connecting to the server through the root URL <code>http://my.server.address:port/</code> is considered as a <code>player</code> client and displays the view <code>player.ejs</code>;</li>
-<li>A client connecting to the server through the URL <code>http://my.server.address:port/clientType</code> would be considered as a <code>clientType</code> client, and display the view <code>clientType.ejs</code>.</li>
-</ul>
-</li>
-</ul>
-<h5 id="websocket-communication">WebSocket communication</h5>
-<p>++</p>
-<ul>
-<li><code>broadcast(clientType:String, msg:String, ...args:Any)</code><br>The <code>broadcast</code> method sends the message <code>msg</code> and any number of values <code>...args</code> (of any type) to all the clients of type <code>clientType</code> (as initialized by <code>client.init</code> on the client side) through WebSockets.<br><strong>Note:</strong> on the client side, the clients receive the message with the command <code>client.receive(msg:String, callback:Function)</code>, where the <code>callback</code> function would take <code>...args</code> as arguments (see the <a href="#initialization-and-websocket-communication"><code>client</code> object WebSocket communication</a> section above).</li>
-</ul>
 <h3 id="basic-base-classes">Basic/base classes</h3>
-<h4 id="the-serverclient-class">The ServerClient class</h4>
-<p>The <code>ServerClient</code> module is used to keep track of each connected client and to communicate with it via WebSockets (see the <a href="#initialization-and-websocket-communication"><code>client</code> object WebSocket communication</a> section above). Each time a client of type <code>clientType</code> connects to the server, <em>Soundworks</em> creates an instance of <code>ServerClient</code>. An instance of the class is passed to the <code>connect</code> and <code>disconnect</code> methods of all the server side modules that are mapped to the <code>clientType</code> clients, as well as to the <code>enter</code> and <code>exit</code> methods of any <code>performance</code> class mapped to that same client type.</p>
-<h6 id="methods">Methods</h6>
-<ul>
-<li><code>send(msg:String, ...args:Any)</code><br>The <code>send</code> method sends the message <code>msg</code> and any number of values <code>...args</code> (of any type) to that client through WebSockets.  </li>
-<li><code>receive(msg:String, callback:Function)</code><br>The <code>receive</code> method executes the callback function <code>callback</code> when it receives the message <code>msg</code> sent by that instantiated client.  </li>
-<li><code>broadcast(msg:String, ...args:Any)</code><br>The <code>broadcast</code> method sends the message <code>msg</code> and a list of arbitrary arguments <code>...args</code> to all other clients of the same type (<em>i.e.</em> excluding the given client itself) through WebSockets.</li>
-</ul>
-<h6 id="attributes">Attributes</h6>
-<p>++</p>
-<ul>
-<li><code>type:String</code><br>The <code>type</code> attribute stores the type of the client. This is the client type that is specified when initializing the <code>client</code> object on the client side with <code>client.init(clientType);</code> (generally at the very beginning of the <code>index.es6.js</code> file your write).</li>
-<li><code>index:Number = 0</code><br>The <code>index</code> attribute stores the index of the client as set by the <code>ServerCheckin</code> module (for more information, see <a href="#servercheckin"><code>ServerCheckin</code> module</a>).</li>
-<li><code>coordinates:Array = null</code><br>The <code>coordinates</code> attribute stores the coordinates of the client as an <code>[x, y]</code> array (for more information, see <a href="#servercheckin"><code>ServerCheckin</code> module</a>).</li>
-<li><code>modules:Object = {}</code><br>The <code>modules</code> property is used by any module to associate data to a particular client. All the data associated with a module whose <code>name</code> is <code>moduleName</code> is accessible through the key <code>moduleName</code> (for more information, see <a href="#servermodule"><code>ServerModule</code></a>). For instance, the <code>sync</code> module keeps track of the time offset between the client and the sync clocks in <code>this.modules.sync.timeOffset</code>. Similarly, the <code>performance</code> module could keep track of each client&apos;s status in <code>this.modules.performance.status</code>.</li>
-</ul>
 <h4 id="the-module-base-class">The <code>Module</code> base class</h4>
 <p>The <code>Module</code> server and client classes are the base classes that any <em>Soundworks</em> module should extend. These base classes define interfaces to be implemented by the derived modules, and provide a set of attributes and methods that facilitate the implementation of modules.</p>
-<h5 id="clientmodule">ClientModule</h5>
-<p>++
-The <code>ClientModule</code> extends the <code>EventEmitter</code> class. Each module should have a <code>start</code> and a <code>done</code> method, as explained in the <a href="#implementing-a-module">Implementing a module</a> section. The <code>done</code> method must be called when the module can hand over the control to the subsequent modules (<em>i.e.</em> when the module has done its duty, or when it may run in the background for the rest of the scenario after it finished its initialization process). The base class optionally creates a view &#x2014; a fullscreen <code>div</code> accessible through the <code>view</code> attribute &#x2014; that is added to the DOM when the module is started and removed when the module calls done. (Specifically, the <code>view</code> element is added to the <code>#container</code> element.)</p>
-<p>Any module that extends the <code>ClientModule</code> class requires the four generic SASS partials listed in <a href="#styling-with-sass">Styling with SASS</a>.</p>
-<h6 id="methods">Methods</h6>
-<p>++</p>
-<ul>
-<li><code>constructor(name:String, hasView:Boolean = true, viewColor:String = &apos;black&apos;)</code><br>The <code>constructor</code> accepts up to three arguments:<ul>
-<li><code>name:String</code>, name of the module that is also the identifier and class of the module&apos;s <code>view</code> DOM element (<code>&lt;div id=&apos;name&apos; class=&apos;module name&apos;&gt;&lt;/div&gt;</code>);</li>
-<li><code>hasView:Boolean = true</code>, determines whether the module creates the <code>view</code> DOM element or not;</li>
-<li><code>viewColor = &apos;black&apos;</code>, background color of the module&apos;s view (the class names suitable for this option are defined in the library&#x2019;s <code>sass/_03-colors.scss</code> file).</li>
-</ul>
-</li>
-<li><code>start()</code><br>The <code>start</code> method is called to start the module, and should handle the logic of the module on the client side. For instance, it takes care of the communication with the module on the server side by sending WebSocket messages and setting up WebSocket message listeners. Additionally, if the module has a <code>view</code>, the <code>start</code> method creates the corresponding HTML element and appends it to the DOM&#x2019;s main container element (<code>div#container</code>).</li>
-<li><code>done()</code><br>The <code>done</code> method should be called when the module can hand over the control to a subsequent module (for instance at the end of the <code>start</code> method you write). If the module has a <code>view</code>, the <code>done</code> method removes it from the DOM.<br><strong>Note:</strong> you should not override this method.</li>
-<li><code>setCenteredViewContent(htmlContent:String)</code><br>The <code>setCenteredViewContent</code> method set an arbitrary centered HTML content <code>htmlContent</code> to the module&apos;s <code>view</code>. The method should be called only if the module has a <code>view</code>.</li>
-<li><code>removeCenteredViewContent()</code><br>The <code>removeCenteredViewContent</code> method removes the centered HTML content (set by <code>setCenteredViewContent</code>) from the <code>view</code>.</li>
-</ul>
-<h6 id="attributes">Attributes</h6>
-<p>++</p>
-<ul>
-<li><code>view = null</code><br>The <code>view</code> attribute of the module is the DOM element (a full screen <code>div</code>) in which the content of the module is displayed. This element is a child of the main container (<code>&lt;div id=&apos;container&apos; class=&apos;container&apos;&gt;&lt;/div&gt;</code>), which is the only child of the <code>body</code> element. A module may or may not have a view, as indicated by the argument <code>hasView:Boolean</code> of the <code>constructor</code>. When that is the case, the view is created and added to the DOM when the <code>start</code> method is called, and is removed from the DOM when the <code>done</code> method is called.
-++
-In practice, here is an example of how you would extend this class to create a module on the client side (for a more thorough example, please refer to the <a href="#implementing-a-module">Implementing a module</a> section).
-++
-```javascript
-/<em> Client side </em>/</li>
-</ul>
-<p>// Require the Soundworks library (client side)
-var clientSide = require(&apos;soundworks/client&apos;);</p>
-<p>class MyModule extends clientSide.Module {
-  constructor(options = {}) {
-    // Here, MyModule would always have a view, with the id and class &apos;my-module&apos;,
-    // and possibly the background color defined by the argument &apos;options&apos;.
-    super(&apos;my-module&apos;, true, options.color || &apos;alizarin&apos;);</p>
-<pre><code><code class="source-code prettyprint">... // anything the constructor needs</code>
-</code></pre><p>  }</p>
-<p>  start() {
-    super.start();</p>
-<pre><code><code class="source-code prettyprint">... // what the module has to do (communication with the server, etc.)
-
-this.done(); // call this method when the module can hand over the control to a subsequent module</code>
-</code></pre><p>  }
-}</p>
-<pre><code><code class="source-code prettyprint">
-##### ServerModule
-++
-The `ServerModule` extends the `EventEmitter` class. Each module should have a `connect` and a `disconnect` method, as explained in the [Implementing a module](#implementing-a-module) section.
-Any module mapped to the type of client `clientType` (thanks to the `server.map` method, see the [`server` core object](#server-side-the-server-object) for more information) would call its `connect` method when such a client connects to the server, and its `disconnect` method when such a client disconnects from the server.
-
-###### Methods
-++
-- `constructor(name = &apos;unnamed&apos;)`  
-  The `constructor` accepts the following arguments:
-  - `name:String`, name of the module.
-- `connect(client:ServerClient)`  
-  The `connect` method is called when the client `client` connects to the server, and should handle the logic of the module on the server side. For instance, it can take care of the communication with the client side module by setting up WebSocket message listeners and sending WebSocket messages, or it can add the client to a list to keep track of all the connected clients.
-- `disconnect(client:ServerClient)`  
-  The `disconnect` method is called when the client `client` disconnects from the server, and should do the necessary when that happens. For instance, if the module keeps track of the connected clients, it should remove the client from that list.
-
-
-
-In practice, here is how you would extend this class to create a module on the server side (for a more thorough example, please refer to the [Implementing a module](#implementing-a-module) section).
-
-```javascript
-/* Server side */
-
-// Require the Soundworks library (server side)
-var serverSide = require(&apos;soundworks/server&apos;);
-
-class MyModule extends serverSide.Module {
-  constructor() {
-    ... // anything the constructor needs
-  }
-
-  connect(client) {
-    ... // what the module has to do when a client connects to the server
-  }
-
-  disconnect(client) {
-    ... // what the module has to do when a client disconnects from the server
-  }
-}</code>
-</code></pre><h4 id="the-performance-base-class">The <code>Performance</code> base class</h4>
-<p>++
-The <code>Performance</code> module is a base class meant to be extended when you write the performance code of your scenario. It is a regular <code>Module</code>, and its particularity is to keep track of the clients who are currently in the performance by maintaining the array <code>this.clients</code> on the server side, and to have the <code>enter</code> and <code>exit</code> methods on the server side that inform the module when the client entered the performance (<em>i.e.</em> when the <code>performance</code> on the client side called its <code>start</code> method) and left it (<em>i.e.</em> when the <code>performance</code> on the client side called its <code>done</code> method, or if the client disconnected from the server).
-++
-<strong>Note:</strong> this base class is provided for convenience only. You can also write your performance by extending a regular <code>Module</code> rather than extending this class.</p>
-<h5 id="clientperformance">ClientPerformance</h5>
-<p>++
-The <code>ClientPerformance</code> module extends the <code>ClientModule</code> base class and constitutes a basis on which to build a performance on the client side. It always has the <code>view</code> attribute.</p>
-<h6 id="methods">Methods</h6>
-<p>++</p>
-<ul>
-<li><code>constructor(options:Object = {})</code><br>The <code>constructor</code> accepts the following <code>options</code>:<ul>
-<li><code>name:String = &apos;performance&apos;</code>, the name of the module;</li>
-<li><code>color:String = &apos;black&apos;</code>, the <code>viewColor</code> of the module.</li>
-</ul>
-</li>
-<li><code>start()</code><br>The <code>start</code> method extends the <code>ClientModule</code>&#x2019;s <code>start</code> method and is automatically called to start the performance on the client side.</li>
-<li><code>done()</code><br>The <code>done</code> method extends the <code>ClientModule</code>&#x2019;s <code>done</code> method and can be called if ever the performance terminates before the client disconnects.</li>
-</ul>
-<h5 id="serverperformance">ServerPerformance</h5>
-<p>The <code>ServerPerformance</code> module extends the <code>ServerModule</code> base class and constitutes a basis on which to build a performance on the server side.</p>
-<h6 id="methods">Methods</h6>
-<p>++</p>
-<ul>
-<li><code>constructor(options:Object = {})</code><br>The <code>constructor</code> accepts the following <code>options</code>:<ul>
-<li><code>name:String</code>, name of the module.</li>
-</ul>
-</li>
-<li><code>connect(client:ServerClient)</code><br>The <code>connect</code> method extends the <code>ServerModule</code>&#x2019;s <code>connect</code> method. It adds the client <code>client</code> to the array <code>this.clients</code> when it receives the WebSocket message <code>&apos;performance:start&apos;</code>, and removes it from that array when it receives the WebSocket message <code>&apos;performance:done&apos;</code>.</li>
-<li><code>disconnect(client:ServerClient)</code>
- The <code>disconnect</code> method extends the <code>ServerModule</code>&#x2019;s <code>disconnect</code> method. It removes the client <code>client</code> from the array <code>this.clients</code>.</li>
-<li><code>enter(client:ServerClient)</code><br>The <code>enter</code> method is called when the client <code>client</code> starts the performance.</li>
-<li><code>exit(client:ServerClient)</code><br>The <code>exit</code> method is called when the client <code>client</code> leaves the performance (<em>i.e.</em> when the <code>ClientPerformance</code> calls its <code>done</code> method, or if the client disconnects from the server).  </li>
-</ul>
-<p><strong>Note:</strong> in practice, you will mostly override the <code>enter</code> and <code>exit</code> methods when you write your performance.</p>
-<h6 id="attributes">Attributes</h6>
-<p>++</p>
-<ul>
-<li><code>clients:Array = []</code><br>The <code>clients</code> attribute is an array that contains the list of the clients who are currently in the performance (<em>i.e</em> who started it and have not left it yet).</li>
-</ul>
-<h3 id="client-only-modules">Client only modules</h3>
-<h4 id="clientdialog">ClientDialog</h4>
-<p>++
-The <code>ClientDialog</code> extends the <code>ClientModule</code> base class and displays a full screen dialog. It requires the participant to tap the screen to make the view disappear. The module is also used at the very beginning of a scenario to activate the Web Audio API on iOS devices (with the option <code>activateWebAudio</code>). The <code>ClientDialog</code> module calls its <code>done</code> method when the participant taps on the screen.</p>
-<h6 id="methods">Methods</h6>
-<p>++</p>
-<ul>
-<li><code>constructor(options:Object = {})</code><br>The <code>constructor</code> accepts the following <code>options</code>:<ul>
-<li><code>name:String = dialog</code>, <code>name</code> of the module;</li>
-<li><code>color:String = &apos;black&apos;</code>, <code>viewColor</code> of the module;</li>
-<li><code>text:String = &quot;Hello!&quot;</code>, text to be displayed in the dialog;</li>
-<li><code>activateAudio:Boolean = false</code>, whether the module activates the Web Audio API when the participant touches the screen (useful on iOS devices).
-++
-For instance, the following code would generate the HTML content shown below and append it to the <code>div#container</code> when the module starts:
-++<pre><code class="lang-javascript"><code class="source-code prettyprint">var welcomeDialog = new ClientDialog({
-name: &apos;welcome&apos;,
-text: &apos;Welcome to this awesome scenario!&apos;,
-color: &apos;alizarin&apos; // the list of available colors is in soundworks-template&apos;s &apos;src/sass/_03-colors.scss&apos; folder
-});</code>
-</code></pre>
-++<pre><code class="lang-html"><code class="source-code prettyprint">&lt;div id=&apos;welcome&apos; class=&apos;module welcome alizarin&apos;&gt;
-&lt;p&gt;Welcome to this awesome scenario!&lt;/p&gt;
-&lt;/div&gt;</code>
-</code></pre>
-</li>
-</ul>
-</li>
-</ul>
-<h4 id="clientloader">ClientLoader</h4>
-<p>++
-The <code>ClientLoader</code> module extends the <code>ClientModule</code> base class and allows for loading audio files that can be used in the scenario (for instance, by the <code>performance</code> module). The <code>Loader</code> module has a view that displays a loading bar indicating the progress of the loading. The <code>ClientLoader</code> module calls its <code>done</code> method when all the files are loaded.
-++
-The <code>ClientLoader</code> module requires the SASS partial <code>_77-loader.scss</code>.</p>
-<h6 id="methods">Methods</h6>
-<p>++</p>
-<ul>
-<li><code>constructor(audioFiles:Array, options:Object = {})</code><br>The <code>constructor</code> accepts one mandatory argument:<ul>
-<li><code>audioFiles:Array</code><br> The <code>audiofiles</code> array contains the links (<code>String</code>) to the audio files to be loaded. (The audio files should be in the <code>public/</code> folder of your project, or one of its subfolders.)<br>In addition, it accepts the following <code>options</code>:</li>
-<li><code>name:String = loader</code>, <code>name</code> of the module;</li>
-<li><code>color:String = &apos;black&apos;</code>, <code>viewColor</code> of the module.
-++
-For instance, the following code would allow to access the kick and snare audio buffers created from the mp3 files as shown below:
-++
-```javascript
-// Instantiate the module with the files to load
-var loader = ClientLoader([&apos;sounds/kick.mp3&apos;, &apos;sounds/snare.mp3&apos;]);</li>
-</ul>
-</li>
-</ul>
-<p>// Get the corresponding audio buffers
-var kickBuffer = loader.audioBuffers[0];
-var snareBuffer = loader.audioBuffers[1];</p>
-<pre><code><code class="source-code prettyprint">
-###### Attributes
-++
-- `audioBuffers:Array = []`  
-  The `audioBuffers` array contains the audio buffers created from the audio files passed in the `constructor`.
-
-#### ClientOrientation
-++
-The `ClientOrientation` module extends the `ClientModule` base class and allows for calibrating the compass by getting an angle reference. It displays a view with an instruction text: the user is asked to tap the screen when the phone points at the desired direction for the calibration. WHen that happens, the current compass value is set as the angle reference. The `ClientOrientation` module calls its `done` method when the participant taps the screen.
-
-###### Methods
-++
-- `constructor(options:Object = {})`  
-  The `constructor` accepts the following `options`:
-  - `name:String = orientation`, `name` of the module;
-  - `color:String = &apos;black&apos;`, `viewColor` of the module;
-  - `text:String = &apos;Point the phone exactly in front of you, and touch the screen.&apos;`, instruction text to be displayed.
-
-###### Attributes
-++
-- `angleReference:Number`  
-  The `angleReference` attribute is the value of the `alpha` angle (as in the [`deviceOrientation` HTML5 API](http://www.w3.org/TR/orientation-event/)) when the user touches the screen while the `ClientOrientation` module is displayed. It serves as a calibration / reference of the compass.
-
-#### ClientPlatform
-++
-The `ClientPlatform` module extends the `ClientModule` base class and checks whether the device is compatible with the technologies used in the *Soundworks* library. (Compatible devices are running on iOS 7 or above, or on Android 4.2 or above with the Chrome browser in version 35 or above.) If that is not the case, the module displays a blocking view and prevents the participant to go any further in the scenario. The `ClientPlatform` module calls its `done` method immediately if the phone passes the platform test, or never otherwise.
-
-###### Methods
-++
-- `constructor(options:Object = {})`  
-  The `constructor` accepts the following `options`:
-  - `name:String = platform`, `name` of the module;
-  - `color:String = &apos;black&apos;`, `viewColor` of the module.
-
-### Client/server modules
-
-#### Checkin
-++
-The `Checkin` module is responsible for keeping track of the connected clients by assigning them indices. In case that the scenario is based on predefined positions (*i.e.* a `setup`), the indices correspond to the indices of positions that can be either assigned automatically or selected by the participants.
-++
-For instance, say that the scenario requires 12 participants who sit on a grid of 3 &#x2A09; 4 predefined positions. When a client connects to the server, the `Checkin` module could assign the client to a position on the grid that is not occupied yet. The application can indicate the participant a label that is associated with the assigned position. Similarly, if the scenario takes place in a theater with labeled seats, the `Checkin` module would allow the participants to indicate their seat by its label (*e.g.* a row and a number). If the scenario does not require the participants to sit at particular locations, the `Checkin` module would just assign them arbitrary indices within the range of total number of users the scenario supports.
-++
-Alternatively, when configuring the module adequately, the module can assign arbitrary indices to the the participants and request that they indicate their approximate location in the performance space on a map.
-++
-The `ClientCheckin` module requires the SASS partial `_77-checkin.scss`.
-
-##### ClientCheckin
-++
-The `ClientCheckin` module extends the `ClientModule` base class and takes care of the check-in on the client side. The `ClientCheckin` module calls its `done` method when the user is checked in.
-
-###### Methods
-++
-- `constructor(options:Object = {})`  
-  The `constructor` accepts the following `options`:
-  - `name:String = &apos;checkin&apos;`, `name` of the module;
-  - `color:String = &apos;black&apos;`, `viewColor` of the module;
-  - `select:String = &apos;automatic&apos;`, mode of client index and position selection. The following values are accepted:
-    - `&apos;automatic&apos;`, the client index is selected automatically, no positions are attributed. In case that the client index is associated with a label (requires a predefined `setup` on the server side), the label is indicated to the participant via a dialog;
-    - `&apos;label&apos;`, the participant can select a label associated with a predefined position via a dialog (requires a predefined `setup` on the server side);
-    - `&apos;location&apos;`, the client index is attributed automatically, the participant can indicate an approximate location on a map via a dialog;
-  - `order:String = &apos;ascending&apos;`, order of `&apos;automatic&apos;` client index selection
-    - `&apos;ascending&apos;`, available indices are selected in ascending order;
-    - `&apos;random&apos;`, available indices are selected in random order (not available when the maximum number of clients, as set on the server side, exceeds 1000);
-  - `instructions:Function = defaultInstructions`, function defined as `instructions(label:String) : String` that generates the HTML code of the instructions displayed to the participant. The function is called when the `index` is selected automatically and the selection uses a `setup` with predefined positions (see [`ServerCheckin`](#servercheckin)). This function accepts the `label` associated to the selected position as an argument.
-
-Below is an example of an instantiation of the `ClientCheckin` module that displays the dialog on the client side.
-
-```javascript
-/* Client side */
+<h3 id="client-server-modules">Client/server modules</h3>
+<h4 id="checkin">Checkin</h4>
+<h5 id="clientcheckin">ClientCheckin</h5>
+<p>Below is an example of an instantiation of the <code>ClientCheckin</code> module that displays the dialog on the client side.</p>
+<pre><code class="lang-javascript"><code class="source-code prettyprint">/* Client side */
 
 // Require the Soundworks library (client side)
 var clientSide = require(&apos;soundworks/client&apos;);
 
 // Instantiate the module
 var checkin = new clientSide.Checkin({ select: &apos;automatic&apos;, order: &apos;random&apos; });</code>
-</code></pre><h5 id="servercheckin">ServerCheckin</h5>
-<p>The <code>ServerCheckin</code> extends the <code>ServerModule</code> base class and takes care of the check-in on the server side.</p>
-<ul>
-<li><code>constructor(options:Object = {})</code><br>The <code>constructor</code> accepts the following <code>options</code>:<ul>
-<li><code>name:String = checkin</code>, <code>name</code> of the module;</li>
-<li><code>setup:ServerSetup = null</code>, predefined setup of the performance space (see <a href="#serversetup"><code>ServerSetup</code> class</a>);</li>
-<li><code>maxClients:Number = Infinity</code>, maximum number of clients supported by the scenario (if a <code>setup</code> is provided, the maximum number of clients the number of predefined positions of that <code>setup</code>).</li>
-</ul>
-</li>
-</ul>
+</code></pre>
+<h5 id="servercheckin">ServerCheckin</h5>
 <p>Below is an example of the instantiation of the <code>ServerCheckin</code> module on the server side.</p>
 <pre><code class="lang-javascript"><code class="source-code prettyprint">/* Server side */
 
@@ -398,94 +128,7 @@ var checkin = new serverSide.Checkin({ setup: setup });
 // Case 2: the scenario does not have a predefined setup, but specifies a maximum number of clients
 var checkin = new serverSide.Checkin({ maxClients: 500 });</code>
 </code></pre>
-<h4 id="control">Control</h4>
-<p>The <code>Control</code> module is used to control an application through a dedicated client (that we usually call <code>conductor</code>). The module allows for declaring <code>parameters</code>, <code>infos</code>, and <code>commands</code>, through which the <code>conductor</code> can control and monitor the state of the application:</p>
-<ul>
-<li><code>parameters</code> are values that are changed by a client, sent to the server, and propagated to the other connected clients (<em>e.g.</em> the tempo of a musical application);</li>
-<li><code>infos</code> are values that are changed by the server and propagated to the connected clients, to inform about the current state of the application (<em>e.g.</em> the number of connected <code>player</code> clients);</li>
-<li><code>commands</code> are messages (without arguments) that are send from the client to the server (<em>e.g.</em> <code>start</code>, <code>stop</code> or <code>clear</code> &#x2014; whatever they would mean for a given application) which does the necessary upon reception.</li>
-</ul>
-<p>Optionally, the <code>ClientControl</code> module can automatically construct a simple interface from the list of declared controls that allows to change <code>parameters</code>, display <code>infos</code>, and send <code>commands</code> to the server.</p>
-<p>The controls of different types are declared on the server side and propagated to the client side when a client is set up.</p>
-<h5 id="clientcontrol">ClientControl</h5>
-<p>++
-The <code>ClientControl</code> module extends the <code>ClientModule</code> base class and takes care of the <code>parameters</code>, <code>infos</code>, and <code>commands</code> on the client side. If the module is instantiated with the <code>gui</code> option set to <code>true</code>, it constructs the graphical control interface. Otherwise it simply receives the values that are emitted by the server (usually by through the <code>performance</code> module). The <code>ClientModule</code> calls its <code>done</code> method immediately after having set up the controls and, optionally, the graphical user interface.</p>
-<h6 id="methods">Methods</h6>
-<p>++</p>
-<ul>
-<li><code>constructor(options:Object = {})</code><br>The <code>constructor</code> accepts the following <code>options</code>:<ul>
-<li><code>name:String = &apos;control&apos;</code>, <code>name</code> of the module;</li>
-<li><code>color:String = &apos;black&apos;</code>, <code>viewColor</code> of the module;</li>
-<li><code>gui:Boolean = false</code>, indicates whether the <code>ClientControl</code> creates a view with the graphical control interface (automatically built from a list of controls sent by the server).</li>
-</ul>
-</li>
-</ul>
-<h6 id="attributes">Attributes</h6>
-<p>++</p>
-<ul>
-<li><code>parameters:Object = {}</code><br> The <code>parameters</code> object contains the global parameters of the scenario. Each key of the object is associated with a parameter object. You can access the value of the parameter <code>&apos;myparam&apos;</code> with <code>this.parameters.myparam.value</code>.</li>
-<li><code>infos:Object = {}</code><br> The <code>infos</code> attribute contains info values that inform the client about the state of scenario on the server side. You can access the value of the info <code>&apos;myinfo&apos;</code> with <code>this.infos.myinfo.value</code>.</li>
-<li><code>commands:Object = {}</code><br> The <code>commands</code> attribute contains the declared commands.</li>
-</ul>
-<h6 id="events">Events</h6>
-<p>++</p>
-<ul>
-<li><code>&apos;control:parameter&apos; : name:String, val:Any</code><br>Each time a parameter is updated, the <code>ClientControl</code> module emits the <code>&apos;control:parameter&apos;</code> event with two arguments:<ul>
-<li><code>name:String</code>, name of the parameter that changed;</li>
-<li><code>val:Any</code>, new parameter value.</li>
-</ul>
-</li>
-<li><code>&apos;control:info&apos; : name:String, val:Number|String</code><br>Each time a parameter is updated, the <code>ClientControl</code> module emits the <code>&apos;control:info&apos;</code> event with two arguments:<ul>
-<li><code>name:String</code>, name of the info value that changed;</li>
-<li><code>val:Any</code>, new info value.</li>
-</ul>
-</li>
-</ul>
-<h5 id="servercontrol">ServerControl</h5>
-<p>++
-The <code>ServerControl</code> module extends the <code>ServerModule</code> base class and takes care of the <code>parameters</code>, <code>infos</code>, and <code>commands</code> on the server side. To set up controls in a scenario, you should extend this class on the server side and declare the controls specific to that scenario with the <code>addParameterNumber</code>, <code>addParameterSelect</code>, <code>addCommand</code>, and `addDisplay methods.</p>
-<h6 id="methods">Methods</h6>
-<p>++</p>
-<ul>
-<li><code>constructor(options:Object = {})</code><br>The <code>constructor</code> accepts the following <code>options</code>:<ul>
-<li><code>name:String</code>, <code>name</code> of the module.</li>
-</ul>
-</li>
-<li><code>addParameterNumber(name:String, label:String, min:Number, max:Number, step:Number, init:Number)</code><br>The <code>addParameterNumber</code> method is used to add a number control parameter. Its arguments are:<ul>
-<li><code>name:String</code>, name of the parameter;</li>
-<li><code>label:String</code>, label of the parameter in the GUI on the client side;</li>
-<li><code>min:Number</code>, minimum value of the parameter;</li>
-<li><code>max:Number</code>, maximum value of the parameter;</li>
-<li><code>step:Number</code>, step to increment or decrement the value of the parameter;</li>
-<li><code>init:Number</code>, initial value of the parameter.</li>
-</ul>
-</li>
-<li><code>addParameterSelect(name:String, label:String, options:Array, init:String)</code><br>The <code>addParameterSelect</code> method is used to add a select control parameter. In the GUI on the client side, the select parameter displays a select form with the options <code>options</code>. Its arguments are:<ul>
-<li><code>name:String</code>, name of the parameter;</li>
-<li><code>label:String</code>, label of the parameter in the GUI on the client side;</li>
-<li><code>options:Array</code>, options of the select parameter the user can choose from in the GUI on the client side (the array contains <code>String</code> elements);</li>
-<li><code>init:String</code>, initial value of the parameter (present in the <code>options</code> array).</li>
-</ul>
-</li>
-<li><code>addCommand(name:String, label:String, fun:Function)</code><br>The <code>addCommand</code> method allows for adding a command. Its arguments are:<ul>
-<li><code>name:String</code>, name of the command;</li>
-<li><code>label:String</code>, label of the command in the GUI on the client side;</li>
-<li><code>fun:Function</code>, function to be executed when the command is called.</li>
-</ul>
-</li>
-<li><code>addInfo(name:String, label:String, init:Number|String)</code><br> The <code>addInfo</code> method allows for adding an info to be displayed on the client side. Its arguments are:<ul>
-<li><code>name:String</code>, name of the info to display;</li>
-<li><code>label:String</code>, label of the info in the GUI on the client side;</li>
-<li><code>init:Number|String</code>, initial value of the info to display.</li>
-</ul>
-</li>
-<li><code>setParameter(name:String, value:Number|String)</code><br>The <code>setParameter</code> method allows set the value of the parameter <code>name</code> to <code>value</code>. The argument <code>value</code> is either of <code>Number</code> or <code>String</code> depending on whether you update a number or select parameter.</li>
-<li><code>setInfo(name:String, value:Number|String)</code><br>The <code>setInfo</code> method allows set the value of the info <code>name</code> to <code>value</code>.</li>
-</ul>
 <h4 id="setup">Setup</h4>
-<p>The <code>Setup</code> module contains the information about the setup of the performance space in terms of its surface (<em>i.e.</em> dimensions and outlines) and predefined positions (<em>e.g.</em> seats or labels on the floor).</p>
-<p>For instance, say that the scenario requires 12 participants sitting on the floor on a grid of 3 &#x2A09; 4 positions, the <code>Setup</code> module would contain the information about the grid, including the positions&apos; coordinates in space and their labels. Similarly, if the scenario takes place in a theater where seats are numbered, the <code>Setup</code> module would contain the seating plan.</p>
-<p>If the topography of the performance space does not matter for a given scenario, the <code>Setup</code> module is not needed.</p>
 <h5 id="clientsetup">ClientSetup</h5>
 <p>The <code>ClientSetup</code> modules extends the <code>ClientModule</code> base class and takes care of receiving the setup on the client side, and provides helper functions to display the setup on screen. The <code>ClientSetup</code> calls its <code>done</code> method when it receives the setup from the server.</p>
 <p>The <code>ClientSetup</code> module requires the SASS partial <code>sass/_77-setup.scss</code>.</p>
@@ -612,7 +255,7 @@ var nowSync = sync.getSyncTime(); // current time in the sync clock time</code>
 </div>
 
 <footer class="footer">
-  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.4.1)</span></a>
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.4.3)</span></a>
 </footer>
 
 <script src="script/search_index.js"></script>

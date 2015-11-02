@@ -1,14 +1,23 @@
-/**
- * @fileoverview Soundworks server side check-in module
- * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
- */
 'use strict';
 
-var ServerModule = require('./ServerModule');
+import ServerModule from './ServerModule.es6.js';
 
-var maxRandomClients = 9999;
+const maxRandomClients = 9999;
 
-class ServerCheckin extends ServerModule {
+/**
+ * The {@link ServerCheckin} takes care of the check-in on the server side.
+ */
+export default class ServerCheckin extends ServerModule {
+  /**
+   * Creates an instance of the class.
+   * @param {Object} [options={}] Options.
+   * @param {Object} [options.name='checkin'] Name of the module.
+   * @param {Object} [options.setup] Setup used in the scenario, if any (cf. {@link ServerSetup}).
+   * @param {Object} [options.maxClients=Infinity] maximum number of clients supported by the scenario through this checkin module (if a `options.setup` is provided, the maximum number of clients the number of predefined positions of that `setup`).
+   * @param {Object} [options.order='ascending'] Order in which indices are assigned. Currently spported values are:
+   * - `'ascending'`: indices are assigned in ascending order;
+   * - `'random'`: indices are assigned in random order.
+   */
   constructor(options = {}) {
     super(options.name || 'checkin');
 
@@ -68,6 +77,9 @@ class ServerCheckin extends ServerModule {
     this._availableIndices.push(index);
   }
 
+  /**
+   * @private
+   */
   connect(client) {
     super.connect(client);
 
@@ -125,6 +137,9 @@ class ServerCheckin extends ServerModule {
     })
   }
 
+  /**
+   * @private
+   */
   disconnect(client) {
     super.disconnect(client);
 
@@ -134,5 +149,3 @@ class ServerCheckin extends ServerModule {
       this._releaseIndex(index);
   }
 }
-
-module.exports = ServerCheckin;

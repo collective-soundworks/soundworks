@@ -22,7 +22,7 @@ function convertName(name) {
 }
 
 /**
- * The `ClientSelector` module allows to select one or several options among a list.
+ * The {@link ClientSelector} module allows to select one or several options among a list.
  */
 export default class ClientSelector extends ClientModule {
   /**

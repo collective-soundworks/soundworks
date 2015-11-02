@@ -6,11 +6,11 @@ import client from './client.es6.js';
 import ClientModule from './ClientModule.es6.js';
 
 /**
- * The `ClientLoader` module allows for loading audio files that can be used in the scenario (for instance, by the `performance` module).
- * The `Loader` module has a view that displays a loading bar indicating the progress of the loading.
- * The `ClientLoader` module calls its `done` method when all the files are loaded.
+ * The {@link ClientLoader} module allows for loading audio files that can be used in the scenario (for instance, by the `performance` module).
+ * The {@link ClientLoader} module has a view that displays a loading bar indicating the progress of the loading.
+ * The {@link ClientLoader} module calls its `done` method when all the files are loaded.
  *
- * The `ClientLoader` module requires the SASS partial `_77-loader.scss`.
+ * The {@link ClientLoader} module requires the SASS partial `_77-loader.scss`.
  * @example
  * // Instantiate the module with the files to load
  * const loader = new ClientLoader(['sounds/kick.mp3', 'sounds/snare.mp3']);

@@ -4,9 +4,9 @@ import client from './client.es6.js';
 import ClientModule from './ClientModule.es6.js';
 
 /**
- * The `ClientSpace` displays the setup upon request.
+ * The {@link ClientSpace} displays the setup upon request.
  */
-class ClientSpace extends ClientModule {
+export default class ClientSpace extends ClientModule {
   /**
    * Creates an instance of the class.
    * @param {Object} [options={}] Options.

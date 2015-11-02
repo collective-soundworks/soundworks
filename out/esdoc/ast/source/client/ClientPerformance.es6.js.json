@@ -185,10 +185,10 @@
       "trailingComments": [
         {
           "type": "Block",
-          "value": "*\n * The `ClientPerformance` base class constitutes a basis on which to build a performance on the client side.\n ",
+          "value": "*\n * The {@link ClientPerformance} base class constitutes a basis on which to build a performance on the client side.\n ",
           "range": [
             104,
-            221
+            227
           ],
           "loc": {
             "start": {
@@ -211,8 +211,8 @@
           "type": "Identifier",
           "name": "ClientPerformance",
           "range": [
-            243,
-            260
+            249,
+            266
           ],
           "loc": {
             "start": {
@@ -229,8 +229,8 @@
           "type": "Identifier",
           "name": "ClientModule",
           "range": [
-            269,
-            281
+            275,
+            287
           ],
           "loc": {
             "start": {
@@ -252,8 +252,8 @@
                 "type": "Identifier",
                 "name": "constructor",
                 "range": [
-                  546,
-                  557
+                  552,
+                  563
                 ],
                 "loc": {
                   "start": {
@@ -276,8 +276,8 @@
                       "type": "Identifier",
                       "name": "options",
                       "range": [
-                        558,
-                        565
+                        564,
+                        571
                       ],
                       "loc": {
                         "start": {
@@ -294,8 +294,8 @@
                       "type": "ObjectExpression",
                       "properties": [],
                       "range": [
-                        568,
-                        570
+                        574,
+                        576
                       ],
                       "loc": {
                         "start": {
@@ -309,8 +309,8 @@
                       }
                     },
                     "range": [
-                      558,
-                      570
+                      564,
+                      576
                     ],
                     "loc": {
                       "start": {
@@ -334,8 +334,8 @@
                         "callee": {
                           "type": "Super",
                           "range": [
-                            578,
-                            583
+                            584,
+                            589
                           ],
                           "loc": {
                             "start": {
@@ -359,8 +359,8 @@
                                 "type": "Identifier",
                                 "name": "options",
                                 "range": [
-                                  584,
-                                  591
+                                  590,
+                                  597
                                 ],
                                 "loc": {
                                   "start": {
@@ -377,8 +377,8 @@
                                 "type": "Identifier",
                                 "name": "name",
                                 "range": [
-                                  592,
-                                  596
+                                  598,
+                                  602
                                 ],
                                 "loc": {
                                   "start": {
@@ -392,8 +392,8 @@
                                 }
                               },
                               "range": [
-                                584,
-                                596
+                                590,
+                                602
                               ],
                               "loc": {
                                 "start": {
@@ -411,8 +411,8 @@
                               "value": "performance",
                               "raw": "'performance'",
                               "range": [
-                                600,
-                                613
+                                606,
+                                619
                               ],
                               "loc": {
                                 "start": {
@@ -426,8 +426,8 @@
                               }
                             },
                             "range": [
-                              584,
-                              613
+                              590,
+                              619
                             ],
                             "loc": {
                               "start": {
@@ -445,8 +445,8 @@
                             "value": true,
                             "raw": "true",
                             "range": [
-                              615,
-                              619
+                              621,
+                              625
                             ],
                             "loc": {
                               "start": {
@@ -469,8 +469,8 @@
                                 "type": "Identifier",
                                 "name": "options",
                                 "range": [
-                                  621,
-                                  628
+                                  627,
+                                  634
                                 ],
                                 "loc": {
                                   "start": {
@@ -487,8 +487,8 @@
                                 "type": "Identifier",
                                 "name": "color",
                                 "range": [
-                                  629,
-                                  634
+                                  635,
+                                  640
                                 ],
                                 "loc": {
                                   "start": {
@@ -502,8 +502,8 @@
                                 }
                               },
                               "range": [
-                                621,
-                                634
+                                627,
+                                640
                               ],
                               "loc": {
                                 "start": {
@@ -521,8 +521,8 @@
                               "value": "black",
                               "raw": "'black'",
                               "range": [
-                                638,
-                                645
+                                644,
+                                651
                               ],
                               "loc": {
                                 "start": {
@@ -536,8 +536,8 @@
                               }
                             },
                             "range": [
-                              621,
-                              645
+                              627,
+                              651
                             ],
                             "loc": {
                               "start": {
@@ -552,8 +552,8 @@
                           }
                         ],
                         "range": [
-                          578,
-                          646
+                          584,
+                          652
                         ],
                         "loc": {
                           "start": {
@@ -567,8 +567,8 @@
                         }
                       },
                       "range": [
-                        578,
-                        647
+                        584,
+                        653
                       ],
                       "loc": {
                         "start": {
@@ -583,8 +583,8 @@
                     }
                   ],
                   "range": [
-                    572,
-                    651
+                    578,
+                    657
                   ],
                   "loc": {
                     "start": {
@@ -600,8 +600,8 @@
                 "generator": false,
                 "expression": false,
                 "range": [
-                  557,
-                  651
+                  563,
+                  657
                 ],
                 "loc": {
                   "start": {
@@ -617,8 +617,8 @@
               "kind": "constructor",
               "computed": false,
               "range": [
-                546,
-                651
+                552,
+                657
               ],
               "loc": {
                 "start": {
@@ -635,8 +635,8 @@
                   "type": "Block",
                   "value": "*\n   * Creates an instance of the class. Always has a view.\n   * @param {Object} [options={}] Options.\n   * @param {String} [options.name='performance'] Name of the module.\n   * @param {String} [options.color='black'] Background color of the `view`.\n   ",
                   "range": [
-                    286,
-                    543
+                    292,
+                    549
                   ],
                   "loc": {
                     "start": {
@@ -655,8 +655,8 @@
                   "type": "Block",
                   "value": "*\n   * Automatically called to start the module. // TODO\n   * Sends a message to the server side module to indicate that the client entered the performance.\n   ",
                   "range": [
-                    655,
-                    819
+                    661,
+                    825
                   ],
                   "loc": {
                     "start": {
@@ -678,8 +678,8 @@
                 "type": "Identifier",
                 "name": "start",
                 "range": [
-                  822,
-                  827
+                  828,
+                  833
                 ],
                 "loc": {
                   "start": {
@@ -709,8 +709,8 @@
                           "object": {
                             "type": "Super",
                             "range": [
-                              836,
-                              841
+                              842,
+                              847
                             ],
                             "loc": {
                               "start": {
@@ -727,8 +727,8 @@
                             "type": "Identifier",
                             "name": "start",
                             "range": [
-                              842,
-                              847
+                              848,
+                              853
                             ],
                             "loc": {
                               "start": {
@@ -742,8 +742,8 @@
                             }
                           },
                           "range": [
-                            836,
-                            847
+                            842,
+                            853
                           ],
                           "loc": {
                             "start": {
@@ -758,8 +758,8 @@
                         },
                         "arguments": [],
                         "range": [
-                          836,
-                          849
+                          842,
+                          855
                         ],
                         "loc": {
                           "start": {
@@ -773,8 +773,8 @@
                         }
                       },
                       "range": [
-                        836,
-                        850
+                        842,
+                        856
                       ],
                       "loc": {
                         "start": {
@@ -798,8 +798,8 @@
                             "type": "Identifier",
                             "name": "client",
                             "range": [
-                              855,
-                              861
+                              861,
+                              867
                             ],
                             "loc": {
                               "start": {
@@ -816,8 +816,8 @@
                             "type": "Identifier",
                             "name": "send",
                             "range": [
-                              862,
-                              866
+                              868,
+                              872
                             ],
                             "loc": {
                               "start": {
@@ -831,8 +831,8 @@
                             }
                           },
                           "range": [
-                            855,
-                            866
+                            861,
+                            872
                           ],
                           "loc": {
                             "start": {
@@ -855,8 +855,8 @@
                               "object": {
                                 "type": "ThisExpression",
                                 "range": [
-                                  867,
-                                  871
+                                  873,
+                                  877
                                 ],
                                 "loc": {
                                   "start": {
@@ -873,8 +873,8 @@
                                 "type": "Identifier",
                                 "name": "name",
                                 "range": [
-                                  872,
-                                  876
+                                  878,
+                                  882
                                 ],
                                 "loc": {
                                   "start": {
@@ -888,8 +888,8 @@
                                 }
                               },
                               "range": [
-                                867,
-                                876
+                                873,
+                                882
                               ],
                               "loc": {
                                 "start": {
@@ -907,8 +907,8 @@
                               "value": ":start",
                               "raw": "':start'",
                               "range": [
-                                879,
-                                887
+                                885,
+                                893
                               ],
                               "loc": {
                                 "start": {
@@ -922,8 +922,8 @@
                               }
                             },
                             "range": [
-                              867,
-                              887
+                              873,
+                              893
                             ],
                             "loc": {
                               "start": {
@@ -938,8 +938,8 @@
                           }
                         ],
                         "range": [
-                          855,
-                          888
+                          861,
+                          894
                         ],
                         "loc": {
                           "start": {
@@ -953,8 +953,8 @@
                         }
                       },
                       "range": [
-                        855,
-                        889
+                        861,
+                        895
                       ],
                       "loc": {
                         "start": {
@@ -969,8 +969,8 @@
                     }
                   ],
                   "range": [
-                    830,
-                    893
+                    836,
+                    899
                   ],
                   "loc": {
                     "start": {
@@ -986,8 +986,8 @@
                 "generator": false,
                 "expression": false,
                 "range": [
-                  827,
-                  893
+                  833,
+                  899
                 ],
                 "loc": {
                   "start": {
@@ -1003,8 +1003,8 @@
               "kind": "method",
               "computed": false,
               "range": [
-                822,
-                893
+                828,
+                899
               ],
               "loc": {
                 "start": {
@@ -1021,8 +1021,8 @@
                   "type": "Block",
                   "value": "*\n   * Automatically called to start the module. // TODO\n   * Sends a message to the server side module to indicate that the client entered the performance.\n   ",
                   "range": [
-                    655,
-                    819
+                    661,
+                    825
                   ],
                   "loc": {
                     "start": {
@@ -1041,8 +1041,8 @@
                   "type": "Block",
                   "value": "*\n   * Can be called to terminate the performance.\n   * Sends a message to the server side module to indicate that the client exited the performance.\n   ",
                   "range": [
-                    897,
-                    1054
+                    903,
+                    1060
                   ],
                   "loc": {
                     "start": {
@@ -1064,8 +1064,8 @@
                 "type": "Identifier",
                 "name": "done",
                 "range": [
-                  1057,
-                  1061
+                  1063,
+                  1067
                 ],
                 "loc": {
                   "start": {
@@ -1096,8 +1096,8 @@
                             "type": "Identifier",
                             "name": "client",
                             "range": [
-                              1070,
-                              1076
+                              1076,
+                              1082
                             ],
                             "loc": {
                               "start": {
@@ -1114,8 +1114,8 @@
                             "type": "Identifier",
                             "name": "send",
                             "range": [
-                              1077,
-                              1081
+                              1083,
+                              1087
                             ],
                             "loc": {
                               "start": {
@@ -1129,8 +1129,8 @@
                             }
                           },
                           "range": [
-                            1070,
-                            1081
+                            1076,
+                            1087
                           ],
                           "loc": {
                             "start": {
@@ -1153,8 +1153,8 @@
                               "object": {
                                 "type": "ThisExpression",
                                 "range": [
-                                  1082,
-                                  1086
+                                  1088,
+                                  1092
                                 ],
                                 "loc": {
                                   "start": {
@@ -1171,8 +1171,8 @@
                                 "type": "Identifier",
                                 "name": "name",
                                 "range": [
-                                  1087,
-                                  1091
+                                  1093,
+                                  1097
                                 ],
                                 "loc": {
                                   "start": {
@@ -1186,8 +1186,8 @@
                                 }
                               },
                               "range": [
-                                1082,
-                                1091
+                                1088,
+                                1097
                               ],
                               "loc": {
                                 "start": {
@@ -1205,8 +1205,8 @@
                               "value": ":done",
                               "raw": "':done'",
                               "range": [
-                                1094,
-                                1101
+                                1100,
+                                1107
                               ],
                               "loc": {
                                 "start": {
@@ -1220,8 +1220,8 @@
                               }
                             },
                             "range": [
-                              1082,
-                              1101
+                              1088,
+                              1107
                             ],
                             "loc": {
                               "start": {
@@ -1236,8 +1236,8 @@
                           }
                         ],
                         "range": [
-                          1070,
-                          1102
+                          1076,
+                          1108
                         ],
                         "loc": {
                           "start": {
@@ -1251,8 +1251,8 @@
                         }
                       },
                       "range": [
-                        1070,
-                        1103
+                        1076,
+                        1109
                       ],
                       "loc": {
                         "start": {
@@ -1275,8 +1275,8 @@
                           "object": {
                             "type": "Super",
                             "range": [
-                              1108,
-                              1113
+                              1114,
+                              1119
                             ],
                             "loc": {
                               "start": {
@@ -1293,8 +1293,8 @@
                             "type": "Identifier",
                             "name": "done",
                             "range": [
-                              1114,
-                              1118
+                              1120,
+                              1124
                             ],
                             "loc": {
                               "start": {
@@ -1308,8 +1308,8 @@
                             }
                           },
                           "range": [
-                            1108,
-                            1118
+                            1114,
+                            1124
                           ],
                           "loc": {
                             "start": {
@@ -1324,8 +1324,8 @@
                         },
                         "arguments": [],
                         "range": [
-                          1108,
-                          1120
+                          1114,
+                          1126
                         ],
                         "loc": {
                           "start": {
@@ -1339,8 +1339,8 @@
                         }
                       },
                       "range": [
-                        1108,
-                        1121
+                        1114,
+                        1127
                       ],
                       "loc": {
                         "start": {
@@ -1357,8 +1357,8 @@
                           "type": "Line",
                           "value": " TODO: check if needs to be called lastly",
                           "range": [
-                            1122,
-                            1165
+                            1128,
+                            1171
                           ],
                           "loc": {
                             "start": {
@@ -1375,8 +1375,8 @@
                     }
                   ],
                   "range": [
-                    1064,
-                    1169
+                    1070,
+                    1175
                   ],
                   "loc": {
                     "start": {
@@ -1392,8 +1392,8 @@
                 "generator": false,
                 "expression": false,
                 "range": [
-                  1061,
-                  1169
+                  1067,
+                  1175
                 ],
                 "loc": {
                   "start": {
@@ -1409,8 +1409,8 @@
               "kind": "method",
               "computed": false,
               "range": [
-                1057,
-                1169
+                1063,
+                1175
               ],
               "loc": {
                 "start": {
@@ -1427,8 +1427,8 @@
                   "type": "Block",
                   "value": "*\n   * Can be called to terminate the performance.\n   * Sends a message to the server side module to indicate that the client exited the performance.\n   ",
                   "range": [
-                    897,
-                    1054
+                    903,
+                    1060
                   ],
                   "loc": {
                     "start": {
@@ -1446,8 +1446,8 @@
             }
           ],
           "range": [
-            282,
-            1171
+            288,
+            1177
           ],
           "loc": {
             "start": {
@@ -1461,8 +1461,8 @@
           }
         },
         "range": [
-          237,
-          1171
+          243,
+          1177
         ],
         "loc": {
           "start": {
@@ -1477,10 +1477,10 @@
         "leadingComments": [
           {
             "type": "Block",
-            "value": "*\n * The `ClientPerformance` base class constitutes a basis on which to build a performance on the client side.\n ",
+            "value": "*\n * The {@link ClientPerformance} base class constitutes a basis on which to build a performance on the client side.\n ",
             "range": [
               104,
-              221
+              227
             ],
             "loc": {
               "start": {
@@ -1497,8 +1497,8 @@
         "trailingComments": []
       },
       "range": [
-        222,
-        1171
+        228,
+        1177
       ],
       "loc": {
         "start": {
@@ -1513,10 +1513,10 @@
       "leadingComments": [
         {
           "type": "Block",
-          "value": "*\n * The `ClientPerformance` base class constitutes a basis on which to build a performance on the client side.\n ",
+          "value": "*\n * The {@link ClientPerformance} base class constitutes a basis on which to build a performance on the client side.\n ",
           "range": [
             104,
-            221
+            227
           ],
           "loc": {
             "start": {
@@ -1535,7 +1535,7 @@
   "sourceType": "module",
   "range": [
     0,
-    1171
+    1177
   ],
   "loc": {
     "start": {
@@ -1550,10 +1550,10 @@
   "comments": [
     {
       "type": "Block",
-      "value": "*\n * The `ClientPerformance` base class constitutes a basis on which to build a performance on the client side.\n ",
+      "value": "*\n * The {@link ClientPerformance} base class constitutes a basis on which to build a performance on the client side.\n ",
       "range": [
         104,
-        221
+        227
       ],
       "loc": {
         "start": {
@@ -1570,8 +1570,8 @@
       "type": "Block",
       "value": "*\n   * Creates an instance of the class. Always has a view.\n   * @param {Object} [options={}] Options.\n   * @param {String} [options.name='performance'] Name of the module.\n   * @param {String} [options.color='black'] Background color of the `view`.\n   ",
       "range": [
-        286,
-        543
+        292,
+        549
       ],
       "loc": {
         "start": {
@@ -1588,8 +1588,8 @@
       "type": "Block",
       "value": "*\n   * Automatically called to start the module. // TODO\n   * Sends a message to the server side module to indicate that the client entered the performance.\n   ",
       "range": [
-        655,
-        819
+        661,
+        825
       ],
       "loc": {
         "start": {
@@ -1606,8 +1606,8 @@
       "type": "Block",
       "value": "*\n   * Can be called to terminate the performance.\n   * Sends a message to the server side module to indicate that the client exited the performance.\n   ",
       "range": [
-        897,
-        1054
+        903,
+        1060
       ],
       "loc": {
         "start": {
@@ -1624,8 +1624,8 @@
       "type": "Line",
       "value": " TODO: check if needs to be called lastly",
       "range": [
-        1122,
-        1165
+        1128,
+        1171
       ],
       "loc": {
         "start": {

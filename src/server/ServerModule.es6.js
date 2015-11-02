@@ -3,7 +3,7 @@
 const EventEmitter = require('events').EventEmitter; // TODO: remove EventEmitter? (Implement our own listeners)
 
 /**
- * The `ServerModule` base class is used to create a *Soundworks* module on the server side.
+ * The {@link ServerModule} base class is used to create a *Soundworks* module on the server side.
  * Each module should have a {@link ServerModule#connect} and a {@link ServerModule#disconnect} method.
  * Any module mapped to the type of client `clientType` (thanks to the {@link server#map} method) would call its {@link ServerModule#connect} method when such a client connects to the server, and its {@link ServerModule#disconnect} method when such a client disconnects from the server.
  * @example

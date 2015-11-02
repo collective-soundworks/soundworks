@@ -4,8 +4,11 @@ import client from './client.es6.js';
 import ClientModule from './ClientModule.es6.js';
 
 /**
- * The `ClientSetup` module retrieves the setup information from the server. It never has a view.
+ * The {@link ClientSetup} module retrieves the setup information from the server.
+ * It never has a view.
  * (For rendering the setup graphically, see {@link ClientSpace}.)
+ *
+ * The `ClientSetup` module requires the SASS partial `sass/_77-setup.scss`.
  */
 export default class ClientSetup extends ClientModule {
   /**

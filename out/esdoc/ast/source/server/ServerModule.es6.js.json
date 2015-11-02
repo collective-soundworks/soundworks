@@ -204,10 +204,10 @@
         },
         {
           "type": "Block",
-          "value": "*\n * The `ServerModule` base class is used to create a *Soundworks* module on the server side.\n * Each module should have a {@link ServerModule#connect} and a {@link ServerModule#disconnect} method.\n * Any module mapped to the type of client `clientType` (thanks to the {@link server#map} method) would call its {@link ServerModule#connect} method when such a client connects to the server, and its {@link ServerModule#disconnect} method when such a client disconnects from the server.\n * @example\n * class MyModule extends serverSide.Module {\n *   constructor('my-module-name') {\n *     ... // anything the constructor needs\n *   }\n *\n *   connect(client) {\n *     ... // what the module has to do when a client connects to the server\n *   }\n *\n *   disconnect(client) {\n *     ... // what the module has to do when a client disconnects from the server\n *   }\n * }\n ",
+          "value": "*\n * The {@link ServerModule} base class is used to create a *Soundworks* module on the server side.\n * Each module should have a {@link ServerModule#connect} and a {@link ServerModule#disconnect} method.\n * Any module mapped to the type of client `clientType` (thanks to the {@link server#map} method) would call its {@link ServerModule#connect} method when such a client connects to the server, and its {@link ServerModule#disconnect} method when such a client disconnects from the server.\n * @example\n * class MyModule extends serverSide.Module {\n *   constructor('my-module-name') {\n *     ... // anything the constructor needs\n *   }\n *\n *   connect(client) {\n *     ... // what the module has to do when a client connects to the server\n *   }\n *\n *   disconnect(client) {\n *     ... // what the module has to do when a client disconnects from the server\n *   }\n * }\n ",
           "range": [
             129,
-            1000
+            1006
           ],
           "loc": {
             "start": {
@@ -230,8 +230,8 @@
           "type": "Identifier",
           "name": "ServerModule",
           "range": [
-            1022,
-            1034
+            1028,
+            1040
           ],
           "loc": {
             "start": {
@@ -248,8 +248,8 @@
           "type": "Identifier",
           "name": "EventEmitter",
           "range": [
-            1043,
-            1055
+            1049,
+            1061
           ],
           "loc": {
             "start": {
@@ -271,8 +271,8 @@
                 "type": "Identifier",
                 "name": "constructor",
                 "range": [
-                  1231,
-                  1242
+                  1237,
+                  1248
                 ],
                 "loc": {
                   "start": {
@@ -293,8 +293,8 @@
                     "type": "Identifier",
                     "name": "name",
                     "range": [
-                      1243,
-                      1247
+                      1249,
+                      1253
                     ],
                     "loc": {
                       "start": {
@@ -318,8 +318,8 @@
                         "callee": {
                           "type": "Super",
                           "range": [
-                            1255,
-                            1260
+                            1261,
+                            1266
                           ],
                           "loc": {
                             "start": {
@@ -334,8 +334,8 @@
                         },
                         "arguments": [],
                         "range": [
-                          1255,
-                          1262
+                          1261,
+                          1268
                         ],
                         "loc": {
                           "start": {
@@ -349,8 +349,8 @@
                         }
                       },
                       "range": [
-                        1255,
-                        1263
+                        1261,
+                        1269
                       ],
                       "loc": {
                         "start": {
@@ -367,8 +367,8 @@
                           "type": "Block",
                           "value": "*\n     * The name of the module.\n     * @type {string}\n     ",
                           "range": [
-                            1269,
-                            1333
+                            1275,
+                            1339
                           ],
                           "loc": {
                             "start": {
@@ -394,8 +394,8 @@
                           "object": {
                             "type": "ThisExpression",
                             "range": [
-                              1338,
-                              1342
+                              1344,
+                              1348
                             ],
                             "loc": {
                               "start": {
@@ -412,8 +412,8 @@
                             "type": "Identifier",
                             "name": "name",
                             "range": [
-                              1343,
-                              1347
+                              1349,
+                              1353
                             ],
                             "loc": {
                               "start": {
@@ -427,8 +427,8 @@
                             }
                           },
                           "range": [
-                            1338,
-                            1347
+                            1344,
+                            1353
                           ],
                           "loc": {
                             "start": {
@@ -445,8 +445,8 @@
                           "type": "Identifier",
                           "name": "name",
                           "range": [
-                            1350,
-                            1354
+                            1356,
+                            1360
                           ],
                           "loc": {
                             "start": {
@@ -460,8 +460,8 @@
                           }
                         },
                         "range": [
-                          1338,
-                          1354
+                          1344,
+                          1360
                         ],
                         "loc": {
                           "start": {
@@ -475,8 +475,8 @@
                         }
                       },
                       "range": [
-                        1338,
-                        1355
+                        1344,
+                        1361
                       ],
                       "loc": {
                         "start": {
@@ -493,8 +493,8 @@
                           "type": "Block",
                           "value": "*\n     * The name of the module.\n     * @type {string}\n     ",
                           "range": [
-                            1269,
-                            1333
+                            1275,
+                            1339
                           ],
                           "loc": {
                             "start": {
@@ -511,8 +511,8 @@
                     }
                   ],
                   "range": [
-                    1249,
-                    1359
+                    1255,
+                    1365
                   ],
                   "loc": {
                     "start": {
@@ -528,8 +528,8 @@
                 "generator": false,
                 "expression": false,
                 "range": [
-                  1242,
-                  1359
+                  1248,
+                  1365
                 ],
                 "loc": {
                   "start": {
@@ -545,8 +545,8 @@
               "kind": "constructor",
               "computed": false,
               "range": [
-                1231,
-                1359
+                1237,
+                1365
               ],
               "loc": {
                 "start": {
@@ -563,8 +563,8 @@
                   "type": "Block",
                   "value": "*\n    * Creates an instance of the class.\n    * @param {Object} [options={}] The options.\n    * @param {string} [options.name='unnamed'] The name of the module.\n   ",
                   "range": [
-                    1060,
-                    1228
+                    1066,
+                    1234
                   ],
                   "loc": {
                     "start": {
@@ -583,8 +583,8 @@
                   "type": "Block",
                   "value": "*\n   * Called when the `client` connects to the server.\n   * This method should handle the logic of the module on the server side. For instance, it can take care of the communication with the client side module by setting up WebSocket message listeners and sending WebSocket messages, or it can add the client to a list to keep track of all the connected clients.\n   * @param {ServerClient} client The connected client.\n   ",
                   "range": [
-                    1363,
-                    1790
+                    1369,
+                    1796
                   ],
                   "loc": {
                     "start": {
@@ -606,8 +606,8 @@
                 "type": "Identifier",
                 "name": "connect",
                 "range": [
-                  1793,
-                  1800
+                  1799,
+                  1806
                 ],
                 "loc": {
                   "start": {
@@ -628,8 +628,8 @@
                     "type": "Identifier",
                     "name": "client",
                     "range": [
-                      1801,
-                      1807
+                      1807,
+                      1813
                     ],
                     "loc": {
                       "start": {
@@ -661,8 +661,8 @@
                               "type": "Identifier",
                               "name": "client",
                               "range": [
-                                1838,
-                                1844
+                                1844,
+                                1850
                               ],
                               "loc": {
                                 "start": {
@@ -679,8 +679,8 @@
                               "type": "Identifier",
                               "name": "modules",
                               "range": [
-                                1845,
-                                1852
+                                1851,
+                                1858
                               ],
                               "loc": {
                                 "start": {
@@ -694,8 +694,8 @@
                               }
                             },
                             "range": [
-                              1838,
-                              1852
+                              1844,
+                              1858
                             ],
                             "loc": {
                               "start": {
@@ -714,8 +714,8 @@
                             "object": {
                               "type": "ThisExpression",
                               "range": [
-                                1853,
-                                1857
+                                1859,
+                                1863
                               ],
                               "loc": {
                                 "start": {
@@ -732,8 +732,8 @@
                               "type": "Identifier",
                               "name": "name",
                               "range": [
-                                1858,
-                                1862
+                                1864,
+                                1868
                               ],
                               "loc": {
                                 "start": {
@@ -747,8 +747,8 @@
                               }
                             },
                             "range": [
-                              1853,
-                              1862
+                              1859,
+                              1868
                             ],
                             "loc": {
                               "start": {
@@ -762,8 +762,8 @@
                             }
                           },
                           "range": [
-                            1838,
-                            1863
+                            1844,
+                            1869
                           ],
                           "loc": {
                             "start": {
@@ -780,8 +780,8 @@
                           "type": "ObjectExpression",
                           "properties": [],
                           "range": [
-                            1866,
-                            1868
+                            1872,
+                            1874
                           ],
                           "loc": {
                             "start": {
@@ -795,8 +795,8 @@
                           }
                         },
                         "range": [
-                          1838,
-                          1868
+                          1844,
+                          1874
                         ],
                         "loc": {
                           "start": {
@@ -810,8 +810,8 @@
                         }
                       },
                       "range": [
-                        1838,
-                        1869
+                        1844,
+                        1875
                       ],
                       "loc": {
                         "start": {
@@ -828,8 +828,8 @@
                           "type": "Line",
                           "value": " Setup an object",
                           "range": [
-                            1815,
-                            1833
+                            1821,
+                            1839
                           ],
                           "loc": {
                             "start": {
@@ -846,8 +846,8 @@
                     }
                   ],
                   "range": [
-                    1809,
-                    1873
+                    1815,
+                    1879
                   ],
                   "loc": {
                     "start": {
@@ -863,8 +863,8 @@
                 "generator": false,
                 "expression": false,
                 "range": [
-                  1800,
-                  1873
+                  1806,
+                  1879
                 ],
                 "loc": {
                   "start": {
@@ -880,8 +880,8 @@
               "kind": "method",
               "computed": false,
               "range": [
-                1793,
-                1873
+                1799,
+                1879
               ],
               "loc": {
                 "start": {
@@ -898,8 +898,8 @@
                   "type": "Block",
                   "value": "*\n   * Called when the `client` connects to the server.\n   * This method should handle the logic of the module on the server side. For instance, it can take care of the communication with the client side module by setting up WebSocket message listeners and sending WebSocket messages, or it can add the client to a list to keep track of all the connected clients.\n   * @param {ServerClient} client The connected client.\n   ",
                   "range": [
-                    1363,
-                    1790
+                    1369,
+                    1796
                   ],
                   "loc": {
                     "start": {
@@ -918,8 +918,8 @@
                   "type": "Block",
                   "value": "*\n   * Called when the client `client` disconnects from the server.\n   * This method should handle the logic when that happens. For instance, it can remove the socket message listeners, or remove the client from the list that keeps track of the connected clients.\n   * @param {ServerClient} client The disconnected client.\n   ",
                   "range": [
-                    1877,
-                    2207
+                    1883,
+                    2213
                   ],
                   "loc": {
                     "start": {
@@ -941,8 +941,8 @@
                 "type": "Identifier",
                 "name": "disconnect",
                 "range": [
-                  2210,
-                  2220
+                  2216,
+                  2226
                 ],
                 "loc": {
                   "start": {
@@ -963,8 +963,8 @@
                     "type": "Identifier",
                     "name": "client",
                     "range": [
-                      2221,
-                      2227
+                      2227,
+                      2233
                     ],
                     "loc": {
                       "start": {
@@ -982,8 +982,8 @@
                   "type": "BlockStatement",
                   "body": [],
                   "range": [
-                    2229,
-                    2283
+                    2235,
+                    2289
                   ],
                   "loc": {
                     "start": {
@@ -1000,8 +1000,8 @@
                       "type": "Line",
                       "value": " delete client.modules[this.name] // TODO?",
                       "range": [
-                        2235,
-                        2279
+                        2241,
+                        2285
                       ],
                       "loc": {
                         "start": {
@@ -1019,8 +1019,8 @@
                 "generator": false,
                 "expression": false,
                 "range": [
-                  2220,
-                  2283
+                  2226,
+                  2289
                 ],
                 "loc": {
                   "start": {
@@ -1036,8 +1036,8 @@
               "kind": "method",
               "computed": false,
               "range": [
-                2210,
-                2283
+                2216,
+                2289
               ],
               "loc": {
                 "start": {
@@ -1054,8 +1054,8 @@
                   "type": "Block",
                   "value": "*\n   * Called when the client `client` disconnects from the server.\n   * This method should handle the logic when that happens. For instance, it can remove the socket message listeners, or remove the client from the list that keeps track of the connected clients.\n   * @param {ServerClient} client The disconnected client.\n   ",
                   "range": [
-                    1877,
-                    2207
+                    1883,
+                    2213
                   ],
                   "loc": {
                     "start": {
@@ -1073,8 +1073,8 @@
             }
           ],
           "range": [
-            1056,
-            2285
+            1062,
+            2291
           ],
           "loc": {
             "start": {
@@ -1088,8 +1088,8 @@
           }
         },
         "range": [
-          1016,
-          2285
+          1022,
+          2291
         ],
         "loc": {
           "start": {
@@ -1122,10 +1122,10 @@
           },
           {
             "type": "Block",
-            "value": "*\n * The `ServerModule` base class is used to create a *Soundworks* module on the server side.\n * Each module should have a {@link ServerModule#connect} and a {@link ServerModule#disconnect} method.\n * Any module mapped to the type of client `clientType` (thanks to the {@link server#map} method) would call its {@link ServerModule#connect} method when such a client connects to the server, and its {@link ServerModule#disconnect} method when such a client disconnects from the server.\n * @example\n * class MyModule extends serverSide.Module {\n *   constructor('my-module-name') {\n *     ... // anything the constructor needs\n *   }\n *\n *   connect(client) {\n *     ... // what the module has to do when a client connects to the server\n *   }\n *\n *   disconnect(client) {\n *     ... // what the module has to do when a client disconnects from the server\n *   }\n * }\n ",
+            "value": "*\n * The {@link ServerModule} base class is used to create a *Soundworks* module on the server side.\n * Each module should have a {@link ServerModule#connect} and a {@link ServerModule#disconnect} method.\n * Any module mapped to the type of client `clientType` (thanks to the {@link server#map} method) would call its {@link ServerModule#connect} method when such a client connects to the server, and its {@link ServerModule#disconnect} method when such a client disconnects from the server.\n * @example\n * class MyModule extends serverSide.Module {\n *   constructor('my-module-name') {\n *     ... // anything the constructor needs\n *   }\n *\n *   connect(client) {\n *     ... // what the module has to do when a client connects to the server\n *   }\n *\n *   disconnect(client) {\n *     ... // what the module has to do when a client disconnects from the server\n *   }\n * }\n ",
             "range": [
               129,
-              1000
+              1006
             ],
             "loc": {
               "start": {
@@ -1142,8 +1142,8 @@
         "trailingComments": []
       },
       "range": [
-        1001,
-        2285
+        1007,
+        2291
       ],
       "loc": {
         "start": {
@@ -1176,10 +1176,10 @@
         },
         {
           "type": "Block",
-          "value": "*\n * The `ServerModule` base class is used to create a *Soundworks* module on the server side.\n * Each module should have a {@link ServerModule#connect} and a {@link ServerModule#disconnect} method.\n * Any module mapped to the type of client `clientType` (thanks to the {@link server#map} method) would call its {@link ServerModule#connect} method when such a client connects to the server, and its {@link ServerModule#disconnect} method when such a client disconnects from the server.\n * @example\n * class MyModule extends serverSide.Module {\n *   constructor('my-module-name') {\n *     ... // anything the constructor needs\n *   }\n *\n *   connect(client) {\n *     ... // what the module has to do when a client connects to the server\n *   }\n *\n *   disconnect(client) {\n *     ... // what the module has to do when a client disconnects from the server\n *   }\n * }\n ",
+          "value": "*\n * The {@link ServerModule} base class is used to create a *Soundworks* module on the server side.\n * Each module should have a {@link ServerModule#connect} and a {@link ServerModule#disconnect} method.\n * Any module mapped to the type of client `clientType` (thanks to the {@link server#map} method) would call its {@link ServerModule#connect} method when such a client connects to the server, and its {@link ServerModule#disconnect} method when such a client disconnects from the server.\n * @example\n * class MyModule extends serverSide.Module {\n *   constructor('my-module-name') {\n *     ... // anything the constructor needs\n *   }\n *\n *   connect(client) {\n *     ... // what the module has to do when a client connects to the server\n *   }\n *\n *   disconnect(client) {\n *     ... // what the module has to do when a client disconnects from the server\n *   }\n * }\n ",
           "range": [
             129,
-            1000
+            1006
           ],
           "loc": {
             "start": {
@@ -1198,7 +1198,7 @@
   "sourceType": "module",
   "range": [
     0,
-    2285
+    2291
   ],
   "loc": {
     "start": {
@@ -1231,10 +1231,10 @@
     },
     {
       "type": "Block",
-      "value": "*\n * The `ServerModule` base class is used to create a *Soundworks* module on the server side.\n * Each module should have a {@link ServerModule#connect} and a {@link ServerModule#disconnect} method.\n * Any module mapped to the type of client `clientType` (thanks to the {@link server#map} method) would call its {@link ServerModule#connect} method when such a client connects to the server, and its {@link ServerModule#disconnect} method when such a client disconnects from the server.\n * @example\n * class MyModule extends serverSide.Module {\n *   constructor('my-module-name') {\n *     ... // anything the constructor needs\n *   }\n *\n *   connect(client) {\n *     ... // what the module has to do when a client connects to the server\n *   }\n *\n *   disconnect(client) {\n *     ... // what the module has to do when a client disconnects from the server\n *   }\n * }\n ",
+      "value": "*\n * The {@link ServerModule} base class is used to create a *Soundworks* module on the server side.\n * Each module should have a {@link ServerModule#connect} and a {@link ServerModule#disconnect} method.\n * Any module mapped to the type of client `clientType` (thanks to the {@link server#map} method) would call its {@link ServerModule#connect} method when such a client connects to the server, and its {@link ServerModule#disconnect} method when such a client disconnects from the server.\n * @example\n * class MyModule extends serverSide.Module {\n *   constructor('my-module-name') {\n *     ... // anything the constructor needs\n *   }\n *\n *   connect(client) {\n *     ... // what the module has to do when a client connects to the server\n *   }\n *\n *   disconnect(client) {\n *     ... // what the module has to do when a client disconnects from the server\n *   }\n * }\n ",
       "range": [
         129,
-        1000
+        1006
       ],
       "loc": {
         "start": {
@@ -1251,8 +1251,8 @@
       "type": "Block",
       "value": "*\n    * Creates an instance of the class.\n    * @param {Object} [options={}] The options.\n    * @param {string} [options.name='unnamed'] The name of the module.\n   ",
       "range": [
-        1060,
-        1228
+        1066,
+        1234
       ],
       "loc": {
         "start": {
@@ -1269,8 +1269,8 @@
       "type": "Block",
       "value": "*\n     * The name of the module.\n     * @type {string}\n     ",
       "range": [
-        1269,
-        1333
+        1275,
+        1339
       ],
       "loc": {
         "start": {
@@ -1287,8 +1287,8 @@
       "type": "Block",
       "value": "*\n   * Called when the `client` connects to the server.\n   * This method should handle the logic of the module on the server side. For instance, it can take care of the communication with the client side module by setting up WebSocket message listeners and sending WebSocket messages, or it can add the client to a list to keep track of all the connected clients.\n   * @param {ServerClient} client The connected client.\n   ",
       "range": [
-        1363,
-        1790
+        1369,
+        1796
       ],
       "loc": {
         "start": {
@@ -1305,8 +1305,8 @@
       "type": "Line",
       "value": " Setup an object",
       "range": [
-        1815,
-        1833
+        1821,
+        1839
       ],
       "loc": {
         "start": {
@@ -1323,8 +1323,8 @@
       "type": "Block",
       "value": "*\n   * Called when the client `client` disconnects from the server.\n   * This method should handle the logic when that happens. For instance, it can remove the socket message listeners, or remove the client from the list that keeps track of the connected clients.\n   * @param {ServerClient} client The disconnected client.\n   ",
       "range": [
-        1877,
-        2207
+        1883,
+        2213
       ],
       "loc": {
         "start": {
@@ -1341,8 +1341,8 @@
       "type": "Line",
       "value": " delete client.modules[this.name] // TODO?",
       "range": [
-        2235,
-        2279
+        2241,
+        2285
       ],
       "loc": {
         "start": {

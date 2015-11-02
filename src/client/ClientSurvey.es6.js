@@ -201,7 +201,7 @@ class TextAreaRenderer extends BaseRenderer {
 }
 
 // module
-class ClientSurvey extends ClientModule {
+export default class ClientSurvey extends ClientModule {
   constructor(surveyConfig, options = {}) {
     super(options.name || 'survey', true, options.color);
 
@@ -331,5 +331,3 @@ class ClientSurvey extends ClientModule {
     this._nextBtn.classList.remove('disabled');
   }
 }
-
-module.exports = ClientSurvey;

@@ -973,10 +973,10 @@
               "trailingComments": [
                 {
                   "type": "Block",
-                  "value": "*\n   * Register the receive functions.\n   *\n   * @function ServerCalibration~connect\n   * @param {Object} client\n   ",
+                  "value": "*\n   * Register the receive functions.\n   *\n   * @function ServerCalibration~connect\n   * @param {ServerClient} client\n   ",
                   "range": [
                     895,
-                    1015
+                    1021
                   ],
                   "loc": {
                     "start": {
@@ -998,8 +998,8 @@
                 "type": "Identifier",
                 "name": "connect",
                 "range": [
-                  1018,
-                  1025
+                  1024,
+                  1031
                 ],
                 "loc": {
                   "start": {
@@ -1020,8 +1020,8 @@
                     "type": "Identifier",
                     "name": "client",
                     "range": [
-                      1026,
-                      1032
+                      1032,
+                      1038
                     ],
                     "loc": {
                       "start": {
@@ -1048,8 +1048,8 @@
                           "object": {
                             "type": "Super",
                             "range": [
-                              1040,
-                              1045
+                              1046,
+                              1051
                             ],
                             "loc": {
                               "start": {
@@ -1066,8 +1066,8 @@
                             "type": "Identifier",
                             "name": "connect",
                             "range": [
-                              1046,
-                              1053
+                              1052,
+                              1059
                             ],
                             "loc": {
                               "start": {
@@ -1081,8 +1081,8 @@
                             }
                           },
                           "range": [
-                            1040,
-                            1053
+                            1046,
+                            1059
                           ],
                           "loc": {
                             "start": {
@@ -1100,8 +1100,8 @@
                             "type": "Identifier",
                             "name": "client",
                             "range": [
-                              1054,
-                              1060
+                              1060,
+                              1066
                             ],
                             "loc": {
                               "start": {
@@ -1116,8 +1116,8 @@
                           }
                         ],
                         "range": [
-                          1040,
-                          1061
+                          1046,
+                          1067
                         ],
                         "loc": {
                           "start": {
@@ -1131,8 +1131,8 @@
                         }
                       },
                       "range": [
-                        1040,
-                        1062
+                        1046,
+                        1068
                       ],
                       "loc": {
                         "start": {
@@ -1158,8 +1158,8 @@
                             "object": {
                               "type": "ThisExpression",
                               "range": [
-                                1068,
-                                1072
+                                1074,
+                                1078
                               ],
                               "loc": {
                                 "start": {
@@ -1176,8 +1176,8 @@
                               "type": "Identifier",
                               "name": "calibration",
                               "range": [
-                                1073,
-                                1084
+                                1079,
+                                1090
                               ],
                               "loc": {
                                 "start": {
@@ -1191,8 +1191,8 @@
                               }
                             },
                             "range": [
-                              1068,
-                              1084
+                              1074,
+                              1090
                             ],
                             "loc": {
                               "start": {
@@ -1209,8 +1209,8 @@
                             "type": "Identifier",
                             "name": "start",
                             "range": [
-                              1085,
-                              1090
+                              1091,
+                              1096
                             ],
                             "loc": {
                               "start": {
@@ -1224,8 +1224,8 @@
                             }
                           },
                           "range": [
-                            1068,
-                            1090
+                            1074,
+                            1096
                           ],
                           "loc": {
                             "start": {
@@ -1247,8 +1247,8 @@
                                 "type": "Identifier",
                                 "name": "cmd",
                                 "range": [
-                                  1093,
-                                  1096
+                                  1099,
+                                  1102
                                 ],
                                 "loc": {
                                   "start": {
@@ -1267,8 +1267,8 @@
                                   "type": "Identifier",
                                   "name": "args",
                                   "range": [
-                                    1101,
-                                    1105
+                                    1107,
+                                    1111
                                   ],
                                   "loc": {
                                     "start": {
@@ -1282,8 +1282,8 @@
                                   }
                                 },
                                 "range": [
-                                  1098,
-                                  1105
+                                  1104,
+                                  1111
                                 ],
                                 "loc": {
                                   "start": {
@@ -1311,8 +1311,8 @@
                                         "type": "Identifier",
                                         "name": "client",
                                         "range": [
-                                          1112,
-                                          1118
+                                          1118,
+                                          1124
                                         ],
                                         "loc": {
                                           "start": {
@@ -1329,8 +1329,8 @@
                                         "type": "Identifier",
                                         "name": "send",
                                         "range": [
-                                          1119,
-                                          1123
+                                          1125,
+                                          1129
                                         ],
                                         "loc": {
                                           "start": {
@@ -1344,8 +1344,8 @@
                                         }
                                       },
                                       "range": [
-                                        1112,
-                                        1123
+                                        1118,
+                                        1129
                                       ],
                                       "loc": {
                                         "start": {
@@ -1363,8 +1363,8 @@
                                         "type": "Identifier",
                                         "name": "cmd",
                                         "range": [
-                                          1124,
-                                          1127
+                                          1130,
+                                          1133
                                         ],
                                         "loc": {
                                           "start": {
@@ -1383,8 +1383,8 @@
                                           "type": "Identifier",
                                           "name": "args",
                                           "range": [
-                                            1132,
-                                            1136
+                                            1138,
+                                            1142
                                           ],
                                           "loc": {
                                             "start": {
@@ -1398,8 +1398,8 @@
                                           }
                                         },
                                         "range": [
-                                          1129,
-                                          1136
+                                          1135,
+                                          1142
                                         ],
                                         "loc": {
                                           "start": {
@@ -1414,8 +1414,8 @@
                                       }
                                     ],
                                     "range": [
-                                      1112,
-                                      1137
+                                      1118,
+                                      1143
                                     ],
                                     "loc": {
                                       "start": {
@@ -1429,8 +1429,8 @@
                                     }
                                   },
                                   "range": [
-                                    1112,
-                                    1138
+                                    1118,
+                                    1144
                                   ],
                                   "loc": {
                                     "start": {
@@ -1445,8 +1445,8 @@
                                 }
                               ],
                               "range": [
-                                1110,
-                                1140
+                                1116,
+                                1146
                               ],
                               "loc": {
                                 "start": {
@@ -1462,8 +1462,8 @@
                             "generator": false,
                             "expression": false,
                             "range": [
-                              1092,
-                              1140
+                              1098,
+                              1146
                             ],
                             "loc": {
                               "start": {
@@ -1484,8 +1484,8 @@
                                 "type": "Identifier",
                                 "name": "cmd",
                                 "range": [
-                                  1171,
-                                  1174
+                                  1177,
+                                  1180
                                 ],
                                 "loc": {
                                   "start": {
@@ -1502,8 +1502,8 @@
                                 "type": "Identifier",
                                 "name": "callback",
                                 "range": [
-                                  1176,
-                                  1184
+                                  1182,
+                                  1190
                                 ],
                                 "loc": {
                                   "start": {
@@ -1531,8 +1531,8 @@
                                         "type": "Identifier",
                                         "name": "client",
                                         "range": [
-                                          1191,
-                                          1197
+                                          1197,
+                                          1203
                                         ],
                                         "loc": {
                                           "start": {
@@ -1549,8 +1549,8 @@
                                         "type": "Identifier",
                                         "name": "receive",
                                         "range": [
-                                          1198,
-                                          1205
+                                          1204,
+                                          1211
                                         ],
                                         "loc": {
                                           "start": {
@@ -1564,8 +1564,8 @@
                                         }
                                       },
                                       "range": [
-                                        1191,
-                                        1205
+                                        1197,
+                                        1211
                                       ],
                                       "loc": {
                                         "start": {
@@ -1583,8 +1583,8 @@
                                         "type": "Identifier",
                                         "name": "cmd",
                                         "range": [
-                                          1206,
-                                          1209
+                                          1212,
+                                          1215
                                         ],
                                         "loc": {
                                           "start": {
@@ -1601,8 +1601,8 @@
                                         "type": "Identifier",
                                         "name": "callback",
                                         "range": [
-                                          1211,
-                                          1219
+                                          1217,
+                                          1225
                                         ],
                                         "loc": {
                                           "start": {
@@ -1617,8 +1617,8 @@
                                       }
                                     ],
                                     "range": [
-                                      1191,
-                                      1220
+                                      1197,
+                                      1226
                                     ],
                                     "loc": {
                                       "start": {
@@ -1632,8 +1632,8 @@
                                     }
                                   },
                                   "range": [
-                                    1191,
-                                    1221
+                                    1197,
+                                    1227
                                   ],
                                   "loc": {
                                     "start": {
@@ -1648,8 +1648,8 @@
                                 }
                               ],
                               "range": [
-                                1189,
-                                1223
+                                1195,
+                                1229
                               ],
                               "loc": {
                                 "start": {
@@ -1665,8 +1665,8 @@
                             "generator": false,
                             "expression": false,
                             "range": [
-                              1170,
-                              1223
+                              1176,
+                              1229
                             ],
                             "loc": {
                               "start": {
@@ -1681,8 +1681,8 @@
                           }
                         ],
                         "range": [
-                          1068,
-                          1225
+                          1074,
+                          1231
                         ],
                         "loc": {
                           "start": {
@@ -1696,8 +1696,8 @@
                         }
                       },
                       "range": [
-                        1068,
-                        1226
+                        1074,
+                        1232
                       ],
                       "loc": {
                         "start": {
@@ -1712,8 +1712,8 @@
                     }
                   ],
                   "range": [
-                    1034,
-                    1230
+                    1040,
+                    1236
                   ],
                   "loc": {
                     "start": {
@@ -1729,8 +1729,8 @@
                 "generator": false,
                 "expression": false,
                 "range": [
-                  1025,
-                  1230
+                  1031,
+                  1236
                 ],
                 "loc": {
                   "start": {
@@ -1746,8 +1746,8 @@
               "kind": "method",
               "computed": false,
               "range": [
-                1018,
-                1230
+                1024,
+                1236
               ],
               "loc": {
                 "start": {
@@ -1762,10 +1762,10 @@
               "leadingComments": [
                 {
                   "type": "Block",
-                  "value": "*\n   * Register the receive functions.\n   *\n   * @function ServerCalibration~connect\n   * @param {Object} client\n   ",
+                  "value": "*\n   * Register the receive functions.\n   *\n   * @function ServerCalibration~connect\n   * @param {ServerClient} client\n   ",
                   "range": [
                     895,
-                    1015
+                    1021
                   ],
                   "loc": {
                     "start": {
@@ -1784,7 +1784,7 @@
           ],
           "range": [
             178,
-            1233
+            1239
           ],
           "loc": {
             "start": {
@@ -1799,7 +1799,7 @@
         },
         "range": [
           133,
-          1233
+          1239
         ],
         "loc": {
           "start": {
@@ -1817,8 +1817,8 @@
             "type": "Line",
             "value": " class ServerCalibration",
             "range": [
-              1234,
-              1260
+              1240,
+              1266
             ],
             "loc": {
               "start": {
@@ -1835,7 +1835,7 @@
       },
       "range": [
         118,
-        1233
+        1239
       ],
       "loc": {
         "start": {
@@ -1852,8 +1852,8 @@
           "type": "Line",
           "value": " class ServerCalibration",
           "range": [
-            1234,
-            1260
+            1240,
+            1266
           ],
           "loc": {
             "start": {
@@ -1872,7 +1872,7 @@
   "sourceType": "module",
   "range": [
     0,
-    1233
+    1239
   ],
   "loc": {
     "start": {
@@ -1905,10 +1905,10 @@
     },
     {
       "type": "Block",
-      "value": "*\n   * Register the receive functions.\n   *\n   * @function ServerCalibration~connect\n   * @param {Object} client\n   ",
+      "value": "*\n   * Register the receive functions.\n   *\n   * @function ServerCalibration~connect\n   * @param {ServerClient} client\n   ",
       "range": [
         895,
-        1015
+        1021
       ],
       "loc": {
         "start": {
@@ -1925,8 +1925,8 @@
       "type": "Line",
       "value": " class ServerCalibration",
       "range": [
-        1234,
-        1260
+        1240,
+        1266
       ],
       "loc": {
         "start": {

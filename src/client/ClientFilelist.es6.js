@@ -4,7 +4,7 @@ import client from './client.es6.js';
 import ClientModule from './ClientModule.es6.js';
 
 /**
- * The `Filelist` module requests the file list of a folder from the server. The results can be filtered by file extensions.
+ * The {@link Filelist} module requests the file list of a folder from the server. The results can be filtered by file extensions.
  */
 export default class Filelist extends ClientModule {
   /**

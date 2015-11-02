@@ -33,6 +33,7 @@
   <ul>
     
   <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">client</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientCalibration.es6.js~ClientCalibration.html">ClientCalibration</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientCheckin.es6.js~ClientCheckin.html">ClientCheckin</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientControl.es6.js~ClientControl.html">ClientControl</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientDialog.es6.js~ClientDialog.html">ClientDialog</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientFilelist.es6.js~Filelist.html">Filelist</a></span></span></li>
@@ -45,13 +46,22 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientPlatform.es6.js~ClientPlatform.html">ClientPlatform</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientSelector.es6.js~ClientSelector.html">ClientSelector</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientSetup.es6.js~ClientSetup.html">ClientSetup</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientSpace.es6.js~ClientSpace.html">ClientSpace</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientSurvey.es6.js~ClientSurvey.html">ClientSurvey</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientSync.es6.js~ClientSync.html">ClientSync</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-EventEmitter">EventEmitter</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-client">client</a></span></span></li>
 <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">server</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerCalibration.es6.js~ServerCalibration.html">ServerCalibration</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerCheckin.es6.js~ServerCheckin.html">ServerCheckin</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerClient.es6.js~ServerClient.html">ServerClient</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerControl.es6.js~ServerControl.html">ServerControl</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerFilelist.es6.js~ServerFilelist.html">ServerFilelist</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerLocator.es6.js~ServerLocator.html">ServerLocator</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerModule.es6.js~ServerModule.html">ServerModule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerPerformance.es6.js~ServerPerformance.html">ServerPerformance</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerPlacer.es6.js~ServerPlacer.html">ServerPlacer</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerSetup.es6.js~ServerSetup.html">ServerSetup</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerSurvey.es6.js~ServerSurvey.html">ServerSurvey</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerSync.es6.js~ServerSync.html">ServerSync</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-server">server</a></span></span></li>
 </ul>
@@ -99,13 +109,39 @@
     <td>
       <div>
         <p>
+           <span data-ice="name"><span><a href="class/src/client/ClientCheckin.es6.js~ClientCheckin.html">ClientCheckin</a></span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>The <code>Checkin</code> module is responsible for keeping track of the connected clients by assigning them indices.</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
            <span data-ice="name"><span><a href="class/src/client/ClientControl.es6.js~ClientControl.html">ClientControl</a></span></span>
         </p>
       </div>
       <div>
         
         
-        <div data-ice="description"><p>The <code>ClientControl</code> module takes care of the global <code>parameters</code>, <code>infos</code>, and <code>commands</code> on the client side.</p>
+        <div data-ice="description"><p>The <span><a href="class/src/client/ClientControl.es6.js~ClientControl.html">ClientControl</a></span> module takes care of the global <code>parameters</code>, <code>infos</code>, and <code>commands</code> on the client side.</p>
 </div>
       </div>
     </td>
@@ -131,7 +167,7 @@
       <div>
         
         
-        <div data-ice="description"><p>The <code>ClientDialog</code> displays a full screen dialog.</p>
+        <div data-ice="description"><p>The <span><a href="class/src/client/ClientDialog.es6.js~ClientDialog.html">ClientDialog</a></span> displays a full screen dialog.</p>
 </div>
       </div>
     </td>
@@ -157,7 +193,7 @@
       <div>
         
         
-        <div data-ice="description"><p>The <code>ClientLoader</code> module allows for loading audio files that can be used in the scenario (for instance, by the <code>performance</code> module).</p>
+        <div data-ice="description"><p>The <span><a href="class/src/client/ClientLoader.es6.js~ClientLoader.html">ClientLoader</a></span> module allows for loading audio files that can be used in the scenario (for instance, by the <code>performance</code> module).</p>
 </div>
       </div>
     </td>
@@ -183,7 +219,7 @@
       <div>
         
         
-        <div data-ice="description"><p>The <code>ClientLocator</code>module allows to indicate the approximate physical location of the client on a map via a dialog.</p>
+        <div data-ice="description"><p>The <span><a href="class/src/client/ClientLocator.es6.js~ClientLocator.html">ClientLocator</a></span> module allows to indicate the approximate physical location of the client on a map via a dialog.</p>
 </div>
       </div>
     </td>
@@ -209,7 +245,7 @@
       <div>
         
         
-        <div data-ice="description"><p>The <code>ClientModule</code> base class is used to create a <em>Soundworks</em> module on the client side.</p>
+        <div data-ice="description"><p>The <span><a href="class/src/client/ClientModule.es6.js~ClientModule.html">ClientModule</a></span> base class is used to create a <em>Soundworks</em> module on the client side.</p>
 </div>
       </div>
     </td>
@@ -235,7 +271,7 @@
       <div>
         
         
-        <div data-ice="description"><p>The <code>ClientOrientation</code> module allows for calibrating the compass by getting an angle reference.</p>
+        <div data-ice="description"><p>The <span><a href="class/src/client/ClientOrientation.es6.js~ClientOrientation.html">ClientOrientation</a></span> module allows for calibrating the compass by getting an angle reference.</p>
 </div>
       </div>
     </td>
@@ -261,7 +297,7 @@
       <div>
         
         
-        <div data-ice="description"><p>The <code>ClientPerformance</code> base class constitutes a basis on which to build a performance on the client side.</p>
+        <div data-ice="description"><p>The <span><a href="class/src/client/ClientPerformance.es6.js~ClientPerformance.html">ClientPerformance</a></span> base class constitutes a basis on which to build a performance on the client side.</p>
 </div>
       </div>
     </td>
@@ -287,7 +323,7 @@
       <div>
         
         
-        <div data-ice="description"><p>The <code>ClientPlacer</code> module allows to select a place in a list of predefined places.</p>
+        <div data-ice="description"><p>The <span><a href="class/src/client/ClientPlacer.es6.js~ClientPlacer.html">ClientPlacer</a></span> module allows to select a place in a list of predefined places.</p>
 </div>
       </div>
     </td>
@@ -313,7 +349,7 @@
       <div>
         
         
-        <div data-ice="description"><p>The <code>ClientPlatform</code> checks whether the device is compatible with the technologies used in the <em>Soundworks</em> library.</p>
+        <div data-ice="description"><p>The <span><a href="class/src/client/ClientPlatform.es6.js~ClientPlatform.html">ClientPlatform</a></span> checks whether the device is compatible with the technologies used in the <em>Soundworks</em> library.</p>
 </div>
       </div>
     </td>
@@ -339,7 +375,7 @@
       <div>
         
         
-        <div data-ice="description"><p>The <code>ClientSelector</code> module allows to select one or several options among a list.</p>
+        <div data-ice="description"><p>The <span><a href="class/src/client/ClientSelector.es6.js~ClientSelector.html">ClientSelector</a></span> module allows to select one or several options among a list.</p>
 </div>
       </div>
     </td>
@@ -365,8 +401,59 @@
       <div>
         
         
-        <div data-ice="description"><p>The <code>ClientSetup</code> module retrieves the setup information from the server.</p>
+        <div data-ice="description"><p>The <span><a href="class/src/client/ClientSetup.es6.js~ClientSetup.html">ClientSetup</a></span> module retrieves the setup information from the server.</p>
 </div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+           <span data-ice="name"><span><a href="class/src/client/ClientSpace.es6.js~ClientSpace.html">ClientSpace</a></span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>The <span><a href="class/src/client/ClientSpace.es6.js~ClientSpace.html">ClientSpace</a></span> displays the setup upon request.</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+           <span data-ice="name"><span><a href="class/src/client/ClientSurvey.es6.js~ClientSurvey.html">ClientSurvey</a></span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        
       </div>
     </td>
     <td>
@@ -391,7 +478,7 @@
       <div>
         
         
-        <div data-ice="description"><p>The <code>ClientSync</code> module takes care of the synchronization process on the client side.</p>
+        <div data-ice="description"><p>The <span><a href="class/src/client/ClientSync.es6.js~ClientSync.html">ClientSync</a></span> module takes care of the synchronization process on the client side.</p>
 </div>
       </div>
     </td>
@@ -417,7 +504,7 @@
       <div>
         
         
-        <div data-ice="description"><p>The <code>Filelist</code> module requests the file list of a folder from the server.</p>
+        <div data-ice="description"><p>The <span><a href="class/src/client/ClientFilelist.es6.js~Filelist.html">Filelist</a></span> module requests the file list of a folder from the server.</p>
 </div>
       </div>
     </td>
@@ -462,13 +549,39 @@
     <td>
       <div>
         <p>
+           <span data-ice="name"><span><a href="class/src/server/ServerCheckin.es6.js~ServerCheckin.html">ServerCheckin</a></span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>The <span><a href="class/src/server/ServerCheckin.es6.js~ServerCheckin.html">ServerCheckin</a></span> takes care of the check-in on the server side.</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
            <span data-ice="name"><span><a href="class/src/server/ServerClient.es6.js~ServerClient.html">ServerClient</a></span></span>
         </p>
       </div>
       <div>
         
         
-        <div data-ice="description"><p>The <code>ServerClient</code> module is used to keep track of each connected client and to communicate with it via WebSockets.</p>
+        <div data-ice="description"><p>The <span><a href="class/src/server/ServerClient.es6.js~ServerClient.html">ServerClient</a></span> module is used to keep track of each connected client and to communicate with it via WebSockets.</p>
 </div>
       </div>
     </td>
@@ -494,7 +607,59 @@
       <div>
         
         
-        <div data-ice="description"><p>The <code>ServerControl</code> takes care of the parameters and commands on the server side.</p>
+        <div data-ice="description"><p>The <code>Control</code> module is used to control an application through a dedicated client (that we usually call <code>conductor</code>).</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+           <span data-ice="name"><span><a href="class/src/server/ServerFilelist.es6.js~ServerFilelist.html">ServerFilelist</a></span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>The <span><a href="class/src/server/ServerFilelist.es6.js~ServerFilelist.html">ServerFilelist</a></span> module allows to dynamically send a list of files stored on the server to the clients.</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+           <span data-ice="name"><span><a href="class/src/server/ServerLocator.es6.js~ServerLocator.html">ServerLocator</a></span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>The <span><a href="class/src/server/ServerLocator.es6.js~ServerLocator.html">ServerLocator</a></span> module allows to store the coordinates of a client when the user enters an approximate location through the interfacte provided by the <span><a href="class/src/client/ClientLocator.es6.js~ClientLocator.html">ClientLocator</a></span>.</p>
 </div>
       </div>
     </td>
@@ -520,8 +685,111 @@
       <div>
         
         
-        <div data-ice="description"><p>The <code>ServerModule</code> base class is used to create a <em>Soundworks</em> module on the server side.</p>
+        <div data-ice="description"><p>The <span><a href="class/src/server/ServerModule.es6.js~ServerModule.html">ServerModule</a></span> base class is used to create a <em>Soundworks</em> module on the server side.</p>
 </div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+           <span data-ice="name"><span><a href="class/src/server/ServerPerformance.es6.js~ServerPerformance.html">ServerPerformance</a></span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>The <span><a href="class/src/server/ServerPerformance.es6.js~ServerPerformance.html">ServerPerformance</a></span> base class constitutes a basis on which to build a performance on the server side.</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+           <span data-ice="name"><span><a href="class/src/server/ServerPlacer.es6.js~ServerPlacer.html">ServerPlacer</a></span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>The <span><a href="class/src/server/ServerPlacer.es6.js~ServerPlacer.html">ServerPlacer</a></span> module allows to store the place of a client selected by the user through the interfacte provided by the <span><a href="class/src/client/ClientPlacer.es6.js~ClientPlacer.html">ClientPlacer</a></span>.</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+           <span data-ice="name"><span><a href="class/src/server/ServerSetup.es6.js~ServerSetup.html">ServerSetup</a></span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>The <code>Setup</code> module contains the information about the setup of the performance space in terms of its surface (<em>i.e.</em> dimensions and outlines) and predefined positions (<em>e.g.</em> seats or labels on the floor).</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+           <span data-ice="name"><span><a href="class/src/server/ServerSurvey.es6.js~ServerSurvey.html">ServerSurvey</a></span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        
       </div>
     </td>
     <td>
@@ -546,7 +814,7 @@
       <div>
         
         
-        <div data-ice="description"><p>The <code>ServerSync</code> module takes care of the synchronization process on the server side.</p>
+        <div data-ice="description"><p>The <span><a href="class/src/server/ServerSync.es6.js~ServerSync.html">ServerSync</a></span> module takes care of the synchronization process on the server side.</p>
 </div>
       </div>
     </td>
@@ -649,7 +917,7 @@
 </div>
 
 <footer class="footer">
-  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.4.1)</span></a>
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.4.3)</span></a>
 </footer>
 
 <script src="script/search_index.js"></script>

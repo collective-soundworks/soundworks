@@ -1,7 +1,7 @@
 {
-  "coverage": "77.44%",
-  "expectCount": 133,
-  "actualCount": 103,
+  "coverage": "65.55%",
+  "expectCount": 209,
+  "actualCount": 137,
   "files": {
     "src/client/ClientCalibration.es6.js": {
       "expectCount": 11,
@@ -12,6 +12,14 @@
         36,
         37,
         40
+      ]
+    },
+    "src/client/ClientCheckin.es6.js": {
+      "expectCount": 7,
+      "actualCount": 5,
+      "undocumentLines": [
+        45,
+        46
       ]
     },
     "src/client/ClientControl.es6.js": {
@@ -89,13 +97,48 @@
       "expectCount": 10,
       "actualCount": 3,
       "undocumentLines": [
-        39,
+        42,
+        26,
         23,
-        20,
-        22,
-        21,
+        25,
         24,
-        19
+        27,
+        22
+      ]
+    },
+    "src/client/ClientSpace.es6.js": {
+      "expectCount": 21,
+      "actualCount": 9,
+      "undocumentLines": [
+        56,
+        102,
+        120,
+        49,
+        174,
+        104,
+        119,
+        172,
+        169,
+        170,
+        171,
+        38
+      ]
+    },
+    "src/client/ClientSurvey.es6.js": {
+      "expectCount": 11,
+      "actualCount": 0,
+      "undocumentLines": [
+        204,
+        219,
+        205,
+        218,
+        295,
+        326,
+        330,
+        217,
+        220,
+        257,
+        216
       ]
     },
     "src/client/ClientSync.es6.js": {
@@ -118,6 +161,15 @@
         28
       ]
     },
+    "src/server/ServerCheckin.es6.js": {
+      "expectCount": 5,
+      "actualCount": 2,
+      "undocumentLines": [
+        25,
+        26,
+        24
+      ]
+    },
     "src/server/ServerClient.es6.js": {
       "expectCount": 11,
       "actualCount": 11,
@@ -127,13 +179,60 @@
       "expectCount": 10,
       "actualCount": 9,
       "undocumentLines": [
-        161
+        171
+      ]
+    },
+    "src/server/ServerFilelist.es6.js": {
+      "expectCount": 2,
+      "actualCount": 2,
+      "undocumentLines": []
+    },
+    "src/server/ServerLocator.es6.js": {
+      "expectCount": 3,
+      "actualCount": 2,
+      "undocumentLines": [
+        18
       ]
     },
     "src/server/ServerModule.es6.js": {
       "expectCount": 5,
       "actualCount": 5,
       "undocumentLines": []
+    },
+    "src/server/ServerPerformance.es6.js": {
+      "expectCount": 5,
+      "actualCount": 5,
+      "undocumentLines": []
+    },
+    "src/server/ServerPlacer.es6.js": {
+      "expectCount": 2,
+      "actualCount": 2,
+      "undocumentLines": []
+    },
+    "src/server/ServerSetup.es6.js": {
+      "expectCount": 15,
+      "actualCount": 7,
+      "undocumentLines": [
+        30,
+        29,
+        26,
+        28,
+        27,
+        32,
+        34,
+        25
+      ]
+    },
+    "src/server/ServerSurvey.es6.js": {
+      "expectCount": 5,
+      "actualCount": 0,
+      "undocumentLines": [
+        11,
+        28,
+        12,
+        34,
+        24
+      ]
     },
     "src/server/ServerSync.es6.js": {
       "expectCount": 3,

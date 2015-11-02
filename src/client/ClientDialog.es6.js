@@ -13,7 +13,7 @@ function _base64(format, base64) {
 }
 
 /**
- * The `ClientDialog` displays a full screen dialog. It requires the participant to tap the screen to make the view disappear. The module is also used at the very beginning of a scenario to activate the Web Audio API on iOS devices (with the option `activateWebAudio`). The `ClientDialog` module calls its `done` method when the participant taps on the screen.
+ * The {@link ClientDialog} displays a full screen dialog. It requires the participant to tap the screen to make the view disappear. The module is also used at the very beginning of a scenario to activate the Web Audio API on iOS devices (with the option `activateWebAudio`). The `ClientDialog` module calls its `done` method when the participant taps on the screen.
  * @example
  * const welcomeDialog = new ClientDialog({
  *   name: 'welcome',

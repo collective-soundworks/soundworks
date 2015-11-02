@@ -84,10 +84,10 @@ class Parallel extends Promised {
 }
 
 /**
- * The `ClientModule` base class is used to create a *Soundworks* module on the client side.
+ * The {@link ClientModule} base class is used to create a *Soundworks* module on the client side.
  * Each module should have a {@link ClientModule#start} and a {@link ClientModule#done} method.
  * The {@link ClientModule#done} method must be called when the module can hand over the control to the subsequent modules (*i.e.* when the module has done its duty, or when it may run in the background for the rest of the scenario after it finished its initialization process).
- * The base class optionally creates a view — a fullscreen `div` accessible through the `this.view` attribute — that is added to the DOM when the module is started and removed when the module calls its {@link ClientModule#done} method.
+ * The base class optionally creates a view — a fullscreen `div` accessible through the {@link ClientModule.view} attribute — that is added to the DOM when the module is started and removed when the module calls its {@link ClientModule#done} method.
  * (Specifically, the `view` element is added to the `#container` DOM element.)
  *
  * @example

@@ -33,6 +33,7 @@
   <ul>
     
   <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">client</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientCalibration.es6.js~ClientCalibration.html">ClientCalibration</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientCheckin.es6.js~ClientCheckin.html">ClientCheckin</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientControl.es6.js~ClientControl.html">ClientControl</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientDialog.es6.js~ClientDialog.html">ClientDialog</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientFilelist.es6.js~Filelist.html">Filelist</a></span></span></li>
@@ -45,13 +46,22 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientPlatform.es6.js~ClientPlatform.html">ClientPlatform</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientSelector.es6.js~ClientSelector.html">ClientSelector</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientSetup.es6.js~ClientSetup.html">ClientSetup</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientSpace.es6.js~ClientSpace.html">ClientSpace</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientSurvey.es6.js~ClientSurvey.html">ClientSurvey</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientSync.es6.js~ClientSync.html">ClientSync</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-EventEmitter">EventEmitter</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-client">client</a></span></span></li>
 <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">server</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerCalibration.es6.js~ServerCalibration.html">ServerCalibration</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerCheckin.es6.js~ServerCheckin.html">ServerCheckin</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerClient.es6.js~ServerClient.html">ServerClient</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerControl.es6.js~ServerControl.html">ServerControl</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerFilelist.es6.js~ServerFilelist.html">ServerFilelist</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerLocator.es6.js~ServerLocator.html">ServerLocator</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerModule.es6.js~ServerModule.html">ServerModule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerPerformance.es6.js~ServerPerformance.html">ServerPerformance</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerPlacer.es6.js~ServerPlacer.html">ServerPlacer</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerSetup.es6.js~ServerSetup.html">ServerSetup</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerSurvey.es6.js~ServerSurvey.html">ServerSurvey</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerSync.es6.js~ServerSync.html">ServerSync</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-server">server</a></span></span></li>
 </ul>
@@ -76,7 +86,7 @@
   
   
   <div class="flat-list" data-ice="extendsChain"><h4>Extends:</h4><div><span><a href="variable/index.html#static-variable-EventEmitter">EventEmitter</a></span> &#x2192; <span>src/client/ClientModule.es6.js~Promised</span> &#x2192; ClientModule</div></div>
-  <div class="flat-list" data-ice="directSubclass"><h4>Direct Subclass:</h4><div><span><a href="class/src/client/ClientCalibration.es6.js~ClientCalibration.html">ClientCalibration</a></span>, <span>src/client/ClientCheckin.es6.js~ClientCheckin</span>, <span><a href="class/src/client/ClientControl.es6.js~ClientControl.html">ClientControl</a></span>, <span><a href="class/src/client/ClientDialog.es6.js~ClientDialog.html">ClientDialog</a></span>, <span><a href="class/src/client/ClientLoader.es6.js~ClientLoader.html">ClientLoader</a></span>, <span><a href="class/src/client/ClientLocator.es6.js~ClientLocator.html">ClientLocator</a></span>, <span><a href="class/src/client/ClientOrientation.es6.js~ClientOrientation.html">ClientOrientation</a></span>, <span><a href="class/src/client/ClientPerformance.es6.js~ClientPerformance.html">ClientPerformance</a></span>, <span><a href="class/src/client/ClientPlacer.es6.js~ClientPlacer.html">ClientPlacer</a></span>, <span><a href="class/src/client/ClientPlatform.es6.js~ClientPlatform.html">ClientPlatform</a></span>, <span><a href="class/src/client/ClientSelector.es6.js~ClientSelector.html">ClientSelector</a></span>, <span><a href="class/src/client/ClientSetup.es6.js~ClientSetup.html">ClientSetup</a></span>, <span>src/client/ClientSpace.es6.js~ClientSpace</span>, <span>src/client/ClientSurvey.es6.js~ClientSurvey</span>, <span><a href="class/src/client/ClientSync.es6.js~ClientSync.html">ClientSync</a></span>, <span><a href="class/src/client/ClientFilelist.es6.js~Filelist.html">Filelist</a></span></div></div>
+  <div class="flat-list" data-ice="directSubclass"><h4>Direct Subclass:</h4><div><span><a href="class/src/client/ClientCalibration.es6.js~ClientCalibration.html">ClientCalibration</a></span>, <span><a href="class/src/client/ClientCheckin.es6.js~ClientCheckin.html">ClientCheckin</a></span>, <span><a href="class/src/client/ClientControl.es6.js~ClientControl.html">ClientControl</a></span>, <span><a href="class/src/client/ClientDialog.es6.js~ClientDialog.html">ClientDialog</a></span>, <span><a href="class/src/client/ClientLoader.es6.js~ClientLoader.html">ClientLoader</a></span>, <span><a href="class/src/client/ClientLocator.es6.js~ClientLocator.html">ClientLocator</a></span>, <span><a href="class/src/client/ClientOrientation.es6.js~ClientOrientation.html">ClientOrientation</a></span>, <span><a href="class/src/client/ClientPerformance.es6.js~ClientPerformance.html">ClientPerformance</a></span>, <span><a href="class/src/client/ClientPlacer.es6.js~ClientPlacer.html">ClientPlacer</a></span>, <span><a href="class/src/client/ClientPlatform.es6.js~ClientPlatform.html">ClientPlatform</a></span>, <span><a href="class/src/client/ClientSelector.es6.js~ClientSelector.html">ClientSelector</a></span>, <span><a href="class/src/client/ClientSetup.es6.js~ClientSetup.html">ClientSetup</a></span>, <span><a href="class/src/client/ClientSpace.es6.js~ClientSpace.html">ClientSpace</a></span>, <span><a href="class/src/client/ClientSurvey.es6.js~ClientSurvey.html">ClientSurvey</a></span>, <span><a href="class/src/client/ClientSync.es6.js~ClientSync.html">ClientSync</a></span>, <span><a href="class/src/client/ClientFilelist.es6.js~Filelist.html">Filelist</a></span></div></div>
   
   
   
@@ -85,10 +95,10 @@
 
   
   
-  <div class="description" data-ice="description"><p>The <code>ClientModule</code> base class is used to create a <em>Soundworks</em> module on the client side.
-Each module should have a &lt;span&gt;&lt;a href=&quot;class/src/client/ClientModule.es6.js~ClientModule.html#instance-method-start&quot;&gt;ClientModule#start&lt;/a&gt;&lt;/span&gt; and a &lt;span&gt;&lt;a href=&quot;class/src/client/ClientModule.es6.js~ClientModule.html#instance-method-done&quot;&gt;ClientModule#done&lt;/a&gt;&lt;/span&gt; method.
-The &lt;span&gt;&lt;a href=&quot;class/src/client/ClientModule.es6.js~ClientModule.html#instance-method-done&quot;&gt;ClientModule#done&lt;/a&gt;&lt;/span&gt; method must be called when the module can hand over the control to the subsequent modules (<em>i.e.</em> when the module has done its duty, or when it may run in the background for the rest of the scenario after it finished its initialization process).
-The base class optionally creates a view &#x2014; a fullscreen <code>div</code> accessible through the <code>this.view</code> attribute &#x2014; that is added to the DOM when the module is started and removed when the module calls its &lt;span&gt;&lt;a href=&quot;class/src/client/ClientModule.es6.js~ClientModule.html#instance-method-done&quot;&gt;ClientModule#done&lt;/a&gt;&lt;/span&gt; method.
+  <div class="description" data-ice="description"><p>The <span><a href="class/src/client/ClientModule.es6.js~ClientModule.html">ClientModule</a></span> base class is used to create a <em>Soundworks</em> module on the client side.
+Each module should have a <span><a href="class/src/client/ClientModule.es6.js~ClientModule.html#instance-method-start">ClientModule#start</a></span> and a <span><a href="class/src/client/ClientModule.es6.js~ClientModule.html#instance-method-done">ClientModule#done</a></span> method.
+The <span><a href="class/src/client/ClientModule.es6.js~ClientModule.html#instance-method-done">ClientModule#done</a></span> method must be called when the module can hand over the control to the subsequent modules (<em>i.e.</em> when the module has done its duty, or when it may run in the background for the rest of the scenario after it finished its initialization process).
+The base class optionally creates a view &#x2014; a fullscreen <code>div</code> accessible through the <span><a href="class/src/client/ClientModule.es6.js~ClientModule.html#instance-member-view">ClientModule.view</a></span> attribute &#x2014; that is added to the DOM when the module is started and removed when the module calls its <span><a href="class/src/client/ClientModule.es6.js~ClientModule.html#instance-method-done">ClientModule#done</a></span> method.
 (Specifically, the <code>view</code> element is added to the <code>#container</code> DOM element.)</p>
 </div>
 
@@ -294,7 +304,7 @@ The base class optionally creates a view &#x2014; a fullscreen <code>div</code> 
       <div>
         
         
-        <div data-ice="description"><p>Removes the centered HTML content (set by &lt;span&gt;&lt;a href=&quot;class/src/client/ClientModule.es6.js~ClientModule.html#instance-method-setCenteredViewContent&quot;&gt;ClientModule#setCenteredViewContent&lt;/a&gt;&lt;/span&gt;) from the <code>view</code>.</p>
+        <div data-ice="description"><p>Removes the centered HTML content (set by <span><a href="class/src/client/ClientModule.es6.js~ClientModule.html#instance-method-setCenteredViewContent">ClientModule#setCenteredViewContent</a></span>) from the <code>view</code>.</p>
 </div>
       </div>
     </td>
@@ -320,7 +330,7 @@ The base class optionally creates a view &#x2014; a fullscreen <code>div</code> 
       <div>
         
         
-        <div data-ice="description"><p>Resets the module to the state it had before calling the &lt;span&gt;&lt;a href=&quot;class/src/client/ClientModule.es6.js~ClientModule.html#instance-method-start&quot;&gt;ClientModule#start&lt;/a&gt;&lt;/span&gt; method.</p>
+        <div data-ice="description"><p>Resets the module to the state it had before calling the <span><a href="class/src/client/ClientModule.es6.js~ClientModule.html#instance-method-start">ClientModule#start</a></span> method.</p>
 </div>
       </div>
     </td>
@@ -557,8 +567,8 @@ The method should be called only if the module has a <code>view</code>.</p>
   <div data-ice="description"><p>View of the module.
 The view is a DOM element (a full screen <code>div</code>) in which the content of the module is displayed.
 This element is a child of the main container <code>div#container</code>, which is the only child of the <code>body</code> element.
-A module may or may not have a view, as indicated by the argument <code>hasView:Boolean</code> of the &lt;span&gt;&lt;a href=&quot;class/src/client/ClientModule.es6.js~ClientModule.html#instance-constructor-constructor&quot;&gt;ClientModule#constructor&lt;/a&gt;&lt;/span&gt;.
-When that is the case, the view is created and added to the DOM when the &lt;span&gt;&lt;a href=&quot;class/src/client/ClientModule.es6.js~ClientModule.html#instance-method-start&quot;&gt;ClientModule#start&lt;/a&gt;&lt;/span&gt; method is called, and is removed from the DOM when the &lt;span&gt;&lt;a href=&quot;class/src/client/ClientModule.es6.js~ClientModule.html#instance-method-done&quot;&gt;ClientModule#done&lt;/a&gt;&lt;/span&gt; method is called.</p>
+A module may or may not have a view, as indicated by the argument <code>hasView:Boolean</code> of the <span><a href="class/src/client/ClientModule.es6.js~ClientModule.html#instance-constructor-constructor">ClientModule#constructor</a></span>.
+When that is the case, the view is created and added to the DOM when the <span><a href="class/src/client/ClientModule.es6.js~ClientModule.html#instance-method-start">ClientModule#start</a></span> method is called, and is removed from the DOM when the <span><a href="class/src/client/ClientModule.es6.js~ClientModule.html#instance-method-done">ClientModule#done</a></span> method is called.</p>
 </div>
 
   
@@ -685,7 +695,7 @@ If the module has a <code>view</code>, the <code>done</code> method removes it f
   
   
   
-  <div data-ice="description"><p>Removes the centered HTML content (set by &lt;span&gt;&lt;a href=&quot;class/src/client/ClientModule.es6.js~ClientModule.html#instance-method-setCenteredViewContent&quot;&gt;ClientModule#setCenteredViewContent&lt;/a&gt;&lt;/span&gt;) from the <code>view</code>.</p>
+  <div data-ice="description"><p>Removes the centered HTML content (set by <span><a href="class/src/client/ClientModule.es6.js~ClientModule.html#instance-method-setCenteredViewContent">ClientModule#setCenteredViewContent</a></span>) from the <code>view</code>.</p>
 </div>
 
   
@@ -726,8 +736,8 @@ If the module has a <code>view</code>, the <code>done</code> method removes it f
   
   
   
-  <div data-ice="description"><p>Resets the module to the state it had before calling the &lt;span&gt;&lt;a href=&quot;class/src/client/ClientModule.es6.js~ClientModule.html#instance-method-start&quot;&gt;ClientModule#start&lt;/a&gt;&lt;/span&gt; method.</p>
-<p><strong>Note:</strong> the method is called automatically when necessary (for instance to reset the module after a server crash if the module had not called its &lt;span&gt;&lt;a href=&quot;class/src/client/ClientModule.es6.js~ClientModule.html#instance-method-done&quot;&gt;ClientModule#done&lt;/a&gt;&lt;/span&gt; method yet), you should not call it manually.</p>
+  <div data-ice="description"><p>Resets the module to the state it had before calling the <span><a href="class/src/client/ClientModule.es6.js~ClientModule.html#instance-method-start">ClientModule#start</a></span> method.</p>
+<p><strong>Note:</strong> the method is called automatically when necessary (for instance to reset the module after a server crash if the module had not called its <span><a href="class/src/client/ClientModule.es6.js~ClientModule.html#instance-method-done">ClientModule#done</a></span> method yet), you should not call it manually.</p>
 </div>
 
   
@@ -769,7 +779,7 @@ If the module has a <code>view</code>, the <code>done</code> method removes it f
   
   
   <div data-ice="description"><p>Restarts the module.</p>
-<p><strong>Note:</strong> the method is called automatically when necessary (for instance to restart the module after a server crash if the module had already called its &lt;span&gt;&lt;a href=&quot;class/src/client/ClientModule.es6.js~ClientModule.html#instance-method-done&quot;&gt;ClientModule#done&lt;/a&gt;&lt;/span&gt; method), you should not call it manually.</p>
+<p><strong>Note:</strong> the method is called automatically when necessary (for instance to restart the module after a server crash if the module had already called its <span><a href="class/src/client/ClientModule.es6.js~ClientModule.html#instance-method-done">ClientModule#done</a></span> method), you should not call it manually.</p>
 </div>
 
   
@@ -899,7 +909,7 @@ Additionally, if the module has a <code>view</code>, the <code>start</code> meth
 </div>
 
 <footer class="footer">
-  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.4.1)</span></a>
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.4.3)</span></a>
 </footer>
 
 <script src="script/search_index.js"></script>
