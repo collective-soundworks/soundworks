@@ -1,29 +1,30 @@
-/**
- * @fileoverview Soundworks client side check-in module
- * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
- */
 'use strict';
 
-var ClientModule = require('./ClientModule');
-var client = require('./client');
-// var input = require('./input');
+import client from './client.es6.js';
+import ClientModule from './ClientModule.es6.js';
 
-function instructions(label) {
-  return "<p>Go to</p>" +
-    "<div class='checkin-label circled'><span>" + label + "</span></div>" +
-    "<p><small>Touch the screen<br/>when you are ready.</small></p>";
-}
-
-class ClientLocator extends ClientModule {
+/**
+ * The `ClientLocator`module allows to indicate the approximate physical location of the client on a map via a dialog.
+ */
+export default class ClientLocator extends ClientModule {
+  /**
+   * Creates an instance of the class. Always has a view.
+   * @param {Object} [options={}] Options.
+   * @param {String} [options.name='locator'] Name of the module.
+   * @param {String} [options.color='black'] Background color of the `view`.
+   * @param {ClientSpace} [options.space=null] Space in which to indicate the approximate location.
+   * @param {Boolean} [options.showBackground=false] Indicates whether to show the space background image or not.
+   */
   constructor(options = {}) {
     super(options.name || 'locator', true, options.color);
 
-    this.select = options.select || 'automatic'; // 'automatic' | 'label' | 'location'
-    this.instructions = options.instructions || instructions;
+    /**
+     * The space in which to indicate the approximate location.
+     * @type {ClientSpace}
+     */
     this.space = options.space || null;
-    this.showBackground = options.showBackground ||  false;
 
-    this.label = null;
+    this._showBackground = options.showBackground || false;
 
     this._touchStartHandler = this._touchStartHandler.bind(this);
     this._touchMoveHandler = this._touchMoveHandler.bind(this);
@@ -72,6 +73,9 @@ class ClientLocator extends ClientModule {
     this._resize = this._resize.bind(this);
   }
 
+  /**
+   * Starts the module.
+   */
   start() {
     super.start();
 
@@ -81,11 +85,18 @@ class ClientLocator extends ClientModule {
     window.addEventListener('resize', this._resize);
   }
 
+  /**
+   * Done method.
+   * Removes the `'resize'` listener on the `window`.
+   */
   done() {
     window.removeEventListener('resize', this._resize);
     super.done();
   }
 
+  /**
+   * Resets the module to initial state.
+   */
   reset() {
     client.coordinates = null;
 
@@ -102,6 +113,9 @@ class ClientLocator extends ClientModule {
       this.space.reset();
   }
 
+  /**
+   * Restarts the module.
+   */
   restart() {
     super.restart();
     client.send(this.name + ':restart', client.coordinates);
@@ -125,7 +139,7 @@ class ClientLocator extends ClientModule {
     }
 
     this.space.display(this._surfaceDiv, {
-      showBackground: this.showBackground
+      showBackground: this._showBackground
     });
 
     // Let the participant select his or her location
@@ -214,5 +228,3 @@ class ClientLocator extends ClientModule {
     // TODO: handle out-of-bounds
   }
 }
-
-module.exports = ClientLocator;

@@ -3,7 +3,23 @@
 const EventEmitter = require('events').EventEmitter; // TODO: remove EventEmitter? (Implement our own listeners)
 
 /**
- * The `ServerPerformance` base class constitutes a basis on which to build a performance on the server side.
+ * The `ServerModule` base class is used to create a *Soundworks* module on the server side.
+ * Each module should have a {@link ServerModule#connect} and a {@link ServerModule#disconnect} method.
+ * Any module mapped to the type of client `clientType` (thanks to the {@link server#map} method) would call its {@link ServerModule#connect} method when such a client connects to the server, and its {@link ServerModule#disconnect} method when such a client disconnects from the server.
+ * @example
+ * class MyModule extends serverSide.Module {
+ *   constructor('my-module-name') {
+ *     ... // anything the constructor needs
+ *   }
+ *
+ *   connect(client) {
+ *     ... // what the module has to do when a client connects to the server
+ *   }
+ *
+ *   disconnect(client) {
+ *     ... // what the module has to do when a client disconnects from the server
+ *   }
+ * }
  */
 export default class ServerModule extends EventEmitter {
   /**
@@ -11,7 +27,7 @@ export default class ServerModule extends EventEmitter {
     * @param {Object} [options={}] The options.
     * @param {string} [options.name='unnamed'] The name of the module.
    */
-  constructor(name = 'unnamed') {
+  constructor(name) {
     super();
 
     /**

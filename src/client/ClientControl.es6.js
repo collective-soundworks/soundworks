@@ -1,11 +1,7 @@
-/**
- * @fileoverview Soundworks client side control module
- * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
- */
 'use strict';
 
-const ClientModule = require('./ClientModule');
-const client = require('./client');
+import client from './client.es6.js';
+import ClientModule from './ClientModule.es6.js';
 
 class ControlEvent {
   constructor(type, name, label) {

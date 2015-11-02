@@ -1,7 +1,3 @@
-/**
- * @fileoverview Soundworks client side time syncronization module
- * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
- */
 'use strict';
 
 const Sync = require('sync/client');

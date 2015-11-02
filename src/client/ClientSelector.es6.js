@@ -1,7 +1,7 @@
 'use strict';
 
-var client = require('./client');
-var ClientModule = require('./ClientModule');
+import client from './client.es6.js';
+import ClientModule from './ClientModule.es6.js';
 
 function toTitleCase(str) {
   return str.replace(/\w\S*/g, function(txt) {
@@ -21,15 +21,51 @@ function convertName(name) {
   return n;
 }
 
-class ClientSelector extends ClientModule {
+/**
+ * The `ClientSelector` module allows to select one or several options among a list.
+ */
+export default class ClientSelector extends ClientModule {
+  /**
+   * Creates an instance of the class.
+   * @param {Object} [options={}] Options.
+   * @param {String} [options.name='selector'] Name of the module.
+   * @param {DOMElement} [options.view] The view in which to display the list.
+   * @param {String} [options.color='black'] Background color of the `view`.
+   * @param {String[]} [options.labels=[]] Labels of the list options.
+   * @param {String[]} [options.states=[]] States of each list option. Authorized values are:
+   * - '`disabled`': the option is disabled (unselectable)
+   * - '`unselected`': the option is unselected.
+   * - `'selected'`: the options is selected.
+   * @param {String} [options.defaultState='unselected'] Default state of the list options. Authorized values are:
+   * - '`disabled`': the option is disabled (unselectable)
+   * - '`unselected`': the option is unselected.
+   * - `'selected'`: the options is selected.
+   */
   constructor(options = {}) {
-    super(options.name || 'selector', !options.view);
+    super(options.name || 'selector', !options.view, options.color || 'black');
 
+    /**
+     * Labels of the options.
+     * @type {String[]}
+     */
     this.labels = options.labels || [];
-    this.states = options.states || [];
-    this.defaultState = options.defaultState || 'unselected';
 
+    /**
+     * Current states of the options.
+     * @type {String[]}
+     */
+    this.states = options.states || [];
+
+    /**
+     * Maximum number of simultaneously selected options.
+     * @type {Number}
+     */
     this.maxSelected = 1;
+
+    /**
+     * Currently selected options.
+     * @type {String[]}
+     */
     this.selected = [];
 
     if (typeof options.maxSelected !== 'undefined')
@@ -40,6 +76,7 @@ class ClientSelector extends ClientModule {
       this.isDone = undefined; // skip super.done()
     }
 
+    this._defaultState = options.defaultState || 'unselected';
     this._buttons = [];
     this._listeners = [];
   }
@@ -68,12 +105,16 @@ class ClientSelector extends ClientModule {
     this.view.appendChild(button);
   }
 
+  /**
+   * Starts the module.
+   * @private
+   */
   start() {
     super.start();
 
     for (let i = 0; i < this._labels.length; i++) {
       let label = this._labels[i];
-      let state = this.defaultState;
+      let state = this._defaultState;
 
       if (i < this.states.length)
         state = this.states[i];
@@ -84,20 +125,34 @@ class ClientSelector extends ClientModule {
     }
   }
 
+  /**
+   * Resets the module.
+   * @private
+   */
   reset() {
     let buttons = this.view.querySelectorAll('.btn');
     for (let i = 0; i < buttons.length; i++)
       this.view.removeChild(buttons[i]);
-     
+
     this.selected = [];
     this._buttons = [];
-    this._listeners = []; 
+    this._listeners = [];
   }
 
+  /**
+   * Restarts the module.
+   * @private
+   */
   restart() {
     // TODO
   }
 
+  /**
+   * Selects an option.
+   * @param {Number} index The option index to select.
+   * @emits {'selector:select', index:Number, label:String} The index and label of the selected option.
+   * @return {Boolean} Indicates whether the option was successfully selected or not.
+   */
   select(index) {
     let state = this.states[index];
 
@@ -126,6 +181,12 @@ class ClientSelector extends ClientModule {
     return false;
   }
 
+  /**
+   * Unselects an option.
+   * @param {Number} index The option index to unselect.
+   * @emits {'selector:unselect', index:Number, label:String} The index and label of the unselected option.
+   * @return {Boolean} Indicates whether the option was successfully unselected or not.
+   */
   unselect(index) {
     let state = this.states[index];
 
@@ -148,10 +209,19 @@ class ClientSelector extends ClientModule {
     return true;
   }
 
+  /**
+   * Toggles an option.
+   * @param {Number} index The index of the option to toggle.
+   * @return {Boolean} Indicates whether the option was successfully toggled or not.
+   */
   toggle(index) {
     return this.select(index) || this.unselect(index);
   }
 
+  /**
+   * Enables an option (and sets it to `'unselected'`).
+   * @param {Number} index The option index to enable.
+   */
   enable(index) {
     let state = this.states[index];
 
@@ -164,12 +234,16 @@ class ClientSelector extends ClientModule {
       let button = this._buttons[index];
       button.classList.remove('disabled');
       if (client.platform.isMobile)
-        button.addEventListener('touchstart', listener, false);  
+        button.addEventListener('touchstart', listener, false);
       else
         button.addEventListener('click', listener, false);
     }
   }
 
+  /**
+   * Disables an option (and unselects it before if needed).
+   * @param {Number} index The option index to disable.
+   */
   disable(index) {
     let state = this.states[index];
 
@@ -189,13 +263,19 @@ class ClientSelector extends ClientModule {
     }
   }
 
+  /**
+   * Sets the labels of the options.
+   * @param {String[]} list The list of options.
+   */
   set labels(list) {
     this._labels = list;
   }
 
+  /**
+   * Gets the labels of the options.
+   * @type {String[]}
+   */
   get labels() {
     return this._labels;
   }
 }
-
-module.exports = ClientSelector;

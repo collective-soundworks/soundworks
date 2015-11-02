@@ -7382,10 +7382,10 @@
       "trailingComments": [
         {
           "type": "Block",
-          "value": "*\n * The `serial` method returns a `ClientModule` that starts the given `...modules` in series. After starting the first module (by calling its `start` method), the next module in the series is started (with its `start` method) when the last module called its `done` method. When the last module calls `done`, the returned serial module calls its own `done` method.\n * **Note:** you can compound serial module sequences with parallel module combinations (*e.g.* `client.serial(module1, client.parallel(module2, module3), module4);`).\n * @deprecated Use the new API with the {@link start} method.\n * @param {...ClientModule} ...modules The modules to run in serial.\n * @return {Promise} [description]\n * @todo Clarify return value\n ",
+          "value": "*\n * The `serial` method returns a `ClientModule` that starts the given `...modules` in series. After starting the first module (by calling its `start` method), the next module in the series is started (with its `start` method) when the last module called its `done` method. When the last module calls `done`, the returned serial module calls its own `done` method.\n * \n * **Note:** you can compound serial module sequences with parallel module combinations (*e.g.* `client.serial(module1, client.parallel(module2, module3), module4);`).\n * @deprecated Use the new API with the {@link start} method.\n * @param {...ClientModule} ...modules The modules to run in serial.\n * @return {Promise} [description]\n * @todo Clarify return value\n ",
           "range": [
             3755,
-            4490
+            4494
           ],
           "loc": {
             "start": {
@@ -7393,7 +7393,7 @@
               "column": 0
             },
             "end": {
-              "line": 140,
+              "line": 141,
               "column": 3
             }
           }
@@ -7406,16 +7406,16 @@
         "type": "Identifier",
         "name": "serial",
         "range": [
-          4500,
-          4506
+          4504,
+          4510
         ],
         "loc": {
           "start": {
-            "line": 141,
+            "line": 142,
             "column": 9
           },
           "end": {
-            "line": 141,
+            "line": 142,
             "column": 15
           }
         }
@@ -7427,31 +7427,31 @@
             "type": "Identifier",
             "name": "modules",
             "range": [
-              4510,
-              4517
+              4514,
+              4521
             ],
             "loc": {
               "start": {
-                "line": 141,
+                "line": 142,
                 "column": 19
               },
               "end": {
-                "line": 141,
+                "line": 142,
                 "column": 26
               }
             }
           },
           "range": [
-            4507,
-            4517
+            4511,
+            4521
           ],
           "loc": {
             "start": {
-              "line": 141,
+              "line": 142,
               "column": 16
             },
             "end": {
-              "line": 141,
+              "line": 142,
               "column": 26
             }
           }
@@ -7471,16 +7471,16 @@
                   "type": "Identifier",
                   "name": "console",
                   "range": [
-                    4523,
-                    4530
+                    4527,
+                    4534
                   ],
                   "loc": {
                     "start": {
-                      "line": 142,
+                      "line": 143,
                       "column": 2
                     },
                     "end": {
-                      "line": 142,
+                      "line": 143,
                       "column": 9
                     }
                   }
@@ -7489,31 +7489,31 @@
                   "type": "Identifier",
                   "name": "log",
                   "range": [
-                    4531,
-                    4534
+                    4535,
+                    4538
                   ],
                   "loc": {
                     "start": {
-                      "line": 142,
+                      "line": 143,
                       "column": 10
                     },
                     "end": {
-                      "line": 142,
+                      "line": 143,
                       "column": 13
                     }
                   }
                 },
                 "range": [
-                  4523,
-                  4534
+                  4527,
+                  4538
                 ],
                 "loc": {
                   "start": {
-                    "line": 142,
+                    "line": 143,
                     "column": 2
                   },
                   "end": {
-                    "line": 142,
+                    "line": 143,
                     "column": 13
                   }
                 }
@@ -7524,47 +7524,47 @@
                   "value": "The function \"client.serial\" is deprecated. Please use the new API instead.",
                   "raw": "'The function \"client.serial\" is deprecated. Please use the new API instead.'",
                   "range": [
-                    4535,
-                    4612
+                    4539,
+                    4616
                   ],
                   "loc": {
                     "start": {
-                      "line": 142,
+                      "line": 143,
                       "column": 14
                     },
                     "end": {
-                      "line": 142,
+                      "line": 143,
                       "column": 91
                     }
                   }
                 }
               ],
               "range": [
-                4523,
-                4613
+                4527,
+                4617
               ],
               "loc": {
                 "start": {
-                  "line": 142,
+                  "line": 143,
                   "column": 2
                 },
                 "end": {
-                  "line": 142,
+                  "line": 143,
                   "column": 92
                 }
               }
             },
             "range": [
-              4523,
-              4614
+              4527,
+              4618
             ],
             "loc": {
               "start": {
-                "line": 142,
+                "line": 143,
                 "column": 2
               },
               "end": {
-                "line": 142,
+                "line": 143,
                 "column": 93
               }
             }
@@ -7580,16 +7580,16 @@
                   "type": "Identifier",
                   "name": "ClientModule",
                   "range": [
-                    4624,
-                    4636
+                    4628,
+                    4640
                   ],
                   "loc": {
                     "start": {
-                      "line": 143,
+                      "line": 144,
                       "column": 9
                     },
                     "end": {
-                      "line": 143,
+                      "line": 144,
                       "column": 21
                     }
                   }
@@ -7598,31 +7598,31 @@
                   "type": "Identifier",
                   "name": "sequential",
                   "range": [
-                    4637,
-                    4647
+                    4641,
+                    4651
                   ],
                   "loc": {
                     "start": {
-                      "line": 143,
+                      "line": 144,
                       "column": 22
                     },
                     "end": {
-                      "line": 143,
+                      "line": 144,
                       "column": 32
                     }
                   }
                 },
                 "range": [
-                  4624,
-                  4647
+                  4628,
+                  4651
                 ],
                 "loc": {
                   "start": {
-                    "line": 143,
+                    "line": 144,
                     "column": 9
                   },
                   "end": {
-                    "line": 143,
+                    "line": 144,
                     "column": 32
                   }
                 }
@@ -7634,78 +7634,78 @@
                     "type": "Identifier",
                     "name": "modules",
                     "range": [
-                      4651,
-                      4658
+                      4655,
+                      4662
                     ],
                     "loc": {
                       "start": {
-                        "line": 143,
+                        "line": 144,
                         "column": 36
                       },
                       "end": {
-                        "line": 143,
+                        "line": 144,
                         "column": 43
                       }
                     }
                   },
                   "range": [
-                    4648,
-                    4658
+                    4652,
+                    4662
                   ],
                   "loc": {
                     "start": {
-                      "line": 143,
+                      "line": 144,
                       "column": 33
                     },
                     "end": {
-                      "line": 143,
+                      "line": 144,
                       "column": 43
                     }
                   }
                 }
               ],
               "range": [
-                4624,
-                4659
+                4628,
+                4663
               ],
               "loc": {
                 "start": {
-                  "line": 143,
+                  "line": 144,
                   "column": 9
                 },
                 "end": {
-                  "line": 143,
+                  "line": 144,
                   "column": 44
                 }
               }
             },
             "range": [
-              4617,
-              4660
+              4621,
+              4664
             ],
             "loc": {
               "start": {
-                "line": 143,
+                "line": 144,
                 "column": 2
               },
               "end": {
-                "line": 143,
+                "line": 144,
                 "column": 45
               }
             }
           }
         ],
         "range": [
-          4519,
-          4662
+          4523,
+          4666
         ],
         "loc": {
           "start": {
-            "line": 141,
+            "line": 142,
             "column": 28
           },
           "end": {
-            "line": 144,
+            "line": 145,
             "column": 1
           }
         }
@@ -7713,26 +7713,26 @@
       "generator": false,
       "expression": false,
       "range": [
-        4491,
-        4662
+        4495,
+        4666
       ],
       "loc": {
         "start": {
-          "line": 141,
+          "line": 142,
           "column": 0
         },
         "end": {
-          "line": 144,
+          "line": 145,
           "column": 1
         }
       },
       "leadingComments": [
         {
           "type": "Block",
-          "value": "*\n * The `serial` method returns a `ClientModule` that starts the given `...modules` in series. After starting the first module (by calling its `start` method), the next module in the series is started (with its `start` method) when the last module called its `done` method. When the last module calls `done`, the returned serial module calls its own `done` method.\n * **Note:** you can compound serial module sequences with parallel module combinations (*e.g.* `client.serial(module1, client.parallel(module2, module3), module4);`).\n * @deprecated Use the new API with the {@link start} method.\n * @param {...ClientModule} ...modules The modules to run in serial.\n * @return {Promise} [description]\n * @todo Clarify return value\n ",
+          "value": "*\n * The `serial` method returns a `ClientModule` that starts the given `...modules` in series. After starting the first module (by calling its `start` method), the next module in the series is started (with its `start` method) when the last module called its `done` method. When the last module calls `done`, the returned serial module calls its own `done` method.\n * \n * **Note:** you can compound serial module sequences with parallel module combinations (*e.g.* `client.serial(module1, client.parallel(module2, module3), module4);`).\n * @deprecated Use the new API with the {@link start} method.\n * @param {...ClientModule} ...modules The modules to run in serial.\n * @return {Promise} [description]\n * @todo Clarify return value\n ",
           "range": [
             3755,
-            4490
+            4494
           ],
           "loc": {
             "start": {
@@ -7740,7 +7740,7 @@
               "column": 0
             },
             "end": {
-              "line": 140,
+              "line": 141,
               "column": 3
             }
           }
@@ -7749,18 +7749,18 @@
       "trailingComments": [
         {
           "type": "Block",
-          "value": "*\nThe `ClientModule` returned by the `parallel` method starts the given `...modules` in parallel (with their `start` methods), and calls its `done` method after all modules called their own `done` methods.\n**Note:** you can compound parallel module combinations with serial module sequences (*e.g.* `client.parallel(module1, client.serial(module2, module3), module4);`).\n**Note:** the `view` of a module is always full screen, so in the case where modules run in parallel, their `view`s are stacked on top of each other using the `z-index` CSS property. We use the order of the `parallel` method's arguments to determine the order of the stack (*e.g.* in `client.parallel(module1, module2, module3)`, the `view` of `module1` is displayed on top of the `view` of `module2`, which is displayed on top of the `view` of `module3`).\n * @deprecated Use the new API with the {@link start} method.\n * @param {...ClientModule} modules The modules to run in parallel.\n * @return {Promise} [description]\n * @todo Clarify return value\n ",
+          "value": "*\n * The `ClientModule` returned by the `parallel` method starts the given `...modules` in parallel (with their `start` methods), and calls its `done` method after all modules called their own `done` methods.\n *\n * **Note:** you can compound parallel module combinations with serial module sequences (*e.g.* `client.parallel(module1, client.serial(module2, module3), module4);`).\n *\n * **Note:** the `view` of a module is always full screen, so in the case where modules run in parallel, their `view`s are stacked on top of each other using the `z-index` CSS property.\n * We use the order of the `parallel` method's arguments to determine the order of the stack (*e.g.* in `client.parallel(module1, module2, module3)`, the `view` of `module1` is displayed on top of the `view` of `module2`, which is displayed on top of the `view` of `module3`).\n * @deprecated Use the new API with the {@link start} method.\n * @param {...ClientModule} modules The modules to run in parallel.\n * @return {Promise} [description]\n * @todo Clarify return value\n ",
           "range": [
-            4664,
-            5692
+            4668,
+            5714
           ],
           "loc": {
             "start": {
-              "line": 146,
+              "line": 147,
               "column": 0
             },
             "end": {
-              "line": 154,
+              "line": 158,
               "column": 3
             }
           }
@@ -7773,16 +7773,16 @@
         "type": "Identifier",
         "name": "parallel",
         "range": [
-          5702,
-          5710
+          5724,
+          5732
         ],
         "loc": {
           "start": {
-            "line": 155,
+            "line": 159,
             "column": 9
           },
           "end": {
-            "line": 155,
+            "line": 159,
             "column": 17
           }
         }
@@ -7794,31 +7794,31 @@
             "type": "Identifier",
             "name": "modules",
             "range": [
-              5714,
-              5721
+              5736,
+              5743
             ],
             "loc": {
               "start": {
-                "line": 155,
+                "line": 159,
                 "column": 21
               },
               "end": {
-                "line": 155,
+                "line": 159,
                 "column": 28
               }
             }
           },
           "range": [
-            5711,
-            5721
+            5733,
+            5743
           ],
           "loc": {
             "start": {
-              "line": 155,
+              "line": 159,
               "column": 18
             },
             "end": {
-              "line": 155,
+              "line": 159,
               "column": 28
             }
           }
@@ -7838,16 +7838,16 @@
                   "type": "Identifier",
                   "name": "console",
                   "range": [
-                    5727,
-                    5734
+                    5749,
+                    5756
                   ],
                   "loc": {
                     "start": {
-                      "line": 156,
+                      "line": 160,
                       "column": 2
                     },
                     "end": {
-                      "line": 156,
+                      "line": 160,
                       "column": 9
                     }
                   }
@@ -7856,31 +7856,31 @@
                   "type": "Identifier",
                   "name": "log",
                   "range": [
-                    5735,
-                    5738
+                    5757,
+                    5760
                   ],
                   "loc": {
                     "start": {
-                      "line": 156,
+                      "line": 160,
                       "column": 10
                     },
                     "end": {
-                      "line": 156,
+                      "line": 160,
                       "column": 13
                     }
                   }
                 },
                 "range": [
-                  5727,
-                  5738
+                  5749,
+                  5760
                 ],
                 "loc": {
                   "start": {
-                    "line": 156,
+                    "line": 160,
                     "column": 2
                   },
                   "end": {
-                    "line": 156,
+                    "line": 160,
                     "column": 13
                   }
                 }
@@ -7891,47 +7891,47 @@
                   "value": "The function \"client.parallel\" is deprecated. Please use the new API instead.",
                   "raw": "'The function \"client.parallel\" is deprecated. Please use the new API instead.'",
                   "range": [
-                    5739,
-                    5818
+                    5761,
+                    5840
                   ],
                   "loc": {
                     "start": {
-                      "line": 156,
+                      "line": 160,
                       "column": 14
                     },
                     "end": {
-                      "line": 156,
+                      "line": 160,
                       "column": 93
                     }
                   }
                 }
               ],
               "range": [
-                5727,
-                5819
+                5749,
+                5841
               ],
               "loc": {
                 "start": {
-                  "line": 156,
+                  "line": 160,
                   "column": 2
                 },
                 "end": {
-                  "line": 156,
+                  "line": 160,
                   "column": 94
                 }
               }
             },
             "range": [
-              5727,
-              5820
+              5749,
+              5842
             ],
             "loc": {
               "start": {
-                "line": 156,
+                "line": 160,
                 "column": 2
               },
               "end": {
-                "line": 156,
+                "line": 160,
                 "column": 95
               }
             }
@@ -7947,16 +7947,16 @@
                   "type": "Identifier",
                   "name": "ClientModule",
                   "range": [
-                    5830,
-                    5842
+                    5852,
+                    5864
                   ],
                   "loc": {
                     "start": {
-                      "line": 157,
+                      "line": 161,
                       "column": 9
                     },
                     "end": {
-                      "line": 157,
+                      "line": 161,
                       "column": 21
                     }
                   }
@@ -7965,31 +7965,31 @@
                   "type": "Identifier",
                   "name": "parallel",
                   "range": [
-                    5843,
-                    5851
+                    5865,
+                    5873
                   ],
                   "loc": {
                     "start": {
-                      "line": 157,
+                      "line": 161,
                       "column": 22
                     },
                     "end": {
-                      "line": 157,
+                      "line": 161,
                       "column": 30
                     }
                   }
                 },
                 "range": [
-                  5830,
-                  5851
+                  5852,
+                  5873
                 ],
                 "loc": {
                   "start": {
-                    "line": 157,
+                    "line": 161,
                     "column": 9
                   },
                   "end": {
-                    "line": 157,
+                    "line": 161,
                     "column": 30
                   }
                 }
@@ -8001,78 +8001,78 @@
                     "type": "Identifier",
                     "name": "modules",
                     "range": [
-                      5855,
-                      5862
+                      5877,
+                      5884
                     ],
                     "loc": {
                       "start": {
-                        "line": 157,
+                        "line": 161,
                         "column": 34
                       },
                       "end": {
-                        "line": 157,
+                        "line": 161,
                         "column": 41
                       }
                     }
                   },
                   "range": [
-                    5852,
-                    5862
+                    5874,
+                    5884
                   ],
                   "loc": {
                     "start": {
-                      "line": 157,
+                      "line": 161,
                       "column": 31
                     },
                     "end": {
-                      "line": 157,
+                      "line": 161,
                       "column": 41
                     }
                   }
                 }
               ],
               "range": [
-                5830,
-                5863
+                5852,
+                5885
               ],
               "loc": {
                 "start": {
-                  "line": 157,
+                  "line": 161,
                   "column": 9
                 },
                 "end": {
-                  "line": 157,
+                  "line": 161,
                   "column": 42
                 }
               }
             },
             "range": [
-              5823,
-              5864
+              5845,
+              5886
             ],
             "loc": {
               "start": {
-                "line": 157,
+                "line": 161,
                 "column": 2
               },
               "end": {
-                "line": 157,
+                "line": 161,
                 "column": 43
               }
             }
           }
         ],
         "range": [
-          5723,
-          5866
+          5745,
+          5888
         ],
         "loc": {
           "start": {
-            "line": 155,
+            "line": 159,
             "column": 30
           },
           "end": {
-            "line": 158,
+            "line": 162,
             "column": 1
           }
         }
@@ -8080,34 +8080,34 @@
       "generator": false,
       "expression": false,
       "range": [
-        5693,
-        5866
+        5715,
+        5888
       ],
       "loc": {
         "start": {
-          "line": 155,
+          "line": 159,
           "column": 0
         },
         "end": {
-          "line": 158,
+          "line": 162,
           "column": 1
         }
       },
       "leadingComments": [
         {
           "type": "Block",
-          "value": "*\nThe `ClientModule` returned by the `parallel` method starts the given `...modules` in parallel (with their `start` methods), and calls its `done` method after all modules called their own `done` methods.\n**Note:** you can compound parallel module combinations with serial module sequences (*e.g.* `client.parallel(module1, client.serial(module2, module3), module4);`).\n**Note:** the `view` of a module is always full screen, so in the case where modules run in parallel, their `view`s are stacked on top of each other using the `z-index` CSS property. We use the order of the `parallel` method's arguments to determine the order of the stack (*e.g.* in `client.parallel(module1, module2, module3)`, the `view` of `module1` is displayed on top of the `view` of `module2`, which is displayed on top of the `view` of `module3`).\n * @deprecated Use the new API with the {@link start} method.\n * @param {...ClientModule} modules The modules to run in parallel.\n * @return {Promise} [description]\n * @todo Clarify return value\n ",
+          "value": "*\n * The `ClientModule` returned by the `parallel` method starts the given `...modules` in parallel (with their `start` methods), and calls its `done` method after all modules called their own `done` methods.\n *\n * **Note:** you can compound parallel module combinations with serial module sequences (*e.g.* `client.parallel(module1, client.serial(module2, module3), module4);`).\n *\n * **Note:** the `view` of a module is always full screen, so in the case where modules run in parallel, their `view`s are stacked on top of each other using the `z-index` CSS property.\n * We use the order of the `parallel` method's arguments to determine the order of the stack (*e.g.* in `client.parallel(module1, module2, module3)`, the `view` of `module1` is displayed on top of the `view` of `module2`, which is displayed on top of the `view` of `module3`).\n * @deprecated Use the new API with the {@link start} method.\n * @param {...ClientModule} modules The modules to run in parallel.\n * @return {Promise} [description]\n * @todo Clarify return value\n ",
           "range": [
-            4664,
-            5692
+            4668,
+            5714
           ],
           "loc": {
             "start": {
-              "line": 146,
+              "line": 147,
               "column": 0
             },
             "end": {
-              "line": 154,
+              "line": 158,
               "column": 3
             }
           }
@@ -8118,16 +8118,16 @@
           "type": "Block",
           "value": "*\n * Sends a WebSocket message to the server.\n *\n * **Note:** on the server side, the server receives the message with the command {@link ServerClient#receive}.\n * @param {String} msg Name of the message to send.\n * @param {...*} args Arguments of the message (as many as needed, of any type).\n ",
           "range": [
-            5868,
-            6167
+            5890,
+            6189
           ],
           "loc": {
             "start": {
-              "line": 160,
+              "line": 164,
               "column": 0
             },
             "end": {
-              "line": 166,
+              "line": 170,
               "column": 3
             }
           }
@@ -8140,16 +8140,16 @@
         "type": "Identifier",
         "name": "send",
         "range": [
-          6177,
-          6181
+          6199,
+          6203
         ],
         "loc": {
           "start": {
-            "line": 167,
+            "line": 171,
             "column": 9
           },
           "end": {
-            "line": 167,
+            "line": 171,
             "column": 13
           }
         }
@@ -8159,16 +8159,16 @@
           "type": "Identifier",
           "name": "msg",
           "range": [
-            6182,
-            6185
+            6204,
+            6207
           ],
           "loc": {
             "start": {
-              "line": 167,
+              "line": 171,
               "column": 14
             },
             "end": {
-              "line": 167,
+              "line": 171,
               "column": 17
             }
           }
@@ -8179,31 +8179,31 @@
             "type": "Identifier",
             "name": "args",
             "range": [
-              6190,
-              6194
+              6212,
+              6216
             ],
             "loc": {
               "start": {
-                "line": 167,
+                "line": 171,
                 "column": 22
               },
               "end": {
-                "line": 167,
+                "line": 171,
                 "column": 26
               }
             }
           },
           "range": [
-            6187,
-            6194
+            6209,
+            6216
           ],
           "loc": {
             "start": {
-              "line": 167,
+              "line": 171,
               "column": 19
             },
             "end": {
-              "line": 167,
+              "line": 171,
               "column": 26
             }
           }
@@ -8221,16 +8221,16 @@
                 "type": "Identifier",
                 "name": "client",
                 "range": [
-                  6204,
-                  6210
+                  6226,
+                  6232
                 ],
                 "loc": {
                   "start": {
-                    "line": 168,
+                    "line": 172,
                     "column": 6
                   },
                   "end": {
-                    "line": 168,
+                    "line": 172,
                     "column": 12
                   }
                 }
@@ -8239,31 +8239,31 @@
                 "type": "Identifier",
                 "name": "socket",
                 "range": [
-                  6211,
-                  6217
+                  6233,
+                  6239
                 ],
                 "loc": {
                   "start": {
-                    "line": 168,
+                    "line": 172,
                     "column": 13
                   },
                   "end": {
-                    "line": 168,
+                    "line": 172,
                     "column": 19
                   }
                 }
               },
               "range": [
-                6204,
-                6217
+                6226,
+                6239
               ],
               "loc": {
                 "start": {
-                  "line": 168,
+                  "line": 172,
                   "column": 6
                 },
                 "end": {
-                  "line": 168,
+                  "line": 172,
                   "column": 19
                 }
               }
@@ -8282,16 +8282,16 @@
                       "type": "Identifier",
                       "name": "client",
                       "range": [
-                        6223,
-                        6229
+                        6245,
+                        6251
                       ],
                       "loc": {
                         "start": {
-                          "line": 169,
+                          "line": 173,
                           "column": 4
                         },
                         "end": {
-                          "line": 169,
+                          "line": 173,
                           "column": 10
                         }
                       }
@@ -8300,31 +8300,31 @@
                       "type": "Identifier",
                       "name": "socket",
                       "range": [
-                        6230,
-                        6236
+                        6252,
+                        6258
                       ],
                       "loc": {
                         "start": {
-                          "line": 169,
+                          "line": 173,
                           "column": 11
                         },
                         "end": {
-                          "line": 169,
+                          "line": 173,
                           "column": 17
                         }
                       }
                     },
                     "range": [
-                      6223,
-                      6236
+                      6245,
+                      6258
                     ],
                     "loc": {
                       "start": {
-                        "line": 169,
+                        "line": 173,
                         "column": 4
                       },
                       "end": {
-                        "line": 169,
+                        "line": 173,
                         "column": 17
                       }
                     }
@@ -8333,31 +8333,31 @@
                     "type": "Identifier",
                     "name": "emit",
                     "range": [
-                      6237,
-                      6241
+                      6259,
+                      6263
                     ],
                     "loc": {
                       "start": {
-                        "line": 169,
+                        "line": 173,
                         "column": 18
                       },
                       "end": {
-                        "line": 169,
+                        "line": 173,
                         "column": 22
                       }
                     }
                   },
                   "range": [
-                    6223,
-                    6241
+                    6245,
+                    6263
                   ],
                   "loc": {
                     "start": {
-                      "line": 169,
+                      "line": 173,
                       "column": 4
                     },
                     "end": {
-                      "line": 169,
+                      "line": 173,
                       "column": 22
                     }
                   }
@@ -8367,16 +8367,16 @@
                     "type": "Identifier",
                     "name": "msg",
                     "range": [
-                      6242,
-                      6245
+                      6264,
+                      6267
                     ],
                     "loc": {
                       "start": {
-                        "line": 169,
+                        "line": 173,
                         "column": 23
                       },
                       "end": {
-                        "line": 169,
+                        "line": 173,
                         "column": 26
                       }
                     }
@@ -8387,94 +8387,94 @@
                       "type": "Identifier",
                       "name": "args",
                       "range": [
-                        6250,
-                        6254
+                        6272,
+                        6276
                       ],
                       "loc": {
                         "start": {
-                          "line": 169,
+                          "line": 173,
                           "column": 31
                         },
                         "end": {
-                          "line": 169,
+                          "line": 173,
                           "column": 35
                         }
                       }
                     },
                     "range": [
-                      6247,
-                      6254
+                      6269,
+                      6276
                     ],
                     "loc": {
                       "start": {
-                        "line": 169,
+                        "line": 173,
                         "column": 28
                       },
                       "end": {
-                        "line": 169,
+                        "line": 173,
                         "column": 35
                       }
                     }
                   }
                 ],
                 "range": [
-                  6223,
-                  6255
+                  6245,
+                  6277
                 ],
                 "loc": {
                   "start": {
-                    "line": 169,
+                    "line": 173,
                     "column": 4
                   },
                   "end": {
-                    "line": 169,
+                    "line": 173,
                     "column": 36
                   }
                 }
               },
               "range": [
-                6223,
-                6256
+                6245,
+                6278
               ],
               "loc": {
                 "start": {
-                  "line": 169,
+                  "line": 173,
                   "column": 4
                 },
                 "end": {
-                  "line": 169,
+                  "line": 173,
                   "column": 37
                 }
               }
             },
             "alternate": null,
             "range": [
-              6200,
-              6256
+              6222,
+              6278
             ],
             "loc": {
               "start": {
-                "line": 168,
+                "line": 172,
                 "column": 2
               },
               "end": {
-                "line": 169,
+                "line": 173,
                 "column": 37
               }
             }
           }
         ],
         "range": [
-          6196,
-          6258
+          6218,
+          6280
         ],
         "loc": {
           "start": {
-            "line": 167,
+            "line": 171,
             "column": 28
           },
           "end": {
-            "line": 170,
+            "line": 174,
             "column": 1
           }
         }
@@ -8482,16 +8482,16 @@
       "generator": false,
       "expression": false,
       "range": [
-        6168,
-        6258
+        6190,
+        6280
       ],
       "loc": {
         "start": {
-          "line": 167,
+          "line": 171,
           "column": 0
         },
         "end": {
-          "line": 170,
+          "line": 174,
           "column": 1
         }
       },
@@ -8500,16 +8500,16 @@
           "type": "Block",
           "value": "*\n * Sends a WebSocket message to the server.\n *\n * **Note:** on the server side, the server receives the message with the command {@link ServerClient#receive}.\n * @param {String} msg Name of the message to send.\n * @param {...*} args Arguments of the message (as many as needed, of any type).\n ",
           "range": [
-            5868,
-            6167
+            5890,
+            6189
           ],
           "loc": {
             "start": {
-              "line": 160,
+              "line": 164,
               "column": 0
             },
             "end": {
-              "line": 166,
+              "line": 170,
               "column": 3
             }
           }
@@ -8520,16 +8520,16 @@
           "type": "Block",
           "value": "*\n * Executes a callback function when it receives a WebSocket message from the server.\n *\n * **Note:** on the server side, the server sends the message with the command {@link server.send}`.\n * @param {String} msg Name of the received message.\n * @param {Function} callback Callback function executed when the message is received.\n ",
           "range": [
-            6260,
-            6597
+            6282,
+            6619
           ],
           "loc": {
             "start": {
-              "line": 172,
+              "line": 176,
               "column": 0
             },
             "end": {
-              "line": 178,
+              "line": 182,
               "column": 3
             }
           }
@@ -8542,16 +8542,16 @@
         "type": "Identifier",
         "name": "receive",
         "range": [
-          6607,
-          6614
+          6629,
+          6636
         ],
         "loc": {
           "start": {
-            "line": 179,
+            "line": 183,
             "column": 9
           },
           "end": {
-            "line": 179,
+            "line": 183,
             "column": 16
           }
         }
@@ -8561,16 +8561,16 @@
           "type": "Identifier",
           "name": "msg",
           "range": [
-            6615,
-            6618
+            6637,
+            6640
           ],
           "loc": {
             "start": {
-              "line": 179,
+              "line": 183,
               "column": 17
             },
             "end": {
-              "line": 179,
+              "line": 183,
               "column": 20
             }
           }
@@ -8579,16 +8579,16 @@
           "type": "Identifier",
           "name": "callback",
           "range": [
-            6620,
-            6628
+            6642,
+            6650
           ],
           "loc": {
             "start": {
-              "line": 179,
+              "line": 183,
               "column": 22
             },
             "end": {
-              "line": 179,
+              "line": 183,
               "column": 30
             }
           }
@@ -8606,16 +8606,16 @@
                 "type": "Identifier",
                 "name": "client",
                 "range": [
-                  6638,
-                  6644
+                  6660,
+                  6666
                 ],
                 "loc": {
                   "start": {
-                    "line": 180,
+                    "line": 184,
                     "column": 6
                   },
                   "end": {
-                    "line": 180,
+                    "line": 184,
                     "column": 12
                   }
                 }
@@ -8624,31 +8624,31 @@
                 "type": "Identifier",
                 "name": "socket",
                 "range": [
-                  6645,
-                  6651
+                  6667,
+                  6673
                 ],
                 "loc": {
                   "start": {
-                    "line": 180,
+                    "line": 184,
                     "column": 13
                   },
                   "end": {
-                    "line": 180,
+                    "line": 184,
                     "column": 19
                   }
                 }
               },
               "range": [
-                6638,
-                6651
+                6660,
+                6673
               ],
               "loc": {
                 "start": {
-                  "line": 180,
+                  "line": 184,
                   "column": 6
                 },
                 "end": {
-                  "line": 180,
+                  "line": 184,
                   "column": 19
                 }
               }
@@ -8670,16 +8670,16 @@
                           "type": "Identifier",
                           "name": "client",
                           "range": [
-                            6659,
-                            6665
+                            6681,
+                            6687
                           ],
                           "loc": {
                             "start": {
-                              "line": 181,
+                              "line": 185,
                               "column": 4
                             },
                             "end": {
-                              "line": 181,
+                              "line": 185,
                               "column": 10
                             }
                           }
@@ -8688,31 +8688,31 @@
                           "type": "Identifier",
                           "name": "socket",
                           "range": [
-                            6666,
-                            6672
+                            6688,
+                            6694
                           ],
                           "loc": {
                             "start": {
-                              "line": 181,
+                              "line": 185,
                               "column": 11
                             },
                             "end": {
-                              "line": 181,
+                              "line": 185,
                               "column": 17
                             }
                           }
                         },
                         "range": [
-                          6659,
-                          6672
+                          6681,
+                          6694
                         ],
                         "loc": {
                           "start": {
-                            "line": 181,
+                            "line": 185,
                             "column": 4
                           },
                           "end": {
-                            "line": 181,
+                            "line": 185,
                             "column": 17
                           }
                         }
@@ -8721,31 +8721,31 @@
                         "type": "Identifier",
                         "name": "removeListener",
                         "range": [
-                          6673,
-                          6687
+                          6695,
+                          6709
                         ],
                         "loc": {
                           "start": {
-                            "line": 181,
+                            "line": 185,
                             "column": 18
                           },
                           "end": {
-                            "line": 181,
+                            "line": 185,
                             "column": 32
                           }
                         }
                       },
                       "range": [
-                        6659,
-                        6687
+                        6681,
+                        6709
                       ],
                       "loc": {
                         "start": {
-                          "line": 181,
+                          "line": 185,
                           "column": 4
                         },
                         "end": {
-                          "line": 181,
+                          "line": 185,
                           "column": 32
                         }
                       }
@@ -8755,16 +8755,16 @@
                         "type": "Identifier",
                         "name": "msg",
                         "range": [
-                          6688,
-                          6691
+                          6710,
+                          6713
                         ],
                         "loc": {
                           "start": {
-                            "line": 181,
+                            "line": 185,
                             "column": 33
                           },
                           "end": {
-                            "line": 181,
+                            "line": 185,
                             "column": 36
                           }
                         }
@@ -8773,47 +8773,47 @@
                         "type": "Identifier",
                         "name": "callback",
                         "range": [
-                          6693,
-                          6701
+                          6715,
+                          6723
                         ],
                         "loc": {
                           "start": {
-                            "line": 181,
+                            "line": 185,
                             "column": 38
                           },
                           "end": {
-                            "line": 181,
+                            "line": 185,
                             "column": 46
                           }
                         }
                       }
                     ],
                     "range": [
-                      6659,
-                      6702
+                      6681,
+                      6724
                     ],
                     "loc": {
                       "start": {
-                        "line": 181,
+                        "line": 185,
                         "column": 4
                       },
                       "end": {
-                        "line": 181,
+                        "line": 185,
                         "column": 47
                       }
                     }
                   },
                   "range": [
-                    6659,
-                    6703
+                    6681,
+                    6725
                   ],
                   "loc": {
                     "start": {
-                      "line": 181,
+                      "line": 185,
                       "column": 4
                     },
                     "end": {
-                      "line": 181,
+                      "line": 185,
                       "column": 48
                     }
                   }
@@ -8832,16 +8832,16 @@
                           "type": "Identifier",
                           "name": "client",
                           "range": [
-                            6708,
-                            6714
+                            6730,
+                            6736
                           ],
                           "loc": {
                             "start": {
-                              "line": 182,
+                              "line": 186,
                               "column": 4
                             },
                             "end": {
-                              "line": 182,
+                              "line": 186,
                               "column": 10
                             }
                           }
@@ -8850,31 +8850,31 @@
                           "type": "Identifier",
                           "name": "socket",
                           "range": [
-                            6715,
-                            6721
+                            6737,
+                            6743
                           ],
                           "loc": {
                             "start": {
-                              "line": 182,
+                              "line": 186,
                               "column": 11
                             },
                             "end": {
-                              "line": 182,
+                              "line": 186,
                               "column": 17
                             }
                           }
                         },
                         "range": [
-                          6708,
-                          6721
+                          6730,
+                          6743
                         ],
                         "loc": {
                           "start": {
-                            "line": 182,
+                            "line": 186,
                             "column": 4
                           },
                           "end": {
-                            "line": 182,
+                            "line": 186,
                             "column": 17
                           }
                         }
@@ -8883,31 +8883,31 @@
                         "type": "Identifier",
                         "name": "on",
                         "range": [
-                          6722,
-                          6724
+                          6744,
+                          6746
                         ],
                         "loc": {
                           "start": {
-                            "line": 182,
+                            "line": 186,
                             "column": 18
                           },
                           "end": {
-                            "line": 182,
+                            "line": 186,
                             "column": 20
                           }
                         }
                       },
                       "range": [
-                        6708,
-                        6724
+                        6730,
+                        6746
                       ],
                       "loc": {
                         "start": {
-                          "line": 182,
+                          "line": 186,
                           "column": 4
                         },
                         "end": {
-                          "line": 182,
+                          "line": 186,
                           "column": 20
                         }
                       }
@@ -8917,16 +8917,16 @@
                         "type": "Identifier",
                         "name": "msg",
                         "range": [
-                          6725,
-                          6728
+                          6747,
+                          6750
                         ],
                         "loc": {
                           "start": {
-                            "line": 182,
+                            "line": 186,
                             "column": 21
                           },
                           "end": {
-                            "line": 182,
+                            "line": 186,
                             "column": 24
                           }
                         }
@@ -8935,95 +8935,95 @@
                         "type": "Identifier",
                         "name": "callback",
                         "range": [
-                          6730,
-                          6738
+                          6752,
+                          6760
                         ],
                         "loc": {
                           "start": {
-                            "line": 182,
+                            "line": 186,
                             "column": 26
                           },
                           "end": {
-                            "line": 182,
+                            "line": 186,
                             "column": 34
                           }
                         }
                       }
                     ],
                     "range": [
-                      6708,
-                      6739
+                      6730,
+                      6761
                     ],
                     "loc": {
                       "start": {
-                        "line": 182,
+                        "line": 186,
                         "column": 4
                       },
                       "end": {
-                        "line": 182,
+                        "line": 186,
                         "column": 35
                       }
                     }
                   },
                   "range": [
-                    6708,
-                    6740
+                    6730,
+                    6762
                   ],
                   "loc": {
                     "start": {
-                      "line": 182,
+                      "line": 186,
                       "column": 4
                     },
                     "end": {
-                      "line": 182,
+                      "line": 186,
                       "column": 36
                     }
                   }
                 }
               ],
               "range": [
-                6653,
-                6744
+                6675,
+                6766
               ],
               "loc": {
                 "start": {
-                  "line": 180,
+                  "line": 184,
                   "column": 21
                 },
                 "end": {
-                  "line": 183,
+                  "line": 187,
                   "column": 3
                 }
               }
             },
             "alternate": null,
             "range": [
-              6634,
-              6744
+              6656,
+              6766
             ],
             "loc": {
               "start": {
-                "line": 180,
+                "line": 184,
                 "column": 2
               },
               "end": {
-                "line": 183,
+                "line": 187,
                 "column": 3
               }
             }
           }
         ],
         "range": [
-          6630,
-          6746
+          6652,
+          6768
         ],
         "loc": {
           "start": {
-            "line": 179,
+            "line": 183,
             "column": 32
           },
           "end": {
-            "line": 184,
+            "line": 188,
             "column": 1
           }
         }
@@ -9031,16 +9031,16 @@
       "generator": false,
       "expression": false,
       "range": [
-        6598,
-        6746
+        6620,
+        6768
       ],
       "loc": {
         "start": {
-          "line": 179,
+          "line": 183,
           "column": 0
         },
         "end": {
-          "line": 184,
+          "line": 188,
           "column": 1
         }
       },
@@ -9049,16 +9049,16 @@
           "type": "Block",
           "value": "*\n * Executes a callback function when it receives a WebSocket message from the server.\n *\n * **Note:** on the server side, the server sends the message with the command {@link server.send}`.\n * @param {String} msg Name of the received message.\n * @param {Function} callback Callback function executed when the message is received.\n ",
           "range": [
-            6260,
-            6597
+            6282,
+            6619
           ],
           "loc": {
             "start": {
-              "line": 172,
+              "line": 176,
               "column": 0
             },
             "end": {
-              "line": 178,
+              "line": 182,
               "column": 3
             }
           }
@@ -9069,16 +9069,16 @@
           "type": "Block",
           "value": "*\n * [removeListener description]\n * @private\n * @param {[type]} msg [description]\n * @param {Function} callback [description]\n * @todo doc\n ",
           "range": [
-            6748,
-            6893
+            6770,
+            6915
           ],
           "loc": {
             "start": {
-              "line": 186,
+              "line": 190,
               "column": 0
             },
             "end": {
-              "line": 192,
+              "line": 196,
               "column": 3
             }
           }
@@ -9091,16 +9091,16 @@
         "type": "Identifier",
         "name": "removeListener",
         "range": [
-          6903,
-          6917
+          6925,
+          6939
         ],
         "loc": {
           "start": {
-            "line": 193,
+            "line": 197,
             "column": 9
           },
           "end": {
-            "line": 193,
+            "line": 197,
             "column": 23
           }
         }
@@ -9110,16 +9110,16 @@
           "type": "Identifier",
           "name": "msg",
           "range": [
-            6918,
-            6921
+            6940,
+            6943
           ],
           "loc": {
             "start": {
-              "line": 193,
+              "line": 197,
               "column": 24
             },
             "end": {
-              "line": 193,
+              "line": 197,
               "column": 27
             }
           }
@@ -9128,16 +9128,16 @@
           "type": "Identifier",
           "name": "callback",
           "range": [
-            6923,
-            6931
+            6945,
+            6953
           ],
           "loc": {
             "start": {
-              "line": 193,
+              "line": 197,
               "column": 29
             },
             "end": {
-              "line": 193,
+              "line": 197,
               "column": 37
             }
           }
@@ -9155,16 +9155,16 @@
                 "type": "Identifier",
                 "name": "client",
                 "range": [
-                  6941,
-                  6947
+                  6963,
+                  6969
                 ],
                 "loc": {
                   "start": {
-                    "line": 194,
+                    "line": 198,
                     "column": 6
                   },
                   "end": {
-                    "line": 194,
+                    "line": 198,
                     "column": 12
                   }
                 }
@@ -9173,31 +9173,31 @@
                 "type": "Identifier",
                 "name": "socket",
                 "range": [
-                  6948,
-                  6954
+                  6970,
+                  6976
                 ],
                 "loc": {
                   "start": {
-                    "line": 194,
+                    "line": 198,
                     "column": 13
                   },
                   "end": {
-                    "line": 194,
+                    "line": 198,
                     "column": 19
                   }
                 }
               },
               "range": [
-                6941,
-                6954
+                6963,
+                6976
               ],
               "loc": {
                 "start": {
-                  "line": 194,
+                  "line": 198,
                   "column": 6
                 },
                 "end": {
-                  "line": 194,
+                  "line": 198,
                   "column": 19
                 }
               }
@@ -9216,16 +9216,16 @@
                       "type": "Identifier",
                       "name": "client",
                       "range": [
-                        6960,
-                        6966
+                        6982,
+                        6988
                       ],
                       "loc": {
                         "start": {
-                          "line": 195,
+                          "line": 199,
                           "column": 4
                         },
                         "end": {
-                          "line": 195,
+                          "line": 199,
                           "column": 10
                         }
                       }
@@ -9234,31 +9234,31 @@
                       "type": "Identifier",
                       "name": "socket",
                       "range": [
-                        6967,
-                        6973
+                        6989,
+                        6995
                       ],
                       "loc": {
                         "start": {
-                          "line": 195,
+                          "line": 199,
                           "column": 11
                         },
                         "end": {
-                          "line": 195,
+                          "line": 199,
                           "column": 17
                         }
                       }
                     },
                     "range": [
-                      6960,
-                      6973
+                      6982,
+                      6995
                     ],
                     "loc": {
                       "start": {
-                        "line": 195,
+                        "line": 199,
                         "column": 4
                       },
                       "end": {
-                        "line": 195,
+                        "line": 199,
                         "column": 17
                       }
                     }
@@ -9267,31 +9267,31 @@
                     "type": "Identifier",
                     "name": "removeListener",
                     "range": [
-                      6974,
-                      6988
+                      6996,
+                      7010
                     ],
                     "loc": {
                       "start": {
-                        "line": 195,
+                        "line": 199,
                         "column": 18
                       },
                       "end": {
-                        "line": 195,
+                        "line": 199,
                         "column": 32
                       }
                     }
                   },
                   "range": [
-                    6960,
-                    6988
+                    6982,
+                    7010
                   ],
                   "loc": {
                     "start": {
-                      "line": 195,
+                      "line": 199,
                       "column": 4
                     },
                     "end": {
-                      "line": 195,
+                      "line": 199,
                       "column": 32
                     }
                   }
@@ -9301,16 +9301,16 @@
                     "type": "Identifier",
                     "name": "msg",
                     "range": [
-                      6989,
-                      6992
+                      7011,
+                      7014
                     ],
                     "loc": {
                       "start": {
-                        "line": 195,
+                        "line": 199,
                         "column": 33
                       },
                       "end": {
-                        "line": 195,
+                        "line": 199,
                         "column": 36
                       }
                     }
@@ -9319,79 +9319,79 @@
                     "type": "Identifier",
                     "name": "callback",
                     "range": [
-                      6994,
-                      7002
+                      7016,
+                      7024
                     ],
                     "loc": {
                       "start": {
-                        "line": 195,
+                        "line": 199,
                         "column": 38
                       },
                       "end": {
-                        "line": 195,
+                        "line": 199,
                         "column": 46
                       }
                     }
                   }
                 ],
                 "range": [
-                  6960,
-                  7003
+                  6982,
+                  7025
                 ],
                 "loc": {
                   "start": {
-                    "line": 195,
+                    "line": 199,
                     "column": 4
                   },
                   "end": {
-                    "line": 195,
+                    "line": 199,
                     "column": 47
                   }
                 }
               },
               "range": [
-                6960,
-                7004
+                6982,
+                7026
               ],
               "loc": {
                 "start": {
-                  "line": 195,
+                  "line": 199,
                   "column": 4
                 },
                 "end": {
-                  "line": 195,
+                  "line": 199,
                   "column": 48
                 }
               }
             },
             "alternate": null,
             "range": [
-              6937,
-              7004
+              6959,
+              7026
             ],
             "loc": {
               "start": {
-                "line": 194,
+                "line": 198,
                 "column": 2
               },
               "end": {
-                "line": 195,
+                "line": 199,
                 "column": 48
               }
             }
           }
         ],
         "range": [
-          6933,
-          7006
+          6955,
+          7028
         ],
         "loc": {
           "start": {
-            "line": 193,
+            "line": 197,
             "column": 39
           },
           "end": {
-            "line": 196,
+            "line": 200,
             "column": 1
           }
         }
@@ -9399,16 +9399,16 @@
       "generator": false,
       "expression": false,
       "range": [
-        6894,
-        7006
+        6916,
+        7028
       ],
       "loc": {
         "start": {
-          "line": 193,
+          "line": 197,
           "column": 0
         },
         "end": {
-          "line": 196,
+          "line": 200,
           "column": 1
         }
       },
@@ -9417,16 +9417,16 @@
           "type": "Block",
           "value": "*\n * [removeListener description]\n * @private\n * @param {[type]} msg [description]\n * @param {Function} callback [description]\n * @todo doc\n ",
           "range": [
-            6748,
-            6893
+            6770,
+            6915
           ],
           "loc": {
             "start": {
-              "line": 186,
+              "line": 190,
               "column": 0
             },
             "end": {
-              "line": 192,
+              "line": 196,
               "column": 3
             }
           }
@@ -9439,31 +9439,31 @@
         "type": "Identifier",
         "name": "client",
         "range": [
-          7023,
-          7029
+          7045,
+          7051
         ],
         "loc": {
           "start": {
-            "line": 198,
+            "line": 202,
             "column": 15
           },
           "end": {
-            "line": 198,
+            "line": 202,
             "column": 21
           }
         }
       },
       "range": [
-        7008,
-        7030
+        7030,
+        7052
       ],
       "loc": {
         "start": {
-          "line": 198,
+          "line": 202,
           "column": 0
         },
         "end": {
-          "line": 198,
+          "line": 202,
           "column": 22
         }
       },
@@ -10700,16 +10700,16 @@
         ]
       },
       "range": [
-        7008,
-        7030
+        7030,
+        7052
       ],
       "loc": {
         "start": {
-          "line": 198,
+          "line": 202,
           "column": 0
         },
         "end": {
-          "line": 198,
+          "line": 202,
           "column": 22
         }
       }
@@ -10718,7 +10718,7 @@
   "sourceType": "module",
   "range": [
     0,
-    7030
+    7052
   ],
   "loc": {
     "start": {
@@ -10726,7 +10726,7 @@
       "column": 0
     },
     "end": {
-      "line": 198,
+      "line": 202,
       "column": 22
     }
   },
@@ -10985,10 +10985,10 @@
     },
     {
       "type": "Block",
-      "value": "*\n * The `serial` method returns a `ClientModule` that starts the given `...modules` in series. After starting the first module (by calling its `start` method), the next module in the series is started (with its `start` method) when the last module called its `done` method. When the last module calls `done`, the returned serial module calls its own `done` method.\n * **Note:** you can compound serial module sequences with parallel module combinations (*e.g.* `client.serial(module1, client.parallel(module2, module3), module4);`).\n * @deprecated Use the new API with the {@link start} method.\n * @param {...ClientModule} ...modules The modules to run in serial.\n * @return {Promise} [description]\n * @todo Clarify return value\n ",
+      "value": "*\n * The `serial` method returns a `ClientModule` that starts the given `...modules` in series. After starting the first module (by calling its `start` method), the next module in the series is started (with its `start` method) when the last module called its `done` method. When the last module calls `done`, the returned serial module calls its own `done` method.\n * \n * **Note:** you can compound serial module sequences with parallel module combinations (*e.g.* `client.serial(module1, client.parallel(module2, module3), module4);`).\n * @deprecated Use the new API with the {@link start} method.\n * @param {...ClientModule} ...modules The modules to run in serial.\n * @return {Promise} [description]\n * @todo Clarify return value\n ",
       "range": [
         3755,
-        4490
+        4494
       ],
       "loc": {
         "start": {
@@ -10996,25 +10996,25 @@
           "column": 0
         },
         "end": {
-          "line": 140,
+          "line": 141,
           "column": 3
         }
       }
     },
     {
       "type": "Block",
-      "value": "*\nThe `ClientModule` returned by the `parallel` method starts the given `...modules` in parallel (with their `start` methods), and calls its `done` method after all modules called their own `done` methods.\n**Note:** you can compound parallel module combinations with serial module sequences (*e.g.* `client.parallel(module1, client.serial(module2, module3), module4);`).\n**Note:** the `view` of a module is always full screen, so in the case where modules run in parallel, their `view`s are stacked on top of each other using the `z-index` CSS property. We use the order of the `parallel` method's arguments to determine the order of the stack (*e.g.* in `client.parallel(module1, module2, module3)`, the `view` of `module1` is displayed on top of the `view` of `module2`, which is displayed on top of the `view` of `module3`).\n * @deprecated Use the new API with the {@link start} method.\n * @param {...ClientModule} modules The modules to run in parallel.\n * @return {Promise} [description]\n * @todo Clarify return value\n ",
+      "value": "*\n * The `ClientModule` returned by the `parallel` method starts the given `...modules` in parallel (with their `start` methods), and calls its `done` method after all modules called their own `done` methods.\n *\n * **Note:** you can compound parallel module combinations with serial module sequences (*e.g.* `client.parallel(module1, client.serial(module2, module3), module4);`).\n *\n * **Note:** the `view` of a module is always full screen, so in the case where modules run in parallel, their `view`s are stacked on top of each other using the `z-index` CSS property.\n * We use the order of the `parallel` method's arguments to determine the order of the stack (*e.g.* in `client.parallel(module1, module2, module3)`, the `view` of `module1` is displayed on top of the `view` of `module2`, which is displayed on top of the `view` of `module3`).\n * @deprecated Use the new API with the {@link start} method.\n * @param {...ClientModule} modules The modules to run in parallel.\n * @return {Promise} [description]\n * @todo Clarify return value\n ",
       "range": [
-        4664,
-        5692
+        4668,
+        5714
       ],
       "loc": {
         "start": {
-          "line": 146,
+          "line": 147,
           "column": 0
         },
         "end": {
-          "line": 154,
+          "line": 158,
           "column": 3
         }
       }
@@ -11023,16 +11023,16 @@
       "type": "Block",
       "value": "*\n * Sends a WebSocket message to the server.\n *\n * **Note:** on the server side, the server receives the message with the command {@link ServerClient#receive}.\n * @param {String} msg Name of the message to send.\n * @param {...*} args Arguments of the message (as many as needed, of any type).\n ",
       "range": [
-        5868,
-        6167
+        5890,
+        6189
       ],
       "loc": {
         "start": {
-          "line": 160,
+          "line": 164,
           "column": 0
         },
         "end": {
-          "line": 166,
+          "line": 170,
           "column": 3
         }
       }
@@ -11041,16 +11041,16 @@
       "type": "Block",
       "value": "*\n * Executes a callback function when it receives a WebSocket message from the server.\n *\n * **Note:** on the server side, the server sends the message with the command {@link server.send}`.\n * @param {String} msg Name of the received message.\n * @param {Function} callback Callback function executed when the message is received.\n ",
       "range": [
-        6260,
-        6597
+        6282,
+        6619
       ],
       "loc": {
         "start": {
-          "line": 172,
+          "line": 176,
           "column": 0
         },
         "end": {
-          "line": 178,
+          "line": 182,
           "column": 3
         }
       }
@@ -11059,16 +11059,16 @@
       "type": "Block",
       "value": "*\n * [removeListener description]\n * @private\n * @param {[type]} msg [description]\n * @param {Function} callback [description]\n * @todo doc\n ",
       "range": [
-        6748,
-        6893
+        6770,
+        6915
       ],
       "loc": {
         "start": {
-          "line": 186,
+          "line": 190,
           "column": 0
         },
         "end": {
-          "line": 192,
+          "line": 196,
           "column": 3
         }
       }

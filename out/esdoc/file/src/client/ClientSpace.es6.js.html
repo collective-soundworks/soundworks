@@ -35,13 +35,17 @@
   <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">client</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientCalibration.es6.js~ClientCalibration.html">ClientCalibration</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientControl.es6.js~ClientControl.html">ClientControl</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientDialog.es6.js~ClientDialog.html">ClientDialog</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientFilelist.es6.js~Filelist.html">Filelist</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientLoader.es6.js~ClientLoader.html">ClientLoader</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientLocator.es6.js~ClientLocator.html">ClientLocator</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientModule.es6.js~ClientModule.html">ClientModule</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientOrientation.es6.js~ClientOrientation.html">ClientOrientation</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientPerformance.es6.js~ClientPerformance.html">ClientPerformance</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientPlacer.es6.js~ClientPlacer.html">ClientPlacer</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientPlatform.es6.js~ClientPlatform.html">ClientPlatform</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientSelector.es6.js~ClientSelector.html">ClientSelector</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientSetup.es6.js~ClientSetup.html">ClientSetup</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientSync.es6.js~ClientSync.html">ClientSync</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-ClientModule">ClientModule</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-EventEmitter">EventEmitter</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-client">client</a></span></span></li>
 <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">server</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerCalibration.es6.js~ServerCalibration.html">ServerCalibration</a></span></span></li>
@@ -55,18 +59,40 @@
 </nav>
 
 <div class="content" data-ice="content"><h1 data-ice="title">src/client/ClientSpace.es6.js</h1>
-<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">const ClientModule = require(&apos;./ClientModule&apos;);
-const client = require(&apos;./client&apos;);
-const ns = &apos;http://www.w3.org/2000/svg&apos;;
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">const ns = &apos;http://www.w3.org/2000/svg&apos;;
 
+import client from &apos;./client.es6.js&apos;;
+import ClientModule from &apos;./ClientModule.es6.js&apos;;
+
+/**
+ * The `ClientSpace` displays the setup upon request.
+ */
 class ClientSpace extends ClientModule {
+  /**
+   * Creates an instance of the class.
+   * @param {Object} [options={}] Options.
+   * @param {String} [options.name=&apos;space&apos;] Name of the module.
+   * @param {Boolean} [options.fitContainer=false] Indicates whether the graphical representation fits the container size or not.
+   * @param {Boolean} [options.listenTouchEvent=false] Indicates whether to setup a listener on the space graphical representation or not.
+   */
   constructor(options = {}) {
     super(options.name ||&#xA0;&apos;space&apos;);
 
+    /**
+     * Relative width of the setup.
+     * @type {Number}
+     */
     this.width = 1;
+
+    /**
+     * Relative heigth of the setup.
+     * @type {Number}
+     */
     this.height = 1;
-    this.fitContainer = (options.fitContainer ||&#xA0;false);
-    this.listenTouchEvent = (options.listenTouchEvent || false);
+
+    this._fitContainer = (options.fitContainer ||&#xA0;false);
+    this._listenTouchEvent = (options.listenTouchEvent || false);
+
     // this.spacing = 1;
     // this.labels = [];
     // this.coordinates = [];
@@ -76,11 +102,11 @@ class ClientSpace extends ClientModule {
     this._yFactor = 1;
 
     // map between shapes and their related positions
-    this.shapePositionMap = new Map();
-    this.positionIndexShapeMap = {};
+    this._shapePositionMap = new Map();
+    this._positionIndexShapeMap = {};
   }
 
-  // note -&gt; modfiy here
+  // TODO note -&gt; modfiy here
   initSetup(setup) {
     this.width = setup.width;
     this.height = setup.height;
@@ -93,6 +119,10 @@ class ClientSpace extends ClientModule {
     this.done();
   }
 
+  /**
+   * Starts the module.
+   * @private
+   */
   start() {
     super.start();
     this.done();
@@ -100,18 +130,34 @@ class ClientSpace extends ClientModule {
     // client.send(&apos;setup:request&apos;);
   }
 
+  /**
+   * Restarts the module.
+   * @private
+   */
   restart() {
     super.restart();
     this.done();
   }
 
+  /**
+   * Resets the module.
+   * @private
+   */
   reset() {
-    this.shapePositionMap.clear();
-    this.positionIndexShapeMap = {};
+    this._shapePositionMap.clear();
+    this._positionIndexShapeMap = {};
     // client.removeListener(&apos;setup:init&apos;, this._onSetupInit);
     this.container.innerHTML = &apos;&apos;;
   }
 
+  /**
+   * The `display` method displays a graphical representation of the setup.
+   * @param {ClientSetup} setup Setup to display.
+   * @param {DOMElement} container Container to append the setup representation to.
+   * @param {Object} [options={}] Options.
+   * @param {String} [options.transform] Indicates which transformation to aply to the representation. Possible values are:
+   * - `&apos;rotate180&apos;`: rotates the representation by 180 degrees.
+   */
   display(setup, container, options = {}) {
     this.initSetup(setup);
     this.container = container;
@@ -134,10 +180,10 @@ class ClientSpace extends ClientModule {
     this.svg = svg;
     this.group = group;
 
-    this.resize(this.container);
+    this._resize(this.container);
   }
 
-  resize() {
+  _resize() {
     const boundingRect = this.container.getBoundingClientRect();
     const containerWidth = boundingRect.width;
     const containerHeight = boundingRect.height;
@@ -152,7 +198,7 @@ class ClientSpace extends ClientModule {
     let svgWidth = this.width * ratio;
     let svgHeight = this.height * ratio;
 
-    if (this.fitContainer) {
+    if (this._fitContainer) {
       svgWidth = containerWidth;
       svgHeight = containerHeight;
     }
@@ -189,6 +235,11 @@ class ClientSpace extends ClientModule {
     this.ratio = ratio;
   }
 
+  /**
+   * Display an array of positions.
+   * @param {Object[]} positions Positions to display.
+   * @param {Number} size Size of the positions to display.
+   */
   displayPositions(positions, size) {
     // clean surface
     this.removeAllPositions();
@@ -198,15 +249,15 @@ class ClientSpace extends ClientModule {
     });
 
     // add listeners
-    if (this.listenTouchEvent) {
+    if (this._listenTouchEvent) {
       this.container.addEventListener(&apos;touchstart&apos;, (e) =&gt; {
         e.preventDefault();
-        const dots = Array.from(this.shapePositionMap.keys());
+        const dots = Array.from(this._shapePositionMap.keys());
         let target = e.target;
 
         while (target !== this.container) {
           if (dots.indexOf(target) !== -1) {
-            const position = this.shapePositionMap.get(target);
+            const position = this._shapePositionMap.get(target);
             this.emit(&apos;select&apos;, position);
           }
 
@@ -216,6 +267,11 @@ class ClientSpace extends ClientModule {
     }
   }
 
+  /**
+   * Adds a position to the display.
+   * @param {Object} position Position to add.
+   * @param {Number} size Size of the position to draw.
+   */
   addPosition(position, size) {
     const radius = size / 2;
     const coordinates = position.coordinates;
@@ -228,15 +284,22 @@ class ClientSpace extends ClientModule {
     dot.style.fill = &apos;steelblue&apos;;
 
     this.group.appendChild(dot);
-    this.shapePositionMap.set(dot, position);
-    this.positionIndexShapeMap[index] = dot;
+    this._shapePositionMap.set(dot, position);
+    this._positionIndexShapeMap[index] = dot;
   }
 
+  /**
+   * Removes a position from the display.
+   * @param {Object} position Position to remove.
+   */
   removePosition(position) {
     const el = this. positionIndexShapeMap[position.index];
     this.group.removeChild(el);
   }
 
+  /**
+   * Remove all the positions displayed.
+   */
   removeAllPositions() {
     while (this.group.firstChild) {
       this.group.removeChild(this.group.firstChild);

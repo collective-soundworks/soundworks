@@ -1,7 +1,7 @@
 {
-  "coverage": "65.3%",
-  "expectCount": 98,
-  "actualCount": 64,
+  "coverage": "77.44%",
+  "expectCount": 133,
+  "actualCount": 103,
   "files": {
     "src/client/ClientCalibration.es6.js": {
       "expectCount": 11,
@@ -35,34 +35,17 @@
         70
       ]
     },
-    "src/client/ClientModule.es6.js": {
-      "expectCount": 17,
-      "actualCount": 0,
-      "undocumentLines": [
-        86,
-        3,
-        87,
-        141,
-        108,
-        107,
-        130,
-        90,
-        93,
-        179,
-        122,
-        126,
-        153,
-        94,
-        111,
-        92,
-        186
-      ]
+    "src/client/ClientLocator.es6.js": {
+      "expectCount": 7,
+      "actualCount": 7,
+      "undocumentLines": []
     },
-    "src/client/ClientCheckin.es6.js": {
-      "expectCount": 1,
-      "actualCount": 0,
+    "src/client/ClientModule.es6.js": {
+      "expectCount": 12,
+      "actualCount": 10,
       "undocumentLines": [
-        7
+        3,
+        271
       ]
     },
     "src/client/ClientOrientation.es6.js": {
@@ -77,6 +60,15 @@
       "actualCount": 4,
       "undocumentLines": []
     },
+    "src/client/ClientPlacer.es6.js": {
+      "expectCount": 6,
+      "actualCount": 3,
+      "undocumentLines": [
+        156,
+        157,
+        177
+      ]
+    },
     "src/client/ClientPlatform.es6.js": {
       "expectCount": 4,
       "actualCount": 2,
@@ -85,12 +77,38 @@
         48
       ]
     },
+    "src/client/ClientSelector.es6.js": {
+      "expectCount": 14,
+      "actualCount": 12,
+      "undocumentLines": [
+        76,
+        75
+      ]
+    },
+    "src/client/ClientSetup.es6.js": {
+      "expectCount": 10,
+      "actualCount": 3,
+      "undocumentLines": [
+        39,
+        23,
+        20,
+        22,
+        21,
+        24,
+        19
+      ]
+    },
     "src/client/ClientSync.es6.js": {
       "expectCount": 6,
       "actualCount": 5,
       "undocumentLines": [
-        55
+        51
       ]
+    },
+    "src/client/ClientFilelist.es6.js": {
+      "expectCount": 4,
+      "actualCount": 4,
+      "undocumentLines": []
     },
     "src/server/ServerCalibration.es6.js": {
       "expectCount": 4,

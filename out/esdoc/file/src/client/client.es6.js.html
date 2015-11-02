@@ -35,13 +35,17 @@
   <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">client</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientCalibration.es6.js~ClientCalibration.html">ClientCalibration</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientControl.es6.js~ClientControl.html">ClientControl</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientDialog.es6.js~ClientDialog.html">ClientDialog</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientFilelist.es6.js~Filelist.html">Filelist</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientLoader.es6.js~ClientLoader.html">ClientLoader</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientLocator.es6.js~ClientLocator.html">ClientLocator</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientModule.es6.js~ClientModule.html">ClientModule</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientOrientation.es6.js~ClientOrientation.html">ClientOrientation</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientPerformance.es6.js~ClientPerformance.html">ClientPerformance</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientPlacer.es6.js~ClientPlacer.html">ClientPlacer</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientPlatform.es6.js~ClientPlatform.html">ClientPlatform</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientSelector.es6.js~ClientSelector.html">ClientSelector</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientSetup.es6.js~ClientSetup.html">ClientSetup</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientSync.es6.js~ClientSync.html">ClientSync</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-ClientModule">ClientModule</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-EventEmitter">EventEmitter</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-client">client</a></span></span></li>
 <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">server</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerCalibration.es6.js~ServerCalibration.html">ServerCalibration</a></span></span></li>
@@ -189,6 +193,7 @@ function start(startFun) {
 
 /**
  * The `serial` method returns a `ClientModule` that starts the given `...modules` in series. After starting the first module (by calling its `start` method), the next module in the series is started (with its `start` method) when the last module called its `done` method. When the last module calls `done`, the returned serial module calls its own `done` method.
+ * 
  * **Note:** you can compound serial module sequences with parallel module combinations (*e.g.* `client.serial(module1, client.parallel(module2, module3), module4);`).
  * @deprecated Use the new API with the {@link start} method.
  * @param {...ClientModule} ...modules The modules to run in serial.
@@ -201,9 +206,12 @@ function serial(...modules) {
 }
 
 /**
-The `ClientModule` returned by the `parallel` method starts the given `...modules` in parallel (with their `start` methods), and calls its `done` method after all modules called their own `done` methods.
-**Note:** you can compound parallel module combinations with serial module sequences (*e.g.* `client.parallel(module1, client.serial(module2, module3), module4);`).
-**Note:** the `view` of a module is always full screen, so in the case where modules run in parallel, their `view`s are stacked on top of each other using the `z-index` CSS property. We use the order of the `parallel` method&apos;s arguments to determine the order of the stack (*e.g.* in `client.parallel(module1, module2, module3)`, the `view` of `module1` is displayed on top of the `view` of `module2`, which is displayed on top of the `view` of `module3`).
+ * The `ClientModule` returned by the `parallel` method starts the given `...modules` in parallel (with their `start` methods), and calls its `done` method after all modules called their own `done` methods.
+ *
+ * **Note:** you can compound parallel module combinations with serial module sequences (*e.g.* `client.parallel(module1, client.serial(module2, module3), module4);`).
+ *
+ * **Note:** the `view` of a module is always full screen, so in the case where modules run in parallel, their `view`s are stacked on top of each other using the `z-index` CSS property.
+ * We use the order of the `parallel` method&apos;s arguments to determine the order of the stack (*e.g.* in `client.parallel(module1, module2, module3)`, the `view` of `module1` is displayed on top of the `view` of `module2`, which is displayed on top of the `view` of `module3`).
  * @deprecated Use the new API with the {@link start} method.
  * @param {...ClientModule} modules The modules to run in parallel.
  * @return {Promise} [description]

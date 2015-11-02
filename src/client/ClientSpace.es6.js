@@ -1,15 +1,37 @@
-const ClientModule = require('./ClientModule');
-const client = require('./client');
 const ns = 'http://www.w3.org/2000/svg';
 
+import client from './client.es6.js';
+import ClientModule from './ClientModule.es6.js';
+
+/**
+ * The `ClientSpace` displays the setup upon request.
+ */
 class ClientSpace extends ClientModule {
+  /**
+   * Creates an instance of the class.
+   * @param {Object} [options={}] Options.
+   * @param {String} [options.name='space'] Name of the module.
+   * @param {Boolean} [options.fitContainer=false] Indicates whether the graphical representation fits the container size or not.
+   * @param {Boolean} [options.listenTouchEvent=false] Indicates whether to setup a listener on the space graphical representation or not.
+   */
   constructor(options = {}) {
     super(options.name || 'space');
 
+    /**
+     * Relative width of the setup.
+     * @type {Number}
+     */
     this.width = 1;
+
+    /**
+     * Relative heigth of the setup.
+     * @type {Number}
+     */
     this.height = 1;
-    this.fitContainer = (options.fitContainer || false);
-    this.listenTouchEvent = (options.listenTouchEvent || false);
+
+    this._fitContainer = (options.fitContainer || false);
+    this._listenTouchEvent = (options.listenTouchEvent || false);
+
     // this.spacing = 1;
     // this.labels = [];
     // this.coordinates = [];
@@ -19,11 +41,11 @@ class ClientSpace extends ClientModule {
     this._yFactor = 1;
 
     // map between shapes and their related positions
-    this.shapePositionMap = new Map();
-    this.positionIndexShapeMap = {};
+    this._shapePositionMap = new Map();
+    this._positionIndexShapeMap = {};
   }
 
-  // note -> modfiy here
+  // TODO note -> modfiy here
   initSetup(setup) {
     this.width = setup.width;
     this.height = setup.height;
@@ -36,6 +58,10 @@ class ClientSpace extends ClientModule {
     this.done();
   }
 
+  /**
+   * Starts the module.
+   * @private
+   */
   start() {
     super.start();
     this.done();
@@ -43,18 +69,34 @@ class ClientSpace extends ClientModule {
     // client.send('setup:request');
   }
 
+  /**
+   * Restarts the module.
+   * @private
+   */
   restart() {
     super.restart();
     this.done();
   }
 
+  /**
+   * Resets the module.
+   * @private
+   */
   reset() {
-    this.shapePositionMap.clear();
-    this.positionIndexShapeMap = {};
+    this._shapePositionMap.clear();
+    this._positionIndexShapeMap = {};
     // client.removeListener('setup:init', this._onSetupInit);
     this.container.innerHTML = '';
   }
 
+  /**
+   * The `display` method displays a graphical representation of the setup.
+   * @param {ClientSetup} setup Setup to display.
+   * @param {DOMElement} container Container to append the setup representation to.
+   * @param {Object} [options={}] Options.
+   * @param {String} [options.transform] Indicates which transformation to aply to the representation. Possible values are:
+   * - `'rotate180'`: rotates the representation by 180 degrees.
+   */
   display(setup, container, options = {}) {
     this.initSetup(setup);
     this.container = container;
@@ -77,10 +119,10 @@ class ClientSpace extends ClientModule {
     this.svg = svg;
     this.group = group;
 
-    this.resize(this.container);
+    this._resize(this.container);
   }
 
-  resize() {
+  _resize() {
     const boundingRect = this.container.getBoundingClientRect();
     const containerWidth = boundingRect.width;
     const containerHeight = boundingRect.height;
@@ -95,7 +137,7 @@ class ClientSpace extends ClientModule {
     let svgWidth = this.width * ratio;
     let svgHeight = this.height * ratio;
 
-    if (this.fitContainer) {
+    if (this._fitContainer) {
       svgWidth = containerWidth;
       svgHeight = containerHeight;
     }
@@ -132,6 +174,11 @@ class ClientSpace extends ClientModule {
     this.ratio = ratio;
   }
 
+  /**
+   * Display an array of positions.
+   * @param {Object[]} positions Positions to display.
+   * @param {Number} size Size of the positions to display.
+   */
   displayPositions(positions, size) {
     // clean surface
     this.removeAllPositions();
@@ -141,15 +188,15 @@ class ClientSpace extends ClientModule {
     });
 
     // add listeners
-    if (this.listenTouchEvent) {
+    if (this._listenTouchEvent) {
       this.container.addEventListener('touchstart', (e) => {
         e.preventDefault();
-        const dots = Array.from(this.shapePositionMap.keys());
+        const dots = Array.from(this._shapePositionMap.keys());
         let target = e.target;
 
         while (target !== this.container) {
           if (dots.indexOf(target) !== -1) {
-            const position = this.shapePositionMap.get(target);
+            const position = this._shapePositionMap.get(target);
             this.emit('select', position);
           }
 
@@ -159,6 +206,11 @@ class ClientSpace extends ClientModule {
     }
   }
 
+  /**
+   * Adds a position to the display.
+   * @param {Object} position Position to add.
+   * @param {Number} size Size of the position to draw.
+   */
   addPosition(position, size) {
     const radius = size / 2;
     const coordinates = position.coordinates;
@@ -171,15 +223,22 @@ class ClientSpace extends ClientModule {
     dot.style.fill = 'steelblue';
 
     this.group.appendChild(dot);
-    this.shapePositionMap.set(dot, position);
-    this.positionIndexShapeMap[index] = dot;
+    this._shapePositionMap.set(dot, position);
+    this._positionIndexShapeMap[index] = dot;
   }
 
+  /**
+   * Removes a position from the display.
+   * @param {Object} position Position to remove.
+   */
   removePosition(position) {
     const el = this. positionIndexShapeMap[position.index];
     this.group.removeChild(el);
   }
 
+  /**
+   * Remove all the positions displayed.
+   */
   removeAllPositions() {
     while (this.group.firstChild) {
       this.group.removeChild(this.group.firstChild);

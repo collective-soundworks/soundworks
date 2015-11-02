@@ -35,13 +35,17 @@
   <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">client</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientCalibration.es6.js~ClientCalibration.html">ClientCalibration</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientControl.es6.js~ClientControl.html">ClientControl</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientDialog.es6.js~ClientDialog.html">ClientDialog</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientFilelist.es6.js~Filelist.html">Filelist</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientLoader.es6.js~ClientLoader.html">ClientLoader</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientLocator.es6.js~ClientLocator.html">ClientLocator</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientModule.es6.js~ClientModule.html">ClientModule</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientOrientation.es6.js~ClientOrientation.html">ClientOrientation</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientPerformance.es6.js~ClientPerformance.html">ClientPerformance</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientPlacer.es6.js~ClientPlacer.html">ClientPlacer</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientPlatform.es6.js~ClientPlatform.html">ClientPlatform</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientSelector.es6.js~ClientSelector.html">ClientSelector</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientSetup.es6.js~ClientSetup.html">ClientSetup</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientSync.es6.js~ClientSync.html">ClientSync</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-ClientModule">ClientModule</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-EventEmitter">EventEmitter</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-client">client</a></span></span></li>
 <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">server</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerCalibration.es6.js~ServerCalibration.html">ServerCalibration</a></span></span></li>
@@ -55,13 +59,13 @@
 </nav>
 
 <div class="content" data-ice="content"><div class="header-notice">
-  <div data-ice="importPath" class="import-path"><pre class="prettyprint"><code data-ice="importPathCode">import ClientControl from &apos;<span><a href="file/src/client/ClientControl.es6.js.html#lineNumber241">soundworks/src/client/ClientControl.es6.js</a></span>&apos;</code></pre></div>
+  <div data-ice="importPath" class="import-path"><pre class="prettyprint"><code data-ice="importPathCode">import ClientControl from &apos;<span><a href="file/src/client/ClientControl.es6.js.html#lineNumber237">soundworks/src/client/ClientControl.es6.js</a></span>&apos;</code></pre></div>
   <span data-ice="access">public</span>
   <span data-ice="kind">class</span>
   
   
   
-  <span data-ice="source">| <span><a href="file/src/client/ClientControl.es6.js.html#lineNumber241">source</a></span></span>
+  <span data-ice="source">| <span><a href="file/src/client/ClientControl.es6.js.html#lineNumber237">source</a></span></span>
 </div>
 
 <div class="self-detail detail">
@@ -71,7 +75,7 @@
 
   
   
-  <div class="flat-list" data-ice="extendsChain"><h4>Extends:</h4><div><span><a href="variable/index.html#static-variable-ClientModule">ClientModule</a></span> &#x2192; ClientControl</div></div>
+  <div class="flat-list" data-ice="extendsChain"><h4>Extends:</h4><div><span><a href="variable/index.html#static-variable-EventEmitter">EventEmitter</a></span> &#x2192; <span>src/client/ClientModule.es6.js~Promised</span> &#x2192; <span><a href="class/src/client/ClientModule.es6.js~ClientModule.html">ClientModule</a></span> &#x2192; ClientControl</div></div>
   
   
   
@@ -280,7 +284,247 @@ Otherwise it simply receives the values that are emitted by the server (usually 
 </table>
 </div>
 
-
+<div class="inherited-summary" data-ice="inheritedSummary"><h2>Inherited Summary</h2><table class="summary" data-ice="summary">
+  <thead><tr><td data-ice="title" colspan="3"><span class="toggle closed"></span> From class <span><a href="class/src/client/ClientModule.es6.js~ClientModule.html">ClientModule</a></span></td></tr></thead>
+  <tbody>
+  
+  <tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      <span class="kind" data-ice="kind">set</span>
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+           <span data-ice="name"><span><a href="class/src/client/ClientModule.es6.js~ClientModule.html#instance-set-zIndex">zIndex</a></span></span><span data-ice="signature">: <span>*</span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+           <span data-ice="name"><span><a href="class/src/client/ClientModule.es6.js~ClientModule.html#instance-member-name">name</a></span></span><span data-ice="signature">: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>Name of the module.</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+           <span data-ice="name"><span><a href="class/src/client/ClientModule.es6.js~ClientModule.html#instance-member-view">view</a></span></span><span data-ice="signature">: <span>DOMElement</span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>View of the module.</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+           <span data-ice="name"><span><a href="class/src/client/ClientModule.es6.js~ClientModule.html#instance-method-done">done</a></span></span><span data-ice="signature">()</span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>Should be called when the module can hand over the control to a subsequent module (for instance at the end of the <code>start</code> method you write).</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+           <span data-ice="name"><span><a href="class/src/client/ClientModule.es6.js~ClientModule.html#instance-method-removeCenteredViewContent">removeCenteredViewContent</a></span></span><span data-ice="signature">()</span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>Removes the centered HTML content (set by &lt;span&gt;&lt;a href=&quot;class/src/client/ClientModule.es6.js~ClientModule.html#instance-method-setCenteredViewContent&quot;&gt;ClientModule#setCenteredViewContent&lt;/a&gt;&lt;/span&gt;) from the <code>view</code>.</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      <span class="abstract" data-ice="abstract">abstract</span>
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+           <span data-ice="name"><span><a href="class/src/client/ClientModule.es6.js~ClientModule.html#instance-method-reset">reset</a></span></span><span data-ice="signature">()</span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>Resets the module to the state it had before calling the &lt;span&gt;&lt;a href=&quot;class/src/client/ClientModule.es6.js~ClientModule.html#instance-method-start&quot;&gt;ClientModule#start&lt;/a&gt;&lt;/span&gt; method.</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      <span class="abstract" data-ice="abstract">abstract</span>
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+           <span data-ice="name"><span><a href="class/src/client/ClientModule.es6.js~ClientModule.html#instance-method-restart">restart</a></span></span><span data-ice="signature">()</span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>Restarts the module.</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+           <span data-ice="name"><span><a href="class/src/client/ClientModule.es6.js~ClientModule.html#instance-method-setCenteredViewContent">setCenteredViewContent</a></span></span><span data-ice="signature">(htmlContent: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>)</span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>Set an arbitrary centered HTML content to the module&apos;s <code>view</code>.
+The method should be called only if the module has a <code>view</code>.</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      <span class="abstract" data-ice="abstract">abstract</span>
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+           <span data-ice="name"><span><a href="class/src/client/ClientModule.es6.js~ClientModule.html#instance-method-start">start</a></span></span><span data-ice="signature">()</span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>Handles the logic of the module on the client side.</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+</tbody>
+</table>
+</div>
 
 
 
@@ -297,7 +541,7 @@ Otherwise it simply receives the values that are emitted by the server (usually 
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/client/ClientControl.es6.js.html#lineNumber250">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/client/ClientControl.es6.js.html#lineNumber246">source</a></span></span>
     </span>
   </h3>
 
@@ -307,7 +551,7 @@ Otherwise it simply receives the values that are emitted by the server (usually 
   <div data-ice="description"><p>Creates an instance of the class.</p>
 </div>
 
-  
+  <div data-ice="override"><h4>Override:</h4><span><a href="class/src/client/ClientModule.es6.js~ClientModule.html#instance-constructor-constructor">ClientModule#constructor</a></span></div>
 
   <div data-ice="properties"><div data-ice="properties">
   <h4 data-ice="title">Params:</h4>
@@ -395,7 +639,7 @@ Otherwise it simply receives the values that are emitted by the server (usually 
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/client/ClientControl.es6.js.html#lineNumber257">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/client/ClientControl.es6.js.html#lineNumber253">source</a></span></span>
     </span>
   </h3>
 
@@ -439,7 +683,7 @@ Otherwise it simply receives the values that are emitted by the server (usually 
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/client/ClientControl.es6.js.html#lineNumber318">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/client/ClientControl.es6.js.html#lineNumber314">source</a></span></span>
     </span>
   </h3>
 
@@ -449,7 +693,7 @@ Otherwise it simply receives the values that are emitted by the server (usually 
   <div data-ice="description"><p>Restarts the module and requests the parameters to the server.</p>
 </div>
 
-  
+  <div data-ice="override"><h4>Override:</h4><span><a href="class/src/client/ClientModule.es6.js~ClientModule.html#instance-method-restart">ClientModule#restart</a></span></div>
 
   <div data-ice="properties">
 </div>
@@ -480,7 +724,7 @@ Otherwise it simply receives the values that are emitted by the server (usually 
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/client/ClientControl.es6.js.html#lineNumber328">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/client/ClientControl.es6.js.html#lineNumber324">source</a></span></span>
     </span>
   </h3>
 
@@ -538,7 +782,7 @@ Otherwise it simply receives the values that are emitted by the server (usually 
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/client/ClientControl.es6.js.html#lineNumber310">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/client/ClientControl.es6.js.html#lineNumber306">source</a></span></span>
     </span>
   </h3>
 
@@ -548,7 +792,7 @@ Otherwise it simply receives the values that are emitted by the server (usually 
   <div data-ice="description"><p>Starts the module and requests the parameters to the server.</p>
 </div>
 
-  
+  <div data-ice="override"><h4>Override:</h4><span><a href="class/src/client/ClientModule.es6.js~ClientModule.html#instance-method-start">ClientModule#start</a></span></div>
 
   <div data-ice="properties">
 </div>
@@ -579,7 +823,7 @@ Otherwise it simply receives the values that are emitted by the server (usually 
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/client/ClientControl.es6.js.html#lineNumber341">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/client/ClientControl.es6.js.html#lineNumber337">source</a></span></span>
     </span>
   </h3>
 

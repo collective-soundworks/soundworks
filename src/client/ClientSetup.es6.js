@@ -1,16 +1,18 @@
-/**
- * @fileoverview Soundworks client side seat map module
- * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
- */
 'use strict';
 
-var ClientModule = require('./ClientModule');
-var client = require('./client');
+import client from './client.es6.js';
+import ClientModule from './ClientModule.es6.js';
 
-
-// only communicate with the ServerSetup
-// should use ClientSpace for rendering
-class ClientSetup extends ClientModule {
+/**
+ * The `ClientSetup` module retrieves the setup information from the server. It never has a view.
+ * (For rendering the setup graphically, see {@link ClientSpace}.)
+ */
+export default class ClientSetup extends ClientModule {
+  /**
+   * Creates an instance of the class.
+   * @param {Object} [options={}] Options.
+   * @param {String} [options.name='setup'] Name of the module.
+   */
   constructor(options = {}) {
     super(options.name || 'setup', false);
 
@@ -39,6 +41,10 @@ class ClientSetup extends ClientModule {
     this.done();
   }
 
+  /**
+   * Starts the module.
+   * @private
+   */
   start() {
     super.start();
 
@@ -46,16 +52,28 @@ class ClientSetup extends ClientModule {
     client.send(this.name + ':request');
   }
 
+  /**
+   * Restarts the module.
+   * @private
+   */
   restart() {
     super.restart();
     this.done();
   }
 
+  /**
+   * Resets the module.
+   * @private
+   */
   reset() {
     super.reset();
     client.removeListener(this.name + ':init', this._init);
   }
 
+  /**
+   * Returns the number of positions in the setup.
+   * @return {Number} Number of positions in the setup.
+   */
   getNumPositions() {
     if (this.labels.length || this.coordinates.length) {
       var numLabels = this.labels.length || Infinity;
@@ -216,5 +234,3 @@ class ClientSetup extends ClientModule {
   //     position.classList.remove(className);
   // }
 }
-
-module.exports = ClientSetup;

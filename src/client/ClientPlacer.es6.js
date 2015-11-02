@@ -1,10 +1,13 @@
-const ClientModule = require('./ClientModule');
-const ClientSpace = require('./ClientSpace');
-const client = require('./client');
 const EventEmitter = require('events').EventEmitter;
 
+import client from './client.es6.js';
+import ClientModule from './ClientModule.es6.js';
+import ClientSpace from './ClientSpace.es6.js';
 
-// display strategies for placer
+/**
+ * display strategies for placer
+ * @private
+ */
 class ListSelector extends EventEmitter {
   constructor(options) {
     this._indexPositionMap = new Map();
@@ -12,8 +15,8 @@ class ListSelector extends EventEmitter {
   }
 
   _onSelect(e) {
-    const options = this.select.options;
-    const selectedIndex = this.select.selectedIndex;
+    const options = this._select.options;
+    const selectedIndex = this._select.selectedIndex;
     const index = parseInt(options[selectedIndex].value, 10);
     const position = this._indexPositionMap.get(index);
     this.emit('select', position);
@@ -23,12 +26,12 @@ class ListSelector extends EventEmitter {
     this.container = container;
     this.el = document.createElement('div');
 
-    this.select = document.createElement('select');
+    this._select = document.createElement('select');
     this.button = document.createElement('button');
     this.button.textContent = 'OK';
     this.button.classList.add('btn');
 
-    this.el.appendChild(this.select);
+    this.el.appendChild(this._select);
     this.el.appendChild(this.button);
     this.container.appendChild(this.el);
 
@@ -52,7 +55,7 @@ class ListSelector extends EventEmitter {
     this.el.style.top = top + 'px';
     this.el.style.left = left + 'px';
 
-    this.select.style.width = width + 'px';
+    this._select.style.width = width + 'px';
     this.button.style.width = width + 'px';
   }
 
@@ -62,30 +65,51 @@ class ListSelector extends EventEmitter {
       option.value = position.index;
       option.textContent = position.label;
 
-      this.select.appendChild(option);
+      this._select.appendChild(option);
       this._indexPositionMap.set(position.index, position);
     });
   }
 }
 
-class ClientPlacer extends ClientModule {
+/**
+ * The `ClientPlacer` module allows to select a place in a list of predefined places.
+ */
+export default class ClientPlacer extends ClientModule {
+  /**
+   * Creates an instance of the class.
+   * @param {Object} [options={}] Options.
+   * @param {String} [options.name='performance'] Name of the module.
+   * @param {String} [options.color='black'] Background color of the `view`.
+   * @param {ClientSetup} [options.setup] The setup in which to select the place.
+   * @param {String} [options.mode='list'] Selection mode. Can be:
+   * - `'list'` to select a place among a list of places.
+   * - `'graphic`' to select a place on a graphical representation of the setup.
+   * @param {Boolean} [options.persist=false] Indicates whether the selected place should be stored in the `LocalStorage` for future retrieval or not.
+   * @param {String} [localStorageId='soundworks'] Prefix of the `LocalStorage` ID.
+   * @todo this._selector
+   */
   constructor(options = {}) {
-    super(options.name || 'placer', true);
+    super(options.name || 'placer', true, options.color || 'black');
 
+    /**
+     * The setup in which to select a place.
+     * @type {ClientSetup}
+     */
     this.setup = options.setup;
-    this.mode = options.mode || 'list';
-    this.persist = options.persist || false;
-    this.localStorageId = options.localStorageId || 'soundworks';
 
-    switch (this.mode) {
+    this._mode = options.mode || 'list';
+    this._persist = options.persist || false;
+    this._localStorageId = options.localStorageId || 'soundworks';
+
+    switch (this._mode) {
       case 'graphic':
-        this.selector = new ClientSpace({
+        this._selector = new ClientSpace({
           fitContainer: true,
           listenTouchEvent: true,
         });
         break;
       case 'list':
-        this.selector = new ListSelector({});
+        this._selector = new ListSelector({});
         break;
     }
 
@@ -99,11 +123,11 @@ class ClientPlacer extends ClientModule {
   }
 
   _resizeSelector() {
-    this.selector.resize();
+    this._selector.resize();
   }
 
   _getStorageKey() {
-    return `${this.localStorageId}:${this.name}`;
+    return `${this._localStorageId}:${this.name}`;
   }
 
   _persistInformation(position) {
@@ -142,6 +166,10 @@ class ClientPlacer extends ClientModule {
     );
   }
 
+  /**
+   * Starts the module.
+   * @private
+   */
   start() {
     super.start();
 
@@ -155,7 +183,7 @@ class ClientPlacer extends ClientModule {
     });
 
     // check for informations in local storage
-    if (this.persist) {
+    if (this._persist) {
       const position = this._retrieveInformation();
 
       if (position !== null) {
@@ -165,9 +193,9 @@ class ClientPlacer extends ClientModule {
     }
 
     // listen for selection
-    this.selector.on('select', (position) => {
+    this._selector.on('select', (position) => {
       // optionally store in local storage
-      if (this.persist) {
+      if (this._persist) {
         this._persistInformation(position);
       }
       // send to server
@@ -175,18 +203,26 @@ class ClientPlacer extends ClientModule {
       this.done();
     });
 
-    this.selector.display(this.setup, this.view, {});
+    this._selector.display(this.setup, this.view, {});
     // make sure the DOM is ready (needed on ipods)
     setTimeout(() => {
-      this.selector.displayPositions(this.positions, 20);
+      this._selector.displayPositions(this.positions, 20);
     }, 0);
   }
 
+  /**
+   * Restarts the module.
+   * @private
+   */
   restart() {
     super.restart();
     this._sendInformation();
   }
 
+  /**
+   * Resets the module to initial state.
+   * @private
+   */
   reset() {
     super.reset();
     // reset client
@@ -194,14 +230,16 @@ class ClientPlacer extends ClientModule {
     this.label = null;
     client.coordinates = null;
     // remove listener
-    this.selector.removeAllListeners('select');
+    this._selector.removeAllListeners('select');
   }
 
+  /**
+   * Done method.
+   * @private
+   */
   done() {
     super.done();
     window.removeEventListener('resize', this._resizeSelector, false);
-    this.selector.removeAllListeners('select');
+    this._selector.removeAllListeners('select');
   }
 }
-
-module.exports = ClientPlacer;

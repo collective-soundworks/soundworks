@@ -1,6 +1,7 @@
-const ClientModule = require('./ClientModule');
-const client = require('./client');
+'use strict';
 
+import client from './client.es6.js';
+import ClientModule from './ClientModule.es6.js';
 
 class BaseRenderer {
   constructor(survey, question) {

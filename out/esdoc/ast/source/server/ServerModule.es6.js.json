@@ -204,10 +204,10 @@
         },
         {
           "type": "Block",
-          "value": "*\n * The `ServerPerformance` base class constitutes a basis on which to build a performance on the server side.\n ",
+          "value": "*\n * The `ServerModule` base class is used to create a *Soundworks* module on the server side.\n * Each module should have a {@link ServerModule#connect} and a {@link ServerModule#disconnect} method.\n * Any module mapped to the type of client `clientType` (thanks to the {@link server#map} method) would call its {@link ServerModule#connect} method when such a client connects to the server, and its {@link ServerModule#disconnect} method when such a client disconnects from the server.\n * @example\n * class MyModule extends serverSide.Module {\n *   constructor('my-module-name') {\n *     ... // anything the constructor needs\n *   }\n *\n *   connect(client) {\n *     ... // what the module has to do when a client connects to the server\n *   }\n *\n *   disconnect(client) {\n *     ... // what the module has to do when a client disconnects from the server\n *   }\n * }\n ",
           "range": [
             129,
-            246
+            1000
           ],
           "loc": {
             "start": {
@@ -215,7 +215,7 @@
               "column": 0
             },
             "end": {
-              "line": 7,
+              "line": 23,
               "column": 3
             }
           }
@@ -230,16 +230,16 @@
           "type": "Identifier",
           "name": "ServerModule",
           "range": [
-            268,
-            280
+            1022,
+            1034
           ],
           "loc": {
             "start": {
-              "line": 8,
+              "line": 24,
               "column": 21
             },
             "end": {
-              "line": 8,
+              "line": 24,
               "column": 33
             }
           }
@@ -248,16 +248,16 @@
           "type": "Identifier",
           "name": "EventEmitter",
           "range": [
-            289,
-            301
+            1043,
+            1055
           ],
           "loc": {
             "start": {
-              "line": 8,
+              "line": 24,
               "column": 42
             },
             "end": {
-              "line": 8,
+              "line": 24,
               "column": 54
             }
           }
@@ -271,16 +271,16 @@
                 "type": "Identifier",
                 "name": "constructor",
                 "range": [
-                  477,
-                  488
+                  1231,
+                  1242
                 ],
                 "loc": {
                   "start": {
-                    "line": 14,
+                    "line": 30,
                     "column": 2
                   },
                   "end": {
-                    "line": 14,
+                    "line": 30,
                     "column": 13
                   }
                 }
@@ -290,56 +290,20 @@
                 "id": null,
                 "params": [
                   {
-                    "type": "AssignmentPattern",
-                    "left": {
-                      "type": "Identifier",
-                      "name": "name",
-                      "range": [
-                        489,
-                        493
-                      ],
-                      "loc": {
-                        "start": {
-                          "line": 14,
-                          "column": 14
-                        },
-                        "end": {
-                          "line": 14,
-                          "column": 18
-                        }
-                      }
-                    },
-                    "right": {
-                      "type": "Literal",
-                      "value": "unnamed",
-                      "raw": "'unnamed'",
-                      "range": [
-                        496,
-                        505
-                      ],
-                      "loc": {
-                        "start": {
-                          "line": 14,
-                          "column": 21
-                        },
-                        "end": {
-                          "line": 14,
-                          "column": 30
-                        }
-                      }
-                    },
+                    "type": "Identifier",
+                    "name": "name",
                     "range": [
-                      489,
-                      505
+                      1243,
+                      1247
                     ],
                     "loc": {
                       "start": {
-                        "line": 14,
+                        "line": 30,
                         "column": 14
                       },
                       "end": {
-                        "line": 14,
-                        "column": 30
+                        "line": 30,
+                        "column": 18
                       }
                     }
                   }
@@ -354,47 +318,47 @@
                         "callee": {
                           "type": "Super",
                           "range": [
-                            513,
-                            518
+                            1255,
+                            1260
                           ],
                           "loc": {
                             "start": {
-                              "line": 15,
+                              "line": 31,
                               "column": 4
                             },
                             "end": {
-                              "line": 15,
+                              "line": 31,
                               "column": 9
                             }
                           }
                         },
                         "arguments": [],
                         "range": [
-                          513,
-                          520
+                          1255,
+                          1262
                         ],
                         "loc": {
                           "start": {
-                            "line": 15,
+                            "line": 31,
                             "column": 4
                           },
                           "end": {
-                            "line": 15,
+                            "line": 31,
                             "column": 11
                           }
                         }
                       },
                       "range": [
-                        513,
-                        521
+                        1255,
+                        1263
                       ],
                       "loc": {
                         "start": {
-                          "line": 15,
+                          "line": 31,
                           "column": 4
                         },
                         "end": {
-                          "line": 15,
+                          "line": 31,
                           "column": 12
                         }
                       },
@@ -403,16 +367,16 @@
                           "type": "Block",
                           "value": "*\n     * The name of the module.\n     * @type {string}\n     ",
                           "range": [
-                            527,
-                            591
+                            1269,
+                            1333
                           ],
                           "loc": {
                             "start": {
-                              "line": 17,
+                              "line": 33,
                               "column": 4
                             },
                             "end": {
-                              "line": 20,
+                              "line": 36,
                               "column": 7
                             }
                           }
@@ -430,16 +394,16 @@
                           "object": {
                             "type": "ThisExpression",
                             "range": [
-                              596,
-                              600
+                              1338,
+                              1342
                             ],
                             "loc": {
                               "start": {
-                                "line": 21,
+                                "line": 37,
                                 "column": 4
                               },
                               "end": {
-                                "line": 21,
+                                "line": 37,
                                 "column": 8
                               }
                             }
@@ -448,31 +412,31 @@
                             "type": "Identifier",
                             "name": "name",
                             "range": [
-                              601,
-                              605
+                              1343,
+                              1347
                             ],
                             "loc": {
                               "start": {
-                                "line": 21,
+                                "line": 37,
                                 "column": 9
                               },
                               "end": {
-                                "line": 21,
+                                "line": 37,
                                 "column": 13
                               }
                             }
                           },
                           "range": [
-                            596,
-                            605
+                            1338,
+                            1347
                           ],
                           "loc": {
                             "start": {
-                              "line": 21,
+                              "line": 37,
                               "column": 4
                             },
                             "end": {
-                              "line": 21,
+                              "line": 37,
                               "column": 13
                             }
                           }
@@ -481,46 +445,46 @@
                           "type": "Identifier",
                           "name": "name",
                           "range": [
-                            608,
-                            612
+                            1350,
+                            1354
                           ],
                           "loc": {
                             "start": {
-                              "line": 21,
+                              "line": 37,
                               "column": 16
                             },
                             "end": {
-                              "line": 21,
+                              "line": 37,
                               "column": 20
                             }
                           }
                         },
                         "range": [
-                          596,
-                          612
+                          1338,
+                          1354
                         ],
                         "loc": {
                           "start": {
-                            "line": 21,
+                            "line": 37,
                             "column": 4
                           },
                           "end": {
-                            "line": 21,
+                            "line": 37,
                             "column": 20
                           }
                         }
                       },
                       "range": [
-                        596,
-                        613
+                        1338,
+                        1355
                       ],
                       "loc": {
                         "start": {
-                          "line": 21,
+                          "line": 37,
                           "column": 4
                         },
                         "end": {
-                          "line": 21,
+                          "line": 37,
                           "column": 21
                         }
                       },
@@ -529,16 +493,16 @@
                           "type": "Block",
                           "value": "*\n     * The name of the module.\n     * @type {string}\n     ",
                           "range": [
-                            527,
-                            591
+                            1269,
+                            1333
                           ],
                           "loc": {
                             "start": {
-                              "line": 17,
+                              "line": 33,
                               "column": 4
                             },
                             "end": {
-                              "line": 20,
+                              "line": 36,
                               "column": 7
                             }
                           }
@@ -547,16 +511,16 @@
                     }
                   ],
                   "range": [
-                    507,
-                    617
+                    1249,
+                    1359
                   ],
                   "loc": {
                     "start": {
-                      "line": 14,
-                      "column": 32
+                      "line": 30,
+                      "column": 20
                     },
                     "end": {
-                      "line": 22,
+                      "line": 38,
                       "column": 3
                     }
                   }
@@ -564,16 +528,16 @@
                 "generator": false,
                 "expression": false,
                 "range": [
-                  488,
-                  617
+                  1242,
+                  1359
                 ],
                 "loc": {
                   "start": {
-                    "line": 14,
+                    "line": 30,
                     "column": 13
                   },
                   "end": {
-                    "line": 22,
+                    "line": 38,
                     "column": 3
                   }
                 }
@@ -581,16 +545,16 @@
               "kind": "constructor",
               "computed": false,
               "range": [
-                477,
-                617
+                1231,
+                1359
               ],
               "loc": {
                 "start": {
-                  "line": 14,
+                  "line": 30,
                   "column": 2
                 },
                 "end": {
-                  "line": 22,
+                  "line": 38,
                   "column": 3
                 }
               },
@@ -599,16 +563,16 @@
                   "type": "Block",
                   "value": "*\n    * Creates an instance of the class.\n    * @param {Object} [options={}] The options.\n    * @param {string} [options.name='unnamed'] The name of the module.\n   ",
                   "range": [
-                    306,
-                    474
+                    1060,
+                    1228
                   ],
                   "loc": {
                     "start": {
-                      "line": 9,
+                      "line": 25,
                       "column": 2
                     },
                     "end": {
-                      "line": 13,
+                      "line": 29,
                       "column": 5
                     }
                   }
@@ -619,16 +583,16 @@
                   "type": "Block",
                   "value": "*\n   * Called when the `client` connects to the server.\n   * This method should handle the logic of the module on the server side. For instance, it can take care of the communication with the client side module by setting up WebSocket message listeners and sending WebSocket messages, or it can add the client to a list to keep track of all the connected clients.\n   * @param {ServerClient} client The connected client.\n   ",
                   "range": [
-                    621,
-                    1048
+                    1363,
+                    1790
                   ],
                   "loc": {
                     "start": {
-                      "line": 24,
+                      "line": 40,
                       "column": 2
                     },
                     "end": {
-                      "line": 28,
+                      "line": 44,
                       "column": 5
                     }
                   }
@@ -642,16 +606,16 @@
                 "type": "Identifier",
                 "name": "connect",
                 "range": [
-                  1051,
-                  1058
+                  1793,
+                  1800
                 ],
                 "loc": {
                   "start": {
-                    "line": 29,
+                    "line": 45,
                     "column": 2
                   },
                   "end": {
-                    "line": 29,
+                    "line": 45,
                     "column": 9
                   }
                 }
@@ -664,16 +628,16 @@
                     "type": "Identifier",
                     "name": "client",
                     "range": [
-                      1059,
-                      1065
+                      1801,
+                      1807
                     ],
                     "loc": {
                       "start": {
-                        "line": 29,
+                        "line": 45,
                         "column": 10
                       },
                       "end": {
-                        "line": 29,
+                        "line": 45,
                         "column": 16
                       }
                     }
@@ -697,16 +661,16 @@
                               "type": "Identifier",
                               "name": "client",
                               "range": [
-                                1096,
-                                1102
+                                1838,
+                                1844
                               ],
                               "loc": {
                                 "start": {
-                                  "line": 31,
+                                  "line": 47,
                                   "column": 4
                                 },
                                 "end": {
-                                  "line": 31,
+                                  "line": 47,
                                   "column": 10
                                 }
                               }
@@ -715,31 +679,31 @@
                               "type": "Identifier",
                               "name": "modules",
                               "range": [
-                                1103,
-                                1110
+                                1845,
+                                1852
                               ],
                               "loc": {
                                 "start": {
-                                  "line": 31,
+                                  "line": 47,
                                   "column": 11
                                 },
                                 "end": {
-                                  "line": 31,
+                                  "line": 47,
                                   "column": 18
                                 }
                               }
                             },
                             "range": [
-                              1096,
-                              1110
+                              1838,
+                              1852
                             ],
                             "loc": {
                               "start": {
-                                "line": 31,
+                                "line": 47,
                                 "column": 4
                               },
                               "end": {
-                                "line": 31,
+                                "line": 47,
                                 "column": 18
                               }
                             }
@@ -750,16 +714,16 @@
                             "object": {
                               "type": "ThisExpression",
                               "range": [
-                                1111,
-                                1115
+                                1853,
+                                1857
                               ],
                               "loc": {
                                 "start": {
-                                  "line": 31,
+                                  "line": 47,
                                   "column": 19
                                 },
                                 "end": {
-                                  "line": 31,
+                                  "line": 47,
                                   "column": 23
                                 }
                               }
@@ -768,46 +732,46 @@
                               "type": "Identifier",
                               "name": "name",
                               "range": [
-                                1116,
-                                1120
+                                1858,
+                                1862
                               ],
                               "loc": {
                                 "start": {
-                                  "line": 31,
+                                  "line": 47,
                                   "column": 24
                                 },
                                 "end": {
-                                  "line": 31,
+                                  "line": 47,
                                   "column": 28
                                 }
                               }
                             },
                             "range": [
-                              1111,
-                              1120
+                              1853,
+                              1862
                             ],
                             "loc": {
                               "start": {
-                                "line": 31,
+                                "line": 47,
                                 "column": 19
                               },
                               "end": {
-                                "line": 31,
+                                "line": 47,
                                 "column": 28
                               }
                             }
                           },
                           "range": [
-                            1096,
-                            1121
+                            1838,
+                            1863
                           ],
                           "loc": {
                             "start": {
-                              "line": 31,
+                              "line": 47,
                               "column": 4
                             },
                             "end": {
-                              "line": 31,
+                              "line": 47,
                               "column": 29
                             }
                           }
@@ -816,46 +780,46 @@
                           "type": "ObjectExpression",
                           "properties": [],
                           "range": [
-                            1124,
-                            1126
+                            1866,
+                            1868
                           ],
                           "loc": {
                             "start": {
-                              "line": 31,
+                              "line": 47,
                               "column": 32
                             },
                             "end": {
-                              "line": 31,
+                              "line": 47,
                               "column": 34
                             }
                           }
                         },
                         "range": [
-                          1096,
-                          1126
+                          1838,
+                          1868
                         ],
                         "loc": {
                           "start": {
-                            "line": 31,
+                            "line": 47,
                             "column": 4
                           },
                           "end": {
-                            "line": 31,
+                            "line": 47,
                             "column": 34
                           }
                         }
                       },
                       "range": [
-                        1096,
-                        1127
+                        1838,
+                        1869
                       ],
                       "loc": {
                         "start": {
-                          "line": 31,
+                          "line": 47,
                           "column": 4
                         },
                         "end": {
-                          "line": 31,
+                          "line": 47,
                           "column": 35
                         }
                       },
@@ -864,16 +828,16 @@
                           "type": "Line",
                           "value": " Setup an object",
                           "range": [
-                            1073,
-                            1091
+                            1815,
+                            1833
                           ],
                           "loc": {
                             "start": {
-                              "line": 30,
+                              "line": 46,
                               "column": 4
                             },
                             "end": {
-                              "line": 30,
+                              "line": 46,
                               "column": 22
                             }
                           }
@@ -882,16 +846,16 @@
                     }
                   ],
                   "range": [
-                    1067,
-                    1131
+                    1809,
+                    1873
                   ],
                   "loc": {
                     "start": {
-                      "line": 29,
+                      "line": 45,
                       "column": 18
                     },
                     "end": {
-                      "line": 32,
+                      "line": 48,
                       "column": 3
                     }
                   }
@@ -899,16 +863,16 @@
                 "generator": false,
                 "expression": false,
                 "range": [
-                  1058,
-                  1131
+                  1800,
+                  1873
                 ],
                 "loc": {
                   "start": {
-                    "line": 29,
+                    "line": 45,
                     "column": 9
                   },
                   "end": {
-                    "line": 32,
+                    "line": 48,
                     "column": 3
                   }
                 }
@@ -916,16 +880,16 @@
               "kind": "method",
               "computed": false,
               "range": [
-                1051,
-                1131
+                1793,
+                1873
               ],
               "loc": {
                 "start": {
-                  "line": 29,
+                  "line": 45,
                   "column": 2
                 },
                 "end": {
-                  "line": 32,
+                  "line": 48,
                   "column": 3
                 }
               },
@@ -934,16 +898,16 @@
                   "type": "Block",
                   "value": "*\n   * Called when the `client` connects to the server.\n   * This method should handle the logic of the module on the server side. For instance, it can take care of the communication with the client side module by setting up WebSocket message listeners and sending WebSocket messages, or it can add the client to a list to keep track of all the connected clients.\n   * @param {ServerClient} client The connected client.\n   ",
                   "range": [
-                    621,
-                    1048
+                    1363,
+                    1790
                   ],
                   "loc": {
                     "start": {
-                      "line": 24,
+                      "line": 40,
                       "column": 2
                     },
                     "end": {
-                      "line": 28,
+                      "line": 44,
                       "column": 5
                     }
                   }
@@ -954,16 +918,16 @@
                   "type": "Block",
                   "value": "*\n   * Called when the client `client` disconnects from the server.\n   * This method should handle the logic when that happens. For instance, it can remove the socket message listeners, or remove the client from the list that keeps track of the connected clients.\n   * @param {ServerClient} client The disconnected client.\n   ",
                   "range": [
-                    1135,
-                    1465
+                    1877,
+                    2207
                   ],
                   "loc": {
                     "start": {
-                      "line": 34,
+                      "line": 50,
                       "column": 2
                     },
                     "end": {
-                      "line": 38,
+                      "line": 54,
                       "column": 5
                     }
                   }
@@ -977,16 +941,16 @@
                 "type": "Identifier",
                 "name": "disconnect",
                 "range": [
-                  1468,
-                  1478
+                  2210,
+                  2220
                 ],
                 "loc": {
                   "start": {
-                    "line": 39,
+                    "line": 55,
                     "column": 2
                   },
                   "end": {
-                    "line": 39,
+                    "line": 55,
                     "column": 12
                   }
                 }
@@ -999,16 +963,16 @@
                     "type": "Identifier",
                     "name": "client",
                     "range": [
-                      1479,
-                      1485
+                      2221,
+                      2227
                     ],
                     "loc": {
                       "start": {
-                        "line": 39,
+                        "line": 55,
                         "column": 13
                       },
                       "end": {
-                        "line": 39,
+                        "line": 55,
                         "column": 19
                       }
                     }
@@ -1018,16 +982,16 @@
                   "type": "BlockStatement",
                   "body": [],
                   "range": [
-                    1487,
-                    1541
+                    2229,
+                    2283
                   ],
                   "loc": {
                     "start": {
-                      "line": 39,
+                      "line": 55,
                       "column": 21
                     },
                     "end": {
-                      "line": 41,
+                      "line": 57,
                       "column": 3
                     }
                   },
@@ -1036,16 +1000,16 @@
                       "type": "Line",
                       "value": " delete client.modules[this.name] // TODO?",
                       "range": [
-                        1493,
-                        1537
+                        2235,
+                        2279
                       ],
                       "loc": {
                         "start": {
-                          "line": 40,
+                          "line": 56,
                           "column": 4
                         },
                         "end": {
-                          "line": 40,
+                          "line": 56,
                           "column": 48
                         }
                       }
@@ -1055,16 +1019,16 @@
                 "generator": false,
                 "expression": false,
                 "range": [
-                  1478,
-                  1541
+                  2220,
+                  2283
                 ],
                 "loc": {
                   "start": {
-                    "line": 39,
+                    "line": 55,
                     "column": 12
                   },
                   "end": {
-                    "line": 41,
+                    "line": 57,
                     "column": 3
                   }
                 }
@@ -1072,16 +1036,16 @@
               "kind": "method",
               "computed": false,
               "range": [
-                1468,
-                1541
+                2210,
+                2283
               ],
               "loc": {
                 "start": {
-                  "line": 39,
+                  "line": 55,
                   "column": 2
                 },
                 "end": {
-                  "line": 41,
+                  "line": 57,
                   "column": 3
                 }
               },
@@ -1090,16 +1054,16 @@
                   "type": "Block",
                   "value": "*\n   * Called when the client `client` disconnects from the server.\n   * This method should handle the logic when that happens. For instance, it can remove the socket message listeners, or remove the client from the list that keeps track of the connected clients.\n   * @param {ServerClient} client The disconnected client.\n   ",
                   "range": [
-                    1135,
-                    1465
+                    1877,
+                    2207
                   ],
                   "loc": {
                     "start": {
-                      "line": 34,
+                      "line": 50,
                       "column": 2
                     },
                     "end": {
-                      "line": 38,
+                      "line": 54,
                       "column": 5
                     }
                   }
@@ -1109,31 +1073,31 @@
             }
           ],
           "range": [
-            302,
-            1543
+            1056,
+            2285
           ],
           "loc": {
             "start": {
-              "line": 8,
+              "line": 24,
               "column": 55
             },
             "end": {
-              "line": 42,
+              "line": 58,
               "column": 1
             }
           }
         },
         "range": [
-          262,
-          1543
+          1016,
+          2285
         ],
         "loc": {
           "start": {
-            "line": 8,
+            "line": 24,
             "column": 15
           },
           "end": {
-            "line": 42,
+            "line": 58,
             "column": 1
           }
         },
@@ -1158,10 +1122,10 @@
           },
           {
             "type": "Block",
-            "value": "*\n * The `ServerPerformance` base class constitutes a basis on which to build a performance on the server side.\n ",
+            "value": "*\n * The `ServerModule` base class is used to create a *Soundworks* module on the server side.\n * Each module should have a {@link ServerModule#connect} and a {@link ServerModule#disconnect} method.\n * Any module mapped to the type of client `clientType` (thanks to the {@link server#map} method) would call its {@link ServerModule#connect} method when such a client connects to the server, and its {@link ServerModule#disconnect} method when such a client disconnects from the server.\n * @example\n * class MyModule extends serverSide.Module {\n *   constructor('my-module-name') {\n *     ... // anything the constructor needs\n *   }\n *\n *   connect(client) {\n *     ... // what the module has to do when a client connects to the server\n *   }\n *\n *   disconnect(client) {\n *     ... // what the module has to do when a client disconnects from the server\n *   }\n * }\n ",
             "range": [
               129,
-              246
+              1000
             ],
             "loc": {
               "start": {
@@ -1169,7 +1133,7 @@
                 "column": 0
               },
               "end": {
-                "line": 7,
+                "line": 23,
                 "column": 3
               }
             }
@@ -1178,16 +1142,16 @@
         "trailingComments": []
       },
       "range": [
-        247,
-        1543
+        1001,
+        2285
       ],
       "loc": {
         "start": {
-          "line": 8,
+          "line": 24,
           "column": 0
         },
         "end": {
-          "line": 42,
+          "line": 58,
           "column": 1
         }
       },
@@ -1212,10 +1176,10 @@
         },
         {
           "type": "Block",
-          "value": "*\n * The `ServerPerformance` base class constitutes a basis on which to build a performance on the server side.\n ",
+          "value": "*\n * The `ServerModule` base class is used to create a *Soundworks* module on the server side.\n * Each module should have a {@link ServerModule#connect} and a {@link ServerModule#disconnect} method.\n * Any module mapped to the type of client `clientType` (thanks to the {@link server#map} method) would call its {@link ServerModule#connect} method when such a client connects to the server, and its {@link ServerModule#disconnect} method when such a client disconnects from the server.\n * @example\n * class MyModule extends serverSide.Module {\n *   constructor('my-module-name') {\n *     ... // anything the constructor needs\n *   }\n *\n *   connect(client) {\n *     ... // what the module has to do when a client connects to the server\n *   }\n *\n *   disconnect(client) {\n *     ... // what the module has to do when a client disconnects from the server\n *   }\n * }\n ",
           "range": [
             129,
-            246
+            1000
           ],
           "loc": {
             "start": {
@@ -1223,7 +1187,7 @@
               "column": 0
             },
             "end": {
-              "line": 7,
+              "line": 23,
               "column": 3
             }
           }
@@ -1234,7 +1198,7 @@
   "sourceType": "module",
   "range": [
     0,
-    1543
+    2285
   ],
   "loc": {
     "start": {
@@ -1242,7 +1206,7 @@
       "column": 0
     },
     "end": {
-      "line": 42,
+      "line": 58,
       "column": 1
     }
   },
@@ -1267,10 +1231,10 @@
     },
     {
       "type": "Block",
-      "value": "*\n * The `ServerPerformance` base class constitutes a basis on which to build a performance on the server side.\n ",
+      "value": "*\n * The `ServerModule` base class is used to create a *Soundworks* module on the server side.\n * Each module should have a {@link ServerModule#connect} and a {@link ServerModule#disconnect} method.\n * Any module mapped to the type of client `clientType` (thanks to the {@link server#map} method) would call its {@link ServerModule#connect} method when such a client connects to the server, and its {@link ServerModule#disconnect} method when such a client disconnects from the server.\n * @example\n * class MyModule extends serverSide.Module {\n *   constructor('my-module-name') {\n *     ... // anything the constructor needs\n *   }\n *\n *   connect(client) {\n *     ... // what the module has to do when a client connects to the server\n *   }\n *\n *   disconnect(client) {\n *     ... // what the module has to do when a client disconnects from the server\n *   }\n * }\n ",
       "range": [
         129,
-        246
+        1000
       ],
       "loc": {
         "start": {
@@ -1278,7 +1242,7 @@
           "column": 0
         },
         "end": {
-          "line": 7,
+          "line": 23,
           "column": 3
         }
       }
@@ -1287,16 +1251,16 @@
       "type": "Block",
       "value": "*\n    * Creates an instance of the class.\n    * @param {Object} [options={}] The options.\n    * @param {string} [options.name='unnamed'] The name of the module.\n   ",
       "range": [
-        306,
-        474
+        1060,
+        1228
       ],
       "loc": {
         "start": {
-          "line": 9,
+          "line": 25,
           "column": 2
         },
         "end": {
-          "line": 13,
+          "line": 29,
           "column": 5
         }
       }
@@ -1305,16 +1269,16 @@
       "type": "Block",
       "value": "*\n     * The name of the module.\n     * @type {string}\n     ",
       "range": [
-        527,
-        591
+        1269,
+        1333
       ],
       "loc": {
         "start": {
-          "line": 17,
+          "line": 33,
           "column": 4
         },
         "end": {
-          "line": 20,
+          "line": 36,
           "column": 7
         }
       }
@@ -1323,16 +1287,16 @@
       "type": "Block",
       "value": "*\n   * Called when the `client` connects to the server.\n   * This method should handle the logic of the module on the server side. For instance, it can take care of the communication with the client side module by setting up WebSocket message listeners and sending WebSocket messages, or it can add the client to a list to keep track of all the connected clients.\n   * @param {ServerClient} client The connected client.\n   ",
       "range": [
-        621,
-        1048
+        1363,
+        1790
       ],
       "loc": {
         "start": {
-          "line": 24,
+          "line": 40,
           "column": 2
         },
         "end": {
-          "line": 28,
+          "line": 44,
           "column": 5
         }
       }
@@ -1341,16 +1305,16 @@
       "type": "Line",
       "value": " Setup an object",
       "range": [
-        1073,
-        1091
+        1815,
+        1833
       ],
       "loc": {
         "start": {
-          "line": 30,
+          "line": 46,
           "column": 4
         },
         "end": {
-          "line": 30,
+          "line": 46,
           "column": 22
         }
       }
@@ -1359,16 +1323,16 @@
       "type": "Block",
       "value": "*\n   * Called when the client `client` disconnects from the server.\n   * This method should handle the logic when that happens. For instance, it can remove the socket message listeners, or remove the client from the list that keeps track of the connected clients.\n   * @param {ServerClient} client The disconnected client.\n   ",
       "range": [
-        1135,
-        1465
+        1877,
+        2207
       ],
       "loc": {
         "start": {
-          "line": 34,
+          "line": 50,
           "column": 2
         },
         "end": {
-          "line": 38,
+          "line": 54,
           "column": 5
         }
       }
@@ -1377,16 +1341,16 @@
       "type": "Line",
       "value": " delete client.modules[this.name] // TODO?",
       "range": [
-        1493,
-        1537
+        2235,
+        2279
       ],
       "loc": {
         "start": {
-          "line": 40,
+          "line": 56,
           "column": 4
         },
         "end": {
-          "line": 40,
+          "line": 56,
           "column": 48
         }
       }

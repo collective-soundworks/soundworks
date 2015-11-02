@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <base data-ice="baseUrl" href="../../../">
-  <title data-ice="title">ClientPlatform | API Document</title>
+  <title data-ice="title">ClientPlacer | API Document</title>
   <link type="text/css" rel="stylesheet" href="css/style.css">
   <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
   <script src="script/prettify/prettify.js"></script>
@@ -59,23 +59,23 @@
 </nav>
 
 <div class="content" data-ice="content"><div class="header-notice">
-  <div data-ice="importPath" class="import-path"><pre class="prettyprint"><code data-ice="importPathCode">import ClientPlatform from &apos;<span><a href="file/src/client/ClientPlatform.es6.js.html#lineNumber28">soundworks/src/client/ClientPlatform.es6.js</a></span>&apos;</code></pre></div>
+  <div data-ice="importPath" class="import-path"><pre class="prettyprint"><code data-ice="importPathCode">import ClientPlacer from &apos;<span><a href="file/src/client/ClientPlacer.es6.js.html#lineNumber77">soundworks/src/client/ClientPlacer.es6.js</a></span>&apos;</code></pre></div>
   <span data-ice="access">public</span>
   <span data-ice="kind">class</span>
   
   
   
-  <span data-ice="source">| <span><a href="file/src/client/ClientPlatform.es6.js.html#lineNumber28">source</a></span></span>
+  <span data-ice="source">| <span><a href="file/src/client/ClientPlacer.es6.js.html#lineNumber77">source</a></span></span>
 </div>
 
 <div class="self-detail detail">
-  <h1 data-ice="name">ClientPlatform</h1>
+  <h1 data-ice="name">ClientPlacer</h1>
 
   
 
   
   
-  <div class="flat-list" data-ice="extendsChain"><h4>Extends:</h4><div><span><a href="variable/index.html#static-variable-EventEmitter">EventEmitter</a></span> &#x2192; <span>src/client/ClientModule.es6.js~Promised</span> &#x2192; <span><a href="class/src/client/ClientModule.es6.js~ClientModule.html">ClientModule</a></span> &#x2192; ClientPlatform</div></div>
+  <div class="flat-list" data-ice="extendsChain"><h4>Extends:</h4><div><span><a href="variable/index.html#static-variable-EventEmitter">EventEmitter</a></span> &#x2192; <span>src/client/ClientModule.es6.js~Promised</span> &#x2192; <span><a href="class/src/client/ClientModule.es6.js~ClientModule.html">ClientModule</a></span> &#x2192; ClientPlacer</div></div>
   
   
   
@@ -85,10 +85,7 @@
 
   
   
-  <div class="description" data-ice="description"><p>The <code>ClientPlatform</code> checks whether the device is compatible with the technologies used in the <em>Soundworks</em> library.
-(Compatible devices are running on iOS 7 or above, or on Android 4.2 or above with the Chrome browser in version 35 or above.)
-If that is not the case, the module displays a blocking view and prevents the participant to go any further in the scenario.
-The <code>ClientPlatform</code> module calls its <code>done</code> method immediately if the device passes the platform test, and never otherwise.</p>
+  <div class="description" data-ice="description"><p>The <code>ClientPlacer</code> module allows to select a place in a list of predefined places.</p>
 </div>
 
   
@@ -117,7 +114,7 @@ The <code>ClientPlatform</code> module calls its <code>done</code> method immedi
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/client/ClientPlatform.es6.js~ClientPlatform.html#instance-constructor-constructor">constructor</a></span></span><span data-ice="signature">(options: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></span>)</span>
+           <span data-ice="name"><span><a href="class/src/client/ClientPlacer.es6.js~ClientPlacer.html#instance-constructor-constructor">constructor</a></span></span><span data-ice="signature">(options: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></span>, localStorageId: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>)</span>
         </p>
       </div>
       <div>
@@ -135,9 +132,8 @@ The <code>ClientPlatform</code> module calls its <code>done</code> method immedi
 </tbody>
 </table>
 </div>
-
-<div data-ice="methodSummary"><h2>Method Summary</h2><table class="summary" data-ice="summary">
-  <thead><tr><td data-ice="title" colspan="3">Public Methods</td></tr></thead>
+<div data-ice="memberSummary"><h2>Member Summary</h2><table class="summary" data-ice="summary">
+  <thead><tr><td data-ice="title" colspan="3">Public Members</td></tr></thead>
   <tbody>
   
   <tr data-ice="target">
@@ -151,7 +147,7 @@ The <code>ClientPlatform</code> module calls its <code>done</code> method immedi
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/client/ClientPlatform.es6.js~ClientPlatform.html#instance-method-restart">restart</a></span></span><span data-ice="signature">()</span>
+           <span data-ice="name"><span><a href="class/src/client/ClientPlacer.es6.js~ClientPlacer.html#instance-member-index">index</a></span></span><span data-ice="signature">: <span>*</span></span>
         </p>
       </div>
       <div>
@@ -176,7 +172,7 @@ The <code>ClientPlatform</code> module calls its <code>done</code> method immedi
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/client/ClientPlatform.es6.js~ClientPlatform.html#instance-method-start">start</a></span></span><span data-ice="signature">(): <span>*</span></span>
+           <span data-ice="name"><span><a href="class/src/client/ClientPlacer.es6.js~ClientPlacer.html#instance-member-label">label</a></span></span><span data-ice="signature">: <span>*</span></span>
         </p>
       </div>
       <div>
@@ -190,9 +186,61 @@ The <code>ClientPlatform</code> module calls its <code>done</code> method immedi
       
     </td>
   </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+           <span data-ice="name"><span><a href="class/src/client/ClientPlacer.es6.js~ClientPlacer.html#instance-member-positions">positions</a></span></span><span data-ice="signature">: <span>*</span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+           <span data-ice="name"><span><a href="class/src/client/ClientPlacer.es6.js~ClientPlacer.html#instance-member-setup">setup</a></span></span><span data-ice="signature">: <span><a href="class/src/client/ClientSetup.es6.js~ClientSetup.html">ClientSetup</a></span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>The setup in which to select a place.</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
 </tbody>
 </table>
 </div>
+
 
 <div class="inherited-summary" data-ice="inheritedSummary"><h2>Inherited Summary</h2><table class="summary" data-ice="summary">
   <thead><tr><td data-ice="title" colspan="3"><span class="toggle closed"></span> From class <span><a href="class/src/client/ClientModule.es6.js~ClientModule.html">ClientModule</a></span></td></tr></thead>
@@ -447,18 +495,18 @@ The method should be called only if the module has a <code>view</code>.</p>
     
     
     
-    <span data-ice="name">constructor</span><span data-ice="signature">(options: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></span>)</span>
+    <span data-ice="name">constructor</span><span data-ice="signature">(options: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></span>, localStorageId: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>)</span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/client/ClientPlatform.es6.js.html#lineNumber39">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/client/ClientPlacer.es6.js.html#lineNumber91">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  <div data-ice="description"><p>Creates an instance of the class. Always has a view.</p>
+  <div data-ice="description"><p>Creates an instance of the class.</p>
 </div>
 
   <div data-ice="override"><h4>Override:</h4><span><a href="class/src/client/ClientModule.es6.js~ClientModule.html#instance-constructor-constructor">ClientModule#constructor</a></span></div>
@@ -483,7 +531,7 @@ The method should be called only if the module has a <code>view</code>.</p>
       <td data-ice="name" data-depth="1">options.name</td>
       <td data-ice="type"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></td>
       <td data-ice="appendix"><ul><li>optional</li>
-<li>default: &apos;platform-check&apos;</li></ul></td>
+<li>default: &apos;performance&apos;</li></ul></td>
       <td data-ice="description"><p>Name of the module.</p>
 </td>
     </tr>
@@ -496,35 +544,38 @@ The method should be called only if the module has a <code>view</code>.</p>
 </td>
     </tr>
 <tr data-ice="property" data-depth="1">
-      <td data-ice="name" data-depth="1">options.prefix</td>
-      <td data-ice="type"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></td>
-      <td data-ice="appendix"><ul><li>optional</li>
-<li>default: &apos;&apos;</li></ul></td>
-      <td data-ice="description"><p>Additional content displayed before the error message (<em>e.g.</em> <code>&apos;Welcome to My Scenario!&apos;</code>).</p>
+      <td data-ice="name" data-depth="1">options.setup</td>
+      <td data-ice="type"><span><a href="class/src/client/ClientSetup.es6.js~ClientSetup.html">ClientSetup</a></span></td>
+      <td data-ice="appendix"><ul><li>optional</li></ul></td>
+      <td data-ice="description"><p>The setup in which to select the place.</p>
 </td>
     </tr>
 <tr data-ice="property" data-depth="1">
-      <td data-ice="name" data-depth="1">options.postfix</td>
+      <td data-ice="name" data-depth="1">options.mode</td>
       <td data-ice="type"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></td>
       <td data-ice="appendix"><ul><li>optional</li>
-<li>default: &apos;&apos;</li></ul></td>
-      <td data-ice="description"><p>Additional content displayed after the error message (<em>e.g.</em> <code>&apos;You can still enjoy the performance with others!&apos;</code>).</p>
+<li>default: &apos;list&apos;</li></ul></td>
+      <td data-ice="description"><p>Selection mode. Can be:</p>
+<ul>
+<li><code>&apos;list&apos;</code> to select a place among a list of places.</li>
+<li><code>&apos;graphic</code>&apos; to select a place on a graphical representation of the setup.</li>
+</ul>
 </td>
     </tr>
 <tr data-ice="property" data-depth="1">
-      <td data-ice="name" data-depth="1">options.messages</td>
-      <td data-ice="type"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></td>
-      <td data-ice="appendix"><ul><li>optional</li>
-<li>default: defaultMessages</li></ul></td>
-      <td data-ice="description"><p>Error messages displayed when the device doesn&apos;t pass the platform check.</p>
-</td>
-    </tr>
-<tr data-ice="property" data-depth="1">
-      <td data-ice="name" data-depth="1">options.bypass</td>
+      <td data-ice="name" data-depth="1">options.persist</td>
       <td data-ice="type"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">Boolean</a></span></td>
       <td data-ice="appendix"><ul><li>optional</li>
 <li>default: false</li></ul></td>
-      <td data-ice="description"><p>When set to <code>true</code>, the module is bypassed (calls the <code>done</code>method immediately).</p>
+      <td data-ice="description"><p>Indicates whether the selected place should be stored in the <code>LocalStorage</code> for future retrieval or not.</p>
+</td>
+    </tr>
+<tr data-ice="property" data-depth="0">
+      <td data-ice="name" data-depth="0">localStorageId</td>
+      <td data-ice="type"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></td>
+      <td data-ice="appendix"><ul><li>optional</li>
+<li>default: &apos;soundworks&apos;</li></ul></td>
+      <td data-ice="description"><p>Prefix of the <code>LocalStorage</code> ID.</p>
 </td>
     </tr>
 </tbody>
@@ -545,24 +596,23 @@ The method should be called only if the module has a <code>view</code>.</p>
   
 
   
-  
+  <div data-ice="todo"><h4>TODO:</h4><ul><li><span>this._selector</span></li></ul></div>
 </div>
 </div>
-
-<div data-ice="methodDetails"><h2 data-ice="title">Public Methods</h2>
+<div data-ice="memberDetails"><h2 data-ice="title">Public Members</h2>
 
 <div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-method-restart">
+  <h3 data-ice="anchor" id="instance-member-index">
     <span class="access" data-ice="access">public</span>
     
     
     
     
-    <span data-ice="name">restart</span><span data-ice="signature">()</span>
+    <span data-ice="name">index</span><span data-ice="signature">: <span>*</span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/client/ClientPlatform.es6.js.html#lineNumber81">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/client/ClientPlacer.es6.js.html#lineNumber156">source</a></span></span>
     </span>
   </h3>
 
@@ -571,7 +621,7 @@ The method should be called only if the module has a <code>view</code>.</p>
   
   
 
-  <div data-ice="override"><h4>Override:</h4><span><a href="class/src/client/ClientModule.es6.js~ClientModule.html#instance-method-restart">ClientModule#restart</a></span></div>
+  
 
   <div data-ice="properties">
 </div>
@@ -592,17 +642,17 @@ The method should be called only if the module has a <code>view</code>.</p>
   
 </div>
 <div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-method-start">
+  <h3 data-ice="anchor" id="instance-member-label">
     <span class="access" data-ice="access">public</span>
     
     
     
     
-    <span data-ice="name">start</span><span data-ice="signature">(): <span>*</span></span>
+    <span data-ice="name">label</span><span data-ice="signature">: <span>*</span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/client/ClientPlatform.es6.js.html#lineNumber48">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/client/ClientPlacer.es6.js.html#lineNumber157">source</a></span></span>
     </span>
   </h3>
 
@@ -611,22 +661,12 @@ The method should be called only if the module has a <code>view</code>.</p>
   
   
 
-  <div data-ice="override"><h4>Override:</h4><span><a href="class/src/client/ClientModule.es6.js~ClientModule.html#instance-method-start">ClientModule#start</a></span></div>
+  
 
   <div data-ice="properties">
 </div>
 
-  <div class="return-params" data-ice="returnParams">
-    <h4>Return:</h4>
-    <table>
-      <tr>
-        <td class="return-type" data-ice="returnType"><span>*</span></td>
-        
-      </tr>
-    </table>
-    <div data-ice="returnProperties">
-</div>
-  </div>
+  
 
   
 
@@ -641,7 +681,89 @@ The method should be called only if the module has a <code>view</code>.</p>
   
   
 </div>
+<div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-member-positions">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    
+    <span data-ice="name">positions</span><span data-ice="signature">: <span>*</span></span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/client/ClientPlacer.es6.js.html#lineNumber177">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  
+
+  
+
+  <div data-ice="properties">
 </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-member-setup">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    
+    <span data-ice="name">setup</span><span data-ice="signature">: <span><a href="class/src/client/ClientSetup.es6.js~ClientSetup.html">ClientSetup</a></span></span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/client/ClientPlacer.es6.js.html#lineNumber98">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>The setup in which to select a place.</p>
+</div>
+
+  
+
+  <div data-ice="properties">
+</div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+</div>
+
 </div>
 
 <footer class="footer">

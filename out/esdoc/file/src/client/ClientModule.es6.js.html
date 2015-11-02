@@ -35,13 +35,17 @@
   <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">client</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientCalibration.es6.js~ClientCalibration.html">ClientCalibration</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientControl.es6.js~ClientControl.html">ClientControl</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientDialog.es6.js~ClientDialog.html">ClientDialog</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientFilelist.es6.js~Filelist.html">Filelist</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientLoader.es6.js~ClientLoader.html">ClientLoader</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientLocator.es6.js~ClientLocator.html">ClientLocator</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientModule.es6.js~ClientModule.html">ClientModule</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientOrientation.es6.js~ClientOrientation.html">ClientOrientation</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientPerformance.es6.js~ClientPerformance.html">ClientPerformance</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientPlacer.es6.js~ClientPlacer.html">ClientPlacer</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientPlatform.es6.js~ClientPlatform.html">ClientPlatform</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientSelector.es6.js~ClientSelector.html">ClientSelector</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientSetup.es6.js~ClientSetup.html">ClientSetup</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientSync.es6.js~ClientSync.html">ClientSync</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-ClientModule">ClientModule</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-EventEmitter">EventEmitter</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-client">client</a></span></span></li>
 <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">server</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerCalibration.es6.js~ServerCalibration.html">ServerCalibration</a></span></span></li>
@@ -140,15 +144,66 @@ class Parallel extends Promised {
   }
 }
 
+/**
+ * The `ClientModule` base class is used to create a *Soundworks* module on the client side.
+ * Each module should have a {@link ClientModule#start} and a {@link ClientModule#done} method.
+ * The {@link ClientModule#done} method must be called when the module can hand over the control to the subsequent modules (*i.e.* when the module has done its duty, or when it may run in the background for the rest of the scenario after it finished its initialization process).
+ * The base class optionally creates a view &#x2014; a fullscreen `div` accessible through the `this.view` attribute &#x2014; that is added to the DOM when the module is started and removed when the module calls its {@link ClientModule#done} method.
+ * (Specifically, the `view` element is added to the `#container` DOM element.)
+ *
+ * @example
+ * class MyModule extends ClientModule {
+ *   constructor(options = {}) {
+ *     // Here, MyModule would always have a view,
+ *     // with the id and class &apos;my-module-name&apos;,
+ *     // and possibly the background color
+ *     // defined by the argument &apos;options&apos;.
+ *     super(&apos;my-module-name&apos;, true, options.color || &apos;alizarin&apos;);
+ *
+ *     ... // anything the constructor needs
+ *   }
+ *
+ *   start() {
+ *     super.start();
+ *
+ *     ... // what the module has to do
+ *         // (communication with the server, etc.)
+ *
+ *     this.done(); // call this method when the module can
+ *                  // hand over the control to a subsequent module
+ *   }
+ * }
+ */
 export default class ClientModule extends Promised {
+  /**
+   * Creates an instance of the class.
+   * @param {String} name Name of the module (used as the `id` and CSS class of the `view` if it exists).
+   * @param {Boolean} [createView=true] Indicates whether the module has and displays a `view` or not.
+   * @param {[type]} [color=&apos;black&apos;] Background color of the `view` when it exists.
+   */
   constructor(name, createView = true, color = &apos;black&apos;) { // TODO: change to colorClass?
     super();
 
+    /**
+     * Name of the module.
+     * @type {String}
+     */
     this.name = name;
 
+    /**
+     * View of the module.
+     * The view is a DOM element (a full screen `div`) in which the content of the module is displayed.
+     * This element is a child of the main container `div#container`, which is the only child of the `body` element.
+     * A module may or may not have a view, as indicated by the argument `hasView:Boolean` of the {@link ClientModule#constructor}.
+     * When that is the case, the view is created and added to the DOM when the {@link ClientModule#start} method is called, and is removed from the DOM when the {@link ClientModule#done} method is called.
+     * @type {DOMElement}
+     */
     this.view = null;
-    this.ownsView = false;
-    this.showsView = false;
+
+    this._ownsView = false;
+    this._showsView = false;
+    this._isStarted = false;
+    this._isDone = false;
 
     if (createView) {
       var div = document.createElement(&apos;div&apos;);
@@ -158,55 +213,86 @@ export default class ClientModule extends Promised {
       div.classList.add(color);
 
       this.view = div;
-      this.ownsView = true;
+      this._ownsView = true;
     }
-
-    this.isStarted = false;
-    this.isDone = false;
   }
 
+  /**
+   * Handles the logic of the module on the client side.
+   * For instance, it takes care of the communication with the module on the server side by sending WebSocket messages and setting up WebSocket message listeners.
+   * Additionally, if the module has a `view`, the `start` method creates the corresponding HTML element and appends it to the DOM&#x2019;s main container element (`div#container`).
+   *
+   * **Note:** the method is called automatically when necessary, you should not call it manually.
+   * @abstract
+   */
   start() {
-    if(!this.isStarted) {
+    if(!this._isStarted) {
       if (this.view) {
         container.appendChild(this.view);
-        this.showsView = true;
+        this._showsView = true;
       }
 
-      this.isStarted = true;
+      this._isStarted = true;
     }
   }
 
+  /**
+   * Resets the module to the state it had before calling the {@link ClientModule#start} method.
+   *
+   * **Note:** the method is called automatically when necessary (for instance to reset the module after a server crash if the module had not called its {@link ClientModule#done} method yet), you should not call it manually.
+   * @abstract
+   */
   reset() {
-    this.isStarted = false;
+    this._isStarted = false;
   }
 
+  /**
+   * Restarts the module.
+   *
+   * **Note:** the method is called automatically when necessary (for instance to restart the module after a server crash if the module had already called its {@link ClientModule#done} method), you should not call it manually.
+   * @abstract
+   */
   restart() {
-    this.isDone = false;
+    this._isDone = false;
   }
 
+  /**
+   * @private
+   */
   launch() {
-    if (this.isDone) {
+    if (this._isDone) {
       this.restart();
     } else {
-      if (this.isStarted)
+      if (this._isStarted)
         this.reset();
 
       this.start();
     }
   }
 
+  /**
+   * Should be called when the module can hand over the control to a subsequent module (for instance at the end of the `start` method you write).
+   * If the module has a `view`, the `done` method removes it from the DOM.
+   *
+   * **Note:** you should not override this method.
+   */
   done() {
-    this.isDone = true;
+    this._isDone = true;
 
-    if (this.view &amp;&amp; this.showsView &amp;&amp; this.ownsView) {
+    if (this.view &amp;&amp; this._showsView &amp;&amp; this._ownsView) {
       container.removeChild(this.view);
-      this.showsView = false;
+      this._showsView = false;
     }
 
     if (this.resolvePromised)
       this.resolvePromised();
   }
 
+  /**
+   * Set an arbitrary centered HTML content to the module&apos;s `view`.
+   * The method should be called only if the module has a `view`.
+   * @param {String} htmlContent The HTML content to append to the `view`.
+   */
   setCenteredViewContent(htmlContent) {
     if (this.view) {
       if (!this._centeredViewContent) {
@@ -233,6 +319,9 @@ export default class ClientModule extends Promised {
     }
   }
 
+  /**
+   * Removes the centered HTML content (set by {@link ClientModule#setCenteredViewContent}) from the `view`.
+   */
   removeCenteredViewContent() {
     if (this.view &amp;&amp; this._centeredViewContent) {
       this.view.removeChild(this._centeredViewContent);

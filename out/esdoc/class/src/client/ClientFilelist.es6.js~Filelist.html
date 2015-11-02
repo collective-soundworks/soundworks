@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <base data-ice="baseUrl" href="../../../">
-  <title data-ice="title">ClientPlatform | API Document</title>
+  <title data-ice="title">Filelist | API Document</title>
   <link type="text/css" rel="stylesheet" href="css/style.css">
   <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
   <script src="script/prettify/prettify.js"></script>
@@ -59,23 +59,23 @@
 </nav>
 
 <div class="content" data-ice="content"><div class="header-notice">
-  <div data-ice="importPath" class="import-path"><pre class="prettyprint"><code data-ice="importPathCode">import ClientPlatform from &apos;<span><a href="file/src/client/ClientPlatform.es6.js.html#lineNumber28">soundworks/src/client/ClientPlatform.es6.js</a></span>&apos;</code></pre></div>
+  <div data-ice="importPath" class="import-path"><pre class="prettyprint"><code data-ice="importPathCode">import Filelist from &apos;<span><a href="file/src/client/ClientFilelist.es6.js.html#lineNumber9">soundworks/src/client/ClientFilelist.es6.js</a></span>&apos;</code></pre></div>
   <span data-ice="access">public</span>
   <span data-ice="kind">class</span>
   
   
   
-  <span data-ice="source">| <span><a href="file/src/client/ClientPlatform.es6.js.html#lineNumber28">source</a></span></span>
+  <span data-ice="source">| <span><a href="file/src/client/ClientFilelist.es6.js.html#lineNumber9">source</a></span></span>
 </div>
 
 <div class="self-detail detail">
-  <h1 data-ice="name">ClientPlatform</h1>
+  <h1 data-ice="name">Filelist</h1>
 
   
 
   
   
-  <div class="flat-list" data-ice="extendsChain"><h4>Extends:</h4><div><span><a href="variable/index.html#static-variable-EventEmitter">EventEmitter</a></span> &#x2192; <span>src/client/ClientModule.es6.js~Promised</span> &#x2192; <span><a href="class/src/client/ClientModule.es6.js~ClientModule.html">ClientModule</a></span> &#x2192; ClientPlatform</div></div>
+  <div class="flat-list" data-ice="extendsChain"><h4>Extends:</h4><div><span><a href="variable/index.html#static-variable-EventEmitter">EventEmitter</a></span> &#x2192; <span>src/client/ClientModule.es6.js~Promised</span> &#x2192; <span><a href="class/src/client/ClientModule.es6.js~ClientModule.html">ClientModule</a></span> &#x2192; Filelist</div></div>
   
   
   
@@ -85,10 +85,7 @@
 
   
   
-  <div class="description" data-ice="description"><p>The <code>ClientPlatform</code> checks whether the device is compatible with the technologies used in the <em>Soundworks</em> library.
-(Compatible devices are running on iOS 7 or above, or on Android 4.2 or above with the Chrome browser in version 35 or above.)
-If that is not the case, the module displays a blocking view and prevents the participant to go any further in the scenario.
-The <code>ClientPlatform</code> module calls its <code>done</code> method immediately if the device passes the platform test, and never otherwise.</p>
+  <div class="description" data-ice="description"><p>The <code>Filelist</code> module requests the file list of a folder from the server. The results can be filtered by file extensions.</p>
 </div>
 
   
@@ -117,7 +114,7 @@ The <code>ClientPlatform</code> module calls its <code>done</code> method immedi
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/client/ClientPlatform.es6.js~ClientPlatform.html#instance-constructor-constructor">constructor</a></span></span><span data-ice="signature">(options: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></span>)</span>
+           <span data-ice="name"><span><a href="class/src/client/ClientFilelist.es6.js~Filelist.html#instance-constructor-constructor">constructor</a></span></span><span data-ice="signature">(options: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></span>)</span>
         </p>
       </div>
       <div>
@@ -135,7 +132,39 @@ The <code>ClientPlatform</code> module calls its <code>done</code> method immedi
 </tbody>
 </table>
 </div>
-
+<div data-ice="memberSummary"><h2>Member Summary</h2><table class="summary" data-ice="summary">
+  <thead><tr><td data-ice="title" colspan="3">Public Members</td></tr></thead>
+  <tbody>
+  
+  <tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+           <span data-ice="name"><span><a href="class/src/client/ClientFilelist.es6.js~Filelist.html#instance-member-files">files</a></span></span><span data-ice="signature">: <span><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span><span>[]</span></span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>Array of file paths sent by the server.</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+</tbody>
+</table>
+</div>
 <div data-ice="methodSummary"><h2>Method Summary</h2><table class="summary" data-ice="summary">
   <thead><tr><td data-ice="title" colspan="3">Public Methods</td></tr></thead>
   <tbody>
@@ -151,38 +180,14 @@ The <code>ClientPlatform</code> module calls its <code>done</code> method immedi
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/client/ClientPlatform.es6.js~ClientPlatform.html#instance-method-restart">restart</a></span></span><span data-ice="signature">()</span>
+           <span data-ice="name"><span><a href="class/src/client/ClientFilelist.es6.js~Filelist.html#instance-method-start">start</a></span></span><span data-ice="signature">()</span>
         </p>
       </div>
       <div>
         
         
-        
-      </div>
-    </td>
-    <td>
-      
-      
-    </td>
-  </tr>
-<tr data-ice="target">
-    <td>
-      <span class="access" data-ice="access">public</span>
-      
-      
-      
-      <span class="override" data-ice="override"></span>
-    </td>
-    <td>
-      <div>
-        <p>
-           <span data-ice="name"><span><a href="class/src/client/ClientPlatform.es6.js~ClientPlatform.html#instance-method-start">start</a></span></span><span data-ice="signature">(): <span>*</span></span>
-        </p>
-      </div>
-      <div>
-        
-        
-        
+        <div data-ice="description"><p>Starts the module.</p>
+</div>
       </div>
     </td>
     <td>
@@ -451,14 +456,14 @@ The method should be called only if the module has a <code>view</code>.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/client/ClientPlatform.es6.js.html#lineNumber39">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/client/ClientFilelist.es6.js.html#lineNumber17">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  <div data-ice="description"><p>Creates an instance of the class. Always has a view.</p>
+  <div data-ice="description"><p>Creates an instance of the class. Never has a view.</p>
 </div>
 
   <div data-ice="override"><h4>Override:</h4><span><a href="class/src/client/ClientModule.es6.js~ClientModule.html#instance-constructor-constructor">ClientModule#constructor</a></span></div>
@@ -481,50 +486,26 @@ The method should be called only if the module has a <code>view</code>.</p>
     </tr>
 <tr data-ice="property" data-depth="1">
       <td data-ice="name" data-depth="1">options.name</td>
-      <td data-ice="type"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></td>
+      <td data-ice="type"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></span></td>
       <td data-ice="appendix"><ul><li>optional</li>
-<li>default: &apos;platform-check&apos;</li></ul></td>
+<li>default: &apos;filelist&apos;</li></ul></td>
       <td data-ice="description"><p>Name of the module.</p>
 </td>
     </tr>
 <tr data-ice="property" data-depth="1">
-      <td data-ice="name" data-depth="1">options.color</td>
-      <td data-ice="type"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></td>
-      <td data-ice="appendix"><ul><li>optional</li>
-<li>default: &apos;black&apos;</li></ul></td>
-      <td data-ice="description"><p>Background color of the <code>view</code>.</p>
-</td>
-    </tr>
-<tr data-ice="property" data-depth="1">
-      <td data-ice="name" data-depth="1">options.prefix</td>
-      <td data-ice="type"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></td>
+      <td data-ice="name" data-depth="1">options.folder</td>
+      <td data-ice="type"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></span></td>
       <td data-ice="appendix"><ul><li>optional</li>
 <li>default: &apos;&apos;</li></ul></td>
-      <td data-ice="description"><p>Additional content displayed before the error message (<em>e.g.</em> <code>&apos;Welcome to My Scenario!&apos;</code>).</p>
+      <td data-ice="description"><p>Folder in which to retrieve the file list.</p>
 </td>
     </tr>
 <tr data-ice="property" data-depth="1">
-      <td data-ice="name" data-depth="1">options.postfix</td>
-      <td data-ice="type"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></td>
+      <td data-ice="name" data-depth="1">options.extentions</td>
+      <td data-ice="type"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></span></td>
       <td data-ice="appendix"><ul><li>optional</li>
-<li>default: &apos;&apos;</li></ul></td>
-      <td data-ice="description"><p>Additional content displayed after the error message (<em>e.g.</em> <code>&apos;You can still enjoy the performance with others!&apos;</code>).</p>
-</td>
-    </tr>
-<tr data-ice="property" data-depth="1">
-      <td data-ice="name" data-depth="1">options.messages</td>
-      <td data-ice="type"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></td>
-      <td data-ice="appendix"><ul><li>optional</li>
-<li>default: defaultMessages</li></ul></td>
-      <td data-ice="description"><p>Error messages displayed when the device doesn&apos;t pass the platform check.</p>
-</td>
-    </tr>
-<tr data-ice="property" data-depth="1">
-      <td data-ice="name" data-depth="1">options.bypass</td>
-      <td data-ice="type"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">Boolean</a></span></td>
-      <td data-ice="appendix"><ul><li>optional</li>
-<li>default: false</li></ul></td>
-      <td data-ice="description"><p>When set to <code>true</code>, the module is bypassed (calls the <code>done</code>method immediately).</p>
+<li>default: undefined</li></ul></td>
+      <td data-ice="description"><p>Extensions of the files to retrieve.</p>
 </td>
     </tr>
 </tbody>
@@ -548,30 +529,30 @@ The method should be called only if the module has a <code>view</code>.</p>
   
 </div>
 </div>
-
-<div data-ice="methodDetails"><h2 data-ice="title">Public Methods</h2>
+<div data-ice="memberDetails"><h2 data-ice="title">Public Members</h2>
 
 <div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-method-restart">
+  <h3 data-ice="anchor" id="instance-member-files">
     <span class="access" data-ice="access">public</span>
     
     
     
     
-    <span data-ice="name">restart</span><span data-ice="signature">()</span>
+    <span data-ice="name">files</span><span data-ice="signature">: <span><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span><span>[]</span></span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/client/ClientPlatform.es6.js.html#lineNumber81">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/client/ClientFilelist.es6.js.html#lineNumber24">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  
+  <div data-ice="description"><p>Array of file paths sent by the server.</p>
+</div>
 
-  <div data-ice="override"><h4>Override:</h4><span><a href="class/src/client/ClientModule.es6.js~ClientModule.html#instance-method-restart">ClientModule#restart</a></span></div>
+  
 
   <div data-ice="properties">
 </div>
@@ -591,6 +572,9 @@ The method should be called only if the module has a <code>view</code>.</p>
   
   
 </div>
+</div>
+<div data-ice="methodDetails"><h2 data-ice="title">Public Methods</h2>
+
 <div class="detail" data-ice="detail">
   <h3 data-ice="anchor" id="instance-method-start">
     <span class="access" data-ice="access">public</span>
@@ -598,37 +582,41 @@ The method should be called only if the module has a <code>view</code>.</p>
     
     
     
-    <span data-ice="name">start</span><span data-ice="signature">(): <span>*</span></span>
+    <span data-ice="name">start</span><span data-ice="signature">()</span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/client/ClientPlatform.es6.js.html#lineNumber48">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/client/ClientFilelist.es6.js.html#lineNumber35">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  
+  <div data-ice="description"><p>Starts the module.
+Sends a request to the server and listens for the answer.</p>
+</div>
 
   <div data-ice="override"><h4>Override:</h4><span><a href="class/src/client/ClientModule.es6.js~ClientModule.html#instance-method-start">ClientModule#start</a></span></div>
 
   <div data-ice="properties">
 </div>
 
-  <div class="return-params" data-ice="returnParams">
-    <h4>Return:</h4>
-    <table>
-      <tr>
-        <td class="return-type" data-ice="returnType"><span>*</span></td>
-        
-      </tr>
-    </table>
-    <div data-ice="returnProperties">
-</div>
-  </div>
-
   
+
+  <div data-ice="emitWrap">
+    <h4>Emit:</h4>
+    <table>
+      <tbody>
+      
+      <tr class="emit" data-ice="emit">
+        <td><p data-ice="emitName"><span>this.name + &apos;:files&apos;</span></p></td>
+        <td data-ice="emitDesc"><p>The file path list when it is received from the server.</p>
+</td>
+      </tr>
+</tbody>
+    </table>
+  </div>
 
   
 

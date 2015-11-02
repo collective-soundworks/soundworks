@@ -1,7 +1,3 @@
-/**
- * @fileoverview Soundworks server side module export
- * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
- */
 'use strict';
 
 module.exports = {

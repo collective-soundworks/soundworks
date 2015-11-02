@@ -35,13 +35,17 @@
   <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">client</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientCalibration.es6.js~ClientCalibration.html">ClientCalibration</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientControl.es6.js~ClientControl.html">ClientControl</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientDialog.es6.js~ClientDialog.html">ClientDialog</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientFilelist.es6.js~Filelist.html">Filelist</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientLoader.es6.js~ClientLoader.html">ClientLoader</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientLocator.es6.js~ClientLocator.html">ClientLocator</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientModule.es6.js~ClientModule.html">ClientModule</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientOrientation.es6.js~ClientOrientation.html">ClientOrientation</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientPerformance.es6.js~ClientPerformance.html">ClientPerformance</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientPlacer.es6.js~ClientPlacer.html">ClientPlacer</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientPlatform.es6.js~ClientPlatform.html">ClientPlatform</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientSelector.es6.js~ClientSelector.html">ClientSelector</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientSetup.es6.js~ClientSetup.html">ClientSetup</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientSync.es6.js~ClientSync.html">ClientSync</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-ClientModule">ClientModule</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-EventEmitter">EventEmitter</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-client">client</a></span></span></li>
 <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">server</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerCalibration.es6.js~ServerCalibration.html">ServerCalibration</a></span></span></li>
@@ -55,32 +59,33 @@
 </nav>
 
 <div class="content" data-ice="content"><h1 data-ice="title">src/client/ClientLocator.es6.js</h1>
-<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">/**
- * @fileoverview Soundworks client side check-in module
- * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">&apos;use strict&apos;;
+
+import client from &apos;./client.es6.js&apos;;
+import ClientModule from &apos;./ClientModule.es6.js&apos;;
+
+/**
+ * The `ClientLocator`module allows to indicate the approximate physical location of the client on a map via a dialog.
  */
-&apos;use strict&apos;;
-
-var ClientModule = require(&apos;./ClientModule&apos;);
-var client = require(&apos;./client&apos;);
-// var input = require(&apos;./input&apos;);
-
-function instructions(label) {
-  return &quot;&lt;p&gt;Go to&lt;/p&gt;&quot; +
-    &quot;&lt;div class=&apos;checkin-label circled&apos;&gt;&lt;span&gt;&quot; + label + &quot;&lt;/span&gt;&lt;/div&gt;&quot; +
-    &quot;&lt;p&gt;&lt;small&gt;Touch the screen&lt;br/&gt;when you are ready.&lt;/small&gt;&lt;/p&gt;&quot;;
-}
-
-class ClientLocator extends ClientModule {
+export default class ClientLocator extends ClientModule {
+  /**
+   * Creates an instance of the class. Always has a view.
+   * @param {Object} [options={}] Options.
+   * @param {String} [options.name=&apos;locator&apos;] Name of the module.
+   * @param {String} [options.color=&apos;black&apos;] Background color of the `view`.
+   * @param {ClientSpace} [options.space=null] Space in which to indicate the approximate location.
+   * @param {Boolean} [options.showBackground=false] Indicates whether to show the space background image or not.
+   */
   constructor(options = {}) {
     super(options.name || &apos;locator&apos;, true, options.color);
 
-    this.select = options.select || &apos;automatic&apos;; // &apos;automatic&apos; | &apos;label&apos; | &apos;location&apos;
-    this.instructions = options.instructions || instructions;
+    /**
+     * The space in which to indicate the approximate location.
+     * @type {ClientSpace}
+     */
     this.space = options.space || null;
-    this.showBackground = options.showBackground || &#xA0;false;
 
-    this.label = null;
+    this._showBackground = options.showBackground || false;
 
     this._touchStartHandler = this._touchStartHandler.bind(this);
     this._touchMoveHandler = this._touchMoveHandler.bind(this);
@@ -129,6 +134,9 @@ class ClientLocator extends ClientModule {
     this._resize = this._resize.bind(this);
   }
 
+  /**
+   * Starts the module.
+   */
   start() {
     super.start();
 
@@ -138,11 +146,18 @@ class ClientLocator extends ClientModule {
     window.addEventListener(&apos;resize&apos;, this._resize);
   }
 
+  /**
+   * Done method.
+   * Removes the `&apos;resize&apos;` listener on the `window`.
+   */
   done() {
     window.removeEventListener(&apos;resize&apos;, this._resize);
     super.done();
   }
 
+  /**
+   * Resets the module to initial state.
+   */
   reset() {
     client.coordinates = null;
 
@@ -159,6 +174,9 @@ class ClientLocator extends ClientModule {
       this.space.reset();
   }
 
+  /**
+   * Restarts the module.
+   */
   restart() {
     super.restart();
     client.send(this.name + &apos;:restart&apos;, client.coordinates);
@@ -182,7 +200,7 @@ class ClientLocator extends ClientModule {
     }
 
     this.space.display(this._surfaceDiv, {
-      showBackground: this.showBackground
+      showBackground: this._showBackground
     });
 
     // Let the participant select his or her location
@@ -271,8 +289,7 @@ class ClientLocator extends ClientModule {
     // TODO: handle out-of-bounds
   }
 }
-
-module.exports = ClientLocator;</code></pre>
+</code></pre>
 
 </div>
 
