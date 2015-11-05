@@ -8,7 +8,9 @@
   ],
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "transpile": "node ./bin/scripts --transpile",
+    "watch": "node ./bin/scripts --watch",
+    "hint": "jshint ./src; true"
   },
   "license": "BSD-3",
   "repository": {
@@ -16,11 +18,13 @@
     "url": "https://github.com/collective-soundworks/soundworks"
   },
   "dependencies": {
+    "babel-polyfill": "^6.0.16",
+    "babel-runtime": "^6.0.14",
     "bunyan": "^1.3.6",
     "calibration": "collective-soundworks/calibration#0.3.1",
     "ejs": "^2.3.1",
-    "express": "^4.13.3",
     "es6-promise": "^3.0.2",
+    "express": "^4.13.3",
     "mobile-detect": "^1.2.0",
     "osc": "^1.3.0",
     "platform": "^1.3.0",
@@ -31,14 +35,7 @@
     "waves-loaders": "wavesjs/loaders"
   },
   "devDependencies": {
-    "browserify": "~5.11.0",
-    "gulp": "~3.8.7",
-    "gulp-browserify": "^0.5.0",
-    "gulp-clean": "~0.3.1",
-    "gulp-es6-transpiler": "~1.0.0",
-    "gulp-nodemon": "~1.0.4",
-    "gulp-rename": "^1.2.0",
-    "gulp-watch": "^2.0.0",
-    "vinyl-transform": "^1.0.0"
+    "fs-extra": "^0.26.2",
+    "node-watch": "^0.3.4"
   }
 }
