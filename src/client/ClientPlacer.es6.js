@@ -13,7 +13,7 @@ const ClientSpace = require('./ClientSpace');
  */
 class ListSelector extends EventEmitter {
   constructor(options) {
-    this._indexPositionMap = new Map();
+    this._indexPositionMap = {};
     this._onSelect = this._onSelect.bind(this);
   }
 
@@ -21,7 +21,7 @@ class ListSelector extends EventEmitter {
     const options = this._select.options;
     const selectedIndex = this._select.selectedIndex;
     const index = parseInt(options[selectedIndex].value, 10);
-    const position = this._indexPositionMap.get(index);
+    const position = this._indexPositionMap[index];
     this.emit('select', position);
   }
 
@@ -68,8 +68,8 @@ class ListSelector extends EventEmitter {
       option.value = position.index;
       option.textContent = position.label;
 
-      this._select.appendChild(option);
-      this._indexPositionMap.set(position.index, position);
+      this.select.appendChild(option);
+      this._indexPositionMap[position.index] = position;
     });
   }
 }
