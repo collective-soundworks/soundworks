@@ -2,7 +2,7 @@
 
 const Calibration = require('calibration/client');
 const client = require('./client');
-const ClientModule = require('ClientModule');
+const ClientModule = require('./ClientModule');
 // import client from './client';
 // import ClientModule from './ClientModule.es6.js';
 

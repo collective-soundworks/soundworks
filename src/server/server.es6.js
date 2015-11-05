@@ -9,7 +9,7 @@ const IO = require('socket.io');
 const osc = require('osc');
 const path = require('path');
 
-const ServerClient = require('ServerClient');
+const ServerClient = require('./ServerClient');
 // import ServerClient from './ServerClient.es6.js';
 
 /**

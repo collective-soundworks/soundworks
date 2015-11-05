@@ -2,7 +2,7 @@
 
 const input = require('./input');
 const client = require('./client');
-const ClientModule = require('/ClientModule');
+const ClientModule = require('./ClientModule');
 // import client from './client.es6.js';
 // import ClientModule from './ClientModule.es6.js';
 

@@ -48,4 +48,4 @@ class Filelist extends ClientModule {
   }
 }
 
-module.exports = ClientFilelist;
+module.exports = Filelist;
