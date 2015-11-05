@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../../">
+  <title data-ice="title">src/client/ClientSurvey.es6.js | API Document</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  
+  
+  <script src="script/manual.js"></script>
+</head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  <a href="./manual/index.html" data-ice="manualHeaderLink">Manual</a>
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  
+  <a data-ice="repoURL" href="https://github.com/collective-soundworks/soundworks" class="repo-url-github">Repository</a>
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">client</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientCalibration.es6.js~ClientCalibration.html">ClientCalibration</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientCheckin.es6.js~ClientCheckin.html">ClientCheckin</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientControl.es6.js~ClientControl.html">ClientControl</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientDialog.es6.js~ClientDialog.html">ClientDialog</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientFilelist.es6.js~Filelist.html">Filelist</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientLoader.es6.js~ClientLoader.html">ClientLoader</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientLocator.es6.js~ClientLocator.html">ClientLocator</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientModule.es6.js~ClientModule.html">ClientModule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientOrientation.es6.js~ClientOrientation.html">ClientOrientation</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientPerformance.es6.js~ClientPerformance.html">ClientPerformance</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientPlacer.es6.js~ClientPlacer.html">ClientPlacer</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientPlatform.es6.js~ClientPlatform.html">ClientPlatform</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientSelector.es6.js~ClientSelector.html">ClientSelector</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientSetup.es6.js~ClientSetup.html">ClientSetup</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientSpace.es6.js~ClientSpace.html">ClientSpace</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientSurvey.es6.js~ClientSurvey.html">ClientSurvey</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/ClientSync.es6.js~ClientSync.html">ClientSync</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-EventEmitter">EventEmitter</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-client">client</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">server</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerCalibration.es6.js~ServerCalibration.html">ServerCalibration</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerCheckin.es6.js~ServerCheckin.html">ServerCheckin</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerClient.es6.js~ServerClient.html">ServerClient</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerControl.es6.js~ServerControl.html">ServerControl</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerFilelist.es6.js~ServerFilelist.html">ServerFilelist</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerLocator.es6.js~ServerLocator.html">ServerLocator</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerModule.es6.js~ServerModule.html">ServerModule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerPerformance.es6.js~ServerPerformance.html">ServerPerformance</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerPlacer.es6.js~ServerPlacer.html">ServerPlacer</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerSetup.es6.js~ServerSetup.html">ServerSetup</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerSurvey.es6.js~ServerSurvey.html">ServerSurvey</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/ServerSync.es6.js~ServerSync.html">ServerSync</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-server">server</a></span></span></li>
+</ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">src/client/ClientSurvey.es6.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">&apos;use strict&apos;;
+
+import client from &apos;./client.es6.js&apos;;
+import ClientModule from &apos;./ClientModule.es6.js&apos;;
+
+class BaseRenderer {
+  constructor(survey, question) {
+    this.survey = survey;
+    this.question = question;
+    this.label = question.label;
+    this.id = question.id;
+  }
+
+  render() {  return &apos;&apos;; }
+
+  destroy() {
+    this._unbindEvents();
+  }
+
+  bindEvents() {}
+  _unbindEvents() {}
+
+  getAnswer() {}
+}
+
+// renderers
+class AbstractSelectorRenderer extends BaseRenderer {
+  constructor(survey, question) {
+    super(survey, question);
+    this.answers = question.answers;
+
+    this._onSelect = this._onSelect.bind(this);
+  }
+
+  render(container, type) {
+    this.container = container;
+
+    let title = `&lt;p class=&quot;label&quot;&gt;${this.label}&lt;/p&gt;`;
+    let answers = &apos;&apos;;
+
+    for (let key in this.answers) {
+      let value = this.answers[key];
+      answers += `&lt;p class=&quot;answer ${type}&quot; data-key=&quot;${key}&quot;&gt;${value}&lt;/p&gt;`;
+    }
+
+    return `&lt;div&gt;${title}${answers}&lt;/div&gt;`;
+  }
+
+  bindEvents() {
+    this.answersEl = Array.from(this.container.querySelectorAll(&apos;.answer&apos;));
+    this.container.addEventListener(&apos;click&apos;, this._onSelect, false);
+  }
+
+  _unbindEvents() {
+    this.container.removeEventListener(&apos;click&apos;, this._onSelect, false);
+  }
+}
+
+class RadioRenderer extends AbstractSelectorRenderer {
+  constructor(survey, question) {
+    super(survey, question);
+  }
+
+  render(container) {
+    return super.render(container, &apos;radio&apos;);
+  }
+
+  _onSelect(e) {
+    const target = e.target;
+    if (!target.classList.contains(&apos;answer&apos;)) { return; }
+
+    this.answersEl.forEach((el) =&gt; { el.classList.remove(&apos;selected&apos;); });
+    target.classList.add(&apos;selected&apos;);
+
+    this.survey.enableBtn();
+  }
+
+  getAnswer() {
+    for (let i = 0; i &lt; this.answersEl.length; i++) {
+      let el = this.answersEl[i];
+      if (el.classList.contains(&apos;selected&apos;)) {
+        return el.getAttribute(&apos;data-key&apos;);
+      }
+    };
+
+    return null;
+  }
+}
+
+class CheckboxRenderer extends AbstractSelectorRenderer {
+  constructor(survey, question) {
+    super(survey, question);
+  }
+
+  render(container) {
+    return super.render(container, &apos;checkbox&apos;);
+  }
+
+  _onSelect(e) {
+    const target = e.target;
+    if (!target.classList.contains(&apos;answer&apos;)) { return; }
+
+    const method = target.classList.contains(&apos;selected&apos;) ? &apos;remove&apos; : &apos;add&apos;;
+    target.classList[method](&apos;selected&apos;);
+
+    this.survey.enableBtn();
+  }
+
+  getAnswer() {
+    const answers = [];
+
+    for (let i = 0; i &lt; this.answersEl.length; i++) {
+      let el = this.answersEl[i];
+      if (el.classList.contains(&apos;selected&apos;)) {
+        answers.push(el.getAttribute(&apos;data-key&apos;));
+      }
+    };
+
+    return answers.length === 0 ? null : answers;
+  }
+}
+
+class RangeRenderer extends BaseRenderer {
+  constructor(survey, question) {
+    super(survey, question);
+    this.label = question.label;
+    this.min = question.min === undefined ? 0 : question.min;
+    this.max = question.max === undefined ? 10 : question.max;
+    this.step = question.step === undefined ? 1 : question.step;
+    this.defaultValue = question.defaultValue === undefined ? 5 : question.defaultValue;
+
+    this._onInput = this._onInput.bind(this);
+  }
+
+  render(container) {
+    this.container = container;
+
+    const label = document.createElement(&apos;p&apos;);
+    label.classList.add(&apos;label&apos;);
+    label.textContent = this.label;
+
+    this._range = document.createElement(&apos;input&apos;);
+    this._range.setAttribute(&apos;type&apos;, &apos;range&apos;);
+    this._range.setAttribute(&apos;min&apos;, this.min);
+    this._range.setAttribute(&apos;max&apos;, this.max);
+    this._range.setAttribute(&apos;step&apos;, this.step);
+    this._range.setAttribute(&apos;value&apos;, this.defaultValue);
+    this._range.classList.add(&apos;slider&apos;, &apos;answer&apos;);
+
+    this._number = document.createElement(&apos;span&apos;);
+    this._number.classList.add(&apos;range-feedback&apos;);
+    this._number.textContent = this.defaultValue;
+
+    const div = document.createElement(&apos;div&apos;);
+    div.appendChild(label);
+    div.appendChild(this._range);
+    div.appendChild(this._number);
+
+    return div;
+  }
+
+  bindEvents() {
+    this._range.addEventListener(&apos;input&apos;, this._onInput, false);
+  }
+
+  _unbindEvents() {
+    this._range.removeEventListener(&apos;input&apos;, this._onInput, false);
+  }
+
+  _onInput(e) {
+    this._number.textContent = this._range.value;
+
+    this.survey.enableBtn();
+  }
+
+  getAnswer() {
+    return parseFloat(this._range.value);
+  }
+}
+
+// is never required for now
+class TextAreaRenderer extends BaseRenderer {
+  constructor(survey, question) {
+    super(survey, question);
+    this.label = question.label;
+  }
+
+  render(container) {
+    this._container = container;
+
+    return `
+      &lt;p class=&quot;label&quot;&gt;${this.label}&lt;/p&gt;
+      &lt;textarea class=&quot;answer textarea&quot;&gt;&lt;/textarea&gt;
+    `;
+  }
+
+  getAnswer() {
+    const textarea = this._container.querySelector(&apos;.answer&apos;);
+    return textarea.value;
+  }
+}
+
+// module
+export default class ClientSurvey extends ClientModule {
+  constructor(surveyConfig, options = {}) {
+    super(options.name || &apos;survey&apos;, true, options.color);
+
+    if (options.thanks === undefined) {
+      options.thanks = &apos;Thanks&apos;;
+    }
+
+    options.thanksContent = `&lt;p class=&quot;thanks&quot;&gt;${options.thanks}&lt;/p&gt;`;
+    options.btnNextText = options.btnNextText ||&#xA0;&apos;next&apos;;
+    options.btnValidateText = options.btnValidateText ||&#xA0;&apos;validate&apos;;
+
+    this.survey = surveyConfig;
+    this.options = options;
+    this.contents = [];
+    this.answers = {};
+    this.questionCounter = 0;
+
+    this._createRenderers();
+    this._render();
+
+    this._displayNextQuestion = this._displayNextQuestion.bind(this);
+
+    this._displayNextQuestion();
+    this._bindEvents();
+  }
+
+  _render() {
+    const counter = document.createElement(&apos;div&apos;);
+    counter.classList.add(&apos;counter&apos;);
+    counter.innerHTML = `&lt;span&gt;&lt;/span&gt; / ${this.survey.length}`;
+
+    const nextBtn = document.createElement(&apos;button&apos;);
+    nextBtn.classList.add(&apos;next&apos;, &apos;btn&apos;);
+    nextBtn.textContent = this.options.btnNextText; // @TODO option
+
+    this.view.appendChild(counter);
+    this.view.appendChild(nextBtn);
+
+    this._counter = counter;
+    this._currentQuestionCounter = counter.querySelector(&apos;span&apos;);
+    this._nextBtn = nextBtn;
+  }
+
+  _bindEvents() {
+    this._nextBtn.addEventListener(&apos;click&apos;, this._displayNextQuestion, false);
+  }
+
+  _unbindEvents() {
+    this._nextBtn.removeEventListener(&apos;click&apos;, this._displayNextQuestion, false);
+  }
+
+  _createRenderers() {
+    this.renderers = this.survey.map((question, index) =&gt; {
+      question.required = question.required === undefined ? true : question.required;
+      question.id = question.id || `question-${index}`;
+
+      let ctor;
+
+      switch (question.type) {
+        case &apos;radio&apos;:
+          ctor = RadioRenderer;
+          break;
+        case &apos;checkbox&apos;:
+          ctor = CheckboxRenderer;
+          break;
+        case &apos;range&apos;:
+          ctor = RangeRenderer;
+          break;
+        case &apos;textarea&apos;:
+          question.required = false;
+          ctor = TextAreaRenderer;
+          break;
+      }
+
+      return new ctor(this, question);
+    });
+  }
+
+  _displayNextQuestion() {
+    // handle current question if any
+    if (this.currentRenderer) {
+      const answer = this.currentRenderer.getAnswer();
+      const required = this.currentRenderer.question.required;
+
+      if (answer === null &amp;&amp; required) { return; }
+
+      this.currentRenderer.destroy();
+      this.answers[this.currentRenderer.id] = answer;
+    }
+
+    this.currentRenderer = this.renderers.shift();
+
+    if (this.currentRenderer) {
+      // update counter
+      this.questionCounter += 1;
+      this._currentQuestionCounter.textContent = this.questionCounter;
+      // update content
+      const htmlContent = this.currentRenderer.render(this.view);
+      this.setCenteredViewContent(htmlContent);
+      this.currentRenderer.bindEvents();
+
+      if (this.currentRenderer.question.required) {
+        this.disableBtn();
+      }
+
+      if (this.renderers.length === 0) {
+        this._nextBtn.textContent = this.options.btnValidateText;
+      }
+    } else {
+      // remove counter and next buttons
+      this.view.removeChild(this._counter);
+      this.view.removeChild(this._nextBtn);
+      // display thanks
+      this.setCenteredViewContent(this.options.thanksContent);
+      // send informations to server
+      this.answers.timestamp = new Date().getTime();
+      this.answers.userAgent = navigator.userAgent;
+      client.send(`${this.name}:answers`, JSON.stringify(this.answers));
+    }
+  }
+
+  disableBtn() {
+    this._nextBtn.classList.add(&apos;disabled&apos;);
+  }
+
+  enableBtn() {
+    this._nextBtn.classList.remove(&apos;disabled&apos;);
+  }
+}
+</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.4.3)</span></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>
