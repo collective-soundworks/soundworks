@@ -1,6 +1,6 @@
 {
   "source": "./src",
-  "destination": "./out/esdoc",
+  "destination": "./doc",
   "includes": ["\\.es6.js$"],
   "manual": {
     "overview": ["./manual/overview.md"],
