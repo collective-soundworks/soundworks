@@ -1,0 +1,27 @@
+'use strict';
+
+var bunyan = require('bunyan');
+
+// @TODO allow configuration
+function socketSerializer(socket) {
+  return {
+    id: socket.id
+  };
+}
+
+var log = bunyan.createLogger({
+  name: 'test-app',
+  serializers: {
+    socket: socketSerializer
+  },
+  streams: [{
+    level: 'info',
+    stream: process.stdout
+  }, {
+    level: 'info',
+    path: '/var/tmp/soundworks-app.log'
+  }]
+});
+
+module.exports = log;
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInNyYy9zZXJ2ZXIvbG9nZ2VyLmpzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7O0FBQUEsSUFBTSxNQUFNLEdBQUcsT0FBTyxDQUFDLFFBQVEsQ0FBQyxDQUFDOzs7QUFHakMsU0FBUyxnQkFBZ0IsQ0FBQyxNQUFNLEVBQUU7QUFDaEMsU0FBTztBQUNMLE1BQUUsRUFBRSxNQUFNLENBQUMsRUFBRTtHQUNkLENBQUM7Q0FDSDs7QUFFRCxJQUFNLEdBQUcsR0FBRyxNQUFNLENBQUMsWUFBWSxDQUFDO0FBQzlCLE1BQUksRUFBRSxVQUFVO0FBQ2hCLGFBQVcsRUFBRTtBQUNYLFVBQU0sRUFBRSxnQkFBZ0I7R0FDekI7QUFDRCxTQUFPLEVBQUUsQ0FBQztBQUNSLFNBQUssRUFBRSxNQUFNO0FBQ2IsVUFBTSxFQUFFLE9BQU8sQ0FBQyxNQUFNO0dBQ3ZCLEVBQUU7QUFDRCxTQUFLLEVBQUUsTUFBTTtBQUNiLFFBQUksRUFBRSw2QkFBNkI7R0FDcEMsQ0FBQztDQUNILENBQUMsQ0FBQzs7QUFFSCxNQUFNLENBQUMsT0FBTyxHQUFHLEdBQUcsQ0FBQyIsImZpbGUiOiJzcmMvc2VydmVyL2xvZ2dlci5qcyIsInNvdXJjZXNDb250ZW50IjpbImNvbnN0IGJ1bnlhbiA9IHJlcXVpcmUoJ2J1bnlhbicpO1xuXG4vLyBAVE9ETyBhbGxvdyBjb25maWd1cmF0aW9uXG5mdW5jdGlvbiBzb2NrZXRTZXJpYWxpemVyKHNvY2tldCkge1xuICByZXR1cm4ge1xuICAgIGlkOiBzb2NrZXQuaWRcbiAgfTtcbn1cblxuY29uc3QgbG9nID0gYnVueWFuLmNyZWF0ZUxvZ2dlcih7XG4gIG5hbWU6ICd0ZXN0LWFwcCcsXG4gIHNlcmlhbGl6ZXJzOiB7XG4gICAgc29ja2V0OiBzb2NrZXRTZXJpYWxpemVyXG4gIH0sXG4gIHN0cmVhbXM6IFt7XG4gICAgbGV2ZWw6ICdpbmZvJyxcbiAgICBzdHJlYW06IHByb2Nlc3Muc3Rkb3V0XG4gIH0sIHtcbiAgICBsZXZlbDogJ2luZm8nLFxuICAgIHBhdGg6ICcvdmFyL3RtcC9zb3VuZHdvcmtzLWFwcC5sb2cnXG4gIH1dXG59KTtcblxubW9kdWxlLmV4cG9ydHMgPSBsb2c7Il19
