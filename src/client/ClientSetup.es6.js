@@ -1,7 +1,9 @@
 'use strict';
 
-import client from './client.es6.js';
-import ClientModule from './ClientModule.es6.js';
+const client = require('./client');
+const ClientModule = require('./ClientModule');
+// import client from './client.es6.js';
+// import ClientModule from './ClientModule.es6.js';
 
 /**
  * The {@link ClientSetup} module retrieves the setup information from the server.
@@ -10,7 +12,8 @@ import ClientModule from './ClientModule.es6.js';
  *
  * The `ClientSetup` module requires the SASS partial `sass/_77-setup.scss`.
  */
-export default class ClientSetup extends ClientModule {
+class ClientSetup extends ClientModule {
+// export default class ClientSetup extends ClientModule {
   /**
    * Creates an instance of the class.
    * @param {Object} [options={}] Options.
@@ -237,3 +240,5 @@ export default class ClientSetup extends ClientModule {
   //     position.classList.remove(className);
   // }
 }
+
+module.exports = ClientSetup;

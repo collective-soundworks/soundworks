@@ -7,7 +7,8 @@ const log = require('./logger');
  * Each time a client of type `clientType` connects to the server, *Soundworks* creates a new instance of `ServerClient`.
  * An instance of the class is passed to the `connect` and `disconnect` methods of all the server side modules that are mapped to the `clientType` clients (see {@link server.map}), as well as to the `enter` and `exit` methods of any {@link ServerPerformance} class mapped to that same client type.
  */
-export default class ServerClient {
+class ServerClient {
+// export default class ServerClient {
 	/**
 	 * Creates an instance of the class.
 	 * @param {String} clientType Client type of the connected client.
@@ -93,3 +94,5 @@ export default class ServerClient {
     this.socket.broadcast.emit(msg, ...args);
   }
 }
+
+module.exports = ServerClient;

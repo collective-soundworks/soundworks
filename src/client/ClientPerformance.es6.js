@@ -1,12 +1,15 @@
 'use strict';
 
-import client from './client.es6.js';
-import ClientModule from './ClientModule.es6.js';
+const client = require('./client');
+const ClientModule = require('./ClientModule');
+// import client from './client.es6.js';
+// import ClientModule from './ClientModule.es6.js';
 
 /**
  * The {@link ClientPerformance} base class constitutes a basis on which to build a performance on the client side.
  */
-export default class ClientPerformance extends ClientModule {
+class ClientPerformance extends ClientModule {
+// export default class ClientPerformance extends ClientModule {
   /**
    * Creates an instance of the class. Always has a view.
    * @param {Object} [options={}] Options.
@@ -35,3 +38,5 @@ export default class ClientPerformance extends ClientModule {
     super.done(); // TODO: check if needs to be called lastly
   }
 }
+
+module.exports = ClientPerformance

@@ -2,9 +2,10 @@
 
 const Sync = require('sync/client');
 const audioContext = require('waves-audio').audioContext;
-
-import client from './client.es6.js';
-import ClientModule from './ClientModule.es6.js';
+const client = require('./client');
+const ClientModule = require('./ClientModule');
+// import client from './client.es6.js';
+// import ClientModule from './ClientModule.es6.js';
 
 /**
  * The {@link ClientSync} module takes care of the synchronization process on the client side.
@@ -22,7 +23,8 @@ import ClientModule from './ClientModule.es6.js';
  * const nowLocal = sync.getLocalTime(); // current time in local clock time
  * const nowSync = sync.getSyncTime(); // current time in sync clock time
  */
-export default class ClientSync extends ClientModule {
+class ClientSync extends ClientModule {
+// export default class ClientSync extends ClientModule {
   /**
    * Creates an instance of the class. Always has a view.
    * @param {Object} [options={}] Options.
@@ -86,3 +88,5 @@ export default class ClientSync extends ClientModule {
     }
   }
 }
+
+module.exports = ClientSync;

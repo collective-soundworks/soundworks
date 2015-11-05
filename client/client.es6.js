@@ -197,4 +197,4 @@ function removeListener(msg, callback) {
     client.socket.removeListener(msg, callback);
 }
 
-module.exports = client;
+export default client;

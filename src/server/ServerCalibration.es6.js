@@ -1,10 +1,11 @@
 'use strict';
 
 const Calibration = require('calibration/server');
+const ServerModule = require('./ServerModule');
+// import ServerModule from './ServerModule.es6.js';
 
-import ServerModule from './ServerModule.es6.js';
-
-export default class ServerCalibration extends ServerModule {
+class ServerCalibration extends ServerModule {
+// export default class ServerCalibration extends ServerModule {
   /**
    * Constructor of the calibration server module.
    *
@@ -42,3 +43,5 @@ export default class ServerCalibration extends ServerModule {
   }
 
 } // class ServerCalibration
+
+module.exports = ServerCalibration;

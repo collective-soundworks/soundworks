@@ -21,7 +21,8 @@ const EventEmitter = require('events').EventEmitter; // TODO: remove EventEmitte
  *   }
  * }
  */
-export default class ServerModule extends EventEmitter {
+class ServerModule extends EventEmitter {
+// export default class ServerModule extends EventEmitter {
   /**
     * Creates an instance of the class.
     * @param {Object} [options={}] The options.
@@ -56,3 +57,5 @@ export default class ServerModule extends EventEmitter {
     // delete client.modules[this.name] // TODO?
   }
 }
+
+module.exports = ServerModule;

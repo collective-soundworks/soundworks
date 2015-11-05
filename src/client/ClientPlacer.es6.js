@@ -1,8 +1,11 @@
 const EventEmitter = require('events').EventEmitter;
 
-import client from './client.es6.js';
-import ClientModule from './ClientModule.es6.js';
-import ClientSpace from './ClientSpace.es6.js';
+const client = require('./client');
+const ClientModule = require('./ClientModule');
+const ClientSpace = require('./ClientSpace');
+// import client from './client.es6.js';
+// import ClientModule from './ClientModule.es6.js';
+// import ClientSpace from './ClientSpace.es6.js';
 
 /**
  * display strategies for placer
@@ -74,7 +77,8 @@ class ListSelector extends EventEmitter {
 /**
  * The {@link ClientPlacer} module allows to select a place in a list of predefined places.
  */
-export default class ClientPlacer extends ClientModule {
+class ClientPlacer extends ClientModule {
+// export default class ClientPlacer extends ClientModule {
   /**
    * Creates an instance of the class.
    * @param {Object} [options={}] Options.
@@ -243,3 +247,5 @@ export default class ClientPlacer extends ClientModule {
     this._selector.removeAllListeners('select');
   }
 }
+
+module.exports = ClientPlacer;

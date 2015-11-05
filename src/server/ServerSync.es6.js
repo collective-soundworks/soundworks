@@ -1,8 +1,8 @@
 'use strict';
 
 const Sync = require('sync/server');
-
-import ServerModule from './ServerModule.es6.js';
+const ServerModule = require('./ServerModule');
+// import ServerModule from './ServerModule.es6.js';
 
 /**
  * The {@link ServerSync} module takes care of the synchronization process on the server side.
@@ -16,7 +16,8 @@ import ServerModule from './ServerModule.es6.js';
  * // Get sync time
  * const nowSync = sync.getSyncTime(); // current time in the sync clock time
  */
-export default class ServerSync extends ServerModule {
+class ServerSync extends ServerModule {
+// export default class ServerSync extends ServerModule {
   /**
    * Creates an instance of the class.
    * @param {Object} [options={}] Options.
@@ -49,3 +50,5 @@ export default class ServerSync extends ServerModule {
     return this.sync.getSyncTime();
   }
 }
+
+module.exports = ServerSync;

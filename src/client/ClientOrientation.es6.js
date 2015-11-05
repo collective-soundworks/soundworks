@@ -1,8 +1,8 @@
 'use strict';
 
 const input = require('./input');
-
-import ClientModule from './ClientModule.es6.js';
+const ClientModule = require('./ClientModule');
+// import ClientModule from './ClientModule.es6.js';
 
 /**
  * The {@link ClientOrientation} module allows for calibrating the compass by getting an angle reference.
@@ -10,7 +10,8 @@ import ClientModule from './ClientModule.es6.js';
  * When that happens, the current compass value is set as the angle reference.
  * The {@link ClientOrientation} module calls its `done` method when the participant taps the screen.
  */
-export default class ClientOrientation extends ClientModule {
+class ClientOrientation extends ClientModule {
+// export default class ClientOrientation extends ClientModule {
   /**
    * Creates an instance of the class. Always has a view.
    * @param {Object} [options={}] Options.

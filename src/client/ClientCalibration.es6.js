@@ -1,11 +1,13 @@
 'use strict';
 
 const Calibration = require('calibration/client');
+const client = require('./client');
+const ClientModule = require('ClientModule');
+// import client from './client';
+// import ClientModule from './ClientModule.es6.js';
 
-import client from './client';
-import ClientModule from './ClientModule.es6.js';
-
-export default class ClientCalibration extends ClientModule {
+class ClientCalibration extends ClientModule {
+// export default class ClientCalibration extends ClientModule {
   /**
    * Function called when an update happened.
    *

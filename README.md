@@ -76,10 +76,6 @@ var checkin = new serverSide.Checkin({ maxClients: 500 });
 
 ##### ClientSetup
 
-The `ClientSetup` modules extends the `ClientModule` base class and takes care of receiving the setup on the client side, and provides helper functions to display the setup on screen. The `ClientSetup` calls its `done` method when it receives the setup from the server.
-
-The `ClientSetup` module requires the SASS partial `sass/_77-setup.scss`.
-
 ###### Methods
 
 - `addClassToPosition(setupDisplay:Element, index: Number, className:String = 'player')`  
@@ -108,7 +104,6 @@ setup.addClassToPosition(setupGUI, 3, 'red-highlight');
 
 ##### ServerSetup
 
-The `ServerSetup` extends the `ServerModule` base class and takes care of the setup on the server side. In particular, the module provides helper functions that can generate a setup automatically from some parameters.
 ###### Methods
 
 - `constructor(options:Object = {})`  

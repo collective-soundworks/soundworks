@@ -1,7 +1,3 @@
-/**
- * @fileoverview Soundworks (client side) sensor input module (singleton)
- * @author Sebastien.Robaszkiewicz@ircam.fr, Norbert.Schnell@ircam.fr
- */
 'use strict';
 
 var EventEmitter = require('events').EventEmitter;
@@ -9,6 +5,7 @@ var audioContext = require('waves-audio').audioContext;
 
 // TODO: add deviceMotion and deviceOrientation input.
 class InputModule extends EventEmitter {
+// export default class InputModule extends EventEmitter {
   constructor() {
     super();
 

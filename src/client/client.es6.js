@@ -1,8 +1,8 @@
 "use strict";
 
 const MobileDetect = require('mobile-detect');
-
-import ClientModule from './ClientModule.es6.js';
+const ClientModule = require('./ClientModule');
+// import ClientModule from './ClientModule.es6.js';
 
 // debug - http://socket.io/docs/logging-and-debugging/#available-debugging-scopes
 // localStorage.debug = '*';
@@ -132,7 +132,7 @@ function start(startFun) {
 
 /**
  * The `serial` method returns a `ClientModule` that starts the given `...modules` in series. After starting the first module (by calling its `start` method), the next module in the series is started (with its `start` method) when the last module called its `done` method. When the last module calls `done`, the returned serial module calls its own `done` method.
- * 
+ *
  * **Note:** you can compound serial module sequences with parallel module combinations (*e.g.* `client.serial(module1, client.parallel(module2, module3), module4);`).
  * @deprecated Use the new API with the {@link start} method.
  * @param {...ClientModule} ...modules The modules to run in serial.
@@ -199,4 +199,5 @@ function removeListener(msg, callback) {
     client.socket.removeListener(msg, callback);
 }
 
-export default client;
+// export default client;
+module.exports = client;

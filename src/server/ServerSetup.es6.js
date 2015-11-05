@@ -1,6 +1,7 @@
 'use strict';
 
-import ServerModule from "./ServerModule.es6.js";
+const ServerModule = require('./ServerModule');
+// import ServerModule from "./ServerModule.es6.js";
 
 /**
  * The `Setup` module contains the information about the setup of the performance space in terms of its surface (*i.e.* dimensions and outlines) and predefined positions (*e.g.* seats or labels on the floor).
@@ -13,7 +14,8 @@ import ServerModule from "./ServerModule.es6.js";
  * The {@link ServerSetup} takes care of the setup on the server side.
  * In particular, the module provides helper functions that can generate a setup automatically from some parameters.
  */
-export default class ServerSetup extends ServerModule {
+class ServerSetup extends ServerModule {
+// export default class ServerSetup extends ServerModule {
   /**
    * Creates and instance of the class.
    * @param {Object} [options={}] Options.
@@ -182,3 +184,5 @@ export default class ServerSetup extends ServerModule {
     }
   }
 }
+
+module.exports = ServerSetup;

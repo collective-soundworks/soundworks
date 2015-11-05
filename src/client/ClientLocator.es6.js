@@ -1,12 +1,15 @@
 'use strict';
 
-import client from './client.es6.js';
-import ClientModule from './ClientModule.es6.js';
+const client = require('./client');
+const ClientModule = require('./ClientModule');
+// import client from './client.es6.js';
+// import ClientModule from './ClientModule.es6.js';
 
 /**
  * The {@link ClientLocator} module allows to indicate the approximate physical location of the client on a map via a dialog.
  */
-export default class ClientLocator extends ClientModule {
+class ClientLocator extends ClientModule {
+// export default class ClientLocator extends ClientModule {
   /**
    * Creates an instance of the class. Always has a view.
    * @param {Object} [options={}] Options.
@@ -228,3 +231,5 @@ export default class ClientLocator extends ClientModule {
     // TODO: handle out-of-bounds
   }
 }
+
+module.exports = ClientLocator

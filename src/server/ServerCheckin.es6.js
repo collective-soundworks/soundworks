@@ -1,13 +1,15 @@
 'use strict';
 
-import ServerModule from './ServerModule.es6.js';
+const ServerModule = require('./ServerModule');
+// import ServerModule from './ServerModule.es6.js';
 
 const maxRandomClients = 9999;
 
 /**
  * The {@link ServerCheckin} takes care of the check-in on the server side.
  */
-export default class ServerCheckin extends ServerModule {
+class ServerCheckin extends ServerModule {
+// export default class ServerCheckin extends ServerModule {
   /**
    * Creates an instance of the class.
    * @param {Object} [options={}] Options.
@@ -149,3 +151,5 @@ export default class ServerCheckin extends ServerModule {
       this._releaseIndex(index);
   }
 }
+
+module.exports = ServerCheckin;

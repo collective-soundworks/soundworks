@@ -28,3 +28,47 @@ module.exports = {
   Survey: require('./ClientSurvey'),
   Sync: require('./ClientSync')
 };
+
+// const audioContext = require('waves-audio').audioContext;
+// import client from './client.es6.js';
+// import input from './input.es6.js';
+// import Calibration from './ClientCalibration.es6.js';
+// import Checkin from './ClientCheckin.es6.js';
+// import Control from './ClientControl.es6.js';
+// import Dialog from './ClientDialog.es6.js';
+// import Filelist from './ClientFilelist.es6.js';
+// import Loader from './ClientLoader.es6.js';
+// import Locator from './ClientLocator.es6.js';
+// import Module from './ClientModule.es6.js';
+// import Orientation from './ClientOrientation.es6.js';
+// import Performance from './ClientPerformance.es6.js';
+// import Placer from './ClientPlacer.es6.js';
+// import Platform from './ClientPlatform.es6.js';
+// import Selector from './ClientSelector.es6.js';
+// import Setup from './ClientSetup.es6.js'; // to be removed
+// import Space from './ClientSpace.es6.js';
+// import Survey from './ClientSurvey.es6.js';
+// import Sync from './ClientSync.es6.js');
+
+// export default {
+//   audioContext
+  // client,
+  // input,
+  // Calibration,
+  // Checkin,
+  // Control,
+  // Dialog,
+  // Filelist,
+  // Loader,
+  // Locator,
+  // Module,
+  // Orientation,
+  // Performance,
+  // Placer,
+  // Platform,
+  // Selector,
+  // Setup,
+  // Space,
+  // Survey,
+  // Sync
+// };

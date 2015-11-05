@@ -1,11 +1,13 @@
 'use strict';
 
-import ServerModule from './ServerModule.es6.js';
+const ServerModule = require('./ServerModule');
+// import ServerModule from './ServerModule.es6.js';
 
 /**
  * The {@link ServerLocator} module allows to store the coordinates of a client when the user enters an approximate location through the interfacte provided by the {@link ClientLocator}.
  */
-export default class ServerLocator extends ServerModule {
+class ServerLocator extends ServerModule {
+// export default class ServerLocator extends ServerModule {
   /**
    * Creates an instance of the class.
    * @param {Object} [options={}] Options.

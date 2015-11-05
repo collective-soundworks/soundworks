@@ -1,13 +1,15 @@
 'use strict';
 
-import ServerModule from './ServerModule.es6.js';
+const ServerModule = require('./ServerModule');
+// import ServerModule from './ServerModule.es6.js';
 
 /**
  * The {@link ServerPerformance} base class constitutes a basis on which to build a performance on the server side.
  * Its particularity is to keep track of the clients who are currently in the performance with the array `this.clients`, and to have the `enter` and `exit` methods that inform the module when the client entered the performance (*i.e.* when the `performance` on the client side called its `start` method) and left it (*i.e.* when the `performance` on the client side called its `done` method, or if the client disconnected from the server).
  *
  */
-export default class ServerPerformance extends ServerModule {
+class ServerPerformance extends ServerModule {
+// export default class ServerPerformance extends ServerModule {
   /**
     * Creates an instance of the class.
     * @param {Object} [options={}] Options.
@@ -81,3 +83,5 @@ export default class ServerPerformance extends ServerModule {
     client.modules[this.name].entered = false;
   }
 }
+
+module.exports = ServerPerformance;

@@ -1,6 +1,7 @@
 const fs = require('fs');
 
-import ServerModule from './ServerModule.es6.js';
+const ServerModule = require('./ServerModule');
+// import ServerModule from './ServerModule.es6.js';
 
 function padLeft(str, value, length) {
   str = str + '';
@@ -8,7 +9,8 @@ function padLeft(str, value, length) {
   return str;
 }
 
-export default class ServerSurvey extends ServerModule {
+class ServerSurvey extends ServerModule {
+// export default class ServerSurvey extends ServerModule {
   constructor(options = {}) {
     super(options.name || 'survey');
     // prepare file name

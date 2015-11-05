@@ -1,7 +1,9 @@
 'use strict';
 
-import client from './client.es6.js';
-import ClientModule from './ClientModule.es6.js';
+const client = require('./client');
+const ClientModule = require('./ClientModule');
+// import client from './client.es6.js';
+// import ClientModule from './ClientModule.es6.js';
 
 class BaseRenderer {
   constructor(survey, question) {
@@ -201,7 +203,8 @@ class TextAreaRenderer extends BaseRenderer {
 }
 
 // module
-export default class ClientSurvey extends ClientModule {
+class ClientSurvey extends ClientModule {
+// export default class ClientSurvey extends ClientModule {
   constructor(surveyConfig, options = {}) {
     super(options.name || 'survey', true, options.color);
 
@@ -331,3 +334,5 @@ export default class ClientSurvey extends ClientModule {
     this._nextBtn.classList.remove('disabled');
   }
 }
+
+module.exports = ClientSurvey;

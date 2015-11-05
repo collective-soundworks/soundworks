@@ -1,7 +1,9 @@
 'use strict';
 
-import server from './server.es6.js';
-import ServerModule from './ServerModule.es6.js';
+const server = require('./server');
+const ServerModule = require('./ServerModule');
+// import server from './server.es6.js';
+// import ServerModule from './ServerModule.es6.js';
 
 /**
  * The `Control` module is used to control an application through a dedicated client (that we usually call `conductor`).
@@ -34,7 +36,8 @@ import ServerModule from './ServerModule.es6.js';
  *
  * const control = new Control(guiroNames, soundfieldNames);
  */
-export default class ServerControl extends ServerModule {
+class ServerControl extends ServerModule {
+// export default class ServerControl extends ServerModule {
   /**
    * Creates an instance of the class.
    * @param {Object} [options={}] Options.
@@ -187,3 +190,5 @@ export default class ServerControl extends ServerModule {
     });
   }
 }
+
+module.exports = ServerControl;

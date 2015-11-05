@@ -9,7 +9,8 @@ const IO = require('socket.io');
 const osc = require('osc');
 const path = require('path');
 
-import ServerClient from './ServerClient.es6.js';
+const ServerClient = require('ServerClient');
+// import ServerClient from './ServerClient.es6.js';
 
 /**
  * The `server` object contains the basic methods of the server.
@@ -231,4 +232,5 @@ function receiveOSC(wildcard, callback) {
   oscListeners.push(oscListener);
 }
 
-export default server;
+// export default server;
+module.exports = server;

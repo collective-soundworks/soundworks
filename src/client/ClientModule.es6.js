@@ -113,7 +113,8 @@ class Parallel extends Promised {
  *   }
  * }
  */
-export default class ClientModule extends Promised {
+class ClientModule extends Promised {
+// export default class ClientModule extends Promised {
   /**
    * Creates an instance of the class.
    * @param {String} name Name of the module (used as the `id` and CSS class of the `view` if it exists).
@@ -281,3 +282,5 @@ ClientModule.sequential = function(...modules) {
 ClientModule.parallel = function(...modules) {
   return new Parallel(modules);
 };
+
+module.exports = ClientModule;

@@ -1,12 +1,15 @@
 'use strict';
 
-import client from './client.es6.js';
-import ClientModule from './ClientModule.es6.js';
+const client = require('./client');
+const ClientModule = require('./ClientModule');
+// import client from './client.es6.js';
+// import ClientModule from './ClientModule.es6.js';
 
 /**
  * The {@link Filelist} module requests the file list of a folder from the server. The results can be filtered by file extensions.
  */
-export default class Filelist extends ClientModule {
+class Filelist extends ClientModule {
+// export default class Filelist extends ClientModule {
   /**
    * Creates an instance of the class. Never has a view.
    * @param {Object} [options={}] Options.
@@ -44,3 +47,5 @@ export default class Filelist extends ClientModule {
     }, this);
   }
 }
+
+module.exports = ClientFilelist;
