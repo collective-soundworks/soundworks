@@ -14,6 +14,7 @@ Each of these steps corresponds to a module. While most of the modules are provi
 
 In the example described above, the client side code corresponding to the `player` client (in `src/player/index.es6.js`) would look like this:
 
+TODO: update
 ```javascript
 /* Client side */
 
@@ -33,22 +34,22 @@ class MyPerformance extends clientSide.Performance {
 // Scenario logic
 window.addEventListener('load', () => {
   // Initialize the modules
-  var welcome = new clientSide.Dialog(...);
-  var checkin = new clientSide.Checkin(...);
-  var sync = new clientSide.Sync(...);
-  var performance = new MyPerformance(...);
+  const welcome = new clientSide.Dialog(...);
+  const checkin = new clientSide.Checkin(...);
+  const sync = new clientSide.Sync(...);
+  const performance = new MyPerformance(...);
 
   // Launch the modules in a particular order
-  client.start(
-    client.serial(
+  client.start((serial, parallel) => {
+    serial(
       welcome,
-      client.parallel(
+      parallel(
         checkin,
         sync
       ),
       performance
     )
-  );
+  });
 });
 ```
 
@@ -130,6 +131,14 @@ As an exception, the last module of the scenario (usually the `performance` modu
 
 A derived client module **must not** override the `done` method provided by the base class.
 
+### The `reset` method
+
+TODO
+
+### The `restart` method
+
+TODO
+
 ## Server side
 
 On the server side, a module extends the `ServerModule` base class and has to implement a `connect` and a `disconnect` method.
@@ -145,9 +154,9 @@ Similarly, the `disconnect` method is called whenever the client disconnects fro
 
 # Writing the `Performance` module
 
-In most applications, the only module you will have to implement is the `performance` module. The *Soundworks* library provides the `ClientPerformance` and `ServerPerformance` base classes that you would extend to implement the `performance` of your application.
+In most applications, the only module you will have to implement is the `performance` module. The *Soundworks* library provides the `Performance` base classes on the client side and server side, that you would extend to implement the `performance` of your application.
 
-The `ClientPerformance` and `ServerPerformance` modules respectively extend the `ClientModule` and `ServerModule` base classes, so they provide the `start`, `connect` and `disconnect` methods seen above. On the client side, the `start` method is called when the client enters the performance. On the server side, the `connect` method is called when a client connects to the server, and the `disconnect` method is called when a client disconnects from the server.
+The `Performance` base classes extend the `Module` base classes. On the client side, the `start` method is called when the client enters the performance. On the server side, the `connect` method is called when a client connects to the server, and the `disconnect` method is called when a client disconnects from the server.
 
 Additionally, the `ServerPerformance` class provides the `enter` and `exit` methods, that are called when a client enters or exits the performance. In other words, the `ServerPerformance`'s `enter` method is called when a particular client calls the `ClientPerformance`'s `start` method. On the other hand, the `exit` method is called either when a client calls the `ClientPerformance`'s `done` method, or if a client disconnects from the server. In order to keep track of the clients who participate in the performance (*i.e.* who entered the performance and have not exited yet), `ServerPerformance` module  maintains an array of performing clients in its `clients` attribute.
 
