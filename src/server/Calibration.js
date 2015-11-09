@@ -1,18 +1,15 @@
-'use strict';
+import CalibrationServer from 'calibration/server';
+import Module from './Module';
 
-const Calibration = require('calibration/server');
-const ServerModule = require('./ServerModule');
-// import ServerModule from './ServerModule.es6.js';
 
-class ServerCalibration extends ServerModule {
-// export default class ServerCalibration extends ServerModule {
+export default class Calibration extends Module {
   /**
    * Constructor of the calibration server module.
    *
    * Note that the receive functions are registered by {@linkcode
-   * ServerCalibration~connect}.
+   * Calibration~connect}.
    *
-   * @constructs ServerCalibration
+   * @constructs Calibration
    * @param {Object} [params]
    * @param {Object} [params.persistent]
    * @param {Object} [params.persistent.path='../../data'] where to
@@ -26,22 +23,22 @@ class ServerCalibration extends ServerModule {
       file: 'calibration.json'
     } } ) {
       super(params.name || 'calibration');
-      this.calibration = new Calibration( { persistent: params.persistent });
+      this.calibration = new CalibrationServer({ persistent: params.persistent });
   }
 
   /**
    * Register the receive functions.
    *
-   * @function ServerCalibration~connect
+   * @function Calibration~connect
    * @param {ServerClient} client
    */
   connect(client) {
     super.connect(client);
 
-    this.calibration.start( (cmd, ...args) => { client.send(cmd, ...args); },
-                            (cmd, callback) => { client.receive(cmd, callback); } );
+    const sendCallback = (cmd, ...args) => { client.send(cmd, ...args); };
+    const receiveCallback = (cmd, callback) => { client.receive(cmd, callback); };
+    this.calibration.start(sendCallback, receiveCallback);
   }
 
-} // class ServerCalibration
+}
 
-module.exports = ServerCalibration;

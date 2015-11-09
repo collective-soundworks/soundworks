@@ -1,10 +1,6 @@
-'use strict';
-
-const audioContext = require('waves-audio').audioContext;
-const client = require('./client');
-const ClientModule = require('./ClientModule');
-// import client from './client.es6.js';
-// import ClientModule from './ClientModule.es6.js';
+import { audioContext } from 'waves-audio';
+import client from './client';
+import Module from './Module';
 
 /**
  * @private
@@ -22,8 +18,7 @@ function _base64(format, base64) {
  *   color: 'alizarin'
  * });
  */
-class ClientDialog extends ClientModule {
-// export default class ClientDialog extends ClientModule {
+export default class Dialog extends Module {
   /**
    * Creates an instance of the class. Always has a view.
    * @param {Object} [options={}] Options.
@@ -125,5 +120,3 @@ class ClientDialog extends ClientModule {
     }
   }
 }
-
-module.exports = ClientDialog;

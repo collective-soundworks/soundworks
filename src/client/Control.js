@@ -1,9 +1,5 @@
-'use strict';
-
-const client = require('./client');
-const ClientModule = require('./ClientModule');
-// import client from './client.es6.js';
-// import ClientModule from './ClientModule.es6.js';
+import client from './client';
+import Module from './Module';
 
 class ControlEvent {
   constructor(type, name, label) {
@@ -236,8 +232,7 @@ class ControlCommand extends ControlEvent {
  * - Immediately after having set up the controls if the GUI is disabled;
  * - Never if the GUI is enabled.
  */
-class ClientControl extends ClientModule {
-// export default class ClientControl extends ClientModule {
+export default class Control extends Module {
   /**
    * Creates an instance of the class.
    * @param {Object} [options={}] Options.
@@ -346,5 +341,3 @@ class ClientControl extends ClientModule {
     }
   }
 }
-
-module.exports = ClientControl;

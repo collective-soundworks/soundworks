@@ -6,7 +6,7 @@
     "Sébastien Robaszkiewicz",
     "Norbert Schnell"
   ],
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "transpile": "node ./bin/scripts --transpile",
     "watch": "node ./bin/scripts --watch",

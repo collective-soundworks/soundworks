@@ -1,15 +1,13 @@
+import client from './client';
+import Module from './Module';
+
 const ns = 'http://www.w3.org/2000/svg';
 
-const client = require('./client');
-const ClientModule = require('./ClientModule');
-// import client from './client.es6.js';
-// import ClientModule from './ClientModule.es6.js';
 
 /**
- * The {@link ClientSpace} displays the setup upon request.
+ * The {@link Space} displays the setup upon request.
  */
-class ClientSpace extends ClientModule {
-// export default class ClientSpace extends ClientModule {
+export default class Space extends Module {
   /**
    * Creates an instance of the class.
    * @param {Object} [options={}] Options.
@@ -254,5 +252,3 @@ class ClientSpace extends ClientModule {
     }
   }
 }
-
-module.exports = ClientSpace;

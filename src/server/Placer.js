@@ -1,13 +1,10 @@
-'use strict';
+import Module from './Module';
 
-const ServerModule = require('./ServerModule');
-// import ServerModule from './ServerModule.es6.js';
 
 /**
- * The {@link ServerPlacer} module allows to store the place of a client selected by the user through the interfacte provided by the {@link ClientPlacer}.
+ * The {@link Placer} module allows to store the place of a client selected by the user through the interfacte provided by the {@link ClientPlacer}.
  */
-class ServerPlacer extends ServerModule {
-// export default class ServerPlacer extends ServerModule {
+export default class Placer extends Module {
   /**
    * Creates an instance of the class.
    * @param {Object} [options={}] Options.
@@ -31,4 +28,3 @@ class ServerPlacer extends ServerModule {
   }
 }
 
-module.exports = ServerPlacer;

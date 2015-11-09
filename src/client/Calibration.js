@@ -1,13 +1,9 @@
-'use strict';
+import client from './client';
+import Module from './Module';
+import CalibrationClient from 'calibration/client';
 
-const Calibration = require('calibration/client');
-const client = require('./client');
-const ClientModule = require('./ClientModule');
-// import client from './client';
-// import ClientModule from './ClientModule.es6.js';
 
-class ClientCalibration extends ClientModule {
-// export default class ClientCalibration extends ClientModule {
+export default class Calibration extends Module {
   /**
    * Function called when an update happened.
    *
@@ -41,7 +37,7 @@ class ClientCalibration extends ClientModule {
     // undefined is fine
     this.updateFunction = params.updateFunction;
 
-    this.calibration = new Calibration({
+    this.calibration = new CalibrationClient({
       sendFunction: client.send,
       receiveFunction: client.receive,
       updateFunction: () => { that._calibrationUpdated(); }

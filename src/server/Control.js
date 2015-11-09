@@ -1,9 +1,6 @@
-'use strict';
+import server from './server';
+import Module from './Module';
 
-const server = require('./server');
-const ServerModule = require('./ServerModule');
-// import server from './server.es6.js';
-// import ServerModule from './ServerModule.es6.js';
 
 /**
  * The `Control` module is used to control an application through a dedicated client (that we usually call `conductor`).
@@ -16,10 +13,10 @@ const ServerModule = require('./ServerModule');
  *
  * The controls of different types are declared on the server side and propagated to the client side when a client is set up.
  *
- * The {@link ServerControl} takes care of the parameters and commands on the server side.
+ * The {@link Control} takes care of the parameters and commands on the server side.
  * To set up controls in a scenario, you should extend this class on the server side and declare the controls specific to that scenario with the appropriate methods.
  * @example
- * class Control extends ServerControl {
+ * class Control extends Control {
  *   constructor(nameArray) {
  *     super();
  *
@@ -36,8 +33,7 @@ const ServerModule = require('./ServerModule');
  *
  * const control = new Control(guiroNames, soundfieldNames);
  */
-class ServerControl extends ServerModule {
-// export default class ServerControl extends ServerModule {
+export default class Control extends Module {
   /**
    * Creates an instance of the class.
    * @param {Object} [options={}] Options.
@@ -191,4 +187,3 @@ class ServerControl extends ServerModule {
   }
 }
 
-module.exports = ServerControl;

@@ -1,16 +1,13 @@
-'use strict';
+import { audioContext } from 'waves-audio';
+import SyncClient from 'sync/client';
+import client from './client';
+import Module from './Module';
 
-const Sync = require('sync/client');
-const audioContext = require('waves-audio').audioContext;
-const client = require('./client');
-const ClientModule = require('./ClientModule');
-// import client from './client.es6.js';
-// import ClientModule from './ClientModule.es6.js';
 
 /**
- * The {@link ClientSync} module takes care of the synchronization process on the client side.
+ * The {@link Sync} module takes care of the synchronization process on the client side.
  * It displays "Clock syncing, stand by…" until the very first synchronization process is done.
- * The {@link ClientSync} module calls its `done` method as soon as the client clock is in sync with the sync clock.
+ * The {@link Sync} module calls its `done` method as soon as the client clock is in sync with the sync clock.
  * Then, the synchronization process keeps running in the background to resynchronize the clocks from times to times.
  * @example
  * // Require the Soundworks library (client side)
@@ -23,8 +20,7 @@ const ClientModule = require('./ClientModule');
  * const nowLocal = sync.getLocalTime(); // current time in local clock time
  * const nowSync = sync.getSyncTime(); // current time in sync clock time
  */
-class ClientSync extends ClientModule {
-// export default class ClientSync extends ClientModule {
+export default class Sync extends Module {
   /**
    * Creates an instance of the class. Always has a view.
    * @param {Object} [options={}] Options.
@@ -35,7 +31,7 @@ class ClientSync extends ClientModule {
     super(options.name || 'sync', true, options.color || 'black');
 
     this._ready = false;
-    this._sync = new Sync(() => audioContext.currentTime);
+    this._sync = new SyncClient(() => audioContext.currentTime);
 
     this.setCenteredViewContent('<p class="soft-blink">Clock syncing, stand by&hellip;</p>');
   }
@@ -89,4 +85,3 @@ class ClientSync extends ClientModule {
   }
 }
 
-module.exports = ClientSync;

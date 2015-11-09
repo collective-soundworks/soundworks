@@ -1,16 +1,16 @@
-import server from './server.js';
-import Calibration from './Calibration.js';
-import Checkin from './Checkin.js';
-import Client from './Client.js';
-import Control from './Control.js';
-import Filelist from './Filelist.js';
-import Locator from './Locator.js';
-import Module from './Module.js';
-import Performance from './Performance.js';
-import Placer from './Placer.js';
-import Setup from './Setup.js';
-import Survey from './Survey.js';
-import Sync from './Sync.js';
+import server from './server';
+import Calibration from './Calibration';
+import Checkin from './Checkin';
+import Client from './Client';
+import Control from './Control';
+import Filelist from './Filelist';
+import Locator from './Locator';
+import Module from './Module';
+import Performance from './Performance';
+import Placer from './Placer';
+import Setup from './Setup';
+import Survey from './Survey';
+import Sync from './Sync';
 
 export default {
   server,

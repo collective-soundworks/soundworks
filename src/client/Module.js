@@ -1,6 +1,4 @@
-'use strict';
-
-const EventEmitter = require('events').EventEmitter;
+import { EventEmitter } from 'events';
 const container = window.container || (window.container = document.getElementById('container'));
 
 /**
@@ -85,14 +83,14 @@ class Parallel extends Promised {
 }
 
 /**
- * The {@link ClientModule} base class is used to create a *Soundworks* module on the client side.
- * Each module should have a {@link ClientModule#start} and a {@link ClientModule#done} method.
- * The {@link ClientModule#done} method must be called when the module can hand over the control to the subsequent modules (*i.e.* when the module has done its duty, or when it may run in the background for the rest of the scenario after it finished its initialization process).
- * The base class optionally creates a view — a fullscreen `div` accessible through the {@link ClientModule.view} attribute — that is added to the DOM when the module is started and removed when the module calls its {@link ClientModule#done} method.
+ * The {@link Module} base class is used to create a *Soundworks* module on the client side.
+ * Each module should have a {@link Module#start} and a {@link Module#done} method.
+ * The {@link Module#done} method must be called when the module can hand over the control to the subsequent modules (*i.e.* when the module has done its duty, or when it may run in the background for the rest of the scenario after it finished its initialization process).
+ * The base class optionally creates a view — a fullscreen `div` accessible through the {@link Module.view} attribute — that is added to the DOM when the module is started and removed when the module calls its {@link Module#done} method.
  * (Specifically, the `view` element is added to the `#container` DOM element.)
  *
  * @example
- * class MyModule extends ClientModule {
+ * class MyModule extends Module {
  *   constructor(options = {}) {
  *     // Here, MyModule would always have a view,
  *     // with the id and class 'my-module-name',
@@ -114,8 +112,8 @@ class Parallel extends Promised {
  *   }
  * }
  */
-class ClientModule extends Promised {
-// export default class ClientModule extends Promised {
+class Module extends Promised {
+// export default class Module extends Promised {
   /**
    * Creates an instance of the class.
    * @param {String} name Name of the module (used as the `id` and CSS class of the `view` if it exists).
@@ -135,8 +133,8 @@ class ClientModule extends Promised {
      * View of the module.
      * The view is a DOM element (a full screen `div`) in which the content of the module is displayed.
      * This element is a child of the main container `div#container`, which is the only child of the `body` element.
-     * A module may or may not have a view, as indicated by the argument `hasView:Boolean` of the {@link ClientModule#constructor}.
-     * When that is the case, the view is created and added to the DOM when the {@link ClientModule#start} method is called, and is removed from the DOM when the {@link ClientModule#done} method is called.
+     * A module may or may not have a view, as indicated by the argument `hasView:Boolean` of the {@link Module#constructor}.
+     * When that is the case, the view is created and added to the DOM when the {@link Module#start} method is called, and is removed from the DOM when the {@link Module#done} method is called.
      * @type {DOMElement}
      */
     this.view = null;
@@ -178,9 +176,9 @@ class ClientModule extends Promised {
   }
 
   /**
-   * Resets the module to the state it had before calling the {@link ClientModule#start} method.
+   * Resets the module to the state it had before calling the {@link Module#start} method.
    *
-   * **Note:** the method is called automatically when necessary (for instance to reset the module after a server crash if the module had not called its {@link ClientModule#done} method yet), you should not call it manually.
+   * **Note:** the method is called automatically when necessary (for instance to reset the module after a server crash if the module had not called its {@link Module#done} method yet), you should not call it manually.
    * @abstract
    */
   reset() {
@@ -190,7 +188,7 @@ class ClientModule extends Promised {
   /**
    * Restarts the module.
    *
-   * **Note:** the method is called automatically when necessary (for instance to restart the module after a server crash if the module had already called its {@link ClientModule#done} method), you should not call it manually.
+   * **Note:** the method is called automatically when necessary (for instance to restart the module after a server crash if the module had already called its {@link Module#done} method), you should not call it manually.
    * @abstract
    */
   restart() {
@@ -261,7 +259,7 @@ class ClientModule extends Promised {
   }
 
   /**
-   * Removes the centered HTML content (set by {@link ClientModule#setCenteredViewContent}) from the `view`.
+   * Removes the centered HTML content (set by {@link Module#setCenteredViewContent}) from the `view`.
    */
   removeCenteredViewContent() {
     if (this.view && this._centeredViewContent) {
@@ -276,12 +274,12 @@ class ClientModule extends Promised {
   }
 }
 
-ClientModule.sequential = function(...modules) {
+Module.sequential = function(...modules) {
   return new Sequential(modules);
 };
 
-ClientModule.parallel = function(...modules) {
+Module.parallel = function(...modules) {
   return new Parallel(modules);
 };
 
-module.exports = ClientModule;
+export default Module;

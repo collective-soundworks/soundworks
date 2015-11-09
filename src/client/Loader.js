@@ -1,10 +1,7 @@
-'use strict';
+import { SuperLoader } from 'waves-loaders';
+import client from './client';
+import Module from './Module';
 
-const SuperLoader = require('waves-loaders').SuperLoader;
-const client = require('./client');
-const ClientModule = require('./ClientModule');
-// import client from './client.es6.js';
-// import ClientModule from './ClientModule.es6.js';
 
 /**
  * The {@link ClientLoader} module allows for loading audio files that can be used in the scenario (for instance, by the `performance` module).
@@ -20,8 +17,7 @@ const ClientModule = require('./ClientModule');
  * const kickBuffer = loader.audioBuffers[0];
  * const snareBuffer = loader.audioBuffers[1];
  */
-class ClientLoader extends ClientModule {
-// export default class ClientLoader extends ClientModule {
+export default class Loader extends Module {
   /**
    * Creates an instance of the class. Always has a view.
    * @param {Object} [options={}] Options.
@@ -142,4 +138,3 @@ class ClientLoader extends ClientModule {
   }
 }
 
-module.exports = ClientLoader;

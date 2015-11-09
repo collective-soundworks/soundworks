@@ -1,10 +1,5 @@
-'use strict';
-
-const input = require('./input');
-const client = require('./client');
-const ClientModule = require('./ClientModule');
-// import client from './client.es6.js';
-// import ClientModule from './ClientModule.es6.js';
+import client from './client';
+import Module from './Module';
 
 
 function _instructions(label) {
@@ -30,8 +25,7 @@ function _instructions(label) {
  *
  * The {@link ClientCheckin} module requires the SASS partial `_77-checkin.scss`.
  */
-class ClientCheckin extends ClientModule {
-// export default class ClientCheckin extends ClientModule {
+export default class ClientCheckin extends Module {
   /**
    * Creates an instance of the class. Always has a view.
    * @param {Object} [options={}] Options.
@@ -130,5 +124,3 @@ class ClientCheckin extends ClientModule {
     this.done();
   }
 }
-
-module.exports = ClientCheckin;

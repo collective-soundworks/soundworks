@@ -4,25 +4,25 @@
 // }
 
 import { audioContext } from 'waves-audio';
-import client from './client.js';
-import input from './input.js';
-import Calibration from './Calibration.js';
-import Checkin from './Checkin.js';
-import Control from './Control.js';
-import Dialog from './Dialog.js';
-import Filelist from './Filelist.js';
-import Loader from './Loader.js';
-import Locator from './Locator.js';
-import Module from './Module.js';
-import Orientation from './Orientation.js';
-import Performance from './Performance.js';
-import Placer from './Placer.js';
-import Platform from './Platform.js';
-import Selector from './Selector.js';
-import Setup from './Setup.js'; // to be removed
-import Space from './Space.js';
-import Survey from './Survey.js';
-import Sync from './Sync.js';
+import client from './client';
+import input from './input';
+import Calibration from './Calibration';
+import Checkin from './Checkin';
+import Control from './Control';
+import Dialog from './Dialog';
+import Filelist from './Filelist';
+import Loader from './Loader';
+import Locator from './Locator';
+import Module from './Module';
+import Orientation from './Orientation';
+import Performance from './Performance';
+import Placer from './Placer';
+import Platform from './Platform';
+import Selector from './Selector';
+import Setup from './Setup'; // to be removed
+import Space from './Space';
+import Survey from './Survey';
+import Sync from './Sync';
 
 export default {
   audioContext,

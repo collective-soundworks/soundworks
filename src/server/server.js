@@ -1,16 +1,13 @@
-'use strict';
+import ejs from 'ejs';
+import express from 'express';
+import fs from 'fs';
+import http from 'http';
+import log from './logger';
+import IO from 'socket.io';
+import osc from 'osc';
+import path from 'path';
+import Client from './Client';
 
-const ejs = require('ejs');
-const express = require('express');
-const fs = require('fs');
-const http = require('http');
-const log = require('./logger');
-const IO = require('socket.io');
-const osc = require('osc');
-const path = require('path');
-
-const ServerClient = require('./ServerClient');
-// import ServerClient from './ServerClient.es6.js';
 
 /**
  * The `server` object contains the basic methods of the server.
@@ -89,7 +86,8 @@ function start(app, publicPath, port, options = {}) {
   expressApp = app;
 
   httpServer.listen(app.get('port'), function() {
-    console.log('Server listening on port', app.get('port'));
+    var url = 'http://127.0.0.1:' + app.get('port');
+    console.log('Server listening on', url);
   });
 
   // Engine IO defaults
@@ -157,7 +155,7 @@ function map(clientType, ...modules) {
 
   server.io.of(clientType).on('connection', (socket) => {
     log.info({ socket: socket, clientType: clientType }, 'connection');
-    var client = new ServerClient(clientType, socket);
+    var client = new Client(clientType, socket);
 
     var index = _getClientIndex();
     client.index = index;
@@ -236,5 +234,5 @@ function receiveOSC(wildcard, callback) {
   oscListeners.push(oscListener);
 }
 
-// export default server;
-module.exports = server;
+export default server;
+

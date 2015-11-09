@@ -1,3 +1,4 @@
+// @todo - remove EventEmitter? (Implement our own listeners)
 'use strict';
 
 var _get = require('babel-runtime/helpers/get')['default'];
@@ -8,12 +9,16 @@ var _createClass = require('babel-runtime/helpers/create-class')['default'];
 
 var _classCallCheck = require('babel-runtime/helpers/class-call-check')['default'];
 
-var EventEmitter = require('events').EventEmitter; // TODO: remove EventEmitter? (Implement our own listeners)
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+
+var _events = require('events');
 
 /**
- * The {@link ServerModule} base class is used to create a *Soundworks* module on the server side.
- * Each module should have a {@link ServerModule#connect} and a {@link ServerModule#disconnect} method.
- * Any module mapped to the type of client `clientType` (thanks to the {@link server#map} method) would call its {@link ServerModule#connect} method when such a client connects to the server, and its {@link ServerModule#disconnect} method when such a client disconnects from the server.
+ * The {@link Module} base class is used to create a *Soundworks* module on the server side.
+ * Each module should have a {@link Module#connect} and a {@link Module#disconnect} method.
+ * Any module mapped to the type of client `clientType` (thanks to the {@link server#map} method) would call its {@link Module#connect} method when such a client connects to the server, and its {@link Module#disconnect} method when such a client disconnects from the server.
  * @example
  * class MyModule extends serverSide.Module {
  *   constructor('my-module-name') {
@@ -30,21 +35,19 @@ var EventEmitter = require('events').EventEmitter; // TODO: remove EventEmitter?
  * }
  */
 
-var ServerModule = (function (_EventEmitter) {
-  _inherits(ServerModule, _EventEmitter);
+var Module = (function (_EventEmitter) {
+  _inherits(Module, _EventEmitter);
 
-  // export default class ServerModule extends EventEmitter {
   /**
     * Creates an instance of the class.
     * @param {Object} [options={}] The options.
     * @param {string} [options.name='unnamed'] The name of the module.
    */
 
-  function ServerModule(name) {
-    _classCallCheck(this, ServerModule);
+  function Module(name) {
+    _classCallCheck(this, Module);
 
-    _get(Object.getPrototypeOf(ServerModule.prototype), 'constructor', this).call(this);
-
+    _get(Object.getPrototypeOf(Module.prototype), 'constructor', this).call(this);
     /**
      * The name of the module.
      * @type {string}
@@ -55,10 +58,10 @@ var ServerModule = (function (_EventEmitter) {
   /**
    * Called when the `client` connects to the server.
    * This method should handle the logic of the module on the server side. For instance, it can take care of the communication with the client side module by setting up WebSocket message listeners and sending WebSocket messages, or it can add the client to a list to keep track of all the connected clients.
-   * @param {ServerClient} client The connected client.
+   * @param {ModuleClient} client The connected client.
    */
 
-  _createClass(ServerModule, [{
+  _createClass(Module, [{
     key: 'connect',
     value: function connect(client) {
       // Setup an object
@@ -68,7 +71,7 @@ var ServerModule = (function (_EventEmitter) {
     /**
      * Called when the client `client` disconnects from the server.
      * This method should handle the logic when that happens. For instance, it can remove the socket message listeners, or remove the client from the list that keeps track of the connected clients.
-     * @param {ServerClient} client The disconnected client.
+     * @param {ModuleClient} client The disconnected client.
      */
   }, {
     key: 'disconnect',
@@ -77,8 +80,9 @@ var ServerModule = (function (_EventEmitter) {
     }
   }]);
 
-  return ServerModule;
-})(EventEmitter);
+  return Module;
+})(_events.EventEmitter);
 
-module.exports = ServerModule;
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInNyYy9zZXJ2ZXIvTW9kdWxlLmpzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBLFlBQVksQ0FBQzs7Ozs7Ozs7OztBQUViLElBQU0sWUFBWSxHQUFHLE9BQU8sQ0FBQyxRQUFRLENBQUMsQ0FBQyxZQUFZLENBQUM7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7SUFxQjlDLFlBQVk7WUFBWixZQUFZOzs7Ozs7Ozs7QUFPTCxXQVBQLFlBQVksQ0FPSixJQUFJLEVBQUU7MEJBUGQsWUFBWTs7QUFRZCwrQkFSRSxZQUFZLDZDQVFOOzs7Ozs7QUFNUixRQUFJLENBQUMsSUFBSSxHQUFHLElBQUksQ0FBQztHQUNsQjs7Ozs7Ozs7ZUFmRyxZQUFZOztXQXNCVCxpQkFBQyxNQUFNLEVBQUU7O0FBRWQsWUFBTSxDQUFDLE9BQU8sQ0FBQyxJQUFJLENBQUMsSUFBSSxDQUFDLEdBQUcsRUFBRSxDQUFDO0tBQ2hDOzs7Ozs7Ozs7V0FPUyxvQkFBQyxNQUFNLEVBQUU7O0tBRWxCOzs7U0FsQ0csWUFBWTtHQUFTLFlBQVk7O0FBcUN2QyxNQUFNLENBQUMsT0FBTyxHQUFHLFlBQVksQ0FBQyIsImZpbGUiOiJzcmMvc2VydmVyL01vZHVsZS5qcyIsInNvdXJjZXNDb250ZW50IjpbIid1c2Ugc3RyaWN0JztcblxuY29uc3QgRXZlbnRFbWl0dGVyID0gcmVxdWlyZSgnZXZlbnRzJykuRXZlbnRFbWl0dGVyOyAvLyBUT0RPOiByZW1vdmUgRXZlbnRFbWl0dGVyPyAoSW1wbGVtZW50IG91ciBvd24gbGlzdGVuZXJzKVxuXG4vKipcbiAqIFRoZSB7QGxpbmsgU2VydmVyTW9kdWxlfSBiYXNlIGNsYXNzIGlzIHVzZWQgdG8gY3JlYXRlIGEgKlNvdW5kd29ya3MqIG1vZHVsZSBvbiB0aGUgc2VydmVyIHNpZGUuXG4gKiBFYWNoIG1vZHVsZSBzaG91bGQgaGF2ZSBhIHtAbGluayBTZXJ2ZXJNb2R1bGUjY29ubmVjdH0gYW5kIGEge0BsaW5rIFNlcnZlck1vZHVsZSNkaXNjb25uZWN0fSBtZXRob2QuXG4gKiBBbnkgbW9kdWxlIG1hcHBlZCB0byB0aGUgdHlwZSBvZiBjbGllbnQgYGNsaWVudFR5cGVgICh0aGFua3MgdG8gdGhlIHtAbGluayBzZXJ2ZXIjbWFwfSBtZXRob2QpIHdvdWxkIGNhbGwgaXRzIHtAbGluayBTZXJ2ZXJNb2R1bGUjY29ubmVjdH0gbWV0aG9kIHdoZW4gc3VjaCBhIGNsaWVudCBjb25uZWN0cyB0byB0aGUgc2VydmVyLCBhbmQgaXRzIHtAbGluayBTZXJ2ZXJNb2R1bGUjZGlzY29ubmVjdH0gbWV0aG9kIHdoZW4gc3VjaCBhIGNsaWVudCBkaXNjb25uZWN0cyBmcm9tIHRoZSBzZXJ2ZXIuXG4gKiBAZXhhbXBsZVxuICogY2xhc3MgTXlNb2R1bGUgZXh0ZW5kcyBzZXJ2ZXJTaWRlLk1vZHVsZSB7XG4gKiAgIGNvbnN0cnVjdG9yKCdteS1tb2R1bGUtbmFtZScpIHtcbiAqICAgICAuLi4gLy8gYW55dGhpbmcgdGhlIGNvbnN0cnVjdG9yIG5lZWRzXG4gKiAgIH1cbiAqXG4gKiAgIGNvbm5lY3QoY2xpZW50KSB7XG4gKiAgICAgLi4uIC8vIHdoYXQgdGhlIG1vZHVsZSBoYXMgdG8gZG8gd2hlbiBhIGNsaWVudCBjb25uZWN0cyB0byB0aGUgc2VydmVyXG4gKiAgIH1cbiAqXG4gKiAgIGRpc2Nvbm5lY3QoY2xpZW50KSB7XG4gKiAgICAgLi4uIC8vIHdoYXQgdGhlIG1vZHVsZSBoYXMgdG8gZG8gd2hlbiBhIGNsaWVudCBkaXNjb25uZWN0cyBmcm9tIHRoZSBzZXJ2ZXJcbiAqICAgfVxuICogfVxuICovXG5jbGFzcyBTZXJ2ZXJNb2R1bGUgZXh0ZW5kcyBFdmVudEVtaXR0ZXIge1xuLy8gZXhwb3J0IGRlZmF1bHQgY2xhc3MgU2VydmVyTW9kdWxlIGV4dGVuZHMgRXZlbnRFbWl0dGVyIHtcbiAgLyoqXG4gICAgKiBDcmVhdGVzIGFuIGluc3RhbmNlIG9mIHRoZSBjbGFzcy5cbiAgICAqIEBwYXJhbSB7T2JqZWN0fSBbb3B0aW9ucz17fV0gVGhlIG9wdGlvbnMuXG4gICAgKiBAcGFyYW0ge3N0cmluZ30gW29wdGlvbnMubmFtZT0ndW5uYW1lZCddIFRoZSBuYW1lIG9mIHRoZSBtb2R1bGUuXG4gICAqL1xuICBjb25zdHJ1Y3RvcihuYW1lKSB7XG4gICAgc3VwZXIoKTtcblxuICAgIC8qKlxuICAgICAqIFRoZSBuYW1lIG9mIHRoZSBtb2R1bGUuXG4gICAgICogQHR5cGUge3N0cmluZ31cbiAgICAgKi9cbiAgICB0aGlzLm5hbWUgPSBuYW1lO1xuICB9XG5cbiAgLyoqXG4gICAqIENhbGxlZCB3aGVuIHRoZSBgY2xpZW50YCBjb25uZWN0cyB0byB0aGUgc2VydmVyLlxuICAgKiBUaGlzIG1ldGhvZCBzaG91bGQgaGFuZGxlIHRoZSBsb2dpYyBvZiB0aGUgbW9kdWxlIG9uIHRoZSBzZXJ2ZXIgc2lkZS4gRm9yIGluc3RhbmNlLCBpdCBjYW4gdGFrZSBjYXJlIG9mIHRoZSBjb21tdW5pY2F0aW9uIHdpdGggdGhlIGNsaWVudCBzaWRlIG1vZHVsZSBieSBzZXR0aW5nIHVwIFdlYlNvY2tldCBtZXNzYWdlIGxpc3RlbmVycyBhbmQgc2VuZGluZyBXZWJTb2NrZXQgbWVzc2FnZXMsIG9yIGl0IGNhbiBhZGQgdGhlIGNsaWVudCB0byBhIGxpc3QgdG8ga2VlcCB0cmFjayBvZiBhbGwgdGhlIGNvbm5lY3RlZCBjbGllbnRzLlxuICAgKiBAcGFyYW0ge1NlcnZlckNsaWVudH0gY2xpZW50IFRoZSBjb25uZWN0ZWQgY2xpZW50LlxuICAgKi9cbiAgY29ubmVjdChjbGllbnQpIHtcbiAgICAvLyBTZXR1cCBhbiBvYmplY3RcbiAgICBjbGllbnQubW9kdWxlc1t0aGlzLm5hbWVdID0ge307XG4gIH1cblxuICAvKipcbiAgICogQ2FsbGVkIHdoZW4gdGhlIGNsaWVudCBgY2xpZW50YCBkaXNjb25uZWN0cyBmcm9tIHRoZSBzZXJ2ZXIuXG4gICAqIFRoaXMgbWV0aG9kIHNob3VsZCBoYW5kbGUgdGhlIGxvZ2ljIHdoZW4gdGhhdCBoYXBwZW5zLiBGb3IgaW5zdGFuY2UsIGl0IGNhbiByZW1vdmUgdGhlIHNvY2tldCBtZXNzYWdlIGxpc3RlbmVycywgb3IgcmVtb3ZlIHRoZSBjbGllbnQgZnJvbSB0aGUgbGlzdCB0aGF0IGtlZXBzIHRyYWNrIG9mIHRoZSBjb25uZWN0ZWQgY2xpZW50cy5cbiAgICogQHBhcmFtIHtTZXJ2ZXJDbGllbnR9IGNsaWVudCBUaGUgZGlzY29ubmVjdGVkIGNsaWVudC5cbiAgICovXG4gIGRpc2Nvbm5lY3QoY2xpZW50KSB7XG4gICAgLy8gZGVsZXRlIGNsaWVudC5tb2R1bGVzW3RoaXMubmFtZV0gLy8gVE9ETz9cbiAgfVxufVxuXG5tb2R1bGUuZXhwb3J0cyA9IFNlcnZlck1vZHVsZTtcbiJdfQ==
+exports['default'] = Module;
+module.exports = exports['default'];
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInNyYy9zZXJ2ZXIvTW9kdWxlLmpzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7OztzQkFDNkIsUUFBUTs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OztJQXNCaEIsTUFBTTtZQUFOLE1BQU07Ozs7Ozs7O0FBTWQsV0FOUSxNQUFNLENBTWIsSUFBSSxFQUFFOzBCQU5DLE1BQU07O0FBT3ZCLCtCQVBpQixNQUFNLDZDQU9mOzs7OztBQUtSLFFBQUksQ0FBQyxJQUFJLEdBQUcsSUFBSSxDQUFDO0dBQ2xCOzs7Ozs7OztlQWJrQixNQUFNOztXQW9CbEIsaUJBQUMsTUFBTSxFQUFFOztBQUVkLFlBQU0sQ0FBQyxPQUFPLENBQUMsSUFBSSxDQUFDLElBQUksQ0FBQyxHQUFHLEVBQUUsQ0FBQztLQUNoQzs7Ozs7Ozs7O1dBT1Msb0JBQUMsTUFBTSxFQUFFOztLQUVsQjs7O1NBaENrQixNQUFNOzs7cUJBQU4sTUFBTSIsImZpbGUiOiJzcmMvc2VydmVyL01vZHVsZS5qcyIsInNvdXJjZXNDb250ZW50IjpbIi8vIEB0b2RvIC0gcmVtb3ZlIEV2ZW50RW1pdHRlcj8gKEltcGxlbWVudCBvdXIgb3duIGxpc3RlbmVycylcbmltcG9ydCB7IEV2ZW50RW1pdHRlciB9IGZyb20gJ2V2ZW50cyc7XG5cblxuLyoqXG4gKiBUaGUge0BsaW5rIE1vZHVsZX0gYmFzZSBjbGFzcyBpcyB1c2VkIHRvIGNyZWF0ZSBhICpTb3VuZHdvcmtzKiBtb2R1bGUgb24gdGhlIHNlcnZlciBzaWRlLlxuICogRWFjaCBtb2R1bGUgc2hvdWxkIGhhdmUgYSB7QGxpbmsgTW9kdWxlI2Nvbm5lY3R9IGFuZCBhIHtAbGluayBNb2R1bGUjZGlzY29ubmVjdH0gbWV0aG9kLlxuICogQW55IG1vZHVsZSBtYXBwZWQgdG8gdGhlIHR5cGUgb2YgY2xpZW50IGBjbGllbnRUeXBlYCAodGhhbmtzIHRvIHRoZSB7QGxpbmsgc2VydmVyI21hcH0gbWV0aG9kKSB3b3VsZCBjYWxsIGl0cyB7QGxpbmsgTW9kdWxlI2Nvbm5lY3R9IG1ldGhvZCB3aGVuIHN1Y2ggYSBjbGllbnQgY29ubmVjdHMgdG8gdGhlIHNlcnZlciwgYW5kIGl0cyB7QGxpbmsgTW9kdWxlI2Rpc2Nvbm5lY3R9IG1ldGhvZCB3aGVuIHN1Y2ggYSBjbGllbnQgZGlzY29ubmVjdHMgZnJvbSB0aGUgc2VydmVyLlxuICogQGV4YW1wbGVcbiAqIGNsYXNzIE15TW9kdWxlIGV4dGVuZHMgc2VydmVyU2lkZS5Nb2R1bGUge1xuICogICBjb25zdHJ1Y3RvcignbXktbW9kdWxlLW5hbWUnKSB7XG4gKiAgICAgLi4uIC8vIGFueXRoaW5nIHRoZSBjb25zdHJ1Y3RvciBuZWVkc1xuICogICB9XG4gKlxuICogICBjb25uZWN0KGNsaWVudCkge1xuICogICAgIC4uLiAvLyB3aGF0IHRoZSBtb2R1bGUgaGFzIHRvIGRvIHdoZW4gYSBjbGllbnQgY29ubmVjdHMgdG8gdGhlIHNlcnZlclxuICogICB9XG4gKlxuICogICBkaXNjb25uZWN0KGNsaWVudCkge1xuICogICAgIC4uLiAvLyB3aGF0IHRoZSBtb2R1bGUgaGFzIHRvIGRvIHdoZW4gYSBjbGllbnQgZGlzY29ubmVjdHMgZnJvbSB0aGUgc2VydmVyXG4gKiAgIH1cbiAqIH1cbiAqL1xuZXhwb3J0IGRlZmF1bHQgY2xhc3MgTW9kdWxlIGV4dGVuZHMgRXZlbnRFbWl0dGVyIHtcbiAgLyoqXG4gICAgKiBDcmVhdGVzIGFuIGluc3RhbmNlIG9mIHRoZSBjbGFzcy5cbiAgICAqIEBwYXJhbSB7T2JqZWN0fSBbb3B0aW9ucz17fV0gVGhlIG9wdGlvbnMuXG4gICAgKiBAcGFyYW0ge3N0cmluZ30gW29wdGlvbnMubmFtZT0ndW5uYW1lZCddIFRoZSBuYW1lIG9mIHRoZSBtb2R1bGUuXG4gICAqL1xuICBjb25zdHJ1Y3RvcihuYW1lKSB7XG4gICAgc3VwZXIoKTtcbiAgICAvKipcbiAgICAgKiBUaGUgbmFtZSBvZiB0aGUgbW9kdWxlLlxuICAgICAqIEB0eXBlIHtzdHJpbmd9XG4gICAgICovXG4gICAgdGhpcy5uYW1lID0gbmFtZTtcbiAgfVxuXG4gIC8qKlxuICAgKiBDYWxsZWQgd2hlbiB0aGUgYGNsaWVudGAgY29ubmVjdHMgdG8gdGhlIHNlcnZlci5cbiAgICogVGhpcyBtZXRob2Qgc2hvdWxkIGhhbmRsZSB0aGUgbG9naWMgb2YgdGhlIG1vZHVsZSBvbiB0aGUgc2VydmVyIHNpZGUuIEZvciBpbnN0YW5jZSwgaXQgY2FuIHRha2UgY2FyZSBvZiB0aGUgY29tbXVuaWNhdGlvbiB3aXRoIHRoZSBjbGllbnQgc2lkZSBtb2R1bGUgYnkgc2V0dGluZyB1cCBXZWJTb2NrZXQgbWVzc2FnZSBsaXN0ZW5lcnMgYW5kIHNlbmRpbmcgV2ViU29ja2V0IG1lc3NhZ2VzLCBvciBpdCBjYW4gYWRkIHRoZSBjbGllbnQgdG8gYSBsaXN0IHRvIGtlZXAgdHJhY2sgb2YgYWxsIHRoZSBjb25uZWN0ZWQgY2xpZW50cy5cbiAgICogQHBhcmFtIHtNb2R1bGVDbGllbnR9IGNsaWVudCBUaGUgY29ubmVjdGVkIGNsaWVudC5cbiAgICovXG4gIGNvbm5lY3QoY2xpZW50KSB7XG4gICAgLy8gU2V0dXAgYW4gb2JqZWN0XG4gICAgY2xpZW50Lm1vZHVsZXNbdGhpcy5uYW1lXSA9IHt9O1xuICB9XG5cbiAgLyoqXG4gICAqIENhbGxlZCB3aGVuIHRoZSBjbGllbnQgYGNsaWVudGAgZGlzY29ubmVjdHMgZnJvbSB0aGUgc2VydmVyLlxuICAgKiBUaGlzIG1ldGhvZCBzaG91bGQgaGFuZGxlIHRoZSBsb2dpYyB3aGVuIHRoYXQgaGFwcGVucy4gRm9yIGluc3RhbmNlLCBpdCBjYW4gcmVtb3ZlIHRoZSBzb2NrZXQgbWVzc2FnZSBsaXN0ZW5lcnMsIG9yIHJlbW92ZSB0aGUgY2xpZW50IGZyb20gdGhlIGxpc3QgdGhhdCBrZWVwcyB0cmFjayBvZiB0aGUgY29ubmVjdGVkIGNsaWVudHMuXG4gICAqIEBwYXJhbSB7TW9kdWxlQ2xpZW50fSBjbGllbnQgVGhlIGRpc2Nvbm5lY3RlZCBjbGllbnQuXG4gICAqL1xuICBkaXNjb25uZWN0KGNsaWVudCkge1xuICAgIC8vIGRlbGV0ZSBjbGllbnQubW9kdWxlc1t0aGlzLm5hbWVdIC8vIFRPRE8/XG4gIH1cbn1cblxuIl19

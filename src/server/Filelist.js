@@ -1,9 +1,6 @@
-'use strict';
+import fs from 'fs';
+import Module from './Module';
 
-const fs = require('fs');
-
-const ServerModule = require('./ServerModule');
-// import ServerModule from './ServerModule.es6.js';
 
 function checkForExtensions(file, extensions) {
   if(!extensions || extensions.length === 0)
@@ -20,10 +17,9 @@ function checkForExtensions(file, extensions) {
 }
 
 /**
- * The {@link ServerFilelist} module allows to dynamically send a list of files stored on the server to the clients.
+ * The {@link FileList} module allows to dynamically send a list of files stored on the server to the clients.
  */
-class ServerFilelist extends ServerModule {
-// export default class ServerFilelist extends ServerModule {
+export default class FileList extends Module {
   /**
    * Creates an instance of the class.
    * @param {Object} [options={}] Options.
@@ -56,4 +52,3 @@ class ServerFilelist extends ServerModule {
   }
 }
 
-module.exports = ServerFilelist;

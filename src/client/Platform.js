@@ -1,11 +1,8 @@
-'use strict';
+import { audioContext } from 'waves-audio';
+import platform from 'platform';
+import client from './client';
+import Module from './Module';
 
-const audioContext = require('waves-audio').audioContext;
-const platform = require('platform');
-const client = require('./client');
-const ClientModule = require('./ClientModule');
-// import client from './client.es6.js';
-// import ClientModule from './ClientModule.es6.js';
 
 /**
  * Messages written in the view when the device can't pass the platform check.
@@ -26,8 +23,7 @@ const defaultMessages = {
  * If that is not the case, the module displays a blocking view and prevents the participant to go any further in the scenario.
  * The {@link ClientPlatform} module calls its `done` method immediately if the device passes the platform test, and never otherwise.
  */
-class ClientPlatform extends ClientModule {
-// export default class ClientPlatform extends ClientModule {
+export default class Platform extends Module {
   /**
    * Creates an instance of the class. Always has a view.
    * @param {Object} [options={}] Options.
@@ -85,5 +81,3 @@ class ClientPlatform extends ClientModule {
     this.done();
   }
 }
-
-module.exports = ClientPlatform;

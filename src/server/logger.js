@@ -2,9 +2,7 @@ const bunyan = require('bunyan');
 
 // @TODO allow configuration
 function socketSerializer(socket) {
-  return {
-    id: socket.id
-  };
+  return { id: socket.id };
 }
 
 const log = bunyan.createLogger({
@@ -21,4 +19,4 @@ const log = bunyan.createLogger({
   }]
 });
 
-module.exports = log;
+export default log;

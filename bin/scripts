@@ -106,13 +106,6 @@ function transpileAll() {
 // Using the Sync method crash the entire script each time there is an error in
 // the code which is really boring when watching...
 function transpile(src, stack) {
-  for (var i = 0; i < ignoreDir.length; i++) {
-    var _dir = ignoreDir[i];
-    if (new RegExp(_dir).test(src)) {
-      transpile(stack.shift(), stack);
-    }
-  }
-
   var target = createTargetName(src);
 
   babel.transformFile(src, babelOptions, function (err, result) {

@@ -1,9 +1,6 @@
-'use strict';
+import client from './client';
+import Module from './Module';
 
-const client = require('./client');
-const ClientModule = require('./ClientModule');
-// import client from './client.es6.js';
-// import ClientModule from './ClientModule.es6.js';
 
 function toTitleCase(str) {
   return str.replace(/\w\S*/g, function(txt) {
@@ -26,8 +23,7 @@ function convertName(name) {
 /**
  * The {@link ClientSelector} module allows to select one or several options among a list.
  */
-class ClientSelector extends ClientModule {
-// export default class ClientSelector extends ClientModule {
+export default class Selector extends Module {
   /**
    * Creates an instance of the class.
    * @param {Object} [options={}] Options.
@@ -283,4 +279,3 @@ class ClientSelector extends ClientModule {
   }
 }
 
-module.exports = ClientSelector;

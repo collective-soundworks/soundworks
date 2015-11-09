@@ -1,11 +1,8 @@
-'use strict';
-
-var EventEmitter = require('events').EventEmitter;
-var audioContext = require('waves-audio').audioContext;
+import { EventEmitter } from 'events';
+import { audioContext } from 'waves-audio';
 
 // TODO: add deviceMotion and deviceOrientation input.
-class InputModule extends EventEmitter {
-// export default class InputModule extends EventEmitter {
+class Input extends EventEmitter {
   constructor() {
     super();
 
@@ -124,4 +121,5 @@ class InputModule extends EventEmitter {
   }
 }
 
-module.exports = new InputModule();
+const instance = new Input();
+export default instance;

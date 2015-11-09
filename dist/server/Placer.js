@@ -8,39 +8,45 @@ var _createClass = require('babel-runtime/helpers/create-class')['default'];
 
 var _classCallCheck = require('babel-runtime/helpers/class-call-check')['default'];
 
-var ServerModule = require('./ServerModule');
-// import ServerModule from './ServerModule.es6.js';
+var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
+
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+
+var _Module2 = require('./Module');
+
+var _Module3 = _interopRequireDefault(_Module2);
 
 /**
- * The {@link ServerPlacer} module allows to store the place of a client selected by the user through the interfacte provided by the {@link ClientPlacer}.
+ * The {@link Placer} module allows to store the place of a client selected by the user through the interfacte provided by the {@link ClientPlacer}.
  */
 
-var ServerPlacer = (function (_ServerModule) {
-  _inherits(ServerPlacer, _ServerModule);
+var Placer = (function (_Module) {
+  _inherits(Placer, _Module);
 
-  // export default class ServerPlacer extends ServerModule {
   /**
    * Creates an instance of the class.
    * @param {Object} [options={}] Options.
    * @param {Object} [options.name='placer'] Name of the module.
    */
 
-  function ServerPlacer(options) {
-    _classCallCheck(this, ServerPlacer);
+  function Placer(options) {
+    _classCallCheck(this, Placer);
 
-    _get(Object.getPrototypeOf(ServerPlacer.prototype), 'constructor', this).call(this, options.name || 'placer');
+    _get(Object.getPrototypeOf(Placer.prototype), 'constructor', this).call(this, options.name || 'placer');
   }
 
   /**
    * @private
    */
 
-  _createClass(ServerPlacer, [{
+  _createClass(Placer, [{
     key: 'connect',
     value: function connect(client) {
       var _this = this;
 
-      _get(Object.getPrototypeOf(ServerPlacer.prototype), 'connect', this).call(this, client);
+      _get(Object.getPrototypeOf(Placer.prototype), 'connect', this).call(this, client);
 
       client.receive(this.name + ':information', function (index, label, coords) {
         client.modules[_this.name].index = index;
@@ -50,8 +56,9 @@ var ServerPlacer = (function (_ServerModule) {
     }
   }]);
 
-  return ServerPlacer;
-})(ServerModule);
+  return Placer;
+})(_Module3['default']);
 
-module.exports = ServerPlacer;
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInNyYy9zZXJ2ZXIvUGxhY2VyLmpzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBLFlBQVksQ0FBQzs7Ozs7Ozs7OztBQUViLElBQU0sWUFBWSxHQUFHLE9BQU8sQ0FBQyxnQkFBZ0IsQ0FBQyxDQUFDOzs7Ozs7O0lBTXpDLFlBQVk7WUFBWixZQUFZOzs7Ozs7Ozs7QUFPTCxXQVBQLFlBQVksQ0FPSixPQUFPLEVBQUU7MEJBUGpCLFlBQVk7O0FBUWQsK0JBUkUsWUFBWSw2Q0FRUixPQUFPLENBQUMsSUFBSSxJQUFJLFFBQVEsRUFBRTtHQUNqQzs7Ozs7O2VBVEcsWUFBWTs7V0FjVCxpQkFBQyxNQUFNLEVBQUU7OztBQUNkLGlDQWZFLFlBQVkseUNBZUEsTUFBTSxFQUFFOztBQUV0QixZQUFNLENBQUMsT0FBTyxDQUFJLElBQUksQ0FBQyxJQUFJLG1CQUFnQixVQUFDLEtBQUssRUFBRSxLQUFLLEVBQUUsTUFBTSxFQUFLO0FBQ25FLGNBQU0sQ0FBQyxPQUFPLENBQUMsTUFBSyxJQUFJLENBQUMsQ0FBQyxLQUFLLEdBQUcsS0FBSyxDQUFDO0FBQ3hDLGNBQU0sQ0FBQyxPQUFPLENBQUMsTUFBSyxJQUFJLENBQUMsQ0FBQyxLQUFLLEdBQUcsS0FBSyxDQUFDO0FBQ3hDLGNBQU0sQ0FBQyxXQUFXLEdBQUcsTUFBTSxDQUFDO09BQzdCLENBQUMsQ0FBQztLQUNKOzs7U0F0QkcsWUFBWTtHQUFTLFlBQVk7O0FBeUJ2QyxNQUFNLENBQUMsT0FBTyxHQUFHLFlBQVksQ0FBQyIsImZpbGUiOiJzcmMvc2VydmVyL1BsYWNlci5qcyIsInNvdXJjZXNDb250ZW50IjpbIid1c2Ugc3RyaWN0JztcblxuY29uc3QgU2VydmVyTW9kdWxlID0gcmVxdWlyZSgnLi9TZXJ2ZXJNb2R1bGUnKTtcbi8vIGltcG9ydCBTZXJ2ZXJNb2R1bGUgZnJvbSAnLi9TZXJ2ZXJNb2R1bGUuZXM2LmpzJztcblxuLyoqXG4gKiBUaGUge0BsaW5rIFNlcnZlclBsYWNlcn0gbW9kdWxlIGFsbG93cyB0byBzdG9yZSB0aGUgcGxhY2Ugb2YgYSBjbGllbnQgc2VsZWN0ZWQgYnkgdGhlIHVzZXIgdGhyb3VnaCB0aGUgaW50ZXJmYWN0ZSBwcm92aWRlZCBieSB0aGUge0BsaW5rIENsaWVudFBsYWNlcn0uXG4gKi9cbmNsYXNzIFNlcnZlclBsYWNlciBleHRlbmRzIFNlcnZlck1vZHVsZSB7XG4vLyBleHBvcnQgZGVmYXVsdCBjbGFzcyBTZXJ2ZXJQbGFjZXIgZXh0ZW5kcyBTZXJ2ZXJNb2R1bGUge1xuICAvKipcbiAgICogQ3JlYXRlcyBhbiBpbnN0YW5jZSBvZiB0aGUgY2xhc3MuXG4gICAqIEBwYXJhbSB7T2JqZWN0fSBbb3B0aW9ucz17fV0gT3B0aW9ucy5cbiAgICogQHBhcmFtIHtPYmplY3R9IFtvcHRpb25zLm5hbWU9J3BsYWNlciddIE5hbWUgb2YgdGhlIG1vZHVsZS5cbiAgICovXG4gIGNvbnN0cnVjdG9yKG9wdGlvbnMpIHtcbiAgICBzdXBlcihvcHRpb25zLm5hbWUgfHwgJ3BsYWNlcicpO1xuICB9XG5cbiAgLyoqXG4gICAqIEBwcml2YXRlXG4gICAqL1xuICBjb25uZWN0KGNsaWVudCkge1xuICAgIHN1cGVyLmNvbm5lY3QoY2xpZW50KTtcblxuICAgIGNsaWVudC5yZWNlaXZlKGAke3RoaXMubmFtZX06aW5mb3JtYXRpb25gLCAoaW5kZXgsIGxhYmVsLCBjb29yZHMpID0+IHtcbiAgICAgIGNsaWVudC5tb2R1bGVzW3RoaXMubmFtZV0uaW5kZXggPSBpbmRleDtcbiAgICAgIGNsaWVudC5tb2R1bGVzW3RoaXMubmFtZV0ubGFiZWwgPSBsYWJlbDtcbiAgICAgIGNsaWVudC5jb29yZGluYXRlcyA9IGNvb3JkcztcbiAgICB9KTtcbiAgfVxufVxuXG5tb2R1bGUuZXhwb3J0cyA9IFNlcnZlclBsYWNlcjtcbiJdfQ==
+exports['default'] = Placer;
+module.exports = exports['default'];
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInNyYy9zZXJ2ZXIvUGxhY2VyLmpzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7dUJBQW1CLFVBQVU7Ozs7Ozs7O0lBTVIsTUFBTTtZQUFOLE1BQU07Ozs7Ozs7O0FBTWQsV0FOUSxNQUFNLENBTWIsT0FBTyxFQUFFOzBCQU5GLE1BQU07O0FBT3ZCLCtCQVBpQixNQUFNLDZDQU9qQixPQUFPLENBQUMsSUFBSSxJQUFJLFFBQVEsRUFBRTtHQUNqQzs7Ozs7O2VBUmtCLE1BQU07O1dBYWxCLGlCQUFDLE1BQU0sRUFBRTs7O0FBQ2QsaUNBZGlCLE1BQU0seUNBY1QsTUFBTSxFQUFFOztBQUV0QixZQUFNLENBQUMsT0FBTyxDQUFJLElBQUksQ0FBQyxJQUFJLG1CQUFnQixVQUFDLEtBQUssRUFBRSxLQUFLLEVBQUUsTUFBTSxFQUFLO0FBQ25FLGNBQU0sQ0FBQyxPQUFPLENBQUMsTUFBSyxJQUFJLENBQUMsQ0FBQyxLQUFLLEdBQUcsS0FBSyxDQUFDO0FBQ3hDLGNBQU0sQ0FBQyxPQUFPLENBQUMsTUFBSyxJQUFJLENBQUMsQ0FBQyxLQUFLLEdBQUcsS0FBSyxDQUFDO0FBQ3hDLGNBQU0sQ0FBQyxXQUFXLEdBQUcsTUFBTSxDQUFDO09BQzdCLENBQUMsQ0FBQztLQUNKOzs7U0FyQmtCLE1BQU07OztxQkFBTixNQUFNIiwiZmlsZSI6InNyYy9zZXJ2ZXIvUGxhY2VyLmpzIiwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IE1vZHVsZSBmcm9tICcuL01vZHVsZSc7XG5cblxuLyoqXG4gKiBUaGUge0BsaW5rIFBsYWNlcn0gbW9kdWxlIGFsbG93cyB0byBzdG9yZSB0aGUgcGxhY2Ugb2YgYSBjbGllbnQgc2VsZWN0ZWQgYnkgdGhlIHVzZXIgdGhyb3VnaCB0aGUgaW50ZXJmYWN0ZSBwcm92aWRlZCBieSB0aGUge0BsaW5rIENsaWVudFBsYWNlcn0uXG4gKi9cbmV4cG9ydCBkZWZhdWx0IGNsYXNzIFBsYWNlciBleHRlbmRzIE1vZHVsZSB7XG4gIC8qKlxuICAgKiBDcmVhdGVzIGFuIGluc3RhbmNlIG9mIHRoZSBjbGFzcy5cbiAgICogQHBhcmFtIHtPYmplY3R9IFtvcHRpb25zPXt9XSBPcHRpb25zLlxuICAgKiBAcGFyYW0ge09iamVjdH0gW29wdGlvbnMubmFtZT0ncGxhY2VyJ10gTmFtZSBvZiB0aGUgbW9kdWxlLlxuICAgKi9cbiAgY29uc3RydWN0b3Iob3B0aW9ucykge1xuICAgIHN1cGVyKG9wdGlvbnMubmFtZSB8fCAncGxhY2VyJyk7XG4gIH1cblxuICAvKipcbiAgICogQHByaXZhdGVcbiAgICovXG4gIGNvbm5lY3QoY2xpZW50KSB7XG4gICAgc3VwZXIuY29ubmVjdChjbGllbnQpO1xuXG4gICAgY2xpZW50LnJlY2VpdmUoYCR7dGhpcy5uYW1lfTppbmZvcm1hdGlvbmAsIChpbmRleCwgbGFiZWwsIGNvb3JkcykgPT4ge1xuICAgICAgY2xpZW50Lm1vZHVsZXNbdGhpcy5uYW1lXS5pbmRleCA9IGluZGV4O1xuICAgICAgY2xpZW50Lm1vZHVsZXNbdGhpcy5uYW1lXS5sYWJlbCA9IGxhYmVsO1xuICAgICAgY2xpZW50LmNvb3JkaW5hdGVzID0gY29vcmRzO1xuICAgIH0pO1xuICB9XG59XG5cbiJdfQ==

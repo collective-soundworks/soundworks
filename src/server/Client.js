@@ -1,14 +1,12 @@
-'use strict';
+import log from './logger';
 
-const log = require('./logger');
 
 /**
- * The {@link ServerClient} module is used to keep track of each connected client and to communicate with it via WebSockets.
- * Each time a client of type `clientType` connects to the server, *Soundworks* creates a new instance of `ServerClient`.
+ * The {@link Client} module is used to keep track of each connected client and to communicate with it via WebSockets.
+ * Each time a client of type `clientType` connects to the server, *Soundworks* creates a new instance of `Client`.
  * An instance of the class is passed to the `connect` and `disconnect` methods of all the server side modules that are mapped to the `clientType` clients (see {@link server.map}), as well as to the `enter` and `exit` methods of any {@link ServerPerformance} class mapped to that same client type.
  */
-class ServerClient {
-// export default class ServerClient {
+export default class Client {
 	/**
 	 * Creates an instance of the class.
 	 * @param {String} clientType Client type of the connected client.
@@ -95,4 +93,3 @@ class ServerClient {
   }
 }
 
-module.exports = ServerClient;
