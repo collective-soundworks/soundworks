@@ -108,7 +108,7 @@ function transpileAll() {
 function transpile(src, stack) {
   var target = createTargetName(src);
 
-  babel.transformFile(src, function (err, result) {
+  babel.transformFile(src, function(err, result) {
     if (err) {
       var error = err.codeFrame || err;
       return console.error(error);
