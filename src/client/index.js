@@ -1,7 +1,3 @@
-// @todo - should be handled with `babel-runtime`
-// if (!window.Promise) {
-//   window.Promise = require('es6-promise').Promise;
-// }
 
 import { audioContext } from 'waves-audio';
 import client from './client';
