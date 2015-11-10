@@ -179,10 +179,29 @@ export default class Space extends Module {
       }
     }
 
-    this._svgOffsetLeft = offsetLeft;
-    this._svgOffsetTop = offsetTop;
-    this._svgWidth = svgWidth;
-    this._svgHeight = svgHeight;
+    /**
+     * Left offset of the SVG element.
+     * @type {Number}
+     */
+    this.svgOffsetLeft = offsetLeft;
+
+    /**
+     * Top offset of the SVG element.
+     * @type {Number}
+     */
+    this.svgOffsetTop = offsetTop;
+
+    /**
+     * Width of the SVG element.
+     * @type {Number}
+     */
+    this.svgWidth = svgWidth;
+
+    /**
+     * Height of the SVG element.
+     * @type {Number}
+     */
+    this.svgHeight = svgHeight;
 
     this._ratio = ratio;
   }
