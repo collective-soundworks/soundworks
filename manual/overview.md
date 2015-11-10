@@ -2,20 +2,43 @@
 
 *Soundworks* is a Javascript framework that enables artists and developers to create collaborative music performances where a group of participants distributed in space use their mobile devices to generate sound and light through touch and motion.
 
-The framework is based on a client/server architecture supported by `Node.js` (`v0.12.0` or later) and WebSockets, and uses a modular design to make it easy to implement different performance scenarios: the [`soundworks-template`](https://github.com/collective-soundworks/soundworks-template) allows anyone to bootstrap a scenario based on *Soundworks* and focus on its audiovisual and interaction design instead of the infrastructure.
-
-# Quick, I want to get started!
+The framework is based on a client/server architecture supported by `Node.js` (`v0.12.0` or later) [TODO: upgrade to v4] and WebSockets, and uses a modular design to make it easy to implement different performance scenarios: the [`soundworks-template`](https://github.com/collective-soundworks/soundworks-template) allows anyone to bootstrap a scenario based on *Soundworks* and focus on its audiovisual and interaction design instead of the infrastructure.
 
 If you want to hack in right away, your best best is to go straight to the [`soundworks-template`](https://github.com/collective-soundworks/soundworks-template) repository. Additionally, you'll find a few scenario examples in the [Collective Soundworks](https://github.com/collective-soundworks) organization, such as [*Beats*](https://github.com/collective-soundworks/soundworks-beats), [*Drops*](https://github.com/collective-soundworks/soundworks-drops), [*Paths*](https://github.com/collective-soundworks/soundworks-paths) or [*Wandering Sound*](https://github.com/collective-soundworks/soundworks-wanderingsound). Don't hesitate to have a look at them!
 
-# Modules provided by the library
+# Authors
 
-The *Soundworks* library provides a set of modules that are used in many scenarios:  
-- [`dialog`](#clientdialog), displays a dialog and waits for the participant to touch the screen (client side only);
-- [`loader`](#clientloader), pre-loads a set of audio files required by the application (client side only);
-- [`orientation`](#clientorientation), calibrates the compass in interaction with the participant (client side only);
-- [`platform`](#clientplatform), checks whether the client device and browser are capable to run the application properly, and displays a blocking dialog if not (client side only);
-- [`checkin`](#checkin), obtains a client index and, optionally, a set of spatial coordinates in a static setup;
-- [`control`](#control), allows to control some parameters of the performance in real time;
-- [`setup`](#setup), loads or generates the setup of a performance space including a surface (*i.e.* dimensions and outlines) and predefined positions (*i.e.* coordinates and labels);
-- [`sync`](#sync), synchronizes the client clock to the server.
+- [Sébastien Robaszkiewicz](mailto:hello@robi.me)
+- [Norbert Schnell](mailto:Nobert.Schnell@ircam.fr)
+- [Benjamin Matuszewski](mailto:Benjamin.Matuszewski@ircam.fr)
+- [Jean-Philippe Lambert](mailto:Jean-Philippe.Lambert@ircam.fr)
+
+# License
+
+Copyright (c) 2014, IRCAM (France, Paris)
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification,
+are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice, this
+  list of conditions and the following disclaimer in the documentation and/or
+  other materials provided with the distribution.
+
+* Neither the name of the IRCAM nor the names of its
+  contributors may be used to endorse or promote products derived from
+  this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
