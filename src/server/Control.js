@@ -167,6 +167,9 @@ export default class Control extends Module {
     }
   }
 
+  /**
+   * @private
+   */
   connect(client) {
     super.connect(client);
 
@@ -186,4 +189,3 @@ export default class Control extends Module {
     });
   }
 }
-

@@ -268,6 +268,10 @@ class Module extends Promised {
     }
   }
 
+  /**
+   * `z-index` CSS property of the view
+   * @param {Number} value Value of the `z-index`.
+   */
   set zIndex(value) {
     if(this.view)
       this.view.style.zIndex = value;

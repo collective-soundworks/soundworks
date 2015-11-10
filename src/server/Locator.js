@@ -14,6 +14,10 @@ export default class Locator extends Module {
   constructor(options = {}) {
     super(options.name || 'locator');
 
+    /**
+     * Setup used by the locator, if any.
+     * @type {Setup}
+     */
     this.setup = options.setup || null;
   }
 
@@ -41,4 +45,3 @@ export default class Locator extends Module {
     });
   }
 }
-

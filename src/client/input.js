@@ -2,6 +2,9 @@ import { EventEmitter } from 'events';
 import { audioContext } from 'waves-audio';
 
 // TODO: add deviceMotion and deviceOrientation input.
+/**
+ * @private
+ */
 class Input extends EventEmitter {
   constructor() {
     super();

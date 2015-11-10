@@ -20,8 +20,24 @@ export default class Checkin extends Module {
   constructor(options = {}) {
     super(options.name || 'checkin');
 
+    /**
+     * Setup used by the checkin, if any.
+     * @type {Setup}
+     */
     this.setup = options.setup || null;
+
+    /**
+     * Maximum number of clients supported by the checkin.
+     * @type {Number}
+     */
     this.maxClients = options.maxClients || Infinity;
+
+    /**
+     * Order in which indices are assigned. Currently supported values are:
+     * - `'ascending'`: assigns indices in ascending order;
+     * - `'random'`: assigns indices in random order.
+     * @type {[type]}
+     */
     this.order = options.order || 'ascending'; // 'ascending' | 'random'
 
     if (this.maxClients > Number.MAX_SAFE_INTEGER)
@@ -148,4 +164,3 @@ export default class Checkin extends Module {
       this._releaseIndex(index);
   }
 }
-

@@ -25,7 +25,7 @@ export default class Space extends Module {
     this.width = 1;
 
     /**
-     * Relative heigth of the setup.
+     * Relative height of the setup.
      * @type {Number}
      */
     this.height = 1;
@@ -36,18 +36,30 @@ export default class Space extends Module {
     // this.spacing = 1;
     // this.labels = [];
     // this.coordinates = [];
+
+    /**
+     * Type of the setup (values currently supported: `'matrix'`, `'surface'`).
+     * @type {String}
+     * @todo Remove?
+     */
     this.type = undefined;
+
+    /**
+     * URL of the background image (if any).
+     * @type {String}
+     */
+    this.background = null;
 
     this._xFactor = 1;
     this._yFactor = 1;
 
     // map between shapes and their related positions
-    this.shapePositionMap = [];
-    this.positionIndexShapeMap = {};
+    this._shapePositionMap = [];
+    this._positionIndexShapeMap = {};
   }
 
   // TODO note -> modfiy here
-  initSetup(setup) {
+  _initSetup(setup) {
     this.width = setup.width;
     this.height = setup.height;
     // this.spacing = setup.spacing;
@@ -84,8 +96,8 @@ export default class Space extends Module {
    * @private
    */
   reset() {
-    this.shapePositionMap = [];
-    this.positionIndexShapeMap = {};
+    this._shapePositionMap = [];
+    this._positionIndexShapeMap = {};
     // client.removeListener('setup:init', this._onSetupInit);
     this.container.innerHTML = '';
   }
@@ -99,10 +111,10 @@ export default class Space extends Module {
    * - `'rotate180'`: rotates the representation by 180 degrees.
    */
   display(setup, container, options = {}) {
-    this.initSetup(setup);
+    this._initSetup(setup);
     this.container = container;
     this.container.classList.add('space');
-    this.renderingOptions = options;
+    this._renderingOptions = options;
 
     if (options.showBackground) {
       this.container.style.backgroundImage = `url(${this.background})`;
@@ -117,8 +129,8 @@ export default class Space extends Module {
     svg.appendChild(group);
     this.container.appendChild(svg);
 
-    this.svg = svg;
-    this.group = group;
+    this._svg = svg;
+    this._group = group;
 
     this._resize(this.container);
   }
@@ -146,33 +158,33 @@ export default class Space extends Module {
     const offsetLeft = (containerWidth - svgWidth) / 2;
     const offsetTop = (containerHeight - svgHeight) / 2;
 
-    this.svg.setAttributeNS(null, 'width', svgWidth);
-    this.svg.setAttributeNS(null, 'height', svgHeight);
+    this._svg.setAttributeNS(null, 'width', svgWidth);
+    this._svg.setAttributeNS(null, 'height', svgHeight);
      // use setup coordinates
-    this.svg.setAttributeNS(null, 'viewBox', `0 0 ${this.width} ${this.height}`);
+    this._svg.setAttributeNS(null, 'viewBox', `0 0 ${this.width} ${this.height}`);
     // center svg in container
-    this.svg.style.position = 'absolute';
-    this.svg.style.left = `${offsetLeft}px`;
-    this.svg.style.top = `${offsetTop}px`;
+    this._svg.style.position = 'absolute';
+    this._svg.style.left = `${offsetLeft}px`;
+    this._svg.style.top = `${offsetTop}px`;
 
     // apply rotations
-    if (this.renderingOptions.transform) {
-      switch (this.renderingOptions.transform) {
+    if (this._renderingOptions.transform) {
+      switch (this._renderingOptions.transform) {
         case 'rotate180':
           this.container.setAttribute('data-xfactor', -1);
           this.container.setAttribute('data-yfactor', -1);
           const transform = `rotate(180, ${svgWidth / 2}, ${svgHeight / 2})`;
-          this.group.setAttributeNS(null, 'transform', transform);
+          this._group.setAttributeNS(null, 'transform', transform);
           break;
       }
     }
 
-    this.svgOffsetLeft = offsetLeft;
-    this.svgOffsetTop = offsetTop;
-    this.svgWidth = svgWidth;
-    this.svgHeight = svgHeight;
+    this._svgOffsetLeft = offsetLeft;
+    this._svgOffsetTop = offsetTop;
+    this._svgWidth = svgWidth;
+    this._svgHeight = svgHeight;
 
-    this.ratio = ratio;
+    this._ratio = ratio;
   }
 
   /**
@@ -192,14 +204,14 @@ export default class Space extends Module {
     if (this._listenTouchEvent) {
       this.container.addEventListener('touchstart', (e) => {
         e.preventDefault();
-        const dots = this.shapePositionMap.map((entry) => { return entry.dot });
+        const dots = this._shapePositionMap.map((entry) => { return entry.dot });
         let target = e.target;
 
         // Could probably be simplified...
         while (target !== this.container) {
           if (dots.indexOf(target) !== -1) {
-            for (let i = 0; i < this.shapePositionMap; i++) {
-              const entry = this.shapePositionMap[i];
+            for (let i = 0; i < this._shapePositionMap; i++) {
+              const entry = this._shapePositionMap[i];
               if (target === entry.dot) {
                 const position = entry.position;
                 this.emit('select', position);
@@ -224,14 +236,14 @@ export default class Space extends Module {
     const index = position.index;
 
     const dot = document.createElementNS(ns, 'circle');
-    dot.setAttributeNS(null, 'r', radius / this.ratio);
+    dot.setAttributeNS(null, 'r', radius / this._ratio);
     dot.setAttributeNS(null, 'cx', coordinates[0] * this.width);
     dot.setAttributeNS(null, 'cy', coordinates[1] * this.height);
     dot.style.fill = 'steelblue';
 
-    this.group.appendChild(dot);
-    this.shapePositionMap.push({ dot, position });
-    this.positionIndexShapeMap[index] = dot;
+    this._group.appendChild(dot);
+    this._shapePositionMap.push({ dot, position });
+    this._positionIndexShapeMap[index] = dot;
   }
 
   /**
@@ -240,15 +252,15 @@ export default class Space extends Module {
    */
   removePosition(position) {
     const el = this. positionIndexShapeMap[position.index];
-    this.group.removeChild(el);
+    this._group.removeChild(el);
   }
 
   /**
    * Remove all the positions displayed.
    */
   removeAllPositions() {
-    while (this.group.firstChild) {
-      this.group.removeChild(this.group.firstChild);
+    while (this._group.firstChild) {
+      this._group.removeChild(this._group.firstChild);
     }
   }
 }

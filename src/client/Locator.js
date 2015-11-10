@@ -22,7 +22,7 @@ export default class Locator extends Module {
      * @type {ClientSpace}
      */
     this.space = options.space || null;
-    this.instructions = options.instructions || '<small>Indiquez votre position dans la salle</small>';
+    this._instructions = options.instructions || '<small>Indiquez votre position dans la salle</small>';
 
     this._showBackground = options.showBackground || false;
 
@@ -39,7 +39,7 @@ export default class Locator extends Module {
     let textDiv = document.createElement('div');
     textDiv.classList.add('message');
     let text = document.createElement('p');
-    text.innerHTML = this.instructions;
+    text.innerHTML = this._instructions;
     this._textDiv = textDiv;
     this._text = text;
 

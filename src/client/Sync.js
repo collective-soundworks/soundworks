@@ -38,6 +38,7 @@ export default class Sync extends Module {
 
   /**
    * Starts the synchronization process.
+   * @private
    */
   start() {
     super.start();
@@ -46,6 +47,9 @@ export default class Sync extends Module {
     });
   }
 
+  /**
+   * @private
+   */
   restart() {
     // TODO
   }
@@ -84,4 +88,3 @@ export default class Sync extends Module {
     }
   }
 }
-

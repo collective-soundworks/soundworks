@@ -18,11 +18,41 @@ export default class Setup extends Module {
   constructor(options = {}) {
     super(options.name || 'setup', false);
 
+    /**
+     * Width of the setup (in meters).
+     * @type {Number}
+     */
     this.width = 1;
+
+    /**
+     * Height of the setup (in meters).
+     * @type {Number}
+     */
     this.height = 1;
+
+    /**
+     * Default spacing between positions (in meters).
+     * @type {Number}
+     */
     this.spacing = 1;
+
+    /**
+     * Array of the positions' labels.
+     * @type {String[]}
+     */
     this.labels = [];
+
+    /**
+     * Array of the positions' coordinates (in the format `[x:Number, y:Number]`).
+     * @type {Array[]}
+     */
     this.coordinates = [];
+
+    /**
+     * Type of the setup (values currently supported: `'matrix'`, `'surface'`).
+     * @type {String}
+     * @todo Remove?
+     */
     this.type = undefined;
 
     this._xFactor = 1;
