@@ -135,7 +135,10 @@ export default class Space extends Module {
     this._resize(this.container);
   }
 
-  _resize() {
+  /**
+   * Resize the SVG element.
+   */
+  resize() {
     const boundingRect = this.container.getBoundingClientRect();
     const containerWidth = boundingRect.width;
     const containerHeight = boundingRect.height;
