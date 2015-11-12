@@ -132,7 +132,7 @@ export default class Space extends Module {
     this._svg = svg;
     this._group = group;
 
-    this.resize(this.container);
+    this._resize(this.container);
   }
 
   /**
