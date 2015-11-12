@@ -82,6 +82,7 @@ export default class Setup extends Module {
 
     client.receive(this.name + ':init', this._init);
     client.send(this.name + ':request');
+    console.log(client);
   }
 
   /**
