@@ -24,6 +24,7 @@ export default class Sync extends Module {
     super(options.name || 'sync');
 
     this._hrtimeStart = process.hrtime();
+
     this._sync = new SyncServer(() => {
       const time = process.hrtime(this._hrtimeStart);
       return time[0] + time[1] * 1e-9;

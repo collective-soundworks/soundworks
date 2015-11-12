@@ -3,7 +3,7 @@ var childProcess = require('child_process');
 var util = require('util');
 var path = require('path');
 
-var babel = require('babel-core');
+var babel = require('babel');
 var fse = require('fs-extra');
 var nodeWatch = require('node-watch');
 
@@ -12,14 +12,14 @@ var nodeWatch = require('node-watch');
 // CONFIG
 // -----------------------------------------------
 var srcDir = 'src';
-var distDir = 'dist';
+var distDir = '.';
 var cwd = process.cwd();
 
 // options for babel
 var babelOptions = {
-  // sourceMap: 'inline',
-  // modules: 'common',
-  // optional: ['runtime']
+  sourceMap: 'inline',
+  modules: 'common',
+  optional: ['runtime']
 };
 
 // colors for shell - for a more complete list
@@ -108,7 +108,7 @@ function transpileAll() {
 function transpile(src, stack) {
   var target = createTargetName(src);
 
-  babel.transformFile(src, function(err, result) {
+  babel.transformFile(src, babelOptions, function(err, result) {
     if (err) {
       var error = err.codeFrame || err;
       return console.error(error);

@@ -250,10 +250,6 @@ export default class Control extends Module {
      */
     this.events = {};
 
-    this._init();
-  }
-
-  _init() {
     let view = this._ownsView ? this.view : null;
 
     client.receive('control:init', (events) => {
