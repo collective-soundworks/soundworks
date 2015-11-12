@@ -39,7 +39,16 @@ export default class ClientCheckin extends Module {
   constructor(options = {}) {
     super(options.name || 'checkin', options.hasView || true, options.color);
 
+    /**
+     * Index given by the server to the client.
+     * @type {Number}
+     */
     this.index = -1;
+
+    /**
+     * Label of the index assigned to the client, if any.
+     * @type {String}
+     */
     this.label = null;
 
     this._showDialog = options.showDialog || false;

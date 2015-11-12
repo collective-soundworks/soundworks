@@ -65,11 +65,17 @@ export default class Loader extends Module {
     }
   }
 
+  /**
+   * @private
+   */
   start() {
     super.start();
     this._load(this._files);
   }
 
+  /**
+   * @private
+   */
   restart() {
     super.restart();
     this.done();
@@ -137,4 +143,3 @@ export default class Loader extends Module {
     }
   }
 }
-

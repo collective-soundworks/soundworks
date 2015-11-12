@@ -21,15 +21,54 @@ export default class Setup extends Module {
   constructor(options = {}) {
     super(options.name || 'setup');
 
+    /**
+     * Width of the setup (in meters).
+     * @type {Number}
+     */
     this.width = 1;
+
+    /**
+     * Height of the setup (in meters).
+     * @type {Number}
+     */
     this.height = 1;
+
+    /**
+     * Minimum spacing between positions of the setup (in meters).
+     * @type {Number}
+     */
     this.spacing = 1;
+
+    /**
+     * Array of the positions' labels.
+     * @type {String[]}
+     */
     this.labels = [];
+
+    /**
+     * Array of the positions' coordinates (in the format `[x:Number, y:Number]`).
+     * @type {Array[]}
+     */
     this.coordinates = [];
+
+    /**
+     * URL of the background image (if any).
+     * @type {String}
+     */
     this.background = null;
 
+    /**
+     * Setup parameters specific to a certain type of setup (*e.g.* a 'matrix'`).
+     * @type {Object}
+     */
     this.specific = {};
 
+    /**
+     * Type of the setup. Currently supported types are:
+     * - `'matrix'`;
+     * - `'surface'`.
+     * @type {[type]}
+     */
     this.type = undefined;
   }
 
@@ -181,4 +220,3 @@ export default class Setup extends Module {
     }
   }
 }
-

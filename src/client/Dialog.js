@@ -38,6 +38,9 @@ export default class Dialog extends Module {
     this._clickHandler = this._clickHandler.bind(this);
   }
 
+  /**
+   * @private
+   */
   start() {
     super.start();
 
@@ -50,7 +53,10 @@ export default class Dialog extends Module {
     // Add click listnener
     this.view.addEventListener('click', this._clickHandler);
   }
-
+  
+  /**
+   * @private
+   */
   restart() {
     super.restart();
     this.done();

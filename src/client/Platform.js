@@ -43,6 +43,9 @@ export default class Platform extends Module {
     this._bypass = options.bypass || false;
   }
 
+  /**
+   * @private
+   */
   start() {
     super.start();
 
@@ -76,6 +79,9 @@ export default class Platform extends Module {
     }
   }
 
+  /**
+   * @private
+   */
   restart() {
     super.restart();
     this.done();

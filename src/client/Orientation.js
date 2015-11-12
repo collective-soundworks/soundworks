@@ -37,6 +37,9 @@ export default class Orientation extends Module {
     });
   }
 
+  /**
+   * @private
+   */
   start() {
     super.start();
     this.setCenteredViewContent('<p>' + this._text + '</p>');
