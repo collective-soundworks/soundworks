@@ -78,6 +78,7 @@ export default class Setup extends Module {
   connect(client) {
     super.connect(client);
 
+    console.log('connect setup', this.name, ':request??');
     client.receive(this.name + ':request', () => {
       console.log('got it');
       client.send(this.name + ':init', {
