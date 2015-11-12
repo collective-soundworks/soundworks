@@ -22,6 +22,12 @@ export default class Locator extends Module {
      * @type {ClientSpace}
      */
     this.space = options.space || null;
+
+    /**
+     * The setup in which to indicate the approximate location.
+     * @type {ClientSetup}
+     */
+    this.setup = options.setup || null; 
     this._instructions = options.instructions || '<small>Indiquez votre position dans la salle</small>';
 
     this._showBackground = options.showBackground || false;
@@ -138,7 +144,7 @@ export default class Locator extends Module {
       widthPx = screenHeight / heightWidthRatio;
     }
 
-    this.space.display(this._surfaceDiv, {
+    this.space.display(this.setup, this._surfaceDiv, {
       showBackground: this._showBackground
     });
 
