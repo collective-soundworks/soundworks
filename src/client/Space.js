@@ -273,7 +273,7 @@ export default class Space extends Module {
    * @param {Object} position Position to remove.
    */
   removePosition(position) {
-    const el = this. positionIndexShapeMap[position.index];
+    const el = this._positionIndexShapeMap[position.index];
     this._group.removeChild(el);
   }
 
