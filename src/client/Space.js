@@ -176,7 +176,8 @@ export default class Space extends Module {
         case 'rotate180':
           this.container.setAttribute('data-xfactor', -1);
           this.container.setAttribute('data-yfactor', -1);
-          const transform = `rotate(180, ${svgWidth / 2}, ${svgHeight / 2})`;
+          // const transform = `rotate(180, ${svgWidth / 2}, ${svgHeight / 2})`;
+          const transform = 'rotate(180, 0.5, 0.5)';
           this._group.setAttributeNS(null, 'transform', transform);
           break;
       }
