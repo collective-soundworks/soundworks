@@ -25,7 +25,7 @@ function _instructions(label) {
  *
  * The {@link ClientCheckin} module requires the SASS partial `_77-checkin.scss`.
  */
-export default class ClientCheckin extends Module {
+export default class Checkin extends Module {
   /**
    * Creates an instance of the class. Always has a view.
    * @param {Object} [options={}] Options.

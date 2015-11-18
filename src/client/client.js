@@ -5,7 +5,11 @@ import MobileDetect from 'mobile-detect';
 // localStorage.debug = '*';
 
 /**
- * The `client` object contains the basic methods of the client. For instance, the object initializes the client type with `init` and establishes WebSocket communications with the server through the methods `send` and `receive`. Additionally, it starts the scenario and sequences the modules using the methods `start`, `serial` and `parallel`.
+ * The `client` object contains the basic methods of the client.
+ * For instance, the object initializes the client type with `init` and
+ * establishes WebSocket communications with the server through the methods
+ * `send` and `receive`. Additionally, it starts the scenario and sequences the
+ * modules using the methods `start`, `serial` and `parallel`.
  * @type {Object}
  */
 var client = {
@@ -93,7 +97,7 @@ function init(clientType = 'player', options = {}) {
 }
 
 /**
- * Starts the module logic (*i.e.* the application).
+ * Start the module logic (*i.e.* the application).
  * @param {Function} startFun [todo]
  * @todo Clarify the param.
  * @return {Promise} The Promise return value.
@@ -118,6 +122,8 @@ function start(startFun) {
 
     client.receive('reconnect', () => {
       // console.log('reconnect', client.index);
+      let promise = module.createPromise();
+      module.launch();
     });
   } else {
     // no client i/o, no server
@@ -159,7 +165,7 @@ function parallel(...modules) {
 }
 
 /**
- * Sends a WebSocket message to the server.
+ * Send a WebSocket message to the server.
  *
  * **Note:** on the server side, the server receives the message with the command {@link ServerClient#receive}.
  * @param {String} msg Name of the message to send.
@@ -171,7 +177,7 @@ function send(msg, ...args) {
 }
 
 /**
- * Executes a callback function when it receives a WebSocket message from the server.
+ * Execute a callback function when it receives a WebSocket message from the server.
  *
  * **Note:** on the server side, the server sends the message with the command {@link server.send}`.
  * @param {String} msg Name of the received message.

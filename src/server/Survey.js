@@ -8,7 +8,9 @@ function padLeft(str, value, length) {
   return str;
 }
 
-
+/**
+ * @private
+ */
 export default class Survey extends Module {
   constructor(options = {}) {
     super(options.name || 'survey');
@@ -43,4 +45,3 @@ export default class Survey extends Module {
     });
   }
 }
-
