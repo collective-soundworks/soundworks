@@ -122,8 +122,6 @@ function start(startFun) {
 
     client.receive('reconnect', () => {
       // console.log('reconnect', client.index);
-      let promise = module.createPromise();
-      module.launch();
     });
   } else {
     // no client i/o, no server
