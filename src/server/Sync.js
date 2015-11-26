@@ -45,7 +45,7 @@ export default class Sync extends Module {
    * @return {Number} Current sync time (in seconds).
    */
   getSyncTime() {
-    return this.sync.getSyncTime();
+    return this._sync.getSyncTime();
   }
 }
 
