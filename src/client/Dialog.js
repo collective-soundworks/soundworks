@@ -10,12 +10,19 @@ function _base64(format, base64) {
 }
 
 /**
- * The {@link ClientDialog} displays a full screen dialog. It requires the participant to tap the screen to make the view disappear. The module is also used at the very beginning of a scenario to activate the Web Audio API on iOS devices (with the option `activateWebAudio`). The `ClientDialog` module calls its `done` method when the participant taps on the screen.
+ * [client] Display a full screen dialog.
+ *
+ * The module requires the participant to tap the screen to make the view disappear.
+ * The module is also used at the very beginning of a scenario to activate the Web Audio API on iOS devices (with the option `activateWebAudio`).
+ *
+ * The module finishes its initialzation when the user taps the screen.
+ *
  * @example
  * const welcomeDialog = new ClientDialog({
  *   name: 'welcome',
  *   text: 'Welcome to this awesome scenario!',
- *   color: 'alizarin'
+ *   color: 'alizarin',
+ *   activateWebAudio: true
  * });
  */
 export default class Dialog extends Module {
@@ -53,7 +60,7 @@ export default class Dialog extends Module {
     // Add click listnener
     this.view.addEventListener('click', this._clickHandler);
   }
-  
+
   /**
    * @private
    */

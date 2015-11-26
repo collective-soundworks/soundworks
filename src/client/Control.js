@@ -230,13 +230,42 @@ class ControlCommand extends ControlEvent {
 }
 
 /**
- * The {@link ClientControl} module takes care of the global `parameters`, `infos`, and `commands` on the client side.
- * If the module is instantiated with the `gui` option set to `true`, it constructs the graphical control interface.
- * Otherwise it simply receives the values that are emitted by the server (usually by through the `performance` module).
+ * [client] Manage the global `parameters`, `infos`, and `commands` across the whole scenario.
  *
- * The {@link ClientControl} calls its `done` method:
- * - Immediately after having set up the controls if the GUI is disabled;
- * - Never if the GUI is enabled.
+ * If the module is instantiated with the `gui` option set to `true`, it constructs a graphical interface to modify the parameters, view the infos, and trigger the commands.
+ * Otherwise (`gui` option set to `false`) the module receives the values emitted by the server.
+ * The module forwards the server values by emitting them.
+ *
+ * When the GUI is disabled, the module finishes its initialization immediately after having set up the controls.
+ * Otherwise (GUI enabled), the modules remains in its state.
+ *
+ * When the module a view (`gui` option set to `true`), it requires the SASS partial `_77-checkin.scss`.
+ *
+ * (See also {@link src/server/Control.js~Control} on the server side.)
+ *
+ * @example // Example 1: make a client that displays the control GUI
+ *
+ * import { client, Control } from 'soundworks/client';
+ * const control = new Control();
+ *
+ * // Initialize the client (indicate the client type)
+ * client.init('conductor'); // accessible at the URL /conductor
+ *
+ * // Start the scenario
+ * // For this client type (`'conductor'`), there is only one module
+ * client.start(control);
+ *
+ * @example // Example 2: listen for parameter, infos & commands updates
+ * const control = new Control({ gui: false });
+ *
+ * // Listen for parameter, infos or command updates
+ * control.on('control:event', (name, value) => {
+ *   console.log(`The parameter #{name} has been updated to value #{value}`);
+ * });
+ *
+ * // Get current value of a parameter or info
+ * const currentParamValue = control.event['parameterName'].value;
+ * const currentInfoValue = control.event['infoName'].value;
  */
 export default class Control extends Module {
   /**

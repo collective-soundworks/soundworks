@@ -9,10 +9,15 @@ function _instructions(label) {
 }
 
 /**
- * The {@link Checkin} module assigns places among a predefined {@link Setup}.
+ * [client] Assign places among a predefined {@link Setup}.
+ * The module requests a position to the server and waits for the answer.
  *
- * The {@link Checkin} module always has a view and requires the SASS partial
- * `_77-checkin.scss`.
+ * The module finishes its initialization when it receives a positive answer from the server.
+ * Otherwise (*e.g.* no more positions available), the module stays in its state and never finishes its initialization.
+ *
+ * The module always has a view and requires the SASS partial `_77-checkin.scss`.
+ *
+ * (See also {@link src/server/Checkin.js~Checkin} on the server side.)
  *
  * @example import { client, Checkin, Setup } from 'soundworks/client';
  *

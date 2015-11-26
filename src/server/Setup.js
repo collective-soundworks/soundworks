@@ -1,6 +1,5 @@
 import Module from './Module';
 
-
 /**
  * The `Setup` module contains the information about the setup of the performance space in terms of its surface (*i.e.* dimensions and outlines) and predefined positions (*e.g.* seats or labels on the floor).
  *
