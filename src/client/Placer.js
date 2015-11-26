@@ -75,6 +75,26 @@ export class ListSelector extends EventEmitter {
 /**
  * The {@link Placer} module allows to select a place within a
  * {@link Setup}.
+ *
+ * @example import { client, Placer, Setup } from 'soundworks/client';
+ *
+ * const setup = new Setup();
+ * const placer = new Placer({ setup: setup });
+ * // ... instantiate other modules
+ *
+ * // Initialize the client (indicate the client type)
+ * client.init('clientType');
+ *
+ * // Start the scenario
+ * client.start((serial, parallel) => {
+ *   // Make sure that the `setup` is initialized before it is used by the
+ *   // `placer` (=> we use the `serial` function).
+ *   serial(
+ *     setup,
+ *     placer,
+ *     // ... other modules
+ *   )
+ * });
  */
 export default class Placer extends Module {
   /**
