@@ -5,6 +5,9 @@ function socketSerializer(socket) {
   return { id: socket.id };
 }
 
+/**
+ * @private
+ */
 const log = bunyan.createLogger({
   name: 'test-app',
   serializers: {

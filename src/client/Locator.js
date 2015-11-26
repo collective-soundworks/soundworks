@@ -3,7 +3,29 @@ import Module from './Module';
 
 
 /**
- * The {@link ClientLocator} module allows to indicate the approximate physical location of the client on a map via a dialog.
+ * The {@link Locator} allows to indicate the approximate location of the client
+ * on a map (that graphically represents a {@link Setup}) via a dialog.
+ *
+ * @example import { client, Locator, Setup, Space } from 'soundworks/client';
+ *
+ * const setup = new Setup();
+ * const space = new Space();
+ * const locator = new Locator({ setup: setup, space: space });
+ * // ... instantiate other modules
+ *
+ * // Initialize the client (indicate the client type)
+ * client.init('clientType');
+ *
+ * // Start the scenario
+ * client.start((serial, parallel) => {
+ *   // Make sure that the `setup` and `space` are initialized before they are
+ *   // used by the locator (=> we use the `serial` function).
+ *   serial(
+ *     parallel(setup, space),
+ *     locator,
+ *     // ... other modules
+ *   )
+ * });
  */
 export default class Locator extends Module {
   /**
@@ -11,7 +33,8 @@ export default class Locator extends Module {
    * @param {Object} [options={}] Options.
    * @param {String} [options.name='locator'] Name of the module.
    * @param {String} [options.color='black'] Background color of the `view`.
-   * @param {ClientSpace} [options.space=null] Space in which to indicate the approximate location.
+   * @param {Setup} [options.setup=null] Setup in which to indicate the approximate location.
+   * @param {Space} [options.space=null] Space to graphically represent the setup.
    * @param {Boolean} [options.showBackground=false] Indicates whether to show the space background image or not.
    */
   constructor(options = {}) {
@@ -22,6 +45,12 @@ export default class Locator extends Module {
      * @type {ClientSpace}
      */
     this.space = options.space || null;
+
+    /**
+     * The setup in which to indicate the approximate location.
+     * @type {ClientSetup}
+     */
+    this.setup = options.setup || null;
     this._instructions = options.instructions || '<small>Indiquez votre position dans la salle</small>';
 
     this._showBackground = options.showBackground || false;
@@ -138,7 +167,7 @@ export default class Locator extends Module {
       widthPx = screenHeight / heightWidthRatio;
     }
 
-    this.space.display(this._surfaceDiv, {
+    this.space.display(this.setup, this._surfaceDiv, {
       showBackground: this._showBackground
     });
 

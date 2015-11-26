@@ -5,30 +5,210 @@ import MobileDetect from 'mobile-detect';
 // localStorage.debug = '*';
 
 /**
- * The `client` object contains the basic methods of the client. For instance, the object initializes the client type with `init` and establishes WebSocket communications with the server through the methods `send` and `receive`. Additionally, it starts the scenario and sequences the modules using the methods `start`, `serial` and `parallel`.
+ * The `client` object contains the basic methods and attributes of the client.
  * @type {Object}
  */
 var client = {
-  type: null,
-  ready: null,
-  index: -1,
-  coordinates: null,
-  init: init,
-  start: start,
-  // deprecated functions
-  serial: serial,
-  parallel: parallel,
 
+  /**
+   * socket.io library client object, if any.
+   * @type {Object}
+   * @private
+   */
   io: null,
+
+  /**
+   * Socket used to communicate with the server, if any.
+   * @type {Socket}
+   * @private
+   */
   socket: null,
-  send: send,
-  receive: receive,
-  removeListener: removeListener,
+
+  /**
+   * Information about the client platform.
+   * @type {Object}
+   * @property {String} os Operating system.
+   * @property {Boolean} isMobile Indicates whether the client is running on a
+   * mobile platform or not.
+   * @property {String} audioFileExt Audio file extension to use, depending on
+   * the platform ()
+   */
   platform: {
     os: null,
     isMobile: null,
     audioFileExt: '',
     isForbidden: false
+  },
+
+  /**
+   * Client type.
+   * The client type is speficied in the argument of the `init` method. For
+   * instance, `'player'` is the client type you should be using by default.
+   * @type {String}
+   */
+  type: null,
+
+  /**
+   * Promise resolved when the server sends a message indicating that the client
+   * can start the first mdule.
+   * @type {Promise}
+   * @private
+   */
+  ready: null,
+
+  /**
+   * Client index, given by the server.
+   * @type {Number}
+   */
+  index: -1,
+
+  /**
+   * Client coordinates (if any) given by a {@link Locator}, {@link Placer} or
+   * {@link Checkin} module. (Format: `[x:Number, y:Number]`.)
+   * @type {Number[]}
+   */
+  coordinates: null,
+
+  /**
+   * The `init` method sets the client type and initializes a WebSocket connection associated with the given type.
+   * @param {String} [clientType = 'player'] The client type.
+   * @todo clarify clientType.
+   * @param {Object} [options = {}] The options to initialize a client
+   * @param {Boolean} [options.io] By default, a Soundworks application has a client and a server side. For a standalone application (client side only), use `options.io = false`.
+   * @todo use default value for options.io in the documentation?
+   * @param {String} [options.socketUrl] The URL of the WebSocket server.
+   */
+  init: (clientType = 'player', options = {}) => {
+    client.type = clientType;
+    client.io = null;
+
+    if (options.io === undefined) { options.io = true; }
+    if (options.socketUrl === undefined) { options.socketUrl = ''; }
+
+    if (options.io !== false) {
+      var io = require('socket.io-client');
+
+      client.io = io;
+      client.socket = client.io(options.socketUrl + '/' + clientType, {
+        transports: ['websocket']
+      });
+
+      client.ready = new Promise((resolve) => {
+        client.receive('client:start', (index) => {
+          client.index = index;
+          resolve();
+        });
+      });
+    }
+  },
+
+  /**
+   * Start the module logic (*i.e.* the application).
+   * @param {Function} startFun [todo]
+   * @todo Clarify the param.
+   * @return {Promise} The Promise return value.
+   * @todo Clarify return value (promise).
+   * @todo example
+   */
+  start: (startFun) => {
+    let module = startFun; // be compatible with previous version
+
+    if (typeof startFun === 'function')
+      module = startFun(Module.sequential, Module.parallel);
+
+    let promise = module.createPromise();
+
+    if (client.io) {
+      client.ready
+        .then(() => module.launch());
+
+      client.receive('disconnect', () => {
+        // console.log('disconnect', client.index);
+      });
+
+      client.receive('reconnect', () => {
+        // console.log('reconnect', client.index);
+      });
+    } else {
+      // no client i/o, no server
+      module.launch();
+    }
+
+    return promise;
+  },
+
+  /**
+   * The `serial` method returns a `Module` that starts the given `...modules` in series. After starting the first module (by calling its `start` method), the next module in the series is started (with its `start` method) when the last module called its `done` method. When the last module calls `done`, the returned serial module calls its own `done` method.
+   *
+   * **Note:** you can compound serial module sequences with parallel module combinations (*e.g.* `client.serial(module1, client.parallel(module2, module3), module4);`).
+   * @deprecated Use the new API with the {@link start} method.
+   * @param {...Module} ...modules The modules to run in serial.
+   * @return {Promise} [description]
+   * @todo Clarify return value
+   * @todo Remove
+   */
+  serial: (...modules) => {
+    console.log('The function "client.serial" is deprecated. Please use the new API instead.');
+    return Module.sequential(...modules);
+  },
+
+  /**
+   * The `Module` returned by the `parallel` method starts the given `...modules` in parallel (with their `start` methods), and calls its `done` method after all modules called their own `done` methods.
+   *
+   * **Note:** you can compound parallel module combinations with serial module sequences (*e.g.* `client.parallel(module1, client.serial(module2, module3), module4);`).
+   *
+   * **Note:** the `view` of a module is always full screen, so in the case where modules run in parallel, their `view`s are stacked on top of each other using the `z-index` CSS property.
+   * We use the order of the `parallel` method's arguments to determine the order of the stack (*e.g.* in `client.parallel(module1, module2, module3)`, the `view` of `module1` is displayed on top of the `view` of `module2`, which is displayed on top of the `view` of `module3`).
+   * @deprecated Use the new API with the {@link start} method.
+   * @param {...Module} modules The modules to run in parallel.
+   * @return {Promise} [description]
+   * @todo Clarify return value
+   * @todo Remove
+   */
+  parallel: (...modules) => {
+    console.log('The function "client.parallel" is deprecated. Please use the new API instead.');
+    return Module.parallel(...modules);
+  },
+
+  /**
+   * Send a WebSocket message to the server.
+   *
+   * **Note:** on the server side, the server receives the message with the command {@link ServerClient#receive}.
+   * @param {String} msg Name of the message to send.
+   * @param {...*} args Arguments of the message (as many as needed, of any type).
+   */
+  send: (msg, ...args) => {
+    if (client.socket)
+      client.socket.emit(msg, ...args);
+  },
+
+  /**
+   * Listen for a WebSocket message from the server and execute a callback
+   * function.
+   *
+   * **Note:** on the server side, the server sends the message with the command
+   * {@link server.send}`.
+   * @param {String} msg Name of the received message.
+   * @param {Function} callback Callback function executed when the message is
+   * received.
+   */
+  receive: function (msg, callback) {
+    if (client.socket) {
+      client.socket.removeListener(msg, callback);
+      client.socket.on(msg, callback);
+    }
+  },
+
+  /**
+   * Remove a WebSocket message listener (set with the method {@link
+   * client.receive}).
+   * @param {String} msg Name of the received message.
+   * @param {Function} callback Callback function executed when the message is
+   * received.
+   */
+  removeListener: function (msg, callback) {
+    if (client.socket)
+      client.socket.removeListener(msg, callback);
   }
 };
 
@@ -57,143 +237,6 @@ if (!!(a.canPlayType && a.canPlayType('audio/mpeg;'))) {
   client.platform.audioFileExt = '.ogg';
 } else {
   client.platform.audioFileExt = '.wav';
-}
-
-/**
- * The `init` method sets the client type and initializes a WebSocket connection associated with the given type.
- * @param {String} [clientType = 'player'] The client type.
- * @todo clarify clientType.
- * @param {Object} [options = {}] The options to initialize a client
- * @param {Boolean} [options.io] By default, a Soundworks application has a client and a server side. For a standalone application (client side only), use `options.io = false`.
- * @todo use default value for options.io in the documentation?
- * @param {String} [options.socketUrl] The URL of the WebSocket server.
- */
-function init(clientType = 'player', options = {}) {
-  client.type = clientType;
-  client.io = null;
-
-  if (options.io === undefined) { options.io = true; }
-  if (options.socketUrl === undefined) { options.socketUrl = ''; }
-
-  if (options.io !== false) {
-    var io = require('socket.io-client');
-
-    client.io = io;
-    client.socket = client.io(options.socketUrl + '/' + clientType, {
-      transports: ['websocket']
-    });
-
-    client.ready = new Promise((resolve) => {
-      client.receive('client:start', (index) => {
-        client.index = index;
-        resolve();
-      });
-    });
-  }
-}
-
-/**
- * Starts the module logic (*i.e.* the application).
- * @param {Function} startFun [todo]
- * @todo Clarify the param.
- * @return {Promise} The Promise return value.
- * @todo Clarify return value (promise).
- * @todo example
- */
-function start(startFun) {
-  let module = startFun; // be compatible with previous version
-
-  if (typeof startFun === 'function')
-    module = startFun(Module.sequential, Module.parallel);
-
-  let promise = module.createPromise();
-
-  if (client.io) {
-    client.ready
-      .then(() => module.launch());
-
-    client.receive('disconnect', () => {
-      // console.log('disconnect', client.index);
-    });
-
-    client.receive('reconnect', () => {
-      // console.log('reconnect', client.index);
-    });
-  } else {
-    // no client i/o, no server
-    module.launch();
-  }
-
-  return promise;
-}
-
-/**
- * The `serial` method returns a `Module` that starts the given `...modules` in series. After starting the first module (by calling its `start` method), the next module in the series is started (with its `start` method) when the last module called its `done` method. When the last module calls `done`, the returned serial module calls its own `done` method.
- *
- * **Note:** you can compound serial module sequences with parallel module combinations (*e.g.* `client.serial(module1, client.parallel(module2, module3), module4);`).
- * @deprecated Use the new API with the {@link start} method.
- * @param {...Module} ...modules The modules to run in serial.
- * @return {Promise} [description]
- * @todo Clarify return value
- */
-function serial(...modules) {
-  console.log('The function "client.serial" is deprecated. Please use the new API instead.');
-  return Module.sequential(...modules);
-}
-
-/**
- * The `Module` returned by the `parallel` method starts the given `...modules` in parallel (with their `start` methods), and calls its `done` method after all modules called their own `done` methods.
- *
- * **Note:** you can compound parallel module combinations with serial module sequences (*e.g.* `client.parallel(module1, client.serial(module2, module3), module4);`).
- *
- * **Note:** the `view` of a module is always full screen, so in the case where modules run in parallel, their `view`s are stacked on top of each other using the `z-index` CSS property.
- * We use the order of the `parallel` method's arguments to determine the order of the stack (*e.g.* in `client.parallel(module1, module2, module3)`, the `view` of `module1` is displayed on top of the `view` of `module2`, which is displayed on top of the `view` of `module3`).
- * @deprecated Use the new API with the {@link start} method.
- * @param {...Module} modules The modules to run in parallel.
- * @return {Promise} [description]
- * @todo Clarify return value
- */
-function parallel(...modules) {
-  console.log('The function "client.parallel" is deprecated. Please use the new API instead.');
-  return Module.parallel(...modules);
-}
-
-/**
- * Sends a WebSocket message to the server.
- *
- * **Note:** on the server side, the server receives the message with the command {@link ServerClient#receive}.
- * @param {String} msg Name of the message to send.
- * @param {...*} args Arguments of the message (as many as needed, of any type).
- */
-function send(msg, ...args) {
-  if (client.socket)
-    client.socket.emit(msg, ...args);
-}
-
-/**
- * Executes a callback function when it receives a WebSocket message from the server.
- *
- * **Note:** on the server side, the server sends the message with the command {@link server.send}`.
- * @param {String} msg Name of the received message.
- * @param {Function} callback Callback function executed when the message is received.
- */
-function receive(msg, callback) {
-  if (client.socket) {
-    client.socket.removeListener(msg, callback);
-    client.socket.on(msg, callback);
-  }
-}
-
-/**
- * [removeListener description]
- * @private
- * @param {[type]} msg [description]
- * @param {Function} callback [description]
- * @todo doc
- */
-function removeListener(msg, callback) {
-  if (client.socket)
-    client.socket.removeListener(msg, callback);
 }
 
 export default client;

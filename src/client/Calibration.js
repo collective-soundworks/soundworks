@@ -2,7 +2,9 @@ import client from './client';
 import Module from './Module';
 import CalibrationClient from 'calibration/client';
 
-
+/**
+ * @private
+ */
 export default class Calibration extends Module {
   /**
    * Function called when an update happened.

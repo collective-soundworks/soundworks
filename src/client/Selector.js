@@ -71,7 +71,15 @@ export default class Selector extends Module {
       this.maxSelected = options.maxSelected;
 
     if(options.view) {
+      /**
+       * View of the parent module
+       * @type {DOMElement}
+       */
       this.view = options.view;
+
+      /**
+       * @private
+       */
       this.isDone = undefined; // skip super.done()
     }
 
@@ -278,4 +286,3 @@ export default class Selector extends Module {
     return this._labels;
   }
 }
-

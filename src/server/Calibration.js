@@ -1,7 +1,9 @@
 import CalibrationServer from 'calibration/server';
 import Module from './Module';
 
-
+/**
+ * @private
+ */
 export default class Calibration extends Module {
   /**
    * Constructor of the calibration server module.
@@ -41,4 +43,3 @@ export default class Calibration extends Module {
   }
 
 }
-

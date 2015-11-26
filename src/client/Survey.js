@@ -199,7 +199,9 @@ class TextAreaRenderer extends BaseRenderer {
   }
 }
 
-
+/**
+ * @private
+ */
 export default class Survey extends Module {
   constructor(surveyConfig, options = {}) {
     super(options.name || 'survey', true, options.color);

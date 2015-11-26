@@ -5,7 +5,7 @@ import Space from './Space';
 
 
 /**
- * display strategies for placer
+ * Display strategies for placer
  * @private
  */
 export class ListSelector extends EventEmitter {
@@ -73,10 +73,30 @@ export class ListSelector extends EventEmitter {
 }
 
 /**
- * The {@link ClientPlacer} module allows to select a place in a list of predefined places.
+ * The {@link Placer} module allows to select a place within a
+ * {@link Setup}.
+ *
+ * @example import { client, Placer, Setup } from 'soundworks/client';
+ *
+ * const setup = new Setup();
+ * const placer = new Placer({ setup: setup });
+ * // ... instantiate other modules
+ *
+ * // Initialize the client (indicate the client type)
+ * client.init('clientType');
+ *
+ * // Start the scenario
+ * client.start((serial, parallel) => {
+ *   // Make sure that the `setup` is initialized before it is used by the
+ *   // `placer` (=> we use the `serial` function).
+ *   serial(
+ *     setup,
+ *     placer,
+ *     // ... other modules
+ *   )
+ * });
  */
-class ClientPlacer extends Module {
-// export default class ClientPlacer extends Module {
+export default class Placer extends Module {
   /**
    * Creates an instance of the class.
    * @param {Object} [options={}] Options.
@@ -94,10 +114,22 @@ class ClientPlacer extends Module {
     super(options.name || 'placer', true, options.color || 'black');
 
     /**
-     * The setup in which to select a place.
+     * The setup in which to select a place. (Mandatory.)
      * @type {ClientSetup}
      */
     this.setup = options.setup;
+
+    /**
+     * Index of the position selected by the user.
+     * @type {Number}
+     */
+    this.index = null;
+
+    /**
+     * Label of the position selected by the user.
+     * @type {String}
+     */
+    this.label = null;
 
     this._mode = options.mode || 'list';
     this._persist = options.persist || false;
@@ -176,7 +208,7 @@ class ClientPlacer extends Module {
     super.start();
 
     // prepare positions
-    this.positions = this.setup.coordinates.map((coord, index) => {
+    this._positions = this.setup.coordinates.map((coord, index) => {
       return {
         index: index,
         label: this.setup.labels[index],
@@ -208,7 +240,7 @@ class ClientPlacer extends Module {
     this._selector.display(this.setup, this.view, {});
     // make sure the DOM is ready (needed on ipods)
     setTimeout(() => {
-      this._selector.displayPositions(this.positions, 20);
+      this._selector.displayPositions(this._positions, 20);
     }, 0);
   }
 
