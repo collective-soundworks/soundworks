@@ -10,9 +10,9 @@ function _instructions(label) {
 
 /**
  * The {@link Checkin} module assigns places among a predefined {@link Setup}.
- * It calls its `done` method when the user is checked in.
  *
- * The {@link Checkin} module requires the SASS partial `_77-checkin.scss`.
+ * The {@link Checkin} module always has a view and requires the SASS partial
+ * `_77-checkin.scss`.
  *
  * @example import { client, Checkin, Setup } from 'soundworks/client';
  *
@@ -36,7 +36,6 @@ function _instructions(label) {
  */
 export default class Checkin extends Module {
   /**
-   * Creates an instance of the class. Always has a view.
    * @param {Object} [options={}] Options.
    * @param {String} [options.name='checkin'] Name of the module.
    * @param {Boolean} [options.hasView=true] Indicates whether the module has a view or not.
@@ -49,13 +48,15 @@ export default class Checkin extends Module {
     super(options.name || 'checkin', options.hasView || true, options.color);
 
     /**
-     * Index given by the server module to the client.
+     * Index given by the serverside {@link src/server/Checkin.js~Checkin}
+     * module.
      * @type {Number}
      */
     this.index = -1;
 
     /**
-     * Label of the index assigned to the client (if any).
+     * Label of the index assigned by the serverside
+     * {@link src/server/Checkin.js~Checkin} module (if any).
      * @type {String}
      */
     this.label = null;
@@ -69,28 +70,36 @@ export default class Checkin extends Module {
   }
 
   /**
-   * Starts the module.
-   * Sends a request to the server and sets up listeners for the server's response.
+   * Start the module.
+   *
+   * Send a request to the server and sets up listeners for the server's response.
+   * @private
    */
   start() {
     super.start();
 
+    // Send request to the server
     client.send(this.name + ':request');
 
+    // Setup listeners for the server's response
     client.receive(this.name + ':acknowledge', this._acknowledgementHandler);
     client.receive(this.name + ':unavailable', this._unavailableHandler);
   }
 
   /**
-   * Resets the module to default state.
-   * Removes WebSocket and click / touch listeners.
+   * Reset the module to default state.
+   *
+   * Remove WebSocket and click / touch listeners.
+   * @private
    */
   reset() {
     super.reset();
 
+    // Remove listeners for the server's response
     client.removeListener(this.name + ':acknowledge', this._acknowledgementHandler);
     client.removeListener(this.name + ':unavailable', this._unavailableHandler);
 
+    // Remove touch / click listener set un in the `_acknowledgementHandler`
     if (client.platform.isMobile)
       this.view.removeEventListener('touchstart', this._viewClickHandler);
     else
@@ -100,11 +109,14 @@ export default class Checkin extends Module {
   /**
    * Restarts the module.
    * Sends the index, label and coordinates to the server.
+   * @private
    */
   restart() {
     super.restart();
 
+    // Send current checkin information to the server
     client.send(this.name + ':restart', this.index, this.label, client.coordinates);
+
     this.done();
   }
 

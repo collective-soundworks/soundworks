@@ -1,6 +1,9 @@
 import client from './client';
 import Module from './Module';
 
+/**
+ * @private
+ */
 class ControlEvent {
   constructor(type, name, label) {
     this.type = type;
@@ -18,6 +21,9 @@ class ControlEvent {
   }
 }
 
+/**
+ * @private
+ */
 class ControlNumber extends ControlEvent {
   constructor(init, view = null) {
     super('number', init.name, init.label);
