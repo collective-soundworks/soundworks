@@ -112,7 +112,7 @@ class Parallel extends Promised {
  *   }
  * }
  */
-class Module extends Promised {
+export default class Module extends Promised {
 // export default class Module extends Promised {
   /**
    * Creates an instance of the class.
@@ -285,5 +285,3 @@ Module.sequential = function(...modules) {
 Module.parallel = function(...modules) {
   return new Parallel(modules);
 };
-
-export default Module;

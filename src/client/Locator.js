@@ -3,7 +3,8 @@ import Module from './Module';
 
 
 /**
- * The {@link ClientLocator} module allows to indicate the approximate physical location of the client on a map via a dialog.
+ * The {@link Locator} allows to indicate the approximate location of the client
+ * on a map (that graphically represents a {@link Setup}) via a dialog.
  */
 export default class Locator extends Module {
   /**
@@ -27,7 +28,7 @@ export default class Locator extends Module {
      * The setup in which to indicate the approximate location.
      * @type {ClientSetup}
      */
-    this.setup = options.setup || null; 
+    this.setup = options.setup || null;
     this._instructions = options.instructions || '<small>Indiquez votre position dans la salle</small>';
 
     this._showBackground = options.showBackground || false;

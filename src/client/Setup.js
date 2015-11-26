@@ -5,9 +5,7 @@ import Module from './Module';
 /**
  * The {@link Setup} module retrieves the setup information from the server.
  * It never has a view.
- * (For rendering the setup graphically, see {@link ClientSpace}.)
- *
- * The `Setup` module requires the SASS partial `sass/_77-setup.scss`.
+ * (To rendering the setup graphically, see {@link ClientSpace}.)
  */
 export default class Setup extends Module {
   /**
@@ -54,6 +52,12 @@ export default class Setup extends Module {
      * @todo Remove?
      */
     this.type = undefined;
+
+    /**
+     * Background image URL.
+     * @type {String}
+     */
+    this.background = undefined;
 
     this._xFactor = 1;
     this._yFactor = 1;

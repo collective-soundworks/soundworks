@@ -3,13 +3,12 @@ import Module from './Module';
 
 const ns = 'http://www.w3.org/2000/svg';
 
-
 /**
- * The {@link Space} displays the setup upon request.
+ * The {@link Space} module graphically renders a {@link Setup} data.
  */
 export default class Space extends Module {
   /**
-   * Creates an instance of the class.
+   * Create an instance of the class.
    * @param {Object} [options={}] Options.
    * @param {String} [options.name='space'] Name of the module.
    * @param {Boolean} [options.fitContainer=false] Indicates whether the graphical representation fits the container size or not.
@@ -99,7 +98,7 @@ export default class Space extends Module {
     this._shapePositionMap = [];
     this._positionIndexShapeMap = {};
     // client.removeListener('setup:init', this._onSetupInit);
-    this.container.innerHTML = '';
+    this._container.innerHTML = '';
   }
 
   /**
@@ -109,37 +108,38 @@ export default class Space extends Module {
    * @param {Object} [options={}] Options.
    * @param {String} [options.transform] Indicates which transformation to aply to the representation. Possible values are:
    * - `'rotate180'`: rotates the representation by 180 degrees.
+   * @todo Big problem with the container (_container --> only one of them, while we should be able to use the display method on several containers)
    */
   display(setup, container, options = {}) {
     this._initSetup(setup);
-    this.container = container;
-    this.container.classList.add('space');
+    this._container = container;
+    this._container.classList.add('space');
     this._renderingOptions = options;
 
     if (options.showBackground) {
-      this.container.style.backgroundImage = `url(${this.background})`;
-      this.container.style.backgroundPosition = '50% 50%';
-      this.container.style.backgroundRepeat = 'no-repeat';
-      this.container.style.backgroundSize = 'contain';
+      this._container.style.backgroundImage = `url(${this.background})`;
+      this._container.style.backgroundPosition = '50% 50%';
+      this._container.style.backgroundRepeat = 'no-repeat';
+      this._container.style.backgroundSize = 'contain';
     }
 
     const svg = document.createElementNS(ns, 'svg');
     const group = document.createElementNS(ns, 'g');
 
     svg.appendChild(group);
-    this.container.appendChild(svg);
+    this._container.appendChild(svg);
 
     this._svg = svg;
     this._group = group;
 
-    this.resize(this.container);
+    this.resize(this._container);
   }
 
   /**
    * Resize the SVG element.
    */
   resize() {
-    const boundingRect = this.container.getBoundingClientRect();
+    const boundingRect = this._container.getBoundingClientRect();
     const containerWidth = boundingRect.width;
     const containerHeight = boundingRect.height;
     // force adaptation to container size
@@ -174,8 +174,8 @@ export default class Space extends Module {
     if (this._renderingOptions.transform) {
       switch (this._renderingOptions.transform) {
         case 'rotate180':
-          this.container.setAttribute('data-xfactor', -1);
-          this.container.setAttribute('data-yfactor', -1);
+          this._container.setAttribute('data-xfactor', -1);
+          this._container.setAttribute('data-yfactor', -1);
           // const transform = `rotate(180, ${svgWidth / 2}, ${svgHeight / 2})`;
           const transform = 'rotate(180, 0.5, 0.5)';
           this._group.setAttributeNS(null, 'transform', transform);
@@ -225,13 +225,13 @@ export default class Space extends Module {
 
     // add listeners
     if (this._listenTouchEvent) {
-      this.container.addEventListener('touchstart', (e) => {
+      this._container.addEventListener('touchstart', (e) => {
         e.preventDefault();
         const dots = this._shapePositionMap.map((entry) => { return entry.dot });
         let target = e.target;
 
         // Could probably be simplified...
-        while (target !== this.container) {
+        while (target !== this._container) {
           if (dots.indexOf(target) !== -1) {
             for (let i = 0; i < this._shapePositionMap; i++) {
               const entry = this._shapePositionMap[i];

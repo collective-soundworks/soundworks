@@ -124,5 +124,4 @@ class Input extends EventEmitter {
   }
 }
 
-const instance = new Input();
-export default instance;
+module.exports = new Input();

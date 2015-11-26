@@ -9,21 +9,10 @@ function _instructions(label) {
 }
 
 /**
- * The `Checkin` module is responsible for keeping track of the connected clients by assigning them indices.
- * In case that the scenario is based on predefined positions (*i.e.* a `setup`), the indices correspond to the indices of positions that can be either assigned automatically or selected by the participants.
+ * The {@link Checkin} module assigns places among a predefined {@link Setup}.
+ * It calls its `done` method when the user is checked in.
  *
- * For instance, say that the scenario requires 12 participants who sit on a grid of 3 ⨉ 4 predefined positions.
- * When a client connects to the server, the `Checkin` module could assign the client to a position on the grid that is not occupied yet.
- * The application can indicate the participant a label that is associated with the assigned position.
- * Similarly, if the scenario takes place in a theater with labeled seats, the `Checkin` module would allow the participants to indicate their seat by its label (*e.g.* a row and a number).
- * If the scenario does not require the participants to sit at particular locations, the `Checkin` module would just assign them arbitrary indices within the range of total number of users the scenario supports.
- *
- * Alternatively, when configuring the module adequately, the module can assign arbitrary indices to the the participants and request that they indicate their approximate location in the performance space on a map.
- *
- * The {@link ClientCheckin} module takes care of the check-in on the client side.
- * The {@link ClientCheckin} module calls its `done` method when the user is checked in.
- *
- * The {@link ClientCheckin} module requires the SASS partial `_77-checkin.scss`.
+ * The {@link Checkin} module requires the SASS partial `_77-checkin.scss`.
  */
 export default class Checkin extends Module {
   /**
@@ -40,13 +29,13 @@ export default class Checkin extends Module {
     super(options.name || 'checkin', options.hasView || true, options.color);
 
     /**
-     * Index given by the server to the client.
+     * Index given by the server module to the client.
      * @type {Number}
      */
     this.index = -1;
 
     /**
-     * Label of the index assigned to the client, if any.
+     * Label of the index assigned to the client (if any).
      * @type {String}
      */
     this.label = null;
