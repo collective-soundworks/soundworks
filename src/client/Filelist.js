@@ -4,7 +4,7 @@ import Module from './Module';
 /**
  * [client] Retrieve a list of files on the server.
  *
- * The results can be filtered by file extensions.
+ * The module can filter the file list by extensions. It never has a view.
  *
  * The module finishes its initialization when it receives the file list from the server.
  *
@@ -16,7 +16,6 @@ import Module from './Module';
  */
 export default class Filelist extends Module {
   /**
-   * Creates an instance of the class. Never has a view.
    * @param {Object} [options={}] Options.
    * @param {Object} [options.name='filelist'] Name of the module.
    * @param {String} [options.folder=''] Folder in which to retrieve the file list.

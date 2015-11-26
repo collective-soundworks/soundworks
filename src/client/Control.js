@@ -269,7 +269,6 @@ class ControlCommand extends ControlEvent {
  */
 export default class Control extends Module {
   /**
-   * Creates an instance of the class.
    * @param {Object} [options={}] Options.
    * @param {String} [options.name='sync'] Name of the module.
    * @param {String} [options.color='black'] Background color of the `view`.

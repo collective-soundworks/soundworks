@@ -20,7 +20,6 @@ import Module from './Module';
  */
 export default class Loader extends Module {
   /**
-   * Creates an instance of the class. Always has a view.
    * @param {Object} [options={}] Options.
    * @param {String} [options.name='dialog'] Name of the module.
    * @param {String} [options.color='black'] Background color of the `view`.
@@ -31,7 +30,7 @@ export default class Loader extends Module {
     super(options.name || 'loader', true, options.color);
 
     /**
-     * Audio buffers created from the audio files passed in the {@link ClientLoader#constructor}.
+     * Audio buffers created from the audio files passed in the {@link Loader#constructor}.
      * @type {Array}
      */
     this.buffers = [];
