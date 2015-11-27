@@ -8,13 +8,41 @@ import osc from 'osc';
 import path from 'path';
 import Client from './Client';
 
+// globals
+const availableClientIndices = [];
+const oscListeners = [];
+let nextClientIndex = 0;
+let expressApp = null;
+let httpServer = null;
+
+function _getClientIndex() {
+  var index = -1;
+
+  if (availableClientIndices.length > 0) {
+    availableClientIndices.sort(function(a, b) {
+      return a - b;
+    });
+
+    index = availableClientIndices.splice(0, 1)[0];
+  } else {
+    index = nextClientIndex++;
+  }
+
+  return index;
+}
+
+function _releaseClientIndex(index) {
+  availableClientIndices.push(index);
+}
+
+
 /**
  * The `server` object contains the basic methods of the server.
  * For instance, this object allows setting up, configuring and starting the server with the method `start` while the method `map` allows for managing the mapping between different types of clients and their required server modules.
  * Additionally, the method `broadcast` allows to send messages to all connected clients via WebSockets or OSC.
  * @type {Object}
  */
-var server = {
+export default {
 
   /**
    * WebSocket server.
@@ -54,55 +82,74 @@ var server = {
    * - `remotePort:Number`: port of the device to send default OSC messages to (defaults to `57120`).
    * @param {Object} [options.env={}] Environnement options (set by the user, depends on the scenario).
    */
-  start: (app, publicPath, port, options = {}) => {
-    const socketIOOptions = (options.socketIO || {});
-    const socketConfig = {
-      transports: socketIOOptions.transports || ['websocket'],
-      pingTimeout: socketIOOptions.pingTimeout || 60000,
-      pingInterval: socketIOOptions.pingInterval || 50000,
-    };
+  // start: (app, publicPath, port, options = {}) => {
+  start(appConfig = {}, envConfig = {}) {
+    appConfig = Object.assign({
+      publicPath: path.join(process.cwd(), 'public'),
+      // @note: EngineIO defaults
+      // this.pingTimeout = opts.pingTimeout || 3000;
+      // this.pingInterval = opts.pingInterval || 1000;
+      // this.upgradeTimeout = opts.upgradeTimeout || 10000;
+      // this.maxHttpBufferSize = opts.maxHttpBufferSize || 10E7;
+      socketIO: {
+        transports: ['websocket'],
+        pingTimeout: 60000,
+        pingInterval: 50000
+      }
+    }, appConfig);
 
-    server.envConfig = options.env;
+    envConfig = Object.assign({
+      port: 8000,
+      osc: {
+        localAddress: '127.0.0.1',
+        localPort: 57121,
+        remoteAddress: '127.0.0.1',
+        remotePort: 57120
+      }
+    }, envConfig);
 
-    app.set('port', process.env.PORT || port || 8000);
-    app.set('view engine', 'ejs');
-    app.use(express.static(publicPath));
+    this.envConfig = envConfig;
+    this.appConfig = appConfig;
 
-    httpServer = http.createServer(app);
-    expressApp = app;
+    // configure express and http server
+    expressApp = new express();
+    expressApp.set('port', process.env.PORT || envConfig.port);
+    expressApp.set('view engine', 'ejs');
+    expressApp.use(express.static(appConfig.publicPath));
 
-    httpServer.listen(app.get('port'), function() {
-      var url = 'http://127.0.0.1:' + app.get('port');
-      console.log('Server listening on', url);
+    httpServer = http.createServer(expressApp);
+    httpServer.listen(expressApp.get('port'), function() {
+      const url = `http://127.0.0.1:${expressApp.get('port')}`;
+      console.log('[HTTP SERVER] Server listening on', url);
     });
 
-    // Engine IO defaults
-    // this.pingTimeout = opts.pingTimeout || 3000;
-    // this.pingInterval = opts.pingInterval || 1000;
-    // this.upgradeTimeout = opts.upgradeTimeout || 10000;
-    // this.maxHttpBufferSize = opts.maxHttpBufferSize || 10E7;
+    this.expressApp = expressApp;
+    this.httpServer = httpServer;
 
-    if (httpServer) {
-      server.io = new IO(httpServer, socketConfig);
-    }
+    // configure socket.io
+    this.io = new IO(httpServer, appConfig.socketIO);
 
-    // OSC
-    if (options.osc) {
-      server.osc = new osc.UDPPort({
+    // configure OSC
+    if (envConfig.osc) {
+      this.osc = new osc.UDPPort({
         // This is the port we're listening on.
-        localAddress: options.osc.localAddress || '127.0.0.1',
-        localPort: options.osc.localPort || 57121,
-
+        // @note rename to receiveAddress / receivePort
+        localAddress: envConfig.osc.localAddress,
+        localPort: envConfig.osc.localPort,
         // This is the port we use to send messages.
-        remoteAddress: options.osc.remoteAddress || '127.0.0.1',
-        remotePort: options.osc.remotePort || 57120,
+        // @note rename to sendAddress / sendPort
+        remoteAddress: envConfig.osc.remoteAddress,
+        remotePort: envConfig.osc.remotePort,
       });
 
-      server.osc.on('ready', () => {
-        console.log('Listening for OSC over UDP on port ' + options.osc.localPort + '.');
+      this.osc.on('ready', () => {
+        const receive = `${envConfig.osc.localAddress}:${envConfig.osc.localPort}`;
+        const send = `${envConfig.osc.remoteAddress}:${envConfig.osc.remotePort}`;
+        console.log(`[OSC over UDP] Receiving on ${receive}`);
+        console.log(`[OSC over UDP] Sending on ${send}`);
       });
 
-      server.osc.on('message', (oscMsg) => {
+      this.osc.on('message', (oscMsg) => {
         const address = oscMsg.address;
 
         for (let i = 0; i < oscListeners.length; i++) {
@@ -111,7 +158,7 @@ var server = {
         }
       });
 
-      server.osc.open();
+      this.osc.open();
     }
   },
 
@@ -124,44 +171,37 @@ var server = {
    * @param {String} clientType Client type (as defined by the method {@link client.init} on the client side).
    * @param {...ClientModule} modules Modules to map to that client type.
    */
-  map: (clientType, ...modules) => {
-    var url = '/';
+  map(clientType, ...modules) {
+    let url = '/';
 
     // cache compiled template
-    const tmplPath= path.join(process.cwd(), 'views', clientType + '.ejs');
+    const tmplPath = path.join(process.cwd(), 'views', clientType + '.ejs');
     const tmplString = fs.readFileSync(tmplPath, { encoding: 'utf8' });
     const tmpl = ejs.compile(tmplString);
 
-    if (clientType !== 'player')
-      url += clientType;
+    if (clientType !== 'player') { url += clientType; }
 
-    expressApp.get(url, function(req, res) {
-      res.send(tmpl({ envConfig: JSON.stringify(server.envConfig) }));
+    expressApp.get(url, (req, res) => {
+      res.send(tmpl({ envConfig: JSON.stringify(this.envConfig) }));
     });
 
-    server.io.of(clientType).on('connection', (socket) => {
-      log.info({ socket: socket, clientType: clientType }, 'connection');
-      var client = new Client(clientType, socket);
+    this.io.of(clientType).on('connection', (socket) => {
+      const client = new Client(clientType, socket);
+      client.index = _getClientIndex();
 
-      var index = _getClientIndex();
-      client.index = index;
-
-      for (let mod of modules) {
-        mod.connect(client);
-      }
+      modules.forEach((mod) => { mod.connect(client) });
 
       client.receive('disconnect', () => {
-        log.info({ socket: socket, clientType: clientType }, 'disconnect');
-        for (let i = modules.length - 1; i >= 0; i--) {
-          var mod = modules[i];
-          mod.disconnect(client);
-        }
+        modules.forEach((mod) => { mod.disconnect(client) });
 
         _releaseClientIndex(client.index);
         client.index = -1;
+
+        log.info({ socket: socket, clientType: clientType }, 'disconnect');
       });
 
-      client.send('client:start', index); // the server is ready
+      client.send('client:start', client.index); // the server is ready
+      log.info({ socket: socket, clientType: clientType }, 'connection');
     });
   },
 
@@ -174,11 +214,9 @@ var server = {
    * @param {...*} args Arguments of the message (as many as needed, of any type).
    * @todo solve ... problem
    */
-  broadcast: (clientType, msg, ...args) => {
-    if (server.io) {
-      log.info({ clientType: clientType, channel: msg, arguments: args }, 'broadcast');
-      server.io.of('/' + clientType).emit(msg, ...args);
-    }
+  broadcast(clientType, msg, ...args) {
+    this.io.of('/' + clientType).emit(msg, ...args);
+    log.info({ clientType: clientType, channel: msg, arguments: args }, 'broadcast');
   },
 
   /**
@@ -188,17 +226,18 @@ var server = {
    * @param {String} [url=null] URL to send the OSC message to (if not specified, uses the address defined in the OSC config or in the options of the {@link server.start} method).
    * @param {Number} [port=null] Port to send the message to (if not specified, uses the port defined in the OSC config or in the options of the {@link server.start} method).
    */
-  sendOSC: (wildcard, args, url = null, port = null) => {
+  sendOSC(wildcard, args, url = null, port = null) {
     const oscMsg = {
       address: wildcard,
       args: args
     };
 
     try {
-      if (url && port)
-        server.osc.send(oscMsg, url, port);
-      else
-        server.osc.send(oscMsg); // use defaults (as defined in the config)
+      if (url && port) {
+        this.osc.send(oscMsg, url, port);
+      } else {
+        this.osc.send(oscMsg); // use defaults (as defined in the config)
+      }
     } catch (e) {
       console.log('Error while sending OSC message:', e);
     }
@@ -211,7 +250,7 @@ var server = {
    * @param {String} wildcard Wildcard of the OSC message.
    * @param {Function} callback Callback function executed when the OSC message is received.
    */
-  receiveOSC: (wildcard, callback) => {
+  receiveOSC(wildcard, callback) {
     const oscListener = {
       wildcard: wildcard,
       callback: callback
@@ -221,30 +260,3 @@ var server = {
   }
 };
 
-let availableClientIndices = [];
-let nextClientIndex = 0;
-let oscListeners = [];
-let expressApp = null;
-let httpServer = null;
-
-function _getClientIndex() {
-  var index = -1;
-
-  if (availableClientIndices.length > 0) {
-    availableClientIndices.sort(function(a, b) {
-      return a - b;
-    });
-
-    index = availableClientIndices.splice(0, 1)[0];
-  } else {
-    index = nextClientIndex++;
-  }
-
-  return index;
-}
-
-function _releaseClientIndex(index) {
-  availableClientIndices.push(index);
-}
-
-export default server;
