@@ -2,15 +2,24 @@ import client from './client';
 import Module from './Module';
 
 /**
- * The {@link Filelist} module requests the file list of a folder from the server. The results can be filtered by file extensions.
+ * [client] Retrieve a list of files on the server.
+ *
+ * The module can filter the file list by extensions. It never has a view.
+ *
+ * The module finishes its initialization when it receives the file list from the server.
+ *
+ * @example // Retrieve the mp3 file list in the folder `/recordings`
+ * const filelist = new Filelist({
+ *   folder: '/recordings',
+ *   extensions: ['.mp3']
+ * });
  */
 export default class Filelist extends Module {
   /**
-   * Creates an instance of the class. Never has a view.
    * @param {Object} [options={}] Options.
    * @param {Object} [options.name='filelist'] Name of the module.
-   * @param {Object} [options.folder=''] Folder in which to retrieve the file list.
-   * @param {Object} [options.extentions=undefined] Extensions of the files to retrieve.
+   * @param {String} [options.folder=''] Folder in which to retrieve the file list.
+   * @param {String[]} [options.extentions=undefined] Extensions of the files to retrieve.
    */
   constructor(options = {}) {
     super(options.name || 'filelist', false);
@@ -42,4 +51,3 @@ export default class Filelist extends Module {
     }, this);
   }
 }
-

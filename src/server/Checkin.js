@@ -4,7 +4,9 @@ const maxRandomClients = 9999;
 
 
 /**
- * The {@link Checkin} takes care of the check-in on the server side.
+ * [server] Assign places among a predefined {@link Setup}.
+ *
+ * (See also {@link src/client/Checkin.js~Checkin} on the client side.)
  */
 export default class Checkin extends Module {
   /**

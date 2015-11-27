@@ -4,14 +4,15 @@ import Module from './Module';
 
 
 /**
- * The {@link ClientLoader} module allows for loading audio files that can be used in the scenario (for instance, by the `performance` module).
- * The {@link ClientLoader} module has a view that displays a loading bar indicating the progress of the loading.
- * The {@link ClientLoader} module calls its `done` method when all the files are loaded.
+ * [client] Load audio files that can be used by other modules (*e.g.*, the {@link Performance}).
  *
- * The {@link ClientLoader} module requires the SASS partial `_77-loader.scss`.
+ * The module finishes its initialization when all the files are loaded.
+ *
+ * The module always has a view (that displays a progress bar) and requires the SASS partial `_77-loader.scss`.
+ *
  * @example
  * // Instantiate the module with the files to load
- * const loader = new ClientLoader(['sounds/kick.mp3', 'sounds/snare.mp3']);
+ * const loader = new Loader(['sounds/kick.mp3', 'sounds/snare.mp3']);
  *
  * // Get the corresponding audio buffers
  * const kickBuffer = loader.audioBuffers[0];
@@ -19,7 +20,6 @@ import Module from './Module';
  */
 export default class Loader extends Module {
   /**
-   * Creates an instance of the class. Always has a view.
    * @param {Object} [options={}] Options.
    * @param {String} [options.name='dialog'] Name of the module.
    * @param {String} [options.color='black'] Background color of the `view`.
@@ -30,7 +30,7 @@ export default class Loader extends Module {
     super(options.name || 'loader', true, options.color);
 
     /**
-     * Audio buffers created from the audio files passed in the {@link ClientLoader#constructor}.
+     * Audio buffers created from the audio files passed in the {@link Loader#constructor}.
      * @type {Array}
      */
     this.buffers = [];
