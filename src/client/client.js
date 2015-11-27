@@ -1,4 +1,5 @@
 import Module from './Module';
+import com from './com';
 import MobileDetect from 'mobile-detect';
 
 // debug - http://socket.io/docs/logging-and-debugging/#available-debugging-scopes
@@ -8,21 +9,23 @@ import MobileDetect from 'mobile-detect';
  * The `client` object contains the basic methods and attributes of the client.
  * @type {Object}
  */
-var client = {
+export default {
 
   /**
    * socket.io library client object, if any.
    * @type {Object}
    * @private
    */
-  io: null,
+  // io: null,
 
   /**
    * Socket used to communicate with the server, if any.
    * @type {Socket}
    * @private
    */
-  socket: null,
+  // socket: null,
+
+  com: null,
 
   /**
    * Information about the client platform.
@@ -78,28 +81,63 @@ var client = {
    * @todo use default value for options.io in the documentation?
    * @param {String} [options.socketUrl] The URL of the WebSocket server.
    */
-  init: (clientType = 'player', options = {}) => {
-    client.type = clientType;
-    client.io = null;
+  init(clientType = 'player', options = {}) {
+    this.send = this.send.bind(this);
+    this.receive = this.receive.bind(this);
+    this.removeListener = this.removeListener.bind(this);
 
-    if (options.io === undefined) { options.io = true; }
-    if (options.socketUrl === undefined) { options.socketUrl = ''; }
+    this.type = clientType;
+
+    options = Object.assign({
+      io: true,
+      socketUrl: '',
+      transports: ['websocket'],
+    }, options);
 
     if (options.io !== false) {
-      var io = require('socket.io-client');
+      // initialize socket communications
+      this.com = com.initialize(clientType, options);
 
-      client.io = io;
-      client.socket = client.io(options.socketUrl + '/' + clientType, {
-        transports: ['websocket']
-      });
-
-      client.ready = new Promise((resolve) => {
-        client.receive('client:start', (index) => {
-          client.index = index;
+      this.ready = new Promise((resolve) => {
+        console.log('????');
+        this.com.receive('client:start', (index) => {
+          this.index = index;
           resolve();
         });
       });
+    } else {
+      this.ready = Promise.resolve(true);
     }
+
+    // --------------------------------------------------------------------
+    // @note: move into Platform ? create a dedicated service ?
+    // get informations about client
+    const ua = window.navigator.userAgent
+    const md = new MobileDetect(ua);
+    this.platform.isMobile = (md.mobile() !== null); // true if phone or tablet
+    this.platform.os = (() => {
+      let os = md.os();
+
+      if (os === 'AndroidOS') {
+        return 'android';
+      } else if (os === 'iOS') {
+        return 'ios';
+      } else {
+        return 'other';
+      }
+    })();
+
+    // audio file extention check
+    const a = document.createElement('audio');
+    // http://diveintohtml5.info/everything.html
+    if (!!(a.canPlayType && a.canPlayType('audio/mpeg;'))) {
+      this.platform.audioFileExt = '.mp3';
+    } else if (!!(a.canPlayType && a.canPlayType('audio/ogg; codecs="vorbis"'))) {
+      this.platform.audioFileExt = '.ogg';
+    } else {
+      this.platform.audioFileExt = '.wav';
+    }
+    // --------------------------------------------------------------------
   },
 
   /**
@@ -110,29 +148,15 @@ var client = {
    * @todo Clarify return value (promise).
    * @todo example
    */
-  start: (startFun) => {
+  start(startFun) {
     let module = startFun; // be compatible with previous version
 
-    if (typeof startFun === 'function')
+    if (typeof startFun === 'function') {
       module = startFun(Module.sequential, Module.parallel);
+    }
 
     let promise = module.createPromise();
-
-    if (client.io) {
-      client.ready
-        .then(() => module.launch());
-
-      client.receive('disconnect', () => {
-        // console.log('disconnect', client.index);
-      });
-
-      client.receive('reconnect', () => {
-        // console.log('reconnect', client.index);
-      });
-    } else {
-      // no client i/o, no server
-      module.launch();
-    }
+    this.ready.then(() => module.launch());
 
     return promise;
   },
@@ -147,7 +171,7 @@ var client = {
    * @todo Clarify return value
    * @todo Remove
    */
-  serial: (...modules) => {
+  serial(...modules) {
     console.log('The function "client.serial" is deprecated. Please use the new API instead.');
     return Module.sequential(...modules);
   },
@@ -165,7 +189,7 @@ var client = {
    * @todo Clarify return value
    * @todo Remove
    */
-  parallel: (...modules) => {
+  parallel(...modules) {
     console.log('The function "client.parallel" is deprecated. Please use the new API instead.');
     return Module.parallel(...modules);
   },
@@ -177,9 +201,9 @@ var client = {
    * @param {String} msg Name of the message to send.
    * @param {...*} args Arguments of the message (as many as needed, of any type).
    */
-  send: (msg, ...args) => {
-    if (client.socket)
-      client.socket.emit(msg, ...args);
+  send(msg, ...args) {
+    if (!this.com) { return; }
+    this.com.send(msg, ...args);
   },
 
   /**
@@ -192,11 +216,9 @@ var client = {
    * @param {Function} callback Callback function executed when the message is
    * received.
    */
-  receive: function (msg, callback) {
-    if (client.socket) {
-      client.socket.removeListener(msg, callback);
-      client.socket.on(msg, callback);
-    }
+  receive(msg, callback) {
+    if (!this.com) { return; }
+    this.com.receive(msg, callback);
   },
 
   /**
@@ -206,37 +228,9 @@ var client = {
    * @param {Function} callback Callback function executed when the message is
    * received.
    */
-  removeListener: function (msg, callback) {
-    if (client.socket)
-      client.socket.removeListener(msg, callback);
+  removeListener(msg, callback) {
+    if (!this.com) { return; }
+    this.com.removeListener(msg, callback);
   }
 };
 
-// get informations about client
-const ua = window.navigator.userAgent
-const md = new MobileDetect(ua);
-client.platform.isMobile = (md.mobile() !== null); // true if phone or tablet
-client.platform.os = (() => {
-  let os = md.os();
-
-  if (os === 'AndroidOS') {
-    return 'android';
-  } else if (os === 'iOS') {
-    return 'ios';
-  } else {
-    return 'other';
-  }
-})();
-
-// audio file extention check
-const a = document.createElement('audio');
-// http://diveintohtml5.info/everything.html
-if (!!(a.canPlayType && a.canPlayType('audio/mpeg;'))) {
-  client.platform.audioFileExt = '.mp3';
-} else if (!!(a.canPlayType && a.canPlayType('audio/ogg; codecs="vorbis"'))) {
-  client.platform.audioFileExt = '.ogg';
-} else {
-  client.platform.audioFileExt = '.wav';
-}
-
-export default client;

@@ -3,9 +3,11 @@ import Module from './Module';
 
 
 function _instructions(label) {
-  return "<p>Go to</p>" +
-    "<div class='checkin-label circled'><span>" + label + "</span></div>" +
-    "<p><small>Touch the screen<br/>when you are ready.</small></p>";
+  return `
+    <p>Go to</p>
+    <div class="checkin-label circled"><span>${label}</span></div>
+    <p><small>Touch the screen<br/>when you are ready.</small></p>
+  `;
 }
 
 /**
