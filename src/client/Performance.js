@@ -4,11 +4,12 @@ import client from './client';
 
 
 /**
- * The {@link ClientPerformance} base class constitutes a basis on which to build a performance on the client side.
+ * [client] Base class used to build a performance on the client side.
+ *
+ * The base class always has a view.
  */
 export default class Performance extends Module {
   /**
-   * Creates an instance of the class. Always has a view.
    * @param {Object} [options={}] Options.
    * @param {String} [options.name='performance'] Name of the module.
    * @param {String} [options.color='black'] Background color of the `view`.
@@ -18,8 +19,11 @@ export default class Performance extends Module {
   }
 
   /**
-   * Automatically called to start the module. // TODO
-   * Sends a message to the server side module to indicate that the client entered the performance.
+   * Start the module.
+   *
+   * Send a message to the server side module to indicate that the client entered the performance.
+   *
+   * **Note:** the method is called automatically when necessary, you should not call it manually.
    */
   start() {
     super.start();
@@ -28,7 +32,7 @@ export default class Performance extends Module {
 
   /**
    * Can be called to terminate the performance.
-   * Sends a message to the server side module to indicate that the client exited the performance.
+   * Send a message to the server side module to indicate that the client exited the performance.
    */
   done() {
     client.send(this.name + ':done');

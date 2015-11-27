@@ -83,19 +83,19 @@ class Parallel extends Promised {
 }
 
 /**
- * The {@link Module} base class is used to create a *Soundworks* module on the client side.
- * Each module should have a {@link Module#start} and a {@link Module#done} method.
- * The {@link Module#done} method must be called when the module can hand over the control to the subsequent modules (*i.e.* when the module has done its duty, or when it may run in the background for the rest of the scenario after it finished its initialization process).
- * The base class optionally creates a view — a fullscreen `div` accessible through the {@link Module.view} attribute — that is added to the DOM when the module is started and removed when the module calls its {@link Module#done} method.
- * (Specifically, the `view` element is added to the `#container` DOM element.)
+ * [client] Base class used to create a *Soundworks* module on the client side.
  *
- * @example
- * class MyModule extends Module {
+ * Each module should have a {@link Module#start} and a {@link Module#done} method.
+ * The {@link Module#done} method must be called when the module has finished its initialization (*i.e.* when the module has done its duty, or when it may run in the background for the rest of the scenario after it finished its initialization process), to hand over the control to the subsequent modules
+ *
+ * The base class optionally creates a view (a fullscreen `div` accessible through the {@link Module.view} attribute). The view is added to the DOM (as a child of the `#container` element) when the module is started (with the {@link Module#start} method, and removed when the module calls its {@link Module#done} method.
+ *
+ * @example class MyModule extends Module {
  *   constructor(options = {}) {
- *     // Here, MyModule would always have a view,
- *     // with the id and class 'my-module-name',
- *     // and possibly the background color
- *     // defined by the argument 'options'.
+ *     // This example module:
+ *     // - always has a view
+ *     // - has the id and class 'my-module-name'
+ *     // - and uses the background color defined in the argument 'options' (if any).
  *     super('my-module-name', true, options.color || 'alizarin');
  *
  *     ... // anything the constructor needs
@@ -104,20 +104,19 @@ class Parallel extends Promised {
  *   start() {
  *     super.start();
  *
- *     ... // what the module has to do
- *         // (communication with the server, etc.)
+ *     // Whatever the module does (communication with the server, etc.)
+ *     // ...
  *
- *     this.done(); // call this method when the module can
- *                  // hand over the control to a subsequent module
+ *     // Call the `done` method when the module has finished its initialization
+ *     this.done();
  *   }
  * }
+ * @todo Move example in the manual?
  */
 export default class Module extends Promised {
-// export default class Module extends Promised {
   /**
-   * Creates an instance of the class.
-   * @param {String} name Name of the module (used as the `id` and CSS class of the `view` if it exists).
-   * @param {Boolean} [createView=true] Indicates whether the module has and displays a `view` or not.
+   * @param {String} name Name of the module (used as the `id` and CSS class of the `view` DOM element if it exists).
+   * @param {Boolean} [createView=true] Indicates whether the module displays a `view` or not.
    * @param {[type]} [color='black'] Background color of the `view` when it exists.
    */
   constructor(name, createView = true, color = 'black') { // TODO: change to colorClass?
@@ -131,6 +130,7 @@ export default class Module extends Promised {
 
     /**
      * View of the module.
+     *
      * The view is a DOM element (a full screen `div`) in which the content of the module is displayed.
      * This element is a child of the main container `div#container`, which is the only child of the `body` element.
      * A module may or may not have a view, as indicated by the argument `hasView:Boolean` of the {@link Module#constructor}.
@@ -157,7 +157,8 @@ export default class Module extends Promised {
   }
 
   /**
-   * Handles the logic of the module on the client side.
+   * Handle the logic of the module.
+   *
    * For instance, it takes care of the communication with the module on the server side by sending WebSocket messages and setting up WebSocket message listeners.
    * Additionally, if the module has a `view`, the `start` method creates the corresponding HTML element and appends it to the DOM’s main container element (`div#container`).
    *
@@ -176,7 +177,7 @@ export default class Module extends Promised {
   }
 
   /**
-   * Resets the module to the state it had before calling the {@link Module#start} method.
+   * Reset the module to the state it had before calling the {@link Module#start} method.
    *
    * **Note:** the method is called automatically when necessary (for instance to reset the module after a server crash if the module had not called its {@link Module#done} method yet), you should not call it manually.
    * @abstract
@@ -186,7 +187,7 @@ export default class Module extends Promised {
   }
 
   /**
-   * Restarts the module.
+   * Restart the module.
    *
    * **Note:** the method is called automatically when necessary (for instance to restart the module after a server crash if the module had already called its {@link Module#done} method), you should not call it manually.
    * @abstract
@@ -228,8 +229,7 @@ export default class Module extends Promised {
   }
 
   /**
-   * Set an arbitrary centered HTML content to the module's `view`.
-   * The method should be called only if the module has a `view`.
+   * Set an arbitrary centered HTML content to the module's `view` (if any).
    * @param {String} htmlContent The HTML content to append to the `view`.
    */
   setCenteredViewContent(htmlContent) {

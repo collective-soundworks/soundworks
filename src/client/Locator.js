@@ -3,33 +3,18 @@ import Module from './Module';
 
 
 /**
- * The {@link Locator} allows to indicate the approximate location of the client
- * on a map (that graphically represents a {@link Setup}) via a dialog.
+ * [client] Allow to indicate the approximate location of the client on a map (that graphically represents a {@link Setup}) via a dialog.
  *
- * @example import { client, Locator, Setup, Space } from 'soundworks/client';
+ * The module always has a view (that displays the map and a button to validate the location) and requires the SASS partial `_77-locator.scss`.
  *
- * const setup = new Setup();
+ * The module finishes its initialization after the user confirms his / her approximate location by clicking on the “Validate” button.
+ *
+ * @example const setup = new Setup();
  * const space = new Space();
  * const locator = new Locator({ setup: setup, space: space });
- * // ... instantiate other modules
- *
- * // Initialize the client (indicate the client type)
- * client.init('clientType');
- *
- * // Start the scenario
- * client.start((serial, parallel) => {
- *   // Make sure that the `setup` and `space` are initialized before they are
- *   // used by the locator (=> we use the `serial` function).
- *   serial(
- *     parallel(setup, space),
- *     locator,
- *     // ... other modules
- *   )
- * });
  */
 export default class Locator extends Module {
   /**
-   * Creates an instance of the class. Always has a view.
    * @param {Object} [options={}] Options.
    * @param {String} [options.name='locator'] Name of the module.
    * @param {String} [options.color='black'] Background color of the `view`.
@@ -41,26 +26,19 @@ export default class Locator extends Module {
     super(options.name || 'locator', true, options.color);
 
     /**
-     * The space in which to indicate the approximate location.
-     * @type {ClientSpace}
+     * The space that graphically represents the setup in which to indicate the approximate location.
+     * @type {Space}
      */
     this.space = options.space || null;
 
     /**
      * The setup in which to indicate the approximate location.
-     * @type {ClientSetup}
+     * @type {Setup}
      */
     this.setup = options.setup || null;
+
     this._instructions = options.instructions || '<small>Indiquez votre position dans la salle</small>';
-
     this._showBackground = options.showBackground || false;
-
-    this._touchStartHandler = this._touchStartHandler.bind(this);
-    this._touchMoveHandler = this._touchMoveHandler.bind(this);
-    this._touchEndHandler = this._touchEndHandler.bind(this);
-    this._sendCoordinates = this._sendCoordinates.bind(this);
-    this._surfaceHandler = this._surfaceHandler.bind(this);
-
     this._currentCoordinates = null;
     this._positionRadius = 20;
 
@@ -94,15 +72,23 @@ export default class Locator extends Module {
     surfaceDiv.classList.add('surface');
     this._surfaceDiv = surfaceDiv;
 
+    // Construct DOM
     this._textDiv.appendChild(this._text);
     this._textDiv.appendChild(this._button);
     this._surfaceDiv.appendChild(this._positionDiv);
 
+    // Method bindings
+    this._touchStartHandler = this._touchStartHandler.bind(this);
+    this._touchMoveHandler = this._touchMoveHandler.bind(this);
+    this._touchEndHandler = this._touchEndHandler.bind(this);
+    this._sendCoordinates = this._sendCoordinates.bind(this);
+    this._surfaceHandler = this._surfaceHandler.bind(this);
     this._resize = this._resize.bind(this);
   }
 
   /**
-   * Starts the module.
+   * Start the module.
+   * @private
    */
   start() {
     super.start();
@@ -115,7 +101,8 @@ export default class Locator extends Module {
 
   /**
    * Done method.
-   * Removes the `'resize'` listener on the `window`.
+   * Remove the `'resize'` listener on the `window`.
+   * @private
    */
   done() {
     window.removeEventListener('resize', this._resize);
@@ -123,7 +110,8 @@ export default class Locator extends Module {
   }
 
   /**
-   * Resets the module to initial state.
+   * Reset the module to initial state.
+   * @private
    */
   reset() {
     client.coordinates = null;
@@ -143,7 +131,8 @@ export default class Locator extends Module {
   }
 
   /**
-   * Restarts the module.
+   * Restart the module.
+   * @private
    */
   restart() {
     super.restart();

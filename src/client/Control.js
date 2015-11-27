@@ -273,7 +273,7 @@ export default class Control extends Module {
    * @param {String} [options.name='sync'] Name of the module.
    * @param {String} [options.color='black'] Background color of the `view`.
    * @param {Boolean} [options.gui=true] Indicates whether to create the graphical user interface to control the parameters or not.
-   * @emits {'control:event'} when the server sends an update.
+   * @emits {'control:event'} when the server sends an update. The callback function takes `name:String` and `value:*` as arguments, where `name` is the name of the parameter / info / command, and `value` its new value.
    */
   constructor(options = {}) {
     super(options.name || 'control', (options.gui === true), options.color);

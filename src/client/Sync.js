@@ -5,24 +5,19 @@ import Module from './Module';
 
 
 /**
- * The {@link Sync} module takes care of the synchronization process on the client side.
- * It displays "Clock syncing, stand by…" until the very first synchronization process is done.
- * The {@link Sync} module calls its `done` method as soon as the client clock is in sync with the sync clock.
+ * [client] Synchronize the local clock on a master clock shared by the server and the clients.
+ *
+ * The module always has a view (that displays "Clock syncing, stand by…", until the very first synchronization process is done).
+ *
+ * The module finishes its initialization as soon as the client clock is in sync with the master clock.
  * Then, the synchronization process keeps running in the background to resynchronize the clocks from times to times.
- * @example
- * // Require the Soundworks library (client side)
- * const clientSide = require('soundworks/client'); // TODO
+ * @example const sync = new Sync();
  *
- * // Create Sync module
- * const sync = new clientSide.Sync();
- *
- * // Get times
  * const nowLocal = sync.getLocalTime(); // current time in local clock time
  * const nowSync = sync.getSyncTime(); // current time in sync clock time
  */
 export default class Sync extends Module {
   /**
-   * Creates an instance of the class. Always has a view.
    * @param {Object} [options={}] Options.
    * @param {String} [options.name='sync'] Name of the module.
    * @param {String} [options.color='black'] Background color of the `view`.
@@ -37,7 +32,7 @@ export default class Sync extends Module {
   }
 
   /**
-   * Starts the synchronization process.
+   * Start the synchronization process.
    * @private
    */
   start() {
@@ -55,7 +50,7 @@ export default class Sync extends Module {
   }
 
   /**
-   * Returns the time in the local clock.
+   * Return the time in the local clock.
    * If no arguments are provided, returns the current local time (*i.e.* `audioContext.currentTime`).
    * @param {Number} syncTime Time in the sync clock (in seconds).
    * @return {Number} Time in the local clock corresponding to `syncTime` (in seconds).
@@ -66,7 +61,7 @@ export default class Sync extends Module {
   }
 
   /**
-   * Returns the time in the sync clock.
+   * Return the time in the sync clock.
    * If no arguments are provided, returns the current sync time.
    * @param {Number} localTime Time in the local clock (in seconds).
    * @return {Number} Time in the sync clock corresponding to `localTime` (in seconds)

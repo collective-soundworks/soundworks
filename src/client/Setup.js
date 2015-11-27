@@ -3,9 +3,17 @@ import Module from './Module';
 
 
 /**
- * The {@link Setup} module retrieves the setup information from the server.
+ * [client] Define the physical setup in which the scenarion takes place.
+ *
+ * The setup can consist in a simple rectangle with dimensions.
+ * It can also have additional information such as the positions available with their coordinates and their labels (*e.g.* the position and coordinates of the seats in a theater)
+ *
+ * The module retrieves the setup information from the server.
  * It never has a view.
- * (To rendering the setup graphically, see {@link ClientSpace}.)
+ *
+ * The module finishes its initialization when it receives the setup information from the server.
+ *
+ * **Note:** to render the setup graphically, see {@link Space}.
  */
 export default class Setup extends Module {
   /**

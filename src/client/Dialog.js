@@ -22,7 +22,7 @@ function _base64(format, base64) {
  * @example
  * const welcomeDialog = new ClientDialog({
  *   name: 'welcome',
- *   text: 'Welcome to this awesome scenario!',
+ *   text: 'Welcome to this awesome <i>Soundworks</i>-based application!',
  *   color: 'alizarin',
  *   activateWebAudio: true
  * });
