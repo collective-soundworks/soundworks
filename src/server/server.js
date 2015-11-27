@@ -9,11 +9,9 @@ import path from 'path';
 import Client from './Client';
 
 // globals
+let nextClientIndex = 0;
 const availableClientIndices = [];
 const oscListeners = [];
-let nextClientIndex = 0;
-let expressApp = null;
-let httpServer = null;
 
 function _getClientIndex() {
   var index = -1;
@@ -52,7 +50,25 @@ export default {
   io: null,
 
   /**
-   * Envirnment configuration information (development / production).
+   * Express application
+   * @type {Object}
+   */
+  expressApp: null,
+  /**
+   * Http server
+   * @type {Object}
+   */
+  httpServer: null,
+
+  /**
+   * Application configuration information.
+   * @type {Object}
+   * @private
+   */
+  appConfig: {}, // host env config informations (dev / prod)
+
+  /**
+   * Environment configuration information (development / production).
    * @type {Object}
    * @private
    */
@@ -67,22 +83,20 @@ export default {
 
   /**
    * Start the server.
-   * @param {Object} app Express application.
-   * @param {String} publicPath Public static directory of the Express app.
-   * @param {Number} port Port.
-   * @param {Object} [options={}] Options.
-   * @param {Object} [options.socketIO={}] socket.io options. The socket.io config object can have the following properties:
+   * @param {Object} [appConfig={}] Application configuration options.
+   * @attribute {String} [appConfig.publicPath='./public'] Path to the public folder.
+   * @attribute {Object} [appConfig.socketIO={}] socket.io options. The socket.io config object can have the following properties:
    * - `transports:String`: communication transport (defaults to `'websocket'`);
    * - `pingTimeout:Number`: timeout (in milliseconds) before trying to reestablish a connection between a lost client and a server (defautls to `60000`);
    * - `pingInterval:Number`: time interval (in milliseconds) to send a ping to a client to check the connection (defaults to `50000`).
-   * @param {Object} [options.osc={}] OSC options. The OSC config object can have the following properties:
+   * @param {Object} [envConfig={}] Environment configuration options.
+   * @attribute {Number} [envConfig.port=8000] Port of the HTTP server.
+   * @attribute {Object} [envConfig.osc={}] OSC options. The OSC config object can have the following properties:
    * - `localAddress:String`: address of the local machine to receive OSC messages (defaults to `'127.0.0.1'`);
    * - `localPort:Number`: port of the local machine to receive OSC messages (defaults to `57121`);
    * - `remoteAddress:String`: address of the device to send default OSC messages to (defaults to `'127.0.0.1'`);
    * - `remotePort:Number`: port of the device to send default OSC messages to (defaults to `57120`).
-   * @param {Object} [options.env={}] Environnement options (set by the user, depends on the scenario).
    */
-  // start: (app, publicPath, port, options = {}) => {
   start(appConfig = {}, envConfig = {}) {
     appConfig = Object.assign({
       publicPath: path.join(process.cwd(), 'public'),
@@ -112,12 +126,12 @@ export default {
     this.appConfig = appConfig;
 
     // configure express and http server
-    expressApp = new express();
+    const expressApp = new express();
     expressApp.set('port', process.env.PORT || envConfig.port);
     expressApp.set('view engine', 'ejs');
     expressApp.use(express.static(appConfig.publicPath));
 
-    httpServer = http.createServer(expressApp);
+    const httpServer = http.createServer(expressApp);
     httpServer.listen(expressApp.get('port'), function() {
       const url = `http://127.0.0.1:${expressApp.get('port')}`;
       console.log('[HTTP SERVER] Server listening on', url);
@@ -181,7 +195,7 @@ export default {
 
     if (clientType !== 'player') { url += clientType; }
 
-    expressApp.get(url, (req, res) => {
+    this.expressApp.get(url, (req, res) => {
       res.send(tmpl({ envConfig: JSON.stringify(this.envConfig) }));
     });
 
