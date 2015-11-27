@@ -12,9 +12,9 @@ import Module from './Module';
  * @property {string} wrongOS
  */
 const defaultMessages = {
-  iosVersion: "This application requires at least iOS 7 with Safari or Chrome.",
-  androidVersion: "This application requires at least Android 4.2 with Chrome.",
-  wrongOS: "This application is designed for iOS and Android mobile devices."
+  iosVersion: 'This application requires at least iOS 7 with Safari or Chrome.',
+  androidVersion: 'This application requires at least Android 4.2 with Chrome.',
+  wrongOS: 'This application is designed for iOS and Android mobile devices.'
 };
 
 /**
