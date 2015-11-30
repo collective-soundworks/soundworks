@@ -83,7 +83,7 @@ class Parallel extends Promised {
 }
 
 /**
- * [client] Base class used to create a *Soundworks* module on the client side.
+ * [client] Base class used to create any *Soundworks* module on the client side.
  *
  * Each module should have a {@link Module#start} and a {@link Module#done} method.
  * The {@link Module#done} method must be called when the module has finished its initialization (*i.e.* when the module has done its duty, or when it may run in the background for the rest of the scenario after it finished its initialization process), to hand over the control to the subsequent modules

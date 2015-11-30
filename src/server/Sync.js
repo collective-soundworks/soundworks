@@ -5,6 +5,11 @@ import Module from './Module';
 /**
  * [server] Synchronize the local clock on a master clock shared by the server and the clients.
  *
+ * Both the clients and the server can use this master clock as a common time reference.
+ * For instance, this allows all the clients to do something exactly at the same time, such as blinking the screen or playing a sound in a synchronized manner.
+ *
+ * **Note:** the module is based on [`github.com/collective-soundworks/sync`](https://github.com/collective-soundworks/sync).
+ *
  * (See also {@link src/client/Sync.js~Sync} on the client side.)
  *
  * @example const sync = new Sync();

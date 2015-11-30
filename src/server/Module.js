@@ -3,7 +3,7 @@ import { EventEmitter } from 'events';
 
 
 /**
- * [server] Base class used to create a *Soundworks* module on the server side.
+ * [server] Base class used to create any *Soundworks* module on the server side.
  *
  * Each module should have a {@link Module#connect} and a {@link Module#disconnect} method.
  * Any module mapped to the type of client `clientType` (thanks to the {@link server#map} method) calls its {@link Module#connect} method when such a client connects to the server, and its {@link Module#disconnect} method when such a client disconnects from the server.

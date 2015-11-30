@@ -7,17 +7,27 @@ import Module from './Module';
 /**
  * [client] Synchronize the local clock on a master clock shared by the server and the clients.
  *
+ * Both the clients and the server can use this master clock as a common time reference.
+ * For instance, this allows all the clients to do something exactly at the same time, such as blinking the screen or playing a sound in a synchronized manner.
+ *
  * The module always has a view (that displays "Clock syncing, stand by…", until the very first synchronization process is done).
  *
  * The module finishes its initialization as soon as the client clock is in sync with the master clock.
  * Then, the synchronization process keeps running in the background to resynchronize the clocks from times to times.
  *
- * (See also {@link src/server/Sync.js~Sync} on the server side.)
+ * **Note:** the module is based on [`github.com/collective-soundworks/sync`](https://github.com/collective-soundworks/sync).
  *
+ * (See also {@link src/server/Sync.js~Sync} on the server side.)
+ * 
  * @example const sync = new Sync();
  *
  * const nowLocal = sync.getLocalTime(); // current time in local clock time
  * const nowSync = sync.getSyncTime(); // current time in sync clock time
+ * @emits 'sync:stats' each time the module (re)synchronizes the local clock on the sync clock.
+ * The `'sync:stats'` event goes along with the `report` object that has the following properties:
+ * - `timeOffset`, current estimation of the time offset between the client clock and the sync clock;
+ * - `travelTime`, current estimation of the travel time for a message to go from the client to the server and back;
+ * - `travelTimeMax`, current estimation of the maximum travel time for a message to go from the client to the server and back.
  */
 export default class Sync extends Module {
   /**
