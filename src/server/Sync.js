@@ -3,15 +3,12 @@ import Module from './Module';
 
 
 /**
- * The {@link Sync} module takes care of the synchronization process on the server side.
- * @example
- * // Require the Soundworks library (server side)
- * const serverSide = require('soundworks/server'); // TODO
+ * [server] Synchronize the local clock on a master clock shared by the server and the clients.
  *
- * // Create Sync module
- * const sync = new serverSide.Sync();
+ * (See also {@link src/client/Sync.js~Sync} on the client side.)
  *
- * // Get sync time
+ * @example const sync = new Sync();
+ *
  * const nowSync = sync.getSyncTime(); // current time in the sync clock time
  */
 export default class Sync extends Module {
@@ -48,4 +45,3 @@ export default class Sync extends Module {
     return this._sync.getSyncTime();
   }
 }
-

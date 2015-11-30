@@ -9,6 +9,8 @@ import Module from './Module';
  *
  * The module finishes its initialization after the user confirms his / her approximate location by clicking on the “Validate” button.
  *
+ * (See also {@link src/server/Locator.js~Locator} on the server side.)
+ *
  * @example const setup = new Setup();
  * const space = new Space();
  * const locator = new Locator({ setup: setup, space: space });

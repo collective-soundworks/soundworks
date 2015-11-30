@@ -7,6 +7,8 @@ import client from './client';
  * [client] Base class used to build a performance on the client side.
  *
  * The base class always has a view.
+ *
+ * (See also {@link src/server/Performance.js~Performance} on the server side.)
  */
 export default class Performance extends Module {
   /**

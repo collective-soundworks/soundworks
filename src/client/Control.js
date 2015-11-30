@@ -232,20 +232,22 @@ class ControlCommand extends ControlEvent {
 /**
  * [client] Manage the global `parameters`, `infos`, and `commands` across the whole scenario.
  *
+ * The module keeps track of:
+ * - `parameters`: values that can be updated by the actions of the clients (*e.g.* the gain of a synth);
+ * - `infos`: information about the state of the scenario (*e.g.* number of clients in the performance);
+ * - `commands`: can trigger an action (*e.g.* reload the page).
+ *
  * If the module is instantiated with the `gui` option set to `true`, it constructs a graphical interface to modify the parameters, view the infos, and trigger the commands.
- * Otherwise (`gui` option set to `false`) the module receives the values emitted by the server.
- * The module forwards the server values by emitting them.
+ * Otherwise (`gui` option set to `false`) the module emits an event when it receives updated values from the server.
  *
  * When the GUI is disabled, the module finishes its initialization immediately after having set up the controls.
- * Otherwise (GUI enabled), the modules remains in its state.
+ * Otherwise (GUI enabled), the modules remains in its state and never finishes its initialization.
  *
  * When the module a view (`gui` option set to `true`), it requires the SASS partial `_77-checkin.scss`.
  *
  * (See also {@link src/server/Control.js~Control} on the server side.)
  *
  * @example // Example 1: make a client that displays the control GUI
- *
- * import { client, Control } from 'soundworks/client';
  * const control = new Control();
  *
  * // Initialize the client (indicate the client type)
@@ -260,12 +262,19 @@ class ControlCommand extends ControlEvent {
  *
  * // Listen for parameter, infos or command updates
  * control.on('control:event', (name, value) => {
- *   console.log(`The parameter #{name} has been updated to value #{value}`);
+ *   switch(name) {
+ *     case 'synth:gain':
+ *       console.log(`Update the synth gain to value #{value}.`);
+ *       break;
+ *     case 'reload':
+ *       window.location.reload(true);
+ *       break;
+ *   }
  * });
  *
  * // Get current value of a parameter or info
- * const currentParamValue = control.event['parameterName'].value;
- * const currentInfoValue = control.event['infoName'].value;
+ * const currentSynthGainValue = control.event['synth:gain'].value;
+ * const currentNumPlayersValue = control.event['numPlayers'].value;
  */
 export default class Control extends Module {
   /**

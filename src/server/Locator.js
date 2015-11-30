@@ -2,7 +2,9 @@ import Module from './Module';
 
 
 /**
- * The {@link Locator} module allows to store the coordinates of a client when the user enters an approximate location through the interfacte provided by the {@link ClientLocator}.
+ * [server] Allow to indicate the approximate location of the client on a map (that graphically represents a {@link Setup}) via a dialog.
+ *
+ * (See also {@link src/client/Locator.js~Locator} on the client side.)
  */
 export default class Locator extends Module {
   /**

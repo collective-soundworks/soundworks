@@ -3,39 +3,55 @@ import Module from './Module';
 
 
 /**
- * The `Control` module is used to control an application through a dedicated client (that we usually call `conductor`).
- * The module allows for declaring `parameters`, `infos`, and `commands`, through which the `conductor` can control and monitor the state of the application:
- * - `parameters` are values that are changed by a client, sent to the server, and propagated to the other connected clients (*e.g.* the tempo of a musical application);
- * - `infos` are values that are changed by the server and propagated to the connected clients, to inform about the current state of the application (*e.g.* the number of connected `player` clients);
- * - `commands` are messages (without arguments) that are send from the client to the server (*e.g.* `start`, `stop` or `clear` — whatever they would mean for a given application) which does the necessary upon reception.
+ * [server] Manage the global `parameters`, `infos`, and `commands` across the whole scenario.
  *
- * Optionally, the {@link ClientControl} module can automatically construct a simple interface from the list of declared controls that allows to change `parameters`, display `infos`, and send `commands` to the server.
+ * The module keeps track of:
+ * - `parameters`: values that can be updated by the actions of the clients (*e.g.* the gain of a synth);
+ * - `infos`: information about the state of the scenario (*e.g.* number of clients in the performance);
+ * - `commands`: can trigger an action (*e.g.* reload the page),
+ * and propagates these to different client types.
  *
- * The controls of different types are declared on the server side and propagated to the client side when a client is set up.
- *
- * The {@link Control} takes care of the parameters and commands on the server side.
  * To set up controls in a scenario, you should extend this class on the server side and declare the controls specific to that scenario with the appropriate methods.
- * @example
- * class Control extends Control {
- *   constructor(nameArray) {
+ *
+ * (See also {@link src/client/Control.js~Control} on the client side.)
+ *
+ * @example // Example 1: make a `'conductor'` client to manage the controls
+ * class MyControl extends Control {
+ *   constructor() {
  *     super();
  *
- *     // Info corresponding to the number of players
- *     this.addInfo('numPlayers', 'Number of players', 0);
- *     // Number parameter corresponding to the output gain of the players
- *     this.addNumber('gain', 'Global gain', 0, 1, 0.1, 1);
- *     // Select parameter corresponding to the state of the performance
- *     this.addSelect('state', 'State', ['idle', 'playing'], 'idle');
- *     // Command to reload the page on all the clients
- *     this.addCommand('reload', 'Reload the page of all the clients');
+ *     // Parameter shared by all the client types
+ *     this.addNumber('synth:gain', 'Synth gain', 0, 1, 0.1, 1);
+ *     // Command propagated only to the `'player'` clients
+ *     this.addCommand('reload', 'Reload the page', ['player']);
  *   }
  * }
  *
- * const control = new Control(guiroNames, soundfieldNames);
+ * @example // Example 2: keep track of the number of `'player'` clients
+ * class MyControl extends Control {
+ *   constructor() {
+ *     super();
+ *     this.addInfo('numPlayers', 'Number of players', 0);
+ *   }
+ * }
+ *
+ * class MyPerformance extends Performance {
+ *   constructor(control) {
+ *     this._control = control;
+ *   }
+ *
+ *   enter(client) {
+ *     super.enter(client);
+ *
+ *     this._control.update('numPlayers', this.clients.length);
+ *   }
+ * }
+ *
+ * const control = new MyControl();
+ * const performance = new MyPerformance(control);
  */
 export default class Control extends Module {
   /**
-   * Creates an instance of the class.
    * @param {Object} [options={}] Options.
    * @param {String} [options.name='control'] Name of the module.
    */

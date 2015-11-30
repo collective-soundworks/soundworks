@@ -75,6 +75,8 @@ export class ListSelector extends EventEmitter {
 /**
  * [client] Allow to select an available position within a predefined {@link Setup}.
  *
+ * (See also {@link src/server/Placer.js~Placer} on the server side.)
+ *
  * @example const setup = new Setup();
  * const placer = new Placer({ setup: setup });
  */

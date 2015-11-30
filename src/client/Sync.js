@@ -11,6 +11,9 @@ import Module from './Module';
  *
  * The module finishes its initialization as soon as the client clock is in sync with the master clock.
  * Then, the synchronization process keeps running in the background to resynchronize the clocks from times to times.
+ *
+ * (See also {@link src/server/Sync.js~Sync} on the server side.)
+ *
  * @example const sync = new Sync();
  *
  * const nowLocal = sync.getLocalTime(); // current time in local clock time

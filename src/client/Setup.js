@@ -3,10 +3,9 @@ import Module from './Module';
 
 
 /**
- * [client] Define the physical setup in which the scenarion takes place.
+ * [client] Define the physical setup in which the scenario takes place.
  *
- * The setup can consist in a simple rectangle with dimensions.
- * It can also have additional information such as the positions available with their coordinates and their labels (*e.g.* the position and coordinates of the seats in a theater)
+ * The module contains information about the dimensions and outlines of the space, and optionally about the coordinates and labels of predefined positions (*e.g.* seats in a theater).
  *
  * The module retrieves the setup information from the server.
  * It never has a view.
@@ -14,6 +13,8 @@ import Module from './Module';
  * The module finishes its initialization when it receives the setup information from the server.
  *
  * **Note:** to render the setup graphically, see {@link Space}.
+ *
+ * (See also {@link src/server/Setup.js~Setup} on the server side.)
  */
 export default class Setup extends Module {
   /**

@@ -90,6 +90,8 @@ class Parallel extends Promised {
  *
  * The base class optionally creates a view (a fullscreen `div` accessible through the {@link Module.view} attribute). The view is added to the DOM (as a child of the `#container` element) when the module is started (with the {@link Module#start} method, and removed when the module calls its {@link Module#done} method.
  *
+ * (See also {@link src/server/Module.js~Module} on the server side.)
+ *
  * @example class MyModule extends Module {
  *   constructor(options = {}) {
  *     // This example module:

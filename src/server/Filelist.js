@@ -1,7 +1,6 @@
 import fs from 'fs';
 import Module from './Module';
 
-
 function checkForExtensions(file, extensions) {
   if(!extensions || extensions.length === 0)
     return true;
@@ -17,11 +16,12 @@ function checkForExtensions(file, extensions) {
 }
 
 /**
- * The {@link FileList} module allows to dynamically send a list of files stored on the server to the clients.
+ * [server] Retrieve a list of files on the server in the `/public` folder upon request of the client.
+ *
+ * (See also {@link src/client/Filelist.js~Filelist} on the client side.)
  */
 export default class FileList extends Module {
   /**
-   * Creates an instance of the class.
    * @param {Object} [options={}] Options.
    * @param {String} [options.name='filelist'] Name of the module.
    */
@@ -51,4 +51,3 @@ export default class FileList extends Module {
     });
   }
 }
-

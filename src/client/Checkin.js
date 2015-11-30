@@ -21,25 +21,8 @@ function _instructions(label) {
  *
  * (See also {@link src/server/Checkin.js~Checkin} on the server side.)
  *
- * @example import { client, Checkin, Setup } from 'soundworks/client';
- *
- * const setup = new Setup();
+ * @example const setup = new Setup();
  * const checkin = new Checkin({ setup: setup });
- * // ... instantiate other modules
- *
- * // Initialize the client (indicate the client type)
- * client.init('clientType');
- *
- * // Start the scenario
- * client.start((serial, parallel) => {
- *   // Make sure that the `setup` is initialized before it is used by the
- *   // `checkin` module (=> we use the `serial` function).
- *   serial(
- *     setup,
- *     placer,
- *     // ... other modules
- *   )
- * });
  */
 export default class Checkin extends Module {
   /**
