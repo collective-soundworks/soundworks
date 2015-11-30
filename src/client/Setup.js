@@ -261,6 +261,9 @@ export default class Setup extends Module {
   //   }
   // }
 
+  // /**
+  //  * The `addClassToPosition` method adds the class `className` to the position `index` in the `setupDisplay` DOM element (this graphical representation of the setup had to be created with the `display` method).
+  //  */
   // addClassToPosition(div, index, className) {
   //   var positions = Array.prototype.slice.call(div.childNodes); // .childNode returns a NodeList
   //   var positionIndex = positions.map((t) => parseInt(t.dataset.index)).indexOf(index);
@@ -270,6 +273,9 @@ export default class Setup extends Module {
   //     position.classList.add(className);
   // }
 
+  // /**
+  //  * The `removeClassFromPosition` method removes the class `className` from the position `index` in the `setupDisplay` DOM element (this graphical representation of the setup had to be created with the `display` method).
+  //  */
   // removeClassFromPosition(div, index, className) {
   //   var positions = Array.prototype.slice.call(div.childNodes); // .childNode returns a NodeList
   //   var positionIndex = positions.map((t) => parseInt(t.dataset.index)).indexOf(index);

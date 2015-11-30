@@ -9,6 +9,12 @@ const ns = 'http://www.w3.org/2000/svg';
  * The module never has a view (it displays the graphical representation in a `div` passed in as an argument of the {@link Space#display} method).
  *
  * The module finishes its initialization immediately.
+ *
+ * @example const setup = new Setup();
+ * const space = new Space();
+ * const container = document.getElementById('#spaceContainer');
+ *
+ * space.display(setup, container);
  */
 export default class Space extends Module {
   /**
