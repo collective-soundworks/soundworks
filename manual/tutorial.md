@@ -1,3 +1,20 @@
+# Cheat sheet
+
+In a nutshel, here is what you have to do to write your Javascript code (in `src/client/clientType/index.js` and `src/server/index.js`).
+
+## Client side
+
+- Initialize the client and specify its client type with `client.init('clientType')` ([more information here](#initialization));
+- Create a module for the performance with `class MyPerformance extends Performance { ... }` ([more information here](#performance-module));
+- Instantiate all the modules;
+- Start the scenario and link the modules in the `client.start(...)` method ([more information here](#module-logic)).
+
+## Server side
+
+- Create a module for the performance with `class MyPerformance extends Performance { ... }`.
+- Instantiate all the modules that serve the client;
+- Start the server with `server.start(app)` and map the modules to the types of clients that require them with `server.map(...)` ([more information here](#server-side)).
+
 # Creating a scenario
 
 In this section, we will go through the making of the [`soundworks-template`](https://github.com/collective-soundworks/soundworks-template) scenario step by step (let's call it *My Scenario*).
@@ -92,6 +109,8 @@ A scenario built with *Soundworks* consists in a succession of steps made of com
 - The screen displays a `welcome` screen that the user has to click to enter the scenario;
 - In the background, the client goes through a `checkin` process with the server while a `loader` loads the audio files to play;
 - Finally, when these initialization steps are finished, the user enters the `performance` in which the smartphone plays the welcome sound, and plays another sound when another client connect to the server.
+
+#### Initialization
 
 First of all, let’s load the library and initialize the client.
 

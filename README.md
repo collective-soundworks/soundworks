@@ -2,4 +2,4 @@
 
 *Soundworks* is a Javascript framework to create collaborative music performances.
 
-Read the full documentation here!
+Read the full documentation here! TODO
