@@ -1,126 +1,164 @@
-# The `Checkin` module (simplified version)
+# Example of the `Checkin` module (simplified version)
 
-The purpose of that simplified version of the `Checkin` module is the following: each time a new client connects to the server, the `Checkin` module assigns an available index to it. On the server side, the module can be configured with a `setup` object that lists predefined positions (*i.e.* coordinates and labels): in that case, the module on the client side can automatically request an available position from the `setup` and display the associated `label` to the participant. (In other configurations which we won't review in this example, the participants could alternatively select a label, or indicate their approximate location on a map). When no indices are available anymore, the `Checkin` module informs the participant with a message on the screen (on the client side).
+This section shows an example of how to write a module, with a simplified version of the `Checkin` module.
+
+The simplified `Checkin` module assigns an available index to any client who connects to the server.
+When no indices are available anymore, the `Checkin` module informs the participant with a message on the screen (on the client side).
 
 ## Client side
 
-In detail, the `start` method of the module sends a request to the server side `Checkin` module via WebSockets, asking the server to send an available client index and, optionally, the label of a corresponding predefined position. When it receives the response from the server, it either displays the label on the screen (*e.g.* “Please go to C5 and touch the screen.”) and waits for the participant’s acknowledgement, or immediately calls the `done` method to hand over the control to a subsequent module (generally the `performance`). The server may send an `unavailable` message in the case where no more clients can be admitted to the performance (for example when all predefined positions are occupied). In this case, the applications ends on a blocking dialog (“Sorry, we cannot accept more players at the moment, please try again later”) without calling the `done` method.
+In detail, the `start` method of the module sends a request to the server side `Checkin` module via WebSockets, asking the server to send an available client index.
 
-TODO: update example
+When it receives the response from the server, it displays the label on the screen (*e.g.* “Please go to position 3 and touch the screen.”) and waits for the participant’s acknowledgement.
+
+The server may send an `unavailable` message in the case where no more clients can be admitted to the performance (for example when all predefined positions are occupied).
+In this case, the applications ends on a blocking dialog (“Sorry, we cannot accept more players at the moment, please try again later”) without calling the `done` method.
+
 ```javascript
-/* Client side */
-
-// Require the Soundworks library (client side) and the 'client' object
-var clientSide = require('soundworks/client');
-var client = clientSide.client;
+// Import Soundworks library (client side)
+import { client, Module } from 'soundworks/client';
 
 // Write the module
-class ClientCheckin extends ClientModule {
+export default class Checkin extends Module {
   constructor() {
     // Call base class constructor declaring a name, a view and a background color
     super('checkin', true, 'black');
+
+    // Method bindings
+    this._acknowledgeHandler = this._acknowledgeHandler.bind(this);
+    this._unavailableHandler = this._unavailableHandler.bind(this);
+    this._clickHandler = this._clickHandler.bind(this);
   }
 
+  // Start the module and go through the initialization
   start() {
-    // Call base class start method (don’t forget this!)
+    // Call base class start method
     super.start();
 
     // Request an available client index from the server
     client.send('checkin:request');
 
-    // Receive acknowledgement from the server with client index and optional label
-    client.receive('checkin:acknowledge', (index, label) => {
-      client.index = index;
-
-      if(label) {
-        // Display the label in a dialog
-        this.setCenteredViewContent("<p>Please go to " + label + " and touch the screen.<p>");
-
-        // Call 'done' when the participant acknowledges the dialog
-        this.view.addEventListener('click', () => this.done());
-      } else {
-        this.done();
-      }
-    }
-
-    // If there are no more indices available, display a message on screen
-    // and DO NOT call the 'done' method
-    client.receive('checkin:unavailable', () => {
-      this.setCenteredViewContent("<p>Sorry, we cannot accept more connections at the moment, please try again later.</p>");
-    });
+    // Setup listeners for server messages
+    client.receive('checkin:acknowledge', this._acknowledgeHandler);
+    client.receive('checkin:unavailable', this._unavailableHandler);
   }
 
-  ... // the rest of the module
+  // In the case of a lost (and then recovered) connection with the server,
+  // if the module didn't go through the whole initialization process (*i.e.* if
+  // the module didn't call its `done` method), we reset the module to its
+  // default state to be able to call the `start` method again
+  reset() {
+    super.reset();
 
+    // Remove listeners for server messages
+    client.removeListener('checkin:acknowledge', this._acknowledgeHandler);
+    client.removeListener('checkin:unavailable', this._unavailableHandler);
+
+    // Remove click listener
+    this.view.removeEventListener('click', this._clickHandler, false);
+  }
+
+  // In the case of a lost (and then recovered) connection with the server,
+  // if the module went through the whole initialization process (*i.e.* if the
+  // module called its `done` method), we send to the server the index
+  // originally assigned
+  restart() {
+    super.restart();
+
+    // Send current checkin information to the server
+    client.send('checkin:restart', this.index);
+
+    this.done();
+  }
+
+  // Receive acknowledgement from the server with client index and optional
+  // label
+  _acknowledgeHandler(index) {
+    client.index = index;
+
+    const text = `<p>Please go to #{label} and touch the screen.<p>`;
+    this.setCenteredViewContent(text);
+
+    // Call 'done' when the participant clicks on the screen
+    this.view.addEventListener('click', this._clickHandler, false);
+  }
+
+  // If there are no more indices available, display a message on screen
+  // and DO NOT call the 'done' method
+  _unavailableHandler() {
+    const text = `<p>Sorry, we cannot accept more connections at the moment,
+    please try again later.</p>`;
+
+    this.setCenteredViewContent(text);
+  }
+
+  _clickHandler() {
+    this.done();
+  }
 }
 ```
 
-As shown in this code example, the `ClientModule` base class may provide a `view` (*i.e.* an HTML `div`) that is added to the DOM (specifically to the `#container` element) when the module starts, and removed from the DOM when the module calls its `done` method. The boolean that is passed as second argument to the `constructor` of the base class determines whether the module actually creates its `view` or not.
+As shown in this code example, the `ClientModule` base class may provide a `view` (*i.e.* an HTML `<div>`) that is added to the DOM (specifically to the `#container` element) when the module starts, and removed from the DOM when the module calls its `done` method.
+
+The boolean that is passed as second argument to the `constructor` of the base class determines whether the module actually creates its `view` or not.
+
 The method `setCenteredViewContent` allows for adding an arbitrary centered content (*e.g.* a paragraph of text) to the view.
 
-## Server side: the server side `Checkin` module
+## Server side
 
-In our simplified server side `Checkin` module example, the `connect` method has to install a listener that — upon request of the client — obtains an available client `index` and sends it back to the client. If the module has been configured with a `setup` (that predefines a certain number of spatial positions, associated with a `label`), the server additionally sends the `label` of the position corresponding to the client `index`. In this case, the maximum number of clients is determined by the number of seats defined by the `setup`.
+In our simplified server side `Checkin` module example, the `connect` method must:
+- Install a listener that — upon request of the client — obtains an available client `index` and sends it back to the client;
+- Listen for client indices that might have been assigned earlier during the performance, in case the server restarted.
 
 The `disconnect` method has to release the client index so that it can be reused by another client that connects to the server.
 
 ```javascript
-/* Server side */
-
-// Require the Soundworks library (server side)
-var serverSide = require('soundworks/server');
+// Import Soundworks library (server side)
+import { Module } from 'soundworks/server';
 
 // Write the module
-class ServerCheckin extends serverSide.Module {
-  constructor(options = {}) {
+class Checkin extends Module {
+  constructor(maxClients, options = {}) {
     super();
 
-    // Store setup
-    this.setup = options.setup || null;
-    this.maxClients = options.maxClients || Infinity;
+    this._maxClients = maxClients;
+    this._availableIndices = [];
+    this._unavailableIndices = [];
 
-    // Clip max number of clients
-    if (setup) {
-      var numPositions = setup.getNumPositions();
-
-      if (this.maxClients > numPositions)
-        this.maxClients = numPositions;
-    }
+    // Fill an array with all available indices
+    for (let i = 1; i < maxClients - 1; i++)
+      this._availableIndices.push(i);
   }
 
   connect(client) {
-    // Listen for incoming WebSocket messages from the client side
+    // Listen for a checkin request from the client side
     client.receive('checkin:request', () => {
       // Get an available client index
       let index = this._getIndex();
 
-      if (index >= 0) {
+      if (index >= 1) {
         client.index = index;
-
-        var label = undefined;
-
-        if (this.setup) {
-          // Get a label
-          let label = this.setup.getLabel(index);
-
-          // Get client coordinates according to the setup
-          client.coordinates = this.setup.getCoordinates(index);
-        }
-
         // Acknowledge check-in to client
-        client.send('checkin:acknowledge', index, label);
+        client.send('checkin:acknowledge', index);
       } else {
         // No client indices available
         client.send('checkin:unavailable');
       }
+    });
 
-    disconnect(client) {
-      // Release client index
-      this._releaseIndex(client.index);
+    // Listen for checkin information from the client side
+    client.receive('checkin:restart', (index) => {
+      client.index = index;
+
+      this._makeIndexUnavailable(index);
     });
   }
 
-  ... // the rest of the module
+  disconnect(client) {
+    // Release client index
+    this._releaseIndex(client.index);
+  }
 
+  // ... _getIndex, _releaseIndex, _makeIndexUnavailable methods
 }
 ```
