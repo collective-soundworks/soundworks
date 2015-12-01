@@ -153,14 +153,15 @@ function generateDoc() {
     '.gitignore',
     'bin',
     'doc',
-    'examples',
+    'manual',
     'node_modules',
     'README.md',
+    'LICENSE',
     'esdoc.json'
   ];
 
-  toKeep.push(getUmdName());
-  toKeep.push(getMinName());
+  // toKeep.push(getUmdName());
+  // toKeep.push(getMinName());
 
   files.forEach(function(file) {
     if (toKeep.indexOf(file) !== -1) { return; }
@@ -176,8 +177,8 @@ function generateDoc() {
   execSync('git add -A');
   execSync('git commit -am "updated documentation"');
   execSync('git push origin gh-pages --force');
-  execSync('git checkout master');
+  execSync('git checkout develop'); // TODO: remove when stable
+  // execSync('git checkout master'); // TODO: uncomment when stable
   execSync('git branch -D gh-pages');
   try { execSync('git stash pop'); } catch(err) {}
 }
-
