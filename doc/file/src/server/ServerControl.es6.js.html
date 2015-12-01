@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../../">
+  <title data-ice="title">src/server/ServerControl.es6.js | API Document</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  
+  
+  <script src="script/manual.js"></script>
+</head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  <a href="./manual/index.html" data-ice="manualHeaderLink">Manual</a>
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  
+  <a data-ice="repoURL" href="https://github.com/collective-soundworks/soundworks" class="repo-url-github">Repository</a>
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  </ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">src/server/ServerControl.es6.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">&apos;use strict&apos;;
+
+const server = require(&apos;./server&apos;);
+const ServerModule = require(&apos;./ServerModule&apos;);
+// import server from &apos;./server.es6.js&apos;;
+// import ServerModule from &apos;./ServerModule.es6.js&apos;;
+
+/**
+ * The `Control` module is used to control an application through a dedicated client (that we usually call `conductor`).
+ * The module allows for declaring `parameters`, `infos`, and `commands`, through which the `conductor` can control and monitor the state of the application:
+ * - `parameters` are values that are changed by a client, sent to the server, and propagated to the other connected clients (*e.g.* the tempo of a musical application);
+ * - `infos` are values that are changed by the server and propagated to the connected clients, to inform about the current state of the application (*e.g.* the number of connected `player` clients);
+ * - `commands` are messages (without arguments) that are send from the client to the server (*e.g.* `start`, `stop` or `clear` &#x2014; whatever they would mean for a given application) which does the necessary upon reception.
+ *
+ * Optionally, the {@link ClientControl} module can automatically construct a simple interface from the list of declared controls that allows to change `parameters`, display `infos`, and send `commands` to the server.
+ *
+ * The controls of different types are declared on the server side and propagated to the client side when a client is set up.
+ *
+ * The {@link ServerControl} takes care of the parameters and commands on the server side.
+ * To set up controls in a scenario, you should extend this class on the server side and declare the controls specific to that scenario with the appropriate methods.
+ * @example
+ * class Control extends ServerControl {
+ *   constructor(nameArray) {
+ *     super();
+ *
+ *     // Info corresponding to the number of players
+ *     this.addInfo(&apos;numPlayers&apos;, &apos;Number of players&apos;, 0);
+ *     // Number parameter corresponding to the output gain of the players
+ *     this.addNumber(&apos;gain&apos;, &apos;Global gain&apos;, 0, 1, 0.1, 1);
+ *     // Select parameter corresponding to the state of the performance
+ *     this.addSelect(&apos;state&apos;, &apos;State&apos;, [&apos;idle&apos;, &apos;playing&apos;], &apos;idle&apos;);
+ *     // Command to reload the page on all the clients
+ *     this.addCommand(&apos;reload&apos;, &apos;Reload the page of all the clients&apos;);
+ *   }
+ * }
+ *
+ * const control = new Control(guiroNames, soundfieldNames);
+ */
+class ServerControl extends ServerModule {
+// export default class ServerControl extends ServerModule {
+  /**
+   * Creates an instance of the class.
+   * @param {Object} [options={}] Options.
+   * @param {String} [options.name=&apos;control&apos;] Name of the module.
+   */
+  constructor(options = {}) {
+    super(options.name || &apos;control&apos;);
+
+    /**
+     * Dictionary of all the events.
+     * @type {Object}
+     */
+    this.events = {};
+
+    this._clientTypes = [];
+  }
+
+  /**
+   * Adds a number parameter.
+   * @param {String} name Name of the parameter.
+   * @param {String} label Label of the parameter (displayed on the control GUI on the client side).
+   * @param {Number} min Minimum value of the parameter.
+   * @param {Number} max Maximum value of the parameter.
+   * @param {Number} step Step to increase or decrease the parameter value.
+   * @param {Number} init Initial value of the parameter.
+   * @param {String[]} [clientTypes=null] Array of the client types to send the parameter to. If not set, the parameter is sent to all the client types.
+   */
+  addNumber(name, label, min, max, step, init, clientTypes = null) {
+    this.events[name] = {
+      type: &apos;number&apos;,
+      name: name,
+      label: label,
+      min: min,
+      max: max,
+      step: step,
+      value: init,
+      clientTypes: clientTypes
+    };
+  }
+
+  /**
+   * Adds a select parameter.
+   * @param {String} name Name of the parameter.
+   * @param {String} label Label of the parameter (displayed on the control GUI on the client side).
+   * @param {String[]} options Array of the different values the parameter can take.
+   * @param {Number} init Initial value of the parameter (has to be in the `options` array).
+   * @param {String[]} [clientTypes=null] Array of the client types to send the parameter to. If not set, the parameter is sent to all the client types.
+   */
+  addSelect(name, label, options, init, clientTypes = null) {
+    this.events[name] = {
+      type: &apos;select&apos;,
+      name: name,
+      label: label,
+      options: options,
+      value: init,
+      clientTypes: clientTypes
+    };
+  }
+
+  /**
+   * Adds an info parameter.
+   * @param {String} name Name of the parameter.
+   * @param {String} label Label of the parameter (displayed on the control GUI on the client side).
+   * @param {Number} init Initial value of the parameter (has to be in the `options` array).
+   * @param {String[]} [clientTypes=null] Array of the client types to send the parameter to. If not set, the parameter is sent to all the client types.
+   */
+  addInfo(name, label, init, clientTypes = null) {
+    this.events[name] = {
+      type: &apos;info&apos;,
+      name: name,
+      label: label,
+      value: init,
+      clientTypes: clientTypes
+    };
+  }
+
+  /**
+   * Adds a command.
+   * @param {String} name Name of the command.
+   * @param {String} label Label of the command (displayed on the control GUI on the client side).
+   * @param {String[]} [clientTypes=null] Array of the client types to send the parameter to. If not set, the parameter is sent to all the client types.
+   */
+  addCommand(name, label, clientTypes = null) {
+    this.events[name] = {
+      type: &apos;command&apos;,
+      name: name,
+      label: label,
+      value: undefined,
+      clientTypes: clientTypes
+    };
+  }
+
+  _broadcastEvent(event) {
+    let clientTypes = event.clientTypes || this._clientTypes;
+
+    // propagate parameter to clients
+    for (let clientType of clientTypes)
+      server.broadcast(clientType, &apos;control:event&apos;, event.name, event.value);
+
+    this.emit(&apos;control:event&apos;, event.name, event.value);
+  }
+
+  /**
+   * Sends an event to the clients.
+   * @param {String} name Name of the event to send.
+   * @emits &apos;control:event&apos;
+   */
+  send(name) {
+    let event = this.events[name];
+
+    if (event) {
+      this._broadcastEvent(event);
+    } else {
+      console.log(&apos;server control: send unknown event &quot;&apos; + name + &apos;&quot;&apos;);
+    }
+  }
+
+  /**
+   * Updates the value of a parameter and sends it to the clients.
+   * @param {String} name Name of the parameter to update.
+   * @param {(String|Number|Boolean)} value New value of the parameter.
+   */
+  update(name, value) {
+    let event = this.events[name];
+
+    if (event) {
+      event.value = value;
+      this._broadcastEvent(event);
+    } else {
+      console.log(&apos;server control: update unknown event &quot;&apos; + name + &apos;&quot;&apos;);
+    }
+  }
+
+  connect(client) {
+    super.connect(client);
+
+    let clientType = client.type;
+
+    if (this._clientTypes.indexOf(clientType) &lt; 0)
+      this._clientTypes.push(clientType);
+
+    // init control parameters, infos, and commands at client
+    client.receive(&apos;control:request&apos;, () =&gt; {
+      client.send(&apos;control:init&apos;, this.events);
+    });
+
+    // listen to control parameters
+    client.receive(&apos;control:event&apos;, (name, value) =&gt; {
+      this.update(name, value);
+    });
+  }
+}
+
+module.exports = ServerControl;
+</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.4.3)</span></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>

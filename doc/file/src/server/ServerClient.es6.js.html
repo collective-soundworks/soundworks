@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../../">
+  <title data-ice="title">src/server/ServerClient.es6.js | API Document</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  
+  
+  <script src="script/manual.js"></script>
+</head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  <a href="./manual/index.html" data-ice="manualHeaderLink">Manual</a>
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  
+  <a data-ice="repoURL" href="https://github.com/collective-soundworks/soundworks" class="repo-url-github">Repository</a>
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  </ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">src/server/ServerClient.es6.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">&apos;use strict&apos;;
+
+const log = require(&apos;./logger&apos;);
+
+/**
+ * The {@link ServerClient} module is used to keep track of each connected client and to communicate with it via WebSockets.
+ * Each time a client of type `clientType` connects to the server, *Soundworks* creates a new instance of `ServerClient`.
+ * An instance of the class is passed to the `connect` and `disconnect` methods of all the server side modules that are mapped to the `clientType` clients (see {@link server.map}), as well as to the `enter` and `exit` methods of any {@link ServerPerformance} class mapped to that same client type.
+ */
+class ServerClient {
+// export default class ServerClient {
+	/**
+	 * Creates an instance of the class.
+	 * @param {String} clientType Client type of the connected client.
+	 * @param {Socket} socket Socket object used to comminuate with the client.
+	 */
+	constructor(clientType, socket) {
+		/**
+		 * Client type (specified when initializing the {@link client} object on the client side with {@link client.init}).
+		 * @type {String}
+		 */
+    this.type = clientType;
+
+		/**
+		 * Index of the client as set by the {@link ServerCheckin} module.
+		 * @type {Number}
+		 */
+    this.index = -1;
+
+		/**
+		 * Coordinates of the client in the space, stored as an `[x, y]` array.
+		 * @type {Number[]}
+		 */
+    this.coordinates = null;
+
+		/**
+		 * Used by any {@link ServerModule} to associate data to a particular client.
+		 * All the data associated with a module whose `name` is `moduleName` is accessible through the key `moduleName`.
+		 * For instance, the {@link ServerSync} module keeps track of the time offset between the client and the sync clocks in `this.modules.sync.timeOffset`.
+		 * Similarly, a {@link ServerPerformance} module could keep track of each client&apos;s status in `this.modules.myPerformanceName.status`.
+		 * @type {Object}
+		 */
+    this.modules = {};
+
+		/**
+		 * Socket used to communicate with the client.
+		 * @type {Socket}
+		 * @todo make private?
+		 */
+    this.socket = socket;
+  }
+
+	/**
+	 * Sends a WebSocket message to the client.
+	 * @param {String} msg Name of the message.
+	 * @param {...*} args Arguments of the message (as many as needed, of any type).
+	 */
+  send(msg, ...args) {
+    log.trace({ socket: this.socket, clientType: this.type, channel: msg, arguments: args }, &apos;socket.send&apos;);
+    this.socket.emit(msg, ...args);
+  }
+
+	/**
+	 * Sends a volatile WebSocket message to the client, *i.e.* a non-blocking WebSocket message.
+	 * @param {String} msg Name of the message to send.
+	 * @param {...*} args Arguments of the message (as many as needed, of any type).
+	 */
+  sendVolatile(msg, ...args) {
+    log.trace({ socket: this.socket, clientType: this.type, channel: msg, arguments: args }, &apos;socket.sendVolatile&apos;);
+    this.socket.volatile.emit(msg, ...args);
+  }
+
+	/**
+	 * Executes a callback function when it receives a WebSocket message from the client.
+	 * @param {String} msg Name of the received message.
+	 * @param {Function} callback Callback function executed when the message is received.
+	 */
+  receive(msg, callback) {
+    var _callback = (function(...args) {
+      log.trace({ socket: this.socket, clientType: this.type, channel: msg, arguments: args }, &apos;socket.receive&apos;);
+      callback.apply(this.socket, args);
+    }).bind(this);
+
+    this.socket.on(msg, _callback);
+  }
+
+	/**
+	 * Sends a WebSocket message to all the other clients of the same type (*i.e.* all the clients of type `this.clientType`, excluding this client).
+	 * @param {String} msg Name of the message to broadcast.
+	 * @param {...*} args Arguments of the message (as many as needed, of any type).
+	 */
+  broadcast(msg, ...args) {
+    log.trace({ socket: this.socket, clientType: this.type, channel: msg, arguments: args }, &apos;socket.broadcast&apos;);
+    this.socket.broadcast.emit(msg, ...args);
+  }
+}
+
+module.exports = ServerClient;
+</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.4.3)</span></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>

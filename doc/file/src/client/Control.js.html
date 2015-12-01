@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../../">
+  <title data-ice="title">src/client/Control.js | API Document</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  
+  
+  <script src="script/manual.js"></script>
+</head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  <a href="./manual/index.html" data-ice="manualHeaderLink">Manual</a>
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  
+  <a data-ice="repoURL" href="https://github.com/collective-soundworks/soundworks" class="repo-url-github">Repository</a>
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">client</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/Checkin.js~Checkin.html">Checkin</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/Control.js~Control.html">Control</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/Dialog.js~Dialog.html">Dialog</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/Filelist.js~Filelist.html">Filelist</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/Loader.js~Loader.html">Loader</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/Locator.js~Locator.html">Locator</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/Module.js~Module.html">Module</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/Orientation.js~Orientation.html">Orientation</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/Performance.js~Performance.html">Performance</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/Placer.js~Placer.html">Placer</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/Platform.js~Platform.html">Platform</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/Selector.js~Selector.html">Selector</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/Setup.js~Setup.html">Setup</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/Space.js~Space.html">Space</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/client/Sync.js~Sync.html">Sync</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">server</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/Checkin.js~Checkin.html">Checkin</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/Client.js~Client.html">Client</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/Control.js~Control.html">Control</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/Filelist.js~FileList.html">FileList</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/Locator.js~Locator.html">Locator</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/Module.js~Module.html">Module</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/Performance.js~Performance.html">Performance</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/Placer.js~Placer.html">Placer</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/Setup.js~Setup.html">Setup</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/server/Sync.js~Sync.html">Sync</a></span></span></li>
+</ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">src/client/Control.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import client from &apos;./client&apos;;
+import Module from &apos;./Module&apos;;
+
+/**
+ * @private
+ */
+class ControlEvent {
+  constructor(type, name, label) {
+    this.type = type;
+    this.name = name;
+    this.label = label;
+    this.value = undefined;
+  }
+
+  set(val) {
+
+  }
+
+  send() {
+    client.send(&apos;control:event&apos;, this.name, this.value);
+  }
+}
+
+/**
+ * @private
+ */
+class ControlNumber extends ControlEvent {
+  constructor(init, view = null) {
+    super(&apos;number&apos;, init.name, init.label);
+    this.min = init.min;
+    this.max = init.max;
+    this.step = init.step;
+    this.box = null;
+
+    if (view) {
+      let box = this.box = document.createElement(&apos;input&apos;);
+      box.setAttribute(&apos;id&apos;, this.name + &apos;-box&apos;);
+      box.setAttribute(&apos;type&apos;, &apos;number&apos;);
+      box.setAttribute(&apos;min&apos;, this.min);
+      box.setAttribute(&apos;max&apos;, this.max);
+      box.setAttribute(&apos;step&apos;, this.step);
+      box.setAttribute(&apos;size&apos;, 16);
+
+      box.onchange = (() =&gt; {
+        let val = Number(box.value);
+        this.set(val);
+        this.send();
+      });
+
+      let incrButton = document.createElement(&apos;button&apos;);
+      incrButton.setAttribute(&apos;id&apos;, this.name + &apos;-incr&apos;);
+      incrButton.setAttribute(&apos;width&apos;, &apos;0.5em&apos;);
+      incrButton.innerHTML = &apos;&gt;&apos;;
+      incrButton.onclick = (() =&gt; {
+        this.incr();
+        this.send();
+      });
+
+      let decrButton = document.createElement(&apos;button&apos;);
+      decrButton.setAttribute(&apos;id&apos;, this.name + &apos;-descr&apos;);
+      decrButton.style.width = &apos;0.5em&apos;;
+      decrButton.innerHTML = &apos;&lt;&apos;;
+      decrButton.onclick = (() =&gt; {
+        this.decr();
+        this.send();
+      });
+
+      let label = document.createElement(&apos;span&apos;);
+      label.innerHTML = this.label + &apos;: &apos;;
+
+      let div = document.createElement(&apos;div&apos;);
+      div.appendChild(label);
+      div.appendChild(decrButton);
+      div.appendChild(box);
+      div.appendChild(incrButton);
+      div.appendChild(document.createElement(&apos;br&apos;));
+
+      view.appendChild(div);
+    }
+
+    this.set(init.value);
+  }
+
+  set(val, send = false) {
+    this.value = Math.min(this.max, Math.max(this.min, val));
+
+    if (this.box)
+      this.box.value = val;
+  }
+
+  incr() {
+    let steps = Math.floor(this.value / this.step + 0.5);
+    this.set(this.step * (steps + 1));
+  }
+
+  decr() {
+    let steps = Math.floor(this.value / this.step + 0.5);
+    this.set(this.step * (steps - 1));
+  }
+}
+
+class ControlSelect extends ControlEvent {
+  constructor(init, view = null) {
+    super(&apos;select&apos;, init.name, init.label);
+    this.options = init.options;
+    this.box = null;
+
+    if (view) {
+      let box = this.box = document.createElement(&apos;select&apos;);
+      box.setAttribute(&apos;id&apos;, this.name + &apos;-box&apos;);
+
+      for (let option of this.options) {
+        let optElem = document.createElement(&quot;option&quot;);
+        optElem.value = option;
+        optElem.text = option;
+        box.appendChild(optElem);
+      }
+
+      box.onchange = (() =&gt; {
+        this.set(box.value);
+        this.send();
+      });
+
+      let incrButton = document.createElement(&apos;button&apos;);
+      incrButton.setAttribute(&apos;id&apos;, this.name + &apos;-incr&apos;);
+      incrButton.setAttribute(&apos;width&apos;, &apos;0.5em&apos;);
+      incrButton.innerHTML = &apos;&gt;&apos;;
+      incrButton.onclick = (() =&gt; {
+        this.incr();
+        this.send();
+      });
+
+      let decrButton = document.createElement(&apos;button&apos;);
+      decrButton.setAttribute(&apos;id&apos;, this.name + &apos;-descr&apos;);
+      decrButton.style.width = &apos;0.5em&apos;;
+      decrButton.innerHTML = &apos;&lt;&apos;;
+      decrButton.onclick = (() =&gt; {
+        this.decr();
+        this.send();
+      });
+
+      let label = document.createElement(&apos;span&apos;);
+      label.innerHTML = this.label + &apos;: &apos;;
+
+      let div = document.createElement(&apos;div&apos;);
+      div.appendChild(label);
+      div.appendChild(decrButton);
+      div.appendChild(box);
+      div.appendChild(incrButton);
+      div.appendChild(document.createElement(&apos;br&apos;));
+
+      view.appendChild(div);
+    }
+
+    this.set(init.value);
+  }
+
+  set(val, send = false) {
+    let index = this.options.indexOf(val);
+
+    if (index &gt;= 0) {
+      this.value = val;
+      this.index = index;
+
+      if (this.box)
+        this.box.value = val;
+    }
+  }
+
+  incr() {
+    this.index = (this.index + 1) % this.options.length;
+    this.set(this.options[this.index]);
+  }
+
+  decr() {
+    this.index = (this.index + this.options.length - 1) % this.options.length;
+    this.set(this.options[this.index]);
+  }
+}
+
+class ControlInfo extends ControlEvent {
+  constructor(init, view = null) {
+    super(&apos;info&apos;, init.name, init.label);
+    this.box = null;
+
+    if (view) {
+      let box = this.box = document.createElement(&apos;span&apos;);
+      box.setAttribute(&apos;id&apos;, this.name + &apos;-box&apos;);
+
+      let label = document.createElement(&apos;span&apos;);
+      label.innerHTML = this.label + &apos;: &apos;;
+
+      let div = document.createElement(&apos;div&apos;);
+      div.appendChild(label);
+      div.appendChild(box);
+      div.appendChild(document.createElement(&apos;br&apos;));
+
+      view.appendChild(div);
+    }
+
+    this.set(init.value);
+  }
+
+  set(val) {
+    this.value = val;
+
+    if (this.box)
+      this.box.innerHTML = val;
+  }
+}
+
+class ControlCommand extends ControlEvent {
+  constructor(init, view = null) {
+    super(&apos;command&apos;, init.name, init.label);
+
+    if (view) {
+      let div = document.createElement(&apos;div&apos;);
+      div.setAttribute(&apos;id&apos;, this.name + &apos;-btn&apos;);
+      div.classList.add(&apos;command&apos;);
+      div.innerHTML = this.label;
+
+      div.onclick = (() =&gt; {
+        this.send();
+      });
+
+      view.appendChild(div);
+      view.appendChild(document.createElement(&apos;br&apos;));
+    }
+  }
+}
+
+/**
+ * [client] Manage the global `parameters`, `infos`, and `commands` across the whole scenario.
+ *
+ * The module keeps track of:
+ * - `parameters`: values that can be updated by the actions of the clients (*e.g.* the gain of a synth);
+ * - `infos`: information about the state of the scenario (*e.g.* number of clients in the performance);
+ * - `commands`: can trigger an action (*e.g.* reload the page).
+ *
+ * If the module is instantiated with the `gui` option set to `true`, it constructs a graphical interface to modify the parameters, view the infos, and trigger the commands.
+ * Otherwise (`gui` option set to `false`) the module emits an event when it receives updated values from the server.
+ *
+ * When the GUI is disabled, the module finishes its initialization immediately after having set up the controls.
+ * Otherwise (GUI enabled), the modules remains in its state and never finishes its initialization.
+ *
+ * When the module a view (`gui` option set to `true`), it requires the SASS partial `_77-checkin.scss`.
+ *
+ * (See also {@link src/server/Control.js~Control} on the server side.)
+ *
+ * @example // Example 1: make a client that displays the control GUI
+ * const control = new Control();
+ *
+ * // Initialize the client (indicate the client type)
+ * client.init(&apos;conductor&apos;); // accessible at the URL /conductor
+ *
+ * // Start the scenario
+ * // For this client type (`&apos;conductor&apos;`), there is only one module
+ * client.start(control);
+ *
+ * @example // Example 2: listen for parameter, infos &amp; commands updates
+ * const control = new Control({ gui: false });
+ *
+ * // Listen for parameter, infos or command updates
+ * control.on(&apos;control:event&apos;, (name, value) =&gt; {
+ *   switch(name) {
+ *     case &apos;synth:gain&apos;:
+ *       console.log(`Update the synth gain to value #{value}.`);
+ *       break;
+ *     case &apos;reload&apos;:
+ *       window.location.reload(true);
+ *       break;
+ *   }
+ * });
+ *
+ * // Get current value of a parameter or info
+ * const currentSynthGainValue = control.event[&apos;synth:gain&apos;].value;
+ * const currentNumPlayersValue = control.event[&apos;numPlayers&apos;].value;
+ */
+export default class Control extends Module {
+  /**
+   * @param {Object} [options={}] Options.
+   * @param {String} [options.name=&apos;sync&apos;] Name of the module.
+   * @param {String} [options.color=&apos;black&apos;] Background color of the `view`.
+   * @param {Boolean} [options.gui=true] Indicates whether to create the graphical user interface to control the parameters or not.
+   * @emits {&apos;control:event&apos;} when the server sends an update. The callback function takes `name:String` and `value:*` as arguments, where `name` is the name of the parameter / info / command, and `value` its new value.
+   */
+  constructor(options = {}) {
+    super(options.name || &apos;control&apos;, (options.gui === true), options.color);
+
+    /**
+     * Dictionary of all the parameters and commands.
+     * @type {Object}
+     */
+    this.events = {};
+
+    let view = this._ownsView ? this.view : null;
+
+    client.receive(&apos;control:init&apos;, (events) =&gt; {
+      if (view) {
+        let title = document.createElement(&apos;h1&apos;);
+        title.innerHTML = &apos;Conductor&apos;;
+        view.appendChild(title);
+      }
+
+      for (let key of Object.keys(events)) {
+        let event = events[key];
+
+        switch (event.type) {
+          case &apos;number&apos;:
+            this.events[key] = new ControlNumber(event, view);
+            break;
+
+          case &apos;select&apos;:
+            this.events[key] = new ControlSelect(event, view);
+            break;
+
+          case &apos;info&apos;:
+            this.events[key] = new ControlInfo(event, view);
+            break;
+
+          case &apos;command&apos;:
+            this.events[key] = new ControlCommand(event, view);
+            break;
+        }
+      }
+
+      if (!view)
+        this.done();
+    });
+
+    // listen to events
+    client.receive(&apos;control:event&apos;, (name, val) =&gt; {
+      let event = this.events[name];
+
+      if (event) {
+        event.set(val);
+        this.emit(&apos;control:event&apos;, name, val);
+      }
+      else
+        console.log(&apos;client control: received unknown event &quot;&apos; + name + &apos;&quot;&apos;);
+    });
+  }
+
+  /**
+   * Starts the module and requests the parameters to the server.
+   */
+  start() {
+    super.start();
+    client.send(&apos;control:request&apos;);
+  }
+
+  /**
+   * Restarts the module and requests the parameters to the server.
+   */
+  restart() {
+    super.restart();
+    client.send(&apos;control:request&apos;);
+  }
+
+  /**
+   * Sends a value or command to the server.
+   * @param {String} name Name of the parameter or command to send.
+   * @todo is this method useful?
+   */
+  send(name) {
+    const event = this.events[name];
+
+    if (event) {
+      event.send();
+    }
+  }
+
+  /**
+   * Updates the value of a parameter.
+   * @param {String} name Name of the parameter to update.
+   * @param {(String|Number|Boolean)} val New value of the parameter.
+   */
+  update(name, val) {
+    const event = this.events[name];
+
+    if (event) {
+      event.set(val);
+      event.send();
+    }
+  }
+}
+</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.4.3)</span></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>

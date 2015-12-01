@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../">
+  <title data-ice="title">Tutorial</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  
+  
+  <script src="script/manual.js"></script>
+</head>
+<body class="layout-container manual-root" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  <a href="./manual/index.html" data-ice="manualHeaderLink">Manual</a>
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  
+  <a data-ice="repoURL" href="https://github.com/collective-soundworks/soundworks" class="repo-url-github">Repository</a>
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div class="manual-toc-root">
+  
+<div data-ice="manual" data-toc-name="overview">
+    <h1 class="manual-toc-title"><a href="manual/overview.html" data-ice="title">Overview</a></h1>
+    <ul class="manual-toc">
+      
+    <li data-ice="manualNav" class="indent-h1"><span class="manual-dot"></span><a href="manual/overview.html#presentation" data-ice="link">Presentation</a></li>
+<li data-ice="manualNav" class="indent-h2"><span class="manual-dot"></span><a href="manual/overview.html#before-getting-started-" data-ice="link">Before getting started&#x2026;</a></li>
+<li data-ice="manualNav" class="indent-h2"><span class="manual-dot"></span><a href="manual/overview.html#-go-" data-ice="link">&#x2026; go!</a></li>
+<li data-ice="manualNav" class="indent-h1"><span class="manual-dot"></span><a href="manual/overview.html#authors" data-ice="link">Authors</a></li>
+<li data-ice="manualNav" class="indent-h1"><span class="manual-dot"></span><a href="manual/overview.html#license" data-ice="link">License</a></li>
+</ul>
+  </div>
+<div data-ice="manual" data-toc-name="tutorial">
+    <h1 class="manual-toc-title"><a href="manual/tutorial.html" data-ice="title">Tutorial</a></h1>
+    <ul class="manual-toc">
+      
+    <li data-ice="manualNav" class="indent-h1"><span class="manual-dot"></span><a href="manual/tutorial.html#cheat-sheet" data-ice="link">Cheat sheet</a></li>
+<li data-ice="manualNav" class="indent-h2"><span class="manual-dot"></span><a href="manual/tutorial.html#client-side" data-ice="link">Client side</a></li>
+<li data-ice="manualNav" class="indent-h2"><span class="manual-dot"></span><a href="manual/tutorial.html#server-side" data-ice="link">Server side</a></li>
+<li data-ice="manualNav" class="indent-h1"><span class="manual-dot"></span><a href="manual/tutorial.html#creating-a-scenario" data-ice="link">Creating a scenario</a></li>
+<li data-ice="manualNav" class="indent-h2"><span class="manual-dot"></span><a href="manual/tutorial.html#1-create-a-new-soundworks-project" data-ice="link">1. Create a new Soundworks project</a></li>
+<li data-ice="manualNav" class="indent-h2"><span class="manual-dot"></span><a href="manual/tutorial.html#2-client-side" data-ice="link">2. Client side</a></li>
+<li data-ice="manualNav" class="indent-h3"><span class="manual-dot"></span><a href="manual/tutorial.html#2-1-setting-up-the-ejs-file" data-ice="link">2.1 Setting up the EJS file</a></li>
+<li data-ice="manualNav" class="indent-h3"><span class="manual-dot"></span><a href="manual/tutorial.html#2-2-writing-our-scenario-in-javascript-using-modules" data-ice="link">2.2 Writing our scenario in Javascript using modules</a></li>
+<li data-ice="manualNav" class="indent-h4"><span class="manual-dot"></span><a href="manual/tutorial.html#initialization" data-ice="link">Initialization</a></li>
+<li data-ice="manualNav" class="indent-h4"><span class="manual-dot"></span><a href="manual/tutorial.html#welcome-module" data-ice="link">Welcome module</a></li>
+<li data-ice="manualNav" class="indent-h4"><span class="manual-dot"></span><a href="manual/tutorial.html#checkin-module" data-ice="link">Checkin module</a></li>
+<li data-ice="manualNav" class="indent-h4"><span class="manual-dot"></span><a href="manual/tutorial.html#loader-module" data-ice="link">Loader module</a></li>
+<li data-ice="manualNav" class="indent-h4"><span class="manual-dot"></span><a href="manual/tutorial.html#performance-module" data-ice="link">Performance module</a></li>
+<li data-ice="manualNav" class="indent-h4"><span class="manual-dot"></span><a href="manual/tutorial.html#module-logic" data-ice="link">Module logic</a></li>
+<li data-ice="manualNav" class="indent-h3"><span class="manual-dot"></span><a href="manual/tutorial.html#2-3-writing-the-sass-file-s-for-styling" data-ice="link">2.3 Writing the SASS file(s) for styling</a></li>
+<li data-ice="manualNav" class="indent-h2"><span class="manual-dot"></span><a href="manual/tutorial.html#3-server-side" data-ice="link">3. Server side</a></li>
+<li data-ice="manualNav" class="indent-h2"><span class="manual-dot"></span><a href="manual/tutorial.html#4-run-" data-ice="link">4. Run!</a></li>
+</ul>
+  </div>
+<div data-ice="manual" data-toc-name="usage">
+    <h1 class="manual-toc-title"><a href="manual/usage.html" data-ice="title">Usage</a></h1>
+    <ul class="manual-toc">
+      
+    <li data-ice="manualNav" class="indent-h1"><span class="manual-dot"></span><a href="manual/usage.html#client-server-architecture-urls-and-routes" data-ice="link">Client / server architecture, URLs and routes</a></li>
+<li data-ice="manualNav" class="indent-h1"><span class="manual-dot"></span><a href="manual/usage.html#directory-structure" data-ice="link">Directory structure</a></li>
+<li data-ice="manualNav" class="indent-h1"><span class="manual-dot"></span><a href="manual/usage.html#build" data-ice="link">Build</a></li>
+<li data-ice="manualNav" class="indent-h1"><span class="manual-dot"></span><a href="manual/usage.html#modules-provided-by-the-library" data-ice="link">Modules provided by the library</a></li>
+</ul>
+  </div>
+<div data-ice="manual" data-toc-name="example">
+    <h1 class="manual-toc-title"><a href="manual/example.html" data-ice="title">Example</a></h1>
+    <ul class="manual-toc">
+      
+    <li data-ice="manualNav" class="indent-h1"><span class="manual-dot"></span><a href="manual/example.html#example-of-the-checkin-module-simplified-version-" data-ice="link">Example of the Checkin module (simplified version)</a></li>
+<li data-ice="manualNav" class="indent-h2"><span class="manual-dot"></span><a href="manual/example.html#client-side" data-ice="link">Client side</a></li>
+<li data-ice="manualNav" class="indent-h2"><span class="manual-dot"></span><a href="manual/example.html#server-side" data-ice="link">Server side</a></li>
+</ul>
+  </div>
+<div data-ice="manual" data-toc-name="reference">
+    <h1 class="manual-toc-title"><a href="identifiers.html" data-ice="title">Reference</a></h1>
+    <ul class="manual-toc">
+      
+    <li data-ice="manualNav" class="indent-h1"><span class="manual-dot"></span><a href="identifiers.html#class" data-ice="link">Class</a></li>
+</ul>
+  </div>
+<div data-ice="manual" data-toc-name="changelog">
+    <h1 class="manual-toc-title"><a href="manual/changelog.html" data-ice="title">Changelog</a></h1>
+    <ul class="manual-toc">
+      
+    </ul>
+  </div>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><div class="github-markdown">
+  <div class="manual-breadcrumb-list">
+    <a href="./manual/./index.html">Manual</a>
+    <span>&#xBB;</span>
+    <span data-ice="title">Tutorial</span>
+  </div>
+  <div data-ice="content"><h1 id="cheat-sheet">Cheat sheet</h1>
+<p>In a nutshel, here is what you have to do to write your Javascript code (in <code>src/client/clientType/index.js</code> and <code>src/server/index.js</code>).</p>
+<h2 id="client-side">Client side</h2>
+<ul>
+<li>Initialize the client and specify its client type with <code>client.init(&apos;clientType&apos;)</code> (<a href="#initialization">more information here</a>);</li>
+<li>Create a module for the performance with <code>class MyPerformance extends Performance { ... }</code> (<a href="#performance-module">more information here</a>);</li>
+<li>Instantiate all the modules;</li>
+<li>Start the scenario and link the modules in the <code>client.start(...)</code> method (<a href="#module-logic">more information here</a>).</li>
+</ul>
+<h2 id="server-side">Server side</h2>
+<ul>
+<li>Create a module for the performance with <code>class MyPerformance extends Performance { ... }</code>.</li>
+<li>Instantiate all the modules that serve the client;</li>
+<li>Start the server with <code>server.start(app)</code> and map the modules to the types of clients that require them with <code>server.map(...)</code> (<a href="#server-side">more information here</a>).</li>
+</ul>
+<h1 id="creating-a-scenario">Creating a scenario</h1>
+<p>In this section, we will go through the making of the <a href="https://github.com/collective-soundworks/soundworks-template"><code>soundworks-template</code></a> scenario step by step (let&apos;s call it <em>My Scenario</em>).</p>
+<p>In <em>My Scenario</em>, any client that connects to the server through the root URL (<code>http://my.server.address:port/</code>) plays a sound when joining the performance, and plays another sound when other clients connect to the server.
+Consequently, we will focus on <em>Soundworks</em>&#x2019; default client type (<code>&apos;player&apos;</code>), which is by default the type of all the clients that connect to the server through the root URL.</p>
+<h2 id="1-create-a-new-soundworks-project">1. Create a new <em>Soundworks</em> project</h2>
+<p>Let&#x2019;s create a new <em>Soundworks</em> project.
+Don&apos;t forget to include the <code>bin/scripts</code> file, and the <code>&apos;scripts&apos;</code> property of <code>package.json</code> as found in the <a href="https://github.com/collective-soundworks/soundworks-template"><code>soundworks-template</code></a> repository.
+The directory structure should be the following:</p>
+<pre><code><code class="source-code prettyprint">my-scenario/
+&#x251C;&#x2500;&#x2500; bin/
+&#x2502;   &#x2514;&#x2500;&#x2500; scripts
+&#x251C;&#x2500;&#x2500; public/
+&#x2502;   &#x251C;&#x2500;&#x2500; css/
+&#x2502;   &#x251C;&#x2500;&#x2500; fonts/
+&#x2502;   &#x2502;   &#x251C;&#x2500;&#x2500; Quicksand-Bold.ttf
+&#x2502;   &#x2502;   &#x251C;&#x2500;&#x2500; Quicksand-Light.ttf
+&#x2502;   &#x2502;   &#x2514;&#x2500;&#x2500; Quicksand-Regular.ttf
+&#x2502;   &#x251C;&#x2500;&#x2500; js/
+&#x2502;   &#x2514;&#x2500;&#x2500; sounds/
+&#x2502;       &#x251C;&#x2500;&#x2500; sound-other.mp3
+&#x2502;       &#x2514;&#x2500;&#x2500; sound-welcome.mp3
+&#x251C;&#x2500;&#x2500; sass/
+&#x2502;   &#x2514;&#x2500;&#x2500; player.scss
+&#x251C;&#x2500;&#x2500; src/
+&#x2502;   &#x251C;&#x2500;&#x2500; client/
+&#x2502;   &#x2502;   &#x2514;&#x2500;&#x2500; player/
+&#x2502;   &#x2502;       &#x251C;&#x2500;&#x2500; index.js
+&#x2502;   &#x2502;       &#x2514;&#x2500;&#x2500; PlayerPerformance.js
+&#x2502;   &#x2514;&#x2500;&#x2500; server/
+&#x2502;       &#x251C;&#x2500;&#x2500; index.js
+&#x2502;       &#x2514;&#x2500;&#x2500; PlayerPerformance.js
+&#x251C;&#x2500;&#x2500; views/
+&#x2502;   &#x2514;&#x2500;&#x2500; player.ejs
+&#x251C;&#x2500;&#x2500; package.json
+&#x2514;&#x2500;&#x2500; README.md</code>
+</code></pre><h2 id="2-client-side">2. Client side</h2>
+<p>On the client side, there are three things we need to do:</p>
+<ul>
+<li>Set up the EJS file that will generate the HTML;</li>
+<li>Write the Javascript code;</li>
+<li>And write the SASS files that will generate the CSS.</li>
+</ul>
+<h3 id="2-1-setting-up-the-ejs-file">2.1 Setting up the EJS file</h3>
+<p>Let&#x2019;s start with the easy part, the EJS file located in <code>my-scenario/views/player.ejs</code>.</p>
+<pre><code class="lang-html"><code class="source-code prettyprint">&lt;!doctype html5&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;!-- settings --&gt;
+    &lt;meta charset=&quot;utf-8&quot;&gt;
+    &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no&quot;&gt;
+
+    &lt;!-- title --&gt;
+    &lt;title&gt;My scenario&lt;/title&gt;
+
+    &lt;!-- stylesheets --&gt;
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;css/player.css&quot;&gt;
+  &lt;/head&gt;
+
+  &lt;body&gt;
+    &lt;div id=&quot;container&quot; class=&quot;container&quot;&gt;&lt;/div&gt;
+    &lt;script src=&quot;js/player.js&quot;&gt;&lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code>
+</code></pre>
+<p>The most important things here are:</p>
+<ul>
+<li>To load the <code>stylesheets/player.css</code> stylesheet that will be generated by the SASS file we&#x2019;ll write later;</li>
+<li>To load the <code>js/player.js</code> Javascript file;</li>
+<li>And to have a <code>div</code> element in the <code>body</code> that has the ID <code>#container</code> and a class <code>.container</code>.</li>
+</ul>
+<h3 id="2-2-writing-our-scenario-in-javascript-using-modules">2.2 Writing our scenario in Javascript using modules</h3>
+<p>Now let&#x2019;s write the core of our scenario in the <code>src/client/player/index.js</code> file.
+This is the file that is loaded by any client who connects to the server through the root URL <code>http://my.server.address:port/</code>.
+Such a client is called <code>&apos;player&apos;</code>.</p>
+<p>A scenario built with <em>Soundworks</em> consists in a succession of steps made of combinations of modules. Step by step, this is how the scenario will look like when a participant connects to the server through that URL:</p>
+<ul>
+<li>The screen displays a <code>welcome</code> screen that the user has to click to enter the scenario;</li>
+<li>In the background, the client goes through a <code>checkin</code> process with the server while a <code>loader</code> loads the audio files to play;</li>
+<li>Finally, when these initialization steps are finished, the user enters the <code>performance</code> in which the smartphone plays the welcome sound, and plays another sound when another client connect to the server.</li>
+</ul>
+<h4 id="initialization">Initialization</h4>
+<p>First of all, let&#x2019;s load the library and initialize the client.</p>
+<pre><code class="lang-javascript"><code class="source-code prettyprint">// Import Soundworks library modules (client side)
+import { client, Checkin, Dialog, Loader, Performance } from &apos;soundworks/client&apos;;
+
+// Initialize the client type
+client.init(&apos;player&apos;);</code>
+</code></pre>
+<p>The client type here <code>&apos;player&apos;</code> because we are editing the Javascript file for the <code>&apos;player&apos;</code> clients who connect to the server through the root URL.</p>
+<p>Then, all the scenario will happen when the HTML document is ready, so let&#x2019;s wrap all the scenario logic in a callback function.</p>
+<pre><code class="lang-javascript"><code class="source-code prettyprint">window.addEventListener(&apos;load&apos;, () =&gt; {
+  // Scenario logic
+  ...
+});</code>
+</code></pre>
+<h4 id="welcome-module">Welcome module</h4>
+<p>The <code>welcome</code> module displays a text to welcome the users who connect to the server.
+We also ask the users to click on the screen to hide this screen and start the scenario.
+Under the hood, we use this click to activate the Web Audio API on iOS devices (on iOS, sound is muted until a user action triggers some audio commands).
+This is exactly what the <a href="./manual/../class/src/client/Dialog.js~Dialog.html"><code>Dialog</code></a> module is made for.</p>
+<pre><code class="lang-javascript"><code class="source-code prettyprint">window.addEventListener(&apos;load&apos;, () =&gt; {
+
+  const welcome = new Dialog({
+    name: &apos;welcome&apos;,
+    text: &quot;&lt;p&gt;Welcome to &lt;b&gt;My Scenario&lt;/b&gt;.&lt;/p&gt; &lt;p&gt;Touch the screen to join!&lt;/p&gt;&quot;,
+    activateAudio: true
+  });
+
+  ... // the rest of the scenario logic
+});</code>
+</code></pre>
+<p>Here:</p>
+<ul>
+<li>The <code>name</code> parameter corresponds to the <code>id</code> attribute and a class of the HTML element in which the content of the module is displayed (the <code>view</code>);</li>
+<li>The <code>text</code> parameter contains the text to display on the screen when the module is displayed;</li>
+<li>Finally, the property <code>activateAudio</code> is set to <code>true</code> to enable the sound on iOS devices as well as to start the Web Audio clock (that will be required for the synchronization process).</li>
+</ul>
+<p><strong>Note:</strong> this step is required in almost any scenario, to activate the Web Audio on iOS devices.</p>
+<h4 id="checkin-module">Checkin module</h4>
+<p>The <a href="./manual/../class/src/client/Checkin.js~Checkin.html"><code>Checkin</code></a> module allows the client to register on the server and to get an ID (<em>i.e.</em> an index) that we can refer to later.</p>
+<pre><code class="lang-javascript"><code class="source-code prettyprint">window.addEventListener(&apos;load&apos;, () =&gt; {
+  ... // what we&apos;ve done already
+
+  const checkin = new Checkin();
+
+  ... // the rest of the scenario logic
+});</code>
+</code></pre>
+<h4 id="loader-module">Loader module</h4>
+<p>The <a href="./manual/../class/src/client/Loader.js~Loader.html"><code>Loader</code></a> module allows the client to load audio files from the public folder.</p>
+<pre><code class="lang-javascript"><code class="source-code prettyprint">// Paths to the audio files in the public folder
+const audioFiles = [&apos;sounds/sound-welcome.mp3&apos;, &apos;sounds/sound-others.mp3&apos;];
+
+window.addEventListener(&apos;load&apos;, () =&gt; {
+  ... // what we&apos;ve done already
+
+  const loader = new clientSide.Loader({ files: audioFiles });
+
+  ... // the rest of the scenario logic
+});</code>
+</code></pre>
+<h4 id="performance-module">Performance module</h4>
+<p>To create the performance, we have to write our own module <code>PlayerPerformance</code> by extending the <a href="./manual/../class/src/client/Performance.js~Performance.html"><code>Performance</code></a> base class.</p>
+<p>In the constructor, we keep the <code>options</code> argument from the base class, and we also pass in the <code>loader</code> module since we&#x2019;ll have to access the <code>audioBuffers</code> attribute to play the files in the performance.</p>
+<pre><code class="lang-javascript"><code class="source-code prettyprint">class PlayerPerformance extends Performance {
+  constructor(loader, options = {}) {
+    super(options); // same behavior as the base class
+
+    this._loader = loader; // the loader module
+  }
+
+  ... // the rest of the class
+}</code>
+</code></pre>
+<p>Then, we write the <code>start</code> method that is called when the performance starts.
+We want that method to play a sound immediately, and when we receive a message from the server.</p>
+<pre><code class="lang-javascript"><code class="source-code prettyprint">class PlayerPerformance extends Performance {
+  ... // the constructor
+
+  start() {
+    super.start(); // don&apos;t forget this
+
+    // Play the welcome sound immediately
+    let src = audioContext.createBufferSource();
+    src.buffer = this._loader.buffers[0]; // get first buffer from loader
+    src.connect(audioContext.destination);
+    src.start(audioContext.currentTime);
+
+    // Play another sound when we receive a message from the server (that
+    // indicates that another client joined the performance)
+    client.receive(&apos;performance:play&apos;, () =&gt; {
+      let src = audioContext.createBufferSource();
+      src.buffer = this._loader.buffers[1]; // get second buffer from loader
+      src.connect(audioContext.destination);
+      src.start(audioContext.currentTime);
+    });
+  }
+}</code>
+</code></pre>
+<p><strong>Note:</strong> in theory, we would need to call the <a href="./manual/../class/src/client/Module.js~Module.html#done"><code>Module#done</code></a> method when the module has finished its initialization to be able to go on to the following steps of the scenario.
+However, since the <code>performance</code> is the last step of <em>My Scenario</em>, we don&#x2019;t need to do it here.</p>
+<h4 id="module-logic">Module logic</h4>
+<p>Now let&#x2019;s glue everything together: to run a sequence of modules in series, we use the <code>serial(module1, module2, ...)</code> function.
+On the other hand, to run modules in parallel, we use the <code>parallel(module1, module2, ...)</code> function.
+(For more information about this, please refer to the <a href="./manual/../class/src/client/client.js~client.html"><code>client</code></a> object documentation.)</p>
+<p>Here we go:</p>
+<pre><code class="lang-javascript"><code class="source-code prettyprint">window.addEventListener(&apos;load&apos;, () =&gt; {
+  // Instantiate the modules
+  const welcome = new Dialog({
+    name: &apos;welcome&apos;,
+    text: `&lt;p&gt;Welcome to &lt;b&gt;My Scenario&lt;/b&gt;.&lt;/p&gt;
+           &lt;p&gt;Touch the screen to join!&lt;/p&gt;`,
+    activateAudio: true
+  });
+  const checkin = new Checkin();
+  const loader = new Loader({ files: audioFiles });
+  const performance = new PlayerPerformance(loader);
+
+  // Start the scenario and order the modules
+  client.start((serial, parallel) =&gt;
+    serial(
+      // Initialization step: we launch in parallel the welcome module,
+      // the loading of the files, and the checkin
+      parallel(welcome, loader, checkin),
+      // When the initialization step is done, we launch the performance
+      performance
+    );
+  );
+});</code>
+</code></pre>
+<h3 id="2-3-writing-the-sass-file-s-for-styling">2.3 Writing the SASS file(s) for styling</h3>
+<p>The last thing we have to do on the client side is to write the SASS file(s) that will generate the <code>public/css/player.css</code> file.</p>
+<p>The template contains all the library&apos;s SASS files (in the <code>sass/</code> folder), including the general styling partials and the module specific partials.</p>
+<p>Among them, there are four SASS partials that we&#x2019;ll always need in any scenario (the generic partials):</p>
+<ul>
+<li><code>_01-reset.scss</code>, that resets the CSS rules of several DOM elements;</li>
+<li><code>_02-fonts.scss</code>, that sets up the Quicksand font;</li>
+<li><code>_03-colors.scss</code>, that sets up some color SASS variables;</li>
+<li><code>_04-general.scss</code>, that sets up the general CSS that is common to all the modules.</li>
+</ul>
+<p>Then, we notice that in <code>player/index.js</code>, we used 3 different modules from the library: <code>Dialog</code> for the <code>welcome</code> module, <code>Checkin</code> for the <code>checkin</code> module, and <code>Loader</code> for the <code>loader</code> module. Among these, the <code>Checkin</code> and the <code>Loader</code> require a SASS partial.</p>
+<p>So there we go, let&#x2019;s write our <code>src/sass/player.css</code> file by requiring the partials we need.</p>
+<pre><code class="lang-sass"><code class="source-code prettyprint">// General styling
+@import &apos;01-reset&apos;;
+@import &apos;02-fonts&apos;;
+@import &apos;03-colors&apos;;
+@import &apos;04-general&apos;;
+
+// Module specific partials
+@import &apos;77-checkin&apos;;
+@import &apos;77-loader&apos;;
+
+// Your own partials if needed
+// @import &apos;performance&apos;</code>
+</code></pre>
+<p>We could also add our own SASS code (that goes along the <code>PlayerPerformance</code> module, for example) if we had to customize some of the appearance.</p>
+<p><strong>Note:</strong> more generally, the <code>sass/</code> folder should contain one <code>clientType.scss</code> file for each client type involved in the scenario (<em>e.g.</em> <code>player.scss</code>, <code>conductor.scss</code>, <code>env.scss</code>, &#x2026;).</p>
+<h2 id="3-server-side">3. Server side</h2>
+<p>As some of the modules on the client side need to communicate with the server (for instance the <code>performance</code> that needs to send the connection information to the clients), let&apos;s now have a look at the server side.</p>
+<p>Basically, the server side of the application must provide the server modules that communicate with the client-side modules.</p>
+<p>Let&apos;s edit the file <code>src/server/indexjs</code>: first, we import the libraries and set up the Express app.</p>
+<pre><code class="lang-javascript"><code class="source-code prettyprint">// Import external libraries
+const express = require(&apos;express&apos;);
+const path = require(&apos;path&apos;);
+
+// Import Soundworks library modules (server side)
+import { server, Checkin, Performance } from &apos;soundworks/server&apos;;</code>
+</code></pre>
+<p>Then, we set up the modules that the client needs to communicate with.
+In this example, there is the <code>Checkin</code> module, and the <code>PlayerPerformance</code> module we&#x2019;ll need to write ourselves.</p>
+<p>In the <code>Checkin</code> module, we indicate the maximum number of players this performance supports.</p>
+<pre><code class="lang-javascript"><code class="source-code prettyprint">const checkin = new serverSide.Checkin({ maxClients: 100 }); // we accept a maximum of 100 clients</code>
+</code></pre>
+<p>Finally, we write the performance module by extending <a href="./manual/../class/src/server/Performance.js~Performance.html"><code>Performance</code></a> base class.
+The <a href="./manual/../class/src/server/Performance.js~Performance.html#enter"><code>enter</code></a> method is called when the client <code>client</code> starts the performance (on the client side).
+When that happens, we simply send a WebSocket message back to all the other clients to tell them to play a sound (<code>client.broadcast(&apos;performance:play&apos;);</code>).
+In this example, nothing needs to be done when the client connects to the server, disconnects from the server, or exits the performance (apart from what the <a href="./manual/../class/src/server/Performance.js~Performance.html"><code>Performance</code></a> base class already does), so we don&apos;t have to override these methods.</p>
+<pre><code class="lang-javascript"><code class="source-code prettyprint">class PlayerPerformance extends Performance {
+  constructor() {
+    super(options);
+  }
+
+  // When the client enters the performance...
+  enter(client) {
+    super.enter(client);
+
+    // Send a message to all the other clients
+    client.broadcast(&apos;performance:play&apos;);
+  }
+}</code>
+</code></pre>
+<p>We can now instantiate the performance module, and start the server and map the <code>&apos;player&apos;</code> client type to the modules we just set up.
+This last command indicates that all clients connecting as a <code>&apos;player&apos;</code> (through the root URL) will need to communicate with the <code>checkin</code> and <code>performance</code> modules on the server side.</p>
+<pre><code class="lang-javascript"><code class="source-code prettyprint">const performance = new PlayerPerformance();
+
+// Launch server
+const app = express();
+const dir = path.join(process.cwd(), &apos;public&apos;);
+server.start(app, dir, process.env.PORT || 3000);
+
+// Map modules to client types
+server.map(&apos;player&apos;, checkin, performance);</code>
+</code></pre>
+<p><strong>Note:</strong> we also used the <a href="./manual/../class/src/client/Dialog.js~Dialog.html"><code>Dialog</code></a> and the <a href="./manual/../class/src/client/Loader.js~Loader.html"><code>Loader</code></a> modules on the client side, but they do not need to communicate with the server so we don&apos;t use them on the server side.</p>
+<h2 id="4-run-">4. Run!</h2>
+<p>Congratulations, you just created your first scenario!
+To build the files and launch the server, open a Terminal window in the project folder, run <code>npm install</code> to install all the dependencies and then <code>npm run bundle</code>.
+You can also run <code>npm run watch</code> to watch the changes in your files and restart the server when necessary.</p>
+</div>
+</div>
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.4.3)</span></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>

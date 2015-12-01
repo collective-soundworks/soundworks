@@ -155,6 +155,7 @@ function generateDoc() {
     'doc',
     'manual',
     'node_modules',
+    'LICENSE',
     'README.md',
     'LICENSE',
     'esdoc.json'
