@@ -176,7 +176,7 @@ function generateDoc() {
   execSync('git add -A');
   execSync('git commit -am "updated documentation"');
   execSync('git push origin gh-pages --force');
-  execSync('git checkout master');
+  execSync('git checkout doctest');
   execSync('git branch -D gh-pages');
   try { execSync('git stash pop'); } catch(err) {}
 }
