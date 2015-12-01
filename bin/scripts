@@ -153,14 +153,12 @@ function generateDoc() {
     '.gitignore',
     'bin',
     'doc',
-    'examples',
+    'manual',
     'node_modules',
+    'LICENSE',
     'README.md',
     'esdoc.json'
   ];
-
-  // toKeep.push(getUmdName());
-  // toKeep.push(getMinName());
 
   files.forEach(function(file) {
     if (toKeep.indexOf(file) !== -1) { return; }
