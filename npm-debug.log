@@ -1,0 +1,24 @@
+0 info it worked if it ends with ok
+1 verbose cli [ 'node', '/usr/local/bin/npm', 'run', 'doc' ]
+2 info using npm@3.3.8
+3 info using node@v0.12.4
+4 verbose stack Error: missing script: doc
+4 verbose stack     at run (/usr/local/lib/node_modules/npm/lib/run-script.js:148:19)
+4 verbose stack     at /usr/local/lib/node_modules/npm/lib/run-script.js:58:5
+4 verbose stack     at /usr/local/lib/node_modules/npm/node_modules/read-package-json/read-json.js:345:5
+4 verbose stack     at checkBinReferences_ (/usr/local/lib/node_modules/npm/node_modules/read-package-json/read-json.js:309:45)
+4 verbose stack     at final (/usr/local/lib/node_modules/npm/node_modules/read-package-json/read-json.js:343:3)
+4 verbose stack     at then (/usr/local/lib/node_modules/npm/node_modules/read-package-json/read-json.js:113:5)
+4 verbose stack     at /usr/local/lib/node_modules/npm/node_modules/read-package-json/read-json.js:300:12
+4 verbose stack     at /usr/local/lib/node_modules/npm/node_modules/graceful-fs/graceful-fs.js:76:16
+4 verbose stack     at fs.js:334:14
+4 verbose stack     at /usr/local/lib/node_modules/npm/node_modules/graceful-fs/graceful-fs.js:42:10
+5 verbose cwd /Users/robi/Dev/collective-soundworks-develop/soundworkscopy
+6 error Darwin 15.0.0
+7 error argv "node" "/usr/local/bin/npm" "run" "doc"
+8 error node v0.12.4
+9 error npm  v3.3.8
+10 error missing script: doc
+11 error If you need help, you may report this error at:
+11 error     <https://github.com/npm/npm/issues>
+12 verbose exit [ 1, true ]

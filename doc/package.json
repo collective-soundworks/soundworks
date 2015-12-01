@@ -10,8 +10,7 @@
   "scripts": {
     "transpile": "node ./bin/scripts --transpile",
     "watch": "node ./bin/scripts --watch",
-    "hint": "eslint ./src; true",
-    "doc": "node ./bin/scripts --doc"
+    "hint": "eslint ./src; true"
   },
   "license": "BSD-3",
   "repository": {
