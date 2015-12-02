@@ -3,6 +3,7 @@ export default {
 
   initialize(io) {
     this.io = io;
+    this._nspPrefix = /^\//;
   },
 
   receive(client, channel, callback) {
@@ -19,6 +20,19 @@ export default {
   },
 
   broadcast(clientType, channel, ...args) {
-    this.io.of(`/${clientType}`).emit(channel, ...args);
+    let namespaces;
+
+    if (typeof clientType === 'string') {
+      namespaces = ['/' + clientType.replace(this._nspPrefix, '')];
+    } else if (Array.isArray(clientType)) {
+      namespaces = clientType.map((type) => {
+        return '/' + type.replace(this._nspPrefix, '');
+      });
+    } else {
+      namespaces = Object.keys(this.io.nsps);
+    }
+
+    namespaces.forEach((nsp) => { this.io.of(nsp).emit(channel, ...args); });
   },
+
 };

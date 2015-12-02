@@ -47,8 +47,6 @@ export default class Control extends Module {
      * @type {Object}
      */
     this.events = {};
-
-    this._clientTypes = [];
   }
 
   /**
@@ -127,12 +125,10 @@ export default class Control extends Module {
   }
 
   _broadcastEvent(event) {
-    let clientTypes = event.clientTypes || this._clientTypes;
+    let clientTypes = event.clientTypes || null;
 
     // propagate parameter to clients
-    for (let clientType of clientTypes)
-      this.broadcast(clientType, 'event', event.name, event.value);
-
+    this.broadcast(clientTypes, 'event', event.name, event.value);
     this.emit(`${this.name}:event`, event.name, event.value);
   }
 
@@ -174,11 +170,6 @@ export default class Control extends Module {
   connect(client) {
     super.connect(client);
 
-    let clientType = client.type;
-
-    if (this._clientTypes.indexOf(clientType) < 0)
-      this._clientTypes.push(clientType);
-
     // init control parameters, infos, and commands at client
     this.receive(client, 'request', () => {
       super.send(client, 'init', this.events);
@@ -186,7 +177,6 @@ export default class Control extends Module {
 
     // listen to control parameters
     this.receive(client, 'event', (name, value) => {
-      console.log(name, value);
       this.update(name, value);
     });
   }

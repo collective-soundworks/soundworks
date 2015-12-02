@@ -6,12 +6,12 @@ import Module from './Module';
  * @private
  */
 class ControlEvent {
-  constructor(type, name, label) {
+  constructor(type, parent, name, label) {
     this.type = type;
     this.name = name;
     this.label = label;
+    this.parent = parent;
     this.value = undefined;
-    this.parent = null;
   }
 
   set(val) {
@@ -19,8 +19,6 @@ class ControlEvent {
   }
 
   send() {
-    // @hotfix
-    console.log(this.name, this.value);
     this.parent.send('event', this.name, this.value);
   }
 }
@@ -29,8 +27,8 @@ class ControlEvent {
  * @private
  */
 class ControlNumber extends ControlEvent {
-  constructor(init, view = null) {
-    super('number', init.name, init.label);
+  constructor(parent, init, view = null) {
+    super('number', parent, init.name, init.label);
     this.min = init.min;
     this.max = init.max;
     this.step = init.step;
@@ -104,8 +102,8 @@ class ControlNumber extends ControlEvent {
 }
 
 class ControlSelect extends ControlEvent {
-  constructor(init, view = null) {
-    super('select', init.name, init.label);
+  constructor(parent, init, view = null) {
+    super('select', parent, init.name, init.label);
     this.options = init.options;
     this.box = null;
 
@@ -183,8 +181,8 @@ class ControlSelect extends ControlEvent {
 }
 
 class ControlInfo extends ControlEvent {
-  constructor(init, view = null) {
-    super('info', init.name, init.label);
+  constructor(parent, init, view = null) {
+    super('info', parent, init.name, init.label);
     this.box = null;
 
     if (view) {
@@ -214,8 +212,8 @@ class ControlInfo extends ControlEvent {
 }
 
 class ControlCommand extends ControlEvent {
-  constructor(init, view = null) {
-    super('command', init.name, init.label);
+  constructor(parent, init, view = null) {
+    super('command', parent, init.name, init.label);
 
     if (view) {
       let div = document.createElement('div');
@@ -309,24 +307,21 @@ export default class Control extends Module {
 
         switch (event.type) {
           case 'number':
-            this.events[key] = new ControlNumber(event, view);
+            this.events[key] = new ControlNumber(this, event, view);
             break;
 
           case 'select':
-            this.events[key] = new ControlSelect(event, view);
+            this.events[key] = new ControlSelect(this, event, view);
             break;
 
           case 'info':
-            this.events[key] = new ControlInfo(event, view);
+            this.events[key] = new ControlInfo(this, event, view);
             break;
 
           case 'command':
-            this.events[key] = new ControlCommand(event, view);
+            this.events[key] = new ControlCommand(this, event, view);
             break;
         }
-
-        // @hotfix for new communication system
-        this.events[key].parent = this;
       }
 
       if (!view)
@@ -335,6 +330,7 @@ export default class Control extends Module {
 
     // listen to events
     this.receive('event', (name, val) => {
+      console.log(name, val);
       let event = this.events[name];
 
       if (event) {
