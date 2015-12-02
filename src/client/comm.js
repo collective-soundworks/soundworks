@@ -13,22 +13,22 @@ export default {
     return this;
   },
 
-  send(msg, ...args) {
+  send(channel, ...args) {
     if (!this._socket) { return; }
 
-    this._socket.emit(msg, ...args);
+    this._socket.emit(channel, ...args);
   },
 
-  receive(msg, callback) {
+  receive(channel, callback) {
     if (!this._socket) { return; }
 
-    this._socket.removeListener(msg, callback);
-    this._socket.on(msg, callback);
+    this._socket.removeListener(channel, callback);
+    this._socket.on(channel, callback);
   },
 
-  removeListener(msg, callback) {
+  removeListener(channel, callback) {
     if (!this._socket) { return; }
 
-    this._socket.removeListener(msg, callback);
+    this._socket.removeListener(channel, callback);
   }
 };

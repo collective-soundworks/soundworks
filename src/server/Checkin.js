@@ -46,7 +46,7 @@ export default class Checkin extends Module {
       this.maxClients = Number.MAX_SAFE_INTEGER;
 
     if (this.setup) {
-      var numPlaces = this.setup.getNumPositions();
+      const numPlaces = this.setup.getNumPositions();
 
       if (this.maxClients > numPlaces && numPlaces > 0)
         this.maxClients = numPlaces;
@@ -66,7 +66,7 @@ export default class Checkin extends Module {
   }
 
   _getRandomIndex() {
-    var numAvailable = this._availableIndices.length;
+    const numAvailable = this._availableIndices.length;
 
     if (numAvailable > 0) {
       let random = Math.floor(Math.random() * numAvailable);
@@ -100,9 +100,25 @@ export default class Checkin extends Module {
   connect(client) {
     super.connect(client);
 
-    client.receive(this.name + ':request', () => {
-      var index = -1;
-      var order = this.order;
+    this.receive(client, 'request', this._onRequest(client));
+    this.receive(client, 'restart', this._onRestart(client));
+  }
+
+  /**
+   * @private
+   */
+  disconnect(client) {
+    super.disconnect(client);
+
+    const index = client.modules[this.name].index;
+
+    if (index >= 0)
+      this._releaseIndex(index);
+  }
+
+  _onRequest(client) {
+    return () => {
+      let index = -1;
 
       if (this.order === 'random')
         index = this._getRandomIndex();
@@ -112,8 +128,8 @@ export default class Checkin extends Module {
       if (index >= 0) {
         client.modules[this.name].index = index;
 
-        var label = null;
-        var coordinates = null;
+        let label = null;
+        let coordinates = null;
 
         if (this.setup) {
           label = this.setup.getLabel(index);
@@ -123,13 +139,15 @@ export default class Checkin extends Module {
         client.modules[this.name].label = label;
         client.coordinates = coordinates;
 
-        client.send(this.name + ':acknowledge', index, label, coordinates);
+        this.send(client, 'acknowledge', index, label, coordinates);
       } else {
-        client.send(this.name + ':unavailable');
+        this.send(client, 'unavailable');
       }
-    });
+    }
+  }
 
-    client.receive(this.name + ':restart', (index, label, coordinates) => {
+  _onRestart(client) {
+    return (index, label, coordinates) => {
       // TODO: check if that's ok on random mode
       if (index > this._nextAscendingIndex) {
         for (let i = this._nextAscendingIndex; i < index; i++)
@@ -151,18 +169,6 @@ export default class Checkin extends Module {
         client.modules[this.name].label = label;
         client.coordinates = coordinates;
       }
-    })
-  }
-
-  /**
-   * @private
-   */
-  disconnect(client) {
-    super.disconnect(client);
-
-    var index = client.modules[this.name].index;
-
-    if (index >= 0)
-      this._releaseIndex(index);
+    }
   }
 }

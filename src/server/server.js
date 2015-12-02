@@ -1,3 +1,4 @@
+import comm from './comm';
 import ejs from 'ejs';
 import express from 'express';
 import fs from 'fs';
@@ -9,6 +10,7 @@ import path from 'path';
 import Client from './Client';
 
 // globals
+// @todo hide this into client
 let nextClientIndex = 0;
 const availableClientIndices = [];
 const oscListeners = [];
@@ -84,7 +86,7 @@ export default {
   /**
    * Start the server.
    * @param {Object} [appConfig={}] Application configuration options.
-   * @attribute {String} [appConfig.publicPath='./public'] Path to the public folder.
+   * @attribute {String} [appConfig.publicFolder='./public'] Path to the public folder.
    * @attribute {Object} [appConfig.socketIO={}] socket.io options. The socket.io config object can have the following properties:
    * - `transports:String`: communication transport (defaults to `'websocket'`);
    * - `pingTimeout:Number`: timeout (in milliseconds) before trying to reestablish a connection between a lost client and a server (defautls to `60000`);
@@ -99,7 +101,8 @@ export default {
    */
   start(appConfig = {}, envConfig = {}) {
     appConfig = Object.assign({
-      publicPath: path.join(process.cwd(), 'public'),
+      publicFolder: path.join(process.cwd(), 'public'),
+      defaultClient: 'player',
       // @note: EngineIO defaults
       // this.pingTimeout = opts.pingTimeout || 3000;
       // this.pingInterval = opts.pingInterval || 1000;
@@ -129,7 +132,7 @@ export default {
     const expressApp = new express();
     expressApp.set('port', process.env.PORT || envConfig.port);
     expressApp.set('view engine', 'ejs');
-    expressApp.use(express.static(appConfig.publicPath));
+    expressApp.use(express.static(appConfig.publicFolder));
 
     const httpServer = http.createServer(expressApp);
     httpServer.listen(expressApp.get('port'), function() {
@@ -142,6 +145,7 @@ export default {
 
     // configure socket.io
     this.io = new IO(httpServer, appConfig.socketIO);
+    comm.initialize(this.io);
 
     // configure OSC
     if (envConfig.osc) {
@@ -193,8 +197,9 @@ export default {
     const tmplString = fs.readFileSync(tmplPath, { encoding: 'utf8' });
     const tmpl = ejs.compile(tmplString);
 
-    if (clientType !== 'player') { url += clientType; }
+    if (clientType !== this.appConfig.defaultClient) { url += clientType; }
 
+    //
     this.expressApp.get(url, (req, res) => {
       res.send(tmpl({ envConfig: JSON.stringify(this.envConfig) }));
     });
@@ -205,7 +210,10 @@ export default {
 
       modules.forEach((mod) => { mod.connect(client) });
 
-      client.receive('disconnect', () => {
+      // @todo - hide this into the client ?
+      // global events for the client
+      comm.receive(client, 'disconnect', () => {
+        // problem here for hide into clients
         modules.forEach((mod) => { mod.disconnect(client) });
 
         _releaseClientIndex(client.index);
@@ -214,7 +222,8 @@ export default {
         log.info({ socket: socket, clientType: clientType }, 'disconnect');
       });
 
-      client.send('client:start', client.index); // the server is ready
+      comm.send(client, 'client:start', client.index); // the server is ready
+
       log.info({ socket: socket, clientType: clientType }, 'connection');
     });
   },
@@ -228,10 +237,10 @@ export default {
    * @param {...*} args Arguments of the message (as many as needed, of any type).
    * @todo solve ... problem
    */
-  broadcast(clientType, msg, ...args) {
-    this.io.of('/' + clientType).emit(msg, ...args);
-    log.info({ clientType: clientType, channel: msg, arguments: args }, 'broadcast');
-  },
+  // broadcast(clientType, msg, ...args) {
+  //   this.io.of('/' + clientType).emit(msg, ...args);
+  //   log.info({ clientType: clientType, channel: msg, arguments: args }, 'broadcast');
+  // },
 
   /**
    * Send an OSC message.

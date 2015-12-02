@@ -3,7 +3,6 @@ import SyncClient from 'sync/client';
 import client from './client';
 import Module from './Module';
 
-
 /**
  * The {@link Sync} module takes care of the synchronization process on the client side.
  * It displays "Clock syncing, stand by…" until the very first synchronization process is done.
@@ -42,7 +41,7 @@ export default class Sync extends Module {
    */
   start() {
     super.start();
-    this._sync.start(client.send, client.receive, (status, report) => {
+    this._sync.start(this.send, this.receive, (status, report) => {
       this._syncStatusReport(status, report);
     });
   }
@@ -77,9 +76,9 @@ export default class Sync extends Module {
   }
 
   _syncStatusReport(message, report) {
-    if(message === 'sync:status') {
-      if(report.status === 'training' || report.status === 'sync') {
-        if(!this._ready) {
+    if (message === 'sync:status') {
+      if (report.status === 'training' || report.status === 'sync') {
+        if (!this._ready) {
           this._ready = true;
           this.done();
         }

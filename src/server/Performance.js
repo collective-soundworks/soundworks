@@ -31,12 +31,12 @@ export default class Performance extends Module {
     super.connect(client);
 
     // Listen for the `'performance:start'` socket message from the client.
-    client.receive(this.name + ':start', () => {
+    this.receive(client, 'start', () => {
       this.enter(client);
     });
 
     // Listen for the `'performance:done'` socket message from the client.
-    client.receive(this.name + ':done', () => {
+    this.receive(client, 'done', () => {
       this.exit(client);
     });
   }

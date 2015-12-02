@@ -1,6 +1,5 @@
 import log from './logger';
 
-
 /**
  * The {@link Client} module is used to keep track of each connected client and to communicate with it via WebSockets.
  * Each time a client of type `clientType` connects to the server, *Soundworks* creates a new instance of `Client`.
@@ -45,6 +44,7 @@ export default class Client {
 		 * @type {Socket}
 		 * @todo make private?
 		 */
+    // this.socket = socket;
     this.socket = socket;
   }
 
@@ -53,43 +53,47 @@ export default class Client {
 	 * @param {String} msg Name of the message.
 	 * @param {...*} args Arguments of the message (as many as needed, of any type).
 	 */
-  send(msg, ...args) {
-    log.trace({ socket: this.socket, clientType: this.type, channel: msg, arguments: args }, 'socket.send');
-    this.socket.emit(msg, ...args);
-  }
+  // send(msg, ...args) {
+  //   this.socket.emit(msg, ...args);
+
+  //   log.trace({ socket: this.socket, clientType: this.type, channel: msg, arguments: args }, 'socket.send');
+  // }
 
 	/**
 	 * Sends a volatile WebSocket message to the client, *i.e.* a non-blocking WebSocket message.
 	 * @param {String} msg Name of the message to send.
 	 * @param {...*} args Arguments of the message (as many as needed, of any type).
 	 */
-  sendVolatile(msg, ...args) {
-    log.trace({ socket: this.socket, clientType: this.type, channel: msg, arguments: args }, 'socket.sendVolatile');
-    this.socket.volatile.emit(msg, ...args);
-  }
+  // sendVolatile(msg, ...args) {
+  //   this.socket.volatile.emit(msg, ...args);
+
+  //   log.trace({ socket: this.socket, clientType: this.type, channel: msg, arguments: args }, 'socket.sendVolatile');
+  // }
 
 	/**
 	 * Executes a callback function when it receives a WebSocket message from the client.
 	 * @param {String} msg Name of the received message.
 	 * @param {Function} callback Callback function executed when the message is received.
 	 */
-  receive(msg, callback) {
-    var _callback = (function(...args) {
-      log.trace({ socket: this.socket, clientType: this.type, channel: msg, arguments: args }, 'socket.receive');
-      callback.apply(this.socket, args);
-    }).bind(this);
+  // receive(msg, callback) {
+  //   var _callback = (function(...args) {
+  //     callback.apply(this.socket, args);
 
-    this.socket.on(msg, _callback);
-  }
+  //     log.trace({ socket: this.socket, clientType: this.type, channel: msg, arguments: args }, 'socket.receive');
+  //   }).bind(this);
+
+  //   this.socket.on(msg, _callback);
+  // }
 
 	/**
 	 * Sends a WebSocket message to all the other clients of the same type (*i.e.* all the clients of type `this.clientType`, excluding this client).
 	 * @param {String} msg Name of the message to broadcast.
 	 * @param {...*} args Arguments of the message (as many as needed, of any type).
 	 */
-  broadcast(msg, ...args) {
-    log.trace({ socket: this.socket, clientType: this.type, channel: msg, arguments: args }, 'socket.broadcast');
-    this.socket.broadcast.emit(msg, ...args);
-  }
+  // broadcast(msg, ...args) {
+  //   this.socket.broadcast.emit(msg, ...args);
+
+  //   log.trace({ socket: this.socket, clientType: this.type, channel: msg, arguments: args }, 'socket.broadcast');
+  // }
 }
 

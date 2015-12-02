@@ -86,11 +86,12 @@ export default class Checkin extends Module {
     super.start();
 
     // Send request to the server
-    client.send(this.name + ':request');
+    // client.send(this.name + ':request');
+    this.send('request');
 
     // Setup listeners for the server's response
-    client.receive(this.name + ':acknowledge', this._acknowledgementHandler);
-    client.receive(this.name + ':unavailable', this._unavailableHandler);
+    this.receive('acknowledge', this._acknowledgementHandler);
+    this.receive('unavailable', this._unavailableHandler);
   }
 
   /**
@@ -103,8 +104,8 @@ export default class Checkin extends Module {
     super.reset();
 
     // Remove listeners for the server's response
-    client.removeListener(this.name + ':acknowledge', this._acknowledgementHandler);
-    client.removeListener(this.name + ':unavailable', this._unavailableHandler);
+    this.removeListener('acknowledge', this._acknowledgementHandler);
+    this.removeListener('unavailable', this._unavailableHandler);
 
     // Remove touch / click listener set un in the `_acknowledgementHandler`
     if (client.platform.isMobile)
@@ -120,10 +121,8 @@ export default class Checkin extends Module {
    */
   restart() {
     super.restart();
-
     // Send current checkin information to the server
-    client.send(this.name + ':restart', this.index, this.label, client.coordinates);
-
+    this.send('restart', this.index, this.label, client.coordinates);
     this.done();
   }
 
@@ -154,7 +153,7 @@ export default class Checkin extends Module {
   }
 
   _unavailableHandler() {
-    this.setCenteredViewContent("<p>Sorry, we cannot accept any more connections at the moment, please try again later.</p>");
+    this.setCenteredViewContent('<p>Sorry, we cannot accept any more connections at the moment, please try again later.</p>');
   }
 
   _viewClickHandler() {

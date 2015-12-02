@@ -37,7 +37,11 @@ export default class Sync extends Module {
    */
   connect(client) {
     super.connect(client);
-    this._sync.start((cmd, ...args) => client.send(cmd, ...args), (cmd, callback) => client.receive(cmd, callback));
+
+    const sendFunction = (cmd, ...args) => this.send(client, cmd, ...args);
+    const receiveFunction = (cmd, callback) => this.receive(client, cmd, callback);
+
+    this._sync.start(sendFunction, receiveFunction);
   }
 
   /**

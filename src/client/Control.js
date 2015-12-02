@@ -1,5 +1,6 @@
-import client from './client';
 import Module from './Module';
+
+// @todo refactor
 
 /**
  * @private
@@ -10,6 +11,7 @@ class ControlEvent {
     this.name = name;
     this.label = label;
     this.value = undefined;
+    this.parent = null;
   }
 
   set(val) {
@@ -17,7 +19,9 @@ class ControlEvent {
   }
 
   send() {
-    client.send('control:event', this.name, this.value);
+    // @hotfix
+    console.log(this.name, this.value);
+    this.parent.send('event', this.name, this.value);
   }
 }
 
@@ -283,10 +287,17 @@ export default class Control extends Module {
      * @type {Object}
      */
     this.events = {};
+  }
+
+  /**
+   * Starts the module and requests the parameters to the server.
+   */
+  start() {
+    super.start();
 
     let view = this._ownsView ? this.view : null;
 
-    client.receive('control:init', (events) => {
+    this.receive('init', (events) => {
       if (view) {
         let title = document.createElement('h1');
         title.innerHTML = 'Conductor';
@@ -313,6 +324,9 @@ export default class Control extends Module {
             this.events[key] = new ControlCommand(event, view);
             break;
         }
+
+        // @hotfix for new communication system
+        this.events[key].parent = this;
       }
 
       if (!view)
@@ -320,24 +334,18 @@ export default class Control extends Module {
     });
 
     // listen to events
-    client.receive('control:event', (name, val) => {
+    this.receive('event', (name, val) => {
       let event = this.events[name];
 
       if (event) {
         event.set(val);
-        this.emit('control:event', name, val);
+        this.emit(`${this.name}:event`, name, val);
       }
       else
         console.log('client control: received unknown event "' + name + '"');
     });
-  }
 
-  /**
-   * Starts the module and requests the parameters to the server.
-   */
-  start() {
-    super.start();
-    client.send('control:request');
+    super.send('request');
   }
 
   /**
@@ -345,7 +353,7 @@ export default class Control extends Module {
    */
   restart() {
     super.restart();
-    client.send('control:request');
+    super.send('request');
   }
 
   /**
@@ -353,13 +361,13 @@ export default class Control extends Module {
    * @param {String} name Name of the parameter or command to send.
    * @todo is this method useful?
    */
-  send(name) {
-    const event = this.events[name];
+  // send(name) {
+  //   const event = this.events[name];
 
-    if (event) {
-      event.send();
-    }
-  }
+  //   if (event) {
+  //     event.send();
+  //   }
+  // }
 
   /**
    * Updates the value of a parameter.

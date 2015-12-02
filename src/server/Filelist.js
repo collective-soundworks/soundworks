@@ -3,13 +3,13 @@ import Module from './Module';
 
 
 function checkForExtensions(file, extensions) {
-  if(!extensions || extensions.length === 0)
+  if (!extensions || extensions.length === 0)
     return true;
 
   for (let extension of extensions) {
     let extensionIndex = file.length - extension.length;
 
-    if(extensionIndex >= 0 && file.substring(extensionIndex, extensionIndex + extension.length) === extension)
+    if (extensionIndex >= 0 && file.substring(extensionIndex, extensionIndex + extension.length) === extension)
       return true;
   }
 

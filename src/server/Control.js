@@ -1,4 +1,4 @@
-import server from './server';
+// import server from './server';
 import Module from './Module';
 
 
@@ -131,9 +131,9 @@ export default class Control extends Module {
 
     // propagate parameter to clients
     for (let clientType of clientTypes)
-      server.broadcast(clientType, 'control:event', event.name, event.value);
+      this.broadcast(clientType, 'event', event.name, event.value);
 
-    this.emit('control:event', event.name, event.value);
+    this.emit(`${this.name}:event`, event.name, event.value);
   }
 
   /**
@@ -142,6 +142,7 @@ export default class Control extends Module {
    * @emits 'control:event'
    */
   send(name) {
+    console.dir(name);
     let event = this.events[name];
 
     if (event) {
@@ -179,12 +180,13 @@ export default class Control extends Module {
       this._clientTypes.push(clientType);
 
     // init control parameters, infos, and commands at client
-    client.receive('control:request', () => {
-      client.send('control:init', this.events);
+    this.receive(client, 'request', () => {
+      super.send(client, 'init', this.events);
     });
 
     // listen to control parameters
-    client.receive('control:event', (name, value) => {
+    this.receive(client, 'event', (name, value) => {
+      console.log(name, value);
       this.update(name, value);
     });
   }

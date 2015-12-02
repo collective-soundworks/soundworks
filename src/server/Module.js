@@ -1,6 +1,6 @@
 // @todo - remove EventEmitter? (Implement our own listeners)
+import comm from './comm';
 import { EventEmitter } from 'events';
-
 
 /**
  * The {@link Module} base class is used to create a *Soundworks* module on the server side.
@@ -54,5 +54,32 @@ export default class Module extends EventEmitter {
   disconnect(client) {
     // delete client.modules[this.name] // TODO?
   }
+
+  // -- receive something from a client
+  receive(client, channel, callback) {
+    const namespacedChannel = `${this.name}:${channel}`;
+    comm.receive(client, namespacedChannel, callback);
+  }
+
+  // -- send something to a client type
+  send(client, channel, ...args) {
+    const namespacedChannel = `${this.name}:${channel}`;
+    comm.send(client, namespacedChannel, ...args);
+  }
+
+  // -- send something to all clients of the same type as `client`
+  sendPeers(client, channel, ...args) {
+    const namespacedChannel = `${this.name}:${channel}`;
+    comm.sendPeers(client, namespacedChannel, ...args);
+  }
+
+  // -- send something to all clients of a given type
+  broadcast(clientType, channel, ...args) {
+    const namespacedChannel = `${this.name}:${channel}`;
+    comm.broadcast(clientType, namespacedChannel, ...args);
+  }
 }
+
+
+
 

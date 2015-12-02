@@ -36,7 +36,7 @@ export default class Loader extends Module {
     this.buffers = [];
 
     this._files = options.files || null;
-    this._asynchronous = !!options.asynchronous;
+    this._asynchronous = !!options.asynchronous; // @note bad name loading is always asynchronous as it is ajax
     this._fileProgress = null;
     this._progressBar = null;
     this._numFilesLoaded = 0;

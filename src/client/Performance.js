@@ -1,6 +1,6 @@
-import input from './input';
+// import input from './input';
 import Module from './Module';
-import client from './client';
+// import client from './client';
 
 
 /**
@@ -23,7 +23,8 @@ export default class Performance extends Module {
    */
   start() {
     super.start();
-    client.send(this.name + ':start');
+    // client.send(this.name + ':start');
+    this.send('start')
   }
 
   /**
@@ -31,7 +32,8 @@ export default class Performance extends Module {
    * Sends a message to the server side module to indicate that the client exited the performance.
    */
   done() {
-    client.send(this.name + ':done');
+    // client.send(this.name + ':done');
+    this.send('done')
     super.done(); // TODO: check if needs to be called lastly
   }
 }

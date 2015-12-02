@@ -1,9 +1,11 @@
-import Module from './Module';
-import com from './com';
+import comm from './comm';
+import io from 'socket.io-client';
 import MobileDetect from 'mobile-detect';
+import Module from './Module';
 
 // debug - http://socket.io/docs/logging-and-debugging/#available-debugging-scopes
 // localStorage.debug = '*';
+
 
 /**
  * The `client` object contains the basic methods and attributes of the client.
@@ -25,7 +27,7 @@ export default {
    */
   // socket: null,
 
-  com: null,
+  comm: null,
 
   /**
    * Information about the client platform.
@@ -82,12 +84,13 @@ export default {
    * @param {String} [options.socketUrl] The URL of the WebSocket server.
    */
   init(clientType = 'player', options = {}) {
-    this.send = this.send.bind(this);
-    this.receive = this.receive.bind(this);
-    this.removeListener = this.removeListener.bind(this);
+    // this.send = this.send.bind(this);
+    // this.receive = this.receive.bind(this);
+    // this.removeListener = this.removeListener.bind(this);
 
     this.type = clientType;
 
+    // @todo harmonize io config with server
     options = Object.assign({
       io: true,
       socketUrl: '',
@@ -96,11 +99,10 @@ export default {
 
     if (options.io !== false) {
       // initialize socket communications
-      this.com = com.initialize(clientType, options);
-
+      this.comm = comm.initialize(clientType, options);
+      // wait for socket being ready to resolve this module
       this.ready = new Promise((resolve) => {
-        console.log('????');
-        this.com.receive('client:start', (index) => {
+        this.comm.receive('client:start', (index) => {
           this.index = index;
           resolve();
         });
@@ -171,10 +173,10 @@ export default {
    * @todo Clarify return value
    * @todo Remove
    */
-  serial(...modules) {
-    console.log('The function "client.serial" is deprecated. Please use the new API instead.');
-    return Module.sequential(...modules);
-  },
+  // serial(...modules) {
+  //   console.log('The function "client.serial" is deprecated. Please use the new API instead.');
+  //   return Module.sequential(...modules);
+  // },
 
   /**
    * The `Module` returned by the `parallel` method starts the given `...modules` in parallel (with their `start` methods), and calls its `done` method after all modules called their own `done` methods.
@@ -189,10 +191,10 @@ export default {
    * @todo Clarify return value
    * @todo Remove
    */
-  parallel(...modules) {
-    console.log('The function "client.parallel" is deprecated. Please use the new API instead.');
-    return Module.parallel(...modules);
-  },
+  // parallel(...modules) {
+  //   console.log('The function "client.parallel" is deprecated. Please use the new API instead.');
+  //   return Module.parallel(...modules);
+  // },
 
   /**
    * Send a WebSocket message to the server.
@@ -201,10 +203,10 @@ export default {
    * @param {String} msg Name of the message to send.
    * @param {...*} args Arguments of the message (as many as needed, of any type).
    */
-  send(msg, ...args) {
-    if (!this.com) { return; }
-    this.com.send(msg, ...args);
-  },
+  // send(msg, ...args) {
+  //   if (!this.com) { return; }
+  //   this.com.send(msg, ...args);
+  // },
 
   /**
    * Listen for a WebSocket message from the server and execute a callback
@@ -216,10 +218,10 @@ export default {
    * @param {Function} callback Callback function executed when the message is
    * received.
    */
-  receive(msg, callback) {
-    if (!this.com) { return; }
-    this.com.receive(msg, callback);
-  },
+  // receive(msg, callback) {
+  //   if (!this.com) { return; }
+  //   this.com.receive(msg, callback);
+  // },
 
   /**
    * Remove a WebSocket message listener (set with the method {@link
@@ -228,9 +230,9 @@ export default {
    * @param {Function} callback Callback function executed when the message is
    * received.
    */
-  removeListener(msg, callback) {
-    if (!this.com) { return; }
-    this.com.removeListener(msg, callback);
-  }
+  // removeListener(msg, callback) {
+  //   if (!this.com) { return; }
+  //   this.com.removeListener(msg, callback);
+  // }
 };
 

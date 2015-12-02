@@ -1,4 +1,6 @@
 import { EventEmitter } from 'events';
+import comm from './comm';
+
 const container = window.container || (window.container = document.getElementById('container'));
 
 /**
@@ -154,6 +156,11 @@ export default class Module extends Promised {
       this.view = div;
       this._ownsView = true;
     }
+
+    // bind com methods to the instance.
+    this.send = this.send.bind(this);
+    this.receive = this.receive.bind(this);
+    this.removeListener = this.removeListener.bind(this);
   }
 
   /**
@@ -275,6 +282,20 @@ export default class Module extends Promised {
   set zIndex(value) {
     if(this.view)
       this.view.style.zIndex = value;
+  }
+
+  send(channel, ...args) {
+    // console.log(`${this.name}:${channel}`, this);
+    comm.send(`${this.name}:${channel}`, ...args)
+  }
+
+  receive(channel, callback) {
+    // console.log(`${this.name}:${channel}`, this);
+    comm.receive(`${this.name}:${channel}`, callback);
+  }
+
+  removeListener(channel, callback) {
+    comm.removeListener(`${this.name}:${channel}`, callback);
   }
 }
 
