@@ -1,7 +1,7 @@
-
 import { audioContext } from 'waves-audio';
 import client from './client';
 import input from './input';
+
 import ClientCalibration from './ClientCalibration';
 import ClientCheckin from './ClientCheckin';
 import ClientControl from './ClientControl';
@@ -12,6 +12,7 @@ import ClientPlacer from './ClientPlacer';
 import ClientSetup from './ClientSetup';
 import ClientSurvey from './ClientSurvey';
 import ClientSync from './ClientSync';
+
 import Dialog from './Dialog';
 import Loader from './Loader';
 import Module from './Module';
