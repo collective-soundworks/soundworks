@@ -197,20 +197,6 @@ export default {
   },
 
   /**
-   * Send a WebSocket message to all the clients of type `clientType`.
-   *
-   * **Note:** on the client side, the clients receive the message with the method {@link client.receive}.
-   * @param {String} clientType Client type (as defined by the method {@link client.init} on the client side).
-   * @param {String} msg Name of the message to send.
-   * @param {...*} args Arguments of the message (as many as needed, of any type).
-   * @todo solve ... problem
-   */
-  // broadcast(clientType, msg, ...args) {
-  //   this.io.of('/' + clientType).emit(msg, ...args);
-  //   log.info({ clientType: clientType, channel: msg, arguments: args }, 'broadcast');
-  // },
-
-  /**
    * Send an OSC message.
    * @param {String} wildcard Wildcard of the OSC message.
    * @param {Array} args Arguments of the OSC message.

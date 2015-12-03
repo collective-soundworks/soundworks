@@ -1,5 +1,4 @@
 import comm from './comm';
-import io from 'socket.io-client';
 import MobileDetect from 'mobile-detect';
 import Module from './Module';
 
@@ -9,21 +8,11 @@ import Module from './Module';
  * @type {Object}
  */
 export default {
-
-  /**
-   * socket.io library client object, if any.
-   * @type {Object}
-   * @private
-   */
-  // io: null,
-
   /**
    * Socket used to communicate with the server, if any.
    * @type {Socket}
    * @private
    */
-  // socket: null,
-
   comm: null,
 
   /**
@@ -113,36 +102,6 @@ export default {
     if (options.debugIO) {
       localStorage.debug = '*';
     }
-
-    // --------------------------------------------------------------------
-    // @note: move into Platform ? create a dedicated service ?
-    // get informations about client
-    const ua = window.navigator.userAgent
-    const md = new MobileDetect(ua);
-    this.platform.isMobile = (md.mobile() !== null); // true if phone or tablet
-    this.platform.os = (() => {
-      let os = md.os();
-
-      if (os === 'AndroidOS') {
-        return 'android';
-      } else if (os === 'iOS') {
-        return 'ios';
-      } else {
-        return 'other';
-      }
-    })();
-
-    // audio file extention check
-    const a = document.createElement('audio');
-    // http://diveintohtml5.info/everything.html
-    if (!!(a.canPlayType && a.canPlayType('audio/mpeg;'))) {
-      this.platform.audioFileExt = '.mp3';
-    } else if (!!(a.canPlayType && a.canPlayType('audio/ogg; codecs="vorbis"'))) {
-      this.platform.audioFileExt = '.ogg';
-    } else {
-      this.platform.audioFileExt = '.wav';
-    }
-    // --------------------------------------------------------------------
   },
 
   /**
@@ -199,43 +158,5 @@ export default {
   //   return Module.parallel(...modules);
   // },
 
-  /**
-   * Send a WebSocket message to the server.
-   *
-   * **Note:** on the server side, the server receives the message with the command {@link ServerClient#receive}.
-   * @param {String} msg Name of the message to send.
-   * @param {...*} args Arguments of the message (as many as needed, of any type).
-   */
-  // send(msg, ...args) {
-  //   if (!this.com) { return; }
-  //   this.com.send(msg, ...args);
-  // },
-
-  /**
-   * Listen for a WebSocket message from the server and execute a callback
-   * function.
-   *
-   * **Note:** on the server side, the server sends the message with the command
-   * {@link server.send}`.
-   * @param {String} msg Name of the received message.
-   * @param {Function} callback Callback function executed when the message is
-   * received.
-   */
-  // receive(msg, callback) {
-  //   if (!this.com) { return; }
-  //   this.com.receive(msg, callback);
-  // },
-
-  /**
-   * Remove a WebSocket message listener (set with the method {@link
-   * client.receive}).
-   * @param {String} msg Name of the received message.
-   * @param {Function} callback Callback function executed when the message is
-   * received.
-   */
-  // removeListener(msg, callback) {
-  //   if (!this.com) { return; }
-  //   this.com.removeListener(msg, callback);
-  // }
 };
 

@@ -43,18 +43,51 @@ export default class Platform extends Module {
     this._bypass = options.bypass || false;
   }
 
+  _getPlatform() {
+    const ua = window.navigator.userAgent
+    const md = new MobileDetect(ua);
+    client.platform.isMobile = (md.mobile() !== null); // true if phone or tablet
+    client.platform.os = (() => {
+      let os = md.os();
+
+      if (os === 'AndroidOS') {
+        return 'android';
+      } else if (os === 'iOS') {
+        return 'ios';
+      } else {
+        return 'other';
+      }
+    })();
+  }
+
+  _getAudioFileExtention() {
+    const a = document.createElement('audio');
+    // http://diveintohtml5.info/everything.html
+    if (!!(a.canPlayType && a.canPlayType('audio/mpeg;'))) {
+      client.platform.audioFileExt = '.mp3';
+    } else if (!!(a.canPlayType && a.canPlayType('audio/ogg; codecs="vorbis"'))) {
+      client.platform.audioFileExt = '.ogg';
+    } else {
+      client.platform.audioFileExt = '.wav';
+    }
+  }
+
   /**
    * @private
    */
   start() {
     super.start();
 
+    this._getPlatform();
+    this._getAudioFileExtention();
+
+    // display an error message if platform is not supported
     let msg = null;
     const os = client.platform.os;
     const isMobile = client.platform.isMobile;
 
-    if (this._bypass)
-      return this.done();
+    // bypass thos module for in browser testing
+    if (this._bypass) { return this.done(); }
 
     if (!audioContext) {
       if (os === 'ios') {
@@ -73,7 +106,7 @@ export default class Platform extends Module {
     }
 
     if (msg !== null) {
-      this.setCenteredViewContent(this._prefix + '<p>' + msg + '</p>' + this._postfix);
+      this.setCenteredViewContent(`${this._prefix}<p>${msg}</p>${this._postfix}`);
     } else {
       this.done();
     }
