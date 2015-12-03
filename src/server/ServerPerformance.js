@@ -2,9 +2,15 @@ import Module from './Module';
 
 
 /**
- * The {@link ServerPerformance} base class constitutes a basis on which to build a performance on the server side.
- * Its particularity is to keep track of the clients who are currently in the performance with the array `this.clients`, and to have the `enter` and `exit` methods that inform the module when the client entered the performance (*i.e.* when the `performance` on the client side called its `start` method) and left it (*i.e.* when the `performance` on the client side called its `done` method, or if the client disconnected from the server).
+ * [server] Base class used to build a performance on the client side.
  *
+ * Along with the classic {@link Performance#connect} and {@link Performance#disconnect} methods, the base class has two additional methods:
+ * - {@link Performance#enter}: called when the client enters the performance (*i.e.* when the {@link src/client/Performance.js~Performance} on the client side calls its {@link src/client/Performance.js~Performance#start} method);
+ * - {@link Performance#exit}: called when the client leaves the performance (*i.e.* when the {@link src/client/Performance.js~Performance} on the client side calls its {@link src/client/Performance.js~Performance#done} method, or if the client disconnected from the server).
+ *
+ * The base class also keeps track of the clients who are currently in the performance (*i.e.* who entered but not exited yet) in the array `this.clients`.
+ *
+ * (See also {@link src/client/ClientPerformance.js~ClientPerformance} on the client side.)
  */
 export default class ServerPerformance extends Module {
   /**
@@ -16,16 +22,15 @@ export default class ServerPerformance extends Module {
     super(options.name || 'performance');
 
     /**
-     * Contains the list of the clients who are currently in the performance (*i.e.* who started the performance and have not exited it yet).
-     * @type {ServerClient[]}
+     * List of the clients who are currently in the performance (*i.e.* who entered the performance and have not exited it yet).
+     * @type {Client[]}
      */
     this.clients = [];
   }
 
   /**
    * Called when the client connects to the server.
-   * @param {ServerClient} client The connected client.
-   * @private
+   * @param {Client} client Connected client.
    */
   connect(client) {
     super.connect(client);
@@ -43,8 +48,7 @@ export default class ServerPerformance extends Module {
 
   /**
    * Called when the client disconnects from the server.
-   * @param {ServerClient} client The connected client.
-   * @private
+   * @param {Client} client Disconnected client.
    */
   disconnect(client) {
     super.disconnect(client);
@@ -56,7 +60,7 @@ export default class ServerPerformance extends Module {
 
   /**
    * Called when the client starts the performance on the client side.
-   * @param {ServerClient} client The client that starts the performance.
+   * @param {Client} client Client who enters the performance.
    */
   enter(client) {
     // Add the client to the `this.clients` array.
@@ -68,7 +72,7 @@ export default class ServerPerformance extends Module {
 
   /**
    * Called when the client exits the performance on the client side (*i.e.* when the `done` method of the client side module is called, or when the client disconnects from the server).
-   * @param {ServerClient} client The client that exits the performance.
+   * @param {Client} client Client who exits the performance.
    */
   exit(client) {
     // Remove the client from the `this.clients` array.
@@ -80,4 +84,3 @@ export default class ServerPerformance extends Module {
     client.modules[this.name].entered = false;
   }
 }
-

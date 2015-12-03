@@ -26,7 +26,7 @@ export default {
   sendVolatile(channel, ...args) {
     if (!this.socket) { return; }
     this.socket.volatile.emit(channel, ...args);
-  }
+  },
 
   /**
    * Listen a WebSocket message from the server.

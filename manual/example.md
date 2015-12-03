@@ -1,126 +1,82 @@
-# The `Checkin` module (simplified version)
+# Examples
 
-The purpose of that simplified version of the `Checkin` module is the following: each time a new client connects to the server, the `Checkin` module assigns an available index to it. On the server side, the module can be configured with a `setup` object that lists predefined positions (*i.e.* coordinates and labels): in that case, the module on the client side can automatically request an available position from the `setup` and display the associated `label` to the participant. (In other configurations which we won't review in this example, the participants could alternatively select a label, or indicate their approximate location on a map). When no indices are available anymore, the `Checkin` module informs the participant with a message on the screen (on the client side).
+This section presents a few *Soundworks*-based examples.
 
-## Client side
+## Template
 
-In detail, the `start` method of the module sends a request to the server side `Checkin` module via WebSockets, asking the server to send an available client index and, optionally, the label of a corresponding predefined position. When it receives the response from the server, it either displays the label on the screen (*e.g.* “Please go to C5 and touch the screen.”) and waits for the participant’s acknowledgement, or immediately calls the `done` method to hand over the control to a subsequent module (generally the `performance`). The server may send an `unavailable` message in the case where no more clients can be admitted to the performance (for example when all predefined positions are occupied). In this case, the applications ends on a blocking dialog (“Sorry, we cannot accept more players at the moment, please try again later”) without calling the `done` method.
+The template ([`soundworks-template`](https://github.com/collective-soundworks/soundworks-template)) provides a boilerplate to write a *Soundworks* application. In this scenario example, the players play a sound when they start the performance, and play another sound when other players join the performance.
 
-TODO: update example
-```javascript
-/* Client side */
+This example is well documented in the code.
 
-// Require the Soundworks library (client side) and the 'client' object
-var clientSide = require('soundworks/client');
-var client = clientSide.client;
+### Installation via the command line
 
-// Write the module
-class ClientCheckin extends ClientModule {
-  constructor() {
-    // Call base class constructor declaring a name, a view and a background color
-    super('checkin', true, 'black');
-  }
+To install the scenario and start the server, run:
 
-  start() {
-    // Call base class start method (don’t forget this!)
-    super.start();
-
-    // Request an available client index from the server
-    client.send('checkin:request');
-
-    // Receive acknowledgement from the server with client index and optional label
-    client.receive('checkin:acknowledge', (index, label) => {
-      client.index = index;
-
-      if(label) {
-        // Display the label in a dialog
-        this.setCenteredViewContent("<p>Please go to " + label + " and touch the screen.<p>");
-
-        // Call 'done' when the participant acknowledges the dialog
-        this.view.addEventListener('click', () => this.done());
-      } else {
-        this.done();
-      }
-    }
-
-    // If there are no more indices available, display a message on screen
-    // and DO NOT call the 'done' method
-    client.receive('checkin:unavailable', () => {
-      this.setCenteredViewContent("<p>Sorry, we cannot accept more connections at the moment, please try again later.</p>");
-    });
-  }
-
-  ... // the rest of the module
-
-}
+```
+git clone https://github.com/collective-soundworks/soundworks-template.git
+cd soundworks-template
+npm install
+npm run bundle
 ```
 
-As shown in this code example, the `ClientModule` base class may provide a `view` (*i.e.* an HTML `div`) that is added to the DOM (specifically to the `#container` element) when the module starts, and removed from the DOM when the module calls its `done` method. The boolean that is passed as second argument to the `constructor` of the base class determines whether the module actually creates its `view` or not.
-The method `setCenteredViewContent` allows for adding an arbitrary centered content (*e.g.* a paragraph of text) to the view.
+### How to play?
 
-## Server side: the server side `Checkin` module
+Here are the different client types supported by the scenario:
 
-In our simplified server side `Checkin` module example, the `connect` method has to install a listener that — upon request of the client — obtains an available client `index` and sends it back to the client. If the module has been configured with a `setup` (that predefines a certain number of spatial positions, associated with a `label`), the server additionally sends the `label` of the position corresponding to the client `index`. In this case, the maximum number of clients is determined by the number of seats defined by the `setup`.
+- `'player'`: access `http://localhost:3000` from a mobile device.  
+  This is the regular player who plays a sound when it starts the performance, and when another player joins the performance.
 
-The `disconnect` method has to release the client index so that it can be reused by another client that connects to the server.
+## Soundfield
 
-```javascript
-/* Server side */
+Soundfield ([soundworks-soundfield](https://github.com/collective-soundworks/soundworks-soundfield)) allows a soloist to play sound (and light) on the smartphones of other players.
+At the beginning of the performance, the players indicate their positions on a map: their positions appear on the soloist's screen.
+Then, the soloist can move his / her finger on screen: the players under the finger emit sound and light in real time.
 
-// Require the Soundworks library (server side)
-var serverSide = require('soundworks/server');
+This example is well documented in the code.
 
-// Write the module
-class ServerCheckin extends serverSide.Module {
-  constructor(options = {}) {
-    super();
+### Installation via the command line
 
-    // Store setup
-    this.setup = options.setup || null;
-    this.maxClients = options.maxClients || Infinity;
+To install the scenario and start the server, run:
 
-    // Clip max number of clients
-    if (setup) {
-      var numPositions = setup.getNumPositions();
-
-      if (this.maxClients > numPositions)
-        this.maxClients = numPositions;
-    }
-  }
-
-  connect(client) {
-    // Listen for incoming WebSocket messages from the client side
-    client.receive('checkin:request', () => {
-      // Get an available client index
-      let index = this._getIndex();
-
-      if (index >= 0) {
-        client.index = index;
-
-        var label = undefined;
-
-        if (this.setup) {
-          // Get a label
-          let label = this.setup.getLabel(index);
-
-          // Get client coordinates according to the setup
-          client.coordinates = this.setup.getCoordinates(index);
-        }
-
-        // Acknowledge check-in to client
-        client.send('checkin:acknowledge', index, label);
-      } else {
-        // No client indices available
-        client.send('checkin:unavailable');
-      }
-
-    disconnect(client) {
-      // Release client index
-      this._releaseIndex(client.index);
-    });
-  }
-
-  ... // the rest of the module
-
-}
 ```
+git clone https://github.com/collective-soundworks/soundworks-soundfield.git
+cd soundworks-soundfield
+npm install
+npm run bundle
+```
+
+### How to play?
+
+Here are the different client types supported by the scenario:
+
+- `'player'`: access `http://localhost:3000` from a mobile device.  
+  This is the regular player who emits sound and light when the soloist commands it.
+- `'soloist'`: access `http://localhost:3000/soloist` from a mobile device (a tablet, if possible).  
+  This is the client who can control light and sound on the smartphones of the players.
+
+## Drops
+
+The Drops collective smartphone performance ([soundworks-drops](https://github.com/collective-soundworks/soundworks-drops)) is strongly inspired by the mobile application Bloom by Brian Eno and and Peter Chilvers. Drops reproduces several audiovisual elements of the original Bloom application while transposing them into a collaborative experience.
+
+In Drops, each participant can play sounds whose pitch and timbre vary depending on the touch position. Very similar to the Bloom application, each sound is visualized by a circle growing from the tapping position and fading with the sound.
+
+Together, the players can construct sound sequences (i.e. melodies) by combining their sounds. The sounds are repeated in a fading loop every few seconds until they vanish. Players can clear the loop by shaking their smartphones. The sounds triggered by one player are automatically echoed by the smartphones of other players. The collective performance on the smartphones is accompanied by a synchronized soundscape on ambient loudspeakers.
+
+### Installation via the command line
+
+To install the scenario and start the server, run:
+
+```
+git clone https://github.com/collective-soundworks/soundworks-drops.git
+cd soundworks-drops
+npm install
+npm run bundle
+```
+
+### How to play?
+
+Here are the different client types supported by the scenario:
+- `'player'`: access `http://localhost:3000` from a mobile device.  
+  This is the regular player who can play drops and echo the other players' drops.
+- `'conductor'`: access `http://localhost:3000/conductor` from a computer.  
+  This is the control interface that allows to modify the parameters of the performance (such as the number drops a player has to play) in real time.

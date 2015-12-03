@@ -1,10 +1,22 @@
 # Presentation
 
-*Soundworks* is a Javascript framework that enables artists and developers to create collaborative music performances where a group of participants distributed in space use their mobile devices to generate sound and light through touch and motion.
+[*Soundworks*](https://github.com/collective-soundworks/soundworks) is a web framework that enables artists and developers to create collaborative music performances where a group of participants distributed in space use their mobile devices to generate sound and light through touch and motion.
 
-The framework is based on a client/server architecture supported by `Node.js` (`v0.12.0` or later) [TODO: upgrade to v4] and WebSockets, and uses a modular design to make it easy to implement different performance scenarios: the [`soundworks-template`](https://github.com/collective-soundworks/soundworks-template) allows anyone to bootstrap a scenario based on *Soundworks* and focus on its audiovisual and interaction design instead of the infrastructure.
+The framework is based on a client/server architecture supported by Node.js and WebSockets, and uses a modular design to make it easy to implement different performance scenarios: the [`soundworks-template`](https://github.com/collective-soundworks/soundworks-template) allows anyone to bootstrap a scenario based on *Soundworks* and focus on its audiovisual and interaction design instead of the infrastructure.
 
-If you want to hack in right away, your best best is to go straight to the [`soundworks-template`](https://github.com/collective-soundworks/soundworks-template) repository. Additionally, you'll find a few scenario examples in the [Collective Soundworks](https://github.com/collective-soundworks) organization, such as [*Beats*](https://github.com/collective-soundworks/soundworks-beats), [*Drops*](https://github.com/collective-soundworks/soundworks-drops), [*Paths*](https://github.com/collective-soundworks/soundworks-paths) or [*Wandering Sound*](https://github.com/collective-soundworks/soundworks-wanderingsound). Don't hesitate to have a look at them!
+## Before getting started…
+
+Make sure that:
+- Node `0.12.7` is installed on your system (the [`n`](https://github.com/tj/n) library allows you to switch easily between node versions);
+- npm `3.3.12^` is installed on your system.
+
+## … go!
+
+If you want to hack in right away, your best bet is to go straight to the [`soundworks-template`](https://github.com/collective-soundworks/soundworks-template) repository.
+Additionally, you'll find a few scenario examples in the [Collective Soundworks](https://github.com/collective-soundworks) organization, such as [*Soundfield*](https://github.com/collective-soundworks/soundworks-soundfield), [*Beats*](https://github.com/collective-soundworks/soundworks-beats), or [*Drops*](https://github.com/collective-soundworks/soundworks-drops).
+Don't hesitate to have a look at them!
+
+Otherwise, let's deep dive into this documentation…
 
 # Authors
 
@@ -15,7 +27,7 @@ If you want to hack in right away, your best best is to go straight to the [`sou
 
 # License
 
-Copyright (c) 2014, IRCAM (France, Paris)
+Copyright (c) 2014, 2015, IRCAM – Centre Pompidou (France, Paris)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,

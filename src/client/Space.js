@@ -4,11 +4,20 @@ import Module from './Module';
 const ns = 'http://www.w3.org/2000/svg';
 
 /**
- * The {@link Space} module graphically renders a {@link Setup} data.
+ * [client] Render a {@link Setup} data graphically.
+ *
+ * The module never has a view (it displays the graphical representation in a `div` passed in as an argument of the {@link Space#display} method).
+ *
+ * The module finishes its initialization immediately.
+ *
+ * @example const setup = new Setup();
+ * const space = new Space();
+ * const container = document.getElementById('#spaceContainer');
+ *
+ * space.display(setup, container);
  */
 export default class Space extends Module {
   /**
-   * Create an instance of the class.
    * @param {Object} [options={}] Options.
    * @param {String} [options.name='space'] Name of the module.
    * @param {Boolean} [options.fitContainer=false] Indicates whether the graphical representation fits the container size or not.
@@ -71,7 +80,7 @@ export default class Space extends Module {
   }
 
   /**
-   * Starts the module.
+   * Start the module.
    * @private
    */
   start() {
@@ -82,7 +91,7 @@ export default class Space extends Module {
   }
 
   /**
-   * Restarts the module.
+   * Restart the module.
    * @private
    */
   restart() {
@@ -91,7 +100,7 @@ export default class Space extends Module {
   }
 
   /**
-   * Resets the module.
+   * Reset the module.
    * @private
    */
   reset() {
@@ -102,7 +111,7 @@ export default class Space extends Module {
   }
 
   /**
-   * The `display` method displays a graphical representation of the setup.
+   * Display a graphical representation of the setup.
    * @param {ClientSetup} setup Setup to display.
    * @param {DOMElement} container Container to append the setup representation to.
    * @param {Object} [options={}] Options.

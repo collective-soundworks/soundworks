@@ -19,27 +19,10 @@ function _instructions(label) {
  *
  * The module always has a view and requires the SASS partial `_77-checkin.scss`.
  *
- * (See also {@link src/server/ClientCheckin.js~ClientCheckin} on the server side.)
+ * (See also {@link src/server/ServerCheckin.js~ServerCheckin} on the server side.)
  *
- * @example import { client, ClientCheckin, Setup } from 'soundworks/client';
- *
- * const setup = new Setup();
+ * @example const setup = new ClientSetup();
  * const checkin = new ClientCheckin({ setup: setup });
- * // ... instantiate other modules
- *
- * // Initialize the client (indicate the client type)
- * client.init('clientType');
- *
- * // Start the scenario
- * client.start((serial, parallel) => {
- *   // Make sure that the `setup` is initialized before it is used by the
- *   // `checkin` module (=> we use the `serial` function).
- *   serial(
- *     setup,
- *     placer,
- *     // ... other modules
- *   )
- * });
  */
 export default class ClientCheckin extends Module {
   /**

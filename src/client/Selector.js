@@ -21,11 +21,10 @@ function convertName(name) {
 }
 
 /**
- * The {@link ClientSelector} module allows to select one or several options among a list.
+ * [client] Allow to select one or several options among a list.
  */
 export default class Selector extends Module {
   /**
-   * Creates an instance of the class.
    * @param {Object} [options={}] Options.
    * @param {String} [options.name='selector'] Name of the module.
    * @param {DOMElement} [options.view] The view in which to display the list.

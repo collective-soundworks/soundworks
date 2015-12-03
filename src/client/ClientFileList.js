@@ -2,11 +2,13 @@ import Module from './Module';
 
 
 /**
- * [client] Retrieve a list of files on the server.
+ * [client] Retrieve a list of files on the server in the `/public` folder upon request of the client.
  *
  * The module can filter the file list by extensions. It never has a view.
  *
  * The module finishes its initialization when it receives the file list from the server.
+ *
+ * (See also {@link src/server/ServerFileList.js~ServerFileList} on the server side.)
  *
  * @example // Retrieve the mp3 file list in the folder `/recordings`
  * const filelist = new ClientFileList({
@@ -18,7 +20,7 @@ export default class ClientFileList extends Module {
   /**
    * @param {Object} [options={}] Options.
    * @param {Object} [options.name='filelist'] Name of the module.
-   * @param {String} [options.folder=''] Folder in which to retrieve the file list.
+   * @param {String} [options.folder=''] Subfolder of `/public` in which to retrieve the file list.
    * @param {String[]} [options.extentions=undefined] Extensions of the files to retrieve.
    */
   constructor(options = {}) {

@@ -1,15 +1,29 @@
 import Module from './Module';
 
 /**
- * The `ServerSetup` module contains the information about the setup of the performance space in terms of its surface (*i.e.* dimensions and outlines) and predefined positions (*e.g.* seats or labels on the floor).
+ * [server] Define the physical setup in which the scenario takes place.
  *
- * For instance, say that the scenario requires 12 participants sitting on the floor on a grid of 3 ⨉ 4 positions, the `ServerSetup` module would contain the information about the grid, including the positions' coordinates in space and their labels.
- * Similarly, if the scenario takes place in a theater where seats are numbered, the `ServerSetup` module would contain the seating plan.
+ * The module contains information about the dimensions and outlines of the space, and optionally about the coordinates and labels of predefined positions (*e.g.* seats in a theater).
  *
- * If the topography of the performance space does not matter for a given scenario, the `ServerSetup` module is not needed.
+ * For instance, say that the scenario requires 12 participants sitting on the floor on a grid of 3 ⨉ 4 positions, the module would contain the information about the grid, including the positions' coordinates in space and their labels.
+ * Similarly, if the scenario takes place in a theater where seats are numbered, the module would contain the seating plan.
  *
- * The {@link ServerSetup} takes care of the setup on the server side.
- * In particular, the module provides helper functions that can generate a setup automatically from some parameters.
+ * The setup information is stored on the server and is sent to the client when it connects to the server.
+ * The module provides a helper function that can generate a setup automatically from some parameters (see {@link ServerSetup#generate}).
+ *
+ * (See also {@link src/client/ClientSetup.js~ClientSetup} on the client side.)
+ *
+ * @example // Generate a 3 ⨉ 4 matrix
+ * const setup = new ServerSetup();
+ * setup.generate('matrix', { rows: 3, cols: 4 });
+ *
+ * // Generate a surface of 6 ⨉ 10 meters with a background image
+ * const setup = new ServerSetup();
+ * setup.generate('surface', {
+ *   height: 6,
+ *   width: 10
+ *   background: 'img/bg.png'
+ * });
  */
 export default class ServerSetup extends Module {
   /**
@@ -158,8 +172,8 @@ export default class ServerSetup extends Module {
    *   - `rows:Number`, number of rows (defaults to 4);
    *   - `colSpacing:Number`, spacing between columns (in meters) (defaults to 1);
    *   - `rowSpacing:Number`, spacing between rows (in meters) (defaults to 1);
-   *   - `colMargin`, (horizontal) margins between the borders of the performance space and the first or last column (in meters) (defaults to `colSpacing / 2`);
-   *   - `rowMargin`, (vertical) margins between the borders of the performance space and the first or last row (in meters) (defaults to `rowSpacing / 2`);
+   *   - `colMargin:Number`, (horizontal) margins between the borders of the performance space and the first or last column (in meters) (defaults to `colSpacing / 2`);
+   *   - `rowMargin:Number`, (vertical) margins between the borders of the performance space and the first or last row (in meters) (defaults to `rowSpacing / 2`);
    * - type `'surface'`:
    *   - `height:Number`: height of the surface (in meters);
    *   - `width:Number`: width of the surface (in meters);
@@ -203,6 +217,7 @@ export default class ServerSetup extends Module {
         }
 
         break;
+
       case 'surface':
         // @todo - allow other shape
         const height = params.height || 4;

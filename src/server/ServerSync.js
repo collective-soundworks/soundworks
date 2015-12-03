@@ -3,15 +3,17 @@ import Module from './Module';
 
 
 /**
- * The {@link ServerSync} module takes care of the synchronization process on the server side.
+ * [server] Synchronize the local clock on a master clock shared by the server and the clients.
  *
- * @example
- * // Require the Soundworks library (server side)
- * const soundworks = require('soundworks/server');
+ * Both the clients and the server can use this master clock as a common time reference.
+ * For instance, this allows all the clients to do something exactly at the same time, such as blinking the screen or playing a sound in a synchronized manner.
  *
- * // Create Sync module
- * const sync = new soundworks.ServerSync();
- * // Get sync time
+ * **Note:** the module is based on [`github.com/collective-soundworks/sync`](https://github.com/collective-soundworks/sync).
+ *
+ * (See also {@link src/client/ClientSync.js~ClientSync} on the client side.)
+ *
+ * @example const sync = new ServerSync();
+ *
  * const nowSync = sync.getSyncTime(); // current time in the sync clock time
  */
 export default class ServerSync extends Module {
@@ -52,4 +54,3 @@ export default class ServerSync extends Module {
     return this._sync.getSyncTime();
   }
 }
-

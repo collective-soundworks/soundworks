@@ -6,11 +6,18 @@ const maxRandomClients = 9999;
 /**
  * [server] Assign places among a predefined {@link Setup}.
  *
+ * The module assigns a position to a client upon request of the client-side module.
+ *
  * (See also {@link src/client/ClientCheckin.js~ClientCheckin} on the client side.)
+ *
+ * @example const setup = new ServerSetup();
+ * setup.generate('matrix', { cols: 5, rows: 4 });
+ *
+ * // As new clients connect, the positions in the matrix are assigned randomly
+ * const checkin = new ServerCheckin({ setup: setup, order: 'random' });
  */
 export default class ServerCheckin extends Module {
   /**
-   * Creates an instance of the class.
    * @param {Object} [options={}] Options.
    * @param {Object} [options.name='checkin'] Name of the module.
    * @param {Object} [options.setup] Setup used in the scenario, if any (cf. {@link ServerSetup}).

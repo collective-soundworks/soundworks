@@ -7,7 +7,7 @@ import MobileDetect from 'mobile-detect';
 
 
 /**
- * Messages written in the view when the device can't pass the platform check.
+ * Error messages written in the `view` when the device doesn't pass the platform check.
  * @type {Object}
  * @property {string} iosVersion
  * @property {string} androidVersion
@@ -20,14 +20,15 @@ const defaultMessages = {
 };
 
 /**
- * The {@link ClientPlatform} checks whether the device is compatible with the technologies used in the *Soundworks* library.
- * (Compatible devices are running on iOS 7 or above, or on Android 4.2 or above with the Chrome browser in version 35 or above.)
- * If that is not the case, the module displays a blocking view and prevents the participant to go any further in the scenario.
- * The {@link ClientPlatform} module calls its `done` method immediately if the device passes the platform test, and never otherwise.
+ * [client] Check whether the device is compatible with the technologies used in the *Soundworks* library.
+ *
+ * Compatible devices are running on iOS 7 or above, or on Android 4.2 or above with the Chrome browser in version 35 or above.
+ * If that is not the case, the module displays a blocking `view` and prevents the participant to go any further in the scenario.
+ *
+ * The module finishes its initialization immediately if the device passes the platform test, and never otherwise.
  */
 export default class Platform extends Module {
   /**
-   * Creates an instance of the class. Always has a view.
    * @param {Object} [options={}] Options.
    * @param {String} [options.name='platform-check'] Name of the module.
    * @param {String} [options.color='black'] Background color of the `view`.

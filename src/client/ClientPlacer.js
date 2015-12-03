@@ -73,33 +73,16 @@ export class ListSelector extends EventEmitter {
 }
 
 /**
- * The {@link ClientPlacer} module allows to select a place within a
- * {@link ClientSetup}.
+ * [client] Allow to select an available position within a predefined {@link Setup}.
+ *
+ * (See also {@link src/server/ServerPlacer.js~ServerPlacer} on the server side.)
  *
  * @example
- * import { client, ClientPlacer, ClientSetup } from 'soundworks/client';
- *
  * const setup = new ClientSetup();
  * const placer = new ClientPlacer({ setup: setup });
- * // ... instantiate other modules
- *
- * // Initialize the client (indicate the client type)
- * client.init('clientType');
- *
- * // Start the scenario
- * client.start((serial, parallel) => {
- *   // Make sure that the `setup` is initialized before it is used by the
- *   // `placer` (=> we use the `serial` function).
- *   serial(
- *     setup,
- *     placer,
- *     // ... other modules
- *   )
- * });
  */
 export default class ClientPlacer extends Module {
   /**
-   * Creates an instance of the class.
    * @param {Object} [options={}] Options.
    * @param {String} [options.name='performance'] Name of the module.
    * @param {String} [options.color='black'] Background color of the `view`.
@@ -192,7 +175,7 @@ export default class ClientPlacer extends Module {
   }
 
   /**
-   * Starts the module.
+   * Start the module.
    * @private
    */
   start() {
@@ -239,7 +222,7 @@ export default class ClientPlacer extends Module {
   }
 
   /**
-   * Restarts the module.
+   * Restart the module.
    * @private
    */
   restart() {
@@ -248,7 +231,7 @@ export default class ClientPlacer extends Module {
   }
 
   /**
-   * Resets the module to initial state.
+   * Reset the module to initial state.
    * @private
    */
   reset() {

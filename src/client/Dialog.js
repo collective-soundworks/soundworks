@@ -20,9 +20,9 @@ function _base64(format, base64) {
  * The module finishes its initialzation when the user taps the screen.
  *
  * @example
- * const welcomeDialog = new ClientDialog({
+ * const welcomeDialog = new Dialog({
  *   name: 'welcome',
- *   text: 'Welcome to this awesome scenario!',
+ *   text: 'Welcome to this awesome <i>Soundworks</i>-based application!',
  *   color: 'alizarin',
  *   activateWebAudio: true
  * });

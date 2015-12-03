@@ -3,21 +3,35 @@ import comm from './comm';
 import { EventEmitter } from 'events';
 
 /**
- * The {@link Module} base class is used to create a *Soundworks* module on the server side.
- * Each module should have a {@link Module#connect} and a {@link Module#disconnect} method.
- * Any module mapped to the type of client `clientType` (thanks to the {@link server#map} method) would call its {@link Module#connect} method when such a client connects to the server, and its {@link Module#disconnect} method when such a client disconnects from the server.
+ * [server] Base class used to create any *Soundworks* module on the server side.
+ *
+ * While the sequence of user interactions and exchanges between client and server is determined on the client side, the server side modules are ready to receive requests from the corresponding client side modules as soon as a client is connected to the server.
+ *
+ * Each module should have a {@link Module#connect} and a {@link Module#disconnect} methods.
+ * Any module mapped to the type of client `'clientType'` (thanks to the {@link server#map} method) calls its {@link Module#connect} method when such a client connects to the server, and its {@link Module#disconnect} method when such a client disconnects from the server.
+ *
+ * (See also {@link src/client/Module.js~Module} on the client side.)
+ *
+ * **Note:** a more complete example of how to write a module is in the [Example](manual/example.html) section.
+ *
  * @example
- * class MyModule extends serverSide.Module {
- *   constructor('my-module-name') {
- *     ... // anything the constructor needs
+ * class MyModule extends Module {
+ *   constructor(name) {
+ *     super(name);
+ *
+ *     // ...
  *   }
  *
  *   connect(client) {
- *     ... // what the module has to do when a client connects to the server
+ *     super.connect(client);
+ *
+ *     // ...
  *   }
  *
  *   disconnect(client) {
- *     ... // what the module has to do when a client disconnects from the server
+ *     super.disconnect(client);
+ *
+ *     // ...
  *   }
  * }
  */
@@ -38,8 +52,10 @@ export default class Module extends EventEmitter {
 
   /**
    * Called when the `client` connects to the server.
-   * This method should handle the logic of the module on the server side. For instance, it can take care of the communication with the client side module by setting up WebSocket message listeners and sending WebSocket messages, or it can add the client to a list to keep track of all the connected clients.
-   * @param {ModuleClient} client - The connected client.
+   *
+   * This method should handle the logic of the module on the server side.
+   * For instance, it can take care of the communication with the client side module by setting up WebSocket message listeners and sending WebSocket messages, or it can add the client to a list to keep track of all the connected clients.
+   * @param {Client} client Connected client.
    */
   connect(client) {
     // Setup an object
@@ -48,8 +64,10 @@ export default class Module extends EventEmitter {
 
   /**
    * Called when the client `client` disconnects from the server.
-   * This method should handle the logic when that happens. For instance, it can remove the socket message listeners, or remove the client from the list that keeps track of the connected clients.
-   * @param {ModuleClient} client - The disconnected client.
+   *
+   * This method should handle the logic when that happens.
+   * For instance, it can remove the socket message listeners, or remove the client from the list that keeps track of the connected clients.
+   * @param {Client} client Disconnected client.
    */
   disconnect(client) {
     // delete client.modules[this.name] // TODO?
@@ -99,7 +117,4 @@ export default class Module extends EventEmitter {
     comm.broadcast(clientType, namespacedChannel, ...args);
   }
 }
-
-
-
 

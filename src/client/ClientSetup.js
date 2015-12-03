@@ -3,9 +3,18 @@ import Module from './Module';
 
 
 /**
- * The {@link ClientSetup} module retrieves the setup information from the server.
+ * [client] Define the physical setup in which the scenario takes place.
+ *
+ * The module contains information about the dimensions and outlines of the space, and optionally about the coordinates and labels of predefined positions (*e.g.* seats in a theater).
+ *
+ * The module retrieves the setup information from the server.
  * It never has a view.
- * (To rendering the setup graphically, see {@link ClientSpace}.)
+ *
+ * The module finishes its initialization when it receives the setup information from the server.
+ *
+ * **Note:** to render the setup graphically, see {@link Space}.
+ *
+ * (See also {@link src/server/ServerSetup.js~ServerSetup} on the server side.)
  */
 export default class ClientSetup extends Module {
   /**

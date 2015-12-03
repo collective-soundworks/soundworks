@@ -6,9 +6,9 @@ import Module from './Module';
 /**
  * [client] Load audio files that can be used by other modules (*e.g.*, the {@link Performance}).
  *
- * The module finishes its initialization when all the files are loaded.
- *
  * The module always has a view (that displays a progress bar) and requires the SASS partial `_77-loader.scss`.
+ *
+ * The module finishes its initialization when all the files are loaded.
  *
  * @example
  * // Instantiate the module with the files to load
@@ -31,7 +31,7 @@ export default class Loader extends Module {
 
     /**
      * Audio buffers created from the audio files passed in the {@link Loader#constructor}.
-     * @type {Array}
+     * @type {AudioBuffer[]}
      */
     this.buffers = [];
 

@@ -10,7 +10,8 @@
   "scripts": {
     "transpile": "node ./bin/scripts --transpile",
     "watch": "node ./bin/scripts --watch",
-    "hint": "eslint ./src; true"
+    "hint": "eslint ./src; true",
+    "doc": "node ./bin/scripts --doc"
   },
   "license": "BSD-3",
   "repository": {
@@ -41,7 +42,7 @@
     "platform": "^1.3.0",
     "socket.io": "^1.1.0",
     "socket.io-client": "1.1.0",
-    "sync": "collective-soundworks/sync#0.6.4",
+    "sync": "collective-soundworks/sync#0.7.3",
     "waves-audio": "wavesjs/audio",
     "waves-loaders": "wavesjs/loaders"
   },

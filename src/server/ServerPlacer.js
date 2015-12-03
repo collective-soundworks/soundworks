@@ -2,7 +2,9 @@ import Module from './Module';
 
 
 /**
- * The {@link ServerPlacer} module allows to store the place of a client selected by the user through the interfacte provided by the {@link ClientPlacer}.
+ * [server] Allow to select an available position within a predefined {@link Setup}.
+ *
+ * (See also {@link src/client/ClientPlacer.js~ClientPlacer} on the client side.)
  */
 export default class ServerPlacer extends Module {
   /**
@@ -27,4 +29,3 @@ export default class ServerPlacer extends Module {
     });
   }
 }
-
