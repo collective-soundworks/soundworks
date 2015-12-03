@@ -1,5 +1,5 @@
 import SyncServer from 'sync/server';
-import Module from './Module';
+import ServerModule from './ServerModule';
 
 
 /**
@@ -16,7 +16,7 @@ import Module from './Module';
  *
  * const nowSync = sync.getSyncTime(); // current time in the sync clock time
  */
-export default class ServerSync extends Module {
+export default class ServerSync extends ServerModule {
   /**
    * Creates an instance of the class.
    * @param {Object} [options={}] Options.

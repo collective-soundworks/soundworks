@@ -1,5 +1,5 @@
+import ClientModule from './ClientModule';
 import comm from './comm';
-import Module from './Module';
 
 
 /**
@@ -115,7 +115,7 @@ export default {
     let module = startFun; // be compatible with previous version
 
     if (typeof startFun === 'function') {
-      module = startFun(Module.sequential, Module.parallel);
+      module = startFun(ClientModule.sequential, ClientModule.parallel);
     }
 
     let promise = module.createPromise();
@@ -125,36 +125,36 @@ export default {
   },
 
   /**
-   * The `serial` method returns a `Module` that starts the given `...modules` in series. After starting the first module (by calling its `start` method), the next module in the series is started (with its `start` method) when the last module called its `done` method. When the last module calls `done`, the returned serial module calls its own `done` method.
+   * The `serial` method returns a `ClientModule` that starts the given `...modules` in series. After starting the first module (by calling its `start` method), the next module in the series is started (with its `start` method) when the last module called its `done` method. When the last module calls `done`, the returned serial module calls its own `done` method.
    *
    * **Note:** you can compound serial module sequences with parallel module combinations (*e.g.* `client.serial(module1, client.parallel(module2, module3), module4);`).
    * @deprecated Use the new API with the {@link start} method.
-   * @param {...Module} ...modules The modules to run in serial.
+   * @param {...ClientModule} ...modules The modules to run in serial.
    * @return {Promise} [description]
    * @todo Clarify return value
    * @todo Remove
    */
   // serial(...modules) {
   //   console.log('The function "client.serial" is deprecated. Please use the new API instead.');
-  //   return Module.sequential(...modules);
+  //   return ClientModule.sequential(...modules);
   // },
 
   /**
-   * The `Module` returned by the `parallel` method starts the given `...modules` in parallel (with their `start` methods), and calls its `done` method after all modules called their own `done` methods.
+   * The `ClientModule` returned by the `parallel` method starts the given `...modules` in parallel (with their `start` methods), and calls its `done` method after all modules called their own `done` methods.
    *
    * **Note:** you can compound parallel module combinations with serial module sequences (*e.g.* `client.parallel(module1, client.serial(module2, module3), module4);`).
    *
    * **Note:** the `view` of a module is always full screen, so in the case where modules run in parallel, their `view`s are stacked on top of each other using the `z-index` CSS property.
    * We use the order of the `parallel` method's arguments to determine the order of the stack (*e.g.* in `client.parallel(module1, module2, module3)`, the `view` of `module1` is displayed on top of the `view` of `module2`, which is displayed on top of the `view` of `module3`).
    * @deprecated Use the new API with the {@link start} method.
-   * @param {...Module} modules The modules to run in parallel.
+   * @param {...ClientModule} modules The modules to run in parallel.
    * @return {Promise} [description]
    * @todo Clarify return value
    * @todo Remove
    */
   // parallel(...modules) {
   //   console.log('The function "client.parallel" is deprecated. Please use the new API instead.');
-  //   return Module.parallel(...modules);
+  //   return ClientModule.parallel(...modules);
   // },
 
 };

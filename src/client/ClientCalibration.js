@@ -1,10 +1,10 @@
-import Module from './Module';
+import ClientModule from './ClientModule';
 import CalibrationClient from 'calibration/client';
 
 /**
  * @private
  */
-export default class ClientCalibration extends Module {
+export default class ClientCalibration extends ClientModule {
   /**
    * Function called when an update happened.
    *

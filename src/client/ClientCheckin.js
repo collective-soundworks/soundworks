@@ -1,5 +1,5 @@
 import client from './client';
-import Module from './Module';
+import ClientModule from './ClientModule';
 
 
 function _instructions(label) {
@@ -24,7 +24,7 @@ function _instructions(label) {
  * @example const setup = new ClientSetup();
  * const checkin = new ClientCheckin({ setup: setup });
  */
-export default class ClientCheckin extends Module {
+export default class ClientCheckin extends ClientModule {
   /**
    * @param {Object} [options={}] Options.
    * @param {String} [options.name='checkin'] Name of the module.

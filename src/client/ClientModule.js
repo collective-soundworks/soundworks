@@ -119,7 +119,7 @@ class Parallel extends Promised {
  * }
  * @todo Move example in the manual?
  */
-export default class Module extends Promised {
+export default class ClientModule extends Promised {
   /**
    * @param {String} name Name of the module (used as the `id` and CSS class of the `view` DOM element if it exists).
    * @param {Boolean} [createView=true] Indicates whether the module displays a `view` or not.

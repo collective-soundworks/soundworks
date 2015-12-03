@@ -1,4 +1,4 @@
-import Module from './Module';
+import ServerModule from './ServerModule';
 
 
 /**
@@ -12,7 +12,7 @@ import Module from './Module';
  *
  * (See also {@link src/client/ClientPerformance.js~ClientPerformance} on the client side.)
  */
-export default class ServerPerformance extends Module {
+export default class ServerPerformance extends ServerModule {
   /**
     * Creates an instance of the class.
     * @param {Object} [options={}] Options.

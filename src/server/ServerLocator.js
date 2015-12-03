@@ -1,4 +1,4 @@
-import Module from './Module';
+import ServerModule from './ServerModule';
 
 
 /**
@@ -6,7 +6,7 @@ import Module from './Module';
  *
  * (See also {@link src/client/ClientLocator.js~ClientLocator} on the client side.)
  */
-export default class ServerLocator extends Module {
+export default class ServerLocator extends ServerModule {
   /**
    * Creates an instance of the class.
    * @param {Object} [options={}] Options.

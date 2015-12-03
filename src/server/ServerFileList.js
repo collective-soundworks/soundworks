@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import Module from './Module';
+import ServerModule from './ServerModule';
 
 function checkForExtensions(file, extensions) {
   if (!extensions || extensions.length === 0)
@@ -21,7 +21,7 @@ function checkForExtensions(file, extensions) {
  *
  * (See also {@link src/client/ClientFileList.js~ClientFileList} on the client side.)
  */
-export default class ServerFileList extends Module {
+export default class ServerFileList extends ServerModule {
   /**
    * @param {Object} [options={}] Options.
    * @param {String} [options.name='filelist'] Name of the module.

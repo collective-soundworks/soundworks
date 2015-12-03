@@ -1,4 +1,4 @@
-import Module from './Module';
+import ServerModule from './ServerModule';
 
 /**
  * [server] Define the physical setup in which the scenario takes place.
@@ -25,7 +25,7 @@ import Module from './Module';
  *   background: 'img/bg.png'
  * });
  */
-export default class ServerSetup extends Module {
+export default class ServerSetup extends ServerModule {
   /**
    * Creates and instance of the class.
    * @param {Object} [options={}] Options.

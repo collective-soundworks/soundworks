@@ -1,5 +1,5 @@
 import input from './input';
-import Module from './Module';
+import ClientModule from './ClientModule';
 
 
 /**
@@ -10,7 +10,7 @@ import Module from './Module';
  *
  * The module finishes its initialization when the participant taps the screen (and the referance angle is saved).
  */
-export default class Orientation extends Module {
+export default class Orientation extends ClientModule {
   /**
    * @param {Object} [options={}] Options.
    * @param {String} [options.name='dialog'] Name of the module.

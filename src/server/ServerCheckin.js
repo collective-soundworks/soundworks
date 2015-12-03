@@ -1,4 +1,4 @@
-import Module from './Module';
+import ServerModule from './ServerModule';
 
 const maxRandomClients = 9999;
 
@@ -16,7 +16,7 @@ const maxRandomClients = 9999;
  * // As new clients connect, the positions in the matrix are assigned randomly
  * const checkin = new ServerCheckin({ setup: setup, order: 'random' });
  */
-export default class ServerCheckin extends Module {
+export default class ServerCheckin extends ServerModule {
   /**
    * @param {Object} [options={}] Options.
    * @param {Object} [options.name='checkin'] Name of the module.

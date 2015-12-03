@@ -1,4 +1,4 @@
-import Module from './Module';
+import ClientModule from './ClientModule';
 
 
 /**
@@ -16,7 +16,7 @@ import Module from './Module';
  *   extensions: ['.mp3']
  * });
  */
-export default class ClientFileList extends Module {
+export default class ClientFileList extends ClientModule {
   /**
    * @param {Object} [options={}] Options.
    * @param {Object} [options.name='filelist'] Name of the module.

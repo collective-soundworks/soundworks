@@ -1,4 +1,4 @@
-import Module from './Module';
+import ClientModule from './ClientModule';
 
 
 class BaseRenderer {
@@ -201,7 +201,7 @@ class TextAreaRenderer extends BaseRenderer {
 /**
  * @private
  */
-export default class ClientSurvey extends Module {
+export default class ClientSurvey extends ClientModule {
   constructor(surveyConfig, options = {}) {
     super(options.name || 'survey', true, options.color);
 

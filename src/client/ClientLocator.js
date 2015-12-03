@@ -1,5 +1,5 @@
 import client from './client';
-import Module from './Module';
+import ClientModule from './ClientModule';
 
 
 /**
@@ -16,7 +16,7 @@ import Module from './Module';
  * const space = new Space();
  * const locator = new ClientLocator({ setup: setup, space: space });
  */
-export default class ClientLocator extends Module {
+export default class ClientLocator extends ClientModule {
   /**
    * @param {Object} [options={}] Options.
    * @param {String} [options.name='locator'] Name of the module.

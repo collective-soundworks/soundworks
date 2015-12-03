@@ -1,10 +1,10 @@
 import CalibrationServer from 'calibration/server';
-import Module from './Module';
+import ServerModule from './ServerModule';
 
 /**
  * @private
  */
-export default class ServerCalibration extends Module {
+export default class ServerCalibration extends ServerModule {
   /**
    * Constructor of the calibration server module.
    *

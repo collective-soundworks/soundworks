@@ -1,7 +1,7 @@
 import { audioContext } from 'waves-audio';
 import SyncClient from 'sync/client';
 import client from './client';
-import Module from './Module';
+import ClientModule from './ClientModule';
 
 /**
  * [client] Synchronize the local clock on a master clock shared by the server and the clients.
@@ -28,7 +28,7 @@ import Module from './Module';
  * - `travelTime`, current estimation of the travel time for a message to go from the client to the server and back;
  * - `travelTimeMax`, current estimation of the maximum travel time for a message to go from the client to the server and back.
  */
-export default class ClientSync extends Module {
+export default class ClientSync extends ClientModule {
   /**
    * @param {Object} [options={}] Options.
    * @param {String} [options.name='sync'] Name of the module.

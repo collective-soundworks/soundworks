@@ -1,6 +1,6 @@
 import { audioContext } from 'waves-audio';
 import client from './client';
-import Module from './Module';
+import ClientModule from './ClientModule';
 
 /**
  * @private
@@ -27,7 +27,7 @@ function _base64(format, base64) {
  *   activateWebAudio: true
  * });
  */
-export default class Dialog extends Module {
+export default class Dialog extends ClientModule {
   /**
    * @param {Object} [options={}] Options.
    * @param {String} [options.name='dialog'] Name of the module.

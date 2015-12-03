@@ -15,7 +15,7 @@ import ClientSync from './ClientSync';
 
 import Dialog from './Dialog';
 import Loader from './Loader';
-import Module from './Module';
+import ClientModule from './ClientModule';
 import Orientation from './Orientation';
 import Platform from './Platform';
 import Selector from './Selector';
@@ -37,7 +37,7 @@ export default {
   ClientSync,
   Dialog,
   Loader,
-  Module,
+  ClientModule,
   Orientation,
   Platform,
   Selector,

@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 import client from './client';
-import Module from './Module';
+import ClientModule from './ClientModule';
 import Space from './Space';
 
 
@@ -81,7 +81,7 @@ export class ListSelector extends EventEmitter {
  * const setup = new ClientSetup();
  * const placer = new ClientPlacer({ setup: setup });
  */
-export default class ClientPlacer extends Module {
+export default class ClientPlacer extends ClientModule {
   /**
    * @param {Object} [options={}] Options.
    * @param {String} [options.name='performance'] Name of the module.

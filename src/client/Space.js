@@ -1,5 +1,5 @@
 import client from './client';
-import Module from './Module';
+import ClientModule from './ClientModule';
 
 const ns = 'http://www.w3.org/2000/svg';
 
@@ -16,7 +16,7 @@ const ns = 'http://www.w3.org/2000/svg';
  *
  * space.display(setup, container);
  */
-export default class Space extends Module {
+export default class Space extends ClientModule {
   /**
    * @param {Object} [options={}] Options.
    * @param {String} [options.name='space'] Name of the module.

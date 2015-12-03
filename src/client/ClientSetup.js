@@ -1,5 +1,5 @@
 import client from './client';
-import Module from './Module';
+import ClientModule from './ClientModule';
 
 
 /**
@@ -16,7 +16,7 @@ import Module from './Module';
  *
  * (See also {@link src/server/ServerSetup.js~ServerSetup} on the server side.)
  */
-export default class ClientSetup extends Module {
+export default class ClientSetup extends ClientModule {
   /**
    * Creates an instance of the class.
    * @param {Object} [options={}] Options.
