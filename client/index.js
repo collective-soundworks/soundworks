@@ -16,33 +16,53 @@ var _input = require('./input');
 
 var _input2 = _interopRequireDefault(_input);
 
-var _Calibration = require('./Calibration');
+var _ClientCalibration = require('./ClientCalibration');
 
-var _Calibration2 = _interopRequireDefault(_Calibration);
+var _ClientCalibration2 = _interopRequireDefault(_ClientCalibration);
 
-var _Checkin = require('./Checkin');
+var _ClientCheckin = require('./ClientCheckin');
 
-var _Checkin2 = _interopRequireDefault(_Checkin);
+var _ClientCheckin2 = _interopRequireDefault(_ClientCheckin);
 
-var _Control = require('./Control');
+var _ClientControl = require('./ClientControl');
 
-var _Control2 = _interopRequireDefault(_Control);
+var _ClientControl2 = _interopRequireDefault(_ClientControl);
+
+var _ClientFileList = require('./ClientFileList');
+
+var _ClientFileList2 = _interopRequireDefault(_ClientFileList);
+
+var _ClientLocator = require('./ClientLocator');
+
+var _ClientLocator2 = _interopRequireDefault(_ClientLocator);
+
+var _ClientPerformance = require('./ClientPerformance');
+
+var _ClientPerformance2 = _interopRequireDefault(_ClientPerformance);
+
+var _ClientPlacer = require('./ClientPlacer');
+
+var _ClientPlacer2 = _interopRequireDefault(_ClientPlacer);
+
+var _ClientSetup = require('./ClientSetup');
+
+var _ClientSetup2 = _interopRequireDefault(_ClientSetup);
+
+var _ClientSurvey = require('./ClientSurvey');
+
+var _ClientSurvey2 = _interopRequireDefault(_ClientSurvey);
+
+var _ClientSync = require('./ClientSync');
+
+var _ClientSync2 = _interopRequireDefault(_ClientSync);
 
 var _Dialog = require('./Dialog');
 
 var _Dialog2 = _interopRequireDefault(_Dialog);
 
-var _Filelist = require('./Filelist');
-
-var _Filelist2 = _interopRequireDefault(_Filelist);
-
 var _Loader = require('./Loader');
 
 var _Loader2 = _interopRequireDefault(_Loader);
-
-var _Locator = require('./Locator');
-
-var _Locator2 = _interopRequireDefault(_Locator);
 
 var _Module = require('./Module');
 
@@ -52,14 +72,6 @@ var _Orientation = require('./Orientation');
 
 var _Orientation2 = _interopRequireDefault(_Orientation);
 
-var _Performance = require('./Performance');
-
-var _Performance2 = _interopRequireDefault(_Performance);
-
-var _Placer = require('./Placer');
-
-var _Placer2 = _interopRequireDefault(_Placer);
-
 var _Platform = require('./Platform');
 
 var _Platform2 = _interopRequireDefault(_Platform);
@@ -68,45 +80,31 @@ var _Selector = require('./Selector');
 
 var _Selector2 = _interopRequireDefault(_Selector);
 
-var _Setup = require('./Setup');
-
-var _Setup2 = _interopRequireDefault(_Setup);
-
-// to be removed
-
 var _Space = require('./Space');
 
 var _Space2 = _interopRequireDefault(_Space);
-
-var _Survey = require('./Survey');
-
-var _Survey2 = _interopRequireDefault(_Survey);
-
-var _Sync = require('./Sync');
-
-var _Sync2 = _interopRequireDefault(_Sync);
 
 exports['default'] = {
   audioContext: _wavesAudio.audioContext,
   client: _client2['default'],
   input: _input2['default'],
-  Calibration: _Calibration2['default'],
-  Checkin: _Checkin2['default'],
-  Control: _Control2['default'],
+  ClientCalibration: _ClientCalibration2['default'],
+  ClientCheckin: _ClientCheckin2['default'],
+  ClientControl: _ClientControl2['default'],
+  ClientFileList: _ClientFileList2['default'],
+  ClientLocator: _ClientLocator2['default'],
+  ClientPerformance: _ClientPerformance2['default'],
+  ClientPlacer: _ClientPlacer2['default'],
+  ClientSetup: _ClientSetup2['default'],
+  ClientSurvey: _ClientSurvey2['default'],
+  ClientSync: _ClientSync2['default'],
   Dialog: _Dialog2['default'],
-  Filelist: _Filelist2['default'],
   Loader: _Loader2['default'],
-  Locator: _Locator2['default'],
   Module: _Module2['default'],
   Orientation: _Orientation2['default'],
-  Performance: _Performance2['default'],
-  Placer: _Placer2['default'],
   Platform: _Platform2['default'],
   Selector: _Selector2['default'],
-  Setup: _Setup2['default'],
-  Space: _Space2['default'],
-  Survey: _Survey2['default'],
-  Sync: _Sync2['default']
+  Space: _Space2['default']
 };
 module.exports = exports['default'];
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInNyYy9jbGllbnQvaW5kZXguanMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7MEJBQzZCLGFBQWE7O3NCQUN2QixVQUFVOzs7O3FCQUNYLFNBQVM7Ozs7MkJBQ0gsZUFBZTs7Ozt1QkFDbkIsV0FBVzs7Ozt1QkFDWCxXQUFXOzs7O3NCQUNaLFVBQVU7Ozs7d0JBQ1IsWUFBWTs7OztzQkFDZCxVQUFVOzs7O3VCQUNULFdBQVc7Ozs7c0JBQ1osVUFBVTs7OzsyQkFDTCxlQUFlOzs7OzJCQUNmLGVBQWU7Ozs7c0JBQ3BCLFVBQVU7Ozs7d0JBQ1IsWUFBWTs7Ozt3QkFDWixZQUFZOzs7O3FCQUNmLFNBQVM7Ozs7OztxQkFDVCxTQUFTOzs7O3NCQUNSLFVBQVU7Ozs7b0JBQ1osUUFBUTs7OztxQkFFVjtBQUNiLGNBQVksMEJBQUE7QUFDWixRQUFNLHFCQUFBO0FBQ04sT0FBSyxvQkFBQTtBQUNMLGFBQVcsMEJBQUE7QUFDWCxTQUFPLHNCQUFBO0FBQ1AsU0FBTyxzQkFBQTtBQUNQLFFBQU0scUJBQUE7QUFDTixVQUFRLHVCQUFBO0FBQ1IsUUFBTSxxQkFBQTtBQUNOLFNBQU8sc0JBQUE7QUFDUCxRQUFNLHFCQUFBO0FBQ04sYUFBVywwQkFBQTtBQUNYLGFBQVcsMEJBQUE7QUFDWCxRQUFNLHFCQUFBO0FBQ04sVUFBUSx1QkFBQTtBQUNSLFVBQVEsdUJBQUE7QUFDUixPQUFLLG9CQUFBO0FBQ0wsT0FBSyxvQkFBQTtBQUNMLFFBQU0scUJBQUE7QUFDTixNQUFJLG1CQUFBO0NBQ0wiLCJmaWxlIjoic3JjL2NsaWVudC9pbmRleC5qcyIsInNvdXJjZXNDb250ZW50IjpbIlxuaW1wb3J0IHsgYXVkaW9Db250ZXh0IH0gZnJvbSAnd2F2ZXMtYXVkaW8nO1xuaW1wb3J0IGNsaWVudCBmcm9tICcuL2NsaWVudCc7XG5pbXBvcnQgaW5wdXQgZnJvbSAnLi9pbnB1dCc7XG5pbXBvcnQgQ2FsaWJyYXRpb24gZnJvbSAnLi9DYWxpYnJhdGlvbic7XG5pbXBvcnQgQ2hlY2tpbiBmcm9tICcuL0NoZWNraW4nO1xuaW1wb3J0IENvbnRyb2wgZnJvbSAnLi9Db250cm9sJztcbmltcG9ydCBEaWFsb2cgZnJvbSAnLi9EaWFsb2cnO1xuaW1wb3J0IEZpbGVsaXN0IGZyb20gJy4vRmlsZWxpc3QnO1xuaW1wb3J0IExvYWRlciBmcm9tICcuL0xvYWRlcic7XG5pbXBvcnQgTG9jYXRvciBmcm9tICcuL0xvY2F0b3InO1xuaW1wb3J0IE1vZHVsZSBmcm9tICcuL01vZHVsZSc7XG5pbXBvcnQgT3JpZW50YXRpb24gZnJvbSAnLi9PcmllbnRhdGlvbic7XG5pbXBvcnQgUGVyZm9ybWFuY2UgZnJvbSAnLi9QZXJmb3JtYW5jZSc7XG5pbXBvcnQgUGxhY2VyIGZyb20gJy4vUGxhY2VyJztcbmltcG9ydCBQbGF0Zm9ybSBmcm9tICcuL1BsYXRmb3JtJztcbmltcG9ydCBTZWxlY3RvciBmcm9tICcuL1NlbGVjdG9yJztcbmltcG9ydCBTZXR1cCBmcm9tICcuL1NldHVwJzsgLy8gdG8gYmUgcmVtb3ZlZFxuaW1wb3J0IFNwYWNlIGZyb20gJy4vU3BhY2UnO1xuaW1wb3J0IFN1cnZleSBmcm9tICcuL1N1cnZleSc7XG5pbXBvcnQgU3luYyBmcm9tICcuL1N5bmMnO1xuXG5leHBvcnQgZGVmYXVsdCB7XG4gIGF1ZGlvQ29udGV4dCxcbiAgY2xpZW50LFxuICBpbnB1dCxcbiAgQ2FsaWJyYXRpb24sXG4gIENoZWNraW4sXG4gIENvbnRyb2wsXG4gIERpYWxvZyxcbiAgRmlsZWxpc3QsXG4gIExvYWRlcixcbiAgTG9jYXRvcixcbiAgTW9kdWxlLFxuICBPcmllbnRhdGlvbixcbiAgUGVyZm9ybWFuY2UsXG4gIFBsYWNlcixcbiAgUGxhdGZvcm0sXG4gIFNlbGVjdG9yLFxuICBTZXR1cCxcbiAgU3BhY2UsXG4gIFN1cnZleSxcbiAgU3luY1xufTtcbiJdfQ==
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInNyYy9jbGllbnQvaW5kZXguanMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7MEJBQzZCLGFBQWE7O3NCQUN2QixVQUFVOzs7O3FCQUNYLFNBQVM7Ozs7aUNBQ0cscUJBQXFCOzs7OzZCQUN6QixpQkFBaUI7Ozs7NkJBQ2pCLGlCQUFpQjs7Ozs4QkFDaEIsa0JBQWtCOzs7OzZCQUNuQixpQkFBaUI7Ozs7aUNBQ2IscUJBQXFCOzs7OzRCQUMxQixnQkFBZ0I7Ozs7MkJBQ2pCLGVBQWU7Ozs7NEJBQ2QsZ0JBQWdCOzs7OzBCQUNsQixjQUFjOzs7O3NCQUNsQixVQUFVOzs7O3NCQUNWLFVBQVU7Ozs7c0JBQ1YsVUFBVTs7OzsyQkFDTCxlQUFlOzs7O3dCQUNsQixZQUFZOzs7O3dCQUNaLFlBQVk7Ozs7cUJBQ2YsU0FBUzs7OztxQkFFWjtBQUNiLGNBQVksMEJBQUE7QUFDWixRQUFNLHFCQUFBO0FBQ04sT0FBSyxvQkFBQTtBQUNMLG1CQUFpQixnQ0FBQTtBQUNqQixlQUFhLDRCQUFBO0FBQ2IsZUFBYSw0QkFBQTtBQUNiLGdCQUFjLDZCQUFBO0FBQ2QsZUFBYSw0QkFBQTtBQUNiLG1CQUFpQixnQ0FBQTtBQUNqQixjQUFZLDJCQUFBO0FBQ1osYUFBVywwQkFBQTtBQUNYLGNBQVksMkJBQUE7QUFDWixZQUFVLHlCQUFBO0FBQ1YsUUFBTSxxQkFBQTtBQUNOLFFBQU0scUJBQUE7QUFDTixRQUFNLHFCQUFBO0FBQ04sYUFBVywwQkFBQTtBQUNYLFVBQVEsdUJBQUE7QUFDUixVQUFRLHVCQUFBO0FBQ1IsT0FBSyxvQkFBQTtDQUNOIiwiZmlsZSI6InNyYy9jbGllbnQvaW5kZXguanMiLCJzb3VyY2VzQ29udGVudCI6WyJcbmltcG9ydCB7IGF1ZGlvQ29udGV4dCB9IGZyb20gJ3dhdmVzLWF1ZGlvJztcbmltcG9ydCBjbGllbnQgZnJvbSAnLi9jbGllbnQnO1xuaW1wb3J0IGlucHV0IGZyb20gJy4vaW5wdXQnO1xuaW1wb3J0IENsaWVudENhbGlicmF0aW9uIGZyb20gJy4vQ2xpZW50Q2FsaWJyYXRpb24nO1xuaW1wb3J0IENsaWVudENoZWNraW4gZnJvbSAnLi9DbGllbnRDaGVja2luJztcbmltcG9ydCBDbGllbnRDb250cm9sIGZyb20gJy4vQ2xpZW50Q29udHJvbCc7XG5pbXBvcnQgQ2xpZW50RmlsZUxpc3QgZnJvbSAnLi9DbGllbnRGaWxlTGlzdCc7XG5pbXBvcnQgQ2xpZW50TG9jYXRvciBmcm9tICcuL0NsaWVudExvY2F0b3InO1xuaW1wb3J0IENsaWVudFBlcmZvcm1hbmNlIGZyb20gJy4vQ2xpZW50UGVyZm9ybWFuY2UnO1xuaW1wb3J0IENsaWVudFBsYWNlciBmcm9tICcuL0NsaWVudFBsYWNlcic7XG5pbXBvcnQgQ2xpZW50U2V0dXAgZnJvbSAnLi9DbGllbnRTZXR1cCc7XG5pbXBvcnQgQ2xpZW50U3VydmV5IGZyb20gJy4vQ2xpZW50U3VydmV5JztcbmltcG9ydCBDbGllbnRTeW5jIGZyb20gJy4vQ2xpZW50U3luYyc7XG5pbXBvcnQgRGlhbG9nIGZyb20gJy4vRGlhbG9nJztcbmltcG9ydCBMb2FkZXIgZnJvbSAnLi9Mb2FkZXInO1xuaW1wb3J0IE1vZHVsZSBmcm9tICcuL01vZHVsZSc7XG5pbXBvcnQgT3JpZW50YXRpb24gZnJvbSAnLi9PcmllbnRhdGlvbic7XG5pbXBvcnQgUGxhdGZvcm0gZnJvbSAnLi9QbGF0Zm9ybSc7XG5pbXBvcnQgU2VsZWN0b3IgZnJvbSAnLi9TZWxlY3Rvcic7XG5pbXBvcnQgU3BhY2UgZnJvbSAnLi9TcGFjZSc7XG5cbmV4cG9ydCBkZWZhdWx0IHtcbiAgYXVkaW9Db250ZXh0LFxuICBjbGllbnQsXG4gIGlucHV0LFxuICBDbGllbnRDYWxpYnJhdGlvbixcbiAgQ2xpZW50Q2hlY2tpbixcbiAgQ2xpZW50Q29udHJvbCxcbiAgQ2xpZW50RmlsZUxpc3QsXG4gIENsaWVudExvY2F0b3IsXG4gIENsaWVudFBlcmZvcm1hbmNlLFxuICBDbGllbnRQbGFjZXIsXG4gIENsaWVudFNldHVwLFxuICBDbGllbnRTdXJ2ZXksXG4gIENsaWVudFN5bmMsXG4gIERpYWxvZyxcbiAgTG9hZGVyLFxuICBNb2R1bGUsXG4gIE9yaWVudGF0aW9uLFxuICBQbGF0Zm9ybSxcbiAgU2VsZWN0b3IsXG4gIFNwYWNlLFxufTtcbiJdfQ==

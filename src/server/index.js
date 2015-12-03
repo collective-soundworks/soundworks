@@ -1,29 +1,31 @@
+import comm from './comm';
 import server from './server';
-import Calibration from './Calibration';
-import Checkin from './Checkin';
 import Client from './Client';
-import Control from './Control';
-import Filelist from './Filelist';
-import Locator from './Locator';
 import Module from './Module';
-import Performance from './Performance';
-import Placer from './Placer';
-import Setup from './Setup';
-import Survey from './Survey';
-import Sync from './Sync';
+import ServerCalibration from './ServerCalibration';
+import ServerCheckin from './ServerCheckin';
+import ServerControl from './ServerControl';
+import ServerFileList from './ServerFileList';
+import ServerLocator from './ServerLocator';
+import ServerPerformance from './ServerPerformance';
+import ServerPlacer from './ServerPlacer';
+import ServerSetup from './ServerSetup';
+import ServerSurvey from './ServerSurvey';
+import ServerSync from './ServerSync';
 
 export default {
+  comm,
   server,
-  Calibration,
-  Checkin,
   Client,
-  Control,
-  Filelist,
-  Locator,
   Module,
-  Performance,
-  Placer,
-  Setup,
-  Survey,
-  Sync
+  ServerCalibration,
+  ServerCheckin,
+  ServerControl,
+  ServerFileList,
+  ServerLocator,
+  ServerPerformance,
+  ServerPlacer,
+  ServerSetup,
+  ServerSurvey,
+  ServerSync,
 };
