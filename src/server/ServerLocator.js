@@ -27,20 +27,20 @@ export default class ServerLocator extends Module {
   connect(client) {
     super.connect(client);
 
-    client.receive(this.name + ':request', () => {
+    this.receive(client, 'request', () => {
       if (this.setup) {
-        let surface = this.setup.getSurface();
-        client.send(this.name + ':surface', surface);
+        const surface = this.setup.getSurface();
+        this.send(client, 'surface', surface);
       } else {
         throw new Error('ServerLocator requires a setup.');
       }
     });
 
-    client.receive(this.name + ':coordinates', (coordinates) => {
+    this.receive(client, 'coordinates', (coordinates) => {
       client.coordinates = coordinates;
-    });
+    });@
 
-    client.receive(this.name + ':restart', (coordinates) => {
+    this.receive(client, 'restart', (coordinates) => {
       client.coordinates = coordinates;
     });
   }

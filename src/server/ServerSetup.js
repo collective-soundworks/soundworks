@@ -77,15 +77,15 @@ export default class ServerSetup extends Module {
   connect(client) {
     super.connect(client);
 
-    client.receive(this.name + ':request', () => {
-      client.send(this.name + ':init', {
-        "width": this.width,
-        "height": this.height,
-        "background": this.background,
-        "spacing": this.spacing,
-        "labels": this.labels,
-        "coordinates": this.coordinates,
-        "type": this.type
+    this.receive(client, 'request', () => {
+      this.send(client, 'init', {
+        width: this.width,
+        height: this.height,
+        background: this.background,
+        spacing: this.spacing,
+        labels: this.labels,
+        coordinates: this.coordinates,
+        type: this.type
       });
     });
   }
@@ -122,8 +122,8 @@ export default class ServerSetup extends Module {
    */
   getNumPositions() {
     if(this.labels.length || this.coordinates.length) {
-      var numLabels = this.labels.length || Infinity;
-      var numCoordinates = this.coordinates.length || Infinity;
+      const numLabels = this.labels.length || Infinity;
+      const numCoordinates = this.coordinates.length || Infinity;
 
       return Math.min(numLabels, numCoordinates);
     }
@@ -138,10 +138,10 @@ export default class ServerSetup extends Module {
    * @property {Number} width Width of the setup.
    */
   getSurface() {
-    let surface = {
+    // @todo - allow other shapes
+    const surface = {
       height: this.height,
       width: this.width
-      // TODO: allow other shapes
     }
 
     return surface;
@@ -171,12 +171,12 @@ export default class ServerSetup extends Module {
 
     switch (type) {
       case 'matrix':
-        let cols = params.cols || 3;
-        let rows = params.rows || 4;
-        let colSpacing = params.colSpacing || 1;
-        let rowSpacing = params.rowSpacing || 1;
-        let colMargin = params.colMargin || colSpacing / 2;
-        let rowMargin = params.rowMargin || rowSpacing / 2;
+        const cols = params.cols || 3;
+        const rows = params.rows || 4;
+        const colSpacing = params.colSpacing || 1;
+        const rowSpacing = params.rowSpacing || 1;
+        const colMargin = params.colMargin || colSpacing / 2;
+        const rowMargin = params.rowMargin || rowSpacing / 2;
 
         this.specific.matrix = {};
         this.specific.matrix.cols = cols;
@@ -192,8 +192,10 @@ export default class ServerSetup extends Module {
           for (let i = 0; i < cols; i++) {
             count++;
 
-            let label = count.toString();
-            let coordinates = [(colMargin + i * colSpacing) / this.width, (rowMargin + j * rowSpacing) / this.height];
+            const label = count.toString();
+            const x = (colMargin + i * colSpacing) / this.width;
+            const y = (rowMargin + j * rowSpacing) / this.height;
+            const coordinates = [x, y];
 
             this.labels.push(label);
             this.coordinates.push(coordinates);
@@ -201,17 +203,15 @@ export default class ServerSetup extends Module {
         }
 
         break;
-
       case 'surface':
-        let height = params.height || 4;
-        let width = params.width || 6;
-        let background = params.background || null;
+        // @todo - allow other shape
+        const height = params.height || 4;
+        const width = params.width || 6;
+        const background = params.background || null;
 
         this.height = height;
         this.width = width;
         this.background = background;
-
-        // TODO: allow other shapes
         break;
 
       default:

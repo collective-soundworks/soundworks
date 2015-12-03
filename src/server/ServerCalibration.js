@@ -37,8 +37,14 @@ export default class ServerCalibration extends Module {
   connect(client) {
     super.connect(client);
 
-    const sendCallback = (cmd, ...args) => { client.send(cmd, ...args); };
-    const receiveCallback = (cmd, callback) => { client.receive(cmd, callback); };
+    const sendCallback = (cmd, ...args) => {
+      this.send(client, cmd, ...args);
+    };
+
+    const receiveCallback = (cmd, callback) => {
+      this.receive(client, cmd, callback);
+    };
+
     this.calibration.start(sendCallback, receiveCallback);
   }
 

@@ -150,11 +150,6 @@ export default class ClientPlacer extends Module {
 
     this._resizeSelector = this._resizeSelector.bind(this);
     window.addEventListener('resize', this._resizeSelector, false);
-    // allow to reset localStorage
-    client.receive(`${this.name}:reset`, this._deleteInformation);
-
-    // DEBUG
-    // this._deleteInformation();
   }
 
   _resizeSelector() {
@@ -193,12 +188,7 @@ export default class ClientPlacer extends Module {
       client.coordinates = position.coordinates;
     }
 
-    client.send(
-      `${this.name}:information`,
-      this.index,
-      this.label,
-      client.coordinates
-    );
+    this.send('information', this.index, this.label, client.coordinates);
   }
 
   /**
@@ -243,6 +233,9 @@ export default class ClientPlacer extends Module {
     setTimeout(() => {
       this._selector.displayPositions(this._positions, 20);
     }, 0);
+
+    // allow to reset localStorage
+    this.receive('reset', this._deleteInformation);
   }
 
   /**

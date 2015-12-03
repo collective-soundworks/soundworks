@@ -35,9 +35,10 @@ export default class ServerFileList extends Module {
   connect(client) {
     super.connect(client);
 
-    client.receive(this.name + ':request', (subfolder, extensions) => {
+    this.receive(client, 'request', (subfolder, extensions) => {
       let filesList = [];
 
+      // @todo remove hardcoded path - global config ?
       fs.readdir('./public/' + subfolder, (err, files) => {
         if (err) throw err;
 
@@ -46,7 +47,7 @@ export default class ServerFileList extends Module {
             filesList.push(file);
         }
 
-        client.send(this.name + ':files', filesList);
+        this.send(client, 'files', filesList);
       });
     });
   }

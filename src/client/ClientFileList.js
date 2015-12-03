@@ -1,5 +1,5 @@
-import client from './client';
 import Module from './Module';
+
 
 /**
  * [client] Retrieve a list of files on the server.
@@ -42,11 +42,11 @@ export default class ClientFileList extends Module {
   start() {
     super.start();
 
-    client.send(this.name + ':request', this._folder, this._extensions);
+    this.send('request', this._folder, this._extensions);
 
-    client.receive(this.name + ':files', (files) => {
+    this.receive('files', (files) => {
       this.files = files;
-      this.emit(this.name + ':files', files);
+      this.emit(`${this.name}:files`, files);
       this.done();
     }, this);
   }

@@ -31,7 +31,7 @@ export default class ServerSurvey extends Module {
   connect(client) {
     super.connect(client);
 
-    client.receive(`${this.name}:answers`, this._appendToFile)
+    this.receive(client, 'answers', this._appendToFile)
   }
 
   disconnect(client) {

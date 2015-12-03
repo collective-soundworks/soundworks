@@ -20,7 +20,7 @@ export default class ServerPlacer extends Module {
   connect(client) {
     super.connect(client);
 
-    client.receive(`${this.name}:information`, (index, label, coords) => {
+    this.receive(client, 'information', (index, label, coords) => {
       client.modules[this.name].index = index;
       client.modules[this.name].label = label;
       client.coordinates = coords;

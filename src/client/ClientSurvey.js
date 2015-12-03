@@ -1,4 +1,3 @@
-import client from './client';
 import Module from './Module';
 
 
@@ -320,7 +319,7 @@ export default class ClientSurvey extends Module {
       // send informations to server
       this.answers.timestamp = new Date().getTime();
       this.answers.userAgent = navigator.userAgent;
-      client.send(`${this.name}:answers`, JSON.stringify(this.answers));
+      this.send('answers', JSON.stringify(this.answers));
     }
   }
 

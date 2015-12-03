@@ -1,4 +1,3 @@
-import client from './client';
 import Module from './Module';
 import CalibrationClient from 'calibration/client';
 
@@ -31,7 +30,6 @@ export default class ClientCalibration extends Module {
    */
   constructor(params = {}) {
     super(params.name || 'calibration', true, params.color || 'black');
-    const that = this;
 
     this.ready = false;
     this.started = false;
@@ -40,8 +38,8 @@ export default class ClientCalibration extends Module {
     this.updateFunction = params.updateFunction;
 
     this.calibration = new CalibrationClient({
-      sendFunction: client.send,
-      receiveFunction: client.receive,
+      sendFunction: this.send,
+      receiveFunction: this.receive,
       updateFunction: () => { that._calibrationUpdated(); }
     });
 
@@ -109,11 +107,11 @@ export default class ClientCalibration extends Module {
   }
 
   _calibrationUpdated() {
-    if(!this.started) {
+    if (!this.started) {
       this.started = true;
       this.done();
     }
-    if(typeof this.updateFunction !== 'undefined') {
+    if (typeof this.updateFunction !== 'undefined') {
       this.updateFunction();
     }
   }

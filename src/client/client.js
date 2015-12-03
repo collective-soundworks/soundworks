@@ -3,9 +3,6 @@ import io from 'socket.io-client';
 import MobileDetect from 'mobile-detect';
 import Module from './Module';
 
-// debug - http://socket.io/docs/logging-and-debugging/#available-debugging-scopes
-// localStorage.debug = '*';
-
 
 /**
  * The `client` object contains the basic methods and attributes of the client.
@@ -93,6 +90,7 @@ export default {
     // @todo harmonize io config with server
     options = Object.assign({
       io: true,
+      debugIO: false,
       socketUrl: '',
       transports: ['websocket'],
     }, options);
@@ -109,6 +107,11 @@ export default {
       });
     } else {
       this.ready = Promise.resolve(true);
+    }
+
+    // debug - http://socket.io/docs/logging-and-debugging/#available-debugging-scopes
+    if (options.debugIO) {
+      localStorage.debug = '*';
     }
 
     // --------------------------------------------------------------------
