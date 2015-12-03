@@ -284,16 +284,33 @@ export default class Module extends Promised {
       this.view.style.zIndex = value;
   }
 
+  /**
+   * Sends a WebSocket message to the server side socket.
+   * @param {String} channel - The channel of the message (is automatically namespaced with the module's name: `${this.name}:channel`).
+   * @param {...*} args - Arguments of the message (as many as needed, of any type).
+   */
   send(channel, ...args) {
-    // console.log(`${this.name}:${channel}`, this);
     comm.send(`${this.name}:${channel}`, ...args)
   }
 
+  sendVolatile(channel, ...args) {
+    comm.sendVolatile(`${this.name}:${channel}`, ...args)
+  }
+
+  /**
+   * Listen a WebSocket message from the server.
+   * @param {String} channel - The channel of the message (is automatically namespaced with the module's name: `${this.name}:channel`).
+   * @param {...*} callback - The callback to execute when a message is received.
+   */
   receive(channel, callback) {
-    // console.log(`${this.name}:${channel}`, this);
     comm.receive(`${this.name}:${channel}`, callback);
   }
 
+  /**
+   * Stop listening to a message from the server.
+   * @param {String} channel - The channel of the message (is automatically namespaced with the module's name: `${this.name}:channel`).
+   * @param {...*} callback - The callback to cancel.
+   */
   removeListener(channel, callback) {
     comm.removeListener(`${this.name}:${channel}`, callback);
   }

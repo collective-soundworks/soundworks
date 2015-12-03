@@ -11,29 +11,8 @@ import Client from './Client';
 
 // globals
 // @todo hide this into client
-let nextClientIndex = 0;
-const availableClientIndices = [];
+
 const oscListeners = [];
-
-function _getClientIndex() {
-  var index = -1;
-
-  if (availableClientIndices.length > 0) {
-    availableClientIndices.sort(function(a, b) {
-      return a - b;
-    });
-
-    index = availableClientIndices.splice(0, 1)[0];
-  } else {
-    index = nextClientIndex++;
-  }
-
-  return index;
-}
-
-function _releaseClientIndex(index) {
-  availableClientIndices.push(index);
-}
 
 
 /**
@@ -190,41 +169,30 @@ export default {
    * @param {...ClientModule} modules Modules to map to that client type.
    */
   map(clientType, ...modules) {
-    let url = '/';
-
+    const url = (clientType !== this.appConfig.defaultClient) ? `/${clientType}` : '/';
     // cache compiled template
     const tmplPath = path.join(process.cwd(), 'views', clientType + '.ejs');
     const tmplString = fs.readFileSync(tmplPath, { encoding: 'utf8' });
     const tmpl = ejs.compile(tmplString);
 
-    if (clientType !== this.appConfig.defaultClient) { url += clientType; }
-
-    //
+    // write env config into templates
     this.expressApp.get(url, (req, res) => {
       res.send(tmpl({ envConfig: JSON.stringify(this.envConfig) }));
     });
 
     this.io.of(clientType).on('connection', (socket) => {
       const client = new Client(clientType, socket);
-      client.index = _getClientIndex();
-
       modules.forEach((mod) => { mod.connect(client) });
 
-      // @todo - hide this into the client ?
-      // global events for the client
+      // global lifecycle of the client
       comm.receive(client, 'disconnect', () => {
-        // problem here for hide into clients
         modules.forEach((mod) => { mod.disconnect(client) });
-
-        _releaseClientIndex(client.index);
-        client.index = -1;
-
-        log.info({ socket: socket, clientType: clientType }, 'disconnect');
+        client destroy();
+        // log.info({ socket: socket, clientType: clientType }, 'disconnect');
       });
 
       comm.send(client, 'client:start', client.index); // the server is ready
-
-      log.info({ socket: socket, clientType: clientType }, 'connection');
+      // log.info({ socket: socket, clientType: clientType }, 'connection');
     });
   },
 
