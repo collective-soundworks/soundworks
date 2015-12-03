@@ -15,9 +15,12 @@ const logger = {
     };
 
     const log = bunyan.createLogger(config);
+
     for (let attr in log) {
-      // console.log(attr, log[attr]);
-      // this[attr] = log[attr].bind(log);
+      const method = log[attr];
+      if (typeof method === 'function') {
+        this[attr] = log[attr].bind(log);
+      }
     }
   }
 }

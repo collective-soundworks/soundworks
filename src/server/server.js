@@ -37,16 +37,19 @@ const defaultEnvConfig = {
     remoteAddress: '127.0.0.1',
     remotePort: 57120
   },
-  loggerConfiguration: {
+  logger: {
     name: 'soundworks',
     level: 'info',
-    streams: [{
-      level: 'info',
-      stream: process.stdout,
-    }, {
-      level: 'info',
-      path: path.join(process.cwd(), 'logs', 'soundworks.log'),
-    }]
+    streams: [
+      {
+        level: 'info',
+        stream: process.stdout,
+      },
+      // {
+      //   level: 'info',
+      //   path: path.join(process.cwd(), 'logs', 'soundworks.log'),
+      // }
+    ]
   }
 };
 
@@ -136,7 +139,7 @@ export default {
 
     this.io = new IO(httpServer, appConfig.socketIO);
     comm.initialize(this.io);
-    logger.initialize(envConfig.loggerConfiguration);
+    logger.initialize(envConfig.logger);
 
     // configure OSC
     if (envConfig.osc) {
@@ -187,9 +190,13 @@ export default {
     const tmplString = fs.readFileSync(tmplPath, { encoding: 'utf8' });
     const tmpl = ejs.compile(tmplString);
 
+    // @todo refactor
     // write env config into templates
     this.expressApp.get(url, (req, res) => {
-      res.send(tmpl({ envConfig: JSON.stringify(this.envConfig) }));
+      const envConfigCopy = Object.assign({}, this.envConfig);
+      // remove logger configuration
+      envConfigCopy.logger = undefined;
+      res.send(tmpl({ envConfig: JSON.stringify(envConfigCopy) }));
     });
 
     modules.forEach((mod) => { mod.configure(this.appConfig, this.envConfig) })

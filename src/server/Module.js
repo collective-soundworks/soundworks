@@ -78,8 +78,8 @@ export default class Module extends EventEmitter {
    * @private
    */
   configure(appConfig, envConfig) {
-    this._appConfig = appConfig;
-    this._envConfig = envConfig;
+    this.appConfig = appConfig;
+    this.envConfig = envConfig;
   }
 
   /**

@@ -37,7 +37,7 @@ export default class ServerFileList extends Module {
     super.connect(client);
 
     this.receive(client, 'request', (subfolder, extensions) => {
-      const directory = path.join(this._appConfig.publicFolder, subfolder);
+      const directory = path.join(this.appConfig.publicFolder, subfolder);
       const filesList = [];
       // @todo remove hardcoded path - global config ?
       fs.readdir(directory, (err, files) => {
