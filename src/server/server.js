@@ -187,7 +187,7 @@ export default {
       // global lifecycle of the client
       comm.receive(client, 'disconnect', () => {
         modules.forEach((mod) => { mod.disconnect(client) });
-        client destroy();
+        client.destroy();
         // log.info({ socket: socket, clientType: clientType }, 'disconnect');
       });
 

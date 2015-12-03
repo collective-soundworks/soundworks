@@ -1,7 +1,9 @@
 import { audioContext } from 'waves-audio';
-import platform from 'platform';
 import client from './client';
 import Module from './Module';
+// @todo - remove one of these dependencies
+import platform from 'platform';
+import MobileDetect from 'mobile-detect';
 
 
 /**

@@ -330,8 +330,7 @@ export default class ClientControl extends Module {
 
     // listen to events
     this.receive('event', (name, val) => {
-      console.log(name, val);
-      let event = this.events[name];
+      const event = this.events[name];
 
       if (event) {
         event.set(val);

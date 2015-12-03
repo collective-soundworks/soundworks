@@ -1,5 +1,4 @@
 import comm from './comm';
-import MobileDetect from 'mobile-detect';
 import Module from './Module';
 
 
