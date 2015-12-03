@@ -1,4 +1,4 @@
-const bunyan = require('bunyan');
+import bunyan from 'bunyan';
 
 // @TODO allow configuration
 function socketSerializer(socket) {
@@ -8,18 +8,18 @@ function socketSerializer(socket) {
 /**
  * @private
  */
-const log = bunyan.createLogger({
-  name: 'test-app',
-  serializers: {
-    socket: socketSerializer
-  },
-  streams: [{
-    level: 'info',
-    stream: process.stdout
-  }, {
-    level: 'info',
-    path: '/var/tmp/soundworks-app.log'
-  }]
-});
+const logger = {
+  initialize(config) {
+    config.serializers = {
+      socket: socketSerializer
+    };
 
-export default log;
+    const log = bunyan.createLogger(config);
+    for (let attr in log) {
+      // console.log(attr, log[attr]);
+      // this[attr] = log[attr].bind(log);
+    }
+  }
+}
+
+export default logger;

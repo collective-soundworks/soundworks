@@ -74,6 +74,15 @@ export default class Module extends EventEmitter {
   }
 
   /**
+   * Get access to the global configuration (called from `server`)
+   * @private
+   */
+  configure(appConfig, envConfig) {
+    this._appConfig = appConfig;
+    this._envConfig = envConfig;
+  }
+
+  /**
    * Listen a WebSocket message.
    * @param {Client} client - The client that must listen to the message.
    * @param {String} channel - The channel of the message (is automatically namespaced with the module's name: `${this.name}:channel`).

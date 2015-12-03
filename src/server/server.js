@@ -3,7 +3,7 @@ import ejs from 'ejs';
 import express from 'express';
 import fs from 'fs';
 import http from 'http';
-import log from './logger';
+import logger from './logger';
 import IO from 'socket.io';
 import osc from 'osc';
 import path from 'path';
@@ -14,6 +14,41 @@ import Client from './Client';
 
 const oscListeners = [];
 
+const defaultAppConfig = {
+  publicFolder: path.join(process.cwd(), 'public'),
+  defaultClient: 'player',
+  // @note: EngineIO defaults
+  // this.pingTimeout = opts.pingTimeout || 3000;
+  // this.pingInterval = opts.pingInterval || 1000;
+  // this.upgradeTimeout = opts.upgradeTimeout || 10000;
+  // this.maxHttpBufferSize = opts.maxHttpBufferSize || 10E7;
+  socketIO: {
+    transports: ['websocket'],
+    pingTimeout: 60000,
+    pingInterval: 50000
+  }
+};
+
+const defaultEnvConfig = {
+  port: 8000,
+  osc: {
+    localAddress: '127.0.0.1',
+    localPort: 57121,
+    remoteAddress: '127.0.0.1',
+    remotePort: 57120
+  },
+  loggerConfiguration: {
+    name: 'soundworks',
+    level: 'info',
+    streams: [{
+      level: 'info',
+      stream: process.stdout,
+    }, {
+      level: 'info',
+      path: path.join(process.cwd(), 'logs', 'soundworks.log'),
+    }]
+  }
+};
 
 /**
  * The `server` object contains the basic methods of the server.
@@ -79,33 +114,10 @@ export default {
    * - `remotePort:Number`: port of the device to send default OSC messages to (defaults to `57120`).
    */
   start(appConfig = {}, envConfig = {}) {
-    appConfig = Object.assign({
-      publicFolder: path.join(process.cwd(), 'public'),
-      defaultClient: 'player',
-      // @note: EngineIO defaults
-      // this.pingTimeout = opts.pingTimeout || 3000;
-      // this.pingInterval = opts.pingInterval || 1000;
-      // this.upgradeTimeout = opts.upgradeTimeout || 10000;
-      // this.maxHttpBufferSize = opts.maxHttpBufferSize || 10E7;
-      socketIO: {
-        transports: ['websocket'],
-        pingTimeout: 60000,
-        pingInterval: 50000
-      }
-    }, appConfig);
-
-    envConfig = Object.assign({
-      port: 8000,
-      osc: {
-        localAddress: '127.0.0.1',
-        localPort: 57121,
-        remoteAddress: '127.0.0.1',
-        remotePort: 57120
-      }
-    }, envConfig);
-
-    this.envConfig = envConfig;
+    appConfig = Object.assign(defaultAppConfig, appConfig);
+    envConfig = Object.assign(defaultEnvConfig, envConfig);
     this.appConfig = appConfig;
+    this.envConfig = envConfig;
 
     // configure express and http server
     const expressApp = new express();
@@ -122,9 +134,9 @@ export default {
     this.expressApp = expressApp;
     this.httpServer = httpServer;
 
-    // configure socket.io
     this.io = new IO(httpServer, appConfig.socketIO);
     comm.initialize(this.io);
+    logger.initialize(envConfig.loggerConfiguration);
 
     // configure OSC
     if (envConfig.osc) {
@@ -180,6 +192,8 @@ export default {
       res.send(tmpl({ envConfig: JSON.stringify(this.envConfig) }));
     });
 
+    modules.forEach((mod) => { mod.configure(this.appConfig, this.envConfig) })
+
     this.io.of(clientType).on('connection', (socket) => {
       const client = new Client(clientType, socket);
       modules.forEach((mod) => { mod.connect(client) });
@@ -188,11 +202,11 @@ export default {
       comm.receive(client, 'disconnect', () => {
         modules.forEach((mod) => { mod.disconnect(client) });
         client.destroy();
-        // log.info({ socket: socket, clientType: clientType }, 'disconnect');
+        logger.info({ socket: socket, clientType: clientType }, 'disconnect');
       });
 
       comm.send(client, 'client:start', client.index); // the server is ready
-      // log.info({ socket: socket, clientType: clientType }, 'connection');
+      logger.info({ socket: socket, clientType: clientType }, 'connection');
     });
   },
 

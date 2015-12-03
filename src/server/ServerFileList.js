@@ -1,4 +1,5 @@
 import fs from 'fs';
+import path from 'path';
 import Module from './Module';
 
 function checkForExtensions(file, extensions) {
@@ -16,9 +17,9 @@ function checkForExtensions(file, extensions) {
 }
 
 /**
- * [server] Retrieve a list of files on the server in the `/public` folder upon request of the client.
+ * [server] Retrieve a list of files on the server in the public folder upon request of the client.
  *
- * (See also {@link src/client/ClientFilelist.js~ClientFilelist} on the client side.)
+ * (See also {@link src/client/ClientFileList.js~ClientFileList} on the client side.)
  */
 export default class ServerFileList extends Module {
   /**
@@ -36,10 +37,10 @@ export default class ServerFileList extends Module {
     super.connect(client);
 
     this.receive(client, 'request', (subfolder, extensions) => {
-      let filesList = [];
-
+      const directory = path.join(this._appConfig.publicFolder, subfolder);
+      const filesList = [];
       // @todo remove hardcoded path - global config ?
-      fs.readdir('./public/' + subfolder, (err, files) => {
+      fs.readdir(directory, (err, files) => {
         if (err) throw err;
 
         for (let file of files) {
