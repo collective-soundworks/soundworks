@@ -1,4 +1,5 @@
 import template from 'lodash.template';
+import viewport from './viewport';
 
 /**
  * @todo - write doc
@@ -16,6 +17,9 @@ export default class View {
 
     // create container in memory
     this.$el = document.createElement(this.options.el);
+    // listen viewport
+    this.onResize = this.onResize.bind(this);
+    viewport.on('resize', this.onResize);
   }
 
   /**
@@ -49,13 +53,12 @@ export default class View {
     this.$el.parentNode.removeChild(this.$el);
   }
 
-  // show() {
-  //   this.$el.style.display = 'block';
-  // }
-
-  // hide() {
-  //   this.$el.style.display = 'none';
-  // }
+  onResize(orientation, width, height) {
+    this.$el.classList.remove('portrait', 'landscape');
+    this.$el.classList.add(orientation);
+    this.$el.style.width = `${width}px`;
+    this.$el.style.height = `${height}px`;
+  }
 
   _delegateEvents() {
     for (let key in this.events) {
