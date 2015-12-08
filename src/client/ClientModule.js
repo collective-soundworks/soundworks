@@ -1,7 +1,6 @@
 import { EventEmitter } from 'events';
 import comm from './comm';
-
-const container = window.container || (window.container = document.getElementById('container'));
+import View from './display/View';
 
 /**
  * @private
@@ -125,8 +124,10 @@ export default class ClientModule extends Promised {
    * @param {Boolean} [createView=true] Indicates whether the module displays a `view` or not.
    * @param {[type]} [color='black'] Background color of the `view` when it exists.
    */
-  constructor(name, createView = true, color = 'black') { // TODO: change to colorClass?
+  constructor(name, options = {}) { // TODO: change to colorClass?
     super();
+
+    this._bypass = options.bypass || false;
 
     /**
      * Name of the module.
@@ -136,35 +137,106 @@ export default class ClientModule extends Promised {
 
     /**
      * View of the module.
-     *
-     * The view is a DOM element (a full screen `div`) in which the content of the module is displayed.
-     * This element is a child of the main container `div#container`, which is the only child of the `body` element.
-     * A module may or may not have a view, as indicated by the argument `hasView:Boolean` of the {@link Module#constructor}.
-     * When that is the case, the view is created and added to the DOM when the {@link Module#start} method is called, and is removed from the DOM when the {@link Module#done} method is called.
-     * @type {DOMElement}
+     * @type {BaseView}
      */
     this.view = null;
 
-    this._ownsView = false;
-    this._showsView = false;
-    this._isStarted = false;
-    this._isDone = false;
+    /**
+     * Events to bind to the view. (cf. Backbone's syntax)
+     * @type {Object}
+     */
+    this.events = {};
 
-    if (createView) {
-      var div = document.createElement('div');
-      div.setAttribute('id', name);
-      div.classList.add(name);
-      div.classList.add('module');
-      div.classList.add(color);
-
-      this.view = div;
-      this._ownsView = true;
-    }
+    /** @private */
+    this._template = null;
 
     // bind com methods to the instance.
     this.send = this.send.bind(this);
     this.receive = this.receive.bind(this);
     this.removeListener = this.removeListener.bind(this);
+  }
+
+  /**
+   * Share the defined templates with all `ClientModule` instances.
+   * @param {Object} defs - An object containing the templates.
+   * @private
+   */
+  static setViewTemplateDefinitions(defs) {
+    ClientModule.prototype.templateDefinitions = defs;
+  }
+
+  /**
+   * Share the text content configuration (name and data) with all the `ClientModule` instances
+   * @param {Object} defs - The text contents of the application.
+   * @private
+   */
+  static setViewContentDefinitions(defs) {
+    ClientModule.prototype.contentDefinitions = defs;
+  }
+
+  /**
+   * Sets the container of the views for all `ClientModule` instances.
+   * @param {Element} $el - The element to use as a container for the module's view.
+   */
+  static setViewContainer($el) {
+    ClientModule.prototype.$container = $el;
+  }
+
+  /**
+   * Returns the template associated to the current module.
+   * @returns {Function} - The template related to the `name` of the current module.
+   */
+  get template() {
+    const template = this._template || this.templateDefinitions[this.name];
+    if (!template)
+      throw new Error(`No template defined for module "${this.name}"`);
+
+    return template;
+  }
+
+  set template(tmpl) {
+    this._template = tmpl;
+  }
+
+  /**
+   * Returns the text associated to the current module.
+   * @returns {Object} - The text contents related to the `name` of the current module. The returned object is extended with a pointer to the `_globals` entry of the defined text contents.
+   */
+  get content() {
+    const texts = this._content || this.contentDefinitions[this.name];
+    if (!texts)
+      throw new Error(`No text contents defined for module "${this.name}"`);
+
+    texts._globals = this.contentDefinitions._globals;
+    return texts;
+  }
+
+  set content(obj) {
+    this._content = obj;
+  }
+
+  /**
+   * Create a default view from module attributes.
+   */
+  createDefaultView() {
+    return new View(this.template, this.content, this.events, {
+      id: this.name,
+      className: 'module',
+    });
+  }
+
+  /**
+   * @private
+   */
+  launch() {
+    if (this._isDone) {
+      this.restart();
+    } else {
+      if (this._isStarted)
+        this.reset();
+
+      this.start();
+    }
   }
 
   /**
@@ -178,27 +250,16 @@ export default class ClientModule extends Promised {
    * @abstract
    */
   start() {
-    if(!this._isStarted) {
+    // allow to bypass a module from its options
+    if (this._bypass) { this.done(); }
+
+    if (!this._isStarted) {
       if (this.view) {
-        container.appendChild(this.view);
-        this._showsView = true;
+        this.$container.appendChild(this.view.render());
       }
 
       this._isStarted = true;
     }
-  }
-
-  /**
-   * Reset the module to the state it had before calling the {@link Module#start} method.
-   *
-   * The method is called automatically when a lost connection with the server is resumed (for instance because of a server crash), if the module had not finished its initialization (*i.e.* if it had not called its {@link Module#done} method).
-   * In that case, the module cleans whatever it was doing and starts again from scratch.
-   *
-   * **Note:** the method is called automatically when necessary, you should not call it manually.
-   * @abstract
-   */
-  reset() {
-    this._isStarted = false;
   }
 
   /**
@@ -220,17 +281,16 @@ export default class ClientModule extends Promised {
   }
 
   /**
-   * @private
+   * Reset the module to the state it had before calling the {@link Module#start} method.
+   *
+   * The method is called automatically when a lost connection with the server is resumed (for instance because of a server crash), if the module had not finished its initialization (*i.e.* if it had not called its {@link Module#done} method).
+   * In that case, the module cleans whatever it was doing and starts again from scratch.
+   *
+   * **Note:** the method is called automatically when necessary, you should not call it manually.
+   * @abstract
    */
-  launch() {
-    if (this._isDone) {
-      this.restart();
-    } else {
-      if (this._isStarted)
-        this.reset();
-
-      this.start();
-    }
+  reset() {
+    this._isStarted = false;
   }
 
   /**
@@ -246,62 +306,62 @@ export default class ClientModule extends Promised {
   done() {
     this._isDone = true;
 
-    if (this.view && this._showsView && this._ownsView) {
-      container.removeChild(this.view);
-      this._showsView = false;
-    }
+    if (this.view)
+      this.view.remove();
 
     if (this.resolvePromised)
       this.resolvePromised();
   }
 
+  // /**
+  //  * Set an arbitrary centered HTML content to the module's `view` (if any).
+  //  * @param {String} htmlContent The HTML content to append to the `view`.
+  //  */
+  // setCenteredViewContent(htmlContent) {
+  //   if (this.view) {
+  //     if (!this._centeredViewContent) {
+  //       let contentDiv = document.createElement('div');
+
+  //       contentDiv.classList.add('centered-content');
+  //       this.view.appendChild(contentDiv);
+
+  //       this._centeredViewContent = contentDiv;
+  //     }
+
+  //     if (htmlContent) {
+  //       if (htmlContent instanceof HTMLElement) {
+  //         if (this._centeredViewContent.firstChild) {
+  //           this._centeredViewContent.removeChild(this._centeredViewContent.firstChild);
+  //         }
+
+  //         this._centeredViewContent.appendChild(htmlContent);
+  //       } else {
+  //         // is a string
+  //         this._centeredViewContent.innerHTML = htmlContent;
+  //       }
+  //     }
+  //   }
+  // }
+
+  // /**
+  //  * Removes the centered HTML content (set by {@link Module#setCenteredViewContent}) from the `view`.
+  //  */
+  // removeCenteredViewContent() {
+  //   if (this.view && this._centeredViewContent) {
+  //     this.view.removeChild(this._centeredViewContent);
+  //     delete this._centeredViewContent;
+  //   }
+  // }
+
   /**
-   * Set an arbitrary centered HTML content to the module's `view` (if any).
-   * @param {String} htmlContent The HTML content to append to the `view`.
-   */
-  setCenteredViewContent(htmlContent) {
-    if (this.view) {
-      if (!this._centeredViewContent) {
-        let contentDiv = document.createElement('div');
-
-        contentDiv.classList.add('centered-content');
-        this.view.appendChild(contentDiv);
-
-        this._centeredViewContent = contentDiv;
-      }
-
-      if (htmlContent) {
-        if (htmlContent instanceof HTMLElement) {
-          if (this._centeredViewContent.firstChild) {
-            this._centeredViewContent.removeChild(this._centeredViewContent.firstChild);
-          }
-
-          this._centeredViewContent.appendChild(htmlContent);
-        } else {
-          // is a string
-          this._centeredViewContent.innerHTML = htmlContent;
-        }
-      }
-    }
-  }
-
-  /**
-   * Removes the centered HTML content (set by {@link Module#setCenteredViewContent}) from the `view`.
-   */
-  removeCenteredViewContent() {
-    if (this.view && this._centeredViewContent) {
-      this.view.removeChild(this._centeredViewContent);
-      delete this._centeredViewContent;
-    }
-  }
-
-  /**
-   * `z-index` CSS property of the view
+   * `z-index` CSS property of the view.
+   * @todo - prepend would do the trick ?
    * @param {Number} value Value of the `z-index`.
    */
   set zIndex(value) {
-    if(this.view)
-      this.view.style.zIndex = value;
+    if (this.view) {
+      this.view.$el.style.zIndex = value;
+    }
   }
 
   /**
@@ -313,6 +373,11 @@ export default class ClientModule extends Promised {
     comm.send(`${this.name}:${channel}`, ...args)
   }
 
+  /**
+   * Sends a WebSocket message to the server side socket.
+   * @param {String} channel - The channel of the message (is automatically namespaced with the module's name: `${this.name}:channel`).
+   * @param {...*} args - Arguments of the message (as many as needed, of any type).
+   */
   sendVolatile(channel, ...args) {
     comm.sendVolatile(`${this.name}:${channel}`, ...args)
   }
@@ -336,10 +401,10 @@ export default class ClientModule extends Promised {
   }
 }
 
-Module.sequential = function(...modules) {
+ClientModule.sequential = function(...modules) {
   return new Sequential(modules);
 };
 
-Module.parallel = function(...modules) {
+ClientModule.parallel = function(...modules) {
   return new Parallel(modules);
 };

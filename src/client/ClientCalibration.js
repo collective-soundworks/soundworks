@@ -40,7 +40,7 @@ export default class ClientCalibration extends ClientModule {
     this.calibration = new CalibrationClient({
       sendFunction: this.send,
       receiveFunction: this.receive,
-      updateFunction: () => { that._calibrationUpdated(); }
+      updateFunction: () => { this._calibrationUpdated(); }
     });
 
     this.setCenteredViewContent('<p class="soft-blink">Calibration, stand by…</p>');

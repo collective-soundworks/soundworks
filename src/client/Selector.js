@@ -239,6 +239,7 @@ export default class Selector extends ClientModule {
 
       let button = this._buttons[index];
       button.classList.remove('disabled');
+
       if (client.platform.isMobile)
         button.addEventListener('touchstart', listener, false);
       else
@@ -262,6 +263,7 @@ export default class Selector extends ClientModule {
       let button = this._buttons[index];
       let listener = this._listeners[index];
       button.classList.add('disabled');
+
       if (client.platform.isMobile)
         button.removeListener('touchstart', listener);
       else

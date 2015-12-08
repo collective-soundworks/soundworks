@@ -1,5 +1,7 @@
 import ClientModule from './ClientModule';
 import comm from './comm';
+import defaultTextContents from './display/defaultTextContents';
+import defaultTemplates from './display/defaultTemplates';
 
 
 /**
@@ -66,13 +68,9 @@ export default {
    * @param {Object} [options = {}] The options to initialize a client
    * @param {Boolean} [options.io] By default, a Soundworks application has a client and a server side. For a standalone application (client side only), use `options.io = false`.
    * @todo use default value for options.io in the documentation?
-   * @param {String} [options.socketUrl] The URL of the WebSocket server.
+   * @param {String} [optiondefaultTextContentss.socketUrl] The URL of the WebSocket server.
    */
   init(clientType = 'player', options = {}) {
-    // this.send = this.send.bind(this);
-    // this.receive = this.receive.bind(this);
-    // this.removeListener = this.removeListener.bind(this);
-
     this.type = clientType;
 
     // @todo harmonize io config with server
@@ -81,7 +79,15 @@ export default {
       debugIO: false,
       socketUrl: '',
       transports: ['websocket'],
+      appContainer: '#container',
     }, options);
+
+    // initialize modules views with default texts and templates
+    this.textContents = {};
+    this.templates = {};
+    this.setViewContentDefinitions(defaultTextContents);
+    this.setViewTemplateDefinitions(defaultTemplates);
+    this.setAppContainer(options.appContainer);
 
     if (options.io !== false) {
       // initialize socket communications
@@ -101,6 +107,33 @@ export default {
     if (options.debugIO) {
       localStorage.debug = '*';
     }
+  },
+
+  /**
+   * Extend application text contents with the given object.
+   * @param {Object} contents - The text contents to propagate to modules.
+   */
+  setViewContentDefinitions(defs) {
+    this.textContents = Object.assign(this.textContents, defs);
+    ClientModule.setViewContentDefinitions(this.textContents);
+  },
+
+  /**
+   * Extend application templates with the given object.
+   * @param {Object} templates - The templates to propagate to modules.
+   */
+  setViewTemplateDefinitions(defs) {
+    this.templates = Object.assign(this.templates, defs);
+    ClientModule.setViewTemplateDefinitions(this.templates);
+  },
+
+  /**
+   * Sets the default view container for all `ClientModule`s
+   * @param {String|Element} el - A DOM element or a css selector matching the element to use as a container.
+   */
+  setAppContainer(el) {
+    const $container = el instanceof Element ? el : document.querySelector(el);
+    ClientModule.setViewContainer($container);
   },
 
   /**

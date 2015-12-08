@@ -13,13 +13,18 @@ import ClientSetup from './ClientSetup';
 import ClientSurvey from './ClientSurvey';
 import ClientSync from './ClientSync';
 
-import Dialog from './Dialog';
 import Loader from './Loader';
 import ClientModule from './ClientModule';
 import Orientation from './Orientation';
-import Platform from './Platform';
+// import Platform from './Platform';
 import Selector from './Selector';
 import Space from './Space';
+import Welcome from './Welcome';
+
+import View from './display/View';
+// import defaultTemplates from './views/defaultTemplates';
+// import defaultTextContents from './views/defaultTextContents';
+
 
 export default {
   audioContext,
@@ -35,11 +40,18 @@ export default {
   ClientSetup,
   ClientSurvey,
   ClientSync,
-  Dialog,
+  // Dialog,
   Loader,
   ClientModule,
   Orientation,
-  Platform,
+  // Platform,
   Selector,
   Space,
+  Welcome,
+
+  display: {
+    View,
+    // defaultTemplates,
+    // defaultTextContents,
+  }
 };

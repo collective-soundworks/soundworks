@@ -117,6 +117,7 @@ export default {
    * - `remotePort:Number`: port of the device to send default OSC messages to (defaults to `57120`).
    */
   start(appConfig = {}, envConfig = {}) {
+    // @todo - add 1 level of merging to Object.assign
     appConfig = Object.assign(defaultAppConfig, appConfig);
     envConfig = Object.assign(defaultEnvConfig, envConfig);
     this.appConfig = appConfig;
@@ -196,7 +197,9 @@ export default {
       const envConfigCopy = Object.assign({}, this.envConfig);
       // remove logger configuration
       envConfigCopy.logger = undefined;
-      res.send(tmpl({ envConfig: JSON.stringify(envConfigCopy) }));
+      res.send(tmpl({
+        envConfig: JSON.stringify(envConfigCopy)
+      }));
     });
 
     modules.forEach((mod) => { mod.configure(this.appConfig, this.envConfig) })
