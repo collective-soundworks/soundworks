@@ -17,16 +17,30 @@ const oscListeners = [];
 const defaultAppConfig = {
   publicFolder: path.join(process.cwd(), 'public'),
   defaultClient: 'player',
-  // @note: EngineIO defaults
-  // this.pingTimeout = opts.pingTimeout || 3000;
-  // this.pingInterval = opts.pingInterval || 1000;
-  // this.upgradeTimeout = opts.upgradeTimeout || 10000;
-  // this.maxHttpBufferSize = opts.maxHttpBufferSize || 10E7;
   socketIO: {
     transports: ['websocket'],
     pingTimeout: 60000,
     pingInterval: 50000
-  }
+    // @note: EngineIO defaults
+    // pingTimeout: 3000,
+    // pingInterval: 1000,
+    // upgradeTimeout: 10000,
+    // maxHttpBufferSize: 10E7,
+  },
+  wallSetup: {
+    width: 10,
+    height: 10,
+    background: null,
+    spacing: 1,
+    capacity: 100,
+    coordinates: [],
+    labels: [],
+    generator: {
+      type: 'matrix',
+      cols: 3,
+      rows: 4,
+    },
+  },
 };
 
 const defaultEnvConfig = {
@@ -35,18 +49,18 @@ const defaultEnvConfig = {
     localAddress: '127.0.0.1',
     localPort: 57121,
     remoteAddress: '127.0.0.1',
-    remotePort: 57120
+    remotePort: 57120,
   },
-  loggerConfiguration: {
+  logger: {
     name: 'soundworks',
     level: 'info',
     streams: [{
       level: 'info',
       stream: process.stdout,
-    }, {
+    }, /*{
       level: 'info',
       path: path.join(process.cwd(), 'logs', 'soundworks.log'),
-    }]
+    }*/]
   }
 };
 
@@ -250,4 +264,3 @@ export default {
     oscListeners.push(oscListener);
   }
 };
-

@@ -126,4 +126,3 @@ export default class Module extends EventEmitter {
     comm.broadcast(clientType, namespacedChannel, ...args);
   }
 }
-

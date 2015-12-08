@@ -119,7 +119,8 @@ export default class ClientCheckin extends Module {
       this.label = label;
 
       if (this._showDialog) {
-        let htmlContent = this._instructions(label);
+        let displayLabel = label || (index + 1).toString();
+        let htmlContent = this._instructions(displayLabel);
         this.setCenteredViewContent(htmlContent);
 
         if (client.platform.isMobile)

@@ -1,4 +1,3 @@
-
 export default {
 
   /**
@@ -61,5 +60,4 @@ export default {
 
     namespaces.forEach((nsp) => { this.io.of(nsp).emit(channel, ...args); });
   },
-
 };
