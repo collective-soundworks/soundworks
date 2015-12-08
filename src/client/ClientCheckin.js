@@ -66,7 +66,7 @@ export default class ClientCheckin extends ClientModule {
    */
   start() {
     super.start();
-
+    console.log('clientCheckin start');
     // Send request to the server
     // client.send(this.name + ':request');
     this.send('request');
@@ -110,6 +110,8 @@ export default class ClientCheckin extends ClientModule {
 
   _acknowledgementHandler(index, label, coordinates) {
     this.index = index;
+
+    console.log(index, label, coordinates);
 
     if (coordinates)
       client.coordinates = coordinates;

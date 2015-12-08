@@ -1,13 +1,13 @@
-import template from 'lodash.template';
+import tmpl from 'lodash.template';
 import viewport from './viewport';
 
 /**
  * @todo - write doc
  */
 export default class View {
-  constructor(tmplStr, model = {}, events = {}, options = {}) {
-    this.tmpl = template(tmplStr);
-    this.model = model;
+  constructor(template, content = {}, events = {}, options = {}) {
+    this.tmpl = tmpl(template);
+    this.content = content;
     this.events = events;
     this.options = Object.assign({
       el: 'div',
@@ -34,10 +34,10 @@ export default class View {
       const classes = typeof options.className === 'string' ?
         [options.className] : options.className;
 
-      classes.forEach((className) => { this.$el.classList.add(className); });
+      classes.forEach(className => this.$el.classList.add(className));
     }
 
-    const html = this.tmpl(this.model);
+    const html = this.tmpl(this.content);
     this.$el.innerHTML = html;
 
     this.onRender();

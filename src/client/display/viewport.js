@@ -1,19 +1,43 @@
 import { EventEmitter } from 'events';
 
-// const emitter = new EventEmitter();
-
+/**
+ * Service to track the viewport size and orientation.
+ */
 class Viewport extends EventEmitter {
   constructor() {
     super();
-    console.log('viewport ctor');
 
+    /**
+     * Width of the viewport.
+     * @type {Number}
+     */
+    this.width = null;
+
+    /**
+     * Height of the viewport.
+     * @type {Number}
+     */
+    this.height = null;
+
+    /**
+     * Orientation of the viewport ('portrait'|'landscape').
+     * @type {String}
+     */
+    this.orientation = null;
+
+    this._onResize = this._onResize.bind(this);
+    window.addEventListener('resize', this._onResize);
+    //
     this._onResize();
-    window.addEventListener('resize', this._onResize.bind(this));
   }
 
+  /**
+   * Alias/Middleware for the `EventEmitter` method which applies the callback with current values.
+   * @private
+   */
   on(channel, callback) {
     super.on(channel, callback);
-    this._onResize();
+    callback(this.orientation, this.width, this.height);
   }
 
   _onResize() {
@@ -25,6 +49,9 @@ class Viewport extends EventEmitter {
   }
 };
 
+/**
+ * Singleton for the whole application to be used as a service.
+ * @type {Viewport}
+ */
 const viewport = new Viewport();
-console.log(viewport);
 export default viewport;
