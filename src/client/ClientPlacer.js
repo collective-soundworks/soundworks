@@ -1,8 +1,7 @@
 import { EventEmitter } from 'events';
 import client from './client';
-import Module from './Module';
+import ClientModule from './ClientModule';
 import Space from './Space';
-
 
 /**
  * Display strategies for placer
@@ -77,35 +76,27 @@ export class ListSelector extends EventEmitter {
 }
 
 /**
- * [client] Allow to select an available position within a predefined {@link Setup}.
+ * [client] Allow to select a place within a set of predefined positions (i.e. labels and/or coordinates).
  *
  * (See also {@link src/server/ServerPlacer.js~ServerPlacer} on the server side.)
  *
  * @example
- * const setup = new ClientSetup();
- * const placer = new ClientPlacer({ setup: setup });
+ * const placer = new ClientPlacer({ capacity: 100 });
  */
-export default class ClientPlacer extends Module {
+export default class ClientPlacer extends ClientModule {
   /**
    * @param {Object} [options={}] Options.
    * @param {String} [options.name='performance'] Name of the module.
    * @param {String} [options.color='black'] Background color of the `view`.
-   * @param {ClientSetup} [options.setup] The setup in which to select the place.
    * @param {String} [options.mode='list'] Selection mode. Can be:
    * - `'list'` to select a place among a list of places.
-   * - `'graphic`' to select a place on a graphical representation of the setup.
+   * - `'graphic`' to select a place on a graphical representation of the available positions.
    * @param {Boolean} [options.persist=false] Indicates whether the selected place should be stored in the `LocalStorage` for future retrieval or not.
    * @param {String} [localStorageId='soundworks'] Prefix of the `LocalStorage` ID.
    * @todo this.selector
    */
   constructor(options = {}) {
     super(options.name || 'placer', true, options.color || 'black');
-
-    /**
-     * The setup in which to select a place. (Mandatory.)
-     * @type {ClientSetup}
-     */
-    this.setup = options.setup;
 
     /**
      * Index of the position selected by the user.

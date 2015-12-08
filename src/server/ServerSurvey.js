@@ -1,5 +1,5 @@
 import fs from 'fs';
-import Module from './Module';
+import ServerModule from './ServerModule';
 
 
 function padLeft(str, value, length) {
@@ -11,7 +11,7 @@ function padLeft(str, value, length) {
 /**
  * @private
  */
-export default class ServerSurvey extends Module {
+export default class ServerSurvey extends ServerModule {
   constructor(options = {}) {
     super(options.name || 'survey');
     // prepare file name

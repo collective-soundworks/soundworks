@@ -9,13 +9,12 @@ import ClientFileList from './ClientFileList';
 import ClientLocator from './ClientLocator';
 import ClientPerformance from './ClientPerformance';
 import ClientPlacer from './ClientPlacer';
-import ClientSetup from './ClientSetup';
 import ClientSurvey from './ClientSurvey';
 import ClientSync from './ClientSync';
 
 import Dialog from './Dialog';
 import Loader from './Loader';
-import Module from './Module';
+import ClientModule from './ClientModule';
 import Orientation from './Orientation';
 import Platform from './Platform';
 import Selector from './Selector';
@@ -32,12 +31,11 @@ export default {
   ClientLocator,
   ClientPerformance,
   ClientPlacer,
-  ClientSetup,
   ClientSurvey,
   ClientSync,
   Dialog,
   Loader,
-  Module,
+  ClientModule,
   Orientation,
   Platform,
   Selector,

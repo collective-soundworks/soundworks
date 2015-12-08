@@ -1,6 +1,6 @@
 import { SuperLoader } from 'waves-loaders';
 import client from './client';
-import Module from './Module';
+import ClientModule from './ClientModule';
 
 
 /**
@@ -18,7 +18,7 @@ import Module from './Module';
  * const kickBuffer = loader.audioBuffers[0];
  * const snareBuffer = loader.audioBuffers[1];
  */
-export default class Loader extends Module {
+export default class Loader extends ClientModule {
   /**
    * @param {Object} [options={}] Options.
    * @param {String} [options.name='dialog'] Name of the module.

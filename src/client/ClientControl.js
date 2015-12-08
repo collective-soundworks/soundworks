@@ -1,4 +1,4 @@
-import Module from './Module';
+import ClientModule from './ClientModule';
 
 // @todo refactor
 
@@ -278,7 +278,7 @@ class ControlCommand extends ControlEvent {
  * const currentSynthGainValue = control.event['synth:gain'].value;
  * const currentNumPlayersValue = control.event['numPlayers'].value;
  */
-export default class ClientControl extends Module {
+export default class ClientControl extends ClientModule {
   /**
    * @param {Object} [options={}] Options.
    * @param {String} [options.name='sync'] Name of the module.

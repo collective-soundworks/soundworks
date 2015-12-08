@@ -1,5 +1,5 @@
 import client from './client';
-import Module from './Module';
+import ClientModule from './ClientModule';
 
 
 function toTitleCase(str) {
@@ -23,7 +23,7 @@ function convertName(name) {
 /**
  * [client] Allow to select one or several options among a list.
  */
-export default class Selector extends Module {
+export default class Selector extends ClientModule {
   /**
    * @param {Object} [options={}] Options.
    * @param {String} [options.name='selector'] Name of the module.

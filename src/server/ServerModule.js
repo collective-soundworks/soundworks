@@ -7,15 +7,15 @@ import { EventEmitter } from 'events';
  *
  * While the sequence of user interactions and exchanges between client and server is determined on the client side, the server side modules are ready to receive requests from the corresponding client side modules as soon as a client is connected to the server.
  *
- * Each module should have a {@link Module#connect} and a {@link Module#disconnect} methods.
- * Any module mapped to the type of client `'clientType'` (thanks to the {@link server#map} method) calls its {@link Module#connect} method when such a client connects to the server, and its {@link Module#disconnect} method when such a client disconnects from the server.
+ * Each module should have a {@link ServerModule#connect} and a {@link ServerModule#disconnect} methods.
+ * Any module mapped to the type of client `'clientType'` (thanks to the {@link server#map} method) calls its {@link ServerModule#connect} method when such a client connects to the server, and its {@link ServerModule#disconnect} method when such a client disconnects from the server.
  *
- * (See also {@link src/client/Module.js~Module} on the client side.)
+ * (See also {@link src/client/ClientModule.js~ClientModule} on the client side.)
  *
  * **Note:** a more complete example of how to write a module is in the [Example](manual/example.html) section.
  *
  * @example
- * class MyModule extends Module {
+ * class MyModule extends ServerModule {
  *   constructor(name) {
  *     super(name);
  *
@@ -35,7 +35,7 @@ import { EventEmitter } from 'events';
  *   }
  * }
  */
-export default class Module extends EventEmitter {
+export default class ServerModule extends EventEmitter {
   /**
     * Creates an instance of the class.
     * @param {Object} [options={}] The options.
@@ -78,8 +78,8 @@ export default class Module extends EventEmitter {
    * @private
    */
   configure(appConfig, envConfig) {
-    this._appConfig = appConfig;
-    this._envConfig = envConfig;
+    this.appConfig = appConfig;
+    this.envConfig = envConfig;
   }
 
   /**

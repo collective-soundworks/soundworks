@@ -1,6 +1,6 @@
 import { audioContext } from 'waves-audio';
 import client from './client';
-import Module from './Module';
+import ClientModule from './ClientModule';
 // @todo - remove one of these dependencies
 import platform from 'platform';
 import MobileDetect from 'mobile-detect';
@@ -27,7 +27,7 @@ const defaultMessages = {
  *
  * The module finishes its initialization immediately if the device passes the platform test, and never otherwise.
  */
-export default class Platform extends Module {
+export default class Platform extends ClientModule {
   /**
    * @param {Object} [options={}] Options.
    * @param {String} [options.name='platform-check'] Name of the module.

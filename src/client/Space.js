@@ -1,10 +1,10 @@
 import client from './client';
-import Module from './Module';
+import ClientModule from './ClientModule';
 
 const ns = 'http://www.w3.org/2000/svg';
 
 /**
- * [client] Render a set of positions graphically.
+ * [client] Render a set of positions (i.e. coordinates with optional labels) graphically.
  *
  * The module never has a view (it displays the graphical representation in a `div` passed in as an argument of the {@link Space#display} method).
  *
@@ -13,7 +13,7 @@ const ns = 'http://www.w3.org/2000/svg';
  * @example const space = new Space();
  * space.display(positions, container);
  */
-export default class Space extends Module {
+export default class Space extends ClientModule {
   /**
    * @param {Object} [options={}] Options.
    * @param {String} [options.name='space'] Name of the module.

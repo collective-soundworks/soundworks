@@ -1,26 +1,33 @@
-import Module from './Module';
+import ServerModule from './ServerModule';
 
 
 /**
- * [server] Allow to indicate the approximate location of the client on a map (that graphically represents a {@link Setup}) via a dialog.
+ * [server] Allow to indicate the approximate location of the client on a map.
  *
  * (See also {@link src/client/ClientLocator.js~ClientLocator} on the client side.)
  */
-export default class ServerLocator extends Module {
+export default class ServerLocator extends ServerModule {
   /**
    * Creates an instance of the class.
    * @param {Object} [options={}] Options.
    * @param {Object} [options.name='locator'] Name of the module.
-   * @param {Object} [options.setup] Setup used in the scenario, if any (cf. {@link ServerSetup}).
+   * @param {Number} [options.width] Width of the space.
+   * @param {Number} [options.height] Height of the space.
    */
   constructor(options = {}) {
     super(options.name || 'locator');
 
     /**
-     * Setup used by the locator, if any.
-     * @type {Setup}
+     * Width of the space.
+     * @type {Number}
      */
-    this.setup = options.setup || null;
+    this.width = options.width || 10;
+
+    /**
+     * Height of the space.
+     * @type {Number}
+     */
+    this.height = options.height || 10;
   }
 
   /**
@@ -30,12 +37,7 @@ export default class ServerLocator extends Module {
     super.connect(client);
 
     this.receive(client, 'request', () => {
-      if (this.setup) {
-        const surface = this.setup.getSurface();
-        this.send(client, 'surface', surface);
-      } else {
-        throw new Error('ServerLocator requires a setup.');
-      }
+      this.send(client, 'surface', width, height, background);
     });
 
     this.receive(client, 'coordinates', (coordinates) => {

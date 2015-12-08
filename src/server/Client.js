@@ -62,13 +62,13 @@ export default class Client {
     this.index = _getClientIndex();
 
 		/**
-		 * Coordinates of the client in the setup, stored as an `[x:Number, y:Number]` array.
+		 * Coordinates of the client, stored as an `[x:Number, y:Number]` array.
 		 * @type {Number[]}
 		 */
     this.coordinates = null;
 
 		/**
-		 * Used by any {@link src/server/Module.js~Module} to associate data to a particular client.
+		 * Used by any {@link src/server/ServerModule.js~ServerModule} to associate data to a particular client.
 		 *
 		 * All the data associated with a module whose `name` is `'moduleName'` is accessible through the key `moduleName`.
 		 * For instance, the {@link src/server/Checkin.js~Checkin} module keeps track of client's checkin index and label in `this.modules.checkin.index` and `this.modules.checkin.label`.

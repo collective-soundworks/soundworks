@@ -1,19 +1,19 @@
-import Module from './Module';
+import ServerModule from './ServerModule';
 
 const maxCapacity = 9999;
 
 /**
- * [server] Allow to select an available position within a predefined {@link Setup}.
+ * [server] Allow to select a place within a set of predefined positions (i.e. labels and/or coordinates).
  *
  * (See also {@link src/client/ClientPlacer.js~ClientPlacer} on the client side.)
  */
-export default class ServerPlacer extends Module {
+export default class ServerPlacer extends ServerModule {
   /**
    * Creates an instance of the class.
    * @param {Object} [options={}] Options.
    * @param {Object} [options.name='placer'] Name of the module.
    * @param {String[]} [options.labels=null] List of predefined labels).
-   * @param {Array[]} [options.coordinates=null] List of predefined coordinates given as [x, y].
+   * @param {Array[]} [options.coordinates=null] List of predefined coordinates given as [x:Number, y:Number].
    * @param {Number} [options.capacity=Infinity] Maximum number of places allowed (may be limited by the number of predefined labels and/or coordinates).
    */
   constructor(options) {

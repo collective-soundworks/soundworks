@@ -1,5 +1,4 @@
-// import server from './server';
-import Module from './Module';
+import ServerModule from './ServerModule';
 
 
 /**
@@ -50,7 +49,7 @@ import Module from './Module';
  * const control = new MyControl();
  * const performance = new MyPerformance(control);
  */
-export default class ServerControl extends Module {
+export default class ServerControl extends ServerModule {
   /**
    * @param {Object} [options={}] Options.
    * @param {String} [options.name='control'] Name of the module.

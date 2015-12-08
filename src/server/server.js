@@ -27,20 +27,6 @@ const defaultAppConfig = {
     // upgradeTimeout: 10000,
     // maxHttpBufferSize: 10E7,
   },
-  wallSetup: {
-    width: 10,
-    height: 10,
-    background: null,
-    spacing: 1,
-    capacity: 100,
-    coordinates: [],
-    labels: [],
-    generator: {
-      type: 'matrix',
-      cols: 3,
-      rows: 4,
-    },
-  },
 };
 
 const defaultEnvConfig = {
@@ -150,7 +136,7 @@ export default {
 
     this.io = new IO(httpServer, appConfig.socketIO);
     comm.initialize(this.io);
-    logger.initialize(envConfig.loggerConfiguration);
+    logger.initialize(envConfig.logger);
 
     // configure OSC
     if (envConfig.osc) {
@@ -201,9 +187,13 @@ export default {
     const tmplString = fs.readFileSync(tmplPath, { encoding: 'utf8' });
     const tmpl = ejs.compile(tmplString);
 
+    // @todo refactor
     // write env config into templates
     this.expressApp.get(url, (req, res) => {
-      res.send(tmpl({ envConfig: JSON.stringify(this.envConfig) }));
+      const envConfigCopy = Object.assign({}, this.envConfig);
+      // remove logger configuration
+      envConfigCopy.logger = undefined;
+      res.send(tmpl({ envConfig: JSON.stringify(envConfigCopy) }));
     });
 
     modules.forEach((mod) => { mod.configure(this.appConfig, this.envConfig) })

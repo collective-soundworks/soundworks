@@ -1,9 +1,9 @@
-import Module from './Module';
+import ServerModule from './ServerModule';
 
 const maxRandomCapacity = 9999;
 
 /**
- * [server] Assign places among a predefined {@link Setup}.
+ * [server] Assign places among a set of predefined positions (i.e. labels and/or coordinates).
  *
  * The module assigns a position to a client upon request of the client-side module.
  *
@@ -12,12 +12,12 @@ const maxRandomCapacity = 9999;
  * @example
  * const checkin = new ServerCheckin({ capacity: 100, order: 'random' });
  */
-export default class ServerCheckin extends Module {
+export default class ServerCheckin extends ServerModule {
   /**
    * @param {Object} [options={}] Options.
    * @param {Object} [options.name='checkin'] Name of the module.
    * @param {String[]} [options.labels=null] List of predefined labels).
-   * @param {Array[]} [options.coordinates=null] List of predefined coordinates given as [x, y].
+   * @param {Array[]} [options.coordinates=null] List of predefined coordinates given as an array `[x:Number, y:Number]`.
    * @param {Number} [options.capacity=Infinity] Maximum number of checkins allowed (may be limited by the number of predefined labels and/or coordinates).
    * @param {Object} [options.order='ascending'] Order in which indices are assigned. Currently spported values are:
    * - `'ascending'`: indices are assigned in ascending order;
