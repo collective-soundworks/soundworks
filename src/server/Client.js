@@ -62,7 +62,7 @@ export default class Client {
     this.index = _getClientIndex();
 
 		/**
-		 * Coordinates of the client in the setup, stored as an `[x:Number, y:Number]` array.
+		 * Coordinates of the client, stored as an `[x:Number, y:Number]` array.
 		 * @type {Number[]}
 		 */
     this.coordinates = null;

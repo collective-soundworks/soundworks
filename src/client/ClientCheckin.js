@@ -11,7 +11,7 @@ function _instructions(label) {
 }
 
 /**
- * [client] Assign places among a predefined {@link Setup}.
+ * [client] Assign places among a set of predefined positions (i.e. labels and/or coordinates).
  * The module requests a position to the server and waits for the answer.
  *
  * The module finishes its initialization when it receives a positive answer from the server.
@@ -21,8 +21,7 @@ function _instructions(label) {
  *
  * (See also {@link src/server/ServerCheckin.js~ServerCheckin} on the server side.)
  *
- * @example const setup = new ClientSetup();
- * const checkin = new ClientCheckin({ setup: setup });
+ * @example  * const checkin = new ClientCheckin({ capacity: 100 });
  */
 export default class ClientCheckin extends ClientModule {
   /**
@@ -119,7 +118,8 @@ export default class ClientCheckin extends ClientModule {
       this.label = label;
 
       if (this._showDialog) {
-        let htmlContent = this._instructions(label);
+        let displayLabel = label || (index + 1).toString();
+        let htmlContent = this._instructions(displayLabel);
         this.setCenteredViewContent(htmlContent);
 
         if (client.platform.isMobile)

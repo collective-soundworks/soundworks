@@ -4,17 +4,14 @@ import ClientModule from './ClientModule';
 const ns = 'http://www.w3.org/2000/svg';
 
 /**
- * [client] Render a {@link Setup} data graphically.
+ * [client] Render a set of positions (i.e. coordinates with optional labels) graphically.
  *
  * The module never has a view (it displays the graphical representation in a `div` passed in as an argument of the {@link Space#display} method).
  *
  * The module finishes its initialization immediately.
  *
- * @example const setup = new Setup();
- * const space = new Space();
- * const container = document.getElementById('#spaceContainer');
- *
- * space.display(setup, container);
+ * @example const space = new Space();
+ * space.display(positions, container);
  */
 export default class Space extends ClientModule {
   /**
@@ -26,17 +23,8 @@ export default class Space extends ClientModule {
   constructor(options = {}) {
     super(options.name || 'space');
 
-    /**
-     * Relative width of the setup.
-     * @type {Number}
-     */
-    this.width = 1;
-
-    /**
-     * Relative height of the setup.
-     * @type {Number}
-     */
-    this.height = 1;
+    this.width = 10;
+    this.height = 10;
 
     this._fitContainer = (options.fitContainer || false);
     this._listenTouchEvent = (options.listenTouchEvent || false);
@@ -44,19 +32,6 @@ export default class Space extends ClientModule {
     // this.spacing = 1;
     // this.labels = [];
     // this.coordinates = [];
-
-    /**
-     * Type of the setup (values currently supported: `'matrix'`, `'surface'`).
-     * @type {String}
-     * @todo Remove?
-     */
-    this.type = undefined;
-
-    /**
-     * URL of the background image (if any).
-     * @type {String}
-     */
-    this.background = null;
 
     this._xFactor = 1;
     this._yFactor = 1;
@@ -66,19 +41,6 @@ export default class Space extends ClientModule {
     this._positionIndexShapeMap = {};
   }
 
-  // TODO note -> modfiy here
-  _initSetup(setup) {
-    this.width = setup.width;
-    this.height = setup.height;
-    // this.spacing = setup.spacing;
-    // this.labels = setup.labels;
-    // this.coordinates = setup.coordinates;
-    this.type = setup.type;
-    this.background = setup.background;
-
-    this.done();
-  }
-
   /**
    * Start the module.
    * @private
@@ -86,8 +48,6 @@ export default class Space extends ClientModule {
   start() {
     super.start();
     this.done();
-    // client.receive('setup:init', this._onSetupInit);
-    // client.send('setup:request');
   }
 
   /**
@@ -106,27 +66,25 @@ export default class Space extends ClientModule {
   reset() {
     this._shapePositionMap = [];
     this._positionIndexShapeMap = {};
-    // client.removeListener('setup:init', this._onSetupInit);
     this._container.innerHTML = '';
   }
 
   /**
-   * Display a graphical representation of the setup.
-   * @param {ClientSetup} setup Setup to display.
-   * @param {DOMElement} container Container to append the setup representation to.
+   * Display a graphical representation of the space.
+   * @param {DOMElement} container Container to append the representation to.
+   * @param {Array} positions List of positions to display.
    * @param {Object} [options={}] Options.
    * @param {String} [options.transform] Indicates which transformation to aply to the representation. Possible values are:
    * - `'rotate180'`: rotates the representation by 180 degrees.
    * @todo Big problem with the container (_container --> only one of them, while we should be able to use the display method on several containers)
    */
-  display(setup, container, options = {}) {
-    this._initSetup(setup);
+  display(container, options = {}) {
     this._container = container;
     this._container.classList.add('space');
     this._renderingOptions = options;
 
-    if (options.showBackground) {
-      this._container.style.backgroundImage = `url(${this.background})`;
+    if (options.background) {
+      this._container.style.backgroundImage = `url(${options.background})`;
       this._container.style.backgroundPosition = '50% 50%';
       this._container.style.backgroundRepeat = 'no-repeat';
       this._container.style.backgroundSize = 'contain';
@@ -142,6 +100,8 @@ export default class Space extends ClientModule {
     this._group = group;
 
     this.resize(this._container);
+
+    this.done();
   }
 
   /**
@@ -172,7 +132,7 @@ export default class Space extends ClientModule {
 
     this._svg.setAttributeNS(null, 'width', svgWidth);
     this._svg.setAttributeNS(null, 'height', svgHeight);
-     // use setup coordinates
+     // use space coordinates
     this._svg.setAttributeNS(null, 'viewBox', `0 0 ${this.width} ${this.height}`);
     // center svg in container
     this._svg.style.position = 'absolute';
@@ -280,10 +240,10 @@ export default class Space extends ClientModule {
 
   /**
    * Removes a position from the display.
-   * @param {Object} position Position to remove.
+   * @param {Number} index of position to remove.
    */
-  removePosition(position) {
-    const el = this._positionIndexShapeMap[position.index];
+  removePosition(index) {
+    const el = this._positionIndexShapeMap[index];
     this._group.removeChild(el);
   }
 

@@ -9,7 +9,6 @@ import ClientFileList from './ClientFileList';
 import ClientLocator from './ClientLocator';
 import ClientPerformance from './ClientPerformance';
 import ClientPlacer from './ClientPlacer';
-import ClientSetup from './ClientSetup';
 import ClientSurvey from './ClientSurvey';
 import ClientSync from './ClientSync';
 
@@ -37,7 +36,6 @@ export default {
   ClientLocator,
   ClientPerformance,
   ClientPlacer,
-  ClientSetup,
   ClientSurvey,
   ClientSync,
   // Dialog,

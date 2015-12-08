@@ -10,7 +10,6 @@ import ServerFileList from './ServerFileList';
 import ServerLocator from './ServerLocator';
 import ServerPerformance from './ServerPerformance';
 import ServerPlacer from './ServerPlacer';
-import ServerSetup from './ServerSetup';
 import ServerSurvey from './ServerSurvey';
 import ServerSync from './ServerSync';
 
@@ -26,7 +25,6 @@ export default {
   ServerLocator,
   ServerPerformance,
   ServerPlacer,
-  ServerSetup,
   ServerSurvey,
   ServerSync,
 };

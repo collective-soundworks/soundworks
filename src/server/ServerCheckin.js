@@ -1,27 +1,24 @@
 import ServerModule from './ServerModule';
 
-const maxRandomClients = 9999;
-
+const maxRandomCapacity = 9999;
 
 /**
- * [server] Assign places among a predefined {@link Setup}.
+ * [server] Assign places among a set of predefined positions (i.e. labels and/or coordinates).
  *
  * The module assigns a position to a client upon request of the client-side module.
  *
  * (See also {@link src/client/ClientCheckin.js~ClientCheckin} on the client side.)
  *
- * @example const setup = new ServerSetup();
- * setup.generate('matrix', { cols: 5, rows: 4 });
- *
- * // As new clients connect, the positions in the matrix are assigned randomly
- * const checkin = new ServerCheckin({ setup: setup, order: 'random' });
+ * @example
+ * const checkin = new ServerCheckin({ capacity: 100, order: 'random' });
  */
 export default class ServerCheckin extends ServerModule {
   /**
    * @param {Object} [options={}] Options.
    * @param {Object} [options.name='checkin'] Name of the module.
-   * @param {Object} [options.setup] Setup used in the scenario, if any (cf. {@link ServerSetup}).
-   * @param {Object} [options.maxClients=Infinity] maximum number of clients supported by the scenario through this checkin module (if a `options.setup` is provided, the maximum number of clients the number of predefined positions of that `setup`).
+   * @param {String[]} [options.labels=null] List of predefined labels).
+   * @param {Array[]} [options.coordinates=null] List of predefined coordinates given as an array `[x:Number, y:Number]`.
+   * @param {Number} [options.capacity=Infinity] Maximum number of checkins allowed (may be limited by the number of predefined labels and/or coordinates).
    * @param {Object} [options.order='ascending'] Order in which indices are assigned. Currently spported values are:
    * - `'ascending'`: indices are assigned in ascending order;
    * - `'random'`: indices are assigned in random order.
@@ -30,16 +27,28 @@ export default class ServerCheckin extends ServerModule {
     super(options.name || 'checkin');
 
     /**
-     * Setup used by the checkin, if any.
-     * @type {Setup}
+     * List of predefined labels.
+     * @type {String[]}
      */
-    this.setup = options.setup || null;
+    this.labels = options.labels;
 
     /**
-     * Maximum number of clients supported by the checkin.
+     * List of predefined coordinates.
+     * @type {Array[]}
+     */
+    this.coordinates = options.coordinates;
+
+    /**
+     * Maximum number of clients allowed.
      * @type {Number}
      */
-    this.maxClients = options.maxClients || Infinity;
+    this.capacity = options.capacity || Infinity;
+
+    /**
+     * List of the clients checked in with corresponing indices.
+     * @type {Client[]}
+     */
+    this.clients = [];
 
     /**
      * Order in which indices are assigned. Currently supported values are:
@@ -49,27 +58,26 @@ export default class ServerCheckin extends ServerModule {
      */
     this.order = options.order || 'ascending'; // 'ascending' | 'random'
 
-    if (this.maxClients > Number.MAX_SAFE_INTEGER)
-      this.maxClients = Number.MAX_SAFE_INTEGER;
-
-    if (this.setup) {
-      const numPlaces = this.setup.getNumPositions();
-
-      if (this.maxClients > numPlaces && numPlaces > 0)
-        this.maxClients = numPlaces;
-    }
-
     this._availableIndices = [];
     this._nextAscendingIndex = 0;
 
-    if (this.maxClients > maxRandomClients)
-      this.order = 'ascending';
-    else if (this.order === 'random') {
-      this._nextAscendingIndex = this.maxClients;
+    let numLabels = labels? labels.length: Infinity;
+    let numCoordinates = coordinates? coordinates.length: Infinity;
+    let numPositions = Math.min(numLabels, numCoordinates);
 
-      for (let i = 0; i < this.maxClients; i++)
-        this._availableIndices.push(i);
-    }
+    if(this.capacity > numPositions)
+      this.capacity = numPositions;
+
+    if (this.capacity > Number.MAX_SAFE_INTEGER)
+      this.capacity = Number.MAX_SAFE_INTEGER;
+
+    if (this.capacity > maxRandomCapacity)
+      this.order = 'ascending';
+    else if (this.order === 'random')
+      this._nextAscendingIndex = this.capacity;
+
+    for (let i = 0; i < this.capacity; i++)
+      this._availableIndices.push(i);
   }
 
   _getRandomIndex() {
@@ -90,7 +98,7 @@ export default class ServerCheckin extends ServerModule {
       });
 
       return this._availableIndices.splice(0, 1)[0];
-    } else if (this._nextAscendingIndex < this.maxClients) {
+    } else if (this._nextAscendingIndex < this.capacity) {
       return this._nextAscendingIndex++;
     }
 
@@ -99,28 +107,6 @@ export default class ServerCheckin extends ServerModule {
 
   _releaseIndex(index) {
     this._availableIndices.push(index);
-  }
-
-  /**
-   * @private
-   */
-  connect(client) {
-    super.connect(client);
-
-    this.receive(client, 'request', this._onRequest(client));
-    this.receive(client, 'restart', this._onRestart(client));
-  }
-
-  /**
-   * @private
-   */
-  disconnect(client) {
-    super.disconnect(client);
-
-    const index = client.modules[this.name].index;
-
-    if (index >= 0)
-      this._releaseIndex(index);
   }
 
   _onRequest(client) {
@@ -133,18 +119,14 @@ export default class ServerCheckin extends ServerModule {
         index = this._getAscendingIndex();
 
       if (index >= 0) {
+        const label = this.labels[index];
+        const coordinates = this.coordinates[index];
+
         client.modules[this.name].index = index;
-
-        let label = null;
-        let coordinates = null;
-
-        if (this.setup) {
-          label = this.setup.getLabel(index);
-          coordinates = this.setup.getCoordinates(index);
-        }
-
         client.modules[this.name].label = label;
         client.coordinates = coordinates;
+
+        this.clients[index] = client;
 
         this.send(client, 'acknowledge', index, label, coordinates);
       } else {
@@ -166,16 +148,43 @@ export default class ServerCheckin extends ServerModule {
       } else {
         let i = this._availableIndices.indexOf(index);
 
-        if (i > -1)
+        if (i >= 0)
           this._availableIndices.splice(i, 1);
       }
 
       client.modules[this.name].index = index;
+      this.clients[index] = client;
 
-      if (this.setup) {
+      if (label !== null)
         client.modules[this.name].label = label;
+
+      if(coordinates !== null)
         client.coordinates = coordinates;
-      }
+    }
+  }
+
+  /**
+   * @private
+   */
+  connect(client) {
+    super.connect(client);
+
+    this.receive(client, 'request', this._onRequest(client));
+    this.receive(client, 'restart', this._onRestart(client));
+  }
+
+  /**
+   * @private
+   */
+  disconnect(client) {
+    super.disconnect(client);
+
+    const index = client.modules[this.name].index;
+
+    if (index >= 0) {
+      delete this.clients[index];
+      this._releaseIndex(index);
     }
   }
 }
+

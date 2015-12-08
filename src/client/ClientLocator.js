@@ -1,9 +1,8 @@
 import client from './client';
 import ClientModule from './ClientModule';
 
-
 /**
- * [client] Allow to indicate the approximate location of the client on a map (that graphically represents a {@link Setup}) via a dialog.
+ * [client] Allow to indicate the approximate location of the client on a map.
  *
  * The module always has a view (that displays the map and a button to validate the location) and requires the SASS partial `_77-locator.scss`.
  *
@@ -12,33 +11,25 @@ import ClientModule from './ClientModule';
  * (See also {@link src/server/ServerLocator.js~ServerLocator} on the server side.)
  *
  * @example
- * const setup = new ClientSetup();
  * const space = new Space();
- * const locator = new ClientLocator({ setup: setup, space: space });
+ * const locator = new ClientLocator({ space: space });
  */
 export default class ClientLocator extends ClientModule {
   /**
    * @param {Object} [options={}] Options.
    * @param {String} [options.name='locator'] Name of the module.
    * @param {String} [options.color='black'] Background color of the `view`.
-   * @param {Setup} [options.setup=null] Setup in which to indicate the approximate location.
-   * @param {Space} [options.space=null] Space to graphically represent the setup.
+   * @param {Space} [options.space=null] Space to graphically represent the space.
    * @param {Boolean} [options.showBackground=false] Indicates whether to show the space background image or not.
    */
   constructor(options = {}) {
     super(options.name || 'locator', true, options.color);
 
     /**
-     * The space that graphically represents the setup in which to indicate the approximate location.
+     * The view that graphically represents the space in which to indicate the approximate location.
      * @type {Space}
      */
     this.space = options.space || null;
-
-    /**
-     * The setup in which to indicate the approximate location.
-     * @type {Setup}
-     */
-    this.setup = options.setup || null;
 
     this._instructions = options.instructions || '<small>Indiquez votre position dans la salle</small>';
     this._showBackground = options.showBackground || false;
@@ -97,7 +88,7 @@ export default class ClientLocator extends ClientModule {
     super.start();
 
     this.send('request');
-    this.receive('surface', this._surfaceHandler, false);
+    this.receive('space', this._surfaceHandler, false);
 
     window.addEventListener('resize', this._resize);
   }
@@ -144,8 +135,8 @@ export default class ClientLocator extends ClientModule {
     this.done();
   }
 
-  _surfaceHandler(surface) {
-    let heightWidthRatio = surface.height / surface.width;
+  _surfaceHandler(width, height, background) {
+    let heightWidthRatio = height / width;
     let screenHeight = window.innerHeight;
     let screenWidth = window.innerWidth;
     let screenRatio = screenHeight / screenWidth;
@@ -159,8 +150,8 @@ export default class ClientLocator extends ClientModule {
       widthPx = screenHeight / heightWidthRatio;
     }
 
-    this.space.display(this.setup, this._surfaceDiv, {
-      showBackground: this._showBackground
+    this.space.display(this._surfaceDiv, {
+      background: background
     });
 
     // Let the participant select his or her location
