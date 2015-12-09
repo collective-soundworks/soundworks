@@ -63,7 +63,7 @@ export default class ServerPlacer extends ServerModule {
     super.connect(client);
 
     this.receive(client, 'request', (mode) => {
-      let surface = undefined;
+      let area = undefined;
       let labels = undefined;
       let coordinates = null;
       let capacity = this.capacity;
@@ -75,7 +75,7 @@ export default class ServerPlacer extends ServerModule {
         if(mode === 'graphic') {
           coordinates = setup.coordinates;
 
-          surface = {
+          area = {
             width: setup.width,
             height: setup.height,
             background: setup.background,
@@ -83,7 +83,7 @@ export default class ServerPlacer extends ServerModule {
         }
       }
 
-      this.send(client, 'setup', capacity, labels, coordinates, surface);
+      this.send(client, 'setup', capacity, labels, coordinates, area);
     });
 
     this.receive(client, 'position', (index, label, coords) => {

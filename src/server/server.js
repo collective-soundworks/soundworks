@@ -20,10 +20,11 @@ const oscListeners = [];
  */
 const exampleAppConfig = {
   playerSetup: {
-    width: 10, // width of the space in meters
-    height: 10, // height of the space in meters
-    labels: null, // predefined labels (optional)
-    coordinates: null, // predefined coordinates (optional)
+    width: 10, // width of the setup area in meters
+    height: 10, // height of the setup area in meters
+    labels: undefined, // predefined labels (optional)
+    coordinates: undefined, // predefined coordinates on the setup area (optional)
+    background: undefined, // URL of a background image fitting the setup area (optional)
   },
   controlParameters = {
     tempo: 120, // tempo in BPM

@@ -33,18 +33,18 @@ export default class ServerLocator extends ServerModule {
     super.connect(client);
 
     this.receive(client, 'request', () => {
-      let surface = undefined;
+      let area = undefined;
       let setup = this.setup;
 
       if(setup) {
-        surface = {
+        area = {
           width: setup.width;
           height: setup.height;
           background: setup.background;
         };
       }
 
-      this.send(client, 'surface', surface);
+      this.send(client, 'area', area);
     });
 
     this.receive(client, 'coordinates', (coordinates) => {

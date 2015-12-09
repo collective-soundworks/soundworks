@@ -169,7 +169,7 @@ export default class ClientPlacer extends ClientModule {
     this.send('position', this.index, this.label, client.coordinates);
   }
 
-  _display(positions, surface) {
+  _display(positions, area) {
     // listen for selection
     this.selector.on('select', (position) => {
       // optionally store in local storage
@@ -181,7 +181,7 @@ export default class ClientPlacer extends ClientModule {
       this.done();
     });
 
-    this.selector.display(this.view, surface);
+    this.selector.display(this.view, area);
     this.selector.displayPositions(positions, 20);
   }
 
@@ -205,7 +205,7 @@ export default class ClientPlacer extends ClientModule {
     // request positions or labels
     this.send('request', this.mode);
 
-    this.receive('setup', (capacity, labels, coordinates, surface) => {
+    this.receive('setup', (capacity, labels, coordinates, area) => {
       let numLabels = labels? labels.length: Infinity;
       let numCoordinates = coordinates? coordinates.length: Infinity;
       let numPositions = Math.min(numLabels, numCoordinates);
@@ -226,7 +226,7 @@ export default class ClientPlacer extends ClientModule {
         positions.push(position);
       }
 
-      this._display(positions, surface);
+      this._display(positions, area);
     });
 
     // allow to reset localStorage
