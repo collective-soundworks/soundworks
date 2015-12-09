@@ -11,21 +11,37 @@ export default {
   welcome: `
     <div class="centered-content">
       <% if (error) { %>
-        <p><%- error %></p>
+        <p><%= error %></p>
       <% } else { %>
-        <p><%- welcome %> <b><%- _globals.appName %></b>,</p>
-        <p><%- touchScreen %></p>
+        <p><%= welcome %> <b><%= _globals.appName %></b>,</p>
+        <p><%= touchScreen %></p>
       <% } %>
     </div>
   `,
 
   loader: `
     <div class="centered-content soft-blink">
-      <p><%- loading %></p>
+      <p><%= loading %></p>
       <% if (showProgress) { %>
       <div class="progress-wrap">
         <div class="progress-bar" id="progress-bar"></div>
       </div>
+      <% } %>
+    </div>
+  `,
+
+  checkin: `
+    <div class="centered-content">
+      <% if (waiting) { %>
+        <p><%= wait %></p>
+      <% } else { %>
+        <% if (label) { %>
+          <p><%= labelPrefix %></p>
+          <div class="checkin-label circled"><span><%= label %></span></div>
+          <p><small><%= labelPostfix %></small></p>
+        <% } else { %>
+          <p><%= error %></p>
+        <% } %>
       <% } %>
     </div>
   `,

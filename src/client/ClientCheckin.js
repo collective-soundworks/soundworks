@@ -2,13 +2,13 @@ import client from './client';
 import ClientModule from './ClientModule';
 
 
-function _instructions(label) {
-  return `
-    <p>Go to</p>
-    <div class="checkin-label circled"><span>${label}</span></div>
-    <p><small>Touch the screen<br/>when you are ready.</small></p>
-  `;
-}
+// function _instructions(label) {
+//   return `
+//     <p>Go to</p>
+//     <div class="checkin-label circled"><span>${label}</span></div>
+//     <p><small>Touch the screen<br/>when you are ready.</small></p>
+//   `;
+// }
 
 /**
  * [client] Assign places among a set of predefined positions (i.e. labels and/or coordinates).
@@ -50,12 +50,23 @@ export default class ClientCheckin extends ClientModule {
      */
     this.label = null;
 
-    this._showDialog = options.showDialog || false;
-    this._instructions = options.instructions || _instructions;
+    const showDialog = options.showDialog || false;
+    // this._instructions = options.instructions || _instructions;
 
+    // bind callbacks to the current instance
     this._acknowledgementHandler = this._acknowledgementHandler.bind(this);
     this._unavailableHandler = this._unavailableHandler.bind(this);
     this._viewClickHandler = this._viewClickHandler.bind(this);
+
+    // init()
+    if (showDialog) {
+      this.content.waiting = true;
+      this.content.label = null;
+      if (this.view) { this.view.remove(); } // in `this.reset()`
+      this.view = this.createDefaultView();
+    }
+
+    this.init();
   }
 
   /**
@@ -66,9 +77,7 @@ export default class ClientCheckin extends ClientModule {
    */
   start() {
     super.start();
-    console.log('clientCheckin start');
     // Send request to the server
-    // client.send(this.name + ':request');
     this.send('request');
 
     // Setup listeners for the server's response
@@ -89,11 +98,7 @@ export default class ClientCheckin extends ClientModule {
     this.removeListener('acknowledge', this._acknowledgementHandler);
     this.removeListener('unavailable', this._unavailableHandler);
 
-    // Remove touch / click listener set un in the `_acknowledgementHandler`
-    if (client.platform.isMobile)
-      this.view.removeEventListener('touchstart', this._viewClickHandler);
-    else
-      this.view.removeEventListener('click', this._viewClickHandler, false);
+    if (this.view) { this.view.installEvents({}, true); }
   }
 
   /**
@@ -110,35 +115,25 @@ export default class ClientCheckin extends ClientModule {
 
   _acknowledgementHandler(index, label, coordinates) {
     this.index = index;
+    this.label = label;
+    client.coordinates = coordinates;
 
-    console.log(index, label, coordinates);
+    if (this.view) {
+      const displayLabel = label || (index + 1).toString(); // ?
+      const eventName = client.platform.isMobile ? 'click' : 'touchstart';
 
-    if (coordinates)
-      client.coordinates = coordinates;
-
-    if (label) {
-      this.label = label;
-
-      if (this._showDialog) {
-        let displayLabel = label || (index + 1).toString();
-        let htmlContent = this._instructions(displayLabel);
-        this.setCenteredViewContent(htmlContent);
-
-        if (client.platform.isMobile)
-          this.view.addEventListener('touchstart', this._viewClickHandler);
-        else
-          this.view.addEventListener('click', this._viewClickHandler, false);
-      } else {
-        this.done();
-      }
-
+      this.content.waiting = false;
+      this.content.label = displayLabel;
+      this.view.installEvents({ [eventName]: this._viewClickHandler });
+      this.view.render();
     } else {
       this.done();
     }
   }
 
   _unavailableHandler() {
-    this.setCenteredViewContent('<p>Sorry, we cannot accept any more connections at the moment, please try again later.</p>');
+    this.content.waiting = false;
+    this.view.render();
   }
 
   _viewClickHandler() {

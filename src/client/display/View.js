@@ -2,20 +2,47 @@ import tmpl from 'lodash.template';
 import viewport from './viewport';
 
 /**
- * @todo - write doc
+ * [client] - View.
+ *
+ * @todo
  */
 export default class View {
   constructor(template, content = {}, events = {}, options = {}) {
+    /**
+     * A function created from the given `template`, to be called with `content` object.
+     * @type {Function}
+     */
     this.tmpl = tmpl(template);
+
+    /**
+     * Data to be used in order to populate the template.
+     * @type {Object}
+     */
     this.content = content;
+
+    /**
+     * Events to attach to the view. Each entry follows the convention:
+     * `'eventName [cssSelector]': callbackFunction`
+     * @type {Object}
+     */
     this.events = events;
+
+    /**
+     * Orientation of the view ('portrait'|'landscape')
+     * @type {String}
+     */
+    this.orientation = null;
+
     this.options = Object.assign({
       el: 'div',
       id: null,
       className: null,
     }, options);
 
-    // create container in memory
+    /**
+     * The container element of the view. Defaults to `<div>`.
+     * @type {Element}
+     */
     this.$el = document.createElement(this.options.el);
     // listen viewport
     this.onResize = this.onResize.bind(this);
@@ -23,7 +50,8 @@ export default class View {
   }
 
   /**
-   * @return {DOMElement}
+   * Render the view according to the given template and content.
+   * @return {Element}
    */
   render() {
     const options = this.options;
@@ -45,19 +73,40 @@ export default class View {
     return this.$el;
   }
 
-  // entry point when DOM is ready
+  /**
+   * Entry point for custom behavior (install plugin, ...) when the DOM of the view is ready.
+   */
   onRender() {}
 
+  /**
+   * Remove events listeners and remove the view from it's container. Is automatically called in `Module~done`.
+   */
   remove() {
     this._undelegateEvents();
     this.$el.parentNode.removeChild(this.$el);
   }
 
+  /**
+   * Callback for `viewport.resize` event. Maintain `$el` in sync with the viewport.
+   * @param {String} orientation - The orientation of the viewport ('portrait'|'landscape')
+   * @param {Number} width - The width of the viewport in pixels.
+   * @param {Number} height - The height of the viewport in pixels.
+   */
   onResize(orientation, width, height) {
+    this.orientation = orientation;
     this.$el.classList.remove('portrait', 'landscape');
     this.$el.classList.add(orientation);
     this.$el.style.width = `${width}px`;
     this.$el.style.height = `${height}px`;
+  }
+
+  /**
+   * Allow to install events after instanciation.
+   * @param {Object} events - An object of events mimicing the Backbone's syntax.
+   */
+  installEvents(events, override = false) {
+    this.events = override ? events : Object.assign(this.events, events);
+    this._delegateEvents();
   }
 
   _delegateEvents() {

@@ -1,7 +1,5 @@
 import ServerModule from './ServerModule';
 
-const maxRandomCapacity = 9999;
-
 /**
  * [server] Assign places among a set of predefined positions (i.e. labels and/or coordinates).
  *
@@ -61,30 +59,28 @@ export default class ServerCheckin extends ServerModule {
     this._availableIndices = [];
     this._nextAscendingIndex = 0;
 
-    let numLabels = labels? labels.length: Infinity;
-    let numCoordinates = coordinates? coordinates.length: Infinity;
-    let numPositions = Math.min(numLabels, numCoordinates);
+    const numLabels = this.labels ? this.labels.length : Infinity;
+    const numCoordinates = this.coordinates ? this.coordinates.length : Infinity;
+    const numPositions = Math.min(numLabels, numCoordinates);
 
     if(this.capacity > numPositions)
       this.capacity = numPositions;
 
-    if (this.capacity > Number.MAX_SAFE_INTEGER)
-      this.capacity = Number.MAX_SAFE_INTEGER;
-
-    if (this.capacity > maxRandomCapacity)
+    if (this.capacity === Infinity)
       this.order = 'ascending';
-    else if (this.order === 'random')
+    else if (this.order === 'random') {
       this._nextAscendingIndex = this.capacity;
 
-    for (let i = 0; i < this.capacity; i++)
-      this._availableIndices.push(i);
+      for (let i = 0; i < this.capacity; i++)
+        this._availableIndices.push(i);
+    }
   }
 
   _getRandomIndex() {
     const numAvailable = this._availableIndices.length;
 
     if (numAvailable > 0) {
-      let random = Math.floor(Math.random() * numAvailable);
+      const random = Math.floor(Math.random() * numAvailable);
       return this._availableIndices.splice(random, 1)[0];
     }
 
@@ -119,8 +115,8 @@ export default class ServerCheckin extends ServerModule {
         index = this._getAscendingIndex();
 
       if (index >= 0) {
-        const label = this.labels[index];
-        const coordinates = this.coordinates[index];
+        const label = this.labels ? this.labels[index] : undefined;
+        const coordinates = this.coordinates ? this.coordinates[index] : undefined;
 
         client.modules[this.name].index = index;
         client.modules[this.name].label = label;

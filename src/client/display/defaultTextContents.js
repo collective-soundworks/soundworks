@@ -16,5 +16,11 @@ export default {
   },
   loader: {
     loading: 'Loading sounds…'
+  },
+  checkin: {
+    wait: '...',
+    labelPrefix: 'Go to',
+    labelPostfix: 'Touch the screen<br/>when you are ready.',
+    error: 'Sorry, we cannot accept any more connections at the moment, please try again later.'
   }
 };
