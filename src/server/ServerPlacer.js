@@ -12,36 +12,45 @@ export default class ServerPlacer extends ServerModule {
    * Creates an instance of the class.
    * @param {Object} [options={}] Options.
    * @param {Object} [options.name='placer'] Name of the module.
-   * @param {String[]} [options.labels=null] List of predefined labels).
-   * @param {Array[]} [options.coordinates=null] List of predefined coordinates given as [x:Number, y:Number].
-   * @param {Number} [options.capacity=Infinity] Maximum number of places allowed (may be limited by the number of predefined labels and/or coordinates).
+   * @param {Object} [options.setup] Setup defining dimensions and predefined positions (labels and/or coordinates).
+   * @param {String[]} [options.setup.width] Width of the setup.
+   * @param {String[]} [options.setup.height] Height of the setup.
+   * @param {String[]} [options.setup.background] Background (image) of the setup.
+   * @param {String[]} [options.setup.labels] List of predefined labels.
+   * @param {Array[]} [options.setup.coordinates] List of predefined coordinates given as an array `[x:Number, y:Number]`.
+   * @param {Number} [options.capacity=Infinity] Maximum number of places (may limit or be limited by the number of labels and/or coordinates defined by the setup).
    */
   constructor(options) {
     super(options.name || 'placer');
 
     /**
-     * List of predefined labels.
-     * @type {String[]}
+     * Setup defining dimensions and predefined positions (labels and/or coordinates).
+     * @type {Object}
      */
-    this.labels = options.labels;
+    this.setup = options.setup;
 
     /**
-     * List of predefined coordinates.
-     * @type {Array[]}
-     */
-    this.coordinates = options.coordinates;
-
-    /**
-     * Maximum number of clients supported.
+     * Maximum number of places.
      * @type {Number}
      */
-    this.capacity = options.capacity || maxCapacity;
+    this.capacity = getOpt(options.capacity, Infinity, 1);
+
+    const setup = options.setup;
+
+    if(setup) {
+      const numLabels = setup.labels ? setup.labels.length : Infinity;
+      const numCoordinates = setup.coordinates ? setup.coordinates.length : Infinity;
+      const numPositions = Math.min(numLabels, numCoordinates);
+
+      if(this.capacity > numPositions)
+        this.capacity = numPositions;
+    }
 
     if(this.capacity > maxCapacity)
       this.capacity = maxCapacity;
 
     /**
-     * List of the clients checked in with corresponing indices.
+     * List of clients checked in with corresponing indices.
      * @type {Client[]}
      */
     this.clients = [];
@@ -54,10 +63,27 @@ export default class ServerPlacer extends ServerModule {
     super.connect(client);
 
     this.receive(client, 'request', (mode) => {
-      let labels = this.labels;
-      let coordinates = (mode === 'graphic')? this.coordinates: undefined;
+      let surface = undefined;
+      let labels = undefined;
+      let coordinates = null;
       let capacity = this.capacity;
-      this.send(client, 'acknowledge', labels, coordinates, capacity);
+      let setup = this.setup;
+
+      if(setup) {
+        labels = setup.labels;
+
+        if(mode === 'graphic') {
+          coordinates = setup.coordinates;
+
+          surface = {
+            width: setup.width,
+            height: setup.height,
+            background: setup.background,
+          }
+        }
+      }
+
+      this.send(client, 'setup', capacity, labels, coordinates, surface);
     });
 
     this.receive(client, 'position', (index, label, coords) => {

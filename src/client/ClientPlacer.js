@@ -22,23 +22,6 @@ export class ListSelector extends EventEmitter {
     this.emit('select', index);
   }
 
-  display(container, options = {}) {
-    this.container = container;
-    this.el = document.createElement('div');
-
-    this.select = document.createElement('select');
-    this.button = document.createElement('button');
-    this.button.textContent = 'OK';
-    this.button.classList.add('btn');
-
-    this.el.appendChild(this.select);
-    this.el.appendChild(this.button);
-    this.container.appendChild(this.el);
-
-    this.button.addEventListener('touchstart', this._onSelect, false);
-    this.resize();
-  }
-
   resize() {
     if (this.container) {
       const containerWidth = this.container.getBoundingClientRect().width;
@@ -57,6 +40,23 @@ export class ListSelector extends EventEmitter {
       this.select.style.width = width + 'px';
       this.button.style.width = width + 'px';
     }
+  }
+
+  display(container) {
+    this.container = container;
+    this.el = document.createElement('div');
+
+    this.select = document.createElement('select');
+    this.button = document.createElement('button');
+    this.button.textContent = 'OK';
+    this.button.classList.add('btn');
+
+    this.el.appendChild(this.select);
+    this.el.appendChild(this.button);
+    this.container.appendChild(this.el);
+
+    this.button.addEventListener('touchstart', this._onSelect, false);
+    this.resize();
   }
 
   displayPositions(labels, coordinates, capacity) {
@@ -169,7 +169,7 @@ export default class ClientPlacer extends ClientModule {
     this.send('position', this.index, this.label, client.coordinates);
   }
 
-  _display(positions) {
+  _display(positions, surface) {
     // listen for selection
     this.selector.on('select', (position) => {
       // optionally store in local storage
@@ -181,7 +181,7 @@ export default class ClientPlacer extends ClientModule {
       this.done();
     });
 
-    this.selector.display(this.view);
+    this.selector.display(this.view, surface);
     this.selector.displayPositions(positions, 20);
   }
 
@@ -205,7 +205,7 @@ export default class ClientPlacer extends ClientModule {
     // request positions or labels
     this.send('request', this.mode);
 
-    this.receive('acknowledge', (labels, coordinates, capacity = Infinity) => {
+    this.receive('setup', (capacity, labels, coordinates, surface) => {
       let numLabels = labels? labels.length: Infinity;
       let numCoordinates = coordinates? coordinates.length: Infinity;
       let numPositions = Math.min(numLabels, numCoordinates);
@@ -226,7 +226,7 @@ export default class ClientPlacer extends ClientModule {
         positions.push(position);
       }
 
-      this._display(positions);
+      this._display(positions, surface);
     });
 
     // allow to reset localStorage

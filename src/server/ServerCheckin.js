@@ -14,33 +14,28 @@ export default class ServerCheckin extends ServerModule {
   /**
    * @param {Object} [options={}] Options.
    * @param {Object} [options.name='checkin'] Name of the module.
-   * @param {String[]} [options.labels=null] List of predefined labels).
-   * @param {Array[]} [options.coordinates=null] List of predefined coordinates given as an array `[x:Number, y:Number]`.
-   * @param {Number} [options.capacity=Infinity] Maximum number of checkins allowed (may be limited by the number of predefined labels and/or coordinates).
+   * @param {Object} [options.setup] Setup defining predefined positions (labels and/or coordinates).
+   * @param {String[]} [options.setup.labels] List of predefined labels.
+   * @param {Array[]} [options.setup.coordinates] List of predefined coordinates given as an array `[x:Number, y:Number]`.
+   * @param {Number} [options.capacity=Infinity] Maximum number of places (may limit or be limited by the number of labels and/or coordinates defined by the setup).
    * @param {Object} [options.order='ascending'] Order in which indices are assigned. Currently spported values are:
-   * - `'ascending'`: indices are assigned in ascending order;
-   * - `'random'`: indices are assigned in random order.
+   * - `'ascending'`: indices are assigned in ascending order
+   * - `'random'`: indices are assigned in random order
    */
   constructor(options = {}) {
     super(options.name || 'checkin');
 
     /**
-     * List of predefined labels.
-     * @type {String[]}
+     * Setup defining predefined positions (labels and/or coordinates).
+     * @type {Object}
      */
-    this.labels = options.labels;
+    this.setup = options.setup;
 
     /**
-     * List of predefined coordinates.
-     * @type {Array[]}
-     */
-    this.coordinates = options.coordinates;
-
-    /**
-     * Maximum number of clients allowed.
+     * Maximum number of clients checked in (may limit or be limited by the number of predefined labels and/or coordinates).
      * @type {Number}
      */
-    this.capacity = options.capacity || Infinity;
+    this.capacity = getOpt(options.capacity, Infinity, 1);
 
     /**
      * List of the clients checked in with corresponing indices.
@@ -59,12 +54,16 @@ export default class ServerCheckin extends ServerModule {
     this._availableIndices = [];
     this._nextAscendingIndex = 0;
 
-    const numLabels = this.labels ? this.labels.length : Infinity;
-    const numCoordinates = this.coordinates ? this.coordinates.length : Infinity;
-    const numPositions = Math.min(numLabels, numCoordinates);
+    const setup = options.setup;
 
-    if(this.capacity > numPositions)
-      this.capacity = numPositions;
+    if(setup) {
+      const numLabels = setup.labels ? setup.labels.length : Infinity;
+      const numCoordinates = setup.coordinates ? setup.coordinates.length : Infinity;
+      const numPositions = Math.min(numLabels, numCoordinates);
+
+      if(this.capacity > numPositions)
+        this.capacity = numPositions;
+    }
 
     if (this.capacity === Infinity)
       this.order = 'ascending';
@@ -94,7 +93,7 @@ export default class ServerCheckin extends ServerModule {
       });
 
       return this._availableIndices.splice(0, 1)[0];
-    } else if (this._nextAscendingIndex < this.capacity) {
+    } else if (this._nextAscendingIndex < this._capacity) {
       return this._nextAscendingIndex++;
     }
 
@@ -114,17 +113,22 @@ export default class ServerCheckin extends ServerModule {
       else // if (order === 'acsending')
         index = this._getAscendingIndex();
 
-      if (index >= 0) {
-        const label = this.labels ? this.labels[index] : undefined;
-        const coordinates = this.coordinates ? this.coordinates[index] : undefined;
+      client.modules[this.name].index = index;
 
-        client.modules[this.name].index = index;
-        client.modules[this.name].label = label;
-        client.coordinates = coordinates;
+      if (index >= 0) {
+        const setup = this.setup;
+
+        if(setup) {
+          const label = setup.labels ? setup.labels[index] : undefined;
+          const coordinates = setup.coordinates ? setup.coordinates[index] : undefined;
+
+          client.modules[this.name].label = label;
+          client.coordinates = coordinates;
+        }
 
         this.clients[index] = client;
 
-        this.send(client, 'acknowledge', index, label, coordinates);
+        this.send(client, 'position', index, label, coordinates);
       } else {
         this.send(client, 'unavailable');
       }
@@ -183,4 +187,3 @@ export default class ServerCheckin extends ServerModule {
     }
   }
 }
-

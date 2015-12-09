@@ -11,7 +11,7 @@ const ns = 'http://www.w3.org/2000/svg';
  * The module finishes its initialization immediately.
  *
  * @example const space = new Space();
- * space.display(positions, container);
+ * space.display(container);
  */
 export default class Space extends ClientModule {
   /**
@@ -23,15 +23,11 @@ export default class Space extends ClientModule {
   constructor(options = {}) {
     super(options.name || 'space');
 
-    this.width = 10;
-    this.height = 10;
+    this._width = 10;
+    this._height = 10;
 
     this._fitContainer = (options.fitContainer || false);
     this._listenTouchEvent = (options.listenTouchEvent || false);
-
-    // this.spacing = 1;
-    // this.labels = [];
-    // this.coordinates = [];
 
     this._xFactor = 1;
     this._yFactor = 1;
@@ -83,6 +79,9 @@ export default class Space extends ClientModule {
     this._container.classList.add('space');
     this._renderingOptions = options;
 
+    this._width = options.width;
+    this._height = options.height;
+
     if (options.background) {
       this._container.style.backgroundImage = `url(${options.background})`;
       this._container.style.backgroundPosition = '50% 50%';
@@ -102,81 +101,6 @@ export default class Space extends ClientModule {
     this.resize(this._container);
 
     this.done();
-  }
-
-  /**
-   * Resize the SVG element.
-   */
-  resize() {
-    const boundingRect = this._container.getBoundingClientRect();
-    const containerWidth = boundingRect.width;
-    const containerHeight = boundingRect.height;
-    // force adaptation to container size
-
-    const ratio = (() => {
-      return (this.width > this.height) ?
-        containerWidth / this.width :
-        containerHeight / this.height;
-    })();
-
-    let svgWidth = this.width * ratio;
-    let svgHeight = this.height * ratio;
-
-    if (this._fitContainer) {
-      svgWidth = containerWidth;
-      svgHeight = containerHeight;
-    }
-
-    const offsetLeft = (containerWidth - svgWidth) / 2;
-    const offsetTop = (containerHeight - svgHeight) / 2;
-
-    this._svg.setAttributeNS(null, 'width', svgWidth);
-    this._svg.setAttributeNS(null, 'height', svgHeight);
-     // use space coordinates
-    this._svg.setAttributeNS(null, 'viewBox', `0 0 ${this.width} ${this.height}`);
-    // center svg in container
-    this._svg.style.position = 'absolute';
-    this._svg.style.left = `${offsetLeft}px`;
-    this._svg.style.top = `${offsetTop}px`;
-
-    // apply rotations
-    if (this._renderingOptions.transform) {
-      switch (this._renderingOptions.transform) {
-        case 'rotate180':
-          this._container.setAttribute('data-xfactor', -1);
-          this._container.setAttribute('data-yfactor', -1);
-          // const transform = `rotate(180, ${svgWidth / 2}, ${svgHeight / 2})`;
-          const transform = 'rotate(180, 0.5, 0.5)';
-          this._group.setAttributeNS(null, 'transform', transform);
-          break;
-      }
-    }
-
-    /**
-     * Left offset of the SVG element.
-     * @type {Number}
-     */
-    this.svgOffsetLeft = offsetLeft;
-
-    /**
-     * Top offset of the SVG element.
-     * @type {Number}
-     */
-    this.svgOffsetTop = offsetTop;
-
-    /**
-     * Width of the SVG element.
-     * @type {Number}
-     */
-    this.svgWidth = svgWidth;
-
-    /**
-     * Height of the SVG element.
-     * @type {Number}
-     */
-    this.svgHeight = svgHeight;
-
-    this._ratio = ratio;
   }
 
   /**
@@ -229,8 +153,8 @@ export default class Space extends ClientModule {
 
     const dot = document.createElementNS(ns, 'circle');
     dot.setAttributeNS(null, 'r', radius / this._ratio);
-    dot.setAttributeNS(null, 'cx', coordinates[0] * this.width);
-    dot.setAttributeNS(null, 'cy', coordinates[1] * this.height);
+    dot.setAttributeNS(null, 'cx', coordinates[0] * this._width);
+    dot.setAttributeNS(null, 'cy', coordinates[1] * this._height);
     dot.style.fill = 'steelblue';
 
     this._group.appendChild(dot);
@@ -254,5 +178,80 @@ export default class Space extends ClientModule {
     while (this._group.firstChild) {
       this._group.removeChild(this._group.firstChild);
     }
+  }
+
+  /**
+   * Resize the SVG element.
+   */
+  resize() {
+    const boundingRect = this._container.getBoundingClientRect();
+    const containerWidth = boundingRect.width;
+    const containerHeight = boundingRect.height;
+    // force adaptation to container size
+
+    const ratio = (() => {
+      return (this._width > this._height) ?
+        containerWidth / this._width :
+        containerHeight / this._height;
+    })();
+
+    let svgWidth = this._width * ratio;
+    let svgHeight = this._height * ratio;
+
+    if (this._fitContainer) {
+      svgWidth = containerWidth;
+      svgHeight = containerHeight;
+    }
+
+    const offsetLeft = (containerWidth - svgWidth) / 2;
+    const offsetTop = (containerHeight - svgHeight) / 2;
+
+    this._svg.setAttributeNS(null, 'width', svgWidth);
+    this._svg.setAttributeNS(null, 'height', svgHeight);
+     // use space coordinates
+    this._svg.setAttributeNS(null, 'viewBox', `0 0 ${this._width} ${this._height}`);
+    // center svg in container
+    this._svg.style.position = 'absolute';
+    this._svg.style.left = `${offsetLeft}px`;
+    this._svg.style.top = `${offsetTop}px`;
+
+    // apply rotations
+    if (this._renderingOptions.transform) {
+      switch (this._renderingOptions.transform) {
+        case 'rotate180':
+          this._container.setAttribute('data-xfactor', -1);
+          this._container.setAttribute('data-yfactor', -1);
+          // const transform = `rotate(180, ${svgWidth / 2}, ${svgHeight / 2})`;
+          const transform = 'rotate(180, 0.5, 0.5)';
+          this._group.setAttributeNS(null, 'transform', transform);
+          break;
+      }
+    }
+
+    /**
+     * Left offset of the SVG element.
+     * @type {Number}
+     */
+    this.svgOffsetLeft = offsetLeft;
+
+    /**
+     * Top offset of the SVG element.
+     * @type {Number}
+     */
+    this.svgOffsetTop = offsetTop;
+
+    /**
+     * Width of the SVG element.
+     * @type {Number}
+     */
+    this.svgWidth = svgWidth;
+
+    /**
+     * Height of the SVG element.
+     * @type {Number}
+     */
+    this.svgHeight = svgHeight;
+
+    this._ratio = ratio;
   }
 }

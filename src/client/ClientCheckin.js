@@ -54,7 +54,7 @@ export default class ClientCheckin extends ClientModule {
     // this._instructions = options.instructions || _instructions;
 
     // bind callbacks to the current instance
-    this._acknowledgementHandler = this._acknowledgementHandler.bind(this);
+    this._positionHandler = this._positionHandler.bind(this);
     this._unavailableHandler = this._unavailableHandler.bind(this);
     this._viewClickHandler = this._viewClickHandler.bind(this);
 
@@ -81,7 +81,7 @@ export default class ClientCheckin extends ClientModule {
     this.send('request');
 
     // Setup listeners for the server's response
-    this.receive('acknowledge', this._acknowledgementHandler);
+    this.receive('acknowledge', this._positionHandler);
     this.receive('unavailable', this._unavailableHandler);
   }
 
@@ -95,7 +95,7 @@ export default class ClientCheckin extends ClientModule {
     super.reset();
 
     // Remove listeners for the server's response
-    this.removeListener('acknowledge', this._acknowledgementHandler);
+    this.removeListener('position', this._positionHandler);
     this.removeListener('unavailable', this._unavailableHandler);
 
     if (this.view) { this.view.installEvents({}, true); }
@@ -113,7 +113,7 @@ export default class ClientCheckin extends ClientModule {
     this.done();
   }
 
-  _acknowledgementHandler(index, label, coordinates) {
+  _positionHandler(index, label, coordinates) {
     this.index = index;
     this.label = label;
     client.coordinates = coordinates;

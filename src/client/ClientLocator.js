@@ -88,7 +88,7 @@ export default class ClientLocator extends ClientModule {
     super.start();
 
     this.send('request');
-    this.receive('space', this._surfaceHandler, false);
+    this.receive('surface', this._surfaceHandler, false);
 
     window.addEventListener('resize', this._resize);
   }
@@ -135,8 +135,8 @@ export default class ClientLocator extends ClientModule {
     this.done();
   }
 
-  _surfaceHandler(width, height, background) {
-    let heightWidthRatio = height / width;
+  _surfaceHandler(surface = {}) {
+    let heightWidthRatio = surface.height / surface.width;
     let screenHeight = window.innerHeight;
     let screenWidth = window.innerWidth;
     let screenRatio = screenHeight / screenWidth;
@@ -151,7 +151,7 @@ export default class ClientLocator extends ClientModule {
     }
 
     this.space.display(this._surfaceDiv, {
-      background: background
+      background: surface.background
     });
 
     // Let the participant select his or her location

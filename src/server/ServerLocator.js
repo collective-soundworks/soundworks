@@ -11,23 +11,19 @@ export default class ServerLocator extends ServerModule {
    * Creates an instance of the class.
    * @param {Object} [options={}] Options.
    * @param {Object} [options.name='locator'] Name of the module.
-   * @param {Number} [options.width] Width of the space.
-   * @param {Number} [options.height] Height of the space.
+   * @param {Object} [options.setup] Setup defining dimensions and background.
+   * @param {String[]} [options.setup.width] Width of the setup.
+   * @param {String[]} [options.setup.height] Height of the setup.
+   * @param {String[]} [options.setup.background] Background (image) of the setup.
    */
   constructor(options = {}) {
     super(options.name || 'locator');
 
     /**
-     * Width of the space.
-     * @type {Number}
+     * Setup defining dimensions and background.
+     * @type {Object}
      */
-    this.width = options.width || 10;
-
-    /**
-     * Height of the space.
-     * @type {Number}
-     */
-    this.height = options.height || 10;
+    this.setup = options.setup;
   }
 
   /**
@@ -37,7 +33,18 @@ export default class ServerLocator extends ServerModule {
     super.connect(client);
 
     this.receive(client, 'request', () => {
-      this.send(client, 'surface', width, height, background);
+      let surface = undefined;
+      let setup = this.setup;
+
+      if(setup) {
+        surface = {
+          width: setup.width;
+          height: setup.height;
+          background: setup.background;
+        };
+      }
+
+      this.send(client, 'surface', surface);
     });
 
     this.receive(client, 'coordinates', (coordinates) => {

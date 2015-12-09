@@ -14,7 +14,28 @@ import Client from './Client';
 
 const oscListeners = [];
 
-const defaultAppConfig = {
+/**
+ * Set of configuration parameters defined by a particular application.
+ * These parameters typically inclusd a setup and control parameters values.
+ */
+const exampleAppConfig = {
+  playerSetup: {
+    width: 10, // width of the space in meters
+    height: 10, // height of the space in meters
+    labels: null, // predefined labels (optional)
+    coordinates: null, // predefined coordinates (optional)
+  },
+  controlParameters = {
+    tempo: 120, // tempo in BPM
+    volume: 0, // master volume in dB
+  },
+};
+
+/**
+ * Configuration parameters of the Soundworks framework.
+ * These parameters allow for configuring components of the framework such as Express and SocketIO.
+ */
+const defaultFwConfig = {
   publicFolder: path.join(process.cwd(), 'public'),
   defaultClient: 'player',
   socketIO: {
@@ -29,6 +50,10 @@ const defaultAppConfig = {
   },
 };
 
+/**
+ * Configuration parameters of the Soundworks framework.
+ * These parameters allow for configuring components of the framework such as Express and SocketIO.
+ */
 const defaultEnvConfig = {
   port: 8000,
   osc: {

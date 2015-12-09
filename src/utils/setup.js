@@ -1,7 +1,7 @@
 import getOpt from 'helpers';
 
 /**
- * Generates a matrix setup according to the given parameters.
+ * Generates a matrix setup according to a set of parameters.
  *
  * @param {Object} [params={}] Matrix parameters:
  *   - `width:Number`, number of columns (defaults to `10`);
@@ -13,8 +13,8 @@ import getOpt from 'helpers';
  *   - `relColMargin:Number`, (horizontal) margins between the borders of the space and the first or last column relative to the space between two columns (defaults to `0.5`);
  *   - `relRowMargin:Number`, (vertical) margins between the borders of the space and the first or last row relative to the space between two rows (defaults to `0.5`);
  */
-export function setupMatrix(params = {}) {
-  let config = {};
+export function generateMatrixSetup(params = {}) {
+  let setup = {};
   const width = getOpt(params.width, 10, 0);
   const height = getOpt(params.height, 10, 0);
   const cols = getOpt(params.cols, 3, 1);
@@ -28,16 +28,13 @@ export function setupMatrix(params = {}) {
   const colMargin = absColMargin + colSpacing * relColMargin;
   const rowMargin = absRowMargin + rowSpacing * relRowMargin;
 
-  config.spacing = Math.min(colSpacing, rowSpacing);
+  setup.width = width;
+  setup.height = height;
 
-  config.topology = {
-    type: 'matrix',
-    cols: cols,
-    rows: rows
-  };
+  const labels = [];
+  const coordinates = [];
 
   let count = 0;
-
   for (let j = 0; j < rows; j++) {
     for (let i = 0; i < cols; i++) {
       count++;
@@ -45,10 +42,18 @@ export function setupMatrix(params = {}) {
       const label = count.toString();
       const x = (colMargin + i * colSpacing) / width;
       const y = (rowMargin + j * rowSpacing) / height;
-      const coordinates = [x, y];
 
-      this.labels.push(label);
-      this.coordinates.push(coordinates);
+      setup.labels.push(label);
+      setup.coordinates.push([x, y]);
     }
   }
+
+  setup.labels = labels;
+  setup.coordinates = coordinates;
+
+  setup.topology = {
+    type: 'matrix',
+    cols: cols,
+    rows: rows
+  };
 };
