@@ -13,7 +13,7 @@ import getOpt from 'helpers';
  *   - `relColMargin:Number`, (horizontal) margins between the borders of the space and the first or last column relative to the space between two columns (defaults to `0.5`);
  *   - `relRowMargin:Number`, (vertical) margins between the borders of the space and the first or last row relative to the space between two rows (defaults to `0.5`);
  */
-export function generateMatrixSetup(params = {}) {
+export function generateMatrix(params = {}) {
   let setup = {};
   const width = getOpt(params.width, 10, 0);
   const height = getOpt(params.height, 10, 0);
