@@ -38,9 +38,9 @@ export default class ServerLocator extends ServerModule {
 
       if(setup) {
         area = {
-          width: setup.width;
-          height: setup.height;
-          background: setup.background;
+          width: setup.width,
+          height: setup.height,
+          background: setup.background,
         };
       }
 

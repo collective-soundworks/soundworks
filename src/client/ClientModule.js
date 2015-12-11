@@ -137,15 +137,27 @@ export default class ClientModule extends Promised {
 
     /**
      * View of the module.
-     * @type {BaseView}
+     * @type {View}
      */
     this.view = null;
 
     /**
-     * Events to bind to the view. (cf. Backbone's syntax)
+     * Events to bind to the view. (cf. Backbone's syntax).
      * @type {Object}
      */
     this.events = {};
+
+    /**
+     * Additionnal options to pass to the view.
+     * @type {Object}
+     */
+    this.viewOptions = options.viewOptions || {};
+
+    /**
+     * Defines a view constructor to be used in createDefaultView
+     * @type {View}
+     */
+    this.viewCtor = options.viewCtor || View;
 
     /** @private */
     this._template = null;
@@ -188,9 +200,8 @@ export default class ClientModule extends Promised {
    */
   get template() {
     const template = this._template || this.templateDefinitions[this.name];
-    if (!template)
-      throw new Error(`No template defined for module "${this.name}"`);
-
+    // if (!template)
+    //   throw new Error(`No template defined for module "${this.name}"`);
     return template;
   }
 
@@ -219,10 +230,8 @@ export default class ClientModule extends Promised {
    * Create a default view from module attributes.
    */
   createDefaultView() {
-    return new View(this.template, this.content, this.events, {
-      id: this.name,
-      className: 'module',
-    });
+    const options = Object.assign({ id: this.name, className: 'module' }, this.viewOptions);
+    return new this.viewCtor(this.template, this.content, this.events, options);
   }
 
   /**

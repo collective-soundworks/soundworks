@@ -44,9 +44,8 @@ export default class View {
      * @type {Element}
      */
     this.$el = document.createElement(this.options.el);
-    // listen viewport
+
     this.onResize = this.onResize.bind(this);
-    viewport.on('resize', this.onResize);
   }
 
   /**
@@ -70,7 +69,18 @@ export default class View {
 
     this.onRender();
     this._delegateEvents();
+    // listen viewport orientation
+    viewport.addListener('resize', this.onResize);
+
     return this.$el;
+  }
+
+  hide() {
+    this.$el.style.visibility = 'hidden';
+  }
+
+  show() {
+    this.$el.style.visibility = 'visible';
   }
 
   /**
@@ -83,6 +93,7 @@ export default class View {
    */
   remove() {
     this._undelegateEvents();
+    viewport.removeListener('resize', this.onResize);
     this.$el.parentNode.removeChild(this.$el);
   }
 
@@ -110,6 +121,8 @@ export default class View {
   }
 
   _delegateEvents() {
+    this._undelegateEvents();
+
     for (let key in this.events) {
       const [event, selector] = key.split(/ +/);
       const callback = this.events[key];

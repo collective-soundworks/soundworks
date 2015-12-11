@@ -26,18 +26,25 @@ class Viewport extends EventEmitter {
     this.orientation = null;
 
     this._onResize = this._onResize.bind(this);
-    window.addEventListener('resize', this._onResize);
+    window.addEventListener('resize', this._onResize, false);
     //
     this._onResize();
+
+    this.cb;
   }
 
   /**
-   * Alias/Middleware for the `EventEmitter` method which applies the callback with current values.
+   * Middleware for the `EventEmitter` method which applies the callback with the current values.
    * @private
    */
-  on(channel, callback) {
-    super.on(channel, callback);
+  addListener(channel, callback) {
+    super.removeListener(channel, callback);
+    super.addListener(channel, callback);
     callback(this.orientation, this.width, this.height);
+  }
+
+  on(channel, callback) {
+    this.addListener(channel, callback);
   }
 
   _onResize() {

@@ -21,6 +21,7 @@ import Space from './Space';
 import Welcome from './Welcome';
 
 import View from './display/View';
+import SegmentedView from './display/SegmentedView';
 // import defaultTemplates from './views/defaultTemplates';
 // import defaultTextContents from './views/defaultTextContents';
 
@@ -49,6 +50,7 @@ export default {
 
   display: {
     View,
+    SegmentedView,
     // defaultTemplates,
     // defaultTextContents,
   }

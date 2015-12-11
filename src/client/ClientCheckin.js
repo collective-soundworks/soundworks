@@ -1,5 +1,6 @@
 import client from './client';
 import ClientModule from './ClientModule';
+import SegmentedView from './display/SegmentedView';
 
 
 // function _instructions(label) {
@@ -60,6 +61,7 @@ export default class ClientCheckin extends ClientModule {
 
     // init()
     if (showDialog) {
+      this.viewCtor = options.viewCtor || SegmentedView;
       this.content.waiting = true;
       this.content.label = null;
       if (this.view) { this.view.remove(); } // in `this.reset()`
@@ -114,7 +116,6 @@ export default class ClientCheckin extends ClientModule {
   }
 
   _positionHandler(index, label, coordinates) {
-    console.log(index, label, coordinates);
     this.index = index;
     this.label = label;
     client.coordinates = coordinates;

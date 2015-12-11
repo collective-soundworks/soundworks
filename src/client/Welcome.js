@@ -4,7 +4,7 @@ import ClientModule from './ClientModule';
 // @todo - problem of redondant dependency
 import platform from 'platform';
 import MobileDetect from 'mobile-detect';
-
+import SegmentedView from './display/SegmentedView';
 
 /**
  * @private
@@ -27,12 +27,11 @@ function _base64(format, base64) {
  * The module always has a view.
  *
  * @example
- * const welcomeDialog = new Dialog({
- *   name: 'welcome',
- *   activateAudio: true
+ * const welcomeDialog = new Welcome({
+ *   wakeLock: true
  * });
  */
-export default class Dialog extends ClientModule {
+export default class Welcome extends ClientModule {
   /**
    * @param {Object} [options={}] - Options.
    * @param {String} [options.name='welcome'] - Name of the module.
@@ -85,6 +84,7 @@ export default class Dialog extends ClientModule {
     if (options.view) {
       this.view = options.view;
     } else {
+      this.viewCtor = options.viewCtor || SegmentedView;
       this.view = this.createDefaultView();
     }
   }
