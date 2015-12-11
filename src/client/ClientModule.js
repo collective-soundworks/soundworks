@@ -299,6 +299,11 @@ export default class ClientModule extends Promised {
    * @abstract
    */
   reset() {
+    if (this.view) {
+      this.view.remove();
+    }
+
+    // this.init();
     this._isStarted = false;
   }
 

@@ -3,14 +3,6 @@ import ClientModule from './ClientModule';
 import SegmentedView from './display/SegmentedView';
 
 
-// function _instructions(label) {
-//   return `
-//     <p>Go to</p>
-//     <div class="checkin-label circled"><span>${label}</span></div>
-//     <p><small>Touch the screen<br/>when you are ready.</small></p>
-//   `;
-// }
-
 /**
  * [client] Assign places among a set of predefined positions (i.e. labels and/or coordinates).
  * The module requests a position to the server and waits for the answer.
@@ -37,6 +29,18 @@ export default class ClientCheckin extends ClientModule {
   constructor(options = {}) {
     super(options.name || 'checkin', options.hasView || true, options.color);
 
+    this._showDialog = options.showDialog || false;
+    this.viewCtor = options.viewCtor || SegmentedView;
+    // bind callbacks to the current instance
+    this._positionHandler = this._positionHandler.bind(this);
+    this._unavailableHandler = this._unavailableHandler.bind(this);
+    this._viewClickHandler = this._viewClickHandler.bind(this);
+
+    this.init();
+  }
+
+  init() {
+
     /**
      * Index given by the serverside {@link src/server/ServerCheckin.js~ServerCheckin}
      * module.
@@ -51,24 +55,11 @@ export default class ClientCheckin extends ClientModule {
      */
     this.label = null;
 
-    const showDialog = options.showDialog || false;
-    // this._instructions = options.instructions || _instructions;
-
-    // bind callbacks to the current instance
-    this._positionHandler = this._positionHandler.bind(this);
-    this._unavailableHandler = this._unavailableHandler.bind(this);
-    this._viewClickHandler = this._viewClickHandler.bind(this);
-
-    // init()
-    if (showDialog) {
-      this.viewCtor = options.viewCtor || SegmentedView;
+    if (this._showDialog) {
       this.content.waiting = true;
       this.content.label = null;
-      if (this.view) { this.view.remove(); } // in `this.reset()`
       this.view = this.createDefaultView();
     }
-
-    // this.init();
   }
 
   /**
@@ -81,7 +72,6 @@ export default class ClientCheckin extends ClientModule {
     super.start();
     // Send request to the server
     this.send('request');
-
     // Setup listeners for the server's response
     this.receive('position', this._positionHandler);
     this.receive('unavailable', this._unavailableHandler);
@@ -95,7 +85,6 @@ export default class ClientCheckin extends ClientModule {
    */
   reset() {
     super.reset();
-
     // Remove listeners for the server's response
     this.removeListener('position', this._positionHandler);
     this.removeListener('unavailable', this._unavailableHandler);
@@ -121,7 +110,7 @@ export default class ClientCheckin extends ClientModule {
     client.coordinates = coordinates;
 
     if (this.view) {
-      const displayLabel = label || (index + 1).toString(); // ?
+      const displayLabel = label || (index + 1).toString();
       const eventName = client.platform.isMobile ? 'click' : 'touchstart';
 
       this.content.waiting = false;
