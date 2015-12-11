@@ -66,7 +66,7 @@ export default class ClientCheckin extends ClientModule {
       this.view = this.createDefaultView();
     }
 
-    this.init();
+    // this.init();
   }
 
   /**
@@ -81,7 +81,7 @@ export default class ClientCheckin extends ClientModule {
     this.send('request');
 
     // Setup listeners for the server's response
-    this.receive('acknowledge', this._positionHandler);
+    this.receive('position', this._positionHandler);
     this.receive('unavailable', this._unavailableHandler);
   }
 
@@ -114,6 +114,7 @@ export default class ClientCheckin extends ClientModule {
   }
 
   _positionHandler(index, label, coordinates) {
+    console.log(index, label, coordinates);
     this.index = index;
     this.label = label;
     client.coordinates = coordinates;
