@@ -40,8 +40,8 @@ class Sequential extends Promised {
     let mod = null;
     let promise = null;
 
-    for(let next of this.modules) {
-      if(mod !== null)
+    for (let next of this.modules) {
+      if (mod !== null)
         promise.then(() => next.launch());
 
       mod = next;
@@ -65,16 +65,38 @@ class Parallel extends Promised {
 
     this.modules = modules;
 
-    // set z-index of parallel modules
-    let zIndex = modules.length;
-    for(let mod of modules) {
-      mod.zIndex = zIndex;
-      zIndex--;
+    // // set z-index of parallel modules
+    // let zIndex = modules.length;
+    // for(let mod of modules) {
+    //   mod.zIndex = zIndex;
+    //   zIndex--;
+    // }
+  }
+
+  showNext(fromIndex) {
+    const length = this.modules.length;
+
+    for (let i = 0; i < length; i++) {
+      const mod = this.modules[i];
+      const isVisible = mod.show();
+      if (isVisible) { break; }
     }
   }
 
   createPromise() {
-    return Promise.all(this.modules.map((mod) => mod.createPromise()));
+    const promises = [];
+
+    this.modules.forEach((mod, index) => {
+      const promise = mod.createPromise();
+      // hide all modules except the first one
+      mod.hide();
+      promise.then(() => { this.showNext(); });
+      promises.push(promise);
+    });
+
+    this.showNext();
+
+    return Promise.all(promises);
   }
 
   launch() {
@@ -264,7 +286,8 @@ export default class ClientModule extends Promised {
 
     if (!this._isStarted) {
       if (this.view) {
-        this.$container.appendChild(this.view.render());
+        this.view.render();
+        this.view.appendTo(this.$container);
       }
 
       this._isStarted = true;
@@ -376,6 +399,22 @@ export default class ClientModule extends Promised {
     if (this.view) {
       this.view.$el.style.zIndex = value;
     }
+  }
+
+  show() {
+    if (this.view && !this._isDone) {
+      if (!this.view.isVisible) {
+        this.view.show();
+      }
+
+      return true;
+    }
+
+    return false;
+  }
+
+  hide() {
+    if (this.view && !this._done) { this.view.hide(); }
   }
 
   /**

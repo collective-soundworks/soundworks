@@ -17,11 +17,12 @@ import ClientModule from './ClientModule';
 import Orientation from './Orientation';
 // import Platform from './Platform';
 import Selector from './Selector';
-import Space from './Space';
+// import Space from './Space';
 import Welcome from './Welcome';
 
 import View from './display/View';
 import SegmentedView from './display/SegmentedView';
+import SpaceView from './display/SpaceView';
 // import defaultTemplates from './views/defaultTemplates';
 // import defaultTextContents from './views/defaultTextContents';
 
@@ -45,12 +46,13 @@ export default {
   Orientation,
   // Platform,
   Selector,
-  Space,
+  // Space,
   Welcome,
 
   display: {
     View,
     SegmentedView,
+    SpaceView,
     // defaultTemplates,
     // defaultTextContents,
   }

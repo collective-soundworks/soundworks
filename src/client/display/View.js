@@ -39,6 +39,8 @@ export default class View {
       className: null,
     }, options);
 
+    this._components = {};
+
     /**
      * The container element of the view. Defaults to `<div>`.
      * @type {Element}
@@ -46,6 +48,17 @@ export default class View {
     this.$el = document.createElement(this.options.el);
 
     this.onResize = this.onResize.bind(this);
+  }
+
+  setViewComponent(selector, view) {
+    this._components[selector] = view;
+  }
+
+  _executeViewComponents(method) {
+    for (let selector in this._components) {
+      const view = this._components[selector];
+      view[method]();
+    }
   }
 
   /**
@@ -64,23 +77,63 @@ export default class View {
       classes.forEach(className => this.$el.classList.add(className));
     }
 
+    // if rerender, uninstall events before recreating the DOM
+    this._undelegateEvents();
+
     const html = this.tmpl(this.content);
     this.$el.innerHTML = html;
-
+    // must resize before child component
     this.onRender();
-    this._delegateEvents();
-    // listen viewport orientation
     viewport.addListener('resize', this.onResize);
 
-    return this.$el;
+    for (let selector in this._components) {
+      const view = this._components[selector];
+      const $componentContainer = this.$el.querySelector(selector);
+      view.render();
+      view.appendTo($componentContainer);
+    }
+
+    this._delegateEvents();
   }
 
+  /**
+   * Insert the view (`this.$el`) into the given element. Call `View~onShow` when done.
+   * @param {Element} $parent - The element where the view should be inserted.
+   */
+  appendTo($parent) {
+    this.$parent = $parent;
+    $parent.appendChild(this.$el);
+
+    this._executeViewComponents('onShow');
+    this.onShow();
+  }
+
+  /**
+   * Remove events listeners and remove the view from it's container. Is automatically called in `Module~done`.
+   */
+  remove() {
+    this._executeViewComponents('remove');
+
+    this._undelegateEvents();
+    this.$parent.removeChild(this.$el);
+
+    viewport.removeListener('resize', this.onResize);
+  }
+
+  /**
+   * Hide the view.
+   */
   hide() {
-    this.$el.style.visibility = 'hidden';
+    this.$el.style.display = 'none';
+    this.isVisible = false;
   }
 
+  /**
+   * Show the view.
+   */
   show() {
-    this.$el.style.visibility = 'visible';
+    this.$el.style.display = 'block';
+    this.isVisible = true;
   }
 
   /**
@@ -89,13 +142,9 @@ export default class View {
   onRender() {}
 
   /**
-   * Remove events listeners and remove the view from it's container. Is automatically called in `Module~done`.
+   * Entry point for custom behavior when the view is inserted into the DOM.
    */
-  remove() {
-    this._undelegateEvents();
-    viewport.removeListener('resize', this.onResize);
-    this.$el.parentNode.removeChild(this.$el);
-  }
+  onShow() {}
 
   /**
    * Callback for `viewport.resize` event. Maintain `$el` in sync with the viewport.
@@ -121,7 +170,7 @@ export default class View {
   }
 
   _delegateEvents() {
-    this._undelegateEvents();
+    this._executeViewComponents('_delegateEvents');
 
     for (let key in this.events) {
       const [event, selector] = key.split(/ +/);
@@ -137,6 +186,8 @@ export default class View {
   }
 
   _undelegateEvents() {
+    this._executeViewComponents('_undelegateEvents');
+
     for (let key in this.events) {
       const [event, selector] = key.split(/ +/);
       const callback = this.events[key];
