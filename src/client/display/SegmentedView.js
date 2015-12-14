@@ -42,6 +42,7 @@ export default class SegmentedView extends View {
   }
 
   onResize(orientation, width, height) {
+    // console.log(ori)
     super.onResize(orientation, width, height);
 
     for (let sel in this.ratios) {

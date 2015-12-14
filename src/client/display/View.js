@@ -50,6 +50,11 @@ export default class View {
     this.onResize = this.onResize.bind(this);
   }
 
+  /**
+   * Add a compound view inside the current view.
+   * @param {String} selector - A css selector matching an element of the template.
+   * @param {View} view - The view to insert inside the selector.
+   */
   setViewComponent(selector, view) {
     this._components[selector] = view;
   }

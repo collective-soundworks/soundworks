@@ -6,6 +6,18 @@ export default {
   _globals: {
     appName: 'Soundworks',
   },
+  checkin: {
+    wait: '...',
+    labelPrefix: 'Go to',
+    labelPostfix: 'Touch the screen<br class="portrait-only" />when you are ready.',
+    error: 'Sorry, we cannot accept any more connections at the moment, please try again later.',
+  },
+  loader: {
+    loading: 'Loading sounds…',
+  },
+  orientation: {
+    instructions: 'Point the phone exactly in front of you, and touch the screen.',
+  },
   welcome: {
     welcome: 'Welcome to',
     touchScreen: 'Touch the screen to join!',
@@ -14,13 +26,4 @@ export default {
     errorRequireMobile: 'This application is designed for iOS and Android mobile devices.',
     errorDefault: 'Sorry, the application cannot work properly on your device.',
   },
-  loader: {
-    loading: 'Loading sounds…',
-  },
-  checkin: {
-    wait: '...',
-    labelPrefix: 'Go to',
-    labelPostfix: 'Touch the screen<br class="portrait-only" />when you are ready.',
-    error: 'Sorry, we cannot accept any more connections at the moment, please try again later.',
-  }
 };

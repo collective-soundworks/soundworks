@@ -22,6 +22,10 @@ var _ClientModule2 = require('./ClientModule');
 
 var _ClientModule3 = _interopRequireDefault(_ClientModule2);
 
+var _displaySegmentedView = require('./display/SegmentedView');
+
+var _displaySegmentedView2 = _interopRequireDefault(_displaySegmentedView);
+
 /**
  * [client] Calibrate the compass by setting an angle reference.
  *
@@ -43,47 +47,60 @@ var Orientation = (function (_ClientModule) {
    */
 
   function Orientation() {
-    var _this = this;
-
     var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
     _classCallCheck(this, Orientation);
 
-    _get(Object.getPrototypeOf(Orientation.prototype), 'constructor', this).call(this, options.name || 'orientation', true, options.color);
+    _get(Object.getPrototypeOf(Orientation.prototype), 'constructor', this).call(this, options.name || 'orientation', options);
 
-    /**
-     * Value of the `alpha` angle (as in the [`deviceOrientation` HTML5 API](http://www.w3.org/TR/orientation-event/)) when the user touches the screen.
-     * It serves as a calibration / reference of the compass.
-     * @type {Number}
-     */
-    this.angleReference = 0;
-
-    this._angle = 0;
-    this._text = options.text || "Point the phone exactly in front of you, and touch the screen.";
-
-    //TODO: use new input module
+    // @todo - use new input module
     _input2['default'].enableDeviceOrientation();
-    _input2['default'].on('deviceorientation', function (orientationData) {
-      _this._angle = orientationData.alpha;
-    });
+    // bind methods
+    this._onOrientationChange = this._onOrientationChange.bind(this);
+    this._onClick = this._onClick.bind(this);
+    // configure view
+    this.viewCtor = options.viewCtor || _displaySegmentedView2['default'];
+    this.events = { 'click': this._onClick };
+
+    this.init();
   }
 
-  /**
-   * @private
-   */
-
   _createClass(Orientation, [{
+    key: 'init',
+    value: function init() {
+      /**
+       * Value of the `alpha` angle (as in the [`deviceOrientation` HTML5 API](http://www.w3.org/TR/orientation-event/)) when the user touches the screen.
+       * It serves as a calibration / reference of the compass.
+       * @type {Number}
+       */
+      this.angleReference = 0; // @todo - where is this value saved ?
+      this._angle = 0; // @todo - is this really needed ?
+
+      this.view = this.createDefaultView();
+      console.log(this.view);
+    }
+
+    /**
+     * @private
+     */
+  }, {
     key: 'start',
     value: function start() {
-      var _this2 = this;
-
       _get(Object.getPrototypeOf(Orientation.prototype), 'start', this).call(this);
-      this.setCenteredViewContent('<p>' + this._text + '</p>');
-
-      this.view.addEventListener('click', function () {
-        _this2.angleReference = _this2._angle;
-        _this2.done();
-      });
+      _input2['default'].on('deviceorientation', this._onOrientationChange);
+    }
+  }, {
+    key: '_onOrientationChange',
+    value: function _onOrientationChange(orientationData) {
+      this._angle = orientationData.alpha;
+    }
+  }, {
+    key: '_onClick',
+    value: function _onClick() {
+      this.angleReference = this._angle;
+      // stop listening for device orientation when done
+      _input2['default'].removeListener('deviceorientation', this._onOrientationChange);
+      this.done();
     }
   }]);
 
@@ -92,4 +109,4 @@ var Orientation = (function (_ClientModule) {
 
 exports['default'] = Orientation;
 module.exports = exports['default'];
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInNyYy9jbGllbnQvT3JpZW50YXRpb24uanMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7OztxQkFBa0IsU0FBUzs7Ozs2QkFDRixnQkFBZ0I7Ozs7Ozs7Ozs7Ozs7SUFXcEIsV0FBVztZQUFYLFdBQVc7Ozs7Ozs7Ozs7QUFRbkIsV0FSUSxXQUFXLEdBUUo7OztRQUFkLE9BQU8seURBQUcsRUFBRTs7MEJBUkwsV0FBVzs7QUFTNUIsK0JBVGlCLFdBQVcsNkNBU3RCLE9BQU8sQ0FBQyxJQUFJLElBQUksYUFBYSxFQUFFLElBQUksRUFBRSxPQUFPLENBQUMsS0FBSyxFQUFFOzs7Ozs7O0FBTzFELFFBQUksQ0FBQyxjQUFjLEdBQUcsQ0FBQyxDQUFDOztBQUV4QixRQUFJLENBQUMsTUFBTSxHQUFHLENBQUMsQ0FBQztBQUNoQixRQUFJLENBQUMsS0FBSyxHQUFHLE9BQU8sQ0FBQyxJQUFJLElBQUksZ0VBQWdFLENBQUM7OztBQUc5Rix1QkFBTSx1QkFBdUIsRUFBRSxDQUFDO0FBQ2hDLHVCQUFNLEVBQUUsQ0FBQyxtQkFBbUIsRUFBRSxVQUFDLGVBQWUsRUFBSztBQUNqRCxZQUFLLE1BQU0sR0FBRyxlQUFlLENBQUMsS0FBSyxDQUFDO0tBQ3JDLENBQUMsQ0FBQztHQUNKOzs7Ozs7ZUExQmtCLFdBQVc7O1dBK0J6QixpQkFBRzs7O0FBQ04saUNBaENpQixXQUFXLHVDQWdDZDtBQUNkLFVBQUksQ0FBQyxzQkFBc0IsQ0FBQyxLQUFLLEdBQUcsSUFBSSxDQUFDLEtBQUssR0FBRyxNQUFNLENBQUMsQ0FBQzs7QUFFekQsVUFBSSxDQUFDLElBQUksQ0FBQyxnQkFBZ0IsQ0FBQyxPQUFPLEVBQUUsWUFBTTtBQUN4QyxlQUFLLGNBQWMsR0FBRyxPQUFLLE1BQU0sQ0FBQztBQUNsQyxlQUFLLElBQUksRUFBRSxDQUFDO09BQ2IsQ0FBQyxDQUFDO0tBQ0o7OztTQXZDa0IsV0FBVzs7O3FCQUFYLFdBQVciLCJmaWxlIjoic3JjL2NsaWVudC9PcmllbnRhdGlvbi5qcyIsInNvdXJjZXNDb250ZW50IjpbImltcG9ydCBpbnB1dCBmcm9tICcuL2lucHV0JztcbmltcG9ydCBDbGllbnRNb2R1bGUgZnJvbSAnLi9DbGllbnRNb2R1bGUnO1xuXG5cbi8qKlxuICogW2NsaWVudF0gQ2FsaWJyYXRlIHRoZSBjb21wYXNzIGJ5IHNldHRpbmcgYW4gYW5nbGUgcmVmZXJlbmNlLlxuICpcbiAqIFRoZSBtb2R1bGUgYWx3YXlzIGRpc3BsYXlzIGEgdmlldyB3aXRoIGFuIGluc3RydWN0aW9uIHRleHQ6IHRoZSB1c2VyIGlzIGFza2VkIHRvIHRhcCB0aGUgc2NyZWVuIHdoZW4gdGhlIHBob25lIHBvaW50cyBhdCB0aGUgZGVzaXJlZCBkaXJlY3Rpb24gZm9yIHRoZSBjYWxpYnJhdGlvbi5cbiAqIFdoZW4gdGhlIHVzZXIgdGFwcyB0aGUgc2NyZWVuLCB0aGUgY3VycmVudCBjb21wYXNzIHZhbHVlIGlzIHNldCBhcyB0aGUgYW5nbGUgcmVmZXJlbmNlLlxuICpcbiAqIFRoZSBtb2R1bGUgZmluaXNoZXMgaXRzIGluaXRpYWxpemF0aW9uIHdoZW4gdGhlIHBhcnRpY2lwYW50IHRhcHMgdGhlIHNjcmVlbiAoYW5kIHRoZSByZWZlcmFuY2UgYW5nbGUgaXMgc2F2ZWQpLlxuICovXG5leHBvcnQgZGVmYXVsdCBjbGFzcyBPcmllbnRhdGlvbiBleHRlbmRzIENsaWVudE1vZHVsZSB7XG4gIC8qKlxuICAgKiBAcGFyYW0ge09iamVjdH0gW29wdGlvbnM9e31dIE9wdGlvbnMuXG4gICAqIEBwYXJhbSB7U3RyaW5nfSBbb3B0aW9ucy5uYW1lPSdkaWFsb2cnXSBOYW1lIG9mIHRoZSBtb2R1bGUuXG4gICAqIEBwYXJhbSB7U3RyaW5nfSBbb3B0aW9ucy5jb2xvcj0nYmxhY2snXSBCYWNrZ3JvdW5kIGNvbG9yIG9mIHRoZSBgdmlld2AuXG4gICAqIEBwYXJhbSB7U3RyaW5nfSBbb3B0aW9ucy50ZXh0PSdQb2ludCB0aGUgcGhvbmUgZXhhY3RseSBpbiBmcm9udCBvZiB5b3UsIGFuZCB0b3VjaCB0aGUgc2NyZWVuLiddIFRleHQgdG8gYmUgZGlzcGxheWVkIGluIHRoZSBgdmlld2AuXG4gICAqIEB0b2RvIFNvbHZlIHRoZSBzcGFjZSBpbiBkZWZhdWx0IHBhcmFtZXRlciBwcm9ibGVtLlxuICAgKi9cbiAgY29uc3RydWN0b3Iob3B0aW9ucyA9IHt9KSB7XG4gICAgc3VwZXIob3B0aW9ucy5uYW1lIHx8ICdvcmllbnRhdGlvbicsIHRydWUsIG9wdGlvbnMuY29sb3IpO1xuXG4gICAgLyoqXG4gICAgICogVmFsdWUgb2YgdGhlIGBhbHBoYWAgYW5nbGUgKGFzIGluIHRoZSBbYGRldmljZU9yaWVudGF0aW9uYCBIVE1MNSBBUEldKGh0dHA6Ly93d3cudzMub3JnL1RSL29yaWVudGF0aW9uLWV2ZW50LykpIHdoZW4gdGhlIHVzZXIgdG91Y2hlcyB0aGUgc2NyZWVuLlxuICAgICAqIEl0IHNlcnZlcyBhcyBhIGNhbGlicmF0aW9uIC8gcmVmZXJlbmNlIG9mIHRoZSBjb21wYXNzLlxuICAgICAqIEB0eXBlIHtOdW1iZXJ9XG4gICAgICovXG4gICAgdGhpcy5hbmdsZVJlZmVyZW5jZSA9IDA7XG5cbiAgICB0aGlzLl9hbmdsZSA9IDA7XG4gICAgdGhpcy5fdGV4dCA9IG9wdGlvbnMudGV4dCB8fCBcIlBvaW50IHRoZSBwaG9uZSBleGFjdGx5IGluIGZyb250IG9mIHlvdSwgYW5kIHRvdWNoIHRoZSBzY3JlZW4uXCI7XG5cbiAgICAvL1RPRE86IHVzZSBuZXcgaW5wdXQgbW9kdWxlXG4gICAgaW5wdXQuZW5hYmxlRGV2aWNlT3JpZW50YXRpb24oKTtcbiAgICBpbnB1dC5vbignZGV2aWNlb3JpZW50YXRpb24nLCAob3JpZW50YXRpb25EYXRhKSA9PiB7XG4gICAgICB0aGlzLl9hbmdsZSA9IG9yaWVudGF0aW9uRGF0YS5hbHBoYTtcbiAgICB9KTtcbiAgfVxuXG4gIC8qKlxuICAgKiBAcHJpdmF0ZVxuICAgKi9cbiAgc3RhcnQoKSB7XG4gICAgc3VwZXIuc3RhcnQoKTtcbiAgICB0aGlzLnNldENlbnRlcmVkVmlld0NvbnRlbnQoJzxwPicgKyB0aGlzLl90ZXh0ICsgJzwvcD4nKTtcblxuICAgIHRoaXMudmlldy5hZGRFdmVudExpc3RlbmVyKCdjbGljaycsICgpID0+IHtcbiAgICAgIHRoaXMuYW5nbGVSZWZlcmVuY2UgPSB0aGlzLl9hbmdsZTtcbiAgICAgIHRoaXMuZG9uZSgpO1xuICAgIH0pO1xuICB9XG59XG4iXX0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInNyYy9jbGllbnQvT3JpZW50YXRpb24uanMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7OztxQkFBa0IsU0FBUzs7Ozs2QkFDRixnQkFBZ0I7Ozs7b0NBQ2YseUJBQXlCOzs7Ozs7Ozs7Ozs7O0lBVzlCLFdBQVc7WUFBWCxXQUFXOzs7Ozs7Ozs7O0FBUW5CLFdBUlEsV0FBVyxHQVFKO1FBQWQsT0FBTyx5REFBRyxFQUFFOzswQkFSTCxXQUFXOztBQVM1QiwrQkFUaUIsV0FBVyw2Q0FTdEIsT0FBTyxDQUFDLElBQUksSUFBSSxhQUFhLEVBQUUsT0FBTyxFQUFFOzs7QUFHOUMsdUJBQU0sdUJBQXVCLEVBQUUsQ0FBQzs7QUFFaEMsUUFBSSxDQUFDLG9CQUFvQixHQUFHLElBQUksQ0FBQyxvQkFBb0IsQ0FBQyxJQUFJLENBQUMsSUFBSSxDQUFDLENBQUM7QUFDakUsUUFBSSxDQUFDLFFBQVEsR0FBRyxJQUFJLENBQUMsUUFBUSxDQUFDLElBQUksQ0FBQyxJQUFJLENBQUMsQ0FBQzs7QUFFekMsUUFBSSxDQUFDLFFBQVEsR0FBRyxPQUFPLENBQUMsUUFBUSxxQ0FBaUIsQ0FBQztBQUNsRCxRQUFJLENBQUMsTUFBTSxHQUFHLEVBQUUsT0FBTyxFQUFFLElBQUksQ0FBQyxRQUFRLEVBQUUsQ0FBQzs7QUFFekMsUUFBSSxDQUFDLElBQUksRUFBRSxDQUFDO0dBQ2I7O2VBckJrQixXQUFXOztXQXVCMUIsZ0JBQUc7Ozs7OztBQU1MLFVBQUksQ0FBQyxjQUFjLEdBQUcsQ0FBQyxDQUFDO0FBQ3hCLFVBQUksQ0FBQyxNQUFNLEdBQUcsQ0FBQyxDQUFDOztBQUVoQixVQUFJLENBQUMsSUFBSSxHQUFHLElBQUksQ0FBQyxpQkFBaUIsRUFBRSxDQUFDO0FBQ3JDLGFBQU8sQ0FBQyxHQUFHLENBQUMsSUFBSSxDQUFDLElBQUksQ0FBQyxDQUFDO0tBQ3hCOzs7Ozs7O1dBS0ksaUJBQUc7QUFDTixpQ0F4Q2lCLFdBQVcsdUNBd0NkO0FBQ2QseUJBQU0sRUFBRSxDQUFDLG1CQUFtQixFQUFFLElBQUksQ0FBQyxvQkFBb0IsQ0FBQyxDQUFDO0tBQzFEOzs7V0FFbUIsOEJBQUMsZUFBZSxFQUFFO0FBQ3BDLFVBQUksQ0FBQyxNQUFNLEdBQUcsZUFBZSxDQUFDLEtBQUssQ0FBQztLQUNyQzs7O1dBRU8sb0JBQUc7QUFDVCxVQUFJLENBQUMsY0FBYyxHQUFHLElBQUksQ0FBQyxNQUFNLENBQUM7O0FBRWxDLHlCQUFNLGNBQWMsQ0FBQyxtQkFBbUIsRUFBRSxJQUFJLENBQUMsb0JBQW9CLENBQUMsQ0FBQztBQUNyRSxVQUFJLENBQUMsSUFBSSxFQUFFLENBQUM7S0FDYjs7O1NBckRrQixXQUFXOzs7cUJBQVgsV0FBVyIsImZpbGUiOiJzcmMvY2xpZW50L09yaWVudGF0aW9uLmpzIiwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IGlucHV0IGZyb20gJy4vaW5wdXQnO1xuaW1wb3J0IENsaWVudE1vZHVsZSBmcm9tICcuL0NsaWVudE1vZHVsZSc7XG5pbXBvcnQgU2VnbWVudGVkVmlldyBmcm9tICcuL2Rpc3BsYXkvU2VnbWVudGVkVmlldyc7XG5cblxuLyoqXG4gKiBbY2xpZW50XSBDYWxpYnJhdGUgdGhlIGNvbXBhc3MgYnkgc2V0dGluZyBhbiBhbmdsZSByZWZlcmVuY2UuXG4gKlxuICogVGhlIG1vZHVsZSBhbHdheXMgZGlzcGxheXMgYSB2aWV3IHdpdGggYW4gaW5zdHJ1Y3Rpb24gdGV4dDogdGhlIHVzZXIgaXMgYXNrZWQgdG8gdGFwIHRoZSBzY3JlZW4gd2hlbiB0aGUgcGhvbmUgcG9pbnRzIGF0IHRoZSBkZXNpcmVkIGRpcmVjdGlvbiBmb3IgdGhlIGNhbGlicmF0aW9uLlxuICogV2hlbiB0aGUgdXNlciB0YXBzIHRoZSBzY3JlZW4sIHRoZSBjdXJyZW50IGNvbXBhc3MgdmFsdWUgaXMgc2V0IGFzIHRoZSBhbmdsZSByZWZlcmVuY2UuXG4gKlxuICogVGhlIG1vZHVsZSBmaW5pc2hlcyBpdHMgaW5pdGlhbGl6YXRpb24gd2hlbiB0aGUgcGFydGljaXBhbnQgdGFwcyB0aGUgc2NyZWVuIChhbmQgdGhlIHJlZmVyYW5jZSBhbmdsZSBpcyBzYXZlZCkuXG4gKi9cbmV4cG9ydCBkZWZhdWx0IGNsYXNzIE9yaWVudGF0aW9uIGV4dGVuZHMgQ2xpZW50TW9kdWxlIHtcbiAgLyoqXG4gICAqIEBwYXJhbSB7T2JqZWN0fSBbb3B0aW9ucz17fV0gT3B0aW9ucy5cbiAgICogQHBhcmFtIHtTdHJpbmd9IFtvcHRpb25zLm5hbWU9J2RpYWxvZyddIE5hbWUgb2YgdGhlIG1vZHVsZS5cbiAgICogQHBhcmFtIHtTdHJpbmd9IFtvcHRpb25zLmNvbG9yPSdibGFjayddIEJhY2tncm91bmQgY29sb3Igb2YgdGhlIGB2aWV3YC5cbiAgICogQHBhcmFtIHtTdHJpbmd9IFtvcHRpb25zLnRleHQ9J1BvaW50IHRoZSBwaG9uZSBleGFjdGx5IGluIGZyb250IG9mIHlvdSwgYW5kIHRvdWNoIHRoZSBzY3JlZW4uJ10gVGV4dCB0byBiZSBkaXNwbGF5ZWQgaW4gdGhlIGB2aWV3YC5cbiAgICogQHRvZG8gU29sdmUgdGhlIHNwYWNlIGluIGRlZmF1bHQgcGFyYW1ldGVyIHByb2JsZW0uXG4gICAqL1xuICBjb25zdHJ1Y3RvcihvcHRpb25zID0ge30pIHtcbiAgICBzdXBlcihvcHRpb25zLm5hbWUgfHwgJ29yaWVudGF0aW9uJywgb3B0aW9ucyk7XG5cbiAgICAvLyBAdG9kbyAtIHVzZSBuZXcgaW5wdXQgbW9kdWxlXG4gICAgaW5wdXQuZW5hYmxlRGV2aWNlT3JpZW50YXRpb24oKTtcbiAgICAvLyBiaW5kIG1ldGhvZHNcbiAgICB0aGlzLl9vbk9yaWVudGF0aW9uQ2hhbmdlID0gdGhpcy5fb25PcmllbnRhdGlvbkNoYW5nZS5iaW5kKHRoaXMpO1xuICAgIHRoaXMuX29uQ2xpY2sgPSB0aGlzLl9vbkNsaWNrLmJpbmQodGhpcyk7XG4gICAgLy8gY29uZmlndXJlIHZpZXdcbiAgICB0aGlzLnZpZXdDdG9yID0gb3B0aW9ucy52aWV3Q3RvciB8fMKgU2VnbWVudGVkVmlldztcbiAgICB0aGlzLmV2ZW50cyA9IHsgJ2NsaWNrJzogdGhpcy5fb25DbGljayB9O1xuXG4gICAgdGhpcy5pbml0KCk7XG4gIH1cblxuICBpbml0KCkge1xuICAgIC8qKlxuICAgICAqIFZhbHVlIG9mIHRoZSBgYWxwaGFgIGFuZ2xlIChhcyBpbiB0aGUgW2BkZXZpY2VPcmllbnRhdGlvbmAgSFRNTDUgQVBJXShodHRwOi8vd3d3LnczLm9yZy9UUi9vcmllbnRhdGlvbi1ldmVudC8pKSB3aGVuIHRoZSB1c2VyIHRvdWNoZXMgdGhlIHNjcmVlbi5cbiAgICAgKiBJdCBzZXJ2ZXMgYXMgYSBjYWxpYnJhdGlvbiAvIHJlZmVyZW5jZSBvZiB0aGUgY29tcGFzcy5cbiAgICAgKiBAdHlwZSB7TnVtYmVyfVxuICAgICAqL1xuICAgIHRoaXMuYW5nbGVSZWZlcmVuY2UgPSAwOyAvLyBAdG9kbyAtIHdoZXJlIGlzIHRoaXMgdmFsdWUgc2F2ZWQgP1xuICAgIHRoaXMuX2FuZ2xlID0gMDsgLy8gQHRvZG8gLSBpcyB0aGlzIHJlYWxseSBuZWVkZWQgP1xuXG4gICAgdGhpcy52aWV3ID0gdGhpcy5jcmVhdGVEZWZhdWx0VmlldygpO1xuICAgIGNvbnNvbGUubG9nKHRoaXMudmlldyk7XG4gIH1cblxuICAvKipcbiAgICogQHByaXZhdGVcbiAgICovXG4gIHN0YXJ0KCkge1xuICAgIHN1cGVyLnN0YXJ0KCk7XG4gICAgaW5wdXQub24oJ2RldmljZW9yaWVudGF0aW9uJywgdGhpcy5fb25PcmllbnRhdGlvbkNoYW5nZSk7XG4gIH1cblxuICBfb25PcmllbnRhdGlvbkNoYW5nZShvcmllbnRhdGlvbkRhdGEpIHtcbiAgICB0aGlzLl9hbmdsZSA9IG9yaWVudGF0aW9uRGF0YS5hbHBoYTtcbiAgfVxuXG4gIF9vbkNsaWNrKCkge1xuICAgIHRoaXMuYW5nbGVSZWZlcmVuY2UgPSB0aGlzLl9hbmdsZTtcbiAgICAvLyBzdG9wIGxpc3RlbmluZyBmb3IgZGV2aWNlIG9yaWVudGF0aW9uIHdoZW4gZG9uZVxuICAgIGlucHV0LnJlbW92ZUxpc3RlbmVyKCdkZXZpY2VvcmllbnRhdGlvbicsIHRoaXMuX29uT3JpZW50YXRpb25DaGFuZ2UpO1xuICAgIHRoaXMuZG9uZSgpO1xuICB9XG59XG4iXX0=
