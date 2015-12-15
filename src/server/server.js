@@ -26,7 +26,7 @@ const exampleAppConfig = {
     coordinates: undefined, // predefined coordinates on the setup area (optional)
     background: undefined, // URL of a background image fitting the setup area (optional)
   },
-  controlParameters = {
+  controlParameters: {
     tempo: 120, // tempo in BPM
     volume: 0, // master volume in dB
   },
@@ -58,10 +58,10 @@ const defaultFwConfig = {
 const defaultEnvConfig = {
   port: 8000,
   osc: {
-    localAddress: '127.0.0.1',
-    localPort: 57121,
-    remoteAddress: '127.0.0.1',
-    remotePort: 57120,
+    receiveAddress: '127.0.0.1',
+    receivePort: 57121,
+    sendAddress: '127.0.0.1',
+    sendPort: 57120,
   },
   logger: {
     name: 'soundworks',
@@ -103,18 +103,10 @@ export default {
   httpServer: null,
 
   /**
-   * Application configuration information.
+   * Configuration informations.
    * @type {Object}
-   * @private
    */
-  appConfig: {}, // host env config informations (dev / prod)
-
-  /**
-   * Environment configuration information (development / production).
-   * @type {Object}
-   * @private
-   */
-  envConfig: {}, // host env config informations (dev / prod)
+  config: {},
 
   /**
    * OSC object.
@@ -125,6 +117,7 @@ export default {
 
   /**
    * Start the server.
+   * @todo - rewrite doc for this method
    * @param {Object} [appConfig={}] Application configuration options.
    * @attribute {String} [appConfig.publicFolder='./public'] Path to the public folder.
    * @attribute {Object} [appConfig.socketIO={}] socket.io options. The socket.io config object can have the following properties:
@@ -139,18 +132,27 @@ export default {
    * - `remoteAddress:String`: address of the device to send default OSC messages to (defaults to `'127.0.0.1'`);
    * - `remotePort:Number`: port of the device to send default OSC messages to (defaults to `57120`).
    */
-  start(appConfig = {}, envConfig = {}) {
-    // @todo - add 1 level of merging to Object.assign
-    appConfig = Object.assign(defaultAppConfig, appConfig);
-    envConfig = Object.assign(defaultEnvConfig, envConfig);
-    this.appConfig = appConfig;
-    this.envConfig = envConfig;
+  start(...configs) {
+    // merge default configuration objects
+    this.config = Object.assign(this.config, exampleAppConfig, defaultFwConfig, defaultEnvConfig);
+    // merge given configurations objects with defaults
+    configs.forEach((config) => {
+      for (let key in config) {
+        const entry = config[key];
+        if (typeof entry === 'object' && entry !== null) {
+          this.config[key] = this.config[key] || {};
+          this.config[key] = Object.assign(this.config[key], entry);
+        } else {
+          this.config[key] = entry;
+        }
+      }
+    });
 
     // configure express and http server
     const expressApp = new express();
-    expressApp.set('port', process.env.PORT || envConfig.port);
+    expressApp.set('port', process.env.PORT || this.config.port);
     expressApp.set('view engine', 'ejs');
-    expressApp.use(express.static(appConfig.publicFolder));
+    expressApp.use(express.static(this.config.publicFolder));
 
     const httpServer = http.createServer(expressApp);
     httpServer.listen(expressApp.get('port'), function() {
@@ -161,26 +163,24 @@ export default {
     this.expressApp = expressApp;
     this.httpServer = httpServer;
 
-    this.io = new IO(httpServer, appConfig.socketIO);
+    this.io = new IO(httpServer, this.config.socketIO);
     comm.initialize(this.io);
-    logger.initialize(envConfig.logger);
+    logger.initialize(this.config.logger);
 
     // configure OSC
-    if (envConfig.osc) {
+    if (this.config.osc) {
       this.osc = new osc.UDPPort({
         // This is the port we're listening on.
-        // @note rename to receiveAddress / receivePort
-        localAddress: envConfig.osc.localAddress,
-        localPort: envConfig.osc.localPort,
+        localAddress: this.config.osc.receiveAddress,
+        localPort: this.config.osc.receivePort,
         // This is the port we use to send messages.
-        // @note rename to sendAddress / sendPort
-        remoteAddress: envConfig.osc.remoteAddress,
-        remotePort: envConfig.osc.remotePort,
+        remoteAddress: this.config.osc.sendAddress,
+        remotePort: this.config.osc.sendPort,
       });
 
       this.osc.on('ready', () => {
-        const receive = `${envConfig.osc.localAddress}:${envConfig.osc.localPort}`;
-        const send = `${envConfig.osc.remoteAddress}:${envConfig.osc.remotePort}`;
+        const receive = `${this.config.osc.receiveAddress}:${this.config.osc.receivePort}`;
+        const send = `${this.config.osc.sendAddress}:${this.config.osc.sendPort}`;
         console.log(`[OSC over UDP] Receiving on ${receive}`);
         console.log(`[OSC over UDP] Sending on ${send}`);
       });
@@ -208,24 +208,18 @@ export default {
    * @param {...ClientModule} modules Modules to map to that client type.
    */
   map(clientType, ...modules) {
-    const url = (clientType !== this.appConfig.defaultClient) ? `/${clientType}` : '/';
+    const url = (clientType !== this.config.defaultClient) ? `/${clientType}` : '/';
     // cache compiled template
     const tmplPath = path.join(process.cwd(), 'views', clientType + '.ejs');
     const tmplString = fs.readFileSync(tmplPath, { encoding: 'utf8' });
     const tmpl = ejs.compile(tmplString);
 
-    // @todo refactor
-    // write env config into templates
+    // share socket.io config with clients
     this.expressApp.get(url, (req, res) => {
-      const envConfigCopy = Object.assign({}, this.envConfig);
-      // remove logger configuration
-      envConfigCopy.logger = undefined;
-      res.send(tmpl({
-        envConfig: JSON.stringify(envConfigCopy)
-      }));
+      res.send(tmpl({ envConfig: JSON.stringify(this.config.socketIO) }));
     });
 
-    modules.forEach((mod) => { mod.configure(this.appConfig, this.envConfig) })
+    modules.forEach((mod) => { mod.configure(this.config) })
 
     this.io.of(clientType).on('connection', (socket) => {
       const client = new Client(clientType, socket);

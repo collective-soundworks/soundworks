@@ -1,5 +1,6 @@
 import input from './input';
 import ClientModule from './ClientModule';
+import SegmentedView from './display/SegmentedView';
 
 
 /**
@@ -19,23 +20,31 @@ export default class Orientation extends ClientModule {
    * @todo Solve the space in default parameter problem.
    */
   constructor(options = {}) {
-    super(options.name || 'orientation', true, options.color);
+    super(options.name || 'orientation', options);
 
+    // @todo - use new input module
+    input.enableDeviceOrientation();
+    // bind methods
+    this._onOrientationChange = this._onOrientationChange.bind(this);
+    this._onClick = this._onClick.bind(this);
+    // configure view
+    this.viewCtor = options.viewCtor || SegmentedView;
+    this.events = { 'click': this._onClick };
+
+    this.init();
+  }
+
+  init() {
     /**
      * Value of the `alpha` angle (as in the [`deviceOrientation` HTML5 API](http://www.w3.org/TR/orientation-event/)) when the user touches the screen.
      * It serves as a calibration / reference of the compass.
      * @type {Number}
      */
-    this.angleReference = 0;
+    this.angleReference = 0; // @todo - where is this value saved ?
+    this._angle = 0; // @todo - is this really needed ?
 
-    this._angle = 0;
-    this._text = options.text || "Point the phone exactly in front of you, and touch the screen.";
-
-    //TODO: use new input module
-    input.enableDeviceOrientation();
-    input.on('deviceorientation', (orientationData) => {
-      this._angle = orientationData.alpha;
-    });
+    this.view = this.createDefaultView();
+    console.log(this.view);
   }
 
   /**
@@ -43,11 +52,17 @@ export default class Orientation extends ClientModule {
    */
   start() {
     super.start();
-    this.setCenteredViewContent('<p>' + this._text + '</p>');
+    input.on('deviceorientation', this._onOrientationChange);
+  }
 
-    this.view.addEventListener('click', () => {
-      this.angleReference = this._angle;
-      this.done();
-    });
+  _onOrientationChange(orientationData) {
+    this._angle = orientationData.alpha;
+  }
+
+  _onClick() {
+    this.angleReference = this._angle;
+    // stop listening for device orientation when done
+    input.removeListener('deviceorientation', this._onOrientationChange);
+    this.done();
   }
 }

@@ -41,7 +41,7 @@ class Sequential extends Promised {
     let promise = null;
 
     for (let next of this.modules) {
-      if(mod !== null)
+      if (mod !== null)
         promise.then(() => next.launch());
 
       mod = next;
@@ -64,17 +64,32 @@ class Parallel extends Promised {
     super();
 
     this.modules = modules;
+  }
 
-    // set z-index of parallel modules
-    let zIndex = modules.length;
-    for (let mod of modules) {
-      mod.zIndex = zIndex;
-      zIndex--;
+  showNext(fromIndex) {
+    const length = this.modules.length;
+
+    for (let i = 0; i < length; i++) {
+      const mod = this.modules[i];
+      const isVisible = mod.show();
+      if (isVisible) { break; }
     }
   }
 
   createPromise() {
-    return Promise.all(this.modules.map((mod) => mod.createPromise()));
+    const promises = [];
+
+    this.modules.forEach((mod, index) => {
+      const promise = mod.createPromise();
+      // hide all modules except the first one
+      mod.hide();
+      promise.then(() => { this.showNext(); });
+      promises.push(promise);
+    });
+
+    this.showNext();
+
+    return Promise.all(promises);
   }
 
   launch() {
@@ -137,15 +152,27 @@ export default class ClientModule extends Promised {
 
     /**
      * View of the module.
-     * @type {BaseView}
+     * @type {View}
      */
     this.view = null;
 
     /**
-     * Events to bind to the view. (cf. Backbone's syntax)
+     * Events to bind to the view. (cf. Backbone's syntax).
      * @type {Object}
      */
     this.events = {};
+
+    /**
+     * Additionnal options to pass to the view.
+     * @type {Object}
+     */
+    this.viewOptions = options.viewOptions || {};
+
+    /**
+     * Defines a view constructor to be used in createDefaultView
+     * @type {View}
+     */
+    this.viewCtor = options.viewCtor || View;
 
     /** @private */
     this._template = null;
@@ -188,9 +215,8 @@ export default class ClientModule extends Promised {
    */
   get template() {
     const template = this._template || this.templateDefinitions[this.name];
-    if (!template)
-      throw new Error(`No template defined for module "${this.name}"`);
-
+    // if (!template)
+    //   throw new Error(`No template defined for module "${this.name}"`);
     return template;
   }
 
@@ -203,12 +229,12 @@ export default class ClientModule extends Promised {
    * @returns {Object} - The text contents related to the `name` of the current module. The returned object is extended with a pointer to the `_globals` entry of the defined text contents.
    */
   get content() {
-    const texts = this._content || this.contentDefinitions[this.name];
-    if (!texts)
-      throw new Error(`No text contents defined for module "${this.name}"`);
+    const content = this._content || this.contentDefinitions[this.name];
+    if (!content)
+      throw new Error(`No content defined for module "${this.name}"`);
 
-    texts._globals = this.contentDefinitions._globals;
-    return texts;
+    content._globals = this.contentDefinitions._globals;
+    return content;
   }
 
   set content(obj) {
@@ -219,10 +245,8 @@ export default class ClientModule extends Promised {
    * Create a default view from module attributes.
    */
   createDefaultView() {
-    return new View(this.template, this.content, this.events, {
-      id: this.name,
-      className: 'module',
-    });
+    const options = Object.assign({ id: this.name, className: 'module' }, this.viewOptions);
+    return new this.viewCtor(this.template, this.content, this.events, options);
   }
 
   /**
@@ -255,7 +279,8 @@ export default class ClientModule extends Promised {
 
     if (!this._isStarted) {
       if (this.view) {
-        this.$container.appendChild(this.view.render());
+        this.view.render();
+        this.view.appendTo(this.$container);
       }
 
       this._isStarted = true;
@@ -290,6 +315,11 @@ export default class ClientModule extends Promised {
    * @abstract
    */
   reset() {
+    if (this.view) {
+      this.view.remove();
+    }
+
+    // this.init();
     this._isStarted = false;
   }
 
@@ -362,6 +392,22 @@ export default class ClientModule extends Promised {
     if (this.view) {
       this.view.$el.style.zIndex = value;
     }
+  }
+
+  show() {
+    if (this.view && !this._isDone) {
+      if (!this.view.isVisible) {
+        this.view.show();
+      }
+
+      return true;
+    }
+
+    return false;
+  }
+
+  hide() {
+    if (this.view && !this._done) { this.view.hide(); }
   }
 
   /**

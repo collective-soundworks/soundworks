@@ -8,41 +8,73 @@
  * @type {Object}
  */
 export default {
-  welcome: `
-    <div class="centered-content">
-      <% if (error) { %>
-        <p><%= error %></p>
-      <% } else { %>
-        <p><%= welcome %> <b><%= _globals.appName %></b>,</p>
-        <p><%= touchScreen %></p>
-      <% } %>
-    </div>
+  checkin: `
+    <% if (waiting || !label) { %>
+      <div class="section-top"></div>
+      <div class="section-center">
+        <p class="big"><%= waiting || error %></p>
+      </div>
+      <div class="section-bottom"></div>
+    <% } else { %>
+      <div class="section-top">
+        <p class="big"><%= labelPrefix %></p>
+      </div>
+      <div class="section-center">
+        <div class="checkin-label">
+          <p class="huge bold"><%= label %></p></div>
+      </div>
+      <div class="section-bottom">
+        <p class="small"><%= labelPostfix %></p>
+      </div>
+    <% } %>
   `,
 
   loader: `
-    <div class="centered-content soft-blink">
+    <div class="section-top">
       <p><%= loading %></p>
+    </div>
+    <div class="section-center">
       <% if (showProgress) { %>
       <div class="progress-wrap">
         <div class="progress-bar" id="progress-bar"></div>
       </div>
       <% } %>
     </div>
+    <div class="section-bottom"></div>
   `,
 
-  checkin: `
-    <div class="centered-content">
-      <% if (waiting) { %>
-        <p><%= wait %></p>
+  locator: `
+    <div class="section-square"></div>
+    <div class="section-float">
+      <% if (!activateBtn) { %>
+        <p class="small"><%= instructions %></p>
       <% } else { %>
-        <% if (label) { %>
-          <p><%= labelPrefix %></p>
-          <div class="checkin-label circled"><span><%= label %></span></div>
-          <p><small><%= labelPostfix %></small></p>
-        <% } else { %>
-          <p><%= error %></p>
-        <% } %>
+        <button class="btn"><%= send %></button>
       <% } %>
     </div>
+  `,
+
+  welcome: `
+    <div class="section-top">
+      <% if (!error) { %>
+        <p class="big"><%= welcome %> <b><%= _globals.appName %></b>,</p>
+      <% } %>
+    </div>
+    <div class="section-center">
+      <% if (error) { %>
+        <p class="big"><%= error %></p>
+      <% } else { %>
+        <p class="small"><%= touchScreen %></p>
+      <% } %>
+    </div>
+    <div class="section-bottom"></div>
+  `,
+
+  orientation: `
+    <div class="section-top"></div>
+    <div class="section-center">
+      <p><%= instructions %></p>
+    </div>
+    <div class="section-bottom"></div>
   `,
 };

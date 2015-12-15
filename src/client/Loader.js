@@ -1,18 +1,19 @@
 import { SuperLoader } from 'waves-loaders';
 import ClientModule from './ClientModule';
-import View from './display/View';
+import SegmentedView from './display/SegmentedView';
 
 
 /**
  * Default loader view
  */
-class LoaderView extends View {
+class LoaderView extends SegmentedView {
   onRender() {
+    super.onRender();
     this.$progressBar = this.$el.querySelector('#progress-bar');
   }
 
   onProgress(percent) {
-    if (!this.model.showProgress) { return; }
+    if (!this.content.showProgress) { return; }
     this.$progressBar.style.width = `${percent}%`;
   }
 }
@@ -53,12 +54,13 @@ export default class Loader extends ClientModule {
     this._fileProgress = null; // used to track files loading progress
     // this._numFilesLoaded = 0;
 
-    if (options.view instanceof View) {
+    if (options.view) {
       this.view = options.view;
     } else {
       this.content.showProgress = (options.showProgress !== undefined) ?
         !!options.showProgress : true;
 
+      this.viewCtor = options.viewCtor || LoaderView;
       this.view = this.createDefaultView();
     }
   }

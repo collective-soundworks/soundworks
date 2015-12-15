@@ -1,5 +1,5 @@
 import ServerModule from './ServerModule';
-import { getOpt } from  '../utils/helpers';
+import { getOpt } from '../utils/helpers';
 
 /**
  * Assign places among a set of predefined positions (i.e. labels and/or coordinates).
@@ -94,7 +94,7 @@ export default class ServerCheckin extends ServerModule {
       });
 
       return this._availableIndices.splice(0, 1)[0];
-    } else if (this._nextAscendingIndex < this._capacity) {
+    } else if (this._nextAscendingIndex < this.capacity) {
       return this._nextAscendingIndex++;
     }
 
@@ -118,17 +118,19 @@ export default class ServerCheckin extends ServerModule {
 
       if (index >= 0) {
         const setup = this.setup;
+        let label;
+        let coordinates;
 
-        if(setup) {
-          const label = setup.labels ? setup.labels[index] : undefined;
-          const coordinates = setup.coordinates ? setup.coordinates[index] : undefined;
+        if (setup) {
+          label = setup.labels ? setup.labels[index] : undefined;
+          coordinates = setup.coordinates ? setup.coordinates[index] : undefined;
 
           client.modules[this.name].label = label;
           client.coordinates = coordinates;
         }
 
+        console.log(index, label, coordinates);
         this.clients[index] = client;
-
         this.send(client, 'position', index, label, coordinates);
       } else {
         this.send(client, 'unavailable');
