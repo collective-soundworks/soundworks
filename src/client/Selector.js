@@ -40,7 +40,7 @@ export default class Selector extends ClientModule {
    * - `'selected'`: the options is selected.
    */
   constructor(options = {}) {
-    super(options.name || 'selector', !options.view, options.color || 'black');
+    super(options.name || 'selector', options);
 
     /**
      * Labels of the options.

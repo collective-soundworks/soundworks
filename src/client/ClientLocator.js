@@ -33,7 +33,8 @@ export default class ClientLocator extends ClientModule {
     this._onAreaTouchMove = this._onAreaTouchMove.bind(this);
     this._sendCoordinates = this._sendCoordinates.bind(this);
 
-    this.viewCtor = SquaredView;
+    this.spaceCtor = options.spaceCtor || SpaceView;
+    this.viewCtor = options.viewCtor || SquaredView;
     this.init();
   }
 
@@ -67,7 +68,7 @@ export default class ClientLocator extends ClientModule {
    */
   _attachArea(area) {
     this.area = area;
-    this.space = new SpaceView(area);
+    this.space = new this.spaceCtor(area);
 
     this.view.setViewComponent('.section-square', this.space);
     this.view.render('.section-square');
