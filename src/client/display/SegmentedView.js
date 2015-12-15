@@ -11,15 +11,10 @@ const defaultTemplate = `
  * The ratios between the different parts are kept in protrait or landscape orientation.
  */
 export default class SegmentedView extends View {
-  constructor(template, content, events = {}, options = {}) {
+  constructor(template, content = {}, events = {}, options = {}) {
     // fallback on default template if `template = null`
-    template = template === null ? defaultTemplate : template;
-
+    template = !template ? defaultTemplate : template;
     super(template, content, events, options);
-
-    if (this.template === null) {
-      this.template = defaultTemplate;
-    }
 
     /**
      * An object containing selectors defined in the template associated with their vertical ratio, the ratio is applyed in both 'portrait' and 'landscape' orientation.
@@ -42,12 +37,13 @@ export default class SegmentedView extends View {
   }
 
   onResize(orientation, width, height) {
-    // console.log(ori)
     super.onResize(orientation, width, height);
 
     for (let sel in this.ratios) {
       const ratio = this.ratios[sel];
-      this._$sections[sel].style.height = `${ratio * height}px`;
+      const $el = this._$sections[sel];
+
+      $el.style.height = `${ratio * height}px`;
     }
   }
 }

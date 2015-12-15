@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
 import client from './client';
 import ClientModule from './ClientModule';
-import Space from './Space';
+// import Space from './Space';
 
 /**
  * Display strategies for placer
@@ -206,8 +206,8 @@ export default class ClientPlacer extends ClientModule {
     this.send('request', this.mode);
 
     this.receive('setup', (capacity, labels, coordinates, area) => {
-      let numLabels = labels? labels.length: Infinity;
-      let numCoordinates = coordinates? coordinates.length: Infinity;
+      let numLabels = labels ? labels.length : Infinity;
+      let numCoordinates = coordinates ? coordinates.length : Infinity;
       let numPositions = Math.min(numLabels, numCoordinates);
 
       if(numPositions > capacity)

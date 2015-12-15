@@ -43,6 +43,17 @@ export default {
     <div class="section-bottom"></div>
   `,
 
+  locator: `
+    <div class="section-square"></div>
+    <div class="section-float">
+      <% if (!activateBtn) { %>
+        <p class="small"><%= instructions %></p>
+      <% } else { %>
+        <button class="btn"><%= send %></button>
+      <% } %>
+    </div>
+  `,
+
   welcome: `
     <div class="section-top">
       <% if (!error) { %>

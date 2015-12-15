@@ -15,6 +15,10 @@ export default {
   loader: {
     loading: 'Loading sounds…',
   },
+  locator: {
+    instructions: 'Define your position in the area',
+    send: 'Send',
+  },
   orientation: {
     instructions: 'Point the phone exactly in front of you, and touch the screen.',
   },

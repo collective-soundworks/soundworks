@@ -236,12 +236,12 @@ export default class ClientModule extends Promised {
    * @returns {Object} - The text contents related to the `name` of the current module. The returned object is extended with a pointer to the `_globals` entry of the defined text contents.
    */
   get content() {
-    const texts = this._content || this.contentDefinitions[this.name];
-    if (!texts)
-      throw new Error(`No text contents defined for module "${this.name}"`);
+    const content = this._content || this.contentDefinitions[this.name];
+    if (!content)
+      throw new Error(`No content defined for module "${this.name}"`);
 
-    texts._globals = this.contentDefinitions._globals;
-    return texts;
+    content._globals = this.contentDefinitions._globals;
+    return content;
   }
 
   set content(obj) {

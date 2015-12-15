@@ -4,8 +4,9 @@ const template = `<svg id="scene"></svg>`;
 const ns = 'http://www.w3.org/2000/svg';
 
 export default class SpaceView extends View {
-  constructor(area, options) {
-    super(template, {}, {}, { className: 'space' });
+  constructor(area, events = {}, options = {}) {
+    options = Object.assign({ className: 'space' }, options);
+    super(template, {}, events, options);
 
     this.area = area;
     this._renderedPositions = new Map();
@@ -75,7 +76,7 @@ export default class SpaceView extends View {
     }
 
     // display background if any
-    this.$svg.style.backgroundColor = 'red';
+    // this.$svg.style.backgroundColor = 'red';
   }
 
   setPositions(positions) {
@@ -101,7 +102,7 @@ export default class SpaceView extends View {
   }
 
   updatePosition(pos) {
-    const $shape = this._renderedPositions.get(id);
+    const $shape = this._renderedPositions.get(pos.id);
 
     $shape.setAttribute('cx', `${pos.x}`);
     $shape.setAttribute('cy', `${pos.y}`);

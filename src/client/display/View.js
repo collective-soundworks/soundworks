@@ -56,21 +56,37 @@ export default class View {
    * @param {View} view - The view to insert inside the selector.
    */
   setViewComponent(selector, view) {
+    const prevView = this._components[selector];
+    if (prevView instanceof View) { prevView.remove(); }
+
     this._components[selector] = view;
   }
 
-  _executeViewComponents(method) {
+  _executeViewComponentMethod(method) {
     for (let selector in this._components) {
       const view = this._components[selector];
       view[method]();
     }
   }
 
-  /**
-   * Render the view according to the given template and content.
-   * @return {Element}
-   */
-  render() {
+
+  _renderPartial(selector) {
+    const $componentContainer = this.$el.querySelector(selector);
+    const component = this._components[selector];
+    $componentContainer.innerHTML = '';
+
+    if (component) {
+      component.render();
+      component.appendTo($componentContainer);
+    } else {
+      const html = this.tmpl(this.content);
+      const $dummy = document.createElement('div');
+      $dummy.innerHTML = html;
+      $componentContainer.innerHTML = $dummy.querySelector(selector).innerHTML;
+    }
+  }
+
+  _renderAll() {
     const options = this.options;
 
     if (options.id) { this.$el.id = options.id; }
@@ -92,13 +108,22 @@ export default class View {
     viewport.addListener('resize', this.onResize);
 
     for (let selector in this._components) {
-      const view = this._components[selector];
-      const $componentContainer = this.$el.querySelector(selector);
-      view.render();
-      view.appendTo($componentContainer);
+      this._renderPartial(selector);
     }
 
     this._delegateEvents();
+  }
+
+  /**
+   * Render the view according to the given template and content.
+   * @return {Element}
+   */
+  render(selector = null) {
+    if (selector !== null) {
+      this._renderPartial(selector);
+    } else {
+      this._renderAll();
+    }
   }
 
   /**
@@ -109,7 +134,7 @@ export default class View {
     this.$parent = $parent;
     $parent.appendChild(this.$el);
 
-    this._executeViewComponents('onShow');
+    this._executeViewComponentMethod('onShow');
     this.onShow();
   }
 
@@ -117,7 +142,7 @@ export default class View {
    * Remove events listeners and remove the view from it's container. Is automatically called in `Module~done`.
    */
   remove() {
-    this._executeViewComponents('remove');
+    this._executeViewComponentMethod('remove');
 
     this._undelegateEvents();
     this.$parent.removeChild(this.$el);
@@ -175,7 +200,7 @@ export default class View {
   }
 
   _delegateEvents() {
-    this._executeViewComponents('_delegateEvents');
+    this._executeViewComponentMethod('_delegateEvents');
 
     for (let key in this.events) {
       const [event, selector] = key.split(/ +/);
@@ -191,7 +216,7 @@ export default class View {
   }
 
   _undelegateEvents() {
-    this._executeViewComponents('_undelegateEvents');
+    this._executeViewComponentMethod('_undelegateEvents');
 
     for (let key in this.events) {
       const [event, selector] = key.split(/ +/);
