@@ -176,7 +176,7 @@ export default class Selector extends ClientModule {
       this.selected.push(index);
 
       let label = this.labels[index];
-      this.emit('selector:select', index, label);
+      this.emit('select', index, label);
 
       if (this.selected.length === this.maxSelected)
         this.done(); // TODO: beware, might cause problems with the launch thing
@@ -207,7 +207,7 @@ export default class Selector extends ClientModule {
       this.selected.splice(selectedIndex, 1);
 
       let label = this.labels[index];
-      this.emit('selector:unselect', index, label);
+      this.emit('unselect', index, label);
 
       return false;
     }

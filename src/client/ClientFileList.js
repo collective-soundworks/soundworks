@@ -48,7 +48,7 @@ export default class ClientFileList extends ClientModule {
 
     this.receive('files', (files) => {
       this.files = files;
-      this.emit(`${this.name}:files`, files);
+      this.emit('files', files);
       this.done();
     }, this);
   }
