@@ -134,30 +134,30 @@ export default class ClientPlacer extends ClientModule {
     this.selector.resize();
   }
 
-  _getStorageKey() {
-    return `${this.localStorageId}:${this.name}`;
-  }
+  // _getStorageKey() {
+  //   return `${this.localStorageId}:${this.name}`;
+  // }
 
-  _setLocalStorage(position) {
-    // if options.expire add th timestamp to the position object
-    const key = this._getStorageKey();
-    window.localStorage.setItem(key, JSON.stringify(position));
-  }
+  // _setLocalStorage(position) {
+  //   // if options.expire add th timestamp to the position object
+  //   const key = this._getStorageKey();
+  //   window.localStorage.setItem(key, JSON.stringify(position));
+  // }
 
-  _getLocalStorage() {
-    const key = this._getStorageKey();
-    const position = window.localStorage.getItem(key);
+  // _getLocalStorage() {
+  //   const key = this._getStorageKey();
+  //   const position = window.localStorage.getItem(key);
 
-    // check for expires entry
-    // delete if now > expires
-    return JSON.parse(position);
-  }
+  //   // check for expires entry
+  //   // delete if now > expires
+  //   return JSON.parse(position);
+  // }
 
-  _deleteLocalStorage() {
-    const key = this._getStorageKey();
-    window.localStorage.removeItem(key);
-    // window.localStorage.clear(); // remove everything for the domain
-  }
+  // _deleteLocalStorage() {
+  //   const key = this._getStorageKey();
+  //   window.localStorage.removeItem(key);
+  //   // window.localStorage.clear(); // remove everything for the domain
+  // }
 
   _sendPosition(position = null) {
     if (position !== null) {
