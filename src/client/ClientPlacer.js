@@ -63,7 +63,7 @@ export class ListSelector extends EventEmitter {
     this.labels = labels;
     this.coordinates = coordinates;
 
-    for(let i = 0; i < positions.length; i++) {
+    for (let i = 0; i < positions.length; i++) {
       const position = positions[i];
       const option = document.createElement('option');
 
@@ -215,7 +215,7 @@ export default class ClientPlacer extends ClientModule {
 
       let positions = [];
 
-      for(let i = 0; i < numPositions; i++) {
+      for (let i = 0; i < numPositions; i++) {
         let label = labels[i] || (i + 1).toString();
         let coordinates = coordinates[i];
         let position = {

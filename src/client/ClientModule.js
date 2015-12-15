@@ -40,7 +40,7 @@ class Sequential extends Promised {
     let mod = null;
     let promise = null;
 
-    for(let next of this.modules) {
+    for (let next of this.modules) {
       if(mod !== null)
         promise.then(() => next.launch());
 
@@ -67,7 +67,7 @@ class Parallel extends Promised {
 
     // set z-index of parallel modules
     let zIndex = modules.length;
-    for(let mod of modules) {
+    for (let mod of modules) {
       mod.zIndex = zIndex;
       zIndex--;
     }
@@ -78,7 +78,7 @@ class Parallel extends Promised {
   }
 
   launch() {
-    for(let mod of this.modules)
+    for (let mod of this.modules)
       mod.launch();
   }
 }
