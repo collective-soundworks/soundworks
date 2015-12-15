@@ -1,25 +1,27 @@
 import ServerModule from './ServerModule';
+import { EventEmitter } from 'events';
 
 /**
  * @private
  */
 class _ControlEvent extends EventEmitter {
   constructor(control, type, name, label, init = undefined, clientTypes = null) {
+    super();
     this.control = control;
     this.type = type;
     this.name = name;
     this.label = label;
     this.value = init;
-
-    this.listeners = [];
   }
 
   set(val) {
     this.value = value;
   }
 
-  update(val, excludeClient = null) {
-    this.set(val);
+  update(val = undefined, excludeClient = null) {
+    if(val === undefined)
+      this.set(val); // set value
+
     this.emit(this.name, this.value);
 
     for (let clientType of event.clientTypes) {

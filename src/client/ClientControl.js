@@ -6,6 +6,7 @@ import { EventEmitter } from 'events';
  */
 class _ControlEvent extends EventEmitter {
   constructor(control, type, name, label) {
+    super();
     this.control = control;
     this.type = type;
     this.name = name;
@@ -17,14 +18,16 @@ class _ControlEvent extends EventEmitter {
     this.value = value;
   }
 
-  update(val, sendToServer = true) {
-    this.set(val); // set value
+  update(val = undefined, sendToServer = true) {
+    if(val === undefined)
+      this.set(val); // set value
+
     this.emit(this.name, this.value); // call event listeners
 
     if(sendToServer)
-      this.control.send('update', name, val); // send to server
+      this.control.send('update', this.name, this.value); // send to server
 
-    this.control.emit('update', name, val); // call control listeners
+    this.control.emit('update', this.name, this.value); // call control listeners
   }
 }
 
@@ -43,6 +46,16 @@ class _ControlNumber extends _ControlEvent {
   set(val) {
     this.value = Math.min(this.max, Math.max(this.min, val));
   }
+
+  incr() {
+    let steps = Math.floor(this.value / this.step + 0.5);
+    this.value = this.step * (steps + 1);
+  }
+
+  decr() {
+    let steps = Math.floor(this.value / this.step + 0.5);
+    this.value = this.step * (steps - 1);
+  }
 }
 
 class _ControlSelect extends _ControlEvent {
@@ -56,9 +69,19 @@ class _ControlSelect extends _ControlEvent {
     let index = this.options.indexOf(val);
 
     if (index >= 0) {
-      this.value = val;
       this.index = index;
+      this.value = val;
     }
+  }
+
+  incr() {
+    this.index = (this.index + 1) % this.options.length;
+    this.value = this.options[this.index];
+  }
+
+  decr() {
+    this.index = (this.index + this.options.length - 1) % this.options.length;
+    this.value = this.options[this.index];
   }
 }
 
@@ -87,44 +110,46 @@ class _ControlCommand extends _ControlEvent {
  * @private
  */
 class _NumberGui extends EventEmitter {
-  constructor(view) {
+  constructor(view, event) {
+    super();
+    this.event = event;
+
     let box = document.createElement('input');
-    box.setAttribute('id', this.name + '-box');
+    box.setAttribute('id', event.name + '-box');
     box.setAttribute('type', 'number');
-    box.setAttribute('min', this.min);
-    box.setAttribute('max', this.max);
-    box.setAttribute('step', this.step);
+    box.setAttribute('min', event.min);
+    box.setAttribute('max', event.max);
+    box.setAttribute('step', event.step);
+    box.setAttribute('value', event.value);
     box.setAttribute('size', 16);
 
     box.onchange = (() => {
       let val = Number(box.value);
-      this.emit('update', val);
+      this.event.update(val);
     });
 
     this.box = box;
 
     let incrButton = document.createElement('button');
-    incrButton.setAttribute('id', this.name + '-incr');
+    incrButton.setAttribute('id', event.name + '-incr');
     incrButton.setAttribute('width', '0.5em');
     incrButton.innerHTML = '>';
     incrButton.onclick = (() => {
-      let steps = Math.floor(this.value / this.step + 0.5);
-      let val = this.step * (steps + 1);
-      this.emit('update', val);
+      this.event.incr();
+      this.event.update();
     });
 
     let decrButton = document.createElement('button');
-    decrButton.setAttribute('id', this.name + '-descr');
+    decrButton.setAttribute('id', event.name + '-decr');
     decrButton.style.width = '0.5em';
     decrButton.innerHTML = '<';
     decrButton.onclick = (() => {
-      let steps = Math.floor(this.value / this.step + 0.5);
-      let val = this.step * (steps - 1);
-      this.emit('update', val);
+      this.event.decr();
+      this.event.update();
     });
 
     let label = document.createElement('span');
-    label.innerHTML = this.label + ': ';
+    label.innerHTML = event.label + ': ';
 
     let div = document.createElement('div');
     div.appendChild(label);
@@ -145,11 +170,14 @@ class _NumberGui extends EventEmitter {
  * @private
  */
 class _SelectGui extends EventEmitter {
-  constructor(view) {
-    let box = document.createElement('select');
-    box.setAttribute('id', this.name + '-box');
+  constructor(view, event) {
+    super();
+    this.event = event;
 
-    for (let option of this.options) {
+    let box = document.createElement('select');
+    box.setAttribute('id', event.name + '-box');
+
+    for (let option of event.options) {
       let optElem = document.createElement("option");
       optElem.value = option;
       optElem.text = option;
@@ -157,31 +185,31 @@ class _SelectGui extends EventEmitter {
     }
 
     box.onchange = (() => {
-      this.update(box.value);
+      this.event.update(box.value);
     });
 
     this.box = box;
 
     let incrButton = document.createElement('button');
-    incrButton.setAttribute('id', this.name + '-incr');
+    incrButton.setAttribute('id', event.name + '-incr');
     incrButton.setAttribute('width', '0.5em');
     incrButton.innerHTML = '>';
     incrButton.onclick = (() => {
-      this.index = (this.index + 1) % this.options.length;
-      this.emit('update', this.options[this.index]);
+      this.event.incr();
+      this.event.update();
     });
 
     let decrButton = document.createElement('button');
-    decrButton.setAttribute('id', this.name + '-descr');
+    decrButton.setAttribute('id', event.name + '-decr');
     decrButton.style.width = '0.5em';
     decrButton.innerHTML = '<';
     decrButton.onclick = (() => {
-      this.index = (this.index + this.options.length - 1) % this.options.length;
-      this.emit('update', this.options[this.index]);
+      this.event.decr();
+      this.event.update();
     });
 
     let label = document.createElement('span');
-    label.innerHTML = this.label + ': ';
+    label.innerHTML = event.label + ': ';
 
     let div = document.createElement('div');
     div.appendChild(label);
@@ -202,12 +230,15 @@ class _SelectGui extends EventEmitter {
  * @private
  */
 class _InfoGui extends EventEmitter {
-  constructor(view) {
+  constructor(view, event) {
+    super();
+    this.event = event;
+
     let box = document.createElement('span');
-    box.setAttribute('id', this.name + '-box');
+    box.setAttribute('id', event.name + '-box');
 
     let label = document.createElement('span');
-    label.innerHTML = this.label + ': ';
+    label.innerHTML = event.label + ': ';
 
     let div = document.createElement('div');
     div.appendChild(label);
@@ -229,13 +260,16 @@ class _InfoGui extends EventEmitter {
  */
 class _CommandGui extends EventEmitter {
   constructor(view) {
+    super();
+    this.event = event;
+
     let div = document.createElement('div');
     div.setAttribute('id', this.name + '-btn');
     div.classList.add('command');
     div.innerHTML = this.label;
 
     div.onclick = (() => {
-      this.emit('update');
+      this.event.update();
     });
 
     view.appendChild(div);
@@ -355,48 +389,48 @@ export default class ClientControl extends ClientModule {
     }
   }
 
-  _createEvent(event) {
+  _createEvent(init) {
     let event = null;
 
-    switch (event.type) {
+    switch (init.type) {
       case 'number':
-        event = new _ControlNumber(this, event.name, event.label, event.min, event.max, event.step, event.value);
+        event = new _ControlNumber(this, init.name, init.label, init.min, init.max, init.step, init.value);
         break;
 
       case 'select':
-        event = new _ControlSelect(this, event.name, event.label, event.options, event.value);
+        event = new _ControlSelect(this, init.name, init.label, init.options, init.value);
         break;
 
       case 'info':
-        event = new _ControlInfo(this, event.name, event.label, event.value);
+        event = new _ControlInfo(this, init.name, init.label, init.value);
         break;
 
       case 'command':
-        event = new _ControlCommand(this, event.name, event.label);
+        event = new _ControlCommand(this, init.name, init.label);
         break;
     }
 
     return event;
   }
 
-  _createGui(view, type) {
+  _createGui(view, event) {
     let gui = null;
 
-    switch (type) {
+    switch (event.type) {
       case 'number':
-        gui = new _NumberGui(view);
+        gui = new _NumberGui(view, event);
         break;
 
       case 'select':
-        gui = new _SelectGui(view);
+        gui = new _SelectGui(view, event);
         break;
 
       case 'info':
-        gui = new _InfoGui(view);
+        gui = new _InfoGui(view, event);
         break;
 
       case 'command':
-        gui = new _CommandGui(view);
+        gui = new _CommandGui(view, event);
         break;
     }
 
@@ -427,7 +461,7 @@ export default class ClientControl extends ClientModule {
         this.events[key] = event;
 
         if(view)
-          this._createGui(view, event.type);
+          this._createGui(view, event);
       }
 
       if (!view)
