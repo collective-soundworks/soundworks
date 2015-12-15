@@ -1,5 +1,96 @@
 import ServerModule from './ServerModule';
 
+/**
+ * @private
+ */
+class _ControlEvent extends EventEmitter {
+  constructor(control, type, name, label, init = undefined, clientTypes = null) {
+    this.control = control;
+    this.type = type;
+    this.name = name;
+    this.label = label;
+    this.value = init;
+
+    this.listeners = [];
+  }
+
+  set(val) {
+    this.value = value;
+  }
+
+  update(val, excludeClient = null) {
+    this.set(val);
+    this.emit(this.name, this.value);
+
+    for (let clientType of event.clientTypes) {
+      if(excludeClient && clientType === excludeClient.type)
+        this.control.sendPeers(excludeClient, 'update', this.name, this.value);
+      else
+        this.control.broadcast(event.clientTypes, 'update', this.name, this.value);
+    }
+
+    this.emit(this.name, this.value)
+  }
+}
+
+/**
+ * @private
+ */
+class _ControlNumber extends _ControlEvent {
+  constructor(control, name, label, min, max, step, init, clientTypes = null) {
+    super(control, 'number', name, label, init, clientTypes);
+
+    this.min = min;
+    this.max = max;
+    this.step = step;
+  }
+
+  set(val) {
+    this.value = Math.min(this.max, Math.max(this.min, val));
+  }
+}
+
+/**
+ * @private
+ */
+class _ControlSelect extends _ControlEvent {
+  constructor(control, name, label, options, init, clientTypes = null) {
+    super(control, 'select', name, label, init, clientTypes);
+
+    this.options = options;
+  }
+
+  set(val) {
+    let index = this.options.indexOf(val);
+
+    if (index >= 0) {
+      this.value = val;
+      this.index = index;
+    }
+  }
+}
+
+/**
+ * @private
+ */
+class _ControlInfo extends _ControlEvent {
+  constructor(control, name, label, init, clientTypes = null) {
+    super(control, 'info', name, label, init, clientTypes);
+  }
+
+  set(val) {
+    this.value = val;
+  }
+}
+
+/**
+ * @private
+ */
+class _ControlCommand extends _ControlEvent {
+  constructor(control, name, label, clientTypes = null) {
+    super(control, 'command', name, label, undefined, clientTypes);
+  }
+}
 
 /**
  * [server] Manage the global `parameters`, `infos`, and `commands` across the whole scenario.
@@ -75,16 +166,7 @@ export default class ServerControl extends ServerModule {
    * @param {String[]} [clientTypes=null] Array of the client types to send the parameter to. If not set, the parameter is sent to all the client types.
    */
   addNumber(name, label, min, max, step, init, clientTypes = null) {
-    this.events[name] = {
-      type: 'number',
-      name: name,
-      label: label,
-      min: min,
-      max: max,
-      step: step,
-      value: init,
-      clientTypes: clientTypes
-    };
+    this.events[name] = new _ControlNumber(this, name, label, min, max, step, init, clientTypes);
   }
 
   /**
@@ -96,14 +178,7 @@ export default class ServerControl extends ServerModule {
    * @param {String[]} [clientTypes=null] Array of the client types to send the parameter to. If not set, the parameter is sent to all the client types.
    */
   addSelect(name, label, options, init, clientTypes = null) {
-    this.events[name] = {
-      type: 'select',
-      name: name,
-      label: label,
-      options: options,
-      value: init,
-      clientTypes: clientTypes
-    };
+    this.events[name] = new _ControlSelect(this, name, label, options, init, clientTypes);
   }
 
   /**
@@ -114,13 +189,7 @@ export default class ServerControl extends ServerModule {
    * @param {String[]} [clientTypes=null] Array of the client types to send the parameter to. If not set, the parameter is sent to all the client types.
    */
   addInfo(name, label, init, clientTypes = null) {
-    this.events[name] = {
-      type: 'info',
-      name: name,
-      label: label,
-      value: init,
-      clientTypes: clientTypes
-    };
+    this.events[name] = new _ControlInfo(this, name, label, init, clientTypes);
   }
 
   /**
@@ -130,37 +199,35 @@ export default class ServerControl extends ServerModule {
    * @param {String[]} [clientTypes=null] Array of the client types to send the parameter to. If not set, the parameter is sent to all the client types.
    */
   addCommand(name, label, clientTypes = null) {
-    this.events[name] = {
-      type: 'command',
-      name: name,
-      label: label,
-      value: undefined,
-      clientTypes: clientTypes
-    };
-  }
-
-  _broadcastEvent(event) {
-    let clientTypes = event.clientTypes || null;
-
-    // propagate parameter to clients
-    this.broadcast(clientTypes, 'event', event.name, event.value);
-    this.emit(`${this.name}:event`, event.name, event.value);
+    this.events[name] = new _ControlCommand(this, name, label, undefined, clientTypes);
   }
 
   /**
-   * Sends an event to the clients.
-   * @param {String} name Name of the event to send.
-   * @emits 'control:event'
+   * Add listener to an event (i.e. parameter, info or command).
+   * @param {String} name Name of the event.
+   * @param {Function} listener Listener callback.
    */
-  send(name) {
-    console.dir(name);
-    let event = this.events[name];
+  addEventListener(name, listener) {
+    const event = this.events[name];
 
-    if (event) {
-      this._broadcastEvent(event);
-    } else {
-      console.log('server control: send unknown event "' + name + '"');
-    }
+    if (event)
+      event.addListener(listener);
+    else
+      console.log('unknown control event "' + name + '"');
+  }
+
+  /**
+   * Remove listener from an event (i.e. parameter, info or command).
+   * @param {String} name Name of the event.
+   * @param {Function} listener Listener callback.
+   */
+  removeEventListener(name, listener) {
+    const event = this.events[name];
+
+    if (event)
+      event.removeListener(listener);
+    else
+      console.log('unknown control event "' + name + '"');
   }
 
   /**
@@ -168,14 +235,13 @@ export default class ServerControl extends ServerModule {
    * @param {String} name Name of the parameter to update.
    * @param {(String|Number|Boolean)} value New value of the parameter.
    */
-  update(name, value) {
+  update(name, value, excludeClient = null) {
     let event = this.events[name];
 
     if (event) {
-      event.value = value;
-      this._broadcastEvent(event);
+      event.update(value, excludeClient);
     } else {
-      console.log('server control: update unknown event "' + name + '"');
+      console.log('unknown control event "' + name + '"');
     }
   }
 
@@ -191,8 +257,8 @@ export default class ServerControl extends ServerModule {
     });
 
     // listen to control parameters
-    this.receive(client, 'event', (name, value) => {
-      this.update(name, value);
+    this.receive(client, 'update', (name, value) => {
+      this.update(name, value, client); // update, but exclude client from broadcasting to clients
     });
   }
 }
