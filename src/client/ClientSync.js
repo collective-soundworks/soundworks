@@ -2,6 +2,7 @@ import { audioContext } from 'waves-audio';
 import SyncClient from 'sync/client';
 import client from './client';
 import ClientModule from './ClientModule';
+import SegmentedView from './display/SegmentedView';
 
 /**
  * [client] Synchronize the local clock on a master clock shared by the server and the clients.
@@ -35,12 +36,15 @@ export default class ClientSync extends ClientModule {
    * @param {String} [options.color='black'] Background color of the `view`.
    */
   constructor(options = {}) {
-    super(options.name || 'sync', true, options.color || 'black');
+    super(options.name || 'sync', options);
 
-    this._ready = false;
     this._sync = new SyncClient(() => audioContext.currentTime);
+    this.viewCtor = SegmentedView || options.viewCtor;
+  }
 
-    this.setCenteredViewContent('<p class="soft-blink">Clock syncing, stand by&hellip;</p>');
+  init() {
+    this._ready = false;
+    this.view = this.createDefaultView();
   }
 
   /**

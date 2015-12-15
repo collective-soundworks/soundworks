@@ -22,6 +22,9 @@ export default {
   orientation: {
     instructions: 'Point the phone exactly in front of you, and touch the screen.',
   },
+  sync: {
+    wait: `Clock syncing, stand by&hellip;`,
+  }
   welcome: {
     welcome: 'Welcome to',
     touchScreen: 'Touch the screen to join!',

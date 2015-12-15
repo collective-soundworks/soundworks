@@ -62,12 +62,13 @@ export default {
     <div class="section-bottom"></div>
   `,
 
-  selector: `
-    <div class="module">
-      <% btns.forEach((btn) => { %>
-        <button class="btn"><%= btn.label %></button>
-      <% }); %>
-    </div>`,
+  sync: `
+    <div class="section-top"></div>
+    <div class="section-center">
+      <p class="soft-blink"><%= wait %></p>
+    </div>
+    <div class="section-bottom"></div>
+  `,
 
   welcome: `
     <div class="section-top">
