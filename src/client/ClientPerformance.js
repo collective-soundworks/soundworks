@@ -27,7 +27,7 @@ export default class ClientPerformance extends ClientModule {
    */
   start() {
     super.start();
-    this.send('start')
+    this.send('start');
   }
 
   /**
