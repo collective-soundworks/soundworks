@@ -1,4 +1,5 @@
 import ServerModule from './ServerModule';
+import { getOpt } from '../utils/helpers';
 
 const maxCapacity = 9999;
 
@@ -20,7 +21,7 @@ export default class ServerPlacer extends ServerModule {
    * @param {Array[]} [options.setup.coordinates] List of predefined coordinates given as an array `[x:Number, y:Number]`.
    * @param {Number} [options.capacity=Infinity] Maximum number of places (may limit or be limited by the number of labels and/or coordinates defined by the setup).
    */
-  constructor(options) {
+  constructor(options = {}) {
     super(options.name || 'placer');
 
     /**
@@ -63,16 +64,16 @@ export default class ServerPlacer extends ServerModule {
     super.connect(client);
 
     this.receive(client, 'request', (mode) => {
+      const capacity = this.capacity;
+      const setup = this.setup;
       let area = undefined;
       let labels = undefined;
-      let coordinates = null;
-      let capacity = this.capacity;
-      let setup = this.setup;
+      let coordinates = undefined;
 
-      if(setup) {
+      if (setup) {
         labels = setup.labels;
 
-        if(mode === 'graphic') {
+        if (mode === 'graphic') {
           coordinates = setup.coordinates;
 
           area = {

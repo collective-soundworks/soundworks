@@ -10,13 +10,27 @@ export default class SpaceView extends View {
    * @param {Object} area - The area to represent, should be defined by a `width`, an `height` and an optionnal background.
    * @param {Object} events - The events to attach to the view.
    * @param {Object} options - @todo
+   * @param {Object} [options.isSubView=false] - Don't automatically position the view inside it's container (is needed when inserted in a module with css flex behavior).
+   * @todo - `options.isSubView` should be removed and handled through css flex.
    */
   constructor(area, events = {}, options = {}) {
     options = Object.assign({ className: 'space' }, options);
     super(template, {}, events, options);
 
+    /**
+     * The area to display.
+     * @type {Object}
+     */
     this.area = area;
+
+    /**
+     * Expose a Map of the $shapes and their relative position object.
+     * @type {Map}
+     */
+    this.shapePositionMap = new Map();
+
     this._renderedPositions = new Map();
+    this._isSubView = options.isSubView || false;
   }
 
   /**
@@ -24,9 +38,6 @@ export default class SpaceView extends View {
    * @private
    */
   onRender() {
-    this.$el.style.width = '100%';
-    this.$el.style.height = '100%';
-
     this.$svg = this.$el.querySelector('#scene');
   }
 
@@ -43,6 +54,10 @@ export default class SpaceView extends View {
    * @private
    */
   onResize(orientation, width, height) {
+    super.onResize(orientation, width, height);
+    // this.$el.style.width = '100%';
+    // this.$el.style.height = '100%';
+
     this._setArea();
   }
 
@@ -58,6 +73,7 @@ export default class SpaceView extends View {
     const $shape = document.createElementNS(ns, 'circle');
     $shape.classList.add('position');
 
+    $shape.setAttribute('data-id', pos.id);
     $shape.setAttribute('cx', `${pos.x}`);
     $shape.setAttribute('cy', `${pos.y}`);
     $shape.setAttribute('r', pos.radius || 0.3); // radius is relative to area size
@@ -74,13 +90,14 @@ export default class SpaceView extends View {
     if (!this.$parent) { return; }
 
     const area = this.area;
-    // use `this.el` size instead of `this.$parent` size
+    // use `this.$el` size instead of `this.$parent` size to ignore parent padding
     const boundingRect = this.$el.getBoundingClientRect();
     const containerWidth = boundingRect.width;
     const containerHeight = boundingRect.height;
 
+
     const ratio = (() => {
-      return (area.width > area.height) ?
+      return (containerWidth < containerHeight) ?
         containerWidth / area.width :
         containerHeight / area.height;
     })();
@@ -95,13 +112,9 @@ export default class SpaceView extends View {
     this.$svg.style.position = 'relative';
 
     // be consistant with module flex css
-    const test = this.$svg.getBoundingClientRect();
-
-    if (test.left === 0) {
+    // const test = this.$svg.getBoundingClientRect();
+    if (!this._isSubView) {
       this.$svg.style.left = `${(containerWidth - svgWidth) / 2}px`;
-    }
-
-    if (test.top === 0) {
       this.$svg.style.top = `${(containerHeight - svgHeight) / 2}px`;
     }
 
@@ -146,9 +159,11 @@ export default class SpaceView extends View {
    * @param {Object} pos - The new position to render.
    */
   addPosition(pos) {
-    const $shape = this.renderPosition(pos)
+    const $shape = this.renderPosition(pos);
     this.$svg.appendChild($shape);
     this._renderedPositions.set(pos.id, $shape);
+    // map for easier retrieving of the position
+    this.shapePositionMap.set($shape, pos);
   }
 
   /**
@@ -171,5 +186,7 @@ export default class SpaceView extends View {
     const $shape = this._renderedPositions.get(id);
     this.$svg.removechild($shape);
     this._renderedPositions.delete(id);
+    // map for easier retrieving of the position
+    this.shapePositionMap.delete($shape);
   }
 }

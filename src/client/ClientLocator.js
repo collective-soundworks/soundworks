@@ -68,7 +68,7 @@ export default class ClientLocator extends ClientModule {
    */
   _attachArea(area) {
     this.area = area;
-    this.space = new this.spaceCtor(area);
+    this.space = new this.spaceCtor(area, {}, { isSubView: true });
     // @todo - find a way to remove these hardcoded selectors
     this.view.setViewComponent('.section-square', this.space);
     this.view.render('.section-square');

@@ -1,4 +1,3 @@
-
 const namespace = 'soundworks';
 
 export default localStorage {
