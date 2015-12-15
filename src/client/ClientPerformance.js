@@ -1,6 +1,5 @@
 import ClientModule from './ClientModule';
 
-
 /**
  * [client] Base class used to build a performance on the client side.
  *

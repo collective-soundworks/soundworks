@@ -1,4 +1,5 @@
 import ServerModule from './ServerModule';
+import { getOpt } from  '../utils/helpers';
 
 /**
  * Assign places among a set of predefined positions (i.e. labels and/or coordinates).
