@@ -22,6 +22,7 @@ import Welcome from './Welcome';
 
 import View from './display/View';
 import SegmentedView from './display/SegmentedView';
+import SelectorView from './display/SelectorView';
 import SpaceView from './display/SpaceView';
 import SquaredView from './display/SquaredView';
 // import defaultTemplates from './views/defaultTemplates';
@@ -53,6 +54,7 @@ export default {
   display: {
     View,
     SegmentedView,
+    SelectorView,
     SpaceView,
     SquaredView,
     // defaultTemplates,

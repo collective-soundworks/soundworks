@@ -69,7 +69,7 @@ export default class ClientLocator extends ClientModule {
   _attachArea(area) {
     this.area = area;
     this.space = new this.spaceCtor(area);
-
+    // @todo - find a way to remove these hardcoded selectors
     this.view.setViewComponent('.section-square', this.space);
     this.view.render('.section-square');
     // touchSurface on $svg

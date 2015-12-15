@@ -54,6 +54,21 @@ export default {
     </div>
   `,
 
+  orientation: `
+    <div class="section-top"></div>
+    <div class="section-center">
+      <p><%= instructions %></p>
+    </div>
+    <div class="section-bottom"></div>
+  `,
+
+  selector: `
+    <div class="module">
+      <% btns.forEach((btn) => { %>
+        <button class="btn"><%= btn.label %></button>
+      <% }); %>
+    </div>`,
+
   welcome: `
     <div class="section-top">
       <% if (!error) { %>
@@ -66,14 +81,6 @@ export default {
       <% } else { %>
         <p class="small"><%= touchScreen %></p>
       <% } %>
-    </div>
-    <div class="section-bottom"></div>
-  `,
-
-  orientation: `
-    <div class="section-top"></div>
-    <div class="section-center">
-      <p><%= instructions %></p>
     </div>
     <div class="section-bottom"></div>
   `,
