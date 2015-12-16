@@ -2,6 +2,7 @@ import { audioContext } from 'waves-audio';
 import client from './client';
 import input from './input';
 
+import ClientModule from './ClientModule';
 import ClientCalibration from './ClientCalibration';
 import ClientCheckin from './ClientCheckin';
 import ClientControl from './ClientControl';
@@ -13,7 +14,6 @@ import ClientSurvey from './ClientSurvey';
 import ClientSync from './ClientSync';
 
 import Loader from './Loader';
-import ClientModule from './ClientModule';
 import Orientation from './Orientation';
 import Welcome from './Welcome';
 
@@ -26,7 +26,6 @@ import SquaredView from './display/SquaredView';
 import TouchSurface from './display/TouchSurface';
 import defaultTemplates from './display/defaultTemplates';
 import defaultTextContents from './display/defaultTextContents';
-
 
 export default {
   audioContext,
@@ -41,12 +40,10 @@ export default {
   ClientPlacer,
   ClientSurvey,
   ClientSync,
-
   Loader,
   ClientModule,
   Orientation,
   Welcome,
-
   display: {
     View,
     ButtonView,
