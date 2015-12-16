@@ -16,7 +16,7 @@ import Loader from './Loader';
 import ClientModule from './ClientModule';
 import Orientation from './Orientation';
 // import Platform from './Platform';
-import Selector from './Selector';
+// import Selector from './Selector';
 // import Space from './Space';
 import Welcome from './Welcome';
 
@@ -47,7 +47,7 @@ export default {
   ClientModule,
   Orientation,
   // Platform,
-  Selector,
+  // Selector,
   // Space,
   Welcome,
 
