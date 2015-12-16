@@ -11,29 +11,29 @@ export default {
   checkin: `
     <% if (waiting || !label) { %>
       <div class="section-top"></div>
-      <div class="section-center">
+      <div class="section-center flex-center">
         <p class="big"><%= waiting || error %></p>
       </div>
       <div class="section-bottom"></div>
     <% } else { %>
-      <div class="section-top">
+      <div class="section-top flex-middle">
         <p class="big"><%= labelPrefix %></p>
       </div>
-      <div class="section-center">
+      <div class="section-center flex-center">
         <div class="checkin-label">
           <p class="huge bold"><%= label %></p></div>
       </div>
-      <div class="section-bottom">
+      <div class="section-bottom flex-middle">
         <p class="small"><%= labelPostfix %></p>
       </div>
     <% } %>
   `,
 
   loader: `
-    <div class="section-top">
+    <div class="section-top flex-middle">
       <p><%= loading %></p>
     </div>
-    <div class="section-center">
+    <div class="section-center flex-center">
       <% if (showProgress) { %>
       <div class="progress-wrap">
         <div class="progress-bar" id="progress-bar"></div>
@@ -44,8 +44,8 @@ export default {
   `,
 
   locator: `
-    <div class="section-square"></div>
-    <div class="section-float">
+    <div class="section-square flex-middle"></div>
+    <div class="section-float flex-middle">
       <% if (!activateBtn) { %>
         <p class="small"><%= instructions %></p>
       <% } else { %>
@@ -56,33 +56,46 @@ export default {
 
   orientation: `
     <div class="section-top"></div>
-    <div class="section-center">
+    <div class="section-center flex-center">
       <p><%= instructions %></p>
     </div>
     <div class="section-bottom"></div>
   `,
 
+  placer: `
+    <div class="section-square flex-middle"></div>
+    <div class="section-float flex-middle">
+      <% if (mode === 'graphic') { %>
+        <p><%= instructions %></p>
+      <% } else if (mode === 'list') { %>
+        <% if (showBtn) { %>
+          <button class="btn"><%= confirm %></button>
+        <% } %>
+      <% } %>
+    </div>
+  `,
+
   sync: `
     <div class="section-top"></div>
-    <div class="section-center">
+    <div class="section-center flex-center">
       <p class="soft-blink"><%= wait %></p>
     </div>
     <div class="section-bottom"></div>
   `,
 
   welcome: `
-    <div class="section-top">
+    <div class="section-top flex-middle">
       <% if (!error) { %>
         <p class="big"><%= welcome %> <b><%= _globals.appName %></b>,</p>
       <% } %>
     </div>
-    <div class="section-center">
+    <div class="section-center flex-center">
       <% if (error) { %>
         <p class="big"><%= error %></p>
       <% } else { %>
         <p class="small"><%= touchScreen %></p>
       <% } %>
     </div>
-    <div class="section-bottom"></div>
+    <div class="section-bottom flex-middle"></div>
   `,
 };

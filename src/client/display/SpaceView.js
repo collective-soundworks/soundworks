@@ -55,8 +55,8 @@ export default class SpaceView extends View {
    */
   onResize(orientation, width, height) {
     super.onResize(orientation, width, height);
-    // this.$el.style.width = '100%';
-    // this.$el.style.height = '100%';
+    this.$el.style.width = '100%';
+    this.$el.style.height = '100%';
 
     this._setArea();
   }
@@ -110,13 +110,6 @@ export default class SpaceView extends View {
     this.$svg.setAttribute('viewBox', `0 0 ${area.width} ${area.height}`);
     // center the svg into the parent
     this.$svg.style.position = 'relative';
-
-    // be consistant with module flex css
-    // const test = this.$svg.getBoundingClientRect();
-    if (!this._isSubView) {
-      this.$svg.style.left = `${(containerWidth - svgWidth) / 2}px`;
-      this.$svg.style.top = `${(containerHeight - svgHeight) / 2}px`;
-    }
 
     // display background if any
     if (area.background) {

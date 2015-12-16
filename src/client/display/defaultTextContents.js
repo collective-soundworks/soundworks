@@ -22,6 +22,10 @@ export default {
   orientation: {
     instructions: 'Point the phone exactly in front of you, and touch the screen.',
   },
+  placer: {
+    instructions: 'Select your position',
+    confirm: 'ok',
+  },
   sync: {
     wait: `Clock syncing, stand by&hellip;`,
   },

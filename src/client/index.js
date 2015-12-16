@@ -41,7 +41,6 @@ export default {
   ClientModule,
   Orientation,
   Welcome,
-
   display: {
     View,
     SegmentedView,

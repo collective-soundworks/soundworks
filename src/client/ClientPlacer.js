@@ -1,7 +1,10 @@
 import client from './client';
 import ClientModule from './ClientModule';
 import localStorage from './localStorage';
+
 import SpaceView from './display/SpaceView';
+import SquaredView from './display/SquaredView';
+import View from './display/View';
 
 /**
  * Display strategies for placer
@@ -76,6 +79,23 @@ import SpaceView from './display/SpaceView';
 //   }
 // }
 
+const defaultTemplate = `
+  <option class="small"><%= instructions %></option>
+  <% entries.forEach((entry) => { %>
+    <option value="<%= entry.id %>">
+      <%= entry.label %>
+    </option>
+  <% }) %>
+`;
+
+class SelectView extends View {
+  constructor(content, events = {}, options = {}) {
+    options = Object.assign({ el: 'select', className: 'select' }, options);
+    super(defaultTemplate, content, events, options);
+  }
+
+  onResize() {}
+}
 
 /**
  * [client] Allow to select a place within a set of predefined positions (i.e. labels and/or coordinates).
@@ -109,11 +129,13 @@ export default class ClientPlacer extends ClientModule {
 
     this._createView = this._createView.bind(this);
     this._onSelect = this._onSelect.bind(this);
+
+    this.init();
   }
 
   init() {
     /**
-     * =Index of the position selected by the user.
+     * Index of the position selected by the user.
      * @type {Number}
      */
     this.index = null;
@@ -125,6 +147,13 @@ export default class ClientPlacer extends ClientModule {
     this.label = null;
 
     client.coordinates = null;
+
+    this.viewCtor = SquaredView;
+    this.content = {
+      mode: this.mode,
+      showBtn: false,
+    };
+    this.view = this.createDefaultView();
   }
 
   /**
@@ -133,7 +162,6 @@ export default class ClientPlacer extends ClientModule {
    */
   start() {
     super.start();
-
     // check for informations in local storage
     if (this.persist) {
       const position = localStorage.get(this.localStorageNS);
@@ -148,7 +176,7 @@ export default class ClientPlacer extends ClientModule {
     this.send('request', this.mode);
     this.receive('setup', this._createView);
 
-    // allow to reset localStorage
+    // reset position stored in local storage
     this.receive('reset', () => localStorage.delete(this.localStorageNS));
   }
 
@@ -182,15 +210,12 @@ export default class ClientPlacer extends ClientModule {
     const numCoordinates = coordinates ? coordinates.length : Infinity;
     let numPositions = Math.min(numLabels, numCoordinates);
 
-    if (numPositions > capacity) {
-      numPositions = capacity;
-    }
+    if (numPositions > capacity) { numPositions = capacity; }
 
     const positions = [];
 
     for (let i = 0; i < numPositions; i++) {
       const label = labels[i] || (i + 1).toString();
-      const coords = coordinates[i];
 
       // @todo - define if coords should be an array
       // or an object and harmonize with SpaceView, Locator, etc...
@@ -198,9 +223,13 @@ export default class ClientPlacer extends ClientModule {
         id: i,
         index: i,
         label: label,
-        x: coords[0],
-        y: coords[1],
       };
+
+      if (coordinates) {
+        const coords = coordinates[i];
+        position.x = coords[0];
+        position.y = coords[1];
+      }
 
       positions.push(position);
     }
@@ -209,20 +238,32 @@ export default class ClientPlacer extends ClientModule {
     switch (this.mode) {
       case 'graphic':
         // @todo handle instruction and error messages
-        this.view = new SpaceView(area);
-        this.view.render();
-        this.view.setPositions(positions);
-        this.view.installEvents({
+        this.selector = new SpaceView(area, {}, { isSubView: true });
+        this.view.setViewComponent('.section-square', this.selector);
+        this.view.render('.section-square');
+
+        this.selector.setPositions(positions);
+        this.selector.installEvents({
           'click .position': (e) => {
-            const position = this.view.shapePositionMap.get(e.target);
+            const position = this.selector.shapePositionMap.get(e.target);
             this._onSelect(position);
           },
         });
-
-        this.view.appendTo(this.$container);
         break;
       case 'list':
+        this.selector = new SelectView({
+          instructions: this.content.instructions,
+          entries: positions,
+        });
+        this.view.setViewComponent('.section-square', this.selector);
+        this.view.render('.section-square');
 
+        this.selector.installEvents({
+          'click .position': (e) => {
+            const position = this.selector.shapePositionMap.get(e.target);
+            this._onSelect(position);
+          },
+        });
         break;
     }
   }
@@ -233,9 +274,10 @@ export default class ClientPlacer extends ClientModule {
       this._setLocalStorage(position);
     }
 
-    // @todo should handle rejection from the server.
     // send to server
     this._sendPosition(position);
+    // @todo - should handle rejection from the server.
+    // `done()` should be called only on server confirmation / aknowledgement.
     this.done();
   }
 
