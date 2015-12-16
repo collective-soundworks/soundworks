@@ -2,7 +2,7 @@ import ServerModule from './ServerModule';
 import { getOpt } from '../utils/helpers';
 
 /**
- * [server] Assign places among a set of predefined positions (i.e. labels and/or coordinates).
+ * Assign places among a set of predefined positions (i.e. labels and/or coordinates).
  *
  * The module assigns a position to a client upon request of the client-side module.
  *

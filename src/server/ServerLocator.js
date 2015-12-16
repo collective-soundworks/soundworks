@@ -1,8 +1,7 @@
 import ServerModule from './ServerModule';
 
-
 /**
- * [server] Allow to indicate the approximate location of the client on a map.
+ * Allow to indicate the approximate location of the client on a map.
  *
  * (See also {@link src/client/ClientLocator.js~ClientLocator} on the client side.)
  */

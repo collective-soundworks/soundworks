@@ -17,7 +17,7 @@ function checkForExtensions(file, extensions) {
 }
 
 /**
- * [server] Retrieve a list of files on the server in the public folder upon request of the client.
+ * Retrieve a list of files on the server in the public folder upon request of the client.
  *
  * (See also {@link src/client/ClientFileList.js~ClientFileList} on the client side.)
  */

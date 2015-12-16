@@ -24,7 +24,7 @@ export default {
   },
   sync: {
     wait: `Clock syncing, stand by&hellip;`,
-  }
+  },
   welcome: {
     welcome: 'Welcome to',
     touchScreen: 'Touch the screen to join!',

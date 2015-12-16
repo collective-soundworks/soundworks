@@ -24,7 +24,7 @@ function _releaseClientIndex(index) {
 }
 
 /**
- * [server] Client who connects to the server.
+ * Client that connects to the server.
  *
  * Each time a client of type `'clientType'` connects to the server, *Soundworks* creates a new instance of `Client`.
  * An instance of the class is passed to the `connect` and `disconnect` methods of all the server side modules that are mapped to the `'clientType'` clients (see {@link server#map}), as well as to the `enter` and `exit` methods of any {@link src/server/Performance.js~Performance} class mapped to that same client type.

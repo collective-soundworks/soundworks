@@ -7,6 +7,7 @@ import SpaceView from './display/SpaceView';
  * Display strategies for placer
  * @private
  */
+
 // export class ListSelector extends EventEmitter {
 //   constructor(options) {
 //     super();
@@ -75,6 +76,7 @@ import SpaceView from './display/SpaceView';
 //   }
 // }
 
+
 /**
  * [client] Allow to select a place within a set of predefined positions (i.e. labels and/or coordinates).
  *
@@ -111,7 +113,7 @@ export default class ClientPlacer extends ClientModule {
 
   init() {
     /**
-     * Index of the position selected by the user.
+     * =Index of the position selected by the user.
      * @type {Number}
      */
     this.index = null;
@@ -145,6 +147,7 @@ export default class ClientPlacer extends ClientModule {
     // request positions or labels
     this.send('request', this.mode);
     this.receive('setup', this._createView);
+
     // allow to reset localStorage
     this.receive('reset', () => localStorage.delete(this.localStorageNS));
   }

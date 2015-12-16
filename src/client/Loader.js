@@ -81,27 +81,6 @@ export default class Loader extends ClientModule {
     this.done();
   }
 
-  // _loadFile(index, file) {
-  //   const loader = new SuperLoader();
-
-  //   loader
-  //     .load([file])
-  //     .then((buffers) => {
-  //       let buffer = buffers[0];
-
-  //       this.buffers[index] = buffer;
-  //       this.emit('loader:fileLoaded', index, file, buffer);
-
-  //       this._numFilesLoaded++;
-
-  //       if (this._numFilesLoaded >= this.buffers.length) {
-  //         this.emit('loader:allFilesLoaded');
-  //       }
-  //     }, (error) => {
-  //       console.log(error);
-  //     });
-  // }
-
   _load(fileList) {
     const loader = new SuperLoader();
     this._fileProgress = [];
@@ -114,8 +93,7 @@ export default class Loader extends ClientModule {
     loader.load(fileList)
       .then((buffers) => {
         this.buffers = buffers;
-        // this.emit('loader:allFilesLoaded');
-        this.emit('loader:completed')
+        this.emit('completed')
         this.done();
       }, (error) => {
         console.log(error);

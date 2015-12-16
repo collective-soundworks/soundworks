@@ -64,13 +64,6 @@ class Parallel extends Promised {
     super();
 
     this.modules = modules;
-
-    // // set z-index of parallel modules
-    // let zIndex = modules.length;
-    // for(let mod of modules) {
-    //   mod.zIndex = zIndex;
-    //   zIndex--;
-    // }
   }
 
   showNext(fromIndex) {
@@ -100,7 +93,7 @@ class Parallel extends Promised {
   }
 
   launch() {
-    for(let mod of this.modules)
+    for (let mod of this.modules)
       mod.launch();
   }
 }

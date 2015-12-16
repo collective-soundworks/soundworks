@@ -2,9 +2,8 @@ import client from './client';
 import ClientModule from './ClientModule';
 import SegmentedView from './display/SegmentedView';
 
-
 /**
- * [client] Assign places among a set of predefined positions (i.e. labels and/or coordinates).
+ * Assign places among a set of predefined positions (i.e. labels and/or coordinates).
  * The module requests a position to the server and waits for the answer.
  *
  * The module finishes its initialization when it receives a positive answer from the server.

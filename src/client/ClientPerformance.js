@@ -1,6 +1,5 @@
 import ClientModule from './ClientModule';
 
-
 /**
  * [client] Base class used to build a performance on the client side.
  *
@@ -27,7 +26,7 @@ export default class ClientPerformance extends ClientModule {
    */
   start() {
     super.start();
-    this.send('start')
+    this.send('start');
   }
 
   /**

@@ -3,7 +3,7 @@ import ServerModule from './ServerModule';
 
 
 /**
- * [server] Synchronize the local clock on a master clock shared by the server and the clients.
+ * Synchronize the local clock on a master clock shared by the server and the clients.
  *
  * Both the clients and the server can use this master clock as a common time reference.
  * For instance, this allows all the clients to do something exactly at the same time, such as blinking the screen or playing a sound in a synchronized manner.

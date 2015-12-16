@@ -3,7 +3,7 @@ import comm from './comm';
 import { EventEmitter } from 'events';
 
 /**
- * [server] Base class used to create any *Soundworks* module on the server side.
+ * Base class used to create any *Soundworks* module on the server side.
  *
  * While the sequence of user interactions and exchanges between client and server is determined on the client side, the server side modules are ready to receive requests from the corresponding client side modules as soon as a client is connected to the server.
  *

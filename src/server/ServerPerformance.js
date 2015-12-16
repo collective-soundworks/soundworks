@@ -2,7 +2,7 @@ import ServerModule from './ServerModule';
 
 
 /**
- * [server] Base class used to build a performance on the client side.
+ * Base class used to build a performance on the client side.
  *
  * Along with the classic {@link Performance#connect} and {@link Performance#disconnect} methods, the base class has two additional methods:
  * - {@link Performance#enter}: called when the client enters the performance (*i.e.* when the {@link src/client/Performance.js~Performance} on the client side calls its {@link src/client/Performance.js~Performance#start} method);

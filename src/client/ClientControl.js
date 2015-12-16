@@ -1,238 +1,288 @@
 import ClientModule from './ClientModule';
-
-// @todo refactor
+import { EventEmitter } from 'events';
 
 /**
  * @private
  */
-class ControlEvent {
-  constructor(type, parent, name, label) {
+class _ControlEvent extends EventEmitter {
+  constructor(control, type, name, label) {
+    super();
+    this.control = control;
     this.type = type;
     this.name = name;
     this.label = label;
-    this.parent = parent;
     this.value = undefined;
   }
 
   set(val) {
-
+    this.value = value;
   }
 
-  send() {
-    this.parent.send('event', this.name, this.value);
+  update(val = undefined, sendToServer = true) {
+    if(val === undefined)
+      this.set(val); // set value
+
+    this.emit(this.name, this.value); // call event listeners
+
+    if(sendToServer)
+      this.control.send('update', this.name, this.value); // send to server
+
+    this.control.emit('update', this.name, this.value); // call control listeners
   }
 }
 
 /**
  * @private
  */
-class ControlNumber extends ControlEvent {
-  constructor(parent, init, view = null) {
-    super('number', parent, init.name, init.label);
-    this.min = init.min;
-    this.max = init.max;
-    this.step = init.step;
-    this.box = null;
-
-    if (view) {
-      let box = this.box = document.createElement('input');
-      box.setAttribute('id', this.name + '-box');
-      box.setAttribute('type', 'number');
-      box.setAttribute('min', this.min);
-      box.setAttribute('max', this.max);
-      box.setAttribute('step', this.step);
-      box.setAttribute('size', 16);
-
-      box.onchange = (() => {
-        let val = Number(box.value);
-        this.set(val);
-        this.send();
-      });
-
-      let incrButton = document.createElement('button');
-      incrButton.setAttribute('id', this.name + '-incr');
-      incrButton.setAttribute('width', '0.5em');
-      incrButton.innerHTML = '>';
-      incrButton.onclick = (() => {
-        this.incr();
-        this.send();
-      });
-
-      let decrButton = document.createElement('button');
-      decrButton.setAttribute('id', this.name + '-descr');
-      decrButton.style.width = '0.5em';
-      decrButton.innerHTML = '<';
-      decrButton.onclick = (() => {
-        this.decr();
-        this.send();
-      });
-
-      let label = document.createElement('span');
-      label.innerHTML = this.label + ': ';
-
-      let div = document.createElement('div');
-      div.appendChild(label);
-      div.appendChild(decrButton);
-      div.appendChild(box);
-      div.appendChild(incrButton);
-      div.appendChild(document.createElement('br'));
-
-      view.appendChild(div);
-    }
-
-    this.set(init.value);
+class _ControlNumber extends _ControlEvent {
+  constructor(control, name, label, min, max, step, init) {
+    super(control, 'number', name, label);
+    this.min = min;
+    this.max = max;
+    this.step = step;
+    this.set(init);
   }
 
-  set(val, send = false) {
+  set(val) {
     this.value = Math.min(this.max, Math.max(this.min, val));
-
-    if (this.box)
-      this.box.value = val;
   }
 
   incr() {
     let steps = Math.floor(this.value / this.step + 0.5);
-    this.set(this.step * (steps + 1));
+    this.value = this.step * (steps + 1);
   }
 
   decr() {
     let steps = Math.floor(this.value / this.step + 0.5);
-    this.set(this.step * (steps - 1));
+    this.value = this.step * (steps - 1);
   }
 }
 
-class ControlSelect extends ControlEvent {
-  constructor(parent, init, view = null) {
-    super('select', parent, init.name, init.label);
-    this.options = init.options;
-    this.box = null;
-
-    if (view) {
-      let box = this.box = document.createElement('select');
-      box.setAttribute('id', this.name + '-box');
-
-      for (let option of this.options) {
-        let optElem = document.createElement("option");
-        optElem.value = option;
-        optElem.text = option;
-        box.appendChild(optElem);
-      }
-
-      box.onchange = (() => {
-        this.set(box.value);
-        this.send();
-      });
-
-      let incrButton = document.createElement('button');
-      incrButton.setAttribute('id', this.name + '-incr');
-      incrButton.setAttribute('width', '0.5em');
-      incrButton.innerHTML = '>';
-      incrButton.onclick = (() => {
-        this.incr();
-        this.send();
-      });
-
-      let decrButton = document.createElement('button');
-      decrButton.setAttribute('id', this.name + '-descr');
-      decrButton.style.width = '0.5em';
-      decrButton.innerHTML = '<';
-      decrButton.onclick = (() => {
-        this.decr();
-        this.send();
-      });
-
-      let label = document.createElement('span');
-      label.innerHTML = this.label + ': ';
-
-      let div = document.createElement('div');
-      div.appendChild(label);
-      div.appendChild(decrButton);
-      div.appendChild(box);
-      div.appendChild(incrButton);
-      div.appendChild(document.createElement('br'));
-
-      view.appendChild(div);
-    }
-
-    this.set(init.value);
+class _ControlSelect extends _ControlEvent {
+  constructor(control, name, label, options, init) {
+    super(control, 'select', name, label);
+    this.options = options;
+    this.set(init);
   }
 
-  set(val, send = false) {
+  set(val) {
     let index = this.options.indexOf(val);
 
     if (index >= 0) {
-      this.value = val;
       this.index = index;
-
-      if (this.box)
-        this.box.value = val;
+      this.value = val;
     }
   }
 
   incr() {
     this.index = (this.index + 1) % this.options.length;
-    this.set(this.options[this.index]);
+    this.value = this.options[this.index];
   }
 
   decr() {
     this.index = (this.index + this.options.length - 1) % this.options.length;
-    this.set(this.options[this.index]);
+    this.value = this.options[this.index];
   }
 }
 
-class ControlInfo extends ControlEvent {
-  constructor(parent, init, view = null) {
-    super('info', parent, init.name, init.label);
-    this.box = null;
-
-    if (view) {
-      let box = this.box = document.createElement('span');
-      box.setAttribute('id', this.name + '-box');
-
-      let label = document.createElement('span');
-      label.innerHTML = this.label + ': ';
-
-      let div = document.createElement('div');
-      div.appendChild(label);
-      div.appendChild(box);
-      div.appendChild(document.createElement('br'));
-
-      view.appendChild(div);
-    }
-
-    this.set(init.value);
+class _ControlInfo extends _ControlEvent {
+  constructor(control, name, label, init) {
+    super(control, 'info', name, label);
+    this.set(init);
   }
 
   set(val) {
     this.value = val;
-
-    if (this.box)
-      this.box.innerHTML = val;
   }
 }
 
-class ControlCommand extends ControlEvent {
-  constructor(parent, init, view = null) {
-    super('command', parent, init.name, init.label);
+class _ControlCommand extends _ControlEvent {
+  constructor(control, name, label) {
+    super(control, 'command', name, label);
+  }
 
-    if (view) {
-      let div = document.createElement('div');
-      div.setAttribute('id', this.name + '-btn');
-      div.classList.add('command');
-      div.innerHTML = this.label;
-
-      div.onclick = (() => {
-        this.send();
-      });
-
-      view.appendChild(div);
-      view.appendChild(document.createElement('br'));
-    }
+  set(val) {
+    // nothing to set here
   }
 }
 
 /**
- * [client] Manage the global `parameters`, `infos`, and `commands` across the whole scenario.
+ * @private
+ */
+class _NumberGui extends EventEmitter {
+  constructor(view, event) {
+    super();
+    this.event = event;
+
+    let box = document.createElement('input');
+    box.setAttribute('id', event.name + '-box');
+    box.setAttribute('type', 'number');
+    box.setAttribute('min', event.min);
+    box.setAttribute('max', event.max);
+    box.setAttribute('step', event.step);
+    box.setAttribute('value', event.value);
+    box.setAttribute('size', 16);
+
+    box.onchange = (() => {
+      let val = Number(box.value);
+      this.event.update(val);
+    });
+
+    this.box = box;
+
+    let incrButton = document.createElement('button');
+    incrButton.setAttribute('id', event.name + '-incr');
+    incrButton.setAttribute('width', '0.5em');
+    incrButton.innerHTML = '>';
+    incrButton.onclick = (() => {
+      this.event.incr();
+      this.event.update();
+    });
+
+    let decrButton = document.createElement('button');
+    decrButton.setAttribute('id', event.name + '-decr');
+    decrButton.style.width = '0.5em';
+    decrButton.innerHTML = '<';
+    decrButton.onclick = (() => {
+      this.event.decr();
+      this.event.update();
+    });
+
+    let label = document.createElement('span');
+    label.innerHTML = event.label + ': ';
+
+    let div = document.createElement('div');
+    div.appendChild(label);
+    div.appendChild(decrButton);
+    div.appendChild(box);
+    div.appendChild(incrButton);
+    div.appendChild(document.createElement('br'));
+
+    view.appendChild(div);
+  }
+
+  set(val) {
+    this.box.value = val;
+  }
+}
+
+/**
+ * @private
+ */
+class _SelectGui extends EventEmitter {
+  constructor(view, event) {
+    super();
+    this.event = event;
+
+    let box = document.createElement('select');
+    box.setAttribute('id', event.name + '-box');
+
+    for (let option of event.options) {
+      let optElem = document.createElement("option");
+      optElem.value = option;
+      optElem.text = option;
+      box.appendChild(optElem);
+    }
+
+    box.onchange = (() => {
+      this.event.update(box.value);
+    });
+
+    this.box = box;
+
+    let incrButton = document.createElement('button');
+    incrButton.setAttribute('id', event.name + '-incr');
+    incrButton.setAttribute('width', '0.5em');
+    incrButton.innerHTML = '>';
+    incrButton.onclick = (() => {
+      this.event.incr();
+      this.event.update();
+    });
+
+    let decrButton = document.createElement('button');
+    decrButton.setAttribute('id', event.name + '-decr');
+    decrButton.style.width = '0.5em';
+    decrButton.innerHTML = '<';
+    decrButton.onclick = (() => {
+      this.event.decr();
+      this.event.update();
+    });
+
+    let label = document.createElement('span');
+    label.innerHTML = event.label + ': ';
+
+    let div = document.createElement('div');
+    div.appendChild(label);
+    div.appendChild(decrButton);
+    div.appendChild(box);
+    div.appendChild(incrButton);
+    div.appendChild(document.createElement('br'));
+
+    view.appendChild(div);
+  }
+
+  set(val) {
+    this.box.value = val;
+  }
+}
+
+/**
+ * @private
+ */
+class _InfoGui extends EventEmitter {
+  constructor(view, event) {
+    super();
+    this.event = event;
+
+    let box = document.createElement('span');
+    box.setAttribute('id', event.name + '-box');
+
+    let label = document.createElement('span');
+    label.innerHTML = event.label + ': ';
+
+    let div = document.createElement('div');
+    div.appendChild(label);
+    div.appendChild(box);
+    div.appendChild(document.createElement('br'));
+
+    view.appendChild(div);
+
+    this.box = box;
+  }
+
+  set(val) {
+    this.box.innerHTML = val;
+  }
+}
+
+/**
+ * @private
+ */
+class _CommandGui extends EventEmitter {
+  constructor(view) {
+    super();
+    this.event = event;
+
+    let div = document.createElement('div');
+    div.setAttribute('id', this.name + '-btn');
+    div.classList.add('command');
+    div.innerHTML = this.label;
+
+    div.onclick = (() => {
+      this.event.update();
+    });
+
+    view.appendChild(div);
+    view.appendChild(document.createElement('br'));
+  }
+
+  set(val) {
+    // nothing to set here
+  }
+}
+
+/**
+ * Manage the global control `parameters`, `infos`, and `commands` across the whole scenario.
  *
  * The module keeps track of:
  * - `parameters`: values that can be updated by the actions of the clients (*e.g.* the gain of a synth);
@@ -263,7 +313,7 @@ class ControlCommand extends ControlEvent {
  * const control = new ClientControl({ gui: false });
  *
  * // Listen for parameter, infos or command updates
- * control.on('control:event', (name, value) => {
+ * control.on('update', (name, value) => {
  *   switch(name) {
  *     case 'synth:gain':
  *       console.log(`Update the synth gain to value #{value}.`);
@@ -284,7 +334,7 @@ export default class ClientControl extends ClientModule {
    * @param {String} [options.name='sync'] Name of the module.
    * @param {String} [options.color='black'] Background color of the `view`.
    * @param {Boolean} [options.gui=true] Indicates whether to create the graphical user interface to control the parameters or not.
-   * @emits {'control:event'} when the server sends an update. The callback function takes `name:String` and `value:*` as arguments, where `name` is the name of the parameter / info / command, and `value` its new value.
+   * @emits {'update'} when the server sends an update. The callback function takes `name:String` and `value:*` as arguments, where `name` is the name of the parameter / info / command, and `value` its new value.
    */
   constructor(options = {}) {
     super(options.name || 'control', (options.gui === true), options.color);
@@ -297,40 +347,121 @@ export default class ClientControl extends ClientModule {
   }
 
   /**
+   * Adds a listener to a specific event (i.e. parameter, info or command).
+   * @param {String} name Name of the event.
+   * @param {Function} listener Listener callback.
+   */
+  addEventListener(name, listener) {
+    const event = this.events[name];
+
+    if (event)
+      event.addListener(listener);
+    else
+      console.log('unknown control event "' + name + '"');
+  }
+
+  /**
+   * Removes a listener from a specific event (i.e. parameter, info or command).
+   * @param {String} name Name of the event.
+   * @param {Function} listener Listener callback.
+   */
+  removeEventListener(name, listener) {
+    const event = this.events[name];
+
+    if (event)
+      event.removeListener(listener);
+    else
+      console.log('unknown control event "' + name + '"');
+  }
+
+  /**
+   * Updates the value of a parameter.
+   * @param {String} name Name of the parameter to update.
+   * @param {(String|Number|Boolean)} val New value of the parameter.
+   */
+  update(name, val, sendToServer = true) {
+    const event = this.events[name];
+
+    if (event) {
+      event.update(val, sendToServer);
+    } else {
+      console.log('unknown control event "' + name + '"');
+    }
+  }
+
+  _createEvent(init) {
+    let event = null;
+
+    switch (init.type) {
+      case 'number':
+        event = new _ControlNumber(this, init.name, init.label, init.min, init.max, init.step, init.value);
+        break;
+
+      case 'select':
+        event = new _ControlSelect(this, init.name, init.label, init.options, init.value);
+        break;
+
+      case 'info':
+        event = new _ControlInfo(this, init.name, init.label, init.value);
+        break;
+
+      case 'command':
+        event = new _ControlCommand(this, init.name, init.label);
+        break;
+    }
+
+    return event;
+  }
+
+  _createGui(view, event) {
+    let gui = null;
+
+    switch (event.type) {
+      case 'number':
+        gui = new _NumberGui(view, event);
+        break;
+
+      case 'select':
+        gui = new _SelectGui(view, event);
+        break;
+
+      case 'info':
+        gui = new _InfoGui(view, event);
+        break;
+
+      case 'command':
+        gui = new _CommandGui(view, event);
+        break;
+    }
+
+    return gui;
+  }
+
+  /**
    * Starts the module and requests the parameters to the server.
    */
   start() {
     super.start();
 
+    this.send('request');
+
     let view = this._ownsView ? this.view : null;
 
-    this.receive('init', (events) => {
+    this.receive('init', (initEvents) => {
       if (view) {
         let title = document.createElement('h1');
         title.innerHTML = 'Conductor';
         view.appendChild(title);
       }
 
-      for (let key of Object.keys(events)) {
-        let event = events[key];
+      for (let key of Object.keys(initEvents)) {
+        let init = initEvents[key];
 
-        switch (event.type) {
-          case 'number':
-            this.events[key] = new ControlNumber(this, event, view);
-            break;
+        let event = this._createEvent(init);
+        this.events[key] = event;
 
-          case 'select':
-            this.events[key] = new ControlSelect(this, event, view);
-            break;
-
-          case 'info':
-            this.events[key] = new ControlInfo(this, event, view);
-            break;
-
-          case 'command':
-            this.events[key] = new ControlCommand(this, event, view);
-            break;
-        }
+        if(view)
+          this._createGui(view, event);
       }
 
       if (!view)
@@ -338,18 +469,14 @@ export default class ClientControl extends ClientModule {
     });
 
     // listen to events
-    this.receive('event', (name, val) => {
+    this.receive('update', (name, val) => {
       const event = this.events[name];
 
-      if (event) {
-        event.set(val);
-        this.emit(`${this.name}:event`, name, val);
-      }
+      if (event)
+        this.update(name, val, false); // update, but don't send to server
       else
         console.log('client control: received unknown event "' + name + '"');
     });
-
-    super.send('request');
   }
 
   /**
@@ -357,33 +484,6 @@ export default class ClientControl extends ClientModule {
    */
   restart() {
     super.restart();
-    super.send('request');
-  }
-
-  /**
-   * Sends a value or command to the server.
-   * @param {String} name Name of the parameter or command to send.
-   * @todo is this method useful?
-   */
-  // send(name) {
-  //   const event = this.events[name];
-
-  //   if (event) {
-  //     event.send();
-  //   }
-  // }
-
-  /**
-   * Updates the value of a parameter.
-   * @param {String} name Name of the parameter to update.
-   * @param {(String|Number|Boolean)} val New value of the parameter.
-   */
-  update(name, val) {
-    const event = this.events[name];
-
-    if (event) {
-      event.set(val);
-      event.send();
-    }
+    this.send('request');
   }
 }

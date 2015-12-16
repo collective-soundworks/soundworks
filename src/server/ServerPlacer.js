@@ -4,7 +4,7 @@ import { getOpt } from '../utils/helpers';
 const maxCapacity = 9999;
 
 /**
- * [server] Allow to select a place within a set of predefined positions (i.e. labels and/or coordinates).
+ * Allow to select a place within a set of predefined positions (i.e. labels and/or coordinates).
  *
  * (See also {@link src/client/ClientPlacer.js~ClientPlacer} on the client side.)
  */
