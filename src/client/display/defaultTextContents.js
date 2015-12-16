@@ -24,7 +24,7 @@ export default {
   },
   placer: {
     instructions: 'Select your position',
-    confirm: 'ok',
+    send: 'Send',
   },
   sync: {
     wait: `Clock syncing, stand by&hellip;`,

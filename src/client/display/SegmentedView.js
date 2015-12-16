@@ -1,9 +1,9 @@
 import View from './View';
 
 const defaultTemplate = `
-  <div class="section-top"><%= top %></div>
-  <div class="section-center"><%= center %></div>
-  <div class="section-bottom"><%= bottom %></div>
+  <div class="section-top flex-middle"><%= top %></div>
+  <div class="section-center flex-center"><%= center %></div>
+  <div class="section-bottom flex-middle"><%= bottom %></div>
 `;
 
 /**
@@ -18,7 +18,7 @@ export default class SegmentedView extends View {
 
     /**
      * An object containing selectors defined in the template associated with their vertical ratio, the ratio is applyed in both 'portrait' and 'landscape' orientation.
-     * @type {Object<String: Number>}
+     * @type {Object<String:Number>}
      */
     this.ratios = options.ratios || {
       '.section-top': 0.3,

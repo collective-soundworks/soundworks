@@ -2,8 +2,8 @@ import View from './View';
 
 
 const defaultTemplate = `
-  <div class="section-square"></div>
-  <div class="section-float"></div>
+  <div class="section-square flex-middle"></div>
+  <div class="section-float flex-middle"></div>
 `;
 
 export default class SquaredView extends View {
