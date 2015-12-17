@@ -79,7 +79,6 @@ const defaultEnvConfig = {
 /**
  * The `server` object contains the basic methods of the server.
  * For instance, this object allows setting up, configuring and starting the server with the method `start` while the method `map` allows for managing the mapping between different types of clients and their required server modules.
- * Additionally, the method `broadcast` allows to send messages to all connected clients via WebSockets or OSC.
  * @type {Object}
  */
 export default {
