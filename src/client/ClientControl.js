@@ -337,13 +337,19 @@ export default class ClientControl extends ClientModule {
    * @emits {'update'} when the server sends an update. The callback function takes `name:String` and `value:*` as arguments, where `name` is the name of the parameter / info / command, and `value` its new value.
    */
   constructor(options = {}) {
-    super(options.name || 'control', (options.gui === true), options.color);
+    super(options.name || 'control', (options.hasGui === true), options.color);
 
     /**
      * Dictionary of all the parameters and commands.
      * @type {Object}
      */
     this.events = {};
+
+    /**
+     * Flag whether client has control GUI.
+     * @type {Boolean}
+     */
+    this.hasGui = options.hasGui;
   }
 
   /**
@@ -445,20 +451,18 @@ export default class ClientControl extends ClientModule {
 
     this.send('request');
 
-    let view = this._ownsView ? this.view : null;
+    let view = (this.hasGui)? this.$container: null;
 
-    this.receive('init', (initEvents) => {
+    this.receive('init', (data) => {
       if (view) {
         let title = document.createElement('h1');
         title.innerHTML = 'Conductor';
         view.appendChild(title);
       }
 
-      for (let key of Object.keys(initEvents)) {
-        let init = initEvents[key];
-
-        let event = this._createEvent(init);
-        this.events[key] = event;
+      for (let d of data) {
+        let event = this._createEvent(d);
+        this.events[event.name] = event;
 
         if(view)
           this._createGui(view, event);
