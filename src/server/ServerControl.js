@@ -21,16 +21,14 @@ class _ControlEvent extends EventEmitter {
   }
 
   set(val) {
-    this.data.value = value;
+    this.data.value = val;
   }
 
   update(val = undefined, excludeClient = null) {
     let control = this.control;
     let data = this.data;
 
-    if(val === undefined)
-      this.set(val); // set value
-
+    this.set(val); // set value
     this.emit(data.name, data.value); // call event listeners
     control.broadcast(this.clientTypes, excludeClient, 'update', data.name, data.value); // send to clients
     control.emit('update', data.name, data.value); // call control listeners
@@ -44,13 +42,14 @@ class _ControlNumber extends _ControlEvent {
   constructor(control, name, label, min, max, step, init, clientTypes = null) {
     super(control, 'number', name, label, init, clientTypes);
 
-    this.data.min = min;
-    this.data.max = max;
-    this.data.step = step;
+    let data = this.data;
+    data.min = min;
+    data.max = max;
+    data.step = step;
   }
 
   set(val) {
-    this.value = Math.min(this.max, Math.max(this.min, val));
+    this.data.value = Math.min(this.data.max, Math.max(this.data.min, val));
   }
 }
 
@@ -65,11 +64,12 @@ class _ControlSelect extends _ControlEvent {
   }
 
   set(val) {
-    let index = this.options.indexOf(val);
+    let data = this.data;
+    let index = data.options.indexOf(val);
 
     if (index >= 0) {
-      this.data.value = val;
-      this.data.index = index;
+      data.value = val;
+      data.index = index;
     }
   }
 }
@@ -190,7 +190,6 @@ export default class ServerControl extends ServerModule {
    * @param {String[]} [clientTypes=null] Array of the client types to send the parameter to. If not set, the parameter is sent to all the client types.
    */
   addSelect(name, label, options, init, clientTypes = null) {
-    console.log('addSelect', name, label, options, init, clientTypes);
     let event = new _ControlSelect(this, name, label, options, init, clientTypes);
     this.events[name] = event;
     this.data.push(event.data);
@@ -204,7 +203,6 @@ export default class ServerControl extends ServerModule {
    * @param {String[]} [clientTypes=null] Array of the client types to send the parameter to. If not set, the parameter is sent to all the client types.
    */
   addInfo(name, label, init, clientTypes = null) {
-    console.log('addInfo', name, label, init, clientTypes );
     let event = new _ControlInfo(this, name, label, init, clientTypes);
     this.events[name] = event;
     this.data.push(event.data);
