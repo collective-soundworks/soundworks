@@ -129,7 +129,6 @@ export default class ServerCheckin extends ServerModule {
           client.coordinates = coordinates;
         }
 
-        console.log(index, label, coordinates);
         this.clients[index] = client;
         this.send(client, 'position', index, label, coordinates);
       } else {
