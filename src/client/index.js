@@ -17,12 +17,21 @@ import Loader from './Loader';
 import Orientation from './Orientation';
 import Welcome from './Welcome';
 
+// views
 import View from './display/View';
+import ButtonView from './display/ButtonView';
 import SegmentedView from './display/SegmentedView';
-import SelectorView from './display/SelectorView';
+import SelectView from './display/SelectView';
 import SpaceView from './display/SpaceView';
 import SquaredView from './display/SquaredView';
+import TouchSurface from './display/TouchSurface';
+import defaultTemplates from './display/defaultTemplates';
+import defaultTextContents from './display/defaultTextContents';
 
+// utils
+import * as helpers from '../utils/helpers';
+import * as math from '../utils/math';
+import * as setup from '../utils/setup';
 
 export default {
   audioContext,
@@ -43,11 +52,18 @@ export default {
   Welcome,
   display: {
     View,
+    ButtonView,
     SegmentedView,
-    SelectorView,
+    SelectView,
     SpaceView,
     SquaredView,
-    // defaultTemplates,
-    // defaultTextContents,
-  }
+    TouchSurface,
+    defaultTemplates,
+    defaultTextContents,
+  },
+  utils: {
+    helpers,
+    math,
+    setup,
+  },
 };

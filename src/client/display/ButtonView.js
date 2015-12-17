@@ -33,7 +33,7 @@ const defaultTemplate = `
 /**
  * View to display a list of buttons.
  */
-export default class SelectorView extends View {
+export default class ButtonView extends View {
   /**
    * @param {Array<Object>} definitions - An array of definitions for the buttons. Each definitions should contain a `label` and an optionnal `state` entry (valid values for `states` are `'selected'`, `'unselected'` or `'disabled'`).
    * @param {Function} onSelect - The callback to execute when a button is selected.

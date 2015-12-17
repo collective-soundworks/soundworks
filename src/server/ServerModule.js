@@ -105,24 +105,13 @@ export default class ServerModule extends EventEmitter {
   }
 
   /**
-   * Sends a WebSocket message to all the clients belonging to the same `clientType` as `client`. (`client` does not receive a message)
-   * @param {Client} client - The client which peers must receive the message
-   * @param {String} channel - The channel of the message (is automatically namespaced with the module's name: `${this.name}:channel`).
-   * @param {...*} args - Arguments of the message (as many as needed, of any type).
-   */
-  sendPeers(client, channel, ...args) {
-    const namespacedChannel = `${this.name}:${channel}`;
-    comm.sendPeers(client, namespacedChannel, ...args);
-  }
-
-  /**
    * Sends a message to all client of given `clientType` or `clientType`s. If not specified, the message is sent to all clients
    * @param {String|Array} clientType - The `clientType`(s) that must receive the message.
    * @param {String} channel - The channel of the message (is automatically namespaced with the module's name: `${this.name}:channel`).
    * @param {...*} args - Arguments of the message (as many as needed, of any type).
    */
-  broadcast(clientType, channel, ...args) {
+  broadcast(clientType, excludeClient, channel, ...args) {
     const namespacedChannel = `${this.name}:${channel}`;
-    comm.broadcast(clientType, namespacedChannel, ...args);
+    comm.broadcast(clientType, excludeClient, namespacedChannel, ...args);
   }
 }

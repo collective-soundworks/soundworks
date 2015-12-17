@@ -30,34 +30,33 @@ export default {
   },
 
   /**
-   * Sends a WebSocket message to all the clients belonging to the same `clientType` as `client`. (`client` does not receive a message)
-   * @param {Client} client - The client which peers must receive the message
-   * @param {String} channel - The channel of the message
-   * @param {...*} args - Arguments of the message (as many as needed, of any type).
-   */
-  sendPeers(client, channel, ...args) {
-    client.socket.broadcast.emit(channel, ...args);
-  },
-
-  /**
    * Sends a message to all client of given `clientType` or `clientType`s. If not specified, the message is sent to all clients
    * @param {String|Array} clientType - The `clientType`(s) that must receive the message.
    * @param {String} channel - The channel of the message
    * @param {...*} args - Arguments of the message (as many as needed, of any type).
    */
-  broadcast(clientType, channel, ...args) {
+  broadcast(clientType, excludeClient, channel, ...args) {
     let namespaces;
 
     if (typeof clientType === 'string') {
-      namespaces = ['/' + clientType.replace(this._nspPrefix, '')];
+      namespaces = [`/${clientType}`];
     } else if (Array.isArray(clientType)) {
-      namespaces = clientType.map((type) => {
-        return '/' + type.replace(this._nspPrefix, '');
-      });
+      namespaces = clientType.map(type => `/${type}`);
     } else {
       namespaces = Object.keys(this.io.nsps);
     }
 
-    namespaces.forEach((nsp) => { this.io.of(nsp).emit(channel, ...args); });
+    if (excludeClient) {
+      const index = namespaces.indexOf('/' + excludeClient.clientType);
+
+      if (index !== -1) {
+        namespaces.splice(index, 1);
+        client.socket.broadcast.emit(channel, ...args);
+      }
+    }
+
+    namespaces.forEach((nsp) => {
+      this.io.of(nsp).emit(channel, ...args);
+    });
   },
 };

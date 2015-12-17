@@ -13,6 +13,11 @@ import ServerPlacer from './ServerPlacer';
 import ServerSurvey from './ServerSurvey';
 import ServerSync from './ServerSync';
 
+// utils
+import * as helpers from '../utils/helpers';
+import * as math from '../utils/math';
+import * as setup from '../utils/setup';
+
 export default {
   comm,
   server,
@@ -27,4 +32,9 @@ export default {
   ServerPlacer,
   ServerSurvey,
   ServerSync,
+  utils: {
+    helpers,
+    math,
+    setup,
+  },
 };

@@ -1,5 +1,3 @@
-// import templateGenerator from './templateGenerator';
-
 /**
  * The default templates for the shipped modules. The templates are organized according to the `Module.name` property.
  *
@@ -69,7 +67,7 @@ export default {
         <p><%= instructions %></p>
       <% } else if (mode === 'list') { %>
         <% if (showBtn) { %>
-          <button class="btn"><%= confirm %></button>
+          <button class="btn"><%= send %></button>
         <% } %>
       <% } %>
     </div>
@@ -86,7 +84,7 @@ export default {
   welcome: `
     <div class="section-top flex-middle">
       <% if (!error) { %>
-        <p class="big"><%= welcome %> <b><%= _globals.appName %></b>,</p>
+        <p class="big"><%= welcome %> <b><%= _globals.appName %></b></p>
       <% } %>
     </div>
     <div class="section-center flex-center">
