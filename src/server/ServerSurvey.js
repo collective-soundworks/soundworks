@@ -24,13 +24,12 @@ export default class ServerSurvey extends ServerModule {
     const fileName = `survey-${year}-${month}-${day}_${hour}-${minutes}`;
 
     // @TODO allow to change folder name (aka `surveys`)
-    this.filePath = `${process.cwd()}/surveys/${fileName}`;
+    this.filePath = options.folder || `${process.cwd()}/surveys/${fileName}`;
     this._appendToFile = this._appendToFile.bind(this);
   }
 
   connect(client) {
     super.connect(client);
-
     this.receive(client, 'answers', this._appendToFile)
   }
 
@@ -39,6 +38,8 @@ export default class ServerSurvey extends ServerModule {
   }
 
   _appendToFile(json) {
+    console.log(json);
+
     fs.appendFile(this.filePath, `${json}\n`, (err) => {
       if (err) { console.error(err.message); }
       console.log(json + ' appended to ' + this.filePath);

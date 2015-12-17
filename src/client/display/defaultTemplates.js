@@ -81,6 +81,28 @@ export default {
     <div class="section-bottom"></div>
   `,
 
+  survey: `
+    <div class="section-top">
+      <% if (counter <= length) { %>
+      <p class="counter"><%= counter %> / <%= length %></p>
+      <% } %>
+    </div>
+    <% if (counter > length) { %>
+      <div class="section-center flex-center">
+        <p class="big"><%= thanks %>
+      </div>
+    <% } else { %>
+      <div class="section-center"></div>
+    <% } %>
+    <div class="section-bottom flex-middle">
+      <% if (counter < length) { %>
+      <button class="btn"><%= next %></button>
+      <% } else if (counter === length) { %>
+      <button class="btn"><%= validate %></button>
+      <% } %>
+    </div>
+  `,
+
   welcome: `
     <div class="section-top flex-middle">
       <% if (!error) { %>
