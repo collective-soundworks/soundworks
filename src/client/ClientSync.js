@@ -40,6 +40,8 @@ export default class ClientSync extends ClientModule {
 
     this._sync = new SyncClient(() => audioContext.currentTime);
     this.viewCtor = SegmentedView || options.viewCtor;
+
+    this.init();
   }
 
   init() {

@@ -27,7 +27,7 @@ export default {
     confirm: 'ok',
   },
   sync: {
-    wait: `Clock syncing, stand by&hellip;`,
+    wait: `Clock syncing,<br />stand by&hellip;`,
   },
   welcome: {
     welcome: 'Welcome to',
