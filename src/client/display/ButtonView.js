@@ -44,7 +44,7 @@ export default class ButtonView extends View {
    */
   constructor(definitions, onSelect, onUnselect, options) {
     const template = options.template || defaultTemplate;
-    super(template, { definitions, convertName }, {}, { className: 'selector' });
+    super(template, { definitions, convertName }, {}, { className: 'buttons' });
 
     this._definitions = definitions;
     this._maxSelected = options.maxSelected || 1;
@@ -119,7 +119,6 @@ export default class ButtonView extends View {
     }
 
     this[executeMethod](index, $target);
-    console.log(this._selected);
   }
 
   /**

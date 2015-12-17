@@ -6,7 +6,6 @@ export default {
    */
   initialize(io) {
     this.io = io;
-    this._nspPrefix = /^\//;
   },
 
   /**

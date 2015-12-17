@@ -26,6 +26,11 @@ export default {
     instructions: 'Select your position',
     send: 'Send',
   },
+  survey: {
+    next: 'Next',
+    validate: 'Validate',
+    thanks: 'Thanks',
+  },
   sync: {
     wait: `Clock syncing, stand by&hellip;`,
   },

@@ -1,256 +1,240 @@
 import ClientModule from './ClientModule';
+import View from './display/View';
+import SegmentedView from './display/SegmentedView';
 
+/**
+ * Renderers
+ */
+class BaseRenderer extends View {
+  constructor(parent, template, question) {
+    super(template, question, {}, { className: 'question' });
 
-class BaseRenderer {
-  constructor(survey, question) {
-    this.survey = survey;
+    this.parent = parent;
     this.question = question;
-    this.label = question.label;
     this.id = question.id;
   }
 
-  render() {  return ''; }
-
-  destroy() {
-    this._unbindEvents();
-  }
-
-  bindEvents() {}
-  _unbindEvents() {}
-
-  getAnswer() {}
+  onResize(orientation, width, height) {}
 }
 
-// renderers
-class AbstractSelectorRenderer extends BaseRenderer {
-  constructor(survey, question) {
-    super(survey, question);
-    this.answers = question.answers;
+const radioTemplate = `
+  <p class="label"><%= label %></p>
+  <% for (var key in answers) { %>
+    <p class="answer radio" data-key="<%= key %>"><%= answers[key] %></p>
+  <% } %>
+`;
 
+class RadioRenderer extends BaseRenderer {
+  constructor(parent, question) {
+    super(parent, radioTemplate, question);
+
+    this.answer = null;
     this._onSelect = this._onSelect.bind(this);
   }
 
-  render(container, type) {
-    this.container = container;
-
-    let title = `<p class="label">${this.label}</p>`;
-    let answers = '';
-
-    for (let key in this.answers) {
-      let value = this.answers[key];
-      answers += `<p class="answer ${type}" data-key="${key}">${value}</p>`;
-    }
-
-    return `<div>${title}${answers}</div>`;
-  }
-
-  bindEvents() {
-    this.answersEl = Array.from(this.container.querySelectorAll('.answer'));
-    this.container.addEventListener('click', this._onSelect, false);
-  }
-
-  _unbindEvents() {
-    this.container.removeEventListener('click', this._onSelect, false);
-  }
-}
-
-class RadioRenderer extends AbstractSelectorRenderer {
-  constructor(survey, question) {
-    super(survey, question);
-  }
-
-  render(container) {
-    return super.render(container, 'radio');
+  onRender() {
+    this.installEvents({ 'click .answer': this._onSelect });
+    this.$answers = Array.from(this.$el.querySelectorAll('.answer'));
   }
 
   _onSelect(e) {
     const target = e.target;
-    if (!target.classList.contains('answer')) { return; }
 
-    this.answersEl.forEach((el) => { el.classList.remove('selected'); });
+    this.$answers.forEach((el) => { el.classList.remove('selected'); });
     target.classList.add('selected');
 
-    this.survey.enableBtn();
+    this.answer = target.getAttribute('data-key');
+
+    this.parent.enableBtn();
   }
 
   getAnswer() {
-    for (let i = 0; i < this.answersEl.length; i++) {
-      let el = this.answersEl[i];
-      if (el.classList.contains('selected')) {
-        return el.getAttribute('data-key');
-      }
-    };
-
-    return null;
+    return this.answer;
   }
 }
 
-class CheckboxRenderer extends AbstractSelectorRenderer {
-  constructor(survey, question) {
-    super(survey, question);
+const checkboxTemplate = `
+  <p class="label"><%= label %></p>
+  <% for (var key in answers) { %>
+    <p class="answer checkbox" data-key="<%= key %>"><%= answers[key] %></p>
+  <% } %>
+`;
+
+class CheckboxRenderer extends BaseRenderer {
+  constructor(parent, question) {
+    super(parent, checkboxTemplate, question);
+
+    this.answers = [];
+    this._onSelect = this._onSelect.bind(this);
   }
 
-  render(container) {
-    return super.render(container, 'checkbox');
+  onRender() {
+    this.installEvents({ 'click .answer': this._onSelect });
   }
 
   _onSelect(e) {
     const target = e.target;
-    if (!target.classList.contains('answer')) { return; }
-
+    const key = target.getAttribute('data-key');
     const method = target.classList.contains('selected') ? 'remove' : 'add';
+
+    if (method === 'add') {
+      this.answers.push(key);
+    } else if ((method === 'remove')) {
+      this.answers.splice(this.answers.indexOf(key), 1);
+    }
+
     target.classList[method]('selected');
 
-    this.survey.enableBtn();
+    if (this.answers.length > 0) {
+      this.parent.enableBtn();
+    } else {
+      this.parent.disableBtn();
+    }
   }
 
   getAnswer() {
-    const answers = [];
-
-    for (let i = 0; i < this.answersEl.length; i++) {
-      let el = this.answersEl[i];
-      if (el.classList.contains('selected')) {
-        answers.push(el.getAttribute('data-key'));
-      }
-    };
-
-    return answers.length === 0 ? null : answers;
+    return this.answers.length === 0 ? null : this.answers;
   }
 }
 
-class RangeRenderer extends BaseRenderer {
-  constructor(survey, question) {
-    super(survey, question);
-    this.label = question.label;
-    this.min = question.min === undefined ? 0 : question.min;
-    this.max = question.max === undefined ? 10 : question.max;
-    this.step = question.step === undefined ? 1 : question.step;
-    this.defaultValue = question.defaultValue === undefined ? 5 : question.defaultValue;
+const rangeTemplate = `
+  <p class="label"><%= label %></p>
+  <input class="slider answer"
+    type="range"
+    min="<%= min %>"
+    max="<%= max %>"
+    step="<%= step %>"
+    value="<%= defaultValue %>" />
+  <span class="feedback"><%= defaultValue %></span>
+`;
 
+class RangeRenderer extends BaseRenderer {
+  constructor(parent, question) {
+    question = Object.assign({
+      min: 0,
+      max: 10,
+      step: 1,
+      defaultValue: 5,
+    }, question);
+
+    super(parent, rangeTemplate, question);
+
+    this.answer = null;
     this._onInput = this._onInput.bind(this);
   }
 
-  render(container) {
-    this.container = container;
-
-    const label = document.createElement('p');
-    label.classList.add('label');
-    label.textContent = this.label;
-
-    this._range = document.createElement('input');
-    this._range.setAttribute('type', 'range');
-    this._range.setAttribute('min', this.min);
-    this._range.setAttribute('max', this.max);
-    this._range.setAttribute('step', this.step);
-    this._range.setAttribute('value', this.defaultValue);
-    this._range.classList.add('slider', 'answer');
-
-    this._number = document.createElement('span');
-    this._number.classList.add('range-feedback');
-    this._number.textContent = this.defaultValue;
-
-    const div = document.createElement('div');
-    div.appendChild(label);
-    div.appendChild(this._range);
-    div.appendChild(this._number);
-
-    return div;
-  }
-
-  bindEvents() {
-    this._range.addEventListener('input', this._onInput, false);
-  }
-
-  _unbindEvents() {
-    this._range.removeEventListener('input', this._onInput, false);
+  onRender() {
+    this.installEvents({ 'input .answer': this._onInput });
+    this.$slider = this.$el.querySelector('.slider')
+    this.$feedback = this.$el.querySelector('.feedback');
   }
 
   _onInput(e) {
-    this._number.textContent = this._range.value;
-
-    this.survey.enableBtn();
+    this.$feedback.textContent = this.$slider.value;
+    this.answer = parseFloat(this.$slider.value)
+    this.parent.enableBtn();
   }
 
   getAnswer() {
-    return parseFloat(this._range.value);
+    return this.answer;
   }
 }
 
+const textareaTemplate = `
+  <p class="label"><%= label %></p>
+  <textarea class="answer textarea"></textarea>
+`;
+
 // is never required for now
 class TextAreaRenderer extends BaseRenderer {
-  constructor(survey, question) {
-    super(survey, question);
-    this.label = question.label;
+  constructor(parent, question) {
+    super(parent, textareaTemplate, question);
   }
 
-  render(container) {
-    this._container = container;
+  onRender() {
+    this.$label = this.$el.querySelector('.label');
+    this.$textarea = this.$el.querySelector('.answer');
+  }
 
-    return `
-      <p class="label">${this.label}</p>
-      <textarea class="answer textarea"></textarea>
-    `;
+  onShow() {
+    this.onResize();
+  }
+
+  onResize(orientation, viewportVidth, viewportHeight) {
+    if (!this.$parent) { return; }
+    const boundingRect = this.$el.getBoundingClientRect();
+    const width = boundingRect.width;
+    const height = boundingRect.height;
+
+    const labelHeight = this.$label.getBoundingClientRect().height;
+
+    this.$textarea.style.width = `${width}px`;
+    this.$textarea.style.height = `${height - labelHeight}px`;
   }
 
   getAnswer() {
-    const textarea = this._container.querySelector('.answer');
-    return textarea.value;
+    return this.$textarea.value;
   }
 }
 
 /**
- * @private
+ * Survey main vue
+ */
+class SurveyView extends SegmentedView {
+  constructor(template, content, events, options) {
+    super(template, content, events, options);
+
+    this.ratios = {
+      '.section-top': 0.15,
+      '.section-center': 0.65,
+      '.section-bottom': 0.2,
+    };
+  }
+
+  onRender() {
+    super.onRender();
+    this.$nextBtn = this.$el.querySelector('.btn');
+  }
+
+  disableBtn() {
+    this.$nextBtn.setAttribute('disabled', true);
+  }
+
+  enableBtn() {
+    this.$nextBtn.removeAttribute('disabled');
+  }
+}
+
+/**
+ * A module to create surveys.
  */
 export default class ClientSurvey extends ClientModule {
   constructor(surveyConfig, options = {}) {
-    super(options.name || 'survey', true, options.color);
-
-    if (options.thanks === undefined) {
-      options.thanks = 'Thanks';
-    }
-
-    options.thanksContent = `<p class="thanks">${options.thanks}</p>`;
-    options.btnNextText = options.btnNextText || 'next';
-    options.btnValidateText = options.btnValidateText || 'validate';
+    super(options.name || 'survey', options);
 
     this.survey = surveyConfig;
     this.options = options;
-    this.contents = [];
     this.answers = {};
-    this.questionCounter = 0;
-
-    this._createRenderers();
-    this._render();
 
     this._displayNextQuestion = this._displayNextQuestion.bind(this);
 
+    this.viewCtor = SurveyView;
+    this.init();
+  }
+
+  init() {
+    this.content.counter = 0;
+    this.content.length = this.survey.length;
+    this.events = { 'click .btn': this._displayNextQuestion };
+
+    this.view = this.createDefaultView();
+  }
+
+  start() {
+    super.start();
+
+    this._createRenderers();
     this._displayNextQuestion();
-    this._bindEvents();
-  }
-
-  _render() {
-    const counter = document.createElement('div');
-    counter.classList.add('counter');
-    counter.innerHTML = `<span></span> / ${this.survey.length}`;
-
-    const nextBtn = document.createElement('button');
-    nextBtn.classList.add('next', 'btn');
-    nextBtn.textContent = this.options.btnNextText; // @TODO option
-
-    this.view.appendChild(counter);
-    this.view.appendChild(nextBtn);
-
-    this._counter = counter;
-    this._currentQuestionCounter = counter.querySelector('span');
-    this._nextBtn = nextBtn;
-  }
-
-  _bindEvents() {
-    this._nextBtn.addEventListener('click', this._displayNextQuestion, false);
-  }
-
-  _unbindEvents() {
-    this._nextBtn.removeEventListener('click', this._displayNextQuestion, false);
   }
 
   _createRenderers() {
@@ -276,58 +260,41 @@ export default class ClientSurvey extends ClientModule {
           break;
       }
 
-      return new ctor(this, question);
+      return new ctor(this.view, question);
     });
   }
 
   _displayNextQuestion() {
-    // handle current question if any
+    // // handle current question if any
     if (this.currentRenderer) {
       const answer = this.currentRenderer.getAnswer();
       const required = this.currentRenderer.question.required;
 
       if (answer === null && required) { return; }
-
-      this.currentRenderer.destroy();
       this.answers[this.currentRenderer.id] = answer;
+      console.log(this.answers);
     }
 
     this.currentRenderer = this.renderers.shift();
 
+    // update counter
+    this.content.counter += 1;
+
     if (this.currentRenderer) {
-      // update counter
-      this.questionCounter += 1;
-      this._currentQuestionCounter.textContent = this.questionCounter;
       // update content
-      const htmlContent = this.currentRenderer.render(this.view);
-      this.setCenteredViewContent(htmlContent);
-      this.currentRenderer.bindEvents();
+      this.view.setViewComponent('.section-center', this.currentRenderer);
+      this.view.render();
 
       if (this.currentRenderer.question.required) {
-        this.disableBtn();
-      }
-
-      if (this.renderers.length === 0) {
-        this._nextBtn.textContent = this.options.btnValidateText;
+        this.view.disableBtn();
       }
     } else {
-      // remove counter and next buttons
-      this.view.removeChild(this._counter);
-      this.view.removeChild(this._nextBtn);
-      // display thanks
-      this.setCenteredViewContent(this.options.thanksContent);
+      this.view.setViewComponent('.section-center', null);
+      this.view.render();
       // send informations to server
       this.answers.timestamp = new Date().getTime();
       this.answers.userAgent = navigator.userAgent;
       this.send('answers', JSON.stringify(this.answers));
     }
-  }
-
-  disableBtn() {
-    this._nextBtn.classList.add('disabled');
-  }
-
-  enableBtn() {
-    this._nextBtn.classList.remove('disabled');
   }
 }
