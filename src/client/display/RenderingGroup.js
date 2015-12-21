@@ -22,7 +22,7 @@ const loop = {
     if (this._isRunning) { return; }
     this._isRunning = true;
     this.lastRenderTime = this.getTime();
-    console.log('=> Start canvas rendering loop');
+    // console.log('=> Start canvas rendering loop');
 
     (function(self) {
       function loop() {
@@ -59,8 +59,7 @@ const loop = {
     }
 
     if (shouldStop) {
-      console.log('=> Stop canvas rendering loop');
-
+      // console.log('=> Stop canvas rendering loop');
       cancelAnimationFrame(this.rAFid);
       this._isRunning = false;
     }
@@ -155,7 +154,7 @@ export default class RenderingGroup {
   }
 
   /**
-   * Add a `Renderer` instance to the `RenderingGroup`.
+   * Add a `Renderer` instance to the group.
    * @param {Renderer} renderer - The renderer to add.
    */
   add(renderer) {
@@ -172,7 +171,7 @@ export default class RenderingGroup {
   }
 
   /**
-   * Remove a `Renderer` instance to the `RenderingGroup`.
+   * Remove a `Renderer` instance from the group.
    * @param {Renderer} renderer - The renderer to remove.
    */
   remove(renderer) {

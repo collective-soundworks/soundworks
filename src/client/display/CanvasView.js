@@ -3,11 +3,11 @@ import RenderingGroup from './RenderingGroup';
 
 
 const defaultCanvasTemplate = `
-  <canvas></canvas>
-  <div class="top">
+  <canvas class="background"></canvas>
+  <div class="foreground">
     <div class="section-top flex-middle"><%= top %></div>
     <div class="section-center flex-center"><%= center %></div>
-    <div class="section-bottom"><%= bottom %></div>
+    <div class="section-bottom flex-middle"><%= bottom %></div>
   </div>
 `;
 
