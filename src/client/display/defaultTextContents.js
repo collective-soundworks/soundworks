@@ -29,7 +29,7 @@ export default {
   survey: {
     next: 'Next',
     validate: 'Validate',
-    thanks: 'Thanks',
+    thanks: 'Thanks!',
   },
   sync: {
     wait: `Clock syncing,<br />stand by&hellip;`,

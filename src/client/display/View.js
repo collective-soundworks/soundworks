@@ -211,15 +211,17 @@ export default class View {
   /**
    * Callback for `viewport.resize` event. Maintain `$el` in sync with the viewport.
    * @param {String} orientation - The orientation of the viewport ('portrait'|'landscape')
-   * @param {Number} width - The width of the viewport in pixels.
-   * @param {Number} height - The height of the viewport in pixels.
+   * @param {Number} viewportWidth - The width of the viewport in pixels.
+   * @param {Number} viewportHeight - The height of the viewport in pixels.
    */
-  onResize(orientation, width, height) {
+  onResize(orientation, viewportWidth, viewportHeight) {
     this.orientation = orientation;
     this.$el.classList.remove('portrait', 'landscape');
     this.$el.classList.add(orientation);
-    this.$el.style.width = `${width}px`;
-    this.$el.style.height = `${height}px`;
+    this.$el.style.width = `${viewportWidth}px`;
+    this.$el.style.height = `${viewportHeight}px`;
+    this.viewportWidth = viewportWidth;
+    this.viewportHeight = viewportHeight;
   }
 
   /**

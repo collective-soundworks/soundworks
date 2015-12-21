@@ -84,7 +84,7 @@ export default {
   survey: `
     <div class="section-top">
       <% if (counter <= length) { %>
-      <p class="counter"><%= counter %> / <%= length %></p>
+        <p class="counter"><%= counter %> / <%= length %></p>
       <% } %>
     </div>
     <% if (counter > length) { %>
@@ -96,9 +96,9 @@ export default {
     <% } %>
     <div class="section-bottom flex-middle">
       <% if (counter < length) { %>
-      <button class="btn"><%= next %></button>
+        <button class="btn"><%= next %></button>
       <% } else if (counter === length) { %>
-      <button class="btn"><%= validate %></button>
+        <button class="btn"><%= validate %></button>
       <% } %>
     </div>
   `,

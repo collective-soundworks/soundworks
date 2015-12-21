@@ -388,11 +388,11 @@ export default class ClientModule extends Promised {
    * @todo - prepend would do the trick ?
    * @param {Number} value Value of the `z-index`.
    */
-  set zIndex(value) {
-    if (this.view) {
-      this.view.$el.style.zIndex = value;
-    }
-  }
+  // set zIndex(value) {
+  //   if (this.view) {
+  //     this.view.$el.style.zIndex = value;
+  //   }
+  // }
 
   show() {
     if (this.view && !this._isDone) {

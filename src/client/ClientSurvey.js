@@ -265,23 +265,21 @@ export default class ClientSurvey extends ClientModule {
   }
 
   _displayNextQuestion() {
-    // // handle current question if any
+    // retrive and store current answer if any
     if (this.currentRenderer) {
       const answer = this.currentRenderer.getAnswer();
       const required = this.currentRenderer.question.required;
 
       if (answer === null && required) { return; }
       this.answers[this.currentRenderer.id] = answer;
-      console.log(this.answers);
     }
 
+    // retrieve the next renderer
     this.currentRenderer = this.renderers.shift();
-
     // update counter
     this.content.counter += 1;
 
     if (this.currentRenderer) {
-      // update content
       this.view.setViewComponent('.section-center', this.currentRenderer);
       this.view.render();
 

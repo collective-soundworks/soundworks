@@ -15,6 +15,8 @@ export default class ClientPerformance extends ClientModule {
    */
   constructor(options = {}) {
     super(options.name || 'performance', true, options.color || 'black');
+
+    this.viewOptions = { className: ['module', 'performance'] };
   }
 
   /**

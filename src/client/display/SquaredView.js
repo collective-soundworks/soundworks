@@ -21,19 +21,19 @@ export default class SquaredView extends View {
     this.$float.style.float = 'left';
   }
 
-  onResize(orientation, width, height) {
-    super.onResize(orientation, width, height);
+  onResize(orientation, viewportWidth, viewportHeight) {
+    super.onResize(orientation, viewportWidth, viewportHeight);
 
     let size, floatHeight, floatWidth;
 
     if (orientation === 'portrait') {
-      size = width;
-      floatHeight = height - size;
-      floatWidth = width;
+      size = viewportWidth;
+      floatHeight = viewportHeight - size;
+      floatWidth = viewportWidth;
     } else {
-      size = height;
-      floatHeight = height;
-      floatWidth = width - size;
+      size = viewportHeight;
+      floatHeight = viewportHeight;
+      floatWidth = viewportWidth - size;
     }
 
     this.$square.style.width = `${size}px`;

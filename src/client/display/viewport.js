@@ -48,10 +48,16 @@ class Viewport extends EventEmitter {
   }
 
   _onResize() {
-    // window.scrollTo(0, 0);
     this.width = window.innerWidth;
     this.height = window.innerHeight;
     this.orientation = this.width > this.height ? 'landscape' : 'portrait';
+
+    // console.log(this.width, this.height);
+    // document.body.style.width = `${this.width}px`;
+    // document.body.style.height = `${this.height}px`;
+    // try on iOS
+    // document.body.style.marginTop = '1px';
+    // window.scrollTo(0, 1);
 
     this.emit('resize', this.orientation, this.width, this.height);
   }

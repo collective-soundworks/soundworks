@@ -6,6 +6,8 @@ import platform from 'platform';
 import MobileDetect from 'mobile-detect';
 import SegmentedView from './display/SegmentedView';
 
+import screenfull from 'screenfull';
+
 /**
  * @private
  */
@@ -44,6 +46,7 @@ export default class Welcome extends ClientModule {
 
     this._requireMobile = options.requireMobile === false ? false : true;
     this._mustActivateAudio = options.activateAudio === false ? false : true;
+    this._mustFullScreen = options.fullScreen === false ? false : true;
     this._mustWakeLock = !!options.wakeLock;
 
     // check platform
@@ -94,8 +97,6 @@ export default class Welcome extends ClientModule {
    */
   start() {
     super.start();
-    // Initialize hacks for wakeLocking
-    if (this._mustWakeLock) { this._initWakeLock(); }
   }
 
   /**
@@ -107,6 +108,10 @@ export default class Welcome extends ClientModule {
   }
 
   _onClick() {
+    // http://www.html5rocks.com/en/mobile/fullscreen/?redirect_from_locale=fr
+    if (this._mustFullScreen && screenfull.enabled)
+      screenfull.request();
+
     if (this._mustActivateAudio)
       this._activateAudio();
 

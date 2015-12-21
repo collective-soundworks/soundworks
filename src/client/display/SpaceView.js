@@ -53,8 +53,9 @@ export default class SpaceView extends View {
    * Update the area when inserted in the DOM.
    * @private
    */
-  onResize(orientation, width, height) {
-    super.onResize(orientation, width, height);
+  onResize(orientation, viewportWidth, viewportHeight) {
+    super.onResize(orientation, viewportWidth, viewportHeight);
+    // override size to match parent size
     this.$el.style.width = '100%';
     this.$el.style.height = '100%';
 

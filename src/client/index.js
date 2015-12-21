@@ -20,6 +20,7 @@ import Welcome from './Welcome';
 // views
 import View from './display/View';
 import ButtonView from './display/ButtonView';
+import CanvasView from './display/CanvasView';
 import SegmentedView from './display/SegmentedView';
 import SelectView from './display/SelectView';
 import SpaceView from './display/SpaceView';
@@ -27,6 +28,10 @@ import SquaredView from './display/SquaredView';
 import TouchSurface from './display/TouchSurface';
 import defaultTemplates from './display/defaultTemplates';
 import defaultTextContents from './display/defaultTextContents';
+
+// drawing
+import Renderer from './display/Renderer';
+import RenderingGroup from './display/RenderingGroup';
 
 // utils
 import * as helpers from '../utils/helpers';
@@ -53,6 +58,7 @@ export default {
   display: {
     View,
     ButtonView,
+    CanvasView,
     SegmentedView,
     SelectView,
     SpaceView,
@@ -60,6 +66,8 @@ export default {
     TouchSurface,
     defaultTemplates,
     defaultTextContents,
+    Renderer,
+    RenderingGroup,
   },
   utils: {
     helpers,
