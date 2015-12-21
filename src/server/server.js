@@ -19,6 +19,8 @@ const oscListeners = [];
  * These parameters typically inclusd a setup and control parameters values.
  */
 const exampleAppConfig = {
+  appName: 'Soundworks', // title of the application (for <title> tag)
+  version: '0.0.1', // version of the application (bypass browser cache)
   playerSetup: {
     width: 10, // width of the setup area in meters
     height: 10, // height of the setup area in meters
@@ -38,8 +40,11 @@ const exampleAppConfig = {
  */
 const defaultFwConfig = {
   publicFolder: path.join(process.cwd(), 'public'),
+  templateFolder: path.join(process.cwd(), 'views'),
   defaultClient: 'player',
+  assetsDomain: '', // override to download assets from a different serveur (nginx)
   socketIO: {
+    url: '',
     transports: ['websocket'],
     pingTimeout: 60000,
     pingInterval: 50000
@@ -166,7 +171,8 @@ export default {
     comm.initialize(this.io);
     logger.initialize(this.config.logger);
 
-    // configure OSC
+
+    // configure OSC - should be optionnal
     if (this.config.osc) {
       this.osc = new osc.UDPPort({
         // This is the port we're listening on.
@@ -209,13 +215,24 @@ export default {
   map(clientType, ...modules) {
     const url = (clientType !== this.config.defaultClient) ? `/${clientType}` : '/';
     // cache compiled template
-    const tmplPath = path.join(process.cwd(), 'views', clientType + '.ejs');
-    const tmplString = fs.readFileSync(tmplPath, { encoding: 'utf8' });
+
+    // use template with `clientType` name or default if not defined
+    const clientTmpl = path.join(this.config.templateFolder, `${clientType}.ejs`);
+    const defaultTmpl = path.join(this.config.templateFolder, `default.ejs`);
+    const template = fs.existsSync(clientTmpl) ? clientTmpl : defaultTmpl;
+    console.log(template);
+
+    const tmplString = fs.readFileSync(template, { encoding: 'utf8' });
     const tmpl = ejs.compile(tmplString);
 
-    // share socket.io config with clients
     this.expressApp.get(url, (req, res) => {
-      res.send(tmpl({ envConfig: JSON.stringify(this.config.socketIO) }));
+      res.send(tmpl({
+        socketIO: JSON.stringify(this.config.socketIO),
+        appName: this.config.appName,
+        clientType: clientType,
+        defaultType: this.config.defaultClient,
+        assetsDomain: this.config.assetsDomain,
+      }));
     });
 
     modules.forEach((mod) => { mod.configure(this.config) })

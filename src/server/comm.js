@@ -45,12 +45,13 @@ export default {
       namespaces = Object.keys(this.io.nsps);
     }
 
+    // console.log(excludeClient);
     if (excludeClient) {
-      const index = namespaces.indexOf('/' + excludeClient.clientType);
+      const index = namespaces.indexOf('/' + excludeClient.type);
 
       if (index !== -1) {
         namespaces.splice(index, 1);
-        client.socket.broadcast.emit(channel, ...args);
+        excludeClient.socket.broadcast.emit(channel, ...args);
       }
     }
 

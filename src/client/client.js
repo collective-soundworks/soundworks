@@ -29,7 +29,6 @@ export default {
     os: null,
     isMobile: null,
     audioFileExt: '',
-    isForbidden: false
   },
 
   /**
@@ -73,12 +72,13 @@ export default {
   init(clientType = 'player', options = {}) {
     this.type = clientType;
 
+    const socketIO = window.SOCKET_CONFIG; // shared by server (cf .ejs template)
     // @todo harmonize io config with server
     options = Object.assign({
       io: true,
       debugIO: false,
-      socketUrl: '',
-      transports: ['websocket'],
+      socketUrl: socketIO ? socketIO.url || '',
+      transports: socketIO ? socketIO.transports || ['websocket'],
       appContainer: '#container',
     }, options);
 
