@@ -77,8 +77,8 @@ export default {
     options = Object.assign({
       io: true,
       debugIO: false,
-      socketUrl: socketIO ? socketIO.url || '',
-      transports: socketIO ? socketIO.transports || ['websocket'],
+      socketUrl: socketIO ? socketIO.url : '',
+      transports: socketIO ? socketIO.transports : ['websocket'],
       appContainer: '#container',
     }, options);
 
@@ -110,6 +110,28 @@ export default {
   },
 
   /**
+   * Start the module logic (*i.e.* the application).
+   * @param {Function} startFun [todo]
+   * @todo Clarify the param.
+   * @return {Promise} The Promise return value.
+   * @todo Clarify return value (promise).
+   * @todo example
+   * @todo remove old version compatibility
+   */
+  start(startFun) {
+    let module = startFun; // be compatible with previous version
+
+    if (typeof startFun === 'function') {
+      module = startFun(ClientModule.sequential, ClientModule.parallel);
+    }
+
+    let promise = module.createPromise();
+    this.ready.then(() => module.launch());
+
+    return promise;
+  },
+
+  /**
    * Extend application text contents with the given object.
    * @param {Object} contents - The text contents to propagate to modules.
    */
@@ -135,60 +157,6 @@ export default {
     const $container = el instanceof Element ? el : document.querySelector(el);
     ClientModule.setViewContainer($container);
   },
-
-  /**
-   * Start the module logic (*i.e.* the application).
-   * @param {Function} startFun [todo]
-   * @todo Clarify the param.
-   * @return {Promise} The Promise return value.
-   * @todo Clarify return value (promise).
-   * @todo example
-   */
-  start(startFun) {
-    let module = startFun; // be compatible with previous version
-
-    if (typeof startFun === 'function') {
-      module = startFun(ClientModule.sequential, ClientModule.parallel);
-    }
-
-    let promise = module.createPromise();
-    this.ready.then(() => module.launch());
-
-    return promise;
-  },
-
-  /**
-   * The `serial` method returns a `ClientModule` that starts the given `...modules` in series. After starting the first module (by calling its `start` method), the next module in the series is started (with its `start` method) when the last module called its `done` method. When the last module calls `done`, the returned serial module calls its own `done` method.
-   *
-   * **Note:** you can compound serial module sequences with parallel module combinations (*e.g.* `client.serial(module1, client.parallel(module2, module3), module4);`).
-   * @deprecated Use the new API with the {@link start} method.
-   * @param {...ClientModule} ...modules The modules to run in serial.
-   * @return {Promise} [description]
-   * @todo Clarify return value
-   * @todo Remove
-   */
-  // serial(...modules) {
-  //   console.log('The function "client.serial" is deprecated. Please use the new API instead.');
-  //   return ClientModule.sequential(...modules);
-  // },
-
-  /**
-   * The `ClientModule` returned by the `parallel` method starts the given `...modules` in parallel (with their `start` methods), and calls its `done` method after all modules called their own `done` methods.
-   *
-   * **Note:** you can compound parallel module combinations with serial module sequences (*e.g.* `client.parallel(module1, client.serial(module2, module3), module4);`).
-   *
-   * **Note:** the `view` of a module is always full screen, so in the case where modules run in parallel, their `view`s are stacked on top of each other using the `z-index` CSS property.
-   * We use the order of the `parallel` method's arguments to determine the order of the stack (*e.g.* in `client.parallel(module1, module2, module3)`, the `view` of `module1` is displayed on top of the `view` of `module2`, which is displayed on top of the `view` of `module3`).
-   * @deprecated Use the new API with the {@link start} method.
-   * @param {...ClientModule} modules The modules to run in parallel.
-   * @return {Promise} [description]
-   * @todo Clarify return value
-   * @todo Remove
-   */
-  // parallel(...modules) {
-  //   console.log('The function "client.parallel" is deprecated. Please use the new API instead.');
-  //   return ClientModule.parallel(...modules);
-  // },
 
 };
 
