@@ -18,16 +18,18 @@ class _ControlEvent extends EventEmitter {
     this.value = value;
   }
 
-  update(val = undefined, sendToServer = true) {
-    if(val === undefined)
-      this.set(val); // set value
-
-    this.emit(this.name, this.value); // call event listeners
+  propagate(sendToServer = true) {
+    this.emit('update', this.value); // call event listeners
 
     if(sendToServer)
       this.control.send('update', this.name, this.value); // send to server
 
     this.control.emit('update', this.name, this.value); // call control listeners
+  }
+
+  update(val) {
+    this.set(val);
+    this.propagate();
   }
 }
 
@@ -109,11 +111,8 @@ class _ControlCommand extends _ControlEvent {
 /**
  * @private
  */
-class _NumberGui extends EventEmitter {
+class _NumberGui {
   constructor(view, event) {
-    super();
-    this.event = event;
-
     let box = document.createElement('input');
     box.setAttribute('id', event.name + '-box');
     box.setAttribute('type', 'number');
@@ -125,7 +124,8 @@ class _NumberGui extends EventEmitter {
 
     box.onchange = (() => {
       let val = Number(box.value);
-      this.event.update(val);
+      event.set(val);
+      event.propagate();
     });
 
     this.box = box;
@@ -135,8 +135,8 @@ class _NumberGui extends EventEmitter {
     incrButton.setAttribute('width', '0.5em');
     incrButton.innerHTML = '>';
     incrButton.onclick = (() => {
-      this.event.incr();
-      this.event.update();
+      event.incr();
+      event.propagate();
     });
 
     let decrButton = document.createElement('button');
@@ -144,8 +144,8 @@ class _NumberGui extends EventEmitter {
     decrButton.style.width = '0.5em';
     decrButton.innerHTML = '<';
     decrButton.onclick = (() => {
-      this.event.decr();
-      this.event.update();
+      event.decr();
+      event.propagate();
     });
 
     let label = document.createElement('span');
@@ -169,11 +169,8 @@ class _NumberGui extends EventEmitter {
 /**
  * @private
  */
-class _SelectGui extends EventEmitter {
+class _SelectGui {
   constructor(view, event) {
-    super();
-    this.event = event;
-
     let box = document.createElement('select');
     box.setAttribute('id', event.name + '-box');
 
@@ -185,7 +182,8 @@ class _SelectGui extends EventEmitter {
     }
 
     box.onchange = (() => {
-      this.event.update(box.value);
+      event.set(box.value);
+      event.propagate();
     });
 
     this.box = box;
@@ -195,8 +193,8 @@ class _SelectGui extends EventEmitter {
     incrButton.setAttribute('width', '0.5em');
     incrButton.innerHTML = '>';
     incrButton.onclick = (() => {
-      this.event.incr();
-      this.event.update();
+      event.incr();
+      event.propagate();
     });
 
     let decrButton = document.createElement('button');
@@ -204,8 +202,8 @@ class _SelectGui extends EventEmitter {
     decrButton.style.width = '0.5em';
     decrButton.innerHTML = '<';
     decrButton.onclick = (() => {
-      this.event.decr();
-      this.event.update();
+      event.decr();
+      event.propagate();
     });
 
     let label = document.createElement('span');
@@ -229,11 +227,8 @@ class _SelectGui extends EventEmitter {
 /**
  * @private
  */
-class _InfoGui extends EventEmitter {
+class _InfoGui {
   constructor(view, event) {
-    super();
-    this.event = event;
-
     let box = document.createElement('span');
     box.setAttribute('id', event.name + '-box');
 
@@ -258,18 +253,15 @@ class _InfoGui extends EventEmitter {
 /**
  * @private
  */
-class _CommandGui extends EventEmitter {
-  constructor(view) {
-    super();
-    this.event = event;
-
+class _CommandGui {
+  constructor(view, event) {
     let div = document.createElement('div');
-    div.setAttribute('id', this.name + '-btn');
+    div.setAttribute('id', event.name + '-btn');
     div.classList.add('command');
-    div.innerHTML = this.label;
+    div.innerHTML = event.label;
 
     div.onclick = (() => {
-      this.event.update();
+      event.propagate();
     });
 
     view.appendChild(div);
@@ -384,12 +376,14 @@ export default class ClientControl extends ClientModule {
    * Updates the value of a parameter.
    * @param {String} name Name of the parameter to update.
    * @param {(String|Number|Boolean)} val New value of the parameter.
+   * @param {Boolean} [sendToServer=true] Flag whether the value is sent to the server.
    */
   update(name, val, sendToServer = true) {
     const event = this.events[name];
 
     if (event) {
-      event.update(val, sendToServer);
+      event.set(val);
+      event.propagate(sendToServer);
     } else {
       console.log('unknown control event "' + name + '"');
     }
@@ -440,6 +434,8 @@ export default class ClientControl extends ClientModule {
         break;
     }
 
+    event.addListener('update', (val) => gui.set(val));
+
     return gui;
   }
 
@@ -474,12 +470,7 @@ export default class ClientControl extends ClientModule {
 
     // listen to events
     this.receive('update', (name, val) => {
-      const event = this.events[name];
-
-      if (event)
-        this.update(name, val, false); // update, but don't send to server
-      else
-        console.log('client control: received unknown event "' + name + '"');
+      this.update(name, val, false); // update, but don't send to server
     });
   }
 
