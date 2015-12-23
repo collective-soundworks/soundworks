@@ -230,10 +230,10 @@ export default class ClientModule extends Promised {
    */
   get content() {
     const content = this._content || this.contentDefinitions[this.name];
-    if (!content)
-      throw new Error(`No content defined for module "${this.name}"`);
 
-    content._globals = this.contentDefinitions._globals;
+    if (content)
+      content._globals = this.contentDefinitions._globals;
+
     return content;
   }
 
