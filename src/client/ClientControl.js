@@ -2,8 +2,7 @@ import basicControllers from 'waves-basic-controllers';
 import ClientModule from './ClientModule';
 import { EventEmitter } from 'events';
 
-basicControllers.setTheme('dark');
-
+basicControllers.disableStyles();
 
 /* --------------------------------------------------------- */
 /* CONTROL UNITS
@@ -54,6 +53,7 @@ class _ControlNumber extends _ControlUnit {
   }
 
   // is now handled from the GUI
+  // @note - check algo in basic controllers, looks more reliable
   incr() {
     let steps = Math.floor(this.value / this.step + 0.5);
     this.value = this.step * (steps + 1);
@@ -124,7 +124,7 @@ class _ControlCommand extends _ControlUnit {
 
 /** @private */
 class _NumberGui {
-  constructor(view, controlUnit, guiOptions) {
+  constructor($container, controlUnit, guiOptions) {
     const { label, min, max, step, value } = controlUnit;
 
     if (guiOptions.type === 'slider') {
@@ -133,7 +133,8 @@ class _NumberGui {
       this.controller = new basicControllers.NumberBox(label, min, max, step, value);
     }
 
-    view.$el.appendChild(this.controller.render());
+    $container.appendChild(this.controller.render());
+    this.controller.onRender();
 
     this.controller.on('change', (value) => {
       if (guiOptions.confirm) {
@@ -153,14 +154,15 @@ class _NumberGui {
 
 /** @private */
 class _SelectGui {
-  constructor(view, controlUnit, guiOptions) {
+  constructor($container, controlUnit, guiOptions) {
     const { label, options, value } = controlUnit;
 
     const ctor = guiOptions.type === 'buttons' ?
       basicControllers.SelectButtons : basicControllers.SelectList
 
     this.controller = new ctor(label, options, value);
-    view.$el.appendChild(this.controller.render());
+    $container.appendChild(this.controller.render());
+    this.controller.onRender();
 
     this.controller.on('change', (value) => {
       if (guiOptions.confirm) {
@@ -180,11 +182,12 @@ class _SelectGui {
 
 /** @private */
 class _CommandGui {
-  constructor(view, controlUnit, guiOptions) {
+  constructor($container, controlUnit, guiOptions) {
     const { label } = controlUnit;
 
     this.controller = new basicControllers.Buttons('', [label]);
-    view.$el.appendChild(this.controller.render());
+    $container.appendChild(this.controller.render());
+    this.controller.onRender();
 
     this.controller.on('change', () => {
       if (guiOptions.confirm) {
@@ -201,11 +204,12 @@ class _CommandGui {
 
 /** @private */
 class _InfoGui {
-  constructor(view, controlUnit, guiOptions) {
+  constructor($container, controlUnit, guiOptions) {
     const { label, value } = controlUnit;
 
     this.controller = new basicControllers.Info(label, value);
-    view.$el.appendChild(this.controller.render());
+    $container.appendChild(this.controller.render());
+    this.controller.onRender();
   }
 
   set(val) {
@@ -369,12 +373,20 @@ export default class ClientControl extends ClientModule {
     return controlUnit;
   }
 
+  /**
+   * Configure the GUI for a specific control unit (e.g. if it should appear or not,
+   * which type of GUI to use).
+   * @param {String} name - The name of the `controlUnit` to configure.
+   * @param {Object} options - The options to apply to configure the given `controlUnit`.
+   * @param {String} options.type - The type of GUI to use.
+   * @param {Boolean} [options.show=true] - Show the GUI for this `controlUnit` or not.
+   * @param {Boolean} [options.confirm=false] - Ask for confirmation when the value changes.
+   */
   configureGui(name, options) {
     this._guiConfig[name] = options;
   }
 
   _createGui(view, controlUnit) {
-    let gui = null;
     const config = Object.assign({
       show: true,
       confirm: false,
@@ -384,28 +396,31 @@ export default class ClientControl extends ClientModule {
       return null;
     }
 
+    let gui = null;
+    const $container = this.view.$el;
+
     switch (controlUnit.type) {
       case 'number':
-        // can be `NumberBox` or `Slider`
-        gui = new _NumberGui(view, controlUnit, config);
+        // `NumberBox` or `Slider`
+        gui = new _NumberGui($container, controlUnit, config);
         break;
 
       case 'select':
-        // can be `SelectList` or `SelectButtons`
-        gui = new _SelectGui(view, controlUnit, config);
+        // `SelectList` or `SelectButtons`
+        gui = new _SelectGui($container, controlUnit, config);
         break;
 
       case 'command':
-        // can be `Button` (or `Bang` @todo)
-        gui = new _CommandGui(view, controlUnit, config);
+        // `Button`
+        gui = new _CommandGui($container, controlUnit, config);
         break;
 
       case 'info':
-        // can be
-        gui = new _InfoGui(view, controlUnit, config);
+        // `Info`
+        gui = new _InfoGui($container, controlUnit, config);
         break;
 
-      // case 'toggle' ?
+      // case 'toggle'
     }
 
     controlUnit.addListener('update', (val) => gui.set(val));
@@ -418,29 +433,20 @@ export default class ClientControl extends ClientModule {
    */
   start() {
     super.start();
-
     this.send('request');
 
-    let view = (this.hasGui) ? this.view : null;
+    const view = (this.hasGui) ? this.view : null;
 
-    this.receive('init', (data) => {
-      if (view) {
-        // create a template
-        let title = document.createElement('h1');
-        title.innerHTML = 'Conductor';
-        view.$el.appendChild(title);
-      }
-
-      for (let d of data) {
-        let controlUnit = this._createControlUnit(d);
+    this.receive('init', (config) => {
+      config.forEach((entry) => {
+        const controlUnit = this._createControlUnit(entry);
         this.controlUnits[controlUnit.name] = controlUnit;
 
         if (view)
           this._createGui(view, controlUnit);
-      }
+      });
 
-      if (!view)
-        this.done();
+      if (!view) { this.done(); }
     });
 
     // listen to events

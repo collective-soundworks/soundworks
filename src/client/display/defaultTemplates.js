@@ -27,6 +27,10 @@ export default {
     <% } %>
   `,
 
+  control: `
+    <h1 class="big"><%= title %></h1>
+  `,
+
   loader: `
     <div class="section-top flex-middle">
       <p><%= loading %></p>

@@ -12,6 +12,9 @@ export default {
     labelPostfix: 'Touch the screen<br class="portrait-only" />when you are ready.',
     error: 'Sorry, we cannot accept any more connections at the moment, please try again later.',
   },
+  control: {
+    title: 'Conductor',
+  },
   loader: {
     loading: 'Loading sounds…',
   },
