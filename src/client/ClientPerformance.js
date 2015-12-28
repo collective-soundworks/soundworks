@@ -1,4 +1,5 @@
 import ClientModule from './ClientModule';
+import CanvasView from './display/CanvasView';
 
 /**
  * [client] Base class used to build a performance on the client side.
@@ -18,6 +19,8 @@ export default class ClientPerformance extends ClientModule {
 
     this.viewOptions = { className: ['module', 'performance'] };
   }
+
+  init() {}
 
   /**
    * Start the module.
