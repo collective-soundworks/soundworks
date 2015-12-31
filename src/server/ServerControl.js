@@ -5,7 +5,7 @@ import { EventEmitter } from 'events';
 /**
  * @private
  */
-class _ControlEvent extends EventEmitter {
+class _ControlItem extends EventEmitter {
   constructor(control, type, name, label, init = undefined, clientTypes = null) {
     super();
 
@@ -18,6 +18,9 @@ class _ControlEvent extends EventEmitter {
       label: label,
       value: init,
     };
+
+    control.items[name] = item;
+    control.data.push(this.data);
   }
 
   set(val) {
@@ -29,7 +32,7 @@ class _ControlEvent extends EventEmitter {
     let data = this.data;
 
     this.set(val); // set value
-    this.emit(data.name, data.value); // call event listeners
+    this.emit(data.name, data.value); // call item listeners
     control.broadcast(this.clientTypes, excludeClient, 'update', data.name, data.value); // send to clients
     control.emit('update', data.name, data.value); // call control listeners
   }
@@ -38,7 +41,7 @@ class _ControlEvent extends EventEmitter {
 /**
  * @private
  */
-class _ControlNumber extends _ControlEvent {
+class _NumberItem extends _ControlItem {
   constructor(control, name, label, min, max, step, init, clientTypes = null) {
     super(control, 'number', name, label, init, clientTypes);
 
@@ -56,9 +59,9 @@ class _ControlNumber extends _ControlEvent {
 /**
  * @private
  */
-class _ControlSelect extends _ControlEvent {
+class _EnumItem extends _ControlItem {
   constructor(control, name, label, options, init, clientTypes = null) {
-    super(control, 'select', name, label, init, clientTypes);
+    super(control, 'enum', name, label, init, clientTypes);
 
     this.data.options = options;
   }
@@ -77,7 +80,7 @@ class _ControlSelect extends _ControlEvent {
 /**
  * @private
  */
-class _ControlInfo extends _ControlEvent {
+class _InfoItem extends _ControlItem {
   constructor(control, name, label, init, clientTypes = null) {
     super(control, 'info', name, label, init, clientTypes);
   }
@@ -90,7 +93,7 @@ class _ControlInfo extends _ControlEvent {
 /**
  * @private
  */
-class _ControlCommand extends _ControlEvent {
+class _CommandItem extends _ControlItem {
   constructor(control, name, label, clientTypes = null) {
     super(control, 'command', name, label, undefined, clientTypes);
   }
@@ -153,13 +156,13 @@ export default class ServerControl extends ServerModule {
     super(options.name || 'control');
 
     /**
-     * Dictionary of all control events.
+     * Dictionary of all control items.
      * @type {Object}
      */
-    this.events = {};
+    this.items = {};
 
     /**
-     * Array of event data cells.
+     * Array of item data cells.
      * @type {Array}
      */
     this.data = [];
@@ -176,23 +179,19 @@ export default class ServerControl extends ServerModule {
    * @param {String[]} [clientTypes=null] Array of the client types to send the parameter to. If not set, the parameter is sent to all the client types.
    */
   addNumber(name, label, min, max, step, init, clientTypes = null) {
-    let event = new _ControlNumber(this, name, label, min, max, step, init, clientTypes);
-    this.events[name] = event;
-    this.data.push(event.data);
+    return new _NumberItem(this, name, label, min, max, step, init, clientTypes);
   }
 
   /**
-   * Adds a select parameter.
+   * Adds a enum parameter.
    * @param {String} name Name of the parameter.
    * @param {String} label Label of the parameter (displayed on the control GUI on the client side).
    * @param {String[]} options Array of the different values the parameter can take.
    * @param {Number} init Initial value of the parameter (has to be in the `options` array).
    * @param {String[]} [clientTypes=null] Array of the client types to send the parameter to. If not set, the parameter is sent to all the client types.
    */
-  addSelect(name, label, options, init, clientTypes = null) {
-    let event = new _ControlSelect(this, name, label, options, init, clientTypes);
-    this.events[name] = event;
-    this.data.push(event.data);
+  addEnum(name, label, options, init, clientTypes = null) {
+    return new _EnumItem(this, name, label, options, init, clientTypes);
   }
 
   /**
@@ -203,9 +202,7 @@ export default class ServerControl extends ServerModule {
    * @param {String[]} [clientTypes=null] Array of the client types to send the parameter to. If not set, the parameter is sent to all the client types.
    */
   addInfo(name, label, init, clientTypes = null) {
-    let event = new _ControlInfo(this, name, label, init, clientTypes);
-    this.events[name] = event;
-    this.data.push(event.data);
+    return new _InfoItem(this, name, label, init, clientTypes);
   }
 
   /**
@@ -215,37 +212,35 @@ export default class ServerControl extends ServerModule {
    * @param {String[]} [clientTypes=null] Array of the client types to send the parameter to. If not set, the parameter is sent to all the client types.
    */
   addCommand(name, label, clientTypes = null) {
-    let event = new _ControlCommand(this, name, label, undefined, clientTypes);
-    this.events[name] = event;
-    this.data.push(event.data);
+    return new _CommandItem(this, name, label, undefined, clientTypes);
   }
 
   /**
-   * Add listener to an event (i.e. parameter, info or command).
-   * @param {String} name Name of the event.
+   * Add listener to a control item (i.e. parameter, info or command).
+   * @param {String} name Name of the item.
    * @param {Function} listener Listener callback.
    */
-  addEventListener(name, listener) {
-    const event = this.events[name];
+  addItemListener(name, listener) {
+    const item = this.items[name];
 
-    if (event)
-      event.addListener(listener);
+    if (item)
+      item.addListener(listener);
     else
-      console.log('unknown control event "' + name + '"');
+      console.log('unknown control item "' + name + '"');
   }
 
   /**
-   * Remove listener from an event (i.e. parameter, info or command).
-   * @param {String} name Name of the event.
+   * Remove listener from a control item (i.e. parameter, info or command).
+   * @param {String} name Name of the item.
    * @param {Function} listener Listener callback.
    */
-  removeEventListener(name, listener) {
-    const event = this.events[name];
+  removeItemListener(name, listener) {
+    const item = this.items[name];
 
-    if (event)
-      event.removeListener(listener);
+    if (item)
+      item.removeListener(listener);
     else
-      console.log('unknown control event "' + name + '"');
+      console.log('unknown control item "' + name + '"');
   }
 
   /**
@@ -254,12 +249,12 @@ export default class ServerControl extends ServerModule {
    * @param {(String|Number|Boolean)} value New value of the parameter.
    */
   update(name, value, excludeClient = null) {
-    let event = this.events[name];
+    let item = this.items[name];
 
-    if (event)
-      event.update(value, excludeClient);
+    if (item)
+      item.update(value, excludeClient);
     else
-      console.log('unknown control event "' + name + '"');
+      console.log('unknown control item "' + name + '"');
   }
 
   /**
