@@ -214,13 +214,11 @@ export default {
    */
   map(clientType, ...modules) {
     const url = (clientType !== this.config.defaultClient) ? `/${clientType}` : '/';
-    // cache compiled template
 
     // use template with `clientType` name or default if not defined
     const clientTmpl = path.join(this.config.templateFolder, `${clientType}.ejs`);
     const defaultTmpl = path.join(this.config.templateFolder, `default.ejs`);
     const template = fs.existsSync(clientTmpl) ? clientTmpl : defaultTmpl;
-    console.log(template);
 
     const tmplString = fs.readFileSync(template, { encoding: 'utf8' });
     const tmpl = ejs.compile(tmplString);
@@ -234,8 +232,6 @@ export default {
         assetsDomain: this.config.assetsDomain,
       }));
     });
-
-    modules.forEach((mod) => { mod.configure(this.config) })
 
     this.io.of(clientType).on('connection', (socket) => {
       const client = new Client(clientType, socket);
