@@ -57,12 +57,12 @@ export default class ServerCheckin extends ServerModule {
 
     const setup = options.setup;
 
-    if(setup) {
+    if (setup) {
       const numLabels = setup.labels ? setup.labels.length : Infinity;
       const numCoordinates = setup.coordinates ? setup.coordinates.length : Infinity;
       const numPositions = Math.min(numLabels, numCoordinates);
 
-      if(this.capacity > numPositions)
+      if (this.capacity > numPositions)
         this.capacity = numPositions;
     }
 
