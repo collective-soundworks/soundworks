@@ -1,27 +1,7 @@
 import log from './logger';
 
-let nextClientIndex = 0;
-const availableClientIndices = [];
-
-function _getClientIndex() {
-  var index = -1;
-
-  if (availableClientIndices.length > 0) {
-    availableClientIndices.sort(function(a, b) {
-      return a - b;
-    });
-
-    index = availableClientIndices.splice(0, 1)[0];
-  } else {
-    index = nextClientIndex++;
-  }
-
-  return index;
-}
-
-function _releaseClientIndex(index) {
-  availableClientIndices.push(index);
-}
+let _counter = 0;
+function _getUID() { return _counter++; }
 
 /**
  * Client that connects to the server.
@@ -59,7 +39,7 @@ export default class Client {
 		 * Index of the client.
 		 * @type {Number}
 		 */
-    this.index = _getClientIndex();
+    this.uid = _getUID();
 
 		/**
 		 * Coordinates of the client, stored as an `[x:Number, y:Number]` array.
@@ -91,7 +71,6 @@ export default class Client {
    * Destroy the client.
    */
   destroy() {
-    _releaseClientIndex(this.index);
-    this.index = -1;
+    this.uid = -1;
   }
 }
