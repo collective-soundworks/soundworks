@@ -5,7 +5,7 @@ import { EventEmitter } from 'events';
 /**
  * @private
  */
-class _ControlEvent extends EventEmitter {
+class _ControlUnit extends EventEmitter {
   constructor(control, type, name, label, init = undefined, clientTypes = null) {
     super();
 
@@ -38,7 +38,7 @@ class _ControlEvent extends EventEmitter {
 /**
  * @private
  */
-class _ControlNumber extends _ControlEvent {
+class _ControlNumber extends _ControlUnit {
   constructor(control, name, label, min, max, step, init, clientTypes = null) {
     super(control, 'number', name, label, init, clientTypes);
 
@@ -56,7 +56,7 @@ class _ControlNumber extends _ControlEvent {
 /**
  * @private
  */
-class _ControlSelect extends _ControlEvent {
+class _ControlSelect extends _ControlUnit {
   constructor(control, name, label, options, init, clientTypes = null) {
     super(control, 'select', name, label, init, clientTypes);
 
@@ -77,7 +77,7 @@ class _ControlSelect extends _ControlEvent {
 /**
  * @private
  */
-class _ControlInfo extends _ControlEvent {
+class _ControlInfo extends _ControlUnit {
   constructor(control, name, label, init, clientTypes = null) {
     super(control, 'info', name, label, init, clientTypes);
   }
@@ -90,7 +90,7 @@ class _ControlInfo extends _ControlEvent {
 /**
  * @private
  */
-class _ControlCommand extends _ControlEvent {
+class _ControlCommand extends _ControlUnit {
   constructor(control, name, label, clientTypes = null) {
     super(control, 'command', name, label, undefined, clientTypes);
   }
@@ -156,13 +156,13 @@ export default class ServerControl extends ServerModule {
      * Dictionary of all control events.
      * @type {Object}
      */
-    this.events = {};
+    this.units = {};
 
     /**
      * Array of event data cells.
      * @type {Array}
      */
-    this.data = [];
+    this.__unitData = [];
   }
 
   /**
@@ -176,9 +176,9 @@ export default class ServerControl extends ServerModule {
    * @param {String[]} [clientTypes=null] Array of the client types to send the parameter to. If not set, the parameter is sent to all the client types.
    */
   addNumber(name, label, min, max, step, init, clientTypes = null) {
-    let event = new _ControlNumber(this, name, label, min, max, step, init, clientTypes);
-    this.events[name] = event;
-    this.data.push(event.data);
+    const unit = new _ControlNumber(this, name, label, min, max, step, init, clientTypes);
+    this.units[name] = unit;
+    this._unitData.push(unit.data);
   }
 
   /**
@@ -190,9 +190,9 @@ export default class ServerControl extends ServerModule {
    * @param {String[]} [clientTypes=null] Array of the client types to send the parameter to. If not set, the parameter is sent to all the client types.
    */
   addSelect(name, label, options, init, clientTypes = null) {
-    let event = new _ControlSelect(this, name, label, options, init, clientTypes);
-    this.events[name] = event;
-    this.data.push(event.data);
+    const unit = new _ControlSelect(this, name, label, options, init, clientTypes);
+    this.units[name] = unit;
+    this._unitData.push(unit.data);
   }
 
   /**
@@ -203,9 +203,9 @@ export default class ServerControl extends ServerModule {
    * @param {String[]} [clientTypes=null] Array of the client types to send the parameter to. If not set, the parameter is sent to all the client types.
    */
   addInfo(name, label, init, clientTypes = null) {
-    let event = new _ControlInfo(this, name, label, init, clientTypes);
-    this.events[name] = event;
-    this.data.push(event.data);
+    const unit = new _ControlInfo(this, name, label, init, clientTypes);
+    this.units[name] = unit;
+    this._unitData.push(unit.data);
   }
 
   /**
@@ -215,9 +215,9 @@ export default class ServerControl extends ServerModule {
    * @param {String[]} [clientTypes=null] Array of the client types to send the parameter to. If not set, the parameter is sent to all the client types.
    */
   addCommand(name, label, clientTypes = null) {
-    let event = new _ControlCommand(this, name, label, undefined, clientTypes);
-    this.events[name] = event;
-    this.data.push(event.data);
+    const unit = new _ControlCommand(this, name, label, undefined, clientTypes);
+    this.units[name] = unit;
+    this._unitData.push(unit.data);
   }
 
   /**
@@ -226,10 +226,10 @@ export default class ServerControl extends ServerModule {
    * @param {Function} listener Listener callback.
    */
   addEventListener(name, listener) {
-    const event = this.events[name];
+    const unit = this.units[name];
 
-    if (event)
-      event.addListener(listener);
+    if (unit)
+      unit.addListener(listener);
     else
       console.log('unknown control event "' + name + '"');
   }
@@ -240,10 +240,10 @@ export default class ServerControl extends ServerModule {
    * @param {Function} listener Listener callback.
    */
   removeEventListener(name, listener) {
-    const event = this.events[name];
+    const unit = this.units[name];
 
-    if (event)
-      event.removeListener(listener);
+    if (unit)
+      unit.removeListener(listener);
     else
       console.log('unknown control event "' + name + '"');
   }
@@ -254,10 +254,10 @@ export default class ServerControl extends ServerModule {
    * @param {(String|Number|Boolean)} value New value of the parameter.
    */
   update(name, value, excludeClient = null) {
-    let event = this.events[name];
+    const unit = this.units[name];
 
-    if (event)
-      event.update(value, excludeClient);
+    if (unit)
+      unit.update(value, excludeClient);
     else
       console.log('unknown control event "' + name + '"');
   }
@@ -270,7 +270,7 @@ export default class ServerControl extends ServerModule {
 
     // init control parameters, infos, and commands at client
     this.receive(client, 'request', () => {
-      this.send(client, 'init', this.data);
+      this.send(client, 'init', this._unitData);
     });
 
     // listen to control parameters
