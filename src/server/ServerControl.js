@@ -162,7 +162,7 @@ export default class ServerControl extends ServerModule {
      * Array of event data cells.
      * @type {Array}
      */
-    this.__unitData = [];
+    this._unitData = [];
   }
 
   /**
