@@ -62,12 +62,13 @@ const defaultFwConfig = {
  */
 const defaultEnvConfig = {
   port: 8000,
-  osc: {
-    receiveAddress: '127.0.0.1',
-    receivePort: 57121,
-    sendAddress: '127.0.0.1',
-    sendPort: 57120,
-  },
+  // osc: {
+  //   receiveAddress: '127.0.0.1',
+  //   receivePort: 57121,
+  //   sendAddress: '127.0.0.1',
+  //   sendPort: 57120,
+  // },
+  osc: null,
   logger: {
     name: 'soundworks',
     level: 'info',
@@ -244,7 +245,7 @@ export default {
         logger.info({ socket: socket, clientType: clientType }, 'disconnect');
       });
 
-      comm.send(client, 'client:start', client.index); // the server is ready
+      comm.send(client, 'client:start', client.uid); // the server is ready
       logger.info({ socket: socket, clientType: clientType }, 'connection');
     });
   },
