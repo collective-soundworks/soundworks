@@ -18,6 +18,9 @@ class _ControlUnit extends EventEmitter {
       label: label,
       value: init,
     };
+
+    control.units[name] = this;
+    control._unitData.push(this.data);
   }
 
   set(val) {
@@ -29,7 +32,7 @@ class _ControlUnit extends EventEmitter {
     let data = this.data;
 
     this.set(val); // set value
-    this.emit(data.name, data.value); // call event listeners
+    this.emit(data.name, data.value); // call item listeners
     control.broadcast(this.clientTypes, excludeClient, 'update', data.name, data.value); // send to clients
     control.emit('update', data.name, data.value); // call control listeners
   }
@@ -38,7 +41,7 @@ class _ControlUnit extends EventEmitter {
 /**
  * @private
  */
-class _ControlNumber extends _ControlUnit {
+class _NumberUnit extends _ControlUnit {
   constructor(control, name, label, min, max, step, init, clientTypes = null) {
     super(control, 'number', name, label, init, clientTypes);
 
@@ -56,9 +59,9 @@ class _ControlNumber extends _ControlUnit {
 /**
  * @private
  */
-class _ControlSelect extends _ControlUnit {
+class _EnumUnit extends _ControlUnit {
   constructor(control, name, label, options, init, clientTypes = null) {
-    super(control, 'select', name, label, init, clientTypes);
+    super(control, 'enum', name, label, init, clientTypes);
 
     this.data.options = options;
   }
@@ -77,7 +80,7 @@ class _ControlSelect extends _ControlUnit {
 /**
  * @private
  */
-class _ControlInfo extends _ControlUnit {
+class _InfoUnit extends _ControlUnit {
   constructor(control, name, label, init, clientTypes = null) {
     super(control, 'info', name, label, init, clientTypes);
   }
@@ -90,7 +93,7 @@ class _ControlInfo extends _ControlUnit {
 /**
  * @private
  */
-class _ControlCommand extends _ControlUnit {
+class _CommandUnit extends _ControlUnit {
   constructor(control, name, label, clientTypes = null) {
     super(control, 'command', name, label, undefined, clientTypes);
   }
@@ -153,13 +156,13 @@ export default class ServerControl extends ServerModule {
     super(options.name || 'control');
 
     /**
-     * Dictionary of all control events.
+     * Dictionary of all control items.
      * @type {Object}
      */
     this.units = {};
 
     /**
-     * Array of event data cells.
+     * Array of item data cells.
      * @type {Array}
      */
     this._unitData = [];
@@ -176,23 +179,19 @@ export default class ServerControl extends ServerModule {
    * @param {String[]} [clientTypes=null] Array of the client types to send the parameter to. If not set, the parameter is sent to all the client types.
    */
   addNumber(name, label, min, max, step, init, clientTypes = null) {
-    const unit = new _ControlNumber(this, name, label, min, max, step, init, clientTypes);
-    this.units[name] = unit;
-    this._unitData.push(unit.data);
+    return new _NumberUnit(this, name, label, min, max, step, init, clientTypes);
   }
 
   /**
-   * Adds a select parameter.
+   * Adds a enum parameter.
    * @param {String} name Name of the parameter.
    * @param {String} label Label of the parameter (displayed on the control GUI on the client side).
    * @param {String[]} options Array of the different values the parameter can take.
    * @param {Number} init Initial value of the parameter (has to be in the `options` array).
    * @param {String[]} [clientTypes=null] Array of the client types to send the parameter to. If not set, the parameter is sent to all the client types.
    */
-  addSelect(name, label, options, init, clientTypes = null) {
-    const unit = new _ControlSelect(this, name, label, options, init, clientTypes);
-    this.units[name] = unit;
-    this._unitData.push(unit.data);
+  addEnum(name, label, options, init, clientTypes = null) {
+    return new _EnumUnit(this, name, label, options, init, clientTypes);
   }
 
   /**
@@ -203,9 +202,7 @@ export default class ServerControl extends ServerModule {
    * @param {String[]} [clientTypes=null] Array of the client types to send the parameter to. If not set, the parameter is sent to all the client types.
    */
   addInfo(name, label, init, clientTypes = null) {
-    const unit = new _ControlInfo(this, name, label, init, clientTypes);
-    this.units[name] = unit;
-    this._unitData.push(unit.data);
+    return new _InfoUnit(this, name, label, init, clientTypes);
   }
 
   /**
@@ -215,37 +212,35 @@ export default class ServerControl extends ServerModule {
    * @param {String[]} [clientTypes=null] Array of the client types to send the parameter to. If not set, the parameter is sent to all the client types.
    */
   addCommand(name, label, clientTypes = null) {
-    const unit = new _ControlCommand(this, name, label, undefined, clientTypes);
-    this.units[name] = unit;
-    this._unitData.push(unit.data);
+    return new _CommandUnit(this, name, label, undefined, clientTypes);
   }
 
   /**
-   * Add listener to an event (i.e. parameter, info or command).
-   * @param {String} name Name of the event.
+   * Add listener to a control item (i.e. parameter, info or command).
+   * @param {String} name Name of the item.
    * @param {Function} listener Listener callback.
    */
-  addEventListener(name, listener) {
+  addUnitListener(name, listener) {
     const unit = this.units[name];
 
     if (unit)
       unit.addListener(listener);
     else
-      console.log('unknown control event "' + name + '"');
+      console.log('unknown control item "' + name + '"');
   }
 
   /**
-   * Remove listener from an event (i.e. parameter, info or command).
-   * @param {String} name Name of the event.
+   * Remove listener from a control item (i.e. parameter, info or command).
+   * @param {String} name Name of the item.
    * @param {Function} listener Listener callback.
    */
-  removeEventListener(name, listener) {
+  removeUnitListener(name, listener) {
     const unit = this.units[name];
 
     if (unit)
       unit.removeListener(listener);
     else
-      console.log('unknown control event "' + name + '"');
+      console.log('unknown control item "' + name + '"');
   }
 
   /**
@@ -259,7 +254,7 @@ export default class ServerControl extends ServerModule {
     if (unit)
       unit.update(value, excludeClient);
     else
-      console.log('unknown control event "' + name + '"');
+      console.log('unknown control item "' + name + '"');
   }
 
   /**

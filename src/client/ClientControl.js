@@ -39,7 +39,7 @@ class _ControlUnit extends EventEmitter {
 }
 
 /** @private */
-class _ControlNumber extends _ControlUnit {
+class _NumberUnit extends _ControlUnit {
   constructor(control, name, label, min, max, step, init) {
     super(control, 'number', name, label);
     this.min = min;
@@ -54,9 +54,9 @@ class _ControlNumber extends _ControlUnit {
 }
 
 /** @private */
-class _ControlSelect extends _ControlUnit {
+class _EnumUnit extends _ControlUnit {
   constructor(control, name, label, options, init) {
-    super(control, 'select', name, label);
+    super(control, 'enum', name, label);
     this.options = options;
     this.set(init);
   }
@@ -72,7 +72,7 @@ class _ControlSelect extends _ControlUnit {
 }
 
 /** @private */
-class _ControlInfo extends _ControlUnit {
+class _InfoUnit extends _ControlUnit {
   constructor(control, name, label, init) {
     super(control, 'info', name, label);
     this.set(init);
@@ -84,7 +84,7 @@ class _ControlInfo extends _ControlUnit {
 }
 
 /** @private */
-class _ControlCommand extends _ControlUnit {
+class _CommandUnit extends _ControlUnit {
   constructor(control, name, label) {
     super(control, 'command', name, label);
   }
@@ -129,7 +129,7 @@ class _NumberGui {
 }
 
 /** @private */
-class _SelectGui {
+class _EnumGui {
   constructor($container, unit, guiOptions) {
     const { label, options, value } = unit;
 
@@ -328,19 +328,19 @@ export default class ClientControl extends ClientModule {
 
     switch (init.type) {
       case 'number':
-        unit = new _ControlNumber(this, init.name, init.label, init.min, init.max, init.step, init.value);
+        unit = new _NumberUnit(this, init.name, init.label, init.min, init.max, init.step, init.value);
         break;
 
-      case 'select':
-        unit = new _ControlSelect(this, init.name, init.label, init.options, init.value);
+      case 'enum':
+        unit = new _EnumUnit(this, init.name, init.label, init.options, init.value);
         break;
 
       case 'info':
-        unit = new _ControlInfo(this, init.name, init.label, init.value);
+        unit = new _InfoUnit(this, init.name, init.label, init.value);
         break;
 
       case 'command':
-        unit = new _ControlCommand(this, init.name, init.label);
+        unit = new _CommandUnit(this, init.name, init.label);
         break;
     }
 
@@ -379,9 +379,9 @@ export default class ClientControl extends ClientModule {
         gui = new _NumberGui($container, unit, config);
         break;
 
-      case 'select':
+      case 'enum':
         // `SelectList` or `SelectButtons`
-        gui = new _SelectGui($container, unit, config);
+        gui = new _EnumGui($container, unit, config);
         break;
 
       case 'command':
@@ -414,6 +414,7 @@ export default class ClientControl extends ClientModule {
     this.receive('init', (config) => {
       config.forEach((entry) => {
         const unit = this._createControlUnit(entry);
+        console.log(unit);
         this.units[unit.name] = unit;
 
         if (view)
