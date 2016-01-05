@@ -23,7 +23,7 @@ class _ControlUnit extends EventEmitter {
     this.value = value;
   }
 
-  propagate(sendToServer = true) {
+  _propagate(sendToServer = true) {
     this.emit('update', this.value); // call event listeners
 
     if (sendToServer)
@@ -32,14 +32,14 @@ class _ControlUnit extends EventEmitter {
     this.control.emit('update', this.name, this.value); // call control listeners
   }
 
-  update(val) {
+  update(val, sendToServer = true) {
     this.set(val);
-    this.propagate();
+    this._propagate(sendToServer);
   }
 }
 
 /** @private */
-class _ControlNumber extends _ControlUnit {
+class _NumberUnit extends _ControlUnit {
   constructor(control, name, label, min, max, step, init) {
     super(control, 'number', name, label);
     this.min = min;
@@ -51,24 +51,12 @@ class _ControlNumber extends _ControlUnit {
   set(val) {
     this.value = Math.min(this.max, Math.max(this.min, val));
   }
-
-  // is now handled from the GUI
-  // @note - check algo in basic controllers, looks more reliable
-  incr() {
-    let steps = Math.floor(this.value / this.step + 0.5);
-    this.value = this.step * (steps + 1);
-  }
-
-  decr() {
-    let steps = Math.floor(this.value / this.step + 0.5);
-    this.value = this.step * (steps - 1);
-  }
 }
 
 /** @private */
-class _ControlSelect extends _ControlUnit {
+class _EnumUnit extends _ControlUnit {
   constructor(control, name, label, options, init) {
-    super(control, 'select', name, label);
+    super(control, 'enum', name, label);
     this.options = options;
     this.set(init);
   }
@@ -81,21 +69,10 @@ class _ControlSelect extends _ControlUnit {
       this.value = val;
     }
   }
-
-  // is now handled from the GUI
-  incr() {
-    this.index = (this.index + 1) % this.options.length;
-    this.value = this.options[this.index];
-  }
-
-  decr() {
-    this.index = (this.index + this.options.length - 1) % this.options.length;
-    this.value = this.options[this.index];
-  }
 }
 
 /** @private */
-class _ControlInfo extends _ControlUnit {
+class _InfoUnit extends _ControlUnit {
   constructor(control, name, label, init) {
     super(control, 'info', name, label);
     this.set(init);
@@ -107,7 +84,7 @@ class _ControlInfo extends _ControlUnit {
 }
 
 /** @private */
-class _ControlCommand extends _ControlUnit {
+class _CommandUnit extends _ControlUnit {
   constructor(control, name, label) {
     super(control, 'command', name, label);
   }
@@ -124,8 +101,8 @@ class _ControlCommand extends _ControlUnit {
 
 /** @private */
 class _NumberGui {
-  constructor($container, controlUnit, guiOptions) {
-    const { label, min, max, step, value } = controlUnit;
+  constructor($container, unit, guiOptions) {
+    const { label, min, max, step, value } = unit;
 
     if (guiOptions.type === 'slider') {
       this.controller = new basicControllers.Slider(label, min, max, step, value, guiOptions.unit, guiOptions.size);
@@ -138,12 +115,11 @@ class _NumberGui {
 
     this.controller.on('change', (value) => {
       if (guiOptions.confirm) {
-        const msg = `Are you sure you want to propagate "${controlUnit.name}:${value}"`;
+        const msg = `Are you sure you want to propagate "${unit.name}:${value}"`;
         if (!window.confirm(msg)) { return; }
       }
 
-      controlUnit.set(value);
-      controlUnit.propagate();
+      unit.update(value);
     });
   }
 
@@ -153,9 +129,9 @@ class _NumberGui {
 }
 
 /** @private */
-class _SelectGui {
-  constructor($container, controlUnit, guiOptions) {
-    const { label, options, value } = controlUnit;
+class _EnumGui {
+  constructor($container, unit, guiOptions) {
+    const { label, options, value } = unit;
 
     const ctor = guiOptions.type === 'buttons' ?
       basicControllers.SelectButtons : basicControllers.SelectList
@@ -166,12 +142,11 @@ class _SelectGui {
 
     this.controller.on('change', (value) => {
       if (guiOptions.confirm) {
-        const msg = `Are you sure you want to propagate "${controlUnit.name}:${value}"`;
+        const msg = `Are you sure you want to propagate "${unit.name}:${value}"`;
         if (!window.confirm(msg)) { return; }
       }
 
-      controlUnit.set(value);
-      controlUnit.propagate();
+      unit.update(value);
     });
   }
 
@@ -182,8 +157,8 @@ class _SelectGui {
 
 /** @private */
 class _CommandGui {
-  constructor($container, controlUnit, guiOptions) {
-    const { label } = controlUnit;
+  constructor($container, unit, guiOptions) {
+    const { label } = unit;
 
     this.controller = new basicControllers.Buttons('', [label]);
     $container.appendChild(this.controller.render());
@@ -191,11 +166,11 @@ class _CommandGui {
 
     this.controller.on('change', () => {
       if (guiOptions.confirm) {
-        const msg = `Are you sure you want to propagate "${controlUnit.name}"`;
+        const msg = `Are you sure you want to propagate "${unit.name}"`;
         if (!window.confirm(msg)) { return; }
       }
 
-      controlUnit.propagate()
+      unit.update();
     });
   }
 
@@ -204,8 +179,8 @@ class _CommandGui {
 
 /** @private */
 class _InfoGui {
-  constructor($container, controlUnit, guiOptions) {
-    const { label, value } = controlUnit;
+  constructor($container, unit, guiOptions) {
+    const { label, value } = unit;
 
     this.controller = new basicControllers.Info(label, value);
     $container.appendChild(this.controller.render());
@@ -279,7 +254,7 @@ export default class ClientControl extends ClientModule {
      * Dictionary of all the parameters and commands.
      * @type {Object}
      */
-    this.controlUnits = {};
+    this.units = {};
 
     /**
      * Flag whether client has control GUI.
@@ -287,14 +262,14 @@ export default class ClientControl extends ClientModule {
      */
     this.hasGui = options.hasGui;
 
-    this._guiConfig = {};
+    this._guiOptions = {};
 
     this.init();
   }
 
   init() {
     if (this.hasGui) {
-      this.view = this.createDefaultView();
+      this.view = this.createView();
     }
   }
 
@@ -304,12 +279,12 @@ export default class ClientControl extends ClientModule {
    * @param {Function} listener Listener callback.
    */
   addEventListener(name, listener) {
-    const controlUnit = this.controlUnits[name];
+    const unit = this.units[name];
 
-    if (controlUnit) {
-      controlUnit.addListener('update', listener);
+    if (unit) {
+      unit.addListener('update', listener);
     } else {
-      console.log('unknown controlUnit "' + name + '"');
+      console.log('unknown unit "' + name + '"');
     }
   }
 
@@ -319,78 +294,77 @@ export default class ClientControl extends ClientModule {
    * @param {Function} listener Listener callback.
    */
   removeEventListener(name, listener) {
-    const controlUnit = this.controlUnits[name];
+    const unit = this.units[name];
 
-    if (controlUnit) {
-      controlUnit.removeListener('update', listener);
+    if (unit) {
+      unit.removeListener('update', listener);
     } else {
-      console.log('unknown controlUnit "' + name + '"');
+      console.log('unknown unit "' + name + '"');
     }
   }
 
   getValue(name) {
-    return this.controlUnits[name].value;
+    return this.units[name].value;
   }
 
   /**
    * Updates the value of a parameter.
-   * @param {String} name Name of the parameter to update.
-   * @param {(String|Number|Boolean)} val New value of the parameter.
-   * @param {Boolean} [sendToServer=true] Flag whether the value is sent to the server.
+   * @param {String} name - Name of the parameter to update.
+   * @param {(String|Number|Boolean)} val - New value of the parameter.
+   * @param {Boolean} [sendToServer=true] - Flag whether the value is sent to the server.
    */
   update(name, val, sendToServer = true) {
-    const controlUnit = this.controlUnits[name];
+    const unit = this.units[name];
 
-    if (controlUnit) {
-      controlUnit.set(val);
-      controlUnit.propagate(sendToServer);
+    if (unit) {
+      unit.update(val, sendToServer);
     } else {
-      console.log('unknown control controlUnit "' + name + '"');
+      console.log('unknown control unit "' + name + '"');
     }
   }
 
   _createControlUnit(init) {
-    let controlUnit = null;
+    let unit = null;
 
     switch (init.type) {
       case 'number':
-        controlUnit = new _ControlNumber(this, init.name, init.label, init.min, init.max, init.step, init.value);
+        unit = new _NumberUnit(this, init.name, init.label, init.min, init.max, init.step, init.value);
         break;
 
-      case 'select':
-        controlUnit = new _ControlSelect(this, init.name, init.label, init.options, init.value);
+      case 'enum':
+        unit = new _EnumUnit(this, init.name, init.label, init.options, init.value);
         break;
 
       case 'info':
-        controlUnit = new _ControlInfo(this, init.name, init.label, init.value);
+        unit = new _InfoUnit(this, init.name, init.label, init.value);
         break;
 
       case 'command':
-        controlUnit = new _ControlCommand(this, init.name, init.label);
+        unit = new _CommandUnit(this, init.name, init.label);
         break;
     }
 
-    return controlUnit;
+    return unit;
   }
 
   /**
    * Configure the GUI for a specific control unit (e.g. if it should appear or not,
    * which type of GUI to use).
-   * @param {String} name - The name of the `controlUnit` to configure.
-   * @param {Object} options - The options to apply to configure the given `controlUnit`.
+   * @param {String} name - The name of the `unit` to configure.
+   * @param {Object} options - The options to apply to configure the given `unit`.
    * @param {String} options.type - The type of GUI to use.
-   * @param {Boolean} [options.show=true] - Show the GUI for this `controlUnit` or not.
+   * @param {Boolean} [options.show=true] - Show the GUI for this `unit` or not.
    * @param {Boolean} [options.confirm=false] - Ask for confirmation when the value changes.
    */
-  configureGui(name, options) {
-    this._guiConfig[name] = options;
+  setGuiOptions(name, options) {
+    this._guiOptions[name] = options;
   }
 
-  _createGui(view, controlUnit) {
+  _createGui(view, unit) {
     const config = Object.assign({
       show: true,
       confirm: false,
-    }, this._guiConfig[controlUnit.name]);
+    }, this._guiOptions[unit.name]);
 
     if (config.show === false) {
       return null;
@@ -399,31 +373,31 @@ export default class ClientControl extends ClientModule {
     let gui = null;
     const $container = this.view.$el;
 
-    switch (controlUnit.type) {
+    switch (unit.type) {
       case 'number':
         // `NumberBox` or `Slider`
-        gui = new _NumberGui($container, controlUnit, config);
+        gui = new _NumberGui($container, unit, config);
         break;
 
-      case 'select':
+      case 'enum':
         // `SelectList` or `SelectButtons`
-        gui = new _SelectGui($container, controlUnit, config);
+        gui = new _EnumGui($container, unit, config);
         break;
 
       case 'command':
         // `Button`
-        gui = new _CommandGui($container, controlUnit, config);
+        gui = new _CommandGui($container, unit, config);
         break;
 
       case 'info':
         // `Info`
-        gui = new _InfoGui($container, controlUnit, config);
+        gui = new _InfoGui($container, unit, config);
         break;
 
       // case 'toggle'
     }
 
-    controlUnit.addListener('update', (val) => gui.set(val));
+    unit.addListener('update', (val) => gui.set(val));
 
     return gui;
   }
@@ -439,11 +413,12 @@ export default class ClientControl extends ClientModule {
 
     this.receive('init', (config) => {
       config.forEach((entry) => {
-        const controlUnit = this._createControlUnit(entry);
-        this.controlUnits[controlUnit.name] = controlUnit;
+        const unit = this._createControlUnit(entry);
+        console.log(unit);
+        this.units[unit.name] = unit;
 
         if (view)
-          this._createGui(view, controlUnit);
+          this._createGui(view, unit);
       });
 
       if (!view) { this.done(); }

@@ -5,7 +5,7 @@ import { EventEmitter } from 'events';
 /**
  * @private
  */
-class _ControlItem extends EventEmitter {
+class _ControlUnit extends EventEmitter {
   constructor(control, type, name, label, init = undefined, clientTypes = null) {
     super();
 
@@ -19,8 +19,8 @@ class _ControlItem extends EventEmitter {
       value: init,
     };
 
-    control.items[name] = item;
-    control.data.push(this.data);
+    control.units[name] = this;
+    control._unitData.push(this.data);
   }
 
   set(val) {
@@ -41,7 +41,7 @@ class _ControlItem extends EventEmitter {
 /**
  * @private
  */
-class _NumberItem extends _ControlItem {
+class _NumberUnit extends _ControlUnit {
   constructor(control, name, label, min, max, step, init, clientTypes = null) {
     super(control, 'number', name, label, init, clientTypes);
 
@@ -59,7 +59,7 @@ class _NumberItem extends _ControlItem {
 /**
  * @private
  */
-class _EnumItem extends _ControlItem {
+class _EnumUnit extends _ControlUnit {
   constructor(control, name, label, options, init, clientTypes = null) {
     super(control, 'enum', name, label, init, clientTypes);
 
@@ -80,7 +80,7 @@ class _EnumItem extends _ControlItem {
 /**
  * @private
  */
-class _InfoItem extends _ControlItem {
+class _InfoUnit extends _ControlUnit {
   constructor(control, name, label, init, clientTypes = null) {
     super(control, 'info', name, label, init, clientTypes);
   }
@@ -93,7 +93,7 @@ class _InfoItem extends _ControlItem {
 /**
  * @private
  */
-class _CommandItem extends _ControlItem {
+class _CommandUnit extends _ControlUnit {
   constructor(control, name, label, clientTypes = null) {
     super(control, 'command', name, label, undefined, clientTypes);
   }
@@ -159,13 +159,13 @@ export default class ServerControl extends ServerModule {
      * Dictionary of all control items.
      * @type {Object}
      */
-    this.items = {};
+    this.units = {};
 
     /**
      * Array of item data cells.
      * @type {Array}
      */
-    this.data = [];
+    this._unitData = [];
   }
 
   /**
@@ -179,7 +179,7 @@ export default class ServerControl extends ServerModule {
    * @param {String[]} [clientTypes=null] Array of the client types to send the parameter to. If not set, the parameter is sent to all the client types.
    */
   addNumber(name, label, min, max, step, init, clientTypes = null) {
-    return new _NumberItem(this, name, label, min, max, step, init, clientTypes);
+    return new _NumberUnit(this, name, label, min, max, step, init, clientTypes);
   }
 
   /**
@@ -191,7 +191,7 @@ export default class ServerControl extends ServerModule {
    * @param {String[]} [clientTypes=null] Array of the client types to send the parameter to. If not set, the parameter is sent to all the client types.
    */
   addEnum(name, label, options, init, clientTypes = null) {
-    return new _EnumItem(this, name, label, options, init, clientTypes);
+    return new _EnumUnit(this, name, label, options, init, clientTypes);
   }
 
   /**
@@ -202,7 +202,7 @@ export default class ServerControl extends ServerModule {
    * @param {String[]} [clientTypes=null] Array of the client types to send the parameter to. If not set, the parameter is sent to all the client types.
    */
   addInfo(name, label, init, clientTypes = null) {
-    return new _InfoItem(this, name, label, init, clientTypes);
+    return new _InfoUnit(this, name, label, init, clientTypes);
   }
 
   /**
@@ -212,7 +212,7 @@ export default class ServerControl extends ServerModule {
    * @param {String[]} [clientTypes=null] Array of the client types to send the parameter to. If not set, the parameter is sent to all the client types.
    */
   addCommand(name, label, clientTypes = null) {
-    return new _CommandItem(this, name, label, undefined, clientTypes);
+    return new _CommandUnit(this, name, label, undefined, clientTypes);
   }
 
   /**
@@ -220,11 +220,11 @@ export default class ServerControl extends ServerModule {
    * @param {String} name Name of the item.
    * @param {Function} listener Listener callback.
    */
-  addItemListener(name, listener) {
-    const item = this.items[name];
+  addUnitListener(name, listener) {
+    const unit = this.units[name];
 
-    if (item)
-      item.addListener(listener);
+    if (unit)
+      unit.addListener(listener);
     else
       console.log('unknown control item "' + name + '"');
   }
@@ -234,11 +234,11 @@ export default class ServerControl extends ServerModule {
    * @param {String} name Name of the item.
    * @param {Function} listener Listener callback.
    */
-  removeItemListener(name, listener) {
-    const item = this.items[name];
+  removeUnitListener(name, listener) {
+    const unit = this.units[name];
 
-    if (item)
-      item.removeListener(listener);
+    if (unit)
+      unit.removeListener(listener);
     else
       console.log('unknown control item "' + name + '"');
   }
@@ -249,10 +249,10 @@ export default class ServerControl extends ServerModule {
    * @param {(String|Number|Boolean)} value New value of the parameter.
    */
   update(name, value, excludeClient = null) {
-    let item = this.items[name];
+    const unit = this.units[name];
 
-    if (item)
-      item.update(value, excludeClient);
+    if (unit)
+      unit.update(value, excludeClient);
     else
       console.log('unknown control item "' + name + '"');
   }
@@ -265,7 +265,7 @@ export default class ServerControl extends ServerModule {
 
     // init control parameters, infos, and commands at client
     this.receive(client, 'request', () => {
-      this.send(client, 'init', this.data);
+      this.send(client, 'init', this._unitData);
     });
 
     // listen to control parameters

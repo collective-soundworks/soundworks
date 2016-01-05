@@ -61,7 +61,7 @@ export default class Loader extends ClientModule {
         !!options.showProgress : true;
 
       this.viewCtor = options.viewCtor || LoaderView;
-      this.view = this.createDefaultView();
+      this.view = this.createView();
     }
   }
 

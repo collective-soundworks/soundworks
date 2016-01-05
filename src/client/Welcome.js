@@ -88,7 +88,7 @@ export default class Welcome extends ClientModule {
       this.view = options.view;
     } else {
       this.viewCtor = options.viewCtor || SegmentedView;
-      this.view = this.createDefaultView();
+      this.view = this.createView();
     }
   }
 

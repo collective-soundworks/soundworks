@@ -7,6 +7,9 @@ export default class TouchSurface {
     this._elBoundingRect = null;
     this._listeners = {};
 
+    this._normX = 0;
+    this._normY = 0;
+
     // cache bounding rect values
     window.addEventListener('resize', this._updateBoundingRect.bind(this));
     this._updateBoundingRect();
@@ -62,29 +65,21 @@ export default class TouchSurface {
     this._elBoundingRect = this.$el.getBoundingClientRect();
   }
 
-  _getNormalizedCoordinates(touchEvent) {
-    // @TODO should be cached for performance
-    const boundingRect = this._elBoundingRect;
-
-    const relX = touchEvent.clientX - boundingRect.left;
-    const relY = touchEvent.clientY - boundingRect.top;
-    const normX = relX / boundingRect.width;
-    const normY = relY / boundingRect.height;
-
-    return { normX, normY };
-  }
-
   _handleTouch(callback) {
     return (e) => {
       e.preventDefault();
       const touches = e.changedTouches;
+      const boundingRect = this._elBoundingRect;
 
       for (let i = 0; i < touches.length; i++) {
         const touchEvent = touches[i];
         const touchId = touchEvent.identifier;
-        const { normX, normY } = this._getNormalizedCoordinates(touchEvent);
+        const relX = touchEvent.clientX - boundingRect.left;
+        const relY = touchEvent.clientY - boundingRect.top;
+        this._normX = relX / boundingRect.width;
+        this._normY = relY / boundingRect.height;
 
-        callback(touchId, normX, normY, touchEvent);
+        callback(touchId, this._normX, this._normY, touchEvent);
       }
     }
   }
