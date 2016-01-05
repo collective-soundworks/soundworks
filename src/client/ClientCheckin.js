@@ -57,7 +57,7 @@ export default class ClientCheckin extends ClientModule {
     if (this._showDialog) {
       this.content.waiting = true;
       this.content.label = null;
-      this.view = this.createDefaultView();
+      this.view = this.createView();
     }
   }
 

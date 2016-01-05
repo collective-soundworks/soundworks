@@ -43,7 +43,7 @@ export default class Orientation extends ClientModule {
     this.angleReference = 0; // @todo - where is this value saved ?
     this._angle = 0; // @todo - is this really needed ?
 
-    this.view = this.createDefaultView();
+    this.view = this.createView();
     console.log(this.view);
   }
 

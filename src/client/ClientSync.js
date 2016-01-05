@@ -46,7 +46,7 @@ export default class ClientSync extends ClientModule {
 
   init() {
     this._ready = false;
-    this.view = this.createDefaultView();
+    this.view = this.createView();
   }
 
   /**

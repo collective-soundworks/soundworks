@@ -227,7 +227,7 @@ export default class ClientSurvey extends ClientModule {
     this.content.length = this.survey.length;
     this.events = { 'click .btn': this._displayNextQuestion };
 
-    this.view = this.createDefaultView();
+    this.view = this.createView();
   }
 
   start() {

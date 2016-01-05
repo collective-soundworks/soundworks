@@ -58,7 +58,7 @@ export default class ClientPlacer extends ClientModule {
     this.viewCtor = SquaredView;
     this.content.mode = this.mode;
     this.content.showBtn = false;
-    this.view = this.createDefaultView();
+    this.view = this.createView();
   }
 
   /**

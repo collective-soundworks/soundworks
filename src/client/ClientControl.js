@@ -269,7 +269,7 @@ export default class ClientControl extends ClientModule {
 
   init() {
     if (this.hasGui) {
-      this.view = this.createDefaultView();
+      this.view = this.createView();
     }
   }
 

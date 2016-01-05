@@ -48,10 +48,10 @@ export default {
   ready: null,
 
   /**
-   * Client index, given by the server.
+   * Client unique id, given by the server.
    * @type {Number}
    */
-  index: -1,
+  uid: null,
 
   /**
    * Client coordinates (if any) given by a {@link Locator}, {@link Placer} or
@@ -94,8 +94,8 @@ export default {
       this.comm = comm.initialize(clientType, options);
       // wait for socket being ready to resolve this module
       this.ready = new Promise((resolve) => {
-        this.comm.receive('client:start', (index) => {
-          this.index = index;
+        this.comm.receive('client:start', (uid) => {
+          this.uid = uid;
           resolve();
         });
       });
@@ -111,15 +111,12 @@ export default {
 
   /**
    * Start the module logic (*i.e.* the application).
-   * @param {Function} startFun [todo]
-   * @todo Clarify the param.
-   * @return {Promise} The Promise return value.
-   * @todo Clarify return value (promise).
+   * @param {Function} startFun - [@todo Clarify the param]
+   * @return {Promise} - The Promise return value [@todo Clarify the param].
    * @todo example
-   * @todo remove old version compatibility
    */
   start(startFun) {
-    let module = startFun; // be compatible with previous version
+    let module = startFun; // facade in case of one module only
 
     if (typeof startFun === 'function') {
       module = startFun(ClientModule.sequential, ClientModule.parallel);

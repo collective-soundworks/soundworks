@@ -40,7 +40,7 @@ export default class ClientLocator extends ClientModule {
 
   init() {
     this.content.activateBtn = false;
-    this.view = this.createDefaultView();
+    this.view = this.createView();
   }
 
   /**

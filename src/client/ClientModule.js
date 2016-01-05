@@ -169,7 +169,7 @@ export default class ClientModule extends Promised {
     this.viewOptions = options.viewOptions || {};
 
     /**
-     * Defines a view constructor to be used in createDefaultView
+     * Defines a view constructor to be used in createView
      * @type {View}
      */
     this.viewCtor = options.viewCtor || View;
@@ -244,7 +244,7 @@ export default class ClientModule extends Promised {
   /**
    * Create a default view from module attributes.
    */
-  createDefaultView() {
+  createView() {
     const options = Object.assign({ id: this.name, className: 'module' }, this.viewOptions);
     return new this.viewCtor(this.template, this.content, this.events, options);
   }
@@ -263,6 +263,10 @@ export default class ClientModule extends Promised {
     }
   }
 
+  reset(reInit = false) {
+
+  }
+
   /**
    * Handle the logic and steps that lead to the initialization of the module.
    *
@@ -277,14 +281,14 @@ export default class ClientModule extends Promised {
     // allow to bypass a module from its options
     if (this._bypass) { this.done(); }
 
-    if (!this._isStarted) {
-      if (this.view) {
-        this.view.render();
-        this.view.appendTo(this.$container);
-      }
-
-      this._isStarted = true;
+    // if (!this._isStarted) { // @todo - confirm this is not needed
+    if (this.view) {
+      this.view.render();
+      this.view.appendTo(this.$container);
     }
+
+    this._isStarted = true;
+    // }
   }
 
   /**
@@ -319,7 +323,6 @@ export default class ClientModule extends Promised {
       this.view.remove();
     }
 
-    // this.init();
     this._isStarted = false;
   }
 
@@ -336,64 +339,16 @@ export default class ClientModule extends Promised {
   done() {
     this._isDone = true;
 
-    if (this.view)
-      this.view.remove();
+    this.reset();
 
     if (this.resolvePromised)
       this.resolvePromised();
   }
 
-  // /**
-  //  * Set an arbitrary centered HTML content to the module's `view` (if any).
-  //  * @param {String} htmlContent The HTML content to append to the `view`.
-  //  */
-  // setCenteredViewContent(htmlContent) {
-  //   if (this.view) {
-  //     if (!this._centeredViewContent) {
-  //       let contentDiv = document.createElement('div');
-
-  //       contentDiv.classList.add('centered-content');
-  //       this.view.appendChild(contentDiv);
-
-  //       this._centeredViewContent = contentDiv;
-  //     }
-
-  //     if (htmlContent) {
-  //       if (htmlContent instanceof HTMLElement) {
-  //         if (this._centeredViewContent.firstChild) {
-  //           this._centeredViewContent.removeChild(this._centeredViewContent.firstChild);
-  //         }
-
-  //         this._centeredViewContent.appendChild(htmlContent);
-  //       } else {
-  //         // is a string
-  //         this._centeredViewContent.innerHTML = htmlContent;
-  //       }
-  //     }
-  //   }
-  // }
-
-  // /**
-  //  * Removes the centered HTML content (set by {@link Module#setCenteredViewContent}) from the `view`.
-  //  */
-  // removeCenteredViewContent() {
-  //   if (this.view && this._centeredViewContent) {
-  //     this.view.removeChild(this._centeredViewContent);
-  //     delete this._centeredViewContent;
-  //   }
-  // }
-
   /**
-   * `z-index` CSS property of the view.
-   * @todo - prepend would do the trick ?
-   * @param {Number} value Value of the `z-index`.
+   * @private
+   * @todo - doc
    */
-  // set zIndex(value) {
-  //   if (this.view) {
-  //     this.view.$el.style.zIndex = value;
-  //   }
-  // }
-
   show() {
     if (this.view && !this._isDone) {
       if (!this.view.isVisible) {
@@ -406,6 +361,10 @@ export default class ClientModule extends Promised {
     return false;
   }
 
+  /**
+   * @private
+   * @todo - doc
+   */
   hide() {
     if (this.view && !this._done) { this.view.hide(); }
   }
