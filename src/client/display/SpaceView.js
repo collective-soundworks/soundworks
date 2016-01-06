@@ -1,6 +1,6 @@
 import View from './View';
 
-const template = `<svg id="scene"></svg>`;
+const template = `<svg></svg>`;
 const ns = 'http://www.w3.org/2000/svg';
 
 
@@ -10,7 +10,7 @@ export default class SpaceView extends View {
    * @param {Object} area - The area to represent, should be defined by a `width`, an `height` and an optionnal background.
    * @param {Object} events - The events to attach to the view.
    * @param {Object} options - @todo
-   * @param {Object} [options.isSubView=false] - Don't automatically position the view inside it's container (is needed when inserted in a module with css flex behavior).
+   * @param {Object} [options.isSubView=false] - Don't automatically point the view inside it's container (is needed when inserted in a module with css flex behavior).
    * @todo - `options.isSubView` should be removed and handled through css flex.
    */
   constructor(area, events = {}, options = {}) {
@@ -24,13 +24,19 @@ export default class SpaceView extends View {
     this.area = area;
 
     /**
-     * Expose a Map of the $shapes and their relative position object.
+     * Expose a Map of the $shapes and their relative point object.
      * @type {Map}
      */
-    this.shapePositionMap = new Map();
+    this.shapePointMap = new Map();
 
-    this._renderedPositions = new Map();
-    this._isSubView = options.isSubView || false;
+    /**
+     * Expose a Map of the $shapes and their relative line object.
+     * @type {Map}
+     */
+    this.shapeLineMap = new Map();
+
+    this._renderedPoints = new Map();
+    this._renderedLines = new Map();
   }
 
   /**
@@ -38,7 +44,30 @@ export default class SpaceView extends View {
    * @private
    */
   onRender() {
-    this.$svg = this.$el.querySelector('#scene');
+    this.$svg = this.$el.querySelector('svg');
+    this.addDefinitions();
+  }
+
+  /**
+   * Add definitions into the `<defs>` tag of `this.$svg` to allow to draw directed graphs from css
+   */
+  addDefinitions() {
+    this.$defs = document.createElementNS(ns, 'defs');
+
+    // const markerCircle = `
+    //   <marker id="marker-circle" markerWidth="7" markerHeight="7" refX="4" refY="4" >
+    //       <circle cx="4" cy="4" r="3" class="marker-circle" />
+    //   </marker>
+    // `;
+
+    const markerArrow = `
+      <marker id="marker-arrow" markerWidth="10" markerHeight="10" refX="5" refY="5" orient="auto">
+          <path d="M0,0 L0,10 L10,5 L0,0" class="marker-arrow" />
+      </marker>
+    `;
+
+    this.$defs.innerHTML = markerArrow;
+    this.$svg.insertBefore(this.$defs, this.$svg.firstChild);
   }
 
   /**
@@ -62,26 +91,6 @@ export default class SpaceView extends View {
     this._setArea();
   }
 
-  /**
-   * The method used to render a specific position. This method should be overriden to display a position with a user defined shape.
-   * @param {Object} pos - The position to render.
-   * @param {String|Number} pos.id - An unique identifier for the position.
-   * @param {Number} pos.x - The position in the x axis in the area cordinate system.
-   * @param {Number} pos.y - The position in the y axis in the area cordinate system.
-   * @param {Number} [pos.radius=0.3] - The radius of the position (relative to the area width and height).
-   */
-  renderPosition(pos) {
-    const $shape = document.createElementNS(ns, 'circle');
-    $shape.classList.add('position');
-
-    $shape.setAttribute('data-id', pos.id);
-    $shape.setAttribute('cx', `${pos.x}`);
-    $shape.setAttribute('cy', `${pos.y}`);
-    $shape.setAttribute('r', pos.radius || 0.3); // radius is relative to area size
-    if (pos.selected) { $shape.classList.add('selected'); }
-
-    return $shape;
-  }
 
   /**
    * Render the area.
@@ -110,77 +119,216 @@ export default class SpaceView extends View {
     this.$svg.setAttribute('height', svgHeight);
     this.$svg.setAttribute('viewBox', `0 0 ${area.width} ${area.height}`);
     // center the svg into the parent
-    this.$svg.style.position = 'relative';
+    this.$svg.style.point = 'relative';
 
     // display background if any
     if (area.background) {
       this.$el.style.backgroundImage = area.background;
-      this.$el.style.backgroundPosition = '50% 50%';
+      this.$el.style.backgroundPoint = '50% 50%';
       this.$el.style.backgroundRepeat = 'no-repeat';
       this.$el.style.backgroundSize = 'cover';
     }
+
+    // update area for markers
+    const markers = Array.from(this.$defs.querySelectorAll('marker'));
+    markers.forEach((marker) => {
+      marker.setAttribute('viewBox', `0 0 ${svgWidth} ${svgHeight}`);
+    });
+  }
+
+
+  /**
+   * The method used to render a specific point. This method should be overriden to display a point with a user defined shape. These shapes are appended to the `svg` element
+   * @param {Object} point - The point to render.
+   * @param {String|Number} point.id - An unique identifier for the point.
+   * @param {Number} point.x - The point in the x axis in the area cordinate system.
+   * @param {Number} point.y - The point in the y axis in the area cordinate system.
+   * @param {Number} [point.radius=0.3] - The radius of the point (relative to the area width and height).
+   * @param {String} [point.color=undefined] - If specified, the color of the point.
+   */
+  renderPoint(point) {
+    const $shape = document.createElementNS(ns, 'circle');
+    $shape.classList.add('point');
+
+    $shape.setAttribute('data-id', point.id);
+    $shape.setAttribute('cx', `${point.x}`);
+    $shape.setAttribute('cy', `${point.y}`);
+    $shape.setAttribute('r', point.radius || 0.3); // radius is relative to area size
+
+    if (point.color)
+      $shape.style.fill = point.color;
+
+    if (point.selected)
+      $shape.classList.add('selected');
+
+    return $shape;
   }
 
   /**
-   * Replace all the existing positions with the given array of position.
-   * @param {Array<Object>} positions - The new positions to render.
+   * The method used to render a specific line. This method should be overriden to display a point with a user defined shape. These shapes are prepended to the `svg` element
+   * @param {Object} line - The line to render.
+   * @param {String|Number} line.id - An unique identifier for the line.
+   * @param {Object} line.tail - The point where the line should begin.
+   * @param {Object} line.head - The point where the line should end.
+   * @param {Boolean} [line.directed=false] - Defines if the line should be directed or not.
+   * @param {String} [line.color=undefined] - If specified, the color of the line.
    */
-  setPositions(positions) {
-    this.clearPositions()
-    this.addPositions(positions);
+  renderLine(line) {
+    const tail = line.tail;
+    const head = line.head;
+
+    const $shape = document.createElementNS(ns, 'polyline');
+    $shape.classList.add('line');
+    $shape.setAttribute('data-id', line.id);
+
+    const points = [
+      `${tail.x},${tail.y}`,
+      `${(tail.x + head.x) / 2},${(tail.y + head.y) / 2}`,
+      `${head.x},${head.y}`
+    ];
+
+    $shape.setAttribute('points', points.join(' '));
+    $shape.setAttribute('vector-effect', 'non-scaling-stroke');
+
+    if (line.color)
+      $shape.style.stroke = line.color;
+
+    if (line.directed)
+      $shape.classList.add('arrow');
+
+    return $shape;
   }
 
   /**
-   * Clear all the displayed positions.
+   * Replace all the existing points with the given array of point.
+   * @param {Array<Object>} points - The new points to render.
    */
-  clearPositions() {
-    const keys = this._renderedPositions.keys();
-    for (let id of keys) {
-      this.deletePosition(id);
+  setPoints(points) {
+    this.clearPoints()
+    this.addPoints(points);
+  }
+
+  /**
+   * Clear all the displayed points.
+   */
+  clearPoints() {
+    for (let id of this._renderedPoints.keys()) {
+      this.deletePoint(id);
     }
   }
 
   /**
-   * Add new positions to the area.
-   * @param {Array<Object>} positions - The new positions to render.
+   * Add new points to the area.
+   * @param {Array<Object>} points - The new points to render.
    */
-  addPositions(positions) {
-    positions.forEach(pos => this.addPosition(pos));
+  addPoints(points) {
+    console.log(points);
+    points.forEach(point => this.addPoint(point));
   }
 
   /**
-   * Add a new position to the area.
-   * @param {Object} pos - The new position to render.
+   * Add a new point to the area.
+   * @param {Object} point - The new point to render.
    */
-  addPosition(pos) {
-    const $shape = this.renderPosition(pos);
+  addPoint(point) {
+    const $shape = this.renderPoint(point);
     this.$svg.appendChild($shape);
-    this._renderedPositions.set(pos.id, $shape);
-    // map for easier retrieving of the position
-    this.shapePositionMap.set($shape, pos);
+    this._renderedPoints.set(point.id, $shape);
+    // map for easier retrieving of the point
+    this.shapePointMap.set($shape, point);
   }
 
   /**
-   * Update a rendered position.
-   * @param {Object} pos - The position to update.
+   * Update a rendered point.
+   * @param {Object} point - The point to update.
    */
-  updatePosition(pos) {
-    const $shape = this._renderedPositions.get(pos.id);
+  updatePoint(point) {
+    const $shape = this._renderedPoints.get(point.id);
 
-    $shape.setAttribute('cx', `${pos.x}`);
-    $shape.setAttribute('cy', `${pos.y}`);
-    $shape.setAttribute('r', pos.radius || 0.3);
+    $shape.setAttribute('cx', `${point.x}`);
+    $shape.setAttribute('cy', `${point.y}`);
+    $shape.setAttribute('r', point.radius || 0.3);
   }
 
   /**
-   * Remove a rendered position.
-   * @param {String|Number} id - The position to delete.
+   * Remove a rendered point.
+   * @param {String|Number} id - The id of the point to delete.
    */
-  deletePosition(id) {
-    const $shape = this._renderedPositions.get(id);
+  deletePoint(id) {
+    const $shape = this._renderedPoints.get(id);
     this.$svg.removechild($shape);
-    this._renderedPositions.delete(id);
-    // map for easier retrieving of the position
-    this.shapePositionMap.delete($shape);
+    this._renderedPoints.delete(id);
+    // map for easier retrieving of the point
+    this.shapePointMap.delete($shape);
+  }
+
+  /**
+   * Replace all the existing lines with the given array of line.
+   * @param {Array<Object>} lines - The new lines to render.
+   */
+  setLines(lines) {
+    this.clearLines();
+    this.addLines(lines);
+  }
+
+  /**
+   * Clear all the displayed lines.
+   */
+  clearLines() {
+    for (let id of this._renderedLines.keys()) {
+      this.deleteLine(id);
+    }
+  }
+
+  /**
+   * Add new lines to the area.
+   * @param {Array<Object>} lines - The new lines to render.
+   */
+  addLines(lines) {
+    lines.forEach(line => this.addLine(line));
+  }
+
+  /**
+   * Add a new line to the area.
+   * @param {Object} line - The new line to render.
+   */
+  addLine(line) {
+    const $shape = this.renderLine(line);
+    // insert just after the <defs> tag
+    // this.$svg.insertBefore($shape, this.$svg.firstChild.nextSibling);
+    this.$svg.appendChild($shape);
+
+    this._renderedLines.set(line.id, $shape);
+    this.shapeLineMap.set($shape, line);
+  }
+
+  /**
+   * Update a rendered line.
+   * @param {Object} line - The line to update.
+   */
+  updateLine(line) {
+    const $shape = this._renderedLines.get(line.id);
+    const tail = line.tail;
+    const head = line.head;
+
+    const points = [
+      `${tail.x},${tail.y}`,
+      `${(tail.x + head.x) / 2},${(tail.y + head.y) / 2}`,
+      `${head.x},${head.y}`
+    ];
+
+    $shape.setAttribute('points', points.join(' '));
+  }
+
+  /**
+   * Remove a rendered line.
+   * @param {String|Number} id - The id of the line to delete.
+   */
+  deleteLine(id) {
+    const $shape = this._renderedLines.get(id);
+    this.$svg.removeChild($shape);
+
+    this._renderedLines.delete(id);
+    this.shapeLineMap.delete($shape);
   }
 }

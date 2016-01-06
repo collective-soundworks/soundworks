@@ -97,6 +97,7 @@ export default class ClientSync extends ClientModule {
           this.done();
         }
       }
+
       this.emit('status', report);
     }
   }

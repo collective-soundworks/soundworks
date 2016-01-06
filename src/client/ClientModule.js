@@ -66,7 +66,7 @@ class Parallel extends Promised {
     this.modules = modules;
   }
 
-  showNext(fromIndex) {
+  showNext() {
     const length = this.modules.length;
 
     for (let i = 0; i < length; i++) {

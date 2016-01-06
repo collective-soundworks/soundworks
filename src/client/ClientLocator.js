@@ -33,6 +33,7 @@ export default class ClientLocator extends ClientModule {
     this._onAreaTouchMove = this._onAreaTouchMove.bind(this);
     this._sendCoordinates = this._sendCoordinates.bind(this);
 
+    this._positionRadius = options.positionRadius || 0.3;
     this.spaceCtor = options.spaceCtor || SpaceView;
     this.viewCtor = options.viewCtor || SquaredView;
     this.init();
@@ -79,7 +80,8 @@ export default class ClientLocator extends ClientModule {
   }
 
   _onAreaTouchStart(id, normX, normY) {
-    if (id !== 0) { return; }
+    // if (id !== 0) { return; } // does not work in Safari
+    // -> how to prevent multitouch ?
 
     if (!this.position) {
       this._createPosition(normX, normY);
@@ -95,7 +97,7 @@ export default class ClientLocator extends ClientModule {
   }
 
   _onAreaTouchMove(id, normX, normY) {
-    if (id !== 0) { return; }
+    // if (id !== 0) { return; } // does not work in Safari
     this._updatePosition(normX, normY);
   }
 
@@ -104,16 +106,17 @@ export default class ClientLocator extends ClientModule {
       id: 'locator',
       x: normX * this.area.width,
       y: normY * this.area.height,
+      radius: this._positionRadius,
     }
 
-    this.space.addPosition(this.position);
+    this.space.addPoint(this.position);
   }
 
   _updatePosition(normX, normY) {
     this.position.x = normX * this.area.width;
     this.position.y = normY * this.area.height;
 
-    this.space.updatePosition(this.position);
+    this.space.updatePoint(this.position);
   }
 
   _sendCoordinates() {
