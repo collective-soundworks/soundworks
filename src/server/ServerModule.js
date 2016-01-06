@@ -70,7 +70,7 @@ export default class ServerModule extends EventEmitter {
    * @param {Client} client Disconnected client.
    */
   disconnect(client) {
-    // delete client.modules[this.name] // TODO?
+    // delete client.modules[this.name] // maybe needed by other modules
   }
 
   /**
