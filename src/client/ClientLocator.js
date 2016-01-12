@@ -1,7 +1,6 @@
 import client from './client';
-import ClientModule from './ClientModule';
 import localStorage from './localStorage';
-import View from './display/View';
+import ClientModule from './ClientModule';
 import SquaredView from './display/SquaredView';
 import SpaceView from './display/SpaceView';
 import TouchSurface from './display/TouchSurface';
@@ -10,9 +9,9 @@ import TouchSurface from './display/TouchSurface';
 /**
  * [client] Allow to indicate the approximate location of the client on a map.
  *
- * The module always has a view (that displays the map and a button to validate the location) and requires the SASS partial `_77-locator.scss`.
+ * The module always has a view that displays the map and a button to validate the location.
  *
- * The module finishes its initialization after the user confirms his / her approximate location by clicking on the “Validate” button.
+ * The module finishes its initialization after the user confirms his / her approximate location by clicking on the “Validate” button. For development purposes it can be configured to send random coordinates or retrieving previously stored location (see `options.random` and `options.persist`.
  *
  * (See also {@link src/server/ServerLocator.js~ServerLocator} on the server side.)
  *
@@ -102,7 +101,6 @@ export default class ClientLocator extends ClientModule {
   }
 
   _onAreaTouchStart(id, normX, normY) {
-    // if (id !== 0) { return; } // does not work in Safari -> how to prevent multitouch ?
     if (!this.position) {
       this._createPosition(normX, normY);
 
@@ -123,6 +121,11 @@ export default class ClientLocator extends ClientModule {
     this._updatePosition(normX, normY);
   }
 
+  /**
+   * Creates the position object according to normalized coordinates.
+   * @param {Number} normX - The normalized coordinate in the x axis.
+   * @param {Number} normY - The normalized coordinate in the y axis.
+   */
   _createPosition(normX, normY) {
     this.position = {
       id: 'locator',
@@ -134,6 +137,11 @@ export default class ClientLocator extends ClientModule {
     this.space.addPoint(this.position);
   }
 
+  /**
+   * Updates the position object according to normalized coordinates.
+   * @param {Number} normX - The normalized coordinate in the x axis.
+   * @param {Number} normY - The normalized coordinate in the y axis.
+   */
   _updatePosition(normX, normY) {
     this.position.x = normX * this.area.width;
     this.position.y = normY * this.area.height;
@@ -141,6 +149,9 @@ export default class ClientLocator extends ClientModule {
     this.space.updatePoint(this.position);
   }
 
+  /**
+   * Send coordinates to the server.
+   */
   _sendCoordinates() {
     if (this._persist) { // store normalized coordinates
       const normX = this.position.x / this.area.width;
