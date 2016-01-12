@@ -23,7 +23,10 @@ export default {
     send: 'Send',
   },
   orientation: {
-    instructions: 'Point the phone exactly in front of you, and touch the screen.',
+    instructions: 'Point the phone exactly in front of you, and validate.',
+    errorMessage: `Sorry, your plone cannot support this application`,
+    send: 'Send',
+    error: false,
   },
   placer: {
     instructions: 'Select your position',
