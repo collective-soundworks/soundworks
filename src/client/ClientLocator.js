@@ -23,8 +23,8 @@ export default class ClientLocator extends ClientModule {
   /**
    * @param {Object} [options={}] - Options.
    * @param {String} [options.name='locator'] - The name of the module.
-   * @param {Boolean} [options.random=false] - Send random position to the server and call `this.done()` (for developpement purpose)
-   * @param {Boolean} [options.persist=false] - If set to `true`, store the normalized coordinates in `localStorage` and retrieve them in subsequent calls. Delete the stored position when set to `false`. (for developpement purpose)
+   * @param {Boolean} [options.random=false] - Send random position to the server and call `this.done()` (for development purpose)
+   * @param {Boolean} [options.persist=false] - If set to `true`, store the normalized coordinates in `localStorage` and retrieve them in subsequent calls. Delete the stored position when set to `false`. (for development purpose)
    */
   constructor(options = {}) {
     super(options.name || 'locator', options);
