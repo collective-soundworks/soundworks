@@ -222,7 +222,6 @@ export default class SpaceView extends View {
    * @param {Array<Object>} points - The new points to render.
    */
   addPoints(points) {
-    console.log(points);
     points.forEach(point => this.addPoint(point));
   }
 
