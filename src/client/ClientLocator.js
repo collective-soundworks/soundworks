@@ -1,6 +1,6 @@
 import client from './client';
 import ClientModule from './ClientModule';
-
+import localStorage from './localStorage';
 import View from './display/View';
 import SquaredView from './display/SquaredView';
 import SpaceView from './display/SpaceView';
@@ -22,20 +22,25 @@ import TouchSurface from './display/TouchSurface';
 export default class ClientLocator extends ClientModule {
   /**
    * @param {Object} [options={}] - Options.
-   * @param {String} [options.name='locator'] - Name of the module.
-   * @param {Boolean} [options.showBackground=false] - Indicates whether to show the space background image or not.
+   * @param {String} [options.name='locator'] - The name of the module.
+   * @param {Boolean} [options.random=false] - Send random position to the server and call `this.done()` (for developpement purpose)
+   * @param {Boolean} [options.persist=false] - If set to `true`, store the normalized coordinates in `localStorage` and retrieve them in subsequent calls. Delete the stored position when set to `false`. (for developpement purpose)
    */
   constructor(options = {}) {
     super(options.name || 'locator', options);
 
-    this._attachArea = this._attachArea.bind(this);
-    this._onAreaTouchStart = this._onAreaTouchStart.bind(this);
-    this._onAreaTouchMove = this._onAreaTouchMove.bind(this);
-    this._sendCoordinates = this._sendCoordinates.bind(this);
-
+    this._random = options.random || false;
+    this._persist = options.persist || false;
     this._positionRadius = options.positionRadius || 0.3;
     this.spaceCtor = options.spaceCtor || SpaceView;
     this.viewCtor = options.viewCtor || SquaredView;
+
+    // The namespace where coordinates are stored when `options.persist = true`.
+    this._localStorageNamespace = `soundworks:${this.name}`;
+
+    this._onAreaTouchStart = this._onAreaTouchStart.bind(this);
+    this._onAreaTouchMove = this._onAreaTouchMove.bind(this);
+
     this.init();
   }
 
@@ -52,20 +57,37 @@ export default class ClientLocator extends ClientModule {
     super.start();
 
     this.send('request');
-    this.receive('area', this._attachArea, false);
+
+    if (!this._persist)
+      localStorage.delete(this._localStorageNamespace);
+
+    this.receive('area', (area) => {
+      this._attachArea(area);
+
+      // Bypass the locator according to module configuration options.
+      // If `options.random` is set to true, use random coordinates.
+      // If `options.persist` is set to true use coordinates stored in local storage,
+      // do nothing when no coordinates are stored yet.
+      if (this._random || this._persist) {
+        let coords;
+
+        if (this._random) {
+          coords.normX = Math.random();
+          coords.normY = Math.random();
+        } else if (this._persist) {
+          coords = JSON.parse(localStorage.get(this._localStorageNamespace));
+        }
+
+        if (coords !== null) {
+          this._createPosition(coords.normX, coords.normY);
+          this._sendCoordinates();
+        }
+      }
+    });
   }
 
   /**
-   * Done method.
-   * Remove the `'resize'` listener on the `window`.
-   * @private
-   */
-  done() {
-    super.done();
-  }
-
-  /**
-   * Create a SpaceView and display it in the square section of the view
+   * Create a `SpaceView` and display it in the square section of the view
    */
   _attachArea(area) {
     this.area = area;
@@ -80,24 +102,24 @@ export default class ClientLocator extends ClientModule {
   }
 
   _onAreaTouchStart(id, normX, normY) {
-    // if (id !== 0) { return; } // does not work in Safari
-    // -> how to prevent multitouch ?
-
+    // if (id !== 0) { return; } // does not work in Safari -> how to prevent multitouch ?
     if (!this.position) {
       this._createPosition(normX, normY);
 
       this.content.activateBtn = true;
       this.view.render('.section-float');
       this.view.installEvents({
-        'click .btn': this._sendCoordinates,
-      })
+        'click .btn': (e) => {
+          e.target.setAttribute('disabled', true);
+          this._sendCoordinates();
+        },
+      });
     } else {
       this._updatePosition(normX, normY);
     }
   }
 
   _onAreaTouchMove(id, normX, normY) {
-    // if (id !== 0) { return; } // does not work in Safari
     this._updatePosition(normX, normY);
   }
 
@@ -120,8 +142,11 @@ export default class ClientLocator extends ClientModule {
   }
 
   _sendCoordinates() {
-    const $btn = this.view.$el.querySelector('.btn');
-    $btn.setAttribute('disabled', true);
+    if (this._persist) { // store normalized coordinates
+      const normX = this.position.x / this.area.width;
+      const normY = this.position.y / this.area.height;
+      localStorage.set(this._localStorageNamespace, JSON.stringify({ normX, normY }));
+    }
 
     client.coordinates = this.position;
     this.send('coordinates', client.coordinates);
