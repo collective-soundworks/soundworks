@@ -142,7 +142,7 @@ export default class ClientModule extends Promised {
   constructor(name, options = {}) { // TODO: change to colorClass?
     super();
 
-    this._bypass = options.bypass || false;
+    // this._bypass = options.bypass || false;
 
     /**
      * Name of the module.
@@ -279,7 +279,7 @@ export default class ClientModule extends Promised {
    */
   start() {
     // allow to bypass a module from its options
-    if (this._bypass) { this.done(); }
+    // if (this._bypass) { this.done(); }
 
     // if (!this._isStarted) { // @todo - confirm this is not needed
     if (this.view) {
