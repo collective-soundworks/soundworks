@@ -1,4 +1,4 @@
-import { audioContext } from 'waves-audio';
+import audio from 'waves-audio';
 import client from './client';
 import input from './input';
 
@@ -14,8 +14,10 @@ import ClientSurvey from './ClientSurvey';
 import ClientSync from './ClientSync';
 
 import Loader from './Loader';
+import motionInput from 'motion-input';
 import Orientation from './Orientation';
 import Welcome from './Welcome';
+
 
 // views
 import View from './display/View';
@@ -39,20 +41,22 @@ import * as math from '../utils/math';
 import * as setup from '../utils/setup';
 
 export default {
-  audioContext,
+  audio,
+  audioContext: audio.audioContext,
   client,
   input,
   ClientCalibration,
   ClientCheckin,
   ClientControl,
   ClientFileList,
+  ClientModule,
   ClientLocator,
   ClientPerformance,
   ClientPlacer,
   ClientSurvey,
   ClientSync,
   Loader,
-  ClientModule,
+  motionInput,
   Orientation,
   Welcome,
   display: {
