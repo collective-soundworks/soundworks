@@ -283,7 +283,9 @@ export default class ClientControl extends ClientModule {
 
     if (unit) {
       unit.addListener('update', listener);
-      listener(unit.value);
+
+      if (unit.type !== 'command')
+        listener(unit.value);
     } else {
       console.log('unknown unit "' + name + '"');
     }
