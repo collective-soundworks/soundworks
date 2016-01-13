@@ -71,8 +71,7 @@ export default class ClientLocator extends ClientModule {
         let coords;
 
         if (this._random) {
-          coords.normX = Math.random();
-          coords.normY = Math.random();
+          coords = { normX: Math.random(), normY: Math.random() };
         } else if (this._persist) {
           coords = JSON.parse(localStorage.get(this._localStorageNamespace));
         }
