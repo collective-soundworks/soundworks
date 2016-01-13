@@ -414,7 +414,6 @@ export default class ClientControl extends ClientModule {
     this.receive('init', (config) => {
       config.forEach((entry) => {
         const unit = this._createControlUnit(entry);
-        console.log(unit);
         this.units[unit.name] = unit;
 
         if (view)
