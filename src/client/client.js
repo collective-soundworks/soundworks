@@ -72,7 +72,7 @@ export default {
   init(clientType = 'player', options = {}) {
     this.type = clientType;
 
-    const socketIO = window.SOCKET_CONFIG; // shared by server (cf .ejs template)
+    const socketIO = window.CONFIG.SOCKET_CONFIG; // shared by server (cf .ejs template)
     // @todo harmonize io config with server
     options = Object.assign({
       io: true,
@@ -85,7 +85,12 @@ export default {
     // initialize modules views with default texts and templates
     this.textContents = {};
     this.templates = {};
-    this.setViewContentDefinitions(defaultTextContents);
+
+    const textContents = Object.assign(defaultTextContents, {
+      globals: { appName: window.CONFIG.APP_NAME }
+    });
+
+    this.setViewContentDefinitions(textContents);
     this.setViewTemplateDefinitions(defaultTemplates);
     this.setAppContainer(options.appContainer);
 

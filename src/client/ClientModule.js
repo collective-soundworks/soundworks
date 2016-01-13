@@ -226,13 +226,13 @@ export default class ClientModule extends Promised {
 
   /**
    * Returns the text associated to the current module.
-   * @returns {Object} - The text contents related to the `name` of the current module. The returned object is extended with a pointer to the `_globals` entry of the defined text contents.
+   * @returns {Object} - The text contents related to the `name` of the current module. The returned object is extended with a pointer to the `globals` entry of the defined text contents.
    */
   get content() {
     const content = this._content || this.contentDefinitions[this.name];
 
     if (content)
-      content._globals = this.contentDefinitions._globals;
+      content.globals = this.contentDefinitions.globals;
 
     return content;
   }
@@ -245,7 +245,11 @@ export default class ClientModule extends Promised {
    * Create a default view from module attributes.
    */
   createView() {
-    const options = Object.assign({ id: this.name, className: 'module' }, this.viewOptions);
+    const options = Object.assign({
+      id: this.name,
+      className: 'module'
+    }, this.viewOptions);
+
     return new this.viewCtor(this.template, this.content, this.events, options);
   }
 

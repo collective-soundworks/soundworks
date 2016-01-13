@@ -3,9 +3,8 @@
  * @type {Object}
  */
 export default {
-  _globals: {
-    appName: 'Soundworks',
-  },
+  /* `globals` is populated with server `appName` and shared between all templates */
+  globals: {},
   checkin: {
     wait: '...',
     labelPrefix: 'Go to',
