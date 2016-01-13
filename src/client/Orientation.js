@@ -1,7 +1,9 @@
-import input from './input';
+// import input from './input';
+import motionInput from 'motion-input';
 import ClientModule from './ClientModule';
 import SegmentedView from './display/SegmentedView';
 
+// https://sites.google.com/a/chromium.org/dev/Home/chromium-security/deprecating-powerful-features-on-insecure-origins
 
 /**
  * [client] Calibrate the compass by setting an angle reference.
@@ -14,16 +16,15 @@ import SegmentedView from './display/SegmentedView';
 export default class Orientation extends ClientModule {
   /**
    * @param {Object} [options={}] Options.
-   * @param {String} [options.name='dialog'] Name of the module.
-   * @param {String} [options.color='black'] Background color of the `view`.
-   * @param {String} [options.text='Point the phone exactly in front of you, and touch the screen.'] Text to be displayed in the `view`.
-   * @todo Solve the space in default parameter problem.
+   * @param {String} [options.name='orientation'] Name of the module.
+   * @todo Solve the space in default parameter problem. (??)
    */
   constructor(options = {}) {
     super(options.name || 'orientation', options);
 
+    this.bypass = options.bypass || false;
     // @todo - use new input module
-    input.enableDeviceOrientation();
+    // input.enableDeviceOrientation();
     // bind methods
     this._onOrientationChange = this._onOrientationChange.bind(this);
     this._onClick = this._onClick.bind(this);
@@ -35,6 +36,11 @@ export default class Orientation extends ClientModule {
   }
 
   init() {
+    if (this.bypass) {
+      this.angleReference = 0;
+      this.done();
+    }
+
     /**
      * Value of the `alpha` angle (as in the [`deviceOrientation` HTML5 API](http://www.w3.org/TR/orientation-event/)) when the user touches the screen.
      * It serves as a calibration / reference of the compass.
@@ -43,8 +49,17 @@ export default class Orientation extends ClientModule {
     this.angleReference = 0; // @todo - where is this value saved ?
     this._angle = 0; // @todo - is this really needed ?
 
-    this.view = this.createView();
-    console.log(this.view);
+    motionInput
+      .init('orientation')
+      .then((modules) => {
+        const [orientation] = modules;
+
+        if (!orientation.isValid) {
+          this.content.error = true;
+        }
+
+        this.view = this.createView();
+      });
   }
 
   /**
@@ -52,7 +67,10 @@ export default class Orientation extends ClientModule {
    */
   start() {
     super.start();
-    input.on('deviceorientation', this._onOrientationChange);
+    // input.on('deviceorientation', this._onOrientationChange);
+    if (!this.content.error) {
+      motionInput.addListener('orientation', this._onOrientationChange);
+    }
   }
 
   _onOrientationChange(orientationData) {
@@ -61,8 +79,9 @@ export default class Orientation extends ClientModule {
 
   _onClick() {
     this.angleReference = this._angle;
+    console.log(this.angleReference);
     // stop listening for device orientation when done
-    input.removeListener('deviceorientation', this._onOrientationChange);
+    motionInput.removeListener('orientation', this._onOrientationChange);
     this.done();
   }
 }

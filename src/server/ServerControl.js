@@ -217,16 +217,19 @@ export default class ServerControl extends ServerModule {
 
   /**
    * Add listener to a control item (i.e. parameter, info or command).
+   * The given listener is fired immediately with the unit current value.
    * @param {String} name Name of the item.
    * @param {Function} listener Listener callback.
    */
   addUnitListener(name, listener) {
     const unit = this.units[name];
 
-    if (unit)
-      unit.addListener(listener);
-    else
+    if (unit) {
+      unit.addListener(unit.data.name, listener);
+      listener(unit.data.value);
+    } else {
       console.log('unknown control item "' + name + '"');
+    }
   }
 
   /**
@@ -238,7 +241,7 @@ export default class ServerControl extends ServerModule {
     const unit = this.units[name];
 
     if (unit)
-      unit.removeListener(listener);
+      unit.removeListener(unit.data.name, listener);
     else
       console.log('unknown control item "' + name + '"');
   }

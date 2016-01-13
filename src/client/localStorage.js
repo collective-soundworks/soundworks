@@ -6,7 +6,7 @@ export default {
   },
 
   get(key) {
-    return window.localStorage.getItem(key);
+    return window.localStorage.getItem(key) || null;
   },
 
   delete(key) {

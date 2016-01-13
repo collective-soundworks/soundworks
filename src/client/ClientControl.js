@@ -278,11 +278,12 @@ export default class ClientControl extends ClientModule {
    * @param {String} name Name of the event.
    * @param {Function} listener Listener callback.
    */
-  addEventListener(name, listener) {
+  addUnitListener(name, listener) {
     const unit = this.units[name];
 
     if (unit) {
       unit.addListener('update', listener);
+      listener(unit.value);
     } else {
       console.log('unknown unit "' + name + '"');
     }
@@ -293,7 +294,7 @@ export default class ClientControl extends ClientModule {
    * @param {String} name Name of the event.
    * @param {Function} listener Listener callback.
    */
-  removeEventListener(name, listener) {
+  removeUnitListener(name, listener) {
     const unit = this.units[name];
 
     if (unit) {
@@ -416,8 +417,7 @@ export default class ClientControl extends ClientModule {
         const unit = this._createControlUnit(entry);
         this.units[unit.name] = unit;
 
-        if (view)
-          this._createGui(view, unit);
+        if (view) { this._createGui(view, unit); }
       });
 
       if (!view) { this.done(); }

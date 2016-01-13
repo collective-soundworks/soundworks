@@ -59,9 +59,13 @@ export default {
   orientation: `
     <div class="section-top"></div>
     <div class="section-center flex-center">
-      <p><%= instructions %></p>
+      <p><%= !error ? instructions : errorMessage %></p>
     </div>
-    <div class="section-bottom"></div>
+    <div class="section-bottom flex-middle">
+      <% if (!error) { %>
+        <button class="btn"><%= send %></button>
+      <% } %>
+    </div>
   `,
 
   placer: `
