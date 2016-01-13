@@ -47,7 +47,6 @@ export default class Orientation extends ClientModule {
      * @type {Number}
      */
     this.angleReference = 0; // @todo - where is this value saved ?
-    this._angle = 0; // @todo - is this really needed ?
 
     motionInput
       .init('orientation')
@@ -67,19 +66,17 @@ export default class Orientation extends ClientModule {
    */
   start() {
     super.start();
-    // input.on('deviceorientation', this._onOrientationChange);
+
     if (!this.content.error) {
       motionInput.addListener('orientation', this._onOrientationChange);
     }
   }
 
-  _onOrientationChange(orientationData) {
-    this._angle = orientationData.alpha;
+  _onOrientationChange(data) {
+    this.angleReference = data[0];
   }
 
   _onClick() {
-    this.angleReference = this._angle;
-    console.log(this.angleReference);
     // stop listening for device orientation when done
     motionInput.removeListener('orientation', this._onOrientationChange);
     this.done();
