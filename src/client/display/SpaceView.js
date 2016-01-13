@@ -255,7 +255,7 @@ export default class SpaceView extends View {
    */
   deletePoint(id) {
     const $shape = this._renderedPoints.get(id);
-    this.$svg.removechild($shape);
+    this.$svg.removeChild($shape);
     this._renderedPoints.delete(id);
     // map for easier retrieving of the point
     this.shapePointMap.delete($shape);
