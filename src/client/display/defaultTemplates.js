@@ -114,7 +114,7 @@ export default {
   welcome: `
     <div class="section-top flex-middle">
       <% if (!error) { %>
-        <p class="big"><%= welcome %> <b><%= globals.appName %></b></p>
+        <p class="big"><%= welcome %> <br /><b><%= globals.appName %></b></p>
       <% } %>
     </div>
     <div class="section-center flex-center">
