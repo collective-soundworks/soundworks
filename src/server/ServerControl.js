@@ -100,6 +100,19 @@ class _CommandUnit extends _ControlUnit {
 }
 
 /**
+ * @private
+ */
+class _LabelUnit extends _ControlUnit {
+  constructor(control, name, label) {
+    super(control, 'label', name, label);
+  }
+
+  set(val) { /* noop */ }
+}
+
+
+
+/**
  * [server] Manage the global `parameters`, `infos`, and `commands` across the whole scenario.
  *
  * The module keeps track of:
@@ -150,7 +163,7 @@ class _CommandUnit extends _ControlUnit {
 export default class ServerControl extends ServerModule {
   /**
    * @param {Object} [options={}] Options.
-   * @param {String} [options.name='control'] Name of the module.
+   * @param {String} [options.name='control'] - Name of the module.
    */
   constructor(options = {}) {
     super(options.name || 'control');
@@ -172,11 +185,11 @@ export default class ServerControl extends ServerModule {
    * Adds a number parameter.
    * @param {String} name Name of the parameter.
    * @param {String} label Label of the parameter (displayed on the control GUI on the client side).
-   * @param {Number} min Minimum value of the parameter.
-   * @param {Number} max Maximum value of the parameter.
-   * @param {Number} step Step to increase or decrease the parameter value.
-   * @param {Number} init Initial value of the parameter.
-   * @param {String[]} [clientTypes=null] Array of the client types to send the parameter to. If not set, the parameter is sent to all the client types.
+   * @param {Number} min - Minimum value of the parameter.
+   * @param {Number} max - Maximum value of the parameter.
+   * @param {Number} step - Step to increase or decrease the parameter value.
+   * @param {Number} init - Initial value of the parameter.
+   * @param {String[]} [clientTypes=null] - Array of the client types to send the parameter to. If not set, the parameter is sent to all the client types.
    */
   addNumber(name, label, min, max, step, init, clientTypes = null) {
     return new _NumberUnit(this, name, label, min, max, step, init, clientTypes);
@@ -184,11 +197,11 @@ export default class ServerControl extends ServerModule {
 
   /**
    * Adds a enum parameter.
-   * @param {String} name Name of the parameter.
-   * @param {String} label Label of the parameter (displayed on the control GUI on the client side).
-   * @param {String[]} options Array of the different values the parameter can take.
-   * @param {Number} init Initial value of the parameter (has to be in the `options` array).
-   * @param {String[]} [clientTypes=null] Array of the client types to send the parameter to. If not set, the parameter is sent to all the client types.
+   * @param {String} name - Name of the parameter.
+   * @param {String} label - Label of the parameter (displayed on the control GUI on the client side).
+   * @param {String[]} options - Array of the different values the parameter can take.
+   * @param {Number} init - Initial value of the parameter (has to be in the `options` array).
+   * @param {String[]} [clientTypes=null] - Array of the client types to send the parameter to. If not set, the parameter is sent to all the client types.
    */
   addEnum(name, label, options, init, clientTypes = null) {
     return new _EnumUnit(this, name, label, options, init, clientTypes);
@@ -196,10 +209,10 @@ export default class ServerControl extends ServerModule {
 
   /**
    * Adds an info parameter.
-   * @param {String} name Name of the parameter.
-   * @param {String} label Label of the parameter (displayed on the control GUI on the client side).
-   * @param {Number} init Initial value of the parameter (has to be in the `options` array).
-   * @param {String[]} [clientTypes=null] Array of the client types to send the parameter to. If not set, the parameter is sent to all the client types.
+   * @param {String} name - Name of the parameter.
+   * @param {String} label - Label of the parameter (displayed on the control GUI on the client side).
+   * @param {Number} init - Initial value of the parameter (has to be in the `options` array).
+   * @param {String[]} [clientTypes=null] - Array of the client types to send the parameter to. If not set, the parameter is sent to all the client types.
    */
   addInfo(name, label, init, clientTypes = null) {
     return new _InfoUnit(this, name, label, init, clientTypes);
@@ -207,19 +220,29 @@ export default class ServerControl extends ServerModule {
 
   /**
    * Adds a command.
-   * @param {String} name Name of the command.
-   * @param {String} label Label of the command (displayed on the control GUI on the client side).
-   * @param {String[]} [clientTypes=null] Array of the client types to send the parameter to. If not set, the parameter is sent to all the client types.
+   * @param {String} name - Name of the command.
+   * @param {String} label - Label of the command (displayed on the control GUI on the client side).
+   * @param {String[]} [clientTypes=null] - Array of the client types to send the parameter to. If not set, the parameter is sent to all the client types.
    */
   addCommand(name, label, clientTypes = null) {
     return new _CommandUnit(this, name, label, undefined, clientTypes);
   }
 
   /**
+   * Adds a label.
+   * @param {String} name - Name of the label.
+   * @param {String} label - Label of the label (displayed on the control GUI on the client side).
+   */
+  addLabel(name, label) {
+    return new _LabelUnit(this, name, label);
+  }
+
+
+  /**
    * Add listener to a control item (i.e. parameter, info or command).
    * The given listener is fired immediately with the unit current value.
-   * @param {String} name Name of the item.
-   * @param {Function} listener Listener callback.
+   * @param {String} name - Name of the item.
+   * @param {Function} listener - Listener callback.
    */
   addUnitListener(name, listener) {
     const unit = this.units[name];
@@ -234,8 +257,8 @@ export default class ServerControl extends ServerModule {
 
   /**
    * Remove listener from a control item (i.e. parameter, info or command).
-   * @param {String} name Name of the item.
-   * @param {Function} listener Listener callback.
+   * @param {String} name - Name of the item.
+   * @param {Function} listener - Listener callback.
    */
   removeUnitListener(name, listener) {
     const unit = this.units[name];
@@ -248,8 +271,8 @@ export default class ServerControl extends ServerModule {
 
   /**
    * Updates the value of a parameter and sends it to the clients.
-   * @param {String} name Name of the parameter to update.
-   * @param {(String|Number|Boolean)} value New value of the parameter.
+   * @param {String} name - Name of the parameter to update.
+   * @param {(String|Number|Boolean)} value - New value of the parameter.
    */
   update(name, value, excludeClient = null) {
     const unit = this.units[name];

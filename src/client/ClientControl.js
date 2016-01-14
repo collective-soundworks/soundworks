@@ -89,9 +89,16 @@ class _CommandUnit extends _ControlUnit {
     super(control, 'command', name, label);
   }
 
-  set(val) {
-    // nothing to set here
+  set(val) { /* nothing to set here */ }
+}
+
+/** @private */
+class _LabelUnit extends _ControlUnit {
+  constructor(control, name, label) {
+    super(control, 'label', name, label);
   }
+
+  set(val) { /* nothing to set here */ }
 }
 
 
@@ -190,6 +197,19 @@ class _InfoGui {
   set(val) {
     this.controller.value = val;
   }
+}
+
+/** @private */
+class _LabelGui {
+  constructor($container, unit, guiOptions) {
+    const { label } = unit;
+
+    this.controller = new basicControllers.Title(label);
+    $container.appendChild(this.controller.render());
+    this.controller.onRender();
+  }
+
+  set(val) { /* nothing to set here */ }
 }
 
 /**
@@ -345,6 +365,10 @@ export default class ClientControl extends ClientModule {
       case 'command':
         unit = new _CommandUnit(this, init.name, init.label);
         break;
+
+      case 'label':
+        unit = new _LabelUnit(this, init.name, init.label);
+        break;
     }
 
     return unit;
@@ -397,6 +421,11 @@ export default class ClientControl extends ClientModule {
         gui = new _InfoGui($container, unit, config);
         break;
 
+      case 'label':
+        // label has no associated unit
+        gui = new _LabelGui($container, unit, config);
+        break;
+
       // case 'toggle'
     }
 
@@ -417,9 +446,11 @@ export default class ClientControl extends ClientModule {
     this.receive('init', (config) => {
       config.forEach((entry) => {
         const unit = this._createControlUnit(entry);
-        this.units[unit.name] = unit;
 
-        if (view) { this._createGui(view, unit); }
+      this.units[unit.name] = unit;
+
+        if (view)
+          this._createGui(view, unit);
       });
 
       if (!view) { this.done(); }
