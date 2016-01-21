@@ -1,6 +1,5 @@
 import audio from 'waves-audio';
 import client from './client';
-import input from './input';
 
 import ClientModule from './ClientModule';
 import ClientCalibration from './ClientCalibration';
@@ -44,7 +43,6 @@ export default {
   audio,
   audioContext: audio.audioContext,
   client,
-  input,
   ClientCalibration,
   ClientCheckin,
   ClientControl,
