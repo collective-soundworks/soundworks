@@ -44,23 +44,34 @@ export default class Welcome extends ClientModule {
   constructor(options = {}) {
     super(options.name || 'welcome', options);
 
-    this._requireMobile = options.requireMobile === false ? false : true;
-    this._mustActivateAudio = options.activateAudio === false ? false : true;
-    this._mustFullScreen = options.fullScreen === false ? false : true;
-    this._mustWakeLock = !!options.wakeLock;
+    const defaults = {
+      requireMobile: true,
+      activateAudio: true,
+      fullScreen: false,
+      wakeLock: false,
+      showView: true,
+      viewCtor: SegmentedView,
+    };
+
+    this.options = Object.assign(defaults, options);
 
     // check platform
     this._defineAudioFileExtention();
     this._definePlatform();
+    // initialize module
+    this.init();
+  }
 
-    // and build view according to the device and requirements
+  init() {
+    // build view according to the device and requirements
     const os = client.platform.os;
     const version = parseFloat(platform.os.version);
     const isMobile = client.platform.isMobile;
-    const requireMobile = this._requireMobile;
+    const requireMobile = this.options.requireMobile;
+    const activateAudio = this.options.activateAudio;
     let error = null;
 
-    if (!this._supportsWebAudio()) {
+    if (activateAudio && !this._supportsWebAudio()) {
       if (os === 'ios') {
         error = this.content.errorIosVersion;
       } else if (os === 'android') {
@@ -80,13 +91,11 @@ export default class Welcome extends ClientModule {
 
     this.content.error = error;
 
-    if (!error) {
-      this.events = { 'click': this._onClick.bind(this) };
-    }
+    if (this.options.showView) {
+      if (!error) {
+        this.events = { 'touchend': this.activateMedia.bind(this) };
+      }
 
-    if (options.view) {
-      this.view = options.view;
-    } else {
       this.viewCtor = options.viewCtor || SegmentedView;
       this.view = this.createView();
     }
@@ -107,18 +116,21 @@ export default class Welcome extends ClientModule {
     this.done();
   }
 
-  _onClick() {
+  activateMedia() {
+    // if (this.content.error)
+    //   return false;
     // http://www.html5rocks.com/en/mobile/fullscreen/?redirect_from_locale=fr
-    if (this._mustFullScreen && screenfull.enabled)
+    if (this.options.fullScreen && screenfull.enabled)
       screenfull.request();
 
-    if (this._mustActivateAudio)
+    if (this.options.activateAudio)
       this._activateAudio();
 
-    if (this._mustWakeLock)
+    if (this.options.wakeLock)
       this._requestWakeLock();
 
     this.done();
+    // return true;
   }
 
   _supportsWebAudio() {
@@ -145,24 +157,26 @@ export default class Welcome extends ClientModule {
     client.platform.os = (function() {
       let os = md.os();
 
-      if (os === 'AndroidOS') {
+      if (os === 'AndroidOS')
         return 'android';
-      } else if (os === 'iOS') {
+      else if (os === 'iOS')
         return 'ios';
-      } else {
+      else
         return 'other';
-      }
     })();
   }
 
   _activateAudio() {
     var o = audioContext.createOscillator();
     var g = audioContext.createGain();
-    g.gain.value = 0;
+    g.gain.value = 0.000000001; // -180dB ?
     o.connect(g);
     g.connect(audioContext.destination);
     o.start(0);
-    o.stop(audioContext.currentTime + 0.01);
+
+    // prevent android to stop audio by keping the oscillator active
+    if (client.platform.os !== 'android')
+      o.stop(audioContext.currentTime + 0.01);
   }
 
   // cf. https://github.com/borismus/webvr-boilerplate/blob/8abbc74cfa5976b9ab0c388cb0c51944008c6989/js/webvr-manager.js#L268-L289
