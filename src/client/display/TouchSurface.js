@@ -1,4 +1,6 @@
-
+/**
+ * @todo
+ */
 export default class TouchSurface {
   constructor($el) {
     this.$el = $el;
@@ -89,7 +91,7 @@ export default class TouchSurface {
     if (!listeners) { return; }
 
     listeners.forEach((listener) => {
-      listener(touchId, normX, normY, touchEvent)
+      listener(touchId, normX, normY, touchEvent);
     });
   }
 }
