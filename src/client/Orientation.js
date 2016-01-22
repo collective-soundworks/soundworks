@@ -1,4 +1,3 @@
-// import input from './input';
 import motionInput from 'motion-input';
 import ClientModule from './ClientModule';
 import SegmentedView from './display/SegmentedView';
@@ -15,22 +14,24 @@ import SegmentedView from './display/SegmentedView';
  */
 export default class Orientation extends ClientModule {
   /**
-   * @param {Object} [options={}] Options.
-   * @param {String} [options.name='orientation'] Name of the module.
-   * @todo Solve the space in default parameter problem. (??)
+   * @param {Object} [options={}] - Options.
+   * @param {String} [options.name='orientation'] - Name of the module.
    */
   constructor(options = {}) {
     super(options.name || 'orientation', options);
 
+    this.options = Object.assign({
+      bypass: false,
+      viewCtor: SegmentedView,
+    }, options);
+
     this.bypass = options.bypass || false;
-    // @todo - use new input module
-    // input.enableDeviceOrientation();
     // bind methods
     this._onOrientationChange = this._onOrientationChange.bind(this);
-    this._onClick = this._onClick.bind(this);
+    this._onOrientationSelected = this._onOrientationSelected.bind(this);
     // configure view
-    this.viewCtor = options.viewCtor || SegmentedView;
-    this.events = { 'click': this._onClick };
+    this.viewCtor = this.options.viewCtor;
+    this.events = { 'click': this._onOrientationSelected };
 
     this.init();
   }
@@ -46,7 +47,7 @@ export default class Orientation extends ClientModule {
      * It serves as a calibration / reference of the compass.
      * @type {Number}
      */
-    this.angleReference = 0; // @todo - where is this value saved ?
+    this.angleReference = 0;
 
     motionInput
       .init('orientation')
@@ -57,28 +58,35 @@ export default class Orientation extends ClientModule {
           this.content.error = true;
         }
 
+        // @todo - this should have a waiting state before `motionInput` is ready
         this.view = this.createView();
       });
   }
 
-  /**
-   * @private
-   */
+  /** @private */
   start() {
     super.start();
 
-    if (!this.content.error) {
+    if (!this.content.error)
       motionInput.addListener('orientation', this._onOrientationChange);
-    }
+  }
+
+  /** @private */
+  stop() {
+    motionInput.removeListener('orientation', this._onOrientationChange);
+  }
+
+  /** @private */
+  restart() {
+    // As this module is client side only, nothing has to be done when restarting.
+    this.done();
   }
 
   _onOrientationChange(data) {
     this.angleReference = data[0];
   }
 
-  _onClick() {
-    // stop listening for device orientation when done
-    motionInput.removeListener('orientation', this._onOrientationChange);
+  _onOrientationSelected() {
     this.done();
   }
 }

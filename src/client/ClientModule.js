@@ -142,8 +142,6 @@ export default class ClientModule extends Promised {
   constructor(name, options = {}) { // TODO: change to colorClass?
     super();
 
-    // this._bypass = options.bypass || false;
-
     /**
      * Name of the module.
      * @type {String}
@@ -169,7 +167,7 @@ export default class ClientModule extends Promised {
     this.viewOptions = options.viewOptions || {};
 
     /**
-     * Defines a view constructor to be used in createView
+     * Defines a view constructor to be used in `createView`.
      * @type {View}
      */
     this.viewCtor = options.viewCtor || View;
@@ -181,6 +179,21 @@ export default class ClientModule extends Promised {
     this.send = this.send.bind(this);
     this.receive = this.receive.bind(this);
     this.removeListener = this.removeListener.bind(this);
+
+    /**
+     * For module lifecycle. Is set to true when the module starts and back to false when `done`
+     * @type {boolean}
+     * @private
+     */
+    this._isActive = false;
+
+    /**
+     * For module lifecycle. Is set to true when done for the first time.
+     * Allow to resync with server without restarting the module.
+     * @type {boolean}
+     * @private
+     */
+    this._isDone = false;
   }
 
   /**
@@ -242,7 +255,7 @@ export default class ClientModule extends Promised {
   }
 
   /**
-   * Create a default view from module attributes.
+   * Create the view of the module according to its attributes.
    */
   createView() {
     const options = Object.assign({
@@ -254,110 +267,123 @@ export default class ClientModule extends Promised {
   }
 
   /**
+   * @todo - doc
    * @private
    */
   launch() {
-    if (this._isDone) {
+    // console.log(`${this.name}:launch`, this._isActive, this._isDone);
+    if (this._isDone)
       this.restart();
-    } else {
-      if (this._isStarted)
-        this.reset();
-
+    else if (this._isActive)
+      this.reset();
+    else
       this.start();
-    }
-  }
-
-  reset(reInit = false) {
-
   }
 
   /**
-   * Handle the logic and steps that lead to the initialization of the module.
-   *
-   * For instance, it takes care of the communication with the module on the server side by sending WebSocket messages and setting up WebSocket message listeners.
-   *
-   * Additionally, if the module has a `view`, the `start` method creates the corresponding HTML element and appends it to the DOM’s main container element (`div#container`).
+   * Interface method to override in order to initialize module state and optionnaly it's view.
+   * The module should return to a default state when this method is called.
+   */
+  init() {
+    // console.log(`${this.name}:init`);
+  }
+
+  /**
+   * Handle the logic and steps that starts the module.
+   * Is mainly used to attach listeners to communication with the server or other modules (e.g. motionInput). If the module has a view, it is attach to the DOM.
    *
    * **Note:** the method is called automatically when necessary, you should not call it manually.
    * @abstract
    */
   start() {
-    // allow to bypass a module from its options
-    // if (this._bypass) { this.done(); }
-
-    // if (!this._isStarted) { // @todo - confirm this is not needed
+    // console.log(`${this.name}:start`);
     if (this.view) {
       this.view.render();
       this.view.appendTo(this.$container);
     }
 
-    this._isStarted = true;
-    // }
+    this._isActive = true;
   }
 
   /**
-   * Restart the module.
-   *
-   * The method is called automatically when a lost connection with the server is resumed (for instance because of a server crash), if the module had already finished its initialization (*i.e.* if it had called its {@link Module#done} method).
-   * The method should send to the server the current state of the module.
-   *
-   * (Indeed, if the server crashes, it will reset all the information it has about all the clients.
-   * On the client side, the modules that had finished their initialization process should send their state to the server so that it can be up to date with the real state of the scenario.)
-   *
-   * For instance, this method in the {@link Locator} module sends the coordinates of the client to the server.
+   * This method should be considered as the opposite of {@link ClientModule#start}, removing listeners from socket or other module (aka motionInput).
+   * It is internally called at 2 different moment of the module's lifecycle:
+   * - when the module is {@link ClientModule#done}
+   * - when the module has to restart because of a socket reconnection during the active state of the module. In this particular case the module is stopped, initialized and started again.
    *
    * **Note:** the method is called automatically when necessary, you should not call it manually.
    * @abstract
    */
-  restart() {
-    this._isDone = false;
+  stop() {
+    // console.log(`${this.name}:stop`);
+    if (this.view) {
+      this.view.remove();
+      this.view = null;
+    }
+  }
+
+/**
+   * Should be called when the module has finished its initialization (*i.e.* when the module has done its duty, or when it may run in the background for the rest of the scenario after it finished its initialization process), to allow subsequent steps of the scenario to start.
+   *
+   * For instance, the {@link Loader} module calls its {@link ClientModule#done} method when files are loaded, and the {@link ClientSync} module calls it when the first synchronization process is finished (while the module keeps running in the background afterwards).
+   * As an exception, the last module of the scenario (usually the {@link Performance} module) may not call its {@link Module#done} method.
+   *
+   * If the module has a `view`, the `done` method removes it from the DOM.
+   * The method internally call {@link ClientModule#stop} where socket listeners and so on should be removed.
+   *
+   * **Note:** you should not override this method.
+   */
+  done() {
+    // console.log(`${this.name}:done`);
+    this.stop();
+
+    if (this.resolvePromised)
+      this.resolvePromised();
+
+    this._isDone = true;
+    this._isActive = false;
   }
 
   /**
-   * Reset the module to the state it had before calling the {@link Module#start} method.
-   *
-   * The method is called automatically when a lost connection with the server is resumed (for instance because of a server crash), if the module had not finished its initialization (*i.e.* if it had not called its {@link Module#done} method).
-   * In that case, the module cleans whatever it was doing and starts again from scratch.
+   * Reset an active module to it's default state.
    *
    * **Note:** the method is called automatically when necessary, you should not call it manually.
    * @abstract
    */
   reset() {
-    if (this.view) {
-      this.view.remove();
-    }
-
-    this._isStarted = false;
+    // console.log(`${this.name}:reset`);
+    this.stop();
+    this.init();
+    this.start();
   }
 
   /**
-   * Should be called when the module has finished its initialization (*i.e.* when the module has done its duty, or when it may run in the background for the rest of the scenario after it finished its initialization process), to allow subsequent steps of the scenario to start.
+   * * @todo - This prepare the installation of a server side persistance. Most of the module should override it for now.
    *
-   * For instance, the {@link Loader} module calls its {@link Module#done} method when files are loaded, and the {@link Sync} module calls it when the first synchronization process is finished (while the module keeps running in the background afterwards).
-   * As an exception, the last module of the scenario (usually the {@link Performance} module) may not call its {@link Module#done} method.
+   * Restarts a module after it has been considered as `done`.
+   * The main objective of this method is to restore the distributed state betweeen the client and the server after a disconnection.
+   * The method is called automatically when a lost connection with the server is resumed (because of a server crash) and {@link ClientModule#done} has already been called.
    *
-   * If the module has a `view`, the `done` method removes it from the DOM.
+   * If the server crashes, all in memory informations about the shared state of the application are lost. On the client side, the modules that had finished their initialization must resynchronize with the server to restore the global (and distributed) state of the application.
    *
-   * **Note:** you should not override this method.
+   * **Note:** the method is called automatically when necessary, you should not call it manually.
+   * @abstract
    */
-  done() {
-    this._isDone = true;
-
-    this.reset();
-
-    if (this.resolvePromised)
-      this.resolvePromised();
+  restart() {
+    // console.log(`${this.name}:restart`);
+    this.init();
+    this.start();
   }
 
   /**
+   * Display the view of a module if it owns one and is not done.
+   * @return {Boolean} - true if the module has a view and is not done, false otherwise.
    * @private
-   * @todo - doc
    */
   show() {
     if (this.view && !this._isDone) {
-      if (!this.view.isVisible) {
+      if (!this.view.isVisible)
         this.view.show();
-      }
 
       return true;
     }
@@ -366,11 +392,12 @@ export default class ClientModule extends Promised {
   }
 
   /**
+   * Display the view of a module if it owns one and is not done.
    * @private
-   * @todo - doc
    */
   hide() {
-    if (this.view && !this._done) { this.view.hide(); }
+    if (this.view && !this._done)
+      this.view.hide();
   }
 
   /**

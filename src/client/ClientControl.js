@@ -262,35 +262,76 @@ class _LabelGui {
 export default class ClientControl extends ClientModule {
   /**
    * @param {Object} [options={}] Options.
-   * @param {String} [options.name='sync'] Name of the module.
-   * @param {String} [options.color='black'] Background color of the `view`.
-   * @param {Boolean} [options.gui=true] Indicates whether to create the graphical user interface to control the parameters or not.
+   * @param {String} [options.name='control'] Name of the module.
+   * @param {Boolean} [options.hasGui=true] Indicates whether to create the graphical user interface to control the parameters or not.
+   *
    * @emits {'update'} when the server sends an update. The callback function takes `name:String` and `value:*` as arguments, where `name` is the name of the parameter / info / command, and `value` its new value.
    */
   constructor(options = {}) {
     super(options.name || 'control', options);
 
+    this.options = Object.assign({
+      hasGui: false,
+    }, options);
+
+    /** @private */
+    this._guiOptions = {};
+
+    this._onInitResponse = this._onInitResponse.bind(this);
+    this._onUpdateResponse = this._onUpdateResponse.bind(this);
+
+    this.init();
+  }
+
+  init() {
     /**
      * Dictionary of all the parameters and commands.
      * @type {Object}
      */
     this.units = {};
 
-    /**
-     * Flag whether client has control GUI.
-     * @type {Boolean}
-     */
-    this.hasGui = options.hasGui;
-
-    this._guiOptions = {};
-
-    this.init();
+    if (this.options.hasGui)
+      this.view = this.createView();
   }
 
-  init() {
-    if (this.hasGui) {
-      this.view = this.createView();
-    }
+  /** @private */
+  start() {
+    super.start();
+
+    this.send('request');
+
+    this.receive('init', this._onInitResponse);
+    this.receive('update', this._onUpdateResponse);
+  }
+
+  /** @private */
+  stop() {
+    super.stop();
+    // don't remove listeners, as the control should run in background
+  }
+
+  /** @private */
+  restart() {
+    super.restart(); // @note should be tested.
+    // this.send('request');
+  }
+
+  _onInitResponse(config) {
+    config.forEach((entry) => {
+      const unit = this._createControlUnit(entry);
+
+      this.units[unit.name] = unit;
+
+      if (this.view)
+        this._createGui(this.view, unit);
+    });
+
+    if (!this.view) { this.done(); }
+  }
+
+  _onUpdateResponse(name, val) {
+    // update, but don't send back to server
+    this.update(name, val, false);
   }
 
   /**
@@ -326,6 +367,11 @@ export default class ClientControl extends ClientModule {
     }
   }
 
+  /**
+   * Get the value of a given parameter.
+   * @param {String} name - The name of the parameter.
+   * @returns {Mixed} - The related value.
+   */
   getValue(name) {
     return this.units[name].value;
   }
@@ -432,41 +478,5 @@ export default class ClientControl extends ClientModule {
     unit.addListener('update', (val) => gui.set(val));
 
     return gui;
-  }
-
-  /**
-   * Starts the module and requests the parameters to the server.
-   */
-  start() {
-    super.start();
-    this.send('request');
-
-    const view = (this.hasGui) ? this.view : null;
-
-    this.receive('init', (config) => {
-      config.forEach((entry) => {
-        const unit = this._createControlUnit(entry);
-
-      this.units[unit.name] = unit;
-
-        if (view)
-          this._createGui(view, unit);
-      });
-
-      if (!view) { this.done(); }
-    });
-
-    // listen to events
-    this.receive('update', (name, val) => {
-      this.update(name, val, false); // update, but don't send to server
-    });
-  }
-
-  /**
-   * Restarts the module and requests the parameters to the server.
-   */
-  restart() {
-    super.restart();
-    this.send('request');
   }
 }

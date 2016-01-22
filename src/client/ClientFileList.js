@@ -26,30 +26,37 @@ export default class ClientFileList extends ClientModule {
   constructor(options = {}) {
     super(options.name || 'filelist', false);
 
+    this.options = Object.assign({
+      folder: '',
+      extensions: undefined,
+    }, options)
+
     /**
      * Array of file paths sent by the server.
      * @type {String[]}
      */
-    this.files = null;
+    this.files = null; // @todo - make sure this doesn't need to be reinit.
 
-    this._folder = options.folder || '';
-    this._extensions = options.extensions || undefined;
+    this._onFileResponse = this._onFileResponse.bind(this);
   }
 
-  /**
-   * Starts the module.
-   * Sends a request to the server and listens for the answer.
-   * @emits {this.name + ':files'} The file path list when it is received from the server.
-   */
+  /** @private */
   start() {
     super.start();
 
-    this.send('request', this._folder, this._extensions);
+    this.send('request', this.options.folder, this.options.extensions);
+    this.receive('files', this._onFileResponse);
+  }
 
-    this.receive('files', (files) => {
-      this.files = files;
-      this.emit('files', files);
-      this.done();
-    }, this);
+  /** @private */
+  stop() {
+    super.stop();
+    this.removeListener('files', this._onFileResponse);
+  }
+
+  _onFileResponse(files) {
+    this.files = files;
+    // this.emit('files', files); // @todo - remove ?
+    this.done();
   }
 }

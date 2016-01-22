@@ -20,12 +20,8 @@ export default class ClientPerformance extends ClientModule {
     this.viewOptions = { className: ['module', 'performance'] };
   }
 
-  init() {}
-
   /**
-   * Start the module.
-   *
-   * Send a message to the server side module to indicate that the client entered the performance.
+   * Start the module and send a message to the server side module to indicate that the client enters the performance.
    *
    * **Note:** the method is called automatically when necessary, you should not call it manually.
    */
@@ -35,11 +31,18 @@ export default class ClientPerformance extends ClientModule {
   }
 
   /**
+   * The performance module should not be resetted while launched, instead it should resynchronize (aka restart) with the server.
+   */
+  reset() {
+    this.restart();
+  }
+
+  /**
    * Can be called to terminate the performance.
-   * Send a message to the server side module to indicate that the client exited the performance.
+   * Send a message to the server side module to indicate that the client exits the performance.
    */
   done() {
-    this.send('done')
-    super.done(); // TODO: check if needs to be called lastly
+    this.send('done');
+    super.done();
   }
 }

@@ -222,6 +222,7 @@ export default class ClientSurvey extends ClientModule {
     this.init();
   }
 
+  /** @private */
   init() {
     this.content.counter = 0;
     this.content.length = this.survey.length;
@@ -230,11 +231,18 @@ export default class ClientSurvey extends ClientModule {
     this.view = this.createView();
   }
 
+  /** @private */
   start() {
     super.start();
 
     this._createRenderers();
     this._displayNextQuestion();
+  }
+
+  /** @private */
+  restart() {
+    // do nothing in case the server restarts after `done`, the response should already be persisted.
+    this.done();
   }
 
   _createRenderers() {

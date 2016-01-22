@@ -7,13 +7,7 @@
  */
 export default {
   checkin: `
-    <% if (waiting || !label) { %>
-      <div class="section-top"></div>
-      <div class="section-center flex-center">
-        <p class="big"><%= waiting || error %></p>
-      </div>
-      <div class="section-bottom"></div>
-    <% } else { %>
+    <% if (label) { %>
       <div class="section-top flex-middle">
         <p class="big"><%= labelPrefix %></p>
       </div>
@@ -24,6 +18,12 @@ export default {
       <div class="section-bottom flex-middle">
         <p class="small"><%= labelPostfix %></p>
       </div>
+    <% } else { %>
+      <div class="section-top"></div>
+      <div class="section-center flex-center">
+        <p class="big"><%= error ? errorMessage : wait %></p>
+      </div>
+      <div class="section-bottom"></div>
     <% } %>
   `,
 
@@ -38,7 +38,7 @@ export default {
     <div class="section-center flex-center">
       <% if (showProgress) { %>
       <div class="progress-wrap">
-        <div class="progress-bar" id="progress-bar"></div>
+        <div class="progress-bar"></div>
       </div>
       <% } %>
     </div>

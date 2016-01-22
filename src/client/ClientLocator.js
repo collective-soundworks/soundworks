@@ -28,68 +28,92 @@ export default class ClientLocator extends ClientModule {
   constructor(options = {}) {
     super(options.name || 'locator', options);
 
-    this._random = options.random || false;
-    this._persist = options.persist || false;
-    this._positionRadius = options.positionRadius || 0.3;
-    this.spaceCtor = options.spaceCtor || SpaceView;
-    this.viewCtor = options.viewCtor || SquaredView;
+    this.options = Object.assign({
+      random: false,
+      persist: false,
+      positionRadius: 0.3, // relative to the area unit
+      spaceCtor: SpaceView,
+      viewCtor: SquaredView,
+    }, options);
 
     // The namespace where coordinates are stored when `options.persist = true`.
     this._localStorageNamespace = `soundworks:${this.name}`;
 
     this._onAreaTouchStart = this._onAreaTouchStart.bind(this);
     this._onAreaTouchMove = this._onAreaTouchMove.bind(this);
+    this._onAreaResponse = this._onAreaResponse.bind(this);
 
     this.init();
   }
 
+  /** @private */
   init() {
-    this.content.activateBtn = false;
+    this.viewCtor = this.options.viewCtor;
     this.view = this.createView();
   }
 
-  /**
-   * Start the module.
-   * @private
-   */
+  /** @private */
   start() {
     super.start();
 
     this.send('request');
 
-    if (!this._persist)
+    if (!this.options.persist)
       localStorage.delete(this._localStorageNamespace);
 
-    this.receive('area', (area) => {
-      this._attachArea(area);
-
-      // Bypass the locator according to module configuration options.
-      // If `options.random` is set to true, use random coordinates.
-      // If `options.persist` is set to true use coordinates stored in local storage,
-      // do nothing when no coordinates are stored yet.
-      if (this._random || this._persist) {
-        let coords;
-
-        if (this._random) {
-          coords = { normX: Math.random(), normY: Math.random() };
-        } else if (this._persist) {
-          coords = JSON.parse(localStorage.get(this._localStorageNamespace));
-        }
-
-        if (coords !== null) {
-          this._createPosition(coords.normX, coords.normY);
-          this._sendCoordinates();
-        }
-      }
-    });
+    this.receive('area', this._onAreaResponse);
   }
+
+  /** @private */
+  stop() {
+    super.stop();
+    this.removeListener('area', this._onAreaResponse);
+  }
+
+  /**
+   * Bypass the locator according to module configuration options.
+   * If `options.random` is set to true, use random coordinates.
+   * If `options.persist` is set to true use coordinates stored in local storage,
+   * do nothing when no coordinates are stored yet.
+   * @param {Object} area - The area as defined in server configuration.
+   */
+  _onAreaResponse(area) {
+    this._attachArea(area);
+
+    if (this.options.random || this.options.persist) {
+      let coords;
+
+      if (this.options.random) {
+        coords = { normX: Math.random(), normY: Math.random() };
+      } else if (this.options.persist) {
+        coords = JSON.parse(localStorage.get(this._localStorageNamespace));
+      }
+
+      if (coords !== null) {
+        this._createPosition(coords.normX, coords.normY);
+        this._sendCoordinates();
+      }
+    }
+  }
+
+  /**
+   * Store the current coordinates in `localStorage`.
+   */
+  storeCoordinates() {
+    const normX = this.position.x / this.area.width;
+    const normY = this.position.y / this.area.height;
+    localStorage.set(this._localStorageNamespace, JSON.stringify({ normX, normY }));
+  }
+
+  retrieveCoordinates() {}
+  deleteCoordinates() {}
 
   /**
    * Create a `SpaceView` and display it in the square section of the view
    */
   _attachArea(area) {
     this.area = area;
-    this.space = new this.spaceCtor(area, {}, { isSubView: true });
+    this.space = new this.options.spaceCtor(area, {}, { isSubView: true });
     // @todo - find a way to remove these hardcoded selectors
     this.view.setViewComponent('.section-square', this.space);
     this.view.render('.section-square');
@@ -103,7 +127,7 @@ export default class ClientLocator extends ClientModule {
     if (!this.position) {
       this._createPosition(normX, normY);
 
-      this.content.activateBtn = true;
+      this.content.showBtn = true;
       this.view.render('.section-float');
       this.view.installEvents({
         'click .btn': (e) => {
@@ -130,7 +154,7 @@ export default class ClientLocator extends ClientModule {
       id: 'locator',
       x: normX * this.area.width,
       y: normY * this.area.height,
-      radius: this._positionRadius,
+      radius: this.options.positionRadius,
     }
 
     this.space.addPoint(this.position);
@@ -152,10 +176,8 @@ export default class ClientLocator extends ClientModule {
    * Send coordinates to the server.
    */
   _sendCoordinates() {
-    if (this._persist) { // store normalized coordinates
-      const normX = this.position.x / this.area.width;
-      const normY = this.position.y / this.area.height;
-      localStorage.set(this._localStorageNamespace, JSON.stringify({ normX, normY }));
+    if (this.options.persist) { // store normalized coordinates
+      this.storeCoordinates();
     }
 
     client.coordinates = this.position;

@@ -38,34 +38,29 @@ export default class ClientSync extends ClientModule {
   constructor(options = {}) {
     super(options.name || 'sync', options);
 
-    this._sync = new SyncClient(() => audioContext.currentTime);
-    this.viewCtor = SegmentedView || options.viewCtor;
+    this.options = Object.assign({
+      viewCtor:  SegmentedView,
+    }, options);
+
+    this._syncStatusReport = this._syncStatusReport.bind(this);
 
     this.init();
   }
 
   init() {
+    this._sync = new SyncClient(() => audioContext.currentTime);
     this._ready = false;
+
+    this.viewCtor = this.options.viewCtor;
     this.view = this.createView();
   }
 
-  /**
-   * Start the synchronization process.
-   * @private
-   */
+  /** @private */
   start() {
     super.start();
-    this._sync.start(this.send, this.receive, (status, report) => {
-      this._syncStatusReport(status, report);
-    });
+    this._sync.start(this.send, this.receive, this._syncStatusReport);
   }
 
-  /**
-   * @private
-   */
-  restart() {
-    // TODO
-  }
 
   /**
    * Return the time in the local clock.

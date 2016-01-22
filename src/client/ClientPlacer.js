@@ -22,20 +22,21 @@ export default class ClientPlacer extends ClientModule {
    * @param {String} [options.mode='graphic'] - Selection mode. Can be:
    * - `'graphic'` to select a place on a graphical representation of the available positions.
    * - `'list'` to select a place among a list of places.
-   * @param {Boolean} [options.persist=false] - Indicates whether the selected place should be stored in the `LocalStorage` for future retrieval or not.
+   * @param {String} [options.persist=false] - Defines if the location should be stored in `localStorage`.
    */
   constructor(options = {}) {
     super(options.name || 'placer', options);
 
-    this.index = null;
-    this.label = null;
+    this.options = Object.assign({
+      mode: 'graphic',
+      persist: false,
+    }, options);
 
-    this.mode = options.mode || 'graphic';
-    this.persist = options.persist || false;
     this.localStorageNS = 'placer:position';
 
-    this._createView = this._createView.bind(this);
+    this._onSetupResponse = this._onSetupResponse.bind(this);
     this._onSelect = this._onSelect.bind(this);
+    this._deleteLocalStorage = this._deleteLocalStorage.bind(this);
 
     this.init();
   }
@@ -56,20 +57,16 @@ export default class ClientPlacer extends ClientModule {
     client.coordinates = null;
 
     this.viewCtor = SquaredView;
-    this.content.mode = this.mode;
-    this.content.showBtn = false;
+    this.content.mode = this.options.mode;
     this.view = this.createView();
   }
 
-  /**
-   * Start the module.
-   * @private
-   */
+  /** @private */
   start() {
     super.start();
     // check for informations in local storage
-    if (this.persist) {
-      const position = localStorage.get(this.localStorageNS);
+    if (this.options.persist) {
+      const position = this._retrieveLocalStorage();
 
       if (position !== null) {
         this._sendPosition(position);
@@ -78,39 +75,37 @@ export default class ClientPlacer extends ClientModule {
     }
 
     // request positions or labels
-    this.send('request', this.mode);
-    this.receive('setup', this._createView);
+    this.send('request', this.options.mode);
 
-    // reset position stored in local storage
-    this.receive('reset', () => localStorage.delete(this.localStorageNS));
+    this.receive('setup', this._onSetupResponse);
+    this.receive('reset', this._deleteLocalStorage);
   }
 
-  /**
-   * Restart the module.
-   * @private
-   */
+  /** @private */
+  stop() {
+    this.removeListener('setup', this._onSetupResponse);
+    this.removeListener('reset', this._deleteLocalStorage);
+  }
+
+  /** @private */
   restart() {
-    super.restart();
+    // super.restart(); // @todo - prepare next gen server side db
     this._sendPosition();
   }
 
-  /**
-   * Reset the module to initial state.
-   * @private
-   */
-  reset() {
-    super.reset();
+  _setLocalStorage(position) {
+    localStorage.set(this.localStorageNS, position);
   }
 
-  /**
-   * Done method.
-   * @private
-   */
-  done() {
-    super.done();
+  _retrieveLocalStorage() {
+    return localStorage.get(this.localStorageNS);
   }
 
-  _createView(capacity, labels, coordinates, area) {
+  _deleteLocalStorage() {
+    localStorage.delete(this.localStorageNS);
+  }
+
+  _onSetupResponse(capacity, labels, coordinates, area) {
     const numLabels = labels ? labels.length : Infinity;
     const numCoordinates = coordinates ? coordinates.length : Infinity;
     let numPositions = Math.min(numLabels, numCoordinates);
@@ -124,11 +119,7 @@ export default class ClientPlacer extends ClientModule {
 
       // @todo - define if coords should be an array
       // or an object and harmonize with SpaceView, Locator, etc...
-      const position = {
-        id: i,
-        index: i,
-        label: label,
-      };
+      const position = { id: i, index: i, label: label };
 
       if (coordinates) {
         const coords = coordinates[i];
@@ -142,7 +133,7 @@ export default class ClientPlacer extends ClientModule {
     let selector;
     // @todo - disable positions selected by other players in real time
     // @todo - handle error messages
-    switch (this.mode) {
+    switch (this.options.mode) {
       case 'graphic':
         selector = new SpaceView(area);
         this.view.setViewComponent('.section-square', selector);
@@ -182,9 +173,8 @@ export default class ClientPlacer extends ClientModule {
 
   _onSelect(position) {
     // optionally store in local storage
-    if (this.persist) {
+    if (this.options.persist)
       this._setLocalStorage(position);
-    }
 
     // send to server
     this._sendPosition(position);

@@ -2,6 +2,7 @@ import ClientModule from './ClientModule';
 import CalibrationClient from 'calibration/client';
 
 /**
+ * @todo - Revise entirelly, outdated.
  * @private
  */
 export default class ClientCalibration extends ClientModule {

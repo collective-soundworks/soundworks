@@ -61,6 +61,13 @@ export default {
   coordinates: null,
 
   /**
+   * Is set to `true` by the `Welcome` module when the client does not meet the requirements.
+   * Especially usefull when the module is used without a view and activated manually.
+   * @type {Boolean}
+   */
+  rejected: false,
+
+  /**
    * The `init` method sets the client type and initializes a WebSocket connection associated with the given type.
    * @param {String} [clientType = 'player'] The client type.
    * @todo clarify clientType.
@@ -74,7 +81,7 @@ export default {
 
     const socketIO = window.CONFIG.SOCKET_CONFIG; // shared by server (cf .ejs template)
     // @todo harmonize io config with server
-    options = Object.assign({
+    this.options = Object.assign({
       io: true,
       debugIO: false,
       socketUrl: socketIO ? socketIO.url : '',
@@ -92,24 +99,10 @@ export default {
 
     this.setViewContentDefinitions(textContents);
     this.setViewTemplateDefinitions(defaultTemplates);
-    this.setAppContainer(options.appContainer);
-
-    if (options.io !== false) {
-      // initialize socket communications
-      this.comm = comm.initialize(clientType, options);
-      // wait for socket being ready to resolve this module
-      this.ready = new Promise((resolve) => {
-        this.comm.receive('client:start', (uid) => {
-          this.uid = uid;
-          resolve();
-        });
-      });
-    } else {
-      this.ready = Promise.resolve(true);
-    }
+    this.setAppContainer(this.options.appContainer);
 
     // debug - http://socket.io/docs/logging-and-debugging/#available-debugging-scopes
-    if (options.debugIO) {
+    if (this.options.debugIO) {
       localStorage.debug = '*';
     }
   },
@@ -128,7 +121,35 @@ export default {
     }
 
     let promise = module.createPromise();
-    this.ready.then(() => module.launch());
+
+    if (this.options.io !== false) {
+      // initialize socket communications
+      this.comm = comm.initialize(this.type, this.options);
+      // wait for socket being ready to resolve this module
+      this.comm.receive('client:start', (uid) => {
+        if (this.uid) {
+          console.info('=========> reconnect:reload');
+          // window.location.reload(false);
+        }
+
+        this.uid = uid;
+        module.launch();
+      });
+
+      this.comm.receive('reconnect', () => {
+        console.info('=========> reconnect');
+      });
+
+      this.comm.receive('disconnect', () => {
+        console.info('=========> disconnect');
+      });
+
+      this.comm.receive('error', (err) => {
+        console.error(err);
+      });
+    } else {
+      module.launch();
+    }
 
     return promise;
   },

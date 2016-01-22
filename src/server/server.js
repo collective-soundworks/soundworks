@@ -214,6 +214,7 @@ export default {
    * @param {...ClientModule} modules Modules to map to that client type.
    */
   map(clientType, ...modules) {
+    // @todo - allow to pass
     const url = (clientType !== this.config.defaultClient) ? `/${clientType}` : '/';
 
     // use template with `clientType` name or default if not defined
@@ -234,7 +235,11 @@ export default {
       }));
     });
 
-    this.io.of(clientType).on('connection', (socket) => {
+    this.io.of(clientType).on('connection', this.onConnection(clientType, modules));
+  },
+
+  onConnection(clientType, modules) {
+    return (socket) => {
       const client = new Client(clientType, socket);
       modules.forEach((mod) => { mod.connect(client) });
 
@@ -242,12 +247,13 @@ export default {
       comm.receive(client, 'disconnect', () => {
         modules.forEach((mod) => { mod.disconnect(client) });
         client.destroy();
-        logger.info({ socket: socket, clientType: clientType }, 'disconnect');
+        logger.info({ socket, clientType }, 'disconnect');
       });
 
+      // @todo - refactor handshake and uid definition.
       comm.send(client, 'client:start', client.uid); // the server is ready
-      logger.info({ socket: socket, clientType: clientType }, 'connection');
-    });
+      logger.info({ socket, clientType }, 'connection');
+    }
   },
 
   /**

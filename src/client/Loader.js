@@ -9,7 +9,7 @@ import SegmentedView from './display/SegmentedView';
 class LoaderView extends SegmentedView {
   onRender() {
     super.onRender();
-    this.$progressBar = this.$el.querySelector('#progress-bar');
+    this.$progressBar = this.$el.querySelector('.progress-bar');
   }
 
   onProgress(percent) {
@@ -37,83 +37,72 @@ class LoaderView extends SegmentedView {
 export default class Loader extends ClientModule {
   /**
    * @param {Object} [options={}] Options.
-   * @param {String} [options.name='dialog'] - Name of the module.
+   * @param {String} [options.name='loader'] - The name of the module.
+   * @param {Boolean} [options.showProgress=true] - Defines if the progress bar is rendered. If set to true, the view should implement an `onProgress(percent)` method.
    * @param {String[]} [options.files=null] - The audio files to load.
-   * @param {String} [options.view=undefined] - If defined, the view to be used.
-   * @param {Boolean} [options.showProgress=true] - Defines if the progress bar should be rendered. If set to true, the view should implement an `onProgress(percent)` method.
+   * @param {String} [options.viewCtor=LoaderView] - Constructor for the module's view.
    */
   constructor(options = {}) {
     super(options.name || 'loader');
 
+    this.options = Object.assign({
+      showProgress: true,
+      files: null,
+      viewCtor: LoaderView,
+    }, options);
+
+    this.init();
+  }
+
+  /** @private */
+  init() {
     /**
      * Audio buffers created from the audio files passed in the {@link Loader#constructor}.
-     * @type {AudioBuffer[]}
+     * @type {Array<AudioBuffer>}
      */
     this.buffers = [];
-    this._files = options.files || null;
-    this._fileProgress = null; // used to track files loading progress
-    // this._numFilesLoaded = 0;
+    // to track files loading progress
+    this._progress = [];
+    this.options.files.forEach((file, index) => this._progress[index] = 0);
 
-    if (options.view) {
-      this.view = options.view;
-    } else {
-      this.content.showProgress = (options.showProgress !== undefined) ?
-        !!options.showProgress : true;
-
-      this.viewCtor = options.viewCtor || LoaderView;
-      this.view = this.createView();
-    }
+    // prepare view
+    this.content.showProgress = this.options.showProgress;
+    this.viewCtor = this.options.viewCtor;
+    this.view = this.createView();
   }
 
-  /**
-   * @private
-   */
   start() {
     super.start();
-    this._load(this._files);
+    this._load(this.options.files);
   }
 
-  /**
-   * @private
-   */
+  /** @private */
   restart() {
-    super.restart();
+    // As this module is client side only, nothing has to be done when restarting.
     this.done();
   }
 
   _load(fileList) {
     const loader = new SuperLoader();
-    this._fileProgress = [];
 
-    for (let i = 0; i < fileList.length; i++) {
-      this._fileProgress[i] = 0;
-    }
-
-    loader.progressCallback = this._progressCallback.bind(this);
+    loader.progressCallback = this._onProgress.bind(this);
     loader.load(fileList)
       .then((buffers) => {
         this.buffers = buffers;
-        this.emit('completed')
+        this.emit('completed');
         this.done();
       }, (error) => {
-        console.log(error);
+        console.error(error);
       });
   }
 
-  _progressCallback(obj) {
-    const fileIndex = obj.index;
-    const fileProgress = obj.value;
-    const length = this._fileProgress.length;
-    this._fileProgress[fileIndex] = fileProgress;
+  _onProgress(e) {
+    this._progress[e.index] = e.value;
 
-    let progress = this._fileProgress.reduce((prev, current) => {
-      return prev + current;
-    }, 0);
+    let progress = this._progress.reduce((prev, current) => prev + current, 0);
+    progress /= this._progress.length;
 
-    progress /= length;
-
-    if (this.view && this.view.onProgress) {
+    if (this.view && this.view.onProgress)
       this.view.onProgress(progress * 100);
-    }
   }
 }

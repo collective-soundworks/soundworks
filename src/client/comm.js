@@ -19,12 +19,10 @@ export default {
    * @param {...*} args - Arguments of the message (as many as needed, of any type).
    */
   send(channel, ...args) {
-    // if (!this.socket) { return; }
     this.socket.emit(channel, ...args);
   },
 
   sendVolatile(channel, ...args) {
-    // if (!this.socket) { return; }
     this.socket.volatile.emit(channel, ...args);
   },
 
@@ -34,7 +32,6 @@ export default {
    * @param {...*} callback - The callback to execute when a message is received.
    */
   receive(channel, callback) {
-    // if (!this.socket) { return; }
     this.socket.removeListener(channel, callback);
     this.socket.on(channel, callback);
   },
@@ -45,7 +42,6 @@ export default {
    * @param {...*} callback - The callback to cancel.
    */
   removeListener(channel, callback) {
-    // if (!this.socket) { return; }
     this.socket.removeListener(channel, callback);
   }
 };

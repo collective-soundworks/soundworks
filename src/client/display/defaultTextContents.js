@@ -6,10 +6,11 @@ export default {
   /* `globals` is populated with server `appName` and shared between all templates */
   globals: {},
   checkin: {
-    wait: '...',
     labelPrefix: 'Go to',
     labelPostfix: 'Touch the screen<br class="portrait-only" />when you are ready.',
-    error: 'Sorry, we cannot accept any more connections at the moment, please try again later.',
+    error: false,
+    errorMessage: 'Sorry, we cannot accept any more connections at the moment, please try again later.',
+    wait: 'Please wait...',
   },
   control: {
     title: 'Conductor',
@@ -20,6 +21,7 @@ export default {
   locator: {
     instructions: 'Define your position in the area',
     send: 'Send',
+    showBtn: false,
   },
   orientation: {
     instructions: 'Point the phone exactly in front of you, and validate.',
@@ -30,6 +32,7 @@ export default {
   placer: {
     instructions: 'Select your position',
     send: 'Send',
+    showBtn: false,
   },
   survey: {
     next: 'Next',

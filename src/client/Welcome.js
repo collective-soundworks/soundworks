@@ -44,20 +44,19 @@ export default class Welcome extends ClientModule {
   constructor(options = {}) {
     super(options.name || 'welcome', options);
 
-    const defaults = {
+    this.options = Object.assign({
       requireMobile: true,
       activateAudio: true,
       fullScreen: false,
       wakeLock: false,
-      showView: true,
+      showDialog: true,
       viewCtor: SegmentedView,
-    };
-
-    this.options = Object.assign(defaults, options);
+    }, options);
 
     // check platform
     this._defineAudioFileExtention();
     this._definePlatform();
+
     // initialize module
     this.init();
   }
@@ -90,35 +89,29 @@ export default class Welcome extends ClientModule {
     }
 
     this.content.error = error;
+    client.rejected = error === null ? false : true;
 
-    if (this.options.showView) {
+    if (this.options.showDialog) {
       if (!error) {
         this.events = { 'touchend': this.activateMedia.bind(this) };
       }
 
-      this.viewCtor = options.viewCtor || SegmentedView;
+      this.viewCtor = this.options.viewCtor;
       this.view = this.createView();
     }
+
+    // is client doesn't meet requirements, nothing else to do
+    if (client.rejected) { this.done(); }
   }
 
-  /**
-   * @private
-   */
-  start() {
-    super.start();
-  }
-
-  /**
-   * @private
-   */
+  /** @private */
   restart() {
-    super.restart();
+    // As this module is client side only, nothing has to be done when restarting.
     this.done();
   }
 
   activateMedia() {
-    // if (this.content.error)
-    //   return false;
+    if (client.rejected) { return; }
     // http://www.html5rocks.com/en/mobile/fullscreen/?redirect_from_locale=fr
     if (this.options.fullScreen && screenfull.enabled)
       screenfull.request();
@@ -130,7 +123,6 @@ export default class Welcome extends ClientModule {
       this._requestWakeLock();
 
     this.done();
-    // return true;
   }
 
   _supportsWebAudio() {
