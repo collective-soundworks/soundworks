@@ -1,3 +1,4 @@
+/* core */
 'use strict';
 
 var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
@@ -8,57 +9,42 @@ Object.defineProperty(exports, '__esModule', {
   value: true
 });
 
-var _comm = require('./comm');
+var _coreSockets = require('./core/sockets');
 
-var _comm2 = _interopRequireDefault(_comm);
+var _coreSockets2 = _interopRequireDefault(_coreSockets);
 
-var _server = require('./server');
+var _coreServer = require('./core/server');
 
-var _server2 = _interopRequireDefault(_server);
+var _coreServer2 = _interopRequireDefault(_coreServer);
 
-var _Client = require('./Client');
+var _coreClient = require('./core/Client');
 
-var _Client2 = _interopRequireDefault(_Client);
+var _coreClient2 = _interopRequireDefault(_coreClient);
 
-var _ServerModule = require('./ServerModule');
+var _corePier = require('./core/Pier');
 
-var _ServerModule2 = _interopRequireDefault(_ServerModule);
+var _corePier2 = _interopRequireDefault(_corePier);
 
-var _ServerCalibration = require('./ServerCalibration');
+/* scenes */
 
-var _ServerCalibration2 = _interopRequireDefault(_ServerCalibration);
+var _scenesExperience = require('./scenes/Experience');
 
-var _ServerCheckin = require('./ServerCheckin');
+var _scenesExperience2 = _interopRequireDefault(_scenesExperience);
 
-var _ServerCheckin2 = _interopRequireDefault(_ServerCheckin);
+/* services */
+// import ServerCalibration from './ServerCalibration';
 
-var _ServerControl = require('./ServerControl');
+var _servicesServerCheckin = require('./services/ServerCheckin');
 
-var _ServerControl2 = _interopRequireDefault(_ServerControl);
+var _servicesServerCheckin2 = _interopRequireDefault(_servicesServerCheckin);
 
-var _ServerFileList = require('./ServerFileList');
-
-var _ServerFileList2 = _interopRequireDefault(_ServerFileList);
-
-var _ServerLocator = require('./ServerLocator');
-
-var _ServerLocator2 = _interopRequireDefault(_ServerLocator);
-
-var _ServerPerformance = require('./ServerPerformance');
-
-var _ServerPerformance2 = _interopRequireDefault(_ServerPerformance);
-
-var _ServerPlacer = require('./ServerPlacer');
-
-var _ServerPlacer2 = _interopRequireDefault(_ServerPlacer);
-
-var _ServerSurvey = require('./ServerSurvey');
-
-var _ServerSurvey2 = _interopRequireDefault(_ServerSurvey);
-
-var _ServerSync = require('./ServerSync');
-
-var _ServerSync2 = _interopRequireDefault(_ServerSync);
+// import ServerControl from './ServerControl';
+// import ServerFileList from './ServerFileList';
+// import ServerLocator from './ServerLocator';
+// import ServerPerformance from './ServerPerformance';
+// import ServerPlacer from './ServerPlacer';
+// import ServerSurvey from './ServerSurvey';
+// import ServerSync from './ServerSync';
 
 // utils
 
@@ -75,19 +61,25 @@ var _utilsSetup = require('../utils/setup');
 var setup = _interopRequireWildcard(_utilsSetup);
 
 exports['default'] = {
-  comm: _comm2['default'],
-  server: _server2['default'],
-  Client: _Client2['default'],
-  ServerModule: _ServerModule2['default'],
-  ServerCalibration: _ServerCalibration2['default'],
-  ServerCheckin: _ServerCheckin2['default'],
-  ServerControl: _ServerControl2['default'],
-  ServerFileList: _ServerFileList2['default'],
-  ServerLocator: _ServerLocator2['default'],
-  ServerPerformance: _ServerPerformance2['default'],
-  ServerPlacer: _ServerPlacer2['default'],
-  ServerSurvey: _ServerSurvey2['default'],
-  ServerSync: _ServerSync2['default'],
+  /* core */
+  sockets: _coreSockets2['default'],
+  server: _coreServer2['default'],
+  Client: _coreClient2['default'],
+  Pier: _corePier2['default'],
+
+  /* scenes */
+  Experience: _scenesExperience2['default'],
+
+  /* services */
+  // ServerCalibration,
+  ServerCheckin: _servicesServerCheckin2['default'],
+  // ServerControl,
+  // ServerFileList,
+  // ServerLocator,
+  // ServerPerformance,
+  // ServerPlacer,
+  // ServerSurvey,
+  // ServerSync,
   utils: {
     helpers: helpers,
     math: math,
@@ -95,4 +87,4 @@ exports['default'] = {
   }
 };
 module.exports = exports['default'];
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInNyYy9zZXJ2ZXIvaW5kZXguanMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7OztvQkFBaUIsUUFBUTs7OztzQkFDTixVQUFVOzs7O3NCQUNWLFVBQVU7Ozs7NEJBQ0osZ0JBQWdCOzs7O2lDQUVYLHFCQUFxQjs7Ozs2QkFDekIsaUJBQWlCOzs7OzZCQUNqQixpQkFBaUI7Ozs7OEJBQ2hCLGtCQUFrQjs7Ozs2QkFDbkIsaUJBQWlCOzs7O2lDQUNiLHFCQUFxQjs7Ozs0QkFDMUIsZ0JBQWdCOzs7OzRCQUNoQixnQkFBZ0I7Ozs7MEJBQ2xCLGNBQWM7Ozs7Ozs0QkFHWixrQkFBa0I7O0lBQS9CLE9BQU87O3lCQUNHLGVBQWU7O0lBQXpCLElBQUk7OzBCQUNPLGdCQUFnQjs7SUFBM0IsS0FBSzs7cUJBRUY7QUFDYixNQUFJLG1CQUFBO0FBQ0osUUFBTSxxQkFBQTtBQUNOLFFBQU0scUJBQUE7QUFDTixjQUFZLDJCQUFBO0FBQ1osbUJBQWlCLGdDQUFBO0FBQ2pCLGVBQWEsNEJBQUE7QUFDYixlQUFhLDRCQUFBO0FBQ2IsZ0JBQWMsNkJBQUE7QUFDZCxlQUFhLDRCQUFBO0FBQ2IsbUJBQWlCLGdDQUFBO0FBQ2pCLGNBQVksMkJBQUE7QUFDWixjQUFZLDJCQUFBO0FBQ1osWUFBVSx5QkFBQTtBQUNWLE9BQUssRUFBRTtBQUNMLFdBQU8sRUFBUCxPQUFPO0FBQ1AsUUFBSSxFQUFKLElBQUk7QUFDSixTQUFLLEVBQUwsS0FBSztHQUNOO0NBQ0YiLCJmaWxlIjoic3JjL3NlcnZlci9pbmRleC5qcyIsInNvdXJjZXNDb250ZW50IjpbImltcG9ydCBjb21tIGZyb20gJy4vY29tbSc7XG5pbXBvcnQgc2VydmVyIGZyb20gJy4vc2VydmVyJztcbmltcG9ydCBDbGllbnQgZnJvbSAnLi9DbGllbnQnO1xuaW1wb3J0IFNlcnZlck1vZHVsZSBmcm9tICcuL1NlcnZlck1vZHVsZSc7XG5cbmltcG9ydCBTZXJ2ZXJDYWxpYnJhdGlvbiBmcm9tICcuL1NlcnZlckNhbGlicmF0aW9uJztcbmltcG9ydCBTZXJ2ZXJDaGVja2luIGZyb20gJy4vU2VydmVyQ2hlY2tpbic7XG5pbXBvcnQgU2VydmVyQ29udHJvbCBmcm9tICcuL1NlcnZlckNvbnRyb2wnO1xuaW1wb3J0IFNlcnZlckZpbGVMaXN0IGZyb20gJy4vU2VydmVyRmlsZUxpc3QnO1xuaW1wb3J0IFNlcnZlckxvY2F0b3IgZnJvbSAnLi9TZXJ2ZXJMb2NhdG9yJztcbmltcG9ydCBTZXJ2ZXJQZXJmb3JtYW5jZSBmcm9tICcuL1NlcnZlclBlcmZvcm1hbmNlJztcbmltcG9ydCBTZXJ2ZXJQbGFjZXIgZnJvbSAnLi9TZXJ2ZXJQbGFjZXInO1xuaW1wb3J0IFNlcnZlclN1cnZleSBmcm9tICcuL1NlcnZlclN1cnZleSc7XG5pbXBvcnQgU2VydmVyU3luYyBmcm9tICcuL1NlcnZlclN5bmMnO1xuXG4vLyB1dGlsc1xuaW1wb3J0ICogYXMgaGVscGVycyBmcm9tICcuLi91dGlscy9oZWxwZXJzJztcbmltcG9ydCAqIGFzIG1hdGggZnJvbSAnLi4vdXRpbHMvbWF0aCc7XG5pbXBvcnQgKiBhcyBzZXR1cCBmcm9tICcuLi91dGlscy9zZXR1cCc7XG5cbmV4cG9ydCBkZWZhdWx0IHtcbiAgY29tbSxcbiAgc2VydmVyLFxuICBDbGllbnQsXG4gIFNlcnZlck1vZHVsZSxcbiAgU2VydmVyQ2FsaWJyYXRpb24sXG4gIFNlcnZlckNoZWNraW4sXG4gIFNlcnZlckNvbnRyb2wsXG4gIFNlcnZlckZpbGVMaXN0LFxuICBTZXJ2ZXJMb2NhdG9yLFxuICBTZXJ2ZXJQZXJmb3JtYW5jZSxcbiAgU2VydmVyUGxhY2VyLFxuICBTZXJ2ZXJTdXJ2ZXksXG4gIFNlcnZlclN5bmMsXG4gIHV0aWxzOiB7XG4gICAgaGVscGVycyxcbiAgICBtYXRoLFxuICAgIHNldHVwLFxuICB9LFxufTtcbiJdfQ==
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInNyYy9zZXJ2ZXIvaW5kZXguanMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7MkJBQ29CLGdCQUFnQjs7OzswQkFDakIsZUFBZTs7OzswQkFDZixlQUFlOzs7O3dCQUNqQixhQUFhOzs7Ozs7Z0NBR1AscUJBQXFCOzs7Ozs7O3FDQUlsQiwwQkFBMEI7Ozs7Ozs7Ozs7Ozs7OzRCQVUzQixrQkFBa0I7O0lBQS9CLE9BQU87O3lCQUNHLGVBQWU7O0lBQXpCLElBQUk7OzBCQUNPLGdCQUFnQjs7SUFBM0IsS0FBSzs7cUJBRUY7O0FBRWIsU0FBTywwQkFBQTtBQUNQLFFBQU0seUJBQUE7QUFDTixRQUFNLHlCQUFBO0FBQ04sTUFBSSx1QkFBQTs7O0FBR0osWUFBVSwrQkFBQTs7OztBQUlWLGVBQWEsb0NBQUE7Ozs7Ozs7O0FBUWIsT0FBSyxFQUFFO0FBQ0wsV0FBTyxFQUFQLE9BQU87QUFDUCxRQUFJLEVBQUosSUFBSTtBQUNKLFNBQUssRUFBTCxLQUFLO0dBQ047Q0FDRiIsImZpbGUiOiJzcmMvc2VydmVyL2luZGV4LmpzIiwic291cmNlc0NvbnRlbnQiOlsiLyogY29yZSAqL1xuaW1wb3J0IHNvY2tldHMgZnJvbSAnLi9jb3JlL3NvY2tldHMnO1xuaW1wb3J0IHNlcnZlciBmcm9tICcuL2NvcmUvc2VydmVyJztcbmltcG9ydCBDbGllbnQgZnJvbSAnLi9jb3JlL0NsaWVudCc7XG5pbXBvcnQgUGllciBmcm9tICcuL2NvcmUvUGllcic7XG5cbi8qIHNjZW5lcyAqL1xuaW1wb3J0IEV4cGVyaWVuY2UgZnJvbSAnLi9zY2VuZXMvRXhwZXJpZW5jZSc7XG5cbi8qIHNlcnZpY2VzICovXG4vLyBpbXBvcnQgU2VydmVyQ2FsaWJyYXRpb24gZnJvbSAnLi9TZXJ2ZXJDYWxpYnJhdGlvbic7XG5pbXBvcnQgU2VydmVyQ2hlY2tpbiBmcm9tICcuL3NlcnZpY2VzL1NlcnZlckNoZWNraW4nO1xuLy8gaW1wb3J0IFNlcnZlckNvbnRyb2wgZnJvbSAnLi9TZXJ2ZXJDb250cm9sJztcbi8vIGltcG9ydCBTZXJ2ZXJGaWxlTGlzdCBmcm9tICcuL1NlcnZlckZpbGVMaXN0Jztcbi8vIGltcG9ydCBTZXJ2ZXJMb2NhdG9yIGZyb20gJy4vU2VydmVyTG9jYXRvcic7XG4vLyBpbXBvcnQgU2VydmVyUGVyZm9ybWFuY2UgZnJvbSAnLi9TZXJ2ZXJQZXJmb3JtYW5jZSc7XG4vLyBpbXBvcnQgU2VydmVyUGxhY2VyIGZyb20gJy4vU2VydmVyUGxhY2VyJztcbi8vIGltcG9ydCBTZXJ2ZXJTdXJ2ZXkgZnJvbSAnLi9TZXJ2ZXJTdXJ2ZXknO1xuLy8gaW1wb3J0IFNlcnZlclN5bmMgZnJvbSAnLi9TZXJ2ZXJTeW5jJztcblxuLy8gdXRpbHNcbmltcG9ydCAqIGFzIGhlbHBlcnMgZnJvbSAnLi4vdXRpbHMvaGVscGVycyc7XG5pbXBvcnQgKiBhcyBtYXRoIGZyb20gJy4uL3V0aWxzL21hdGgnO1xuaW1wb3J0ICogYXMgc2V0dXAgZnJvbSAnLi4vdXRpbHMvc2V0dXAnO1xuXG5leHBvcnQgZGVmYXVsdCB7XG4gIC8qIGNvcmUgKi9cbiAgc29ja2V0cyxcbiAgc2VydmVyLFxuICBDbGllbnQsXG4gIFBpZXIsXG5cbiAgLyogc2NlbmVzICovXG4gIEV4cGVyaWVuY2UsXG5cbiAgLyogc2VydmljZXMgKi9cbiAgLy8gU2VydmVyQ2FsaWJyYXRpb24sXG4gIFNlcnZlckNoZWNraW4sXG4gIC8vIFNlcnZlckNvbnRyb2wsXG4gIC8vIFNlcnZlckZpbGVMaXN0LFxuICAvLyBTZXJ2ZXJMb2NhdG9yLFxuICAvLyBTZXJ2ZXJQZXJmb3JtYW5jZSxcbiAgLy8gU2VydmVyUGxhY2VyLFxuICAvLyBTZXJ2ZXJTdXJ2ZXksXG4gIC8vIFNlcnZlclN5bmMsXG4gIHV0aWxzOiB7XG4gICAgaGVscGVycyxcbiAgICBtYXRoLFxuICAgIHNldHVwLFxuICB9LFxufTtcbiJdfQ==

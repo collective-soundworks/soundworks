@@ -142,43 +142,43 @@ export default class ClientModule extends Promised {
   constructor(name, options = {}) { // TODO: change to colorClass?
     super();
 
-    /**
-     * Name of the module.
-     * @type {String}
-     */
-    this.name = name;
+    // /**
+    //  * Name of the module.
+    //  * @type {String}
+    //  */
+    // this.name = name;
 
-    /**
-     * View of the module.
-     * @type {View}
-     */
-    this.view = null;
+    // /**
+    //  * View of the module.
+    //  * @type {View}
+    //  */
+    // this.view = null;
 
-    /**
-     * Events to bind to the view. (cf. Backbone's syntax).
-     * @type {Object}
-     */
-    this.events = {};
+    // /**
+    //  * Events to bind to the view. (cf. Backbone's syntax).
+    //  * @type {Object}
+    //  */
+    // this.events = {};
 
-    /**
-     * Additionnal options to pass to the view.
-     * @type {Object}
-     */
-    this.viewOptions = options.viewOptions || {};
+    // /**
+    //  * Additionnal options to pass to the view.
+    //  * @type {Object}
+    //  */
+    // this.viewOptions = options.viewOptions || {};
 
-    /**
-     * Defines a view constructor to be used in `createView`.
-     * @type {View}
-     */
-    this.viewCtor = options.viewCtor || View;
+    // /**
+    //  * Defines a view constructor to be used in `createView`.
+    //  * @type {View}
+    //  */
+    // this.viewCtor = options.viewCtor || View;
 
-    /** @private */
-    this._template = null;
+    // /** @private */
+    // this._template = null;
 
     // bind com methods to the instance.
-    this.send = this.send.bind(this);
-    this.receive = this.receive.bind(this);
-    this.removeListener = this.removeListener.bind(this);
+    // this.send = this.send.bind(this);
+    // this.receive = this.receive.bind(this);
+    // this.removeListener = this.removeListener.bind(this);
 
     /**
      * For module lifecycle. Is set to true when the module starts and back to false when `done`
@@ -196,75 +196,77 @@ export default class ClientModule extends Promised {
     this._isDone = false;
   }
 
-  /**
-   * Share the defined templates with all `ClientModule` instances.
-   * @param {Object} defs - An object containing the templates.
-   * @private
-   */
-  static setViewTemplateDefinitions(defs) {
-    ClientModule.prototype.templateDefinitions = defs;
-  }
+  // MOVED TO ACTIVITY
+  // /**
+  //  * Share the defined templates with all `ClientModule` instances.
+  //  * @param {Object} defs - An object containing the templates.
+  //  * @private
+  //  */
+  // static setViewTemplateDefinitions(defs) {
+  //   ClientModule.prototype.templateDefinitions = defs;
+  // }
 
-  /**
-   * Share the text content configuration (name and data) with all the `ClientModule` instances
-   * @param {Object} defs - The text contents of the application.
-   * @private
-   */
-  static setViewContentDefinitions(defs) {
-    ClientModule.prototype.contentDefinitions = defs;
-  }
+  // /**
+  //  * Share the text content configuration (name and data) with all the `ClientModule` instances
+  //  * @param {Object} defs - The text contents of the application.
+  //  * @private
+  //  */
+  // static setViewContentDefinitions(defs) {
+  //   ClientModule.prototype.contentDefinitions = defs;
+  // }
 
-  /**
-   * Sets the container of the views for all `ClientModule` instances.
-   * @param {Element} $el - The element to use as a container for the module's view.
-   */
-  static setViewContainer($el) {
-    ClientModule.prototype.$container = $el;
-  }
+  // /**
+  //  * Sets the container of the views for all `ClientModule` instances.
+  //  * @param {Element} $el - The element to use as a container for the module's view.
+  //  */
+  // static setViewContainer($el) {
+  //   ClientModule.prototype.$container = $el;
+  // }
 
-  /**
-   * Returns the template associated to the current module.
-   * @returns {Function} - The template related to the `name` of the current module.
-   */
-  get template() {
-    const template = this._template || this.templateDefinitions[this.name];
-    // if (!template)
-    //   throw new Error(`No template defined for module "${this.name}"`);
-    return template;
-  }
+  // /**
+  //  * Returns the template associated to the current module.
+  //  * @returns {Function} - The template related to the `name` of the current module.
+  //  */
+  // get template() {
+  //   const template = this._template || this.templateDefinitions[this.name];
+  //   // if (!template)
+  //   //   throw new Error(`No template defined for module "${this.name}"`);
+  //   return template;
+  // }
 
-  set template(tmpl) {
-    this._template = tmpl;
-  }
+  // set template(tmpl) {
+  //   this._template = tmpl;
+  // }
 
-  /**
-   * Returns the text associated to the current module.
-   * @returns {Object} - The text contents related to the `name` of the current module. The returned object is extended with a pointer to the `globals` entry of the defined text contents.
-   */
-  get content() {
-    const content = this._content || this.contentDefinitions[this.name];
+  // /**
+  //  * Returns the text associated to the current module.
+  //  * @returns {Object} - The text contents related to the `name` of the current module. The returned object is extended with a pointer to the `globals` entry of the defined text contents.
+  //  */
+  // get content() {
+  //   const content = this._content || this.contentDefinitions[this.name];
 
-    if (content)
-      content.globals = this.contentDefinitions.globals;
+  //   if (content)
+  //     content.globals = this.contentDefinitions.globals;
 
-    return content;
-  }
+  //   return content;
+  // }
 
-  set content(obj) {
-    this._content = obj;
-  }
+  // set content(obj) {
+  //   this._content = obj;
+  // }
 
-  /**
-   * Create the view of the module according to its attributes.
-   */
-  createView() {
-    const options = Object.assign({
-      id: this.name,
-      className: 'module'
-    }, this.viewOptions);
+  // /**
+  //  * Create the view of the module according to its attributes.
+  //  */
+  // createView() {
+  //   const options = Object.assign({
+  //     id: this.name,
+  //     className: 'module'
+  //   }, this.viewOptions);
 
-    return new this.viewCtor(this.template, this.content, this.events, options);
-  }
+  //   return new this.viewCtor(this.template, this.content, this.events, options);
+  // }
+  // !MOVED TO ACTIVITY
 
   /**
    * @todo - doc
@@ -320,9 +322,11 @@ export default class ClientModule extends Promised {
       this.view.remove();
       this.view = null;
     }
+
+    this._isActive = false;
   }
 
-/**
+  /**
    * Should be called when the module has finished its initialization (*i.e.* when the module has done its duty, or when it may run in the background for the rest of the scenario after it finished its initialization process), to allow subsequent steps of the scenario to start.
    *
    * For instance, the {@link Loader} module calls its {@link ClientModule#done} method when files are loaded, and the {@link ClientSync} module calls it when the first synchronization process is finished (while the module keeps running in the background afterwards).
@@ -341,7 +345,6 @@ export default class ClientModule extends Promised {
       this.resolvePromised();
 
     this._isDone = true;
-    this._isActive = false;
   }
 
   /**
@@ -400,41 +403,43 @@ export default class ClientModule extends Promised {
       this.view.hide();
   }
 
-  /**
-   * Sends a WebSocket message to the server side socket.
-   * @param {String} channel - The channel of the message (is automatically namespaced with the module's name: `${this.name}:channel`).
-   * @param {...*} args - Arguments of the message (as many as needed, of any type).
-   */
-  send(channel, ...args) {
-    comm.send(`${this.name}:${channel}`, ...args)
-  }
+  // MOVED TO CLIENT ACTIVITY
+  // /**
+  //  * Sends a WebSocket message to the server side socket.
+  //  * @param {String} channel - The channel of the message (is automatically namespaced with the module's name: `${this.name}:channel`).
+  //  * @param {...*} args - Arguments of the message (as many as needed, of any type).
+  //  */
+  // send(channel, ...args) {
+  //   comm.send(`${this.name}:${channel}`, ...args)
+  // }
 
-  /**
-   * Sends a WebSocket message to the server side socket.
-   * @param {String} channel - The channel of the message (is automatically namespaced with the module's name: `${this.name}:channel`).
-   * @param {...*} args - Arguments of the message (as many as needed, of any type).
-   */
-  sendVolatile(channel, ...args) {
-    comm.sendVolatile(`${this.name}:${channel}`, ...args)
-  }
+  // /**
+  //  * Sends a WebSocket message to the server side socket.
+  //  * @param {String} channel - The channel of the message (is automatically namespaced with the module's name: `${this.name}:channel`).
+  //  * @param {...*} args - Arguments of the message (as many as needed, of any type).
+  //  */
+  // sendVolatile(channel, ...args) {
+  //   comm.sendVolatile(`${this.name}:${channel}`, ...args)
+  // }
 
-  /**
-   * Listen a WebSocket message from the server.
-   * @param {String} channel - The channel of the message (is automatically namespaced with the module's name: `${this.name}:channel`).
-   * @param {...*} callback - The callback to execute when a message is received.
-   */
-  receive(channel, callback) {
-    comm.receive(`${this.name}:${channel}`, callback);
-  }
+  // /**
+  //  * Listen a WebSocket message from the server.
+  //  * @param {String} channel - The channel of the message (is automatically namespaced with the module's name: `${this.name}:channel`).
+  //  * @param {...*} callback - The callback to execute when a message is received.
+  //  */
+  // receive(channel, callback) {
+  //   comm.receive(`${this.name}:${channel}`, callback);
+  // }
 
-  /**
-   * Stop listening to a message from the server.
-   * @param {String} channel - The channel of the message (is automatically namespaced with the module's name: `${this.name}:channel`).
-   * @param {...*} callback - The callback to cancel.
-   */
-  removeListener(channel, callback) {
-    comm.removeListener(`${this.name}:${channel}`, callback);
-  }
+  // /**
+  //  * Stop listening to a message from the server.
+  //  * @param {String} channel - The channel of the message (is automatically namespaced with the module's name: `${this.name}:channel`).
+  //  * @param {...*} callback - The callback to cancel.
+  //  */
+  // removeListener(channel, callback) {
+  //   comm.removeListener(`${this.name}:${channel}`, callback);
+  // }
+  // !MOVED TO CLIENT ACTIVITY
 }
 
 ClientModule.sequential = function(...modules) {

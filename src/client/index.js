@@ -1,21 +1,27 @@
 import audio from 'waves-audio';
-import client from './client';
 
-import ClientModule from './ClientModule';
-import ClientCalibration from './ClientCalibration';
-import ClientCheckin from './ClientCheckin';
-import ClientControl from './ClientControl';
-import ClientFileList from './ClientFileList';
-import ClientLocator from './ClientLocator';
-import ClientPerformance from './ClientPerformance';
-import ClientPlacer from './ClientPlacer';
-import ClientSurvey from './ClientSurvey';
-import ClientSync from './ClientSync';
+// core
+import client from './core/client';
 
-import Loader from './Loader';
+// scenes
+import Experience from './scenes/Experience';
+
+// services
+// import ClientModule from './ClientModule';
+// import ClientCalibration from './ClientCalibration';
+import ClientCheckin from './services/ClientCheckin';
+// import ClientControl from './ClientControl';
+// import ClientFileList from './ClientFileList';
+// import ClientLocator from './ClientLocator';
+// import ClientPerformance from './ClientPerformance';
+// import ClientPlacer from './ClientPlacer';
+// import ClientSurvey from './ClientSurvey';
+// import ClientSync from './ClientSync';
+import Loader from './services/Loader';
+import Welcome from './services/Welcome';
+
 import motionInput from 'motion-input';
-import Orientation from './Orientation';
-import Welcome from './Welcome';
+// import Orientation from './Orientation';
 
 
 // views
@@ -29,7 +35,6 @@ import SquaredView from './display/SquaredView';
 import TouchSurface from './display/TouchSurface';
 import defaultTemplates from './display/defaultTemplates';
 import defaultTextContents from './display/defaultTextContents';
-
 // drawing
 import Renderer from './display/Renderer';
 import RenderingGroup from './display/RenderingGroup';
@@ -40,23 +45,30 @@ import * as math from '../utils/math';
 import * as setup from '../utils/setup';
 
 export default {
+  /* external */
   audio,
   audioContext: audio.audioContext,
+  /* core */
   client,
-  ClientCalibration,
+
+  /* scenes */
+  Experience,
+  /* services */
+  // ClientCalibration,
   ClientCheckin,
-  ClientControl,
-  ClientFileList,
-  ClientModule,
-  ClientLocator,
-  ClientPerformance,
-  ClientPlacer,
-  ClientSurvey,
-  ClientSync,
+  // ClientControl,
+  // ClientFileList,
+  // ClientModule,
+  // ClientLocator,
+  // ClientPerformance,
+  // ClientPlacer,
+  // ClientSurvey,
+  // ClientSync,
   Loader,
-  motionInput,
-  Orientation,
+  // motionInput,
+  // Orientation,
   Welcome,
+
   display: {
     View,
     ButtonView,
@@ -71,6 +83,7 @@ export default {
     Renderer,
     RenderingGroup,
   },
+
   utils: {
     helpers,
     math,

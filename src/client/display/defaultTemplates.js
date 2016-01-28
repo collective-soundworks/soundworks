@@ -6,7 +6,7 @@
  * @type {Object}
  */
 export default {
-  checkin: `
+  'service:checkin': `
     <% if (label) { %>
       <div class="section-top flex-middle">
         <p class="big"><%= labelPrefix %></p>
@@ -27,11 +27,11 @@ export default {
     <% } %>
   `,
 
-  control: `
+  'service:control': `
     <h1 class="big"><%= title %></h1>
   `,
 
-  loader: `
+  'service:loader': `
     <div class="section-top flex-middle">
       <p><%= loading %></p>
     </div>
@@ -45,7 +45,7 @@ export default {
     <div class="section-bottom"></div>
   `,
 
-  locator: `
+  'service:locator': `
     <div class="section-square flex-middle"></div>
     <div class="section-float flex-middle">
       <% if (!activateBtn) { %>
@@ -56,7 +56,7 @@ export default {
     </div>
   `,
 
-  orientation: `
+  'service:orientation': `
     <div class="section-top"></div>
     <div class="section-center flex-center">
       <p><%= !error ? instructions : errorMessage %></p>
@@ -68,7 +68,7 @@ export default {
     </div>
   `,
 
-  placer: `
+  'service:placer': `
     <div class="section-square flex-middle"></div>
     <div class="section-float flex-middle">
       <% if (mode === 'graphic') { %>
@@ -81,13 +81,30 @@ export default {
     </div>
   `,
 
-  sync: `
+  'service:sync': `
     <div class="section-top"></div>
     <div class="section-center flex-center">
       <p class="soft-blink"><%= wait %></p>
     </div>
     <div class="section-bottom"></div>
   `,
+
+  'service:welcome': `
+    <div class="section-top flex-middle">
+      <% if (!error) { %>
+        <p class="big"><%= welcome %> <br /><b><%= globals.appName %></b></p>
+      <% } %>
+    </div>
+    <div class="section-center flex-center">
+      <% if (error) { %>
+        <p class="big"><%= error %></p>
+      <% } else { %>
+        <p class="small"><%= touchScreen %></p>
+      <% } %>
+    </div>
+    <div class="section-bottom flex-middle"></div>
+  `,
+
 
   survey: `
     <div class="section-top">
@@ -111,19 +128,4 @@ export default {
     </div>
   `,
 
-  welcome: `
-    <div class="section-top flex-middle">
-      <% if (!error) { %>
-        <p class="big"><%= welcome %> <br /><b><%= globals.appName %></b></p>
-      <% } %>
-    </div>
-    <div class="section-center flex-center">
-      <% if (error) { %>
-        <p class="big"><%= error %></p>
-      <% } else { %>
-        <p class="small"><%= touchScreen %></p>
-      <% } %>
-    </div>
-    <div class="section-bottom flex-middle"></div>
-  `,
 };
