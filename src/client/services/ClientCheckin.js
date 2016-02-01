@@ -85,7 +85,6 @@ class ClientCheckin extends Service {
   }
 
   _onPositionResponse(index, label, coordinates) {
-    console.log(index, label, coordinates);
     this.index = index;
     this.label = label;
     client.coordinates = coordinates;

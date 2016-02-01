@@ -1,6 +1,9 @@
 import client from './client';
+import debug from 'debug';
 import Signal from './Signal';
 import SignalAll from './SignalAll';
+
+const log = debug('soundworks:serviceManager');
 
 /**
  * Factory for the services.
@@ -14,12 +17,9 @@ const serviceManager = {
    * Initialize the serviceManager
    */
   init() {
-    console.log('serviceManager:init');
+    log('init');
     this._requiredSignals = new SignalAll();
-    this._requiredSignals.addObserver(() => {
-      console.log('serviceManager:ready');
-      this.signals.ready.set(true);
-    });
+    this._requiredSignals.addObserver(() => this.ready());
 
     this.signals = {};
     this.signals.start = new Signal();
@@ -32,7 +32,7 @@ const serviceManager = {
    * Sends the signal required by all services to start.
    */
   start() {
-    console.log('serviceManager:start');
+    log('start');
     this.signals.start.set(true);
   },
 
@@ -40,7 +40,7 @@ const serviceManager = {
    * Mark the services as ready. Should be listened by `Experience` instances.
    */
   ready() {
-    console.log('serviceManager:ready');
+    log('ready');
     this.signals.ready.set(true);
   },
 

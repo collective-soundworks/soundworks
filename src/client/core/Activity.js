@@ -5,6 +5,7 @@ import View from '../display/View';
 import viewManager from './viewManager';
 
 
+
 /**
  * Base class for services and scenes. Basically a process with view and optionnal network abilities.
  */
@@ -87,6 +88,10 @@ export default class Activity {
     Object.assign(this.options, options);
   }
 
+  /**
+   * Interface method to define which signal must be listened in order to start the activity
+   */
+  require() {}
 
   /**
    * Share the defined templates with all `Activity` instances.
@@ -201,7 +206,6 @@ export default class Activity {
    * @param {...*} args - Arguments of the message (as many as needed, of any type).
    */
   send(channel, ...args) {
-    console.log(`${this.id}:${channel}`);
     socket.send(`${this.id}:${channel}`, ...args)
   }
 

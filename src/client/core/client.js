@@ -83,7 +83,6 @@ const client = {
    * @param {Object} [options.debugIO=false] - If set to `true`, show socket.io debug informations.
    */
   init(clientType = 'player', options = {}) {
-    console.log('client:init');
     this.type = clientType;
 
     // 1. if socket options given, mix it with defaults.
@@ -106,7 +105,6 @@ const client = {
    * * Initialize the application.
    */
   start() {
-    console.log('client:start', `--- socket: ${socket.required}`);
     // init socket
     if (socket.required)
       this._initSocket();

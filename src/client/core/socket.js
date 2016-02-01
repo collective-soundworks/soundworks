@@ -1,4 +1,7 @@
+import debug from 'debug';
 import io from 'socket.io-client';
+
+const log = debug('soundworks:socket');
 
 export default {
   /**
@@ -19,10 +22,12 @@ export default {
    * @param {Array<String>} options.transports - The transports to use for the socket (cf. socket.io).
    */
   initialize(namespace, options) {
-    this.socket = io(`${options.url}/${namespace}`, {
+    const url = `${options.url}/${namespace}`;
+    this.socket = io(url, {
       transports: options.transports
     });
 
+    log(`initialized - url: "${url}" - transports: ${options.transports}`);
     return this;
   },
 
@@ -33,10 +38,12 @@ export default {
    */
   send(channel, ...args) {
     this.socket.emit(channel, ...args);
+    log(`send - channel: "${channel}"`, ...args);
   },
 
   sendVolatile(channel, ...args) {
     this.socket.volatile.emit(channel, ...args);
+    log(`sendVolatile - channel: "${channel}"`, ...args);
   },
 
   /**
@@ -47,6 +54,7 @@ export default {
   receive(channel, callback) {
     this.socket.removeListener(channel, callback);
     this.socket.on(channel, callback);
+    log(`receive listener - channel: "${channel}"`);
   },
 
   /**
@@ -56,5 +64,6 @@ export default {
    */
   removeListener(channel, callback) {
     this.socket.removeListener(channel, callback);
+    log(`remove listener - channel: "${channel}"`);
   },
 };

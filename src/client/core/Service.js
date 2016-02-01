@@ -1,7 +1,10 @@
 import Activity from './Activity';
+import debug from 'debug';
 import serviceManager from './serviceManager';
 import Signal from './Signal';
 import SignalAll from './SignalAll';
+
+const log = debug('soundworks:services');
 
 export default class Service extends Activity {
   constructor(id, hasNetwork) {
@@ -46,12 +49,12 @@ export default class Service extends Activity {
 
   start() {
     super.start();
-    console.log(`%c${this.id}:start`, 'color: green');
+    log(`"${this.id}" started`);
   }
 
   stop() {
     super.stop();
-    console.log(`%c${this.id}:stop`, 'color: green');
+    log(`"${this.id}" stopped`);
   }
 }
 

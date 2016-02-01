@@ -1,12 +1,12 @@
-// handle views according to their priority
-// should throttle on start to wait for several module starting at the same time (ex parallel) to define the higher priority.
-// should then displayviews according to their priority.
+import debug from 'debug';
 
-// should only deal with show and hide.
-
+const log = debug('soundworks:viewManager');
 const stack = new Set();
 let $container = null;
 
+/**
+ * Handle services' views according to their priorities.
+ */
 export default {
   /**
    * Sets the container of the views for all `Activity` instances.
@@ -20,7 +20,7 @@ export default {
    * Register a view into the stack of views to display.
    */
   register(view) {
-    console.log('==> viewManager:register', view.options.id);
+    log(`register - id: "${view.options.id}" - priority: ${view.priority}`);
     // add to the stack
     stack.add(view);
 
@@ -34,7 +34,7 @@ export default {
    * Remove view from the stack of views to display.
    */
   remove(view) {
-    console.log('==> viewManager:remove', view.options.id);
+    log(`remove - id: "${view.options.id}" - priority: ${view.priority}`);
     view.remove();
     stack.delete(view);
 
@@ -61,7 +61,7 @@ export default {
 
 
     if (nextView && !hasVisibleView) {
-      console.log('==> viewManager:nextView', nextView.options.id, priority);
+      log(`nextView - id: "${nextView.options.id}" - priority: ${priority}`);
       nextView.show();
     }
   },
