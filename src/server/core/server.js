@@ -121,6 +121,26 @@ export default {
   osc: null,
 
   /**
+   * Mapping between a `clientType` and its related activities
+   */
+  _maps: {},
+
+  /**
+   * Activities to be started
+   */
+  _activities: new Set(),
+
+  setMap(clientTypes, activity) {
+    clientTypes.forEach((clientType) => {
+      if (!this._maps[clientType])
+        this._maps[clientType] = new Set();
+
+      this._maps[clientType].add(activity);
+      this._activities.add(activity);
+    });
+  },
+
+  /**
    * Start the server.
    * @todo - rewrite doc for this method
    * @param {Object} [appConfig={}] Application configuration options.
@@ -172,7 +192,15 @@ export default {
     sockets.initialize(this.io);
     logger.initialize(this.config.logger);
 
+    // start all activities
+    this._activities.forEach((activity) => activity.start());
+    // map `clientType` to their repsective modules
+    for (let clientType in this._maps) {
+      const modules = this._maps[clientType];
+      this._map(clientType, modules);
+    }
 
+    // @todo - move into a proper service.
     // configure OSC - should be optionnal
     if (this.config.osc) {
       this.osc = new osc.UDPPort({
@@ -213,8 +241,8 @@ export default {
    * @param {String} clientType Client type (as defined by the method {@link client.init} on the client side).
    * @param {...ClientModule} modules Modules to map to that client type.
    */
-  map(clientType, ...modules) {
-    // @todo - allow to pass
+  _map(clientType, modules) {
+    // @todo - allow to pass some variable in the url -> define how bind it to sockets...
     const url = (clientType !== this.config.defaultClient) ? `/${clientType}` : '/';
 
     // use template with `clientType` name or default if not defined
@@ -235,17 +263,18 @@ export default {
       }));
     });
 
-    this.io.of(clientType).on('connection', this.onConnection(clientType, modules));
+    // wait for socket connnection
+    this.io.of(clientType).on('connection', this._onConnection(clientType, modules));
   },
 
-  onConnection(clientType, modules) {
+  _onConnection(clientType, modules) {
     return (socket) => {
       const client = new Client(clientType, socket);
-      modules.forEach((mod) => { mod.connect(client) });
+      modules.forEach((mod) => mod.connect(client));
 
       // global lifecycle of the client
       sockets.receive(client, 'disconnect', () => {
-        modules.forEach((mod) => { mod.disconnect(client) });
+        modules.forEach((mod) => mod.disconnect(client));
         client.destroy();
         logger.info({ socket, clientType }, 'disconnect');
       });

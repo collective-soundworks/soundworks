@@ -2,6 +2,7 @@ import audio from 'waves-audio';
 
 // core
 import client from './core/client';
+import serviceManager from './core/serviceManager';
 
 // scenes
 import Experience from './scenes/Experience';
@@ -10,7 +11,7 @@ import Experience from './scenes/Experience';
 // import ClientModule from './ClientModule';
 // import ClientCalibration from './ClientCalibration';
 import ClientCheckin from './services/ClientCheckin';
-// import ClientControl from './ClientControl';
+import ClientControl from './services/ClientControl';
 // import ClientFileList from './ClientFileList';
 // import ClientLocator from './ClientLocator';
 // import ClientPerformance from './ClientPerformance';
@@ -50,13 +51,15 @@ export default {
   audioContext: audio.audioContext,
   /* core */
   client,
+  serviceManager,
 
   /* scenes */
   Experience,
+
   /* services */
   // ClientCalibration,
   ClientCheckin,
-  // ClientControl,
+  ClientControl,
   // ClientFileList,
   // ClientModule,
   // ClientLocator,
@@ -65,7 +68,7 @@ export default {
   // ClientSurvey,
   ClientSync,
   Loader,
-  // motionInput,
+  motionInput,
   // Orientation,
   Welcome,
 

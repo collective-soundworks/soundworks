@@ -49,16 +49,12 @@ const serviceManager = {
   //   this.signals.ready.set(false);
   // },
 
-  configure(id, options) {
-    return this.getInstance(id, options);
-  },
-
   /**
    * Returns an instance of a service with options to be applied to its constructor.
    * @param {String} id - The id of the service.
    * @param {Object} options - Options to pass to the service constructor.
    */
-  getInstance(id, options = {}) {
+  require(id, options = {}) {
     id = 'service:' + id;
 
     if (!_ctors[id])

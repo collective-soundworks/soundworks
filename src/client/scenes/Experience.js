@@ -27,7 +27,7 @@ export default class Experience extends Scene {
   }
 
   require(id, options) {
-    return serviceManager.getInstance(id, options);
+    return serviceManager.require(id, options);
   }
 
   done() {

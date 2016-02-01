@@ -37,7 +37,7 @@ export default class Service extends Activity {
   }
 
   require(id) {
-    const service = serviceManager.getInstance(id);
+    const service = serviceManager.require(id);
     const signal = service.signals.ready;
 
     if (signal)

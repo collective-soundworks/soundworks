@@ -1,6 +1,9 @@
 import basicControllers from 'waves-basic-controllers';
-import ClientModule from './ClientModule';
 import { EventEmitter } from 'events';
+import Service from '../core/Service';
+import serviceManager from '../core/serviceManager';
+
+const SERVICE_ID = 'service:control';
 
 basicControllers.disableStyles();
 
@@ -111,11 +114,10 @@ class _NumberGui {
   constructor($container, unit, guiOptions) {
     const { label, min, max, step, value } = unit;
 
-    if (guiOptions.type === 'slider') {
+    if (guiOptions.type === 'slider')
       this.controller = new basicControllers.Slider(label, min, max, step, value, guiOptions.unit, guiOptions.size);
-    } else {
+    else
       this.controller = new basicControllers.NumberBox(label, min, max, step, value);
-    }
 
     $container.appendChild(this.controller.render());
     this.controller.onRender();
@@ -259,28 +261,25 @@ class _LabelGui {
  * const currentSynthGainValue = control.event['synth:gain'].value;
  * const currentNumPlayersValue = control.event['numPlayers'].value;
  */
-export default class ClientControl extends ClientModule {
+class ClientControl extends Service {
   /**
-   * @param {Object} [options={}] Options.
-   * @param {String} [options.name='control'] Name of the module.
-   * @param {Boolean} [options.hasGui=true] Indicates whether to create the graphical user interface to control the parameters or not.
-   *
    * @emits {'update'} when the server sends an update. The callback function takes `name:String` and `value:*` as arguments, where `name` is the name of the parameter / info / command, and `value` its new value.
    */
-  constructor(options = {}) {
-    super(options.name || 'control', options);
+  constructor() {
+    super(SERVICE_ID, true);
 
-    this.options = Object.assign({
-      hasGui: false,
-    }, options);
+    /**
+     * @param {Object} [options={}] Options.
+     * @param {Boolean} [options.hasGui=true] - Indicates whether to create the graphical user interface to control the parameters or not.
+     */
+    const defaults = { hasGui: false };
+    this.configure(defaults);
 
     /** @private */
     this._guiOptions = {};
 
     this._onInitResponse = this._onInitResponse.bind(this);
     this._onUpdateResponse = this._onUpdateResponse.bind(this);
-
-    this.init();
   }
 
   init() {
@@ -298,35 +297,37 @@ export default class ClientControl extends ClientModule {
   start() {
     super.start();
 
+    if (!this.hasStarted)
+      this.init();
+
     this.send('request');
 
     this.receive('init', this._onInitResponse);
     this.receive('update', this._onUpdateResponse);
+
+    // this.show();
   }
 
   /** @private */
   stop() {
     super.stop();
-    // don't remove listeners, as the control should run in background
-  }
-
-  /** @private */
-  restart() {
-    super.restart(); // @note should be tested.
-    // this.send('request');
+    // don't remove 'update' listener, as the control is runnig as a background process
+    this.removeListener('init', this._onInitResponse);
   }
 
   _onInitResponse(config) {
+    this.show();
+
     config.forEach((entry) => {
       const unit = this._createControlUnit(entry);
-
       this.units[unit.name] = unit;
 
       if (this.view)
         this._createGui(this.view, unit);
     });
 
-    if (!this.view) { this.done(); }
+    if (!this.options.hasGui)
+      this.ready();
   }
 
   _onUpdateResponse(name, val) {
@@ -439,39 +440,27 @@ export default class ClientControl extends ClientModule {
       confirm: false,
     }, this._guiOptions[unit.name]);
 
-    if (config.show === false) {
-      return null;
-    }
+    if (config.show === false) return null;
 
     let gui = null;
     const $container = this.view.$el;
 
     switch (unit.type) {
       case 'number':
-        // `NumberBox` or `Slider`
-        gui = new _NumberGui($container, unit, config);
+        gui = new _NumberGui($container, unit, config); // `NumberBox` or `Slider`
         break;
-
       case 'enum':
-        // `SelectList` or `SelectButtons`
-        gui = new _EnumGui($container, unit, config);
+        gui = new _EnumGui($container, unit, config); // `SelectList` or `SelectButtons`
         break;
-
       case 'command':
-        // `Button`
-        gui = new _CommandGui($container, unit, config);
+        gui = new _CommandGui($container, unit, config); // `Button`
         break;
-
       case 'info':
-        // `Info`
-        gui = new _InfoGui($container, unit, config);
+        gui = new _InfoGui($container, unit, config); // `Info`
         break;
-
       case 'label':
-        // label has no associated unit
         gui = new _LabelGui($container, unit, config);
         break;
-
       // case 'toggle'
     }
 
@@ -480,3 +469,7 @@ export default class ClientControl extends ClientModule {
     return gui;
   }
 }
+
+serviceManager.register(SERVICE_ID, ClientControl);
+
+export default ClientControl;

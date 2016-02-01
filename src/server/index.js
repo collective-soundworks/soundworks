@@ -10,7 +10,7 @@ import Experience from './scenes/Experience';
 /* services */
 // import ServerCalibration from './ServerCalibration';
 import ServerCheckin from './services/ServerCheckin';
-// import ServerControl from './ServerControl';
+import ServerControl from './services/ServerControl';
 // import ServerFileList from './ServerFileList';
 // import ServerLocator from './ServerLocator';
 // import ServerPerformance from './ServerPerformance';
@@ -36,7 +36,7 @@ export default {
   /* services */
   // ServerCalibration,
   ServerCheckin,
-  // ServerControl,
+  ServerControl,
   // ServerFileList,
   // ServerLocator,
   // ServerPerformance,

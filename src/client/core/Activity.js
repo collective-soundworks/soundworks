@@ -1,3 +1,4 @@
+import { EventEmitter } from 'events';
 import Signal from './Signal';
 import SignalAll from './SignalAll';
 import socket from './socket';
@@ -9,9 +10,9 @@ import viewManager from './viewManager';
 /**
  * Base class for services and scenes. Basically a process with view and optionnal network abilities.
  */
-export default class Activity {
+export default class Activity extends EventEmitter {
   constructor(id, hasNetwork = true) {
-
+    super();
     /**
      * Name of the module.
      * @type {String}
@@ -89,11 +90,6 @@ export default class Activity {
   }
 
   /**
-   * Interface method to define which signal must be listened in order to start the activity
-   */
-  require() {}
-
-  /**
    * Share the defined templates with all `Activity` instances.
    * @param {Object} defs - An object containing the templates.
    * @private
@@ -155,7 +151,6 @@ export default class Activity {
 
     return new this.viewCtor(this.template, this.content, this.events, options);
   }
-
 
   /**
    * Handle the logic and steps that starts the module.

@@ -1,5 +1,8 @@
-import Pier from '../core/Pier';
+import ServerActivity from '../core/ServerActivity';
 import { getOpt } from '../../utils/helpers';
+import serviceManager from '../core/serverServiceManager';
+
+const SERVICE_ID = 'service:checkin';
 
 /**
  * Assign places among a set of predefined positions (i.e. labels and/or coordinates).
@@ -11,7 +14,7 @@ import { getOpt } from '../../utils/helpers';
  * @example
  * const checkin = new ServerCheckin({ capacity: 100, order: 'random' });
  */
-export default class ServerCheckin extends Pier {
+class ServerCheckin extends ServerActivity {
   /**
    * @param {Object} [options={}] Options.
    * @param {Object} [options.name='checkin'] Name of the module.
@@ -23,20 +26,22 @@ export default class ServerCheckin extends Pier {
    * - `'ascending'`: indices are assigned in ascending order
    * - `'random'`: indices are assigned in random order
    */
-  constructor(options = {}) {
-    super('service:checkin');
+  constructor() {
+    super(SERVICE_ID);
+  }
 
+  start() {
     /**
      * Setup defining predefined positions (labels and/or coordinates).
      * @type {Object}
      */
-    this.setup = options.setup;
+    this.setup = this.options.setup;
 
     /**
      * Maximum number of clients checked in (may limit or be limited by the number of predefined labels and/or coordinates).
      * @type {Number}
      */
-    this.capacity = getOpt(options.capacity, Infinity, 1);
+    this.capacity = getOpt(this.options.capacity, Infinity, 1);
 
     /**
      * List of the clients checked in with corresponing indices.
@@ -50,12 +55,12 @@ export default class ServerCheckin extends Pier {
      * - `'random'`: assigns indices in random order.
      * @type {[type]}
      */
-    this.order = options.order || 'ascending'; // 'ascending' | 'random'
+    this.order = this.options.order || 'ascending'; // 'ascending' | 'random'
 
     this._availableIndices = [];
     this._nextAscendingIndex = 0;
 
-    const setup = options.setup;
+    const setup = this.options.setup;
 
     if (setup) {
       const numLabels = setup.labels ? setup.labels.length : Infinity;
@@ -165,9 +170,7 @@ export default class ServerCheckin extends Pier {
   //   }
   // }
 
-  /**
-   * @private
-   */
+  /** @inheritdoc */
   connect(client) {
     super.connect(client);
 
@@ -175,9 +178,7 @@ export default class ServerCheckin extends Pier {
     // this.receive(client, 'restart', this._onRestart(client));
   }
 
-  /**
-   * @private
-   */
+  /** @inheritdoc */
   disconnect(client) {
     super.disconnect(client);
 
@@ -189,3 +190,7 @@ export default class ServerCheckin extends Pier {
     }
   }
 }
+
+serviceManager.register(SERVICE_ID, ServerCheckin);
+
+export default ServerCheckin;

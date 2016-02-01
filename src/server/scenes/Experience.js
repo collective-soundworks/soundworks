@@ -1,4 +1,4 @@
-import Pier from '../core/Pier';
+import ServerActivity from '../core/ServerActivity';
 
 
 /**
@@ -12,13 +12,12 @@ import Pier from '../core/Pier';
  *
  * (See also {@link src/client/ClientPerformance.js~ClientPerformance} on the client side.)
  */
-export default class Experience extends Pier {
+export default class Experience extends ServerActivity {
   /**
     * Creates an instance of the class.
-    * @param {Object} [options={}] Options.
-    * @param {string} [options.name='performance'] Name of the module.
+    * @param {String} id - The id of the module, should its client-side counterpart.
    */
-  constructor(id = 'experience', options = {}) {
+  constructor(id = 'experience') {
     super(id);
 
     /**

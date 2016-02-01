@@ -1,5 +1,7 @@
 /**
  * @todo
+ * @note - some problems might occur between the way
+ * this helper and the viewManager works...
  */
 export default class TouchSurface {
   constructor($el) {
@@ -14,7 +16,6 @@ export default class TouchSurface {
 
     // cache bounding rect values
     window.addEventListener('resize', this._updateBoundingRect.bind(this));
-    this._updateBoundingRect();
 
     // listen events
     this.$el.addEventListener('touchstart', this._handleTouch((id, x, y, e) => {
@@ -70,6 +71,10 @@ export default class TouchSurface {
   _handleTouch(callback) {
     return (e) => {
       e.preventDefault();
+
+      if (!this._elBoundingRect)
+        this._updateBoundingRect();
+
       const touches = e.changedTouches;
       const boundingRect = this._elBoundingRect;
 

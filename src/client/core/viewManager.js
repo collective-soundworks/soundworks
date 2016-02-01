@@ -8,6 +8,8 @@ let $container = null;
  * Handle services' views according to their priorities.
  */
 export default {
+  _timeoutId = null,
+
   /**
    * Sets the container of the views for all `Activity` instances.
    * @param {Element} $el - The element to use as a container for the module's view.
@@ -27,7 +29,8 @@ export default {
     view.hide();
     view.appendTo($container);
 
-    setTimeout(() => { this._showNext(); }, 0);
+    if (!this._timeoutId)
+      this.timeoutId = setTimeout(() => { this._showNext(); }, 0);
   },
 
   /**
@@ -45,13 +48,13 @@ export default {
    * Show the view with the.
    */
   _showNext() {
-    let hasVisibleView;
+    let visibleView;
     let priority = -Infinity;
     let nextView = null;
 
     stack.forEach(function(view) {
       if (view.isVisible)
-        hasVisibleView = true;
+        visibleView = true;
 
       if (view.priority > priority) {
         priority = view.priority;
@@ -59,10 +62,13 @@ export default {
       }
     });
 
-
-    if (nextView && !hasVisibleView) {
-      log(`nextView - id: "${nextView.options.id}" - priority: ${priority}`);
-      nextView.show();
+    if (nextView) {
+      if (!visibleView || (visibleView.priority < nextView.priority)) {
+        log(`nextView - id: "${nextView.options.id}" - priority: ${priority}`);
+        nextView.show();
+      }
     }
+
+    this.timeoutId = null;
   },
 };

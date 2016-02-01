@@ -1,4 +1,5 @@
 import sockets from './sockets';
+import server from './server';
 import { EventEmitter } from 'events';
 
 // @todo - remove EventEmitter ? (Implement our own listeners)
@@ -36,7 +37,7 @@ import { EventEmitter } from 'events';
  *   }
  * }
  */
-export default class Pier extends EventEmitter {
+export default class ServerActivity extends EventEmitter {
   /**
     * Creates an instance of the class.
     * @param {Object} [options={}] The options.
@@ -46,10 +47,46 @@ export default class Pier extends EventEmitter {
     super();
 
     /**
-     * The id of the pier.
+     * The id of the activity. This id must match a client side `Activity` id in order
+     * to create the socket channel between the activity and its client side peer
      * @type {string}
      */
     this.id = id;
+
+    /**
+     * The client types on which the activity should be mapped
+     * @type {Array}
+     * @private
+     */
+    this._clientTypes = [];
+
+    /**
+     * The options of the activity
+     */
+    this.options = {};
+  }
+
+  start() {},
+
+  /**
+   * @param {String|Array} val - The client type(s) on which the activity should be mapped
+   */
+  addClientType(...val) {
+    this._clientTypes = this._clientTypes.concat(val);
+    server.setMap(this._clientTypes, this);
+  }
+
+  /**
+   * Configure the activity.
+   * @param {Object} options
+   */
+  configure(options) {
+    if (options.clientType) {
+      this.addClientType(...options.clientType);
+      delete options.clientType;
+    }
+
+    Object.assign(this.options, options);
   }
 
   /**

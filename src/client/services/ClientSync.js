@@ -22,7 +22,7 @@ const SERVICE_ID = 'service:sync';
  * (See also {@link src/server/ServerSync.js~ServerSync} on the server side.)
  *
  * @example
- * const sync = serviceManager.getInstance('service:sync');
+ * const sync = serviceManager.require('service:sync');
  *
  * const nowLocal = sync.getLocalTime(); // current time in local clock time
  * const nowSync = sync.getSyncTime(); // current time in sync clock time
@@ -91,8 +91,6 @@ class ClientSync extends Service {
   }
 
   _syncStatusReport(message, report) {
-    console.log(message, report);
-
     if (message === 'sync:status') {
       if (report.status === 'training' || report.status === 'sync') {
         if (!this._ready) {

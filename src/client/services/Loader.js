@@ -85,8 +85,8 @@ class Loader extends Service {
   }
 
   stop() {
-    super.stop();
     this.hide();
+    super.stop();
   }
 
   _load(fileList) {

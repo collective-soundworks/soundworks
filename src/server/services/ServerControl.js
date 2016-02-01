@@ -1,5 +1,4 @@
-import ServerModule from './ServerModule';
-import comm from './comm';
+import Pier from '../core/Pier';
 import { EventEmitter } from 'events';
 
 /**
@@ -160,13 +159,13 @@ class _LabelUnit extends _ControlUnit {
  * const control = new MyControl();
  * const performance = new MyPerformance(control);
  */
-export default class ServerControl extends ServerModule {
+export default class ServerControl extends Pier {
   /**
    * @param {Object} [options={}] Options.
    * @param {String} [options.name='control'] - Name of the module.
    */
   constructor(options = {}) {
-    super(options.name || 'control');
+    super('service:control');
 
     /**
      * Dictionary of all control items.
@@ -290,13 +289,16 @@ export default class ServerControl extends ServerModule {
     super.connect(client);
 
     // init control parameters, infos, and commands at client
-    this.receive(client, 'request', () => {
-      this.send(client, 'init', this._unitData);
-    });
+    this.receive(client, 'request', this._onRequest(client));
+    this.receive(client, 'update', this._onUpdate(client));
+  }
 
-    // listen to control parameters
-    this.receive(client, 'update', (name, value) => {
-      this.update(name, value, client); // update, but exclude client from broadcasting to clients
-    });
+  _onRequest(client) {
+    return () => this.send(client, 'init', this._unitData);
+  }
+
+  _onUpdate(client) {
+    // update, but exclude client from broadcasting to other clients
+    return (name, value) => this.update(name, value, client);
   }
 }
