@@ -14,7 +14,6 @@ export default {
    * @param {...*} callback - The callback to execute when a message is received.
    */
   receive(client, channel, callback) {
-    console.log(channel);
     client.socket.on(channel, callback);
   },
 
@@ -45,7 +44,6 @@ export default {
       namespaces = Object.keys(this.io.nsps);
     }
 
-    // console.log(excludeClient);
     if (excludeClient) {
       const index = namespaces.indexOf('/' + excludeClient.type);
 

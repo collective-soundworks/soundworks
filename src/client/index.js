@@ -16,7 +16,7 @@ import ClientCheckin from './services/ClientCheckin';
 // import ClientPerformance from './ClientPerformance';
 // import ClientPlacer from './ClientPlacer';
 // import ClientSurvey from './ClientSurvey';
-// import ClientSync from './ClientSync';
+import ClientSync from './services/ClientSync';
 import Loader from './services/Loader';
 import Welcome from './services/Welcome';
 
@@ -63,7 +63,7 @@ export default {
   // ClientPerformance,
   // ClientPlacer,
   // ClientSurvey,
-  // ClientSync,
+  ClientSync,
   Loader,
   // motionInput,
   // Orientation,

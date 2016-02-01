@@ -118,6 +118,7 @@ class Welcome extends Service {
 
   stop() {
     this.hide();
+    super.stop();
   }
 
   /**

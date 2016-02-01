@@ -28,6 +28,7 @@ class ClientCheckin extends Service {
     const defaults = {
       showDialog: false,
       viewCtor: SegmentedView,
+      viewPriority: 6,
     };
 
     this.configure(defaults);

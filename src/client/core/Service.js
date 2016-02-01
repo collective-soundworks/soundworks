@@ -33,6 +33,7 @@ export default class Service extends Activity {
   ready() {
     this.stop();
     this.signals.ready.set(true);
+    log(`"${this.id}" ready`);
   }
 
   require(id) {

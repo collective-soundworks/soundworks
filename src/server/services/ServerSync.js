@@ -1,5 +1,5 @@
 import SyncServer from 'sync/server';
-import ServerModule from './ServerModule';
+import Pier from '../core/Pier';
 
 
 /**
@@ -16,14 +16,9 @@ import ServerModule from './ServerModule';
  *
  * const nowSync = sync.getSyncTime(); // current time in the sync clock time
  */
-export default class ServerSync extends ServerModule {
-  /**
-   * Creates an instance of the class.
-   * @param {Object} [options={}] Options.
-   * @param {String} [name='sync'] Name of the module.
-   */
-  constructor(options = {}) {
-    super(options.name || 'sync');
+export default class ServerSync extends Pier {
+  constructor() {
+    super('service:sync');
 
     this._hrtimeStart = process.hrtime();
 
@@ -35,20 +30,19 @@ export default class ServerSync extends ServerModule {
 
   /**
    * @private
-   * @todo ?
    */
   connect(client) {
     super.connect(client);
 
-    const sendFunction = (cmd, ...args) => this.send(client, cmd, ...args);
-    const receiveFunction = (cmd, callback) => this.receive(client, cmd, callback);
+    const send = (cmd, ...args) => this.send(client, cmd, ...args);
+    const receive = (cmd, callback) => this.receive(client, cmd, callback);
 
-    this._sync.start(sendFunction, receiveFunction);
+    this._sync.start(send, receive);
   }
 
   /**
    * Returns the current time in the sync clock.
-   * @return {Number} Current sync time (in seconds).
+   * @return {Number} - Current sync time (in seconds).
    */
   getSyncTime() {
     return this._sync.getSyncTime();

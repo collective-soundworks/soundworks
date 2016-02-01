@@ -16,7 +16,7 @@ import ServerCheckin from './services/ServerCheckin';
 // import ServerPerformance from './ServerPerformance';
 // import ServerPlacer from './ServerPlacer';
 // import ServerSurvey from './ServerSurvey';
-// import ServerSync from './ServerSync';
+import ServerSync from './services/ServerSync';
 
 // utils
 import * as helpers from '../utils/helpers';
@@ -42,7 +42,7 @@ export default {
   // ServerPerformance,
   // ServerPlacer,
   // ServerSurvey,
-  // ServerSync,
+  ServerSync,
   utils: {
     helpers,
     math,
