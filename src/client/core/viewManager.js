@@ -1,8 +1,8 @@
 import debug from 'debug';
 
 const log = debug('soundworks:viewManager');
-const stack = new Set();
-let $container = null;
+const _stack = new Set();
+let _$container = null;
 
 /**
  * Handle services' views according to their priorities.
@@ -11,48 +11,52 @@ export default {
   _timeoutId: null,
 
   /**
-   * Sets the container of the views for all `Activity` instances.
-   * @param {Element} $el - The element to use as a container for the module's view.
-   */
-  setViewContainer($el) {
-    $container = $el;
-  },
-
-  /**
-   * Register a view into the stack of views to display.
+   * Register a view into the stack of views to display. The fact that the view is
+   * actually displayed is defined by its priority and activities lifecycle.
+   * @param {View} view - A view to add to the stack.
    */
   register(view) {
     log(`register - id: "${view.options.id}" - priority: ${view.priority}`);
-    // add to the stack
-    stack.add(view);
 
+    _stack.add(view);
     view.hide();
-    view.appendTo($container);
+    view.appendTo(_$container);
 
     if (!this._timeoutId)
-      this.timeoutId = setTimeout(() => { this._showNext(); }, 0);
+      this.timeoutId = setTimeout(() => { this._updateView(); }, 0);
   },
 
   /**
    * Remove view from the stack of views to display.
+   * @param {View} view - A view to remove from the stack.
    */
   remove(view) {
     log(`remove - id: "${view.options.id}" - priority: ${view.priority}`);
     view.remove();
-    stack.delete(view);
+    _stack.delete(view);
 
-    setTimeout(() => { this._showNext(); }, 0);
+    setTimeout(() => { this._updateView(); }, 0);
   },
 
   /**
-   * Show the view with the.
+   * Sets the container of the views for all `Activity` instances. (is called in {@link client})
+   * @param {Element} $el - The element to use as a container for the module's view.
+   * @private
    */
-  _showNext() {
+  setViewContainer($el) {
+    _$container = $el;
+  },
+
+  /**
+   * Defines if the view should be updated according to defined priorities.
+   * @private
+   */
+  _updateView() {
     let visibleView;
     let priority = -Infinity;
     let nextView = null;
 
-    stack.forEach(function(view) {
+    _stack.forEach(function(view) {
       if (view.isVisible)
         visibleView = true;
 
@@ -63,8 +67,12 @@ export default {
     });
 
     if (nextView) {
-      if (!visibleView || (visibleView.priority < nextView.priority)) {
-        log(`nextView - id: "${nextView.options.id}" - priority: ${priority}`);
+      if (!visibleView) {
+        log(`update view - id: "${nextView.options.id}" - priority: ${priority}`);
+        nextView.show();
+      } else if (visibleView.priority < nextView.priority) {
+        log(`update view - id: "${nextView.options.id}" - priority: ${priority}`);
+        visibleView.hide(); // hide but keep in stack
         nextView.show();
       }
     }

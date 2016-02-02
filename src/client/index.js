@@ -19,10 +19,9 @@ import ClientControl from './services/ClientControl';
 // import ClientSurvey from './ClientSurvey';
 import ClientSync from './services/ClientSync';
 import Loader from './services/Loader';
-import Welcome from './services/Welcome';
-
-import motionInput from 'motion-input';
+import MotionInput from './services/MotionInput';
 // import Orientation from './Orientation';
+import Welcome from './services/Welcome';
 
 
 // views
@@ -68,7 +67,7 @@ export default {
   // ClientSurvey,
   ClientSync,
   Loader,
-  motionInput,
+  MotionInput,
   // Orientation,
   Welcome,
 
