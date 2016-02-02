@@ -10,8 +10,7 @@ export default class Service extends Activity {
   constructor(id, hasNetwork) {
     super(id, hasNetwork);
 
-    this._requiredSignals = new SignalAll();
-    this._requiredSignals.addObserver((value) => {
+    this.requiredSignals.addObserver((value) => {
       if (value) {
         this.start();
         this.hasStarted = true;
@@ -27,7 +26,7 @@ export default class Service extends Activity {
     this.signals.ready = new Signal();
 
     // add the serviceManager bootstart signal to the required signals
-    this._requiredSignals.add(serviceManager.signals.start);
+    this.requiredSignals.add(serviceManager.signals.start);
   }
 
   ready() {
@@ -41,7 +40,7 @@ export default class Service extends Activity {
     const signal = service.signals.ready;
 
     if (signal)
-      this._requiredSignals.add(signal);
+      this.requiredSignals.add(signal);
     else
       throw new Error(`signal "continue" doesn't exist on service :`, service);
 

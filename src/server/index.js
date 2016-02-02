@@ -1,11 +1,12 @@
 /* core */
 import sockets from './core/sockets';
 import server from './core/server';
+import serverServiceManager from './core/serverServiceManager';
 import Client from './core/Client';
-import Pier from './core/Pier';
+import ServerActivity from './core/ServerActivity';
 
 /* scenes */
-import Experience from './scenes/Experience';
+import ServerExperience from './scenes/ServerExperience';
 
 /* services */
 // import ServerCalibration from './ServerCalibration';
@@ -27,11 +28,12 @@ export default {
   /* core */
   sockets,
   server,
+  serverServiceManager,
   Client,
-  Pier,
+  ServerActivity,
 
   /* scenes */
-  Experience,
+  ServerExperience,
 
   /* services */
   // ServerCalibration,

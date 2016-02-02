@@ -1,6 +1,6 @@
 import ServerActivity from '../core/ServerActivity';
 import { getOpt } from '../../utils/helpers';
-import serviceManager from '../core/serverServiceManager';
+import serverServiceManager from '../core/serverServiceManager';
 
 const SERVICE_ID = 'service:checkin';
 
@@ -31,6 +31,7 @@ class ServerCheckin extends ServerActivity {
   }
 
   start() {
+    super.start();
     /**
      * Setup defining predefined positions (labels and/or coordinates).
      * @type {Object}
@@ -191,6 +192,6 @@ class ServerCheckin extends ServerActivity {
   }
 }
 
-serviceManager.register(SERVICE_ID, ServerCheckin);
+serverServiceManager.register(SERVICE_ID, ServerCheckin);
 
 export default ServerCheckin;

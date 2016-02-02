@@ -8,7 +8,7 @@ let $container = null;
  * Handle services' views according to their priorities.
  */
 export default {
-  _timeoutId = null,
+  _timeoutId: null,
 
   /**
    * Sets the container of the views for all `Activity` instances.

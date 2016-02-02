@@ -12,7 +12,7 @@ import ServerActivity from '../core/ServerActivity';
  *
  * (See also {@link src/client/ClientPerformance.js~ClientPerformance} on the client side.)
  */
-export default class Experience extends ServerActivity {
+export default class ServerExperience extends ServerActivity {
   /**
     * Creates an instance of the class.
     * @param {String} id - The id of the module, should its client-side counterpart.
@@ -34,15 +34,9 @@ export default class Experience extends ServerActivity {
   connect(client) {
     super.connect(client);
 
-    // Listen for the `'performance:start'` socket message from the client.
-    this.receive(client, 'start', () => {
-      this.enter(client);
-    });
-
-    // Listen for the `'performance:done'` socket message from the client.
-    this.receive(client, 'done', () => {
-      this.exit(client);
-    });
+    // Listen for the `'start'` and `'done'` socket messages from the client.
+    this.receive(client, 'start', () => this.enter(client));
+    this.receive(client, 'done', () => this.exit(client));
   }
 
   /**

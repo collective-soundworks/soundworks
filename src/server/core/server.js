@@ -130,14 +130,23 @@ export default {
    */
   _activities: new Set(),
 
+  /**
+   *
+   */
   setMap(clientTypes, activity) {
     clientTypes.forEach((clientType) => {
       if (!this._maps[clientType])
         this._maps[clientType] = new Set();
 
       this._maps[clientType].add(activity);
-      this._activities.add(activity);
     });
+  },
+
+  /**
+   *
+   */
+  setActivity(activity) {
+    this._activities.add(activity);
   },
 
   /**
@@ -173,7 +182,10 @@ export default {
       }
     });
 
+    // --------------------------------------------------
     // configure express and http server
+    // --------------------------------------------------
+
     const expressApp = new express();
     expressApp.set('port', process.env.PORT || this.config.port);
     expressApp.set('view engine', 'ejs');
@@ -192,7 +204,10 @@ export default {
     sockets.initialize(this.io);
     logger.initialize(this.config.logger);
 
-    // start all activities
+    // --------------------------------------------------
+    // start all activities and create routes
+    // --------------------------------------------------
+
     this._activities.forEach((activity) => activity.start());
     // map `clientType` to their repsective modules
     for (let clientType in this._maps) {
@@ -200,21 +215,24 @@ export default {
       this._map(clientType, modules);
     }
 
+    // --------------------------------------------------
     // @todo - move into a proper service.
     // configure OSC - should be optionnal
     if (this.config.osc) {
+      const oscConfig = this.config.osc;
+
       this.osc = new osc.UDPPort({
         // This is the port we're listening on.
-        localAddress: this.config.osc.receiveAddress,
-        localPort: this.config.osc.receivePort,
+        localAddress: oscConfig.receiveAddress,
+        localPort: oscConfig.receivePort,
         // This is the port we use to send messages.
-        remoteAddress: this.config.osc.sendAddress,
-        remotePort: this.config.osc.sendPort,
+        remoteAddress: oscConfig.sendAddress,
+        remotePort: oscConfig.sendPort,
       });
 
       this.osc.on('ready', () => {
-        const receive = `${this.config.osc.receiveAddress}:${this.config.osc.receivePort}`;
-        const send = `${this.config.osc.sendAddress}:${this.config.osc.sendPort}`;
+        const receive = `${oscConfig.receiveAddress}:${oscConfig.receivePort}`;
+        const send = `${oscConfig.sendAddress}:${oscConfig.sendPort}`;
         console.log(`[OSC over UDP] Receiving on ${receive}`);
         console.log(`[OSC over UDP] Sending on ${send}`);
       });
@@ -230,6 +248,7 @@ export default {
 
       this.osc.open();
     }
+    // --------------------------------------------------
   },
 
   /**
@@ -275,6 +294,7 @@ export default {
       // global lifecycle of the client
       sockets.receive(client, 'disconnect', () => {
         modules.forEach((mod) => mod.disconnect(client));
+        // @todo - should remove all listeners on the client
         client.destroy();
         logger.info({ socket, clientType }, 'disconnect');
       });

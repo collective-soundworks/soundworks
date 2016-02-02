@@ -1,4 +1,5 @@
-import Pier from '../core/Pier';
+import ServerActivity from '../core/ServerActivity';
+import serverServiceManager from '../core/serverServiceManager';
 import { EventEmitter } from 'events';
 
 /**
@@ -110,6 +111,7 @@ class _LabelUnit extends _ControlUnit {
 }
 
 
+const SERVICE_ID = 'service:control';
 
 /**
  * [server] Manage the global `parameters`, `infos`, and `commands` across the whole scenario.
@@ -159,13 +161,9 @@ class _LabelUnit extends _ControlUnit {
  * const control = new MyControl();
  * const performance = new MyPerformance(control);
  */
-export default class ServerControl extends Pier {
-  /**
-   * @param {Object} [options={}] Options.
-   * @param {String} [options.name='control'] - Name of the module.
-   */
+class ServerControl extends ServerActivity {
   constructor(options = {}) {
-    super('service:control');
+    super(SERVICE_ID);
 
     /**
      * Dictionary of all control items.
@@ -302,3 +300,7 @@ export default class ServerControl extends Pier {
     return (name, value) => this.update(name, value, client);
   }
 }
+
+serverServiceManager.register(SERVICE_ID, ServerControl);
+
+export default ServerControl;

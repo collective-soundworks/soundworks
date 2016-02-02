@@ -1,7 +1,8 @@
+import ServerActivity from '../core/ServerActivity';
+import serverServiceManager from '../core/serverServiceManager';
 import SyncServer from 'sync/server';
-import Pier from '../core/Pier';
 
-
+const SERVICE_ID = 'service:sync';
 /**
  * Synchronize the local clock on a master clock shared by the server and the clients.
  *
@@ -16,9 +17,13 @@ import Pier from '../core/Pier';
  *
  * const nowSync = sync.getSyncTime(); // current time in the sync clock time
  */
-export default class ServerSync extends Pier {
+class ServerSync extends ServerActivity {
   constructor() {
-    super('service:sync');
+    super(SERVICE_ID);
+  }
+
+  start() {
+    super.start();
 
     this._hrtimeStart = process.hrtime();
 
@@ -48,3 +53,7 @@ export default class ServerSync extends Pier {
     return this._sync.getSyncTime();
   }
 }
+
+serverServiceManager.register(SERVICE_ID, ServerSync);
+
+export default ServerSync;

@@ -75,11 +75,23 @@ export default class Activity extends EventEmitter {
     this.options = {};
     this.configure({ viewPriority: 0 });
 
+    /**
+     * Define which signal the `Activity` requires to start.
+     * @private
+     */
+    this.requiredSignals = new SignalAll();
+
     this.send = this.send.bind(this);
     this.sendVolatile = this.sendVolatile.bind(this);
     this.receive = this.receive.bind(this);
     this.removeListener = this.removeListener.bind(this);
   }
+
+  /**
+   * Interface method to be implemented in child classes.
+   * Define what to do when a service is required by an `Activity`.
+   */
+  require() {}
 
   /**
    * Configure the process with the given options.
