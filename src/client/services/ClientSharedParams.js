@@ -3,8 +3,6 @@ import { EventEmitter } from 'events';
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
 
-const SERVICE_ID = 'service:control';
-
 basicControllers.disableStyles();
 
 /* --------------------------------------------------------- */
@@ -41,18 +39,16 @@ class _ControlUnit extends EventEmitter {
   }
 }
 
+
 /** @private */
-class _NumberUnit extends _ControlUnit {
-  constructor(control, name, label, min, max, step, init) {
-    super(control, 'number', name, label);
-    this.min = min;
-    this.max = max;
-    this.step = step;
+class _BooleanUnit extends _ControlUnit {
+  constructor(control, name, label, init) {
+    super(control, 'boolean', name, label);
     this.set(init);
   }
 
   set(val) {
-    this.value = Math.min(this.max, Math.max(this.min, val));
+    this.value = val;
   }
 }
 
@@ -75,9 +71,24 @@ class _EnumUnit extends _ControlUnit {
 }
 
 /** @private */
-class _InfoUnit extends _ControlUnit {
+class _NumberUnit extends _ControlUnit {
+  constructor(control, name, label, min, max, step, init) {
+    super(control, 'number', name, label);
+    this.min = min;
+    this.max = max;
+    this.step = step;
+    this.set(init);
+  }
+
+  set(val) {
+    this.value = Math.min(this.max, Math.max(this.min, val));
+  }
+}
+
+/** @private */
+class _TextUnit extends _ControlUnit {
   constructor(control, name, label, init) {
-    super(control, 'info', name, label);
+    super(control, 'text', name, label);
     this.set(init);
   }
 
@@ -87,38 +98,24 @@ class _InfoUnit extends _ControlUnit {
 }
 
 /** @private */
-class _CommandUnit extends _ControlUnit {
+class _TriggerUnit extends _ControlUnit {
   constructor(control, name, label) {
-    super(control, 'command', name, label);
+    super(control, 'trigger', name, label);
   }
 
   set(val) { /* nothing to set here */ }
 }
-
-/** @private */
-class _LabelUnit extends _ControlUnit {
-  constructor(control, name, label) {
-    super(control, 'label', name, label);
-  }
-
-  set(val) { /* nothing to set here */ }
-}
-
 
 /* --------------------------------------------------------- */
 /* GUIs
 /* --------------------------------------------------------- */
 
 /** @private */
-class _NumberGui {
+class _BooleanGui {
   constructor($container, unit, guiOptions) {
-    const { label, min, max, step, value } = unit;
+    const { label, value } = unit;
 
-    if (guiOptions.type === 'slider')
-      this.controller = new basicControllers.Slider(label, min, max, step, value, guiOptions.unit, guiOptions.size);
-    else
-      this.controller = new basicControllers.NumberBox(label, min, max, step, value);
-
+    this.controller = new basicControllers.Toggle(label, value);
     $container.appendChild(this.controller.render());
     this.controller.onRender();
 
@@ -165,7 +162,61 @@ class _EnumGui {
 }
 
 /** @private */
-class _CommandGui {
+class _NumberGui {
+  constructor($container, unit, guiOptions) {
+    const { label, min, max, step, value } = unit;
+
+    if (guiOptions.type === 'slider')
+      this.controller = new basicControllers.Slider(label, min, max, step, value, guiOptions.unit, guiOptions.size);
+    else
+      this.controller = new basicControllers.NumberBox(label, min, max, step, value);
+
+    $container.appendChild(this.controller.render());
+    this.controller.onRender();
+
+    this.controller.on('change', (value) => {
+      if (guiOptions.confirm) {
+        const msg = `Are you sure you want to propagate "${unit.name}:${value}"`;
+        if (!window.confirm(msg)) { return; }
+      }
+
+      unit.update(value);
+    });
+  }
+
+  set(val) {
+    this.controller.value = val;
+  }
+}
+
+/** @private */
+class _TextGui {
+  constructor($container, unit, guiOptions) {
+    const { label, value } = unit;
+
+    this.controller = new basicControllers.Text(label, value, guiOptions.readOnly);
+    $container.appendChild(this.controller.render());
+    this.controller.onRender();
+
+    if (!guiOptions.readOnly) {
+      this.controller.on('change', () => {
+        if (guiOptions.confirm) {
+          const msg = `Are you sure you want to propagate "${unit.name}"`;
+          if (!window.confirm(msg)) { return; }
+        }
+
+        unit.update();
+      });
+    }
+  }
+
+  set(val) {
+    this.controller.value = val;
+  }
+}
+
+/** @private */
+class _TriggerGui {
   constructor($container, unit, guiOptions) {
     const { label } = unit;
 
@@ -186,33 +237,8 @@ class _CommandGui {
   set(val) { /* nothing to set here */ }
 }
 
-/** @private */
-class _InfoGui {
-  constructor($container, unit, guiOptions) {
-    const { label, value } = unit;
 
-    this.controller = new basicControllers.Info(label, value);
-    $container.appendChild(this.controller.render());
-    this.controller.onRender();
-  }
-
-  set(val) {
-    this.controller.value = val;
-  }
-}
-
-/** @private */
-class _LabelGui {
-  constructor($container, unit, guiOptions) {
-    const { label } = unit;
-
-    this.controller = new basicControllers.Title(label);
-    $container.appendChild(this.controller.render());
-    this.controller.onRender();
-  }
-
-  set(val) { /* nothing to set here */ }
-}
+const SERVICE_ID = 'service:shared-params';
 
 /**
  * Manage the global control `parameters`, `infos`, and `commands` across the whole scenario.
@@ -233,7 +259,7 @@ class _LabelGui {
  * (See also {@link src/server/ServerControl.js~ServerControl} on the server side.)
  *
  * @example // Example 1: make a client that displays the control GUI
- * const control = new ClientControl();
+ * const control = new ClientSharedParams();
  *
  * // Initialize the client (indicate the client type)
  * client.init('conductor'); // accessible at the URL /conductor
@@ -243,7 +269,7 @@ class _LabelGui {
  * client.start(control);
  *
  * @example // Example 2: listen for parameter, infos & commands updates
- * const control = new ClientControl({ gui: false });
+ * const control = new ClientSharedParams({ gui: false });
  *
  * // Listen for parameter, infos or command updates
  * control.on('update', (name, value) => {
@@ -261,7 +287,7 @@ class _LabelGui {
  * const currentSynthGainValue = control.event['synth:gain'].value;
  * const currentNumPlayersValue = control.event['numPlayers'].value;
  */
-class ClientControl extends Service {
+class ClientSharedParams extends Service {
   /**
    * @emits {'update'} when the server sends an update. The callback function takes `name:String` and `value:*` as arguments, where `name` is the name of the parameter / info / command, and `value` its new value.
    */
@@ -397,24 +423,24 @@ class ClientControl extends Service {
     let unit = null;
 
     switch (init.type) {
-      case 'number':
-        unit = new _NumberUnit(this, init.name, init.label, init.min, init.max, init.step, init.value);
+      case 'boolean':
+        unit = new _BooleanUnit(this, init.name, init.label, init.value);
         break;
 
       case 'enum':
         unit = new _EnumUnit(this, init.name, init.label, init.options, init.value);
         break;
 
-      case 'info':
-        unit = new _InfoUnit(this, init.name, init.label, init.value);
+      case 'number':
+        unit = new _NumberUnit(this, init.name, init.label, init.min, init.max, init.step, init.value);
         break;
 
-      case 'command':
-        unit = new _CommandUnit(this, init.name, init.label);
+      case 'text':
+        unit = new _TextUnit(this, init.name, init.label, init.value);
         break;
 
-      case 'label':
-        unit = new _LabelUnit(this, init.name, init.label);
+      case 'trigger':
+        unit = new _TriggerUnit(this, init.name, init.label);
         break;
     }
 
@@ -446,22 +472,21 @@ class ClientControl extends Service {
     const $container = this.view.$el;
 
     switch (unit.type) {
-      case 'number':
-        gui = new _NumberGui($container, unit, config); // `NumberBox` or `Slider`
+      case 'boolean':
+        gui = new _BooleanGui($container, unit, config); // `Toggle`
         break;
       case 'enum':
         gui = new _EnumGui($container, unit, config); // `SelectList` or `SelectButtons`
         break;
-      case 'command':
-        gui = new _CommandGui($container, unit, config); // `Button`
+      case 'number':
+        gui = new _NumberGui($container, unit, config); // `NumberBox` or `Slider`
         break;
-      case 'info':
-        gui = new _InfoGui($container, unit, config); // `Info`
+      case 'text':
+        gui = new _TextGui($container, unit, config); // `Text`
         break;
-      case 'label':
-        gui = new _LabelGui($container, unit, config);
+      case 'trigger':
+        gui = new _TriggerGui($container, unit, config);
         break;
-      // case 'toggle'
     }
 
     unit.addListener('update', (val) => gui.set(val));
@@ -470,6 +495,6 @@ class ClientControl extends Service {
   }
 }
 
-serviceManager.register(SERVICE_ID, ClientControl);
+serviceManager.register(SERVICE_ID, ClientSharedParams);
 
-export default ClientControl;
+export default ClientSharedParams;

@@ -8,10 +8,9 @@ import IO from 'socket.io';
 import osc from 'osc';
 import path from 'path';
 import Client from './Client';
+import serverServiceManager from './serverServiceManager';
 
-// globals
-// @todo hide this into client
-
+// @todo - move into osc service.
 const oscListeners = [];
 
 /**
@@ -115,6 +114,7 @@ export default {
 
   /**
    * OSC object.
+   * @todo - Move into service
    * @type {Object}
    * @private
    */
@@ -131,27 +131,10 @@ export default {
   _activities: new Set(),
 
   /**
+   * Initialize the server with the given config objects.
+   * @param {...Object} configs - Object of application configuration.
    *
-   */
-  setMap(clientTypes, activity) {
-    clientTypes.forEach((clientType) => {
-      if (!this._maps[clientType])
-        this._maps[clientType] = new Set();
-
-      this._maps[clientType].add(activity);
-    });
-  },
-
-  /**
-   *
-   */
-  setActivity(activity) {
-    this._activities.add(activity);
-  },
-
-  /**
-   * Start the server.
-   * @todo - rewrite doc for this method
+   * @todo - rewrite doc properly for this method.
    * @param {Object} [appConfig={}] Application configuration options.
    * @attribute {String} [appConfig.publicFolder='./public'] Path to the public folder.
    * @attribute {Object} [appConfig.socketIO={}] socket.io options. The socket.io config object can have the following properties:
@@ -166,10 +149,10 @@ export default {
    * - `remoteAddress:String`: address of the device to send default OSC messages to (defaults to `'127.0.0.1'`);
    * - `remotePort:Number`: port of the device to send default OSC messages to (defaults to `57120`).
    */
-  start(...configs) {
-    // merge default configuration objects
+  init(...configs) {
+        // merge default configuration objects
     this.config = Object.assign(this.config, exampleAppConfig, defaultFwConfig, defaultEnvConfig);
-    // merge given configurations objects with defaults
+    // merge given configurations objects with defaults (1 level depth)
     configs.forEach((config) => {
       for (let key in config) {
         const entry = config[key];
@@ -181,7 +164,16 @@ export default {
         }
       }
     });
+  },
 
+  /**
+   * Start the server:
+   * - launch the HTTP server.
+   * - launch the socket server.
+   * - start all registered activities.
+   * - define routes and associate client types and activities.
+   */
+  start() {
     // --------------------------------------------------
     // configure express and http server
     // --------------------------------------------------
@@ -209,10 +201,10 @@ export default {
     // --------------------------------------------------
 
     this._activities.forEach((activity) => activity.start());
-    // map `clientType` to their repsective modules
+    // map `clientType` to their respective activities
     for (let clientType in this._maps) {
-      const modules = this._maps[clientType];
-      this._map(clientType, modules);
+      const activity = this._maps[clientType];
+      this._map(clientType, activity);
     }
 
     // --------------------------------------------------
@@ -252,6 +244,39 @@ export default {
   },
 
   /**
+   * Returns a service configured with the given options.
+   * @param {String} id - The identifier of the service.
+   * @param {Object} options - The options to configure the service.
+   */
+  require(id, options) {
+    return serverServiceManager.require(id, options);
+  },
+
+  /**
+   * Function used by activities to registered their concerned client type into the server
+   * @param {Array<String>} clientTypes - An array of client type.
+   * @param {Activity} activity - The activity concerned with the given `clientTypes`.
+   * @private
+   */
+  setMap(clientTypes, activity) {
+    clientTypes.forEach((clientType) => {
+      if (!this._maps[clientType])
+        this._maps[clientType] = new Set();
+
+      this._maps[clientType].add(activity);
+    });
+  },
+
+  /**
+   * Function used by activities to register themselves as active activities
+   * @param {Activity} activity
+   * @private
+   */
+  setActivity(activity) {
+    this._activities.add(activity);
+  },
+
+  /**
    * Indicate that the clients of type `clientType` require the modules `...modules` on the server side.
    * Additionally, this method routes the connections from the corresponding URL to the corresponding view.
    * More specifically:
@@ -286,6 +311,9 @@ export default {
     this.io.of(clientType).on('connection', this._onConnection(clientType, modules));
   },
 
+  /**
+   * Socket connection callback.
+   */
   _onConnection(clientType, modules) {
     return (socket) => {
       const client = new Client(clientType, socket);

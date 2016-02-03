@@ -11,6 +11,11 @@ export default class Scene extends Activity {
     this.requiredSignals.add(serviceManager.signals.ready);
   }
 
+  /**
+   * Returns a service configured with the given options.
+   * @param {String} id - The identifier of the service.
+   * @param {Object} options - The options to configure the service.
+   */
   require(id, options) {
     return serviceManager.require(id, options);
   }

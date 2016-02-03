@@ -91,7 +91,6 @@ export default class SpaceView extends View {
     this._setArea();
   }
 
-
   /**
    * Render the area.
    * @private
@@ -104,7 +103,6 @@ export default class SpaceView extends View {
     const boundingRect = this.$el.getBoundingClientRect();
     const containerWidth = boundingRect.width;
     const containerHeight = boundingRect.height;
-
 
     const ratio = (() => {
       return (containerWidth < containerHeight) ?
@@ -119,12 +117,12 @@ export default class SpaceView extends View {
     this.$svg.setAttribute('height', svgHeight);
     this.$svg.setAttribute('viewBox', `0 0 ${area.width} ${area.height}`);
     // center the svg into the parent
-    this.$svg.style.point = 'relative';
+    this.$svg.style.position = 'relative';
 
     // display background if any
     if (area.background) {
       this.$el.style.backgroundImage = area.background;
-      this.$el.style.backgroundPoint = '50% 50%';
+      this.$el.style.backgroundPosition = '50% 50%';
       this.$el.style.backgroundRepeat = 'no-repeat';
       this.$el.style.backgroundSize = 'cover';
     }

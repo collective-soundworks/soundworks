@@ -1,10 +1,12 @@
-import client from './client';
-import localStorage from './localStorage';
-import ClientModule from './ClientModule';
-import SquaredView from './display/SquaredView';
-import SpaceView from './display/SpaceView';
-import TouchSurface from './display/TouchSurface';
+import client from '../core/client';
+// import localStorage from './localStorage'; // @todo - rethink this with db
+import Service from '../core/Service';
+import serviceManager from '../core/serviceManager';
+import SpaceView from '../display/SpaceView';
+import SquaredView from '../display/SquaredView';
+import TouchSurface from '../display/TouchSurface';
 
+const SERVICE_ID = 'service:locator';
 
 /**
  * [client] Allow to indicate the approximate location of the client on a map.
@@ -18,26 +20,29 @@ import TouchSurface from './display/TouchSurface';
  * @example
  * const locator = new ClientLocator();
  */
-export default class ClientLocator extends ClientModule {
+class ClientLocator extends Service {
   /**
    * @param {Object} [options={}] - Options.
    * @param {String} [options.name='locator'] - The name of the module.
    * @param {Boolean} [options.random=false] - Send random position to the server and call `this.done()` (for development purpose)
    * @param {Boolean} [options.persist=false] - If set to `true`, store the normalized coordinates in `localStorage` and retrieve them in subsequent calls. Delete the stored position when set to `false`. (for development purpose)
    */
-  constructor(options = {}) {
-    super(options.name || 'locator', options);
+  constructor() {
+    super(SERVICE_ID);
 
-    this.options = Object.assign({
-      random: false,
-      persist: false,
+    const defaults = {
+      // @todo - re-think this with db
+      // random: false,
+      // persist: false,
       positionRadius: 0.3, // relative to the area unit
       spaceCtor: SpaceView,
       viewCtor: SquaredView,
-    }, options);
+    };
+
+    this.configure(defaults);
 
     // The namespace where coordinates are stored when `options.persist = true`.
-    this._localStorageNamespace = `soundworks:${this.name}`;
+    // this._localStorageNamespace = `soundworks:${this.name}`;
 
     this._onAreaTouchStart = this._onAreaTouchStart.bind(this);
     this._onAreaTouchMove = this._onAreaTouchMove.bind(this);
@@ -56,10 +61,15 @@ export default class ClientLocator extends ClientModule {
   start() {
     super.start();
 
+    if (!this.hasStarted)
+      this.init();
+
+    this.show();
+
     this.send('request');
 
-    if (!this.options.persist)
-      localStorage.delete(this._localStorageNamespace);
+    // if (!this.options.persist)
+    //   localStorage.delete(this._localStorageNamespace);
 
     this.receive('area', this._onAreaResponse);
   }
@@ -67,6 +77,8 @@ export default class ClientLocator extends ClientModule {
   /** @private */
   stop() {
     super.stop();
+
+    this.hide();
     this.removeListener('area', this._onAreaResponse);
   }
 
@@ -80,33 +92,33 @@ export default class ClientLocator extends ClientModule {
   _onAreaResponse(area) {
     this._attachArea(area);
 
-    if (this.options.random || this.options.persist) {
-      let coords;
+    // if (this.options.random || this.options.persist) {
+    //   let coords;
 
-      if (this.options.random) {
-        coords = { normX: Math.random(), normY: Math.random() };
-      } else if (this.options.persist) {
-        coords = JSON.parse(localStorage.get(this._localStorageNamespace));
-      }
+    //   if (this.options.random) {
+    //     coords = { normX: Math.random(), normY: Math.random() };
+    //   } else if (this.options.persist) {
+    //     coords = JSON.parse(localStorage.get(this._localStorageNamespace));
+    //   }
 
-      if (coords !== null) {
-        this._createPosition(coords.normX, coords.normY);
-        this._sendCoordinates();
-      }
-    }
+    //   if (coords !== null) {
+    //     this._createPosition(coords.normX, coords.normY);
+    //     this._sendCoordinates();
+    //   }
+    // }
   }
 
   /**
    * Store the current coordinates in `localStorage`.
    */
-  storeCoordinates() {
-    const normX = this.position.x / this.area.width;
-    const normY = this.position.y / this.area.height;
-    localStorage.set(this._localStorageNamespace, JSON.stringify({ normX, normY }));
-  }
+  // storeCoordinates() {
+  //   const normX = this.position.x / this.area.width;
+  //   const normY = this.position.y / this.area.height;
+  //   localStorage.set(this._localStorageNamespace, JSON.stringify({ normX, normY }));
+  // }
 
-  retrieveCoordinates() {}
-  deleteCoordinates() {}
+  // retrieveCoordinates() {}
+  // deleteCoordinates() {}
 
   /**
    * Create a `SpaceView` and display it in the square section of the view
@@ -176,12 +188,16 @@ export default class ClientLocator extends ClientModule {
    * Send coordinates to the server.
    */
   _sendCoordinates() {
-    if (this.options.persist) { // store normalized coordinates
-      this.storeCoordinates();
-    }
+    // if (this.options.persist) { // store normalized coordinates
+    //   this.storeCoordinates();
+    // }
 
     client.coordinates = this.position;
     this.send('coordinates', client.coordinates);
-    this.done();
+    this.ready();
   }
 }
+
+serviceManager.register(SERVICE_ID, ClientLocator);
+
+export default ClientLocator;

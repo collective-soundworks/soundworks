@@ -7,16 +7,16 @@ import ServerActivity from './core/ServerActivity';
 
 /* scenes */
 import ServerExperience from './scenes/ServerExperience';
+// import ServerSurvey from './ServerSurvey';
 
 /* services */
 // import ServerCalibration from './ServerCalibration';
 import ServerCheckin from './services/ServerCheckin';
-import ServerControl from './services/ServerControl';
 // import ServerFileList from './ServerFileList';
-// import ServerLocator from './ServerLocator';
+import ServerLocator from './services/ServerLocator';
 // import ServerPerformance from './ServerPerformance';
 // import ServerPlacer from './ServerPlacer';
-// import ServerSurvey from './ServerSurvey';
+import ServerSharedParams from './services/ServerSharedParams';
 import ServerSync from './services/ServerSync';
 
 // utils
@@ -28,23 +28,24 @@ export default {
   /* core */
   sockets,
   server,
-  serverServiceManager,
+  serverServiceManager, // @tbd - expose ?
   Client,
   ServerActivity,
 
   /* scenes */
   ServerExperience,
+  // ServerSurvey,
 
   /* services */
   // ServerCalibration,
   ServerCheckin,
-  ServerControl,
   // ServerFileList,
-  // ServerLocator,
+  ServerLocator,
   // ServerPerformance,
   // ServerPlacer,
-  // ServerSurvey,
+  ServerSharedParams,
   ServerSync,
+
   utils: {
     helpers,
     math,

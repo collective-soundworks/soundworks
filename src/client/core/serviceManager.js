@@ -5,16 +5,16 @@ import SignalAll from './SignalAll';
 
 const log = debug('soundworks:serviceManager');
 
-/**
- * Factory for the services.
- * Lazy instanciate an instance of the given type and retrieve it on each call.
- */
 const _instances = {};
 const _ctors = {};
 
+/**
+ * Factory and initialisation manager for the services.
+ * Lazy instanciate an instance of the given type and retrieve it on each call.
+ */
 const serviceManager = {
   /**
-   * Initialize the serviceManager
+   * Initialize the manager.
    */
   init() {
     log('init');
@@ -24,8 +24,6 @@ const serviceManager = {
     this.signals = {};
     this.signals.start = new Signal();
     this.signals.ready = new Signal();
-
-    // return this;
   },
 
   /**
@@ -34,10 +32,14 @@ const serviceManager = {
   start() {
     log('start');
     this.signals.start.set(true);
+
+    if (!this._requiredSignals.length)
+      this.ready();
   },
 
   /**
-   * Mark the services as ready. Should be listened by `Experience` instances.
+   * Mark the services as ready. This signal is observed by {@link Experience}
+   * instances and trigger their `start`.
    */
   ready() {
     log('ready');
@@ -84,5 +86,4 @@ const serviceManager = {
   },
 };
 
-// export default serviceManager.init();
 export default serviceManager;

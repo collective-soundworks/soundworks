@@ -11,6 +11,10 @@ export default class SignalAll extends Signal {
     this._dependencies = new Set();
   }
 
+  get length() {
+    return this._dependencies.size;
+  }
+
   add(signal) {
     this._dependencies.add(signal);
 

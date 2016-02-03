@@ -6,17 +6,15 @@ import serviceManager from './core/serviceManager';
 
 // scenes
 import Experience from './scenes/Experience';
+// import ClientSurvey from './ClientSurvey';
 
 // services
-// import ClientModule from './ClientModule';
 // import ClientCalibration from './ClientCalibration';
 import ClientCheckin from './services/ClientCheckin';
-import ClientControl from './services/ClientControl';
 // import ClientFileList from './ClientFileList';
-// import ClientLocator from './ClientLocator';
-// import ClientPerformance from './ClientPerformance';
+import ClientLocator from './services/ClientLocator';
 // import ClientPlacer from './ClientPlacer';
-// import ClientSurvey from './ClientSurvey';
+import ClientSharedParams from './services/ClientSharedParams';
 import ClientSync from './services/ClientSync';
 import Loader from './services/Loader';
 import MotionInput from './services/MotionInput';
@@ -54,17 +52,15 @@ export default {
 
   /* scenes */
   Experience,
+  // ClientSurvey,
 
   /* services */
   // ClientCalibration,
   ClientCheckin,
-  ClientControl,
   // ClientFileList,
-  // ClientModule,
   // ClientLocator,
-  // ClientPerformance,
   // ClientPlacer,
-  // ClientSurvey,
+  ClientSharedParams,
   ClientSync,
   Loader,
   MotionInput,

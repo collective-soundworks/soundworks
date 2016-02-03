@@ -2,9 +2,7 @@ import ServerActivity from '../core/ServerActivity';
 import serverServiceManager from '../core/serverServiceManager';
 import { EventEmitter } from 'events';
 
-/**
- * @private
- */
+/** @private */
 class _ControlUnit extends EventEmitter {
   constructor(control, type, name, label, init = undefined, clientTypes = null) {
     super();
@@ -38,27 +36,18 @@ class _ControlUnit extends EventEmitter {
   }
 }
 
-/**
- * @private
- */
-class _NumberUnit extends _ControlUnit {
-  constructor(control, name, label, min, max, step, init, clientTypes = null) {
-    super(control, 'number', name, label, init, clientTypes);
-
-    let data = this.data;
-    data.min = min;
-    data.max = max;
-    data.step = step;
+/** @private */
+class _BooleanUnit extends _ControlUnit {
+  constructor(control, name, label, init, clientTypes = null) {
+    super(control, 'boolean', name, label, init, clientType);
   }
 
   set(val) {
-    this.data.value = Math.min(this.data.max, Math.max(this.data.min, val));
+    this.data.value = val;
   }
 }
 
-/**
- * @private
- */
+/** @private */
 class _EnumUnit extends _ControlUnit {
   constructor(control, name, label, options, init, clientTypes = null) {
     super(control, 'enum', name, label, init, clientTypes);
@@ -77,12 +66,26 @@ class _EnumUnit extends _ControlUnit {
   }
 }
 
-/**
- * @private
- */
-class _InfoUnit extends _ControlUnit {
+/** @private */
+class _NumberUnit extends _ControlUnit {
+  constructor(control, name, label, min, max, step, init, clientTypes = null) {
+    super(control, 'number', name, label, init, clientTypes);
+
+    let data = this.data;
+    data.min = min;
+    data.max = max;
+    data.step = step;
+  }
+
+  set(val) {
+    this.data.value = Math.min(this.data.max, Math.max(this.data.min, val));
+  }
+}
+
+/** @private */
+class _TextUnit extends _ControlUnit {
   constructor(control, name, label, init, clientTypes = null) {
-    super(control, 'info', name, label, init, clientTypes);
+    super(control, 'text', name, label, init, clientTypes);
   }
 
   set(val) {
@@ -90,28 +93,15 @@ class _InfoUnit extends _ControlUnit {
   }
 }
 
-/**
- * @private
- */
-class _CommandUnit extends _ControlUnit {
+/** @private */
+class _TriggerUnit extends _ControlUnit {
   constructor(control, name, label, clientTypes = null) {
-    super(control, 'command', name, label, undefined, clientTypes);
+    super(control, 'trigger', name, label, undefined, clientTypes);
   }
 }
 
-/**
- * @private
- */
-class _LabelUnit extends _ControlUnit {
-  constructor(control, name, label) {
-    super(control, 'label', name, label);
-  }
 
-  set(val) { /* noop */ }
-}
-
-
-const SERVICE_ID = 'service:control';
+const SERVICE_ID = 'service:shared-params';
 
 /**
  * [server] Manage the global `parameters`, `infos`, and `commands` across the whole scenario.
@@ -124,10 +114,10 @@ const SERVICE_ID = 'service:control';
  *
  * To set up controls in a scenario, you should extend this class on the server side and declare the controls specific to that scenario with the appropriate methods.
  *
- * (See also {@link src/client/ClientControl.js~ClientControl} on the client side.)
+ * (See also {@link src/client/ClientSharedParams.js~ClientSharedParams} on the client side.)
  *
  * @example // Example 1: make a `'conductor'` client to manage the controls
- * class MyControl extends ServerControl {
+ * class MyControl extends ServerSharedParams {
  *   constructor() {
  *     super();
  *
@@ -161,7 +151,7 @@ const SERVICE_ID = 'service:control';
  * const control = new MyControl();
  * const performance = new MyPerformance(control);
  */
-class ServerControl extends ServerActivity {
+class ServerSharedParams extends ServerActivity {
   constructor(options = {}) {
     super(SERVICE_ID);
 
@@ -178,8 +168,57 @@ class ServerControl extends ServerActivity {
     this._unitData = [];
   }
 
+  addItem() {
+    const args = Array.from(arguments);
+    const type = args.shift();
+    let unit;
+
+    switch(type) {
+      case 'boolean':
+        unit = this.addBool.apply(this, args);
+        break;
+      case 'enum':
+        unit = this.addEnum.apply(this, args);
+        break;
+      case 'number':
+        unit = this.addNumber.apply(this, args);
+        break;
+      case 'text':
+        unit = this.addText.apply(this, args);
+        break;
+      case 'trigger':
+        unit = this.addTrigger.apply(this, args);
+        break;
+    }
+
+    return unit;
+  }
+
   /**
-   * Adds a number parameter.
+   * Adds a `boolean` parameter.
+   * @param {String} name - Name of the parameter.
+   * @param {String} label - Label of the parameter (displayed on the control GUI on the client side).
+   * @param {Number} init - Initial value of the parameter (`true` or `false`).
+   * @param {String[]} [clientTypes=null] - Array of the client types to send the parameter to. If not set, the parameter is sent to all the client types.
+   */
+  addBoolean(name, label, init, clientTypes = null) {
+    return new _BooleanUnit(this, name, label, init, clientTypes);
+  }
+
+  /**
+   * Adds an `enum` parameter.
+   * @param {String} name - Name of the parameter.
+   * @param {String} label - Label of the parameter (displayed on the control GUI on the client side).
+   * @param {String[]} options - Array of the different values the parameter can take.
+   * @param {Number} init - Initial value of the parameter (has to be in the `options` array).
+   * @param {String[]} [clientTypes=null] - Array of the client types to send the parameter to. If not set, the parameter is sent to all the client types.
+   */
+  addEnum(name, label, options, init, clientTypes = null) {
+    return new _EnumUnit(this, name, label, options, init, clientTypes);
+  }
+
+  /**
+   * Adds a `number` parameter.
    * @param {String} name Name of the parameter.
    * @param {String} label Label of the parameter (displayed on the control GUI on the client side).
    * @param {Number} min - Minimum value of the parameter.
@@ -193,47 +232,25 @@ class ServerControl extends ServerActivity {
   }
 
   /**
-   * Adds a enum parameter.
-   * @param {String} name - Name of the parameter.
-   * @param {String} label - Label of the parameter (displayed on the control GUI on the client side).
-   * @param {String[]} options - Array of the different values the parameter can take.
-   * @param {Number} init - Initial value of the parameter (has to be in the `options` array).
-   * @param {String[]} [clientTypes=null] - Array of the client types to send the parameter to. If not set, the parameter is sent to all the client types.
-   */
-  addEnum(name, label, options, init, clientTypes = null) {
-    return new _EnumUnit(this, name, label, options, init, clientTypes);
-  }
-
-  /**
-   * Adds an info parameter.
+   * Adds a `text` parameter.
    * @param {String} name - Name of the parameter.
    * @param {String} label - Label of the parameter (displayed on the control GUI on the client side).
    * @param {Number} init - Initial value of the parameter (has to be in the `options` array).
    * @param {String[]} [clientTypes=null] - Array of the client types to send the parameter to. If not set, the parameter is sent to all the client types.
    */
-  addInfo(name, label, init, clientTypes = null) {
-    return new _InfoUnit(this, name, label, init, clientTypes);
+  addText(name, label, init, clientTypes = null) {
+    return new _TextUnit(this, name, label, init, clientTypes);
   }
 
   /**
-   * Adds a command.
+   * Adds a trigger.
    * @param {String} name - Name of the command.
    * @param {String} label - Label of the command (displayed on the control GUI on the client side).
    * @param {String[]} [clientTypes=null] - Array of the client types to send the parameter to. If not set, the parameter is sent to all the client types.
    */
-  addCommand(name, label, clientTypes = null) {
-    return new _CommandUnit(this, name, label, undefined, clientTypes);
+  addTrigger(name, label, clientTypes = null) {
+    return new _TriggerUnit(this, name, label, undefined, clientTypes);
   }
-
-  /**
-   * Adds a label.
-   * @param {String} name - Name of the label.
-   * @param {String} label - Label of the label (displayed on the control GUI on the client side).
-   */
-  addLabel(name, label) {
-    return new _LabelUnit(this, name, label);
-  }
-
 
   /**
    * Add listener to a control item (i.e. parameter, info or command).
@@ -280,9 +297,7 @@ class ServerControl extends ServerActivity {
       console.log('unknown control item "' + name + '"');
   }
 
-  /**
-   * @private
-   */
+  /** @private */
   connect(client) {
     super.connect(client);
 
@@ -301,6 +316,6 @@ class ServerControl extends ServerActivity {
   }
 }
 
-serverServiceManager.register(SERVICE_ID, ServerControl);
+serverServiceManager.register(SERVICE_ID, ServerSharedParams);
 
-export default ServerControl;
+export default ServerSharedParams;

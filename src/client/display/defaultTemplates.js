@@ -48,7 +48,7 @@ export default {
   'service:locator': `
     <div class="section-square flex-middle"></div>
     <div class="section-float flex-middle">
-      <% if (!activateBtn) { %>
+      <% if (!showBtn) { %>
         <p class="small"><%= instructions %></p>
       <% } else { %>
         <button class="btn"><%= send %></button>

@@ -1,9 +1,9 @@
 import View from './View';
 
 const defaultTemplate = `
-  <div class="section-top flex-middle"><%= top %></div>
-  <div class="section-center flex-center"><%= center %></div>
-  <div class="section-bottom flex-middle"><%= bottom %></div>
+  <div class="section-top flex-middle"><p><%= top %></p></div>
+  <div class="section-center flex-center"><p><%= center %></p></div>
+  <div class="section-bottom flex-middle"><p><%= bottom %></p></div>
 `;
 
 /**

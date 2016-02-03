@@ -76,26 +76,26 @@ const client = {
   /**
    * Initialize the application.
    * @param {String} [clientType = 'player'] - The client type to define the socket namespace, should match a client type defined server side (if any).
-   * @param {Object} [options={}] - The options to initialize a client
-   * @param {Object} [options.socketIO.url=''] - The url where the socket should connect.
-   * @param {Object} [options.socketIO.transports=['websocket']] - The transport used to create the url (overrides default socket.io mecanism).
-   * @param {Object} [options.appContainer='#container'] - A selector matching a DOM element where the views should be inserted.
-   * @param {Object} [options.debugIO=false] - If set to `true`, show socket.io debug informations.
+   * @param {Object} [config={}] - The config to initialize a client
+   * @param {Object} [config.socketIO.url=''] - The url where the socket should connect.
+   * @param {Object} [config.socketIO.transports=['websocket']] - The transport used to create the url (overrides default socket.io mecanism).
+   * @param {Object} [config.appContainer='#container'] - A selector matching a DOM element where the views should be inserted.
+   * @param {Object} [config.debugIO=false] - If set to `true`, show socket.io debug informations.
    */
-  init(clientType = 'player', options = {}) {
+  init(clientType = 'player', config = {}) {
     this.type = clientType;
 
-    // 1. if socket options given, mix it with defaults.
+    // 1. if socket config given, mix it with defaults.
     const socketIO = Object.assign({
       url: '',
       transports: ['websocket']
-    }, options.socketIO);
+    }, config.socketIO);
 
-    // 2. mix all other options and override with defined socket options.
-    this.options = Object.assign({
+    // 2. mix all other config and override with defined socket config.
+    this.config = Object.assign({
       debugIO: false,
       appContainer: '#container',
-    }, options, { socketIO });
+    }, config, { socketIO });
 
     serviceManager.init();
     this._initViews();
@@ -113,12 +113,21 @@ const client = {
   },
 
   /**
+   * Returns a service configured with the given options.
+   * @param {String} id - The identifier of the service.
+   * @param {Object} options - The options to configure the service.
+   */
+  require(id, options) {
+    return serviceManager.require(id, options);
+  },
+
+  /**
    * @todo - refactor handshake.
    * Initialize socket connection and perform handshake with the server.
    */
   _initSocket() {
     // initialize socket communications
-    this.socket = socket.initialize(this.type, this.options.socketIO);
+    this.socket = socket.initialize(this.type, this.config.socketIO);
     // wait for handshake to mark client as `ready`
     this.socket.receive('client:start', (uid) => {
       // don't handle server restart for now.
@@ -142,14 +151,14 @@ const client = {
     this.textContents = {};
     this.templates = {};
 
-    const appName = this.options.appName || defaultTextContents.globals.appName;
+    const appName = this.config.appName || defaultTextContents.globals.appName;
     const textContents = Object.assign(defaultTextContents, {
       globals: { appName }
     });
 
     this.setViewContentDefinitions(textContents);
     this.setViewTemplateDefinitions(defaultTemplates);
-    this.setAppContainer(this.options.appContainer);
+    this.setAppContainer(this.config.appContainer);
   },
 
   /**

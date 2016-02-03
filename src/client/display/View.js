@@ -153,9 +153,6 @@ export default class View {
   appendTo($parent) {
     this.$parent = $parent;
     $parent.appendChild(this.$el);
-
-    this._executeViewComponentMethod('onShow');
-    this.onShow();
   }
 
   /**
@@ -178,6 +175,7 @@ export default class View {
   hide() {
     this.$el.style.display = 'none';
     this.isVisible = false;
+
   }
 
   /**
@@ -186,6 +184,10 @@ export default class View {
   show() {
     this.$el.style.display = 'block';
     this.isVisible = true;
+    // parent must be in the DOM
+
+    this._executeViewComponentMethod('onShow');
+    this.onShow();
   }
 
   /**
