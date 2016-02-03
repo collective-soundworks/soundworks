@@ -14,6 +14,7 @@ import ClientCheckin from './services/ClientCheckin';
 // import ClientFileList from './ClientFileList';
 import ClientLocator from './services/ClientLocator';
 // import ClientPlacer from './ClientPlacer';
+import ClientSharedConfig from './services/ClientSharedConfig';
 import ClientSharedParams from './services/ClientSharedParams';
 import ClientSync from './services/ClientSync';
 import Loader from './services/Loader';
@@ -60,6 +61,7 @@ export default {
   // ClientFileList,
   // ClientLocator,
   // ClientPlacer,
+  ClientSharedConfig,
   ClientSharedParams,
   ClientSync,
   Loader,

@@ -2,7 +2,7 @@ const _ctors = {};
 const _instances = {};
 
 const serverServiceManager = {
-  require(id, options) {
+  require(id, options = {}) {
     id = 'service:' + id;
 
     if (!_ctors[id])
