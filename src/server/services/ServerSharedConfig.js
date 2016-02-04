@@ -46,7 +46,7 @@ class ServerSharedConfig extends ServerActivity {
         // 'setup.area' => ['setup', 'area'];
         const path = configPath.split('.');
         let tmp = serverConfig;
-        // search path trough config
+        // search path through config
         for (let i = 0, l = path.length; i < l; i++) {
           const attr = path[i];
 
