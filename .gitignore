@@ -1,3 +1,5 @@
 node_modules
 doc
+npm-debug.log
+.DS_Store
 NOTES.md

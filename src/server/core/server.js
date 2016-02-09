@@ -305,6 +305,8 @@ export default {
         defaultType: this.config.defaultClient,
         assetsDomain: this.config.assetsDomain,
       }));
+
+      // this.io.of(clientType).on('connection', this._onConnection(clientType, modules));
     });
 
     // wait for socket connnection
@@ -314,14 +316,14 @@ export default {
   /**
    * Socket connection callback.
    */
-  _onConnection(clientType, modules) {
+  _onConnection(clientType, activities) {
     return (socket) => {
       const client = new Client(clientType, socket);
-      modules.forEach((mod) => mod.connect(client));
+      activities.forEach((activity) => activity.connect(client));
 
       // global lifecycle of the client
       sockets.receive(client, 'disconnect', () => {
-        modules.forEach((mod) => mod.disconnect(client));
+        activities.forEach((activity) => activity.disconnect(client));
         // @todo - should remove all listeners on the client
         client.destroy();
         logger.info({ socket, clientType }, 'disconnect');
