@@ -1,9 +1,9 @@
 /* core */
-import sockets from './core/sockets';
-import server from './core/server';
-import serverServiceManager from './core/serverServiceManager';
 import Client from './core/Client';
+import server from './core/server';
 import ServerActivity from './core/ServerActivity';
+import serverServiceManager from './core/serverServiceManager';
+import sockets from './core/sockets';
 
 /* scenes */
 import ServerExperience from './scenes/ServerExperience';
@@ -27,11 +27,11 @@ import * as setup from '../utils/setup';
 
 export default {
   /* core */
-  sockets,
+  Client,
   server,
   serverServiceManager, // @tbd - expose ?
-  Client,
   ServerActivity,
+  sockets,
 
   /* scenes */
   ServerExperience,

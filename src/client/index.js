@@ -2,7 +2,10 @@ import audio from 'waves-audio';
 
 // core
 import client from './core/client';
+import Process from './core/Process';
 import serviceManager from './core/serviceManager';
+import Signal from './core/Signal';
+import SignalAll from './core/SignalAll';
 
 // scenes
 import Experience from './scenes/Experience';
@@ -49,7 +52,10 @@ export default {
   audioContext: audio.audioContext,
   /* core */
   client,
+  Process,
   serviceManager,
+  Signal,
+  SignalAll,
 
   /* scenes */
   Experience,

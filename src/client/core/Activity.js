@@ -1,4 +1,4 @@
-import { EventEmitter } from 'events';
+import Process from './Process';
 import Signal from './Signal';
 import SignalAll from './SignalAll';
 import socket from './socket';
@@ -10,14 +10,9 @@ import viewManager from './viewManager';
 /**
  * Base class for services and scenes. Basically a process with view and optionnal network abilities.
  */
-export default class Activity extends EventEmitter {
+export default class Activity extends Process {
   constructor(id, hasNetwork = true) {
-    super();
-    /**
-     * Name of the module.
-     * @type {String}
-     */
-    this.id = id;
+    super(id);
 
     /**
      * If `true`, define if the process has been started once.
@@ -60,13 +55,6 @@ export default class Activity extends EventEmitter {
      * @type {String}
      */
     this.template = null;
-
-    /**
-     * Signals defining the process state.
-     * @type {Object}
-     */
-    this.signals = {};
-    this.signals.active = new Signal();
 
     /**
      * Options of the process.
@@ -162,30 +150,6 @@ export default class Activity extends EventEmitter {
     }, this.viewOptions);
 
     return new this.viewCtor(this.template, this.content, this.events, options);
-  }
-
-  /**
-   * Handle the logic and steps that starts the module.
-   * Is mainly used to attach listeners to communication with the server or other modules (e.g. motionInput). If the module has a view, it is attach to the DOM.
-   *
-   * **Note:** the method is called automatically when necessary, you should not call it manually.
-   * @abstract
-   */
-  start() {
-    this.signals.active.set(true);
-  }
-
-  /**
-   * This method should be considered as the opposite of {@link Activity#start}, removing listeners from socket or other module (aka motionInput).
-   * It is internally called at 2 different moment of the module's lifecycle:
-   * - when the module is {@link Activity#done}
-   * - when the module has to restart because of a socket reconnection during the active state of the module. In this particular case the module is stopped, initialized and started again.
-   *
-   * **Note:** the method is called automatically when necessary, you should not call it manually.
-   * @abstract
-   */
-  stop() {
-    this.signals.active.set(false);
   }
 
   /**
