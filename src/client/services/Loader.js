@@ -43,13 +43,13 @@ class Loader extends Service {
 
     /**
      * @type {Object} default - Default options of the service.
-     * @type {String[]} [default.files=null] - The audio files to load.
+     * @type {String[]} [default.files=[]] - The audio files to load.
      * @type {Boolean} [default.showProgress=true] - Defines if the progress bar is rendered. If set to true, the view should implement an `onProgress(percent)` method.
      * @type {String} [default.viewCtor=LoaderView] - Constructor for the module's view.
      */
     const defaults = {
       showProgress: true,
-      files: null,
+      files: [],
       viewCtor: LoaderView,
       viewPriority: 4,
     };
