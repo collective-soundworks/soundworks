@@ -16,6 +16,7 @@ import Experience from './scenes/Experience';
 import ClientCheckin from './services/ClientCheckin';
 // import ClientFileList from './ClientFileList';
 import ClientLocator from './services/ClientLocator';
+import ClientNetwork from './services/ClientNetwork';
 // import ClientPlacer from './ClientPlacer';
 import ClientSharedConfig from './services/ClientSharedConfig';
 import ClientSharedParams from './services/ClientSharedParams';
@@ -62,10 +63,12 @@ export default {
   // ClientSurvey,
 
   /* services */
+  // @todo - hide inside a namespace ?
   // ClientCalibration,
   ClientCheckin,
   // ClientFileList,
-  // ClientLocator,
+  ClientLocator,
+  ClientNetwork,
   // ClientPlacer,
   ClientSharedConfig,
   ClientSharedParams,

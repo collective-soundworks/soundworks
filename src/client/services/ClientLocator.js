@@ -28,7 +28,7 @@ class ClientLocator extends Service {
    * @param {Boolean} [options.persist=false] - If set to `true`, store the normalized coordinates in `localStorage` and retrieve them in subsequent calls. Delete the stored position when set to `false`. (for development purpose)
    */
   constructor() {
-    super(SERVICE_ID);
+    super(SERVICE_ID, true);
 
     const defaults = {
       // @todo - re-think this with db

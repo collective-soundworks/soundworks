@@ -14,6 +14,7 @@ import ServerExperience from './scenes/ServerExperience';
 import ServerCheckin from './services/ServerCheckin';
 // import ServerFileList from './ServerFileList';
 import ServerLocator from './services/ServerLocator';
+import ServerNetwork from './services/ServerNetwork';
 // import ServerPerformance from './ServerPerformance';
 // import ServerPlacer from './ServerPlacer';
 import ServerSharedConfig from './services/ServerSharedConfig';
@@ -38,10 +39,12 @@ export default {
   // ServerSurvey,
 
   /* services */
+  // @todo - move into a namespace ?
   // ServerCalibration,
   ServerCheckin,
   // ServerFileList,
   ServerLocator,
+  ServerNetwork,
   // ServerPerformance,
   // ServerPlacer,
   ServerSharedConfig,
