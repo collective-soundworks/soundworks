@@ -44,6 +44,7 @@ class ClientSync extends Service {
 
     this.configure(defaults);
     this._syncStatusReport = this._syncStatusReport.bind(this);
+    this._reportListeners = [];
   }
 
   init() {
@@ -90,6 +91,14 @@ class ClientSync extends Service {
     return this._sync.getSyncTime(localTime);
   }
 
+  /**
+   * Add a function to be called on each sync report
+   * @param {Function} callback
+   */
+  addListener (callback) {
+    this._reportListeners.push(callback);
+  }
+
   _syncStatusReport(message, report) {
     if (message === 'sync:status') {
       if (report.status === 'training' || report.status === 'sync') {
@@ -98,6 +107,8 @@ class ClientSync extends Service {
           this.ready();
         }
       }
+      // called added listeners
+      this._reportListeners.forEach((callback) => callback(status, report));
     }
   }
 }

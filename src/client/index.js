@@ -3,6 +3,7 @@ import audio from 'waves-audio';
 // core
 import client from './core/client';
 import Process from './core/Process';
+import Service from './core/Service';
 import serviceManager from './core/serviceManager';
 import Signal from './core/Signal';
 import SignalAll from './core/SignalAll';
@@ -54,6 +55,7 @@ export default {
   /* core */
   client,
   Process,
+  Service,
   serviceManager,
   Signal,
   SignalAll,
