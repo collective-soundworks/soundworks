@@ -86,8 +86,8 @@ class ClientCheckin extends Service {
   }
 
   _onPositionResponse(index, label, coordinates) {
-    this.index = index;
-    this.label = label;
+    client.index = this.index = index;
+    client.label = this.label = label;
     client.coordinates = coordinates;
 
     if (this.options.showDialog) {

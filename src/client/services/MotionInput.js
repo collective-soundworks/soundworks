@@ -62,7 +62,6 @@ class MotionInput extends Service {
           this._descriptorsValidity[name] = modules[index].isValid;
         });
 
-        // @tbd - maybe handle errors here...
         this.ready();
       });
   }

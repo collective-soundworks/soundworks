@@ -62,9 +62,23 @@ const client = {
   /**
    * Client coordinates (if any) given by a {@link Locator}, {@link Placer} or
    * {@link Checkin} module. (Format: `[x:Number, y:Number]`.)
-   * @type {Number[]}
+   * @type {Array<Number>}
    */
   coordinates: null,
+
+  /**
+   * Ticket index (if any) given by a {@link Placer} or
+   * {@link Checkin} module.
+   * @type {Number}
+   */
+  index: null,
+
+  /**
+   * Ticket label (if any) given by a {@link Placer} or
+   * {@link Checkin} module.
+   * @type {String}
+   */
+  label: null,
 
   /**
    * Is set to `true` or `false` by the `Welcome` service and defines if the client meet the requirements of the application.

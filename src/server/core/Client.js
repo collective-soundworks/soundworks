@@ -43,9 +43,21 @@ export default class Client {
 
 		/**
 		 * Coordinates of the client, stored as an `[x:Number, y:Number]` array.
-		 * @type {Number[]}
+		 * @type {Array<Number>}
 		 */
     this.coordinates = null;
+
+    /**
+     * Ticket index of the client.
+     * @type {Number}
+     */
+    this.index = null;
+
+    /**
+     * Ticket label of the client.
+     * @type {Number}
+     */
+    this.label = null;
 
 		/**
 		 * Used by any {@link src/server/ServerModule.js~ServerModule} to associate data to a particular client.
@@ -61,10 +73,23 @@ export default class Client {
 		 * Socket used to communicate with the client.
 		 * @type {Socket}
 		 * @private
-		 * @todo .socket -> ._socket (maybe?)
 		 */
-    // this.socket = socket;
     this.socket = socket;
+  }
+
+  /**
+   * Returns a lightweight version of the data defining the client.
+   * @returns {Object}
+   */
+  serialize() {
+    return {
+      type: this.type,
+      uid: this.uid,
+      coordinates: this.coordinates,
+      index: this.index,
+      label: this.label,
+      modules: this.modules,
+    };
   }
 
   /**

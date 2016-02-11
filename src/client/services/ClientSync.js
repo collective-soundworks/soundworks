@@ -102,13 +102,13 @@ class ClientSync extends Service {
   _syncStatusReport(message, report) {
     if (message === 'sync:status') {
       if (report.status === 'training' || report.status === 'sync') {
+        this._reportListeners.forEach((callback) =>  callback(status, report));
+
         if (!this._ready) {
           this._ready = true;
           this.ready();
         }
       }
-      // called added listeners
-      this._reportListeners.forEach((callback) => callback(status, report));
     }
   }
 }

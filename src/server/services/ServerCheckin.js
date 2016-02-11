@@ -17,7 +17,6 @@ const SERVICE_ID = 'service:checkin';
 class ServerCheckin extends ServerActivity {
   /**
    * @param {Object} [options={}] Options.
-   * @param {Object} [options.name='checkin'] Name of the module.
    * @param {Object} [options.setup] Setup defining predefined positions (labels and/or coordinates).
    * @param {String[]} [options.setup.labels] List of predefined labels.
    * @param {Array[]} [options.setup.coordinates] List of predefined coordinates given as an array `[x:Number, y:Number]`.
@@ -28,6 +27,13 @@ class ServerCheckin extends ServerActivity {
    */
   constructor() {
     super(SERVICE_ID);
+
+    const defaults = {
+      capacity: Infinity,
+      order: 'ascending',
+    }
+
+    this.configure(defaults);
   }
 
   start() {
@@ -56,7 +62,7 @@ class ServerCheckin extends ServerActivity {
      * - `'random'`: assigns indices in random order.
      * @type {[type]}
      */
-    this.order = this.options.order || 'ascending'; // 'ascending' | 'random'
+    this.order = this.options; // 'ascending' | 'random'
 
     this._availableIndices = [];
     this._nextAscendingIndex = 0;
@@ -108,7 +114,8 @@ class ServerCheckin extends ServerActivity {
   }
 
   _releaseIndex(index) {
-    this._availableIndices.push(index);
+    if (Number.isInteger(index))
+      this._availableIndices.push(index);
   }
 
   _onRequest(client) {
@@ -120,7 +127,7 @@ class ServerCheckin extends ServerActivity {
       else // if (order === 'acsending')
         index = this._getAscendingIndex();
 
-      client.modules[this.id].index = index;
+      client.index = index;
 
       if (index >= 0) {
         const setup = this.setup;
@@ -131,7 +138,7 @@ class ServerCheckin extends ServerActivity {
           label = setup.labels ? setup.labels[index] : undefined;
           coordinates = setup.coordinates ? setup.coordinates[index] : undefined;
 
-          client.modules[this.id].label = label;
+          client.label = label;
           client.coordinates = coordinates;
         }
 
@@ -160,11 +167,11 @@ class ServerCheckin extends ServerActivity {
   //         this._availableIndices.splice(i, 1);
   //     }
 
-  //     client.modules[this.id].index = index;
+  //     client.index = index;
   //     this.clients[index] = client;
 
   //     if (label !== null)
-  //       client.modules[this.id].label = label;
+  //       client.label = label;
 
   //     if(coordinates !== null)
   //       client.coordinates = coordinates;
@@ -183,7 +190,7 @@ class ServerCheckin extends ServerActivity {
   disconnect(client) {
     super.disconnect(client);
 
-    const index = client.modules[this.id].index;
+    const index = client.index;
 
     if (index >= 0) {
       delete this.clients[index];

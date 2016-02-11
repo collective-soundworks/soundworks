@@ -31,8 +31,8 @@ export default class Service extends Activity {
 
   ready() {
     this.stop();
-    this.signals.ready.set(true);
     log(`"${this.id}" ready`);
+    this.signals.ready.set(true);
   }
 
   require(id) {
@@ -48,13 +48,13 @@ export default class Service extends Activity {
   }
 
   start() {
-    super.start();
     log(`"${this.id}" started`);
+    super.start();
   }
 
   stop() {
-    super.stop();
     log(`"${this.id}" stopped`);
+    super.stop();
   }
 }
 
