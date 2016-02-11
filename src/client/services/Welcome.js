@@ -96,8 +96,10 @@ class Welcome extends Service {
     client.compatible = error === null ? true : false;
 
     if (this.options.showDialog) {
-      if (!error)
-        this.events = { 'touchend': this.activateMedia.bind(this) };
+      if (!error) {
+        const event = isMobile ? 'touchend' : 'click';
+        this.events = { [event]: this.activateMedia.bind(this) };
+      }
 
       this.viewCtor = this.options.viewCtor;
       this.view = this.createView();
