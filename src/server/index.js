@@ -16,7 +16,7 @@ import ServerCheckin from './services/ServerCheckin';
 import ServerLocator from './services/ServerLocator';
 import ServerNetwork from './services/ServerNetwork';
 // import ServerPerformance from './ServerPerformance';
-// import ServerPlacer from './ServerPlacer';
+import ServerPlacer from './services/ServerPlacer';
 import ServerSharedConfig from './services/ServerSharedConfig';
 import ServerSharedParams from './services/ServerSharedParams';
 import ServerSync from './services/ServerSync';
@@ -46,7 +46,7 @@ export default {
   ServerLocator,
   ServerNetwork,
   // ServerPerformance,
-  // ServerPlacer,
+  ServerPlacer,
   ServerSharedConfig,
   ServerSharedParams,
   ServerSync,

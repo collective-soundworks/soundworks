@@ -38,7 +38,7 @@ export default class ServerPlacer extends ServerModule {
 
     const setup = options.setup;
 
-    if(setup) {
+    if (setup) {
       const numLabels = setup.labels ? setup.labels.length : Infinity;
       const numCoordinates = setup.coordinates ? setup.coordinates.length : Infinity;
       const numPositions = Math.min(numLabels, numCoordinates);
@@ -47,7 +47,7 @@ export default class ServerPlacer extends ServerModule {
         this.capacity = numPositions;
     }
 
-    if(this.capacity > maxCapacity)
+    if (this.capacity > maxCapacity)
       this.capacity = maxCapacity;
 
     /**

@@ -55,7 +55,7 @@ my-scenario/
 
 In particular:
 
-- The `public/` folder contains all the resources the clients may need to load, such as sounds, images, fonts…  
+- The `public/` folder contains all the resources the clients may need to load, such as sounds, images, fonts…
   **Note:** the Javascript and CSS files will be automatically generated from the `src/` folder into the `public/js/` and `public/css/` subfolders.
 - The `src/` folder contains:
   - The `client/` subfolder, that contains one subfolder for each client type (`player/` is a mandatory subfolder):

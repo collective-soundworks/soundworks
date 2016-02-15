@@ -3,9 +3,7 @@ import View from './View';
 const defaultTemplate = `
   <option class="small"><%= instructions %></option>
   <% entries.forEach((entry) => { %>
-    <option value="<%= entry.index %>">
-      <%= entry.label %>
-    </option>
+    <option value="<%= entry.index %>"><%= entry.label %></option>
   <% }) %>
 `;
 
@@ -23,5 +21,17 @@ export default class SelectView extends View {
     const index = parseInt(this.$el.value);
     const entry = this.entries.find(entry => entry.index === index);
     return entry || null;
+  }
+
+  enableIndex(index) {
+    const $option = this.$el.querySelector(`option[value="${index}"]`);
+    if ($option)
+      $option.removeAttribute('disabled');
+  }
+
+  disableIndex(index) {
+    const $option = this.$el.querySelector(`option[value="${index}"]`);
+    if ($option)
+      $option.setAttribute('disabled', 'disabled');
   }
 }

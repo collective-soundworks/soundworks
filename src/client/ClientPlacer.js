@@ -1,6 +1,6 @@
 import client from './client';
 import ClientModule from './ClientModule';
-import localStorage from './localStorage';
+// import localStorage from './localStorage';
 
 import SelectView from './display/SelectView';
 import SpaceView from './display/SpaceView';
@@ -32,7 +32,7 @@ export default class ClientPlacer extends ClientModule {
       persist: false,
     }, options);
 
-    this.localStorageNS = 'placer:position';
+    // this.localStorageNS = 'placer:position';
 
     this._onSetupResponse = this._onSetupResponse.bind(this);
     this._onSelect = this._onSelect.bind(this);
@@ -65,14 +65,14 @@ export default class ClientPlacer extends ClientModule {
   start() {
     super.start();
     // check for informations in local storage
-    if (this.options.persist) {
-      const position = this._retrieveLocalStorage();
+    // if (this.options.persist) {
+    //   const position = this._retrieveLocalStorage();
 
-      if (position !== null) {
-        this._sendPosition(position);
-        return this.done();
-      }
-    }
+    //   if (position !== null) {
+    //     this._sendPosition(position);
+    //     return this.done();
+    //   }
+    // }
 
     // request positions or labels
     this.send('request', this.options.mode);
@@ -87,23 +87,23 @@ export default class ClientPlacer extends ClientModule {
     this.removeListener('reset', this._deleteLocalStorage);
   }
 
-  /** @private */
-  restart() {
-    // super.restart(); // @todo - prepare next gen server side db
-    this._sendPosition();
-  }
+  // /** @private */
+  // restart() {
+  //   // super.restart(); // @todo - prepare next gen server side db
+  //   this._sendPosition();
+  // }
 
-  _setLocalStorage(position) {
-    localStorage.set(this.localStorageNS, position);
-  }
+  // _setLocalStorage(position) {
+  //   localStorage.set(this.localStorageNS, position);
+  // }
 
-  _retrieveLocalStorage() {
-    return localStorage.get(this.localStorageNS);
-  }
+  // _retrieveLocalStorage() {
+  //   return localStorage.get(this.localStorageNS);
+  // }
 
-  _deleteLocalStorage() {
-    localStorage.delete(this.localStorageNS);
-  }
+  // _deleteLocalStorage() {
+  //   localStorage.delete(this.localStorageNS);
+  // }
 
   _onSetupResponse(capacity, labels, coordinates, area) {
     const numLabels = labels ? labels.length : Infinity;
@@ -174,7 +174,7 @@ export default class ClientPlacer extends ClientModule {
   _onSelect(position) {
     // optionally store in local storage
     if (this.options.persist)
-      this._setLocalStorage(position);
+      // this._setLocalStorage(position);
 
     // send to server
     this._sendPosition(position);

@@ -69,13 +69,19 @@ export default {
   `,
 
   'service:placer': `
-    <div class="section-square flex-middle"></div>
+    <div class="section-square">
+      <% if (rejected) { %>
+      <p class="big"><%= reject %></p>
+      <% } %>
+    </div>
     <div class="section-float flex-middle">
-      <% if (mode === 'graphic') { %>
-        <p><%= instructions %></p>
-      <% } else if (mode === 'list') { %>
-        <% if (showBtn) { %>
-          <button class="btn"><%= send %></button>
+      <% if (!rejected) { %>
+        <% if (mode === 'graphic') { %>
+          <p><%= instructions %></p>
+        <% } else if (mode === 'list') { %>
+          <% if (showBtn) { %>
+            <button class="btn"><%= send %></button>
+          <% } %>
         <% } %>
       <% } %>
     </div>

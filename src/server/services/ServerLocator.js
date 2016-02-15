@@ -11,18 +11,12 @@ const SERVICE_ID = 'service:locator';
 class ServerLocator extends ServerActivity {
   constructor() {
     super(SERVICE_ID);
-  }
 
-  start() {
-    super.start();
-    /**
-     * Setup defining dimensions and background.
-     * @type {Object}
-     * @property {Number} setup.width - Width of the setup.
-     * @property {Number} setup.height - Height of the setup.
-     * @property {String} setup.background - Optionnal background (image) of the setup.
-     */
-    this.setup = this.options.setup;
+    const defaults = {
+      setup: {},
+    };
+
+    this.configure(defaults);
   }
 
   /**
@@ -37,7 +31,7 @@ class ServerLocator extends ServerActivity {
 
   _onRequest(client) {
     return () => {
-      const setup = this.setup;
+      const setup = this.options.setup;
       let area = undefined;
 
       if (setup) {

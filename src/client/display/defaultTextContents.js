@@ -32,7 +32,9 @@ export default {
   'service:placer': {
     instructions: 'Select your position',
     send: 'Send',
+    reject: 'Sorry, no place is available',
     showBtn: false,
+    rejected: false,
   },
   'service:sync': {
     wait: `Clock syncing,<br />stand by&hellip;`,

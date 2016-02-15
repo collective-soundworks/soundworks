@@ -1,6 +1,6 @@
 import View from './View';
 
-const template = `<svg></svg>`;
+const svgTemplate = `<svg></svg>`;
 const ns = 'http://www.w3.org/2000/svg';
 
 
@@ -10,18 +10,16 @@ export default class SpaceView extends View {
    * @param {Object} area - The area to represent, should be defined by a `width`, an `height` and an optionnal background.
    * @param {Object} events - The events to attach to the view.
    * @param {Object} options - @todo
-   * @param {Object} [options.isSubView=false] - Don't automatically point the view inside it's container (is needed when inserted in a module with css flex behavior).
-   * @todo - `options.isSubView` should be removed and handled through css flex.
    */
-  constructor(area, events = {}, options = {}) {
+  constructor(template = null, content = {}, events = {}, options = {}) {
     options = Object.assign({ className: 'space' }, options);
-    super(template, {}, events, options);
+    super(template || svgTemplate, {}, events, options);
 
     /**
      * The area to display.
      * @type {Object}
      */
-    this.area = area;
+    this.area = null;
 
     /**
      * Expose a Map of the $shapes and their relative point object.
@@ -39,6 +37,10 @@ export default class SpaceView extends View {
     this._renderedLines = new Map();
   }
 
+  setArea(area) {
+    this.area = area;
+  }
+
   /**
    * Apply style and cache elements when rendered.
    * @private
@@ -46,6 +48,7 @@ export default class SpaceView extends View {
   onRender() {
     this.$svg = this.$el.querySelector('svg');
     this.addDefinitions();
+    this._renderArea();
   }
 
   /**
@@ -75,7 +78,11 @@ export default class SpaceView extends View {
    * @private
    */
   onShow() {
-    this._setArea();
+    this._renderArea();
+
+    for (let [$shape, point] of this.shapePointMap) {
+      this.updatePoint(point)
+    }
   }
 
   /**
@@ -88,15 +95,15 @@ export default class SpaceView extends View {
     this.$el.style.width = '100%';
     this.$el.style.height = '100%';
 
-    this._setArea();
+    this._renderArea();
   }
 
   /**
    * Render the area.
    * @private
    */
-  _setArea() {
-    if (!this.$parent) { return; }
+  _renderArea() {
+    // if (!this.$parent) { return; }
 
     const area = this.area;
     // use `this.$el` size instead of `this.$parent` size to ignore parent padding
@@ -104,20 +111,20 @@ export default class SpaceView extends View {
     const containerWidth = boundingRect.width;
     const containerHeight = boundingRect.height;
 
-    const ratio = (() => {
-      return (containerWidth < containerHeight) ?
-        containerWidth / area.width :
-        containerHeight / area.height;
-    })();
+    this.ratio = Math.min(containerWidth / area.width, containerHeight / area.height);
+    const svgWidth = area.width * this.ratio;
+    const svgHeight = area.height * this.ratio;
 
-    const svgWidth = area.width * ratio;
-    const svgHeight = area.height * ratio;
+    const top = (containerHeight - svgHeight) / 2;
+    const left = (containerWidth - svgWidth) / 2;
 
     this.$svg.setAttribute('width', svgWidth);
     this.$svg.setAttribute('height', svgHeight);
-    this.$svg.setAttribute('viewBox', `0 0 ${area.width} ${area.height}`);
+    // this.$svg.setAttribute('viewBox', `0 0 ${svgWidth} ${svgHeight}`);
     // center the svg into the parent
     this.$svg.style.position = 'relative';
+    this.$svg.style.top = `${top}px`;
+    this.$svg.style.left = `${left}px`;
 
     // display background if any
     if (area.background) {
@@ -144,55 +151,22 @@ export default class SpaceView extends View {
    * @param {Number} [point.radius=0.3] - The radius of the point (relative to the area width and height).
    * @param {String} [point.color=undefined] - If specified, the color of the point.
    */
-  renderPoint(point) {
-    const $shape = document.createElementNS(ns, 'circle');
-    $shape.classList.add('point');
+  renderPoint(point, $shape = null) {
+    if ($shape === null) {
+      $shape = document.createElementNS(ns, 'circle');
+      $shape.classList.add('point');
+    }
 
     $shape.setAttribute('data-id', point.id);
-    $shape.setAttribute('cx', `${point.x}`);
-    $shape.setAttribute('cy', `${point.y}`);
-    $shape.setAttribute('r', point.radius || 0.3); // radius is relative to area size
+    $shape.setAttribute('cx', `${point.x * this.ratio}`);
+    $shape.setAttribute('cy', `${point.y * this.ratio}`);
+    $shape.setAttribute('r', point.radius || 5); // radius is relative to area size
 
     if (point.color)
       $shape.style.fill = point.color;
 
-    if (point.selected)
-      $shape.classList.add('selected');
-
-    return $shape;
-  }
-
-  /**
-   * The method used to render a specific line. This method should be overriden to display a point with a user defined shape. These shapes are prepended to the `svg` element
-   * @param {Object} line - The line to render.
-   * @param {String|Number} line.id - An unique identifier for the line.
-   * @param {Object} line.tail - The point where the line should begin.
-   * @param {Object} line.head - The point where the line should end.
-   * @param {Boolean} [line.directed=false] - Defines if the line should be directed or not.
-   * @param {String} [line.color=undefined] - If specified, the color of the line.
-   */
-  renderLine(line) {
-    const tail = line.tail;
-    const head = line.head;
-
-    const $shape = document.createElementNS(ns, 'polyline');
-    $shape.classList.add('line');
-    $shape.setAttribute('data-id', line.id);
-
-    const points = [
-      `${tail.x},${tail.y}`,
-      `${(tail.x + head.x) / 2},${(tail.y + head.y) / 2}`,
-      `${head.x},${head.y}`
-    ];
-
-    $shape.setAttribute('points', points.join(' '));
-    $shape.setAttribute('vector-effect', 'non-scaling-stroke');
-
-    if (line.color)
-      $shape.style.stroke = line.color;
-
-    if (line.directed)
-      $shape.classList.add('arrow');
+    const method = point.selected ? 'add' : 'remove';
+    $shape.classList[method]('selected');
 
     return $shape;
   }
@@ -241,10 +215,7 @@ export default class SpaceView extends View {
    */
   updatePoint(point) {
     const $shape = this._renderedPoints.get(point.id);
-
-    $shape.setAttribute('cx', `${point.x}`);
-    $shape.setAttribute('cy', `${point.y}`);
-    $shape.setAttribute('r', point.radius || 0.3);
+    this.renderPoint(point, $shape);
   }
 
   /**
@@ -259,73 +230,110 @@ export default class SpaceView extends View {
     this.shapePointMap.delete($shape);
   }
 
-  /**
-   * Replace all the existing lines with the given array of line.
-   * @param {Array<Object>} lines - The new lines to render.
-   */
-  setLines(lines) {
-    this.clearLines();
-    this.addLines(lines);
-  }
 
-  /**
-   * Clear all the displayed lines.
-   */
-  clearLines() {
-    for (let id of this._renderedLines.keys()) {
-      this.deleteLine(id);
-    }
-  }
-
-  /**
-   * Add new lines to the area.
-   * @param {Array<Object>} lines - The new lines to render.
-   */
-  addLines(lines) {
-    lines.forEach(line => this.addLine(line));
-  }
-
-  /**
-   * Add a new line to the area.
-   * @param {Object} line - The new line to render.
-   */
-  addLine(line) {
-    const $shape = this.renderLine(line);
-    // insert just after the <defs> tag
-    // this.$svg.insertBefore($shape, this.$svg.firstChild.nextSibling);
-    this.$svg.appendChild($shape);
-
-    this._renderedLines.set(line.id, $shape);
-    this.shapeLineMap.set($shape, line);
-  }
-
-  /**
-   * Update a rendered line.
-   * @param {Object} line - The line to update.
-   */
-  updateLine(line) {
-    const $shape = this._renderedLines.get(line.id);
-    const tail = line.tail;
-    const head = line.head;
-
-    const points = [
-      `${tail.x},${tail.y}`,
-      `${(tail.x + head.x) / 2},${(tail.y + head.y) / 2}`,
-      `${head.x},${head.y}`
-    ];
-
-    $shape.setAttribute('points', points.join(' '));
-  }
-
-  /**
-   * Remove a rendered line.
-   * @param {String|Number} id - The id of the line to delete.
-   */
-  deleteLine(id) {
-    const $shape = this._renderedLines.get(id);
-    this.$svg.removeChild($shape);
-
-    this._renderedLines.delete(id);
-    this.shapeLineMap.delete($shape);
-  }
+// @todo - refactor with new viewbox + remove code duplication in update.
+//  /**
+//   * The method used to render a specific line. This method should be overriden to display a point with a user defined shape. These shapes are prepended to the `svg` element
+//   * @param {Object} line - The line to render.
+//   * @param {String|Number} line.id - An unique identifier for the line.
+//   * @param {Object} line.tail - The point where the line should begin.
+//   * @param {Object} line.head - The point where the line should end.
+//   * @param {Boolean} [line.directed=false] - Defines if the line should be directed or not.
+//   * @param {String} [line.color=undefined] - If specified, the color of the line.
+//   */
+//  renderLine(line) {
+//    const tail = line.tail;
+//    const head = line.head;
+//
+//    const $shape = document.createElementNS(ns, 'polyline');
+//    $shape.classList.add('line');
+//    $shape.setAttribute('data-id', line.id);
+//
+//    const points = [
+//      `${tail.x},${tail.y}`,
+//      `${(tail.x + head.x) / 2},${(tail.y + head.y) / 2}`,
+//      `${head.x},${head.y}`
+//    ];
+//
+//    $shape.setAttribute('points', points.join(' '));
+//    $shape.setAttribute('vector-effect', 'non-scaling-stroke');
+//
+//    if (line.color)
+//      $shape.style.stroke = line.color;
+//
+//    if (line.directed)
+//      $shape.classList.add('arrow');
+//
+//    return $shape;
+//  }
+//
+//  /**
+//   * Replace all the existing lines with the given array of line.
+//   * @param {Array<Object>} lines - The new lines to render.
+//   */
+//  setLines(lines) {
+//    this.clearLines();
+//    this.addLines(lines);
+//  }
+//
+//  /**
+//   * Clear all the displayed lines.
+//   */
+//  clearLines() {
+//    for (let id of this._renderedLines.keys()) {
+//      this.deleteLine(id);
+//    }
+//  }
+//
+//  /**
+//   * Add new lines to the area.
+//   * @param {Array<Object>} lines - The new lines to render.
+//   */
+//  addLines(lines) {
+//    lines.forEach(line => this.addLine(line));
+//  }
+//
+//  /**
+//   * Add a new line to the area.
+//   * @param {Object} line - The new line to render.
+//   */
+//  addLine(line) {
+//    const $shape = this.renderLine(line);
+//    // insert just after the <defs> tag
+//    // this.$svg.insertBefore($shape, this.$svg.firstChild.nextSibling);
+//    this.$svg.appendChild($shape);
+//
+//    this._renderedLines.set(line.id, $shape);
+//    this.shapeLineMap.set($shape, line);
+//  }
+//
+//  /**
+//   * Update a rendered line.
+//   * @param {Object} line - The line to update.
+//   */
+//  updateLine(line) {
+//    const $shape = this._renderedLines.get(line.id);
+//    const tail = line.tail;
+//    const head = line.head;
+//
+//    const points = [
+//      `${tail.x},${tail.y}`,
+//      `${(tail.x + head.x) / 2},${(tail.y + head.y) / 2}`,
+//      `${head.x},${head.y}`
+//    ];
+//
+//    $shape.setAttribute('points', points.join(' '));
+//  }
+//
+//  /**
+//   * Remove a rendered line.
+//   * @param {String|Number} id - The id of the line to delete.
+//   */
+//  deleteLine(id) {
+//    const $shape = this._renderedLines.get(id);
+//    this.$svg.removeChild($shape);
+//
+//    this._renderedLines.delete(id);
+//    this.shapeLineMap.delete($shape);
+//  }
 }
