@@ -9,8 +9,9 @@ export default {
     labelPrefix: 'Go to',
     labelPostfix: 'Touch the screen<br class="portrait-only" />when you are ready.',
     error: false,
-    errorMessage: 'Sorry, we cannot accept any more connections at the moment, please try again later.',
+    errorMessage: 'Sorry, no place is available',
     wait: 'Please wait...',
+    label: '',
   },
   'service:control': {
     title: 'Conductor',

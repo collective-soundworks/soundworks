@@ -71,7 +71,7 @@ export default class View {
    * @param {String} selector - A css selector matching an element of the template.
    * @param {View} view - The view to insert inside the selector.
    */
-  setViewComponent(selector, view) {
+  setViewComponent(selector, view = null) {
     const prevView = this._components[selector];
     if (prevView instanceof View) { prevView.remove(); }
 

@@ -19,13 +19,31 @@ const oscListeners = [];
  */
 const exampleAppConfig = {
   appName: 'Soundworks', // title of the application (for <title> tag)
-  version: '0.0.1', // version of the application (bypass browser cache)
-  playerSetup: {
-    width: 10, // width of the setup area in meters
-    height: 10, // height of the setup area in meters
-    labels: undefined, // predefined labels (optional)
-    coordinates: undefined, // predefined coordinates on the setup area (optional)
-    background: undefined, // URL of a background image fitting the setup area (optional)
+  version: '0.0.1', // version of the application (allow to bypass browser cache)
+  /**
+   * @param {Object} [setup={}] - Setup defining dimensions and predefined positions (labels and/or coordinates).
+   * @attribute {Object} [setup.area=null] - The dimensions of the area.
+   * @attribute {Number} [setup.area.height] - The height of the area.
+   * @attribute {Number} [setup.area.width] - The width of the area.
+   * @attribute {String} [setup.area.background] - The optionnal background (image) of the area.
+   * @attribute {Array<String>} [setup.labels] - List of predefined labels.
+   * @attribute {Array<Array>} [setup.coordinates] - List of predefined coordinates
+   *  given as an array `[x:Number, y:Number]`.
+   * @attribute {Number} [setup.capacity=Infinity] - Maximum number of places
+   *  (may limit or be limited by the number of labels and/or coordinates defined by the setup).
+   * @ttribute {Number} [setup.maxClientsPerPosition=1] - The maximum number of clients
+   *  allowed in one position.
+   */
+  setup: {
+    area: {
+      width: 10,
+      height: 10,
+      background: undefined,
+    },
+    labels: undefined,
+    coordinates: undefined,
+    maxClientsPerPosition: 1,
+    capacity: Infinity,
   },
   controlParameters: {
     tempo: 120, // tempo in BPM

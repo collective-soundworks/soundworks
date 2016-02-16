@@ -8,6 +8,104 @@ import TouchSurface from '../display/TouchSurface';
 
 const SERVICE_ID = 'service:locator';
 
+class _LocatorView extends SquaredView {
+  constructor(template, content, events, options) {
+    super(template, content, events, options);
+
+    this.area = null;
+
+    this._onAreaTouchStart = this._onAreaTouchStart.bind(this);
+    this._onAreaTouchMove = this._onAreaTouchMove.bind(this);
+  }
+
+  /**
+   * Sets the `area` definition.
+   * @param {Object} area - Object containing the area definition.
+   */
+  setArea(area) {
+    this._area = area;
+    this._renderArea();
+  }
+
+  /**
+   * Register the function to be called when the location is choosen.
+   * @param {Function} callback
+   */
+  onSelect(callback) {
+    this._onSelect = callback;
+  }
+
+  /** @inheritdoc */
+  remove() {
+    super.remove();
+
+    this.surface.removeListener('touchstart', this._onAreaTouchStart);
+    this.surface.removeListener('touchmove', this._onAreaTouchMove);
+  }
+
+  _renderArea() {
+    this.selector = new SpaceView();
+    this.selector.setArea(this._area);
+    this.setViewComponent('.section-square', this.selector);
+    this.render('.section-square');
+
+    this.surface = new TouchSurface(this.selector.$svg);
+    this.surface.addListener('touchstart', this._onAreaTouchStart);
+    this.surface.addListener('touchmove', this._onAreaTouchMove);
+  }
+
+  /**
+   * Callback of the `touchstart` event.
+   */
+  _onAreaTouchStart(id, normX, normY) {
+    if (!this.position) {
+      this._createPosition(normX, normY);
+
+      this.content.showBtn = true;
+      this.render('.section-float');
+      this.installEvents({
+        'click .btn': (e) => this._onSelect(this.position.x, this.position.y),
+      });
+    } else {
+      this._updatePosition(normX, normY);
+    }
+  }
+
+  /**
+   * Callback of the `touchmove` event.
+   */
+  _onAreaTouchMove(id, normX, normY) {
+    this._updatePosition(normX, normY);
+  }
+
+  /**
+   * Creates the position object according to normalized coordinates.
+   * @param {Number} normX - The normalized coordinate in the x axis.
+   * @param {Number} normY - The normalized coordinate in the y axis.
+   */
+  _createPosition(normX, normY) {
+    this.position = {
+      id: 'locator',
+      x: normX * this._area.width,
+      y: normY * this._area.height,
+    }
+
+    this.selector.addPoint(this.position);
+  }
+
+  /**
+   * Updates the position object according to normalized coordinates.
+   * @param {Number} normX - The normalized coordinate in the x axis.
+   * @param {Number} normY - The normalized coordinate in the y axis.
+   */
+  _updatePosition(normX, normY) {
+    this.position.x = normX * this._area.width;
+    this.position.y = normY * this._area.height;
+
+    this.selector.updatePoint(this.position);
+  }
+}
+
 /**
  * [client] Allow to indicate the approximate location of the client on a map.
  *
@@ -21,43 +119,35 @@ const SERVICE_ID = 'service:locator';
  * const locator = new ClientLocator();
  */
 class ClientLocator extends Service {
-  /**
-   * @param {Object} [options={}] - Options.
-   * @param {String} [options.name='locator'] - The name of the module.
-   * @param {Boolean} [options.random=false] - Send random position to the server and call `this.done()` (for development purpose)
-   * @param {Boolean} [options.persist=false] - If set to `true`, store the normalized coordinates in `localStorage` and retrieve them in subsequent calls. Delete the stored position when set to `false`. (for development purpose)
-   */
   constructor() {
     super(SERVICE_ID, true);
 
+    /**
+     * @param {Object} [defaults={}] - Defaults configuration of the service.
+     * @param {Boolean} [defaults.random=false] - Send random position to the server
+     *  and call `this.done()` (for development purpose)
+     * @param {View} [defaults.viewCtor=_LocatorView] - The contructor of the view to be used.
+     *  The view must implement the `AbstractLocatorView` interface
+     */
     const defaults = {
-      // @todo - re-think this with db
-      // random: false,
-      // persist: false,
-      positionRadius: 0.3, // relative to the area unit
-      spaceCtor: SpaceView,
-      viewCtor: SquaredView,
+      random: false,
+      // persist: false, // @todo - re-think this with db
+      viewCtor: _LocatorView,
     };
 
     this.configure(defaults);
-
-    // The namespace where coordinates are stored when `options.persist = true`.
-    // this._localStorageNamespace = `soundworks:${this.name}`;
-
-    this._onAreaTouchStart = this._onAreaTouchStart.bind(this);
-    this._onAreaTouchMove = this._onAreaTouchMove.bind(this);
     this._onAreaResponse = this._onAreaResponse.bind(this);
-
-    this.init();
+    this._sendCoordinates = this._sendCoordinates.bind(this);
   }
 
-  /** @private */
+  /** @inheritdoc */
   init() {
     this.viewCtor = this.options.viewCtor;
+    // this.viewOptions
     this.view = this.createView();
   }
 
-  /** @private */
+  /** @inheritdoc */
   start() {
     super.start();
 
@@ -67,132 +157,45 @@ class ClientLocator extends Service {
     this.show();
 
     this.send('request');
-
-    // if (!this.options.persist)
-    //   localStorage.delete(this._localStorageNamespace);
-
     this.receive('area', this._onAreaResponse);
   }
 
-  /** @private */
+  /** @inheritdoc */
   stop() {
     super.stop();
+    this.removeListener('area', this._onAreaResponse);
 
     this.hide();
-    this.removeListener('area', this._onAreaResponse);
   }
 
   /**
    * Bypass the locator according to module configuration options.
-   * If `options.random` is set to true, use random coordinates.
-   * If `options.persist` is set to true use coordinates stored in local storage,
-   * do nothing when no coordinates are stored yet.
+   * If `options.random` is set to true, create random coordinates and send it
+   *  to the server (mainly for development purposes).
+   * @private
    * @param {Object} area - The area as defined in server configuration.
    */
   _onAreaResponse(area) {
-    this._attachArea(area);
-
-    // if (this.options.random || this.options.persist) {
-    //   let coords;
-
-    //   if (this.options.random) {
-    //     coords = { normX: Math.random(), normY: Math.random() };
-    //   } else if (this.options.persist) {
-    //     coords = JSON.parse(localStorage.get(this._localStorageNamespace));
-    //   }
-
-    //   if (coords !== null) {
-    //     this._createPosition(coords.normX, coords.normY);
-    //     this._sendCoordinates();
-    //   }
-    // }
-  }
-
-  /**
-   * Store the current coordinates in `localStorage`.
-   */
-  // storeCoordinates() {
-  //   const normX = this.position.x / this.area.width;
-  //   const normY = this.position.y / this.area.height;
-  //   localStorage.set(this._localStorageNamespace, JSON.stringify({ normX, normY }));
-  // }
-
-  // retrieveCoordinates() {}
-  // deleteCoordinates() {}
-
-  /**
-   * Create a `SpaceView` and display it in the square section of the view
-   */
-  _attachArea(area) {
     this.area = area;
-    this.space = new this.options.spaceCtor(area, {}, { isSubView: true });
-    // @todo - find a way to remove these hardcoded selectors
-    this.view.setViewComponent('.section-square', this.space);
-    this.view.render('.section-square');
-    // touchSurface on $svg
-    this.surface = new TouchSurface(this.space.$svg);
-    this.surface.addListener('touchstart', this._onAreaTouchStart);
-    this.surface.addListener('touchmove', this._onAreaTouchMove);
-  }
+    this.view.setArea(area);
+    this.view.onSelect(this._sendCoordinates);
 
-  _onAreaTouchStart(id, normX, normY) {
-    if (!this.position) {
-      this._createPosition(normX, normY);
-
-      this.content.showBtn = true;
-      this.view.render('.section-float');
-      this.view.installEvents({
-        'click .btn': (e) => {
-          e.target.setAttribute('disabled', true);
-          this._sendCoordinates();
-        },
-      });
-    } else {
-      this._updatePosition(normX, normY);
+    if (this.options.random) {
+      const x = Math.random() * area.width;
+      const y = Math.random() * area.height;
+      this._sendCoordinates(x, y);
     }
-  }
-
-  _onAreaTouchMove(id, normX, normY) {
-    this._updatePosition(normX, normY);
-  }
-
-  /**
-   * Creates the position object according to normalized coordinates.
-   * @param {Number} normX - The normalized coordinate in the x axis.
-   * @param {Number} normY - The normalized coordinate in the y axis.
-   */
-  _createPosition(normX, normY) {
-    this.position = {
-      id: 'locator',
-      x: normX * this.area.width,
-      y: normY * this.area.height,
-      radius: this.options.positionRadius,
-    }
-
-    this.space.addPoint(this.position);
-  }
-
-  /**
-   * Updates the position object according to normalized coordinates.
-   * @param {Number} normX - The normalized coordinate in the x axis.
-   * @param {Number} normY - The normalized coordinate in the y axis.
-   */
-  _updatePosition(normX, normY) {
-    this.position.x = normX * this.area.width;
-    this.position.y = normY * this.area.height;
-
-    this.space.updatePoint(this.position);
   }
 
   /**
    * Send coordinates to the server.
+   * @private
+   * @param {Number} x - The `x` coordinate of the client.
+   * @param {Number} y - The `y` coordinate of the client.
    */
-  _sendCoordinates() {
-    // if (this.options.persist) { // store normalized coordinates
-    //   this.storeCoordinates();
-    // }
+  _sendCoordinates(x, y) {
+    client.coordinates = [x, y];
 
-    client.coordinates = this.position;
     this.send('coordinates', client.coordinates);
     this.ready();
   }

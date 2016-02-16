@@ -6,52 +6,54 @@ const SERVICE_ID = 'service:placer';
 const maxCapacity = 9999;
 
 /**
- * Allow to select a place within a set of predefined positions (i.e. labels and/or coordinates).
+ * [server] Allow to select a place within a set of predefined positions (i.e. labels and/or coordinates).
+ * This service consumme a setup as defined in the server configuration
+ * (see {@link src/server/core/server.js~appConfig} for details).
  *
- * (See also {@link src/client/services/ClientPlacer.js~ClientPlacer} on the client side.)
+ * (See also {@link src/client/services/ClientPlacer.js~ClientPlacer} on the client side)
  */
 class ServerPlacer extends ServerActivity {
-  /**
-   * Creates an instance of the class.
-   *
-   * @todo move this doc somewhere else.
-   * @param {Object} [options.setup] Setup defining dimensions and predefined positions (labels and/or coordinates).
-   * @param {String[]} [options.setup.width] Width of the setup.
-   * @param {String[]} [options.setup.height] Height of the setup.
-   * @param {String[]} [options.setup.background] Background (image) of the setup.
-   * @param {String[]} [options.setup.labels] List of predefined labels.
-   * @param {Array[]} [options.setup.coordinates] List of predefined coordinates given as an array `[x:Number, y:Number]`.
-   * @param {Number} [options.capacity=Infinity] Maximum number of places (may limit or be limited by the number of labels and/or coordinates defined by the setup).
-   */
   constructor() {
     super(SERVICE_ID);
 
+    /**
+     * @type {Object} defaults - Defaults options of the service
+     * @attribute {String} [defaults.setupPath='setup'] - The path to the server's setup
+     *  configuration entry (see {@link src/server/core/server.js~appConfig} for details).
+     */
     const defaults = {
-      setup: {},
-      capacity: maxCapacity,
-      maxClientsPerPosition: 1,
-    }
+      setupPath: 'setup',
+    };
 
     this.configure(defaults);
+    this.sharedConfig = this.require('shared-config');
   }
 
+  /** @inheritdoc */
   start() {
     super.start();
+
+    const setupPath = this.options.setupPath;
+    const setupConfig = this.sharedConfig.get(setupPath);
+
     /**
      * Setup defining dimensions and predefined positions (labels and/or coordinates).
      * @type {Object}
      */
-    this.setup = this.options.setup;
+    this.setup = setupConfig[setupPath];
+
+    if (!this.setup.maxClientsPerPosition)
+      this.setup.maxClientsPerPosition = 1;
 
     /**
      * Maximum number of places.
      * @type {Number}
      */
-    this.capacity = getOpt(this.options.capacity, Infinity, 1);
+    this.capacity = getOpt(this.setup.capacity, Infinity, 1);
 
     if (this.setup) {
       const setup = this.setup;
-      const maxClientsPerPosition = this.options.maxClientsPerPosition;
+      const maxClientsPerPosition = setup.maxClientsPerPosition;
       const numLabels = setup.labels ? setup.labels.length : Infinity;
       const numCoordinates = setup.coordinates ? setup.coordinates.length : Infinity;
       const numPositions = Math.min(numLabels, numCoordinates) * maxClientsPerPosition;
@@ -87,21 +89,23 @@ class ServerPlacer extends ServerActivity {
    * @returns {Boolean} - `true` if succeed, `false` if not
    */
   _storeClientPosition(positionIndex, client) {
-    if (!this.clients[positionIndex])
-      this.clients[positionIndex] = [];
+    if (positionIndex) {
+      if (!this.clients[positionIndex])
+        this.clients[positionIndex] = [];
 
-    const list = this.clients[positionIndex];
+      const list = this.clients[positionIndex];
 
-    if (list.length < this.options.maxClientsPerPosition &&
-        this.numClients < this.capacity
-    ) {
-      list.push(client);
-      this.numClients += 1;
-      // if last available place for this position, lock it
-      if (list.length >= this.options.maxClientsPerPosition)
-        this.disabledPositions.push(positionIndex);
+      if (list.length < this.setup.maxClientsPerPosition &&
+          this.numClients < this.capacity
+      ) {
+        list.push(client);
+        this.numClients += 1;
+        // if last available place for this position, lock it
+        if (list.length >= this.setup.maxClientsPerPosition)
+          this.disabledPositions.push(positionIndex);
 
-      return true;
+        return true;
+      }
     }
 
     return false;
@@ -117,7 +121,7 @@ class ServerPlacer extends ServerActivity {
     if (clientIndex !== -1) {
       list.splice(clientIndex, 1);
       // check if the list was marked as disabled
-      if (list.length < this.options.maxClientsPerPosition) {
+      if (list.length < this.setup.maxClientsPerPosition) {
         const disabledIndex = this.disabledPositions.indexOf(positionIndex);
 
         if (disabledIndex !== -1)
@@ -128,6 +132,7 @@ class ServerPlacer extends ServerActivity {
     }
   }
 
+  /** @private */
   _onRequest(client) {
     return () => {
       const capacity = this.capacity;
@@ -139,11 +144,7 @@ class ServerPlacer extends ServerActivity {
       if (setup) {
         labels = setup.labels;
         coordinates = setup.coordinates;
-        area = {
-          width: setup.width,
-          height: setup.height,
-          background: setup.background,
-        }
+        area = setup.area;
       }
 
       if (this.numClients < capacity)
@@ -153,17 +154,18 @@ class ServerPlacer extends ServerActivity {
     }
   }
 
+  /** @private */
   _onPosition(client) {
-    return (index, label, coords) => {
+    return (index, label, coordinates) => {
       const success = this._storeClientPosition(index, client);
 
       if (success) {
         client.index = index;
         client.label = label;
-        client.coordinates = coords;
+        client.coordinates = coordinates;
 
-        this.send(client, 'confirm');
-        // @todo - check if something more subtile than a broadcast can be done
+        this.send(client, 'confirm', index, label, coordinates);
+        // @todo - check if something more subtile than a broadcast can be done.
         this.broadcast(null, client, 'disable-index', index);
       } else {
         this.send(client, 'reject', this.disabledPositions);
@@ -171,9 +173,7 @@ class ServerPlacer extends ServerActivity {
     }
   }
 
-  /**
-   * @private
-   */
+  /** @inheritdoc */
   connect(client) {
     super.connect(client);
 
@@ -181,14 +181,12 @@ class ServerPlacer extends ServerActivity {
     this.receive(client, 'position', this._onPosition(client));
   }
 
-  /**
-   * @private
-   */
+  /** @inheritdoc */
   disconnect(client) {
     super.disconnect(client);
 
     this._removeClientPosition(client.index, client);
-    // @todo - check if something more subtile than a broadcast can be done
+    // @todo - check if something more subtile than a broadcast can be done.
     this.broadcast(null, client, 'enable-index', client.index);
   }
 }

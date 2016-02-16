@@ -29,26 +29,32 @@ class ServerCheckin extends ServerActivity {
     super(SERVICE_ID);
 
     const defaults = {
-      capacity: Infinity,
       order: 'ascending',
+      setupPath: 'setup',
     }
 
     this.configure(defaults);
+
+    this.sharedConfig = this.require('shared-config');
   }
 
   start() {
     super.start();
+
+    const setupPath = this.options.setupPath;
+    const setupConfig = this.sharedConfig.get(setupPath);
+
     /**
      * Setup defining predefined positions (labels and/or coordinates).
      * @type {Object}
      */
-    this.setup = this.options.setup;
+    this.setup = setupConfig[setupPath];
 
     /**
      * Maximum number of clients checked in (may limit or be limited by the number of predefined labels and/or coordinates).
      * @type {Number}
      */
-    this.capacity = getOpt(this.options.capacity, Infinity, 1);
+    this.capacity = getOpt(this.setup.capacity, Infinity, 1);
 
     /**
      * List of the clients checked in with corresponing indices.
@@ -150,40 +156,12 @@ class ServerCheckin extends ServerActivity {
     }
   }
 
-  // _onRestart(client) {
-  //   return (index, label, coordinates) => {
-  //     // TODO: check if that's ok on random mode
-  //     if (index > this._nextAscendingIndex) {
-  //       for (let i = this._nextAscendingIndex; i < index; i++)
-  //         this._availableIndices.push(i);
-
-  //       this._nextAscendingIndex = index + 1;
-  //     } else if (index === this._nextAscendingIndex) {
-  //       this._nextAscendingIndex++;
-  //     } else {
-  //       let i = this._availableIndices.indexOf(index);
-
-  //       if (i >= 0)
-  //         this._availableIndices.splice(i, 1);
-  //     }
-
-  //     client.index = index;
-  //     this.clients[index] = client;
-
-  //     if (label !== null)
-  //       client.label = label;
-
-  //     if(coordinates !== null)
-  //       client.coordinates = coordinates;
-  //   }
-  // }
 
   /** @inheritdoc */
   connect(client) {
     super.connect(client);
 
     this.receive(client, 'request', this._onRequest(client));
-    // this.receive(client, 'restart', this._onRestart(client));
   }
 
   /** @inheritdoc */

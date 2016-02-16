@@ -4,7 +4,7 @@ import serverServiceManager from '../core/serverServiceManager';
 const SERVICE_ID = 'service:locator';
 
 /**
- * Allow to indicate the approximate location of the client on a map.
+ * [server] This service allows to indicate the approximate location of the client on a map.
  *
  * (See also {@link src/client/services/ClientLocator.js~ClientLocator} on the client side.)
  */
@@ -12,16 +12,30 @@ class ServerLocator extends ServerActivity {
   constructor() {
     super(SERVICE_ID);
 
+    /**
+     * @type {Object} defaults - Defaults options of the service
+     * @attribute {String} [defaults.areaPath='setup.area'] - The path to the server's area
+     *  configuration entry (see {@link src/server/core/server.js~appConfig} for details).
+     */
     const defaults = {
-      setup: {},
+      areaPath: 'setup.area',
     };
 
     this.configure(defaults);
+
+    this.sharedConfig = this.require('shared-config');
   }
 
-  /**
-   * @private
-   */
+  /** @inheritdoc */
+  start() {
+    super.start();
+
+    const areaPath = this.options.areaPath;
+    const config = this.sharedConfig.get(areaPath);
+    this._area = config[areaPath];
+  }
+
+  /** @inheritdoc */
   connect(client) {
     super.connect(client);
 
@@ -29,23 +43,12 @@ class ServerLocator extends ServerActivity {
     this.receive(client, 'coordinates', this._onCoordinates(client));
   }
 
+  /** @private */
   _onRequest(client) {
-    return () => {
-      const setup = this.options.setup;
-      let area = undefined;
-
-      if (setup) {
-        area = {
-          width: setup.width,
-          height: setup.height,
-          background: setup.background,
-        };
-      }
-
-      this.send(client, 'area', area);
-    }
+    return () => this.send(client, 'area', this._area);
   }
 
+  /** @private */
   _onCoordinates(client) {
     return (coordinates) => client.coordinates = coordinates;
   }

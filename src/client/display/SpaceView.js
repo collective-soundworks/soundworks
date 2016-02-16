@@ -52,6 +52,28 @@ export default class SpaceView extends View {
   }
 
   /**
+   * Update the area when inserted in the DOM.
+   * @private
+   */
+  onResize(orientation, viewportWidth, viewportHeight) {
+    super.onResize(orientation, viewportWidth, viewportHeight);
+    // override size to match parent size
+    this.$el.style.width = '100%';
+    this.$el.style.height = '100%';
+
+    this._renderArea();
+  }
+
+
+  /**
+   * Update the area when inserted in the DOM.
+   * @private
+   */
+  onShow() {
+    this._renderArea();
+  }
+
+  /**
    * Add definitions into the `<defs>` tag of `this.$svg` to allow to draw directed graphs from css
    */
   addDefinitions() {
@@ -73,38 +95,12 @@ export default class SpaceView extends View {
     this.$svg.insertBefore(this.$defs, this.$svg.firstChild);
   }
 
-  /**
-   * Update the area when inserted in the DOM.
-   * @private
-   */
-  onShow() {
-    this._renderArea();
-
-    for (let [$shape, point] of this.shapePointMap) {
-      this.updatePoint(point)
-    }
-  }
-
-  /**
-   * Update the area when inserted in the DOM.
-   * @private
-   */
-  onResize(orientation, viewportWidth, viewportHeight) {
-    super.onResize(orientation, viewportWidth, viewportHeight);
-    // override size to match parent size
-    this.$el.style.width = '100%';
-    this.$el.style.height = '100%';
-
-    this._renderArea();
-  }
 
   /**
    * Render the area.
    * @private
    */
   _renderArea() {
-    // if (!this.$parent) { return; }
-
     const area = this.area;
     // use `this.$el` size instead of `this.$parent` size to ignore parent padding
     const boundingRect = this.$el.getBoundingClientRect();
@@ -134,11 +130,16 @@ export default class SpaceView extends View {
       this.$el.style.backgroundSize = 'cover';
     }
 
+    // update existing points position
+    for (let [$shape, point] of this.shapePointMap) {
+      this.updatePoint(point)
+    }
+
     // update area for markers
-    const markers = Array.from(this.$defs.querySelectorAll('marker'));
-    markers.forEach((marker) => {
-      marker.setAttribute('viewBox', `0 0 ${svgWidth} ${svgHeight}`);
-    });
+    // const markers = Array.from(this.$defs.querySelectorAll('marker'));
+    // markers.forEach((marker) => {
+    //   marker.setAttribute('viewBox', `0 0 ${svgWidth} ${svgHeight}`);
+    // });
   }
 
 
@@ -160,7 +161,7 @@ export default class SpaceView extends View {
     $shape.setAttribute('data-id', point.id);
     $shape.setAttribute('cx', `${point.x * this.ratio}`);
     $shape.setAttribute('cy', `${point.y * this.ratio}`);
-    $shape.setAttribute('r', point.radius || 5); // radius is relative to area size
+    $shape.setAttribute('r', point.radius || 8); // radius is relative to area size
 
     if (point.color)
       $shape.style.fill = point.color;

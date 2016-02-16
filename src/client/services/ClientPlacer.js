@@ -2,12 +2,13 @@ import client from '../core/client';
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
 // import localStorage from './localStorage';
-
 import SelectView from '../display/SelectView';
 import SpaceView from '../display/SpaceView';
 import SquaredView from '../display/SquaredView';
 
-//  // view API
+//  /**
+//   * Interface of the view of the placer.
+//   */
 //  class AbstactPlacerView extends soundworks.display.View {
 //    /**
 //     * @param {Array<Object>} positions - Array of positions (index, id, label, coords)
@@ -36,6 +37,9 @@ import SquaredView from '../display/SquaredView';
 //      this._onSelect = callback;
 //    }
 //
+//    /**
+//     * Optionnaly set the area if needed.
+//     */
 //    setArea(area) {}
 //
 //    /**
@@ -57,22 +61,39 @@ class _ListView extends SquaredView {
     this.installEvents({
       'click .btn': (e) => {
         const position = this.selector.value;
-        if (position) { this._onSelect(position); }
+
+        if (position)
+          this._onSelect(position.index, position.label, position.coordinates);
       }
     });
   }
 
-  displayPositions(positions) {
+  setArea(area) { /* no need for area */ }
+
+  displayPositions(capacity, labels, coordinates) {
+    this.capacity = capacity;
+    this.positions = [];
+
+    for (let i = 0; i < capacity; i++) {
+      const label = labels !== null ? labels[i] : (i + 1).toString();
+      const position = { index: i, label: label };
+
+      if (coordinates)
+        position.coordinates = coordinates[i];
+
+      this.positions.push(position);
+    }
+
     this.selector = new SelectView({
       instructions: this.content.instructions,
-      entries: positions,
+      entries: this.positions,
     });
 
     this.setViewComponent('.section-square', this.selector);
     this.render('.section-square');
 
     this.selector.installEvents({
-      'change': this._onSelectionChange(),
+      'change': this._onSelectionChange,
     });
   }
 
@@ -92,11 +113,14 @@ class _ListView extends SquaredView {
     this._onSelect = callback;
   }
 
-  reject() {
-    // @todo - must be tested
-    this.setViewComponent('.section-square');
-    this.content.rejected = true;
-    this.render();
+  reject(disabledPositions) {
+    if (disabledPositions.length >= this.capacity) {
+      this.setViewComponent('.section-square');
+      this.content.rejected = true;
+      this.render();
+    } else {
+      this.disablePositions(disabledPositions);
+    }
   }
 }
 
@@ -114,22 +138,32 @@ class _GraphicView extends SquaredView {
     const disabledIndex = this._disabledPositions.indexOf(position.index);
 
     if (disabledIndex === -1)
-      this._onSelect(position);
+      this._onSelect(position.id, position.label, [position.x, position.y]);
   }
 
   setArea(area) {
     this._area = area;
   }
 
-  displayPositions(positions) {
-    this.positions = positions;
+  displayPositions(capacity, labels, coordinates) {
+    this.positions = [];
+
+    for (let i = 0; i < capacity; i++) {
+      const label = labels !== null ? labels[i] : (i + 1).toString();
+      const position = { id: i, label: label };
+      const coords = coordinates[i];
+      position.x = coords[0];
+      position.y = coords[1];
+
+      this.positions.push(position);
+    }
 
     this.selector = new SpaceView();
     this.selector.setArea(this._area);
     this.setViewComponent('.section-square', this.selector);
     this.render('.section-square');
 
-    this.selector.setPoints(positions);
+    this.selector.setPoints(this.positions);
 
     this.selector.installEvents({
       'click .point': this._onSelectionChange
@@ -168,11 +202,14 @@ class _GraphicView extends SquaredView {
     this._onSelect = callback;
   }
 
-  reject() {
-    // @todo - must be tested
-    this.setViewComponent('.section-square');
-    this.content.rejected = true;
-    this.render();
+  reject(disabledPositions) {
+    if (disabledPositions.length >= this.capacity) {
+      this.setViewComponent('.section-square');
+      this.content.rejected = true;
+      this.render();
+    } else {
+      this.disablePositions(disabledPositions);
+    }
   }
 }
 
@@ -188,19 +225,20 @@ const SERVICE_ID = 'service:placer';
  * const placer = soundworks.client.require('place', { capacity: 100 });
  */
 class ClientPlacer extends Service {
-  /** */
   constructor() {
     super(SERVICE_ID, true);
 
     /**
-     * @param {String} [options.mode='graphic'] - Selection mode. Can be:
+     * @type {Object} defaults - The defaults options of the service.
+     * @attribute {String} [options.mode='list'] - Selection mode. Can be:
      * - `'graphic'` to select a place on a graphical representation of the available positions.
      * - `'list'` to select a place among a list of places.
-     * @param {String} [options.persist=false] - Defines if the location should be stored in `localStorage`.
+     * @attribute {View} [options.view='null'] - The view of the service to be used (@todo)
+     * @attribute {View} [options.view='null'] - The view constructor of the service to be used. Must implement the `PlacerView` interface.
+     * @attribute {Number} [options.priority=6] - The priority of the view.
      */
     const defaults = {
       mode: 'list',
-      persist: false,
       view: null,
       viewCtor: null,
       viewPriority: 6,
@@ -229,7 +267,6 @@ class ClientPlacer extends Service {
      */
     this.label = null;
 
-    client.coordinates = null;
     // allow to pass any view
     if (this.options.view !== null) {
 
@@ -253,7 +290,7 @@ class ClientPlacer extends Service {
     }
   }
 
-  /** @private */
+  /** @inheritdoc */
   start() {
     super.start();
 
@@ -261,7 +298,7 @@ class ClientPlacer extends Service {
       this.init();
 
     this.show();
-    // request positions or labels
+    // request informations about the setup.
     this.send('request');
 
     this.receive('setup', this._onSetupResponse);
@@ -271,7 +308,7 @@ class ClientPlacer extends Service {
     this.receive('disable-index', this._onDisableIndex);
   }
 
-  /** @private */
+  /** @inheritdoc */
   stop() {
     this.removeListener('setup', this._onSetupResponse);
     this.removeListener('confirm', this._onConfirmResponse);
@@ -282,63 +319,50 @@ class ClientPlacer extends Service {
     this.hide();
   }
 
+  /** @private */
   _onSetupResponse(capacity, labels, coordinates, area, disabledPositions) {
     const numLabels = labels ? labels.length : Infinity;
     const numCoordinates = coordinates ? coordinates.length : Infinity;
-    let numPositions = Math.min(numLabels, numCoordinates);
+    this.capacity = Math.min(numLabels, numCoordinates);
 
-    if (numPositions > capacity) { numPositions = capacity; }
+    if (this.capacity > capacity)
+      this.capacity = capacity;
 
-    this.positions = [];
-
-    for (let i = 0; i < numPositions; i++) {
-      const label = labels !== null ? labels[i] : (i + 1).toString();
-      const position = { id: i, index: i, label: label };
-
-      if (coordinates) {
-        const coords = coordinates[i];
-        position.x = coords[0];
-        position.y = coords[1];
-      }
-
-      this.positions.push(position);
-    }
-
-    if (area) {
+    if (area)
       this.view.setArea(area);
-    }
 
-    this.view.displayPositions(this.positions);
+    this.view.displayPositions(this.capacity, labels, coordinates);
     this.view.disablePositions(disabledPositions);
     this.view.onSelect(this._onSelect);
   }
 
+  /** @private */
   _onEnableIndex(index) {
     this.view.enablePosition(index);
   }
 
+  /** @private */
   _onDisableIndex(index) {
     this.view.disablePosition(index);
   }
 
-  _onSelect(position) {
-    client.index = this.index = position.index;
-    client.label = this.label = position.label;
-    client.coordinates = position.coordinates;
-
-    this.send('position', client.index, client.label, client.coordinates);
+  /** @private */
+  _onSelect(index, label, coordinates) {
+    this.send('position', index, label, coordinates);
   }
 
-  _onConfirmResponse() {
+  /** @private */
+  _onConfirmResponse(index, label, coordinates) {
+    client.index = this.index = index;
+    client.label = this.label = label;
+    client.coordinates = coordinates;
+
     this.ready();
   }
 
+  /** @private */
   _onRejectResponse(disabledPositions) {
-    if (disabledPositions.length === this.positions.length)
-      this.view.reject();
-    else
-      this.view.render();
-      this.view.disablePositions(disabledPositions);
+    this.view.reject(disabledPositions);
   }
 }
 

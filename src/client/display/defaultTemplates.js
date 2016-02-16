@@ -21,7 +21,7 @@ export default {
     <% } else { %>
       <div class="section-top"></div>
       <div class="section-center flex-center">
-        <p class="big"><%= error ? errorMessage : wait %></p>
+        <p><%= error ? errorMessage : wait %></p>
       </div>
       <div class="section-bottom"></div>
     <% } %>
@@ -69,9 +69,9 @@ export default {
   `,
 
   'service:placer': `
-    <div class="section-square">
+    <div class="section-square<%= mode === 'list' ? ' flex-middle' : '' %>">
       <% if (rejected) { %>
-      <p class="big"><%= reject %></p>
+      <div class="fit-container flex-middle"><p><%= reject %></p></div>
       <% } %>
     </div>
     <div class="section-float flex-middle">
