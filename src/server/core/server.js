@@ -71,6 +71,7 @@ const defaultFwConfig = {
     // upgradeTimeout: 10000,
     // maxHttpBufferSize: 10E7,
   },
+  errorReporterFolder: 'logs/clients'
 };
 
 /**

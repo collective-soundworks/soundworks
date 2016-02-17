@@ -16,16 +16,20 @@ class ServerErrorReporter extends ServerActivity {
     super(SERVICE_ID);
 
     const defaults = {
-      folder: 'logs/clients',
+      configPath: 'errorReporterFolder',
     };
 
     this.configure(defaults);
     this._logError = this._logError.bind(this);
+
+    this._sharedConfigService = this.require('shared-config');
   }
 
   start() {
+    const configPath = this.options.configPath;
+    const folderPath = this._sharedConfigService.get(configPath)[configPath];
     // @todo - test if it does the job on windows
-    const dirPath = path.join(process.cwd(), this.options.folder);
+    const dirPath = path.join(process.cwd(), folderPath);
     this.dirPath = path.normalize(dirPath);
     // create directory if not exists
     fse.ensureDirSync(dirPath);

@@ -28,21 +28,19 @@ import MotionInput from './services/MotionInput';
 // import Orientation from './Orientation';
 import Welcome from './services/Welcome';
 
-
 // views
-import View from './display/View';
+import defaultTemplates from './display/defaultTemplates';
+import defaultTextContents from './display/defaultTextContents';
 import ButtonView from './display/ButtonView';
 import CanvasView from './display/CanvasView';
+import Renderer from './display/Renderer';
+import RenderingGroup from './display/RenderingGroup';
 import SegmentedView from './display/SegmentedView';
 import SelectView from './display/SelectView';
 import SpaceView from './display/SpaceView';
 import SquaredView from './display/SquaredView';
 import TouchSurface from './display/TouchSurface';
-import defaultTemplates from './display/defaultTemplates';
-import defaultTextContents from './display/defaultTextContents';
-// drawing
-import Renderer from './display/Renderer';
-import RenderingGroup from './display/RenderingGroup';
+import View from './display/View';
 
 // utils
 import * as helpers from '../utils/helpers';
@@ -83,18 +81,18 @@ export default {
   Welcome,
 
   display: {
-    View,
+    defaultTemplates,
+    defaultTextContents,
     ButtonView,
     CanvasView,
+    Renderer,
+    RenderingGroup,
     SegmentedView,
     SelectView,
     SpaceView,
     SquaredView,
     TouchSurface,
-    defaultTemplates,
-    defaultTextContents,
-    Renderer,
-    RenderingGroup,
+    View,
   },
 
   utils: {
