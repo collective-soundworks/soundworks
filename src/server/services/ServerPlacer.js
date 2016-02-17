@@ -2,6 +2,8 @@ import ServerActivity from '../core/ServerActivity';
 import serverServiceManager from '../core/serverServiceManager';
 import { getOpt } from '../../utils/helpers';
 
+import server from '../core/server';
+
 const SERVICE_ID = 'service:placer';
 const maxCapacity = 9999;
 
@@ -26,7 +28,7 @@ class ServerPlacer extends ServerActivity {
     };
 
     this.configure(defaults);
-    this.sharedConfig = this.require('shared-config');
+    this._sharedConfigService = this.require('shared-config');
   }
 
   /** @inheritdoc */
@@ -34,13 +36,13 @@ class ServerPlacer extends ServerActivity {
     super.start();
 
     const setupPath = this.options.setupPath;
-    const setupConfig = this.sharedConfig.get(setupPath);
+    const setupConfig = this._sharedConfigService.get(setupPath)[setupPath];
 
     /**
      * Setup defining dimensions and predefined positions (labels and/or coordinates).
      * @type {Object}
      */
-    this.setup = setupConfig[setupPath];
+    this.setup = setupConfig;
 
     if (!this.setup.maxClientsPerPosition)
       this.setup.maxClientsPerPosition = 1;
@@ -82,6 +84,10 @@ class ServerPlacer extends ServerActivity {
      * @type {Array}
      */
     this.disabledPositions = [];
+
+    // update config capacity with computed one
+    setupConfig.capacity = this.capacity;
+    this._sharedConfigService.addItem(setupPath, this.clientTypes);
   }
 
   /**
@@ -89,23 +95,22 @@ class ServerPlacer extends ServerActivity {
    * @returns {Boolean} - `true` if succeed, `false` if not
    */
   _storeClientPosition(positionIndex, client) {
-    if (positionIndex) {
-      if (!this.clients[positionIndex])
-        this.clients[positionIndex] = [];
+    if (!this.clients[positionIndex])
+      this.clients[positionIndex] = [];
 
-      const list = this.clients[positionIndex];
+    const list = this.clients[positionIndex];
 
-      if (list.length < this.setup.maxClientsPerPosition &&
-          this.numClients < this.capacity
-      ) {
-        list.push(client);
-        this.numClients += 1;
-        // if last available place for this position, lock it
-        if (list.length >= this.setup.maxClientsPerPosition)
-          this.disabledPositions.push(positionIndex);
+    if (list.length < this.setup.maxClientsPerPosition &&
+        this.numClients < this.capacity
+    ) {
+      list.push(client);
+      this.numClients += 1;
 
-        return true;
-      }
+      // if last available place for this position, lock it
+      if (list.length >= this.setup.maxClientsPerPosition)
+        this.disabledPositions.push(positionIndex);
+
+      return true;
     }
 
     return false;
@@ -135,7 +140,6 @@ class ServerPlacer extends ServerActivity {
   /** @private */
   _onRequest(client) {
     return () => {
-      const capacity = this.capacity;
       const setup = this.setup;
       let area = undefined;
       let labels = undefined;
@@ -147,8 +151,9 @@ class ServerPlacer extends ServerActivity {
         area = setup.area;
       }
 
-      if (this.numClients < capacity)
-        this.send(client, 'setup', capacity, labels, coordinates, area, this.disabledPositions);
+      // aknowledge
+      if (this.numClients < setup.capacity)
+        this.send(client, 'aknowlegde', this.options.setupPath, this.disabledPositions);
       else
         this.send('reject', this.disabledPositions);
     }
@@ -166,7 +171,7 @@ class ServerPlacer extends ServerActivity {
 
         this.send(client, 'confirm', index, label, coordinates);
         // @todo - check if something more subtile than a broadcast can be done.
-        this.broadcast(null, client, 'disable-index', index);
+        this.broadcast(null, client, 'client-joined', this.disabledPositions);
       } else {
         this.send(client, 'reject', this.disabledPositions);
       }
@@ -187,7 +192,7 @@ class ServerPlacer extends ServerActivity {
 
     this._removeClientPosition(client.index, client);
     // @todo - check if something more subtile than a broadcast can be done.
-    this.broadcast(null, client, 'enable-index', client.index);
+    this.broadcast(null, client, 'client-leaved', this.disabledPositions);
   }
 }
 

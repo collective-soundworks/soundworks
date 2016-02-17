@@ -22,17 +22,14 @@ class ServerLocator extends ServerActivity {
     };
 
     this.configure(defaults);
-
-    this.sharedConfig = this.require('shared-config');
+    this._sharedConfigService = this.require('shared-config');
   }
 
   /** @inheritdoc */
   start() {
     super.start();
 
-    const areaPath = this.options.areaPath;
-    const config = this.sharedConfig.get(areaPath);
-    this._area = config[areaPath];
+    this._sharedConfigService.addItem(this.options.areaPath, this.clientTypes);
   }
 
   /** @inheritdoc */
@@ -45,7 +42,7 @@ class ServerLocator extends ServerActivity {
 
   /** @private */
   _onRequest(client) {
-    return () => this.send(client, 'area', this._area);
+    return () => this.send(client, 'aknowledge', this.options.areaPath);
   }
 
   /** @private */

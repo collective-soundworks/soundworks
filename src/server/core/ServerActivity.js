@@ -54,18 +54,25 @@ export default class ServerActivity extends EventEmitter {
     this.id = id;
 
     /**
-     * The client types on which the activity should be mapped.
-     * @type {Array}
-     * @private
-     */
-    this._clientTypes = [];
-
-    /**
      * Options of the activity. (Should be changed by calling `this.configure`)
      */
     this.options = {};
 
-    // register as an existing activity to the server
+    /**
+     * The client types on which the activity should be mapped.
+     * @type {Set}
+     * @private
+     */
+    this.clientTypes = new Set();
+
+    /**
+     * List of the required activities
+     * @type {Set}
+     * @private
+     */
+    this.requiredActivities = new Set();
+
+    // register as existing to the server
     server.setActivity(this);
   }
 
@@ -73,29 +80,46 @@ export default class ServerActivity extends EventEmitter {
    * Retrieve a service.
    */
   require(id, options) {
-    return serverServiceManager.require(id, options);
+    return serverServiceManager.require(id, this, options);
   }
 
   /**
    * Start an activity, is automatically called on server startup.
    */
-  start() {
-    // register on which client the activity should apply.
-    server.setMap(this._clientTypes, this);
+  start() {}
+
+  /**
+   * Add client type that should be mapped to this activity.
+   * @private
+   * @param {String|Array} val - The client type(s) on which the activity
+   *  should be mapped
+   */
+  addClientType(value) {
+    if (arguments.length === 1) {
+      if (typeof value === 'string')
+        value = [value];
+    } else {
+      value = Array.from(arguments);
+    }
+
+    // add client types to current activity
+    value.forEach((clientType) => {
+      this.clientTypes.add(clientType);
+    });
+    // propagate value to required activities
+    this.requiredActivities.forEach((activity) => {
+      activity.addClientType(value);
+    });
   }
 
   /**
-   * @param {String|Array} val - The client type(s) on which the activity should be mapped
+   * Add the given activity as a requirement for the behavior of the
+   *  current activity.
+   * @private
+   * @type {ServerActivity} activity
    */
-  addClientType(val) {
-    if (arguments.length === 1) {
-      if (typeof val === 'string')
-        val = [val];
-    } else {
-      val = Array.from(arguments);
-    }
-
-    this._clientTypes = this._clientTypes.concat(val);
+  addRequiredActivity(activity) {
+    this.requiredActivities.add(activity);
   }
 
   /**

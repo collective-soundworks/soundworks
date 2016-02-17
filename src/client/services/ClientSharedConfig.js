@@ -27,7 +27,6 @@ class ClientSharedConfig extends Service {
       this.init();
 
     this.send('request');
-
     this.receive('config', this._onConfigResponse);
   }
 

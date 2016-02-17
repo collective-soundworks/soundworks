@@ -141,7 +141,7 @@ export default {
   /**
    * Mapping between a `clientType` and its related activities
    */
-  _maps: {},
+  _clientTypeActivitiesMap: {},
 
   /**
    * Activities to be started
@@ -215,13 +215,18 @@ export default {
     logger.initialize(this.config.logger);
 
     // --------------------------------------------------
-    // start all activities and create routes
+    // start all activities and map the routes (clientType / activities mapping)
     // --------------------------------------------------
 
     this._activities.forEach((activity) => activity.start());
+
+    this._activities.forEach((activity) => {
+      this.setMap(activity.clientTypes, activity)
+    });
+
     // map `clientType` to their respective activities
-    for (let clientType in this._maps) {
-      const activity = this._maps[clientType];
+    for (let clientType in this._clientTypeActivitiesMap) {
+      const activity = this._clientTypeActivitiesMap[clientType];
       this._map(clientType, activity);
     }
 
@@ -267,7 +272,7 @@ export default {
    * @param {Object} options - The options to configure the service.
    */
   require(id, options) {
-    return serverServiceManager.require(id, options);
+    return serverServiceManager.require(id, null, options);
   },
 
   /**
@@ -278,10 +283,10 @@ export default {
    */
   setMap(clientTypes, activity) {
     clientTypes.forEach((clientType) => {
-      if (!this._maps[clientType])
-        this._maps[clientType] = new Set();
+      if (!this._clientTypeActivitiesMap[clientType])
+        this._clientTypeActivitiesMap[clientType] = new Set();
 
-      this._maps[clientType].add(activity);
+      this._clientTypeActivitiesMap[clientType].add(activity);
     });
   },
 

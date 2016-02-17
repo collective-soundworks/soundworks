@@ -17,10 +17,8 @@ const SERVICE_ID = 'service:checkin';
 class ServerCheckin extends ServerActivity {
   /**
    * @param {Object} [options={}] Options.
-   * @param {Object} [options.setup] Setup defining predefined positions (labels and/or coordinates).
-   * @param {String[]} [options.setup.labels] List of predefined labels.
-   * @param {Array[]} [options.setup.coordinates] List of predefined coordinates given as an array `[x:Number, y:Number]`.
-   * @param {Number} [options.capacity=Infinity] Maximum number of places (may limit or be limited by the number of labels and/or coordinates defined by the setup).
+   * @attribute {String} [defaults.setupPath='setup'] - The path to the server's setup
+   *  configuration entry (see {@link src/server/core/server.js~appConfig} for details).
    * @param {Object} [options.order='ascending'] Order in which indices are assigned. Currently spported values are:
    * - `'ascending'`: indices are assigned in ascending order
    * - `'random'`: indices are assigned in random order
@@ -35,20 +33,21 @@ class ServerCheckin extends ServerActivity {
 
     this.configure(defaults);
 
-    this.sharedConfig = this.require('shared-config');
+    // use shared config service to share the setup
+    this._sharedConfigService = this.require('shared-config');
   }
 
   start() {
     super.start();
 
     const setupPath = this.options.setupPath;
-    const setupConfig = this.sharedConfig.get(setupPath);
+    const setupConfig = this._sharedConfigService.get(setupPath);
 
     /**
      * Setup defining predefined positions (labels and/or coordinates).
      * @type {Object}
      */
-    this.setup = setupConfig[setupPath];
+    this.setup = setupConfig && setupConfig[setupPath];
 
     /**
      * Maximum number of clients checked in (may limit or be limited by the number of predefined labels and/or coordinates).

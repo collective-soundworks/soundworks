@@ -64,6 +64,8 @@ class ClientCheckin extends Service {
 
     if (!this.hasStarted)
       this.init();
+
+    this.setup = this._sharedConfigService
     // send request to the server
     this.send('request');
     // setup listeners for the server's response

@@ -14,11 +14,14 @@ import ServerActivity from '../core/ServerActivity';
  */
 export default class ServerExperience extends ServerActivity {
   /**
-    * Creates an instance of the class.
-    * @param {String} id - The id of the module, should its client-side counterpart.
+   * Creates an instance of the class.
+   * @param {String} clientType - The client type the experience should be
+   *  mapped to. _(note: is used as the id of the activity)_
    */
-  constructor(id = 'experience') {
-    super(id);
+  constructor(clientType) {
+    super(clientType);
+
+    this.addClientType(clientType);
 
     /**
      * List of the clients who are currently in the performance (*i.e.* who entered the performance and have not exited it yet).

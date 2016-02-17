@@ -5,7 +5,6 @@ import server from '../core/server';
 
 const SERVICE_ID = 'service:shared-config';
 
-
 /**
  * [server] This service acts as an accessor for the server config both server
  * and client sides.
