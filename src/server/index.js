@@ -12,6 +12,7 @@ import ServerExperience from './scenes/ServerExperience';
 /* services */
 // import ServerCalibration from './ServerCalibration';
 import ServerCheckin from './services/ServerCheckin';
+import ServerErrorReporter from './services/ServerErrorReporter';
 // import ServerFileList from './ServerFileList';
 import ServerLocator from './services/ServerLocator';
 import ServerNetwork from './services/ServerNetwork';
@@ -42,6 +43,7 @@ export default {
   // @todo - move into a namespace ?
   // ServerCalibration,
   ServerCheckin,
+  ServerErrorReporter,
   // ServerFileList,
   ServerLocator,
   ServerNetwork,

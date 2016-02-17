@@ -16,6 +16,7 @@ import Experience from './scenes/Experience';
 // import ClientCalibration from './ClientCalibration';
 import ClientCheckin from './services/ClientCheckin';
 // import ClientFileList from './ClientFileList';
+import ClientErrorReporter from './services/ClientErrorReporter';
 import ClientLocator from './services/ClientLocator';
 import ClientNetwork from './services/ClientNetwork';
 import ClientPlacer from './services/ClientPlacer';
@@ -68,6 +69,7 @@ export default {
   // @todo - hide inside a namespace ?
   // ClientCalibration,
   ClientCheckin,
+  ClientErrorReporter,
   // ClientFileList,
   ClientLocator,
   ClientNetwork,

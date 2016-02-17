@@ -96,6 +96,7 @@ export default class Client {
    * Destroy the client.
    */
   destroy() {
+    this.socket.removeAllListeners();
     this.uid = -1;
   }
 }

@@ -38,6 +38,7 @@
     "debug": "^2.2.0",
     "ejs": "^2.3.4",
     "express": "^4.13.3",
+    "fs-extra": "^0.26.5",
     "lodash.template": "^3.6.2",
     "mobile-detect": "^1.2.0",
     "motion-input": "collective-soundworks/motion-input#1.0.2",
@@ -55,7 +56,6 @@
     "babel": "^5.8.34",
     "babel-eslint": "^5.0.0-beta1",
     "eslint": "^1.10.1",
-    "fs-extra": "^0.26.2",
     "node-watch": "^0.3.4"
   }
 }

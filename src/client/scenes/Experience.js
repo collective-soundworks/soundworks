@@ -4,7 +4,7 @@ import SignalAll from '../core/SignalAll';
 
 
 export default class Experience extends Scene {
-  constructor(id = 'experience', hasNetwork = 'true') {
+  constructor(id = 'experience', hasNetwork = true) {
     super(id, hasNetwork);
 
     this.requiredSignals.addObserver((value) => {
@@ -15,6 +15,10 @@ export default class Experience extends Scene {
         this.hold();
       }
     });
+
+    // if the experience has network, require errorReporter service by default
+    if (hasNetwork)
+      this._errorReporter = this.require('error-reporter');
   }
 
   init() {

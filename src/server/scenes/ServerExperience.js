@@ -23,6 +23,8 @@ export default class ServerExperience extends ServerActivity {
 
     this.addClientType(clientType);
 
+    this._errorReporter = this.require('error-reporter');
+
     /**
      * List of the clients who are currently in the performance (*i.e.* who entered the performance and have not exited it yet).
      * @type {Client[]}
