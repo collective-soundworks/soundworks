@@ -71,7 +71,8 @@ const defaultFwConfig = {
     // upgradeTimeout: 10000,
     // maxHttpBufferSize: 10E7,
   },
-  errorReporterFolder: 'logs/clients'
+  errorReporterDirectory: 'logs/clients',
+  dbDirectory: 'db',
 };
 
 /**
@@ -353,8 +354,8 @@ export default {
         logger.info({ socket, clientType }, 'disconnect');
       });
 
-      // @todo - refactor handshake and uid definition.
-      sockets.send(client, 'client:start', client.uid); // the server is ready
+      // @todo - refactor handshake and uuid definition.
+      sockets.send(client, 'client:start', client.uuid); // the server is ready
       logger.info({ socket, clientType }, 'connection');
     }
   },

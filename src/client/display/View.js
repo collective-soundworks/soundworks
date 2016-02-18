@@ -98,6 +98,10 @@ export default class View {
     if (component) {
       component.render();
       component.appendTo($componentContainer);
+      component.onRender();
+
+      if (this.isVisible)
+        component.onShow();
     } else {
       const html = this.tmpl(this.content);
       const $dummy = document.createElement('div');
@@ -127,9 +131,8 @@ export default class View {
     this.onRender();
     viewport.addListener('resize', this.onResize);
 
-    for (let selector in this._components) {
+    for (let selector in this._components)
       this._renderPartial(selector);
-    }
 
     this._delegateEvents();
   }

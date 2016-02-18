@@ -1,7 +1,5 @@
-// import logger from '../utils/logger';
+import uuid from 'uuid';
 
-let _counter = 0;
-function _getUID() { return _counter++; }
 
 /**
  * Client that connects to the server.
@@ -39,7 +37,7 @@ export default class Client {
 		 * Index of the client.
 		 * @type {Number}
 		 */
-    this.uid = _getUID();
+    this.uuid = uuid.v4();
 
 		/**
 		 * Coordinates of the client, stored as an `[x:Number, y:Number]` array.
@@ -84,7 +82,7 @@ export default class Client {
   serialize() {
     return {
       type: this.type,
-      uid: this.uid,
+      uuid: this.uuid,
       coordinates: this.coordinates,
       index: this.index,
       label: this.label,
@@ -97,6 +95,6 @@ export default class Client {
    */
   destroy() {
     this.socket.removeAllListeners();
-    this.uid = -1;
+    this.uuid = null;
   }
 }

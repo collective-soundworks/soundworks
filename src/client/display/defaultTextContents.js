@@ -53,5 +53,6 @@ export default {
     next: 'Next',
     validate: 'Validate',
     thanks: 'Thanks!',
+    length: '-',
   },
 };

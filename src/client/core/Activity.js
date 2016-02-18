@@ -23,8 +23,10 @@ export default class Activity extends Process {
     /**
      * Register as a networked service.
      */
-    if (hasNetwork)
+    if (hasNetwork) {
+      this.hasNetwork = true;
       socket.required = true;
+    }
 
     /**
      * View of the module.
@@ -145,7 +147,7 @@ export default class Activity extends Process {
   createView() {
     const options = Object.assign({
       id: this.id,
-      className: 'module',
+      className: 'activity',
       priority: this.options.viewPriority,
     }, this.viewOptions);
 

@@ -47,7 +47,9 @@
     "screenfull": "^3.0.0",
     "socket.io": "^1.4.5",
     "socket.io-client": "^1.4.5",
+    "sqlite3": "^3.1.1",
     "sync": "collective-soundworks/sync#0.7.3",
+    "uuid": "^2.0.1",
     "waves-audio": "wavesjs/audio",
     "waves-basic-controllers": "wavesjs/basic-controllers",
     "waves-loaders": "wavesjs/loaders"

@@ -16,23 +16,23 @@ class ServerErrorReporter extends ServerActivity {
     super(SERVICE_ID);
 
     const defaults = {
-      configPath: 'errorReporterFolder',
+      directoryConfig: 'errorReporterDirectory',
     };
 
     this.configure(defaults);
-    this._logError = this._logError.bind(this);
+    this._onError = this._onError.bind(this);
 
     this._sharedConfigService = this.require('shared-config');
   }
 
   start() {
-    const configPath = this.options.configPath;
-    const folderPath = this._sharedConfigService.get(configPath)[configPath];
-    // @todo - test if it does the job on windows
-    const dirPath = path.join(process.cwd(), folderPath);
-    this.dirPath = path.normalize(dirPath);
-    // create directory if not exists
-    fse.ensureDirSync(dirPath);
+    const directoryConfig = this.options.directoryConfig;
+    let dir = this._sharedConfigService.get(directoryConfig)[directoryConfig];
+    dir = path.join(process.cwd(), dir);
+    dir = path.normalize(dir); // @todo - check it does the job on windows
+    fse.ensureDirSync(dir); // create directory if not exists
+
+    this.dir = dir;
   }
 
   get filePath() {
@@ -42,16 +42,25 @@ class ServerErrorReporter extends ServerActivity {
     const day = padLeft(now.getDate(), 0, 2);
     const filename = `${year}${month}${day}.log`;
 
-    return path.join(this.dirPath, filename);
+    return path.join(this.dir, filename);
   }
 
   connect(client) {
     super.connect(client);
-    this.receive(client, `error`, this._logError);
+    this.receive(client, `error`, this._onError);
   }
 
   disconnect(client) {
     super.disconnect(client);
+  }
+
+  _onError(file, line, col, msg, userAgent) {
+    let entry = `${this._getFormattedDate()}\t\t\t`;
+    entry += `- ${file}:${line}:${col}\t"${msg}"\n\t${userAgent}\n\n`;
+
+    fse.appendFile(this.filePath, entry, (err) => {
+      if (err) console.error(err.message);
+    });
   }
 
   _getFormattedDate() {
@@ -64,16 +73,6 @@ class ServerErrorReporter extends ServerActivity {
     const seconds = padLeft(now.getSeconds(), 0, 2);
     // prepare file name
     return `${year}-${month}-${day} ${hour}:${minutes}:${seconds}`;
-  }
-
-  _logError(file, line, col, msg, userAgent) {
-    let entry = `${this._getFormattedDate()}\t\t\t`;
-    entry += `- ${file}:${line}:${col}\t"${msg}"\n\t${userAgent}\n\n`;
-
-    fse.appendFile(this.filePath, entry, (err) => {
-      if (err)
-        console.error(err.message);
-    });
   }
 }
 

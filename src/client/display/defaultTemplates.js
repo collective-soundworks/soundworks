@@ -120,7 +120,7 @@ export default {
     </div>
     <% if (counter > length) { %>
       <div class="section-center flex-center">
-        <p class="big"><%= thanks %>
+        <p class="big"><%= thanks %></p>
       </div>
     <% } else { %>
       <div class="section-center"></div>

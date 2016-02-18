@@ -14,11 +14,11 @@ class ServerLocator extends ServerActivity {
 
     /**
      * @type {Object} defaults - Defaults options of the service
-     * @attribute {String} [defaults.areaPath='setup.area'] - The path to the server's area
+     * @attribute {String} [defaults.areaConfigPath='setup.area'] - The path to the server's area
      *  configuration entry (see {@link src/server/core/server.js~appConfig} for details).
      */
     const defaults = {
-      areaPath: 'setup.area',
+      areaConfigPath: 'setup.area',
     };
 
     this.configure(defaults);
@@ -29,7 +29,7 @@ class ServerLocator extends ServerActivity {
   start() {
     super.start();
 
-    this._sharedConfigService.addItem(this.options.areaPath, this.clientTypes);
+    this._sharedConfigService.addItem(this.options.areaConfigPath, this.clientTypes);
   }
 
   /** @inheritdoc */
@@ -42,7 +42,7 @@ class ServerLocator extends ServerActivity {
 
   /** @private */
   _onRequest(client) {
-    return () => this.send(client, 'aknowledge', this.options.areaPath);
+    return () => this.send(client, 'aknowledge', this.options.areaConfigPath);
   }
 
   /** @private */

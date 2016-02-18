@@ -57,7 +57,7 @@ const client = {
    * Client unique id, given by the server.
    * @type {Number}
    */
-  uid: null,
+  uuid: null,
 
   /**
    * Client coordinates (if any) given by a {@link Locator}, {@link Placer} or
@@ -143,9 +143,9 @@ const client = {
     // initialize socket communications
     this.socket = socket.initialize(this.type, this.config.socketIO);
     // wait for handshake to mark client as `ready`
-    this.socket.receive('client:start', (uid) => {
+    this.socket.receive('client:start', (uuid) => {
       // don't handle server restart for now.
-      this.uid = uid;
+      this.uuid = uuid;
       serviceManager.start();
 
       // this.comm.receive('reconnect', () => console.info('reconnect'));

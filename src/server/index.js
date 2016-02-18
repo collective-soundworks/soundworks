@@ -7,7 +7,7 @@ import sockets from './core/sockets';
 
 /* scenes */
 import ServerExperience from './scenes/ServerExperience';
-// import ServerSurvey from './ServerSurvey';
+import ServerSurvey from './scenes/ServerSurvey';
 
 /* services */
 // import ServerCalibration from './ServerCalibration';
@@ -29,15 +29,16 @@ import * as setup from '../utils/setup';
 
 export default {
   /* core */
-  Client,
   server,
+  // @todo - move into namespace ?
+  Client,
   serverServiceManager, // @tbd - expose ?
   ServerActivity,
   sockets,
 
   /* scenes */
   ServerExperience,
-  // ServerSurvey,
+  ServerSurvey,
 
   /* services */
   // @todo - move into a namespace ?

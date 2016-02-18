@@ -20,11 +20,11 @@ class ServerPlacer extends ServerActivity {
 
     /**
      * @type {Object} defaults - Defaults options of the service
-     * @attribute {String} [defaults.setupPath='setup'] - The path to the server's setup
+     * @attribute {String} [defaults.setupConfigPath='setup'] - The path to the server's setup
      *  configuration entry (see {@link src/server/core/server.js~appConfig} for details).
      */
     const defaults = {
-      setupPath: 'setup',
+      setupConfigPath: 'setup',
     };
 
     this.configure(defaults);
@@ -35,8 +35,8 @@ class ServerPlacer extends ServerActivity {
   start() {
     super.start();
 
-    const setupPath = this.options.setupPath;
-    const setupConfig = this._sharedConfigService.get(setupPath)[setupPath];
+    const setupConfigPath = this.options.setupConfigPath;
+    const setupConfig = this._sharedConfigService.get(setupConfigPath)[setupConfigPath];
 
     /**
      * Setup defining dimensions and predefined positions (labels and/or coordinates).

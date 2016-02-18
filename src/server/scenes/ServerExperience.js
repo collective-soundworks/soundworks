@@ -1,16 +1,17 @@
 import ServerActivity from '../core/ServerActivity';
+import server from '../core/server';
 
 
 /**
- * Base class used to build a performance on the client side.
+ * Base class used to build a experience on the server side.
  *
- * Along with the classic {@link Performance#connect} and {@link Performance#disconnect} methods, the base class has two additional methods:
- * - {@link Performance#enter}: called when the client enters the performance (*i.e.* when the {@link src/client/Performance.js~Performance} on the client side calls its {@link src/client/Performance.js~Performance#start} method);
- * - {@link Performance#exit}: called when the client leaves the performance (*i.e.* when the {@link src/client/Performance.js~Performance} on the client side calls its {@link src/client/Performance.js~Performance#done} method, or if the client disconnected from the server).
+ * Along with the classic {@link src/server/core/ServerActivity#connect} and {@link src/server/core/ServerActivity#disconnect} methods, the base class has two additional methods:
+ * - {@link ServerExperience#enter}: called when the client enters the `Experience` (*i.e.* when the {@link src/client/scene/Experience.js~Experience} on the client side calls its {@link src/client/scene/Experience.js~Experience#start} method);
+ * - {@link ServerExperience#exit}: called when the client leaves the `Experience` (*i.e.* when the {@link src/client/scene/Experience.js~Experience} on the client side calls its {@link src/client/scene/Experience.js~Experience#done} method, or if the client disconnected from the server).
  *
  * The base class also keeps track of the clients who are currently in the performance (*i.e.* who entered but not exited yet) in the array `this.clients`.
  *
- * (See also {@link src/client/ClientPerformance.js~ClientPerformance} on the client side.)
+ * (See also {@link src/client/scene/Experience.js~Experience} on the client side.)
  */
 export default class ServerExperience extends ServerActivity {
   /**
@@ -18,8 +19,8 @@ export default class ServerExperience extends ServerActivity {
    * @param {String} clientType - The client type the experience should be
    *  mapped to. _(note: is used as the id of the activity)_
    */
-  constructor(clientType) {
-    super(clientType);
+  constructor(id = server.config.defaultClientType, clientType = id) {
+    super(id);
 
     this.addClientType(clientType);
 
@@ -39,9 +40,9 @@ export default class ServerExperience extends ServerActivity {
   connect(client) {
     super.connect(client);
 
-    // Listen for the `'start'` and `'done'` socket messages from the client.
-    this.receive(client, 'start', () => this.enter(client));
-    this.receive(client, 'done', () => this.exit(client));
+    // Listen for the `'enter'` and `'exit'` socket messages from the client.
+    this.receive(client, 'enter', () => this.enter(client));
+    this.receive(client, 'exit', () => this.exit(client));
   }
 
   /**

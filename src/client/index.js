@@ -10,7 +10,7 @@ import SignalAll from './core/SignalAll';
 
 // scenes
 import Experience from './scenes/Experience';
-// import ClientSurvey from './ClientSurvey';
+import ClientSurvey from './scenes/ClientSurvey';
 
 // services
 // import ClientCalibration from './ClientCalibration';
@@ -61,7 +61,7 @@ export default {
 
   /* scenes */
   Experience,
-  // ClientSurvey,
+  ClientSurvey,
 
   /* services */
   // @todo - hide inside a namespace ?

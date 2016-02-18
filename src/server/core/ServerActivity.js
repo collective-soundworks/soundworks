@@ -6,7 +6,7 @@ import { EventEmitter } from 'events';
 // @todo - remove EventEmitter ? (Implement our own listeners)
 
 /**
- * Base class used to create any *Soundworks* piers on the server side.
+ * Base class used to create any *Soundworks* activity on the server side.
  *
  * While the sequence of user interactions and exchanges between client and server is determined on the client side, the server side modules are ready to receive requests from the corresponding client side modules as soon as a client is connected to the server.
  *
@@ -77,16 +77,12 @@ export default class ServerActivity extends EventEmitter {
   }
 
   /**
-   * Retrieve a service.
+   * Configure the activity.
+   * @param {Object} options
    */
-  require(id, options) {
-    return serverServiceManager.require(id, this, options);
+  configure(options) {
+    Object.assign(this.options, options);
   }
-
-  /**
-   * Start an activity, is automatically called on server startup.
-   */
-  start() {}
 
   /**
    * Add client type that should be mapped to this activity.
@@ -123,17 +119,16 @@ export default class ServerActivity extends EventEmitter {
   }
 
   /**
-   * Configure the activity.
-   * @param {Object} options
+   * Retrieve a service.
    */
-  configure(options) {
-    if (options.clientType) {
-      this.addClientType(options.clientType);
-      delete options.clientType;
-    }
-
-    Object.assign(this.options, options);
+  require(id, options) {
+    return serverServiceManager.require(id, this, options);
   }
+
+  /**
+   * Start an activity, is automatically called on server startup.
+   */
+  start() {}
 
   /**
    * Called when the `client` connects to the server.
