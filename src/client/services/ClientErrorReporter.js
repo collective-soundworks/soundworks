@@ -1,6 +1,5 @@
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
-import smc from 'source-map';
 
 
 const SERVICE_ID = 'service:error-reporter';
