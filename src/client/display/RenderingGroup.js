@@ -94,9 +94,8 @@ export default class RenderingGroup {
    * Updates the size of the canvas. Propagate values to all registered renderers.
    * @param {Number} viewportWidth - The width of the viewport.
    * @param {Number} viewportHeight - The height of the viewport.
-   * @todo - rename to `resize` (same for renderers)
    */
-  updateSize(viewportWidth, viewportHeight) {
+  onResize(viewportWidth, viewportHeight) {
     this.canvasWidth = viewportWidth;
     this.canvasHeight = viewportHeight;
 
@@ -104,7 +103,7 @@ export default class RenderingGroup {
     this.ctx.height = this.ctx.canvas.height = this.canvasHeight;
 
     for (let i = 0, l = this.renderers.length; i < l; i++) {
-      this.renderers[i].updateSize(viewportWidth, viewportHeight);
+      this.renderers[i].onResize(viewportWidth, viewportHeight);
     }
   }
 
@@ -163,7 +162,7 @@ export default class RenderingGroup {
     this.currentTime = loop.getTime();
     // update the current time of the renderer
     renderer.currentTime = this.currentTime;
-    renderer.updateSize(this.canvasWidth, this.canvasHeight);
+    renderer.onResize(this.canvasWidth, this.canvasHeight);
     renderer.init();
     // if first renderer added, start the loop
     if (this.renderers.length === 1) {

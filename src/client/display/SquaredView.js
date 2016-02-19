@@ -21,8 +21,8 @@ export default class SquaredView extends View {
     this.$float.style.float = 'left';
   }
 
-  onResize(orientation, viewportWidth, viewportHeight) {
-    super.onResize(orientation, viewportWidth, viewportHeight);
+  onResize(viewportWidth, viewportHeight, orientation) {
+    super.onResize(viewportWidth, viewportHeight, orientation);
 
     let size, floatHeight, floatWidth;
 

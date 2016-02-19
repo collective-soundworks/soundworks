@@ -13,7 +13,7 @@ export default class Renderer {
     this.canvasHeight = 0;
   }
 
-  updateSize(canvasWidth, canvasHeight) {
+  onResize(canvasWidth, canvasHeight) {
     this.canvasWidth = canvasWidth;
     this.canvasHeight = canvasHeight;
   }

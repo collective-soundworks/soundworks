@@ -11,9 +11,9 @@ export default class SpaceView extends View {
    * @param {Object} events - The events to attach to the view.
    * @param {Object} options - @todo
    */
-  constructor(template = null, content = {}, events = {}, options = {}) {
+  constructor(template = svgTemplate, content = {}, events = {}, options = {}) {
     options = Object.assign({ className: 'space' }, options);
-    super(template || svgTemplate, {}, events, options);
+    super(template, content, events, options);
 
     /**
      * The area to display.
@@ -55,21 +55,12 @@ export default class SpaceView extends View {
    * Update the area when inserted in the DOM.
    * @private
    */
-  onResize(orientation, viewportWidth, viewportHeight) {
-    super.onResize(orientation, viewportWidth, viewportHeight);
+  onResize(viewportWidth, viewportHeight, orientation) {
+    super.onResize(viewportWidth, viewportHeight, orientation);
     // override size to match parent size
     this.$el.style.width = '100%';
     this.$el.style.height = '100%';
 
-    this._renderArea();
-  }
-
-
-  /**
-   * Update the area when inserted in the DOM.
-   * @private
-   */
-  onShow() {
     this._renderArea();
   }
 
