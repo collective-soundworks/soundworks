@@ -1,6 +1,6 @@
 import debug from 'debug';
 import osc from 'osc';
-import ServerService from '../core/ServerService';
+import ServerActivity from '../core/ServerActivity';
 import serverServiceManager from '../core/serverServiceManager';
 
 
@@ -8,10 +8,9 @@ const log = debug('soundworks:osc');
 const SERVICE_ID = 'service:osc';
 
 /**
- * Server only service for OSC communications with an external software (e.g. Max).
- * Only support UDP protocol for now.
- * @todo - should be properly tested.
- * @todo - define if other protocols need to be added.
+ * Server only service for OSC communications withw external softwares
+ * (e.g. Max). Only support UDP protocol.
+ * @todo - define if other protocols should be supported.
  */
 class Osc extends ServerActivity {
   constructor() {
@@ -60,12 +59,12 @@ class Osc extends ServerActivity {
    * @private
    */
   _onMessage(msg) {
-    this.listeners.forEach((listener) => {
+    this._listeners.forEach((listener) => {
       if (msg.address === listener.address)
-        listener.callback(msg)
+        listener.callback(...msg.args)
     });
 
-    log(`message - address "${msg.address}"`, ...msg.args);
+    // log(`message - address "${msg.address}"`, ...msg.args);
   }
 
   /**
@@ -101,6 +100,16 @@ class Osc extends ServerActivity {
    */
   receive(address, callback) {
     const listener = { address, callback }
-    this.listeners.push(listener);
+    this._listeners.push(listener);
   }
+
+  /**
+   * @todo - implement
+   */
+  broadcast() {}
 }
+
+serverServiceManager.register(SERVICE_ID, Osc);
+
+export default Osc;
+
