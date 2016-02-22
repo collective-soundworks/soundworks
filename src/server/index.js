@@ -11,6 +11,7 @@ import ServerSurvey from './scenes/ServerSurvey';
 
 /* services */
 // import ServerCalibration from './ServerCalibration';
+import Osc from './services/Osc';
 import ServerCheckin from './services/ServerCheckin';
 import ServerErrorReporter from './services/ServerErrorReporter';
 // import ServerFileList from './ServerFileList';
@@ -42,6 +43,7 @@ export default {
 
   /* services */
   // @todo - move into a namespace ?
+  Osc,
   // ServerCalibration,
   ServerCheckin,
   ServerErrorReporter,

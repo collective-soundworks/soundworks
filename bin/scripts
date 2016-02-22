@@ -83,7 +83,6 @@ function watch() {
   watcher.on('delete', function(filename, stats) {
     remove(filename);
   });
-
 }
 
 // transpile all js files in `srcDir`

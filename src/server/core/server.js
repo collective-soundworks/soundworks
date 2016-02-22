@@ -5,13 +5,10 @@ import fs from 'fs';
 import http from 'http';
 import logger from '../utils/logger';
 import IO from 'socket.io';
-import osc from 'osc';
 import path from 'path';
 import Client from './Client';
 import serverServiceManager from './serverServiceManager';
 
-// @todo - move into osc service.
-const oscListeners = [];
 
 /**
  * Set of configuration parameters defined by a particular application.
@@ -81,13 +78,12 @@ const defaultFwConfig = {
  */
 const defaultEnvConfig = {
   port: 8000,
-  // osc: {
-  //   receiveAddress: '127.0.0.1',
-  //   receivePort: 57121,
-  //   sendAddress: '127.0.0.1',
-  //   sendPort: 57120,
-  // },
-  osc: null,
+  osc: {
+    receiveAddress: '127.0.0.1',
+    receivePort: 57121,
+    sendAddress: '127.0.0.1',
+    sendPort: 57120,
+  },
   logger: {
     name: 'soundworks',
     level: 'info',
@@ -120,6 +116,7 @@ export default {
    * @type {Object}
    */
   expressApp: null,
+
   /**
    * Http server
    * @type {Object}
@@ -133,14 +130,6 @@ export default {
   config: {},
 
   /**
-   * OSC object.
-   * @todo - Move into service
-   * @type {Object}
-   * @private
-   */
-  osc: null,
-
-  /**
    * Mapping between a `clientType` and its related activities
    */
   _clientTypeActivitiesMap: {},
@@ -152,6 +141,8 @@ export default {
 
   /**
    * Initialize the server with the given config objects.
+   * @todo - move this doc to configuration objects.
+   *
    * @param {...Object} configs - Object of application configuration.
    *
    * @todo - rewrite doc properly for this method.
@@ -231,41 +222,6 @@ export default {
       const activity = this._clientTypeActivitiesMap[clientType];
       this._map(clientType, activity);
     }
-
-    // --------------------------------------------------
-    // @todo - move into a proper service.
-    // configure OSC - should be optionnal
-    if (this.config.osc) {
-      const oscConfig = this.config.osc;
-
-      this.osc = new osc.UDPPort({
-        // This is the port we're listening on.
-        localAddress: oscConfig.receiveAddress,
-        localPort: oscConfig.receivePort,
-        // This is the port we use to send messages.
-        remoteAddress: oscConfig.sendAddress,
-        remotePort: oscConfig.sendPort,
-      });
-
-      this.osc.on('ready', () => {
-        const receive = `${oscConfig.receiveAddress}:${oscConfig.receivePort}`;
-        const send = `${oscConfig.sendAddress}:${oscConfig.sendPort}`;
-        console.log(`[OSC over UDP] Receiving on ${receive}`);
-        console.log(`[OSC over UDP] Sending on ${send}`);
-      });
-
-      this.osc.on('message', (oscMsg) => {
-        const address = oscMsg.address;
-
-        for (let i = 0; i < oscListeners.length; i++) {
-          if (address === oscListeners[i].wildcard)
-            oscListeners[i].callback(oscMsg);
-        }
-      });
-
-      this.osc.open();
-    }
-    // --------------------------------------------------
   },
 
   /**
@@ -330,8 +286,6 @@ export default {
         defaultType: this.config.defaultClient,
         assetsDomain: this.config.assetsDomain,
       }));
-
-      // this.io.of(clientType).on('connection', this._onConnection(clientType, modules));
     });
 
     // wait for socket connnection
@@ -359,44 +313,4 @@ export default {
       logger.info({ socket, clientType }, 'connection');
     }
   },
-
-  /**
-   * Send an OSC message.
-   * @param {String} wildcard Wildcard of the OSC message.
-   * @param {Array} args Arguments of the OSC message.
-   * @param {String} [url=null] URL to send the OSC message to (if not specified, uses the address defined in the OSC config or in the options of the {@link server.start} method).
-   * @param {Number} [port=null] Port to send the message to (if not specified, uses the port defined in the OSC config or in the options of the {@link server.start} method).
-   */
-  sendOSC(wildcard, args, url = null, port = null) {
-    const oscMsg = {
-      address: wildcard,
-      args: args
-    };
-
-    try {
-      if (url && port) {
-        this.osc.send(oscMsg, url, port);
-      } else {
-        this.osc.send(oscMsg); // use defaults (as defined in the config)
-      }
-    } catch (e) {
-      console.log('Error while sending OSC message:', e);
-    }
-  },
-
-  /**
-   * Listen for OSC message and execute a callback function.
-   * The server listens to OSC messages at the address and port defined in the config or in the options of the {@link server.start} method.
-   *
-   * @param {String} wildcard Wildcard of the OSC message.
-   * @param {Function} callback Callback function executed when the OSC message is received.
-   */
-  receiveOSC(wildcard, callback) {
-    const oscListener = {
-      wildcard: wildcard,
-      callback: callback
-    };
-
-    oscListeners.push(oscListener);
-  }
 };
