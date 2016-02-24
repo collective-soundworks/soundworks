@@ -1,13 +1,16 @@
-import sockets from './sockets';
+import Client from './Client';
 import ejs from 'ejs';
 import express from 'express';
 import fs from 'fs';
 import http from 'http';
-import logger from '../utils/logger';
+import https from 'https';
 import IO from 'socket.io';
+import logger from '../utils/logger';
 import path from 'path';
-import Client from './Client';
+import pem from 'pem';
 import serverServiceManager from './serverServiceManager';
+import sockets from './sockets';
+
 
 
 /**
@@ -53,6 +56,7 @@ const exampleAppConfig = {
  * These parameters allow for configuring components of the framework such as Express and SocketIO.
  */
 const defaultFwConfig = {
+  useHttps: false,
   publicFolder: path.join(process.cwd(), 'public'),
   templateFolder: path.join(process.cwd(), 'views'),
   defaultClient: 'player',
@@ -114,14 +118,16 @@ export default {
   /**
    * Express application
    * @type {Object}
+   * @private
    */
-  expressApp: null,
+  // expressApp: null,
 
   /**
    * Http server
    * @type {Object}
+   * @private
    */
-  httpServer: null,
+  // httpServer: null,
 
   /**
    * Configuration informations.
@@ -138,6 +144,40 @@ export default {
    * Activities to be started
    */
   _activities: new Set(),
+
+  /**
+   * Returns a service configured with the given options.
+   * @param {String} id - The identifier of the service.
+   * @param {Object} options - The options to configure the service.
+   */
+  require(id, options) {
+    return serverServiceManager.require(id, null, options);
+  },
+
+  /**
+   * Function used by activities to registered their concerned client type into the server
+   * @param {Array<String>} clientTypes - An array of client type.
+   * @param {Activity} activity - The activity concerned with the given `clientTypes`.
+   * @private
+   */
+  setMap(clientTypes, activity) {
+    clientTypes.forEach((clientType) => {
+      if (!this._clientTypeActivitiesMap[clientType])
+        this._clientTypeActivitiesMap[clientType] = new Set();
+
+      this._clientTypeActivitiesMap[clientType].add(activity);
+    });
+  },
+
+  /**
+   * Function used by activities to register themselves as active activities
+   * @param {Activity} activity
+   * @private
+   */
+  setActivity(activity) {
+    this._activities.add(activity);
+  },
+
 
   /**
    * Initialize the server with the given config objects.
@@ -185,32 +225,57 @@ export default {
    * - define routes and associate client types and activities.
    */
   start() {
-    // --------------------------------------------------
-    // configure express and http server
-    // --------------------------------------------------
+    logger.initialize(this.config.logger);
 
+    // --------------------------------------------------
+    // configure express and http(s) server
+    // --------------------------------------------------
     const expressApp = new express();
     expressApp.set('port', process.env.PORT || this.config.port);
     expressApp.set('view engine', 'ejs');
     expressApp.use(express.static(this.config.publicFolder));
 
-    const httpServer = http.createServer(expressApp);
-    httpServer.listen(expressApp.get('port'), function() {
-      const url = `http://127.0.0.1:${expressApp.get('port')}`;
-      console.log('[HTTP SERVER] Server listening on', url);
-    });
+    let httpServer;
 
-    this.expressApp = expressApp;
-    this.httpServer = httpServer;
+    if (!this.config.useHttps) {
+      httpServer = http.createServer(expressApp);
+      this._initSockets(httpServer);
+      this._initActivities(expressApp);
 
+      httpServer.listen(expressApp.get('port'), function() {
+        const url = `http://127.0.0.1:${expressApp.get('port')}`;
+        console.log('[HTTP SERVER] Server listening on', url);
+      });
+    } else {
+      pem.createCertificate({ days: 1, selfSigned: true }, (err, keys) => {
+        httpServer = https.createServer({
+          key: keys.serviceKey,
+          cert: keys.certificate
+        }, expressApp);
+
+        this._initSockets(httpServer);
+        this._initActivities(expressApp);
+
+        httpServer.listen(expressApp.get('port'), function() {
+          const url = `https://127.0.0.1:${expressApp.get('port')}`;
+          console.log('[HTTP SERVER] Server listening on', url);
+        });
+      });
+    }
+  },
+
+  /**
+   * Init websocket server.
+   */
+  _initSockets(httpServer) {
     this.io = new IO(httpServer, this.config.socketIO);
     sockets.initialize(this.io);
-    logger.initialize(this.config.logger);
+  },
 
-    // --------------------------------------------------
-    // start all activities and map the routes (clientType / activities mapping)
-    // --------------------------------------------------
-
+  /**
+   * Start all activities and map the routes (clientType / activities mapping).
+   */
+  _initActivities(expressApp) {
     this._activities.forEach((activity) => activity.start());
 
     this._activities.forEach((activity) => {
@@ -220,41 +285,8 @@ export default {
     // map `clientType` to their respective activities
     for (let clientType in this._clientTypeActivitiesMap) {
       const activity = this._clientTypeActivitiesMap[clientType];
-      this._map(clientType, activity);
+      this._map(clientType, activity, expressApp);
     }
-  },
-
-  /**
-   * Returns a service configured with the given options.
-   * @param {String} id - The identifier of the service.
-   * @param {Object} options - The options to configure the service.
-   */
-  require(id, options) {
-    return serverServiceManager.require(id, null, options);
-  },
-
-  /**
-   * Function used by activities to registered their concerned client type into the server
-   * @param {Array<String>} clientTypes - An array of client type.
-   * @param {Activity} activity - The activity concerned with the given `clientTypes`.
-   * @private
-   */
-  setMap(clientTypes, activity) {
-    clientTypes.forEach((clientType) => {
-      if (!this._clientTypeActivitiesMap[clientType])
-        this._clientTypeActivitiesMap[clientType] = new Set();
-
-      this._clientTypeActivitiesMap[clientType].add(activity);
-    });
-  },
-
-  /**
-   * Function used by activities to register themselves as active activities
-   * @param {Activity} activity
-   * @private
-   */
-  setActivity(activity) {
-    this._activities.add(activity);
   },
 
   /**
@@ -266,7 +298,7 @@ export default {
    * @param {String} clientType Client type (as defined by the method {@link client.init} on the client side).
    * @param {...ClientModule} modules Modules to map to that client type.
    */
-  _map(clientType, modules) {
+  _map(clientType, modules, expressApp) {
     // @todo - allow to pass some variable in the url -> define how bind it to sockets...
     const url = (clientType !== this.config.defaultClient) ? `/${clientType}` : '/';
 
@@ -278,7 +310,7 @@ export default {
     const tmplString = fs.readFileSync(template, { encoding: 'utf8' });
     const tmpl = ejs.compile(tmplString);
 
-    this.expressApp.get(url, (req, res) => {
+    expressApp.get(url, (req, res) => {
       res.send(tmpl({
         socketIO: JSON.stringify(this.config.socketIO),
         appName: this.config.appName,
