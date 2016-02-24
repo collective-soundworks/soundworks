@@ -36,8 +36,8 @@ export default class SegmentedView extends View {
     });
   }
 
-  onResize(orientation, width, height) {
-    super.onResize(orientation, width, height);
+  onResize(width, height, orientation) {
+    super.onResize(width, height, orientation);
 
     for (let sel in this.ratios) {
       const ratio = this.ratios[sel];

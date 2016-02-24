@@ -10,6 +10,8 @@ import ServerExperience from './scenes/ServerExperience';
 import ServerSurvey from './scenes/ServerSurvey';
 
 /* services */
+// import ServerCalibration from './ServerCalibration';
+import Osc from './services/Osc';
 import ServerCheckin from './services/ServerCheckin';
 import ServerErrorReporter from './services/ServerErrorReporter';
 // import ServerFileList from './ServerFileList';
@@ -31,4 +33,25 @@ export default {
   /* scenes */
   ServerExperience,
   ServerSurvey,
+
+  /* services */
+  // @todo - move into a namespace ?
+  Osc,
+  // ServerCalibration,
+  ServerCheckin,
+  ServerErrorReporter,
+  // ServerFileList,
+  ServerLocator,
+  ServerNetwork,
+  // ServerPerformance,
+  ServerPlacer,
+  ServerSharedConfig,
+  ServerSharedParams,
+  ServerSync,
+
+  utils: {
+    helpers,
+    math,
+    setup,
+  },
 };

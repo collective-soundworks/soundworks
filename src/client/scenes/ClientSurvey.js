@@ -14,7 +14,7 @@ class BaseRenderer extends View {
     this.id = question.id;
   }
 
-  onResize(orientation, width, height) {}
+  onResize(width, height, orientation) {}
 }
 
 const radioTemplate = `
@@ -148,12 +148,9 @@ class TextAreaRenderer extends BaseRenderer {
     this.$textarea = this.$el.querySelector('.answer');
   }
 
-  onShow() {
-    this.onResize();
-  }
-
-  onResize(orientation, viewportVidth, viewportHeight) {
+  onResize(viewportVidth, viewportHeight, orientation) {
     if (!this.$parent) { return; }
+
     const boundingRect = this.$el.getBoundingClientRect();
     const width = boundingRect.width;
     const height = boundingRect.height;

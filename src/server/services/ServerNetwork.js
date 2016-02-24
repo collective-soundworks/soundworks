@@ -8,10 +8,6 @@ class ServerNetwork extends ServerActivity {
     super(SERVICE_ID);
   }
 
-  start() {
-    super.start();
-  }
-
   connect(client) {
     super.connect(client);
 

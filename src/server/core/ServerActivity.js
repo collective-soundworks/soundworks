@@ -47,14 +47,17 @@ export default class ServerActivity extends EventEmitter {
     super();
 
     /**
-     * The id of the activity. This id must match a client side `Activity` id in order
-     * to create the socket channel between the activity and its client side peer.
+     * The id of the activity. This value must match a client side
+     * {@link src/client/core/Activity.js~Activity} id in order to create
+     * a namespaced socket channel between the activity and its client side peer.
      * @type {string}
      */
     this.id = id;
 
     /**
-     * Options of the activity. (Should be changed by calling `this.configure`)
+     * Options of the activity. These values should be updated with the
+     * `this.configure` method.
+     * @type {Object}
      */
     this.options = {};
 
@@ -66,7 +69,7 @@ export default class ServerActivity extends EventEmitter {
     this.clientTypes = new Set();
 
     /**
-     * List of the required activities
+     * List of the activities the current activity needs in order to work.
      * @type {Set}
      * @private
      */
@@ -102,6 +105,7 @@ export default class ServerActivity extends EventEmitter {
     value.forEach((clientType) => {
       this.clientTypes.add(clientType);
     });
+
     // propagate value to required activities
     this.requiredActivities.forEach((activity) => {
       activity.addClientType(value);
@@ -109,8 +113,7 @@ export default class ServerActivity extends EventEmitter {
   }
 
   /**
-   * Add the given activity as a requirement for the behavior of the
-   *  current activity.
+   * Add the given activity as a requirement for the current activity.
    * @private
    * @type {ServerActivity} activity
    */
@@ -119,14 +122,22 @@ export default class ServerActivity extends EventEmitter {
   }
 
   /**
-   * Retrieve a service.
+   * Retrieve a service. The required service is added to the `requiredActivities`.
+   * @param {String} id - The id of the service.
+   * @param {Object} options - Some options to configure the service.
    */
   require(id, options) {
     return serverServiceManager.require(id, this, options);
   }
 
   /**
-   * Start an activity, is automatically called on server startup.
+   * Interface method to be implemented by activities. As part of an activity
+   * lifecycle, the method should define the behavior of the activity when started
+   * (e.g. binding listeners). When this method id called, all configuration options
+   * should be setted. Also, if the activity relies on another service
+   * (e.g. {@link src/server/core/ServerSharedConfig.js~ServerSharedConfig}),
+   * this dependency should be considered as instanciated.
+   * The method is automatically called by the server on startup.
    */
   start() {}
 

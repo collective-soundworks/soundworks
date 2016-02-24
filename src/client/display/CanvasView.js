@@ -42,9 +42,9 @@ export default class CanvasView extends SegmentedView {
     this._renderingGroup = new RenderingGroup(this.ctx);
   }
 
-  onResize(orientation, viewportWidth, viewportHeight) {
-    super.onResize(orientation, viewportWidth, viewportHeight);
-    this._renderingGroup.updateSize(viewportWidth, viewportHeight);
+  onResize(viewportWidth, viewportHeight, orientation) {
+    super.onResize(viewportWidth, viewportHeight, orientation);
+    this._renderingGroup.onResize(viewportWidth, viewportHeight);
   }
 
   /**

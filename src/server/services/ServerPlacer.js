@@ -87,7 +87,7 @@ class ServerPlacer extends ServerActivity {
 
     // update config capacity with computed one
     setupConfig.capacity = this.capacity;
-    this._sharedConfigService.addItem(setupPath, this.clientTypes);
+    this._sharedConfigService.addItem(setupConfigPath, this.clientTypes);
   }
 
   /**
@@ -153,7 +153,7 @@ class ServerPlacer extends ServerActivity {
 
       // aknowledge
       if (this.numClients < setup.capacity)
-        this.send(client, 'aknowlegde', this.options.setupPath, this.disabledPositions);
+        this.send(client, 'aknowlegde', this.options.setupConfigPath, this.disabledPositions);
       else
         this.send('reject', this.disabledPositions);
     }

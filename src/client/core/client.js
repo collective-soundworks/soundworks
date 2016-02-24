@@ -9,11 +9,18 @@ import defaultTemplates from '../display/defaultTemplates';
 
 const client = {
   /**
-   * The {@link Signal} used to bootstrap the whole application.
-   * @type {Signal}
-   * @private
+   * Client unique id, given by the server.
+   * @type {Number}
    */
-  // signals: { ready: new Signal() },
+  uuid: null,
+
+  /**
+   * Client type.
+   * The client type is speficied in the argument of the `init` method. For
+   * instance, `'player'` is the client type you should be using by default.
+   * @type {String}
+   */
+  type: null,
 
    /**
    * Socket.io wrapper used to communicate with the server, if any (see {@link socket}.
@@ -38,28 +45,6 @@ const client = {
   },
 
   /**
-   * Client type.
-   * The client type is speficied in the argument of the `init` method. For
-   * instance, `'player'` is the client type you should be using by default.
-   * @type {String}
-   */
-  type: null,
-
-  /**
-   * Promise resolved when the server sends a message indicating that the client
-   * can start the first mdule.
-   * @type {Promise}
-   * @private
-   */
-  ready: null,
-
-  /**
-   * Client unique id, given by the server.
-   * @type {Number}
-   */
-  uuid: null,
-
-  /**
    * Client coordinates (if any) given by a {@link Locator}, {@link Placer} or
    * {@link Checkin} module. (Format: `[x:Number, y:Number]`.)
    * @type {Array<Number>}
@@ -81,8 +66,9 @@ const client = {
   label: null,
 
   /**
-   * Is set to `true` or `false` by the `Welcome` service and defines if the client meet the requirements of the application.
-   * Especially usefull when the `Welcome` service is used without a view and activated manually.
+   * Is set to `true` or `false` by the `Welcome` service and defines if the
+   * client meets the requirements of the application. (Should be usefull when
+   * the `Welcome` service is used without a view and activated manually)
    * @type {Boolean}
    */
   compatible: null,
@@ -116,10 +102,9 @@ const client = {
   },
 
   /**
-   * * Initialize the application.
+   * Start the application.
    */
   start() {
-    // init socket
     if (socket.required)
       this._initSocket();
     else
@@ -140,7 +125,6 @@ const client = {
    * Initialize socket connection and perform handshake with the server.
    */
   _initSocket() {
-    // initialize socket communications
     this.socket = socket.initialize(this.type, this.config.socketIO);
     // wait for handshake to mark client as `ready`
     this.socket.receive('client:start', (uuid) => {
@@ -166,9 +150,7 @@ const client = {
     this.templates = {};
 
     const appName = this.config.appName || defaultTextContents.globals.appName;
-    const textContents = Object.assign(defaultTextContents, {
-      globals: { appName }
-    });
+    const textContents = Object.assign(defaultTextContents, { globals: { appName } });
 
     this.setViewContentDefinitions(textContents);
     this.setViewTemplateDefinitions(defaultTemplates);
@@ -195,7 +177,8 @@ const client = {
 
   /**
    * Sets the default view container for all `ClientModule`s
-   * @param {String|Element} el - A DOM element or a css selector matching the element to use as a container.
+   * @param {String|Element} el - DOM element (or css selector matching
+   *  an existing element) to be used as the container of the application.
    */
   setAppContainer(el) {
     const $container = el instanceof Element ? el : document.querySelector(el);

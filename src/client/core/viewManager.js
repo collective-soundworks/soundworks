@@ -5,7 +5,7 @@ const _stack = new Set();
 let _$container = null;
 
 /**
- * Handle services' views according to their priorities.
+ * Handle activities' (services and scenes) views according to their priorities.
  */
 export default {
   _timeoutId: null,
@@ -22,6 +22,7 @@ export default {
     view.hide();
     view.appendTo(_$container);
 
+    // trigger `_updateView` only once when several view are registered at once.
     if (!this._timeoutId)
       this.timeoutId = setTimeout(() => { this._updateView(); }, 0);
   },
@@ -32,6 +33,7 @@ export default {
    */
   remove(view) {
     log(`remove - id: "${view.options.id}" - priority: ${view.priority}`);
+
     view.remove();
     _stack.delete(view);
 
@@ -39,7 +41,8 @@ export default {
   },
 
   /**
-   * Sets the container of the views for all `Activity` instances. (is called in {@link client})
+   * Sets the container of the views for all `Activity` instances. Is called by
+   * {@link src/client/core/client.js~client}) during application bootstrap.
    * @param {Element} $el - The element to use as a container for the module's view.
    * @private
    */
@@ -69,9 +72,11 @@ export default {
     if (nextView) {
       if (!visibleView) {
         log(`update view - id: "${nextView.options.id}" - priority: ${priority}`);
+
         nextView.show();
       } else if (visibleView.priority < nextView.priority) {
         log(`update view - id: "${nextView.options.id}" - priority: ${priority}`);
+
         visibleView.hide(); // hide but keep in stack
         nextView.show();
       }

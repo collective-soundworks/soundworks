@@ -3,10 +3,8 @@ import { EventEmitter } from 'events';
 /**
  * Service to track the viewport size and orientation.
  */
-class Viewport extends EventEmitter {
+class Viewport {
   constructor() {
-    super();
-
     /**
      * Width of the viewport.
      * @type {Number}
@@ -25,26 +23,35 @@ class Viewport extends EventEmitter {
      */
     this.orientation = null;
 
-    this._onResize = this._onResize.bind(this);
-    window.addEventListener('resize', this._onResize, false);
-    //
-    this._onResize();
+    /**
+     * List of the callback to trigger when `resize` is triggered by the window.
+     */
+    this._callbacks = new Set();
 
-    this.cb;
+    // initialize service
+    this._onResize = this._onResize.bind(this);
+    // listen window events (is `DOMContentLoaded` usefull?)
+    window.addEventListener('DOMContentLoaded', () => this._onResize());
+    window.addEventListener('resize', this._onResize, false);
   }
 
   /**
-   * Middleware for the `EventEmitter` method which applies the callback with the current values.
-   * @private
+   * Register a listener for the `window.resize` event. The callback is executed
+   * with current values when registered.
+   * @param {Function} callback - The callback to execute.
    */
-  addListener(channel, callback) {
-    super.removeListener(channel, callback);
-    super.addListener(channel, callback);
-    callback(this.orientation, this.width, this.height);
+  addResizeListener(callback) {
+    this._callbacks.add(callback);
+    // call immediatly with current values
+    callback(this.width, this.height, this.orientation);
   }
 
-  on(channel, callback) {
-    this.addListener(channel, callback);
+  /**
+   * Remove a listener for the `window.resize` event.
+   * @param {Function} callback - The callback to remove.
+   */
+  removeResizeListener(callback) {
+    this._callbacks.delete(callback);
   }
 
   _onResize() {
@@ -52,14 +59,9 @@ class Viewport extends EventEmitter {
     this.height = window.innerHeight;
     this.orientation = this.width > this.height ? 'landscape' : 'portrait';
 
-    // console.log(this.width, this.height);
-    // document.body.style.width = `${this.width}px`;
-    // document.body.style.height = `${this.height}px`;
-    // try on iOS
-    // document.body.style.marginTop = '1px';
-    // window.scrollTo(0, 1);
-
-    this.emit('resize', this.orientation, this.width, this.height);
+    this._callbacks.forEach((callback) => {
+      callback(this.width, this.height, this.orientation);
+    });
   }
 };
 
@@ -68,4 +70,5 @@ class Viewport extends EventEmitter {
  * @type {Viewport}
  */
 const viewport = new Viewport();
+
 export default viewport;

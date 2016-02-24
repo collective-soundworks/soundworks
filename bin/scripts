@@ -5,15 +5,15 @@ var path = require('path');
 
 var babel = require('babel');
 var fse = require('fs-extra');
-var nodeWatch = require('node-watch');
+var hound = require('hound');
 
 'use strict';
 
 // CONFIG
 // -----------------------------------------------
-var srcDir = 'src';
-var distDir = '.';
 var cwd = process.cwd();
+var srcDir = path.join(cwd, 'src');
+var distDir = cwd;
 
 // options for babel
 var babelOptions = {
@@ -24,20 +24,20 @@ var babelOptions = {
 
 // colors for shell - for a more complete list
 // cf. http://stackoverflow.com/questions/5947742/how-to-change-the-output-color-of-echo-in-linux
-var red   = '\033[0;31m';
-var green = '\033[0;32m';
-var NC    = '\033[0m'; // No Color
+var red    = '\033[0;31m';
+var green  = '\033[0;32m';
+var orange = '\033[0;33m';
+var NC     = '\033[0m'; // No Color
 
 // COMMAND INTERPRETER
 // -----------------------------------------------
-var command = process.argv[2];
 
+var command = process.argv[2];
 // arguments - create a key value object with next arguments
 var args = process.argv.slice(3);
 var argv = {};
-for (var i = 0; i < args.length; i += 2) {
+for (var i = 0; i < args.length; i += 2)
   argv[args[i]] = args[i + 1];
-}
 
 // execute the correct function given the script
 switch (command) {
@@ -48,12 +48,9 @@ switch (command) {
     transpileAll();
     break;
   case '--doc': // must be tested
-    generateDoc();
+    console.log('IS COMMENTED, USE WITH CARE BEFORE PROPER TESTS');
+    // generateDoc();
     break;
-  // case '--dev-test':
-  //   var result = testGitMasterBranch();
-  //   console.log(result);
-  //   break;
 }
 
 // HELPERS
@@ -61,7 +58,7 @@ switch (command) {
 
 // create filename from src to dist
 function createTargetName(filename) {
-  return filename.replace(new RegExp('^' + srcDir), distDir);
+  return filename.replace(new RegExp('^' + srcDir), distDir);;
 }
 
 function isGitMasterBranch() {
@@ -74,30 +71,33 @@ function isGitMasterBranch() {
 
 // watch source dir
 function watch() {
-  nodeWatch(srcDir, function(filename) {
+  var watcher = hound.watch(srcDir);
+  watcher.on('create', function(filename, stats) {
     transpile(filename);
+  });
+
+  watcher.on('change', function(filename, stats) {
+    transpile(filename);
+  });
+
+  watcher.on('delete', function(filename, stats) {
+    remove(filename);
   });
 }
 
-// transpile all files in `srcDir`
+// transpile all js files in `srcDir`
 function transpileAll() {
   var cmd = 'find ' + srcDir + ' -type f';
+  var stack = [];
 
-  childProcess.exec(cmd , function(err, stdout, stderr) {
-    if (err) { console.error(err); }
-    var fileList = stdout.split('\n');
-
-    var stack = [];
-
-    for (var i = 0; i < fileList.length; i++) {
-      var file = fileList[i];
-      if (!file) { continue; }
-
-      stack.push(file);
-    }
-
-    transpile(stack.shift(), stack);
-  });
+  fse
+    .walk(srcDir)
+    .on('data', function(item) {
+      stack.push(item.path);
+    })
+    .on('end', function() {
+      transpile(stack.shift(), stack);
+    });
 }
 
 // transpile one file or several files sequencially
@@ -106,13 +106,19 @@ function transpileAll() {
 // Using the Sync method crash the entire script each time there is an error in
 // the code which is really boring when watching...
 function transpile(src, stack) {
+  function next() {
+    if (stack && stack.length)
+      transpile(stack.shift(), stack);
+  }
+
+  if (!src || path.extname(src) !== '.js')
+    return next();
+
   var target = createTargetName(src);
 
   babel.transformFile(src, babelOptions, function(err, result) {
-    if (err) {
-      var error = err.codeFrame || err;
-      return console.error(error);
-    }
+    if (err)
+      return console.error(err.codeFrame || err);
 
     fse.outputFile(target, result.code, function(err) {
       if (err) { return console.error(err.message); }
@@ -120,17 +126,27 @@ function transpile(src, stack) {
       var msg = green + '=> "%s" successfully transpiled to "%s"' + NC;
       console.log(util.format(msg, src, target));
 
-      // next
-      if (stack && stack.length) {
-        transpile(stack.shift(), stack);
-      }
+      next();
     });
   });
 }
 
-// @todo - must be tested
+function remove(src) {
+  var target = createTargetName(src);
+  fse.remove(target, function(err) {
+    if (err) { return console.error(err.message); }
+
+    var msg = orange + '=> "%s" and "%s" deleted' + NC;
+    console.log(util.format(msg, src, target));
+  });
+
+
+}
+
+// @todo - must be retested
 function generateDoc() {
   // check if in master
+  // @todo - uncomment when stable
   // if (!isGitMasterBranch()) {
   //   var msg = red + '=> you must be in master branch to run the `doc` command' + NC;
   //   return console.log(msg);
@@ -161,9 +177,6 @@ function generateDoc() {
     'esdoc.json'
   ];
 
-  // toKeep.push(getUmdName());
-  // toKeep.push(getMinName());
-
   files.forEach(function(file) {
     if (toKeep.indexOf(file) !== -1) { return; }
     fse.removeSync(file);
@@ -178,8 +191,8 @@ function generateDoc() {
   execSync('git add -A');
   execSync('git commit -am "updated documentation"');
   execSync('git push origin gh-pages --force');
-  execSync('git checkout develop'); // TODO: remove when stable
-  // execSync('git checkout master'); // TODO: uncomment when stable
+  execSync('git checkout develop'); // @todo - remove when stable
+  // execSync('git checkout master'); // @todo - uncomment when stable
   execSync('git branch -D gh-pages');
   try { execSync('git stash pop'); } catch(err) {}
 }

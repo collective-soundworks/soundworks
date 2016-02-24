@@ -329,6 +329,7 @@ class ClientPlacer extends Service {
 
   /** @private */
   _onAknowledgeResponse(setupPath, disabledPositions) {
+    console.log(setupPath, disabledPositions);
     const setup = this._sharedConfigService.get(setupPath);
     const area = setup.area;
     const capacity = setup.capacity;

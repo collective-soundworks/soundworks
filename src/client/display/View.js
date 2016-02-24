@@ -1,5 +1,6 @@
 import tmpl from 'lodash.template';
 import viewport from './viewport';
+import Delegate from 'dom-delegate';
 
 
 /**
@@ -51,11 +52,22 @@ export default class View {
     this.orientation = null;
 
     /**
-     *
+     * Defines if the view is visible or not.
+     * @private
      */
     this.isVisible = false;
 
+    /**
+     * Store the components (sub-views) of the view.
+     * @private
+     */
     this._components = {};
+
+    /**
+     * reformatting of `this.events` for event delegation internal use.
+     * @private
+     */
+    this._events = {};
 
     /**
      * The container element of the view. Defaults to `<div>`.
@@ -63,13 +75,17 @@ export default class View {
      */
     this.$el = document.createElement(this.options.el);
 
+    this._delegate = new Delegate(this.$el);
     this.onResize = this.onResize.bind(this);
+
+    this.installEvents(this.events, false);
   }
 
   /**
-   * Add a compound view inside the current view.
+   * Add or remove a compound view inside the current view.
    * @param {String} selector - A css selector matching an element of the template.
-   * @param {View} view - The view to insert inside the selector.
+   * @param {View} [view=null] - The view to insert inside the selector. If set
+   *  to `null` destroy the component.
    */
   setViewComponent(selector, view = null) {
     const prevView = this._components[selector];
@@ -82,6 +98,10 @@ export default class View {
     }
   }
 
+  /**
+   * Execute a method on all the `components` (sub-views).
+   * @param {String} method - The name of the method to be executed.
+   */
   _executeViewComponentMethod(method) {
     for (let selector in this._components) {
       const view = this._components[selector];
@@ -89,7 +109,11 @@ export default class View {
     }
   }
 
-
+  /**
+   * Render partially the view according to the given selector. If the selector
+   * is associated to a `component` (sub-views), the `component` is rendered.
+   * @param {String} selector - A css selector matching an element of the view.
+   */
   _renderPartial(selector) {
     const $componentContainer = this.$el.querySelector(selector);
     const component = this._components[selector];
@@ -101,57 +125,64 @@ export default class View {
       component.onRender();
 
       if (this.isVisible)
-        component.onShow();
+        component.show();
+      else
+        component.hide();
     } else {
       const html = this.tmpl(this.content);
-      const $dummy = document.createElement('div');
-      $dummy.innerHTML = html;
-      $componentContainer.innerHTML = $dummy.querySelector(selector).innerHTML;
+      const $tmp = document.createElement('div');
+      $tmp.innerHTML = html;
+      $componentContainer.innerHTML = $tmp.querySelector(selector).innerHTML;
     }
-  }
-
-  _renderAll() {
-    const options = this.options;
-
-    if (options.id) { this.$el.id = options.id; }
-
-    if (options.className) {
-      const classes = typeof options.className === 'string' ?
-        [options.className] : options.className;
-
-      classes.forEach(className => this.$el.classList.add(className));
-    }
-
-    // if rerender, uninstall events before recreating the DOM
-    this._undelegateEvents();
-
-    const html = this.tmpl(this.content);
-    this.$el.innerHTML = html;
-    // must resize before child component
-    this.onRender();
-    viewport.addListener('resize', this.onResize);
-
-    for (let selector in this._components)
-      this._renderPartial(selector);
-
-    this._delegateEvents();
   }
 
   /**
+   * Render the whole view and its component (sub-views).
+   */
+  _renderAll() {
+    const options = this.options;
+    // set id of the container id given
+    if (options.id)
+      this.$el.id = options.id;
+    // set classes of the container if given
+    if (options.className) {
+      const className = options.className;
+      const classes = typeof className === 'string' ? [className] : className;
+      this.$el.classList.add(...classes);
+    }
+
+    // render template and insert it in the main element
+    const html = this.tmpl(this.content);
+    this.$el.innerHTML = html;
+    this.onRender();
+
+    // resize parent before rendering components children
+    this.onResize(viewport.width, viewport.height, viewport.orientation);
+
+    for (let selector in this._components)
+      this._renderPartial(selector);
+  }
+
+  // LIFE CYCLE METHODS ----------------------------------
+
+  /**
    * Render the view according to the given template and content.
+   * @param {String} [selector=null] - If specified render only the part of the
+   *  view inside the matched element, if this element contains a component
+   *  (sub-view), the component is rendered. Render all the view otherwise.
    * @return {Element}
    */
   render(selector = null) {
-    if (selector !== null) {
+    if (selector !== null)
       this._renderPartial(selector);
-    } else {
+    else
       this._renderAll();
-    }
   }
 
   /**
    * Insert the view (`this.$el`) into the given element. Call `View~onShow` when done.
-   * @param {Element} $parent - The element where the view should be inserted.
+   * @param {Element} $parent - The element inside which the view is inserted.
+   * @private
    */
   appendTo($parent) {
     this.$parent = $parent;
@@ -159,102 +190,108 @@ export default class View {
   }
 
   /**
-   * Remove events listeners and remove the view from it's container. Is automatically called in `Module~done`.
+   * Show the view .
+   * @private - this method should only be used by the `viewManager`
    */
-  remove() {
-    this._executeViewComponentMethod('remove');
+  show() {
+    this.$el.style.display = 'block';
+    this.isVisible = true;
+    // must resize before child component
+    this._delegateEvents();
+    viewport.addResizeListener(this.onResize);
 
-    this._undelegateEvents();
-    this.$parent.removeChild(this.$el);
-
-    viewport.removeListener('resize', this.onResize);
-
-    this.isVisible = false;
+    this._executeViewComponentMethod('show');
   }
 
   /**
-   * Hide the view.
+   * Hide the view and uninstall events.
+   * @private - this method should only be used by the `viewManager`
    */
   hide() {
     this.$el.style.display = 'none';
     this.isVisible = false;
 
+    this._undelegateEvents();
+    viewport.removeResizeListener(this.onResize);
+
+    this._executeViewComponentMethod('hide');
   }
 
   /**
-   * Show the view.
+   * Remove events listeners and remove the view from it's container.
+   * @private - this method should only be used by the `viewManager`
    */
-  show() {
-    this.$el.style.display = 'block';
-    this.isVisible = true;
-    // parent must be in the DOM
-
-    this._executeViewComponentMethod('onShow');
-    this.onShow();
+  remove() {
+    this.hide();
+    this.$el.remove();
+    // this.$parent.removeChild(this.$el);
+    this._executeViewComponentMethod('remove');
   }
 
+
   /**
-   * Entry point for custom behavior (install plugin, ...) when the DOM of the view is ready.
+   * Entry point when the DOM is ready. Is mainly exposed to cache some element.
    */
   onRender() {}
-
-  /**
-   * Entry point for custom behavior when the view is inserted into the DOM.
-   */
-  onShow() {}
 
   /**
    * Callback for `viewport.resize` event. Maintain `$el` in sync with the viewport.
    * @param {String} orientation - The orientation of the viewport ('portrait'|'landscape')
    * @param {Number} viewportWidth - The width of the viewport in pixels.
    * @param {Number} viewportHeight - The height of the viewport in pixels.
+   * @todo - move `orientation` to third argument
+   * @todo - rename to `resize`
    */
-  onResize(orientation, viewportWidth, viewportHeight) {
-    this.orientation = orientation;
-    this.$el.classList.remove('portrait', 'landscape');
-    this.$el.classList.add(orientation);
+  onResize(viewportWidth, viewportHeight, orientation) {
     this.$el.style.width = `${viewportWidth}px`;
     this.$el.style.height = `${viewportHeight}px`;
     this.viewportWidth = viewportWidth;
     this.viewportHeight = viewportHeight;
+
+    this.orientation = orientation;
+    this.$el.classList.remove('portrait', 'landscape');
+    this.$el.classList.add(orientation);
+    // do not propagate to component as they are listening viewport's event too.
   }
+
+  // EVENTS ----------------------------------------
 
   /**
    * Allow to install events after instanciation.
    * @param {Object} events - An object of events mimicing the Backbone's syntax.
+   * @param {Object} [averride=false] - If set true, replace the previous events
+   *  with the ones given.
    */
   installEvents(events, override = false) {
+    if (this.isVisible)
+      this._undelegateEvents();
+
     this.events = override ? events : Object.assign(this.events, events);
-    this._delegateEvents();
+
+    if (this.isVisible)
+      this._delegateEvents();
   }
 
+  /**
+   * Add event listeners according to `this.events` object (which should
+   * follow the Backbone's event syntax)
+   */
   _delegateEvents() {
-    this._executeViewComponentMethod('_delegateEvents');
-
+    // this._executeViewComponentMethod('_delegateEvents');
     for (let key in this.events) {
       const [event, selector] = key.split(/ +/);
       const callback = this.events[key];
-      const $targets = !selector ? [this.$el] : this.$el.querySelectorAll(selector);
 
-      Array.from($targets).forEach(($target) => {
-        // don't add a listener twice, if render is called several times
-        $target.removeEventListener(event, callback, false);
-        $target.addEventListener(event, callback, false);
-      });
+      this._delegate.on(event, selector || null, callback);
     }
   }
 
+  /**
+   * Remove event listeners according to `this.events` object (which should
+   * follow the Backbone's event syntax)
+   */
   _undelegateEvents() {
-    this._executeViewComponentMethod('_undelegateEvents');
-
-    for (let key in this.events) {
-      const [event, selector] = key.split(/ +/);
-      const callback = this.events[key];
-      const $targets = !selector ? [this.$el] : this.$el.querySelectorAll(selector);
-
-      Array.from($targets).forEach(($target) => {
-        $target.removeEventListener(event, callback, false);
-      });
-    }
+    // this._executeViewComponentMethod('_undelegateEvents');
+    this._delegate.off();
   }
 }
