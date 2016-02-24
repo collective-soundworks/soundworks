@@ -22,7 +22,7 @@ export function centTolinear(val) {
   return Math.exp(0.0005776226504666211 * val); // pow(2, val / 1200)
 };
 
-export function linearScale(minIn, maxIn, minOut, maxOut) {
+export function scale(minIn, maxIn, minOut, maxOut) {
   const a = (maxOut - minOut) / (maxIn - minIn);
   const b = minOut - a * minIn;
   return x => a * x + b;
