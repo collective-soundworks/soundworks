@@ -1,10 +1,50 @@
+#Introduction
+
+a scenario based on  and focus on its audiovisual and interaction design instead of the infrastructure.
+
+## System Requirements
+
+Before getting started with developing a *Soundworks* application, make sure having installed the following software :
+- Node `0.12.7` (the [`n`](https://github.com/tj/n) library allows you to switch easily between node versions);
+- npm `3.3.12^`
+
+# Template
+
+The recommended way of developing a *Soundworks* application is to start from a template.
+The [`soundworks-template`](https://github.com/collective-soundworks/soundworks-template) allows for bootstrapping the development of a *Soundworks* application.
+It includes comprehensive comments in the code.
+
+# Client / server architecture, URLs and routes
+
+In order to connect the mobile devices with each other, *Soundworks* implements a client/server architecture using a Node.js server and WebSockets to pass messages between the server and the clients.
+
+*Soundworks*-based scenarios allow different types of clients to connect to the server through different URLs. The most common type of clients is constituted of the participant's mobile devices who take part in the performance. We refer to this type of client as a `'player'`. For convenience, a `'player'` client connects to the server through the root URL of the application `http://my.server.address:port/`.
+
+In addition to the `'player'` clients, a scenario can include as many other types of clients as you want. For instance, one could imagine that:
+- A device provides an interface to control some parameters of the performance in real time. We would refer to this type of client as `'conductor'` and these clients would connect to the server through the URL `http://my.server.address:port/conductor`.
+- A device generates “environmental” sound and/or light effects projected into the performance in sync with the participants’ performance (*e.g.* lasers, a global visualization, or ambient sounds on external loudspeakers). We would refer to this type of client as `'env'` and these clients would connect to the server through the URL `http://my.server.address:port/env`.
+
+All types of clients (except `'player'`) access the server through a URL that concatenates the root URL of the application, and the name of the client type (*e.g* `http://my.server.address:port/conductor` or `http://my.server.address:port/env`).
+
+# Build
+
+There are a few node scripts you can use to build files from the source files. In a Terminal window:
+- `npm run start` starts the server
+- `npm run transpile` builds all the necessary files from the source files
+- `npm run watch` watches for changes in the source files and restarts the server when necessary
+
+# Modules provided by the library
+
+*Soundworks* provides a set of modules that can be used in many scenarios.
+Please refer to the [Reference](../identifiers.html) page for an exhaustive list.
+
 # Cheat sheet
 
-In a nutshell, here is what you have to do to write your Javascript code (in `src/client/clientType/index.js` and `src/server/index.js`).
+In a nutshell, here is what you have to do to write your Javascript code (in `src/client/<client type>/index.js` and `src/server/index.js`).
 
 ## Client side
 
-- Initialize the client and specify its client type with `client.init('clientType')` (see section [Initialization](#initialization));
+- Initialize the client and specify its client type with `client.init('<client type>')` (see section [Initialization](#initialization));
 - Create a module for the performance with `class MyPerformance extends Performance { ... }` (see section [Performance module](#performance-module));
 - Instantiate all the modules;
 - Start the scenario and link the modules in the `client.start(...)` method (see section [Module logic](#module-logic)).
@@ -57,6 +97,19 @@ my-scenario/
 ├── package.json
 └── README.md
 ```
+
+In particular:
+
+- The `public/` folder contains the resources the clients may need to load, such as sounds, images, fonts…
+  **Note:** the Javascript and CSS files will be automatically generated from the `src/` folder into the `public/js/` and `public/css/` subfolders.
+- The `src/` folder contains:
+  - The `client/` subfolder, that contains one subfolder for each client type (`player/` is a mandatory subfolder):
+    - Each client type subfolder contains an `index.js` file, and any other Javascript files with the source code for that client type;
+  - The `server/` subfolder, that contains an `index.js` file, and any other Javascript files with the source code for the server;
+- The `sass/` subfolder, with the SASS partials used to generate the CSS. In particular, each type of client (including `'player'`) should have its corresponding SASS partial (*e.g.* `player.scss`, `conductor.scss` or `env.scss`).
+- The `views/` folder contains a `*.ejs` file for each client type: all the subfolders in `src/client/` should have their corresponding EJS file (*e.g.* `player.ejs`, `conductor.ejs` or `env.ejs`).
+
+
 
 ## 2. Client side
 

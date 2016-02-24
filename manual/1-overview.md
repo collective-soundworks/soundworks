@@ -3,10 +3,6 @@
 *Soundworks* is a framework to create collaborative/collective music experiences where users interact through their mobile devices.
 The framework is entirely based on web APIs with a Node.js server and provides a set of services to easily setup the infrastructure of an applications and to focus on its audiovisual rendering and interaction design.
 
-# Documentation
-
-The documentation can be found at [http://collective-soundworks.github.io/soundworks/](http://collective-soundworks.github.io/soundworks/).
-
 # Authors
 
 - [Norbert Schnell](mailto:Nobert.Schnell@ircam.fr)

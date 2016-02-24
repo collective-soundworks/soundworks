@@ -2,10 +2,8 @@
   "source": "./src",
   "destination": "./doc",
   "manual": {
-    "overview": ["./manual/overview.md"],
-    "usage": ["./manual/usage.md"],
-    "tutorial": ["./manual/tutorial.md"],
-    "example": ["./manual/example.md"],
-    "changelog": ["./CHANGELOG.md"]
+    "overview": ["./manual/1-overview.md"],
+    "getting started": ["./manual/2-getting-started.md"],
+    "examples": ["./manual/3-examples.md"],
   }
 }

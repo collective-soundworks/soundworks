@@ -1,10 +1,10 @@
 # Examples
 
-This section presents a few *Soundworks*-based examples.
+This section presents two examples of *Soundworks* applications, *Soundfield* and *Drops*.
 
 ## Template
 
-The template ([`soundworks-template`](https://github.com/collective-soundworks/soundworks-template)) provides a boilerplate to write a *Soundworks* application. In this scenario example, the players play a sound when they start the performance, and play another sound when other players join the performance.
+The template ([`soundworks-template`](https://github.com/collective-soundworks/soundworks-template)) provides a boilerplate to write a *Soundworks* application. In this scenario example, the players play a sound when they join the experience, and play another sound when other players join the experience.
 
 This example is well documented in the code.
 
@@ -16,15 +16,8 @@ To install the scenario and start the server, run:
 git clone https://github.com/collective-soundworks/soundworks-template.git
 cd soundworks-template
 npm install
-npm run bundle
+npm run transpile
 ```
-
-### How to play?
-
-Here are the different client types supported by the scenario:
-
-- `'player'`: access `http://localhost:3000` from a mobile device.  
-  This is the regular player who plays a sound when it starts the performance, and when another player joins the performance.
 
 ## Soundfield
 
@@ -42,7 +35,7 @@ To install the scenario and start the server, run:
 git clone https://github.com/collective-soundworks/soundworks-soundfield.git
 cd soundworks-soundfield
 npm install
-npm run bundle
+npm run transpile
 ```
 
 ### How to play?
@@ -70,7 +63,7 @@ To install the scenario and start the server, run:
 git clone https://github.com/collective-soundworks/soundworks-drops.git
 cd soundworks-drops
 npm install
-npm run bundle
+npm run transpile
 ```
 
 ### How to play?
