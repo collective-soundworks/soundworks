@@ -41,6 +41,7 @@ import SpaceView from './display/SpaceView';
 import SquaredView from './display/SquaredView';
 import TouchSurface from './display/TouchSurface';
 import View from './display/View';
+import viewport from './display/viewport';
 
 // utils
 import * as helpers from '../utils/helpers';
@@ -93,6 +94,7 @@ export default {
     SquaredView,
     TouchSurface,
     View,
+    viewport,
   },
 
   utils: {

@@ -102,10 +102,10 @@ export default class View {
    * Execute a method on all the `components` (sub-views).
    * @param {String} method - The name of the method to be executed.
    */
-  _executeViewComponentMethod(method) {
+  _executeViewComponentMethod(method, ...args) {
     for (let selector in this._components) {
       const view = this._components[selector];
-      view[method]();
+      view[method](...args);
     }
   }
 
@@ -133,6 +133,7 @@ export default class View {
       const $tmp = document.createElement('div');
       $tmp.innerHTML = html;
       $componentContainer.innerHTML = $tmp.querySelector(selector).innerHTML;
+      this.onRender();
     }
   }
 
@@ -156,9 +157,6 @@ export default class View {
     this.$el.innerHTML = html;
     this.onRender();
 
-    // resize parent before rendering components children
-    this.onResize(viewport.width, viewport.height, viewport.orientation);
-
     for (let selector in this._components)
       this._renderPartial(selector);
   }
@@ -177,6 +175,9 @@ export default class View {
       this._renderPartial(selector);
     else
       this._renderAll();
+
+    if (this.isVisible)
+      this.onResize(viewport.width, viewport.height, viewport.orientation, true);
   }
 
   /**
@@ -242,7 +243,7 @@ export default class View {
    * @todo - move `orientation` to third argument
    * @todo - rename to `resize`
    */
-  onResize(viewportWidth, viewportHeight, orientation) {
+  onResize(viewportWidth, viewportHeight, orientation, propagate = false) {
     this.$el.style.width = `${viewportWidth}px`;
     this.$el.style.height = `${viewportHeight}px`;
     this.viewportWidth = viewportWidth;
@@ -252,6 +253,8 @@ export default class View {
     this.$el.classList.remove('portrait', 'landscape');
     this.$el.classList.add(orientation);
     // do not propagate to component as they are listening viewport's event too.
+    if (propagate)
+      this._executeViewComponentMethod('onResize', viewportWidth, viewportHeight, orientation);
   }
 
   // EVENTS ----------------------------------------
