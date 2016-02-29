@@ -48,10 +48,4 @@ export default {
   ServerSharedConfig,
   ServerSharedParams,
   ServerSync,
-
-  utils: {
-    helpers,
-    math,
-    setup,
-  },
 };
