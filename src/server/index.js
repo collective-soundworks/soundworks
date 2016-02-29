@@ -23,19 +23,12 @@ import ServerSharedConfig from './services/ServerSharedConfig';
 import ServerSharedParams from './services/ServerSharedParams';
 import ServerSync from './services/ServerSync';
 
-// utils
-import * as helpers from '../utils/helpers';
-import * as math from '../utils/math';
-import * as setup from '../utils/setup';
-
 export default {
   /* core */
   server,
-  // @todo - move into namespace ?
   Client,
   serverServiceManager, // @tbd - expose ?
   ServerActivity,
-  sockets,
 
   /* scenes */
   ServerExperience,
@@ -55,10 +48,4 @@ export default {
   ServerSharedConfig,
   ServerSharedParams,
   ServerSync,
-
-  utils: {
-    helpers,
-    math,
-    setup,
-  },
 };

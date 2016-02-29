@@ -13,7 +13,6 @@ import Experience from './scenes/Experience';
 import ClientSurvey from './scenes/ClientSurvey';
 
 // services
-// import ClientCalibration from './ClientCalibration';
 import ClientCheckin from './services/ClientCheckin';
 // import ClientFileList from './ClientFileList';
 import ClientErrorReporter from './services/ClientErrorReporter';
@@ -43,15 +42,11 @@ import TouchSurface from './display/TouchSurface';
 import View from './display/View';
 import viewport from './display/viewport';
 
-// utils
-import * as helpers from '../utils/helpers';
-import * as math from '../utils/math';
-import * as setup from '../utils/setup';
-
 export default {
   /* external */
   audio,
   audioContext: audio.audioContext,
+
   /* core */
   client,
   Process,
@@ -63,23 +58,6 @@ export default {
   /* scenes */
   Experience,
   ClientSurvey,
-
-  /* services */
-  // @todo - hide inside a namespace ?
-  // ClientCalibration,
-  ClientCheckin,
-  ClientErrorReporter,
-  // ClientFileList,
-  ClientLocator,
-  ClientNetwork,
-  ClientPlacer,
-  ClientSharedConfig,
-  ClientSharedParams,
-  ClientSync,
-  Loader,
-  MotionInput,
-  // Orientation,
-  Welcome,
 
   display: {
     defaultTemplates,
@@ -95,11 +73,5 @@ export default {
     TouchSurface,
     View,
     viewport,
-  },
-
-  utils: {
-    helpers,
-    math,
-    setup,
   },
 };

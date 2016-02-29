@@ -1,7 +1,6 @@
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
 
-
 const SERVICE_ID = 'service:error-reporter';
 
 /**
