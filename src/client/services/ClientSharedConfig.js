@@ -1,5 +1,6 @@
 import serviceManager from '../core/serviceManager';
 import Service from '../core/Service';
+import client from '../core/client';
 
 
 const SERVICE_ID = 'service:shared-config';
@@ -11,7 +12,23 @@ class ClientSharedConfig extends Service {
   constructor() {
     super(SERVICE_ID, true);
 
+    /**
+     * Configuration items required by the client.
+     * @type {Array}
+     */
+    this._items = [];
+
     this._onConfigResponse = this._onConfigResponse.bind(this);
+  }
+
+  /** @inheritdoc */
+  configure(options) {
+    if (options.items) {
+      this._items = this._items.concat(options.items);
+      delete options.items;
+    }
+
+    super.configure(options);
   }
 
   /** @inheritdoc */
@@ -26,22 +43,27 @@ class ClientSharedConfig extends Service {
     if (!this.hasStarted)
       this.init();
 
-    this.send('request');
+    this.send('request', this._items);
     this.receive('config', this._onConfigResponse);
   }
 
   /**
-   * Retrieve a configuration entry from its path, as defined in server side
+   * Retrieve a configuration value from its key item, as defined in server side
    * service's `addItem` method.
-   * @param {String} path - The path of the configuration (ex: `'setup.area'`)
+   * @param {String} item - The item of the configuration (ex: `'setup.area'`)
    * @return {Mixed}
    */
-  get(path) {
-    return this.data[path];
+  get(item) {
+    const parts = item.split('.');
+    let tmp = this.data;
+
+    parts.forEach((attr) => tmp = tmp[attr]);
+
+    return tmp;
   }
 
   _onConfigResponse(data) {
-    this.data = data;
+    this.data = client.config = data;
     this.ready();
   }
 }
