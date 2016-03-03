@@ -20,11 +20,11 @@ class ServerPlacer extends ServerActivity {
 
     /**
      * @type {Object} defaults - Defaults options of the service
-     * @attribute {String} [defaults.setupConfigPath='setup'] - The path to the server's setup
+     * @attribute {String} [defaults.setupConfigItem='setup'] - The path to the server's setup
      *  configuration entry (see {@link src/server/core/server.js~appConfig} for details).
      */
     const defaults = {
-      setupConfigPath: 'setup',
+      setupConfigItem: 'setup',
     };
 
     this.configure(defaults);
@@ -35,11 +35,13 @@ class ServerPlacer extends ServerActivity {
   start() {
     super.start();
 
+    const setupConfigItem = this.options.setupConfigItem;
+
     /**
      * Setup defining dimensions and predefined positions (labels and/or coordinates).
      * @type {Object}
      */
-    this.setup = this._sharedConfigService.get(setupConfigPath);
+    this.setup = this._sharedConfigService.get(setupConfigItem);
 
     if (!this.setup.maxClientsPerPosition)
       this.setup.maxClientsPerPosition = 1;
@@ -83,8 +85,12 @@ class ServerPlacer extends ServerActivity {
     this.disabledPositions = [];
 
     // update config capacity with computed one
-    setupConfig.capacity = this.capacity;
-    this._sharedConfigService.addItem(setupConfigPath, this.clientTypes);
+    this.setup.capacity = this.capacity;
+
+    // add path to shared config requirements for all client type
+    this.clientTypes.forEach((clientType) => {
+      this._sharedConfigService.addItem(setupConfigItem, clientType);
+    });
   }
 
   /**
@@ -137,22 +143,13 @@ class ServerPlacer extends ServerActivity {
   /** @private */
   _onRequest(client) {
     return () => {
-      const setup = this.setup;
-      let area = undefined;
-      let labels = undefined;
-      let coordinates = undefined;
-
-      if (setup) {
-        labels = setup.labels;
-        coordinates = setup.coordinates;
-        area = setup.area;
-      }
-
+      const setupConfigItem = this.options.setupConfigItem;
+      const disabledPositions = this.disabledPositions;
       // aknowledge
-      if (this.numClients < setup.capacity)
-        this.send(client, 'aknowlegde', this.options.setupConfigPath, this.disabledPositions);
+      if (this.numClients < this.setup.capacity)
+        this.send(client, 'aknowlegde', setupConfigItem, disabledPositions);
       else
-        this.send('reject', this.disabledPositions);
+        this.send('reject', disabledPositions);
     }
   }
 

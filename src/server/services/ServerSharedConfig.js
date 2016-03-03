@@ -14,6 +14,7 @@ class ServerSharedConfig extends ServerActivity {
     super(SERVICE_ID);
 
     this._cache = {};
+    this._clientItemsMap = {};
   }
 
   /** @inheritdoc */
@@ -44,16 +45,27 @@ class ServerSharedConfig extends ServerActivity {
   }
 
   /**
+   * Add a required item from server side to a specific client. This should be
+   * called on ServerActivities initialization.
+   *
+   */
+  addItem(item, clientType) {
+    if (!this._clientItemsMap[clientType])
+      this._clientItemsMap[clientType] = new Set();;
+
+    this._clientItemsMap[clientType].add(item);
+  }
+
+  /**
    * Generate a object according to the given items. The result is cached
    * @param {Array<String>} items - The path to the items to be shared.
    * @returns {Object} - An optimized object containing all the requested items.
    */
-  _generateFromItems(items) {
-    const key = items.join(':');
+  _getValues(clientType) {
+    if (this._cache[clientType])
+      return this._cache[clientType];
 
-    if (this._cache[key])
-      return this._cache[key];
-
+    const items = this._clientItemsMap[clientType];
     const serverConfig = server.config;
     const data = {};
 
@@ -87,14 +99,16 @@ class ServerSharedConfig extends ServerActivity {
       });
     });
 
-    this._cache[key] = data;
+    this._cache[clientType] = data;
     return data;
   }
 
   _onRequest(client) {
     // generate an optimized config bundle to return the client
     return (items) => {
-      const config = this._generateFromItems(items);
+      items.forEach((item) => this.addItem(item, client.type));
+
+      const config = this._getValues(client.type);
       this.send(client, 'config', config);
     }
   }
