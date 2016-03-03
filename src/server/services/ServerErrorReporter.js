@@ -26,8 +26,7 @@ class ServerErrorReporter extends ServerActivity {
   }
 
   start() {
-    const directoryConfig = this.options.directoryConfig;
-    let dir = this._sharedConfigService.get(directoryConfig)[directoryConfig];
+    let dir = this._sharedConfigService.get(this.options.directoryConfig);
     dir = path.join(process.cwd(), dir);
     dir = path.normalize(dir); // @todo - check it does the job on windows
     fse.ensureDirSync(dir); // create directory if not exists

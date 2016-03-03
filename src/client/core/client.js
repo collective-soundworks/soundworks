@@ -66,6 +66,13 @@ const client = {
   label: null,
 
   /**
+   * Configuration informations retrieved from the server configuration by
+   * the `SharedConfig` service.
+   * @type {Object}
+   */
+  config: null,
+
+  /**
    * Is set to `true` or `false` by the `Welcome` service and defines if the
    * client meets the requirements of the application. (Should be usefull when
    * the `Welcome` service is used without a view and activated manually)

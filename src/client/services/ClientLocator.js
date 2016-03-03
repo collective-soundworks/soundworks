@@ -136,10 +136,11 @@ class ClientLocator extends Service {
     };
 
     this.configure(defaults);
-    this._onAknowledgeResponse = this._onAknowledgeResponse.bind(this);
-    this._sendCoordinates = this._sendCoordinates.bind(this);
 
     this._sharedConfigService = this.require('shared-config');
+
+    this._onAknowledgeResponse = this._onAknowledgeResponse.bind(this);
+    this._sendCoordinates = this._sendCoordinates.bind(this);
   }
 
   /** @inheritdoc */
@@ -177,9 +178,8 @@ class ClientLocator extends Service {
    * @private
    * @param {Object} area - The area as defined in server configuration.
    */
-  _onAknowledgeResponse(areaPath) {
-    const area = this._sharedConfigService.get(areaPath);
-
+  _onAknowledgeResponse(areaConfigPath) {
+    const area = this._sharedConfigService.get(areaConfigPath);
     this.view.setArea(area);
     this.view.onSelect(this._sendCoordinates);
 

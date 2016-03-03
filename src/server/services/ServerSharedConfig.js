@@ -6,92 +6,15 @@ import server from '../core/server';
 const SERVICE_ID = 'service:shared-config';
 
 /**
- * [server] This service acts as an accessor for the server config both server
- * and client sides.
- *
+ * [server] Service that acts as an accessor for the server config for both
+ * server and client sides.
  */
 class ServerSharedConfig extends ServerActivity {
   constructor() {
     super(SERVICE_ID);
 
-    // this._clientTypeConfigPaths = {};
-
     this._cache = {};
-  }
-
-  /**
-   * Adds an item of the server configuration has required by some type of clients.
-   * @param {String} configPath - String representing the path to the configuration
-   *  ex. `'setup.area'` will search for the `area` entry of the '`setup`' entry
-   *  of the server configuration.
-   * @param {Array<String>|<String>} - The name of the client types with whom the
-   *  configuration entry must be shared.
-   */
-  // addItem(configPath, clientTypes) {
-  //   // add given client type to mapped client types
-  //   const options = { clientTypes };
-  //   this.configure(options);
-
-  //   if (typeof clientTypes === 'string')
-  //     clientTypes = [clientTypes];
-
-  //   clientTypes.forEach((type) => {
-  //     if (!this._clientTypeConfigPaths[type])
-  //       this._clientTypeConfigPaths[type] = [];
-
-  //     this._clientTypeConfigPaths[type].push(configPath);
-  //   });
-  // }
-
-  /**
-   * Returns an item of the server configuration from its path. (Allow to use the
-   * service server-side). Used server-side by other service to get
-   * config informations
-   * @param {String} configPath - String representing the path to the configuration
-   *  ex. `'setup.area'` will search for the `area` entry of the '`setup`' entry
-   *  of the server configuration.
-   * returns {Object<String, Mixed>} - An object containing all the configuration
-   *  informations, ordered with the configuration paths as keys.
-   */
-  getPath(path) {
-
-  }
-
-  /**
-   * @todo - remove
-   * Returns an item of the server configuration from its path. (Allow to use the
-   * service server-side)
-   * @param {String} configPath - String representing the path to the configuration
-   *  ex. `'setup.area'` will search for the `area` entry of the '`setup`' entry
-   *  of the server configuration.
-   * returns {Object<String, Mixed>} - An object containing all the configuration
-   *  informations, ordered with the configuration paths as keys.
-   */
-  get(configPaths) {
-    if (!Array.isArray(configPaths))
-      configPaths = [configPaths];
-
-    const serverConfig = server.config;
-    const config = {};
-
-    configPaths.forEach((configPath) => {
-      // 'setup.area' => ['setup', 'area'];
-      const path = configPath.split('.');
-      let tmp = serverConfig;
-      // search path through config
-      for (let i = 0, l = path.length; i < l; i++) {
-        const attr = path[i];
-
-        if (tmp[attr])
-          tmp = tmp[attr];
-        else
-          throw new Error(`"${configPath}" does not exist in server config`);
-      }
-
-      config[configPath] = tmp;
-    });
-
-    return config;
+    this._clientItemsMap = {};
   }
 
   /** @inheritdoc */
@@ -99,18 +22,93 @@ class ServerSharedConfig extends ServerActivity {
     this.receive(client, 'request', this._onRequest(client));
   }
 
-  _generateObject(paths) {
-    const key = paths.join(':');
-    if (this._cache[key]) {}
+  /**
+   * Returns an item of the server configuration from its path. For server-side use.
+   * @param {String} item - String representing the path to the configuration
+   *  ex. `'setup.area'` will search for the `area` entry of the '`setup`' entry
+   *  of the server configuration.
+   * @returns {Mixed} - The value of the request item. Returns `null` if
+   *  the given item does not exists.
+   */
+  get(item) {
+    const parts = item.split('.');
+    let value = server.config;
+    // search item through config
+    parts.forEach((attr) => {
+      if (value[attr])
+        value = value[attr];
+      else
+        value = null;
+    });
+
+    return value;
   }
 
-  _onRequest(client, paths) {
+  /**
+   * Add a required item from server side to a specific client. This should be
+   * called on ServerActivities initialization.
+   *
+   */
+  addItem(item, clientType) {
+    if (!this._clientItemsMap[clientType])
+      this._clientItemsMap[clientType] = new Set();;
+
+    this._clientItemsMap[clientType].add(item);
+  }
+
+  /**
+   * Generate a object according to the given items. The result is cached
+   * @param {Array<String>} items - The path to the items to be shared.
+   * @returns {Object} - An optimized object containing all the requested items.
+   */
+  _getValues(clientType) {
+    if (this._cache[clientType])
+      return this._cache[clientType];
+
+    const items = this._clientItemsMap[clientType];
+    const serverConfig = server.config;
+    const data = {};
+
+    // build data tree
+    items.forEach((item) => {
+      const parts = item.split('.');
+      let pointer = data;
+
+      parts.forEach((attr) => {
+        if (!pointer[attr])
+          pointer[attr] = {};
+
+        pointer = pointer[attr];
+      });
+    });
+
+    // populate previously builded tree
+    items.forEach((item) => {
+      const parts = item.split('.');
+      const len = parts.length;
+      let value = serverConfig;
+      let pointer = data;
+
+      parts.forEach((attr, index) => {
+        value = value[attr];
+
+        if (index < len - 1)
+          pointer = pointer[attr];
+        else
+          pointer[attr] = value;
+      });
+    });
+
+    this._cache[clientType] = data;
+    return data;
+  }
+
+  _onRequest(client) {
     // generate an optimized config bundle to return the client
+    return (items) => {
+      items.forEach((item) => this.addItem(item, client.type));
 
-    return () => {
-      const configPaths = this._clientTypeConfigPaths[client.type];
-      const config = this.get(configPaths);
-
+      const config = this._getValues(client.type);
       this.send(client, 'config', config);
     }
   }
