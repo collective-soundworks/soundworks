@@ -24,6 +24,7 @@ import ClientSharedParams from './services/ClientSharedParams';
 import ClientSync from './services/ClientSync';
 import Loader from './services/Loader';
 import MotionInput from './services/MotionInput';
+import Scheduler from './services/Scheduler';
 // import Orientation from './Orientation';
 import Welcome from './services/Welcome';
 

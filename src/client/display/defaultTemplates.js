@@ -105,7 +105,7 @@ export default {
       <% if (error) { %>
         <p class="big"><%= error %></p>
       <% } else { %>
-        <p class="small"><%= touchScreen %></p>
+        <p class="small soft-blink"><%= touchScreen %></p>
       <% } %>
     </div>
     <div class="section-bottom flex-middle"></div>

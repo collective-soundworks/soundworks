@@ -175,19 +175,19 @@ class ServerSharedParams extends ServerActivity {
 
     switch(type) {
       case 'boolean':
-        unit = this.addBool.apply(this, args);
+        unit = this.addBool(...args);
         break;
       case 'enum':
-        unit = this.addEnum.apply(this, args);
+        unit = this.addEnum(...args);
         break;
       case 'number':
-        unit = this.addNumber.apply(this, args);
+        unit = this.addNumber(...args);
         break;
       case 'text':
-        unit = this.addText.apply(this, args);
+        unit = this.addText(...args);
         break;
       case 'trigger':
-        unit = this.addTrigger.apply(this, args);
+        unit = this.addTrigger(...args);
         break;
     }
 
