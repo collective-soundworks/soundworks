@@ -35,14 +35,11 @@ class ServerPlacer extends ServerActivity {
   start() {
     super.start();
 
-    const setupConfigPath = this.options.setupConfigPath;
-    const setupConfig = this._sharedConfigService.get(setupConfigPath)[setupConfigPath];
-
     /**
      * Setup defining dimensions and predefined positions (labels and/or coordinates).
      * @type {Object}
      */
-    this.setup = setupConfig;
+    this.setup = this._sharedConfigService.get(setupConfigPath);
 
     if (!this.setup.maxClientsPerPosition)
       this.setup.maxClientsPerPosition = 1;

@@ -17,7 +17,7 @@ class Osc extends ServerActivity {
     super(SERVICE_ID);
 
     const defaults = {
-      oscConfigPath: 'osc',
+      oscConfigItem: 'osc',
       // protocol: 'udp',
     }
 
@@ -30,8 +30,7 @@ class Osc extends ServerActivity {
   }
 
   start() {
-    const oscConfigPath = this.options.oscConfigPath;
-    const oscConfig = this._sharedConfigService.get(oscConfigPath)[oscConfigPath];
+    const oscConfig = this._sharedConfigService.get(this.options.oscConfigItem);
 
     this.osc = new osc.UDPPort({
       // This is the port we're listening on.

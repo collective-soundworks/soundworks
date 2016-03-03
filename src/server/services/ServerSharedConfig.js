@@ -26,19 +26,19 @@ class ServerSharedConfig extends ServerActivity {
    * @param {String} item - String representing the path to the configuration
    *  ex. `'setup.area'` will search for the `area` entry of the '`setup`' entry
    *  of the server configuration.
-   * returns {Object<String, Mixed>} - An object containing all the configuration
-   *  informations, ordered with the configuration paths as keys.
+   * @returns {Mixed} - The value of the request item. Returns `null` if
+   *  the given item does not exists.
    */
   get(item) {
     const parts = item.split('.');
-    let value = serverConfig;
+    let value = server.config;
     // search item through config
     parts.forEach((attr) => {
       if (value[attr])
         value = value[attr];
       else
-        throw new Error(`Invalid item: "${item}"`);
-    })
+        value = null;
+    });
 
     return value;
   }
@@ -46,6 +46,7 @@ class ServerSharedConfig extends ServerActivity {
   /**
    * Generate a object according to the given items. The result is cached
    * @param {Array<String>} items - The path to the items to be shared.
+   * @returns {Object} - An optimized object containing all the requested items.
    */
   _generateFromItems(items) {
     const key = items.join(':');
