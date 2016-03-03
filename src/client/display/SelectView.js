@@ -2,9 +2,9 @@ import View from './View';
 
 const defaultTemplate = `
   <option class="small"><%= instructions %></option>
-  <% entries.forEach((entry) => { %>
+  <% entries.forEach(function(entry) { %>
     <option value="<%= entry.index %>"><%= entry.label %></option>
-  <% }) %>
+  <% }); %>
 `;
 
 export default class SelectView extends View {

@@ -96,19 +96,19 @@ export default {
   `,
 
   'service:welcome': `
-    <div class="section-top flex-middle">
-      <% if (!error) { %>
-        <p class="big"><%= welcome %> <br /><b><%= globals.appName %></b></p>
-      <% } %>
-    </div>
+    <div class="section-top flex-middle"></div>
     <div class="section-center flex-center">
       <% if (error) { %>
         <p class="big"><%= error %></p>
       <% } else { %>
+        <p class="big"><%= welcome %> <br /><b><%= globals.appName %></b></p>
+      <% } %>
+    </div>
+    <div class="section-bottom flex-middle">
+      <% if (!error) { %>
         <p class="small soft-blink"><%= touchScreen %></p>
       <% } %>
     </div>
-    <div class="section-bottom flex-middle"></div>
   `,
 
 
