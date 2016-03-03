@@ -3,7 +3,7 @@ import serverServiceManager from '../core/serverServiceManager';
 import { EventEmitter } from 'events';
 
 /** @private */
-class _ControlUnit extends EventEmitter {
+class _ControlItem extends EventEmitter {
   constructor(control, type, name, label, init = undefined, clientTypes = null) {
     super();
 
@@ -17,8 +17,8 @@ class _ControlUnit extends EventEmitter {
       value: init,
     };
 
-    control.units[name] = this;
-    control._unitData.push(this.data);
+    control.items[name] = this;
+    control._itemData.push(this.data);
   }
 
   set(val) {
@@ -37,7 +37,7 @@ class _ControlUnit extends EventEmitter {
 }
 
 /** @private */
-class _BooleanUnit extends _ControlUnit {
+class _BooleanItem extends _ControlItem {
   constructor(control, name, label, init, clientTypes = null) {
     super(control, 'boolean', name, label, init, clientType);
   }
@@ -48,7 +48,7 @@ class _BooleanUnit extends _ControlUnit {
 }
 
 /** @private */
-class _EnumUnit extends _ControlUnit {
+class _EnumItem extends _ControlItem {
   constructor(control, name, label, options, init, clientTypes = null) {
     super(control, 'enum', name, label, init, clientTypes);
 
@@ -67,7 +67,7 @@ class _EnumUnit extends _ControlUnit {
 }
 
 /** @private */
-class _NumberUnit extends _ControlUnit {
+class _NumberItem extends _ControlItem {
   constructor(control, name, label, min, max, step, init, clientTypes = null) {
     super(control, 'number', name, label, init, clientTypes);
 
@@ -83,7 +83,7 @@ class _NumberUnit extends _ControlUnit {
 }
 
 /** @private */
-class _TextUnit extends _ControlUnit {
+class _TextItem extends _ControlItem {
   constructor(control, name, label, init, clientTypes = null) {
     super(control, 'text', name, label, init, clientTypes);
   }
@@ -94,7 +94,7 @@ class _TextUnit extends _ControlUnit {
 }
 
 /** @private */
-class _TriggerUnit extends _ControlUnit {
+class _TriggerItem extends _ControlItem {
   constructor(control, name, label, clientTypes = null) {
     super(control, 'trigger', name, label, undefined, clientTypes);
   }
@@ -159,39 +159,39 @@ class ServerSharedParams extends ServerActivity {
      * Dictionary of all control items.
      * @type {Object}
      */
-    this.units = {};
+    this.items = {};
 
     /**
      * Array of item data cells.
      * @type {Array}
      */
-    this._unitData = [];
+    this._itemData = [];
   }
 
   addItem() {
     const args = Array.from(arguments);
     const type = args.shift();
-    let unit;
+    let item;
 
     switch(type) {
       case 'boolean':
-        unit = this.addBool(...args);
+        item = this.addBool(...args);
         break;
       case 'enum':
-        unit = this.addEnum(...args);
+        item = this.addEnum(...args);
         break;
       case 'number':
-        unit = this.addNumber(...args);
+        item = this.addNumber(...args);
         break;
       case 'text':
-        unit = this.addText(...args);
+        item = this.addText(...args);
         break;
       case 'trigger':
-        unit = this.addTrigger(...args);
+        item = this.addTrigger(...args);
         break;
     }
 
-    return unit;
+    return item;
   }
 
   /**
@@ -202,7 +202,7 @@ class ServerSharedParams extends ServerActivity {
    * @param {String[]} [clientTypes=null] - Array of the client types to send the parameter to. If not set, the parameter is sent to all the client types.
    */
   addBoolean(name, label, init, clientTypes = null) {
-    return new _BooleanUnit(this, name, label, init, clientTypes);
+    return new _BooleanItem(this, name, label, init, clientTypes);
   }
 
   /**
@@ -214,7 +214,7 @@ class ServerSharedParams extends ServerActivity {
    * @param {String[]} [clientTypes=null] - Array of the client types to send the parameter to. If not set, the parameter is sent to all the client types.
    */
   addEnum(name, label, options, init, clientTypes = null) {
-    return new _EnumUnit(this, name, label, options, init, clientTypes);
+    return new _EnumItem(this, name, label, options, init, clientTypes);
   }
 
   /**
@@ -228,7 +228,7 @@ class ServerSharedParams extends ServerActivity {
    * @param {String[]} [clientTypes=null] - Array of the client types to send the parameter to. If not set, the parameter is sent to all the client types.
    */
   addNumber(name, label, min, max, step, init, clientTypes = null) {
-    return new _NumberUnit(this, name, label, min, max, step, init, clientTypes);
+    return new _NumberItem(this, name, label, min, max, step, init, clientTypes);
   }
 
   /**
@@ -239,7 +239,7 @@ class ServerSharedParams extends ServerActivity {
    * @param {String[]} [clientTypes=null] - Array of the client types to send the parameter to. If not set, the parameter is sent to all the client types.
    */
   addText(name, label, init, clientTypes = null) {
-    return new _TextUnit(this, name, label, init, clientTypes);
+    return new _TextItem(this, name, label, init, clientTypes);
   }
 
   /**
@@ -249,23 +249,23 @@ class ServerSharedParams extends ServerActivity {
    * @param {String[]} [clientTypes=null] - Array of the client types to send the parameter to. If not set, the parameter is sent to all the client types.
    */
   addTrigger(name, label, clientTypes = null) {
-    return new _TriggerUnit(this, name, label, undefined, clientTypes);
+    return new _TriggerItem(this, name, label, undefined, clientTypes);
   }
 
   /**
    * Add listener to a control item (i.e. parameter, info or command).
-   * The given listener is fired immediately with the unit current value.
+   * The given listener is fired immediately with the item current value.
    * @param {String} name - Name of the item.
    * @param {Function} listener - Listener callback.
    */
-  addUnitListener(name, listener) {
-    const unit = this.units[name];
+  addItemListener(name, listener) {
+    const item = this.items[name];
 
-    if (unit) {
-      unit.addListener(unit.data.name, listener);
-      listener(unit.data.value);
+    if (item) {
+      item.addListener(item.data.name, listener);
+      listener(item.data.value);
     } else {
-      console.log('unknown control item "' + name + '"');
+      console.log('unknown shared parameter "' + name + '"');
     }
   }
 
@@ -274,13 +274,13 @@ class ServerSharedParams extends ServerActivity {
    * @param {String} name - Name of the item.
    * @param {Function} listener - Listener callback.
    */
-  removeUnitListener(name, listener) {
-    const unit = this.units[name];
+  removeItemListener(name, listener) {
+    const item = this.items[name];
 
-    if (unit)
-      unit.removeListener(unit.data.name, listener);
+    if (item)
+      item.removeListener(item.data.name, listener);
     else
-      console.log('unknown control item "' + name + '"');
+      console.log('unknown shared parameter "' + name + '"');
   }
 
   /**
@@ -289,12 +289,12 @@ class ServerSharedParams extends ServerActivity {
    * @param {(String|Number|Boolean)} value - New value of the parameter.
    */
   update(name, value, excludeClient = null) {
-    const unit = this.units[name];
+    const item = this.items[name];
 
-    if (unit)
-      unit.update(value, excludeClient);
+    if (item)
+      item.update(value, excludeClient);
     else
-      console.log('unknown control item "' + name + '"');
+      console.log('unknown shared parameter  "' + name + '"');
   }
 
   /** @private */
@@ -307,7 +307,7 @@ class ServerSharedParams extends ServerActivity {
   }
 
   _onRequest(client) {
-    return () => this.send(client, 'init', this._unitData);
+    return () => this.send(client, 'init', this._itemData);
   }
 
   _onUpdate(client) {
