@@ -14,7 +14,9 @@ class ServerSharedConfig extends ServerActivity {
   constructor() {
     super(SERVICE_ID);
 
-    this._clientTypeConfigPaths = {};
+    // this._clientTypeConfigPaths = {};
+
+    this._cache = {};
   }
 
   /**
@@ -25,23 +27,38 @@ class ServerSharedConfig extends ServerActivity {
    * @param {Array<String>|<String>} - The name of the client types with whom the
    *  configuration entry must be shared.
    */
-  addItem(configPath, clientTypes) {
-    // add given client type to mapped client types
-    const options = { clientTypes };
-    this.configure(options);
+  // addItem(configPath, clientTypes) {
+  //   // add given client type to mapped client types
+  //   const options = { clientTypes };
+  //   this.configure(options);
 
-    if (typeof clientTypes === 'string')
-      clientTypes = [clientTypes];
+  //   if (typeof clientTypes === 'string')
+  //     clientTypes = [clientTypes];
 
-    clientTypes.forEach((type) => {
-      if (!this._clientTypeConfigPaths[type])
-        this._clientTypeConfigPaths[type] = [];
+  //   clientTypes.forEach((type) => {
+  //     if (!this._clientTypeConfigPaths[type])
+  //       this._clientTypeConfigPaths[type] = [];
 
-      this._clientTypeConfigPaths[type].push(configPath);
-    });
+  //     this._clientTypeConfigPaths[type].push(configPath);
+  //   });
+  // }
+
+  /**
+   * Returns an item of the server configuration from its path. (Allow to use the
+   * service server-side). Used server-side by other service to get
+   * config informations
+   * @param {String} configPath - String representing the path to the configuration
+   *  ex. `'setup.area'` will search for the `area` entry of the '`setup`' entry
+   *  of the server configuration.
+   * returns {Object<String, Mixed>} - An object containing all the configuration
+   *  informations, ordered with the configuration paths as keys.
+   */
+  getPath(path) {
+
   }
 
   /**
+   * @todo - remove
    * Returns an item of the server configuration from its path. (Allow to use the
    * service server-side)
    * @param {String} configPath - String representing the path to the configuration
@@ -82,7 +99,14 @@ class ServerSharedConfig extends ServerActivity {
     this.receive(client, 'request', this._onRequest(client));
   }
 
-  _onRequest(client) {
+  _generateObject(paths) {
+    const key = paths.join(':');
+    if (this._cache[key]) {}
+  }
+
+  _onRequest(client, paths) {
+    // generate an optimized config bundle to return the client
+
     return () => {
       const configPaths = this._clientTypeConfigPaths[client.type];
       const config = this.get(configPaths);
