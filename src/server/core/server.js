@@ -269,6 +269,10 @@ export default {
    */
   _initSockets(httpServer) {
     this.io = new IO(httpServer, this.config.socketIO);
+
+    if (this.config.cordova.socketIO) // IO add some configuration options to the object
+      this.config.cordova.socketIO = Object.assign({}, this.config.socketIO, this.config.cordova.socketIO);
+
     sockets.initialize(this.io);
   },
 
@@ -311,12 +315,26 @@ export default {
     const tmpl = ejs.compile(tmplString);
 
     expressApp.get(url, (req, res) => {
+      let includeCordovaTags = false;
+      let socketConfig = JSON.stringify(this.config.socketIO);
+      console.log(req.query);
+
+      if (req.query.cordova) {
+        includeCordovaTags = true;
+        socketConfig = JSON.stringify(this.config.cordova.socketIO);
+      }
+
+      if (req.query.clientType)
+        clientType = req.query.clientType;
+
       res.send(tmpl({
-        socketIO: JSON.stringify(this.config.socketIO),
+        socketIO: socketConfig,
         appName: this.config.appName,
         clientType: clientType,
         defaultType: this.config.defaultClient,
         assetsDomain: this.config.assetsDomain,
+        // export html for cordova use
+        includeCordovaTags: includeCordovaTags,
       }));
     });
 
