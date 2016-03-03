@@ -2,14 +2,15 @@ import audio from 'waves-audio';
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
 
-
 class _SyncTimeSchedulingQueue extends audio.SchedulingQueue {
   constructor(sync, scheduler) {
     super();
+
     this.sync = sync;
     this.scheduler = scheduler;
     this.scheduler.add(this, Infinity);
     this.nextSyncTime = Infinity;
+
     // call this.resync in sync callback
     this.resync = this.resync.bind(this);
     this.sync.addListener(this.resync);
@@ -54,18 +55,47 @@ class Scheduler extends Service {
   constructor () {
     super(SERVICE_ID);
 
-    this.sync = this.require('sync');
+    this._sync = this.require('sync');
 
-    this.queue = undefined;
-    this.scheduler = audio.getScheduler();
-    this.scheduler.lookahead = 0.2; // in seconds (100 ms for video)
-    this.queue = new _SyncTimeSchedulingQueue(this.sync, this.scheduler);
+    this._scheduler = audio.getScheduler();
+    this._syncedQueue = new _SyncTimeSchedulingQueue(this._sync, this._scheduler);
+
+    const defaults = {
+      lookahead: this._scheduler.lookahead,
+      period: this._scheduler.period,
+    };
+
+    this.configure(defaults);
   }
 
+  /**
+   * Override default configure to add descriptors from multiple calls.
+   * @param {Object} options - The options to apply to the service.
+   */
+  configure(options) {
+    if(options.period !== undefined) {
+      if(options.period > 0.010)
+        this._scheduler.period = options.period;
+      else
+        throw new Error(`Invalid scheduler period: ${options.period}`);
+    }
+
+    if(options.lookahead !== undefined) {
+      if(options.lookahead > 0.010)
+        this._scheduler.lookahead = options.lookahead;
+      else
+        throw new Error(`Invalid scheduler lookahead: ${options.lookahead}`);
+    }
+
+    super.configure(options);
+  }
+
+  /** private */
   init () {
 
   }
 
+  /** private */
   start() {
     super.start();
 
@@ -75,25 +105,41 @@ class Scheduler extends Service {
     this.ready();
   }
 
-  getSyncScheduler () {
-    return this.queue;
+  get audioTime() {
+    return this._scheduler.currentTime;
   }
 
-  getLocalTime () {
-    return this.scheduler.currentTime;
+  get syncTime() {
+    return this._syncedQueue.currentTime;
   }
 
-  getSyncTime () {
-    return this.queue.currentTime;
+  get deltaTime() {
+    return this._scheduler.currentTime - audio.audioContext.currentTime;
   }
 
-  getDeltaTime() {
-    const audioContext = audio.audioContext;
-    return this.scheduler.currentTime - audioContext.currentTime;
+  defer(fun, time, synchronized = true) {
+    const scheduler = synchronized? this._syncedQueue: this._scheduler;
+    scheduler.defer(fun, time)
+  }
+
+  add(engine, time, synchronized = true) {
+    const scheduler = synchronized? this._syncedQueue: this._scheduler;
+    scheduler.add(engine, time);
+  }
+
+  remove(engine) {
+    if(this._scheduler.has(engine))
+      this._scheduler.remove(engine);
+    else if(this._syncedQueue.has(engine))
+      this._syncedQueue.remove(engine);
+  }
+
+  clear() {
+    this._syncedQueue.clear();
+    this._scheduler.clear();
   }
 };
 
 serviceManager.register(SERVICE_ID, Scheduler);
 
 export default Scheduler;
-
