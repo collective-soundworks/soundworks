@@ -58,7 +58,6 @@ class Welcome extends Service {
     };
 
     this.configure(defaults);
-
     // check platform
     this._defineAudioFileExtention();
     this._definePlatform();

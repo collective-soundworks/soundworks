@@ -43,6 +43,9 @@ class ClientSync extends Service {
     }
 
     this.configure(defaults);
+    // needs audio time
+    this.require('welcome');
+
     this._syncStatusReport = this._syncStatusReport.bind(this);
     this._reportListeners = [];
   }
