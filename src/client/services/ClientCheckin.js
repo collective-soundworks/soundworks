@@ -33,6 +33,7 @@ class ClientCheckin extends Service {
 
     this.configure(defaults);
 
+    this.require('welcome');
     // bind callbacks to the current instance
     this._onPositionResponse = this._onPositionResponse.bind(this);
     this._onUnavailableResponse = this._onUnavailableResponse.bind(this);
