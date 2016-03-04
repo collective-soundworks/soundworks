@@ -59,7 +59,6 @@
   "devDependencies": {
     "babel": "^5.8.34",
     "babel-eslint": "^5.0.0-beta1",
-    "babelify": "^7.2.0",
     "eslint": "^1.10.1",
     "hound": "^1.0.4"
   }
