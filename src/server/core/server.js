@@ -270,7 +270,7 @@ export default {
   _initSockets(httpServer) {
     this.io = new IO(httpServer, this.config.socketIO);
 
-    if (this.config.cordova.socketIO) // IO add some configuration options to the object
+    if (this.config.cordova && this.config.cordova.socketIO) // IO add some configuration options to the object
       this.config.cordova.socketIO = Object.assign({}, this.config.socketIO, this.config.cordova.socketIO);
 
     sockets.initialize(this.io);
@@ -317,7 +317,6 @@ export default {
     expressApp.get(url, (req, res) => {
       let includeCordovaTags = false;
       let socketConfig = JSON.stringify(this.config.socketIO);
-      console.log(req.query);
 
       if (req.query.cordova) {
         includeCordovaTags = true;
