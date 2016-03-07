@@ -37,6 +37,7 @@ export default class View {
       el: 'div',
       id: null,
       className: null,
+      priority: 0,
     }, options);
 
     /**

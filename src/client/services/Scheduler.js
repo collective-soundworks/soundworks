@@ -21,7 +21,7 @@ class _SyncTimeSchedulingQueue extends audio.SchedulingQueue {
   }
 
   advanceTime(localTime) {
-    console.log('scheduler', localTime);
+    // console.log('advanceTime', localTime);
     const syncTime = this.sync.getSyncTime(localTime);
     const nextSyncTime = super.advanceTime(syncTime);
     const nextLocalTime = this.sync.getLocalTime(nextSyncTime);
@@ -36,6 +36,9 @@ class _SyncTimeSchedulingQueue extends audio.SchedulingQueue {
     const localTime = (typeof syncTime !== 'undefined') ?
       this.sync.getLocalTime(syncTime) : undefined;
 
+    this.nextSyncTime = syncTime;
+    this.nextLocalTime = localTime;
+
     this.master.resetEngineTime(this, localTime);
   }
 
@@ -46,6 +49,7 @@ class _SyncTimeSchedulingQueue extends audio.SchedulingQueue {
     } else {
       this.master.resetEngineTime(this, Infinity);
     }
+
   }
 
 }
@@ -124,7 +128,6 @@ class Scheduler extends Service {
   }
 
   add(engine, time, synchronized = true) {
-    console.log(engine);
     const scheduler = synchronized ? this._syncedQueue : this._scheduler;
     scheduler.add(engine, time);
   }
