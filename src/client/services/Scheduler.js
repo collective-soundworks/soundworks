@@ -35,6 +35,9 @@ class _SyncTimeSchedulingQueue extends audio.SchedulingQueue {
     const localTime = (typeof syncTime !== 'undefined') ?
       this.sync.getLocalTime(syncTime) : undefined;
 
+    this.nextSyncTime = syncTime;
+    this.nextLocalTime = localTime;
+
     this.master.resetEngineTime(this, localTime);
   }
 
@@ -45,6 +48,7 @@ class _SyncTimeSchedulingQueue extends audio.SchedulingQueue {
     } else {
       this.master.resetEngineTime(this, Infinity);
     }
+
   }
 
 }

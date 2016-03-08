@@ -166,11 +166,6 @@ class _GraphicView extends SquaredView {
     });
   }
 
-  // disablePositions(indexes) {
-  //   this._disabledPositions = indexes;
-  //   indexes.forEach((index) => this.disablePosition(index));
-  // }
-
   updateDisabledPositions(indexes) {
     this._disabledPositions = indexes;
 
@@ -181,29 +176,6 @@ class _GraphicView extends SquaredView {
       this.selector.updatePoint(position);
     }
   }
-
-  // disablePosition(index) {
-  //   this._disabledPositions.push(index);
-  //   const position = this.positions[index];
-
-  //   if (position) {
-  //     position.selected = true;
-  //     this.selector.updatePoint(position);
-  //   }
-  // }
-
-  // enablePosition(index) {
-  //   const disabledIndex = this._disabledPositions.indexOf(index);
-  //   if (disabledIndex !== -1)
-  //     this._disabledPositions.splice(disabledIndex, 1);
-
-  //   const position = this.positions[index];
-
-  //   if (position) {
-  //     position.selected = false;
-  //     this.selector.updatePoint(position);
-  //   }
-  // }
 
   onSelect(callback) {
     this._onSelect = callback;
@@ -278,11 +250,11 @@ class ClientPlacer extends Service {
 
     // allow to pass any view
     if (this.options.view !== null) {
-
+      this.view = this.options.view;
     } else {
-      if (this.options.viewCtor !== null)
-        this.viewCtor = this.options.viewCtor;
-      else {
+      if (this.options.viewCtor !== null) {
+
+      } else {
         switch (this.options.mode) {
           case 'graphic':
             this.viewCtor = _GraphicView;
@@ -292,10 +264,10 @@ class ClientPlacer extends Service {
             this.viewCtor = _ListView;
             break;
         }
-      }
 
-      this.content.mode = this.options.mode;
-      this.view = this.createView();
+        this.content.mode = this.options.mode;
+        this.view = this.createView();
+      }
     }
   }
 
