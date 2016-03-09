@@ -1,17 +1,21 @@
-# Consideration regarding development *(draft, to be completed, corrected, ...)*
+# Consideration regarding development
 
-3 main branches can be maintained:
+  *draft, to be completed, corrected, ...*
 
- * `master`: for hosting releases only
- * `develop`: for day to day development purposes, inherently unstable
- * `gh-pages`: for hosting the documentation.
+3 main branches should be maintained:
+
+ * `master`: for releases only
+ * `develop`: for development purposes, inherently unstable
+ * `gh-pages`: for documentation.
 
 
 ## Releases process
 
 ### Create a new Release
 
-In `develop` branch, transpiled files are ignored in order to keep a cleaner git history. For releases however, this files must be part of the commit in order to be consumed by the final application.
+In `develop` branch, transpiled files are ignored in order to keep a cleaner git history.
+
+For *releases* however, these files must be part of the commit in order to be consumed by the final application.
 
  * go to `release|master` branch
  * comment `/client`, `/server` and `/utils` in . to track them
