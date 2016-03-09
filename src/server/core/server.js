@@ -58,7 +58,7 @@ const exampleAppConfig = {
 const defaultFwConfig = {
   useHttps: false,
   publicFolder: path.join(process.cwd(), 'public'),
-  templateFolder: path.join(process.cwd(), 'views'),
+  templateFolder: path.join(process.cwd(), 'html'),
   defaultClient: 'player',
   assetsDomain: '', // override to download assets from a different serveur (nginx)
   socketIO: {

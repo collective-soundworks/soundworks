@@ -3,7 +3,7 @@ import Activity from './Activity';
 import serviceManager from './serviceManager';
 import viewManager from './viewManager';
 import socket from './socket';
-import defaultTextContents from '../views/defaultTextContents';
+import defaultTextContent from '../views/defaultTextContent';
 import defaultTemplates from '../views/defaultTemplates';
 
 
@@ -153,13 +153,13 @@ const client = {
    */
   _initViews() {
     // initialize modules views with default texts and templates
-    this.textContents = {};
+    this.textContent = {};
     this.templates = {};
 
-    const appName = this.config.appName || defaultTextContents.globals.appName;
-    const textContents = Object.assign(defaultTextContents, { globals: { appName } });
+    const appName = this.config.appName || defaultTextContent.globals.appName;
+    const textContent = Object.assign(defaultTextContent, { globals: { appName } });
 
-    this.setViewContentDefinitions(textContents);
+    this.setViewContentDefinitions(textContent);
     this.setViewTemplateDefinitions(defaultTemplates);
     this.setAppContainer(this.config.appContainer);
   },
@@ -169,8 +169,8 @@ const client = {
    * @param {Object} contents - The text contents to propagate to modules.
    */
   setViewContentDefinitions(defs) {
-    this.textContents = Object.assign(this.textContents, defs);
-    Activity.setViewContentDefinitions(this.textContents);
+    this.textContent = Object.assign(this.textContent, defs);
+    Activity.setViewContentDefinitions(this.textContent);
   },
 
   /**
