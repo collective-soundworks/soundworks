@@ -98,7 +98,7 @@ function _getFileList(folder, callback) {
 /**
  * Watch javascript source files.
  */
-function watch(srcDirectory, distDirectory) {
+function watchFiles(srcDirectory, distDirectory) {
   watch.createMonitor(srcDirectory, watchOptions, function(monitor) {
     var transpiler = javascripts.getTranspiler(srcDirectory, distDirectory, isAllowed, babelOptions);
 
@@ -120,7 +120,7 @@ function watch(srcDirectory, distDirectory) {
 }
 
 
-function transpile(srcDirectory, distDirectory) {
+function transpileFiles(srcDirectory, distDirectory) {
   _getFileList(srcDirectory, function(files) {
     var transpiler = javascripts.getTranspiler(srcDirectory, distDirectory, isAllowed, babelOptions);
     transpiler.transpile(undefined, files);
@@ -144,14 +144,14 @@ switch (command) {
    * Watch the file system and transpile from es6 to es5.
    */
   case '--watch':
-    watch(srcDirectory, distDirectory);
+    watchFiles(srcDirectory, distDirectory);
     break;
 
   /**
    * Transpile all files in `src` from es6 to es5.
    */
   case '--transpile':
-    transpile(srcDirectory, distDirectory);
+    transpileFiles(srcDirectory, distDirectory);
     break;
 
   /**
