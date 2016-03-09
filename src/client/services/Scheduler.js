@@ -21,7 +21,6 @@ class _SyncTimeSchedulingQueue extends audio.SchedulingQueue {
   }
 
   advanceTime(localTime) {
-    // console.log('advanceTime', localTime);
     const syncTime = this.sync.getSyncTime(localTime);
     const nextSyncTime = super.advanceTime(syncTime);
     const nextLocalTime = this.sync.getLocalTime(nextSyncTime);

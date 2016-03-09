@@ -2,8 +2,6 @@
   "source": "./src",
   "destination": "./doc",
   "manual": {
-    "overview": ["./manual/1-overview.md"],
-    "getting started": ["./manual/2-getting-started.md"],
-    "examples": ["./manual/3-examples.md"],
+    "overview": ["./README.md"],
   }
 }
