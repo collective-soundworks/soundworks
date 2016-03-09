@@ -1,110 +1,109 @@
-/* core */
 'use strict';
 
-var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
-
-Object.defineProperty(exports, '__esModule', {
+Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _coreClient = require('./core/Client');
+var _Client = require('./core/Client');
 
-var _coreClient2 = _interopRequireDefault(_coreClient);
+var _Client2 = _interopRequireDefault(_Client);
 
-var _coreServer = require('./core/server');
+var _server = require('./core/server');
 
-var _coreServer2 = _interopRequireDefault(_coreServer);
+var _server2 = _interopRequireDefault(_server);
 
-var _coreServerActivity = require('./core/ServerActivity');
+var _ServerActivity = require('./core/ServerActivity');
 
-var _coreServerActivity2 = _interopRequireDefault(_coreServerActivity);
+var _ServerActivity2 = _interopRequireDefault(_ServerActivity);
 
-var _coreServerServiceManager = require('./core/serverServiceManager');
+var _serverServiceManager = require('./core/serverServiceManager');
 
-var _coreServerServiceManager2 = _interopRequireDefault(_coreServerServiceManager);
+var _serverServiceManager2 = _interopRequireDefault(_serverServiceManager);
 
-var _coreSockets = require('./core/sockets');
+var _sockets = require('./core/sockets');
 
-var _coreSockets2 = _interopRequireDefault(_coreSockets);
+var _sockets2 = _interopRequireDefault(_sockets);
 
-/* scenes */
+var _ServerExperience = require('./scenes/ServerExperience');
 
-var _scenesServerExperience = require('./scenes/ServerExperience');
+var _ServerExperience2 = _interopRequireDefault(_ServerExperience);
 
-var _scenesServerExperience2 = _interopRequireDefault(_scenesServerExperience);
+var _ServerSurvey = require('./scenes/ServerSurvey');
 
-var _scenesServerSurvey = require('./scenes/ServerSurvey');
+var _ServerSurvey2 = _interopRequireDefault(_ServerSurvey);
 
-var _scenesServerSurvey2 = _interopRequireDefault(_scenesServerSurvey);
+var _Osc = require('./services/Osc');
+
+var _Osc2 = _interopRequireDefault(_Osc);
+
+var _ServerCheckin = require('./services/ServerCheckin');
+
+var _ServerCheckin2 = _interopRequireDefault(_ServerCheckin);
+
+var _ServerErrorReporter = require('./services/ServerErrorReporter');
+
+var _ServerErrorReporter2 = _interopRequireDefault(_ServerErrorReporter);
+
+var _ServerLocator = require('./services/ServerLocator');
+
+var _ServerLocator2 = _interopRequireDefault(_ServerLocator);
+
+var _ServerNetwork = require('./services/ServerNetwork');
+
+var _ServerNetwork2 = _interopRequireDefault(_ServerNetwork);
+
+var _ServerPlacer = require('./services/ServerPlacer');
+
+var _ServerPlacer2 = _interopRequireDefault(_ServerPlacer);
+
+var _ServerSharedConfig = require('./services/ServerSharedConfig');
+
+var _ServerSharedConfig2 = _interopRequireDefault(_ServerSharedConfig);
+
+var _ServerSharedParams = require('./services/ServerSharedParams');
+
+var _ServerSharedParams2 = _interopRequireDefault(_ServerSharedParams);
+
+var _ServerSync = require('./services/ServerSync');
+
+var _ServerSync2 = _interopRequireDefault(_ServerSync);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+// import ServerPerformance from './ServerPerformance';
+
+// import ServerFileList from './ServerFileList';
+/* core */
+exports.default = {
+  /* core */
+  server: _server2.default,
+  Client: _Client2.default,
+  serverServiceManager: _serverServiceManager2.default, // @tbd - expose ?
+  ServerActivity: _ServerActivity2.default,
+
+  /* scenes */
+  ServerExperience: _ServerExperience2.default,
+  ServerSurvey: _ServerSurvey2.default,
+
+  /* services */
+  // @todo - move into a namespace ?
+  Osc: _Osc2.default,
+  // ServerCalibration,
+  ServerCheckin: _ServerCheckin2.default,
+  ServerErrorReporter: _ServerErrorReporter2.default,
+  // ServerFileList,
+  ServerLocator: _ServerLocator2.default,
+  ServerNetwork: _ServerNetwork2.default,
+  // ServerPerformance,
+  ServerPlacer: _ServerPlacer2.default,
+  ServerSharedConfig: _ServerSharedConfig2.default,
+  ServerSharedParams: _ServerSharedParams2.default,
+  ServerSync: _ServerSync2.default
+};
 
 /* services */
 // import ServerCalibration from './ServerCalibration';
 
-var _servicesOsc = require('./services/Osc');
 
-var _servicesOsc2 = _interopRequireDefault(_servicesOsc);
-
-var _servicesServerCheckin = require('./services/ServerCheckin');
-
-var _servicesServerCheckin2 = _interopRequireDefault(_servicesServerCheckin);
-
-var _servicesServerErrorReporter = require('./services/ServerErrorReporter');
-
-var _servicesServerErrorReporter2 = _interopRequireDefault(_servicesServerErrorReporter);
-
-// import ServerFileList from './ServerFileList';
-
-var _servicesServerLocator = require('./services/ServerLocator');
-
-var _servicesServerLocator2 = _interopRequireDefault(_servicesServerLocator);
-
-var _servicesServerNetwork = require('./services/ServerNetwork');
-
-var _servicesServerNetwork2 = _interopRequireDefault(_servicesServerNetwork);
-
-// import ServerPerformance from './ServerPerformance';
-
-var _servicesServerPlacer = require('./services/ServerPlacer');
-
-var _servicesServerPlacer2 = _interopRequireDefault(_servicesServerPlacer);
-
-var _servicesServerSharedConfig = require('./services/ServerSharedConfig');
-
-var _servicesServerSharedConfig2 = _interopRequireDefault(_servicesServerSharedConfig);
-
-var _servicesServerSharedParams = require('./services/ServerSharedParams');
-
-var _servicesServerSharedParams2 = _interopRequireDefault(_servicesServerSharedParams);
-
-var _servicesServerSync = require('./services/ServerSync');
-
-var _servicesServerSync2 = _interopRequireDefault(_servicesServerSync);
-
-exports['default'] = {
-  /* core */
-  server: _coreServer2['default'],
-  Client: _coreClient2['default'],
-  serverServiceManager: _coreServerServiceManager2['default'], // @tbd - expose ?
-  ServerActivity: _coreServerActivity2['default'],
-
-  /* scenes */
-  ServerExperience: _scenesServerExperience2['default'],
-  ServerSurvey: _scenesServerSurvey2['default'],
-
-  /* services */
-  // @todo - move into a namespace ?
-  Osc: _servicesOsc2['default'],
-  // ServerCalibration,
-  ServerCheckin: _servicesServerCheckin2['default'],
-  ServerErrorReporter: _servicesServerErrorReporter2['default'],
-  // ServerFileList,
-  ServerLocator: _servicesServerLocator2['default'],
-  ServerNetwork: _servicesServerNetwork2['default'],
-  // ServerPerformance,
-  ServerPlacer: _servicesServerPlacer2['default'],
-  ServerSharedConfig: _servicesServerSharedConfig2['default'],
-  ServerSharedParams: _servicesServerSharedParams2['default'],
-  ServerSync: _servicesServerSync2['default']
-};
-module.exports = exports['default'];
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi9Vc2Vycy9tYXR1c3pld3NraS9kZXYvY29zaW1hL2xpYi9zb3VuZHdvcmtzL3NyYy9zZXJ2ZXIvaW5kZXguanMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7OzBCQUNtQixlQUFlOzs7OzBCQUNmLGVBQWU7Ozs7a0NBQ1AsdUJBQXVCOzs7O3dDQUNqQiw2QkFBNkI7Ozs7MkJBQzFDLGdCQUFnQjs7Ozs7O3NDQUdQLDJCQUEyQjs7OztrQ0FDL0IsdUJBQXVCOzs7Ozs7OzJCQUloQyxnQkFBZ0I7Ozs7cUNBQ04sMEJBQTBCOzs7OzJDQUNwQixnQ0FBZ0M7Ozs7OztxQ0FFdEMsMEJBQTBCOzs7O3FDQUMxQiwwQkFBMEI7Ozs7OztvQ0FFM0IseUJBQXlCOzs7OzBDQUNuQiwrQkFBK0I7Ozs7MENBQy9CLCtCQUErQjs7OztrQ0FDdkMsdUJBQXVCOzs7O3FCQUUvQjs7QUFFYixRQUFNLHlCQUFBO0FBQ04sUUFBTSx5QkFBQTtBQUNOLHNCQUFvQix1Q0FBQTtBQUNwQixnQkFBYyxpQ0FBQTs7O0FBR2Qsa0JBQWdCLHFDQUFBO0FBQ2hCLGNBQVksaUNBQUE7Ozs7QUFJWixLQUFHLDBCQUFBOztBQUVILGVBQWEsb0NBQUE7QUFDYixxQkFBbUIsMENBQUE7O0FBRW5CLGVBQWEsb0NBQUE7QUFDYixlQUFhLG9DQUFBOztBQUViLGNBQVksbUNBQUE7QUFDWixvQkFBa0IseUNBQUE7QUFDbEIsb0JBQWtCLHlDQUFBO0FBQ2xCLFlBQVUsaUNBQUE7Q0FDWCIsImZpbGUiOiIvVXNlcnMvbWF0dXN6ZXdza2kvZGV2L2Nvc2ltYS9saWIvc291bmR3b3Jrcy9zcmMvc2VydmVyL2luZGV4LmpzIiwic291cmNlc0NvbnRlbnQiOlsiLyogY29yZSAqL1xuaW1wb3J0IENsaWVudCBmcm9tICcuL2NvcmUvQ2xpZW50JztcbmltcG9ydCBzZXJ2ZXIgZnJvbSAnLi9jb3JlL3NlcnZlcic7XG5pbXBvcnQgU2VydmVyQWN0aXZpdHkgZnJvbSAnLi9jb3JlL1NlcnZlckFjdGl2aXR5JztcbmltcG9ydCBzZXJ2ZXJTZXJ2aWNlTWFuYWdlciBmcm9tICcuL2NvcmUvc2VydmVyU2VydmljZU1hbmFnZXInO1xuaW1wb3J0IHNvY2tldHMgZnJvbSAnLi9jb3JlL3NvY2tldHMnO1xuXG4vKiBzY2VuZXMgKi9cbmltcG9ydCBTZXJ2ZXJFeHBlcmllbmNlIGZyb20gJy4vc2NlbmVzL1NlcnZlckV4cGVyaWVuY2UnO1xuaW1wb3J0IFNlcnZlclN1cnZleSBmcm9tICcuL3NjZW5lcy9TZXJ2ZXJTdXJ2ZXknO1xuXG4vKiBzZXJ2aWNlcyAqL1xuLy8gaW1wb3J0IFNlcnZlckNhbGlicmF0aW9uIGZyb20gJy4vU2VydmVyQ2FsaWJyYXRpb24nO1xuaW1wb3J0IE9zYyBmcm9tICcuL3NlcnZpY2VzL09zYyc7XG5pbXBvcnQgU2VydmVyQ2hlY2tpbiBmcm9tICcuL3NlcnZpY2VzL1NlcnZlckNoZWNraW4nO1xuaW1wb3J0IFNlcnZlckVycm9yUmVwb3J0ZXIgZnJvbSAnLi9zZXJ2aWNlcy9TZXJ2ZXJFcnJvclJlcG9ydGVyJztcbi8vIGltcG9ydCBTZXJ2ZXJGaWxlTGlzdCBmcm9tICcuL1NlcnZlckZpbGVMaXN0JztcbmltcG9ydCBTZXJ2ZXJMb2NhdG9yIGZyb20gJy4vc2VydmljZXMvU2VydmVyTG9jYXRvcic7XG5pbXBvcnQgU2VydmVyTmV0d29yayBmcm9tICcuL3NlcnZpY2VzL1NlcnZlck5ldHdvcmsnO1xuLy8gaW1wb3J0IFNlcnZlclBlcmZvcm1hbmNlIGZyb20gJy4vU2VydmVyUGVyZm9ybWFuY2UnO1xuaW1wb3J0IFNlcnZlclBsYWNlciBmcm9tICcuL3NlcnZpY2VzL1NlcnZlclBsYWNlcic7XG5pbXBvcnQgU2VydmVyU2hhcmVkQ29uZmlnIGZyb20gJy4vc2VydmljZXMvU2VydmVyU2hhcmVkQ29uZmlnJztcbmltcG9ydCBTZXJ2ZXJTaGFyZWRQYXJhbXMgZnJvbSAnLi9zZXJ2aWNlcy9TZXJ2ZXJTaGFyZWRQYXJhbXMnO1xuaW1wb3J0IFNlcnZlclN5bmMgZnJvbSAnLi9zZXJ2aWNlcy9TZXJ2ZXJTeW5jJztcblxuZXhwb3J0IGRlZmF1bHQge1xuICAvKiBjb3JlICovXG4gIHNlcnZlcixcbiAgQ2xpZW50LFxuICBzZXJ2ZXJTZXJ2aWNlTWFuYWdlciwgLy8gQHRiZCAtIGV4cG9zZSA/XG4gIFNlcnZlckFjdGl2aXR5LFxuXG4gIC8qIHNjZW5lcyAqL1xuICBTZXJ2ZXJFeHBlcmllbmNlLFxuICBTZXJ2ZXJTdXJ2ZXksXG5cbiAgLyogc2VydmljZXMgKi9cbiAgLy8gQHRvZG8gLSBtb3ZlIGludG8gYSBuYW1lc3BhY2UgP1xuICBPc2MsXG4gIC8vIFNlcnZlckNhbGlicmF0aW9uLFxuICBTZXJ2ZXJDaGVja2luLFxuICBTZXJ2ZXJFcnJvclJlcG9ydGVyLFxuICAvLyBTZXJ2ZXJGaWxlTGlzdCxcbiAgU2VydmVyTG9jYXRvcixcbiAgU2VydmVyTmV0d29yayxcbiAgLy8gU2VydmVyUGVyZm9ybWFuY2UsXG4gIFNlcnZlclBsYWNlcixcbiAgU2VydmVyU2hhcmVkQ29uZmlnLFxuICBTZXJ2ZXJTaGFyZWRQYXJhbXMsXG4gIFNlcnZlclN5bmMsXG59O1xuIl19
+/* scenes */
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImluZGV4LmpzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7Ozs7OztBQUNBOzs7O0FBQ0E7Ozs7QUFDQTs7OztBQUNBOzs7O0FBQ0E7Ozs7QUFHQTs7OztBQUNBOzs7O0FBSUE7Ozs7QUFDQTs7OztBQUNBOzs7O0FBRUE7Ozs7QUFDQTs7OztBQUVBOzs7O0FBQ0E7Ozs7QUFDQTs7OztBQUNBOzs7Ozs7Ozs7O2tCQUVlOztBQUViLDBCQUZhO0FBR2IsMEJBSGE7QUFJYixzREFKYTtBQUtiLDBDQUxhOzs7QUFRYiw4Q0FSYTtBQVNiLHNDQVRhOzs7O0FBYWIsb0JBYmE7O0FBZWIsd0NBZmE7QUFnQmIsb0RBaEJhOztBQWtCYix3Q0FsQmE7QUFtQmIsd0NBbkJhOztBQXFCYixzQ0FyQmE7QUFzQmIsa0RBdEJhO0FBdUJiLGtEQXZCYTtBQXdCYixrQ0F4QmEiLCJmaWxlIjoiaW5kZXguanMiLCJzb3VyY2VzQ29udGVudCI6WyIvKiBjb3JlICovXG5pbXBvcnQgQ2xpZW50IGZyb20gJy4vY29yZS9DbGllbnQnO1xuaW1wb3J0IHNlcnZlciBmcm9tICcuL2NvcmUvc2VydmVyJztcbmltcG9ydCBTZXJ2ZXJBY3Rpdml0eSBmcm9tICcuL2NvcmUvU2VydmVyQWN0aXZpdHknO1xuaW1wb3J0IHNlcnZlclNlcnZpY2VNYW5hZ2VyIGZyb20gJy4vY29yZS9zZXJ2ZXJTZXJ2aWNlTWFuYWdlcic7XG5pbXBvcnQgc29ja2V0cyBmcm9tICcuL2NvcmUvc29ja2V0cyc7XG5cbi8qIHNjZW5lcyAqL1xuaW1wb3J0IFNlcnZlckV4cGVyaWVuY2UgZnJvbSAnLi9zY2VuZXMvU2VydmVyRXhwZXJpZW5jZSc7XG5pbXBvcnQgU2VydmVyU3VydmV5IGZyb20gJy4vc2NlbmVzL1NlcnZlclN1cnZleSc7XG5cbi8qIHNlcnZpY2VzICovXG4vLyBpbXBvcnQgU2VydmVyQ2FsaWJyYXRpb24gZnJvbSAnLi9TZXJ2ZXJDYWxpYnJhdGlvbic7XG5pbXBvcnQgT3NjIGZyb20gJy4vc2VydmljZXMvT3NjJztcbmltcG9ydCBTZXJ2ZXJDaGVja2luIGZyb20gJy4vc2VydmljZXMvU2VydmVyQ2hlY2tpbic7XG5pbXBvcnQgU2VydmVyRXJyb3JSZXBvcnRlciBmcm9tICcuL3NlcnZpY2VzL1NlcnZlckVycm9yUmVwb3J0ZXInO1xuLy8gaW1wb3J0IFNlcnZlckZpbGVMaXN0IGZyb20gJy4vU2VydmVyRmlsZUxpc3QnO1xuaW1wb3J0IFNlcnZlckxvY2F0b3IgZnJvbSAnLi9zZXJ2aWNlcy9TZXJ2ZXJMb2NhdG9yJztcbmltcG9ydCBTZXJ2ZXJOZXR3b3JrIGZyb20gJy4vc2VydmljZXMvU2VydmVyTmV0d29yayc7XG4vLyBpbXBvcnQgU2VydmVyUGVyZm9ybWFuY2UgZnJvbSAnLi9TZXJ2ZXJQZXJmb3JtYW5jZSc7XG5pbXBvcnQgU2VydmVyUGxhY2VyIGZyb20gJy4vc2VydmljZXMvU2VydmVyUGxhY2VyJztcbmltcG9ydCBTZXJ2ZXJTaGFyZWRDb25maWcgZnJvbSAnLi9zZXJ2aWNlcy9TZXJ2ZXJTaGFyZWRDb25maWcnO1xuaW1wb3J0IFNlcnZlclNoYXJlZFBhcmFtcyBmcm9tICcuL3NlcnZpY2VzL1NlcnZlclNoYXJlZFBhcmFtcyc7XG5pbXBvcnQgU2VydmVyU3luYyBmcm9tICcuL3NlcnZpY2VzL1NlcnZlclN5bmMnO1xuXG5leHBvcnQgZGVmYXVsdCB7XG4gIC8qIGNvcmUgKi9cbiAgc2VydmVyLFxuICBDbGllbnQsXG4gIHNlcnZlclNlcnZpY2VNYW5hZ2VyLCAvLyBAdGJkIC0gZXhwb3NlID9cbiAgU2VydmVyQWN0aXZpdHksXG5cbiAgLyogc2NlbmVzICovXG4gIFNlcnZlckV4cGVyaWVuY2UsXG4gIFNlcnZlclN1cnZleSxcblxuICAvKiBzZXJ2aWNlcyAqL1xuICAvLyBAdG9kbyAtIG1vdmUgaW50byBhIG5hbWVzcGFjZSA/XG4gIE9zYyxcbiAgLy8gU2VydmVyQ2FsaWJyYXRpb24sXG4gIFNlcnZlckNoZWNraW4sXG4gIFNlcnZlckVycm9yUmVwb3J0ZXIsXG4gIC8vIFNlcnZlckZpbGVMaXN0LFxuICBTZXJ2ZXJMb2NhdG9yLFxuICBTZXJ2ZXJOZXR3b3JrLFxuICAvLyBTZXJ2ZXJQZXJmb3JtYW5jZSxcbiAgU2VydmVyUGxhY2VyLFxuICBTZXJ2ZXJTaGFyZWRDb25maWcsXG4gIFNlcnZlclNoYXJlZFBhcmFtcyxcbiAgU2VydmVyU3luYyxcbn07XG4iXX0=

@@ -1,26 +1,42 @@
 'use strict';
 
-var _get = require('babel-runtime/helpers/get')['default'];
-
-var _inherits = require('babel-runtime/helpers/inherits')['default'];
-
-var _createClass = require('babel-runtime/helpers/create-class')['default'];
-
-var _classCallCheck = require('babel-runtime/helpers/class-call-check')['default'];
-
-var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
-
-Object.defineProperty(exports, '__esModule', {
+Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _coreService = require('../core/Service');
+var _getPrototypeOf = require('babel-runtime/core-js/object/get-prototype-of');
 
-var _coreService2 = _interopRequireDefault(_coreService);
+var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
 
-var _coreServiceManager = require('../core/serviceManager');
+var _classCallCheck2 = require('babel-runtime/helpers/classCallCheck');
 
-var _coreServiceManager2 = _interopRequireDefault(_coreServiceManager);
+var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+
+var _createClass2 = require('babel-runtime/helpers/createClass');
+
+var _createClass3 = _interopRequireDefault(_createClass2);
+
+var _possibleConstructorReturn2 = require('babel-runtime/helpers/possibleConstructorReturn');
+
+var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
+
+var _get2 = require('babel-runtime/helpers/get');
+
+var _get3 = _interopRequireDefault(_get2);
+
+var _inherits2 = require('babel-runtime/helpers/inherits');
+
+var _inherits3 = _interopRequireDefault(_inherits2);
+
+var _Service2 = require('../core/Service');
+
+var _Service3 = _interopRequireDefault(_Service2);
+
+var _serviceManager = require('../core/serviceManager');
+
+var _serviceManager2 = _interopRequireDefault(_serviceManager);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var SERVICE_ID = 'service:error-reporter';
 
@@ -30,30 +46,33 @@ var SERVICE_ID = 'service:error-reporter';
  * if its `hasNetwork` is set to `true`.
  */
 
-var ClientErrorReporter = (function (_Service) {
-  _inherits(ClientErrorReporter, _Service);
+var ClientErrorReporter = function (_Service) {
+  (0, _inherits3.default)(ClientErrorReporter, _Service);
 
   function ClientErrorReporter() {
-    _classCallCheck(this, ClientErrorReporter);
+    (0, _classCallCheck3.default)(this, ClientErrorReporter);
 
-    _get(Object.getPrototypeOf(ClientErrorReporter.prototype), 'constructor', this).call(this, SERVICE_ID, true);
+    var _this = (0, _possibleConstructorReturn3.default)(this, (0, _getPrototypeOf2.default)(ClientErrorReporter).call(this, SERVICE_ID, true));
 
-    this._onError = this._onError.bind(this);
+    _this._onError = _this._onError.bind(_this);
+    return _this;
   }
 
   /** @inheritdoc */
 
-  _createClass(ClientErrorReporter, [{
+
+  (0, _createClass3.default)(ClientErrorReporter, [{
     key: 'init',
     value: function init() {
       window.addEventListener('error', this._onError);
     }
 
     /** @inheritdoc */
+
   }, {
     key: 'start',
     value: function start() {
-      _get(Object.getPrototypeOf(ClientErrorReporter.prototype), 'start', this).call(this);
+      (0, _get3.default)((0, _getPrototypeOf2.default)(ClientErrorReporter.prototype), 'start', this).call(this);
 
       if (!this.hasStarted) this.init();
 
@@ -62,7 +81,7 @@ var ClientErrorReporter = (function (_Service) {
   }, {
     key: '_onError',
     value: function _onError(e) {
-      var stack = undefined;
+      var stack = void 0;
       var file = e.filename;
       file = file.replace(window.location.origin, '');
       var line = e.lineno;
@@ -73,12 +92,10 @@ var ClientErrorReporter = (function (_Service) {
       this.send('error', file, line, col, msg, userAgent);
     }
   }]);
-
   return ClientErrorReporter;
-})(_coreService2['default']);
+}(_Service3.default);
 
-_coreServiceManager2['default'].register(SERVICE_ID, ClientErrorReporter);
+_serviceManager2.default.register(SERVICE_ID, ClientErrorReporter);
 
-exports['default'] = ClientErrorReporter;
-module.exports = exports['default'];
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi9Vc2Vycy9tYXR1c3pld3NraS9kZXYvY29zaW1hL2xpYi9zb3VuZHdvcmtzL3NyYy9jbGllbnQvc2VydmljZXMvQ2xpZW50RXJyb3JSZXBvcnRlci5qcyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7OzJCQUFvQixpQkFBaUI7Ozs7a0NBQ1Ysd0JBQXdCOzs7O0FBRW5ELElBQU0sVUFBVSxHQUFHLHdCQUF3QixDQUFDOzs7Ozs7OztJQU90QyxtQkFBbUI7WUFBbkIsbUJBQW1COztBQUNaLFdBRFAsbUJBQW1CLEdBQ1Q7MEJBRFYsbUJBQW1COztBQUVyQiwrQkFGRSxtQkFBbUIsNkNBRWYsVUFBVSxFQUFFLElBQUksRUFBRTs7QUFFeEIsUUFBSSxDQUFDLFFBQVEsR0FBRyxJQUFJLENBQUMsUUFBUSxDQUFDLElBQUksQ0FBQyxJQUFJLENBQUMsQ0FBQztHQUMxQzs7OztlQUxHLG1CQUFtQjs7V0FRbkIsZ0JBQUc7QUFDTCxZQUFNLENBQUMsZ0JBQWdCLENBQUMsT0FBTyxFQUFFLElBQUksQ0FBQyxRQUFRLENBQUMsQ0FBQztLQUNqRDs7Ozs7V0FHSSxpQkFBRztBQUNOLGlDQWRFLG1CQUFtQix1Q0FjUDs7QUFFZCxVQUFJLENBQUMsSUFBSSxDQUFDLFVBQVUsRUFDbEIsSUFBSSxDQUFDLElBQUksRUFBRSxDQUFDOztBQUVkLFVBQUksQ0FBQyxLQUFLLEVBQUUsQ0FBQztLQUNkOzs7V0FFTyxrQkFBQyxDQUFDLEVBQUU7QUFDVixVQUFJLEtBQUssWUFBQSxDQUFDO0FBQ1YsVUFBSSxJQUFJLEdBQUcsQ0FBQyxDQUFDLFFBQVEsQ0FBQztBQUN0QixVQUFJLEdBQUcsSUFBSSxDQUFDLE9BQU8sQ0FBQyxNQUFNLENBQUMsUUFBUSxDQUFDLE1BQU0sRUFBRSxFQUFFLENBQUMsQ0FBQztBQUNoRCxVQUFNLElBQUksR0FBRyxDQUFDLENBQUMsTUFBTSxDQUFDO0FBQ3RCLFVBQU0sR0FBRyxHQUFHLENBQUMsQ0FBQyxLQUFLLENBQUM7QUFDcEIsVUFBTSxHQUFHLEdBQUcsQ0FBQyxDQUFDLE9BQU8sQ0FBQztBQUN0QixVQUFNLFNBQVMsR0FBRyxTQUFTLENBQUMsU0FBUyxDQUFDOztBQUV0QyxVQUFJLENBQUMsSUFBSSxDQUFDLE9BQU8sRUFBRSxJQUFJLEVBQUUsSUFBSSxFQUFFLEdBQUcsRUFBRSxHQUFHLEVBQUUsU0FBUyxDQUFDLENBQUM7S0FDckQ7OztTQWhDRyxtQkFBbUI7OztBQW1DekIsZ0NBQWUsUUFBUSxDQUFDLFVBQVUsRUFBRSxtQkFBbUIsQ0FBQyxDQUFDOztxQkFFMUMsbUJBQW1CIiwiZmlsZSI6Ii9Vc2Vycy9tYXR1c3pld3NraS9kZXYvY29zaW1hL2xpYi9zb3VuZHdvcmtzL3NyYy9jbGllbnQvc2VydmljZXMvQ2xpZW50RXJyb3JSZXBvcnRlci5qcyIsInNvdXJjZXNDb250ZW50IjpbImltcG9ydCBTZXJ2aWNlIGZyb20gJy4uL2NvcmUvU2VydmljZSc7XG5pbXBvcnQgc2VydmljZU1hbmFnZXIgZnJvbSAnLi4vY29yZS9zZXJ2aWNlTWFuYWdlcic7XG5cbmNvbnN0IFNFUlZJQ0VfSUQgPSAnc2VydmljZTplcnJvci1yZXBvcnRlcic7XG5cbi8qKlxuICogW2NsaWVudF0gVGhpcyBzZXJ2aWNlIGxpc3RlbiBmb3IgZXJyb3JzIG9uIHRoZSBjbGllbnQgc2lkZSB0byByZXBvcnQgdGhlbVxuICogb24gdGhlIHNlcnZlci4gSXMgcmVxdWlyZWQgYnkgZGVmYXVsdCBieSBhbnkge0BsaW5rIHNyYy9jbGllbnQvc2NlbmUvRXhwZXJpZW5jZS5qc31cbiAqIGlmIGl0cyBgaGFzTmV0d29ya2AgaXMgc2V0IHRvIGB0cnVlYC5cbiAqL1xuY2xhc3MgQ2xpZW50RXJyb3JSZXBvcnRlciBleHRlbmRzIFNlcnZpY2Uge1xuICBjb25zdHJ1Y3RvcigpIHtcbiAgICBzdXBlcihTRVJWSUNFX0lELCB0cnVlKTtcblxuICAgIHRoaXMuX29uRXJyb3IgPSB0aGlzLl9vbkVycm9yLmJpbmQodGhpcyk7XG4gIH1cblxuICAvKiogQGluaGVyaXRkb2MgKi9cbiAgaW5pdCgpIHtcbiAgICB3aW5kb3cuYWRkRXZlbnRMaXN0ZW5lcignZXJyb3InLCB0aGlzLl9vbkVycm9yKTtcbiAgfVxuXG4gIC8qKiBAaW5oZXJpdGRvYyAqL1xuICBzdGFydCgpIHtcbiAgICBzdXBlci5zdGFydCgpO1xuXG4gICAgaWYgKCF0aGlzLmhhc1N0YXJ0ZWQpXG4gICAgICB0aGlzLmluaXQoKTtcblxuICAgIHRoaXMucmVhZHkoKTtcbiAgfVxuXG4gIF9vbkVycm9yKGUpIHtcbiAgICBsZXQgc3RhY2s7XG4gICAgbGV0IGZpbGUgPSBlLmZpbGVuYW1lO1xuICAgIGZpbGUgPSBmaWxlLnJlcGxhY2Uod2luZG93LmxvY2F0aW9uLm9yaWdpbiwgJycpO1xuICAgIGNvbnN0IGxpbmUgPSBlLmxpbmVubztcbiAgICBjb25zdCBjb2wgPSBlLmNvbG5vO1xuICAgIGNvbnN0IG1zZyA9IGUubWVzc2FnZTtcbiAgICBjb25zdCB1c2VyQWdlbnQgPSBuYXZpZ2F0b3IudXNlckFnZW50O1xuXG4gICAgdGhpcy5zZW5kKCdlcnJvcicsIGZpbGUsIGxpbmUsIGNvbCwgbXNnLCB1c2VyQWdlbnQpO1xuICB9XG59XG5cbnNlcnZpY2VNYW5hZ2VyLnJlZ2lzdGVyKFNFUlZJQ0VfSUQsIENsaWVudEVycm9yUmVwb3J0ZXIpO1xuXG5leHBvcnQgZGVmYXVsdCBDbGllbnRFcnJvclJlcG9ydGVyO1xuIl19
+exports.default = ClientErrorReporter;
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIkNsaWVudEVycm9yUmVwb3J0ZXIuanMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O0FBQUE7Ozs7QUFDQTs7Ozs7O0FBRUEsSUFBTSxhQUFhLHdCQUFiOzs7Ozs7OztJQU9BOzs7QUFDSixXQURJLG1CQUNKLEdBQWM7d0NBRFYscUJBQ1U7OzZGQURWLGdDQUVJLFlBQVksT0FETjs7QUFHWixVQUFLLFFBQUwsR0FBZ0IsTUFBSyxRQUFMLENBQWMsSUFBZCxPQUFoQixDQUhZOztHQUFkOzs7Ozs2QkFESTs7MkJBUUc7QUFDTCxhQUFPLGdCQUFQLENBQXdCLE9BQXhCLEVBQWlDLEtBQUssUUFBTCxDQUFqQyxDQURLOzs7Ozs7OzRCQUtDO0FBQ04sdURBZEUseURBY0YsQ0FETTs7QUFHTixVQUFJLENBQUMsS0FBSyxVQUFMLEVBQ0gsS0FBSyxJQUFMLEdBREY7O0FBR0EsV0FBSyxLQUFMLEdBTk07Ozs7NkJBU0MsR0FBRztBQUNWLFVBQUksY0FBSixDQURVO0FBRVYsVUFBSSxPQUFPLEVBQUUsUUFBRixDQUZEO0FBR1YsYUFBTyxLQUFLLE9BQUwsQ0FBYSxPQUFPLFFBQVAsQ0FBZ0IsTUFBaEIsRUFBd0IsRUFBckMsQ0FBUCxDQUhVO0FBSVYsVUFBTSxPQUFPLEVBQUUsTUFBRixDQUpIO0FBS1YsVUFBTSxNQUFNLEVBQUUsS0FBRixDQUxGO0FBTVYsVUFBTSxNQUFNLEVBQUUsT0FBRixDQU5GO0FBT1YsVUFBTSxZQUFZLFVBQVUsU0FBVixDQVBSOztBQVNWLFdBQUssSUFBTCxDQUFVLE9BQVYsRUFBbUIsSUFBbkIsRUFBeUIsSUFBekIsRUFBK0IsR0FBL0IsRUFBb0MsR0FBcEMsRUFBeUMsU0FBekMsRUFUVTs7O1NBdEJSOzs7QUFtQ04seUJBQWUsUUFBZixDQUF3QixVQUF4QixFQUFvQyxtQkFBcEM7O2tCQUVlIiwiZmlsZSI6IkNsaWVudEVycm9yUmVwb3J0ZXIuanMiLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgU2VydmljZSBmcm9tICcuLi9jb3JlL1NlcnZpY2UnO1xuaW1wb3J0IHNlcnZpY2VNYW5hZ2VyIGZyb20gJy4uL2NvcmUvc2VydmljZU1hbmFnZXInO1xuXG5jb25zdCBTRVJWSUNFX0lEID0gJ3NlcnZpY2U6ZXJyb3ItcmVwb3J0ZXInO1xuXG4vKipcbiAqIFtjbGllbnRdIFRoaXMgc2VydmljZSBsaXN0ZW4gZm9yIGVycm9ycyBvbiB0aGUgY2xpZW50IHNpZGUgdG8gcmVwb3J0IHRoZW1cbiAqIG9uIHRoZSBzZXJ2ZXIuIElzIHJlcXVpcmVkIGJ5IGRlZmF1bHQgYnkgYW55IHtAbGluayBzcmMvY2xpZW50L3NjZW5lL0V4cGVyaWVuY2UuanN9XG4gKiBpZiBpdHMgYGhhc05ldHdvcmtgIGlzIHNldCB0byBgdHJ1ZWAuXG4gKi9cbmNsYXNzIENsaWVudEVycm9yUmVwb3J0ZXIgZXh0ZW5kcyBTZXJ2aWNlIHtcbiAgY29uc3RydWN0b3IoKSB7XG4gICAgc3VwZXIoU0VSVklDRV9JRCwgdHJ1ZSk7XG5cbiAgICB0aGlzLl9vbkVycm9yID0gdGhpcy5fb25FcnJvci5iaW5kKHRoaXMpO1xuICB9XG5cbiAgLyoqIEBpbmhlcml0ZG9jICovXG4gIGluaXQoKSB7XG4gICAgd2luZG93LmFkZEV2ZW50TGlzdGVuZXIoJ2Vycm9yJywgdGhpcy5fb25FcnJvcik7XG4gIH1cblxuICAvKiogQGluaGVyaXRkb2MgKi9cbiAgc3RhcnQoKSB7XG4gICAgc3VwZXIuc3RhcnQoKTtcblxuICAgIGlmICghdGhpcy5oYXNTdGFydGVkKVxuICAgICAgdGhpcy5pbml0KCk7XG5cbiAgICB0aGlzLnJlYWR5KCk7XG4gIH1cblxuICBfb25FcnJvcihlKSB7XG4gICAgbGV0IHN0YWNrO1xuICAgIGxldCBmaWxlID0gZS5maWxlbmFtZTtcbiAgICBmaWxlID0gZmlsZS5yZXBsYWNlKHdpbmRvdy5sb2NhdGlvbi5vcmlnaW4sICcnKTtcbiAgICBjb25zdCBsaW5lID0gZS5saW5lbm87XG4gICAgY29uc3QgY29sID0gZS5jb2xubztcbiAgICBjb25zdCBtc2cgPSBlLm1lc3NhZ2U7XG4gICAgY29uc3QgdXNlckFnZW50ID0gbmF2aWdhdG9yLnVzZXJBZ2VudDtcblxuICAgIHRoaXMuc2VuZCgnZXJyb3InLCBmaWxlLCBsaW5lLCBjb2wsIG1zZywgdXNlckFnZW50KTtcbiAgfVxufVxuXG5zZXJ2aWNlTWFuYWdlci5yZWdpc3RlcihTRVJWSUNFX0lELCBDbGllbnRFcnJvclJlcG9ydGVyKTtcblxuZXhwb3J0IGRlZmF1bHQgQ2xpZW50RXJyb3JSZXBvcnRlcjtcbiJdfQ==

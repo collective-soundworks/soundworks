@@ -1,30 +1,41 @@
-/**
- *
- *
- */
 "use strict";
-
-var _createClass = require("babel-runtime/helpers/create-class")["default"];
-
-var _classCallCheck = require("babel-runtime/helpers/class-call-check")["default"];
-
-var _Set = require("babel-runtime/core-js/set")["default"];
-
-var _getIterator = require("babel-runtime/core-js/get-iterator")["default"];
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var Signal = (function () {
+var _getIterator2 = require("babel-runtime/core-js/get-iterator");
+
+var _getIterator3 = _interopRequireDefault(_getIterator2);
+
+var _set = require("babel-runtime/core-js/set");
+
+var _set2 = _interopRequireDefault(_set);
+
+var _classCallCheck2 = require("babel-runtime/helpers/classCallCheck");
+
+var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+
+var _createClass2 = require("babel-runtime/helpers/createClass");
+
+var _createClass3 = _interopRequireDefault(_createClass2);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ *
+ *
+ */
+
+var Signal = function () {
   function Signal() {
-    _classCallCheck(this, Signal);
+    (0, _classCallCheck3.default)(this, Signal);
 
     this._state = false;
-    this._observers = new _Set();
+    this._observers = new _set2.default();
   }
 
-  _createClass(Signal, [{
+  (0, _createClass3.default)(Signal, [{
     key: "set",
     value: function set(value) {
       if (value !== this._state) {
@@ -35,7 +46,7 @@ var Signal = (function () {
         var _iteratorError = undefined;
 
         try {
-          for (var _iterator = _getIterator(this._observers), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          for (var _iterator = (0, _getIterator3.default)(this._observers), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
             var observer = _step.value;
 
             observer(value);
@@ -45,8 +56,8 @@ var Signal = (function () {
           _iteratorError = err;
         } finally {
           try {
-            if (!_iteratorNormalCompletion && _iterator["return"]) {
-              _iterator["return"]();
+            if (!_iteratorNormalCompletion && _iterator.return) {
+              _iterator.return();
             }
           } finally {
             if (_didIteratorError) {
@@ -69,13 +80,11 @@ var Signal = (function () {
   }, {
     key: "removeObserver",
     value: function removeObserver(observer) {
-      this._observers["delete"](observer);
+      this._observers.delete(observer);
     }
   }]);
-
   return Signal;
-})();
+}();
 
-exports["default"] = Signal;
-module.exports = exports["default"];
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi9Vc2Vycy9tYXR1c3pld3NraS9kZXYvY29zaW1hL2xpYi9zb3VuZHdvcmtzL3NyYy9jbGllbnQvY29yZS9TaWduYWwuanMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7Ozs7O0lBSXFCLE1BQU07QUFDZCxXQURRLE1BQU0sR0FDWDswQkFESyxNQUFNOztBQUV2QixRQUFJLENBQUMsTUFBTSxHQUFHLEtBQUssQ0FBQztBQUNwQixRQUFJLENBQUMsVUFBVSxHQUFHLFVBQVMsQ0FBQztHQUM3Qjs7ZUFKa0IsTUFBTTs7V0FNdEIsYUFBQyxLQUFLLEVBQUU7QUFDVCxVQUFJLEtBQUssS0FBSyxJQUFJLENBQUMsTUFBTSxFQUFFO0FBQ3pCLFlBQUksQ0FBQyxNQUFNLEdBQUcsS0FBSyxDQUFDOzs7Ozs7O0FBRXBCLDRDQUFxQixJQUFJLENBQUMsVUFBVTtnQkFBM0IsUUFBUTs7QUFDZixvQkFBUSxDQUFDLEtBQUssQ0FBQyxDQUFDO1dBQUE7Ozs7Ozs7Ozs7Ozs7OztPQUNuQjtLQUNGOzs7V0FFRSxlQUFHO0FBQ0osYUFBTyxJQUFJLENBQUMsTUFBTSxDQUFDO0tBQ3BCOzs7V0FFVSxxQkFBQyxRQUFRLEVBQUU7QUFDcEIsVUFBSSxDQUFDLFVBQVUsQ0FBQyxHQUFHLENBQUMsUUFBUSxDQUFDLENBQUM7S0FDL0I7OztXQUVhLHdCQUFDLFFBQVEsRUFBRTtBQUN2QixVQUFJLENBQUMsVUFBVSxVQUFPLENBQUMsUUFBUSxDQUFDLENBQUM7S0FDbEM7OztTQXpCa0IsTUFBTTs7O3FCQUFOLE1BQU0iLCJmaWxlIjoiL1VzZXJzL21hdHVzemV3c2tpL2Rldi9jb3NpbWEvbGliL3NvdW5kd29ya3Mvc3JjL2NsaWVudC9jb3JlL1NpZ25hbC5qcyIsInNvdXJjZXNDb250ZW50IjpbIi8qKlxuICpcbiAqXG4gKi9cbmV4cG9ydCBkZWZhdWx0IGNsYXNzIFNpZ25hbCB7XG4gIGNvbnN0cnVjdG9yKCkge1xuICAgIHRoaXMuX3N0YXRlID0gZmFsc2U7XG4gICAgdGhpcy5fb2JzZXJ2ZXJzID0gbmV3IFNldCgpO1xuICB9XG5cbiAgc2V0KHZhbHVlKSB7XG4gICAgaWYgKHZhbHVlICE9PSB0aGlzLl9zdGF0ZSkge1xuICAgICAgdGhpcy5fc3RhdGUgPSB2YWx1ZTtcblxuICAgICAgZm9yIChsZXQgb2JzZXJ2ZXIgb2YgdGhpcy5fb2JzZXJ2ZXJzKVxuICAgICAgICBvYnNlcnZlcih2YWx1ZSk7XG4gICAgfVxuICB9XG5cbiAgZ2V0KCkge1xuICAgIHJldHVybiB0aGlzLl9zdGF0ZTtcbiAgfVxuXG4gIGFkZE9ic2VydmVyKG9ic2VydmVyKSB7XG4gICAgdGhpcy5fb2JzZXJ2ZXJzLmFkZChvYnNlcnZlcik7XG4gIH1cblxuICByZW1vdmVPYnNlcnZlcihvYnNlcnZlcikge1xuICAgIHRoaXMuX29ic2VydmVycy5kZWxldGUob2JzZXJ2ZXIpO1xuICB9XG59XG4iXX0=
+exports.default = Signal;
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIlNpZ25hbC5qcyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OztJQUlxQjtBQUNuQixXQURtQixNQUNuQixHQUFjO3dDQURLLFFBQ0w7O0FBQ1osU0FBSyxNQUFMLEdBQWMsS0FBZCxDQURZO0FBRVosU0FBSyxVQUFMLEdBQWtCLG1CQUFsQixDQUZZO0dBQWQ7OzZCQURtQjs7d0JBTWYsT0FBTztBQUNULFVBQUksVUFBVSxLQUFLLE1BQUwsRUFBYTtBQUN6QixhQUFLLE1BQUwsR0FBYyxLQUFkLENBRHlCOzs7Ozs7O0FBR3pCLDBEQUFxQixLQUFLLFVBQUwsUUFBckI7Z0JBQVM7O0FBQ1AscUJBQVMsS0FBVDtXQURGOzs7Ozs7Ozs7Ozs7OztTQUh5QjtPQUEzQjs7OzswQkFRSTtBQUNKLGFBQU8sS0FBSyxNQUFMLENBREg7Ozs7Z0NBSU0sVUFBVTtBQUNwQixXQUFLLFVBQUwsQ0FBZ0IsR0FBaEIsQ0FBb0IsUUFBcEIsRUFEb0I7Ozs7bUNBSVAsVUFBVTtBQUN2QixXQUFLLFVBQUwsQ0FBZ0IsTUFBaEIsQ0FBdUIsUUFBdkIsRUFEdUI7OztTQXZCTiIsImZpbGUiOiJTaWduYWwuanMiLCJzb3VyY2VzQ29udGVudCI6WyIvKipcbiAqXG4gKlxuICovXG5leHBvcnQgZGVmYXVsdCBjbGFzcyBTaWduYWwge1xuICBjb25zdHJ1Y3RvcigpIHtcbiAgICB0aGlzLl9zdGF0ZSA9IGZhbHNlO1xuICAgIHRoaXMuX29ic2VydmVycyA9IG5ldyBTZXQoKTtcbiAgfVxuXG4gIHNldCh2YWx1ZSkge1xuICAgIGlmICh2YWx1ZSAhPT0gdGhpcy5fc3RhdGUpIHtcbiAgICAgIHRoaXMuX3N0YXRlID0gdmFsdWU7XG5cbiAgICAgIGZvciAobGV0IG9ic2VydmVyIG9mIHRoaXMuX29ic2VydmVycylcbiAgICAgICAgb2JzZXJ2ZXIodmFsdWUpO1xuICAgIH1cbiAgfVxuXG4gIGdldCgpIHtcbiAgICByZXR1cm4gdGhpcy5fc3RhdGU7XG4gIH1cblxuICBhZGRPYnNlcnZlcihvYnNlcnZlcikge1xuICAgIHRoaXMuX29ic2VydmVycy5hZGQob2JzZXJ2ZXIpO1xuICB9XG5cbiAgcmVtb3ZlT2JzZXJ2ZXIob2JzZXJ2ZXIpIHtcbiAgICB0aGlzLl9vYnNlcnZlcnMuZGVsZXRlKG9ic2VydmVyKTtcbiAgfVxufVxuIl19

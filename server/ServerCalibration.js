@@ -1,33 +1,49 @@
 'use strict';
 
-var _get = require('babel-runtime/helpers/get')['default'];
-
-var _inherits = require('babel-runtime/helpers/inherits')['default'];
-
-var _createClass = require('babel-runtime/helpers/create-class')['default'];
-
-var _classCallCheck = require('babel-runtime/helpers/class-call-check')['default'];
-
-var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
-
-Object.defineProperty(exports, '__esModule', {
+Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _calibrationServer = require('calibration/server');
+var _getPrototypeOf = require('babel-runtime/core-js/object/get-prototype-of');
 
-var _calibrationServer2 = _interopRequireDefault(_calibrationServer);
+var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
+
+var _classCallCheck2 = require('babel-runtime/helpers/classCallCheck');
+
+var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+
+var _createClass2 = require('babel-runtime/helpers/createClass');
+
+var _createClass3 = _interopRequireDefault(_createClass2);
+
+var _possibleConstructorReturn2 = require('babel-runtime/helpers/possibleConstructorReturn');
+
+var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
+
+var _get2 = require('babel-runtime/helpers/get');
+
+var _get3 = _interopRequireDefault(_get2);
+
+var _inherits2 = require('babel-runtime/helpers/inherits');
+
+var _inherits3 = _interopRequireDefault(_inherits2);
+
+var _server = require('calibration/server');
+
+var _server2 = _interopRequireDefault(_server);
 
 var _ServerModule2 = require('./ServerModule');
 
 var _ServerModule3 = _interopRequireDefault(_ServerModule2);
 
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 /**
  * @private
  */
 
-var ServerCalibration = (function (_ServerModule) {
-  _inherits(ServerCalibration, _ServerModule);
+var ServerCalibration = function (_ServerModule) {
+  (0, _inherits3.default)(ServerCalibration, _ServerModule);
 
   /**
    * Constructor of the calibration server module.
@@ -50,11 +66,12 @@ var ServerCalibration = (function (_ServerModule) {
         path: '../../data',
         file: 'calibration.json'
       } } : arguments[0];
+    (0, _classCallCheck3.default)(this, ServerCalibration);
 
-    _classCallCheck(this, ServerCalibration);
+    var _this = (0, _possibleConstructorReturn3.default)(this, (0, _getPrototypeOf2.default)(ServerCalibration).call(this, params.name || 'calibration'));
 
-    _get(Object.getPrototypeOf(ServerCalibration.prototype), 'constructor', this).call(this, params.name || 'calibration');
-    this.calibration = new _calibrationServer2['default']({ persistent: params.persistent });
+    _this.calibration = new _server2.default({ persistent: params.persistent });
+    return _this;
   }
 
   /**
@@ -64,32 +81,31 @@ var ServerCalibration = (function (_ServerModule) {
    * @param {ServerClient} client
    */
 
-  _createClass(ServerCalibration, [{
+
+  (0, _createClass3.default)(ServerCalibration, [{
     key: 'connect',
     value: function connect(client) {
-      var _this = this;
+      var _this2 = this;
 
-      _get(Object.getPrototypeOf(ServerCalibration.prototype), 'connect', this).call(this, client);
+      (0, _get3.default)((0, _getPrototypeOf2.default)(ServerCalibration.prototype), 'connect', this).call(this, client);
 
       var sendCallback = function sendCallback(cmd) {
         for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
           args[_key - 1] = arguments[_key];
         }
 
-        _this.send.apply(_this, [client, cmd].concat(args));
+        _this2.send.apply(_this2, [client, cmd].concat(args));
       };
 
       var receiveCallback = function receiveCallback(cmd, callback) {
-        _this.receive(client, cmd, callback);
+        _this2.receive(client, cmd, callback);
       };
 
       this.calibration.start(sendCallback, receiveCallback);
     }
   }]);
-
   return ServerCalibration;
-})(_ServerModule3['default']);
+}(_ServerModule3.default);
 
-exports['default'] = ServerCalibration;
-module.exports = exports['default'];
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi9Vc2Vycy9tYXR1c3pld3NraS9kZXYvY29zaW1hL2xpYi9zb3VuZHdvcmtzL3NyYy9zZXJ2ZXIvU2VydmVyQ2FsaWJyYXRpb24uanMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7OztpQ0FBOEIsb0JBQW9COzs7OzZCQUN6QixnQkFBZ0I7Ozs7Ozs7O0lBS3BCLGlCQUFpQjtZQUFqQixpQkFBaUI7Ozs7Ozs7Ozs7Ozs7Ozs7O0FBZXpCLFdBZlEsaUJBQWlCLEdBbUI1QjtRQUpJLE1BQU0seURBQUc7QUFDbkIsZ0JBQVUsRUFBRTtBQUNWLFlBQUksRUFBRSxZQUFZO0FBQ2xCLFlBQUksRUFBRSxrQkFBa0I7T0FDekIsRUFBRTs7MEJBbkJjLGlCQUFpQjs7QUFvQmhDLCtCQXBCZSxpQkFBaUIsNkNBb0IxQixNQUFNLENBQUMsSUFBSSxJQUFJLGFBQWEsRUFBRTtBQUNwQyxRQUFJLENBQUMsV0FBVyxHQUFHLG1DQUFzQixFQUFFLFVBQVUsRUFBRSxNQUFNLENBQUMsVUFBVSxFQUFFLENBQUMsQ0FBQztHQUMvRTs7Ozs7Ozs7O2VBdEJrQixpQkFBaUI7O1dBOEI3QixpQkFBQyxNQUFNLEVBQUU7OztBQUNkLGlDQS9CaUIsaUJBQWlCLHlDQStCcEIsTUFBTSxFQUFFOztBQUV0QixVQUFNLFlBQVksR0FBRyxTQUFmLFlBQVksQ0FBSSxHQUFHLEVBQWM7MENBQVQsSUFBSTtBQUFKLGNBQUk7OztBQUNoQyxjQUFLLElBQUksTUFBQSxTQUFDLE1BQU0sRUFBRSxHQUFHLFNBQUssSUFBSSxFQUFDLENBQUM7T0FDakMsQ0FBQzs7QUFFRixVQUFNLGVBQWUsR0FBRyxTQUFsQixlQUFlLENBQUksR0FBRyxFQUFFLFFBQVEsRUFBSztBQUN6QyxjQUFLLE9BQU8sQ0FBQyxNQUFNLEVBQUUsR0FBRyxFQUFFLFFBQVEsQ0FBQyxDQUFDO09BQ3JDLENBQUM7O0FBRUYsVUFBSSxDQUFDLFdBQVcsQ0FBQyxLQUFLLENBQUMsWUFBWSxFQUFFLGVBQWUsQ0FBQyxDQUFDO0tBQ3ZEOzs7U0ExQ2tCLGlCQUFpQjs7O3FCQUFqQixpQkFBaUIiLCJmaWxlIjoiL1VzZXJzL21hdHVzemV3c2tpL2Rldi9jb3NpbWEvbGliL3NvdW5kd29ya3Mvc3JjL3NlcnZlci9TZXJ2ZXJDYWxpYnJhdGlvbi5qcyIsInNvdXJjZXNDb250ZW50IjpbImltcG9ydCBDYWxpYnJhdGlvblNlcnZlciBmcm9tICdjYWxpYnJhdGlvbi9zZXJ2ZXInO1xuaW1wb3J0IFNlcnZlck1vZHVsZSBmcm9tICcuL1NlcnZlck1vZHVsZSc7XG5cbi8qKlxuICogQHByaXZhdGVcbiAqL1xuZXhwb3J0IGRlZmF1bHQgY2xhc3MgU2VydmVyQ2FsaWJyYXRpb24gZXh0ZW5kcyBTZXJ2ZXJNb2R1bGUge1xuICAvKipcbiAgICogQ29uc3RydWN0b3Igb2YgdGhlIGNhbGlicmF0aW9uIHNlcnZlciBtb2R1bGUuXG4gICAqXG4gICAqIE5vdGUgdGhhdCB0aGUgcmVjZWl2ZSBmdW5jdGlvbnMgYXJlIHJlZ2lzdGVyZWQgYnkge0BsaW5rY29kZVxuICAgKiBDYWxpYnJhdGlvbn5jb25uZWN0fS5cbiAgICpcbiAgICogQGNvbnN0cnVjdHMgQ2FsaWJyYXRpb25cbiAgICogQHBhcmFtIHtPYmplY3R9IFtwYXJhbXNdXG4gICAqIEBwYXJhbSB7T2JqZWN0fSBbcGFyYW1zLnBlcnNpc3RlbnRdXG4gICAqIEBwYXJhbSB7T2JqZWN0fSBbcGFyYW1zLnBlcnNpc3RlbnQucGF0aD0nLi4vLi4vZGF0YSddIHdoZXJlIHRvXG4gICAqIHN0b3JlIHRoZSBwZXJzaXN0ZW50IGZpbGVcbiAgICogQHBhcmFtIHtPYmplY3R9IFtwYXJhbXMucGVyc2lzdGVudC5maWxlPSdjYWxpYnJhdGlvbi5qc29uJ10gbmFtZVxuICAgKiBvZiB0aGUgcGVyc2lzdGVudCBmaWxlXG4gICAqL1xuICBjb25zdHJ1Y3RvcihwYXJhbXMgPSB7XG4gICAgcGVyc2lzdGVudDoge1xuICAgICAgcGF0aDogJy4uLy4uL2RhdGEnLFxuICAgICAgZmlsZTogJ2NhbGlicmF0aW9uLmpzb24nXG4gICAgfSB9ICkge1xuICAgICAgc3VwZXIocGFyYW1zLm5hbWUgfHwgJ2NhbGlicmF0aW9uJyk7XG4gICAgICB0aGlzLmNhbGlicmF0aW9uID0gbmV3IENhbGlicmF0aW9uU2VydmVyKHsgcGVyc2lzdGVudDogcGFyYW1zLnBlcnNpc3RlbnQgfSk7XG4gIH1cblxuICAvKipcbiAgICogUmVnaXN0ZXIgdGhlIHJlY2VpdmUgZnVuY3Rpb25zLlxuICAgKlxuICAgKiBAZnVuY3Rpb24gQ2FsaWJyYXRpb25+Y29ubmVjdFxuICAgKiBAcGFyYW0ge1NlcnZlckNsaWVudH0gY2xpZW50XG4gICAqL1xuICBjb25uZWN0KGNsaWVudCkge1xuICAgIHN1cGVyLmNvbm5lY3QoY2xpZW50KTtcblxuICAgIGNvbnN0IHNlbmRDYWxsYmFjayA9IChjbWQsIC4uLmFyZ3MpID0+IHtcbiAgICAgIHRoaXMuc2VuZChjbGllbnQsIGNtZCwgLi4uYXJncyk7XG4gICAgfTtcblxuICAgIGNvbnN0IHJlY2VpdmVDYWxsYmFjayA9IChjbWQsIGNhbGxiYWNrKSA9PiB7XG4gICAgICB0aGlzLnJlY2VpdmUoY2xpZW50LCBjbWQsIGNhbGxiYWNrKTtcbiAgICB9O1xuXG4gICAgdGhpcy5jYWxpYnJhdGlvbi5zdGFydChzZW5kQ2FsbGJhY2ssIHJlY2VpdmVDYWxsYmFjayk7XG4gIH1cblxufVxuIl19
+exports.default = ServerCalibration;
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIlNlcnZlckNhbGlicmF0aW9uLmpzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OztBQUFBOzs7O0FBQ0E7Ozs7Ozs7Ozs7SUFLcUI7Ozs7Ozs7Ozs7Ozs7Ozs7OztBQWVuQixXQWZtQixpQkFlbkIsR0FJUTtRQUpJLCtEQUFTO0FBQ25CLGtCQUFZO0FBQ1YsY0FBTSxZQUFOO0FBQ0EsY0FBTSxrQkFBTjtPQUZGLGtCQUdNO3dDQW5CVyxtQkFtQlg7OzZGQW5CVyw4QkFvQlQsT0FBTyxJQUFQLElBQWUsYUFBZixHQURGOztBQUVKLFVBQUssV0FBTCxHQUFtQixxQkFBc0IsRUFBRSxZQUFZLE9BQU8sVUFBUCxFQUFwQyxDQUFuQixDQUZJOztHQUpSOzs7Ozs7Ozs7OzZCQWZtQjs7NEJBOEJYLFFBQVE7OztBQUNkLHVEQS9CaUIsMERBK0JILE9BQWQsQ0FEYzs7QUFHZCxVQUFNLGVBQWUsU0FBZixZQUFlLENBQUMsR0FBRCxFQUFrQjswQ0FBVDs7U0FBUzs7QUFDckMsZUFBSyxJQUFMLGdCQUFVLFFBQVEsWUFBUSxLQUExQixFQURxQztPQUFsQixDQUhQOztBQU9kLFVBQU0sa0JBQWtCLFNBQWxCLGVBQWtCLENBQUMsR0FBRCxFQUFNLFFBQU4sRUFBbUI7QUFDekMsZUFBSyxPQUFMLENBQWEsTUFBYixFQUFxQixHQUFyQixFQUEwQixRQUExQixFQUR5QztPQUFuQixDQVBWOztBQVdkLFdBQUssV0FBTCxDQUFpQixLQUFqQixDQUF1QixZQUF2QixFQUFxQyxlQUFyQyxFQVhjOzs7U0E5QkciLCJmaWxlIjoiU2VydmVyQ2FsaWJyYXRpb24uanMiLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgQ2FsaWJyYXRpb25TZXJ2ZXIgZnJvbSAnY2FsaWJyYXRpb24vc2VydmVyJztcbmltcG9ydCBTZXJ2ZXJNb2R1bGUgZnJvbSAnLi9TZXJ2ZXJNb2R1bGUnO1xuXG4vKipcbiAqIEBwcml2YXRlXG4gKi9cbmV4cG9ydCBkZWZhdWx0IGNsYXNzIFNlcnZlckNhbGlicmF0aW9uIGV4dGVuZHMgU2VydmVyTW9kdWxlIHtcbiAgLyoqXG4gICAqIENvbnN0cnVjdG9yIG9mIHRoZSBjYWxpYnJhdGlvbiBzZXJ2ZXIgbW9kdWxlLlxuICAgKlxuICAgKiBOb3RlIHRoYXQgdGhlIHJlY2VpdmUgZnVuY3Rpb25zIGFyZSByZWdpc3RlcmVkIGJ5IHtAbGlua2NvZGVcbiAgICogQ2FsaWJyYXRpb25+Y29ubmVjdH0uXG4gICAqXG4gICAqIEBjb25zdHJ1Y3RzIENhbGlicmF0aW9uXG4gICAqIEBwYXJhbSB7T2JqZWN0fSBbcGFyYW1zXVxuICAgKiBAcGFyYW0ge09iamVjdH0gW3BhcmFtcy5wZXJzaXN0ZW50XVxuICAgKiBAcGFyYW0ge09iamVjdH0gW3BhcmFtcy5wZXJzaXN0ZW50LnBhdGg9Jy4uLy4uL2RhdGEnXSB3aGVyZSB0b1xuICAgKiBzdG9yZSB0aGUgcGVyc2lzdGVudCBmaWxlXG4gICAqIEBwYXJhbSB7T2JqZWN0fSBbcGFyYW1zLnBlcnNpc3RlbnQuZmlsZT0nY2FsaWJyYXRpb24uanNvbiddIG5hbWVcbiAgICogb2YgdGhlIHBlcnNpc3RlbnQgZmlsZVxuICAgKi9cbiAgY29uc3RydWN0b3IocGFyYW1zID0ge1xuICAgIHBlcnNpc3RlbnQ6IHtcbiAgICAgIHBhdGg6ICcuLi8uLi9kYXRhJyxcbiAgICAgIGZpbGU6ICdjYWxpYnJhdGlvbi5qc29uJ1xuICAgIH0gfSApIHtcbiAgICAgIHN1cGVyKHBhcmFtcy5uYW1lIHx8ICdjYWxpYnJhdGlvbicpO1xuICAgICAgdGhpcy5jYWxpYnJhdGlvbiA9IG5ldyBDYWxpYnJhdGlvblNlcnZlcih7IHBlcnNpc3RlbnQ6IHBhcmFtcy5wZXJzaXN0ZW50IH0pO1xuICB9XG5cbiAgLyoqXG4gICAqIFJlZ2lzdGVyIHRoZSByZWNlaXZlIGZ1bmN0aW9ucy5cbiAgICpcbiAgICogQGZ1bmN0aW9uIENhbGlicmF0aW9ufmNvbm5lY3RcbiAgICogQHBhcmFtIHtTZXJ2ZXJDbGllbnR9IGNsaWVudFxuICAgKi9cbiAgY29ubmVjdChjbGllbnQpIHtcbiAgICBzdXBlci5jb25uZWN0KGNsaWVudCk7XG5cbiAgICBjb25zdCBzZW5kQ2FsbGJhY2sgPSAoY21kLCAuLi5hcmdzKSA9PiB7XG4gICAgICB0aGlzLnNlbmQoY2xpZW50LCBjbWQsIC4uLmFyZ3MpO1xuICAgIH07XG5cbiAgICBjb25zdCByZWNlaXZlQ2FsbGJhY2sgPSAoY21kLCBjYWxsYmFjaykgPT4ge1xuICAgICAgdGhpcy5yZWNlaXZlKGNsaWVudCwgY21kLCBjYWxsYmFjayk7XG4gICAgfTtcblxuICAgIHRoaXMuY2FsaWJyYXRpb24uc3RhcnQoc2VuZENhbGxiYWNrLCByZWNlaXZlQ2FsbGJhY2spO1xuICB9XG5cbn1cbiJdfQ==
