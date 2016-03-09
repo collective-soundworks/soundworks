@@ -120,7 +120,7 @@ export default class Activity extends Process {
   }
 
   set viewTemplate(tmpl) {
-    this._viewTemplate tmpl;
+    this._viewTemplate = tmpl;
   }
 
   /**
