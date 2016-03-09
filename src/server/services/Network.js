@@ -1,9 +1,9 @@
-import ServerActivity from '../core/ServerActivity';
+import Activity from '../core/Activity';
 import serviceManager from '../core/serviceManager';
 
 const SERVICE_ID = 'service:network';
 
-class ServerNetwork extends ServerActivity {
+class Network extends Activity {
   constructor() {
     super(SERVICE_ID);
   }
@@ -27,6 +27,6 @@ class ServerNetwork extends ServerActivity {
   }
 }
 
-serviceManager.register(SERVICE_ID, ServerNetwork);
+serviceManager.register(SERVICE_ID, Network);
 
-export default ServerNetwork;
+export default Network;

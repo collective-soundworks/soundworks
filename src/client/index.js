@@ -30,7 +30,7 @@ export { default as Welcome } from './services/Welcome';
 
 // views
 export { default as defaultTemplates } from './views/defaultTemplates';
-export { default as defaultTextContent } from './views/defaultTextContent';
+export { default as defaultContent } from './views/defaultContent';
 export { default as ButtonView } from './views/ButtonView';
 export { default as CanvasView } from './views/CanvasView';
 export { default as Renderer } from './views/Renderer';

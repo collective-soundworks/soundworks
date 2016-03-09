@@ -69,7 +69,7 @@ class Loader extends Service {
     this.options.files.forEach((file, index) => this._progress[index] = 0);
 
     // prepare view
-    this.content.showProgress = this.options.showProgress;
+    this.viewContent.showProgress = this.options.showProgress;
     this.viewCtor = this.options.viewCtor;
     this.view = this.createView();
   }
