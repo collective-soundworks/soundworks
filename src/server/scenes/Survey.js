@@ -1,6 +1,6 @@
 import fse from 'fs-extra';
 import path from 'path';
-import ServerActivity from '../core/ServerActivity';
+import Activity from '../core/Activity';
 import sqlite from 'sqlite3';
 
 const sql = sqlite.verbose();
@@ -71,7 +71,7 @@ const SQL_SELECT = {
   userId: `SELECT last_insert_rowid() AS id FROM users`,
 }
 
-export default class ServerSurvey extends ServerActivity {
+export default class Survey extends Activity {
   constructor(clientType, surveyConfig) {
     super(SCENE_ID);
 

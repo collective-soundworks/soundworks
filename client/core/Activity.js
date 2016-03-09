@@ -111,7 +111,7 @@ var Activity = function (_Process) {
      * The template of the view (use `lodash.template` syntax).
      * @type {String}
      */
-    _this.template = null;
+    _this.viewTemplate = null;
 
     /**
      * Options of the process.
@@ -174,7 +174,7 @@ var Activity = function (_Process) {
         priority: this.options.viewPriority
       }, this.viewOptions);
 
-      return new this.viewCtor(this.template, this.content, this.events, options);
+      return new this.viewCtor(this.viewTemplate, this.content, this.events, options);
     }
 
     /**

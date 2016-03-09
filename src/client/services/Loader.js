@@ -23,14 +23,14 @@ class LoaderView extends SegmentedView {
 const SERVICE_ID = 'service:loader';
 
 /**
- * [client] Load audio files that can be used by other modules (*e.g.*, the {@link Performance}).
+ * [client] Load audio files.
  *
- * The module always has a view (that displays a progress bar) and requires the SASS partial `_77-loader.scss`.
+ * The service always has a view (that displays a progress bar) and requires the SASS partial `_77-loader.scss`.
  *
- * The module finishes its initialization when all the files are loaded.
+ * The service finishes its initialization when all the files are loaded.
  *
  * @example
- * // Instantiate the module with the files to load
+ * // Instantiate the service with the files to load
  * const loader = new Loader({ files: ['sounds/kick.mp3', 'sounds/snare.mp3'] });
  *
  * // Get the corresponding audio buffers
@@ -45,7 +45,7 @@ class Loader extends Service {
      * @type {Object} default - Default options of the service.
      * @type {String[]} [default.files=[]] - The audio files to load.
      * @type {Boolean} [default.showProgress=true] - Defines if the progress bar is rendered. If set to true, the view should implement an `onProgress(percent)` method.
-     * @type {String} [default.viewCtor=LoaderView] - Constructor for the module's view.
+     * @type {String} [default.viewCtor=LoaderView] - Constructor for the service's view.
      */
     const defaults = {
       showProgress: true,

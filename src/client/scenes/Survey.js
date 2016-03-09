@@ -197,9 +197,9 @@ class SurveyView extends SegmentedView {
 const SCENE_ID = 'survey';
 
 /**
- * A module to create surveys.
+ * A scene to create surveys.
  */
-export default class ClientSurvey extends Scene {
+export default class Survey extends Scene {
   constructor() {
     super(SCENE_ID, true);
 
@@ -215,8 +215,8 @@ export default class ClientSurvey extends Scene {
 
   /** @private */
   init() {
-    this.content.counter = 0;
-    this.events = { 'click .btn': this._displayNextQuestion };
+    this.viewContent.counter = 0;
+    this.viewEvents = { 'click .btn': this._displayNextQuestion };
     this.viewCtor = SurveyView;
 
     this.view = this.createView();
@@ -237,7 +237,7 @@ export default class ClientSurvey extends Scene {
 
   _onConfigResponse(surveyConfig) {
     // set length of the survey for the view
-    this.content.length = surveyConfig.length;
+    this.viewContent.length = surveyConfig.length;
     this._createRenderers(surveyConfig);
     this._displayNextQuestion();
   }
@@ -281,7 +281,7 @@ export default class ClientSurvey extends Scene {
     // retrieve the next renderer
     this.currentRenderer = this.renderers.shift();
     // update counter
-    this.content.counter += 1;
+    this.viewContent.counter += 1;
 
     if (this.currentRenderer) {
       this.view.setViewComponent('.section-center', this.currentRenderer);

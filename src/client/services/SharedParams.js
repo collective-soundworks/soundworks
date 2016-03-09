@@ -243,33 +243,31 @@ const SERVICE_ID = 'service:shared-params';
 /**
  * Manage the global control `parameters`, `infos`, and `commands` across the whole scenario.
  *
- * The module keeps track of:
+ * The service keeps track of:
  * - `parameters`: values that can be updated by the actions of the clients (*e.g.* the gain of a synth);
  * - `infos`: information about the state of the scenario (*e.g.* number of clients in the performance);
  * - `commands`: can trigger an action (*e.g.* reload the page).
  *
- * If the module is instantiated with the `gui` option set to `true`, it constructs a graphical interface to modify the parameters, view the infos, and trigger the commands.
- * Otherwise (`gui` option set to `false`) the module emits an event when it receives updated values from the server.
+ * If the service is instantiated with the `gui` option set to `true`, it constructs a graphical interface to modify the parameters, view the infos, and trigger the commands.
+ * Otherwise (`gui` option set to `false`) the service emits an event when it receives updated values from the server.
  *
- * When the GUI is disabled, the module finishes its initialization immediately after having set up the controls.
- * Otherwise (GUI enabled), the modules remains in its state and never finishes its initialization.
+ * When the GUI is disabled, the service finishes its initialization immediately after having set up the controls.
+ * Otherwise (GUI enabled), the service remains in its state and never finishes its initialization.
  *
- * When the module a view (`gui` option set to `true`), it requires the SASS partial `_77-checkin.scss`.
- *
- * (See also {@link src/server/ServerControl.js~ServerControl} on the server side.)
+ * When the service a view (`gui` option set to `true`), it requires the SASS partial `_77-checkin.scss`.
  *
  * @example // Example 1: make a client that displays the control GUI
- * const control = new ClientSharedParams();
+ * const control = new SharedParams();
  *
  * // Initialize the client (indicate the client type)
  * client.init('conductor'); // accessible at the URL /conductor
  *
  * // Start the scenario
- * // For this client type (`'conductor'`), there is only one module
+ * // For this client type (`'conductor'`), there is only one service
  * client.start(control);
  *
  * @example // Example 2: listen for parameter, infos & commands updates
- * const control = new ClientSharedParams({ gui: false });
+ * const control = new SharedParams({ gui: false });
  *
  * // Listen for parameter, infos or command updates
  * control.on('update', (name, value) => {
@@ -287,7 +285,7 @@ const SERVICE_ID = 'service:shared-params';
  * const currentSynthGainValue = control.event['synth:gain'].value;
  * const currentNumPlayersValue = control.event['numPlayers'].value;
  */
-class ClientSharedParams extends Service {
+class SharedParams extends Service {
   /**
    * @emits {'update'} when the server sends an update. The callback function takes `name:String` and `value:*` as arguments, where `name` is the name of the parameter / info / command, and `value` its new value.
    */
@@ -495,6 +493,6 @@ class ClientSharedParams extends Service {
   }
 }
 
-serviceManager.register(SERVICE_ID, ClientSharedParams);
+serviceManager.register(SERVICE_ID, SharedParams);
 
-export default ClientSharedParams;
+export default SharedParams;

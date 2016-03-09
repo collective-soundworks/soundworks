@@ -146,4 +146,3 @@ export default class ButtonView extends View {
     $target.setAttribute('disabled', true);
   }
 }
-

@@ -198,12 +198,10 @@ const SERVICE_ID = 'service:placer';
 /**
  * [client] Allow to select a place within a set of predefined positions (i.e. labels and/or coordinates).
  *
- * (See also {@link src/server/ServerPlacer.js~ServerPlacer} on the server side.)
- *
  * @example
  * const placer = soundworks.client.require('place', { capacity: 100 });
  */
-class ClientPlacer extends Service {
+class Placer extends Service {
   constructor() {
     super(SERVICE_ID, true);
 
@@ -265,7 +263,7 @@ class ClientPlacer extends Service {
             break;
         }
 
-        this.content.mode = this.options.mode;
+        this.viewContent.mode = this.options.mode;
         this.view = this.createView();
       }
     }
@@ -346,6 +344,6 @@ class ClientPlacer extends Service {
   }
 }
 
-serviceManager.register(SERVICE_ID, ClientPlacer);
+serviceManager.register(SERVICE_ID, Placer);
 
-export default ClientPlacer;
+export default Placer;

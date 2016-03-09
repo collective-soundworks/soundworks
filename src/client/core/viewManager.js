@@ -43,7 +43,7 @@ export default {
   /**
    * Sets the container of the views for all `Activity` instances. Is called by
    * {@link src/client/core/client.js~client}) during application bootstrap.
-   * @param {Element} $el - The element to use as a container for the module's view.
+   * @param {Element} $el - The element to use as a container for the view.
    * @private
    */
   setViewContainer($el) {

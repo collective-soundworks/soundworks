@@ -1,6 +1,6 @@
 import sockets from './sockets';
 import server from './server';
-import serverServiceManager from './serverServiceManager';
+import serviceManager from './serviceManager';
 import { EventEmitter } from 'events';
 
 // @todo - remove EventEmitter ? (Implement our own listeners)
@@ -8,14 +8,12 @@ import { EventEmitter } from 'events';
 /**
  * Base class used to create any *Soundworks* activity on the server side.
  *
- * While the sequence of user interactions and exchanges between client and server is determined on the client side, the server side modules are ready to receive requests from the corresponding client side modules as soon as a client is connected to the server.
+ * While the sequence of user interactions and exchanges between client and server is determined on the client side, the server side activities are ready to receive requests from the corresponding client side activities as soon as a client is connected to the server.
  *
- * Each module should have a {@link ServerModule#connect} and a {@link ServerModule#disconnect} methods.
- * Any module mapped to the type of client `'clientType'` (thanks to the {@link server#map} method) calls its {@link ServerModule#connect} method when such a client connects to the server, and its {@link ServerModule#disconnect} method when such a client disconnects from the server.
+ * Each activity should have a connect and a disconnect method.
+ * Any activity mapped to the type of client `'clientType'` (thanks to the {@link server#map} method) calls its connect method when such a client connects to the server, and its disconnect method when such a client disconnects from the server.
  *
- * (See also {@link src/client/ClientModule.js~ClientModule} on the client side.)
- *
- * **Note:** a more complete example of how to write a module is in the [Example](manual/example.html) section.
+ * **Note:** a more complete example of how to write a activity is in the [Example](manual/example.html) section.
  *
  * @example
  * class MyPier extends Pier {
@@ -38,7 +36,7 @@ import { EventEmitter } from 'events';
  *   }
  * }
  */
-export default class ServerActivity extends EventEmitter {
+export default class Activity extends EventEmitter {
   /**
    * Creates an instance of the class.
    * @param {String} id - The id of the activity.
@@ -115,7 +113,7 @@ export default class ServerActivity extends EventEmitter {
   /**
    * Add the given activity as a requirement for the current activity.
    * @private
-   * @type {ServerActivity} activity
+   * @type {Activity} activity
    */
   addRequiredActivity(activity) {
     this.requiredActivities.add(activity);
@@ -127,15 +125,14 @@ export default class ServerActivity extends EventEmitter {
    * @param {Object} options - Some options to configure the service.
    */
   require(id, options) {
-    return serverServiceManager.require(id, this, options);
+    return serviceManager.require(id, this, options);
   }
 
   /**
    * Interface method to be implemented by activities. As part of an activity
    * lifecycle, the method should define the behavior of the activity when started
    * (e.g. binding listeners). When this method id called, all configuration options
-   * should be setted. Also, if the activity relies on another service
-   * (e.g. {@link src/server/core/ServerSharedConfig.js~ServerSharedConfig}),
+   * should be setted. Also, if the activity relies on another service,
    * this dependency should be considered as instanciated.
    * The method is automatically called by the server on startup.
    */
@@ -144,13 +141,13 @@ export default class ServerActivity extends EventEmitter {
   /**
    * Called when the `client` connects to the server.
    *
-   * This method should handle the logic of the module on the server side.
-   * For instance, it can take care of the communication with the client side module by setting up WebSocket message listeners and sending WebSocket messages, or it can add the client to a list to keep track of all the connected clients.
+   * This method should handle the logic of the activity on the server side.
+   * For instance, it can take care of the communication with the client side activity by setting up WebSocket message listeners and sending WebSocket messages, or it can add the client to a list to keep track of all the connected clients.
    * @param {Client} client Connected client.
    */
   connect(client) {
     // Setup an object
-    client.modules[this.id] = {};
+    client.activities[this.id] = {};
   }
 
   /**
@@ -161,13 +158,13 @@ export default class ServerActivity extends EventEmitter {
    * @param {Client} client Disconnected client.
    */
   disconnect(client) {
-    // delete client.modules[this.id] // maybe needed by other modules
+    // delete client.activities[this.id] // maybe needed by other activities
   }
 
   /**
    * Listen a WebSocket message.
    * @param {Client} client - The client that must listen to the message.
-   * @param {String} channel - The channel of the message (is automatically namespaced with the module's name: `${this.id}:channel`).
+   * @param {String} channel - The channel of the message (is automatically namespaced with the activity's name: `${this.id}:channel`).
    * @param {...*} callback - The callback to execute when a message is received.
    */
   receive(client, channel, callback) {
@@ -178,7 +175,7 @@ export default class ServerActivity extends EventEmitter {
   /**
    * Sends a WebSocket message to the client.
    * @param {Client} client - The client to send the message to.
-   * @param {String} channel - The channel of the message (is automatically namespaced with the module's name: `${this.id}:channel`).
+   * @param {String} channel - The channel of the message (is automatically namespaced with the activity's name: `${this.id}:channel`).
    * @param {...*} args - Arguments of the message (as many as needed, of any type).
    */
   send(client, channel, ...args) {
@@ -189,7 +186,7 @@ export default class ServerActivity extends EventEmitter {
   /**
    * Sends a message to all client of given `clientType` or `clientType`s. If not specified, the message is sent to all clients
    * @param {String|Array} clientType - The `clientType`(s) that must receive the message.
-   * @param {String} channel - The channel of the message (is automatically namespaced with the module's name: `${this.id}:channel`).
+   * @param {String} channel - The channel of the message (is automatically namespaced with the activity's name: `${this.id}:channel`).
    * @param {...*} args - Arguments of the message (as many as needed, of any type).
    */
   broadcast(clientType, excludeClient, channel, ...args) {

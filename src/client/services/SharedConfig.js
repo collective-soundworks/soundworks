@@ -8,7 +8,7 @@ const SERVICE_ID = 'service:shared-config';
 /**
  * This service allows to retrieve part of the server configuration to client.
  */
-class ClientSharedConfig extends Service {
+class SharedConfig extends Service {
   constructor() {
     super(SERVICE_ID, true);
 
@@ -68,6 +68,6 @@ class ClientSharedConfig extends Service {
   }
 }
 
-serviceManager.register(SERVICE_ID, ClientSharedConfig);
+serviceManager.register(SERVICE_ID, SharedConfig);
 
-export default ClientSharedConfig;
+export default SharedConfig;

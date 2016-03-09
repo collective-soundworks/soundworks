@@ -20,16 +20,16 @@ const SERVICE_ID = 'service:welcome';
 
 /**
  * [client] Check whether the device is compatible with the technologies used in the *Soundworks* library.
- * The module should used at the very beginning of a scenario to activate the Web Audio API on iOS devices (with the `activateAudio` option).
+ * The service should used at the very beginning of a scenario to activate the Web Audio API on iOS devices (with the `activateAudio` option).
  *
- * The module requires the participant to tap the screen in order to initialize the webAudio on iOS devices and to make the view disappear.
+ * The service requires the participant to tap the screen in order to initialize the webAudio on iOS devices and to make the view disappear.
  *
  * Compatible devices are running on iOS 7 or above, or on Android 4.2 or above with the Chrome browser in version 35 or above.
- * If that is not the case, the module displays a blocking `view` and prevents the participant to go any further in the scenario.
+ * If that is not the case, the service displays a blocking `view` and prevents the participant to go any further in the scenario.
  *
- * The module finishes its initialization when the user touches the screen if the device passes the platform test, and never otherwise.
+ * The service finishes its initialization when the user touches the screen if the device passes the platform test, and never otherwise.
  *
- * The module always has a view.
+ * The service always has a view.
  *
  * @example
  * const welcomeDialog = new Welcome({
@@ -42,10 +42,10 @@ class Welcome extends Service {
 
     /**
      * @type {Object} [defaults={}] - Options.
-     * @type {String} [defaults.name='welcome'] - Name of the module.
-     * @type {Boolean} [defaults.activateAudio=true] - Indicates whether the module activates the Web Audio API when the participant touches the screen (useful on iOS devices).
+     * @type {String} [defaults.name='welcome'] - Name of the service.
+     * @type {Boolean} [defaults.activateAudio=true] - Indicates whether the service activates the Web Audio API when the participant touches the screen (useful on iOS devices).
      * @type {Boolean} [defaults.requireMobile=true] - Defines if the application requires the use of a mobile device.
-     * @type {Boolean} [defaults.wakeLock=false] - Indicates whether the modules activates an ever-looping 1-pixel video to prevent the device from going idle.
+     * @type {Boolean} [defaults.wakeLock=false] - Indicates whether the service activates an ever-looping 1-pixel video to prevent the device from going idle.
      */
     const defaults = {
       requireMobile: true,
@@ -70,34 +70,34 @@ class Welcome extends Service {
     const isMobile = client.platform.isMobile;
     const requireMobile = this.options.requireMobile;
     const activateAudio = this.options.activateAudio;
-    const content = this.content;
+    const viewContent = this.viewContent;
     let error = null;
 
     if (activateAudio && !this._supportsWebAudio()) {
       if (os === 'ios') {
-        error = content.errorIosVersion;
+        error = viewContent.errorIosVersion;
       } else if (os === 'android') {
-        error = content.errorAndroidVersion;
+        error = viewContent.errorAndroidVersion;
       } else if (requireMobile) {
-        error = content.errorRequireMobile;
+        error = viewContent.errorRequireMobile;
       } else {
-        error = content.errorDefault;
+        error = viewContent.errorDefault;
       }
     } else if (requireMobile && (!isMobile || os === 'other')) {
-      error = content.errorRequireMobile;
+      error = viewContent.errorRequireMobile;
     } else if (os === 'ios' && version < 7) {
-      error = content.errorIosVersion;
+      error = viewContent.errorIosVersion;
     } else if (os === 'android' && version < 4.2) {
-      error = content.errorAndroidVersion;
+      error = viewContent.errorAndroidVersion;
     }
 
-    content.error = error;
+    viewContent.error = error;
     client.compatible = error === null ? true : false;
 
     if (this.options.showDialog) {
       if (!error) {
         const event = isMobile ? 'touchend' : 'click';
-        this.events = { [event]: this.activateMedia.bind(this) };
+        this.viewEvents = { [event]: this.activateMedia.bind(this) };
       }
 
       this.viewCtor = this.options.viewCtor;
@@ -233,4 +233,3 @@ class Welcome extends Service {
 serviceManager.register(SERVICE_ID, Welcome);
 
 export default Welcome;
-

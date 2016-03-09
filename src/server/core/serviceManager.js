@@ -6,12 +6,12 @@ const _instances = {};
  * Manager the services and their relations. Acts as a factory to ensure services
  * are instanciated only once.
  */
-const serverServiceManager = {
+const serviceManager = {
   /**
    * Retrieve a service according to the given id. If the service as not beeen
    * requested yet, it is instanciated.
    * @param {String} id - The id of the registered service
-   * @param {ServerActivity} consumer - The activity instance requering the service.
+   * @param {Activity} consumer - The activity instance requering the service.
    * @param {Object} options - The options to configure the service.
    */
   require(id, consumer = null, options = {}) {
@@ -46,4 +46,4 @@ const serverServiceManager = {
   },
 };
 
-export default serverServiceManager;
+export default serviceManager;

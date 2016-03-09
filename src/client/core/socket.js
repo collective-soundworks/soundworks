@@ -10,7 +10,7 @@ export default {
   socket: null,
 
   /**
-   * Is set to `true` when a `ClientActivity` is instanciated. Is checked by the `client` to initialize the connection or not.
+   * Is set to `true` when a `Activity` is instanciated. Is checked by the `client` to initialize the connection or not.
    */
   required: false,
 

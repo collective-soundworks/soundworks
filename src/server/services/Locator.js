@@ -1,5 +1,5 @@
-import ServerActivity from '../core/ServerActivity';
-import serverServiceManager from '../core/serverServiceManager';
+import Activity from '../core/Activity';
+import serviceManager from '../core/serviceManager';
 
 const SERVICE_ID = 'service:locator';
 
@@ -8,7 +8,7 @@ const SERVICE_ID = 'service:locator';
  *
  * (See also {@link src/client/services/ClientLocator.js~ClientLocator} on the client side.)
  */
-class ServerLocator extends ServerActivity {
+class Locator extends Activity {
   constructor() {
     super(SERVICE_ID);
 
@@ -57,6 +57,6 @@ class ServerLocator extends ServerActivity {
   }
 }
 
-serverServiceManager.register(SERVICE_ID, ServerLocator);
+serviceManager.register(SERVICE_ID, Locator);
 
-export default ServerLocator;
+export default Locator;

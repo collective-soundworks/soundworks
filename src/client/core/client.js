@@ -3,9 +3,8 @@ import Activity from './Activity';
 import serviceManager from './serviceManager';
 import viewManager from './viewManager';
 import socket from './socket';
-import defaultTextContent from '../views/defaultTextContent';
-import defaultTemplates from '../views/defaultTemplates';
-
+import defaultViewContent from '../views/defaultContent';
+import defaultViewTemplates from '../views/defaultTemplates';
 
 const client = {
   /**
@@ -46,21 +45,21 @@ const client = {
 
   /**
    * Client coordinates (if any) given by a {@link Locator}, {@link Placer} or
-   * {@link Checkin} module. (Format: `[x:Number, y:Number]`.)
+   * {@link Checkin} service. (Format: `[x:Number, y:Number]`.)
    * @type {Array<Number>}
    */
   coordinates: null,
 
   /**
    * Ticket index (if any) given by a {@link Placer} or
-   * {@link Checkin} module.
+   * {@link Checkin} service.
    * @type {Number}
    */
   index: null,
 
   /**
    * Ticket label (if any) given by a {@link Placer} or
-   * {@link Checkin} module.
+   * {@link Checkin} service.
    * @type {String}
    */
   label: null,
@@ -149,41 +148,41 @@ const client = {
   },
 
   /**
-   * Initialize templates for all
+   * Initialize view templates for all
    */
   _initViews() {
-    // initialize modules views with default texts and templates
-    this.textContent = {};
-    this.templates = {};
+    // initialize views with default view content and templates
+    this.viewContent = {};
+    this.viewTemplates = {};
 
-    const appName = this.config.appName || defaultTextContent.globals.appName;
-    const textContent = Object.assign(defaultTextContent, { globals: { appName } });
+    const appName = this.config.appName || defaultViewContent.globals.appName;
+    const viewContent = Object.assign(defaultViewContent, { globals: { appName } });
 
-    this.setViewContentDefinitions(textContent);
-    this.setViewTemplateDefinitions(defaultTemplates);
+    this.setViewContentDefinitions(viewContent);
+    this.setViewTemplateDefinitions(defaultViewTemplates);
     this.setAppContainer(this.config.appContainer);
   },
 
   /**
-   * Extend application text contents with the given object.
-   * @param {Object} contents - The text contents to propagate to modules.
+   * Extend application view contents with the given object.
+   * @param {Object} content - The view content to propagate to activities.
    */
   setViewContentDefinitions(defs) {
-    this.textContent = Object.assign(this.textContent, defs);
-    Activity.setViewContentDefinitions(this.textContent);
+    this.viewContent = Object.assign(this.viewContent, defs);
+    Activity.setViewContentDefinitions(this.viewContent);
   },
 
   /**
-   * Extend application templates with the given object.
-   * @param {Object} templates - The templates to propagate to modules.
+   * Extend application view templates with the given object.
+   * @param {Object} view templates - The view templates to propagate to activities.
    */
   setViewTemplateDefinitions(defs) {
-    this.templates = Object.assign(this.templates, defs);
-    Activity.setViewTemplateDefinitions(this.templates);
+    this.viewTemplates = Object.assign(this.viewTemplates, defs);
+    Activity.setViewTemplateDefinitions(this.viewTemplates);
   },
 
   /**
-   * Sets the default view container for all `ClientModule`s
+   * Set the default container for all views.
    * @param {String|Element} el - DOM element (or css selector matching
    *  an existing element) to be used as the container of the application.
    */

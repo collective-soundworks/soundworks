@@ -2,7 +2,7 @@ import { audioContext } from 'waves-audio';
 import SegmentedView from '../views/SegmentedView';
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
-import SyncClient from 'sync/client';
+import SyncModule from 'sync/client';
 
 const SERVICE_ID = 'service:sync';
 
@@ -12,34 +12,32 @@ const SERVICE_ID = 'service:sync';
  * Both the clients and the server can use this master clock as a common time reference.
  * For instance, this allows all the clients to do something exactly at the same time, such as blinking the screen or playing a sound in a synchronized manner.
  *
- * The module always has a view (that displays "Clock syncing, stand by…", until the very first synchronization process is done).
+ * The service always has a view (that displays "Clock syncing, stand by…", until the very first synchronization process is done).
  *
- * The module finishes its initialization as soon as the client clock is in sync with the master clock.
+ * The service finishes its initialization as soon as the client clock is in sync with the master clock.
  * Then, the synchronization process keeps running in the background to resynchronize the clocks from times to times.
  *
  * **Note:** the service is based on [`github.com/collective-soundworks/sync`](https://github.com/collective-soundworks/sync).
- *
- * (See also {@link src/server/ServerSync.js~ServerSync} on the server side.)
  *
  * @example
  * const sync = serviceManager.require('service:sync');
  *
  * const nowLocal = sync.getLocalTime(); // current time in local clock time
  * const nowSync = sync.getSyncTime(); // current time in sync clock time
- * @emits 'sync:stats' each time the module (re)synchronizes the local clock on the sync clock.
+ * @emits 'sync:stats' each time the service (re)synchronizes the local clock on the sync clock.
  * The `'status'` event goes along with the `report` object that has the following properties:
  * - `timeOffset`, current estimation of the time offset between the client clock and the sync clock;
  * - `travelTime`, current estimation of the travel time for a message to go from the client to the server and back;
  * - `travelTimeMax`, current estimation of the maximum travel time for a message to go from the client to the server and back.
  */
-class ClientSync extends Service {
+class Sync extends Service {
   constructor() {
     super(SERVICE_ID, true);
 
     const defaults = {
       viewCtor: SegmentedView,
       viewPriority: 3,
-      // @todo - add options to configure the sync module
+      // @todo - add options to configure the sync service
     }
 
     this.configure(defaults);
@@ -51,7 +49,7 @@ class ClientSync extends Service {
   }
 
   init() {
-    this._sync = new SyncClient(() => audioContext.currentTime);
+    this._sync = new SyncModule(() => audioContext.currentTime);
     this._ready = false;
 
     this.viewCtor = this.options.viewCtor;
@@ -116,7 +114,6 @@ class ClientSync extends Service {
   }
 }
 
-serviceManager.register(SERVICE_ID, ClientSync);
+serviceManager.register(SERVICE_ID, Sync);
 
-export default ClientSync;
-
+export default Sync;

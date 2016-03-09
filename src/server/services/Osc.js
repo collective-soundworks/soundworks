@@ -1,18 +1,18 @@
 import debug from 'debug';
 import osc from 'osc';
-import ServerActivity from '../core/ServerActivity';
-import serverServiceManager from '../core/serverServiceManager';
+import Activity from '../core/Activity';
+import serviceManager from '../core/serviceManager';
 
 
 const log = debug('soundworks:osc');
 const SERVICE_ID = 'service:osc';
 
 /**
- * Server only service for OSC communications withw external softwares
+ *  only service for OSC communications withw external softwares
  * (e.g. Max). Only support UDP protocol.
  * @todo - define if other protocols should be supported.
  */
-class Osc extends ServerActivity {
+class Osc extends Activity {
   constructor() {
     super(SERVICE_ID);
 
@@ -108,7 +108,6 @@ class Osc extends ServerActivity {
   broadcast() {}
 }
 
-serverServiceManager.register(SERVICE_ID, Osc);
+serviceManager.register(SERVICE_ID, Osc);
 
 export default Osc;
-

@@ -1,20 +1,20 @@
-import ServerActivity from '../core/ServerActivity';
+import Activity from '../core/Activity';
 import { getOpt } from '../../utils/helpers';
-import serverServiceManager from '../core/serverServiceManager';
+import serviceManager from '../core/serviceManager';
 
 const SERVICE_ID = 'service:checkin';
 
 /**
  * Assign places among a set of predefined positions (i.e. labels and/or coordinates).
  *
- * The module assigns a position to a client upon request of the client-side module.
+ * The service assigns a position to a client upon request of the client-side service.
  *
  * (See also {@link src/client/ClientCheckin.js~ClientCheckin} on the client side.)
  *
  * @example
- * const checkin = new ServerCheckin({ capacity: 100, order: 'random' });
+ * const checkin = new Checkin({ capacity: 100, order: 'random' });
  */
-class ServerCheckin extends ServerActivity {
+class Checkin extends Activity {
   /**
    * @param {Object} [options={}] Options.
    * @attribute {String} [defaults.setupConfigItem='setup'] - The path to the server's
@@ -174,6 +174,6 @@ class ServerCheckin extends ServerActivity {
   }
 }
 
-serverServiceManager.register(SERVICE_ID, ServerCheckin);
+serviceManager.register(SERVICE_ID, Checkin);
 
-export default ServerCheckin;
+export default Checkin;

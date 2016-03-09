@@ -1,7 +1,7 @@
 /**
- * The default templates for the shipped modules. The templates are organized according to the `Module.name` property.
+ * The default view templates for the services and scenes. The view templates are organized according to the `Module.name` property.
  *
- * These template are internally parsed using `lodash.template`, see [https://lodash.com/docs#template](https://lodash.com/docs#template) for more information.
+ * These view template are internally parsed using `lodash.template`, see [https://lodash.com/docs#template](https://lodash.com/docs#template) for more information.
  *
  * @type {Object}
  */

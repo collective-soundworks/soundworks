@@ -7,16 +7,14 @@ const SERVICE_ID = 'service:checkin';
 
 /**
  * Assign places among a set of predefined positions (i.e. labels and/or coordinates).
- * The module requests a position to the server and waits for the answer.
+ * The service requests a position to the server and waits for the answer.
  *
- * The module finishes its initialization when it receives a positive answer from the server. Otherwise (*e.g.* no more positions available), the module stays in its state and never finishes its initialization.
- *
- * (See also {@link src/server/ServerCheckin.js~ServerCheckin} on the server side.)
+ * The service finishes its initialization when it receives a positive answer from the server. Otherwise (*e.g.* no more positions available), the service stays in its state and never finishes its initialization.
  *
  * @example
- * const checkin = new ClientCheckin({ capacity: 100 });
+ * const checkin = new Checkin({ capacity: 100 });
  */
-class ClientCheckin extends Service {
+class Checkin extends Service {
   constructor() {
     super(SERVICE_ID, true);
 
@@ -42,13 +40,13 @@ class ClientCheckin extends Service {
   init() {
 
     /**
-     * Index given by the serverside {@link src/server/ServerCheckin.js~ServerCheckin} module.
+     * Index given by the server side service.
      * @type {Number}
      */
     this.index = -1;
 
     /**
-     * Label of the index assigned by the serverside {@link src/server/Checkin.js~Checkin} module (if any).
+     * Label of the index assigned by the serverside {@link src/server/Checkin.js~Checkin} service (if any).
      * @type {String}
      */
     this.label = null;
@@ -97,7 +95,7 @@ class ClientCheckin extends Service {
       const displayLabel = label || (index + 1).toString();
       const eventName = client.platform.isMobile ? 'click' : 'touchstart';
 
-      this.content.label = displayLabel;
+      this.viewContent.label = displayLabel;
       this.view.installEvents({ [eventName]: () => this.ready() });
       this.view.render();
     } else {
@@ -106,12 +104,11 @@ class ClientCheckin extends Service {
   }
 
   _onUnavailableResponse() {
-    this.content.error = true;
+    this.viewContent.error = true;
     this.view.render();
   }
 }
 
-serviceManager.register(SERVICE_ID, ClientCheckin);
+serviceManager.register(SERVICE_ID, Checkin);
 
-export default ClientCheckin;
-
+export default Checkin;

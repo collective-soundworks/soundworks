@@ -9,7 +9,7 @@ export default class Process extends EventEmitter {
   constructor(id) {
     super();
     /**
-     * Name of the module.
+     * Name of the process.
      * @type {String}
      */
     this.id = id;

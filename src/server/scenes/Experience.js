@@ -1,19 +1,19 @@
-import ServerActivity from '../core/ServerActivity';
+import Activity from '../core/Activity';
 import server from '../core/server';
 
 
 /**
  * Base class used to build a experience on the server side.
  *
- * Along with the classic {@link src/server/core/ServerActivity#connect} and {@link src/server/core/ServerActivity#disconnect} methods, the base class has two additional methods:
- * - {@link ServerExperience#enter}: called when the client enters the `Experience` (*i.e.* when the {@link src/client/scene/Experience.js~Experience} on the client side calls its {@link src/client/scene/Experience.js~Experience#start} method);
- * - {@link ServerExperience#exit}: called when the client leaves the `Experience` (*i.e.* when the {@link src/client/scene/Experience.js~Experience} on the client side calls its {@link src/client/scene/Experience.js~Experience#done} method, or if the client disconnected from the server).
+ * Along with the classic {@link src/server/core/Activity#connect} and {@link src/server/core/Activity#disconnect} methods, the base class has two additional methods:
+ * - {@link Experience#enter}: called when the client enters the `Experience` (*i.e.* when the {@link src/client/scene/Experience.js~Experience} on the client side calls its {@link src/client/scene/Experience.js~Experience#start} method);
+ * - {@link Experience#exit}: called when the client leaves the `Experience` (*i.e.* when the {@link src/client/scene/Experience.js~Experience} on the client side calls its {@link src/client/scene/Experience.js~Experience#done} method, or if the client disconnected from the server).
  *
  * The base class also keeps track of the clients who are currently in the performance (*i.e.* who entered but not exited yet) in the array `this.clients`.
  *
  * (See also {@link src/client/scene/Experience.js~Experience} on the client side.)
  */
-export default class ServerExperience extends ServerActivity {
+export default class Experience extends Activity {
   /**
    * Creates an instance of the class.
    * @param {String} clientType - The client type the experience should be
@@ -53,7 +53,7 @@ export default class ServerExperience extends ServerActivity {
     super.disconnect(client);
 
     // Call the `exit` method if the client previously entered the performance.
-    if (client.modules[this.id].entered)
+    if (client.activities[this.id].entered)
       this.exit(client);
   }
 
@@ -66,11 +66,11 @@ export default class ServerExperience extends ServerActivity {
     this.clients.push(client);
 
     // Set flag.
-    client.modules[this.id].entered = true;
+    client.activities[this.id].entered = true;
   }
 
   /**
-   * Called when the client exits the performance on the client side (*i.e.* when the `done` method of the client side module is called, or when the client disconnects from the server).
+   * Called when the client exits the performance on the client side (*i.e.* when the `done` method of the client side experience is called, or when the client disconnects from the server).
    * @param {Client} client Client who exits the performance.
    */
   exit(client) {
@@ -80,6 +80,6 @@ export default class ServerExperience extends ServerActivity {
       this.clients.splice(index, 1);
 
     // Remove flag.
-    client.modules[this.id].entered = false;
+    client.activities[this.id].entered = false;
   }
 }

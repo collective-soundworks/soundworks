@@ -1,5 +1,5 @@
-import ServerActivity from '../core/ServerActivity';
-import serverServiceManager from '../core/serverServiceManager';
+import Activity from '../core/Activity';
+import serviceManager from '../core/serviceManager';
 import fse  from 'fs-extra';
 import path from 'path';
 
@@ -11,7 +11,7 @@ function padLeft(str, value, length) {
 
 const SERVICE_ID = 'service:error-reporter';
 
-class ServerErrorReporter extends ServerActivity {
+class ErrorReporter extends Activity {
   constructor() {
     super(SERVICE_ID);
 
@@ -75,6 +75,6 @@ class ServerErrorReporter extends ServerActivity {
   }
 }
 
-serverServiceManager.register(SERVICE_ID, ServerErrorReporter);
+serviceManager.register(SERVICE_ID, ErrorReporter);
 
-export default ServerErrorReporter;
+export default ErrorReporter;

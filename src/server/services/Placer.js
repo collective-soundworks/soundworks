@@ -1,5 +1,5 @@
-import ServerActivity from '../core/ServerActivity';
-import serverServiceManager from '../core/serverServiceManager';
+import Activity from '../core/Activity';
+import serviceManager from '../core/serviceManager';
 import { getOpt } from '../../utils/helpers';
 
 import server from '../core/server';
@@ -14,7 +14,7 @@ const maxCapacity = 9999;
  *
  * (See also {@link src/client/services/ClientPlacer.js~ClientPlacer} on the client side)
  */
-class ServerPlacer extends ServerActivity {
+class Placer extends Activity {
   constructor() {
     super(SERVICE_ID);
 
@@ -190,4 +190,4 @@ class ServerPlacer extends ServerActivity {
   }
 }
 
-serverServiceManager.register(SERVICE_ID, ServerPlacer);
+serviceManager.register(SERVICE_ID, Placer);

@@ -8,7 +8,7 @@ const SERVICE_ID = 'service:error-reporter';
  * on the server. Is required by default by any {@link src/client/scene/Experience.js}
  * if its `hasNetwork` is set to `true`.
  */
-class ClientErrorReporter extends Service {
+class ErrorReporter extends Service {
   constructor() {
     super(SERVICE_ID, true);
 
@@ -43,6 +43,6 @@ class ClientErrorReporter extends Service {
   }
 }
 
-serviceManager.register(SERVICE_ID, ClientErrorReporter);
+serviceManager.register(SERVICE_ID, ErrorReporter);
 
-export default ClientErrorReporter;
+export default ErrorReporter;

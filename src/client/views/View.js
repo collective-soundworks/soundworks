@@ -2,7 +2,6 @@ import tmpl from 'lodash.template';
 import viewport from './viewport';
 import Delegate from 'dom-delegate';
 
-
 /**
  * [client] - View.
  *
@@ -165,7 +164,7 @@ export default class View {
   // LIFE CYCLE METHODS ----------------------------------
 
   /**
-   * Render the view according to the given template and content.
+   * Render the view according to the given view template and content.
    * @param {String} [selector=null] - If specified render only the part of the
    *  view inside the matched element, if this element contains a component
    *  (sub-view), the component is rendered. Render all the view otherwise.

@@ -1,6 +1,6 @@
 export default {
   /**
-   * Initialize the module which socket.io
+   * Initialize the object which socket.io
    * @private
    */
   initialize(io) {

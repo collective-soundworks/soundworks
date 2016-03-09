@@ -1,5 +1,5 @@
-import ServerActivity from '../core/ServerActivity';
-import serverServiceManager from '../core/serverServiceManager';
+import Activity from '../core/Activity';
+import serviceManager from '../core/serviceManager';
 import server from '../core/server';
 
 
@@ -9,7 +9,7 @@ const SERVICE_ID = 'service:shared-config';
  * [server] Service that acts as an accessor for the server config for both
  * server and client sides.
  */
-class ServerSharedConfig extends ServerActivity {
+class SharedConfig extends Activity {
   constructor() {
     super(SERVICE_ID);
 
@@ -46,7 +46,7 @@ class ServerSharedConfig extends ServerActivity {
 
   /**
    * Add a required item from server side to a specific client. This should be
-   * called on ServerActivities initialization.
+   * called at the activity's initialization.
    *
    */
   addItem(item, clientType) {
@@ -114,6 +114,6 @@ class ServerSharedConfig extends ServerActivity {
   }
 }
 
-serverServiceManager.register(SERVICE_ID, ServerSharedConfig);
+serviceManager.register(SERVICE_ID, SharedConfig);
 
-export default ServerSharedConfig;
+export default SharedConfig;

@@ -11,18 +11,17 @@ export { default as SignalAll } from './core/SignalAll';
 
 // scenes
 export { default as Experience } from './scenes/Experience';
-export { default as ClientSurvey } from './scenes/ClientSurvey';
+export { default as Survey } from './scenes/Survey';
 
 // services
-export { default as ClientCheckin } from './services/ClientCheckin';
-// import ClientFileList from './ClientFileList';
-export { default as ClientErrorReporter } from './services/ClientErrorReporter';
-export { default as ClientLocator } from './services/ClientLocator';
-export { default as ClientNetwork } from './services/ClientNetwork';
-export { default as ClientPlacer } from './services/ClientPlacer';
-export { default as ClientSharedConfig } from './services/ClientSharedConfig';
-export { default as ClientSharedParams } from './services/ClientSharedParams';
-export { default as ClientSync } from './services/ClientSync';
+export { default as Checkin } from './services/Checkin';
+export { default as ErrorReporter } from './services/ErrorReporter';
+export { default as Locator } from './services/Locator';
+export { default as Network } from './services/Network';
+export { default as Placer } from './services/Placer';
+export { default as SharedConfig } from './services/SharedConfig';
+export { default as SharedParams } from './services/SharedParams';
+export { default as Sync } from './services/Sync';
 export { default as Loader } from './services/Loader';
 export { default as MotionInput } from './services/MotionInput';
 export { default as Scheduler } from './services/Scheduler';
@@ -43,5 +42,3 @@ export { default as SquaredView } from './views/SquaredView';
 export { default as TouchSurface } from './views/TouchSurface';
 export { default as View } from './views/View';
 export { default as viewport } from './views/viewport';
-
-

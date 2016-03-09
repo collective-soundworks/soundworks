@@ -113,12 +113,10 @@ class _LocatorView extends SquaredView {
  *
  * The module finishes its initialization after the user confirms his / her approximate location by clicking on the “Validate” button. For development purposes it can be configured to send random coordinates or retrieving previously stored location (see `options.random` and `options.persist`.
  *
- * (See also {@link src/server/ServerLocator.js~ServerLocator} on the server side.)
- *
  * @example
- * const locator = new ClientLocator();
+ * const locator = new Locator();
  */
-class ClientLocator extends Service {
+class Locator extends Service {
   constructor() {
     super(SERVICE_ID, true);
 
@@ -204,6 +202,6 @@ class ClientLocator extends Service {
   }
 }
 
-serviceManager.register(SERVICE_ID, ClientLocator);
+serviceManager.register(SERVICE_ID, Locator);
 
-export default ClientLocator;
+export default Locator;

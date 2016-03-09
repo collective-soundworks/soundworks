@@ -1,5 +1,5 @@
-import ServerActivity from '../core/ServerActivity';
-import serverServiceManager from '../core/serverServiceManager';
+import Activity from '../core/Activity';
+import serviceManager from '../core/serviceManager';
 import { EventEmitter } from 'events';
 
 /** @private */
@@ -106,7 +106,7 @@ const SERVICE_ID = 'service:shared-params';
 /**
  * [server] Manage the global `parameters`, `infos`, and `commands` across the whole scenario.
  *
- * The module keeps track of:
+ * The service keeps track of:
  * - `parameters`: values that can be updated by the actions of the clients (*e.g.* the gain of a synth);
  * - `infos`: information about the state of the scenario (*e.g.* number of clients in the performance);
  * - `commands`: can trigger an action (*e.g.* reload the page),
@@ -117,7 +117,7 @@ const SERVICE_ID = 'service:shared-params';
  * (See also {@link src/client/ClientSharedParams.js~ClientSharedParams} on the client side.)
  *
  * @example // Example 1: make a `'conductor'` client to manage the controls
- * class MyControl extends ServerSharedParams {
+ * class MyControl extends SharedParams {
  *   constructor() {
  *     super();
  *
@@ -151,7 +151,7 @@ const SERVICE_ID = 'service:shared-params';
  * const control = new MyControl();
  * const performance = new MyPerformance(control);
  */
-class ServerSharedParams extends ServerActivity {
+class SharedParams extends Activity {
   constructor(options = {}) {
     super(SERVICE_ID);
 
@@ -316,6 +316,6 @@ class ServerSharedParams extends ServerActivity {
   }
 }
 
-serverServiceManager.register(SERVICE_ID, ServerSharedParams);
+serviceManager.register(SERVICE_ID, SharedParams);
 
-export default ServerSharedParams;
+export default SharedParams;

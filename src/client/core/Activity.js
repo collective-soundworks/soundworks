@@ -28,7 +28,7 @@ export default class Activity extends Process {
     }
 
     /**
-     * View of the module.
+     * View of the activity.
      * @type {View}
      */
     this.view = null;
@@ -37,7 +37,7 @@ export default class Activity extends Process {
      * Events to bind to the view. (cf. Backbone's syntax).
      * @type {Object}
      */
-    this.events = {};
+    this.viewEvents = {};
 
     /**
      * Additionnal options to pass to the view.
@@ -52,10 +52,10 @@ export default class Activity extends Process {
     this.viewCtor = View;
 
     /**
-     * The template of the view (use `lodash.template` syntax).
+     * The view template of the view (use `lodash.template` syntax).
      * @type {String}
      */
-    this.template = null;
+    this.viewTemplate = null;
 
     /**
      * Options of the process.
@@ -91,57 +91,57 @@ export default class Activity extends Process {
   }
 
   /**
-   * Share the defined templates with all `Activity` instances.
-   * @param {Object} defs - An object containing the templates.
+   * Share the defined view templates with all `Activity` instances.
+   * @param {Object} defs - An object containing the view templates.
    * @private
    */
   static setViewTemplateDefinitions(defs) {
-    Activity.prototype.templateDefinitions = defs;
+    Activity.prototype.viewTemplateDefinitions = defs;
   }
 
   /**
-   * Share the text content configuration (name and data) with all the `Activity` instances
-   * @param {Object} defs - The text contents of the application.
+   * Share the view content configuration (name and data) with all the `Activity` instances
+   * @param {Object} defs - The view contents of the application.
    * @private
    */
   static setViewContentDefinitions(defs) {
-    Activity.prototype.contentDefinitions = defs;
+    Activity.prototype.viewContentDefinitions = defs;
   }
 
   /**
-   * Returns the template associated to the current module.
-   * @returns {Function} - The template related to the `name` of the current module.
+   * Returns the view template associated to the current activity.
+   * @returns {Function} - The view template related to the `name` of the current activity.
    */
-  get template() {
-    const template = this._template || this.templateDefinitions[this.id];
-    // if (!template)
-    //   throw new Error(`No template defined for module "${this.id}"`);
-    return template;
+  get viewTemplate() {
+    const viewTemplate = this._viewTemplate || this.viewTemplateDefinitions[this.id];
+    // if (!viewTemplate)
+    //   throw new Error(`No view template defined for activity "${this.id}"`);
+    return viewTemplate;
   }
 
-  set template(tmpl) {
-    this._template = tmpl;
+  set viewTemplate(tmpl) {
+    this._viewTemplate tmpl;
   }
 
   /**
-   * Returns the text associated to the current module.
-   * @returns {Object} - The text contents related to the `name` of the current module. The returned object is extended with a pointer to the `globals` entry of the defined text contents.
+   * Returns the text associated to the current activity.
+   * @returns {Object} - The view contents related to the `name` of the current activity. The returned object is extended with a pointer to the `globals` entry of the defined view contents.
    */
-  get content() {
-    const content = this._content || this.contentDefinitions[this.id];
+  get viewContent() {
+    const viewContent = this._viewContent || this.viewContentDefinitions[this.id];
 
-    if (content)
-      content.globals = this.contentDefinitions.globals;
+    if (viewContent)
+      viewContent.globals = this.viewContentDefinitions.globals;
 
-    return content;
+    return viewContent;
   }
 
-  set content(obj) {
-    this._content = obj;
+  set viewContent(obj) {
+    this._viewContent = obj;
   }
 
   /**
-   * Create the view of the module according to its attributes.
+   * Create the view of the activity according to its attributes.
    */
   createView() {
     const options = Object.assign({
@@ -150,11 +150,11 @@ export default class Activity extends Process {
       priority: this.options.viewPriority,
     }, this.viewOptions);
 
-    return new this.viewCtor(this.template, this.content, this.events, options);
+    return new this.viewCtor(this.viewTemplate, this.viewContent, this.viewEvents, options);
   }
 
   /**
-   * Display the view of a module if it owns one.
+   * Display the view of a activity if it owns one.
    */
   show() {
     if (!this.view) { return; }
@@ -174,7 +174,7 @@ export default class Activity extends Process {
 
   /**
    * Sends a WebSocket message to the server side socket.
-   * @param {String} channel - The channel of the message (is automatically namespaced with the module's name: `${this.id}:channel`).
+   * @param {String} channel - The channel of the message (is automatically namespaced with the activity's name: `${this.id}:channel`).
    * @param {...*} args - Arguments of the message (as many as needed, of any type).
    */
   send(channel, ...args) {
@@ -183,7 +183,7 @@ export default class Activity extends Process {
 
   /**
    * Sends a WebSocket message to the server side socket.
-   * @param {String} channel - The channel of the message (is automatically namespaced with the module's name: `${this.id}:channel`).
+   * @param {String} channel - The channel of the message (is automatically namespaced with the activity's name: `${this.id}:channel`).
    * @param {...*} args - Arguments of the message (as many as needed, of any type).
    */
   sendVolatile(channel, ...args) {
@@ -192,7 +192,7 @@ export default class Activity extends Process {
 
   /**
    * Listen a WebSocket message from the server.
-   * @param {String} channel - The channel of the message (is automatically namespaced with the module's name: `${this.id}:channel`).
+   * @param {String} channel - The channel of the message (is automatically namespaced with the activity's name: `${this.id}:channel`).
    * @param {...*} callback - The callback to execute when a message is received.
    */
   receive(channel, callback) {
@@ -201,7 +201,7 @@ export default class Activity extends Process {
 
   /**
    * Stop listening to a message from the server.
-   * @param {String} channel - The channel of the message (is automatically namespaced with the module's name: `${this.id}:channel`).
+   * @param {String} channel - The channel of the message (is automatically namespaced with the activity's name: `${this.id}:channel`).
    * @param {...*} callback - The callback to cancel.
    */
   removeListener(channel, callback) {

@@ -9,7 +9,7 @@ import serviceManager from '../core/serviceManager';
 
 const SERVICE_ID = 'service:network';
 
-class ClientNetwork extends Service {
+class Network extends Service {
   constructor() {
     super(SERVICE_ID, true);
 
@@ -63,6 +63,6 @@ class ClientNetwork extends Service {
   }
 }
 
-serviceManager.register(SERVICE_ID, ClientNetwork);
+serviceManager.register(SERVICE_ID, Network);
 
-export default ClientNetwork;
+export default Network;

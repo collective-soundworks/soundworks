@@ -1,9 +1,9 @@
 /**
- * The default templates for the shipped modules. The templates are organized according to the `Module.name` property.
+ * The default view templates for the provided services and scenes. The view templates are organized according to the `Module.name` property.
  * @type {Object}
  */
 export default {
-  /* `globals` is populated with server `appName` and shared between all templates */
+  /* `globals` is populated with server `appName` and shared between all view templates */
   'globals': {},
   'service:checkin': {
     labelPrefix: 'Go to',

@@ -8,7 +8,7 @@ import IO from 'socket.io';
 import logger from '../utils/logger';
 import path from 'path';
 import pem from 'pem';
-import serverServiceManager from './serverServiceManager';
+import serviceManager from './serviceManager';
 import sockets from './sockets';
 
 
@@ -103,7 +103,7 @@ const defaultEnvConfig = {
 
 /**
  * The `server` object contains the basic methods of the server.
- * For instance, this object allows setting up, configuring and starting the server with the method `start` while the method `map` allows for managing the mapping between different types of clients and their required server modules.
+ * For instance, this object allows setting up, configuring and starting the server with the method `start` while the method `map` allows for managing the mapping between different types of clients and their required server activities.
  * @type {Object}
  */
 export default {
@@ -151,7 +151,7 @@ export default {
    * @param {Object} options - The options to configure the service.
    */
   require(id, options) {
-    return serverServiceManager.require(id, null, options);
+    return serviceManager.require(id, null, options);
   },
 
   /**
@@ -294,15 +294,15 @@ export default {
   },
 
   /**
-   * Indicate that the clients of type `clientType` require the modules `...modules` on the server side.
+   * Indicate that the clients of type `clientType` require the activities `...activities` on the server side.
    * Additionally, this method routes the connections from the corresponding URL to the corresponding view.
    * More specifically:
    * - A client connecting to the server through the root URL `http://my.server.address:port/` is considered as a `'player'` client and displays the view `player.ejs`;
    * - A client connecting to the server through the URL `http://my.server.address:port/clientType` is considered as a `clientType` client, and displays the view `clientType.ejs`.
    * @param {String} clientType Client type (as defined by the method {@link client.init} on the client side).
-   * @param {...ClientModule} modules Modules to map to that client type.
+   * @param {...Activity} activities Activities to map to that client type.
    */
-  _map(clientType, modules, expressApp) {
+  _map(clientType, activities, expressApp) {
     // @todo - allow to pass some variable in the url -> define how bind it to sockets...
     const url = (clientType !== this.config.defaultClient) ? `/${clientType}` : '/';
 
@@ -338,7 +338,7 @@ export default {
     });
 
     // wait for socket connnection
-    this.io.of(clientType).on('connection', this._onConnection(clientType, modules));
+    this.io.of(clientType).on('connection', this._onConnection(clientType, activities));
   },
 
   /**

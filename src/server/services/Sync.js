@@ -1,6 +1,6 @@
-import ServerActivity from '../core/ServerActivity';
-import serverServiceManager from '../core/serverServiceManager';
-import SyncServer from 'sync/server';
+import Activity from '../core/Activity';
+import serviceManager from '../core/serviceManager';
+import SyncModule from 'sync/server';
 
 const SERVICE_ID = 'service:sync';
 /**
@@ -9,15 +9,15 @@ const SERVICE_ID = 'service:sync';
  * Both the clients and the server can use this master clock as a common time reference.
  * For instance, this allows all the clients to do something exactly at the same time, such as blinking the screen or playing a sound in a synchronized manner.
  *
- * **Note:** the module is based on [`github.com/collective-soundworks/sync`](https://github.com/collective-soundworks/sync).
+ * **Note:** the service is based on [`github.com/collective-soundworks/sync`](https://github.com/collective-soundworks/sync).
  *
  * (See also {@link src/client/ClientSync.js~ClientSync} on the client side.)
  *
- * @example const sync = new ServerSync();
+ * @example const sync = new Sync();
  *
  * const nowSync = sync.getSyncTime(); // current time in the sync clock time
  */
-class ServerSync extends ServerActivity {
+class Sync extends Activity {
   constructor() {
     super(SERVICE_ID);
   }
@@ -27,7 +27,7 @@ class ServerSync extends ServerActivity {
 
     this._hrtimeStart = process.hrtime();
 
-    this._sync = new SyncServer(() => {
+    this._sync = new SyncModule(() => {
       const time = process.hrtime(this._hrtimeStart);
       return time[0] + time[1] * 1e-9;
     });
@@ -54,6 +54,6 @@ class ServerSync extends ServerActivity {
   }
 }
 
-serverServiceManager.register(SERVICE_ID, ServerSync);
+serviceManager.register(SERVICE_ID, Sync);
 
-export default ServerSync;
+export default Sync;
