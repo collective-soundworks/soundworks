@@ -5,14 +5,14 @@
   "authors": [
     "Benjamin Matuszewski",
     "Sébastien Robaszkiewicz",
-    "Norbert Schnell",
+    "Norbert Schnell"
   ],
   "main": "",
   "scripts": {
     "transpile": "node ./bin/build --transpile",
     "watch": "node ./bin/build --watch"
   },
-  "license": "BSD-3",
+  "license": "BSD-3-Clause",
   "repository": {
     "type": "git",
     "url": "https://github.com/collective-soundworks/soundworks"
