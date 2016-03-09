@@ -1,13 +1,10 @@
 #!/usr/bin/env node
 var fse = require('fs-extra');
-// var hound = require('hound');
 var watch = require('watch');
 var path = require('path');
 var util = require('util');
 
 var javascripts = require('./javascripts');
-// var server = require('./server');
-// var styles = require('./styles');
 var cwd = process.cwd();
 
 'use strict';
@@ -17,17 +14,8 @@ var cwd = process.cwd();
  */
 var babelOptions = {
   sourceMap: 'inline',
-  // modules: 'common',
   presets: ['es2015'],
   plugins: ['transform-runtime', 'transform-es2015-modules-commonjs'],
-};
-
-/**
- * Options for browserify.
- */
-var browserifyOptions = {
-  debug: true,
-  fullPaths: false,
 };
 
 /**
@@ -43,7 +31,6 @@ var watchOptions = {
 /**
  * Watched directories
  */
-// server side javascript directories
 var srcDirectory = path.join(cwd, 'src');
 var distDirectory = path.join(cwd, '.');
 
@@ -152,13 +139,6 @@ switch (command) {
    */
   case '--transpile':
     transpileFiles(srcDirectory, distDirectory);
-    break;
-
-  /**
-   * Create `client.js`, `server.js` and `utils.js` for releases.
-   */
-  case '--bundle':
-    // commands.start();
     break;
 }
 

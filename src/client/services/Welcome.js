@@ -1,7 +1,7 @@
 import { audioContext } from 'waves-audio';
 import client from '../core/client';
 import screenfull from 'screenfull';
-import SegmentedView from '../display/SegmentedView';
+import SegmentedView from '../views/SegmentedView';
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
 

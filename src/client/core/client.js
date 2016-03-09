@@ -3,8 +3,8 @@ import Activity from './Activity';
 import serviceManager from './serviceManager';
 import viewManager from './viewManager';
 import socket from './socket';
-import defaultTextContents from '../display/defaultTextContents';
-import defaultTemplates from '../display/defaultTemplates';
+import defaultTextContents from '../views/defaultTextContents';
+import defaultTemplates from '../views/defaultTemplates';
 
 
 const client = {

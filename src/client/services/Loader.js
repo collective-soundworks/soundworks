@@ -1,5 +1,5 @@
 import { SuperLoader } from 'waves-loaders';
-import SegmentedView from '../display/SegmentedView';
+import SegmentedView from '../views/SegmentedView';
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
 

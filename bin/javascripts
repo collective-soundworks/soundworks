@@ -1,32 +1,15 @@
 #!/usr/bin/env node
 var babel = require('babel-core');
-var browserify = require('browserify');
 var colors = require('colors');
 var fse = require('fs-extra');
 var path = require('path');
-// var watchify = require('watchify');
 
 'use strict';
 
 /**
  * Create a transpiler object binded to a `srcDirectory` and a `distDirectory`
  */
-function getTranspiler(srcDirectory, distDirectory, isAllowed, babelOptions, browserifyOptions) {
-
-  /**
-   * Add watchify to the browserify options. client only.
-   */
-  // if (browserifyOptions !== undefined) {
-  //   Object.assign(browserifyOptions, {
-  //     cache: {}, // required for watchify
-  //     packageCache: {}, // required for watchify
-  //   });
-
-  //   if (browserifyOptions.plugin)
-  //     browserifyOptions.plugin.push(watchify);
-  //   else
-  //     browserifyOptions.plugin = [watchify];
-  // }
+function getTranspiler(srcDirectory, distDirectory, isAllowed, babelOptions) {
 
   /**
    * Returns the name of the target transpiled file
@@ -96,56 +79,6 @@ function getTranspiler(srcDirectory, distDirectory, isAllowed, babelOptions, bro
           next();
         });
       });
-    },
-
-    /** @private */
-    _bundlers: [],
-
-    /**
-     * Transform a given file to it's browserified version.
-     * Only clients have their browserified counterparts, each folder in `src/client`
-     * is considered has a separate browserified client file. The `index.js` in each
-     * folder defines the entry point of the particular client. The browserified
-     * file is name after the name of the folder.
-     */
-    bundle: function(filename, bundleDistDirectory, ensureFile, stopWhenDone) {
-      if (filename === undefined || !isAllowed(filename, ensureFile))
-        return;
-
-      // get the entry point of the client (`index.js`)
-      const entryPoint = getEntryPoint(filename);
-      const outBasename = getFolderName(filename) + '.js';
-      const outFilename = path.join(bundleDistDirectory, outBasename);
-
-      // if (!this._bundlers[entryPoint]) {
-        var bundler = browserify(entryPoint, browserifyOptions);
-
-        // function rebundle() {
-          console.log('=> Start bundling "%s"'.yellow, outFilename);
-          var start = new Date().getTime();
-          // ensure file exists or is created
-          fse.ensureFileSync(outFilename);
-
-          bundler
-            .bundle()
-            .on('error', function(err) {
-              console.error(('=> ' + err.message).red);
-            })
-            .on('end', function() {
-              var dt = (new Date().getTime() - start);
-              console.log('=> "%s" successfully created (compiled in: %sms)'.green, outFilename, dt);
-
-              if (stopWhenDone)
-                bundler.close();
-            })
-            .pipe(fse.createWriteStream(outFilename));
-        // }
-
-        // bundler.on('update', rebundle);
-        // rebundle();
-
-        // this._bundlers[entryPoint] = bundler;
-      // }
     },
 
     /**

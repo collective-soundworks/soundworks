@@ -1,51 +1,24 @@
 /* core */
-import Client from './core/Client';
-import server from './core/server';
-import ServerActivity from './core/ServerActivity';
-import serverServiceManager from './core/serverServiceManager';
-import sockets from './core/sockets';
+export { default as Client } from './core/Client';
+export { default as server } from './core/server';
+export { default as ServerActivity } from './core/ServerActivity';
+export { default as serverServiceManager } from './core/serverServiceManager';
+export { default as sockets } from './core/sockets';
 
 /* scenes */
-import ServerExperience from './scenes/ServerExperience';
-import ServerSurvey from './scenes/ServerSurvey';
+export { default as ServerExperience } from './scenes/ServerExperience';
+export { default as ServerSurvey } from './scenes/ServerSurvey';
 
 /* services */
 // import ServerCalibration from './ServerCalibration';
-import Osc from './services/Osc';
-import ServerCheckin from './services/ServerCheckin';
-import ServerErrorReporter from './services/ServerErrorReporter';
+export { default as Osc } from './services/Osc';
+export { default as ServerCheckin } from './services/ServerCheckin';
+export { default as ServerErrorReporter } from './services/ServerErrorReporter';
 // import ServerFileList from './ServerFileList';
-import ServerLocator from './services/ServerLocator';
-import ServerNetwork from './services/ServerNetwork';
+export { default as ServerLocator } from './services/ServerLocator';
+export { default as ServerNetwork } from './services/ServerNetwork';
 // import ServerPerformance from './ServerPerformance';
-import ServerPlacer from './services/ServerPlacer';
-import ServerSharedConfig from './services/ServerSharedConfig';
-import ServerSharedParams from './services/ServerSharedParams';
-import ServerSync from './services/ServerSync';
-
-export default {
-  /* core */
-  server,
-  Client,
-  serverServiceManager, // @tbd - expose ?
-  ServerActivity,
-
-  /* scenes */
-  ServerExperience,
-  ServerSurvey,
-
-  /* services */
-  // @todo - move into a namespace ?
-  Osc,
-  // ServerCalibration,
-  ServerCheckin,
-  ServerErrorReporter,
-  // ServerFileList,
-  ServerLocator,
-  ServerNetwork,
-  // ServerPerformance,
-  ServerPlacer,
-  ServerSharedConfig,
-  ServerSharedParams,
-  ServerSync,
-};
+export { default as ServerPlacer } from './services/ServerPlacer';
+export { default as ServerSharedConfig } from './services/ServerSharedConfig';
+export { default as ServerSharedParams } from './services/ServerSharedParams';
+export { default as ServerSync } from './services/ServerSync';

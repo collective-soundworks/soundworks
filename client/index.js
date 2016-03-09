@@ -6,187 +6,315 @@ Object.defineProperty(exports, "__esModule", {
 
 var _wavesAudio = require('waves-audio');
 
-var _wavesAudio2 = _interopRequireDefault(_wavesAudio);
+Object.defineProperty(exports, 'audio', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_wavesAudio).default;
+  }
+});
+Object.defineProperty(exports, 'audioContext', {
+  enumerable: true,
+  get: function get() {
+    return _wavesAudio.audioContext;
+  }
+});
 
 var _client = require('./core/client');
 
-var _client2 = _interopRequireDefault(_client);
+Object.defineProperty(exports, 'client', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_client).default;
+  }
+});
 
 var _Process = require('./core/Process');
 
-var _Process2 = _interopRequireDefault(_Process);
+Object.defineProperty(exports, 'Process', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_Process).default;
+  }
+});
 
 var _Service = require('./core/Service');
 
-var _Service2 = _interopRequireDefault(_Service);
+Object.defineProperty(exports, 'Service', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_Service).default;
+  }
+});
 
 var _serviceManager = require('./core/serviceManager');
 
-var _serviceManager2 = _interopRequireDefault(_serviceManager);
+Object.defineProperty(exports, 'serviceManager', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_serviceManager).default;
+  }
+});
 
 var _Signal = require('./core/Signal');
 
-var _Signal2 = _interopRequireDefault(_Signal);
+Object.defineProperty(exports, 'Signal', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_Signal).default;
+  }
+});
 
 var _SignalAll = require('./core/SignalAll');
 
-var _SignalAll2 = _interopRequireDefault(_SignalAll);
+Object.defineProperty(exports, 'SignalAll', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_SignalAll).default;
+  }
+});
 
 var _Experience = require('./scenes/Experience');
 
-var _Experience2 = _interopRequireDefault(_Experience);
+Object.defineProperty(exports, 'Experience', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_Experience).default;
+  }
+});
 
 var _ClientSurvey = require('./scenes/ClientSurvey');
 
-var _ClientSurvey2 = _interopRequireDefault(_ClientSurvey);
+Object.defineProperty(exports, 'ClientSurvey', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_ClientSurvey).default;
+  }
+});
 
 var _ClientCheckin = require('./services/ClientCheckin');
 
-var _ClientCheckin2 = _interopRequireDefault(_ClientCheckin);
+Object.defineProperty(exports, 'ClientCheckin', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_ClientCheckin).default;
+  }
+});
 
 var _ClientErrorReporter = require('./services/ClientErrorReporter');
 
-var _ClientErrorReporter2 = _interopRequireDefault(_ClientErrorReporter);
+Object.defineProperty(exports, 'ClientErrorReporter', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_ClientErrorReporter).default;
+  }
+});
 
 var _ClientLocator = require('./services/ClientLocator');
 
-var _ClientLocator2 = _interopRequireDefault(_ClientLocator);
+Object.defineProperty(exports, 'ClientLocator', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_ClientLocator).default;
+  }
+});
 
 var _ClientNetwork = require('./services/ClientNetwork');
 
-var _ClientNetwork2 = _interopRequireDefault(_ClientNetwork);
+Object.defineProperty(exports, 'ClientNetwork', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_ClientNetwork).default;
+  }
+});
 
 var _ClientPlacer = require('./services/ClientPlacer');
 
-var _ClientPlacer2 = _interopRequireDefault(_ClientPlacer);
+Object.defineProperty(exports, 'ClientPlacer', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_ClientPlacer).default;
+  }
+});
 
 var _ClientSharedConfig = require('./services/ClientSharedConfig');
 
-var _ClientSharedConfig2 = _interopRequireDefault(_ClientSharedConfig);
+Object.defineProperty(exports, 'ClientSharedConfig', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_ClientSharedConfig).default;
+  }
+});
 
 var _ClientSharedParams = require('./services/ClientSharedParams');
 
-var _ClientSharedParams2 = _interopRequireDefault(_ClientSharedParams);
+Object.defineProperty(exports, 'ClientSharedParams', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_ClientSharedParams).default;
+  }
+});
 
 var _ClientSync = require('./services/ClientSync');
 
-var _ClientSync2 = _interopRequireDefault(_ClientSync);
+Object.defineProperty(exports, 'ClientSync', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_ClientSync).default;
+  }
+});
 
 var _Loader = require('./services/Loader');
 
-var _Loader2 = _interopRequireDefault(_Loader);
+Object.defineProperty(exports, 'Loader', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_Loader).default;
+  }
+});
 
 var _MotionInput = require('./services/MotionInput');
 
-var _MotionInput2 = _interopRequireDefault(_MotionInput);
+Object.defineProperty(exports, 'MotionInput', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_MotionInput).default;
+  }
+});
 
 var _Scheduler = require('./services/Scheduler');
 
-var _Scheduler2 = _interopRequireDefault(_Scheduler);
+Object.defineProperty(exports, 'Scheduler', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_Scheduler).default;
+  }
+});
 
 var _Welcome = require('./services/Welcome');
 
-var _Welcome2 = _interopRequireDefault(_Welcome);
+Object.defineProperty(exports, 'Welcome', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_Welcome).default;
+  }
+});
 
-var _defaultTemplates = require('./display/defaultTemplates');
+var _defaultTemplates = require('./views/defaultTemplates');
 
-var _defaultTemplates2 = _interopRequireDefault(_defaultTemplates);
+Object.defineProperty(exports, 'defaultTemplates', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_defaultTemplates).default;
+  }
+});
 
-var _defaultTextContents = require('./display/defaultTextContents');
+var _defaultTextContent = require('./views/defaultTextContent');
 
-var _defaultTextContents2 = _interopRequireDefault(_defaultTextContents);
+Object.defineProperty(exports, 'defaultTextContent', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_defaultTextContent).default;
+  }
+});
 
-var _ButtonView = require('./display/ButtonView');
+var _ButtonView = require('./views/ButtonView');
 
-var _ButtonView2 = _interopRequireDefault(_ButtonView);
+Object.defineProperty(exports, 'ButtonView', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_ButtonView).default;
+  }
+});
 
-var _CanvasView = require('./display/CanvasView');
+var _CanvasView = require('./views/CanvasView');
 
-var _CanvasView2 = _interopRequireDefault(_CanvasView);
+Object.defineProperty(exports, 'CanvasView', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_CanvasView).default;
+  }
+});
 
-var _Renderer = require('./display/Renderer');
+var _Renderer = require('./views/Renderer');
 
-var _Renderer2 = _interopRequireDefault(_Renderer);
+Object.defineProperty(exports, 'Renderer', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_Renderer).default;
+  }
+});
 
-var _RenderingGroup = require('./display/RenderingGroup');
+var _RenderingGroup = require('./views/RenderingGroup');
 
-var _RenderingGroup2 = _interopRequireDefault(_RenderingGroup);
+Object.defineProperty(exports, 'RenderingGroup', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_RenderingGroup).default;
+  }
+});
 
-var _SegmentedView = require('./display/SegmentedView');
+var _SegmentedView = require('./views/SegmentedView');
 
-var _SegmentedView2 = _interopRequireDefault(_SegmentedView);
+Object.defineProperty(exports, 'SegmentedView', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_SegmentedView).default;
+  }
+});
 
-var _SelectView = require('./display/SelectView');
+var _SelectView = require('./views/SelectView');
 
-var _SelectView2 = _interopRequireDefault(_SelectView);
+Object.defineProperty(exports, 'SelectView', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_SelectView).default;
+  }
+});
 
-var _SpaceView = require('./display/SpaceView');
+var _SpaceView = require('./views/SpaceView');
 
-var _SpaceView2 = _interopRequireDefault(_SpaceView);
+Object.defineProperty(exports, 'SpaceView', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_SpaceView).default;
+  }
+});
 
-var _SquaredView = require('./display/SquaredView');
+var _SquaredView = require('./views/SquaredView');
 
-var _SquaredView2 = _interopRequireDefault(_SquaredView);
+Object.defineProperty(exports, 'SquaredView', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_SquaredView).default;
+  }
+});
 
-var _TouchSurface = require('./display/TouchSurface');
+var _TouchSurface = require('./views/TouchSurface');
 
-var _TouchSurface2 = _interopRequireDefault(_TouchSurface);
+Object.defineProperty(exports, 'TouchSurface', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_TouchSurface).default;
+  }
+});
 
-var _View = require('./display/View');
+var _View = require('./views/View');
 
-var _View2 = _interopRequireDefault(_View);
+Object.defineProperty(exports, 'View', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_View).default;
+  }
+});
 
-var _viewport = require('./display/viewport');
+var _viewport = require('./views/viewport');
 
-var _viewport2 = _interopRequireDefault(_viewport);
+Object.defineProperty(exports, 'viewport', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_viewport).default;
+  }
+});
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-// import Orientation from './Orientation';
-
-// import ClientFileList from './ClientFileList';
-exports.default = {
-  /* external */
-  audio: _wavesAudio2.default,
-  audioContext: _wavesAudio2.default.audioContext,
-
-  /* core */
-  client: _client2.default,
-  Process: _Process2.default,
-  Service: _Service2.default,
-  serviceManager: _serviceManager2.default,
-  Signal: _Signal2.default,
-  SignalAll: _SignalAll2.default,
-
-  /* scenes */
-  Experience: _Experience2.default,
-  ClientSurvey: _ClientSurvey2.default,
-
-  display: {
-    defaultTemplates: _defaultTemplates2.default,
-    defaultTextContents: _defaultTextContents2.default,
-    ButtonView: _ButtonView2.default,
-    CanvasView: _CanvasView2.default,
-    Renderer: _Renderer2.default,
-    RenderingGroup: _RenderingGroup2.default,
-    SegmentedView: _SegmentedView2.default,
-    SelectView: _SelectView2.default,
-    SpaceView: _SpaceView2.default,
-    SquaredView: _SquaredView2.default,
-    TouchSurface: _TouchSurface2.default,
-    View: _View2.default,
-    viewport: _viewport2.default
-  }
-};
-
-// views
-
-
-// services
-
-
-// scenes
-
-
-// core
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImluZGV4LmpzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7Ozs7OztBQUFBOzs7O0FBR0E7Ozs7QUFDQTs7OztBQUNBOzs7O0FBQ0E7Ozs7QUFDQTs7OztBQUNBOzs7O0FBR0E7Ozs7QUFDQTs7OztBQUdBOzs7O0FBRUE7Ozs7QUFDQTs7OztBQUNBOzs7O0FBQ0E7Ozs7QUFDQTs7OztBQUNBOzs7O0FBQ0E7Ozs7QUFDQTs7OztBQUNBOzs7O0FBQ0E7Ozs7QUFFQTs7OztBQUdBOzs7O0FBQ0E7Ozs7QUFDQTs7OztBQUNBOzs7O0FBQ0E7Ozs7QUFDQTs7OztBQUNBOzs7O0FBQ0E7Ozs7QUFDQTs7OztBQUNBOzs7O0FBQ0E7Ozs7QUFDQTs7OztBQUNBOzs7Ozs7Ozs7a0JBRWU7O0FBRWIsNkJBRmE7QUFHYixnQkFBYyxxQkFBTSxZQUFOOzs7QUFHZCwwQkFOYTtBQU9iLDRCQVBhO0FBUWIsNEJBUmE7QUFTYiwwQ0FUYTtBQVViLDBCQVZhO0FBV2IsZ0NBWGE7OztBQWNiLGtDQWRhO0FBZWIsc0NBZmE7O0FBaUJiLFdBQVM7QUFDUCxnREFETztBQUVQLHNEQUZPO0FBR1Asb0NBSE87QUFJUCxvQ0FKTztBQUtQLGdDQUxPO0FBTVAsNENBTk87QUFPUCwwQ0FQTztBQVFQLG9DQVJPO0FBU1Asa0NBVE87QUFVUCxzQ0FWTztBQVdQLHdDQVhPO0FBWVAsd0JBWk87QUFhUCxnQ0FiTztHQUFUIiwiZmlsZSI6ImluZGV4LmpzIiwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IGF1ZGlvIGZyb20gJ3dhdmVzLWF1ZGlvJztcblxuLy8gY29yZVxuaW1wb3J0IGNsaWVudCBmcm9tICcuL2NvcmUvY2xpZW50JztcbmltcG9ydCBQcm9jZXNzIGZyb20gJy4vY29yZS9Qcm9jZXNzJztcbmltcG9ydCBTZXJ2aWNlIGZyb20gJy4vY29yZS9TZXJ2aWNlJztcbmltcG9ydCBzZXJ2aWNlTWFuYWdlciBmcm9tICcuL2NvcmUvc2VydmljZU1hbmFnZXInO1xuaW1wb3J0IFNpZ25hbCBmcm9tICcuL2NvcmUvU2lnbmFsJztcbmltcG9ydCBTaWduYWxBbGwgZnJvbSAnLi9jb3JlL1NpZ25hbEFsbCc7XG5cbi8vIHNjZW5lc1xuaW1wb3J0IEV4cGVyaWVuY2UgZnJvbSAnLi9zY2VuZXMvRXhwZXJpZW5jZSc7XG5pbXBvcnQgQ2xpZW50U3VydmV5IGZyb20gJy4vc2NlbmVzL0NsaWVudFN1cnZleSc7XG5cbi8vIHNlcnZpY2VzXG5pbXBvcnQgQ2xpZW50Q2hlY2tpbiBmcm9tICcuL3NlcnZpY2VzL0NsaWVudENoZWNraW4nO1xuLy8gaW1wb3J0IENsaWVudEZpbGVMaXN0IGZyb20gJy4vQ2xpZW50RmlsZUxpc3QnO1xuaW1wb3J0IENsaWVudEVycm9yUmVwb3J0ZXIgZnJvbSAnLi9zZXJ2aWNlcy9DbGllbnRFcnJvclJlcG9ydGVyJztcbmltcG9ydCBDbGllbnRMb2NhdG9yIGZyb20gJy4vc2VydmljZXMvQ2xpZW50TG9jYXRvcic7XG5pbXBvcnQgQ2xpZW50TmV0d29yayBmcm9tICcuL3NlcnZpY2VzL0NsaWVudE5ldHdvcmsnO1xuaW1wb3J0IENsaWVudFBsYWNlciBmcm9tICcuL3NlcnZpY2VzL0NsaWVudFBsYWNlcic7XG5pbXBvcnQgQ2xpZW50U2hhcmVkQ29uZmlnIGZyb20gJy4vc2VydmljZXMvQ2xpZW50U2hhcmVkQ29uZmlnJztcbmltcG9ydCBDbGllbnRTaGFyZWRQYXJhbXMgZnJvbSAnLi9zZXJ2aWNlcy9DbGllbnRTaGFyZWRQYXJhbXMnO1xuaW1wb3J0IENsaWVudFN5bmMgZnJvbSAnLi9zZXJ2aWNlcy9DbGllbnRTeW5jJztcbmltcG9ydCBMb2FkZXIgZnJvbSAnLi9zZXJ2aWNlcy9Mb2FkZXInO1xuaW1wb3J0IE1vdGlvbklucHV0IGZyb20gJy4vc2VydmljZXMvTW90aW9uSW5wdXQnO1xuaW1wb3J0IFNjaGVkdWxlciBmcm9tICcuL3NlcnZpY2VzL1NjaGVkdWxlcic7XG4vLyBpbXBvcnQgT3JpZW50YXRpb24gZnJvbSAnLi9PcmllbnRhdGlvbic7XG5pbXBvcnQgV2VsY29tZSBmcm9tICcuL3NlcnZpY2VzL1dlbGNvbWUnO1xuXG4vLyB2aWV3c1xuaW1wb3J0IGRlZmF1bHRUZW1wbGF0ZXMgZnJvbSAnLi9kaXNwbGF5L2RlZmF1bHRUZW1wbGF0ZXMnO1xuaW1wb3J0IGRlZmF1bHRUZXh0Q29udGVudHMgZnJvbSAnLi9kaXNwbGF5L2RlZmF1bHRUZXh0Q29udGVudHMnO1xuaW1wb3J0IEJ1dHRvblZpZXcgZnJvbSAnLi9kaXNwbGF5L0J1dHRvblZpZXcnO1xuaW1wb3J0IENhbnZhc1ZpZXcgZnJvbSAnLi9kaXNwbGF5L0NhbnZhc1ZpZXcnO1xuaW1wb3J0IFJlbmRlcmVyIGZyb20gJy4vZGlzcGxheS9SZW5kZXJlcic7XG5pbXBvcnQgUmVuZGVyaW5nR3JvdXAgZnJvbSAnLi9kaXNwbGF5L1JlbmRlcmluZ0dyb3VwJztcbmltcG9ydCBTZWdtZW50ZWRWaWV3IGZyb20gJy4vZGlzcGxheS9TZWdtZW50ZWRWaWV3JztcbmltcG9ydCBTZWxlY3RWaWV3IGZyb20gJy4vZGlzcGxheS9TZWxlY3RWaWV3JztcbmltcG9ydCBTcGFjZVZpZXcgZnJvbSAnLi9kaXNwbGF5L1NwYWNlVmlldyc7XG5pbXBvcnQgU3F1YXJlZFZpZXcgZnJvbSAnLi9kaXNwbGF5L1NxdWFyZWRWaWV3JztcbmltcG9ydCBUb3VjaFN1cmZhY2UgZnJvbSAnLi9kaXNwbGF5L1RvdWNoU3VyZmFjZSc7XG5pbXBvcnQgVmlldyBmcm9tICcuL2Rpc3BsYXkvVmlldyc7XG5pbXBvcnQgdmlld3BvcnQgZnJvbSAnLi9kaXNwbGF5L3ZpZXdwb3J0JztcblxuZXhwb3J0IGRlZmF1bHQge1xuICAvKiBleHRlcm5hbCAqL1xuICBhdWRpbyxcbiAgYXVkaW9Db250ZXh0OiBhdWRpby5hdWRpb0NvbnRleHQsXG5cbiAgLyogY29yZSAqL1xuICBjbGllbnQsXG4gIFByb2Nlc3MsXG4gIFNlcnZpY2UsXG4gIHNlcnZpY2VNYW5hZ2VyLFxuICBTaWduYWwsXG4gIFNpZ25hbEFsbCxcblxuICAvKiBzY2VuZXMgKi9cbiAgRXhwZXJpZW5jZSxcbiAgQ2xpZW50U3VydmV5LFxuXG4gIGRpc3BsYXk6IHtcbiAgICBkZWZhdWx0VGVtcGxhdGVzLFxuICAgIGRlZmF1bHRUZXh0Q29udGVudHMsXG4gICAgQnV0dG9uVmlldyxcbiAgICBDYW52YXNWaWV3LFxuICAgIFJlbmRlcmVyLFxuICAgIFJlbmRlcmluZ0dyb3VwLFxuICAgIFNlZ21lbnRlZFZpZXcsXG4gICAgU2VsZWN0VmlldyxcbiAgICBTcGFjZVZpZXcsXG4gICAgU3F1YXJlZFZpZXcsXG4gICAgVG91Y2hTdXJmYWNlLFxuICAgIFZpZXcsXG4gICAgdmlld3BvcnQsXG4gIH0sXG59O1xuIl19
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImluZGV4LmpzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7OytDQUFTOzs7Ozs7dUJBQ0E7Ozs7Ozs7OzsyQ0FHQTs7Ozs7Ozs7OzRDQUNBOzs7Ozs7Ozs7NENBQ0E7Ozs7Ozs7OzttREFDQTs7Ozs7Ozs7OzJDQUNBOzs7Ozs7Ozs7OENBQ0E7Ozs7Ozs7OzsrQ0FHQTs7Ozs7Ozs7O2lEQUNBOzs7Ozs7Ozs7a0RBR0E7Ozs7Ozs7Ozt3REFFQTs7Ozs7Ozs7O2tEQUNBOzs7Ozs7Ozs7a0RBQ0E7Ozs7Ozs7OztpREFDQTs7Ozs7Ozs7O3VEQUNBOzs7Ozs7Ozs7dURBQ0E7Ozs7Ozs7OzsrQ0FDQTs7Ozs7Ozs7OzJDQUNBOzs7Ozs7Ozs7Z0RBQ0E7Ozs7Ozs7Ozs4Q0FDQTs7Ozs7Ozs7OzRDQUVBOzs7Ozs7Ozs7cURBR0E7Ozs7Ozs7Ozt1REFDQTs7Ozs7Ozs7OytDQUNBOzs7Ozs7Ozs7K0NBQ0E7Ozs7Ozs7Ozs2Q0FDQTs7Ozs7Ozs7O21EQUNBOzs7Ozs7Ozs7a0RBQ0E7Ozs7Ozs7OzsrQ0FDQTs7Ozs7Ozs7OzhDQUNBOzs7Ozs7Ozs7Z0RBQ0E7Ozs7Ozs7OztpREFDQTs7Ozs7Ozs7O3lDQUNBOzs7Ozs7Ozs7NkNBQ0EiLCJmaWxlIjoiaW5kZXguanMiLCJzb3VyY2VzQ29udGVudCI6WyJleHBvcnQgeyBkZWZhdWx0IGFzIGF1ZGlvIH0gZnJvbSAnd2F2ZXMtYXVkaW8nO1xuZXhwb3J0IHsgYXVkaW9Db250ZXh0IH0gZnJvbSAnd2F2ZXMtYXVkaW8nO1xuXG4vLyBjb3JlXG5leHBvcnQgeyBkZWZhdWx0IGFzIGNsaWVudCB9IGZyb20gJy4vY29yZS9jbGllbnQnO1xuZXhwb3J0IHsgZGVmYXVsdCBhcyBQcm9jZXNzIH0gZnJvbSAnLi9jb3JlL1Byb2Nlc3MnO1xuZXhwb3J0IHsgZGVmYXVsdCBhcyBTZXJ2aWNlIH0gZnJvbSAnLi9jb3JlL1NlcnZpY2UnO1xuZXhwb3J0IHsgZGVmYXVsdCBhcyBzZXJ2aWNlTWFuYWdlciB9IGZyb20gJy4vY29yZS9zZXJ2aWNlTWFuYWdlcic7XG5leHBvcnQgeyBkZWZhdWx0IGFzIFNpZ25hbCB9IGZyb20gJy4vY29yZS9TaWduYWwnO1xuZXhwb3J0IHsgZGVmYXVsdCBhcyBTaWduYWxBbGwgfSBmcm9tICcuL2NvcmUvU2lnbmFsQWxsJztcblxuLy8gc2NlbmVzXG5leHBvcnQgeyBkZWZhdWx0IGFzIEV4cGVyaWVuY2UgfSBmcm9tICcuL3NjZW5lcy9FeHBlcmllbmNlJztcbmV4cG9ydCB7IGRlZmF1bHQgYXMgQ2xpZW50U3VydmV5IH0gZnJvbSAnLi9zY2VuZXMvQ2xpZW50U3VydmV5JztcblxuLy8gc2VydmljZXNcbmV4cG9ydCB7IGRlZmF1bHQgYXMgQ2xpZW50Q2hlY2tpbiB9IGZyb20gJy4vc2VydmljZXMvQ2xpZW50Q2hlY2tpbic7XG4vLyBpbXBvcnQgQ2xpZW50RmlsZUxpc3QgZnJvbSAnLi9DbGllbnRGaWxlTGlzdCc7XG5leHBvcnQgeyBkZWZhdWx0IGFzIENsaWVudEVycm9yUmVwb3J0ZXIgfSBmcm9tICcuL3NlcnZpY2VzL0NsaWVudEVycm9yUmVwb3J0ZXInO1xuZXhwb3J0IHsgZGVmYXVsdCBhcyBDbGllbnRMb2NhdG9yIH0gZnJvbSAnLi9zZXJ2aWNlcy9DbGllbnRMb2NhdG9yJztcbmV4cG9ydCB7IGRlZmF1bHQgYXMgQ2xpZW50TmV0d29yayB9IGZyb20gJy4vc2VydmljZXMvQ2xpZW50TmV0d29yayc7XG5leHBvcnQgeyBkZWZhdWx0IGFzIENsaWVudFBsYWNlciB9IGZyb20gJy4vc2VydmljZXMvQ2xpZW50UGxhY2VyJztcbmV4cG9ydCB7IGRlZmF1bHQgYXMgQ2xpZW50U2hhcmVkQ29uZmlnIH0gZnJvbSAnLi9zZXJ2aWNlcy9DbGllbnRTaGFyZWRDb25maWcnO1xuZXhwb3J0IHsgZGVmYXVsdCBhcyBDbGllbnRTaGFyZWRQYXJhbXMgfSBmcm9tICcuL3NlcnZpY2VzL0NsaWVudFNoYXJlZFBhcmFtcyc7XG5leHBvcnQgeyBkZWZhdWx0IGFzIENsaWVudFN5bmMgfSBmcm9tICcuL3NlcnZpY2VzL0NsaWVudFN5bmMnO1xuZXhwb3J0IHsgZGVmYXVsdCBhcyBMb2FkZXIgfSBmcm9tICcuL3NlcnZpY2VzL0xvYWRlcic7XG5leHBvcnQgeyBkZWZhdWx0IGFzIE1vdGlvbklucHV0IH0gZnJvbSAnLi9zZXJ2aWNlcy9Nb3Rpb25JbnB1dCc7XG5leHBvcnQgeyBkZWZhdWx0IGFzIFNjaGVkdWxlciB9IGZyb20gJy4vc2VydmljZXMvU2NoZWR1bGVyJztcbi8vIGltcG9ydCBPcmllbnRhdGlvbiBmcm9tICcuL09yaWVudGF0aW9uJztcbmV4cG9ydCB7IGRlZmF1bHQgYXMgV2VsY29tZSB9IGZyb20gJy4vc2VydmljZXMvV2VsY29tZSc7XG5cbi8vIHZpZXdzXG5leHBvcnQgeyBkZWZhdWx0IGFzIGRlZmF1bHRUZW1wbGF0ZXMgfSBmcm9tICcuL3ZpZXdzL2RlZmF1bHRUZW1wbGF0ZXMnO1xuZXhwb3J0IHsgZGVmYXVsdCBhcyBkZWZhdWx0VGV4dENvbnRlbnQgfSBmcm9tICcuL3ZpZXdzL2RlZmF1bHRUZXh0Q29udGVudCc7XG5leHBvcnQgeyBkZWZhdWx0IGFzIEJ1dHRvblZpZXcgfSBmcm9tICcuL3ZpZXdzL0J1dHRvblZpZXcnO1xuZXhwb3J0IHsgZGVmYXVsdCBhcyBDYW52YXNWaWV3IH0gZnJvbSAnLi92aWV3cy9DYW52YXNWaWV3JztcbmV4cG9ydCB7IGRlZmF1bHQgYXMgUmVuZGVyZXIgfSBmcm9tICcuL3ZpZXdzL1JlbmRlcmVyJztcbmV4cG9ydCB7IGRlZmF1bHQgYXMgUmVuZGVyaW5nR3JvdXAgfSBmcm9tICcuL3ZpZXdzL1JlbmRlcmluZ0dyb3VwJztcbmV4cG9ydCB7IGRlZmF1bHQgYXMgU2VnbWVudGVkVmlldyB9IGZyb20gJy4vdmlld3MvU2VnbWVudGVkVmlldyc7XG5leHBvcnQgeyBkZWZhdWx0IGFzIFNlbGVjdFZpZXcgfSBmcm9tICcuL3ZpZXdzL1NlbGVjdFZpZXcnO1xuZXhwb3J0IHsgZGVmYXVsdCBhcyBTcGFjZVZpZXcgfSBmcm9tICcuL3ZpZXdzL1NwYWNlVmlldyc7XG5leHBvcnQgeyBkZWZhdWx0IGFzIFNxdWFyZWRWaWV3IH0gZnJvbSAnLi92aWV3cy9TcXVhcmVkVmlldyc7XG5leHBvcnQgeyBkZWZhdWx0IGFzIFRvdWNoU3VyZmFjZSB9IGZyb20gJy4vdmlld3MvVG91Y2hTdXJmYWNlJztcbmV4cG9ydCB7IGRlZmF1bHQgYXMgVmlldyB9IGZyb20gJy4vdmlld3MvVmlldyc7XG5leHBvcnQgeyBkZWZhdWx0IGFzIHZpZXdwb3J0IH0gZnJvbSAnLi92aWV3cy92aWV3cG9ydCc7XG5cblxuIl19

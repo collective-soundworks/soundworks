@@ -2,14 +2,14 @@ import client from '../core/client';
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
 // import localStorage from './localStorage';
-import SelectView from '../display/SelectView';
-import SpaceView from '../display/SpaceView';
-import SquaredView from '../display/SquaredView';
+import SelectView from '../views/SelectView';
+import SpaceView from '../views/SpaceView';
+import SquaredView from '../views/SquaredView';
 
 //  /**
 //   * Interface of the view of the placer.
 //   */
-//  class AbstactPlacerView extends soundworks.display.View {
+//  class AbstactPlacerView extends soundworks.View {
 //    /**
 //     * @param {Number} capacity - The maximum number of clients allowed.
 //     * @param {Array<String>} [labels=null] - An array of the labels for the positions

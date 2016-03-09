@@ -1,6 +1,6 @@
 import client from '../core/client';
 import Service from '../core/Service';
-import SegmentedView from '../display/SegmentedView';
+import SegmentedView from '../views/SegmentedView';
 import serviceManager from '../core/serviceManager';
 
 const SERVICE_ID = 'service:checkin';

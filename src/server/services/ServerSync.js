@@ -1,4 +1,5 @@
 import ServerActivity from '../core/ServerActivity';
+console.log(ServerActivity);
 import serverServiceManager from '../core/serverServiceManager';
 import SyncServer from 'sync/server';
 

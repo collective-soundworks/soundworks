@@ -2,9 +2,9 @@ import client from '../core/client';
 // import localStorage from './localStorage'; // @todo - rethink this with db
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
-import SpaceView from '../display/SpaceView';
-import SquaredView from '../display/SquaredView';
-import TouchSurface from '../display/TouchSurface';
+import SpaceView from '../views/SpaceView';
+import SquaredView from '../views/SquaredView';
+import TouchSurface from '../views/TouchSurface';
 
 const SERVICE_ID = 'service:locator';
 

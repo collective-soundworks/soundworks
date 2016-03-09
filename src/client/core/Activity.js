@@ -2,7 +2,7 @@ import Process from './Process';
 import Signal from './Signal';
 import SignalAll from './SignalAll';
 import socket from './socket';
-import View from '../display/View';
+import View from '../views/View';
 import viewManager from './viewManager';
 
 

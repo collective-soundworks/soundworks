@@ -1,6 +1,6 @@
 import Scene from '../core/Scene';
-import View from '../display/View';
-import SegmentedView from '../display/SegmentedView';
+import View from '../views/View';
+import SegmentedView from '../views/SegmentedView';
 
 /**
  * Renderers
