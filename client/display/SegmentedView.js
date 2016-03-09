@@ -1,24 +1,42 @@
 'use strict';
 
-var _get = require('babel-runtime/helpers/get')['default'];
-
-var _inherits = require('babel-runtime/helpers/inherits')['default'];
-
-var _createClass = require('babel-runtime/helpers/create-class')['default'];
-
-var _classCallCheck = require('babel-runtime/helpers/class-call-check')['default'];
-
-var _Object$keys = require('babel-runtime/core-js/object/keys')['default'];
-
-var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
-
-Object.defineProperty(exports, '__esModule', {
+Object.defineProperty(exports, "__esModule", {
   value: true
 });
+
+var _keys = require('babel-runtime/core-js/object/keys');
+
+var _keys2 = _interopRequireDefault(_keys);
+
+var _getPrototypeOf = require('babel-runtime/core-js/object/get-prototype-of');
+
+var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
+
+var _classCallCheck2 = require('babel-runtime/helpers/classCallCheck');
+
+var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+
+var _createClass2 = require('babel-runtime/helpers/createClass');
+
+var _createClass3 = _interopRequireDefault(_createClass2);
+
+var _possibleConstructorReturn2 = require('babel-runtime/helpers/possibleConstructorReturn');
+
+var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
+
+var _get2 = require('babel-runtime/helpers/get');
+
+var _get3 = _interopRequireDefault(_get2);
+
+var _inherits2 = require('babel-runtime/helpers/inherits');
+
+var _inherits3 = _interopRequireDefault(_inherits2);
 
 var _View2 = require('./View');
 
 var _View3 = _interopRequireDefault(_View2);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var defaultTemplate = '\n  <div class="section-top flex-middle"><p><%= top %></p></div>\n  <div class="section-center flex-center"><p><%= center %></p></div>\n  <div class="section-bottom flex-middle"><p><%= bottom %></p></div>\n';
 
@@ -27,47 +45,50 @@ var defaultTemplate = '\n  <div class="section-top flex-middle"><p><%= top %></p
  * The ratios between the different parts are kept in protrait or landscape orientation.
  */
 
-var SegmentedView = (function (_View) {
-  _inherits(SegmentedView, _View);
+var SegmentedView = function (_View) {
+  (0, _inherits3.default)(SegmentedView, _View);
 
   function SegmentedView(template) {
     var content = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
     var events = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
     var options = arguments.length <= 3 || arguments[3] === undefined ? {} : arguments[3];
-
-    _classCallCheck(this, SegmentedView);
+    (0, _classCallCheck3.default)(this, SegmentedView);
 
     // fallback on default template if `template = null`
     template = !template ? defaultTemplate : template;
-    _get(Object.getPrototypeOf(SegmentedView.prototype), 'constructor', this).call(this, template, content, events, options);
+
 
     /**
      * An object containing selectors defined in the template associated with their vertical ratio, the ratio is applyed in both 'portrait' and 'landscape' orientation.
      * @type {Object<String:Number>}
      */
-    this.ratios = options.ratios || {
+
+    var _this = (0, _possibleConstructorReturn3.default)(this, (0, _getPrototypeOf2.default)(SegmentedView).call(this, template, content, events, options));
+
+    _this.ratios = options.ratios || {
       '.section-top': 0.3,
       '.section-center': 0.5,
       '.section-bottom': 0.2
     };
 
-    this._$sections = {};
+    _this._$sections = {};
+    return _this;
   }
 
-  _createClass(SegmentedView, [{
+  (0, _createClass3.default)(SegmentedView, [{
     key: 'onRender',
     value: function onRender() {
-      var _this = this;
+      var _this2 = this;
 
-      _Object$keys(this.ratios).forEach(function (sel) {
-        var $el = _this.$el.querySelector(sel);
-        _this._$sections[sel] = $el;
+      (0, _keys2.default)(this.ratios).forEach(function (sel) {
+        var $el = _this2.$el.querySelector(sel);
+        _this2._$sections[sel] = $el;
       });
     }
   }, {
     key: 'onResize',
     value: function onResize(width, height, orientation) {
-      _get(Object.getPrototypeOf(SegmentedView.prototype), 'onResize', this).call(this, width, height, orientation);
+      (0, _get3.default)((0, _getPrototypeOf2.default)(SegmentedView.prototype), 'onResize', this).call(this, width, height, orientation);
 
       for (var sel in this.ratios) {
         var ratio = this.ratios[sel];
@@ -77,10 +98,8 @@ var SegmentedView = (function (_View) {
       }
     }
   }]);
-
   return SegmentedView;
-})(_View3['default']);
+}(_View3.default);
 
-exports['default'] = SegmentedView;
-module.exports = exports['default'];
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi9Vc2Vycy9tYXR1c3pld3NraS9kZXYvY29zaW1hL2xpYi9zb3VuZHdvcmtzL3NyYy9jbGllbnQvZGlzcGxheS9TZWdtZW50ZWRWaWV3LmpzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7OztxQkFBaUIsUUFBUTs7OztBQUV6QixJQUFNLGVBQWUsbU5BSXBCLENBQUM7Ozs7Ozs7SUFNbUIsYUFBYTtZQUFiLGFBQWE7O0FBQ3JCLFdBRFEsYUFBYSxDQUNwQixRQUFRLEVBQTJDO1FBQXpDLE9BQU8seURBQUcsRUFBRTtRQUFFLE1BQU0seURBQUcsRUFBRTtRQUFFLE9BQU8seURBQUcsRUFBRTs7MEJBRDFDLGFBQWE7OztBQUc5QixZQUFRLEdBQUcsQ0FBQyxRQUFRLEdBQUcsZUFBZSxHQUFHLFFBQVEsQ0FBQztBQUNsRCwrQkFKaUIsYUFBYSw2Q0FJeEIsUUFBUSxFQUFFLE9BQU8sRUFBRSxNQUFNLEVBQUUsT0FBTyxFQUFFOzs7Ozs7QUFNMUMsUUFBSSxDQUFDLE1BQU0sR0FBRyxPQUFPLENBQUMsTUFBTSxJQUFJO0FBQzlCLG9CQUFjLEVBQUUsR0FBRztBQUNuQix1QkFBaUIsRUFBRSxHQUFHO0FBQ3RCLHVCQUFpQixFQUFFLEdBQUc7S0FDdkIsQ0FBQzs7QUFFRixRQUFJLENBQUMsVUFBVSxHQUFHLEVBQUUsQ0FBQztHQUN0Qjs7ZUFqQmtCLGFBQWE7O1dBbUJ4QixvQkFBRzs7O0FBQ1QsbUJBQVksSUFBSSxDQUFDLE1BQU0sQ0FBQyxDQUFDLE9BQU8sQ0FBQyxVQUFDLEdBQUcsRUFBSztBQUN4QyxZQUFNLEdBQUcsR0FBRyxNQUFLLEdBQUcsQ0FBQyxhQUFhLENBQUMsR0FBRyxDQUFDLENBQUM7QUFDeEMsY0FBSyxVQUFVLENBQUMsR0FBRyxDQUFDLEdBQUcsR0FBRyxDQUFDO09BQzVCLENBQUMsQ0FBQztLQUNKOzs7V0FFTyxrQkFBQyxLQUFLLEVBQUUsTUFBTSxFQUFFLFdBQVcsRUFBRTtBQUNuQyxpQ0EzQmlCLGFBQWEsMENBMkJmLEtBQUssRUFBRSxNQUFNLEVBQUUsV0FBVyxFQUFFOztBQUUzQyxXQUFLLElBQUksR0FBRyxJQUFJLElBQUksQ0FBQyxNQUFNLEVBQUU7QUFDM0IsWUFBTSxLQUFLLEdBQUcsSUFBSSxDQUFDLE1BQU0sQ0FBQyxHQUFHLENBQUMsQ0FBQztBQUMvQixZQUFNLEdBQUcsR0FBRyxJQUFJLENBQUMsVUFBVSxDQUFDLEdBQUcsQ0FBQyxDQUFDOztBQUVqQyxXQUFHLENBQUMsS0FBSyxDQUFDLE1BQU0sR0FBTSxLQUFLLEdBQUcsTUFBTSxPQUFJLENBQUM7T0FDMUM7S0FDRjs7O1NBbkNrQixhQUFhOzs7cUJBQWIsYUFBYSIsImZpbGUiOiIvVXNlcnMvbWF0dXN6ZXdza2kvZGV2L2Nvc2ltYS9saWIvc291bmR3b3Jrcy9zcmMvY2xpZW50L2Rpc3BsYXkvU2VnbWVudGVkVmlldy5qcyIsInNvdXJjZXNDb250ZW50IjpbImltcG9ydCBWaWV3IGZyb20gJy4vVmlldyc7XG5cbmNvbnN0IGRlZmF1bHRUZW1wbGF0ZSA9IGBcbiAgPGRpdiBjbGFzcz1cInNlY3Rpb24tdG9wIGZsZXgtbWlkZGxlXCI+PHA+PCU9IHRvcCAlPjwvcD48L2Rpdj5cbiAgPGRpdiBjbGFzcz1cInNlY3Rpb24tY2VudGVyIGZsZXgtY2VudGVyXCI+PHA+PCU9IGNlbnRlciAlPjwvcD48L2Rpdj5cbiAgPGRpdiBjbGFzcz1cInNlY3Rpb24tYm90dG9tIGZsZXgtbWlkZGxlXCI+PHA+PCU9IGJvdHRvbSAlPjwvcD48L2Rpdj5cbmA7XG5cbi8qKlxuICogW2NsaWVudF0gLSBUaGlzIGNvbnN0cnVjdG9yIGFsbG93IHRvIGNyZWF0ZSB2aWV3cyB3aGljaCBkZWZpbmUgdmVydGljYWwgcmF0aW9zIGFtb25nIGVsZW1lbnRzLlxuICogVGhlIHJhdGlvcyBiZXR3ZWVuIHRoZSBkaWZmZXJlbnQgcGFydHMgYXJlIGtlcHQgaW4gcHJvdHJhaXQgb3IgbGFuZHNjYXBlIG9yaWVudGF0aW9uLlxuICovXG5leHBvcnQgZGVmYXVsdCBjbGFzcyBTZWdtZW50ZWRWaWV3IGV4dGVuZHMgVmlldyB7XG4gIGNvbnN0cnVjdG9yKHRlbXBsYXRlLCBjb250ZW50ID0ge30sIGV2ZW50cyA9IHt9LCBvcHRpb25zID0ge30pIHtcbiAgICAvLyBmYWxsYmFjayBvbiBkZWZhdWx0IHRlbXBsYXRlIGlmIGB0ZW1wbGF0ZSA9IG51bGxgXG4gICAgdGVtcGxhdGUgPSAhdGVtcGxhdGUgPyBkZWZhdWx0VGVtcGxhdGUgOiB0ZW1wbGF0ZTtcbiAgICBzdXBlcih0ZW1wbGF0ZSwgY29udGVudCwgZXZlbnRzLCBvcHRpb25zKTtcblxuICAgIC8qKlxuICAgICAqIEFuIG9iamVjdCBjb250YWluaW5nIHNlbGVjdG9ycyBkZWZpbmVkIGluIHRoZSB0ZW1wbGF0ZSBhc3NvY2lhdGVkIHdpdGggdGhlaXIgdmVydGljYWwgcmF0aW8sIHRoZSByYXRpbyBpcyBhcHBseWVkIGluIGJvdGggJ3BvcnRyYWl0JyBhbmQgJ2xhbmRzY2FwZScgb3JpZW50YXRpb24uXG4gICAgICogQHR5cGUge09iamVjdDxTdHJpbmc6TnVtYmVyPn1cbiAgICAgKi9cbiAgICB0aGlzLnJhdGlvcyA9IG9wdGlvbnMucmF0aW9zIHx8wqB7XG4gICAgICAnLnNlY3Rpb24tdG9wJzogMC4zLFxuICAgICAgJy5zZWN0aW9uLWNlbnRlcic6IDAuNSxcbiAgICAgICcuc2VjdGlvbi1ib3R0b20nOiAwLjIsXG4gICAgfTtcblxuICAgIHRoaXMuXyRzZWN0aW9ucyA9IHt9O1xuICB9XG5cbiAgb25SZW5kZXIoKSB7XG4gICAgT2JqZWN0LmtleXModGhpcy5yYXRpb3MpLmZvckVhY2goKHNlbCkgPT4ge1xuICAgICAgY29uc3QgJGVsID0gdGhpcy4kZWwucXVlcnlTZWxlY3RvcihzZWwpO1xuICAgICAgdGhpcy5fJHNlY3Rpb25zW3NlbF0gPSAkZWw7XG4gICAgfSk7XG4gIH1cblxuICBvblJlc2l6ZSh3aWR0aCwgaGVpZ2h0LCBvcmllbnRhdGlvbikge1xuICAgIHN1cGVyLm9uUmVzaXplKHdpZHRoLCBoZWlnaHQsIG9yaWVudGF0aW9uKTtcblxuICAgIGZvciAobGV0IHNlbCBpbiB0aGlzLnJhdGlvcykge1xuICAgICAgY29uc3QgcmF0aW8gPSB0aGlzLnJhdGlvc1tzZWxdO1xuICAgICAgY29uc3QgJGVsID0gdGhpcy5fJHNlY3Rpb25zW3NlbF07XG5cbiAgICAgICRlbC5zdHlsZS5oZWlnaHQgPSBgJHtyYXRpbyAqIGhlaWdodH1weGA7XG4gICAgfVxuICB9XG59XG4iXX0=
+exports.default = SegmentedView;
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIlNlZ21lbnRlZFZpZXcuanMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OztBQUFBOzs7Ozs7QUFFQSxJQUFNLGtPQUFOOzs7Ozs7O0lBVXFCOzs7QUFDbkIsV0FEbUIsYUFDbkIsQ0FBWSxRQUFaLEVBQStEO1FBQXpDLGdFQUFVLGtCQUErQjtRQUEzQiwrREFBUyxrQkFBa0I7UUFBZCxnRUFBVSxrQkFBSTt3Q0FENUMsZUFDNEM7OztBQUU3RCxlQUFXLENBQUMsUUFBRCxHQUFZLGVBQVosR0FBOEIsUUFBOUIsQ0FGa0Q7Ozs7Ozs7OzZGQUQ1QywwQkFJWCxVQUFVLFNBQVMsUUFBUSxVQUg0Qjs7QUFTN0QsVUFBSyxNQUFMLEdBQWMsUUFBUSxNQUFSLElBQWtCO0FBQzlCLHNCQUFnQixHQUFoQjtBQUNBLHlCQUFtQixHQUFuQjtBQUNBLHlCQUFtQixHQUFuQjtLQUhZLENBVCtDOztBQWU3RCxVQUFLLFVBQUwsR0FBa0IsRUFBbEIsQ0FmNkQ7O0dBQS9EOzs2QkFEbUI7OytCQW1CUjs7O0FBQ1QsMEJBQVksS0FBSyxNQUFMLENBQVosQ0FBeUIsT0FBekIsQ0FBaUMsVUFBQyxHQUFELEVBQVM7QUFDeEMsWUFBTSxNQUFNLE9BQUssR0FBTCxDQUFTLGFBQVQsQ0FBdUIsR0FBdkIsQ0FBTixDQURrQztBQUV4QyxlQUFLLFVBQUwsQ0FBZ0IsR0FBaEIsSUFBdUIsR0FBdkIsQ0FGd0M7T0FBVCxDQUFqQyxDQURTOzs7OzZCQU9GLE9BQU8sUUFBUSxhQUFhO0FBQ25DLHVEQTNCaUIsdURBMkJGLE9BQU8sUUFBUSxZQUE5QixDQURtQzs7QUFHbkMsV0FBSyxJQUFJLEdBQUosSUFBVyxLQUFLLE1BQUwsRUFBYTtBQUMzQixZQUFNLFFBQVEsS0FBSyxNQUFMLENBQVksR0FBWixDQUFSLENBRHFCO0FBRTNCLFlBQU0sTUFBTSxLQUFLLFVBQUwsQ0FBZ0IsR0FBaEIsQ0FBTixDQUZxQjs7QUFJM0IsWUFBSSxLQUFKLENBQVUsTUFBVixHQUFzQixRQUFRLE1BQVIsT0FBdEIsQ0FKMkI7T0FBN0I7OztTQTdCaUIiLCJmaWxlIjoiU2VnbWVudGVkVmlldy5qcyIsInNvdXJjZXNDb250ZW50IjpbImltcG9ydCBWaWV3IGZyb20gJy4vVmlldyc7XG5cbmNvbnN0IGRlZmF1bHRUZW1wbGF0ZSA9IGBcbiAgPGRpdiBjbGFzcz1cInNlY3Rpb24tdG9wIGZsZXgtbWlkZGxlXCI+PHA+PCU9IHRvcCAlPjwvcD48L2Rpdj5cbiAgPGRpdiBjbGFzcz1cInNlY3Rpb24tY2VudGVyIGZsZXgtY2VudGVyXCI+PHA+PCU9IGNlbnRlciAlPjwvcD48L2Rpdj5cbiAgPGRpdiBjbGFzcz1cInNlY3Rpb24tYm90dG9tIGZsZXgtbWlkZGxlXCI+PHA+PCU9IGJvdHRvbSAlPjwvcD48L2Rpdj5cbmA7XG5cbi8qKlxuICogW2NsaWVudF0gLSBUaGlzIGNvbnN0cnVjdG9yIGFsbG93IHRvIGNyZWF0ZSB2aWV3cyB3aGljaCBkZWZpbmUgdmVydGljYWwgcmF0aW9zIGFtb25nIGVsZW1lbnRzLlxuICogVGhlIHJhdGlvcyBiZXR3ZWVuIHRoZSBkaWZmZXJlbnQgcGFydHMgYXJlIGtlcHQgaW4gcHJvdHJhaXQgb3IgbGFuZHNjYXBlIG9yaWVudGF0aW9uLlxuICovXG5leHBvcnQgZGVmYXVsdCBjbGFzcyBTZWdtZW50ZWRWaWV3IGV4dGVuZHMgVmlldyB7XG4gIGNvbnN0cnVjdG9yKHRlbXBsYXRlLCBjb250ZW50ID0ge30sIGV2ZW50cyA9IHt9LCBvcHRpb25zID0ge30pIHtcbiAgICAvLyBmYWxsYmFjayBvbiBkZWZhdWx0IHRlbXBsYXRlIGlmIGB0ZW1wbGF0ZSA9IG51bGxgXG4gICAgdGVtcGxhdGUgPSAhdGVtcGxhdGUgPyBkZWZhdWx0VGVtcGxhdGUgOiB0ZW1wbGF0ZTtcbiAgICBzdXBlcih0ZW1wbGF0ZSwgY29udGVudCwgZXZlbnRzLCBvcHRpb25zKTtcblxuICAgIC8qKlxuICAgICAqIEFuIG9iamVjdCBjb250YWluaW5nIHNlbGVjdG9ycyBkZWZpbmVkIGluIHRoZSB0ZW1wbGF0ZSBhc3NvY2lhdGVkIHdpdGggdGhlaXIgdmVydGljYWwgcmF0aW8sIHRoZSByYXRpbyBpcyBhcHBseWVkIGluIGJvdGggJ3BvcnRyYWl0JyBhbmQgJ2xhbmRzY2FwZScgb3JpZW50YXRpb24uXG4gICAgICogQHR5cGUge09iamVjdDxTdHJpbmc6TnVtYmVyPn1cbiAgICAgKi9cbiAgICB0aGlzLnJhdGlvcyA9IG9wdGlvbnMucmF0aW9zIHx8wqB7XG4gICAgICAnLnNlY3Rpb24tdG9wJzogMC4zLFxuICAgICAgJy5zZWN0aW9uLWNlbnRlcic6IDAuNSxcbiAgICAgICcuc2VjdGlvbi1ib3R0b20nOiAwLjIsXG4gICAgfTtcblxuICAgIHRoaXMuXyRzZWN0aW9ucyA9IHt9O1xuICB9XG5cbiAgb25SZW5kZXIoKSB7XG4gICAgT2JqZWN0LmtleXModGhpcy5yYXRpb3MpLmZvckVhY2goKHNlbCkgPT4ge1xuICAgICAgY29uc3QgJGVsID0gdGhpcy4kZWwucXVlcnlTZWxlY3RvcihzZWwpO1xuICAgICAgdGhpcy5fJHNlY3Rpb25zW3NlbF0gPSAkZWw7XG4gICAgfSk7XG4gIH1cblxuICBvblJlc2l6ZSh3aWR0aCwgaGVpZ2h0LCBvcmllbnRhdGlvbikge1xuICAgIHN1cGVyLm9uUmVzaXplKHdpZHRoLCBoZWlnaHQsIG9yaWVudGF0aW9uKTtcblxuICAgIGZvciAobGV0IHNlbCBpbiB0aGlzLnJhdGlvcykge1xuICAgICAgY29uc3QgcmF0aW8gPSB0aGlzLnJhdGlvc1tzZWxdO1xuICAgICAgY29uc3QgJGVsID0gdGhpcy5fJHNlY3Rpb25zW3NlbF07XG5cbiAgICAgICRlbC5zdHlsZS5oZWlnaHQgPSBgJHtyYXRpbyAqIGhlaWdodH1weGA7XG4gICAgfVxuICB9XG59XG4iXX0=

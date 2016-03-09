@@ -6,7 +6,6 @@ import View from '../display/View';
 import viewManager from './viewManager';
 
 
-
 /**
  * Base class for services and scenes. Basically a process with view and optionnal network abilities.
  */

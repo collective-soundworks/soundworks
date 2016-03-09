@@ -1,51 +1,69 @@
 'use strict';
 
-var _get = require('babel-runtime/helpers/get')['default'];
-
-var _inherits = require('babel-runtime/helpers/inherits')['default'];
-
-var _createClass = require('babel-runtime/helpers/create-class')['default'];
-
-var _classCallCheck = require('babel-runtime/helpers/class-call-check')['default'];
-
-var _interopRequireDefault = require('babel-runtime/helpers/interop-require-default')['default'];
-
-Object.defineProperty(exports, '__esModule', {
+Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _coreScene = require('../core/Scene');
+var _getPrototypeOf = require('babel-runtime/core-js/object/get-prototype-of');
 
-var _coreScene2 = _interopRequireDefault(_coreScene);
+var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
 
-var _coreSignal = require('../core/Signal');
+var _classCallCheck2 = require('babel-runtime/helpers/classCallCheck');
 
-var _coreSignal2 = _interopRequireDefault(_coreSignal);
+var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
 
-var _coreSignalAll = require('../core/SignalAll');
+var _createClass2 = require('babel-runtime/helpers/createClass');
 
-var _coreSignalAll2 = _interopRequireDefault(_coreSignalAll);
+var _createClass3 = _interopRequireDefault(_createClass2);
 
-var _coreClient = require('../core/client');
+var _possibleConstructorReturn2 = require('babel-runtime/helpers/possibleConstructorReturn');
 
-var _coreClient2 = _interopRequireDefault(_coreClient);
+var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
 
-var Experience = (function (_Scene) {
-  _inherits(Experience, _Scene);
+var _get2 = require('babel-runtime/helpers/get');
+
+var _get3 = _interopRequireDefault(_get2);
+
+var _inherits2 = require('babel-runtime/helpers/inherits');
+
+var _inherits3 = _interopRequireDefault(_inherits2);
+
+var _Scene2 = require('../core/Scene');
+
+var _Scene3 = _interopRequireDefault(_Scene2);
+
+var _Signal = require('../core/Signal');
+
+var _Signal2 = _interopRequireDefault(_Signal);
+
+var _SignalAll = require('../core/SignalAll');
+
+var _SignalAll2 = _interopRequireDefault(_SignalAll);
+
+var _client = require('../core/client');
+
+var _client2 = _interopRequireDefault(_client);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var Experience = function (_Scene) {
+  (0, _inherits3.default)(Experience, _Scene);
 
   function Experience() {
-    var id = arguments.length <= 0 || arguments[0] === undefined ? _coreClient2['default'].type : arguments[0];
+    var id = arguments.length <= 0 || arguments[0] === undefined ? _client2.default.type : arguments[0];
     var hasNetwork = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
+    (0, _classCallCheck3.default)(this, Experience);
 
-    _classCallCheck(this, Experience);
-
-    _get(Object.getPrototypeOf(Experience.prototype), 'constructor', this).call(this, id, hasNetwork);
 
     // if the experience has network, require errorReporter service by default
-    if (hasNetwork) this._errorReporter = this.require('error-reporter');
+
+    var _this = (0, _possibleConstructorReturn3.default)(this, (0, _getPrototypeOf2.default)(Experience).call(this, id, hasNetwork));
+
+    if (hasNetwork) _this._errorReporter = _this.require('error-reporter');
+    return _this;
   }
 
-  _createClass(Experience, [{
+  (0, _createClass3.default)(Experience, [{
     key: 'init',
     value: function init() {
       this.viewOptions = { className: ['activity', 'experience'] };
@@ -53,7 +71,7 @@ var Experience = (function (_Scene) {
   }, {
     key: 'start',
     value: function start() {
-      _get(Object.getPrototypeOf(Experience.prototype), 'start', this).call(this);
+      (0, _get3.default)((0, _getPrototypeOf2.default)(Experience.prototype), 'start', this).call(this);
 
       if (this.hasNetwork) this.send('enter');
     }
@@ -65,13 +83,11 @@ var Experience = (function (_Scene) {
     value: function done() {
       if (this.hasNetwork) this.send('exit');
 
-      _get(Object.getPrototypeOf(Experience.prototype), 'done', this).call(this);
+      (0, _get3.default)((0, _getPrototypeOf2.default)(Experience.prototype), 'done', this).call(this);
     }
   }]);
-
   return Experience;
-})(_coreScene2['default']);
+}(_Scene3.default);
 
-exports['default'] = Experience;
-module.exports = exports['default'];
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi9Vc2Vycy9tYXR1c3pld3NraS9kZXYvY29zaW1hL2xpYi9zb3VuZHdvcmtzL3NyYy9jbGllbnQvc2NlbmVzL0V4cGVyaWVuY2UuanMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7Ozt5QkFBa0IsZUFBZTs7OzswQkFDZCxnQkFBZ0I7Ozs7NkJBQ2IsbUJBQW1COzs7OzBCQUN0QixnQkFBZ0I7Ozs7SUFFZCxVQUFVO1lBQVYsVUFBVTs7QUFDbEIsV0FEUSxVQUFVLEdBQ29CO1FBQXJDLEVBQUUseURBQUcsd0JBQU8sSUFBSTtRQUFFLFVBQVUseURBQUcsSUFBSTs7MEJBRDVCLFVBQVU7O0FBRTNCLCtCQUZpQixVQUFVLDZDQUVyQixFQUFFLEVBQUUsVUFBVSxFQUFFOzs7QUFHdEIsUUFBSSxVQUFVLEVBQ1osSUFBSSxDQUFDLGNBQWMsR0FBRyxJQUFJLENBQUMsT0FBTyxDQUFDLGdCQUFnQixDQUFDLENBQUM7R0FDeEQ7O2VBUGtCLFVBQVU7O1dBU3pCLGdCQUFHO0FBQ0wsVUFBSSxDQUFDLFdBQVcsR0FBRyxFQUFFLFNBQVMsRUFBRSxDQUFDLFVBQVUsRUFBRSxZQUFZLENBQUMsRUFBRSxDQUFDO0tBQzlEOzs7V0FFSSxpQkFBRztBQUNOLGlDQWRpQixVQUFVLHVDQWNiOztBQUVkLFVBQUksSUFBSSxDQUFDLFVBQVUsRUFDakIsSUFBSSxDQUFDLElBQUksQ0FBQyxPQUFPLENBQUMsQ0FBQztLQUN0Qjs7Ozs7O1dBSUcsZ0JBQUc7QUFDTCxVQUFJLElBQUksQ0FBQyxVQUFVLEVBQ2pCLElBQUksQ0FBQyxJQUFJLENBQUMsTUFBTSxDQUFDLENBQUM7O0FBRXBCLGlDQTFCaUIsVUFBVSxzQ0EwQmQ7S0FDZDs7O1NBM0JrQixVQUFVOzs7cUJBQVYsVUFBVSIsImZpbGUiOiIvVXNlcnMvbWF0dXN6ZXdza2kvZGV2L2Nvc2ltYS9saWIvc291bmR3b3Jrcy9zcmMvY2xpZW50L3NjZW5lcy9FeHBlcmllbmNlLmpzIiwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IFNjZW5lIGZyb20gJy4uL2NvcmUvU2NlbmUnO1xuaW1wb3J0IFNpZ25hbCBmcm9tICcuLi9jb3JlL1NpZ25hbCc7XG5pbXBvcnQgU2lnbmFsQWxsIGZyb20gJy4uL2NvcmUvU2lnbmFsQWxsJztcbmltcG9ydCBjbGllbnQgZnJvbSAnLi4vY29yZS9jbGllbnQnO1xuXG5leHBvcnQgZGVmYXVsdCBjbGFzcyBFeHBlcmllbmNlIGV4dGVuZHMgU2NlbmUge1xuICBjb25zdHJ1Y3RvcihpZCA9IGNsaWVudC50eXBlLCBoYXNOZXR3b3JrID0gdHJ1ZSkge1xuICAgIHN1cGVyKGlkLCBoYXNOZXR3b3JrKTtcblxuICAgIC8vIGlmIHRoZSBleHBlcmllbmNlIGhhcyBuZXR3b3JrLCByZXF1aXJlIGVycm9yUmVwb3J0ZXIgc2VydmljZSBieSBkZWZhdWx0XG4gICAgaWYgKGhhc05ldHdvcmspXG4gICAgICB0aGlzLl9lcnJvclJlcG9ydGVyID0gdGhpcy5yZXF1aXJlKCdlcnJvci1yZXBvcnRlcicpO1xuICB9XG5cbiAgaW5pdCgpIHtcbiAgICB0aGlzLnZpZXdPcHRpb25zID0geyBjbGFzc05hbWU6IFsnYWN0aXZpdHknLCAnZXhwZXJpZW5jZSddIH07XG4gIH1cblxuICBzdGFydCgpIHtcbiAgICBzdXBlci5zdGFydCgpO1xuXG4gICAgaWYgKHRoaXMuaGFzTmV0d29yaylcbiAgICAgIHRoaXMuc2VuZCgnZW50ZXInKTtcbiAgfVxuXG4gIC8vIGhvbGQoKSB7fVxuXG4gIGRvbmUoKSB7XG4gICAgaWYgKHRoaXMuaGFzTmV0d29yaylcbiAgICAgIHRoaXMuc2VuZCgnZXhpdCcpO1xuXG4gICAgc3VwZXIuZG9uZSgpO1xuICB9XG59XG4iXX0=
+exports.default = Experience;
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIkV4cGVyaWVuY2UuanMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O0FBQUE7Ozs7QUFDQTs7OztBQUNBOzs7O0FBQ0E7Ozs7OztJQUVxQjs7O0FBQ25CLFdBRG1CLFVBQ25CLEdBQWlEO1FBQXJDLDJEQUFLLGlCQUFPLElBQVAsZ0JBQWdDO1FBQW5CLG1FQUFhLG9CQUFNO3dDQUQ5QixZQUM4Qjs7Ozs7NkZBRDlCLHVCQUVYLElBQUksYUFEcUM7O0FBSS9DLFFBQUksVUFBSixFQUNFLE1BQUssY0FBTCxHQUFzQixNQUFLLE9BQUwsQ0FBYSxnQkFBYixDQUF0QixDQURGO2lCQUorQztHQUFqRDs7NkJBRG1COzsyQkFTWjtBQUNMLFdBQUssV0FBTCxHQUFtQixFQUFFLFdBQVcsQ0FBQyxVQUFELEVBQWEsWUFBYixDQUFYLEVBQXJCLENBREs7Ozs7NEJBSUM7QUFDTix1REFkaUIsZ0RBY2pCLENBRE07O0FBR04sVUFBSSxLQUFLLFVBQUwsRUFDRixLQUFLLElBQUwsQ0FBVSxPQUFWLEVBREY7Ozs7Ozs7MkJBTUs7QUFDTCxVQUFJLEtBQUssVUFBTCxFQUNGLEtBQUssSUFBTCxDQUFVLE1BQVYsRUFERjs7QUFHQSx1REExQmlCLCtDQTBCakIsQ0FKSzs7O1NBdEJZIiwiZmlsZSI6IkV4cGVyaWVuY2UuanMiLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgU2NlbmUgZnJvbSAnLi4vY29yZS9TY2VuZSc7XG5pbXBvcnQgU2lnbmFsIGZyb20gJy4uL2NvcmUvU2lnbmFsJztcbmltcG9ydCBTaWduYWxBbGwgZnJvbSAnLi4vY29yZS9TaWduYWxBbGwnO1xuaW1wb3J0IGNsaWVudCBmcm9tICcuLi9jb3JlL2NsaWVudCc7XG5cbmV4cG9ydCBkZWZhdWx0IGNsYXNzIEV4cGVyaWVuY2UgZXh0ZW5kcyBTY2VuZSB7XG4gIGNvbnN0cnVjdG9yKGlkID0gY2xpZW50LnR5cGUsIGhhc05ldHdvcmsgPSB0cnVlKSB7XG4gICAgc3VwZXIoaWQsIGhhc05ldHdvcmspO1xuXG4gICAgLy8gaWYgdGhlIGV4cGVyaWVuY2UgaGFzIG5ldHdvcmssIHJlcXVpcmUgZXJyb3JSZXBvcnRlciBzZXJ2aWNlIGJ5IGRlZmF1bHRcbiAgICBpZiAoaGFzTmV0d29yaylcbiAgICAgIHRoaXMuX2Vycm9yUmVwb3J0ZXIgPSB0aGlzLnJlcXVpcmUoJ2Vycm9yLXJlcG9ydGVyJyk7XG4gIH1cblxuICBpbml0KCkge1xuICAgIHRoaXMudmlld09wdGlvbnMgPSB7IGNsYXNzTmFtZTogWydhY3Rpdml0eScsICdleHBlcmllbmNlJ10gfTtcbiAgfVxuXG4gIHN0YXJ0KCkge1xuICAgIHN1cGVyLnN0YXJ0KCk7XG5cbiAgICBpZiAodGhpcy5oYXNOZXR3b3JrKVxuICAgICAgdGhpcy5zZW5kKCdlbnRlcicpO1xuICB9XG5cbiAgLy8gaG9sZCgpIHt9XG5cbiAgZG9uZSgpIHtcbiAgICBpZiAodGhpcy5oYXNOZXR3b3JrKVxuICAgICAgdGhpcy5zZW5kKCdleGl0Jyk7XG5cbiAgICBzdXBlci5kb25lKCk7XG4gIH1cbn1cbiJdfQ==
