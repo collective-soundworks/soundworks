@@ -28,9 +28,10 @@ export { default as Scheduler } from './services/Scheduler';
 // import Orientation from './Orientation';
 export { default as Welcome } from './services/Welcome';
 
+// config
+export { default as defaultTemplates } from './config/defaultTemplates';
+export { default as defaultContent } from './config/defaultContent';
 // views
-export { default as defaultTemplates } from './views/defaultTemplates';
-export { default as defaultContent } from './views/defaultContent';
 export { default as ButtonView } from './views/ButtonView';
 export { default as CanvasView } from './views/CanvasView';
 export { default as Renderer } from './views/Renderer';
