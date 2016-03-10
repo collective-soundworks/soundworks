@@ -1,18 +1,13 @@
 # transpiled files
-
 /client
 /server
 /utils
 
-
-# dependencies
-
+# others
 /node_modules
 /doc
 
-
 # junk files
-
 npm-debug.log
 .DS_Store
 Thumbs.db
