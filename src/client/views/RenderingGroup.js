@@ -22,7 +22,6 @@ const loop = {
     if (this._isRunning) { return; }
     this._isRunning = true;
     this.lastRenderTime = this.getTime();
-    // console.log('=> Start canvas rendering loop');
 
     (function(self) {
       function loop() {
@@ -59,7 +58,6 @@ const loop = {
     }
 
     if (shouldStop) {
-      // console.log('=> Stop canvas rendering loop');
       cancelAnimationFrame(this.rAFid);
       this._isRunning = false;
     }
@@ -102,9 +100,8 @@ export default class RenderingGroup {
     this.ctx.width = this.ctx.canvas.width = this.canvasWidth;
     this.ctx.height = this.ctx.canvas.height = this.canvasHeight;
 
-    for (let i = 0, l = this.renderers.length; i < l; i++) {
+    for (let i = 0, l = this.renderers.length; i < l; i++)
       this.renderers[i].onResize(viewportWidth, viewportHeight);
-    }
   }
 
   /**
@@ -148,9 +145,8 @@ export default class RenderingGroup {
 
     this.preRender(ctx, dt);
 
-    for (let i = 0, l = renderers.length; i < l; i++) {
+    for (let i = 0, l = renderers.length; i < l; i++)
       renderers[i].render(ctx);
-    }
   }
 
   /**
@@ -165,9 +161,8 @@ export default class RenderingGroup {
     renderer.onResize(this.canvasWidth, this.canvasHeight);
     renderer.init();
     // if first renderer added, start the loop
-    if (this.renderers.length === 1) {
+    if (this.renderers.length === 1)
       loop.requireStart();
-    }
   }
 
   /**
@@ -176,12 +171,12 @@ export default class RenderingGroup {
    */
   remove(renderer) {
     const index = this.renderers.indexOf(renderer);
-    if (index === -1) { return; }
 
-    this.renderers.splice(index, 1);
-    // if last renderer removed, stop the loop
-    if (this.renderers.length === 0) {
-      loop.requireStop();
-    }
+    if (index !== -1) {
+      this.renderers.splice(index, 1);
+      // if last renderer removed, stop the loop
+      if (this.renderers.length === 0)
+        loop.requireStop();
+     }
   }
 }

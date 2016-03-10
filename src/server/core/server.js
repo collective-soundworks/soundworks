@@ -11,95 +11,10 @@ import pem from 'pem';
 import serviceManager from './serviceManager';
 import sockets from './sockets';
 
-
-
-/**
- * Set of configuration parameters defined by a particular application.
- * These parameters typically inclusd a setup and control parameters values.
- */
-const exampleAppConfig = {
-  appName: 'Soundworks', // title of the application (for <title> tag)
-  version: '0.0.1', // version of the application (allow to bypass browser cache)
-  /**
-   * @param {Object} [setup={}] - Setup defining dimensions and predefined positions (labels and/or coordinates).
-   * @attribute {Object} [setup.area=null] - The dimensions of the area.
-   * @attribute {Number} [setup.area.height] - The height of the area.
-   * @attribute {Number} [setup.area.width] - The width of the area.
-   * @attribute {String} [setup.area.background] - The optionnal background (image) of the area.
-   * @attribute {Array<String>} [setup.labels] - List of predefined labels.
-   * @attribute {Array<Array>} [setup.coordinates] - List of predefined coordinates
-   *  given as an array `[x:Number, y:Number]`.
-   * @attribute {Number} [setup.capacity=Infinity] - Maximum number of places
-   *  (may limit or be limited by the number of labels and/or coordinates defined by the setup).
-   * @ttribute {Number} [setup.maxClientsPerPosition=1] - The maximum number of clients
-   *  allowed in one position.
-   */
-  setup: {
-    area: {
-      width: 10,
-      height: 10,
-      background: undefined,
-    },
-    labels: undefined,
-    coordinates: undefined,
-    maxClientsPerPosition: 1,
-    capacity: Infinity,
-  },
-  controlParameters: {
-    tempo: 120, // tempo in BPM
-    volume: 0, // master volume in dB
-  },
-};
-
-/**
- * Configuration parameters of the Soundworks framework.
- * These parameters allow for configuring components of the framework such as Express and SocketIO.
- */
-const defaultFwConfig = {
-  useHttps: false,
-  publicFolder: path.join(process.cwd(), 'public'),
-  templateFolder: path.join(process.cwd(), 'html'),
-  defaultClient: 'player',
-  assetsDomain: '', // override to download assets from a different serveur (nginx)
-  socketIO: {
-    url: '',
-    transports: ['websocket'],
-    pingTimeout: 60000, // configure client side too ?
-    pingInterval: 50000, // configure client side too ?
-    // @note: EngineIO defaults
-    // pingTimeout: 3000,
-    // pingInterval: 1000,
-    // upgradeTimeout: 10000,
-    // maxHttpBufferSize: 10E7,
-  },
-  errorReporterDirectory: 'logs/clients',
-  dbDirectory: 'db',
-};
-
-/**
- * Configuration parameters of the Soundworks framework.
- * These parameters allow for configuring components of the framework such as Express and SocketIO.
- */
-const defaultEnvConfig = {
-  port: 8000,
-  osc: {
-    receiveAddress: '127.0.0.1',
-    receivePort: 57121,
-    sendAddress: '127.0.0.1',
-    sendPort: 57120,
-  },
-  logger: {
-    name: 'soundworks',
-    level: 'info',
-    streams: [{
-      level: 'info',
-      stream: process.stdout,
-    }, /*{
-      level: 'info',
-      path: path.join(process.cwd(), 'logs', 'soundworks.log'),
-    }*/]
-  }
-};
+// import default configuration
+import { default as defaultAppConfig } from '../config/app';
+import { default as defaultFwConfig } from '../config/fw';
+import { default as defaultEnvConfig } from '../config/env';
 
 /**
  * The `server` object contains the basic methods of the server.
@@ -202,7 +117,7 @@ export default {
    */
   init(...configs) {
         // merge default configuration objects
-    this.config = Object.assign(this.config, exampleAppConfig, defaultFwConfig, defaultEnvConfig);
+    this.config = Object.assign(this.config, defaultAppConfig, defaultFwConfig, defaultEnvConfig);
     // merge given configurations objects with defaults (1 level depth)
     configs.forEach((config) => {
       for (let key in config) {

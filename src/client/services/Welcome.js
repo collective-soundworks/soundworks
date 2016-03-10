@@ -162,7 +162,7 @@ class Welcome extends Service {
 
     client.platform.isMobile = (md.mobile() !== null); // true if phone or tablet
     client.platform.os = (function() {
-      let os = md.os();
+      const os = md.os();
 
       if (os === 'AndroidOS')
         return 'android';
@@ -174,11 +174,13 @@ class Welcome extends Service {
   }
 
   _activateAudio() {
-    var o = audioContext.createOscillator();
-    var g = audioContext.createGain();
-    g.gain.value = 0.000000001; // -180dB ?
-    o.connect(g);
+    const g = audioContext.createGain();
     g.connect(audioContext.destination);
+    g.gain.value = 0.000000001; // -180dB ?
+
+    const o = audioContext.createOscillator();
+    o.connect(g);
+    o.frequency.value = 20;
     o.start(0);
 
     // prevent android to stop audio by keping the oscillator active

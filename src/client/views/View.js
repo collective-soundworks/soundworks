@@ -280,7 +280,6 @@ export default class View {
    * follow the Backbone's event syntax)
    */
   _delegateEvents() {
-    // this._executeViewComponentMethod('_delegateEvents');
     for (let key in this.events) {
       const [event, selector] = key.split(/ +/);
       const callback = this.events[key];
@@ -294,7 +293,6 @@ export default class View {
    * follow the Backbone's event syntax)
    */
   _undelegateEvents() {
-    // this._executeViewComponentMethod('_undelegateEvents');
     this._delegate.off();
   }
 }

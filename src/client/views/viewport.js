@@ -1,10 +1,8 @@
-import { EventEmitter } from 'events';
-
 /**
  * Service to track the viewport size and orientation.
  */
-class Viewport {
-  constructor() {
+const viewport = {
+  init() {
     /**
      * Width of the viewport.
      * @type {Number}
@@ -33,7 +31,7 @@ class Viewport {
     // listen window events (is `DOMContentLoaded` usefull?)
     window.addEventListener('DOMContentLoaded', () => this._onResize());
     window.addEventListener('resize', this._onResize, false);
-  }
+  },
 
   /**
    * Register a listener for the `window.resize` event. The callback is executed
@@ -44,7 +42,7 @@ class Viewport {
     this._callbacks.add(callback);
     // call immediatly with current values
     callback(this.width, this.height, this.orientation);
-  }
+  },
 
   /**
    * Remove a listener for the `window.resize` event.
@@ -52,7 +50,7 @@ class Viewport {
    */
   removeResizeListener(callback) {
     this._callbacks.delete(callback);
-  }
+  },
 
   _onResize() {
     this.width = window.innerWidth;
@@ -62,13 +60,13 @@ class Viewport {
     this._callbacks.forEach((callback) => {
       callback(this.width, this.height, this.orientation);
     });
-  }
+  },
 };
 
 /**
  * Singleton for the whole application to be used as a service.
  * @type {Viewport}
  */
-const viewport = new Viewport();
+viewport.init();
 
 export default viewport;

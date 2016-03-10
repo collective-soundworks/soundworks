@@ -18,6 +18,12 @@ export default class CanvasView extends SegmentedView {
   constructor(template, content, events, options) {
     template = template || defaultCanvasTemplate;
     super(template, content, events, options);
+
+    /**
+     * Temporary stack the renderers when the view is not shown.
+     * @type {Set}
+     */
+    this._renderersStack = new Set();
   }
 
   onRender() {
@@ -45,10 +51,15 @@ export default class CanvasView extends SegmentedView {
   onResize(viewportWidth, viewportHeight, orientation) {
     super.onResize(viewportWidth, viewportHeight, orientation);
     this._renderingGroup.onResize(viewportWidth, viewportHeight);
+
+    // add stacked renderers to the rendering group
+    this._renderersStack.forEach((renderer) => this._renderingGroup.add(renderer));
+    this._renderersStack.length = 0;
   }
 
   /**
-   * Overrides the `preRender` interface method of the default `RenderingGroup` of the view. cf. @link `RenderingGroup~prerender`
+   * Overrides the `preRender` interface method of the default `RenderingGroup`
+   * of the view. cf. @link `RenderingGroup~prerender`
    * @param {Function} callback - The function to use as a pre-render method.
    */
   setPreRender(callback) {
@@ -56,18 +67,26 @@ export default class CanvasView extends SegmentedView {
   }
 
   /**
-   * Add a renderer to the `RenderingGroup`. The renderer is automaticcaly activated when added to the group.
+   * Add a renderer to the `RenderingGroup`. The renderer is automaticcaly
+   * activated when added to the group.
    * @param {Renderer} renderer - The renderer to add.
    */
   addRenderer(renderer) {
-    this._renderingGroup.add(renderer);
+    if (this.isVisible)
+      this._renderingGroup.add(renderer);
+    else
+      this._renderersStack.add(renderer);
   }
 
   /**
-   * Add a renderer to the `RenderingGroup`. The renderer is automaticcaly disactivated when removed from the group.
+   * Add a renderer to the `RenderingGroup`. The renderer is automaticcaly
+   * disactivated when removed from the group.
    * @param {Renderer} renderer - The renderer to remove.
    */
   removeRenderer(renderer) {
-    this._renderingGroup.remove(renderer);
+    if (this.isVisible)
+      this._renderingGroup.remove(renderer);
+    else
+      this._renderersStack.delete(renderer);
   }
 }
