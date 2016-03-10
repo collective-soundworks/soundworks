@@ -10,7 +10,6 @@
   "version": "1.0.0",
   "main": "",
   "scripts": {
-    "bundle": "node ./bin/runner --bundle",
     "transpile": "node ./bin/runner --transpile",
     "watch": "node ./bin/runner --watch"
   },

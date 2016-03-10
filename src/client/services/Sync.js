@@ -22,7 +22,7 @@ const SERVICE_ID = 'service:sync';
  * @example
  * const sync = serviceManager.require('service:sync');
  *
- * const nowLocal = sync.getLocalTime(); // current time in local clock time
+ * const nowLocal = sync.getAudioTime(); // current time in local clock time
  * const nowSync = sync.getSyncTime(); // current time in sync clock time
  * @emits 'sync:stats' each time the service (re)synchronizes the local clock on the sync clock.
  * The `'status'` event goes along with the `report` object that has the following properties:
@@ -78,18 +78,18 @@ class Sync extends Service {
    * @param {Number} syncTime Time in the sync clock (in seconds).
    * @return {Number} Time in the local clock corresponding to `syncTime` (in seconds).
    */
-  getLocalTime(syncTime) {
+  getAudioTime(syncTime) {
     return this._sync.getLocalTime(syncTime);
   }
 
   /**
    * Return the time in the sync clock.
    * If no arguments are provided, returns the current sync time.
-   * @param {Number} localTime Time in the local clock (in seconds).
-   * @return {Number} Time in the sync clock corresponding to `localTime` (in seconds)
+   * @param {Number} audioTime Time in the local clock (in seconds).
+   * @return {Number} Time in the sync clock corresponding to `audioTime` (in seconds)
    */
-  getSyncTime(localTime) {
-    return this._sync.getSyncTime(localTime);
+  getSyncTime(audioTime) {
+    return this._sync.getSyncTime(audioTime);
   }
 
   /**

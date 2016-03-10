@@ -1,4 +1,6 @@
-export { default as audio } from 'waves-audio';
+// export * as audio from 'waves-audio';
+import * as _audio from 'waves-audio';
+export const audio = _audio;
 export { audioContext } from 'waves-audio';
 
 // core
