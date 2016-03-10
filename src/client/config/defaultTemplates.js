@@ -5,7 +5,7 @@
  *
  * @type {Object}
  */
-export default {
+const defaultViewTemplates = {
   'service:checkin': `
     <% if (label) { %>
       <div class="section-top flex-middle">
@@ -56,18 +56,6 @@ export default {
     </div>
   `,
 
-  'service:orientation': `
-    <div class="section-top"></div>
-    <div class="section-center flex-center">
-      <p><%= !error ? instructions : errorMessage %></p>
-    </div>
-    <div class="section-bottom flex-middle">
-      <% if (!error) { %>
-        <button class="btn"><%= send %></button>
-      <% } %>
-    </div>
-  `,
-
   'service:placer': `
     <div class="section-square<%= mode === 'list' ? ' flex-middle' : '' %>">
       <% if (rejected) { %>
@@ -87,6 +75,14 @@ export default {
     </div>
   `,
 
+  'service:platform': `
+    <div class="section-top"></div>
+    <div class="section-center flex-center">
+      <p><%= errorMessage %></p>
+    </div>
+    <div class="section-bottom"></div>
+  `,
+
   'service:sync': `
     <div class="section-top"></div>
     <div class="section-center flex-center">
@@ -98,19 +94,16 @@ export default {
   'service:welcome': `
     <div class="section-top flex-middle"></div>
     <div class="section-center flex-center">
-      <% if (error) { %>
-        <p class="big"><%= error %></p>
-      <% } else { %>
-        <p class="big"><%= welcome %> <br /><b><%= globals.appName %></b></p>
-      <% } %>
+        <p class="big">
+          <%= welcome %>
+          <br />
+          <b><%= globals.appName %></b>
+        </p>
     </div>
     <div class="section-bottom flex-middle">
-      <% if (!error) { %>
-        <p class="small soft-blink"><%= touchScreen %></p>
-      <% } %>
+      <p class="small soft-blink"><%= touchScreen %></p>
     </div>
   `,
-
 
   survey: `
     <div class="section-top">
@@ -133,5 +126,6 @@ export default {
       <% } %>
     </div>
   `,
-
 };
+
+export default defaultViewTemplates;

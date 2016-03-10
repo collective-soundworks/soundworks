@@ -1,9 +1,13 @@
 /**
- * The default view templates for the provided services and scenes. The view templates are organized according to the `Module.name` property.
+ * The default view templates for the provided services and scenes.
+ * The view templates are organized according to the `Module.name` property.
  * @type {Object}
  */
-export default {
-  /* `globals` is populated with server `appName` and shared between all view templates */
+const defaultViewContent = {
+  /**
+   * `globals` is populated with server `appName` and
+   * shared between all view templates
+   */
   'globals': {},
   'service:checkin': {
     labelPrefix: 'Go to',
@@ -24,18 +28,15 @@ export default {
     send: 'Send',
     showBtn: false,
   },
-  'service:orientation': {
-    instructions: 'Point the phone exactly in front of you, and validate.',
-    errorMessage: `Sorry, your plone cannot support this application`,
-    send: 'Send',
-    error: false,
-  },
   'service:placer': {
     instructions: 'Select your position',
     send: 'Send',
     reject: 'Sorry, no place is available',
     showBtn: false,
     rejected: false,
+  },
+  'service:platform': {
+    errorMessage: 'Sorry,<br />Your device is not compatible with the application.',
   },
   'service:sync': {
     wait: `Clock syncing,<br />stand by&hellip;`,
@@ -56,3 +57,5 @@ export default {
     length: '-',
   },
 };
+
+export default defaultViewContent;

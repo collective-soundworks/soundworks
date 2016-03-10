@@ -60,6 +60,7 @@ class Scheduler extends Service {
     super(SERVICE_ID);
 
     this._sync = this.require('sync');
+    this._platform = this.require('platform', { features: 'web-audio' });
 
     this._scheduler = audio.getScheduler();
     this._syncedQueue = new _SyncTimeSchedulingQueue(this._sync, this._scheduler);

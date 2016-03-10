@@ -1,13 +1,9 @@
-import { audioContext } from 'waves-audio';
 import client from '../core/client';
 import screenfull from 'screenfull';
 import SegmentedView from '../views/SegmentedView';
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
 
-// @todo - redondant dependencies
-import MobileDetect from 'mobile-detect';
-import platform from 'platform';
 
 /**
  * @private
@@ -48,8 +44,6 @@ class Welcome extends Service {
      * @type {Boolean} [defaults.wakeLock=false] - Indicates whether the service activates an ever-looping 1-pixel video to prevent the device from going idle.
      */
     const defaults = {
-      requireMobile: true,
-      activateAudio: true,
       fullScreen: false,
       wakeLock: false,
       showDialog: true,
@@ -58,48 +52,12 @@ class Welcome extends Service {
     };
 
     this.configure(defaults);
-    // check platform
-    this._defineAudioFileExtention();
-    this._definePlatform();
+
+    this._platform = this.require('platform');
   }
 
   init() {
-    // build view according to the device and requirements
-    const os = client.platform.os;
-    const version = parseFloat(platform.os.version);
-    const isMobile = client.platform.isMobile;
-    const requireMobile = this.options.requireMobile;
-    const activateAudio = this.options.activateAudio;
-    const viewContent = this.viewContent;
-    let error = null;
-
-    if (activateAudio && !this._supportsWebAudio()) {
-      if (os === 'ios') {
-        error = viewContent.errorIosVersion;
-      } else if (os === 'android') {
-        error = viewContent.errorAndroidVersion;
-      } else if (requireMobile) {
-        error = viewContent.errorRequireMobile;
-      } else {
-        error = viewContent.errorDefault;
-      }
-    } else if (requireMobile && (!isMobile || os === 'other')) {
-      error = viewContent.errorRequireMobile;
-    } else if (os === 'ios' && version < 7) {
-      error = viewContent.errorIosVersion;
-    } else if (os === 'android' && version < 4.2) {
-      error = viewContent.errorAndroidVersion;
-    }
-
-    viewContent.error = error;
-    client.compatible = error === null ? true : false;
-
     if (this.options.showDialog) {
-      if (!error) {
-        const event = isMobile ? 'touchend' : 'click';
-        this.viewEvents = { [event]: this.activateMedia.bind(this) };
-      }
-
       this.viewCtor = this.options.viewCtor;
       this.view = this.createView();
     }
@@ -111,10 +69,18 @@ class Welcome extends Service {
     if (!this.hasStarted)
       this.init();
 
+    // execute start hooks from the platform
+    const startHooks = this._platform.getStartHooks();
+    startHooks.forEach((hook) => hook());
+
     if (!this.options.showDialog)
       this.ready();
     else
       this.show();
+
+    // install events for interaction hook
+    const event = client.platform.isMobile ? 'touchend' : 'click';
+    this.view.installEvents({ [event]: this._onInteraction.bind(this) });
   }
 
   stop() {
@@ -125,69 +91,22 @@ class Welcome extends Service {
   /**
    * Activate media as defined in `this.options`.
    */
-  activateMedia() {
-    if (client.rejected) { return; }
+  _onInteraction() {
+    // execute interaction hooks from the platform
+    const interactionHooks = this._platform.getInteractionHooks();
+    interactionHooks.forEach((hook) => hook());
+
     // http://www.html5rocks.com/en/mobile/fullscreen/?redirect_from_locale=fr
     if (this.options.fullScreen && screenfull.enabled)
       screenfull.request();
 
-    if (this.options.activateAudio)
-      this._activateAudio();
-
     if (this.options.wakeLock)
-      this._requestWakeLock();
+      this._initWakeLock();
 
     this.ready();
   }
 
-  _supportsWebAudio() {
-    return !!audioContext;
-  }
-
-  _defineAudioFileExtention() {
-    const a = document.createElement('audio');
-    // http://diveintohtml5.info/everything.html
-    if (!!(a.canPlayType && a.canPlayType('audio/mpeg;'))) {
-      client.platform.audioFileExt = '.mp3';
-    } else if (!!(a.canPlayType && a.canPlayType('audio/ogg; codecs="vorbis"'))) {
-      client.platform.audioFileExt = '.ogg';
-    } else {
-      client.platform.audioFileExt = '.wav';
-    }
-  }
-
-  _definePlatform() {
-    const ua = window.navigator.userAgent
-    const md = new MobileDetect(ua);
-
-    client.platform.isMobile = (md.mobile() !== null); // true if phone or tablet
-    client.platform.os = (function() {
-      const os = md.os();
-
-      if (os === 'AndroidOS')
-        return 'android';
-      else if (os === 'iOS')
-        return 'ios';
-      else
-        return 'other';
-    })();
-  }
-
-  _activateAudio() {
-    const g = audioContext.createGain();
-    g.connect(audioContext.destination);
-    g.gain.value = 0.000000001; // -180dB ?
-
-    const o = audioContext.createOscillator();
-    o.connect(g);
-    o.frequency.value = 20;
-    o.start(0);
-
-    // prevent android to stop audio by keping the oscillator active
-    if (client.platform.os !== 'android')
-      o.stop(audioContext.currentTime + 0.01);
-  }
-
+  // hacks to keep the device awake...
   // cf. https://github.com/borismus/webvr-boilerplate/blob/8abbc74cfa5976b9ab0c388cb0c51944008c6989/js/webvr-manager.js#L268-L289
   _initWakeLock() {
     this._wakeLockVideo = document.createElement('video');
@@ -231,7 +150,6 @@ class Welcome extends Service {
   }
 }
 
-// register in factory
 serviceManager.register(SERVICE_ID, Welcome);
 
 export default Welcome;

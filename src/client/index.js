@@ -21,13 +21,13 @@ export { default as ErrorReporter } from './services/ErrorReporter';
 export { default as Locator } from './services/Locator';
 export { default as Network } from './services/Network';
 export { default as Placer } from './services/Placer';
+export { default as Platform } from './services/Platform';
 export { default as SharedConfig } from './services/SharedConfig';
 export { default as SharedParams } from './services/SharedParams';
 export { default as Sync } from './services/Sync';
 export { default as Loader } from './services/Loader';
 export { default as MotionInput } from './services/MotionInput';
 export { default as Scheduler } from './services/Scheduler';
-// import Orientation from './Orientation';
 export { default as Welcome } from './services/Welcome';
 
 // config

@@ -42,7 +42,7 @@ class Sync extends Service {
 
     this.configure(defaults);
     // needs audio time
-    this.require('welcome');
+    this._platform = this.require('platform', { features: 'web-audio' });
 
     this._syncStatusReport = this._syncStatusReport.bind(this);
     this._reportListeners = [];
