@@ -4,8 +4,9 @@ import MobileDetect from 'mobile-detect';
 import SegmentedView from '../views/SegmentedView';
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
-import * as adapter from 'webrtc-adapter';
 
+// @todo - define if we keep this
+import * as adapter from 'webrtc-adapter';
 adapter.disableLog(true);
 
 // to be added

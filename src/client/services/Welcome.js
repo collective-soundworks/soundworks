@@ -24,13 +24,6 @@ const SERVICE_ID = 'service:welcome';
  * If that is not the case, the service displays a blocking `view` and prevents the participant to go any further in the scenario.
  *
  * The service finishes its initialization when the user touches the screen if the device passes the platform test, and never otherwise.
- *
- * The service always has a view.
- *
- * @example
- * const welcomeDialog = new Welcome({
- *   wakeLock: true
- * });
  */
 class Welcome extends Service {
   constructor() {
@@ -89,7 +82,8 @@ class Welcome extends Service {
   }
 
   /**
-   * Activate media as defined in `this.options`.
+   * Execute `interactions` hooks from the `platform` service.
+   * Also activate the media according to the `options`.
    */
   _onInteraction() {
     // execute interaction hooks from the platform

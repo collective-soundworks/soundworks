@@ -29,7 +29,7 @@ class MotionInput extends Service {
 
     const defaults = {
       descriptors: [],
-      // @todo - how to handle if only descriptors are invalid ?
+      // @todo - how to handle if only some descriptors are invalid ?
       // showError: false,
     };
 
