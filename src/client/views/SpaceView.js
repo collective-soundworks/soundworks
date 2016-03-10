@@ -58,8 +58,10 @@ export default class SpaceView extends View {
   onResize(viewportWidth, viewportHeight, orientation) {
     super.onResize(viewportWidth, viewportHeight, orientation);
     // override size to match parent size
-    this.$el.style.width = '100%';
-    this.$el.style.height = '100%';
+    if (this.parentView) {
+      this.$el.style.width = '100%';
+      this.$el.style.height = '100%';
+    }
 
     this._renderArea();
   }

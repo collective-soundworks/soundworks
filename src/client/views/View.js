@@ -58,6 +58,11 @@ export default class View {
     this.isVisible = false;
 
     /**
+     * If the view is a component, parent view.
+     */
+    this.parentView = null;
+
+    /**
      * Store the components (sub-views) of the view.
      * @private
      */
@@ -95,7 +100,16 @@ export default class View {
       delete this._components[selector];
     } else {
       this._components[selector] = view;
+      view.setParentView(this);
     }
+  }
+
+  /**
+   * Sets the parent when is a component view.
+   * @param {View} view - The parent view.
+   */
+  setParentView(view) {
+    this.parentView = view;
   }
 
   /**
