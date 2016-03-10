@@ -24,7 +24,6 @@ export default class Service extends Activity {
      * @type {Signal}
      */
     this.signals.ready = new Signal();
-
     // add the serviceManager bootstart signal to the required signals
     this.requiredSignals.add(serviceManager.signals.start);
   }
@@ -35,8 +34,8 @@ export default class Service extends Activity {
     this.signals.ready.set(true);
   }
 
-  require(id) {
-    const service = serviceManager.require(id);
+  require(id, options) {
+    const service = serviceManager.require(id, options);
     const signal = service.signals.ready;
 
     if (signal)
