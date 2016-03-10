@@ -1,4 +1,4 @@
-import audio from 'waves-audio';
+import * as audio from 'waves-audio';
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
 
@@ -20,31 +20,31 @@ class _SyncTimeSchedulingQueue extends audio.SchedulingQueue {
     return this.sync.getSyncTime(this.scheduler.currentTime);
   }
 
-  advanceTime(localTime) {
-    const syncTime = this.sync.getSyncTime(localTime);
+  advanceTime(audioTime) {
+    const syncTime = this.sync.getSyncTime(audioTime);
     const nextSyncTime = super.advanceTime(syncTime);
-    const nextLocalTime = this.sync.getLocalTime(nextSyncTime);
+    const nextAudioTime = this.sync.getAudioTime(nextSyncTime);
 
     this.nextSyncTime = nextSyncTime;
-    this.nextLocalTime = nextLocalTime; // for resync testing
+    this.nextAudioTime = nextAudioTime; // for resync testing
 
-    return nextLocalTime;
+    return nextAudioTime;
   }
 
   resetTime(syncTime) {
-    const localTime = (typeof syncTime !== 'undefined') ?
-      this.sync.getLocalTime(syncTime) : undefined;
+    const audioTime = (typeof syncTime !== 'undefined') ?
+      this.sync.getAudioTime(syncTime) : undefined;
 
     this.nextSyncTime = syncTime;
-    this.nextLocalTime = localTime;
+    this.nextAudioTime = audioTime;
 
-    this.master.resetEngineTime(this, localTime);
+    this.master.resetEngineTime(this, audioTime);
   }
 
   resync() {
     if (this.nextSyncTime !== Infinity) {
-      const nextLocalTime = this.sync.getLocalTime(this.nextSyncTime);
-      this.master.resetEngineTime(this, nextLocalTime);
+      const nextAudioTime = this.sync.getAudioTime(this.nextSyncTime);
+      this.master.resetEngineTime(this, nextAudioTime);
     } else {
       this.master.resetEngineTime(this, Infinity);
     }
