@@ -3,7 +3,7 @@ import io from 'socket.io-client';
 
 const log = debug('soundworks:socket');
 
-export default {
+const socket = {
   /**
    * Store the instance of Socket.io Manager.
    */
@@ -67,3 +67,5 @@ export default {
     log(`remove listener - channel: "${channel}"`);
   },
 };
+
+export default socket;

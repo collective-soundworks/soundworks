@@ -5,6 +5,7 @@ import viewManager from './viewManager';
 import socket from './socket';
 import defaultViewContent from '../config/defaultContent';
 import defaultViewTemplates from '../config/defaultTemplates';
+import viewport from '../views/viewport';
 
 const client = {
   /**
@@ -91,13 +92,13 @@ const client = {
   init(clientType = 'player', config = {}) {
     this.type = clientType;
 
-    // 1. if socket config given, mix it with defaults.
+    // 1. if socket config given, mix it with defaults
     const socketIO = Object.assign({
       url: '',
       transports: ['websocket']
     }, config.socketIO);
 
-    // 2. mix all other config and override with defined socket config.
+    // 2. mix all other config and override with defined socket config
     this.config = Object.assign({
       debugIO: false,
       appContainer: '#container',
@@ -151,6 +152,7 @@ const client = {
    * Initialize view templates for all
    */
   _initViews() {
+    viewport.init();
     // initialize views with default view content and templates
     this.viewContent = {};
     this.viewTemplates = {};
@@ -194,3 +196,4 @@ const client = {
 };
 
 export default client;
+

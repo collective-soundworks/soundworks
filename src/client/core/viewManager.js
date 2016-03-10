@@ -7,7 +7,7 @@ let _$container = null;
 /**
  * Handle activities' (services and scenes) views according to their priorities.
  */
-export default {
+const viewManager = {
   _timeoutId: null,
 
   /**
@@ -85,3 +85,5 @@ export default {
     this.timeoutId = null;
   },
 };
+
+export default viewManager;

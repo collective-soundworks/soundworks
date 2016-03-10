@@ -2,6 +2,10 @@
  * Service to track the viewport size and orientation.
  */
 const viewport = {
+  /**
+   * Initialize the service, is called in `client._initViews`.
+   * @private
+   */
   init() {
     /**
      * Width of the viewport.
@@ -28,8 +32,8 @@ const viewport = {
 
     // initialize service
     this._onResize = this._onResize.bind(this);
-    // listen window events (is `DOMContentLoaded` usefull?)
-    window.addEventListener('DOMContentLoaded', () => this._onResize());
+
+    this._onResize();
     window.addEventListener('resize', this._onResize, false);
   },
 
@@ -52,6 +56,7 @@ const viewport = {
     this._callbacks.delete(callback);
   },
 
+  /** @private */
   _onResize() {
     this.width = window.innerWidth;
     this.height = window.innerHeight;
@@ -62,11 +67,5 @@ const viewport = {
     });
   },
 };
-
-/**
- * Singleton for the whole application to be used as a service.
- * @type {Viewport}
- */
-viewport.init();
 
 export default viewport;
