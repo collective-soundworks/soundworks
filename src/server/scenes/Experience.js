@@ -19,8 +19,8 @@ export default class Experience extends Activity {
    * @param {String} clientType - The client type the experience should be
    *  mapped to. _(note: is used as the id of the activity)_
    */
-  constructor(id = server.config.defaultClientType, clientType = id) {
-    super(id);
+  constructor(/* id = server.config.defaultClientType, */ clientType = server.config.defaultClientType) {
+    super('experience');
 
     this.addClientType(clientType);
 
@@ -62,10 +62,9 @@ export default class Experience extends Activity {
    * @param {Client} client Client who enters the performance.
    */
   enter(client) {
-    // Add the client to the `this.clients` array.
+    // add the client to the `this.clients` array
     this.clients.push(client);
-
-    // Set flag.
+    // set flag
     client.activities[this.id].entered = true;
   }
 

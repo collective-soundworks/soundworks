@@ -46,7 +46,7 @@ const defaultViewTemplates = {
   `,
 
   'service:locator': `
-    <div class="section-square flex-middle"></div>
+    <div class="section-square"></div>
     <div class="section-float flex-middle">
       <% if (!showBtn) { %>
         <p class="small"><%= instructions %></p>

@@ -6,35 +6,12 @@ import { EventEmitter } from 'events';
 // @todo - remove EventEmitter ? (Implement our own listeners)
 
 /**
- * Base class used to create any *Soundworks* activity on the server side.
+ * Base class used to create any *Soundworks* Activity on the server side.
  *
  * While the sequence of user interactions and exchanges between client and server is determined on the client side, the server side activities are ready to receive requests from the corresponding client side activities as soon as a client is connected to the server.
  *
  * Each activity should have a connect and a disconnect method.
  * Any activity mapped to the type of client `'clientType'` (thanks to the {@link server#map} method) calls its connect method when such a client connects to the server, and its disconnect method when such a client disconnects from the server.
- *
- * **Note:** a more complete example of how to write a activity is in the [Example](manual/example.html) section.
- *
- * @example
- * class MyPier extends Pier {
- *   constructor(name) {
- *     super(name);
- *
- *     // ...
- *   }
- *
- *   connect(client) {
- *     super.connect(client);
- *
- *     // ...
- *   }
- *
- *   disconnect(client) {
- *     super.disconnect(client);
- *
- *     // ...
- *   }
- * }
  */
 export default class Activity extends EventEmitter {
   /**
@@ -146,7 +123,7 @@ export default class Activity extends EventEmitter {
    * @param {Client} client Connected client.
    */
   connect(client) {
-    // Setup an object
+    // setup an object
     client.activities[this.id] = {};
   }
 

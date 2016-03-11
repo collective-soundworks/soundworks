@@ -178,7 +178,7 @@ export default class Activity extends Process {
    * @param {...*} args - Arguments of the message (as many as needed, of any type).
    */
   send(channel, ...args) {
-    socket.send(`${this.id}:${channel}`, ...args)
+    socket.send(`${this.id}:${channel}`, ...args);
   }
 
   /**
@@ -187,7 +187,7 @@ export default class Activity extends Process {
    * @param {...*} args - Arguments of the message (as many as needed, of any type).
    */
   sendVolatile(channel, ...args) {
-    socket.sendVolatile(`${this.id}:${channel}`, ...args)
+    socket.sendVolatile(`${this.id}:${channel}`, ...args);
   }
 
   /**
