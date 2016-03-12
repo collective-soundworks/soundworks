@@ -1,9 +1,8 @@
 #!/usr/bin/env node
 var babel = require('babel-core');
-var colors = require('colors');
 var fse = require('fs-extra');
-var path = require('path');
 var log = require('./log');
+var path = require('path');
 
 'use strict';
 
