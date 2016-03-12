@@ -25,9 +25,9 @@ var log = {
 
   transpileError(err, startTime) {
     var parts = err.message.split(':');
-    var msg = prefix + (err.message).red;
+    var msg = prefix + '%s'.red;
 
-    console.log(msg);
+    console.log(msg, toRel(err.message));
     console.log(err.codeFrame);
   },
 
