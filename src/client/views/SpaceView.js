@@ -22,6 +22,18 @@ export default class SpaceView extends View {
     this.area = null;
 
     /**
+     * The with of the rendered area in pixels.
+     * @type {Number}
+     */
+    this.areaWidth = null;
+
+    /**
+     * The height of the rendered area in pixels.
+     * @type {Number}
+     */
+    this.areaHeight = null;
+
+    /**
      * Expose a Map of the $shapes and their relative point object.
      * @type {Map}
      */
@@ -37,27 +49,28 @@ export default class SpaceView extends View {
     this._renderedLines = new Map();
   }
 
+  /**
+   * Define the area to be renderer.
+   * @type {Object} area - On object describing the area to render, generally
+   *  defined in server configuration.
+   * @attribute {Number} area.width - The width of the area.
+   * @attribute {Number} area.height - The height of the area.
+   */
   setArea(area) {
     this.area = area;
   }
 
-  /**
-   * Apply style and cache elements when rendered.
-   * @private
-   */
+  /** @inheritdoc */
   onRender() {
     this.$svg = this.$el.querySelector('svg');
     this.addDefinitions();
     this._renderArea();
   }
 
-  /**
-   * Update the area when inserted in the DOM.
-   * @private
-   */
+  /** @inheritdoc */
   onResize(viewportWidth, viewportHeight, orientation) {
     super.onResize(viewportWidth, viewportHeight, orientation);
-    // override size to match parent size
+    // override size to match parent size if component of another view
     if (this.parentView) {
       this.$el.style.width = '100%';
       this.$el.style.height = '100%';
@@ -67,7 +80,8 @@ export default class SpaceView extends View {
   }
 
   /**
-   * Add definitions into the `<defs>` tag of `this.$svg` to allow to draw directed graphs from css
+   * @private
+   * @note - don't expose for now.
    */
   addDefinitions() {
     this.$defs = document.createElementNS(ns, 'defs');
@@ -89,10 +103,7 @@ export default class SpaceView extends View {
   }
 
 
-  /**
-   * Render the area.
-   * @private
-   */
+  /** @private */
   _renderArea() {
     const area = this.area;
     // use `this.$el` size instead of `this.$parent` size to ignore parent padding
@@ -128,6 +139,10 @@ export default class SpaceView extends View {
       this.updatePoint(point)
     }
 
+    // expose the size of the area in pixel
+    this.areaWidth = svgWidth;
+    this.areaHeight = svgHeight;
+
     // update area for markers
     // const markers = Array.from(this.$defs.querySelectorAll('marker'));
     // markers.forEach((marker) => {
@@ -137,12 +152,16 @@ export default class SpaceView extends View {
 
 
   /**
-   * The method used to render a specific point. This method should be overriden to display a point with a user defined shape. These shapes are appended to the `svg` element
+   * The method used to render a specific point. This method should be
+   * overriden to display a point with a user defined shape. These shapes
+   * are appended to the `svg` element.
+   *
    * @param {Object} point - The point to render.
    * @param {String|Number} point.id - An unique identifier for the point.
    * @param {Number} point.x - The point in the x axis in the area cordinate system.
    * @param {Number} point.y - The point in the y axis in the area cordinate system.
-   * @param {Number} [point.radius=0.3] - The radius of the point (relative to the area width and height).
+   * @param {Number} [point.radius=0.3] - The radius of the point (relative to the
+   *  area width and height).
    * @param {String} [point.color=undefined] - If specified, the color of the point.
    */
   renderPoint(point, $shape = null) {
@@ -225,7 +244,9 @@ export default class SpaceView extends View {
   }
 
 
-// @todo - refactor with new viewbox + remove code duplication in update.
+// @todo - refactor with new viewbox
+// @todo - remove code duplication in update
+
 //  /**
 //   * The method used to render a specific line. This method should be overriden to display a point with a user defined shape. These shapes are prepended to the `svg` element
 //   * @param {Object} line - The line to render.
