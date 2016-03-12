@@ -3,6 +3,7 @@ var babel = require('babel-core');
 var colors = require('colors');
 var fse = require('fs-extra');
 var path = require('path');
+var log = require('./log');
 
 'use strict';
 
@@ -63,19 +64,17 @@ function getTranspiler(srcDirectory, distDirectory, isAllowed, babelOptions) {
         return next();
 
       var outFilename = getTarget(filename);
+      var startTime = new Date().getTime();
 
       babel.transformFile(filename, babelOptions, function(err, result) {
-        if (err) {
-          console.log(('=> %s').red, err.message);
-          console.log(err.codeFrame);
-          return;
-        }
+        if (err)
+          return log.transpileError(err, startTime);
 
         fse.outputFile(outFilename, result.code, function(err) {
           if (err)
             return console.error(err.message);
 
-          console.log('=> "%s" successfully transpiled to "%s"'.green, filename, outFilename);
+          log.transpileSuccess(filename, outFilename, startTime);
           next();
         });
       });
@@ -92,7 +91,7 @@ function getTranspiler(srcDirectory, distDirectory, isAllowed, babelOptions) {
           if (err)
             return console.log(err.message);
 
-          console.log('=> "%s" successfully removed'.yellow, outFilename);
+          log.deleteFile(outFilename);
 
           if (callback)
             callback();
