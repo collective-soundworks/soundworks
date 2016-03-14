@@ -1,7 +1,7 @@
-# transpiled files
-/client
-/server
-/utils
+# transpiled files (insert for releases)
+# /client
+# /server
+# /utils
 
 # others
 /node_modules

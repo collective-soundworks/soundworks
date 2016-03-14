@@ -1,0 +1,40 @@
+#!/usr/bin/env node
+var pkg = require('../package.json');
+var colors = require('colors');
+
+'use strict';
+
+var prefix = '[' + pkg.name + ']\t';
+var cwd = process.cwd();
+
+function toRel(path) {
+  return path.replace(new RegExp('^' + cwd), '');
+}
+
+function getDeltaTime(time) {
+  return new Date().getTime() - time;
+}
+
+var log = {
+  transpileSuccess: function(src, dest, startTime) {
+    var time = getDeltaTime(startTime);
+    var msg = prefix + '%s: successfully transpiled to "%s" (%sms)'.green;
+
+    console.log(msg, toRel(src), toRel(dest), time);
+  },
+
+  transpileError: function(err) {
+    var parts = err.message.split(':');
+    var msg = prefix + '%s'.red;
+
+    console.log(msg, toRel(err.message));
+    console.log(err.codeFrame);
+  },
+
+  deleteFile: function(filename) {
+    var msg = prefix + '%s: successfully removed'.yellow;
+    console.log(msg, toRel(filename));
+  }
+};
+
+module.exports = log;

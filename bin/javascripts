@@ -1,0 +1,109 @@
+#!/usr/bin/env node
+var babel = require('babel-core');
+var fse = require('fs-extra');
+var log = require('./log');
+var path = require('path');
+
+'use strict';
+
+/**
+ * Create a transpiler object binded to a `srcDirectory` and a `distDirectory`
+ */
+function getTranspiler(srcDirectory, distDirectory, isAllowed, babelOptions) {
+
+  /**
+   * Returns the name of the target transpiled file
+   */
+  function getTarget(filename) {
+    return filename.replace(new RegExp('^' + srcDirectory), distDirectory);
+  }
+
+  /**
+   * Returns the path transpiled `index.js` file the client folder in which resides
+   * the given `filename`
+   */
+  function getEntryPoint(filename) {
+    const folderName = getFolderName(filename);
+    const entryPoint = path.join(distDirectory, folderName, 'index.js');
+    return entryPoint;
+  }
+
+  /**
+   * Returns the name of the 1rst level folder inside `srcDirectory` in which the
+   * client side javascript file resides.
+   */
+  function getFolderName(filename) {
+    const relFilename = filename.replace(new RegExp('^' + srcDirectory), '');
+    const folderName = relFilename.split(path.sep)[1];
+    return folderName;
+  }
+
+  /**
+   * returns the transpiler to be consumed.
+   */
+  var transpiler = {
+    /**
+     * Transpile the given file from es6 to es5. If the given stack is not empty
+     * call the method recursively till its empty. When the stack is empty,
+     * execute the callback.
+     */
+    transpile: function(filename, stack, callback) {
+      /**
+       * If stack is not empty transpile the next entry, else execute the
+       * callback if any.
+       */
+      function next() {
+        if (stack && stack.length > 0)
+          transpiler.transpile(stack.shift(), stack, callback);
+        else if (stack.length === 0 && callback)
+          callback();
+      }
+
+      if (filename === undefined || !isAllowed(filename))
+        return next();
+
+      var outFilename = getTarget(filename);
+      var startTime = new Date().getTime();
+
+      babel.transformFile(filename, babelOptions, function(err, result) {
+        if (err)
+          return log.transpileError(err);
+
+        fse.outputFile(outFilename, result.code, function(err) {
+          if (err)
+            return console.error(err.message);
+
+          log.transpileSuccess(filename, outFilename, startTime);
+          next();
+        });
+      });
+    },
+
+    /**
+     * Delete the transpiled file.
+     */
+    delete: function(filename, callback) {
+      var outFilename = getTarget(filename);
+
+      if (fse.statSync(outFilename).isFile()) {
+        fse.remove(outFilename, function(err) {
+          if (err)
+            return console.log(err.message);
+
+          log.deleteFile(outFilename);
+
+          if (callback)
+            callback();
+        });
+      } else {
+        callback();
+      }
+    },
+  };
+
+  return transpiler;
+}
+
+module.exports = {
+  getTranspiler: getTranspiler
+};

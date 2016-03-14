@@ -1,0 +1,7 @@
+{
+  "source": "./src",
+  "destination": "./doc",
+  "manual": {
+    "overview": ["./README.md"],
+  }
+}
