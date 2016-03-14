@@ -7,7 +7,8 @@ import viewManager from './viewManager';
 
 
 /**
- * Base class for services and scenes. Basically a process with view and optionnal network abilities.
+ * Base class for services and scenes. Basically a process with view
+ * and optionnal network abilities.
  */
 export default class Activity extends Process {
   constructor(id, hasNetwork = true) {
@@ -100,7 +101,8 @@ export default class Activity extends Process {
   }
 
   /**
-   * Share the view content configuration (name and data) with all the `Activity` instances
+   * Share the view content configuration (name and data) with all the
+   * `Activity` instances
    * @param {Object} defs - The view contents of the application.
    * @private
    */
@@ -125,7 +127,9 @@ export default class Activity extends Process {
 
   /**
    * Returns the text associated to the current activity.
-   * @returns {Object} - The view contents related to the `name` of the current activity. The returned object is extended with a pointer to the `globals` entry of the defined view contents.
+   * @returns {Object} - The view contents related to the `name` of the current
+   *  activity. The returned object is extended with a pointer to the `globals`
+   *  entry of the defined view contents.
    */
   get viewContent() {
     const viewContent = this._viewContent || this.viewContentDefinitions[this.id];
@@ -174,7 +178,8 @@ export default class Activity extends Process {
 
   /**
    * Sends a WebSocket message to the server side socket.
-   * @param {String} channel - The channel of the message (is automatically namespaced with the activity's name: `${this.id}:channel`).
+   * @param {String} channel - The channel of the message (is automatically
+   *  namespaced with the activity's name: `${this.id}:channel`).
    * @param {...*} args - Arguments of the message (as many as needed, of any type).
    */
   send(channel, ...args) {
@@ -183,7 +188,8 @@ export default class Activity extends Process {
 
   /**
    * Sends a WebSocket message to the server side socket.
-   * @param {String} channel - The channel of the message (is automatically namespaced with the activity's name: `${this.id}:channel`).
+   * @param {String} channel - The channel of the message (is automatically
+   *  namespaced with the activity's name: `${this.id}:channel`).
    * @param {...*} args - Arguments of the message (as many as needed, of any type).
    */
   sendVolatile(channel, ...args) {
@@ -192,7 +198,8 @@ export default class Activity extends Process {
 
   /**
    * Listen a WebSocket message from the server.
-   * @param {String} channel - The channel of the message (is automatically namespaced with the activity's name: `${this.id}:channel`).
+   * @param {String} channel - The channel of the message (is automatically
+   *  namespaced with the activity's name: `${this.id}:channel`).
    * @param {...*} callback - The callback to execute when a message is received.
    */
   receive(channel, callback) {
@@ -201,7 +208,8 @@ export default class Activity extends Process {
 
   /**
    * Stop listening to a message from the server.
-   * @param {String} channel - The channel of the message (is automatically namespaced with the activity's name: `${this.id}:channel`).
+   * @param {String} channel - The channel of the message (is automatically
+   *  namespaced with the activity's name: `${this.id}:channel`).
    * @param {...*} callback - The callback to cancel.
    */
   removeListener(channel, callback) {

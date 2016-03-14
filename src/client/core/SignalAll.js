@@ -2,7 +2,8 @@ import Signal from './Signal';
 
 
 /**
- * Call it's observers with true when all its added `Signal` instances are setted to `true`, `false` otherwise.
+ * Call it's observers with true when all its added `Signal` instances are
+ * setted to `true`, `false` otherwise.
  * @private
  */
 export default class SignalAll extends Signal {

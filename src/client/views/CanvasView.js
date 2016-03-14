@@ -23,7 +23,7 @@ export default class CanvasView extends SegmentedView {
      * Temporary stack the renderers when the view is not shown.
      * @type {Set}
      */
-    this._renderersStack = new Set();
+    this._rendererStack = new Set();
   }
 
   onRender() {
@@ -53,8 +53,8 @@ export default class CanvasView extends SegmentedView {
     this._renderingGroup.onResize(viewportWidth, viewportHeight);
 
     // add stacked renderers to the rendering group
-    this._renderersStack.forEach((renderer) => this._renderingGroup.add(renderer));
-    this._renderersStack.length = 0;
+    this._rendererStack.forEach((renderer) => this._renderingGroup.add(renderer));
+    this._rendererStack.length = 0;
   }
 
   /**
@@ -75,7 +75,7 @@ export default class CanvasView extends SegmentedView {
     if (this.isVisible)
       this._renderingGroup.add(renderer);
     else
-      this._renderersStack.add(renderer);
+      this._rendererStack.add(renderer);
   }
 
   /**
@@ -87,6 +87,6 @@ export default class CanvasView extends SegmentedView {
     if (this.isVisible)
       this._renderingGroup.remove(renderer);
     else
-      this._renderersStack.delete(renderer);
+      this._rendererStack.delete(renderer);
   }
 }
