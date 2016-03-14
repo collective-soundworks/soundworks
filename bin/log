@@ -16,14 +16,14 @@ function getDeltaTime(time) {
 }
 
 var log = {
-  transpileSuccess(src, dest, startTime) {
+  transpileSuccess: function(src, dest, startTime) {
     var time = getDeltaTime(startTime);
     var msg = prefix + '%s: successfully transpiled to "%s" (%sms)'.green;
 
     console.log(msg, toRel(src), toRel(dest), time);
   },
 
-  transpileError(err, startTime) {
+  transpileError: function(err) {
     var parts = err.message.split(':');
     var msg = prefix + '%s'.red;
 
@@ -31,7 +31,7 @@ var log = {
     console.log(err.codeFrame);
   },
 
-  deleteFile(filename) {
+  deleteFile: function(filename) {
     var msg = prefix + '%s: successfully removed'.yellow;
     console.log(msg, toRel(filename));
   }

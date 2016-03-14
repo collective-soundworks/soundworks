@@ -26,7 +26,7 @@ var watchOptions = {
   ignoreUnreadableDir: true,
   ignoreNotPermitted: true,
   interval: 2000, // watch internally use `fs.watchFile`
-}
+};
 
 /**
  * Watched directories

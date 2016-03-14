@@ -67,7 +67,7 @@ function getTranspiler(srcDirectory, distDirectory, isAllowed, babelOptions) {
 
       babel.transformFile(filename, babelOptions, function(err, result) {
         if (err)
-          return log.transpileError(err, startTime);
+          return log.transpileError(err);
 
         fse.outputFile(outFilename, result.code, function(err) {
           if (err)
