@@ -54,7 +54,7 @@ export default class CanvasView extends SegmentedView {
 
     // add stacked renderers to the rendering group
     this._rendererStack.forEach((renderer) => this._renderingGroup.add(renderer));
-    this._rendererStack.length = 0;
+    this._rendererStack.clear();
   }
 
   /**
