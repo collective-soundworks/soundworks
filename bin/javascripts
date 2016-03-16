@@ -15,27 +15,9 @@ function getTranspiler(srcDirectory, distDirectory, isAllowed, babelOptions) {
    * Returns the name of the target transpiled file
    */
   function getTarget(filename) {
-    return filename.replace(new RegExp('^' + srcDirectory), distDirectory);
-  }
-
-  /**
-   * Returns the path transpiled `index.js` file the client folder in which resides
-   * the given `filename`
-   */
-  function getEntryPoint(filename) {
-    const folderName = getFolderName(filename);
-    const entryPoint = path.join(distDirectory, folderName, 'index.js');
-    return entryPoint;
-  }
-
-  /**
-   * Returns the name of the 1rst level folder inside `srcDirectory` in which the
-   * client side javascript file resides.
-   */
-  function getFolderName(filename) {
-    const relFilename = filename.replace(new RegExp('^' + srcDirectory), '');
-    const folderName = relFilename.split(path.sep)[1];
-    return folderName;
+    var relFilename = path.relative(srcDirectory, filename);
+    var outFilename = path.join(distDirectory, relFilename);
+    return outFilename;
   }
 
   /**
