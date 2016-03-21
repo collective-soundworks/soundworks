@@ -3,9 +3,11 @@ import Signal from './Signal';
 
 /**
  * A process defines the simpliest unit of the framework.
- * It is defined by a signal `active` and 2 methods: `start` and `stop`=.
+ * It is defined by a signal `active` and 2 methods: `start` and `stop`.
+ *
+ * @memberof module:soundworks/client
  */
-export default class Process extends EventEmitter {
+class Process extends EventEmitter {
   constructor(id) {
     super();
     /**
@@ -23,17 +25,18 @@ export default class Process extends EventEmitter {
   }
 
   /**
-   * Start a process.
+   * Start the process.
    */
   start() {
     this.signals.active.set(true);
   }
 
   /**
-   * Stop a process.
+   * Stop the process.
    */
   stop() {
     this.signals.active.set(false);
   }
-
 }
+
+export default Process;

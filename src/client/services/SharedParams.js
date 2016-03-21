@@ -241,61 +241,45 @@ class _TriggerGui {
 const SERVICE_ID = 'service:shared-params';
 
 /**
- * Manage the global control `parameters`, `infos`, and `commands` across the whole scenario.
+ * Interface of the client `'shared-params'` service.
  *
- * The service keeps track of:
- * - `parameters`: values that can be updated by the actions of the clients (*e.g.* the gain of a synth);
- * - `infos`: information about the state of the scenario (*e.g.* number of clients in the performance);
- * - `commands`: can trigger an action (*e.g.* reload the page).
+ * This service is used to maintain and update global parameters used among
+ * all connected clients. Each defined parameter (`item`) can be of the following
+ * data type:
+ * - boolean
+ * - enum
+ * - number
+ * - text
+ * - trigger
  *
- * If the service is instantiated with the `gui` option set to `true`, it constructs a graphical interface to modify the parameters, view the infos, and trigger the commands.
- * Otherwise (`gui` option set to `false`) the service emits an event when it receives updated values from the server.
+ * This type and specific attributes of an item is configured server side.
+ * The service is espacially usefull if a special client is defined with the
+ * `hasGUI` option setted to true, allowing to create a special client aimed at
+ * controlling the different parameters of the experience.
  *
- * When the GUI is disabled, the service finishes its initialization immediately after having set up the controls.
- * Otherwise (GUI enabled), the service remains in its state and never finishes its initialization.
+ * __*This service must be use with its [server-side counterpart]{@link module:soundworks/server.SharedParams}*__
  *
- * When the service a view (`gui` option set to `true`), it requires the SASS partial `_77-checkin.scss`.
+ * @param {Object} options
+ * @param {Boolean} [options.hasGui=true] - Defines if the service should display
+ *  a GUI. If set to `true`, the service never set its `ready` signal to true and
+ *  the client application stay in this state forever. The option should then be
+ *  be used create special `client` type (sometimes called `conductor`) aimed at
+ *  modifying application parameters during while the application is running.
  *
- * @example // Example 1: make a client that displays the control GUI
- * const control = new SharedParams();
- *
- * // Initialize the client (indicate the client type)
- * client.init('conductor'); // accessible at the URL /conductor
- *
- * // Start the scenario
- * // For this client type (`'conductor'`), there is only one service
- * client.start(control);
- *
- * @example // Example 2: listen for parameter, infos & commands updates
- * const control = new SharedParams({ gui: false });
- *
- * // Listen for parameter, infos or command updates
- * control.on('update', (name, value) => {
- *   switch(name) {
- *     case 'synth:gain':
- *       console.log(`Update the synth gain to value #{value}.`);
- *       break;
- *     case 'reload':
- *       window.location.reload(true);
- *       break;
- *   }
+ * @memberof module:soundworks/client
+ * @example
+ * // inside an experience
+ * this.control = this.require('shared-params');
+ * // listen for parameter, infos or command updates
+ * this.control.addItemListener('synth:gain', (value) => {
+ *   this.synth.setGain(value);
  * });
- *
- * // Get current value of a parameter or info
- * const currentSynthGainValue = control.event['synth:gain'].value;
- * const currentNumPlayersValue = control.event['numPlayers'].value;
  */
 class SharedParams extends Service {
-  /**
-   * @emits {'update'} when the server sends an update. The callback function takes `name:String` and `value:*` as arguments, where `name` is the name of the parameter / info / command, and `value` its new value.
-   */
+  /** __WARNING__ This class should never be instanciated manually */
   constructor() {
     super(SERVICE_ID, true);
 
-    /**
-     * @param {Object} [options={}] Options.
-     * @param {Boolean} [options.hasGui=true] - Indicates whether to create the graphical user interface to control the parameters or not.
-     */
     const defaults = { hasGui: false };
     this.configure(defaults);
 
@@ -306,6 +290,7 @@ class SharedParams extends Service {
     this._onUpdateResponse = this._onUpdateResponse.bind(this);
   }
 
+  /** @private */
   init() {
     /**
      * Dictionary of all the parameters and commands.
@@ -328,8 +313,6 @@ class SharedParams extends Service {
 
     this.receive('init', this._onInitResponse);
     this.receive('update', this._onUpdateResponse);
-
-    // this.show();
   }
 
   /** @private */
@@ -339,6 +322,7 @@ class SharedParams extends Service {
     this.removeListener('init', this._onInitResponse);
   }
 
+  /** @private */
   _onInitResponse(config) {
     this.show();
 
@@ -354,15 +338,22 @@ class SharedParams extends Service {
       this.ready();
   }
 
+  /** @private */
   _onUpdateResponse(name, val) {
     // update, but don't send back to server
     this.update(name, val, false);
   }
 
   /**
-   * Adds a listener to a specific event (i.e. parameter, info or command).
-   * @param {String} name Name of the event.
-   * @param {Function} listener Listener callback.
+   * @callback module:soundworks/client.SharedParams~itemCallback
+   * @param {Mixed} value - Updated value of the item.
+   */
+  /**
+   * Add a listener to listen a specific item changes. The listener is called a first
+   * time when added to retrieve the current value of the item.
+   * @param {String} name - Name of the item.
+   * @param {module:soundworks/client.SharedParams~itemCallback} listener - Callback
+   *  that handle the event.
    */
   addItemListener(name, listener) {
     const item = this.items[name];
@@ -378,9 +369,10 @@ class SharedParams extends Service {
   }
 
   /**
-   * Removes a listener from a specific event (i.e. parameter, info or command).
-   * @param {String} name Name of the event.
-   * @param {Function} listener Listener callback.
+   * Remove a listener from listening a specific item changes.
+   * @param {String} name - Name of the event.
+   * @param {module:soundworks/client.SharedParams~itemCallback} listener - The
+   *  callback to remove.
    */
   removeItemListener(name, listener) {
     const item = this.items[name];
@@ -393,19 +385,21 @@ class SharedParams extends Service {
   }
 
   /**
-   * Get the value of a given parameter.
-   * @param {String} name - The name of the parameter.
-   * @returns {Mixed} - The related value.
+   * Get the value of a given item.
+   * @param {String} name - The name of the item.
+   * @returns {Mixed} - The current value of the item.
    */
   getValue(name) {
     return this.items[name].value;
   }
 
   /**
-   * Updates the value of a parameter.
-   * @param {String} name - Name of the parameter to update.
-   * @param {(String|Number|Boolean)} val - New value of the parameter.
-   * @param {Boolean} [sendToServer=true] - Flag whether the value is sent to the server.
+   * Update the value of an item (used when `options.hasGUI=true`)
+   * @private
+   * @param {String} name - Name of the item.
+   * @param {Mixed} val - New value of the item.
+   * @param {Boolean} [sendToServer=true] - Flag whether the value should be
+   *  propagate to the server.
    */
   update(name, val, sendToServer = true) {
     const item = this.items[name];
@@ -417,6 +411,7 @@ class SharedParams extends Service {
     }
   }
 
+  /** @private */
   _createControlItem(init) {
     let item = null;
 
@@ -446,18 +441,21 @@ class SharedParams extends Service {
   }
 
   /**
-   * Configure the GUI for a specific control item (e.g. if it should appear or not,
-   * which type of GUI to use).
-   * @param {String} name - The name of the `item` to configure.
-   * @param {Object} options - The options to apply to configure the given `item`.
-   * @param {String} options.type - The type of GUI to use.
-   * @param {Boolean} [options.show=true] - Show the GUI for this `item` or not.
+   * Configure the GUI for a specific item, this method only makes sens if
+   * `options.hasGUI=true`.
+   * @param {String} name - Name of the item to configure.
+   * @param {Object} options - Options to configure the item GUI.
+   * @param {String} options.type - Type of GUI to use. Each type of item can
+   *  used with different GUI according to their type and comes with acceptable
+   *  default values.
+   * @param {Boolean} [options.show=true] - Display or not the GUI for this item.
    * @param {Boolean} [options.confirm=false] - Ask for confirmation when the value changes.
    */
   setGuiOptions(name, options) {
     this._guiOptions[name] = options;
   }
 
+  /** @private */
   _createGui(view, item) {
     const config = Object.assign({
       show: true,

@@ -13,7 +13,7 @@ import { EventEmitter } from 'events';
  * Each activity should have a connect and a disconnect method.
  * Any activity mapped to the type of client `'clientType'` (thanks to the {@link server#map} method) calls its connect method when such a client connects to the server, and its disconnect method when such a client disconnects from the server.
  */
-export default class Activity extends EventEmitter {
+class Activity extends EventEmitter {
   /**
    * Creates an instance of the class.
    * @param {String} id - The id of the activity.
@@ -171,3 +171,5 @@ export default class Activity extends EventEmitter {
     sockets.broadcast(clientType, excludeClient, namespacedChannel, ...args);
   }
 }
+
+export default Activity;

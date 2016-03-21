@@ -1,3 +1,7 @@
+/**
+ * @module soundworks/client
+ */
+
 // export * as audio from 'waves-audio';
 import * as _audio from 'waves-audio';
 export const audio = _audio;

@@ -6,6 +6,7 @@
 # others
 /node_modules
 /doc
+/out
 
 # junk files
 npm-debug.log

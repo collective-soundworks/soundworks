@@ -9,8 +9,10 @@ import viewManager from './viewManager';
 /**
  * Base class for services and scenes. Basically a process with view
  * and optionnal network abilities.
+ * @memberof module:soundworks/client
+ * @extends module:soundworks/client.Process
  */
-export default class Activity extends Process {
+class Activity extends Process {
   constructor(id, hasNetwork = true) {
     super(id);
 
@@ -200,7 +202,7 @@ export default class Activity extends Process {
    * Listen a WebSocket message from the server.
    * @param {String} channel - The channel of the message (is automatically
    *  namespaced with the activity's name: `${this.id}:channel`).
-   * @param {...*} callback - The callback to execute when a message is received.
+   * @param {Function} callback - The callback to execute when a message is received.
    */
   receive(channel, callback) {
     socket.receive(`${this.id}:${channel}`, callback);
@@ -210,9 +212,12 @@ export default class Activity extends Process {
    * Stop listening to a message from the server.
    * @param {String} channel - The channel of the message (is automatically
    *  namespaced with the activity's name: `${this.id}:channel`).
-   * @param {...*} callback - The callback to cancel.
+   * @param {Function} callback - The callback to remove from the stack.
    */
   removeListener(channel, callback) {
     socket.removeListener(`${this.id}:${channel}`, callback);
   }
 }
+
+export default Activity;
+

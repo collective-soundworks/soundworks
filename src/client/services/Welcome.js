@@ -15,27 +15,32 @@ function _base64(format, base64) {
 const SERVICE_ID = 'service:welcome';
 
 /**
- * [client] Check whether the device is compatible with the technologies used in the *Soundworks* library.
- * The service should used at the very beginning of a scenario to activate the Web Audio API on iOS devices (with the `activateAudio` option).
+ * Interface of the client `'welcome'` service.
  *
- * The service requires the participant to tap the screen in order to initialize the webAudio on iOS devices and to make the view disappear.
+ * This service is used to create the home page of a *soundworks* application.
+ * It also works in conjunction with the `platform` service to execute the hooks
+ * provided to properly initialize requirements of the application (for example:
+ * use the user touch event to enter the application to initialize a proper
+ * `AudioContext`).
  *
- * Compatible devices are running on iOS 7 or above, or on Android 4.2 or above with the Chrome browser in version 35 or above.
- * If that is not the case, the service displays a blocking `view` and prevents the participant to go any further in the scenario.
+ * _If any of the application's requirements fail, an error message is displayed
+ * instead of the home page._
  *
- * The service finishes its initialization when the user touches the screen if the device passes the platform test, and never otherwise.
+ * @memberof module:soundworks/client
+ *
+ * @param {Object} options
+ * @param {Boolean} [options.fullscreen=false] - If available on the platform, request full screen.
+ * @param {Boolean} [options.showDialog=true] - Define if the service should use its view or not.
+ *
+ * @example
+ * // inside an experience constructor
+ * this.welcome = this.require('welcome', { fullscreen: true });
  */
 class Welcome extends Service {
+  /** __WARNING__ This class should never be instanciated manually */
   constructor() {
     super(SERVICE_ID, false);
 
-    /**
-     * @type {Object} [defaults={}] - Options.
-     * @type {String} [defaults.name='welcome'] - Name of the service.
-     * @type {Boolean} [defaults.activateAudio=true] - Indicates whether the service activates the Web Audio API when the participant touches the screen (useful on iOS devices).
-     * @type {Boolean} [defaults.requireMobile=true] - Defines if the application requires the use of a mobile device.
-     * @type {Boolean} [defaults.wakeLock=false] - Indicates whether the service activates an ever-looping 1-pixel video to prevent the device from going idle.
-     */
     const defaults = {
       fullScreen: false,
       wakeLock: false,
@@ -84,6 +89,7 @@ class Welcome extends Service {
   /**
    * Execute `interactions` hooks from the `platform` service.
    * Also activate the media according to the `options`.
+   * @private
    */
   _onInteraction() {
     // execute interaction hooks from the platform

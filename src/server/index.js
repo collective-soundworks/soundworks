@@ -1,3 +1,7 @@
+/**
+ * @module soundworks/server
+ */
+
 /* core */
 export { default as Client } from './core/Client';
 export { default as server } from './core/server';

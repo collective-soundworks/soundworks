@@ -7,23 +7,40 @@ import defaultViewContent from '../config/defaultContent';
 import defaultViewTemplates from '../config/defaultTemplates';
 import viewport from '../views/viewport';
 
+/**
+ * Client side entry point for a `soundworks` application. This object host general
+ * informations about the user, as well as methods to initialize and start the
+ * application.
+ *
+ * @memberof module:soundworks/client
+ * @namespace
+ *
+ * @example
+ * import {client} from 'soundworks/client';
+ * client.init('player');
+ * // instanciate your experience
+ * client.start();
+ */
 const client = {
   /**
-   * Client unique id, given by the server.
+   * Unique id of the client, generated and retrieved by the server.
    * @type {Number}
    */
   uuid: null,
 
   /**
-   * Client type.
-   * The client type is speficied in the argument of the `init` method. For
-   * instance, `'player'` is the client type you should be using by default.
+   * The type of the client, this can generally be considered as the role the
+   * specific client has in the application. This value is speficied as an
+   * argument of the {@link module:soundworks/client.client.init} method and defaults to
+   * `'player'`.
    * @type {String}
    */
   type: null,
 
-   /**
-   * Socket.io wrapper used to communicate with the server, if any (see {@link socket}.
+  /**
+   * Socket object to handle communications with the server, if any.
+   * This object is automatically created if the experience requires any service
+   * having a server-side counterpart.
    * @type {object}
    * @private
    */
@@ -32,11 +49,11 @@ const client = {
   /**
    * Information about the client platform.
    * @type {Object}
-   * @property {String} os Operating system.
-   * @property {Boolean} isMobile Indicates whether the client is running on a
-   * mobile platform or not.
-   * @property {String} audioFileExt Audio file extension to use, depending on
-   * the platform ()
+   * @property {String} os - Operating system.
+   * @property {Boolean} isMobile - Indicates whether the client is running on a
+   *  mobile platform or not.
+   * @property {String} audioFileExt - Audio file extension to use, depending on
+   *  the platform.
    */
   platform: {
     os: null,
@@ -66,16 +83,15 @@ const client = {
   label: null,
 
   /**
-   * Configuration informations retrieved from the server configuration by
-   * the `SharedConfig` service.
+   * Configuration informations retrieved from the server configuration
+   * (@see `service:shared-config`).
    * @type {Object}
    */
   config: null,
 
   /**
-   * Is set to `true` or `false` by the `Welcome` service and defines if the
-   * client meets the requirements of the application. (Should be usefull when
-   * the `Welcome` service is used without a view and activated manually)
+   * Defines if the user's device is compatible with the application requirements
+   * (see 'service:platfrom' and 'service:welcome').
    * @type {Boolean}
    */
   compatible: null,
@@ -130,6 +146,7 @@ const client = {
   /**
    * @todo - refactor handshake.
    * Initialize socket connection and perform handshake with the server.
+   * @private
    */
   _initSocket() {
     this.socket = socket.initialize(this.type, this.config.socketIO);
@@ -150,6 +167,7 @@ const client = {
 
   /**
    * Initialize view templates for all
+   * @private
    */
   _initViews() {
     viewport.init();

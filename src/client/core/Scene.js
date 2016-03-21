@@ -2,8 +2,13 @@ import Activity from './Activity';
 import serviceManager from './serviceManager';
 import Signal from './Signal';
 
-
-export default class Scene extends Activity {
+/**
+ *
+ *
+ * @memberof module:soundworks/client
+ * @extends module:soundworks/client.Activity
+ */
+class Scene extends Activity {
   constructor(id, hasNetwork) {
     super(id, hasNetwork);
 
@@ -31,7 +36,8 @@ export default class Scene extends Activity {
   }
 
   /**
-   * Add a signal to the required signals for start.
+   * Add a signal to the required signals in order for the `Scene` instance
+   * to start.
    * @param {Signal} signal - The signal that must be waited for.
    */
   waitFor(signal) {
@@ -47,3 +53,5 @@ export default class Scene extends Activity {
     this.signals.done.set(true);
   }
 }
+
+export default Scene;

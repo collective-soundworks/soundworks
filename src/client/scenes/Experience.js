@@ -3,7 +3,14 @@ import Signal from '../core/Signal';
 import SignalAll from '../core/SignalAll';
 import client from '../core/client';
 
-export default class Experience extends Scene {
+/**
+ * Base class to be extended in order to create the client-side of a custom experience.
+ * The user defined `Experience` is the main component of a soundworks application.
+ *
+ * @memberof module:soundworks/client
+ * @extends module:soundworks/client.Scene
+ */
+class Experience extends Scene {
   constructor(/* id = client.type, */ hasNetwork = true) {
     super('experience', hasNetwork);
     // if the experience has network, require errorReporter service by default
@@ -11,6 +18,15 @@ export default class Experience extends Scene {
       this._errorReporter = this.require('error-reporter');
   }
 
+  /**
+   * Interface method to implement in each experience. This method is part of the
+   * experience lifecycle and should be called when {@link Experience#start} is
+   * called for the first time.
+   *
+   * @example
+   * if (this.hasStarted)
+   *   this.init();
+   */
   init() {}
 
   createView() {
@@ -42,3 +58,5 @@ export default class Experience extends Scene {
     super.done();
   }
 }
+
+export default Experience;

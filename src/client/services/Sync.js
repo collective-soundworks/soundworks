@@ -7,30 +7,26 @@ import SyncModule from 'sync/client';
 const SERVICE_ID = 'service:sync';
 
 /**
- * [client] Synchronize the local clock on a master clock shared by the server and the clients.
+ * Interface of the client `'sync'` service.
  *
- * Both the clients and the server can use this master clock as a common time reference.
- * For instance, this allows all the clients to do something exactly at the same time, such as blinking the screen or playing a sound in a synchronized manner.
+ * This service synchronize the local audio clock of the client with the clock
+ * of the server (master clock). It then internally relies on the `WebAudio`
+ * clock and requires the platform to access this feature.
  *
- * The service always has a view (that displays "Clock syncing, stand by…", until the very first synchronization process is done).
+ * __*This service must be use with its [server-side counterpart]{@link module:soundworks/server.Sync}*__
  *
- * The service finishes its initialization as soon as the client clock is in sync with the master clock.
- * Then, the synchronization process keeps running in the background to resynchronize the clocks from times to times.
+ * _Note:_ the service is based on [`github.com/collective-soundworks/sync`](https://github.com/collective-soundworks/sync).
  *
- * **Note:** the service is based on [`github.com/collective-soundworks/sync`](https://github.com/collective-soundworks/sync).
- *
+ * @memberof module:soundworks/client
  * @example
- * const sync = serviceManager.require('service:sync');
- *
- * const nowLocal = sync.getAudioTime(); // current time in local clock time
- * const nowSync = sync.getSyncTime(); // current time in sync clock time
- * @emits 'sync:stats' each time the service (re)synchronizes the local clock on the sync clock.
- * The `'status'` event goes along with the `report` object that has the following properties:
- * - `timeOffset`, current estimation of the time offset between the client clock and the sync clock;
- * - `travelTime`, current estimation of the travel time for a message to go from the client to the server and back;
- * - `travelTimeMax`, current estimation of the maximum travel time for a message to go from the client to the server and back.
+ * // inside an experience constructor
+ * this.sync = this.require('sync');
+ * // later... translate the sync time in local time
+ * const syncTime = sync.getSyncTime();
+ * const localTime = sync.getAudioTime(syncTime);
  */
 class Sync extends Service {
+  /** __WARNING__ This class should never be instanciated manually */
   constructor() {
     super(SERVICE_ID, true);
 
@@ -48,6 +44,7 @@ class Sync extends Service {
     this._reportListeners = [];
   }
 
+  /** @private */
   init() {
     this._sync = new SyncModule(() => audioContext.currentTime);
     this._ready = false;
@@ -67,33 +64,36 @@ class Sync extends Service {
     this._sync.start(this.send, this.receive, this._syncStatusReport);
   }
 
+  /** @private */
   stop() {
     this.hide();
     super.stop();
   }
 
   /**
-   * Return the time in the local clock.
-   * If no arguments are provided, returns the current local time (*i.e.* `audioContext.currentTime`).
-   * @param {Number} syncTime Time in the sync clock (in seconds).
-   * @return {Number} Time in the local clock corresponding to `syncTime` (in seconds).
+   * Return the time in the local clock. If no arguments provided,
+   * returns the current local time.
+   * @param {Number} syncTime - Time from the sync clock (in _seconds_).
+   * @return {Number} - Local time corresponding to the given
+   *  `syncTime` (in _seconds_).
    */
   getAudioTime(syncTime) {
     return this._sync.getLocalTime(syncTime);
   }
 
   /**
-   * Return the time in the sync clock.
-   * If no arguments are provided, returns the current sync time.
-   * @param {Number} audioTime Time in the local clock (in seconds).
-   * @return {Number} Time in the sync clock corresponding to `audioTime` (in seconds)
+   * Return the time in the sync clock. If no arguments provided,
+   * returns the current sync time.
+   * @param {Number} audioTime - Time from the local clock (in _seconds_).
+   * @return {Number} - Sync time corresponding to the given
+   *  `audioTime` (in _seconds_).
    */
   getSyncTime(audioTime) {
     return this._sync.getSyncTime(audioTime);
   }
 
   /**
-   * Add a function to be called on each sync report
+   * Add a callback function to the synchronization reports from the server.
    * @param {Function} callback
    */
   addListener (callback) {
