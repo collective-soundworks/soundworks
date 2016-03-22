@@ -1,5 +1,9 @@
 /**
+ * Client-side entry point of the *soundworks* framework.
+ *
  * @module soundworks/client
+ * @example
+ * import * as soundworks from 'soundworks/client';
  */
 
 // export * as audio from 'waves-audio';

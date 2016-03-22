@@ -19,7 +19,7 @@ The framework heavily relies on the [*Web Audio API*](https://www.w3.org/TR/weba
 
 ### Template
 
-The recommended way of developing a *Soundworks* application is to start from the ***template*** at https://github.com/collective-soundworks/soundworks-template/.
+The recommended way of developing a *Soundworks* application is to start from the ***template*** at [https://github.com/collective-soundworks/soundworks-template/](https://github.com/collective-soundworks/soundworks-template/).
 
 The template includes comprehensive comments in the code.
 Please refer to the repository's README file for further instructions and documentation.
@@ -81,7 +81,7 @@ In addition, the views and view templates allow for defining callbacks for user 
 The views of an experience as well as of the provided services can be customized through CSS/SASS styles and by changing the content fitting the associated view templates.
 Different configurations of an application may include customized view content to generate different variants and localizations of the same screens.
 
-The content fitting a view template can be changed dynamically (e.g. depending on a user interaction) whereby the view can be updated partially (i.e. only a specific tag).
+The content fitting a view template can be changed dynamically (e.g. depending on a user interaction) whereby the view can be updated partially (i.e. only a specific HTML tag).
 Default CSS/SASS styles for the provided templates (used by the services and experiences) are part of the *Soundworks* application template.
 
 An advanced way of creating customized views consists in choosing alternative view templates and/or views among sets of provided templates and view classes.
@@ -92,8 +92,8 @@ Ultimately, developers can create customized views extending the `View` base cla
 ## Further Examples
 
 Apart from the template, the [*collective-soundworks*](https://github.com/collective-soundworks) GitHub project includes the following example applications with comprehensively commented code:
- * Soundfield - https://github.com/collective-soundworks/soundworks-soundfield/
- * Drops - https://github.com/collective-soundworks/soundworks-drops/
+ * Soundfield - [https://github.com/collective-soundworks/soundworks-soundfield/](https://github.com/collective-soundworks/soundworks-soundfield/)
+ * Drops - [https://github.com/collective-soundworks/soundworks-drops/](https://github.com/collective-soundworks/soundworks-drops/)
 
 Please refer to the repositories' README file for further instructions and documentation.
 

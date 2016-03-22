@@ -3,6 +3,17 @@ import path from 'path';
 /**
  * Configuration parameters of the Soundworks framework.
  * These parameters allow for configuring components of the framework such as Express and SocketIO.
+ *
+ * @todo - refactor
+ * @param {Object} [appConfig={}] Application configuration options.
+ * @attribute {String} [appConfig.publicFolder='./public'] Path to the public folder.
+ * @attribute {Object} [appConfig.socketIO={}] socket.io options. The socket.io
+ *  config object can have the following properties:
+ *  - `transports:String`: communication transport (defaults to `'websocket'`);
+ *  - `pingTimeout:Number`: timeout (in milliseconds) before trying to
+ *     reestablish a connection between a lost client and a server (defautls to `60000`);
+ *  - `pingInterval:Number`: time interval (in milliseconds) to send a ping to a
+ *     client to check the connection (defaults to `50000`).
  */
 export default {
   useHttps: false,

@@ -13,17 +13,17 @@ const SERVICE_ID = 'service:sync';
  * of the server (master clock). It then internally relies on the `WebAudio`
  * clock and requires the platform to access this feature.
  *
- * __*This service must be use with its [server-side counterpart]{@link module:soundworks/server.Sync}*__
+ * __*The service must be used with its [server-side counterpart]{@link module:soundworks/server.Sync}*__
  *
  * _Note:_ the service is based on [`github.com/collective-soundworks/sync`](https://github.com/collective-soundworks/sync).
  *
  * @memberof module:soundworks/client
  * @example
- * // inside an experience constructor
+ * // inside the experience constructor
  * this.sync = this.require('sync');
- * // later... translate the sync time in local time
- * const syncTime = sync.getSyncTime();
- * const localTime = sync.getAudioTime(syncTime);
+ * // when the experience has started, translate the sync time in local time
+ * const syncTime = this.sync.getSyncTime();
+ * const localTime = this.sync.getAudioTime(syncTime);
  */
 class Sync extends Service {
   /** __WARNING__ This class should never be instanciated manually */

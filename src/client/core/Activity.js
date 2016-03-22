@@ -147,7 +147,8 @@ class Activity extends Process {
   }
 
   /**
-   * Create the view of the activity according to its attributes.
+   * Create the view of the activity according to its `viewCotr`, `viewTemplate`,
+   * `viewContent`, `viewEvents` and `viewOptions` attributes.
    */
   createView() {
     const options = Object.assign({

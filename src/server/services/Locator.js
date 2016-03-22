@@ -3,20 +3,33 @@ import serviceManager from '../core/serviceManager';
 
 const SERVICE_ID = 'service:locator';
 
+
 /**
- * [server] This service allows to indicate the approximate location of the client on a map.
+ * Interface of the server `'locator'` service.
  *
- * (See also {@link src/client/services/ClientLocator.js~ClientLocator} on the client side.)
+ * This service is one of the provided services aimed at identifying clients inside
+ * the experience along with the [`'placer'`]{@link module:soundworks/server.Placer}
+ * and [`'checkin'`]{@link module:soundworks/server.Checkin} services.
+ *
+ * The `'locator'` service allows a client to give its approximate location inside
+ * a graphical representation of the `area` as defined in the server's `setup`
+ * configuration entry.
+ *
+ * __*The service must be used with its [client-side counterpart]{@link module:soundworks/client.Locator}*__
+ *
+ * @see {@link module:soundworks/server.Placer}
+ * @see {@link module:soundworks/server.Checkin}
+ *
+ * @memberof module:soundworks/server
+ * @example
+ * // inside the experience constructor
+ * this.locator = this.require('locator');
  */
 class Locator extends Activity {
+  /** __WARNING__ This class should never be instanciated manually */
   constructor() {
     super(SERVICE_ID);
 
-    /**
-     * @type {Object} defaults - Defaults options of the service
-     * @attribute {String} [defaults.areaConfigItem='setup.area'] - The path to the server's area
-     *  configuration entry (see {@link src/server/core/server.js~appConfig} for details).
-     */
     const defaults = {
       areaConfigItem: 'setup.area',
     };
@@ -27,7 +40,7 @@ class Locator extends Activity {
     this._sharedConfigService = this.require('shared-config');
   }
 
-  /** @inheritdoc */
+  /** @private */
   start() {
     super.start();
 
@@ -38,7 +51,7 @@ class Locator extends Activity {
     });
   }
 
-  /** @inheritdoc */
+  /** @private */
   connect(client) {
     super.connect(client);
 

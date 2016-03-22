@@ -9,15 +9,15 @@ const SERVICE_ID = 'service:sync';
  * This service acts as the master clock provider for the client sync service,
  * in order to synchronize the clocks of the different clients to its own clock.
  *
- * __*This service must be use with its [client-side counterpart]{@link module:soundworks/client.Sync}*__
+ * __*The service must be used with its [client-side counterpart]{@link module:soundworks/client.Sync}*__
  *
  * **Note:** the service is based on [`github.com/collective-soundworks/sync`](https://github.com/collective-soundworks/sync).
  *
  * @memberof module:soundworks/server
  * @example
- * // inside an experience constructor
+ * // inside the experience constructor
  * this.sync = this.require('sync');
- * // later...
+ * // when the experience has started
  * const syncTime = this.sync.getSyncTime();
  */
 class Sync extends Activity {

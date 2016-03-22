@@ -4,9 +4,6 @@ import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
 
 
-/**
- * Default loader view
- */
 class LoaderView extends SegmentedView {
   onRender() {
     super.onRender();
@@ -14,8 +11,8 @@ class LoaderView extends SegmentedView {
   }
 
   onProgress(percent) {
-    if (!this.content.showProgress) { return; }
-    this.$progressBar.style.width = `${percent}%`;
+    if (this.content.showProgress)
+      this.$progressBar.style.width = `${percent}%`;
   }
 }
 
@@ -23,30 +20,28 @@ class LoaderView extends SegmentedView {
 const SERVICE_ID = 'service:loader';
 
 /**
- * [client] Load audio files.
+ * Interface of the client `'loader'` service.
  *
- * The service always has a view (that displays a progress bar) and requires the SASS partial `_77-loader.scss`.
+ * This service allow to preload audio files and convert them into audio buffers
+ * before the start of the experience.
  *
- * The service finishes its initialization when all the files are loaded.
+ * @param {Object} options
+ * @param {Array<String>} options.files - List of files to load.
+ * @param {Boolean} [options.showProgress=true] - Display the progress bar in the view.
  *
+ * @memberof module:soundworks/client
  * @example
- * // Instantiate the service with the files to load
- * const loader = new Loader({ files: ['sounds/kick.mp3', 'sounds/snare.mp3'] });
- *
- * // Get the corresponding audio buffers
- * const kickBuffer = loader.audioBuffers[0];
- * const snareBuffer = loader.audioBuffers[1];
+ * // inside the experience constructor
+ * this.loader = this.require('loader', { files: ['kick.mp3', 'snare.mp3'] });
+ * // get the corresponding audio buffers when experience has started
+ * const kickBuffer = this.loader.audioBuffers[0];
+ * const snareBuffer = this.loader.audioBuffers[1];
  */
 class Loader extends Service {
+  /** __WARNING__ This class should never be instanciated manually */
   constructor() {
     super(SERVICE_ID, false);
 
-    /**
-     * @type {Object} default - Default options of the service.
-     * @type {String[]} [default.files=[]] - The audio files to load.
-     * @type {Boolean} [default.showProgress=true] - Defines if the progress bar is rendered. If set to true, the view should implement an `onProgress(percent)` method.
-     * @type {String} [default.viewCtor=LoaderView] - Constructor for the service's view.
-     */
     const defaults = {
       showProgress: true,
       files: [],
@@ -60,20 +55,20 @@ class Loader extends Service {
   /** @private */
   init() {
     /**
-     * Audio buffers created from the audio files passed in the {@link Loader#constructor}.
+     * List of the audio buffers created from the audio files.
      * @type {Array<AudioBuffer>}
      */
     this.buffers = [];
-    // to track files loading progress
-    this._progress = [];
-    this.options.files.forEach((file, index) => this._progress[index] = 0);
 
+    // track files loading progress
+    this._progress = this.options.files.map(() => { return 0 });
     // prepare view
     this.viewContent.showProgress = this.options.showProgress;
     this.viewCtor = this.options.viewCtor;
     this.view = this.createView();
   }
 
+  /** @private */
   start() {
     super.start();
 
@@ -84,11 +79,13 @@ class Loader extends Service {
     this.show();
   }
 
+  /** @private */
   stop() {
     this.hide();
     super.stop();
   }
 
+  /** @private */
   _load(fileList) {
     const loader = new SuperLoader();
 
@@ -102,6 +99,7 @@ class Loader extends Service {
       });
   }
 
+  /** @private */
   _onProgress(e) {
     this._progress[e.index] = e.value;
 

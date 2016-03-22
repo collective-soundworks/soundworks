@@ -196,24 +196,36 @@ class _GraphicView extends SquaredView {
 const SERVICE_ID = 'service:placer';
 
 /**
- * [client] Allow to select a place within a set of predefined positions (i.e. labels and/or coordinates).
+ * Interface of the `'placer'` service.
  *
+ * This service is one of the provided services aimed at identifying clients inside
+ * the experience along with the [`'locator'`]{@link module:soundworks/client.Locator}
+ * and [`'checkin'`]{@link module:soundworks/client.Checkin} services.
+ *
+ * The `'placer'` service allows a client to choose its place among a set of
+ * positions defined in the server's `setup` configuration entry.
+ *
+ * __*The service must be used with its [server-side counterpart]{@link module:soundworks/server.Placer}*__
+ *
+ * @see {@link module:soundworks/client.Locator}
+ * @see {@link module:soundworks/client.Checkin}
+ *
+ * @param {Object} options
+ * @param {String} [options.mode='list'] - Sets the interaction mode for the
+ *  client to choose its position, the `'list'` mode propose a drop-down menu
+ *  while the `'graphic'` mode (which requires located positions) proposes an
+ *  interface representing the area and dots for each available location.
+ *
+ * @memberof module:soundworks/client
  * @example
- * const placer = soundworks.client.require('place', { capacity: 100 });
+ * // inside the experience constructor
+ * this.placer = this.require('placer', { mode: 'graphic' });
  */
 class Placer extends Service {
+  /** __WARNING__ This class should never be instanciated manually */
   constructor() {
     super(SERVICE_ID, true);
 
-    /**
-     * @type {Object} defaults - The defaults options of the service.
-     * @attribute {String} [options.mode='list'] - Selection mode. Can be:
-     * - `'graphic'` to select a place on a graphical representation of the available positions.
-     * - `'list'` to select a place among a list of places.
-     * @attribute {View} [options.view='null'] - The view of the service to be used (@todo)
-     * @attribute {View} [options.view='null'] - The view constructor of the service to be used. Must implement the `PlacerView` interface.
-     * @attribute {Number} [options.priority=6] - The priority of the view.
-     */
     const defaults = {
       mode: 'list',
       view: null,
@@ -233,6 +245,7 @@ class Placer extends Service {
     this._sharedConfigService = this.require('shared-config');
   }
 
+  /** @private */
   init() {
     /**
      * Index of the position selected by the user.
@@ -269,7 +282,7 @@ class Placer extends Service {
     }
   }
 
-  /** @inheritdoc */
+  /** @private */
   start() {
     super.start();
 
@@ -286,7 +299,7 @@ class Placer extends Service {
     this.receive('client-leaved', this._onClientLeaved);
   }
 
-  /** @inheritdoc */
+  /** @private */
   stop() {
     this.removeListener('aknowlegde', this._onAknowledgeResponse);
     this.removeListener('confirm', this._onConfirmResponse);

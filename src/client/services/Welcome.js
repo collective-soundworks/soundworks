@@ -29,12 +29,12 @@ const SERVICE_ID = 'service:welcome';
  * @memberof module:soundworks/client
  *
  * @param {Object} options
- * @param {Boolean} [options.fullscreen=false] - If available on the platform, request full screen.
+ * @param {Boolean} [options.fullScreen=false] - If available on the platform, request full screen.
  * @param {Boolean} [options.showDialog=true] - Define if the service should use its view or not.
  *
  * @example
- * // inside an experience constructor
- * this.welcome = this.require('welcome', { fullscreen: true });
+ * // inside the experience constructor
+ * this.welcome = this.require('welcome', { fullScreen: true });
  */
 class Welcome extends Service {
   /** __WARNING__ This class should never be instanciated manually */

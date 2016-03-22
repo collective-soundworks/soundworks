@@ -8,11 +8,27 @@ const log = debug('soundworks:osc');
 const SERVICE_ID = 'service:osc';
 
 /**
- *  only service for OSC communications withw external softwares
- * (e.g. Max). Only support UDP protocol.
- * @todo - define if other protocols should be supported.
+ * Interface of the server `'osc'` service.
+ *
+ * This server-only service provides support for OSC communications with an extenal
+ * software (e.g. Max). The configuration of the service (url and port) should be
+ * defined in the server configuration, cf. {@link module:soundworks/server.envConfig}.
+ *
+ * The service currently only supports UDP protocol.
+ *
+ * @memberof module:soundworks/server
+ * @example
+ * // inside the experience constructor
+ * this.osc = this.require('osc');
+ * // when the experience has started, listen for incomming message
+ * this.osc.receive('/osc/channel1', (values) => {
+ *   // do something with `values`
+ * });
+ * // send a message
+ * this.osc.send('/osc/channel2', [0.618, true]);
  */
 class Osc extends Activity {
+  /** __WARNING__ This class should never be instanciated manually */
   constructor() {
     super(SERVICE_ID);
 
@@ -29,6 +45,7 @@ class Osc extends Activity {
     this._onMessage = this._onMessage.bind(this);
   }
 
+  /** @private */
   start() {
     const oscConfig = this._sharedConfigService.get(this.options.oscConfigItem);
 
@@ -63,7 +80,7 @@ class Osc extends Activity {
         listener.callback(...msg.args)
     });
 
-    // log(`message - address "${msg.address}"`, ...msg.args);
+    log(`message - address "${msg.address}"`, ...msg.args);
   }
 
   /**
@@ -91,9 +108,9 @@ class Osc extends Activity {
   }
 
   /**
-   * Register callbacks for OSC mesages. The server listens to OSC messages
+   * Register callbacks for OSC mesages. The server listens for OSC messages
    * at the address and port defined in the configuration of the {@link server}.
-   * @param {String} wildcard - Wildcard of the OSC message.
+   * @param {String} address - Wildcard of the OSC message.
    * @param {Function} callback - Callback function to be executed when an OSC
    *  message is received on the given address.
    */
@@ -104,8 +121,9 @@ class Osc extends Activity {
 
   /**
    * @todo - implement
+   * @private
    */
-  broadcast() {}
+  removeListener(address, callback) {}
 }
 
 serviceManager.register(SERVICE_ID, Osc);

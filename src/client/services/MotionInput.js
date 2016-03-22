@@ -6,17 +6,19 @@ const SERVICE_ID = 'service:motion-input';
 
 
 /**
- * Wrapper for the motion-input module.
+ * Interface of the client `'motion-input'` service.
  *
+ * This service provides a wrapper for the
+ * [`motionInput`]{$link https://github.com/collective-soundworks/motion-input}
+ * external module.
+ *
+ * @memberof module:soundworks/client
  * @example
  * // in the experince constructor
- * this.motionInput = this.require(‘motioninput', {
- *   descriptors: [‘accelerationIncludingGravity']
- * });
- *
- * // in the experience start
- * if (this.motionInput.isAvailable(‘accelerationIncludingGravity')) {
- *   this.motionInput.addListener('accelerationIncludingGravity', (data) => {
+ * this.motionInput = this.require('motioninput', { descriptors: ['energy'] });
+ * // when the experience has started
+ * if (this.motionInput.isAvailable('energy')) {
+ *   this.motionInput.addListener('energy', (data) => {
  *     // digest motion data
  *   });
  * } else {
@@ -38,10 +40,9 @@ class MotionInput extends Service {
     this._descriptorsValidity = {}
   }
 
-  // init() { /* nothing to do here... */ }
-
   /**
    * Override default configure to add descriptors from multiple calls.
+   * @private
    * @param {Object} options - The options to apply to the service.
    */
   configure(options) {
@@ -73,8 +74,8 @@ class MotionInput extends Service {
 
   /**
    * Define if a given descriptor is available or not
-   * @param {String} name - The descriptor name.
-   * @returns {Boolean}
+   * @param {String} name - Descriptor name.
+   * @returns {Boolean} - Returns `true` if available, `false` otherwise.
    */
   isAvailable(name) {
     return this._descriptorsValidity[name];
@@ -82,8 +83,8 @@ class MotionInput extends Service {
 
   /**
    * Add a listener to a given descriptor.
-   * @param {String} name - The descriptor name.
-   * @param {Function} callback - The callback to register.
+   * @param {String} name - Descriptor name.
+   * @param {Function} callback - Callback to register.
    */
   addListener(name, callback) {
     if (this._descriptorsValidity[name])
@@ -92,8 +93,8 @@ class MotionInput extends Service {
 
   /**
    * Remove a listener from a given descriptor.
-   * @param {String} name - The descriptor name.
-   * @param {Function} callback - The callback to remove.
+   * @param {String} name - Descriptor name.
+   * @param {Function} callback - Callback to remove.
    */
   removeListener(name, callback) {
     if (this._descriptorsValidity[name])

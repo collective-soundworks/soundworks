@@ -1,12 +1,10 @@
 import client from '../core/client';
-// import localStorage from './localStorage'; // @todo - rethink this with db
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
 import SpaceView from '../views/SpaceView';
 import SquaredView from '../views/SquaredView';
 import TouchSurface from '../views/TouchSurface';
 
-const SERVICE_ID = 'service:locator';
 
 class _LocatorView extends SquaredView {
   constructor(template, content, events, options) {
@@ -106,49 +104,59 @@ class _LocatorView extends SquaredView {
   }
 }
 
+
+const SERVICE_ID = 'service:locator';
+
 /**
- * [client] Allow to indicate the approximate location of the client on a map.
+ * Interface of the client `'locator'` service.
  *
- * The module always has a view that displays the map and a button to validate the location.
+ * This service is one of the provided services aimed at identifying clients inside
+ * the experience along with the [`'placer'`]{@link module:soundworks/client.Placer}
+ * and [`'checkin'`]{@link module:soundworks/client.Checkin} services.
  *
- * The module finishes its initialization after the user confirms his / her approximate location by clicking on the “Validate” button. For development purposes it can be configured to send random coordinates or retrieving previously stored location (see `options.random` and `options.persist`.
+ * The `'locator'` service allows a client to give its approximate location inside
+ * a graphical representation of the `area` as defined in the server's `setup`
+ * configuration entry.
  *
+ * __*The service must be used with its [server-side counterpart]{@link module:soundworks/server.Locator}*__
+ *
+ * @see {@link module:soundworks/client.Placer}
+ * @see {@link module:soundworks/client.Checkin}
+ *
+ * @param {Object} options
+ * @param {Boolean} [options.random=false] - If set to `true`, the location is
+ *  setted randomly (mainly for development purposes).
+ *
+ * @memberof module:soundworks/client
  * @example
- * const locator = new Locator();
+ * // inside the experience constructor
+ * this.locator = this.require('locator');
  */
 class Locator extends Service {
+  /** __WARNING__ This class should never be instanciated manually */
   constructor() {
     super(SERVICE_ID, true);
 
-    /**
-     * @param {Object} [defaults={}] - Defaults configuration of the service.
-     * @param {Boolean} [defaults.random=false] - Send random position to the server
-     *  and call `this.done()` (for development purpose)
-     * @param {View} [defaults.viewCtor=_LocatorView] - The contructor of the view to be used.
-     *  The view must implement the `AbstractLocatorView` interface
-     */
     const defaults = {
       random: false,
-      // persist: false, // @todo - re-think this with db
       viewCtor: _LocatorView,
     };
 
     this.configure(defaults);
 
-    this._sharedConfigService = this.require('shared-config');
+    this._sharedConfig = this.require('shared-config');
 
     this._onAknowledgeResponse = this._onAknowledgeResponse.bind(this);
     this._sendCoordinates = this._sendCoordinates.bind(this);
   }
 
-  /** @inheritdoc */
+  /** @private */
   init() {
     this.viewCtor = this.options.viewCtor;
-    // this.viewOptions
     this.view = this.createView();
   }
 
-  /** @inheritdoc */
+  /** @private */
   start() {
     super.start();
 
@@ -161,7 +169,7 @@ class Locator extends Service {
     this.receive('aknowledge', this._onAknowledgeResponse);
   }
 
-  /** @inheritdoc */
+  /** @private */
   stop() {
     super.stop();
     this.removeListener('aknowledge', this._onAknowledgeResponse);
@@ -170,14 +178,11 @@ class Locator extends Service {
   }
 
   /**
-   * Bypass the locator according to module configuration options.
-   * If `options.random` is set to true, create random coordinates and send it
-   *  to the server (mainly for development purposes).
    * @private
-   * @param {Object} area - The area as defined in server configuration.
+   * @param {Object} areaConfigPath - Path to the area in the configuration.
    */
   _onAknowledgeResponse(areaConfigPath) {
-    const area = this._sharedConfigService.get(areaConfigPath);
+    const area = this._sharedConfig.get(areaConfigPath);
     this.view.setArea(area);
     this.view.onSelect(this._sendCoordinates);
 

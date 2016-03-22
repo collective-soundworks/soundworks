@@ -257,20 +257,20 @@ const SERVICE_ID = 'service:shared-params';
  * `hasGUI` option setted to true, allowing to create a special client aimed at
  * controlling the different parameters of the experience.
  *
- * __*This service must be use with its [server-side counterpart]{@link module:soundworks/server.SharedParams}*__
+ * __*The service must be used with its [server-side counterpart]{@link module:soundworks/server.SharedParams}*__
  *
  * @param {Object} options
  * @param {Boolean} [options.hasGui=true] - Defines if the service should display
  *  a GUI. If set to `true`, the service never set its `ready` signal to true and
  *  the client application stay in this state forever. The option should then be
- *  be used create special `client` type (sometimes called `conductor`) aimed at
- *  modifying application parameters during while the application is running.
+ *  used create special clients (sometimes called `conductor`) aimed at
+ *  controlling application parameters in real time.
  *
  * @memberof module:soundworks/client
  * @example
- * // inside an experience
+ * // inside the experience constructor
  * this.control = this.require('shared-params');
- * // listen for parameter, infos or command updates
+ * // when the experience starts, listen for item updates
  * this.control.addItemListener('synth:gain', (value) => {
  *   this.synth.setGain(value);
  * });
@@ -295,6 +295,7 @@ class SharedParams extends Service {
     /**
      * Dictionary of all the parameters and commands.
      * @type {Object}
+     * @private
      */
     this.items = {};
 

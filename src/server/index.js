@@ -1,5 +1,9 @@
 /**
+ * Server-side entry point of the *soundworks* framework.
+ *
  * @module soundworks/server
+ * @example
+ * import * as soundworks from 'soundworks/server';
  */
 
 /* core */

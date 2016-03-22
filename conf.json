@@ -3,23 +3,42 @@
     "include": [
       "README.md",
       "src/client/index.js",
+
       "src/client/core/client.js",
 
-      "src/client/scenes/Experience.js",
-
-      "src/client/services/Sync.js",
+      "src/client/services/Checkin.js",
+      "src/client/services/ErrorReporter.js",
+      "src/client/services/Loader.js",
+      "src/client/services/Locator.js",
+      "src/client/services/MotionInput.js",
+      "src/client/services/Network.js",
+      "src/client/services/Placer.js",
+      "src/client/services/Platform.js",
+      "src/client/services/Scheduler.js",
+      "src/client/services/SharedConfig.js",
       "src/client/services/SharedParams.js",
+      "src/client/services/Sync.js",
       "src/client/services/Welcome.js",
-
 
       "src/server/index.js",
 
+      "src/server/core/server.js",
+
+      "src/server/services/Checkin.js",
+      "src/server/services/ErrorReporter.js",
+      "src/server/services/Locator.js",
+      "src/server/services/Network.js",
+      "src/server/services/Osc.js",
+      "src/server/services/Placer.js",
+      "src/server/services/SharedConfig.js",
       "src/server/services/SharedParams.js",
       "src/server/services/Sync.js"
     ]
   },
-  "opts": {
-
-  },
-  "plugins": ["plugins/markdown"]
+  "plugins": ["plugins/markdown"],
+  "templates": {
+    "default": {
+      "useLongnameInNav": true
+    }
+  }
 }

@@ -8,52 +8,61 @@ import defaultViewTemplates from '../config/defaultTemplates';
 import viewport from '../views/viewport';
 
 /**
- * Client side entry point for a `soundworks` application. This object host general
- * informations about the user, as well as methods to initialize and start the
- * application.
+ * Client side entry point for a `soundworks` application.
+ *
+ * This object host general informations about the user, as well as methods
+ * to initialize and start the application.
  *
  * @memberof module:soundworks/client
  * @namespace
  *
  * @example
- * import {client} from 'soundworks/client';
- * client.init('player');
- * // instanciate your experience
- * client.start();
+ * import * as soundworks from 'soundworks/client';
+ * import MyExperience from './MyExperience';
+ *
+ * soundworks.client.init('player');
+ * const myExperience = new MyExperience();
+ * soundworks.client.start();
  */
 const client = {
   /**
    * Unique id of the client, generated and retrieved by the server.
+   *
    * @type {Number}
    */
   uuid: null,
 
   /**
-   * The type of the client, this can generally be considered as the role the
-   * specific client has in the application. This value is speficied as an
-   * argument of the {@link module:soundworks/client.client.init} method and defaults to
-   * `'player'`.
+   * The type of the client, this can generally be considered as the role of the
+   * client in the application. This value is defined as argument of the
+   * [`client.init`]{@link module:soundworks/client.client.init} method and
+   * defaults to `'player'`.
+   *
    * @type {String}
    */
   type: null,
 
   /**
-   * Socket object to handle communications with the server, if any.
-   * This object is automatically created if the experience requires any service
-   * having a server-side counterpart.
-   * @type {object}
-   * @private
+   * Configuration informations retrieved from the server configuration.
+   *
+   * @type {Object}
+   * @see {@link module:soundworks/client.SharedConfig}
    */
-  socket: null,
+  config: null,
 
   /**
-   * Information about the client platform.
+   * Information about the client platform. The properties are setted by the
+   * [`platform`]{@link module:soundworks/client.Platform} service.
+   *
    * @type {Object}
    * @property {String} os - Operating system.
    * @property {Boolean} isMobile - Indicates whether the client is running on a
    *  mobile platform or not.
    * @property {String} audioFileExt - Audio file extension to use, depending on
    *  the platform.
+   *
+   * @see {@link module:soundworks/client.Platform}
+   * @see {@link module:soundworks/client.Welcome}
    */
   platform: {
     os: null,
@@ -62,48 +71,71 @@ const client = {
   },
 
   /**
-   * Client coordinates (if any) given by a {@link Locator}, {@link Placer} or
-   * {@link Checkin} service. (Format: `[x:Number, y:Number]`.)
-   * @type {Array<Number>}
-   */
-  coordinates: null,
-
-  /**
-   * Ticket index (if any) given by a {@link Placer} or
-   * {@link Checkin} service.
-   * @type {Number}
-   */
-  index: null,
-
-  /**
-   * Ticket label (if any) given by a {@link Placer} or
-   * {@link Checkin} service.
-   * @type {String}
-   */
-  label: null,
-
-  /**
-   * Configuration informations retrieved from the server configuration
-   * (@see `service:shared-config`).
-   * @type {Object}
-   */
-  config: null,
-
-  /**
-   * Defines if the user's device is compatible with the application requirements
-   * (see 'service:platfrom' and 'service:welcome').
+   * Defines if the user's device is compatible with the application
+   * requirements.
+   *
    * @type {Boolean}
+   * @see {@link module:soundworks/client.Platform}
+   * @see {@link module:soundworks/client.Welcome}
    */
   compatible: null,
 
   /**
+   * Index (if any) given by a [`placer`]{@link module:soundworks/client.Placer}
+   * or [`checkin`]{@link module:soundworks/client.Checkin} service.
+   *
+   * @type {Number}
+   * @see {@link module:soundworks/client.Checkin}
+   * @see {@link module:soundworks/client.Placer}
+   */
+  index: null,
+
+  /**
+   * Ticket label (if any) given by a [`placer`]{@link module:soundworks/client.Placer}
+   * or [`checkin`]{@link module:soundworks/client.Checkin} service.
+   *
+   * @type {String}
+   * @see {@link module:soundworks/client.Checkin}
+   * @see {@link module:soundworks/client.Placer}
+   */
+  label: null,
+
+  /**
+   * Client coordinates (if any) given by a
+   * [`locator`]{@link module:soundworks/client.Locator},
+   * [`placer`]{@link module:soundworks/client.Placer} or
+   * [`checkin`]{@link module:soundworks/client.Checkin} service.
+   * (Format: `[x:Number, y:Number]`.)
+   *
+   * @type {Array<Number>}
+   * @see {@link module:soundworks/client.Checkin}
+   * @see {@link module:soundworks/client.Locator}
+   * @see {@link module:soundworks/client.Placer}
+   */
+  coordinates: null,
+
+  /**
+   * Socket object that handle communications with the server, if any.
+   * This object is automatically created if the experience requires any service
+   * having a server-side counterpart.
+   *
+   * @type {module:soundworks/client.socket}
+   * @private
+   */
+  socket: null,
+
+  /**
    * Initialize the application.
-   * @param {String} [clientType = 'player'] - The client type to define the socket namespace, should match a client type defined server side (if any).
-   * @param {Object} [config={}] - The config to initialize a client
-   * @param {Object} [config.socketIO.url=''] - The url where the socket should connect.
-   * @param {Object} [config.socketIO.transports=['websocket']] - The transport used to create the url (overrides default socket.io mecanism).
-   * @param {Object} [config.appContainer='#container'] - A selector matching a DOM element where the views should be inserted.
-   * @param {Object} [config.debugIO=false] - If set to `true`, show socket.io debug informations.
+   *
+   * @param {String} [clientType='player'] - The type of the client, defines the
+   *  socket connection namespace. Should match a client type defined server side.
+   * @param {Object} [config={}]
+   * @param {Object} [config.appContainer='#container'] - A css selector
+   *  matching a DOM element where the views should be inserted.
+   * @param {Object} [config.socketIO.url=''] - The url where the socket should
+   *  connect _(unstable)_.
+   * @param {Object} [config.socketIO.transports=['websocket']] - The transport
+   *  used to create the url (overrides default socket.io mecanism) _(unstable)_.
    */
   init(clientType = 'player', config = {}) {
     this.type = clientType;
@@ -116,7 +148,6 @@ const client = {
 
     // 2. mix all other config and override with defined socket config
     this.config = Object.assign({
-      debugIO: false,
       appContainer: '#container',
     }, config, { socketIO });
 
@@ -136,16 +167,16 @@ const client = {
 
   /**
    * Returns a service configured with the given options.
-   * @param {String} id - The identifier of the service.
-   * @param {Object} options - The options to configure the service.
+   * @param {String} id - Identifier of the service.
+   * @param {Object} options - Options to configure the service.
    */
   require(id, options) {
     return serviceManager.require(id, options);
   },
 
   /**
-   * @todo - refactor handshake.
    * Initialize socket connection and perform handshake with the server.
+   * @todo - refactor handshake.
    * @private
    */
   _initSocket() {
@@ -166,7 +197,7 @@ const client = {
   },
 
   /**
-   * Initialize view templates for all
+   * Initialize view templates for all activities.
    * @private
    */
   _initViews() {
@@ -184,8 +215,8 @@ const client = {
   },
 
   /**
-   * Extend application view contents with the given object.
-   * @param {Object} content - The view content to propagate to activities.
+   * Extend or override application view contents with the given object.
+   * @param {Object} defs - Content to be used by activities.
    */
   setViewContentDefinitions(defs) {
     this.viewContent = Object.assign(this.viewContent, defs);
@@ -193,8 +224,8 @@ const client = {
   },
 
   /**
-   * Extend application view templates with the given object.
-   * @param {Object} view templates - The view templates to propagate to activities.
+   * Extend or override application view templates with the given object.
+   * @param {Object} defs - Templates to be used by activities.
    */
   setViewTemplateDefinitions(defs) {
     this.viewTemplates = Object.assign(this.viewTemplates, defs);
@@ -202,7 +233,8 @@ const client = {
   },
 
   /**
-   * Set the default container for all views.
+   * Set the DOM elemnt that will be the container for all views.
+   * @private
    * @param {String|Element} el - DOM element (or css selector matching
    *  an existing element) to be used as the container of the application.
    */

@@ -117,13 +117,13 @@ const SERVICE_ID = 'service:shared-params';
  *
  * configured with specific attributes, and bounded to specific type of clients.
  *
- * __*This service must be use with its [client-side counterpart]{@link module:soundworks/client.SharedParams}*__
+ * __*The service must be used with its [client-side counterpart]{@link module:soundworks/client.SharedParams}*__
  *
  * @memberof module:soundworks/server
  * @example
- * // inside a server experience
+ * // create a boolean shared parameter with default value to `false`,
+ * // inside the server experience constructor
  * this.sharedParams = this.require('shared-params');
- * // create a boolean shared parameter with default value to `false`
  * this.sharedParams.addBoolean('my:boolean', 'MyBoolean', false);
  */
 class SharedParams extends Activity {

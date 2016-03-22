@@ -1,26 +1,40 @@
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
 
+
 const SERVICE_ID = 'service:error-reporter';
 
 /**
- * [client] This service listen for errors on the client side to report them
- * on the server. Is required by default by any {@link src/client/scene/Experience.js}
- * if its `hasNetwork` is set to `true`.
+ * Interface for the client `'error-reporter'` service.
+ *
+ * This service allows to log javascript errors that could occur during the
+ * application life cycle. Errors are catch and send to the server in order
+ * to be persisted in a file.
+ * By default, the log file are located in the `logs/clients` directory inside
+ * the application directory.
+ *
+ * *The service is automatically launched whenever the application detects the
+ * use of a networked activity. It should never be required manually inside
+ * an application.*
+ *
+ * __*The service must be used with its [server-side counterpart]{@link module:soundworks/server.ErrorReporter}*__
+ *
+ * @memberof module:soundworks/client
  */
 class ErrorReporter extends Service {
+  /** __WARNING__ This class should never be instanciated manually */
   constructor() {
     super(SERVICE_ID, true);
 
     this._onError = this._onError.bind(this);
   }
 
-  /** @inheritdoc */
+  /** @private */
   init() {
     window.addEventListener('error', this._onError);
   }
 
-  /** @inheritdoc */
+  /** @private */
   start() {
     super.start();
 
@@ -30,6 +44,7 @@ class ErrorReporter extends Service {
     this.ready();
   }
 
+  /** @private */
   _onError(e) {
     let stack;
     let file = e.filename;
