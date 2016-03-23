@@ -39,8 +39,8 @@ export { default as Scheduler } from './services/Scheduler';
 export { default as Welcome } from './services/Welcome';
 
 // config
-export { default as defaultTemplates } from './config/defaultTemplates';
-export { default as defaultContent } from './config/defaultContent';
+export { default as defaultViewTemplates } from './config/defaultViewTemplates';
+export { default as defaultViewContent } from './config/defaultViewContent';
 // views
 export { default as ButtonView } from './views/ButtonView';
 export { default as CanvasView } from './views/CanvasView';
