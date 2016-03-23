@@ -52,6 +52,7 @@
     "plugins/markdown"
   ],
   "opts": {
+    "destination": ".",
     "projectTitle": "Soundworks",
     "template": "node_modules/jsdoc-template"
   },
