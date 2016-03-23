@@ -111,7 +111,7 @@ const SERVICE_ID = 'service:platform';
  * this.platform = this.require('platform', { features: 'web-audio' });
  */
 class Platform extends Service {
-  /** __WARNING__ This class should never be instanciated manually */
+  /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */
   constructor() {
     super(SERVICE_ID, false);
 

@@ -28,7 +28,7 @@ const SERVICE_ID = 'service:osc';
  * this.osc.send('/osc/channel2', [0.618, true]);
  */
 class Osc extends Activity {
-  /** __WARNING__ This class should never be instanciated manually */
+  /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */
   constructor() {
     super(SERVICE_ID);
 

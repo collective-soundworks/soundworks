@@ -5,6 +5,11 @@
       "src/client/index.js",
 
       "src/client/core/client.js",
+      "src/client/core/Activity.js",
+      "src/client/core/Scene.js",
+
+      "src/client/config/defaultViewTemplates.js",
+      "src/client/config/defaultViewContent.js",
 
       "src/client/services/Checkin.js",
       "src/client/services/ErrorReporter.js",
@@ -19,6 +24,14 @@
       "src/client/services/SharedParams.js",
       "src/client/services/Sync.js",
       "src/client/services/Welcome.js",
+
+      "src/client/scenes/Experience.js",
+
+      "src/client/views/CanvasView.js",
+      "src/client/views/Renderer.js",
+      "src/client/views/SegmentedView.js",
+      "src/client/views/View.js",
+      "src/client/views/viewport.js",
 
       "src/server/index.js",
 
@@ -35,7 +48,13 @@
       "src/server/services/Sync.js"
     ]
   },
-  "plugins": ["plugins/markdown"],
+  "plugins": [
+    "plugins/markdown"
+  ],
+  "opts": {
+    "projectTitle": "Soundworks",
+    "template": "node_modules/jsdoc-template"
+  },
   "templates": {
     "default": {
       "useLongnameInNav": true

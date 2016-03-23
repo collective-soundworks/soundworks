@@ -26,7 +26,7 @@ const SERVICE_ID = 'service:locator';
  * this.locator = this.require('locator');
  */
 class Locator extends Activity {
-  /** __WARNING__ This class should never be instanciated manually */
+  /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */
   constructor() {
     super(SERVICE_ID);
 

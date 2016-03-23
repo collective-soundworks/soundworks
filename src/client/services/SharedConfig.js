@@ -27,8 +27,8 @@ const SERVICE_ID = 'service:shared-config';
  * const areaWidth = this.sharedConfig.get('setup.area.width');
  */
 class SharedConfig extends Service {
+  /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */
   constructor() {
-    /** __WARNING__ This class should never be instanciated manually */
     super(SERVICE_ID, true);
 
     /**

@@ -23,7 +23,7 @@ const SERVICE_ID = 'service:network';
  * this.network.send('player', 'my:channel', 42, false);
  */
 class Network extends Service {
-  /** __WARNING__ This class should never be instanciated manually */
+  /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */
   constructor() {
     super(SERVICE_ID, true);
 

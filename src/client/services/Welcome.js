@@ -37,7 +37,7 @@ const SERVICE_ID = 'service:welcome';
  * this.welcome = this.require('welcome', { fullScreen: true });
  */
 class Welcome extends Service {
-  /** __WARNING__ This class should never be instanciated manually */
+  /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */
   constructor() {
     super(SERVICE_ID, false);
 

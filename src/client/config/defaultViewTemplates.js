@@ -1,6 +1,6 @@
 /**
- * The default view templates for the services and scenes. Each key correspond
- * to the `id` attribute of the activity it belongs to.
+ * The default view templates for the services. Each key correspond
+ * to the `id` attribute of the activity it is associated to.
  *
  * The view templates are internally parsed using the `lodash.template` system,
  * see [https://lodash.com/docs#template]{@link https://lodash.com/docs#template}
@@ -9,10 +9,15 @@
  * [`defaultContent`]{@link module:soundworks/client.defaultContent} inside
  * an object with the same key.
  *
- * @memberof soundworks/client
- * @namespace
+ * These default templates can be overriden by passing an object to the
+ * [`client.setViewTemplateDefinitions`]{@link module:soundworks/client.client.setViewTemplateDefinitions}
+ * method.
  *
- * @see {@link module:soundworks/client.defaultContent}
+ * @namespace
+ * @memberof module:soundworks/client
+ *
+ * @see {@link module:soundworks/client.defaultViewContent}
+ * @see {@link module:soundworks/client.client}
  * @see {@link https://lodash.com/docs#template}
  */
 const defaultViewTemplates = {
@@ -163,4 +168,4 @@ const defaultViewTemplates = {
   `,
 };
 
-export default defaultViewDefault templates;
+export default defaultViewTemplates;

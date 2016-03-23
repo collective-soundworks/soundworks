@@ -4,14 +4,20 @@ import SignalAll from '../core/SignalAll';
 import client from '../core/client';
 
 /**
- * Base class to be extended in order to create the client-side of a custom experience.
+ * Base class to be extended in order to create the client-side of a custom
+ * experience.
+ *
  * The user defined `Experience` is the main component of a soundworks application.
  *
  * @memberof module:soundworks/client
  * @extends module:soundworks/client.Scene
  */
 class Experience extends Scene {
-  constructor(/* id = client.type, */ hasNetwork = true) {
+  /**
+   * @param {Boolean} [hasNetwork=true] - Define if the experience needs a
+   *  socket connection or not.
+   */
+  constructor(hasNetwork = true) {
     super('experience', hasNetwork);
     // if the experience has network, require errorReporter service by default
     if (hasNetwork)
@@ -20,10 +26,12 @@ class Experience extends Scene {
 
   /**
    * Interface method to implement in each experience. This method is part of the
-   * experience lifecycle and should be called when {@link Experience#start} is
-   * called for the first time.
+   * experience lifecycle and should be called when
+   * [`Experience#start`]{@link module:soundworks/client.Experience#start}
+   * is called for the first time.
    *
    * @example
+   * // in MyExperience#start
    * if (this.hasStarted)
    *   this.init();
    */
@@ -42,6 +50,11 @@ class Experience extends Scene {
     return super.createView();
   }
 
+  /**
+   * Start the experience. This lifecycle method is called when all the
+   * required services are `ready` and thus the experience can begin with all
+   * the necessary informations and services ready to be consumed.
+   */
   start() {
     super.start();
 
@@ -49,8 +62,7 @@ class Experience extends Scene {
       this.send('enter');
   }
 
-  // hold() {}
-
+  /** @private */
   done() {
     if (this.hasNetwork)
       this.send('exit');

@@ -9,7 +9,7 @@ const SERVICE_ID = 'service:motion-input';
  * Interface of the client `'motion-input'` service.
  *
  * This service provides a wrapper for the
- * [`motionInput`]{$link https://github.com/collective-soundworks/motion-input}
+ * [`motionInput`]{@link https://github.com/collective-soundworks/motion-input}
  * external module.
  *
  * @memberof module:soundworks/client
@@ -26,6 +26,7 @@ const SERVICE_ID = 'service:motion-input';
  * }
  */
 class MotionInput extends Service {
+  /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */
   constructor() {
     super(SERVICE_ID, false);
 

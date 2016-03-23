@@ -7,10 +7,31 @@ const defaultTemplate = `
 `;
 
 /**
- * [client] - This constructor allow to create views which define vertical ratios among elements.
- * The ratios between the different parts are kept in protrait or landscape orientation.
+ * Create views which keep defined vertical ratios among elements. These ratios
+ * are kept between the different parts in portrait and landscape orientation.
+ * The default Segmented view defines a layout with 3 verticals parts.
+ *
+ * Others ratios can be defined by creating a new template and defining the
+ * ratios of the different elements by defining the ratio entry in the options.
+ * The sum of all the ratios should be equal to 1.
+ *
+ * @memberof module:soundworks/client
+ * @extends {module:soundworks/client.View}
  */
-export default class SegmentedView extends View {
+class SegmentedView extends View {
+  /**
+   * _<span class="warning">__WARNING__</span> Views should preferably by
+   * created using the [`Experience#createView`]{@link module:soundworks/client.Experience#createView}
+   * method._
+   *
+   * @param {String} template - Template of the view.
+   * @param {Object} content - Object containing the variables used to populate
+   *  the template. {@link module:soundworks/client.View#content}.
+   * @param {Object} events - Listeners to install in the view
+   *  {@link module:soundworks/client.View#events}.
+   * @param {Object} options - Options of the view.
+   *  {@link module:soundworks/client.View#options}.
+   */
   constructor(template, content = {}, events = {}, options = {}) {
     // fallback on default template if `template = null`
     template = !template ? defaultTemplate : template;
@@ -47,3 +68,5 @@ export default class SegmentedView extends View {
     }
   }
 }
+
+export default SegmentedView;

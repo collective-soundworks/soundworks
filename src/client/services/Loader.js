@@ -38,7 +38,7 @@ const SERVICE_ID = 'service:loader';
  * const snareBuffer = this.loader.audioBuffers[1];
  */
 class Loader extends Service {
-  /** __WARNING__ This class should never be instanciated manually */
+  /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */
   constructor() {
     super(SERVICE_ID, false);
 

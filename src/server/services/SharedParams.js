@@ -127,7 +127,7 @@ const SERVICE_ID = 'service:shared-params';
  * this.sharedParams.addBoolean('my:boolean', 'MyBoolean', false);
  */
 class SharedParams extends Activity {
-  /** __WARNING__ This class should never be instanciated manually */
+  /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */
   constructor(options = {}) {
     super(SERVICE_ID);
 

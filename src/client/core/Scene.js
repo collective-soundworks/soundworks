@@ -3,8 +3,6 @@ import serviceManager from './serviceManager';
 import Signal from './Signal';
 
 /**
- *
- *
  * @memberof module:soundworks/client
  * @extends module:soundworks/client.Activity
  */
@@ -39,14 +37,16 @@ class Scene extends Activity {
    * Add a signal to the required signals in order for the `Scene` instance
    * to start.
    * @param {Signal} signal - The signal that must be waited for.
+   * @private
    */
   waitFor(signal) {
     this.requiredSignals.add(signal);
   }
 
   /**
-   * Mark the `Scene` as terminated. The call of this method is a responsibility
-   * of the client code.
+   * Mark the `Scene` as terminated. The call of this method is a
+   * responsibility of the client code.
+   * @private
    */
   done() {
     this.hide();

@@ -26,7 +26,7 @@ const SERVICE_ID = 'service:sync';
  * const localTime = this.sync.getAudioTime(syncTime);
  */
 class Sync extends Service {
-  /** __WARNING__ This class should never be instanciated manually */
+  /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */
   constructor() {
     super(SERVICE_ID, true);
 
