@@ -17,9 +17,6 @@ const defaultViewContent = {
     wait: 'Please wait...',
     label: '',
   },
-  'service:control': {
-    title: 'Conductor',
-  },
   'service:loader': {
     loading: 'Loading sounds…',
   },

@@ -1,9 +1,15 @@
 /**
- * The default view templates for the services and scenes. The view templates are organized according to the `Module.name` property.
+ * The default view templates for the services and scenes. Each key correspond
+ * to the `id` attribute of the activity it belongs to.
  *
- * These view template are internally parsed using `lodash.template`, see [https://lodash.com/docs#template](https://lodash.com/docs#template) for more information.
+ * The view templates are internally parsed using the `lodash.template` system,
+ * see [https://lodash.com/docs#template]{@link https://lodash.com/docs#template}
+ * for more information.
  *
- * @type {Object}
+ * @memberof soundworks/client
+ * @namespace
+ *
+ * @see {@link https://lodash.com/docs#template}
  */
 const defaultViewTemplates = {
   'service:checkin': `
@@ -25,10 +31,6 @@ const defaultViewTemplates = {
       </div>
       <div class="section-bottom"></div>
     <% } %>
-  `,
-
-  'service:control': `
-    <h1 class="big"><%= title %></h1>
   `,
 
   'service:loader': `
