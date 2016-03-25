@@ -35,6 +35,10 @@
 
       "src/server/index.js",
 
+      "src/server/config/defaultAppConfig.js",
+      "src/server/config/defaultEnvConfig.js",
+      "src/server/config/defaultFwConfig.js",
+
       "src/server/core/server.js",
 
       "src/server/services/Checkin.js",
@@ -52,7 +56,7 @@
     "plugins/markdown"
   ],
   "opts": {
-    "destination": ".",
+    "destination": "./out",
     "projectTitle": "Soundworks",
     "template": "node_modules/jsdoc-template"
   },
