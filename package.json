@@ -1,6 +1,6 @@
 {
   "name": "soundworks",
-  "description": "The Soundworks framework.",
+  "description": "Full stack Javascript framework to create collective audio visual experiences based on mobile devices",
   "authors": [
     "Benjamin Matuszewski",
     "Sébastien Robaszkiewicz",
