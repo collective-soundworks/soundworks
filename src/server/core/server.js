@@ -14,7 +14,7 @@ import sockets from './sockets';
 // import default configuration
 import { default as defaultAppConfig } from '../config/defaultAppConfig';
 import { default as defaultEnvConfig } from '../config/defaultEnvConfig';
-import { default as defaultFwConfig } from '../config/fw';
+import { default as defaultFwConfig } from '../config/defaultFwConfig';
 
 
 /**
