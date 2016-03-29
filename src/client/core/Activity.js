@@ -173,12 +173,12 @@ class Activity extends Process {
   }
 
   /**
-   * Create the view of the activity according to its `viewCotr`, `viewTemplate`,
+   * Create the view of the activity according to its `viewCtor`, `viewTemplate`,
    * `viewContent`, `viewEvents` and `viewOptions` attributes.
    */
   createView() {
     const options = Object.assign({
-      id: this.id,
+      id: this.id.replace(/\:/g, '-'),
       className: 'activity',
       priority: this.options.viewPriority,
     }, this.viewOptions);
