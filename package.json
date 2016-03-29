@@ -52,7 +52,7 @@
     "uuid": "^2.0.1",
     "waves-audio": "wavesjs/audio#v0.3.0",
     "waves-basic-controllers": "wavesjs/basic-controllers",
-    "waves-loaders": "wavesjs/loaders",
+    "waves-loaders": "wavesjs/waves-loaders#v0.1.2",
     "webrtc-adapter": "^1.0.4"
   },
   "devDependencies": {
