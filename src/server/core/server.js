@@ -233,6 +233,7 @@ const server = {
       res.send(tmpl({
         socketIO: socketConfig,
         appName: this.config.appName,
+        version: this.config.version,
         clientType: clientType,
         defaultType: this.config.defaultClient,
         assetsDomain: this.config.assetsDomain,
