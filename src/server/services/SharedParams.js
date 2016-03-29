@@ -104,60 +104,37 @@ class _TriggerItem extends _ControlItem {
 const SERVICE_ID = 'service:shared-params';
 
 /**
- * [server] Manage the global `parameters`, `infos`, and `commands` across the whole scenario.
+ * Interface of the server `'shared-params'` service.
  *
- * The service keeps track of:
- * - `parameters`: values that can be updated by the actions of the clients (*e.g.* the gain of a synth);
- * - `infos`: information about the state of the scenario (*e.g.* number of clients in the performance);
- * - `commands`: can trigger an action (*e.g.* reload the page),
- * and propagates these to different client types.
+ * This service allow to create shared parameter items among to distributed
+ * application. Each defined parameter (`item`) can be of the following
+ * data types:
+ * - boolean
+ * - enum
+ * - number
+ * - text
+ * - trigger,
  *
- * To set up controls in a scenario, you should extend this class on the server side and declare the controls specific to that scenario with the appropriate methods.
+ * configured with specific attributes, and bounded to specific type of clients.
  *
- * (See also {@link src/client/ClientSharedParams.js~ClientSharedParams} on the client side.)
+ * __*The service must be used with its [client-side counterpart]{@link module:soundworks/client.SharedParams}*__
  *
- * @example // Example 1: make a `'conductor'` client to manage the controls
- * class MyControl extends SharedParams {
- *   constructor() {
- *     super();
- *
- *     // Parameter shared by all the client types
- *     this.addNumber('synth:gain', 'Synth gain', 0, 1, 0.1, 1);
- *     // Command propagated only to the `'player'` clients
- *     this.addCommand('reload', 'Reload the page', ['player']);
- *   }
- * }
- *
- * @example // Example 2: keep track of the number of `'player'` clients
- * class MyControl extends Control {
- *   constructor() {
- *     super();
- *     this.addInfo('numPlayers', 'Number of players', 0);
- *   }
- * }
- *
- * class MyPerformance extends Performance {
- *   constructor(control) {
- *     this._control = control;
- *   }
- *
- *   enter(client) {
- *     super.enter(client);
- *
- *     this._control.update('numPlayers', this.clients.length);
- *   }
- * }
- *
- * const control = new MyControl();
- * const performance = new MyPerformance(control);
+ * @memberof module:soundworks/server
+ * @example
+ * // create a boolean shared parameter with default value to `false`,
+ * // inside the server experience constructor
+ * this.sharedParams = this.require('shared-params');
+ * this.sharedParams.addBoolean('my:boolean', 'MyBoolean', false);
  */
 class SharedParams extends Activity {
+  /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */
   constructor(options = {}) {
     super(SERVICE_ID);
 
     /**
      * Dictionary of all control items.
      * @type {Object}
+     * @private
      */
     this.items = {};
 
@@ -168,9 +145,14 @@ class SharedParams extends Activity {
     this._itemData = [];
   }
 
-  addItem() {
-    const args = Array.from(arguments);
-    const type = args.shift();
+  /**
+   * Generic method to create items. The first argument defines the type of item,
+   * the corresponding method (for example `addBoolean`) is called when the
+   * remaining arguments.
+   * @param {String} type - Type of item to create.
+   * @param {...Mixed} args - Arguments to pass to the specific add method.
+   */
+  addItem(type, ...args) {
     let item;
 
     switch(type) {
@@ -195,68 +177,87 @@ class SharedParams extends Activity {
   }
 
   /**
-   * Adds a `boolean` parameter.
-   * @param {String} name - Name of the parameter.
-   * @param {String} label - Label of the parameter (displayed on the control GUI on the client side).
-   * @param {Number} init - Initial value of the parameter (`true` or `false`).
-   * @param {String[]} [clientTypes=null] - Array of the client types to send the parameter to. If not set, the parameter is sent to all the client types.
+   * @todo - remove `labels` and define them client side in guiOptions.
+   */
+
+  /**
+   * Add a `boolean` parameter item.
+   * @param {String} name - Name of the item.
+   * @param {String} label - Label of the item (displayed on the control
+   *  GUI on the client side)
+   * @param {Number} init - Initial value of the item (`true` or `false`).
+   * @param {String[]} [clientTypes=null] - Array of the client types to send
+   *  the item value to. If not set, the value is sent to all the client types.
    */
   addBoolean(name, label, init, clientTypes = null) {
     return new _BooleanItem(this, name, label, init, clientTypes);
   }
 
   /**
-   * Adds an `enum` parameter.
-   * @param {String} name - Name of the parameter.
-   * @param {String} label - Label of the parameter (displayed on the control GUI on the client side).
-   * @param {String[]} options - Array of the different values the parameter can take.
-   * @param {Number} init - Initial value of the parameter (has to be in the `options` array).
-   * @param {String[]} [clientTypes=null] - Array of the client types to send the parameter to. If not set, the parameter is sent to all the client types.
+   * Add an `enum` parameter item.
+   * @param {String} name - Name of the item.
+   * @param {String} label - Label of the item (displayed on the control
+   *  GUI on the client side).
+   * @param {String[]} options - Different possible values of the item.
+   * @param {Number} init - Initial value of the item (must be defined in `options`).
+   * @param {String[]} [clientTypes=null] - Array of the client types to send
+   *  the item value to. If not set, the value is sent to all the client types.
    */
   addEnum(name, label, options, init, clientTypes = null) {
     return new _EnumItem(this, name, label, options, init, clientTypes);
   }
 
   /**
-   * Adds a `number` parameter.
-   * @param {String} name Name of the parameter.
-   * @param {String} label Label of the parameter (displayed on the control GUI on the client side).
-   * @param {Number} min - Minimum value of the parameter.
-   * @param {Number} max - Maximum value of the parameter.
-   * @param {Number} step - Step to increase or decrease the parameter value.
-   * @param {Number} init - Initial value of the parameter.
-   * @param {String[]} [clientTypes=null] - Array of the client types to send the parameter to. If not set, the parameter is sent to all the client types.
+   * Add a `number` parameter item.
+   * @param {String} name - Name of the item.
+   * @param {String} label - Label of the item (displayed on the control
+   *  GUI on the client side).
+   * @param {Number} min - Minimum value of the item.
+   * @param {Number} max - Maximum value of the item.
+   * @param {Number} step - Step by which the item value is increased or decreased.
+   * @param {Number} init - Initial value of the item.
+   * @param {String[]} [clientTypes=null] - Array of the client types to send
+   *  the item value to. If not set, the value is sent to all the client types.
    */
   addNumber(name, label, min, max, step, init, clientTypes = null) {
     return new _NumberItem(this, name, label, min, max, step, init, clientTypes);
   }
 
   /**
-   * Adds a `text` parameter.
-   * @param {String} name - Name of the parameter.
-   * @param {String} label - Label of the parameter (displayed on the control GUI on the client side).
-   * @param {Number} init - Initial value of the parameter (has to be in the `options` array).
-   * @param {String[]} [clientTypes=null] - Array of the client types to send the parameter to. If not set, the parameter is sent to all the client types.
+   * Add a `text` parameter item.
+   * @param {String} name - Name of the item.
+   * @param {String} label - Label of the item (displayed on the control
+   *  GUI on the client side).
+   * @param {Number} init - Initial value of the item.
+   * @param {String[]} [clientTypes=null] - Array of the client types to send
+   *  the item value to. If not set, the value is sent to all the client types.
    */
   addText(name, label, init, clientTypes = null) {
     return new _TextItem(this, name, label, init, clientTypes);
   }
 
   /**
-   * Adds a trigger.
-   * @param {String} name - Name of the command.
-   * @param {String} label - Label of the command (displayed on the control GUI on the client side).
-   * @param {String[]} [clientTypes=null] - Array of the client types to send the parameter to. If not set, the parameter is sent to all the client types.
+   * Add a trigger item.
+   * @param {String} name - Name of the item.
+   * @param {String} label - Label of the item (displayed on the control
+   *  GUI on the client side).
+   * @param {String[]} [clientTypes=null] - Array of the client types to send
+   *  the item value to. If not set, the value is sent to all the client types.
    */
   addTrigger(name, label, clientTypes = null) {
     return new _TriggerItem(this, name, label, undefined, clientTypes);
   }
 
   /**
-   * Add listener to a control item (i.e. parameter, info or command).
-   * The given listener is fired immediately with the item current value.
+   * @callback module:soundworks/server.SharedParams~itemCallback
+   * @param {Mixed} value - Updated value of the item.
+   */
+  /**
+   * Add a listener to listen a specific item changes. The listener is called a first
+   * time when added to retrieve the current value of the item.
    * @param {String} name - Name of the item.
-   * @param {Function} listener - Listener callback.
+   * @param {module:soundworks/server.SharedParams~itemCallback} listener - Callback
+   *  that handle the event.
    */
   addItemListener(name, listener) {
     const item = this.items[name];
@@ -270,9 +271,10 @@ class SharedParams extends Activity {
   }
 
   /**
-   * Remove listener from a control item (i.e. parameter, info or command).
-   * @param {String} name - Name of the item.
-   * @param {Function} listener - Listener callback.
+   * Remove a listener from listening a specific item changes.
+   * @param {String} name - Name of the event.
+   * @param {module:soundworks/client.SharedParams~itemCallback} listener - The
+   *  callback to remove.
    */
   removeItemListener(name, listener) {
     const item = this.items[name];
@@ -285,8 +287,11 @@ class SharedParams extends Activity {
 
   /**
    * Updates the value of a parameter and sends it to the clients.
+   * @private
    * @param {String} name - Name of the parameter to update.
-   * @param {(String|Number|Boolean)} value - New value of the parameter.
+   * @param {Mixed} value - New value of the parameter.
+   * @param {String} [excludeClient=null] - Exclude the given client from the
+   *  clients to send the update to (generally the source of the update).
    */
   update(name, value, excludeClient = null) {
     const item = this.items[name];
@@ -301,15 +306,16 @@ class SharedParams extends Activity {
   connect(client) {
     super.connect(client);
 
-    // init control parameters, infos, and commands at client
     this.receive(client, 'request', this._onRequest(client));
     this.receive(client, 'update', this._onUpdate(client));
   }
 
+  /** @private */
   _onRequest(client) {
     return () => this.send(client, 'init', this._itemData);
   }
 
+  /** @private */
   _onUpdate(client) {
     // update, but exclude client from broadcasting to other clients
     return (name, value) => this.update(name, value, client);

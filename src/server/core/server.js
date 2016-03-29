@@ -12,70 +12,64 @@ import serviceManager from './serviceManager';
 import sockets from './sockets';
 
 // import default configuration
-import { default as defaultAppConfig } from '../config/app';
-import { default as defaultFwConfig } from '../config/fw';
-import { default as defaultEnvConfig } from '../config/env';
+import { default as defaultAppConfig } from '../config/defaultAppConfig';
+import { default as defaultEnvConfig } from '../config/defaultEnvConfig';
+import { default as defaultFwConfig } from '../config/defaultFwConfig';
+
 
 /**
- * The `server` object contains the basic methods of the server.
- * For instance, this object allows setting up, configuring and starting the server with the method `start` while the method `map` allows for managing the mapping between different types of clients and their required server activities.
- * @type {Object}
+ * Server side entry point for a `soundworks` application.
+ *
+ * This object host configuration informations, as well as methods to
+ * initialize and start the application. It is also responsible for creating
+ * the static file (http) server as well as the socket server.
+ *
+ * @memberof module:soundworks/server
+ * @namespace
+ *
+ * @example
+ * import * as soundworks from 'soundworks/server';
+ * import MyExperience from './MyExperience';
+ *
+ * soundworks.server.init({ appName: 'MyApplication' });
+ * const myExperience = new MyExperience();
+ * soundworks.server.start();
  */
-export default {
-
+const server = {
   /**
-   * WebSocket server.
+   * SocketIO server.
    * @type {Object}
    * @private
    */
   io: null,
 
   /**
-   * Express application
-   * @type {Object}
-   * @private
-   */
-  // expressApp: null,
-
-  /**
-   * Http server
-   * @type {Object}
-   * @private
-   */
-  // httpServer: null,
-
-  /**
-   * Configuration informations.
+   * Configuration informations, all config objects passed to the
+   * [`server.init`]{@link module:soundworks/server.server.init} are merged
+   * into this object.
    * @type {Object}
    */
   config: {},
 
   /**
-   * Mapping between a `clientType` and its related activities
+   * Mapping between a `clientType` and its related activities.
+   * @private
    */
   _clientTypeActivitiesMap: {},
 
   /**
-   * Activities to be started
+   * Required activities that must be started.
+   * @private
    */
   _activities: new Set(),
 
   /**
-   * Returns a service configured with the given options.
-   * @param {String} id - The identifier of the service.
-   * @param {Object} options - The options to configure the service.
-   */
-  require(id, options) {
-    return serviceManager.require(id, null, options);
-  },
-
-  /**
-   * Function used by activities to registered their concerned client type into the server
-   * @param {Array<String>} clientTypes - An array of client type.
-   * @param {Activity} activity - The activity concerned with the given `clientTypes`.
+   * Map client types with an activity.
+   * @param {Array<String>} clientTypes - List of client type.
+   * @param {Activity} activity - Activity concerned with the given `clientTypes`.
    * @private
    */
-  setMap(clientTypes, activity) {
+  _setMap(clientTypes, activity) {
     clientTypes.forEach((clientType) => {
       if (!this._clientTypeActivitiesMap[clientType])
         this._clientTypeActivitiesMap[clientType] = new Set();
@@ -86,37 +80,34 @@ export default {
 
   /**
    * Function used by activities to register themselves as active activities
-   * @param {Activity} activity
+   * @param {Activity} activity - Activity to be registered.
    * @private
    */
   setActivity(activity) {
     this._activities.add(activity);
   },
 
+  /**
+   * Return a service configured with the given options.
+   * @param {String} id - Identifier of the service.
+   * @param {Object} options - Options to configure the service.
+   */
+  require(id, options) {
+    return serviceManager.require(id, null, options);
+  },
 
   /**
    * Initialize the server with the given config objects.
-   * @todo - move this doc to configuration objects.
+   * @param {...Object} configs - configuration object to be merge with the
+   *  default `soundworks` config. (_Note:_ given objects are merged at 2 levels
+   *  of depth)
    *
-   * @param {...Object} configs - Object of application configuration.
-   *
-   * @todo - rewrite doc properly for this method.
-   * @param {Object} [appConfig={}] Application configuration options.
-   * @attribute {String} [appConfig.publicFolder='./public'] Path to the public folder.
-   * @attribute {Object} [appConfig.socketIO={}] socket.io options. The socket.io config object can have the following properties:
-   * - `transports:String`: communication transport (defaults to `'websocket'`);
-   * - `pingTimeout:Number`: timeout (in milliseconds) before trying to reestablish a connection between a lost client and a server (defautls to `60000`);
-   * - `pingInterval:Number`: time interval (in milliseconds) to send a ping to a client to check the connection (defaults to `50000`).
-   * @param {Object} [envConfig={}] Environment configuration options.
-   * @attribute {Number} [envConfig.port=8000] Port of the HTTP server.
-   * @attribute {Object} [envConfig.osc={}] OSC options. The OSC config object can have the following properties:
-   * - `localAddress:String`: address of the local machine to receive OSC messages (defaults to `'127.0.0.1'`);
-   * - `localPort:Number`: port of the local machine to receive OSC messages (defaults to `57121`);
-   * - `remoteAddress:String`: address of the device to send default OSC messages to (defaults to `'127.0.0.1'`);
-   * - `remotePort:Number`: port of the device to send default OSC messages to (defaults to `57120`).
+   * @see {@link module:soundworks/server.app}
+   * @see {@link module:soundworks/server.env}
+   * @see {@link module:soundworks/server.fw}
    */
   init(...configs) {
-        // merge default configuration objects
+    // merge default configuration objects
     this.config = Object.assign(this.config, defaultAppConfig, defaultFwConfig, defaultEnvConfig);
     // merge given configurations objects with defaults (1 level depth)
     configs.forEach((config) => {
@@ -133,11 +124,11 @@ export default {
   },
 
   /**
-   * Start the server:
+   * Start the application:
    * - launch the HTTP server.
    * - launch the socket server.
    * - start all registered activities.
-   * - define routes and associate client types and activities.
+   * - define routes and and activities mapping for all client types.
    */
   start() {
     logger.initialize(this.config.logger);
@@ -181,6 +172,7 @@ export default {
 
   /**
    * Init websocket server.
+   * @private
    */
   _initSockets(httpServer) {
     this.io = new IO(httpServer, this.config.socketIO);
@@ -193,12 +185,13 @@ export default {
 
   /**
    * Start all activities and map the routes (clientType / activities mapping).
+   * @private
    */
   _initActivities(expressApp) {
     this._activities.forEach((activity) => activity.start());
 
     this._activities.forEach((activity) => {
-      this.setMap(activity.clientTypes, activity)
+      this._setMap(activity.clientTypes, activity)
     });
 
     // map `clientType` to their respective activities
@@ -209,13 +202,9 @@ export default {
   },
 
   /**
-   * Indicate that the clients of type `clientType` require the activities `...activities` on the server side.
-   * Additionally, this method routes the connections from the corresponding URL to the corresponding view.
-   * More specifically:
-   * - A client connecting to the server through the root URL `http://my.server.address:port/` is considered as a `'player'` client and displays the view `player.ejs`;
-   * - A client connecting to the server through the URL `http://my.server.address:port/clientType` is considered as a `clientType` client, and displays the view `clientType.ejs`.
-   * @param {String} clientType Client type (as defined by the method {@link client.init} on the client side).
-   * @param {...Activity} activities Activities to map to that client type.
+   * Map a client type to a route, a set of activities.
+   * Additionnally listen for their socket connection.
+   * @private
    */
   _map(clientType, activities, expressApp) {
     // @todo - allow to pass some variable in the url -> define how bind it to sockets...
@@ -258,6 +247,7 @@ export default {
 
   /**
    * Socket connection callback.
+   * @private
    */
   _onConnection(clientType, activities) {
     return (socket) => {
@@ -267,14 +257,15 @@ export default {
       // global lifecycle of the client
       sockets.receive(client, 'disconnect', () => {
         activities.forEach((activity) => activity.disconnect(client));
-        // @todo - should remove all listeners on the client
         client.destroy();
         logger.info({ socket, clientType }, 'disconnect');
       });
 
       // @todo - refactor handshake and uuid definition.
-      sockets.send(client, 'client:start', client.uuid); // the server is ready
+      sockets.send(client, 'client:start', client.uuid);
       logger.info({ socket, clientType }, 'connection');
     }
   },
 };
+
+export default server;

@@ -5,7 +5,9 @@
 
 # others
 /node_modules
-/doc
+
+# documentation default output
+/out
 
 # junk files
 npm-debug.log

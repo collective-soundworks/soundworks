@@ -7,22 +7,31 @@ import viewManager from './viewManager';
 
 
 /**
- * Base class for services and scenes. Basically a process with view
+ * Internal base class for services and scenes. Basically a process with view
  * and optionnal network abilities.
+ *
+ * @memberof module:soundworks/client
+ * @extends module:soundworks/client.Process
  */
-export default class Activity extends Process {
+class Activity extends Process {
+  /**
+   * @param {String} id - Id of the activity.
+   * @param {Boolean} hasNetwork - Define if the activity needs a socket
+   *  connection or not.
+   */
   constructor(id, hasNetwork = true) {
     super(id);
 
     /**
-     * If `true`, define if the process has been started once.
+     * If `true`, define if the activity has already been started once.
      * @type {Boolean}
+     * @name hasStarted
+     * @instance
+     * @memberof module:soundworks/client.Activity
      */
     this.hasStarted = false;
 
-    /**
-     * Register as a networked service.
-     */
+    // register as a networked service
     if (hasNetwork) {
       this.hasNetwork = true;
       socket.required = true;
@@ -30,37 +39,55 @@ export default class Activity extends Process {
 
     /**
      * View of the activity.
-     * @type {View}
+     * @type {module:soundworks/client.View}
+     * @name view
+     * @instance
+     * @memberof module:soundworks/client.Activity
      */
     this.view = null;
 
     /**
-     * Events to bind to the view. (cf. Backbone's syntax).
+     * Events to bind to the view. (mimic the Backbone's syntax).
      * @type {Object}
+     * @name viewEvents
+     * @instance
+     * @memberof module:soundworks/client.Activity
+     * @example
+     * this.viewEvents = {
+     *   "touchstart .button": (e) => {
+     *     // do somthing
+     *   },
+     *   // etc...
+     * };
      */
     this.viewEvents = {};
 
     /**
      * Additionnal options to pass to the view.
      * @type {Object}
+     * @name viewOptions
+     * @instance
+     * @memberof module:soundworks/client.Activity
      */
     this.viewOptions = {};
 
     /**
-     * Defines a view constructor to be used in `createView`.
-     * @type {View}
+     * View constructor to be used in
+     * [`Activity#createView`]{@link module:soundworks/client.Activity#createView}.
+     * @type {module:soundworks/client.View}
+     * @default module:soundworks/client.View
+     * @name viewCtor
+     * @instance
+     * @memberof module:soundworks/client.Activity
      */
     this.viewCtor = View;
 
     /**
-     * The view template of the view (use `lodash.template` syntax).
-     * @type {String}
-     */
-    this.viewTemplate = null;
-
-    /**
-     * Options of the process.
+     * Options of the activity.
      * @type {Object}
+     * @name options
+     * @instance
+     * @memberof module:soundworks/client.Activity
      */
     this.options = {};
     this.configure({ viewPriority: 0 });
@@ -84,7 +111,7 @@ export default class Activity extends Process {
   require() {}
 
   /**
-   * Configure the process with the given options.
+   * Configure the activity with the given options.
    * @param {Object} options
    */
   configure(options) {
@@ -111,8 +138,9 @@ export default class Activity extends Process {
   }
 
   /**
-   * Returns the view template associated to the current activity.
-   * @returns {Function} - The view template related to the `name` of the current activity.
+   * The template related to the `id` of the activity.
+   * @type {String}
+   * @see {@link module:soundworks/client.defaultViewTemplates}
    */
   get viewTemplate() {
     const viewTemplate = this._viewTemplate || this.viewTemplateDefinitions[this.id];
@@ -126,10 +154,10 @@ export default class Activity extends Process {
   }
 
   /**
-   * Returns the text associated to the current activity.
-   * @returns {Object} - The view contents related to the `name` of the current
-   *  activity. The returned object is extended with a pointer to the `globals`
-   *  entry of the defined view contents.
+   * The view contents related to the `id` of the activity. The object is
+   * extended with a pointer to the `globals` entry of the defined view contents.
+   * @type {Object}
+   * @see {@link module:soundworks/client.defaultViewContent}
    */
   get viewContent() {
     const viewContent = this._viewContent || this.viewContentDefinitions[this.id];
@@ -145,7 +173,8 @@ export default class Activity extends Process {
   }
 
   /**
-   * Create the view of the activity according to its attributes.
+   * Create the view of the activity according to its `viewCotr`, `viewTemplate`,
+   * `viewContent`, `viewEvents` and `viewOptions` attributes.
    */
   createView() {
     const options = Object.assign({
@@ -158,7 +187,9 @@ export default class Activity extends Process {
   }
 
   /**
-   * Display the view of a activity if it owns one.
+   * Request the view manager to display the view. The call of this method
+   * doesn't garantee a synchronized rendering of the view as the view manager
+   * decide which view to display based on their priority.
    */
   show() {
     if (!this.view) { return; }
@@ -168,7 +199,7 @@ export default class Activity extends Process {
   }
 
   /**
-   * Hide the view of an activity if it owns one.
+   * Hide the view of the activity if it owns one.
    */
   hide() {
     if (!this.view) { return; }
@@ -179,7 +210,7 @@ export default class Activity extends Process {
   /**
    * Sends a WebSocket message to the server side socket.
    * @param {String} channel - The channel of the message (is automatically
-   *  namespaced with the activity's name: `${this.id}:channel`).
+   *  namespaced with the activity's id: `${this.id}:channel`).
    * @param {...*} args - Arguments of the message (as many as needed, of any type).
    */
   send(channel, ...args) {
@@ -189,7 +220,7 @@ export default class Activity extends Process {
   /**
    * Sends a WebSocket message to the server side socket.
    * @param {String} channel - The channel of the message (is automatically
-   *  namespaced with the activity's name: `${this.id}:channel`).
+   *  namespaced with the activity's id: `${this.id}:channel`).
    * @param {...*} args - Arguments of the message (as many as needed, of any type).
    */
   sendVolatile(channel, ...args) {
@@ -199,8 +230,8 @@ export default class Activity extends Process {
   /**
    * Listen a WebSocket message from the server.
    * @param {String} channel - The channel of the message (is automatically
-   *  namespaced with the activity's name: `${this.id}:channel`).
-   * @param {...*} callback - The callback to execute when a message is received.
+   *  namespaced with the activity's id: `${this.id}:channel`).
+   * @param {Function} callback - The callback to execute when a message is received.
    */
   receive(channel, callback) {
     socket.receive(`${this.id}:${channel}`, callback);
@@ -209,10 +240,13 @@ export default class Activity extends Process {
   /**
    * Stop listening to a message from the server.
    * @param {String} channel - The channel of the message (is automatically
-   *  namespaced with the activity's name: `${this.id}:channel`).
-   * @param {...*} callback - The callback to cancel.
+   *  namespaced with the activity's id: `${this.id}:channel`).
+   * @param {Function} callback - The callback to remove from the stack.
    */
   removeListener(channel, callback) {
     socket.removeListener(`${this.id}:${channel}`, callback);
   }
 }
+
+export default Activity;
+

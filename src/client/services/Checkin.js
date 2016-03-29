@@ -7,23 +7,40 @@ import serviceManager from '../core/serviceManager';
 const SERVICE_ID = 'service:checkin';
 
 /**
- * Assign places among a set of predefined positions (i.e. labels and/or coordinates).
- * The service requests a position to the server and waits for the answer.
+ * Interface of the client `'checkin'` service.
  *
- * The service finishes its initialization when it receives a positive answer from the server. Otherwise (*e.g.* no more positions available), the service stays in its state and never finishes its initialization.
+ * This service is one of the provided services aimed at identifying clients inside
+ * the experience along with the [`'locator'`]{@link module:soundworks/client.Locator}
+ * and [`'placer'`]{@link module:soundworks/client.Placer} services.
  *
+ * The `'checkin'` service is the more simple among these services as the server
+ * simply assign a ticket to the client among the available ones. The ticket can
+ * optionnaly be associated with coordinates or label according to the server
+ * `setup` configuration.
+ *
+ * The service requires the ['welcome']{@link module:soundworks/client.Welcome}
+ * service, as itis considered that an index should be given only to clients who
+ * actively entered the application.
+ *
+ * __*The service must be used with its [server-side counterpart]{@link module:soundworks/server.Checkin}*__
+ *
+ * @see {@link module:soundworks/client.Locator}
+ * @see {@link module:soundworks/client.Placer}
+ *
+ * @param {Object} options
+ * @param {Boolean} [options.showDialog=false] - Define if the service should
+ *  display a view informaing the client of it's position.
+ *
+ * @memberof module:soundworks/client
  * @example
- * const checkin = new Checkin({ capacity: 100 });
+ * // inside the experience constructor
+ * this.checkin = this.require('checkin', { showDialog: true });
  */
 class Checkin extends Service {
+  /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */
   constructor() {
     super(SERVICE_ID, true);
 
-    /**
-     * @param {Object} defaults - Default options.
-     * @param {Boolean} [defaults.showDialog=false] - Indicates whether the view displays text or not.
-     * @param {View} [defaults.viewCtor=SegmentedView] - The constructor to use in order to create the view.
-     */
     const defaults = {
       showDialog: false,
       viewCtor: SegmentedView,
@@ -38,19 +55,25 @@ class Checkin extends Service {
     this._onUnavailableResponse = this._onUnavailableResponse.bind(this);
   }
 
+  /** @private */
   init() {
-
     /**
-     * Index given by the server side service.
+     * Index given by the server.
      * @type {Number}
      */
     this.index = -1;
 
     /**
-     * Label of the index assigned by the serverside {@link src/server/Checkin.js~Checkin} service (if any).
+     * Optionnal label given by the server.
      * @type {String}
      */
     this.label = null;
+
+    /**
+     * Optionnal coordinates given by the server.
+     * @type {String}
+     */
+    this.coordinates = null;
 
     if (this.options.showDialog) {
       this.viewCtor = this.options.viewCtor;
@@ -58,7 +81,7 @@ class Checkin extends Service {
     }
   }
 
-  /** private */
+  /** @private */
   start() {
     super.start();
 
@@ -76,7 +99,7 @@ class Checkin extends Service {
       this.show();
   }
 
-  /** private */
+  /** @private */
   stop() {
     super.stop();
     // Remove listeners for the server's response
@@ -87,10 +110,11 @@ class Checkin extends Service {
       this.hide();
   }
 
+  /** @private */
   _onPositionResponse(index, label, coordinates) {
     client.index = this.index = index;
     client.label = this.label = label;
-    client.coordinates = coordinates;
+    client.coordinates = this.coordinates = coordinates;
 
     if (this.options.showDialog) {
       const displayLabel = label || (index + 1).toString();
@@ -104,6 +128,7 @@ class Checkin extends Service {
     }
   }
 
+  /** @private */
   _onUnavailableResponse() {
     this.viewContent.error = true;
     this.view.render();

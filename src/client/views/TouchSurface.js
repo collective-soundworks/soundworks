@@ -95,8 +95,6 @@ export default class TouchSurface {
     const listeners = this._listeners[eventName];
     if (!listeners) { return; }
 
-    listeners.forEach((listener) => {
-      listener(touchId, normX, normY, touchEvent);
-    });
+    listeners.forEach((listener) => listener(touchId, normX, normY, touchEvent));
   }
 }

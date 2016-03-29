@@ -1,3 +1,11 @@
+/**
+ * Server-side entry point of the *soundworks* framework.
+ *
+ * @module soundworks/server
+ * @example
+ * import * as soundworks from 'soundworks/server';
+ */
+
 /* core */
 export { default as Client } from './core/Client';
 export { default as server } from './core/server';

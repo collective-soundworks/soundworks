@@ -12,15 +12,35 @@ const defaultCanvasTemplate = `
 `;
 
 /**
- * A `SegmentedView` with a `canvas` element in the background. This view should mainly be used in preformances.
+ * View designed for experiences where 2d graphical rendering is needed.
+ * The view is basically a `SegmentedView` with a `canvas` element in
+ * the background.
+ *
+ * @memberof module:soundworks/client
+ * @extends {module:soundworks/client.SegmentedView}
+ * @see {@link module:soundworks/client.View}
+ * @see {@link module:soundworks/client.Renderer}
  */
-export default class CanvasView extends SegmentedView {
+class CanvasView extends SegmentedView {
+  /**
+   * _<span class="warning">__WARNING__</span> Views should preferably by
+   * created using the [`Experience#createView`]{@link module:soundworks/client.Experience#createView}
+   * method._
+   *
+   * @param {String} template - Template of the view.
+   * @param {Object} content - Object containing the variables used to populate
+   *  the template. {@link module:soundworks/client.View#content}.
+   * @param {Object} events - Listeners to install in the view
+   *  {@link module:soundworks/client.View#events}.
+   * @param {Object} options - Options of the view.
+   *  {@link module:soundworks/client.View#options}.
+   */
   constructor(template, content, events, options) {
     template = template || defaultCanvasTemplate;
     super(template, content, events, options);
 
     /**
-     * Temporary stack the renderers when the view is not shown.
+     * Temporary stack the renderers when the view is not visible.
      * @type {Set}
      */
     this._rendererStack = new Set();
@@ -30,7 +50,7 @@ export default class CanvasView extends SegmentedView {
     super.onRender();
 
     /**
-     * The canvas element to draw into
+     * The canvas element to draw into.
      * @type {Element}
      */
     this.$canvas = this.$el.querySelector('canvas');
@@ -44,6 +64,7 @@ export default class CanvasView extends SegmentedView {
     /**
      * The default rendering group.
      * @type {RenderingGroup}
+     * @private
      */
     this._renderingGroup = new RenderingGroup(this.ctx);
   }
@@ -58,18 +79,25 @@ export default class CanvasView extends SegmentedView {
   }
 
   /**
-   * Overrides the `preRender` interface method of the default `RenderingGroup`
-   * of the view. cf. @link `RenderingGroup~prerender`
-   * @param {Function} callback - The function to use as a pre-render method.
+   * @callback module:soundworks/client.CanvasView~preRenderer
+   * @param {CanvasRenderingContext2D} ctx - Context of the canvas.
+   * @param {Number} dt - Delta time in seconds since the last rendering cycle.
+   */
+  /**
+   * Defines a function to be executed before all
+   * [`Renderer#render`]{@link module:soundworks/client.Renderer#render}
+   * at each cycle.
+   * @param {module:soundworks/client.CanvasView~preRenderer} callback - Function
+   *  to execute before aech rendering cycle.
    */
   setPreRender(callback) {
     this._renderingGroup.preRender = callback.bind(this._renderingGroup);
   }
 
   /**
-   * Add a renderer to the `RenderingGroup`. The renderer is automaticcaly
+   * Add a renderer to the `RenderingGroup`. The renderer is automatically
    * activated when added to the group.
-   * @param {Renderer} renderer - The renderer to add.
+   * @param {module:soundworks/client.Renderer} renderer - Renderer to add.
    */
   addRenderer(renderer) {
     if (this.isVisible)
@@ -79,9 +107,9 @@ export default class CanvasView extends SegmentedView {
   }
 
   /**
-   * Add a renderer to the `RenderingGroup`. The renderer is automaticcaly
+   * Add a renderer to the `RenderingGroup`. The renderer is automatically
    * disactivated when removed from the group.
-   * @param {Renderer} renderer - The renderer to remove.
+   * @param {module:soundworks/client.Renderer} renderer - Renderer to remove.
    */
   removeRenderer(renderer) {
     if (this.isVisible)
@@ -90,3 +118,5 @@ export default class CanvasView extends SegmentedView {
       this._rendererStack.delete(renderer);
   }
 }
+
+export default CanvasView;

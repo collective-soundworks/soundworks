@@ -8,21 +8,43 @@ const SERVICE_ID = 'service:placer';
 const maxCapacity = 9999;
 
 /**
- * [server] Allow to select a place within a set of predefined positions (i.e. labels and/or coordinates).
- * This service consumme a setup as defined in the server configuration
- * (see {@link src/server/core/server.js~appConfig} for details).
+ * Interface of the server `'placer'` service.
  *
- * (See also {@link src/client/services/ClientPlacer.js~ClientPlacer} on the client side)
+ * This service is one of the provided services aimed at identifying clients inside
+ * the experience along with the [`'locator'`]{@link module:soundworks/server.Locator}
+ * and [`'checkin'`]{@link module:soundworks/server.Checkin} services.
+ *
+ * The placer service is suited for situations where the experience has a set of
+ * predefined places (located or not) and shall refuse clients when all places
+ * are already associated with a client.
+ * The definition of the capacity, maximum clients per available positions,
+ * optionnal labels and coordinates used by the service, must be defined in the
+ * `setup` entry of the server configuration and must follow the format specified
+ * in {@link module:soundworks/server.appConfig.setup}. If no labels are provided
+ * the service generate incrementals numbers matching the given capacity.
+ *
+ * __*The service must be used with its [client-side counterpart]{@link module:soundworks/client.Placer}*__
+ *
+ * @see {@link module:soundworks/server.Locator}
+ * @see {@link module:soundworks/server.Checkin}
+ *
+ * @memberof module:soundworks/server
+ * @example
+ * // initialize the server with a custom setup
+ * const setup = {
+ *   capacity: 8,
+ *   labels: ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'],
+ * };
+ * soundworks.server.init({ setup });
+ *
+ * // inside the experience constructor
+ * this.placer = this.require('placer');
  */
 class Placer extends Activity {
+  /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */
   constructor() {
     super(SERVICE_ID);
 
-    /**
-     * @type {Object} defaults - Defaults options of the service
-     * @attribute {String} [defaults.setupConfigItem='setup'] - The path to the server's setup
-     *  configuration entry (see {@link src/server/core/server.js~appConfig} for details).
-     */
     const defaults = {
       setupConfigItem: 'setup',
     };
@@ -31,7 +53,7 @@ class Placer extends Activity {
     this._sharedConfigService = this.require('shared-config');
   }
 
-  /** @inheritdoc */
+  /** @private */
   start() {
     super.start();
 
@@ -95,7 +117,10 @@ class Placer extends Activity {
 
   /**
    * Store the client in a given position.
-   * @returns {Boolean} - `true` if succeed, `false` if not
+   * @private
+   * @param {Number} positionIndex - Index of chosen position.
+   * @param {Object} client - Client associated to the position.
+   * @returns {Boolean} - `true` if succeed, `false` if not.
    */
   _storeClientPosition(positionIndex, client) {
     if (!this.clients[positionIndex])
@@ -121,6 +146,9 @@ class Placer extends Activity {
 
   /**
    * Remove the client from a given position.
+   * @private
+   * @param {Number} positionIndex - Index of chosen position.
+   * @param {Object} client - Client associated to the position.
    */
   _removeClientPosition(positionIndex, client) {
     const list = this.clients[positionIndex] || [];
@@ -172,7 +200,7 @@ class Placer extends Activity {
     }
   }
 
-  /** @inheritdoc */
+  /** @private */
   connect(client) {
     super.connect(client);
 
@@ -180,7 +208,7 @@ class Placer extends Activity {
     this.receive(client, 'position', this._onPosition(client));
   }
 
-  /** @inheritdoc */
+  /** @private */
   disconnect(client) {
     super.disconnect(client);
 
