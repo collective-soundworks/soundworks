@@ -84,7 +84,7 @@ Different configurations of an application may include customized view content t
 The content fitting a view template can be changed dynamically (e.g. depending on a user interaction) whereby the view can be updated partially (i.e. only a specific HTML tag).
 Default CSS/SASS styles for the provided templates (used by the services and experiences) are part of the *Soundworks* application template.
 
-An advanced way of creating customized views consists in choosing alternative view templates and/or views among sets of provided templates and view classes.
+An advanced way of creating customized views consists in choosing alternative view templates and/or views among a set of provided templates and view classes.
 The `CanvasView` class, for example, implements a formalism that facilitates the implementation of canvas-based rendering through a `Renderer` abstraction.
 
 Ultimately, developers can create customized views extending the `View` base class or one of the provided view classes.
