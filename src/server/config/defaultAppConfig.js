@@ -20,7 +20,7 @@
 const defaultAppConfig = {
   /**
    * Title of the application, by default this value is used by the
-   * [`welcome`]{@link module:soundworks/client.Welcome} service to populate
+   * [`platform`]{@link module:soundworks/client.Platform} service to populate
    * its view.
    * @type {String}
    */

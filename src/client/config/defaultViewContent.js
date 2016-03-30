@@ -73,7 +73,10 @@ const defaultViewContent = {
    * @type {Object}
    */
   'service:platform': {
+    isCompatible: null,
     errorMessage: 'Sorry,<br />Your device is not compatible with the application.',
+    intro: 'Welcome to',
+    instructions: 'Touch the screen to join!',
   },
 
   /**
@@ -82,19 +85,6 @@ const defaultViewContent = {
    */
   'service:sync': {
     wait: `Clock syncing,<br />stand by&hellip;`,
-  },
-
-  /**
-   * Default content for the `welcome` service
-   * @type {Object}
-   */
-  'service:welcome': {
-    welcome: 'Welcome to',
-    touchScreen: 'Touch the screen to join!',
-    errorIosVersion: 'This application requires at least iOS 7 with Safari or Chrome.',
-    errorAndroidVersion: 'This application requires at least Android 4.2 with Chrome.',
-    errorRequireMobile: 'This application is designed for iOS and Android mobile devices.',
-    errorDefault: 'Sorry, the application cannot work properly on your device.',
   },
 
   /** @private */

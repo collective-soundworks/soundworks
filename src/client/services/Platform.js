@@ -1,6 +1,7 @@
 import { audioContext } from 'waves-audio';
 import client from '../core/client';
 import MobileDetect from 'mobile-detect';
+import screenfull from 'screenfull';
 import SegmentedView from '../views/SegmentedView';
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
@@ -19,13 +20,11 @@ adapter.disableLog(true);
  * @property {String} id - Id of the definition.
  * @property {Function} check - A function that should return `true` if the
  *  feature is available on the platform, `false` otherwise.
- * @property {Function} [interactionHook] - A function to be executed by the
- *  [`welcome` service]{@link module:soundworks/client.Welcome} on the first
- *  interaction (i.e. `click` or `touchstart`) of the user with application
+ * @property {Function} [interactionHook] - A function to be executed on the
+ *  first interaction (i.e. `click` or `touchstart`) of the user with application
  *  (for example, to initialize AudioContext on iOS devices).
- * @property {Function} [interactionHook] - A function to be executed by the
- *  [`welcome` service]{@link module:soundworks/client.Welcome} on start (for
- *  example to ask access to microphone or geolocation).
+ * @property {Function} [interactionHook] - A function to be executed on start
+ *  (for example to ask access to microphone or geolocation).
  */
 const defaultDefinitions = [
   {
@@ -71,6 +70,17 @@ const defaultDefinitions = [
         throw err;
       });
     }
+  },
+  {
+    id: 'full-screen',
+    check: function() {
+      // check later, is not a functionnality that can brake the application
+      return true;
+    },
+    interactionHook() {
+      if (screenfull.enabled)
+        screenfull.request();
+    }
   }
 ];
 
@@ -84,7 +94,7 @@ const SERVICE_ID = 'service:platform';
  * device (cf. [`client.device`]{@link module:soundworks/client.client.platform})
  * as well as check availability and provide hooks to initialize the features
  * required by the application (audio, microphone, etc.).
- * If one of the required definition is not available, an view is created with
+ * If one of the required definitions is not available, an view is created with
  * an error message and the [`client.compatible`]{@link module:soundworks/client.client.compatible}
  * attribute is set to `false`.
  *
@@ -92,18 +102,18 @@ const SERVICE_ID = 'service:platform';
  * - 'web-audio'
  * - 'mobile-device'
  * - 'audio-input'
+ * - 'full-screen' (this feature don't block the application, just applied if available)
  *
  * Most of these feature requiring an interaction or a confirmation from the
- * user in order to be initialized correctly, this service should be used in
- * conjonction with the [`welcome`]{@link module:soundworks/client.Welcome}
- * service.
+ * user in order to be initialized correctly, be carefull when setting
+ * `showDialog` option to `false`.
  *
- * @see {@link module:soundworks/client.Welcome}
  * @see {@link module:soundworks/client.client}
  *
  * @param {Object} options
  * @param {Array<String>|String} options.features - Id(s) of the feature(s)
  *  required by the application.
+ * @param {}
  *
  * @memberof module:soundworks/client
  * @example
@@ -116,8 +126,10 @@ class Platform extends Service {
     super(SERVICE_ID, false);
 
     const defaults = {
+      // wakeLock: false, // @todo - fix and transform into a feature
+      showDialog: true,
       viewCtor: SegmentedView,
-      viewPriority: 20,
+      viewPriority: 10,
     };
 
     this.configure(defaults);
@@ -149,6 +161,7 @@ class Platform extends Service {
     this._definePlatform();
     // resolve required features from the application
     client.compatible = this.resolveRequiredFeatures();
+    this.viewContent.isCompatible = client.compatible;
 
     this.viewCtor = this.options.viewCtor;
     this.view = this.createView();
@@ -161,10 +174,32 @@ class Platform extends Service {
     if (!this.hasStarted)
       this.init();
 
-    if (client.compatible)
-      this.ready();
-    else
+    // execute start hooks from the features definitions
+    const startHooks = this.getStartHooks();
+    startHooks.forEach((hook) => hook());
+
+    // optionnaly skip the view if client is compatible
+    if (client.compatible && !this.options.showDialog) {
+      // bypass features contains 'web-audio' and client.platform.os === 'ios'
+      if (this._requiredFeatures.contains('web-audio') && client.platform.os === 'ios')
+        this.show();
+      else
+        this.ready();
+    } else {
       this.show();
+    }
+
+    // install events for interaction hook
+    if (client.compatible) {
+      const event = client.platform.isMobile ? 'touchend' : 'click';
+      this.view.installEvents({ [event]: this._onInteraction.bind(this) });
+    }
+  }
+
+  /** @private */
+  stop() {
+    this.hide();
+    super.stop();
   }
 
   /**
@@ -207,7 +242,7 @@ class Platform extends Service {
   }
 
   /**
-   * Returns the list of the functions to be executed on welcome `start` lifecycle.
+   * Returns the list of the functions to be executed on `start` lifecycle.
    * @private
    * @return {Array}
    */
@@ -216,8 +251,8 @@ class Platform extends Service {
   }
 
   /**
-   * Returns the list of the functions to be executed on welcome when the user
-   * interacts with the application.
+   * Returns the list of the functions to be executed when the user
+   * interacts with the application for the first time.
    * @private
    * @return {Array}
    */
@@ -237,6 +272,23 @@ class Platform extends Service {
     });
 
     return hooks;
+  }
+
+  /**
+   * Execute `interactions` hooks from the `platform` service.
+   * Also activate the media according to the `options`.
+   * @private
+   */
+  _onInteraction() {
+    // execute interaction hooks from the platform
+    const interactionHooks = this.getInteractionHooks();
+    interactionHooks.forEach((hook) => hook());
+
+    // @todo - fix and transform into a feature
+    // if (this.options.wakeLock)
+    //   this._initWakeLock();
+
+    this.ready();
   }
 
   /**
@@ -274,6 +326,50 @@ class Platform extends Service {
       else
         return 'other';
     })();
+  }
+
+  // @todo - transform into feature definition
+  // hacks to keep the device awake...
+  // cf. https://github.com/borismus/webvr-boilerplate/blob/8abbc74cfa5976b9ab0c388cb0c51944008c6989/js/webvr-manager.js#L268-L289
+  _initWakeLock() {
+    this._wakeLockVideo = document.createElement('video');
+
+    this._wakeLockVideo.addEventListener('ended', () => {
+      this._wakeLockVideo.play();
+    });
+  }
+
+  _requestWakeLock() {
+    const os = client.platform.os;
+    this._releaseWakeClock();
+
+    if (os === 'ios') {
+      if (this._wakeLockTimer) return;
+
+      this._wakeLockTimer = setInterval(() => {
+        window.location = window.location;
+        setTimeout(window.stop, 0);
+      }, 30000);
+    } else if (os === 'android') {
+      if (this._wakeLockVideo.paused === false) return;
+
+      this._wakeLockVideo.src = _base64('video/webm', 'GkXfowEAAAAAAAAfQoaBAUL3gQFC8oEEQvOBCEKChHdlYm1Ch4ECQoWBAhhTgGcBAAAAAAACWxFNm3RALE27i1OrhBVJqWZTrIHfTbuMU6uEFlSua1OsggEuTbuMU6uEHFO7a1OsggI+7AEAAAAAAACkAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAVSalmAQAAAAAAAEMq17GDD0JATYCMTGF2ZjU2LjQuMTAxV0GMTGF2ZjU2LjQuMTAxc6SQ20Yv/Elws73A/+KfEjM11ESJiEBkwAAAAAAAFlSuawEAAAAAAABHrgEAAAAAAAA+14EBc8WBAZyBACK1nIN1bmSGhVZfVlA4g4EBI+ODhAT3kNXgAQAAAAAAABKwgRC6gRBTwIEBVLCBEFS6gRAfQ7Z1AQAAAAAAALHngQCgAQAAAAAAAFyho4EAAIAQAgCdASoQABAAAEcIhYWIhYSIAgIADA1gAP7/q1CAdaEBAAAAAAAALaYBAAAAAAAAJO6BAaWfEAIAnQEqEAAQAABHCIWFiIWEiAICAAwNYAD+/7r/QKABAAAAAAAAQKGVgQBTALEBAAEQEAAYABhYL/QACAAAdaEBAAAAAAAAH6YBAAAAAAAAFu6BAaWRsQEAARAQABgAGFgv9AAIAAAcU7trAQAAAAAAABG7j7OBALeK94EB8YIBgfCBAw==');
+      this._wakeLockVideo.play();
+    }
+  }
+
+  _releaseWakeClock() {
+    const os = client.platform.os;
+
+    if (os === 'ios') {
+      if (this._wakeLockTimer) {
+        clearInterval(this._wakeLockTimer);
+        this._wakeLockTimer = null;
+      }
+    } else if (os === 'android') {
+      this._wakeLockVideo.pause();
+      this._wakeLockVideo.src = '';
+    }
   }
 }
 

@@ -62,7 +62,6 @@ const client = {
    *  the platform.
    *
    * @see {@link module:soundworks/client.Platform}
-   * @see {@link module:soundworks/client.Welcome}
    */
   platform: {
     os: null,
@@ -76,7 +75,6 @@ const client = {
    *
    * @type {Boolean}
    * @see {@link module:soundworks/client.Platform}
-   * @see {@link module:soundworks/client.Welcome}
    */
   compatible: null,
 

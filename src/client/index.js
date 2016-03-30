@@ -36,7 +36,6 @@ export { default as Sync } from './services/Sync';
 export { default as Loader } from './services/Loader';
 export { default as MotionInput } from './services/MotionInput';
 export { default as Scheduler } from './services/Scheduler';
-export { default as Welcome } from './services/Welcome';
 
 // config
 export { default as defaultViewTemplates } from './config/defaultViewTemplates';

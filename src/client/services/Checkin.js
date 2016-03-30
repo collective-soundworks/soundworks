@@ -18,8 +18,8 @@ const SERVICE_ID = 'service:checkin';
  * optionnaly be associated with coordinates or label according to the server
  * `setup` configuration.
  *
- * The service requires the ['welcome']{@link module:soundworks/client.Welcome}
- * service, as itis considered that an index should be given only to clients who
+ * The service requires the ['platform']{@link module:soundworks/client.Platform}
+ * service, as it is considered that an index should be given only to clients who
  * actively entered the application.
  *
  * __*The service must be used with its [server-side counterpart]{@link module:soundworks/server.Checkin}*__
@@ -49,7 +49,7 @@ class Checkin extends Service {
 
     this.configure(defaults);
 
-    this.require('welcome');
+    this.require('platform', { showDialog: true });
     // bind callbacks to the current instance
     this._onPositionResponse = this._onPositionResponse.bind(this);
     this._onUnavailableResponse = this._onUnavailableResponse.bind(this);

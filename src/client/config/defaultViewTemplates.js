@@ -107,11 +107,25 @@ const defaultViewTemplates = {
    * @type {String}
    */
   'service:platform': `
-    <div class="section-top"></div>
-    <div class="section-center flex-center">
-      <p><%= errorMessage %></p>
-    </div>
-    <div class="section-bottom"></div>
+    <% if (!isCompatible) { %>
+      <div class="section-top"></div>
+      <div class="section-center flex-center">
+        <p><%= errorMessage %></p>
+      </div>
+      <div class="section-bottom"></div>
+    <% } else { %>
+      <div class="section-top flex-middle"></div>
+      <div class="section-center flex-center">
+          <p class="big">
+            <%= intro %>
+            <br />
+            <b><%= globals.appName %></b>
+          </p>
+      </div>
+      <div class="section-bottom flex-middle">
+        <p class="small soft-blink"><%= instructions %></p>
+      </div>
+    <% } %>
   `,
 
   /**
@@ -124,24 +138,6 @@ const defaultViewTemplates = {
       <p class="soft-blink"><%= wait %></p>
     </div>
     <div class="section-bottom"></div>
-  `,
-
-  /**
-   * Default template of the `welcome` service.
-   * @type {String}
-   */
-  'service:welcome': `
-    <div class="section-top flex-middle"></div>
-    <div class="section-center flex-center">
-        <p class="big">
-          <%= welcome %>
-          <br />
-          <b><%= globals.appName %></b>
-        </p>
-    </div>
-    <div class="section-bottom flex-middle">
-      <p class="small soft-blink"><%= touchScreen %></p>
-    </div>
   `,
 
   /** @private */

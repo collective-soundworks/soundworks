@@ -37,9 +37,7 @@ class Sync extends Service {
     }
 
     this.configure(defaults);
-    // needs audio time
     this.require('platform', { features: 'web-audio' });
-    this.require('welcome');
 
     this._syncStatusReport = this._syncStatusReport.bind(this);
     this._reportListeners = [];
@@ -97,14 +95,14 @@ class Sync extends Service {
    * Add a callback function to the synchronization reports from the server.
    * @param {Function} callback
    */
-  addListener (callback) {
+  addListener(callback) {
     this._reportListeners.push(callback);
   }
 
-  _syncStatusReport(message, report) {
-    if (message === 'sync:status') {
+  _syncStatusReport(channel, report) {
+    if (channel === 'sync:status') {
       if (report.status === 'training' || report.status === 'sync') {
-        this._reportListeners.forEach((callback) =>  callback(status, report));
+        this._reportListeners.forEach((callback) =>  callback(report));
 
         if (!this._ready) {
           this._ready = true;
@@ -113,6 +111,7 @@ class Sync extends Service {
       }
     }
   }
+
 }
 
 serviceManager.register(SERVICE_ID, Sync);

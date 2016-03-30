@@ -87,7 +87,6 @@ class Scheduler extends Service {
 
     this._sync = this.require('sync');
     this._platform = this.require('platform', { features: 'web-audio' });
-    this._welcome = this.require('welcome');
 
     this._scheduler = audio.getScheduler();
     this._syncedQueue = new _SyncTimeSchedulingQueue(this._sync, this._scheduler);

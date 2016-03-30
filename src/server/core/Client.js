@@ -1,32 +1,12 @@
 import uuid from 'uuid';
 
 /**
- * Client that connects to the server.
- *
- * Each time a client of type `'clientType'` connects to the server, *Soundworks*
- * creates a new instance of `Client`.
- * An instance of the class is passed to the `connect` and `disconnect` methods
- * of all the server side activities that are mapped to the `'clientType'` clients
- * (see {@link server#map}), as well as to the `enter` and `exit` methods of any
- * {@link src/server/Experience.js~Experience} class mapped to that same client type.
- *
- * The class is also used to communicate with the client via WebSockets.
- *
- * @example class MyPerformance extends Performance {
- *   // ...
- *
- *   enter(client) {
- *     const msg = "Welcome to the performance!";
- *     client.send('init', msg);
- *   }
- *
- *   // ...
- * }
+ * Server side representation of a client.
  */
 export default class Client {
 	/**
-	 * @param {String} clientType Client type of the connected client.
-	 * @param {Socket} socket Socket object used to comminuate with the client.
+	 * @param {String} clientType - Client type of the connected client.
+	 * @param {Socket} socket - Socket object used to comminuate with the client.
 	 * @private
 	 */
 	constructor(clientType, socket) {

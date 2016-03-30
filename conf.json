@@ -23,7 +23,6 @@
       "src/client/services/SharedConfig.js",
       "src/client/services/SharedParams.js",
       "src/client/services/Sync.js",
-      "src/client/services/Welcome.js",
 
       "src/client/scenes/Experience.js",
 
