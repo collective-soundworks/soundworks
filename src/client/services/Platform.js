@@ -181,7 +181,7 @@ class Platform extends Service {
     // optionnaly skip the view if client is compatible
     if (client.compatible && !this.options.showDialog) {
       // bypass features contains 'web-audio' and client.platform.os === 'ios'
-      if (this._requiredFeatures.contains('web-audio') && client.platform.os === 'ios')
+      if (this._requiredFeatures.has('web-audio') && client.platform.os === 'ios')
         this.show();
       else
         this.ready();
@@ -328,7 +328,7 @@ class Platform extends Service {
     })();
   }
 
-  // @todo - transform into feature definition
+  // @todo - fix transform into feature definition
   // hacks to keep the device awake...
   // cf. https://github.com/borismus/webvr-boilerplate/blob/8abbc74cfa5976b9ab0c388cb0c51944008c6989/js/webvr-manager.js#L268-L289
   _initWakeLock() {
