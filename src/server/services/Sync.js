@@ -24,11 +24,6 @@ class Sync extends Activity {
   /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */
   constructor() {
     super(SERVICE_ID);
-  }
-
-  /** @private */
-  start() {
-    super.start();
 
     this._hrtimeStart = process.hrtime();
 
@@ -36,6 +31,11 @@ class Sync extends Activity {
       const time = process.hrtime(this._hrtimeStart);
       return time[0] + time[1] * 1e-9;
     });
+  }
+
+  /** @private */
+  start() {
+    super.start();
   }
 
   /** @private */
