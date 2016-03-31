@@ -111,7 +111,7 @@ class Placer extends Activity {
 
     // add path to shared config requirements for all client type
     this.clientTypes.forEach((clientType) => {
-      this._sharedConfigService.addItem(setupConfigItem, clientType);
+      this._sharedConfigService.share(setupConfigItem, clientType);
     });
   }
 

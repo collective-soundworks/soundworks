@@ -180,7 +180,7 @@ class Platform extends Service {
 
     // optionnaly skip the view if client is compatible
     if (client.compatible && !this.options.showDialog) {
-      // bypass features contains 'web-audio' and client.platform.os === 'ios'
+      // bypass if features contains 'web-audio' and client.platform.os === 'ios'
       if (this._requiredFeatures.has('web-audio') && client.platform.os === 'ios')
         this.show();
       else

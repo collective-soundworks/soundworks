@@ -47,7 +47,7 @@ class Locator extends Activity {
     const areaConfigItem = this.options.areaConfigItem;
 
     this.clientTypes.forEach((clientType) => {
-      this._sharedConfigService.addItem(areaConfigItem, clientType);
+      this._sharedConfigService.share(areaConfigItem, clientType);
     });
   }
 
