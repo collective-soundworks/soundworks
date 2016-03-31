@@ -167,7 +167,10 @@ const server = {
       const httpsInfos = this.config.httpsInfos;
 
       if (httpsInfos.key && httpsInfos.cert) {
-        launchHttpsServer(httpsInfos.key, httpsInfos.cert);
+        const key = fs.readFileSync(httpsInfos.key);
+        const cert = fs.readFileSync(httpsInfos.cert);
+
+        launchHttpsServer(key, cert);
       } else {
         // generate https certificate (for development usage)
         pem.createCertificate({ days: 1, selfSigned: true }, (err, keys) => {
