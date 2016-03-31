@@ -46,6 +46,8 @@ export default class Service extends Activity {
     return service;
   }
 
+  init() {}
+
   start() {
     log(`"${this.id}" started`);
     super.start();

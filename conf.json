@@ -1,0 +1,67 @@
+{
+  "source": {
+    "include": [
+      "README.md",
+      "src/client/index.js",
+
+      "src/client/core/client.js",
+      "src/client/core/Activity.js",
+      "src/client/core/Scene.js",
+
+      "src/client/config/defaultViewTemplates.js",
+      "src/client/config/defaultViewContent.js",
+
+      "src/client/services/Checkin.js",
+      "src/client/services/ErrorReporter.js",
+      "src/client/services/Loader.js",
+      "src/client/services/Locator.js",
+      "src/client/services/MotionInput.js",
+      "src/client/services/Network.js",
+      "src/client/services/Placer.js",
+      "src/client/services/Platform.js",
+      "src/client/services/Scheduler.js",
+      "src/client/services/SharedConfig.js",
+      "src/client/services/SharedParams.js",
+      "src/client/services/Sync.js",
+
+      "src/client/scenes/Experience.js",
+
+      "src/client/views/CanvasView.js",
+      "src/client/views/Renderer.js",
+      "src/client/views/SegmentedView.js",
+      "src/client/views/View.js",
+      "src/client/views/viewport.js",
+
+      "src/server/index.js",
+
+      "src/server/config/defaultAppConfig.js",
+      "src/server/config/defaultEnvConfig.js",
+      "src/server/config/defaultFwConfig.js",
+
+      "src/server/core/server.js",
+
+      "src/server/services/Checkin.js",
+      "src/server/services/ErrorReporter.js",
+      "src/server/services/Locator.js",
+      "src/server/services/Network.js",
+      "src/server/services/Osc.js",
+      "src/server/services/Placer.js",
+      "src/server/services/SharedConfig.js",
+      "src/server/services/SharedParams.js",
+      "src/server/services/Sync.js"
+    ]
+  },
+  "plugins": [
+    "plugins/markdown"
+  ],
+  "opts": {
+    "destination": "./out",
+    "projectTitle": "Soundworks",
+    "template": "node_modules/jsdoc-template"
+  },
+  "templates": {
+    "default": {
+      "useLongnameInNav": true
+    }
+  }
+}

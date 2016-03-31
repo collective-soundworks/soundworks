@@ -72,14 +72,17 @@ const loop = {
 };
 
 /**
- * This class allow to register several renderers on a single full screen canvas. Calls the `requireStart` and `requireStop` of the main rendering loop when a `Renderer` instance is added or removed.
+ * This class allow to register several renderers on a single full screen
+ * canvas. Calls the `requireStart` and `requireStop` of the main rendering
+ * loop when a `Renderer` instance is added or removed.
  *
- * This class should be considered as private, and is hidden into the @link `CanvasView` for most of the usecases
+ * This class should be considered as private, and is hidden into the
+ * {@link module:soundworks/client.CanvasView} for most of the usecases.
  */
 export default class RenderingGroup {
   /**
-   * The construcotr of a `RenderingGroup`.
-   * @param {CanvasRenderingContext2D} ctx - The main canvas context in which the renderer should draw.
+   * @param {CanvasRenderingContext2D} ctx - Canvas context in which
+   *  the renderer should draw.
    */
   constructor(ctx) {
     this.ctx = ctx;
@@ -90,8 +93,8 @@ export default class RenderingGroup {
 
   /**
    * Updates the size of the canvas. Propagate values to all registered renderers.
-   * @param {Number} viewportWidth - The width of the viewport.
-   * @param {Number} viewportHeight - The height of the viewport.
+   * @param {Number} viewportWidth - Width of the viewport.
+   * @param {Number} viewportHeight - Height of the viewport.
    */
   onResize(viewportWidth, viewportHeight) {
     this.canvasWidth = viewportWidth;
@@ -105,9 +108,10 @@ export default class RenderingGroup {
   }
 
   /**
-   * Propagate the `update` to all registered renderers. The `update` method for each renderer is called according to their update period.
-   * @param {Number} time - The current time.
-   * @param {Number} dt - The delta time in seconds since the last update.
+   * Propagate the `update` to all registered renderers. The `update` method
+   * for each renderer is called according to their update period.
+   * @param {Number} time - Current time.
+   * @param {Number} dt - Delta time in seconds since the last update.
    */
   update(time, dt) {
     const renderers = this.renderers;
@@ -129,15 +133,18 @@ export default class RenderingGroup {
   }
 
   /**
-   * Entry point to apply global transformations to the canvas before each renderer is rendered.
-   * @param {CanvasRenderingContext2D} ctx - The context of the canvas.
-   * @param {Number} dt - The delta time in seconds since the last rendering loop (`requestAnimationFrame`).
+   * Entry point to apply global transformations to the canvas before each
+   * renderer is rendered.
+   * @param {CanvasRenderingContext2D} ctx - Context of the canvas.
+   * @param {Number} dt - Delta time in seconds since the last rendering
+   *  loop (`requestAnimationFrame`).
    */
   preRender(ctx, dt) {}
 
   /**
    * Propagate `render` method to all the registered renderers.
-   * @param {Number} dt - The delta time in seconds since the last rendering loop (`requestAnimationFrame`).
+   * @param {Number} dt - Delta time in seconds since the last rendering
+   *  loop (`requestAnimationFrame`).
    */
   render(dt) {
     const ctx = this.ctx;
@@ -151,7 +158,7 @@ export default class RenderingGroup {
 
   /**
    * Add a `Renderer` instance to the group.
-   * @param {Renderer} renderer - The renderer to add.
+   * @param {Renderer} renderer - Renderer to be added.
    */
   add(renderer) {
     this.renderers.push(renderer);
@@ -167,7 +174,7 @@ export default class RenderingGroup {
 
   /**
    * Remove a `Renderer` instance from the group.
-   * @param {Renderer} renderer - The renderer to remove.
+   * @param {Renderer} renderer - Eenderer to remove.
    */
   remove(renderer) {
     const index = this.renderers.indexOf(renderer);

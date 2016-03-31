@@ -4,26 +4,26 @@ import SyncModule from 'sync/server';
 
 const SERVICE_ID = 'service:sync';
 /**
- * Synchronize the local clock on a master clock shared by the server and the clients.
+ * Interface of the server `'sync'` service.
  *
- * Both the clients and the server can use this master clock as a common time reference.
- * For instance, this allows all the clients to do something exactly at the same time, such as blinking the screen or playing a sound in a synchronized manner.
+ * This service acts as the master clock provider for the client sync service,
+ * in order to synchronize the clocks of the different clients to its own clock.
+ *
+ * __*The service must be used with its [client-side counterpart]{@link module:soundworks/client.Sync}*__
  *
  * **Note:** the service is based on [`github.com/collective-soundworks/sync`](https://github.com/collective-soundworks/sync).
  *
- * (See also {@link src/client/ClientSync.js~ClientSync} on the client side.)
- *
- * @example const sync = new Sync();
- *
- * const nowSync = sync.getSyncTime(); // current time in the sync clock time
+ * @memberof module:soundworks/server
+ * @example
+ * // inside the experience constructor
+ * this.sync = this.require('sync');
+ * // when the experience has started
+ * const syncTime = this.sync.getSyncTime();
  */
 class Sync extends Activity {
+  /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */
   constructor() {
     super(SERVICE_ID);
-  }
-
-  start() {
-    super.start();
 
     this._hrtimeStart = process.hrtime();
 
@@ -33,9 +33,12 @@ class Sync extends Activity {
     });
   }
 
-  /**
-   * @private
-   */
+  /** @private */
+  start() {
+    super.start();
+  }
+
+  /** @private */
   connect(client) {
     super.connect(client);
 
@@ -46,8 +49,8 @@ class Sync extends Activity {
   }
 
   /**
-   * Returns the current time in the sync clock.
-   * @return {Number} - Current sync time (in seconds).
+   * Returns the current time in the sync clock, devired from `process.hrtime()`.
+   * @return {Number} - Current sync time (in _seconds_).
    */
   getSyncTime() {
     return this._sync.getSyncTime();

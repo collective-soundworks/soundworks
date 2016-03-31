@@ -1,11 +1,30 @@
 /**
- * The default view templates for the services and scenes. The view templates are organized according to the `Module.name` property.
+ * The default view templates for the services. Each key correspond
+ * to the `id` attribute of the activity it is associated to.
  *
- * These view template are internally parsed using `lodash.template`, see [https://lodash.com/docs#template](https://lodash.com/docs#template) for more information.
+ * The view templates are internally parsed using the `lodash.template` system,
+ * see [https://lodash.com/docs#template]{@link https://lodash.com/docs#template}
+ * for more information.
+ * Each variable used inside a given template is declared inside the
+ * [`defaultContent`]{@link module:soundworks/client.defaultContent} inside
+ * an object with the same key.
  *
- * @type {Object}
+ * These default templates can be overriden by passing an object to the
+ * [`client.setViewTemplateDefinitions`]{@link module:soundworks/client.client.setViewTemplateDefinitions}
+ * method.
+ *
+ * @namespace
+ * @memberof module:soundworks/client
+ *
+ * @see {@link module:soundworks/client.defaultViewContent}
+ * @see {@link module:soundworks/client.client}
+ * @see {@link https://lodash.com/docs#template}
  */
 const defaultViewTemplates = {
+  /**
+   * Default template of the `checkin` service.
+   * @type {String}
+   */
   'service:checkin': `
     <% if (label) { %>
       <div class="section-top flex-middle">
@@ -27,10 +46,10 @@ const defaultViewTemplates = {
     <% } %>
   `,
 
-  'service:control': `
-    <h1 class="big"><%= title %></h1>
-  `,
-
+  /**
+   * Default template of the `loader` service.
+   * @type {String}
+   */
   'service:loader': `
     <div class="section-top flex-middle">
       <p><%= loading %></p>
@@ -45,6 +64,10 @@ const defaultViewTemplates = {
     <div class="section-bottom"></div>
   `,
 
+  /**
+   * Default template of the `locator` service.
+   * @type {String}
+   */
   'service:locator': `
     <div class="section-square"></div>
     <div class="section-float flex-middle">
@@ -56,6 +79,10 @@ const defaultViewTemplates = {
     </div>
   `,
 
+  /**
+   * Default template of the `placer` service.
+   * @type {String}
+   */
   'service:placer': `
     <div class="section-square<%= mode === 'list' ? ' flex-middle' : '' %>">
       <% if (rejected) { %>
@@ -75,14 +102,36 @@ const defaultViewTemplates = {
     </div>
   `,
 
+  /**
+   * Default template of the `platform` service.
+   * @type {String}
+   */
   'service:platform': `
-    <div class="section-top"></div>
-    <div class="section-center flex-center">
-      <p><%= errorMessage %></p>
-    </div>
-    <div class="section-bottom"></div>
+    <% if (!isCompatible) { %>
+      <div class="section-top"></div>
+      <div class="section-center flex-center">
+        <p><%= errorMessage %></p>
+      </div>
+      <div class="section-bottom"></div>
+    <% } else { %>
+      <div class="section-top flex-middle"></div>
+      <div class="section-center flex-center">
+          <p class="big">
+            <%= intro %>
+            <br />
+            <b><%= globals.appName %></b>
+          </p>
+      </div>
+      <div class="section-bottom flex-middle">
+        <p class="small soft-blink"><%= instructions %></p>
+      </div>
+    <% } %>
   `,
 
+  /**
+   * Default template of the `sync` service.
+   * @type {String}
+   */
   'service:sync': `
     <div class="section-top"></div>
     <div class="section-center flex-center">
@@ -91,20 +140,7 @@ const defaultViewTemplates = {
     <div class="section-bottom"></div>
   `,
 
-  'service:welcome': `
-    <div class="section-top flex-middle"></div>
-    <div class="section-center flex-center">
-        <p class="big">
-          <%= welcome %>
-          <br />
-          <b><%= globals.appName %></b>
-        </p>
-    </div>
-    <div class="section-bottom flex-middle">
-      <p class="small soft-blink"><%= touchScreen %></p>
-    </div>
-  `,
-
+  /** @private */
   survey: `
     <div class="section-top">
       <% if (counter <= length) { %>

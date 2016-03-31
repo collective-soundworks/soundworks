@@ -69,8 +69,10 @@ export default class Experience extends Activity {
   }
 
   /**
-   * Called when the client exits the performance on the client side (*i.e.* when the `done` method of the client side experience is called, or when the client disconnects from the server).
-   * @param {Client} client Client who exits the performance.
+   * Called when the client exits the performance on the client side (*i.e.*
+   * when the `done` method of the client side experience is called, or when
+   * the client disconnects from the server).
+   * @param {Client} client - Client who exits the performance.
    */
   exit(client) {
     // Remove the client from the `this.clients` array.

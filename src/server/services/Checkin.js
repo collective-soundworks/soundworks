@@ -4,26 +4,37 @@ import serviceManager from '../core/serviceManager';
 
 const SERVICE_ID = 'service:checkin';
 
+
 /**
- * Assign places among a set of predefined positions (i.e. labels and/or coordinates).
+ * Interface of the server `'checkin'` service.
  *
- * The service assigns a position to a client upon request of the client-side service.
+ * This service is one of the provided services aimed at identifying clients inside
+ * the experience along with the [`'locator'`]{@link module:soundworks/server.Locator}
+ * and [`'placer'`]{@link module:soundworks/server.Placer} services.
  *
- * (See also {@link src/client/ClientCheckin.js~ClientCheckin} on the client side.)
+ * The `'checkin'` service is the more simple among these services as the server
+ * simply assign a ticket to the client among the available ones. The ticket can
+ * optionnaly be associated with coordinates or label according to the server
+ * `setup` configuration.
  *
+ * __*The service must be used with its [client-side counterpart]{@link module:soundworks/client.Checkin}*__
+ *
+ * @see {@link module:soundworks/server.Locator}
+ * @see {@link module:soundworks/server.Placer}
+ *
+ * @param {Object} options
+ * @param {Boolean}  [options.order='ascending'] - The order in which indices
+ * are assigned. Currently supported values are:
+ * - `'ascending'`: indices are assigned in ascending order
+ * - `'random'`: indices are assigned in random order
+ *
+ * @memberof module:soundworks/server
  * @example
- * const checkin = new Checkin({ capacity: 100, order: 'random' });
+ * // inside the experience constructor
+ * this.checkin = this.require('checkin');
  */
 class Checkin extends Activity {
-  /**
-   * @param {Object} [options={}] Options.
-   * @attribute {String} [defaults.setupConfigItem='setup'] - The path to the server's
-   *  setup configuration entry (see {@link src/server/core/server.js~appConfig} for details).
-   * @param {Object} [options.order='ascending'] - The order in which indices are assigned.
-   *  Currently supported values are:
-   * - `'ascending'`: indices are assigned in ascending order
-   * - `'random'`: indices are assigned in random order
-   */
+  /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */
   constructor() {
     super(SERVICE_ID);
 
@@ -33,38 +44,34 @@ class Checkin extends Activity {
     }
 
     this.configure(defaults);
-
     // use shared config service to share the setup
     this._sharedConfigService = this.require('shared-config');
   }
 
+  /** @private */
   start() {
     super.start();
 
     /**
-     * Setup defining predefined positions (labels and/or coordinates).
+     * Setup retrieved from server configuration.
      * @type {Object}
      */
     this.setup = this._sharedConfigService.get(this.options.setupConfigItem);
 
     /**
-     * Maximum number of clients checked in (may limit or be limited by the number of predefined labels and/or coordinates).
+     * Maximum number of clients checked in (may limit or be limited by the
+     * number of predefined labels and/or coordinates).
      * @type {Number}
      */
     this.capacity = getOpt(this.setup.capacity, Infinity, 1);
 
     /**
-     * List of the clients checked in with corresponing indices.
+     * List of the clients checked in at their corresponding indices.
      * @type {Client[]}
      */
     this.clients = [];
 
-    /**
-     * Order in which indices are assigned. Currently supported values are:
-     * - `'ascending'`: assigns indices in ascending order;
-     * - `'random'`: assigns indices in random order.
-     * @type {[type]}
-     */
+    /** @private */
     this.order = this.options; // 'ascending' | 'random'
 
     this._availableIndices = [];
@@ -91,6 +98,7 @@ class Checkin extends Activity {
     }
   }
 
+  /** @private */
   _getRandomIndex() {
     const numAvailable = this._availableIndices.length;
 
@@ -102,6 +110,7 @@ class Checkin extends Activity {
     return -1;
   }
 
+  /** @private */
   _getAscendingIndex() {
     if (this._availableIndices.length > 0) {
       this._availableIndices.sort(function(a, b) {
@@ -116,11 +125,13 @@ class Checkin extends Activity {
     return -1;
   }
 
+  /** @private */
   _releaseIndex(index) {
     if (Number.isInteger(index))
       this._availableIndices.push(index);
   }
 
+  /** @private */
   _onRequest(client) {
     return () => {
       let index = -1;
@@ -153,15 +164,14 @@ class Checkin extends Activity {
     }
   }
 
-
-  /** @inheritdoc */
+  /** @private */
   connect(client) {
     super.connect(client);
 
     this.receive(client, 'request', this._onRequest(client));
   }
 
-  /** @inheritdoc */
+  /** @private */
   disconnect(client) {
     super.disconnect(client);
 

@@ -67,19 +67,24 @@ function getTranspiler(srcDirectory, distDirectory, isAllowed, babelOptions) {
     delete: function(filename, callback) {
       var outFilename = getTarget(filename);
 
-      if (fse.statSync(outFilename).isFile()) {
-        fse.remove(outFilename, function(err) {
-          if (err)
-            return console.log(err.message);
+      fse.stat(outFilename, function(err, stats) {
+        if (err)
+          return console.log(err.message);
 
-          log.deleteFile(outFilename);
+        if (stats.isFile()) {
+          fse.remove(outFilename, function(err) {
+            if (err)
+              return console.log(err.message);
 
-          if (callback)
-            callback();
-        });
-      } else {
-        callback();
-      }
+            log.deleteFile(outFilename);
+
+            if (callback)
+              callback();
+          });
+        } else {
+          callback();
+        }
+      });
     },
   };
 
