@@ -11,7 +11,7 @@ basicControllers.disableStyles();
 /* --------------------------------------------------------- */
 
 /** @private */
-class _ControlItem extends EventEmitter {
+class _Param extends EventEmitter {
   constructor(control, type, name, label) {
     super();
     this.control = control;
@@ -42,7 +42,7 @@ class _ControlItem extends EventEmitter {
 
 
 /** @private */
-class _BooleanItem extends _ControlItem {
+class _BooleanParam extends _Param {
   constructor(control, name, label, init) {
     super(control, 'boolean', name, label);
     this.set(init);
@@ -54,7 +54,7 @@ class _BooleanItem extends _ControlItem {
 }
 
 /** @private */
-class _EnumItem extends _ControlItem {
+class _EnumParam extends _Param {
   constructor(control, name, label, options, init) {
     super(control, 'enum', name, label);
     this.options = options;
@@ -72,7 +72,7 @@ class _EnumItem extends _ControlItem {
 }
 
 /** @private */
-class _NumberItem extends _ControlItem {
+class _NumberParam extends _Param {
   constructor(control, name, label, min, max, step, init) {
     super(control, 'number', name, label);
     this.min = min;
@@ -87,7 +87,7 @@ class _NumberItem extends _ControlItem {
 }
 
 /** @private */
-class _TextItem extends _ControlItem {
+class _TextParam extends _Param {
   constructor(control, name, label, init) {
     super(control, 'text', name, label);
     this.set(init);
@@ -99,7 +99,7 @@ class _TextItem extends _ControlItem {
 }
 
 /** @private */
-class _TriggerItem extends _ControlItem {
+class _TriggerParam extends _Param {
   constructor(control, name, label) {
     super(control, 'trigger', name, label);
   }
@@ -113,8 +113,8 @@ class _TriggerItem extends _ControlItem {
 
 /** @private */
 class _BooleanGui {
-  constructor($container, item, guiOptions) {
-    const { label, value } = item;
+  constructor($container, param, guiOptions) {
+    const { label, value } = param;
 
     this.controller = new basicControllers.Toggle(label, value);
     $container.appendChild(this.controller.render());
@@ -122,11 +122,11 @@ class _BooleanGui {
 
     this.controller.on('change', (value) => {
       if (guiOptions.confirm) {
-        const msg = `Are you sure you want to propagate "${item.name}:${value}"`;
+        const msg = `Are you sure you want to propagate "${param.name}:${value}"`;
         if (!window.confirm(msg)) { return; }
       }
 
-      item.update(value);
+      param.update(value);
     });
   }
 
@@ -137,8 +137,8 @@ class _BooleanGui {
 
 /** @private */
 class _EnumGui {
-  constructor($container, item, guiOptions) {
-    const { label, options, value } = item;
+  constructor($container, param, guiOptions) {
+    const { label, options, value } = param;
 
     const ctor = guiOptions.type === 'buttons' ?
       basicControllers.SelectButtons : basicControllers.SelectList
@@ -149,11 +149,11 @@ class _EnumGui {
 
     this.controller.on('change', (value) => {
       if (guiOptions.confirm) {
-        const msg = `Are you sure you want to propagate "${item.name}:${value}"`;
+        const msg = `Are you sure you want to propagate "${param.name}:${value}"`;
         if (!window.confirm(msg)) { return; }
       }
 
-      item.update(value);
+      param.update(value);
     });
   }
 
@@ -164,11 +164,11 @@ class _EnumGui {
 
 /** @private */
 class _NumberGui {
-  constructor($container, item, guiOptions) {
-    const { label, min, max, step, value } = item;
+  constructor($container, param, guiOptions) {
+    const { label, min, max, step, value } = param;
 
     if (guiOptions.type === 'slider')
-      this.controller = new basicControllers.Slider(label, min, max, step, value, guiOptions.item, guiOptions.size);
+      this.controller = new basicControllers.Slider(label, min, max, step, value, guiOptions.param, guiOptions.size);
     else
       this.controller = new basicControllers.NumberBox(label, min, max, step, value);
 
@@ -177,11 +177,11 @@ class _NumberGui {
 
     this.controller.on('change', (value) => {
       if (guiOptions.confirm) {
-        const msg = `Are you sure you want to propagate "${item.name}:${value}"`;
+        const msg = `Are you sure you want to propagate "${param.name}:${value}"`;
         if (!window.confirm(msg)) { return; }
       }
 
-      item.update(value);
+      param.update(value);
     });
   }
 
@@ -192,8 +192,8 @@ class _NumberGui {
 
 /** @private */
 class _TextGui {
-  constructor($container, item, guiOptions) {
-    const { label, value } = item;
+  constructor($container, param, guiOptions) {
+    const { label, value } = param;
 
     this.controller = new basicControllers.Text(label, value, guiOptions.readOnly);
     $container.appendChild(this.controller.render());
@@ -202,11 +202,11 @@ class _TextGui {
     if (!guiOptions.readOnly) {
       this.controller.on('change', () => {
         if (guiOptions.confirm) {
-          const msg = `Are you sure you want to propagate "${item.name}"`;
+          const msg = `Are you sure you want to propagate "${param.name}"`;
           if (!window.confirm(msg)) { return; }
         }
 
-        item.update();
+        param.update();
       });
     }
   }
@@ -218,8 +218,8 @@ class _TextGui {
 
 /** @private */
 class _TriggerGui {
-  constructor($container, item, guiOptions) {
-    const { label } = item;
+  constructor($container, param, guiOptions) {
+    const { label } = param;
 
     this.controller = new basicControllers.Buttons('', [label]);
     $container.appendChild(this.controller.render());
@@ -227,11 +227,11 @@ class _TriggerGui {
 
     this.controller.on('change', () => {
       if (guiOptions.confirm) {
-        const msg = `Are you sure you want to propagate "${item.name}"`;
+        const msg = `Are you sure you want to propagate "${param.name}"`;
         if (!window.confirm(msg)) { return; }
       }
 
-      item.update();
+      param.update();
     });
   }
 
@@ -245,15 +245,15 @@ const SERVICE_ID = 'service:shared-params';
  * Interface of the client `'shared-params'` service.
  *
  * This service is used to maintain and update global parameters used among
- * all connected clients. Each defined parameter (`item`) can be of the following
- * data type:
+ * all connected clients. Each defined parameter can be of the following
+ * data types:
  * - boolean
  * - enum
  * - number
  * - text
  * - trigger
  *
- * This type and specific attributes of an item is configured server side.
+ * This type and specific attributes of an parameter is configured server side.
  * The service is espacially usefull if a special client is defined with the
  * `hasGUI` option setted to true, allowing to create a special client aimed at
  * controlling the different parameters of the experience.
@@ -271,8 +271,8 @@ const SERVICE_ID = 'service:shared-params';
  * @example
  * // inside the experience constructor
  * this.control = this.require('shared-params');
- * // when the experience starts, listen for item updates
- * this.control.addItemListener('synth:gain', (value) => {
+ * // when the experience starts, listen for parameter updates
+ * this.control.addParamListener('synth:gain', (value) => {
  *   this.synth.setGain(value);
  * });
  */
@@ -298,7 +298,7 @@ class SharedParams extends Service {
      * @type {Object}
      * @private
      */
-    this.items = {};
+    this.params = {};
 
     if (this.options.hasGui)
       this.view = this.createView();
@@ -329,11 +329,11 @@ class SharedParams extends Service {
     this.show();
 
     config.forEach((entry) => {
-      const item = this._createControlItem(entry);
-      this.items[item.name] = item;
+      const param = this._createParam(entry);
+      this.params[param.name] = param;
 
       if (this.view)
-        this._createGui(this.view, item);
+        this._createGui(this.view, param);
     });
 
     if (!this.options.hasGui)
@@ -347,110 +347,110 @@ class SharedParams extends Service {
   }
 
   /**
-   * @callback module:soundworks/client.SharedParams~itemCallback
-   * @param {Mixed} value - Updated value of the item.
+   * @callback module:soundworks/client.SharedParams~paramCallback
+   * @param {Mixed} value - Updated value of the shared parameter.
    */
   /**
-   * Add a listener to listen a specific item changes. The listener is called a first
-   * time when added to retrieve the current value of the item.
-   * @param {String} name - Name of the item.
-   * @param {module:soundworks/client.SharedParams~itemCallback} listener - Callback
+   * Add a listener to listen a specific parameter changes. The listener is called a first
+   * time when added to retrieve the current value of the parameter.
+   * @param {String} name - Name of the parameter.
+   * @param {module:soundworks/client.SharedParams~paramCallback} listener - Callback
    *  that handle the event.
    */
-  addItemListener(name, listener) {
-    const item = this.items[name];
+  addParamListener(name, listener) {
+    const param = this.params[name];
 
-    if (item) {
-      item.addListener('update', listener);
+    if (param) {
+      param.addListener('update', listener);
 
-      if (item.type !== 'command')
-        listener(item.value);
+      if (param.type !== 'command')
+        listener(param.value);
     } else {
-      console.log('unknown item "' + name + '"');
+      console.log('unknown param "' + name + '"');
     }
   }
 
   /**
-   * Remove a listener from listening a specific item changes.
-   * @param {String} name - Name of the event.
-   * @param {module:soundworks/client.SharedParams~itemCallback} listener - The
+   * Remove a listener from listening a specific parameter changes.
+   * @param {String} name - Name of the parameter.
+   * @param {module:soundworks/client.SharedParams~paramCallback} listener - The
    *  callback to remove.
    */
-  removeItemListener(name, listener) {
-    const item = this.items[name];
+  removeParamListener(name, listener) {
+    const param = this.params[name];
 
-    if (item) {
-      item.removeListener('update', listener);
+    if (param) {
+      param.removeListener('update', listener);
     } else {
-      console.log('unknown item "' + name + '"');
+      console.log('unknown param "' + name + '"');
     }
   }
 
   /**
-   * Get the value of a given item.
-   * @param {String} name - The name of the item.
-   * @returns {Mixed} - The current value of the item.
+   * Get the value of a given parameter.
+   * @param {String} name - The name of the parameter.
+   * @returns {Mixed} - The current value of the parameter.
    */
   getValue(name) {
-    return this.items[name].value;
+    return this.params[name].value;
   }
 
   /**
-   * Update the value of an item (used when `options.hasGUI=true`)
+   * Update the value of a parameter (used when `options.hasGUI=true`)
    * @private
-   * @param {String} name - Name of the item.
-   * @param {Mixed} val - New value of the item.
+   * @param {String} name - Name of the parameter.
+   * @param {Mixed} val - New value of the parameter.
    * @param {Boolean} [sendToServer=true] - Flag whether the value should be
    *  propagate to the server.
    */
   update(name, val, sendToServer = true) {
-    const item = this.items[name];
+    const param = this.params[name];
 
-    if (item) {
-      item.update(val, sendToServer);
+    if (param) {
+      param.update(val, sendToServer);
     } else {
-      console.log('unknown control item "' + name + '"');
+      console.log('unknown shared parameter "' + name + '"');
     }
   }
 
   /** @private */
-  _createControlItem(init) {
-    let item = null;
+  _createParam(init) {
+    let param = null;
 
     switch (init.type) {
       case 'boolean':
-        item = new _BooleanItem(this, init.name, init.label, init.value);
+        param = new _BooleanParam(this, init.name, init.label, init.value);
         break;
 
       case 'enum':
-        item = new _EnumItem(this, init.name, init.label, init.options, init.value);
+        param = new _EnumParam(this, init.name, init.label, init.options, init.value);
         break;
 
       case 'number':
-        item = new _NumberItem(this, init.name, init.label, init.min, init.max, init.step, init.value);
+        param = new _NumberParam(this, init.name, init.label, init.min, init.max, init.step, init.value);
         break;
 
       case 'text':
-        item = new _TextItem(this, init.name, init.label, init.value);
+        param = new _TextParam(this, init.name, init.label, init.value);
         break;
 
       case 'trigger':
-        item = new _TriggerItem(this, init.name, init.label);
+        param = new _TriggerParam(this, init.name, init.label);
         break;
     }
 
-    return item;
+    return param;
   }
 
   /**
-   * Configure the GUI for a specific item, this method only makes sens if
+   * Configure the GUI for a given parameter, this method only makes sens if
    * `options.hasGUI=true`.
-   * @param {String} name - Name of the item to configure.
-   * @param {Object} options - Options to configure the item GUI.
-   * @param {String} options.type - Type of GUI to use. Each type of item can
+   * @param {String} name - Name of the parameter to configure.
+   * @param {Object} options - Options to configure the parameter GUI.
+   * @param {String} options.type - Type of GUI to use. Each type of parameter can
    *  used with different GUI according to their type and comes with acceptable
    *  default values.
-   * @param {Boolean} [options.show=true] - Display or not the GUI for this item.
+   * @param {Boolean} [options.show=true] - Display or not the GUI for this parameter.
    * @param {Boolean} [options.confirm=false] - Ask for confirmation when the value changes.
    */
   setGuiOptions(name, options) {
@@ -458,36 +458,36 @@ class SharedParams extends Service {
   }
 
   /** @private */
-  _createGui(view, item) {
+  _createGui(view, param) {
     const config = Object.assign({
       show: true,
       confirm: false,
-    }, this._guiOptions[item.name]);
+    }, this._guiOptions[param.name]);
 
     if (config.show === false) return null;
 
     let gui = null;
     const $container = this.view.$el;
 
-    switch (item.type) {
+    switch (param.type) {
       case 'boolean':
-        gui = new _BooleanGui($container, item, config); // `Toggle`
+        gui = new _BooleanGui($container, param, config); // `Toggle`
         break;
       case 'enum':
-        gui = new _EnumGui($container, item, config); // `SelectList` or `SelectButtons`
+        gui = new _EnumGui($container, param, config); // `SelectList` or `SelectButtons`
         break;
       case 'number':
-        gui = new _NumberGui($container, item, config); // `NumberBox` or `Slider`
+        gui = new _NumberGui($container, param, config); // `NumberBox` or `Slider`
         break;
       case 'text':
-        gui = new _TextGui($container, item, config); // `Text`
+        gui = new _TextGui($container, param, config); // `Text`
         break;
       case 'trigger':
-        gui = new _TriggerGui($container, item, config);
+        gui = new _TriggerGui($container, param, config);
         break;
     }
 
-    item.addListener('update', (val) => gui.set(val));
+    param.addListener('update', (val) => gui.set(val));
 
     return gui;
   }

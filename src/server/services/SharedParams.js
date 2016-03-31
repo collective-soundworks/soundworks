@@ -17,8 +17,8 @@ class _ControlItem extends EventEmitter {
       value: init,
     };
 
-    control.items[name] = this;
-    control._itemData.push(this.data);
+    control.params[name] = this;
+    control._paramData.push(this.data);
   }
 
   set(val) {
@@ -30,7 +30,7 @@ class _ControlItem extends EventEmitter {
     let data = this.data;
 
     this.set(val); // set value
-    this.emit(data.name, data.value); // call item listeners
+    this.emit(data.name, data.value); // call param listeners
     control.broadcast(this.clientTypes, excludeClient, 'update', data.name, data.value); // send to clients
     control.emit('update', data.name, data.value); // call control listeners
   }
@@ -106,8 +106,8 @@ const SERVICE_ID = 'service:shared-params';
 /**
  * Interface of the server `'shared-params'` service.
  *
- * This service allow to create shared parameter items among to distributed
- * application. Each defined parameter (`item`) can be of the following
+ * This service allow to create shared parameters among to distributed
+ * application. Each shared parameter can be of the following
  * data types:
  * - boolean
  * - enum
@@ -132,155 +132,156 @@ class SharedParams extends Activity {
     super(SERVICE_ID);
 
     /**
-     * Dictionary of all control items.
+     * Dictionary of all control parameters.
      * @type {Object}
      * @private
      */
-    this.items = {};
+    this.params = {};
 
     /**
-     * Array of item data cells.
+     * Array of parameter data cells.
      * @type {Array}
      */
-    this._itemData = [];
+    this._paramData = [];
   }
 
   /**
-   * Generic method to create items. The first argument defines the type of item,
-   * the corresponding method (for example `addBoolean`) is called when the
-   * remaining arguments.
-   * @param {String} type - Type of item to create.
-   * @param {...Mixed} args - Arguments to pass to the specific add method.
+   * Generic method to create shared parameters from an array of definitions.
+   * A definition is an object with a 'type' property
+   * ('boolean' | 'enum' | 'number' | 'text' | 'trigger') a set of properties
+   * corresponding to the argument of the corresponding add<Type> method.
+   * @see {@link SharedParams#addBoolean}
+   * @see {@link SharedParams#addEnum}
+   * @see {@link SharedParams#addNumber}
+   * @see {@link SharedParams#addText}
+   * @see {@link SharedParams#addTrigger}
+   * @param {Array} definitions - An array of parameter definitions.
    */
-  addItem(type, ...args) {
-    let item;
+  add(definitions) {
+    for (let def of definitions) {
+      let type = def.type || 'text';
 
-    switch(type) {
-      case 'boolean':
-        item = this.addBool(...args);
-        break;
-      case 'enum':
-        item = this.addEnum(...args);
-        break;
-      case 'number':
-        item = this.addNumber(...args);
-        break;
-      case 'text':
-        item = this.addText(...args);
-        break;
-      case 'trigger':
-        item = this.addTrigger(...args);
-        break;
+      switch(type) {
+        case 'boolean':
+          this.addBoolean(def.name, def.label, def.value, def.clientTypes);
+          break;
+        case 'enum':
+          this.addEnum(def.name, def.label, def.options, def.value, def.clientTypes);
+          break;
+        case 'number':
+          this.addNumber(def.name, def.label, def.min, def.max, def.step, def.value, def.clientTypes);
+          break;
+        case 'text':
+          this.addText(def.name, def.label, def.value, def.clientTypes);
+          break;
+        case 'trigger':
+          this.addTrigger(def.name, def.label, def.clientTypes);
+          break;
+      }
     }
-
-    return item;
   }
 
   /**
-   * @todo - remove `labels` and define them client side in guiOptions.
-   */
-
-  /**
-   * Add a `boolean` parameter item.
-   * @param {String} name - Name of the item.
-   * @param {String} label - Label of the item (displayed on the control
+   * Add a `boolean` parameter.
+   * @param {String} name - Name of the parameter.
+   * @param {String} label - Label of the parameter (displayed on the control
    *  GUI on the client side)
-   * @param {Number} init - Initial value of the item (`true` or `false`).
+   * @param {Number} value - Initial value of the parameter (`true` or `false`).
    * @param {String[]} [clientTypes=null] - Array of the client types to send
-   *  the item value to. If not set, the value is sent to all the client types.
+   *  the parameter value to. If not set, the value is sent to all the client types.
    */
-  addBoolean(name, label, init, clientTypes = null) {
-    return new _BooleanItem(this, name, label, init, clientTypes);
+  addBoolean(name, label, value, clientTypes = null) {
+    return new _BooleanItem(this, name, label, value, clientTypes);
   }
 
   /**
-   * Add an `enum` parameter item.
-   * @param {String} name - Name of the item.
-   * @param {String} label - Label of the item (displayed on the control
+   * Add an `enum` parameter.
+   * @param {String} name - Name of the parameter.
+   * @param {String} label - Label of the parameter (displayed on the control
    *  GUI on the client side).
-   * @param {String[]} options - Different possible values of the item.
-   * @param {Number} init - Initial value of the item (must be defined in `options`).
+   * @param {String[]} options - Different possible values of the parameter.
+   * @param {Number} value - Initial value of the parameter (must be defined in `options`).
    * @param {String[]} [clientTypes=null] - Array of the client types to send
-   *  the item value to. If not set, the value is sent to all the client types.
+   *  the parameter value to. If not set, the value is sent to all the client types.
    */
-  addEnum(name, label, options, init, clientTypes = null) {
-    return new _EnumItem(this, name, label, options, init, clientTypes);
+  addEnum(name, label, options, value, clientTypes = null) {
+    return new _EnumItem(this, name, label, options, value, clientTypes);
   }
 
   /**
-   * Add a `number` parameter item.
-   * @param {String} name - Name of the item.
-   * @param {String} label - Label of the item (displayed on the control
+   * Add a `number` parameter.
+   * @param {String} name - Name of the parameter.
+   * @param {String} label - Label of the parameter (displayed on the control
    *  GUI on the client side).
-   * @param {Number} min - Minimum value of the item.
-   * @param {Number} max - Maximum value of the item.
-   * @param {Number} step - Step by which the item value is increased or decreased.
-   * @param {Number} init - Initial value of the item.
+   * @param {Number} min - Minimum value of the parameter.
+   * @param {Number} max - Maximum value of the parameter.
+   * @param {Number} step - Step by which the parameter value is increased or decreased.
+   * @param {Number} value - Initial value of the parameter.
    * @param {String[]} [clientTypes=null] - Array of the client types to send
-   *  the item value to. If not set, the value is sent to all the client types.
+   *  the parameter value to. If not set, the value is sent to all the client types.
    */
-  addNumber(name, label, min, max, step, init, clientTypes = null) {
-    return new _NumberItem(this, name, label, min, max, step, init, clientTypes);
+  addNumber(name, label, min, max, step, value, clientTypes = null) {
+    return new _NumberItem(this, name, label, min, max, step, value, clientTypes);
   }
 
   /**
-   * Add a `text` parameter item.
-   * @param {String} name - Name of the item.
-   * @param {String} label - Label of the item (displayed on the control
+   * Add a `text` parameter.
+   * @param {String} name - Name of the parameter.
+   * @param {String} label - Label of the parameter (displayed on the control
    *  GUI on the client side).
-   * @param {Number} init - Initial value of the item.
+   * @param {Number} value - Initial value of the parameter.
    * @param {String[]} [clientTypes=null] - Array of the client types to send
-   *  the item value to. If not set, the value is sent to all the client types.
+   *  the parameter value to. If not set, the value is sent to all the client types.
    */
-  addText(name, label, init, clientTypes = null) {
-    return new _TextItem(this, name, label, init, clientTypes);
+  addText(name, label, value, clientTypes = null) {
+    return new _TextItem(this, name, label, value, clientTypes);
   }
 
   /**
-   * Add a trigger item.
-   * @param {String} name - Name of the item.
-   * @param {String} label - Label of the item (displayed on the control
+   * Add a trigger (not really a parameter).
+   * @param {String} name - Name of the trigger.
+   * @param {String} label - Label of the trigger (displayed on the control
    *  GUI on the client side).
    * @param {String[]} [clientTypes=null] - Array of the client types to send
-   *  the item value to. If not set, the value is sent to all the client types.
+   *  the trigger to. If not set, the value is sent to all the client types.
    */
   addTrigger(name, label, clientTypes = null) {
     return new _TriggerItem(this, name, label, undefined, clientTypes);
   }
 
   /**
-   * @callback module:soundworks/server.SharedParams~itemCallback
-   * @param {Mixed} value - Updated value of the item.
+   * @callback module:soundworks/server.SharedParams~paramCallback
+   * @param {Mixed} value - Updated value of the parameter.
    */
   /**
-   * Add a listener to listen a specific item changes. The listener is called a first
-   * time when added to retrieve the current value of the item.
-   * @param {String} name - Name of the item.
-   * @param {module:soundworks/server.SharedParams~itemCallback} listener - Callback
+   * Add a listener to listen a specific parameter changes. The listener is called a first
+   * time when added to retrieve the current value of the parameter.
+   * @param {String} name - Name of the parameter.
+   * @param {module:soundworks/server.SharedParams~paramCallback} listener - Callback
    *  that handle the event.
    */
-  addItemListener(name, listener) {
-    const item = this.items[name];
+  addParamListener(name, listener) {
+    const param = this.params[name];
 
-    if (item) {
-      item.addListener(item.data.name, listener);
-      listener(item.data.value);
+    if (param) {
+      param.addListener(param.data.name, listener);
+      listener(param.data.value);
     } else {
       console.log('unknown shared parameter "' + name + '"');
     }
   }
 
   /**
-   * Remove a listener from listening a specific item changes.
+   * Remove a listener from listening a specific parameter changes.
    * @param {String} name - Name of the event.
-   * @param {module:soundworks/client.SharedParams~itemCallback} listener - The
+   * @param {module:soundworks/client.SharedParams~paramCallback} listener - The
    *  callback to remove.
    */
-  removeItemListener(name, listener) {
-    const item = this.items[name];
+  removeParamListener(name, listener) {
+    const param = this.params[name];
 
-    if (item)
-      item.removeListener(item.data.name, listener);
+    if (param)
+      param.removeListener(param.data.name, listener);
     else
       console.log('unknown shared parameter "' + name + '"');
   }
@@ -294,10 +295,10 @@ class SharedParams extends Activity {
    *  clients to send the update to (generally the source of the update).
    */
   update(name, value, excludeClient = null) {
-    const item = this.items[name];
+    const param = this.params[name];
 
-    if (item)
-      item.update(value, excludeClient);
+    if (param)
+      param.update(value, excludeClient);
     else
       console.log('unknown shared parameter  "' + name + '"');
   }
@@ -312,7 +313,7 @@ class SharedParams extends Activity {
 
   /** @private */
   _onRequest(client) {
-    return () => this.send(client, 'init', this._itemData);
+    return () => this.send(client, 'init', this._paramData);
   }
 
   /** @private */
