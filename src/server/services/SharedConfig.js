@@ -21,7 +21,7 @@ const SERVICE_ID = 'service:shared-config';
  * // access a configuration item for server-side use
  * const area = this.sharedConfig.get('setup.area');
  * // share this item with client of type `player`
- * this.sharedConfig.addItem('setup.area', 'player');
+ * this.sharedConfig.share('setup.area', 'player');
  */
 class SharedConfig extends Activity {
   /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */
@@ -65,7 +65,7 @@ class SharedConfig extends Activity {
    * @param {String} item - Key to the configuration item (_ex:_ `'setup.area'`)
    * @param {String} clientType - Client type whom the data should be shared.
    */
-  addItem(item, clientType) {
+  share(item, clientType) {
     if (!this._clientItemsMap[clientType])
       this._clientItemsMap[clientType] = new Set();;
 
@@ -123,7 +123,7 @@ class SharedConfig extends Activity {
   _onRequest(client) {
     // generate an optimized config bundle to return the client
     return (items) => {
-      items.forEach((item) => this.addItem(item, client.type));
+      items.forEach((item) => this.share(item, client.type));
 
       const config = this._getValues(client.type);
       this.send(client, 'config', config);
