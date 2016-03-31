@@ -153,20 +153,27 @@ const server = {
         console.log('[HTTP SERVER] Server listening on', url);
       });
     } else {
-      pem.createCertificate({ days: 1, selfSigned: true }, (err, keys) => {
-        httpServer = https.createServer({
-          key: keys.serviceKey,
-          cert: keys.certificate
-        }, expressApp);
-
+      const launchHttpsServer = (key, cert) => {
+        httpServer = https.createServer({ key, cert }, expressApp);
         this._initSockets(httpServer);
         this._initActivities(expressApp);
 
         httpServer.listen(expressApp.get('port'), function() {
           const url = `https://127.0.0.1:${expressApp.get('port')}`;
-          console.log('[HTTP SERVER] Server listening on', url);
+          console.log('[HTTPS SERVER] Server listening on', url);
         });
-      });
+      }
+
+      const httpsInfos = this.config.httpsInfos;
+
+      if (httpsInfos.key && httpsInfos.cert) {
+        launchHttpsServer(httpsInfos.key, httpsInfos.cert);
+      } else {
+        // generate https certificate (for development usage)
+        pem.createCertificate({ days: 1, selfSigned: true }, (err, keys) => {
+          launchHttpsServer(keys.serviceKey, keys.certificate);
+        });
+      }
     }
   },
 

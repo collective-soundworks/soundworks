@@ -32,6 +32,19 @@ const defaultEnvConfig = {
   useHttps: false,
 
   /**
+   * Paths to the key and certificate to be used in order to launch the https
+   * server. Both entries must be informed otherwise a selfSigned certificate
+   * is generated (the later can be usefull for development purposes).
+   * @type {Object}
+   * @property {String} key - Path to the key.
+   * @property {String} cert - Path to the certificate.
+   */
+  httpsInfos: {
+    key: null,
+    cert: null,
+  },
+
+  /**
    * Default port of the application, in production this value should typically
    * be setted to 80.
    * @type {Number}
