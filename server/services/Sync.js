@@ -44,51 +44,57 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var SERVICE_ID = 'service:sync';
 /**
- * Synchronize the local clock on a master clock shared by the server and the clients.
+ * Interface of the server `'sync'` service.
  *
- * Both the clients and the server can use this master clock as a common time reference.
- * For instance, this allows all the clients to do something exactly at the same time, such as blinking the screen or playing a sound in a synchronized manner.
+ * This service acts as the master clock provider for the client sync service,
+ * in order to synchronize the clocks of the different clients to its own clock.
+ *
+ * __*The service must be used with its [client-side counterpart]{@link module:soundworks/client.Sync}*__
  *
  * **Note:** the service is based on [`github.com/collective-soundworks/sync`](https://github.com/collective-soundworks/sync).
  *
- * (See also {@link src/client/ClientSync.js~ClientSync} on the client side.)
- *
- * @example const sync = new Sync();
- *
- * const nowSync = sync.getSyncTime(); // current time in the sync clock time
+ * @memberof module:soundworks/server
+ * @example
+ * // inside the experience constructor
+ * this.sync = this.require('sync');
+ * // when the experience has started
+ * const syncTime = this.sync.getSyncTime();
  */
 
 var Sync = function (_Activity) {
   (0, _inherits3.default)(Sync, _Activity);
 
+  /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */
+
   function Sync() {
     (0, _classCallCheck3.default)(this, Sync);
-    return (0, _possibleConstructorReturn3.default)(this, (0, _getPrototypeOf2.default)(Sync).call(this, SERVICE_ID));
+
+    var _this = (0, _possibleConstructorReturn3.default)(this, (0, _getPrototypeOf2.default)(Sync).call(this, SERVICE_ID));
+
+    _this._hrtimeStart = process.hrtime();
+
+    _this._sync = new _server2.default(function () {
+      var time = process.hrtime(_this._hrtimeStart);
+      return time[0] + time[1] * 1e-9;
+    });
+    return _this;
   }
+
+  /** @private */
+
 
   (0, _createClass3.default)(Sync, [{
     key: 'start',
     value: function start() {
-      var _this2 = this;
-
       (0, _get3.default)((0, _getPrototypeOf2.default)(Sync.prototype), 'start', this).call(this);
-
-      this._hrtimeStart = process.hrtime();
-
-      this._sync = new _server2.default(function () {
-        var time = process.hrtime(_this2._hrtimeStart);
-        return time[0] + time[1] * 1e-9;
-      });
     }
 
-    /**
-     * @private
-     */
+    /** @private */
 
   }, {
     key: 'connect',
     value: function connect(client) {
-      var _this3 = this;
+      var _this2 = this;
 
       (0, _get3.default)((0, _getPrototypeOf2.default)(Sync.prototype), 'connect', this).call(this, client);
 
@@ -97,18 +103,18 @@ var Sync = function (_Activity) {
           args[_key - 1] = arguments[_key];
         }
 
-        return _this3.send.apply(_this3, [client, cmd].concat(args));
+        return _this2.send.apply(_this2, [client, cmd].concat(args));
       };
       var receive = function receive(cmd, callback) {
-        return _this3.receive(client, cmd, callback);
+        return _this2.receive(client, cmd, callback);
       };
 
       this._sync.start(send, receive);
     }
 
     /**
-     * Returns the current time in the sync clock.
-     * @return {Number} - Current sync time (in seconds).
+     * Returns the current time in the sync clock, devired from `process.hrtime()`.
+     * @return {Number} - Current sync time (in _seconds_).
      */
 
   }, {
@@ -123,4 +129,4 @@ var Sync = function (_Activity) {
 _serviceManager2.default.register(SERVICE_ID, Sync);
 
 exports.default = Sync;
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIlN5bmMuanMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O0FBQUE7Ozs7QUFDQTs7OztBQUNBOzs7Ozs7QUFFQSxJQUFNLGFBQWEsY0FBYjs7Ozs7Ozs7Ozs7Ozs7OztJQWVBOzs7QUFDSixXQURJLElBQ0osR0FBYzt3Q0FEVixNQUNVO3dGQURWLGlCQUVJLGFBRE07R0FBZDs7NkJBREk7OzRCQUtJOzs7QUFDTix1REFORSwwQ0FNRixDQURNOztBQUdOLFdBQUssWUFBTCxHQUFvQixRQUFRLE1BQVIsRUFBcEIsQ0FITTs7QUFLTixXQUFLLEtBQUwsR0FBYSxxQkFBZSxZQUFNO0FBQ2hDLFlBQU0sT0FBTyxRQUFRLE1BQVIsQ0FBZSxPQUFLLFlBQUwsQ0FBdEIsQ0FEMEI7QUFFaEMsZUFBTyxLQUFLLENBQUwsSUFBVSxLQUFLLENBQUwsSUFBVSxJQUFWLENBRmU7T0FBTixDQUE1QixDQUxNOzs7Ozs7Ozs7NEJBY0EsUUFBUTs7O0FBQ2QsdURBcEJFLDZDQW9CWSxPQUFkLENBRGM7O0FBR2QsVUFBTSxPQUFPLFNBQVAsSUFBTyxDQUFDLEdBQUQ7MENBQVM7Ozs7ZUFBUyxPQUFLLElBQUwsZ0JBQVUsUUFBUSxZQUFRLEtBQTFCO09BQWxCLENBSEM7QUFJZCxVQUFNLFVBQVUsU0FBVixPQUFVLENBQUMsR0FBRCxFQUFNLFFBQU47ZUFBbUIsT0FBSyxPQUFMLENBQWEsTUFBYixFQUFxQixHQUFyQixFQUEwQixRQUExQjtPQUFuQixDQUpGOztBQU1kLFdBQUssS0FBTCxDQUFXLEtBQVgsQ0FBaUIsSUFBakIsRUFBdUIsT0FBdkIsRUFOYzs7Ozs7Ozs7OztrQ0FhRjtBQUNaLGFBQU8sS0FBSyxLQUFMLENBQVcsV0FBWCxFQUFQLENBRFk7OztTQWhDVjs7O0FBcUNOLHlCQUFlLFFBQWYsQ0FBd0IsVUFBeEIsRUFBb0MsSUFBcEM7O2tCQUVlIiwiZmlsZSI6IlN5bmMuanMiLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgQWN0aXZpdHkgZnJvbSAnLi4vY29yZS9BY3Rpdml0eSc7XG5pbXBvcnQgc2VydmljZU1hbmFnZXIgZnJvbSAnLi4vY29yZS9zZXJ2aWNlTWFuYWdlcic7XG5pbXBvcnQgU3luY01vZHVsZSBmcm9tICdzeW5jL3NlcnZlcic7XG5cbmNvbnN0IFNFUlZJQ0VfSUQgPSAnc2VydmljZTpzeW5jJztcbi8qKlxuICogU3luY2hyb25pemUgdGhlIGxvY2FsIGNsb2NrIG9uIGEgbWFzdGVyIGNsb2NrIHNoYXJlZCBieSB0aGUgc2VydmVyIGFuZCB0aGUgY2xpZW50cy5cbiAqXG4gKiBCb3RoIHRoZSBjbGllbnRzIGFuZCB0aGUgc2VydmVyIGNhbiB1c2UgdGhpcyBtYXN0ZXIgY2xvY2sgYXMgYSBjb21tb24gdGltZSByZWZlcmVuY2UuXG4gKiBGb3IgaW5zdGFuY2UsIHRoaXMgYWxsb3dzIGFsbCB0aGUgY2xpZW50cyB0byBkbyBzb21ldGhpbmcgZXhhY3RseSBhdCB0aGUgc2FtZSB0aW1lLCBzdWNoIGFzIGJsaW5raW5nIHRoZSBzY3JlZW4gb3IgcGxheWluZyBhIHNvdW5kIGluIGEgc3luY2hyb25pemVkIG1hbm5lci5cbiAqXG4gKiAqKk5vdGU6KiogdGhlIHNlcnZpY2UgaXMgYmFzZWQgb24gW2BnaXRodWIuY29tL2NvbGxlY3RpdmUtc291bmR3b3Jrcy9zeW5jYF0oaHR0cHM6Ly9naXRodWIuY29tL2NvbGxlY3RpdmUtc291bmR3b3Jrcy9zeW5jKS5cbiAqXG4gKiAoU2VlIGFsc28ge0BsaW5rIHNyYy9jbGllbnQvQ2xpZW50U3luYy5qc35DbGllbnRTeW5jfSBvbiB0aGUgY2xpZW50IHNpZGUuKVxuICpcbiAqIEBleGFtcGxlIGNvbnN0IHN5bmMgPSBuZXcgU3luYygpO1xuICpcbiAqIGNvbnN0IG5vd1N5bmMgPSBzeW5jLmdldFN5bmNUaW1lKCk7IC8vIGN1cnJlbnQgdGltZSBpbiB0aGUgc3luYyBjbG9jayB0aW1lXG4gKi9cbmNsYXNzIFN5bmMgZXh0ZW5kcyBBY3Rpdml0eSB7XG4gIGNvbnN0cnVjdG9yKCkge1xuICAgIHN1cGVyKFNFUlZJQ0VfSUQpO1xuICB9XG5cbiAgc3RhcnQoKSB7XG4gICAgc3VwZXIuc3RhcnQoKTtcblxuICAgIHRoaXMuX2hydGltZVN0YXJ0ID0gcHJvY2Vzcy5ocnRpbWUoKTtcblxuICAgIHRoaXMuX3N5bmMgPSBuZXcgU3luY01vZHVsZSgoKSA9PiB7XG4gICAgICBjb25zdCB0aW1lID0gcHJvY2Vzcy5ocnRpbWUodGhpcy5faHJ0aW1lU3RhcnQpO1xuICAgICAgcmV0dXJuIHRpbWVbMF0gKyB0aW1lWzFdICogMWUtOTtcbiAgICB9KTtcbiAgfVxuXG4gIC8qKlxuICAgKiBAcHJpdmF0ZVxuICAgKi9cbiAgY29ubmVjdChjbGllbnQpIHtcbiAgICBzdXBlci5jb25uZWN0KGNsaWVudCk7XG5cbiAgICBjb25zdCBzZW5kID0gKGNtZCwgLi4uYXJncykgPT4gdGhpcy5zZW5kKGNsaWVudCwgY21kLCAuLi5hcmdzKTtcbiAgICBjb25zdCByZWNlaXZlID0gKGNtZCwgY2FsbGJhY2spID0+IHRoaXMucmVjZWl2ZShjbGllbnQsIGNtZCwgY2FsbGJhY2spO1xuXG4gICAgdGhpcy5fc3luYy5zdGFydChzZW5kLCByZWNlaXZlKTtcbiAgfVxuXG4gIC8qKlxuICAgKiBSZXR1cm5zIHRoZSBjdXJyZW50IHRpbWUgaW4gdGhlIHN5bmMgY2xvY2suXG4gICAqIEByZXR1cm4ge051bWJlcn0gLSBDdXJyZW50IHN5bmMgdGltZSAoaW4gc2Vjb25kcykuXG4gICAqL1xuICBnZXRTeW5jVGltZSgpIHtcbiAgICByZXR1cm4gdGhpcy5fc3luYy5nZXRTeW5jVGltZSgpO1xuICB9XG59XG5cbnNlcnZpY2VNYW5hZ2VyLnJlZ2lzdGVyKFNFUlZJQ0VfSUQsIFN5bmMpO1xuXG5leHBvcnQgZGVmYXVsdCBTeW5jO1xuIl19
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIlN5bmMuanMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O0FBQUE7Ozs7QUFDQTs7OztBQUNBOzs7Ozs7QUFFQSxJQUFNLGFBQWEsY0FBYjs7Ozs7Ozs7Ozs7Ozs7Ozs7OztJQWtCQTs7Ozs7QUFFSixXQUZJLElBRUosR0FBYzt3Q0FGVixNQUVVOzs2RkFGVixpQkFHSSxhQURNOztBQUdaLFVBQUssWUFBTCxHQUFvQixRQUFRLE1BQVIsRUFBcEIsQ0FIWTs7QUFLWixVQUFLLEtBQUwsR0FBYSxxQkFBZSxZQUFNO0FBQ2hDLFVBQU0sT0FBTyxRQUFRLE1BQVIsQ0FBZSxNQUFLLFlBQUwsQ0FBdEIsQ0FEMEI7QUFFaEMsYUFBTyxLQUFLLENBQUwsSUFBVSxLQUFLLENBQUwsSUFBVSxJQUFWLENBRmU7S0FBTixDQUE1QixDQUxZOztHQUFkOzs7Ozs2QkFGSTs7NEJBY0k7QUFDTix1REFmRSwwQ0FlRixDQURNOzs7Ozs7OzRCQUtBLFFBQVE7OztBQUNkLHVEQXBCRSw2Q0FvQlksT0FBZCxDQURjOztBQUdkLFVBQU0sT0FBTyxTQUFQLElBQU8sQ0FBQyxHQUFEOzBDQUFTOzs7O2VBQVMsT0FBSyxJQUFMLGdCQUFVLFFBQVEsWUFBUSxLQUExQjtPQUFsQixDQUhDO0FBSWQsVUFBTSxVQUFVLFNBQVYsT0FBVSxDQUFDLEdBQUQsRUFBTSxRQUFOO2VBQW1CLE9BQUssT0FBTCxDQUFhLE1BQWIsRUFBcUIsR0FBckIsRUFBMEIsUUFBMUI7T0FBbkIsQ0FKRjs7QUFNZCxXQUFLLEtBQUwsQ0FBVyxLQUFYLENBQWlCLElBQWpCLEVBQXVCLE9BQXZCLEVBTmM7Ozs7Ozs7Ozs7a0NBYUY7QUFDWixhQUFPLEtBQUssS0FBTCxDQUFXLFdBQVgsRUFBUCxDQURZOzs7U0FoQ1Y7OztBQXFDTix5QkFBZSxRQUFmLENBQXdCLFVBQXhCLEVBQW9DLElBQXBDOztrQkFFZSIsImZpbGUiOiJTeW5jLmpzIiwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IEFjdGl2aXR5IGZyb20gJy4uL2NvcmUvQWN0aXZpdHknO1xuaW1wb3J0IHNlcnZpY2VNYW5hZ2VyIGZyb20gJy4uL2NvcmUvc2VydmljZU1hbmFnZXInO1xuaW1wb3J0IFN5bmNNb2R1bGUgZnJvbSAnc3luYy9zZXJ2ZXInO1xuXG5jb25zdCBTRVJWSUNFX0lEID0gJ3NlcnZpY2U6c3luYyc7XG4vKipcbiAqIEludGVyZmFjZSBvZiB0aGUgc2VydmVyIGAnc3luYydgIHNlcnZpY2UuXG4gKlxuICogVGhpcyBzZXJ2aWNlIGFjdHMgYXMgdGhlIG1hc3RlciBjbG9jayBwcm92aWRlciBmb3IgdGhlIGNsaWVudCBzeW5jIHNlcnZpY2UsXG4gKiBpbiBvcmRlciB0byBzeW5jaHJvbml6ZSB0aGUgY2xvY2tzIG9mIHRoZSBkaWZmZXJlbnQgY2xpZW50cyB0byBpdHMgb3duIGNsb2NrLlxuICpcbiAqIF9fKlRoZSBzZXJ2aWNlIG11c3QgYmUgdXNlZCB3aXRoIGl0cyBbY2xpZW50LXNpZGUgY291bnRlcnBhcnRde0BsaW5rIG1vZHVsZTpzb3VuZHdvcmtzL2NsaWVudC5TeW5jfSpfX1xuICpcbiAqICoqTm90ZToqKiB0aGUgc2VydmljZSBpcyBiYXNlZCBvbiBbYGdpdGh1Yi5jb20vY29sbGVjdGl2ZS1zb3VuZHdvcmtzL3N5bmNgXShodHRwczovL2dpdGh1Yi5jb20vY29sbGVjdGl2ZS1zb3VuZHdvcmtzL3N5bmMpLlxuICpcbiAqIEBtZW1iZXJvZiBtb2R1bGU6c291bmR3b3Jrcy9zZXJ2ZXJcbiAqIEBleGFtcGxlXG4gKiAvLyBpbnNpZGUgdGhlIGV4cGVyaWVuY2UgY29uc3RydWN0b3JcbiAqIHRoaXMuc3luYyA9IHRoaXMucmVxdWlyZSgnc3luYycpO1xuICogLy8gd2hlbiB0aGUgZXhwZXJpZW5jZSBoYXMgc3RhcnRlZFxuICogY29uc3Qgc3luY1RpbWUgPSB0aGlzLnN5bmMuZ2V0U3luY1RpbWUoKTtcbiAqL1xuY2xhc3MgU3luYyBleHRlbmRzIEFjdGl2aXR5IHtcbiAgLyoqIF88c3BhbiBjbGFzcz1cIndhcm5pbmdcIj5fX1dBUk5JTkdfXzwvc3Bhbj4gVGhpcyBjbGFzcyBzaG91bGQgbmV2ZXIgYmUgaW5zdGFuY2lhdGVkIG1hbnVhbGx5XyAqL1xuICBjb25zdHJ1Y3RvcigpIHtcbiAgICBzdXBlcihTRVJWSUNFX0lEKTtcblxuICAgIHRoaXMuX2hydGltZVN0YXJ0ID0gcHJvY2Vzcy5ocnRpbWUoKTtcblxuICAgIHRoaXMuX3N5bmMgPSBuZXcgU3luY01vZHVsZSgoKSA9PiB7XG4gICAgICBjb25zdCB0aW1lID0gcHJvY2Vzcy5ocnRpbWUodGhpcy5faHJ0aW1lU3RhcnQpO1xuICAgICAgcmV0dXJuIHRpbWVbMF0gKyB0aW1lWzFdICogMWUtOTtcbiAgICB9KTtcbiAgfVxuXG4gIC8qKiBAcHJpdmF0ZSAqL1xuICBzdGFydCgpIHtcbiAgICBzdXBlci5zdGFydCgpO1xuICB9XG5cbiAgLyoqIEBwcml2YXRlICovXG4gIGNvbm5lY3QoY2xpZW50KSB7XG4gICAgc3VwZXIuY29ubmVjdChjbGllbnQpO1xuXG4gICAgY29uc3Qgc2VuZCA9IChjbWQsIC4uLmFyZ3MpID0+IHRoaXMuc2VuZChjbGllbnQsIGNtZCwgLi4uYXJncyk7XG4gICAgY29uc3QgcmVjZWl2ZSA9IChjbWQsIGNhbGxiYWNrKSA9PiB0aGlzLnJlY2VpdmUoY2xpZW50LCBjbWQsIGNhbGxiYWNrKTtcblxuICAgIHRoaXMuX3N5bmMuc3RhcnQoc2VuZCwgcmVjZWl2ZSk7XG4gIH1cblxuICAvKipcbiAgICogUmV0dXJucyB0aGUgY3VycmVudCB0aW1lIGluIHRoZSBzeW5jIGNsb2NrLCBkZXZpcmVkIGZyb20gYHByb2Nlc3MuaHJ0aW1lKClgLlxuICAgKiBAcmV0dXJuIHtOdW1iZXJ9IC0gQ3VycmVudCBzeW5jIHRpbWUgKGluIF9zZWNvbmRzXykuXG4gICAqL1xuICBnZXRTeW5jVGltZSgpIHtcbiAgICByZXR1cm4gdGhpcy5fc3luYy5nZXRTeW5jVGltZSgpO1xuICB9XG59XG5cbnNlcnZpY2VNYW5hZ2VyLnJlZ2lzdGVyKFNFUlZJQ0VfSUQsIFN5bmMpO1xuXG5leHBvcnQgZGVmYXVsdCBTeW5jO1xuIl19

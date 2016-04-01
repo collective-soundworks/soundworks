@@ -45,11 +45,31 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var SERVICE_ID = 'service:shared-config';
 
 /**
- * This service allows to retrieve part of the server configuration to client.
+ * Interface of the client `'shared-config'` service.
+ *
+ * This service allows to share parts of the server configuration to the clients.
+ *
+ * __*The service must be used with its [server-side counterpart]{@link module:soundworks/server.SharedConfig}*__
+ *
+ * @param {Object} options
+ * @param {Array<String>} options.items - List of the configuration items
+ *  required by the server. The given strings follow a convention defining a path
+ *  to the required configuration item, for example `'setup.area'` will retrieve
+ *  the value (here an object) corresponding to the `area` key inside the `setup`
+ *  entry of the server configuration.
+ *
+ * @memberof module:soundworks/client
+ * @example
+ * // inside the experience constructor
+ * this.sharedConfig = this.require('shared-config', { items: ['setup.area'] });
+ * // when the experience has started
+ * const areaWidth = this.sharedConfig.get('setup.area.width');
  */
 
 var SharedConfig = function (_Service) {
   (0, _inherits3.default)(SharedConfig, _Service);
+
+  /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */
 
   function SharedConfig() {
     (0, _classCallCheck3.default)(this, SharedConfig);
@@ -58,6 +78,7 @@ var SharedConfig = function (_Service) {
     /**
      * Configuration items required by the client.
      * @type {Array}
+     * @private
      */
 
     var _this = (0, _possibleConstructorReturn3.default)(this, (0, _getPrototypeOf2.default)(SharedConfig).call(this, SERVICE_ID, true));
@@ -68,7 +89,7 @@ var SharedConfig = function (_Service) {
     return _this;
   }
 
-  /** @inheritdoc */
+  /** @private */
 
 
   (0, _createClass3.default)(SharedConfig, [{
@@ -82,15 +103,21 @@ var SharedConfig = function (_Service) {
       (0, _get3.default)((0, _getPrototypeOf2.default)(SharedConfig.prototype), 'configure', this).call(this, options);
     }
 
-    /** @inheritdoc */
+    /** @private */
 
   }, {
     key: 'init',
     value: function init() {
+      /**
+       * Object containing all the configuration items shared by the server. The
+       * object is flattened in order to minimize the needed communications between
+       * the client and the server.
+       * @type {Object}
+       */
       this.data = null;
     }
 
-    /** @inheritdoc */
+    /** @private */
 
   }, {
     key: 'start',
@@ -103,10 +130,19 @@ var SharedConfig = function (_Service) {
       this.receive('config', this._onConfigResponse);
     }
 
+    /** @private */
+
+  }, {
+    key: '_onConfigResponse',
+    value: function _onConfigResponse(data) {
+      this.data = _client2.default.config = data;
+      this.ready();
+    }
+
     /**
      * Retrieve a configuration value from its key item, as defined in server side
-     * service's `addItem` method.
-     * @param {String} item - The item of the configuration (ex: `'setup.area'`)
+     * service's `addItem` method or in client-side `items` option.
+     * @param {String} item - Key to the configuration item (_ex:_ `'setup.area'`)
      * @return {Mixed}
      */
 
@@ -122,12 +158,6 @@ var SharedConfig = function (_Service) {
 
       return tmp;
     }
-  }, {
-    key: '_onConfigResponse',
-    value: function _onConfigResponse(data) {
-      this.data = _client2.default.config = data;
-      this.ready();
-    }
   }]);
   return SharedConfig;
 }(_Service3.default);
@@ -135,4 +165,4 @@ var SharedConfig = function (_Service) {
 _serviceManager2.default.register(SERVICE_ID, SharedConfig);
 
 exports.default = SharedConfig;
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIlNoYXJlZENvbmZpZy5qcyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7QUFBQTs7OztBQUNBOzs7O0FBQ0E7Ozs7OztBQUdBLElBQU0sYUFBYSx1QkFBYjs7Ozs7O0lBS0E7OztBQUNKLFdBREksWUFDSixHQUFjO3dDQURWLGNBQ1U7Ozs7Ozs7OzZGQURWLHlCQUVJLFlBQVksT0FETjs7QUFPWixVQUFLLE1BQUwsR0FBYyxFQUFkLENBUFk7O0FBU1osVUFBSyxpQkFBTCxHQUF5QixNQUFLLGlCQUFMLENBQXVCLElBQXZCLE9BQXpCLENBVFk7O0dBQWQ7Ozs7OzZCQURJOzs4QkFjTSxTQUFTO0FBQ2pCLFVBQUksUUFBUSxLQUFSLEVBQWU7QUFDakIsYUFBSyxNQUFMLEdBQWMsS0FBSyxNQUFMLENBQVksTUFBWixDQUFtQixRQUFRLEtBQVIsQ0FBakMsQ0FEaUI7QUFFakIsZUFBTyxRQUFRLEtBQVIsQ0FGVTtPQUFuQjs7QUFLQSx1REFwQkUsdURBb0JjLFFBQWhCLENBTmlCOzs7Ozs7OzJCQVVaO0FBQ0wsV0FBSyxJQUFMLEdBQVksSUFBWixDQURLOzs7Ozs7OzRCQUtDO0FBQ04sdURBOUJFLGtEQThCRixDQURNOztBQUdOLFVBQUksQ0FBQyxLQUFLLFVBQUwsRUFDSCxLQUFLLElBQUwsR0FERjs7QUFHQSxXQUFLLElBQUwsQ0FBVSxTQUFWLEVBQXFCLEtBQUssTUFBTCxDQUFyQixDQU5NO0FBT04sV0FBSyxPQUFMLENBQWEsUUFBYixFQUF1QixLQUFLLGlCQUFMLENBQXZCLENBUE07Ozs7Ozs7Ozs7Ozt3QkFnQkosTUFBTTtBQUNSLFVBQU0sUUFBUSxLQUFLLEtBQUwsQ0FBVyxHQUFYLENBQVIsQ0FERTtBQUVSLFVBQUksTUFBTSxLQUFLLElBQUwsQ0FGRjs7QUFJUixZQUFNLE9BQU4sQ0FBYyxVQUFDLElBQUQ7ZUFBVSxNQUFNLElBQUksSUFBSixDQUFOO09BQVYsQ0FBZCxDQUpROztBQU1SLGFBQU8sR0FBUCxDQU5ROzs7O3NDQVNRLE1BQU07QUFDdEIsV0FBSyxJQUFMLEdBQVksaUJBQU8sTUFBUCxHQUFnQixJQUFoQixDQURVO0FBRXRCLFdBQUssS0FBTCxHQUZzQjs7O1NBdERwQjs7O0FBNEROLHlCQUFlLFFBQWYsQ0FBd0IsVUFBeEIsRUFBb0MsWUFBcEM7O2tCQUVlIiwiZmlsZSI6IlNoYXJlZENvbmZpZy5qcyIsInNvdXJjZXNDb250ZW50IjpbImltcG9ydCBzZXJ2aWNlTWFuYWdlciBmcm9tICcuLi9jb3JlL3NlcnZpY2VNYW5hZ2VyJztcbmltcG9ydCBTZXJ2aWNlIGZyb20gJy4uL2NvcmUvU2VydmljZSc7XG5pbXBvcnQgY2xpZW50IGZyb20gJy4uL2NvcmUvY2xpZW50JztcblxuXG5jb25zdCBTRVJWSUNFX0lEID0gJ3NlcnZpY2U6c2hhcmVkLWNvbmZpZyc7XG5cbi8qKlxuICogVGhpcyBzZXJ2aWNlIGFsbG93cyB0byByZXRyaWV2ZSBwYXJ0IG9mIHRoZSBzZXJ2ZXIgY29uZmlndXJhdGlvbiB0byBjbGllbnQuXG4gKi9cbmNsYXNzIFNoYXJlZENvbmZpZyBleHRlbmRzIFNlcnZpY2Uge1xuICBjb25zdHJ1Y3RvcigpIHtcbiAgICBzdXBlcihTRVJWSUNFX0lELCB0cnVlKTtcblxuICAgIC8qKlxuICAgICAqIENvbmZpZ3VyYXRpb24gaXRlbXMgcmVxdWlyZWQgYnkgdGhlIGNsaWVudC5cbiAgICAgKiBAdHlwZSB7QXJyYXl9XG4gICAgICovXG4gICAgdGhpcy5faXRlbXMgPSBbXTtcblxuICAgIHRoaXMuX29uQ29uZmlnUmVzcG9uc2UgPSB0aGlzLl9vbkNvbmZpZ1Jlc3BvbnNlLmJpbmQodGhpcyk7XG4gIH1cblxuICAvKiogQGluaGVyaXRkb2MgKi9cbiAgY29uZmlndXJlKG9wdGlvbnMpIHtcbiAgICBpZiAob3B0aW9ucy5pdGVtcykge1xuICAgICAgdGhpcy5faXRlbXMgPSB0aGlzLl9pdGVtcy5jb25jYXQob3B0aW9ucy5pdGVtcyk7XG4gICAgICBkZWxldGUgb3B0aW9ucy5pdGVtcztcbiAgICB9XG5cbiAgICBzdXBlci5jb25maWd1cmUob3B0aW9ucyk7XG4gIH1cblxuICAvKiogQGluaGVyaXRkb2MgKi9cbiAgaW5pdCgpIHtcbiAgICB0aGlzLmRhdGEgPSBudWxsO1xuICB9XG5cbiAgLyoqIEBpbmhlcml0ZG9jICovXG4gIHN0YXJ0KCkge1xuICAgIHN1cGVyLnN0YXJ0KCk7XG5cbiAgICBpZiAoIXRoaXMuaGFzU3RhcnRlZClcbiAgICAgIHRoaXMuaW5pdCgpO1xuXG4gICAgdGhpcy5zZW5kKCdyZXF1ZXN0JywgdGhpcy5faXRlbXMpO1xuICAgIHRoaXMucmVjZWl2ZSgnY29uZmlnJywgdGhpcy5fb25Db25maWdSZXNwb25zZSk7XG4gIH1cblxuICAvKipcbiAgICogUmV0cmlldmUgYSBjb25maWd1cmF0aW9uIHZhbHVlIGZyb20gaXRzIGtleSBpdGVtLCBhcyBkZWZpbmVkIGluIHNlcnZlciBzaWRlXG4gICAqIHNlcnZpY2UncyBgYWRkSXRlbWAgbWV0aG9kLlxuICAgKiBAcGFyYW0ge1N0cmluZ30gaXRlbSAtIFRoZSBpdGVtIG9mIHRoZSBjb25maWd1cmF0aW9uIChleDogYCdzZXR1cC5hcmVhJ2ApXG4gICAqIEByZXR1cm4ge01peGVkfVxuICAgKi9cbiAgZ2V0KGl0ZW0pIHtcbiAgICBjb25zdCBwYXJ0cyA9IGl0ZW0uc3BsaXQoJy4nKTtcbiAgICBsZXQgdG1wID0gdGhpcy5kYXRhO1xuXG4gICAgcGFydHMuZm9yRWFjaCgoYXR0cikgPT4gdG1wID0gdG1wW2F0dHJdKTtcblxuICAgIHJldHVybiB0bXA7XG4gIH1cblxuICBfb25Db25maWdSZXNwb25zZShkYXRhKSB7XG4gICAgdGhpcy5kYXRhID0gY2xpZW50LmNvbmZpZyA9IGRhdGE7XG4gICAgdGhpcy5yZWFkeSgpO1xuICB9XG59XG5cbnNlcnZpY2VNYW5hZ2VyLnJlZ2lzdGVyKFNFUlZJQ0VfSUQsIFNoYXJlZENvbmZpZyk7XG5cbmV4cG9ydCBkZWZhdWx0IFNoYXJlZENvbmZpZztcbiJdfQ==
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIlNoYXJlZENvbmZpZy5qcyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7QUFBQTs7OztBQUNBOzs7O0FBQ0E7Ozs7OztBQUdBLElBQU0sYUFBYSx1QkFBYjs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O0lBdUJBOzs7OztBQUVKLFdBRkksWUFFSixHQUFjO3dDQUZWLGNBRVU7Ozs7Ozs7Ozs2RkFGVix5QkFHSSxZQUFZLE9BRE47O0FBUVosVUFBSyxNQUFMLEdBQWMsRUFBZCxDQVJZOztBQVVaLFVBQUssaUJBQUwsR0FBeUIsTUFBSyxpQkFBTCxDQUF1QixJQUF2QixPQUF6QixDQVZZOztHQUFkOzs7Ozs2QkFGSTs7OEJBZ0JNLFNBQVM7QUFDakIsVUFBSSxRQUFRLEtBQVIsRUFBZTtBQUNqQixhQUFLLE1BQUwsR0FBYyxLQUFLLE1BQUwsQ0FBWSxNQUFaLENBQW1CLFFBQVEsS0FBUixDQUFqQyxDQURpQjtBQUVqQixlQUFPLFFBQVEsS0FBUixDQUZVO09BQW5COztBQUtBLHVEQXRCRSx1REFzQmMsUUFBaEIsQ0FOaUI7Ozs7Ozs7MkJBVVo7Ozs7Ozs7QUFPTCxXQUFLLElBQUwsR0FBWSxJQUFaLENBUEs7Ozs7Ozs7NEJBV0M7QUFDTix1REF0Q0Usa0RBc0NGLENBRE07O0FBR04sVUFBSSxDQUFDLEtBQUssVUFBTCxFQUNILEtBQUssSUFBTCxHQURGOztBQUdBLFdBQUssSUFBTCxDQUFVLFNBQVYsRUFBcUIsS0FBSyxNQUFMLENBQXJCLENBTk07QUFPTixXQUFLLE9BQUwsQ0FBYSxRQUFiLEVBQXVCLEtBQUssaUJBQUwsQ0FBdkIsQ0FQTTs7Ozs7OztzQ0FXVSxNQUFNO0FBQ3RCLFdBQUssSUFBTCxHQUFZLGlCQUFPLE1BQVAsR0FBZ0IsSUFBaEIsQ0FEVTtBQUV0QixXQUFLLEtBQUwsR0FGc0I7Ozs7Ozs7Ozs7Ozt3QkFXcEIsTUFBTTtBQUNSLFVBQU0sUUFBUSxLQUFLLEtBQUwsQ0FBVyxHQUFYLENBQVIsQ0FERTtBQUVSLFVBQUksTUFBTSxLQUFLLElBQUwsQ0FGRjs7QUFJUixZQUFNLE9BQU4sQ0FBYyxVQUFDLElBQUQ7ZUFBVSxNQUFNLElBQUksSUFBSixDQUFOO09BQVYsQ0FBZCxDQUpROztBQU1SLGFBQU8sR0FBUCxDQU5ROzs7U0EzRE47OztBQXFFTix5QkFBZSxRQUFmLENBQXdCLFVBQXhCLEVBQW9DLFlBQXBDOztrQkFFZSIsImZpbGUiOiJTaGFyZWRDb25maWcuanMiLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgc2VydmljZU1hbmFnZXIgZnJvbSAnLi4vY29yZS9zZXJ2aWNlTWFuYWdlcic7XG5pbXBvcnQgU2VydmljZSBmcm9tICcuLi9jb3JlL1NlcnZpY2UnO1xuaW1wb3J0IGNsaWVudCBmcm9tICcuLi9jb3JlL2NsaWVudCc7XG5cblxuY29uc3QgU0VSVklDRV9JRCA9ICdzZXJ2aWNlOnNoYXJlZC1jb25maWcnO1xuXG4vKipcbiAqIEludGVyZmFjZSBvZiB0aGUgY2xpZW50IGAnc2hhcmVkLWNvbmZpZydgIHNlcnZpY2UuXG4gKlxuICogVGhpcyBzZXJ2aWNlIGFsbG93cyB0byBzaGFyZSBwYXJ0cyBvZiB0aGUgc2VydmVyIGNvbmZpZ3VyYXRpb24gdG8gdGhlIGNsaWVudHMuXG4gKlxuICogX18qVGhlIHNlcnZpY2UgbXVzdCBiZSB1c2VkIHdpdGggaXRzIFtzZXJ2ZXItc2lkZSBjb3VudGVycGFydF17QGxpbmsgbW9kdWxlOnNvdW5kd29ya3Mvc2VydmVyLlNoYXJlZENvbmZpZ30qX19cbiAqXG4gKiBAcGFyYW0ge09iamVjdH0gb3B0aW9uc1xuICogQHBhcmFtIHtBcnJheTxTdHJpbmc+fSBvcHRpb25zLml0ZW1zIC0gTGlzdCBvZiB0aGUgY29uZmlndXJhdGlvbiBpdGVtc1xuICogIHJlcXVpcmVkIGJ5IHRoZSBzZXJ2ZXIuIFRoZSBnaXZlbiBzdHJpbmdzIGZvbGxvdyBhIGNvbnZlbnRpb24gZGVmaW5pbmcgYSBwYXRoXG4gKiAgdG8gdGhlIHJlcXVpcmVkIGNvbmZpZ3VyYXRpb24gaXRlbSwgZm9yIGV4YW1wbGUgYCdzZXR1cC5hcmVhJ2Agd2lsbCByZXRyaWV2ZVxuICogIHRoZSB2YWx1ZSAoaGVyZSBhbiBvYmplY3QpIGNvcnJlc3BvbmRpbmcgdG8gdGhlIGBhcmVhYCBrZXkgaW5zaWRlIHRoZSBgc2V0dXBgXG4gKiAgZW50cnkgb2YgdGhlIHNlcnZlciBjb25maWd1cmF0aW9uLlxuICpcbiAqIEBtZW1iZXJvZiBtb2R1bGU6c291bmR3b3Jrcy9jbGllbnRcbiAqIEBleGFtcGxlXG4gKiAvLyBpbnNpZGUgdGhlIGV4cGVyaWVuY2UgY29uc3RydWN0b3JcbiAqIHRoaXMuc2hhcmVkQ29uZmlnID0gdGhpcy5yZXF1aXJlKCdzaGFyZWQtY29uZmlnJywgeyBpdGVtczogWydzZXR1cC5hcmVhJ10gfSk7XG4gKiAvLyB3aGVuIHRoZSBleHBlcmllbmNlIGhhcyBzdGFydGVkXG4gKiBjb25zdCBhcmVhV2lkdGggPSB0aGlzLnNoYXJlZENvbmZpZy5nZXQoJ3NldHVwLmFyZWEud2lkdGgnKTtcbiAqL1xuY2xhc3MgU2hhcmVkQ29uZmlnIGV4dGVuZHMgU2VydmljZSB7XG4gIC8qKiBfPHNwYW4gY2xhc3M9XCJ3YXJuaW5nXCI+X19XQVJOSU5HX188L3NwYW4+IFRoaXMgY2xhc3Mgc2hvdWxkIG5ldmVyIGJlIGluc3RhbmNpYXRlZCBtYW51YWxseV8gKi9cbiAgY29uc3RydWN0b3IoKSB7XG4gICAgc3VwZXIoU0VSVklDRV9JRCwgdHJ1ZSk7XG5cbiAgICAvKipcbiAgICAgKiBDb25maWd1cmF0aW9uIGl0ZW1zIHJlcXVpcmVkIGJ5IHRoZSBjbGllbnQuXG4gICAgICogQHR5cGUge0FycmF5fVxuICAgICAqIEBwcml2YXRlXG4gICAgICovXG4gICAgdGhpcy5faXRlbXMgPSBbXTtcblxuICAgIHRoaXMuX29uQ29uZmlnUmVzcG9uc2UgPSB0aGlzLl9vbkNvbmZpZ1Jlc3BvbnNlLmJpbmQodGhpcyk7XG4gIH1cblxuICAvKiogQHByaXZhdGUgKi9cbiAgY29uZmlndXJlKG9wdGlvbnMpIHtcbiAgICBpZiAob3B0aW9ucy5pdGVtcykge1xuICAgICAgdGhpcy5faXRlbXMgPSB0aGlzLl9pdGVtcy5jb25jYXQob3B0aW9ucy5pdGVtcyk7XG4gICAgICBkZWxldGUgb3B0aW9ucy5pdGVtcztcbiAgICB9XG5cbiAgICBzdXBlci5jb25maWd1cmUob3B0aW9ucyk7XG4gIH1cblxuICAvKiogQHByaXZhdGUgKi9cbiAgaW5pdCgpIHtcbiAgICAvKipcbiAgICAgKiBPYmplY3QgY29udGFpbmluZyBhbGwgdGhlIGNvbmZpZ3VyYXRpb24gaXRlbXMgc2hhcmVkIGJ5IHRoZSBzZXJ2ZXIuIFRoZVxuICAgICAqIG9iamVjdCBpcyBmbGF0dGVuZWQgaW4gb3JkZXIgdG8gbWluaW1pemUgdGhlIG5lZWRlZCBjb21tdW5pY2F0aW9ucyBiZXR3ZWVuXG4gICAgICogdGhlIGNsaWVudCBhbmQgdGhlIHNlcnZlci5cbiAgICAgKiBAdHlwZSB7T2JqZWN0fVxuICAgICAqL1xuICAgIHRoaXMuZGF0YSA9IG51bGw7XG4gIH1cblxuICAvKiogQHByaXZhdGUgKi9cbiAgc3RhcnQoKSB7XG4gICAgc3VwZXIuc3RhcnQoKTtcblxuICAgIGlmICghdGhpcy5oYXNTdGFydGVkKVxuICAgICAgdGhpcy5pbml0KCk7XG5cbiAgICB0aGlzLnNlbmQoJ3JlcXVlc3QnLCB0aGlzLl9pdGVtcyk7XG4gICAgdGhpcy5yZWNlaXZlKCdjb25maWcnLCB0aGlzLl9vbkNvbmZpZ1Jlc3BvbnNlKTtcbiAgfVxuXG4gIC8qKiBAcHJpdmF0ZSAqL1xuICBfb25Db25maWdSZXNwb25zZShkYXRhKSB7XG4gICAgdGhpcy5kYXRhID0gY2xpZW50LmNvbmZpZyA9IGRhdGE7XG4gICAgdGhpcy5yZWFkeSgpO1xuICB9XG5cbiAgLyoqXG4gICAqIFJldHJpZXZlIGEgY29uZmlndXJhdGlvbiB2YWx1ZSBmcm9tIGl0cyBrZXkgaXRlbSwgYXMgZGVmaW5lZCBpbiBzZXJ2ZXIgc2lkZVxuICAgKiBzZXJ2aWNlJ3MgYGFkZEl0ZW1gIG1ldGhvZCBvciBpbiBjbGllbnQtc2lkZSBgaXRlbXNgIG9wdGlvbi5cbiAgICogQHBhcmFtIHtTdHJpbmd9IGl0ZW0gLSBLZXkgdG8gdGhlIGNvbmZpZ3VyYXRpb24gaXRlbSAoX2V4Ol8gYCdzZXR1cC5hcmVhJ2ApXG4gICAqIEByZXR1cm4ge01peGVkfVxuICAgKi9cbiAgZ2V0KGl0ZW0pIHtcbiAgICBjb25zdCBwYXJ0cyA9IGl0ZW0uc3BsaXQoJy4nKTtcbiAgICBsZXQgdG1wID0gdGhpcy5kYXRhO1xuXG4gICAgcGFydHMuZm9yRWFjaCgoYXR0cikgPT4gdG1wID0gdG1wW2F0dHJdKTtcblxuICAgIHJldHVybiB0bXA7XG4gIH1cbn1cblxuc2VydmljZU1hbmFnZXIucmVnaXN0ZXIoU0VSVklDRV9JRCwgU2hhcmVkQ29uZmlnKTtcblxuZXhwb3J0IGRlZmF1bHQgU2hhcmVkQ29uZmlnO1xuIl19
