@@ -158,19 +158,40 @@ class Scheduler extends Service {
    * Call a function at a given time.
    * @param {Function} fun - Function to be deferred.
    * @param {Number} time - The time at which the function should be executed.
-   * @param {Number} [synchronized=true] - Defines if the function call should be
-   *  synchronized or not.
+   * @param {Boolean} [synchronized=true] - Defines whether the function call should be
+   * @param {Boolean} [lookahead=false] - Defines whether the function is called anticipated
+   * (e.g. for audio events) or precisely at the given time (default).
    */
-  defer(fun, time, synchronized = true) {
+  defer(fun, time, synchronized = true, lookahead = false) {
     const scheduler = synchronized ? this._syncedQueue : this._scheduler;
-    scheduler.defer(fun, time)
+    const schedulerService = this;
+    let engine;
+
+    if(lookahead) {
+      scheduler.defer(fun, time);
+    } else {
+      engine = {
+        advanceTime: function(time) {
+          const delta = schedulerService.deltaTime;
+
+          console.log("delta:", delta);
+
+          if(delta > 0)
+            setTimeout(fun, 1000 * delta, time); // bridge scheduler lookahead with timeout
+          else
+            fun(time);
+        },
+      };
+
+      scheduler.add(engine, time); // add without checks
+    }
   }
 
   /**
    * Add a time engine to the queue.
    * @param {Function} engine - Engine to schedule.
    * @param {Number} time - The time at which the function should be executed.
-   * @param {Number} [synchronized=true] - Defines if the engine should be
+   * @param {Boolean} [synchronized=true] - Defines whether the engine should be
    *  synchronized or not.
    * @see [`wavesAudio.TimeEngine`]{@link http://wavesjs.github.io/audio/#audio-time-engine}
    */

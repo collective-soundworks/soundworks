@@ -88,7 +88,7 @@ class View {
     this.orientation = null;
 
     /**
-     * Defines if the view is currently visible or not.
+     * Indicates whether the view is currently visible or not.
      * @type {Boolean}
      * @name isVisible
      * @instance
@@ -324,8 +324,8 @@ class View {
   /**
    * Install events on the view at any moment of its lifecycle.
    * @param {Object<String, Function>} events - An object of events.
-   * @param {Object} [override=false] - If set true, replace the previous events
-   *  with the new ones.
+   * @param {Boolean} [override=false] - Defines whether the previous events
+   *  are replaced with the new ones.
    */
   installEvents(events, override = false) {
     if (this.isVisible)
