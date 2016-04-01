@@ -247,7 +247,7 @@ const server = {
         clientType: clientType,
         defaultType: this.config.defaultClient,
         assetsDomain: this.config.assetsDomain,
-        // export html for cordova use
+        // export html for cordova or client only usage
         includeCordovaTags: includeCordovaTags,
       }));
     });
