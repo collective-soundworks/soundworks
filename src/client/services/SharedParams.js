@@ -255,13 +255,13 @@ const SERVICE_ID = 'service:shared-params';
  *
  * This type and specific attributes of an parameter is configured server side.
  * The service is espacially usefull if a special client is defined with the
- * `hasGUI` option setted to true, allowing to create a special client aimed at
+ * `hasGUI` option set to true, allowing to create a special client aimed at
  * controlling the different parameters of the experience.
  *
  * __*The service must be used with its [server-side counterpart]{@link module:soundworks/server.SharedParams}*__
  *
  * @param {Object} options
- * @param {Boolean} [options.hasGui=true] - Defines if the service should display
+ * @param {Boolean} [options.hasGui=true] - Defines whether the service should display
  *  a GUI. If set to `true`, the service never set its `ready` signal to true and
  *  the client application stay in this state forever. The option should then be
  *  used create special clients (sometimes called `conductor`) aimed at

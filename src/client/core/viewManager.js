@@ -51,7 +51,7 @@ const viewManager = {
   },
 
   /**
-   * Defines if the view should be updated according to defined priorities.
+   * Defines whether the view should be updated according to defined priorities.
    * @private
    */
   _updateView() {

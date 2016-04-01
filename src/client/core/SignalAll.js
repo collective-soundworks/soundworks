@@ -1,9 +1,8 @@
 import Signal from './Signal';
 
-
 /**
- * Call it's observers with true when all its added `Signal` instances are
- * setted to `true`, `false` otherwise.
+ * Compound signal that is `true` when all signals it depends on are `true`.
+ * Dependencies are added through the `add` method.
  * @private
  */
 export default class SignalAll extends Signal {

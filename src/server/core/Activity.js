@@ -109,7 +109,7 @@ class Activity extends EventEmitter {
    * Interface method to be implemented by activities. As part of an activity
    * lifecycle, the method should define the behavior of the activity when started
    * (e.g. binding listeners). When this method id called, all configuration options
-   * should be setted. Also, if the activity relies on another service,
+   * should be set. Also, if the activity relies on another service,
    * this dependency should be considered as instanciated.
    * The method is automatically called by the server on startup.
    */
