@@ -175,8 +175,10 @@ class Platform extends Service {
       this.init();
 
     // execute start hooks from the features definitions
-    const startHooks = this.getStartHooks();
-    startHooks.forEach((hook) => hook());
+    if(client.compatible) {
+      const startHooks = this.getStartHooks();
+      startHooks.forEach((hook) => hook());
+    }
 
     // optionnaly skip the view if client is compatible
     if (client.compatible && !this.options.showDialog) {
