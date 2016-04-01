@@ -124,8 +124,8 @@ const SERVICE_ID = 'service:locator';
  * @see {@link module:soundworks/client.Checkin}
  *
  * @param {Object} options
- * @param {Boolean} [options.random=false] - If set to `true`, the location is
- *  setted randomly (mainly for development purposes).
+ * @param {Boolean} [options.random=false] - Defines whether the location is
+ *  set randomly (mainly for development purposes).
  *
  * @memberof module:soundworks/client
  * @example

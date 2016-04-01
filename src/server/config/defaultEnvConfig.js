@@ -46,7 +46,7 @@ const defaultEnvConfig = {
 
   /**
    * Default port of the application, in production this value should typically
-   * be setted to 80.
+   * be set to 80.
    * @type {Number}
    * @default 8000
    */

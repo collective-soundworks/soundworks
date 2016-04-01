@@ -253,7 +253,7 @@ export default class SpaceView extends View {
 //   * @param {String|Number} line.id - An unique identifier for the line.
 //   * @param {Object} line.tail - The point where the line should begin.
 //   * @param {Object} line.head - The point where the line should end.
-//   * @param {Boolean} [line.directed=false] - Defines if the line should be directed or not.
+//   * @param {Boolean} [line.directed=false] - Defines whether the line should be directed or not.
 //   * @param {String} [line.color=undefined] - If specified, the color of the line.
 //   */
 //  renderLine(line) {

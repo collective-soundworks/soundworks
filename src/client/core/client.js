@@ -51,7 +51,7 @@ const client = {
   config: null,
 
   /**
-   * Information about the client platform. The properties are setted by the
+   * Information about the client platform. The properties are set by the
    * [`platform`]{@link module:soundworks/client.Platform} service.
    *
    * @type {Object}
@@ -70,7 +70,7 @@ const client = {
   },
 
   /**
-   * Defines if the user's device is compatible with the application
+   * Defines whether the user's device is compatible with the application
    * requirements.
    *
    * @type {Boolean}
@@ -244,4 +244,3 @@ const client = {
 };
 
 export default client;
-
