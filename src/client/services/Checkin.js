@@ -75,10 +75,9 @@ class Checkin extends Service {
      */
     this.coordinates = null;
 
-    if (this.options.showDialog) {
-      this.viewCtor = this.options.viewCtor;
-      this.view = this.createView();
-    }
+    // view should be always be created in case of unavailability
+    this.viewCtor = this.options.viewCtor;
+    this.view = this.createView();
   }
 
   /** @private */
@@ -95,8 +94,7 @@ class Checkin extends Service {
     this.receive('position', this._onPositionResponse);
     this.receive('unavailable', this._onUnavailableResponse);
 
-    if (this.options.showDialog)
-      this.show();
+    this.show();
   }
 
   /** @private */
@@ -106,8 +104,7 @@ class Checkin extends Service {
     this.removeListener('position', this._onPositionResponse);
     this.removeListener('unavailable', this._onUnavailableResponse);
 
-    if (this.options.showDialog)
-      this.hide();
+    this.hide();
   }
 
   /** @private */

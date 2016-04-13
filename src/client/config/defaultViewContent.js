@@ -33,7 +33,7 @@ const defaultViewContent = {
     labelPrefix: 'Go to',
     labelPostfix: 'Touch the screen<br class="portrait-only" />when you are ready.',
     error: false,
-    errorMessage: 'Sorry, no place is available',
+    errorMessage: 'Sorry,<br/>no place available',
     wait: 'Please wait...',
     label: '',
   },
