@@ -196,7 +196,8 @@ class Loader extends Service {
 
         loader.load(filePaths, { wrapAroundExtention: this.options.audioWrapTail })
           .then((loadedObjects) => {
-            this.buffers.concat(loadedObjects);
+            for(let obj of loadedObjects)
+              this.buffers.push(obj);
 
             for(let i = 0; i < loadedObjects.length; i++) {
               const obj = loadedObjects[i];
