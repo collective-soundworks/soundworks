@@ -68,6 +68,7 @@ const SERVICE_ID = 'service:scheduler';
  * @param {Object} options
  * @param {Number} options.period - Period of the scheduler.
  * @param {Number} options.lookahead - Lookahead of the scheduler.
+ * @param {Boolean} options.local - Local scheduling only (no sync required).
  *
  * @memberof module:soundworks/client
  * @see [`wavesAudio.Scheduler`]{@link http://wavesjs.github.io/audio/#audio-scheduler}
@@ -85,18 +86,23 @@ class Scheduler extends Service {
   constructor () {
     super(SERVICE_ID);
 
-    this._sync = this.require('sync');
     this._platform = this.require('platform', { features: 'web-audio' });
 
+    // initialize sync option
+    this._sync = null;
+    this._syncedQueue = null;
+
+    // get audio time based scheduler
     this._scheduler = audio.getScheduler();
-    this._syncedQueue = new _SyncTimeSchedulingQueue(this._sync, this._scheduler);
 
     const defaults = {
       lookahead: this._scheduler.lookahead,
       period: this._scheduler.period,
+      local: false,
     };
 
-    this.configure(defaults);
+    // call super.configure (activate sync option only if required)
+    super.configure(defaults);
   }
 
   /**
@@ -117,6 +123,12 @@ class Scheduler extends Service {
         this._scheduler.lookahead = options.lookahead;
       else
         throw new Error(`Invalid scheduler lookahead: ${options.lookahead}`);
+    }
+
+    // enable sync option a first request with
+    if(!options.local && !this._sync) {
+      this._sync = this.require('sync');
+      this._syncedQueue = new _SyncTimeSchedulingQueue(this._sync, this._scheduler)
     }
 
     super.configure(options);
@@ -143,7 +155,10 @@ class Scheduler extends Service {
    * Current sync time of the scheduler.
    */
   get syncTime() {
-    return this._syncedQueue.currentTime;
+    if(this._syncedQueue)
+      return this._syncedQueue.currentTime;
+
+    return undefined;
   }
 
   /**
@@ -162,8 +177,8 @@ class Scheduler extends Service {
    * @param {Boolean} [lookahead=false] - Defines whether the function is called anticipated
    * (e.g. for audio events) or precisely at the given time (default).
    */
-  defer(fun, time, synchronized = true, lookahead = false) {
-    const scheduler = synchronized ? this._syncedQueue : this._scheduler;
+  defer(fun, time, synchronized = !!this._sync, lookahead = false) {
+    const scheduler = (synchronized && this._sync) ? this._syncedQueue : this._scheduler;
     const schedulerService = this;
     let engine;
 
@@ -173,8 +188,6 @@ class Scheduler extends Service {
       engine = {
         advanceTime: function(time) {
           const delta = schedulerService.deltaTime;
-
-          console.log("delta:", delta);
 
           if(delta > 0)
             setTimeout(fun, 1000 * delta, time); // bridge scheduler lookahead with timeout
@@ -195,8 +208,8 @@ class Scheduler extends Service {
    *  synchronized or not.
    * @see [`wavesAudio.TimeEngine`]{@link http://wavesjs.github.io/audio/#audio-time-engine}
    */
-  add(engine, time, synchronized = true) {
-    const scheduler = synchronized ? this._syncedQueue : this._scheduler;
+  add(engine, time, synchronized = !!this._sync) {
+    const scheduler = (synchronized && this._sync) ? this._syncedQueue : this._scheduler;
     scheduler.add(engine, time);
   }
 
@@ -208,7 +221,7 @@ class Scheduler extends Service {
   remove(engine) {
     if (this._scheduler.has(engine))
       this._scheduler.remove(engine);
-    else if (this._syncedQueue.has(engine))
+    else if (this._syncedQueue && this._syncedQueue.has(engine))
       this._syncedQueue.remove(engine);
   }
 
@@ -216,7 +229,9 @@ class Scheduler extends Service {
    * Remove all engine from the scheduling queues (synchronized and not synchronized).
    */
   clear() {
-    this._syncedQueue.clear();
+    if(this._syncedQueue)
+      this._syncedQueue.clear();
+
     this._scheduler.clear();
   }
 };
