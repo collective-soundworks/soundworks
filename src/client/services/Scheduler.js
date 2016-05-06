@@ -61,14 +61,21 @@ const SERVICE_ID = 'service:scheduler';
  * scheduler provided by the [`wavesjs`]{@link https://github.com/wavesjs/audio}
  * library.
  *
+ * When setting the option `'sync'` to `'false'`, the scheduling is local
+ * (without sunchronization to the other clients) and the `'sync'` service is
+ * not required (attention: since its default value is `'true'`, all requests
+ * of the `'scheduler'` service in the application have to explicitly specify
+ * the `'sync'` option as `'false'` to assure that the `'sync'` service is not
+ * enabled).
+ *
  * While this service has no direct server counterpart, it's dependency to the
- * [`sync`]{@link module:soundworks/client.Sync} service requires the existance
- * of a server. Also, the service requires a device with `WebAudio` ability.
+ * [`sync`]{@link module:soundworks/client.Sync} service may require the existance
+ * of a server. In addition, the service requires a device with `WebAudio` ability.
  *
  * @param {Object} options
- * @param {Number} options.period - Period of the scheduler.
- * @param {Number} options.lookahead - Lookahead of the scheduler.
- * @param {Boolean} options.local - Local scheduling only (no sync required).
+ * @param {Number} [options.period] - Period of the scheduler (defauts to current value).
+ * @param {Number} [options.lookahead] - Lookahead of the scheduler (defauts to current value).
+ * @param {Boolean} [options.sync = true] - Enable synchronized scheduling.
  *
  * @memberof module:soundworks/client
  * @see [`wavesAudio.Scheduler`]{@link http://wavesjs.github.io/audio/#audio-scheduler}
@@ -76,7 +83,8 @@ const SERVICE_ID = 'service:scheduler';
  *
  * @example
  * // inside the experience constructor
- * this.scheduler = this.require('scheduler');
+ * this.scheduler = this.require('scheduler', { sync: true });
+ *
  * // when the experience has started
  * const nextSyncTime = this.scheduler.getSyncTime() + 2;
  * this.scheduler.add(timeEngine, nextSyncTime, true);
@@ -98,7 +106,7 @@ class Scheduler extends Service {
     const defaults = {
       lookahead: this._scheduler.lookahead,
       period: this._scheduler.period,
-      local: false,
+      sync: undefined,
     };
 
     // call super.configure (activate sync option only if required)
@@ -111,6 +119,7 @@ class Scheduler extends Service {
    * @param {Object} options - The options to apply to the service.
    */
   configure(options) {
+    // check and set scheduler period option
     if (options.period !== undefined) {
       if (options.period > 0.010)
         this._scheduler.period = options.period;
@@ -118,6 +127,7 @@ class Scheduler extends Service {
         throw new Error(`Invalid scheduler period: ${options.period}`);
     }
 
+    // check and set scheduler lookahead option
     if (options.lookahead !== undefined) {
       if (options.lookahead > 0.010)
         this._scheduler.lookahead = options.lookahead;
@@ -125,12 +135,17 @@ class Scheduler extends Service {
         throw new Error(`Invalid scheduler lookahead: ${options.lookahead}`);
     }
 
-    // enable sync option a first request with
-    if(!options.local && !this._sync) {
+    // set sync option
+    const opt = (options.sync !== undefined)? options.sync: true; // default is true
+    const sync = (sync === undefined)? opt: (sync || opt); // truth will prevail
+
+    // enable sync at first request with option set to true
+    if(sync && !this._sync) {
       this._sync = this.require('sync');
       this._syncedQueue = new _SyncTimeSchedulingQueue(this._sync, this._scheduler)
     }
 
+    options.sync = sync;
     super.configure(options);
   }
 
@@ -176,6 +191,12 @@ class Scheduler extends Service {
    * @param {Boolean} [synchronized=true] - Defines whether the function call should be
    * @param {Boolean} [lookahead=false] - Defines whether the function is called anticipated
    * (e.g. for audio events) or precisely at the given time (default).
+   *
+   * Attention: The actual synchronization of the scheduled function depends not
+   * only of the `'synchronized'` option, but also of the configuration of the
+   * scheduler service. However, to assure a the desired synchronization, the
+   * option has to be properly specified. Without specifying the option,
+   * synchronized scheduling will be used when available.
    */
   defer(fun, time, synchronized = !!this._sync, lookahead = false) {
     const scheduler = (synchronized && this._sync) ? this._syncedQueue : this._scheduler;
@@ -204,9 +225,13 @@ class Scheduler extends Service {
    * Add a time engine to the queue.
    * @param {Function} engine - Engine to schedule.
    * @param {Number} time - The time at which the function should be executed.
-   * @param {Boolean} [synchronized=true] - Defines whether the engine should be
-   *  synchronized or not.
-   * @see [`wavesAudio.TimeEngine`]{@link http://wavesjs.github.io/audio/#audio-time-engine}
+   * @param {Boolean} [synchronized=true] - Defines whether the engine should be synchronized or not.
+   *
+   * Attention: The actual synchronization of the scheduled time engine depends
+   * not only of the `'synchronized'` option, but also of the configuration of
+   * the scheduler service. However, to assure a the desired synchronization,
+   * the option has to be properly specified. Without specifying the option,
+   * synchronized scheduling will be used when available.
    */
   add(engine, time, synchronized = !!this._sync) {
     const scheduler = (synchronized && this._sync) ? this._syncedQueue : this._scheduler;
@@ -215,8 +240,7 @@ class Scheduler extends Service {
 
   /**
    * Remove the given engine from the queue.
-   * @param {Function} engine - Engine to remove from the queue.
-   * @see [`wavesAudio.TimeEngine`]{@link http://wavesjs.github.io/audio/#audio-time-engine}
+   * @param {Function} engine - Engine to remove from the scheduler.
    */
   remove(engine) {
     if (this._scheduler.has(engine))
@@ -226,7 +250,7 @@ class Scheduler extends Service {
   }
 
   /**
-   * Remove all engine from the scheduling queues (synchronized and not synchronized).
+   * Remove all scheduled functions and time engines (synchronized and not) from the scheduler.
    */
   clear() {
     if(this._syncedQueue)
