@@ -92,8 +92,8 @@ function appendFileDescription(filePaths, fileDescriptions, fileDescr, id = unde
  *
  * // the loaded objects can be retrieved according to their definition
  * const kickBuffer = this.loader.get('kick');
- * const audioBuffer = this.loader.get('jazz', audio);
- * const segmentArray = this.loader.get('jazz', segments);
+ * const audioBuffer = this.loader.get('jazz', 'audio');
+ * const segmentArray = this.loader.get('jazz', 'segments');
  *
  * // ... audio buffers an be retrieved through their identifier
  * const snareBuffer = this.loader.getAudioBuffer('snare');
