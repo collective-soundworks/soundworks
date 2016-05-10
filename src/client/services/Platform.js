@@ -5,9 +5,10 @@ import screenfull from 'screenfull';
 import SegmentedView from '../views/SegmentedView';
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
+
 // @todo - define if we keep this in defaults
-import * as adapter from 'webrtc-adapter';
-adapter.disableLog(true);
+// import * as adapter from 'webrtc-adapter';
+// adapter.disableLog(true);
 
 // @todo - to be added
 // + “video-input”: needs video input
