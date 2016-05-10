@@ -363,7 +363,7 @@ class SharedParams extends Service {
     if (param) {
       param.addListener('update', listener);
 
-      if (param.type !== 'command')
+      if (param.type !== 'trigger')
         listener(param.value);
     } else {
       console.log('unknown param "' + name + '"');
