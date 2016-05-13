@@ -276,13 +276,13 @@ class Loader extends Service {
   /**
    * Retrieve a loaded object.
    * @param {String} id - Object or group identifier.
-   * @param {String} member - Member key in group.
+   * @param {String} key - Member key in group.
    * @returns {Promise} - Returns the loaded object.
    */
-  get(id, member = undefined) {
+  get(id, key = undefined) {
     const obj = this.data[id];
 
-    if(obj && key)
+    if (obj && key)
       return obj[key];
 
     return obj;
