@@ -174,21 +174,21 @@ class Loader extends Service {
         for(let file of files)
           appendFileDescription(filePaths, fileDescriptions, file);
       } else {
-        for(let id in files)
+        for (let id in files)
           appendFileDescription(filePaths, fileDescriptions, files[id], id);
       }
 
-      if(filePaths.length > 0 && fileDescriptions.length > 0) {
+      if (filePaths.length > 0 && fileDescriptions.length > 0) {
         const loader = new SuperLoader();
 
-        if(view && view.onProgress) {
+        if (view && view.onProgress) {
           const progressPerFile = filePaths.map(() => 0); // track files loading progress
 
           loader.progressCallback = (e) => {
             progressPerFile[e.index] = e.value;
 
             let totalProgress = progressPerFile.reduce((prev, current) => prev + current, 0);
-            totalProgress /= totalProgress.length;
+            totalProgress /= progressPerFile.length;
 
             view.onProgress(totalProgress * 100);
           }
@@ -220,7 +220,7 @@ class Loader extends Service {
               }
             }
 
-            if(signalReady)
+            if (signalReady)
               this.ready();
 
             resolve();
@@ -229,7 +229,7 @@ class Loader extends Service {
             console.error(error);
           });
       } else {
-        if(signalReady)
+        if (signalReady)
           this.ready();
 
         resolve();
