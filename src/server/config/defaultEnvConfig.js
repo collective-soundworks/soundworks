@@ -17,7 +17,7 @@ const defaultEnvConfig = {
    * by the node.js server.
    * @type {String}
    */
-  assetsDomain: '',
+  assetsDomain: '/',
 
   /**
    * Define if the HTTP server should be launched using secure connections.
