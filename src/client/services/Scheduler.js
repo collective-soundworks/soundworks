@@ -22,22 +22,21 @@ class _SyncTimeSchedulingQueue extends audio.SchedulingQueue {
 
   advanceTime(audioTime) {
     const syncTime = this.sync.getSyncTime(audioTime);
-    const nextSyncTime = super.advanceTime(syncTime);
+    const nextSyncTime = super.advanceTime(this.nextSyncTime);
     const nextAudioTime = this.sync.getAudioTime(nextSyncTime);
 
     this.nextSyncTime = nextSyncTime;
-    this.nextAudioTime = nextAudioTime; // for resync testing
 
     return nextAudioTime;
   }
 
   resetTime(syncTime) {
-    const audioTime = (typeof syncTime !== 'undefined') ?
-      this.sync.getAudioTime(syncTime) : undefined;
+    if(syncTime === undefined)
+      syncTime = this.sync.getSyncTime();
 
     this.nextSyncTime = syncTime;
-    this.nextAudioTime = audioTime;
 
+    const audioTime = this.sync.getAudioTime(syncTime);
     this.master.resetEngineTime(this, audioTime);
   }
 
