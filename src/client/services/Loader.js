@@ -196,19 +196,19 @@ class Loader extends Service {
 
         loader.load(filePaths, { wrapAroundExtention: this.options.audioWrapTail })
           .then((loadedObjects) => {
-            for(let obj of loadedObjects)
-              this.buffers.push(obj);
-
-            for(let i = 0; i < loadedObjects.length; i++) {
-              const obj = loadedObjects[i];
+            // for (let i = 0; i < loadedObjects.length; i++) {
+            loadedObjects.forEach((obj, i) => {
+              // const obj = loadedObjects[i];
               const descr = fileDescriptions[i];
               const id = descr.id;
               let key = descr.key;
 
-              if(obj instanceof AudioBuffer)
+              this.buffers.push(obj);
+
+              if (obj instanceof AudioBuffer)
                 this.audioBuffers[id] = obj;
 
-              if(key) {
+              if (key) {
                 let data = this.data[id];
 
                 if(!data)
@@ -218,7 +218,7 @@ class Loader extends Service {
               } else {
                 this.data[id] = obj;
               }
-            }
+            });
 
             if (signalReady)
               this.ready();
