@@ -205,18 +205,18 @@ const server = {
     });
 
     // map `clientType` to their respective activities
-    // make sure `defaultClient` (aka `player`) is mapped last
     for (let clientType in this._clientTypeActivitiesMap) {
       if (clientType !== this.config.defaultClient) {
-        const activity = this._clientTypeActivitiesMap[clientType];
-        this._map(clientType, activity, expressApp);
+        const activities = this._clientTypeActivitiesMap[clientType];
+        this._map(clientType, activities, expressApp);
       }
     }
 
+    // make sure `defaultClient` (aka `player`) is mapped last
     for (let clientType in this._clientTypeActivitiesMap) {
       if (clientType === this.config.defaultClient) {
-        const activity = this._clientTypeActivitiesMap[clientType];
-        this._map(clientType, activity, expressApp);
+        const activities = this._clientTypeActivitiesMap[clientType];
+        this._map(clientType, activities, expressApp);
       }
     }
   },
@@ -228,7 +228,7 @@ const server = {
    */
   _map(clientType, activities, expressApp) {
     // @todo - allow to pass some variable in the url -> define how bind it to sockets...
-    const url = (clientType !== this.config.defaultClient) ? `/${clientType}/*` : '/*';
+    const url = (clientType !== this.config.defaultClient) ? `/${clientType}` : '/';
 
     // use template with `clientType` name or default if not defined
     const clientTmpl = path.join(this.config.templateFolder, `${clientType}.ejs`);
@@ -239,7 +239,6 @@ const server = {
     const tmpl = ejs.compile(tmplString);
 
     expressApp.get(url, (req, res) => {
-      console.log(req.params);
       let includeCordovaTags = false;
       let socketConfig = JSON.stringify(this.config.socketIO);
 
