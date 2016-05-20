@@ -206,8 +206,18 @@ const server = {
 
     // map `clientType` to their respective activities
     for (let clientType in this._clientTypeActivitiesMap) {
-      const activity = this._clientTypeActivitiesMap[clientType];
-      this._map(clientType, activity, expressApp);
+      if (clientType !== this.config.defaultClient) {
+        const activities = this._clientTypeActivitiesMap[clientType];
+        this._map(clientType, activities, expressApp);
+      }
+    }
+
+    // force `defaultClient` to be defined last, acts as a catch all client
+    for (let clientType in this._clientTypeActivitiesMap) {
+      if (clientType === this.config.defaultClient) {
+        const activities = this._clientTypeActivitiesMap[clientType];
+        this._map(clientType, activities, expressApp);
+      }
     }
   },
 
@@ -262,7 +272,6 @@ const server = {
    */
   _onConnection(clientType, activities) {
     return (socket) => {
-      console.log(socket.request);
       const client = new Client(clientType, socket);
       activities.forEach((activity) => activity.connect(client));
 

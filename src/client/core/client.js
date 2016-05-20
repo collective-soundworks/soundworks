@@ -176,6 +176,22 @@ const client = {
   },
 
   /**
+   * Retrieve an array of optionnal parameters from the url excluding the client type.
+   * Parameters can be defined in two ways :
+   * - as a regular route (ex: `/player/param1/param2`)
+   * - as a hash (ex: `/player#param1-param2`)
+   * The parameters are send along with the socket connection
+   *
+   * @see {@link module:soundworks/client.socket}
+   * @private
+   * @todo - When handshake implemented, define if these informations should be part of it
+   */
+  _parseOptionnalUrlParameters() {
+    const pathname = window.location.pathname;
+
+  },
+
+  /**
    * Initialize socket connection and perform handshake with the server.
    * @todo - refactor handshake.
    * @private
