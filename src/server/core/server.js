@@ -218,7 +218,7 @@ const server = {
    */
   _map(clientType, activities, expressApp) {
     // @todo - allow to pass some variable in the url -> define how bind it to sockets...
-    const url = (clientType !== this.config.defaultClient) ? `/${clientType}` : '/';
+    const url = (clientType !== this.config.defaultClient) ? `/${clientType}/*` : '/*';
 
     // use template with `clientType` name or default if not defined
     const clientTmpl = path.join(this.config.templateFolder, `${clientType}.ejs`);
@@ -262,6 +262,7 @@ const server = {
    */
   _onConnection(clientType, activities) {
     return (socket) => {
+      console.log(socket.request);
       const client = new Client(clientType, socket);
       activities.forEach((activity) => activity.connect(client));
 

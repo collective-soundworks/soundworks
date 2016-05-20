@@ -138,18 +138,21 @@ const client = {
   init(clientType = 'player', config = {}) {
     this.type = clientType;
 
-    // 1. if socket config given, mix it with defaults
+    // retrieve
+    this._parseOptionnalUrlParameters();
+    // if socket config given, mix it with defaults
     const socketIO = Object.assign({
       url: '',
       transports: ['websocket']
     }, config.socketIO);
 
-    // 2. mix all other config and override with defined socket config
+    // mix all other config and override with defined socket config
     this.config = Object.assign({
       appContainer: '#container',
     }, config, { socketIO });
 
     serviceManager.init();
+
     this._initViews();
   },
 
