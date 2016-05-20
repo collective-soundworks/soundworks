@@ -22,22 +22,21 @@ class _SyncTimeSchedulingQueue extends audio.SchedulingQueue {
 
   advanceTime(audioTime) {
     const syncTime = this.sync.getSyncTime(audioTime);
-    const nextSyncTime = super.advanceTime(syncTime);
+    const nextSyncTime = super.advanceTime(this.nextSyncTime);
     const nextAudioTime = this.sync.getAudioTime(nextSyncTime);
 
     this.nextSyncTime = nextSyncTime;
-    this.nextAudioTime = nextAudioTime; // for resync testing
 
     return nextAudioTime;
   }
 
   resetTime(syncTime) {
-    const audioTime = (typeof syncTime !== 'undefined') ?
-      this.sync.getAudioTime(syncTime) : undefined;
+    if(syncTime === undefined)
+      syncTime = this.sync.getSyncTime();
 
     this.nextSyncTime = syncTime;
-    this.nextAudioTime = audioTime;
 
+    const audioTime = this.sync.getAudioTime(syncTime);
     this.master.resetEngineTime(this, audioTime);
   }
 
@@ -61,13 +60,21 @@ const SERVICE_ID = 'service:scheduler';
  * scheduler provided by the [`wavesjs`]{@link https://github.com/wavesjs/audio}
  * library.
  *
+ * When setting the option `'sync'` to `'false'`, the scheduling is local
+ * (without sunchronization to the other clients) and the `'sync'` service is
+ * not required (attention: since its default value is `'true'`, all requests
+ * of the `'scheduler'` service in the application have to explicitly specify
+ * the `'sync'` option as `'false'` to assure that the `'sync'` service is not
+ * enabled).
+ *
  * While this service has no direct server counterpart, it's dependency to the
- * [`sync`]{@link module:soundworks/client.Sync} service requires the existance
- * of a server. Also, the service requires a device with `WebAudio` ability.
+ * [`sync`]{@link module:soundworks/client.Sync} service may require the existance
+ * of a server. In addition, the service requires a device with `WebAudio` ability.
  *
  * @param {Object} options
- * @param {Number} options.period - Period of the scheduler.
- * @param {Number} options.lookahead - Lookahead of the scheduler.
+ * @param {Number} [options.period] - Period of the scheduler (defauts to current value).
+ * @param {Number} [options.lookahead] - Lookahead of the scheduler (defauts to current value).
+ * @param {Boolean} [options.sync = true] - Enable synchronized scheduling.
  *
  * @memberof module:soundworks/client
  * @see [`wavesAudio.Scheduler`]{@link http://wavesjs.github.io/audio/#audio-scheduler}
@@ -75,7 +82,8 @@ const SERVICE_ID = 'service:scheduler';
  *
  * @example
  * // inside the experience constructor
- * this.scheduler = this.require('scheduler');
+ * this.scheduler = this.require('scheduler', { sync: true });
+ *
  * // when the experience has started
  * const nextSyncTime = this.scheduler.getSyncTime() + 2;
  * this.scheduler.add(timeEngine, nextSyncTime, true);
@@ -85,18 +93,23 @@ class Scheduler extends Service {
   constructor () {
     super(SERVICE_ID);
 
-    this._sync = this.require('sync');
     this._platform = this.require('platform', { features: 'web-audio' });
 
+    // initialize sync option
+    this._sync = null;
+    this._syncedQueue = null;
+
+    // get audio time based scheduler
     this._scheduler = audio.getScheduler();
-    this._syncedQueue = new _SyncTimeSchedulingQueue(this._sync, this._scheduler);
 
     const defaults = {
       lookahead: this._scheduler.lookahead,
       period: this._scheduler.period,
+      sync: undefined,
     };
 
-    this.configure(defaults);
+    // call super.configure (activate sync option only if required)
+    super.configure(defaults);
   }
 
   /**
@@ -105,6 +118,7 @@ class Scheduler extends Service {
    * @param {Object} options - The options to apply to the service.
    */
   configure(options) {
+    // check and set scheduler period option
     if (options.period !== undefined) {
       if (options.period > 0.010)
         this._scheduler.period = options.period;
@@ -112,6 +126,7 @@ class Scheduler extends Service {
         throw new Error(`Invalid scheduler period: ${options.period}`);
     }
 
+    // check and set scheduler lookahead option
     if (options.lookahead !== undefined) {
       if (options.lookahead > 0.010)
         this._scheduler.lookahead = options.lookahead;
@@ -119,6 +134,17 @@ class Scheduler extends Service {
         throw new Error(`Invalid scheduler lookahead: ${options.lookahead}`);
     }
 
+    // set sync option
+    const opt = (options.sync !== undefined)? options.sync: true; // default is true
+    const sync = (sync === undefined)? opt: (sync || opt); // truth will prevail
+
+    // enable sync at first request with option set to true
+    if(sync && !this._sync) {
+      this._sync = this.require('sync');
+      this._syncedQueue = new _SyncTimeSchedulingQueue(this._sync, this._scheduler)
+    }
+
+    options.sync = sync;
     super.configure(options);
   }
 
@@ -143,7 +169,10 @@ class Scheduler extends Service {
    * Current sync time of the scheduler.
    */
   get syncTime() {
-    return this._syncedQueue.currentTime;
+    if(this._syncedQueue)
+      return this._syncedQueue.currentTime;
+
+    return undefined;
   }
 
   /**
@@ -161,9 +190,15 @@ class Scheduler extends Service {
    * @param {Boolean} [synchronized=true] - Defines whether the function call should be
    * @param {Boolean} [lookahead=false] - Defines whether the function is called anticipated
    * (e.g. for audio events) or precisely at the given time (default).
+   *
+   * Attention: The actual synchronization of the scheduled function depends not
+   * only of the `'synchronized'` option, but also of the configuration of the
+   * scheduler service. However, to assure a the desired synchronization, the
+   * option has to be properly specified. Without specifying the option,
+   * synchronized scheduling will be used when available.
    */
-  defer(fun, time, synchronized = true, lookahead = false) {
-    const scheduler = synchronized ? this._syncedQueue : this._scheduler;
+  defer(fun, time, synchronized = !!this._sync, lookahead = false) {
+    const scheduler = (synchronized && this._sync) ? this._syncedQueue : this._scheduler;
     const schedulerService = this;
     let engine;
 
@@ -173,8 +208,6 @@ class Scheduler extends Service {
       engine = {
         advanceTime: function(time) {
           const delta = schedulerService.deltaTime;
-
-          console.log("delta:", delta);
 
           if(delta > 0)
             setTimeout(fun, 1000 * delta, time); // bridge scheduler lookahead with timeout
@@ -191,32 +224,37 @@ class Scheduler extends Service {
    * Add a time engine to the queue.
    * @param {Function} engine - Engine to schedule.
    * @param {Number} time - The time at which the function should be executed.
-   * @param {Boolean} [synchronized=true] - Defines whether the engine should be
-   *  synchronized or not.
-   * @see [`wavesAudio.TimeEngine`]{@link http://wavesjs.github.io/audio/#audio-time-engine}
+   * @param {Boolean} [synchronized=true] - Defines whether the engine should be synchronized or not.
+   *
+   * Attention: The actual synchronization of the scheduled time engine depends
+   * not only of the `'synchronized'` option, but also of the configuration of
+   * the scheduler service. However, to assure a the desired synchronization,
+   * the option has to be properly specified. Without specifying the option,
+   * synchronized scheduling will be used when available.
    */
-  add(engine, time, synchronized = true) {
-    const scheduler = synchronized ? this._syncedQueue : this._scheduler;
+  add(engine, time, synchronized = !!this._sync) {
+    const scheduler = (synchronized && this._sync) ? this._syncedQueue : this._scheduler;
     scheduler.add(engine, time);
   }
 
   /**
    * Remove the given engine from the queue.
-   * @param {Function} engine - Engine to remove from the queue.
-   * @see [`wavesAudio.TimeEngine`]{@link http://wavesjs.github.io/audio/#audio-time-engine}
+   * @param {Function} engine - Engine to remove from the scheduler.
    */
   remove(engine) {
     if (this._scheduler.has(engine))
       this._scheduler.remove(engine);
-    else if (this._syncedQueue.has(engine))
+    else if (this._syncedQueue && this._syncedQueue.has(engine))
       this._syncedQueue.remove(engine);
   }
 
   /**
-   * Remove all engine from the scheduling queues (synchronized and not synchronized).
+   * Remove all scheduled functions and time engines (synchronized and not) from the scheduler.
    */
   clear() {
-    this._syncedQueue.clear();
+    if(this._syncedQueue)
+      this._syncedQueue.clear();
+
     this._scheduler.clear();
   }
 };

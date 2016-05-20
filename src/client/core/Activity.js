@@ -89,8 +89,7 @@ class Activity extends Process {
      * @instance
      * @memberof module:soundworks/client.Activity
      */
-    this.options = {};
-    this.configure({ viewPriority: 0 });
+    this.options = { viewPriority: 0 };
 
     /**
      * Define which signal the `Activity` requires to start.
@@ -249,4 +248,3 @@ class Activity extends Process {
 }
 
 export default Activity;
-

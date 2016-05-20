@@ -38,7 +38,8 @@ class MotionInput extends Service {
 
     this.configure(defaults);
     // @todo - should be handled directly inside the motionInput
-    this._descriptorsValidity = {}
+    this._descriptorsValidity = {};
+    this._descriptorsPeriod = {};
   }
 
   /**
@@ -62,6 +63,7 @@ class MotionInput extends Service {
       .then((modules) => {
         this.options.descriptors.forEach((name, index) => {
           this._descriptorsValidity[name] = modules[index].isValid;
+          this._descriptorsPeriod[name] = modules[index].period;
         });
 
         this.ready();
@@ -80,6 +82,15 @@ class MotionInput extends Service {
    */
   isAvailable(name) {
     return this._descriptorsValidity[name];
+  }
+
+  /**
+   * Returns the event period of a descriptor
+   * @param {String} name - Descriptor name.
+   * @returns {Number} - Event period (in seconds).
+   */
+  getPeriod(name) {
+    return this._descriptorsPeriod[name];
   }
 
   /**
