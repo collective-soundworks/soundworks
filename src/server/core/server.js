@@ -292,7 +292,7 @@ const server = {
         // @todo - refactor handshake and uuid definition.
         sockets.send(client, 'client:start', client.uuid);
 
-        logger.info({ socket, clientType }, 'connection');
+        logger.info({ socket, clientType }, 'handshake');
       });
     }
   },
