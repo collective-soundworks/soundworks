@@ -1,5 +1,8 @@
-import Scene from '../core/Scene';
+import * as basicControllers from 'waves-basic-controllers';
 import client from '../core/client';
+import Scene from '../core/Scene';
+
+basicControllers.disableStyles();
 
 /* --------------------------------------------------------- */
 /* GUIs
@@ -132,20 +135,23 @@ class _TriggerGui {
   set(val) { /* nothing to set here */ }
 }
 
+const SCENE_ID = 'conductor';
 
 /**
  * Scene definition
  */
-class Conductor extends Scene {
+export default class Conductor extends Scene {
   constructor() {
-    super('conductor', true);
+    super(SCENE_ID, true);
+
+    this._guiOptions = {};
 
     this._errorReporter = this.require('error-reporter');
     this._sharedParams = this.require('shared-params');
   }
 
   init() {
-    this.view = this.createDefaultView();
+    this.view = this.createView();
   }
 
   start() {
@@ -154,10 +160,10 @@ class Conductor extends Scene {
     if (!this.hasStarted)
       this.init();
 
-    for (let name in this.params)
-      this.createGui(this.params[name]);
-
     this.show();
+
+    for (let name in this._sharedParams.params)
+      this.createGui(this._sharedParams.params[name]);
   }
 
   /**

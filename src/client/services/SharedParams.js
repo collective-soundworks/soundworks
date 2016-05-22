@@ -1,10 +1,7 @@
-import * as basicControllers from 'waves-basic-controllers';
 import { EventEmitter } from 'events';
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
 
-
-basicControllers.disableStyles();
 
 /* --------------------------------------------------------- */
 /* CONTROL UNITS
@@ -201,7 +198,6 @@ class SharedParams extends Service {
       this.params[param.name] = param;
     });
 
-    // if (!this.options.hasGui)
     this.ready();
   }
 
