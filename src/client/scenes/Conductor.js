@@ -97,13 +97,13 @@ class _TextGui {
     this.controller.onRender();
 
     if (!guiOptions.readOnly) {
-      this.controller.on('change', () => {
+      this.controller.on('change', (value) => {
         if (guiOptions.confirm) {
           const msg = `Are you sure you want to propagate "${param.name}"`;
           if (!window.confirm(msg)) { return; }
         }
 
-        param.update();
+        param.update(value);
       });
     }
   }
