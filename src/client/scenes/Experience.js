@@ -1,6 +1,4 @@
 import Scene from '../core/Scene';
-import Signal from '../core/Signal';
-import SignalAll from '../core/SignalAll';
 import client from '../core/client';
 
 /**

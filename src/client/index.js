@@ -20,6 +20,7 @@ export { default as Signal } from './core/Signal';
 export { default as SignalAll } from './core/SignalAll';
 
 // scenes
+export { default as Conductor } from './scenes/Conductor';
 export { default as Experience } from './scenes/Experience';
 export { default as Survey } from './scenes/Survey';
 
