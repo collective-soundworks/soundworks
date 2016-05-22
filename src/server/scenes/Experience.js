@@ -53,7 +53,7 @@ export default class Experience extends Activity {
     super.disconnect(client);
 
     // Call the `exit` method if the client previously entered the performance.
-    if (client.activities[this.id].entered)
+    if (client.activities[this.id] && client.activities[this.id].entered)
       this.exit(client);
   }
 
