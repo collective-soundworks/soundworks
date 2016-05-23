@@ -238,6 +238,8 @@ const server = {
     const tmplString = fs.readFileSync(template, { encoding: 'utf8' });
     const tmpl = ejs.compile(tmplString);
 
+    // @todo - add a middleware to add a trailing slash if not present
+
     expressApp.get(url, (req, res) => {
       let includeCordovaTags = false;
       let socketConfig = JSON.stringify(this.config.socketIO);

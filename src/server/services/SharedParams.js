@@ -39,7 +39,7 @@ class _ControlItem extends EventEmitter {
 /** @private */
 class _BooleanItem extends _ControlItem {
   constructor(control, name, label, init, clientTypes = null) {
-    super(control, 'boolean', name, label, init, clientType);
+    super(control, 'boolean', name, label, init, clientTypes);
   }
 
   set(val) {
@@ -191,6 +191,7 @@ class SharedParams extends Activity {
    *  the parameter value to. If not set, the value is sent to all the client types.
    */
   addBoolean(name, label, value, clientTypes = null) {
+    console.log(name, label, value, clientTypes = null);
     return new _BooleanItem(this, name, label, value, clientTypes);
   }
 
