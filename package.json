@@ -11,6 +11,7 @@
   "main": "",
   "scripts": {
     "transpile": "node ./bin/runner --transpile",
+    "prewatch": "npm run transpile",
     "watch": "node ./bin/runner --watch"
   },
   "repository": {
