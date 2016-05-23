@@ -44,29 +44,34 @@ class CanvasView extends SegmentedView {
      * @type {Set}
      */
     this._rendererStack = new Set();
+    this._hasRenderedOnce = false;
   }
 
   onRender() {
     super.onRender();
 
-    /**
-     * The canvas element to draw into.
-     * @type {Element}
-     */
-    this.$canvas = this.$el.querySelector('canvas');
+    if (!this._hasRenderedOnce) {
+      /**
+       * The canvas element to draw into.
+       * @type {Element}
+       */
+      this.$canvas = this.$el.querySelector('canvas');
 
-    /**
-     * The 2d context of the canvas.
-     * @type {CanvasRenderingContext2D}
-     */
-    this.ctx = this.$canvas.getContext('2d');
+      /**
+       * The 2d context of the canvas.
+       * @type {CanvasRenderingContext2D}
+       */
+      this.ctx = this.$canvas.getContext('2d');
 
-    /**
-     * The default rendering group.
-     * @type {RenderingGroup}
-     * @private
-     */
-    this._renderingGroup = new RenderingGroup(this.ctx);
+      /**
+       * The default rendering group.
+       * @type {RenderingGroup}
+       * @private
+       */
+      this._renderingGroup = new RenderingGroup(this.ctx);
+
+      this._hasRenderedOnce = true;
+    }
   }
 
   onResize(viewportWidth, viewportHeight, orientation) {
