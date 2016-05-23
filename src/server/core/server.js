@@ -240,7 +240,7 @@ const server = {
    * // `http://my.experience.com/conductor/1`
    * ```
    */
-  registerRoute(clientType, route) {
+  defineRoute(clientType, route) {
     this._routes[clientType] = route;
   },
 
@@ -269,7 +269,6 @@ const server = {
 
     // http request
     expressApp.get(url, (req, res) => {
-      console.log(clientType, url);
       const appIndex = tmpl(this.retrieveHtmlVariables(clientType, req));
       res.send(appIndex);
     });
