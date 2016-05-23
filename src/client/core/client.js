@@ -202,7 +202,7 @@ const client = {
     pathname = pathname
       .replace(/^\//, '') // leading slash
       .replace(new RegExp('^' + this.type + '/?'), '') // clientType
-      .replace(/\/$/, '');    // trailing slashe
+      .replace(/\/$/, ''); // trailing slashe
 
     if (pathname.length > 0)
       this.urlParams = pathname.split('/');
@@ -223,9 +223,7 @@ const client = {
     this.socket = socket.initialize(this.type, this.config.socketIO);
     // send `urlParams` throught handshake to not polute the socket.io api
     // and eventually be able to modify the transport system
-    this.socket.send('handshake', {
-      urlParams: this.urlParams,
-    });
+    this.socket.send('handshake', { urlParams: this.urlParams });
     // wait for handshake to mark client as `ready`
     this.socket.receive('client:start', (uuid) => {
       // don't handle server restart for now.
