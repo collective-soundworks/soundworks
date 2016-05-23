@@ -260,8 +260,9 @@ const server = {
 
     // define `index.html` template filename:
     // `${clientType}.ejs` or `default.ejs` if file not exists
-    const clientTmpl = path.join(this.config.templateFolder, `${clientType}.ejs`);
-    const defaultTmpl = path.join(this.config.templateFolder, `default.ejs`);
+    const templateDirectory = this.config.templateDirectory;
+    const clientTmpl = path.join(templateDirectory, `${clientType}.ejs`);
+    const defaultTmpl = path.join(templateDirectory, `default.ejs`);
     const template = fs.existsSync(clientTmpl) ? clientTmpl : defaultTmpl;
 
     const tmplString = fs.readFileSync(template, { encoding: 'utf8' });
