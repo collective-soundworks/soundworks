@@ -64,6 +64,13 @@ const server = {
   _activities: new Set(),
 
   /**
+   * Optionnal routing defined for each client.
+   * @private
+   * @type {Object}
+   */
+  _routes: {},
+
+  /**
    * Map client types with an activity.
    * @param {Array<String>} clientTypes - List of client type.
    * @param {Activity} activity - Activity concerned with the given `clientTypes`.
@@ -113,6 +120,7 @@ const server = {
     configs.forEach((config) => {
       for (let key in config) {
         const entry = config[key];
+
         if (typeof entry === 'object' && entry !== null) {
           this.config[key] = this.config[key] || {};
           this.config[key] = Object.assign(this.config[key], entry);
@@ -133,9 +141,7 @@ const server = {
   start() {
     logger.initialize(this.config.logger);
 
-    // --------------------------------------------------
     // configure express and http(s) server
-    // --------------------------------------------------
     const expressApp = new express();
     expressApp.set('port', process.env.PORT || this.config.port);
     expressApp.set('view engine', 'ejs');
@@ -222,15 +228,38 @@ const server = {
   },
 
   /**
+   * Register a route for a given `clientType`, allow to define a more complex
+   * routing (additionnal route parameters) for a given type of client.
+   * @param {String} clientType - Type of the client.
+   * @param {String|RegExp} route - Template of the route that should be append
+   *  to the client type
+   * @example
+   * ```
+   * server.registerRoute('conductor', '/:id')
+   * // allows conductors to connect to the following url:
+   * // `http://my.experience.com/conductor/1`
+   * ```
+   */
+  registerRoute(clientType, route) {
+    this._routes[clientType] = route;
+  },
+
+  /**
    * Map a client type to a route, a set of activities.
    * Additionnally listen for their socket connection.
    * @private
    */
   _map(clientType, activities, expressApp) {
-    // @todo - allow to pass some variable in the url -> define how bind it to sockets...
-    const url = (clientType !== this.config.defaultClient) ? `/${clientType}/*` : '/*';
+    let url = '';
 
-    // use template with `clientType` name or default if not defined
+    if (this._routes[clientType])
+      url += this._routes[clientType];
+
+    if (clientType !== this.config.defaultClient)
+      url = `/${clientType}${url}`;
+
+    // define `index.html` template filename:
+    // `${clientType}.ejs` or `default.ejs` if file not exists
     const clientTmpl = path.join(this.config.templateFolder, `${clientType}.ejs`);
     const defaultTmpl = path.join(this.config.templateFolder, `default.ejs`);
     const template = fs.existsSync(clientTmpl) ? clientTmpl : defaultTmpl;
@@ -238,63 +267,78 @@ const server = {
     const tmplString = fs.readFileSync(template, { encoding: 'utf8' });
     const tmpl = ejs.compile(tmplString);
 
+    // http request
     expressApp.get(url, (req, res) => {
-      let includeCordovaTags = false;
-      let socketConfig = JSON.stringify(this.config.socketIO);
-
-      // @todo - refactor
-      if (req.query.cordova) {
-        if (!this.config.cordova)
-          throw new Error('`server.config.cordova` is not an object');
-
-        includeCordovaTags = true;
-        socketConfig = JSON.stringify(this.config.cordova.socketIO);
-      }
-
-      if (req.query.clientType)
-        clientType = req.query.clientType;
-
-      res.send(tmpl({
-        socketIO: socketConfig,
-        appName: this.config.appName,
-        version: this.config.version,
-        clientType: clientType,
-        defaultType: this.config.defaultClient,
-        assetsDomain: this.config.assetsDomain,
-        // export html for cordova or client only usage
-        includeCordovaTags: includeCordovaTags,
-      }));
+      console.log(clientType, url);
+      const appIndex = tmpl(this.retrieveHtmlVariables(clientType, req));
+      res.send(appIndex);
     });
 
-    // wait for socket connnection
-    this.io.of(clientType).on('connection', this._onConnection(clientType, activities));
+    // socket connnection
+    this.io.of(clientType).on('connection', (socket) => {
+      this._onSocketConnection(clientType, socket, activities);
+    });
+  },
+
+  /**
+   * This function should returns the variables used in the `index.html` template.
+   * @private
+   * @todo - Allow end users to override this function.
+   * @todo - Move into template ?
+   * @param {String} clientType - Type of the client.
+   * @param {Object} req - Request object from the client.
+   * @return {Object}
+   */
+  retrieveHtmlVariables(clientType, req) {
+    let includeCordovaTags = false;
+    let socketConfig = JSON.stringify(this.config.socketIO);
+
+    if (req.query.cordova) {
+      if (!this.config.cordova)
+        throw new Error('`server.config.cordova` is not an object');
+
+      includeCordovaTags = true;
+      socketConfig = JSON.stringify(this.config.cordova.socketIO);
+    }
+
+    if (req.query.clientType)
+      clientType = req.query.clientType;
+
+    return {
+      socketIO: socketConfig,
+      appName: this.config.appName,
+      version: this.config.version,
+      clientType: clientType,
+      defaultType: this.config.defaultClient,
+      assetsDomain: this.config.assetsDomain,
+      // export html for cordova or client only usage
+      includeCordovaTags: includeCordovaTags,
+    };
   },
 
   /**
    * Socket connection callback.
    * @private
    */
-  _onConnection(clientType, activities) {
-    return (socket) => {
-      const client = new Client(clientType, socket);
-      // global lifecycle of the client
-      sockets.receive(client, 'disconnect', () => {
-        activities.forEach((activity) => activity.disconnect(client));
-        client.destroy();
+  _onSocketConnection(clientType, socket, activities) {
+    const client = new Client(clientType, socket);
 
-        logger.info({ socket, clientType }, 'disconnect');
-      });
+    // global lifecycle of the client
+    sockets.receive(client, 'disconnect', () => {
+      activities.forEach((activity) => activity.disconnect(client));
+      client.destroy();
 
-      sockets.receive(client, 'handshake', (data) => {
-        client.urlParams = data.urlParams;
-        // @todo - handle reconnection (`data` contains an `uuid`)
-        activities.forEach((activity) => activity.connect(client));
-        // @todo - refactor handshake and uuid definition.
-        sockets.send(client, 'client:start', client.uuid);
+      logger.info({ socket, clientType }, 'disconnect');
+    });
 
-        logger.info({ socket, clientType }, 'handshake');
-      });
-    }
+    sockets.receive(client, 'handshake', (data) => {
+      client.urlParams = data.urlParams;
+      // @todo - handle reconnection (ex: `data` contains an `uuid`)
+      activities.forEach((activity) => activity.connect(client));
+      sockets.send(client, 'client:start', client.uuid);
+
+      logger.info({ socket, clientType }, 'handshake');
+    });
   },
 };
 

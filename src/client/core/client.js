@@ -195,7 +195,7 @@ const client = {
    * @todo - When handshake implemented, define if these informations should be part of it
    */
   _parseUrlParams() {
-    let params = null;
+    // let params = null;
     // handle path name first
     let pathname = window.location.pathname;
     // sanitize
@@ -204,15 +204,14 @@ const client = {
       .replace(new RegExp('^' + this.type + '/?'), '') // clientType
       .replace(/\/$/, '');    // trailing slashe
 
-    if (pathname.length > 0) {
-      params = pathname.split('/');
-    } else {
-      let hash = window.location.hash
-      hash = hash.substr(1); // remove leading '#'
-      params = hash.split('-'); // how to handle from server side config
-    }
-
-    this.urlParams = params;
+    if (pathname.length > 0)
+      this.urlParams = pathname.split('/');
+    // } else {
+    //   let hash = window.location.hash
+    //   hash = hash.substr(1); // remove leading '#'
+    //   params = hash.split('-'); // how to handle from server side config
+    // }
+    // this.urlParams = params;
   },
 
   /**
