@@ -228,7 +228,7 @@ const server = {
    */
   _map(clientType, activities, expressApp) {
     // @todo - allow to pass some variable in the url -> define how bind it to sockets...
-    const url = (clientType !== this.config.defaultClient) ? `/${clientType}` : '/';
+    const url = (clientType !== this.config.defaultClient) ? `/${clientType}/*` : '/*';
 
     // use template with `clientType` name or default if not defined
     const clientTmpl = path.join(this.config.templateFolder, `${clientType}.ejs`);
@@ -242,7 +242,11 @@ const server = {
       let includeCordovaTags = false;
       let socketConfig = JSON.stringify(this.config.socketIO);
 
+      // @todo - refactor
       if (req.query.cordova) {
+        if (!this.config.cordova)
+          throw new Error('`server.config.cordova` is not an object');
+
         includeCordovaTags = true;
         socketConfig = JSON.stringify(this.config.cordova.socketIO);
       }
@@ -273,18 +277,23 @@ const server = {
   _onConnection(clientType, activities) {
     return (socket) => {
       const client = new Client(clientType, socket);
-      activities.forEach((activity) => activity.connect(client));
-
       // global lifecycle of the client
       sockets.receive(client, 'disconnect', () => {
         activities.forEach((activity) => activity.disconnect(client));
         client.destroy();
+
         logger.info({ socket, clientType }, 'disconnect');
       });
 
-      // @todo - refactor handshake and uuid definition.
-      sockets.send(client, 'client:start', client.uuid);
-      logger.info({ socket, clientType }, 'connection');
+      sockets.receive(client, 'handshake', (data) => {
+        client.urlParams = data.urlParams;
+        // @todo - handle reconnection (`data` contains an `uuid`)
+        activities.forEach((activity) => activity.connect(client));
+        // @todo - refactor handshake and uuid definition.
+        sockets.send(client, 'client:start', client.uuid);
+
+        logger.info({ socket, clientType }, 'handshake');
+      });
     }
   },
 };

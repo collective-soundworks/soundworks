@@ -23,11 +23,10 @@ const socket = {
    */
   initialize(namespace, options) {
     const url = `${options.url}/${namespace}`;
-    this.socket = io(url, {
-      transports: options.transports
-    });
 
+    this.socket = io(url, { transports: options.transports });
     log(`initialized - url: "${url}" - transports: ${options.transports}`);
+
     return this;
   },
 
