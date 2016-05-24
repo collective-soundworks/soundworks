@@ -147,43 +147,106 @@ const server = {
     expressApp.set('view engine', 'ejs');
     expressApp.use(express.static(this.config.publicFolder));
 
-    let httpServer;
-
     if (!this.config.useHttps) {
-      httpServer = http.createServer(expressApp);
-      this._initSockets(httpServer);
-      this._initActivities(expressApp);
-
-      httpServer.listen(expressApp.get('port'), function() {
-        const url = `http://127.0.0.1:${expressApp.get('port')}`;
-        console.log('[HTTP SERVER] Server listening on', url);
-      });
+      this._runHttpServer(expressApp);
     } else {
-      const launchHttpsServer = (key, cert) => {
-        httpServer = https.createServer({ key, cert }, expressApp);
-        this._initSockets(httpServer);
-        this._initActivities(expressApp);
-
-        httpServer.listen(expressApp.get('port'), function() {
-          const url = `https://127.0.0.1:${expressApp.get('port')}`;
-          console.log('[HTTPS SERVER] Server listening on', url);
-        });
-      }
-
       const httpsInfos = this.config.httpsInfos;
 
+      // use given certificate
       if (httpsInfos.key && httpsInfos.cert) {
         const key = fs.readFileSync(httpsInfos.key);
         const cert = fs.readFileSync(httpsInfos.cert);
 
-        launchHttpsServer(key, cert);
+        this._runHttpsServer(expressApp, key, cert);
+      // generate https certificate on the fly (for development usage)
       } else {
-        // generate https certificate (for development usage)
         pem.createCertificate({ days: 1, selfSigned: true }, (err, keys) => {
-          launchHttpsServer(keys.serviceKey, keys.certificate);
+          this._runHttpsServer(expressApp, keys.serviceKey, keys.certificate);
         });
       }
     }
+  },
+
+  /**
+   * Register a route for a given `clientType`, allow to define a more complex
+   * routing (additionnal route parameters) for a given type of client.
+   * @param {String} clientType - Type of the client.
+   * @param {String|RegExp} route - Template of the route that should be append
+   *  to the client type
+   * @example
+   * ```
+   * server.registerRoute('conductor', '/:id')
+   * // allows conductors to connect to the following url:
+   * // `http://my.experience.com/conductor/1`
+   * ```
+   */
+  defineRoute(clientType, route) {
+    this._routes[clientType] = route;
+  },
+
+  /**
+   * This function should returns the variables used in the `index.html` template.
+   * @private
+   * @todo - Allow end users to override this function.
+   * @todo - Move into template ?
+   * @param {String} clientType - Type of the client.
+   * @param {Object} req - Request object from the client.
+   * @return {Object}
+   */
+  retrieveHtmlVariables(clientType, req) {
+    let includeCordovaTags = false;
+    let socketConfig = JSON.stringify(this.config.socketIO);
+
+    if (req.query.cordova) {
+      if (!this.config.cordova)
+        throw new Error('`server.config.cordova` is not an object');
+
+      includeCordovaTags = true;
+      socketConfig = JSON.stringify(this.config.cordova.socketIO);
+    }
+
+    if (req.query.clientType)
+      clientType = req.query.clientType;
+
+    return {
+      socketIO: socketConfig,
+      appName: this.config.appName,
+      version: this.config.version,
+      clientType: clientType,
+      defaultType: this.config.defaultClient,
+      assetsDomain: this.config.assetsDomain,
+      // export html for cordova or client only usage
+      includeCordovaTags: includeCordovaTags,
+    };
+  },
+
+
+  /**
+   * Launch a http server
+   */
+  _runHttpServer(expressApp) {
+    const httpServer = http.createServer(expressApp);
+    this._initSockets(httpServer);
+    this._initActivities(expressApp);
+
+    httpServer.listen(expressApp.get('port'), function() {
+      const url = `http://127.0.0.1:${expressApp.get('port')}`;
+      console.log('[HTTP SERVER] Server listening on', url);
+    });
+  },
+
+  /**
+   * Launch a https server
+   */
+  _runHttpsServer(expressApp, key, cert) {
+    const httpsServer = https.createServer({ key, cert }, expressApp);
+    this._initSockets(httpsServer);
+    this._initActivities(expressApp);
+
+    httpsServer.listen(expressApp.get('port'), function() {
+      const url = `https://127.0.0.1:${expressApp.get('port')}`;
+      console.log('[HTTPS SERVER] Server listening on', url);
+    });
   },
 
   /**
@@ -228,23 +291,6 @@ const server = {
   },
 
   /**
-   * Register a route for a given `clientType`, allow to define a more complex
-   * routing (additionnal route parameters) for a given type of client.
-   * @param {String} clientType - Type of the client.
-   * @param {String|RegExp} route - Template of the route that should be append
-   *  to the client type
-   * @example
-   * ```
-   * server.registerRoute('conductor', '/:id')
-   * // allows conductors to connect to the following url:
-   * // `http://my.experience.com/conductor/1`
-   * ```
-   */
-  defineRoute(clientType, route) {
-    this._routes[clientType] = route;
-  },
-
-  /**
    * Map a client type to a route, a set of activities.
    * Additionnally listen for their socket connection.
    * @private
@@ -263,6 +309,7 @@ const server = {
     const templateDirectory = this.config.templateDirectory;
     const clientTmpl = path.join(templateDirectory, `${clientType}.ejs`);
     const defaultTmpl = path.join(templateDirectory, `default.ejs`);
+    // @todo - check `existsSync` deprecation
     const template = fs.existsSync(clientTmpl) ? clientTmpl : defaultTmpl;
 
     const tmplString = fs.readFileSync(template, { encoding: 'utf8' });
@@ -278,42 +325,6 @@ const server = {
     this.io.of(clientType).on('connection', (socket) => {
       this._onSocketConnection(clientType, socket, activities);
     });
-  },
-
-  /**
-   * This function should returns the variables used in the `index.html` template.
-   * @private
-   * @todo - Allow end users to override this function.
-   * @todo - Move into template ?
-   * @param {String} clientType - Type of the client.
-   * @param {Object} req - Request object from the client.
-   * @return {Object}
-   */
-  retrieveHtmlVariables(clientType, req) {
-    let includeCordovaTags = false;
-    let socketConfig = JSON.stringify(this.config.socketIO);
-
-    if (req.query.cordova) {
-      if (!this.config.cordova)
-        throw new Error('`server.config.cordova` is not an object');
-
-      includeCordovaTags = true;
-      socketConfig = JSON.stringify(this.config.cordova.socketIO);
-    }
-
-    if (req.query.clientType)
-      clientType = req.query.clientType;
-
-    return {
-      socketIO: socketConfig,
-      appName: this.config.appName,
-      version: this.config.version,
-      clientType: clientType,
-      defaultType: this.config.defaultClient,
-      assetsDomain: this.config.assetsDomain,
-      // export html for cordova or client only usage
-      includeCordovaTags: includeCordovaTags,
-    };
   },
 
   /**
