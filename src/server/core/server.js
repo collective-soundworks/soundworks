@@ -141,12 +141,13 @@ const server = {
   start() {
     logger.initialize(this.config.logger);
 
-    // configure express and http(s) server
+    // configure express
     const expressApp = new express();
     expressApp.set('port', process.env.PORT || this.config.port);
     expressApp.set('view engine', 'ejs');
     expressApp.use(express.static(this.config.publicFolder));
 
+    // launch http(s) server
     if (!this.config.useHttps) {
       this._runHttpServer(expressApp);
     } else {
@@ -158,7 +159,7 @@ const server = {
         const cert = fs.readFileSync(httpsInfos.cert);
 
         this._runHttpsServer(expressApp, key, cert);
-      // generate https certificate on the fly (for development usage)
+      // generate certificate on the fly (for development purposes)
       } else {
         pem.createCertificate({ days: 1, selfSigned: true }, (err, keys) => {
           this._runHttpsServer(expressApp, keys.serviceKey, keys.certificate);
@@ -171,13 +172,12 @@ const server = {
    * Register a route for a given `clientType`, allow to define a more complex
    * routing (additionnal route parameters) for a given type of client.
    * @param {String} clientType - Type of the client.
-   * @param {String|RegExp} route - Template of the route that should be append
+   * @param {String|RegExp} route - Template of the route that should be append.
    *  to the client type
    * @example
    * ```
-   * server.registerRoute('conductor', '/:id')
-   * // allows conductors to connect to the following url:
-   * // `http://my.experience.com/conductor/1`
+   * // allow `conductor` clients to connect to `http://site.com/conductor/1`
+   * server.registerRoute('conductor', '/:param')
    * ```
    */
   defineRoute(clientType, route) {
@@ -222,7 +222,7 @@ const server = {
 
 
   /**
-   * Launch a http server
+   * Launch a http server.
    */
   _runHttpServer(expressApp) {
     const httpServer = http.createServer(expressApp);
@@ -236,7 +236,7 @@ const server = {
   },
 
   /**
-   * Launch a https server
+   * Launch a https server.
    */
   _runHttpsServer(expressApp, key, cert) {
     const httpsServer = https.createServer({ key, cert }, expressApp);
