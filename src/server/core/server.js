@@ -269,13 +269,13 @@ const server = {
    * @private
    */
   _map(clientType, activities, expressApp) {
-    let url = '';
+    let route = '';
 
     if (this._routes[clientType])
-      url += this._routes[clientType];
+      route += this._routes[clientType];
 
     if (clientType !== this.config.defaultClient)
-      url = `/${clientType}${url}`;
+      route = `/${clientType}${route}`;
 
     // define `index.html` template filename:
     // `${clientType}.ejs` or `default.ejs` if file not exists
@@ -289,7 +289,7 @@ const server = {
     const tmpl = ejs.compile(tmplString);
 
     // http request
-    expressApp.get(url, (req, res) => {
+    expressApp.get(route, (req, res) => {
       const data = this._clientConfigDefinition(clientType, this.config, req);
       const appIndex = tmpl({ data });
       res.send(appIndex);

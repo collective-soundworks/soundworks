@@ -141,6 +141,10 @@ const SCENE_ID = 'conductor';
  * Scene definition
  */
 export default class Conductor extends Scene {
+  /**
+   * _<span class="warning">__WARNING__</span> This API is unstable, and
+   * subject to change in further versions.
+   */
   constructor() {
     super(SCENE_ID, true);
 

@@ -107,8 +107,6 @@ export default class RenderingGroup {
       return preservePixelRatio ? (dPR / bPR) : 1;
     }(this.ctx));
 
-    console.log(this.pixelRatio);
-
     // register the group into the loop
     loop.registerRenderingGroup(this);
   }
