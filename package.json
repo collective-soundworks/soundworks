@@ -7,10 +7,11 @@
     "Norbert Schnell"
   ],
   "license": "BSD-3-Clause",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "main": "",
   "scripts": {
     "transpile": "node ./bin/runner --transpile",
+    "prewatch": "npm run transpile",
     "watch": "node ./bin/runner --watch"
   },
   "repository": {

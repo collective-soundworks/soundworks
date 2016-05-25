@@ -51,7 +51,7 @@ class Network extends Service {
 
   /**
    * Send a message to given client type(s).
-   * @param {String|Arrayw<String>} clientTypes - Client type(s) to send the
+   * @param {String|Array<String>} clientTypes - Client type(s) to send the
    *  message to.
    * @param {String} channel - Channel of the message.
    * @param {...Mixed} values - Values to send in the message.

@@ -32,7 +32,7 @@ const defaultFwConfig = {
    * @type {String}
    * @default 'html'
    */
-  templateFolder: path.join(cwd, 'html'),
+  templateDirectory: path.join(cwd, 'html'),
 
   /**
    * The name of the default client type, i.e. the client that can access the

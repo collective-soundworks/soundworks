@@ -64,7 +64,7 @@ class SegmentedView extends View {
       const ratio = this.ratios[sel];
       const $el = this._$sections[sel];
 
-      $el.style.height = `${ratio * height}px`;
+      $el.style.minHeight = `${ratio * height}px`;
     }
   }
 }

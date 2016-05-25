@@ -43,12 +43,19 @@ const client = {
   type: null,
 
   /**
-   * Configuration informations retrieved from the server configuration.
+   * Configuration informations from the server configuration if any.
    *
    * @type {Object}
    * @see {@link module:soundworks/client.SharedConfig}
    */
   config: null,
+
+  /**
+   * Array of optionnal parameters passed through the url
+   *
+   * @type {Array}
+   */
+   urlParams: null,
 
   /**
    * Information about the client platform. The properties are set by the
@@ -138,18 +145,21 @@ const client = {
   init(clientType = 'player', config = {}) {
     this.type = clientType;
 
-    // 1. if socket config given, mix it with defaults
+    // retrieve
+    this._parseUrlParams();
+    // if socket config given, mix it with defaults
     const socketIO = Object.assign({
       url: '',
       transports: ['websocket']
     }, config.socketIO);
 
-    // 2. mix all other config and override with defined socket config
+    // mix all other config and override with defined socket config
     this.config = Object.assign({
       appContainer: '#container',
     }, config, { socketIO });
 
     serviceManager.init();
+
     this._initViews();
   },
 
@@ -173,12 +183,47 @@ const client = {
   },
 
   /**
+   * Retrieve an array of optionnal parameters from the url excluding the client type
+   * and store it in `this.config.urlParameters`.
+   * Parameters can be defined in two ways :
+   * - as a regular route (ex: `/player/param1/param2`)
+   * - as a hash (ex: `/player#param1-param2`)
+   * The parameters are send along with the socket connection
+   *
+   * @see {@link module:soundworks/client.socket}
+   * @private
+   * @todo - When handshake implemented, define if these informations should be part of it
+   */
+  _parseUrlParams() {
+    // let params = null;
+    // handle path name first
+    let pathname = window.location.pathname;
+    // sanitize
+    pathname = pathname
+      .replace(/^\//, '') // leading slash
+      .replace(new RegExp('^' + this.type + '/?'), '') // clientType
+      .replace(/\/$/, ''); // trailing slashe
+
+    if (pathname.length > 0)
+      this.urlParams = pathname.split('/');
+    // } else {
+    //   let hash = window.location.hash
+    //   hash = hash.substr(1); // remove leading '#'
+    //   params = hash.split('-'); // how to handle from server side config
+    // }
+    // this.urlParams = params;
+  },
+
+  /**
    * Initialize socket connection and perform handshake with the server.
    * @todo - refactor handshake.
    * @private
    */
   _initSocket() {
     this.socket = socket.initialize(this.type, this.config.socketIO);
+    // send `urlParams` throught handshake to not polute the socket.io api
+    // and eventually be able to modify the transport system
+    this.socket.send('handshake', { urlParams: this.urlParams });
     // wait for handshake to mark client as `ready`
     this.socket.receive('client:start', (uuid) => {
       // don't handle server restart for now.

@@ -12,14 +12,17 @@ export const audio = _audio;
 export { audioContext } from 'waves-audio';
 
 // core
+export { default as Activity } from './core/Activity';
 export { default as client } from './core/client';
 export { default as Process } from './core/Process';
+export { default as Scene } from './core/Scene';
 export { default as Service } from './core/Service';
 export { default as serviceManager } from './core/serviceManager';
 export { default as Signal } from './core/Signal';
 export { default as SignalAll } from './core/SignalAll';
 
 // scenes
+export { default as Conductor } from './scenes/Conductor';
 export { default as Experience } from './scenes/Experience';
 export { default as Survey } from './scenes/Survey';
 
