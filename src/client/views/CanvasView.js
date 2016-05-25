@@ -37,6 +37,10 @@ class CanvasView extends SegmentedView {
    */
   constructor(template, content, events, options) {
     template = template || defaultCanvasTemplate;
+    options = Object.assign({
+      preservePixelRatio: false,
+    }, options);
+
     super(template, content, events, options);
 
     /**
@@ -44,6 +48,11 @@ class CanvasView extends SegmentedView {
      * @type {Set}
      */
     this._rendererStack = new Set();
+
+    /**
+     * Flag to track the first `render` call
+     * @type {Boolean}
+     */
     this._hasRenderedOnce = false;
   }
 
@@ -70,6 +79,7 @@ class CanvasView extends SegmentedView {
        */
       this._renderingGroup = new RenderingGroup(this.ctx);
 
+      // prevent creating a new rendering group each time the view is rendered
       this._hasRenderedOnce = true;
     }
   }

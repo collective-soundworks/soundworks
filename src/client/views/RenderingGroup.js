@@ -83,10 +83,32 @@ export default class RenderingGroup {
   /**
    * @param {CanvasRenderingContext2D} ctx - Canvas context in which
    *  the renderer should draw.
+   * @param {Boolean} [preservePixelRatio=false] - Define if the canvas should
+   *  take account of the device pixel ratio for the drawing. When set to `true`,
+   *  quality if favored over performance.
    */
-  constructor(ctx) {
+  constructor(ctx, preservePixelRatio = false) {
     this.ctx = ctx;
     this.renderers = [];
+
+    /**
+     * Pixel ratio of the device, if `preservePixelRatio` is `false`,
+     * this value is forced to 1
+     * @type {Number}
+     */
+    this.pixelRatio = (function(ctx) {
+      const dPR = window.devicePixelRatio || 1;
+      const bPR = ctx.webkitBackingStorePixelRatio ||
+        ctx.mozBackingStorePixelRatio ||
+        ctx.msBackingStorePixelRatio ||
+        ctx.oBackingStorePixelRatio ||
+        ctx.backingStorePixelRatio || 1;
+
+      return preservePixelRatio ? (dPR / bPR) : 1;
+    }(this.ctx));
+
+    console.log(this.pixelRatio);
+
     // register the group into the loop
     loop.registerRenderingGroup(this);
   }
@@ -97,14 +119,25 @@ export default class RenderingGroup {
    * @param {Number} viewportHeight - Height of the viewport.
    */
   onResize(viewportWidth, viewportHeight) {
-    this.canvasWidth = viewportWidth;
-    this.canvasHeight = viewportHeight;
+    const ctx = this.ctx;
+    const pixelRatio = this.pixelRatio;
 
-    this.ctx.width = this.ctx.canvas.width = this.canvasWidth;
-    this.ctx.height = this.ctx.canvas.height = this.canvasHeight;
+    this.canvasWidth = viewportWidth * pixelRatio;
+    this.canvasHeight = viewportHeight * pixelRatio;
 
+    ctx.width = this.canvasWidth;
+    ctx.height = this.canvasHeight;
+
+    ctx.canvas.width = viewportWidth;
+    ctx.canvas.height = viewportHeight;
+    ctx.canvas.style.width = `${viewportWidth}px`;
+    ctx.canvas.style.height = `${viewportHeight}px`;
+
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+    // propagate logical size to renderers
     for (let i = 0, l = this.renderers.length; i < l; i++)
-      this.renderers[i].onResize(viewportWidth, viewportHeight);
+      this.renderers[i].onResize(this.canvasWidth, this.canvasHeight);
   }
 
   /**
