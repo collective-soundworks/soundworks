@@ -60,7 +60,7 @@ On the server side, the methods `enter` and `exit` of `ServerExperience` are cal
 
 Apart from the abstractions mentioned above, the most important aspect of the framework is to provide a set of ***services*** to an application.
 The services currently provided include, for example:
- * `platfrom` - checks for the compatibility of the application with the user's device, OS, and browser and shows a welcome screen when needed.
+ * `platform` - checks for the compatibility of the application with the user's device, OS, and browser and shows a welcome screen when needed.
  * `checkin` - automatically assigns a ticket or predefined position (i.e. number or label with optional coordinates) to the user
  * `placer` - lets the user chose an available ticket or predefined position
  * `locator` - lets the user indicate an approximate position on a map
