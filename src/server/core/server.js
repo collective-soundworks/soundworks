@@ -70,6 +70,11 @@ const server = {
    */
   _routes: {},
 
+
+  _clientConfigDefinition: (clientType, serverConfig, httpRequest) => {
+    return { clientType };
+  },
+
   /**
    * Map client types with an activity.
    * @param {Array<String>} clientTypes - List of client type.
@@ -184,42 +189,10 @@ const server = {
     this._routes[clientType] = route;
   },
 
-  /**
-   * This function should returns the variables used in the `index.html` template.
-   * @private
-   * @todo - Allow end users to override this function.
-   * @todo - Move into template ?
-   * @param {String} clientType - Type of the client.
-   * @param {Object} req - Request object from the client.
-   * @return {Object}
-   */
-  retrieveHtmlVariables(clientType, req) {
-    let includeCordovaTags = false;
-    let socketConfig = JSON.stringify(this.config.socketIO);
 
-    if (req.query.cordova) {
-      if (!this.config.cordova)
-        throw new Error('`server.config.cordova` is not an object');
-
-      includeCordovaTags = true;
-      socketConfig = JSON.stringify(this.config.cordova.socketIO);
-    }
-
-    if (req.query.clientType)
-      clientType = req.query.clientType;
-
-    return {
-      socketIO: socketConfig,
-      appName: this.config.appName,
-      version: this.config.version,
-      clientType: clientType,
-      defaultType: this.config.defaultClient,
-      assetsDomain: this.config.assetsDomain,
-      // export html for cordova or client only usage
-      includeCordovaTags: includeCordovaTags,
-    };
+  setClientConfigDefinition(func) {
+    this._clientConfigDefinition = func;
   },
-
 
   /**
    * Launch a http server.
@@ -317,7 +290,8 @@ const server = {
 
     // http request
     expressApp.get(url, (req, res) => {
-      const appIndex = tmpl(this.retrieveHtmlVariables(clientType, req));
+      const data = this._clientConfigDefinition(clientType, this.config, req);
+      const appIndex = tmpl({ data });
       res.send(appIndex);
     });
 
