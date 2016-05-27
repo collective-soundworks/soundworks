@@ -72,8 +72,8 @@ const viewport = {
 
   /** @private */
   _onResize() {
-    this.width = window.innerWidth;
-    this.height = window.innerHeight;
+    this.width = document.documentElement.clientWidth || window.innerWidth;
+    this.height = document.documentElement.clientHeight || window.innerHeight;
     this.orientation = this.width > this.height ? 'landscape' : 'portrait';
 
     this._callbacks.forEach((callback) => {
