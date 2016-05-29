@@ -77,7 +77,7 @@ class CanvasView extends SegmentedView {
        * @type {RenderingGroup}
        * @private
        */
-      this._renderingGroup = new RenderingGroup(this.ctx);
+      this._renderingGroup = new RenderingGroup(this.ctx, this.options.preservePixelRatio);
 
       // prevent creating a new rendering group each time the view is rendered
       this._hasRenderedOnce = true;
