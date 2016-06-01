@@ -128,10 +128,12 @@ export default class SpaceView extends View {
 
     // display background if any
     if (area.background) {
-      this.$el.style.backgroundImage = area.background;
+      this.$el.style.backgroundImage = `url(${area.background})`;
       this.$el.style.backgroundPosition = '50% 50%';
       this.$el.style.backgroundRepeat = 'no-repeat';
-      this.$el.style.backgroundSize = 'cover';
+      this.$el.style.backgroundSize = 'contain';
+      // force $svg to be transparent
+      this.$svg.style.backgroundColor = 'transparent';
     }
 
     // update existing points position

@@ -140,6 +140,7 @@ class Locator extends Service {
     const defaults = {
       random: false,
       viewCtor: _LocatorView,
+      viewPriority: 6,
     };
 
     this.configure(defaults);
