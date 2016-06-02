@@ -277,27 +277,33 @@ const server = {
     if (clientType !== this.config.defaultClient)
       route = `/${clientType}${route}`;
 
-    // define `index.html` template filename:
-    // `${clientType}.ejs` or `default.ejs` if file not exists
+    // define template filename: `${clientType}.ejs` or `default.ejs`
     const templateDirectory = this.config.templateDirectory;
     const clientTmpl = path.join(templateDirectory, `${clientType}.ejs`);
     const defaultTmpl = path.join(templateDirectory, `default.ejs`);
-    // @todo - check `existsSync` deprecation
-    const template = fs.existsSync(clientTmpl) ? clientTmpl : defaultTmpl;
 
-    const tmplString = fs.readFileSync(template, { encoding: 'utf8' });
-    const tmpl = ejs.compile(tmplString);
+    fs.stat(clientTmpl, (err, stats) => {
+      let template;
 
-    // http request
-    expressApp.get(route, (req, res) => {
-      const data = this._clientConfigDefinition(clientType, this.config, req);
-      const appIndex = tmpl({ data });
-      res.send(appIndex);
-    });
+      if (err || !stats.isFile())
+        template = defaultTmpl;
+      else
+        template = clientTmpl;
 
-    // socket connnection
-    this.io.of(clientType).on('connection', (socket) => {
-      this._onSocketConnection(clientType, socket, activities);
+      const tmplString = fs.readFileSync(template, { encoding: 'utf8' });
+      const tmpl = ejs.compile(tmplString);
+
+      // http request
+      expressApp.get(route, (req, res) => {
+        const data = this._clientConfigDefinition(clientType, this.config, req);
+        const appIndex = tmpl({ data });
+        res.send(appIndex);
+      });
+
+      // socket connnection
+      this.io.of(clientType).on('connection', (socket) => {
+        this._onSocketConnection(clientType, socket, activities);
+      });
     });
   },
 
