@@ -19,11 +19,12 @@ const cwd = process.cwd();
  */
 const defaultFwConfig = {
   /**
-   * Name of the environnement.
-   * @type {String}
-   * @default 'DEV'
+   * Define if assets should be sent to clients gzipped.
+   * @type {Boolean}
+   * @default true
    */
-  env: 'DEV',
+  enableGZipCompression: true,
+
   /**
    * The location of the public directory inside the application. This directory
    * should then host all the static assets of the application.

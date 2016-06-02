@@ -11,6 +11,13 @@
  */
 const defaultEnvConfig = {
   /**
+   * Name of the environnement.
+   * @type {String}
+   * @default 'development'
+   */
+  env: 'development',
+
+  /**
    * If assets (basically the content of the `publicFolder`) are hosted on a
    * separate server (e.g. nginx) for scalability and performance reasons,
    * register here the IP or URL of this server. By default, assets are served

@@ -1,4 +1,5 @@
 import Client from './Client';
+import compression from 'compression';
 import ejs from 'ejs';
 import express from 'express';
 import fs from 'fs';
@@ -150,6 +151,11 @@ const server = {
     const expressApp = new express();
     expressApp.set('port', process.env.PORT || this.config.port);
     expressApp.set('view engine', 'ejs');
+
+    // console.log(this.config.enableGZipCompression);
+    if (this.config.enableGZipCompression)
+      expressApp.use(compression());
+
     expressApp.use(express.static(this.config.publicFolder));
 
     // launch http(s) server
