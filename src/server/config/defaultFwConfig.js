@@ -19,6 +19,12 @@ const cwd = process.cwd();
  */
 const defaultFwConfig = {
   /**
+   * Name of the environnement.
+   * @type {String}
+   * @default 'DEV'
+   */
+  env: 'DEV',
+  /**
    * The location of the public directory inside the application. This directory
    * should then host all the static assets of the application.
    * @type {String}
