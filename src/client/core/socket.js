@@ -27,7 +27,44 @@ const socket = {
     this.socket = io(url, { transports: options.transports });
     log(`initialized - url: "${url}" - transports: ${options.transports}`);
 
+    this._stateListeners = new Set();
+    this._state = null;
+
+    this._listenSocketState();
+
     return this;
+  },
+
+  /**
+   * Listen to the different states of the socket.
+   * @param {Function} callback - The function to be called when the state
+   *  of the socket changes, the given function is called with the name of the
+   *  event as argument.
+   * @see {http://socket.io/docs/client-api/#socket}
+   */
+  addStateListener(callback) {
+    this._stateListeners.add(callback);
+
+    if (this._state !== null)
+      callback(this._state);
+  },
+
+  _listenSocketState() {
+    // see: http://socket.io/docs/client-api/#socket
+    [ 'connect',
+      'reconnect',
+      'disconnect',
+      'connect_error',
+      'reconnect_attempt',
+      'reconnecting',
+      'reconnect_error',
+      'reconnect_failed'
+    ].forEach((eventName) => {
+      this.socket.on(eventName, () => {
+        this._state = eventName;
+        this._stateListeners.forEach((listener) => listener(this._state));
+      });
+    });
   },
 
   /**

@@ -195,23 +195,16 @@ const client = {
    * @todo - When handshake implemented, define if these informations should be part of it
    */
   _parseUrlParams() {
-    // let params = null;
     // handle path name first
     let pathname = window.location.pathname;
     // sanitize
     pathname = pathname
-      .replace(/^\//, '') // leading slash
-      .replace(new RegExp('^' + this.type + '/?'), '') // clientType
-      .replace(/\/$/, ''); // trailing slashe
+      .replace(/^\//, '')                               // leading slash
+      .replace(new RegExp('^' + this.type + '/?'), '')  // remove clientType
+      .replace(/\/$/, '');                              // trailing slash
 
     if (pathname.length > 0)
       this.urlParams = pathname.split('/');
-    // } else {
-    //   let hash = window.location.hash
-    //   hash = hash.substr(1); // remove leading '#'
-    //   params = hash.split('-'); // how to handle from server side config
-    // }
-    // this.urlParams = params;
   },
 
   /**
@@ -221,21 +214,33 @@ const client = {
    */
   _initSocket() {
     this.socket = socket.initialize(this.type, this.config.socketIO);
-    // send `urlParams` throught handshake to not polute the socket.io api
-    // and eventually be able to modify the transport system
-    this.socket.send('handshake', { urlParams: this.urlParams });
-    // wait for handshake to mark client as `ready`
-    this.socket.receive('client:start', (uuid) => {
-      // don't handle server restart for now.
-      this.uuid = uuid;
-      serviceManager.start();
 
-      // this.comm.receive('reconnect', () => console.info('reconnect'));
-      // this.comm.receive('disconnect', () => {
-      //   console.info('disconnect')
-      //   serviceManager.reset(); // can relaunch serviceManager on reconnection.
-      // });
-      // this.comm.receive('error', (err) => console.error(err));
+    // see: http://socket.io/docs/client-api/#socket
+    this.socket.addStateListener((eventName) => {
+      switch (eventName) {
+        case 'connect':
+          this.socket.send('handshake', { urlParams: this.urlParams });
+          // wait for handshake to mark client as `ready`
+          this.socket.receive('client:start', (uuid) => {
+            // don't handle server restart for now.
+            this.uuid = uuid;
+            serviceManager.start();
+          });
+          break;
+          // case 'reconnect':
+          //   // serviceManager.start();
+          //   break;
+          // case 'disconnect':
+          //   // can relaunch serviceManager on reconnection
+          //   // serviceManager.reset();
+          //   break;
+          // case 'connect_error':
+          // case 'reconnect_attempt':
+          // case 'reconnecting':
+          // case 'reconnect_error':
+          // case 'reconnect_failed':
+          //   break;
+      }
     });
   },
 
