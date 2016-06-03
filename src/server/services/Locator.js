@@ -1,4 +1,4 @@
-import Activity from '../core/Activity';
+import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
 
 const SERVICE_ID = 'service:locator';
@@ -25,7 +25,7 @@ const SERVICE_ID = 'service:locator';
  * // inside the experience constructor
  * this.locator = this.require('locator');
  */
-class Locator extends Activity {
+class Locator extends Service {
   /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */
   constructor() {
     super(SERVICE_ID);

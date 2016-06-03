@@ -1,4 +1,4 @@
-import Activity from '../core/Activity';
+import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
 import server from '../core/server';
 
@@ -23,7 +23,7 @@ const SERVICE_ID = 'service:shared-config';
  * // share this item with client of type `player`
  * this.sharedConfig.share('setup.area', 'player');
  */
-class SharedConfig extends Activity {
+class SharedConfig extends Service {
   /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */
   constructor() {
     super(SERVICE_ID);

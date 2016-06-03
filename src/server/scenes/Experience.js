@@ -1,4 +1,4 @@
-import Activity from '../core/Activity';
+import Scene from '../core/Scene';
 import server from '../core/server';
 
 
@@ -13,16 +13,14 @@ import server from '../core/server';
  *
  * (See also {@link src/client/scene/Experience.js~Experience} on the client side.)
  */
-export default class Experience extends Activity {
+export default class Experience extends Scene {
   /**
    * Creates an instance of the class.
    * @param {String} clientType - The client type the experience should be
    *  mapped to. _(note: is used as the id of the activity)_
    */
   constructor(clientType = server.config.defaultClientType) {
-    super('experience');
-
-    this.addClientType(clientType);
+    super('experience', clientType);
 
     this._errorReporter = this.require('error-reporter');
 

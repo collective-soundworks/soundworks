@@ -1,4 +1,4 @@
-import Activity from '../core/Activity';
+import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
 import { getOpt } from '../../utils/helpers';
 
@@ -40,7 +40,7 @@ const maxCapacity = 9999;
  * // inside the experience constructor
  * this.placer = this.require('placer');
  */
-class Placer extends Activity {
+class Placer extends Service {
   /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */
   constructor() {
     super(SERVICE_ID);

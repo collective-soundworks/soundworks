@@ -1,4 +1,4 @@
-import Activity from '../core/Activity';
+import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
 import { EventEmitter } from 'events';
 
@@ -126,7 +126,7 @@ const SERVICE_ID = 'service:shared-params';
  * this.sharedParams = this.require('shared-params');
  * this.sharedParams.addBoolean('my:boolean', 'MyBoolean', false);
  */
-class SharedParams extends Activity {
+class SharedParams extends Service {
   /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */
   constructor(options = {}) {
     super(SERVICE_ID);

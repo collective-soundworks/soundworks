@@ -1,6 +1,6 @@
 import debug from 'debug';
 import osc from 'osc';
-import Activity from '../core/Activity';
+import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
 
 
@@ -27,7 +27,7 @@ const SERVICE_ID = 'service:osc';
  * // send a message
  * this.osc.send('/osc/channel2', [0.618, true]);
  */
-class Osc extends Activity {
+class Osc extends Service {
   /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */
   constructor() {
     super(SERVICE_ID);

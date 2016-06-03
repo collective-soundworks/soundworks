@@ -1,4 +1,4 @@
-import Activity from '../core/Activity';
+import Service from '../core/Service';
 import { getOpt } from '../../utils/helpers';
 import serviceManager from '../core/serviceManager';
 
@@ -9,7 +9,7 @@ const SERVICE_ID = 'service:auth';
  *
  * __*The service must be used with its [client-side counterpart]{@link module:soundworks/client.Checkin}*__
  */
-class Auth extends Activity {
+class Auth extends Service {
   constructor() {
     super(SERVICE_ID);
   }

@@ -1,4 +1,4 @@
-import Activity from '../core/Activity';
+import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
 import fse  from 'fs-extra';
 import path from 'path';
@@ -29,7 +29,7 @@ const SERVICE_ID = 'service:error-reporter';
  *
  * @memberof module:soundworks/server
  */
-class ErrorReporter extends Activity {
+class ErrorReporter extends Service {
   /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */
   constructor() {
     super(SERVICE_ID);
