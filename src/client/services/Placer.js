@@ -1,7 +1,6 @@
 import client from '../core/client';
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
-// import localStorage from './localStorage';
 import SelectView from '../views/SelectView';
 import SpaceView from '../views/SpaceView';
 import SquaredView from '../views/SquaredView';
