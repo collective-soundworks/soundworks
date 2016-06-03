@@ -27,6 +27,7 @@ export { default as Experience } from './scenes/Experience';
 export { default as Survey } from './scenes/Survey';
 
 // services
+export { default as Auth } from './services/Auth';
 export { default as Checkin } from './services/Checkin';
 export { default as ErrorReporter } from './services/ErrorReporter';
 export { default as Locator } from './services/Locator';

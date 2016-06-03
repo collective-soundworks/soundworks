@@ -22,6 +22,31 @@
  */
 const defaultViewTemplates = {
   /**
+   * Default template of the `auth` service.
+   * @type {String}
+   */
+  'service:auth': `
+    <% if (!rejected) { %>
+      <div class="section-top flex-middle">
+        <p><%= instructions %></p>
+      </div>
+      <div class="section-center flex-center">
+        <div>
+          <input type="password" id="password" />
+          <button class="btn" id="send"><%= send %></button>
+        </div>
+      </div>
+      <div class="section-bottom"></div>
+    <% } else { %>
+      <div class="section-top"></div>
+      <div class="section-center flex-center">
+        <p><%= rejectMessage %></p>
+      </div>
+      <div class="section-bottom"></div>
+    <% } %>
+  `,
+
+  /**
    * Default template of the `checkin` service.
    * @type {String}
    */
@@ -32,7 +57,8 @@ const defaultViewTemplates = {
       </div>
       <div class="section-center flex-center">
         <div class="checkin-label">
-          <p class="huge bold"><%= label %></p></div>
+          <p class="huge bold"><%= label %></p>
+        </div>
       </div>
       <div class="section-bottom flex-middle">
         <p class="small"><%= labelPostfix %></p>
@@ -86,7 +112,9 @@ const defaultViewTemplates = {
   'service:placer': `
     <div class="section-square<%= mode === 'list' ? ' flex-middle' : '' %>">
       <% if (rejected) { %>
-      <div class="fit-container flex-middle"><p><%= reject %></p></div>
+      <div class="fit-container flex-middle">
+        <p><%= reject %></p>
+      </div>
       <% } %>
     </div>
     <div class="section-float flex-middle">
