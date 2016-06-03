@@ -29,6 +29,18 @@ const defaultViewContent = {
    * Default content for the `checkin` service
    * @type {Object}
    */
+  'service:auth': {
+    instructions: 'Login',
+    send: 'Send',
+    rejectMessage: `Sorry, you don't have access to this client`,
+    rejected: false,
+  },
+
+
+  /**
+   * Default content for the `checkin` service
+   * @type {Object}
+   */
   'service:checkin': {
     labelPrefix: 'Go to',
     labelPostfix: 'Touch the screen<br class="portrait-only" />when you are ready.',

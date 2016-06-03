@@ -15,7 +15,7 @@ const SERVICE_ID = 'service:motion-input';
  * @memberof module:soundworks/client
  * @example
  * // in the experince constructor
- * this.motionInput = this.require('motioninput', { descriptors: ['energy'] });
+ * this.motionInput = this.require('motion-input', { descriptors: ['energy'] });
  * // when the experience has started
  * if (this.motionInput.isAvailable('energy')) {
  *   this.motionInput.addListener('energy', (data) => {
