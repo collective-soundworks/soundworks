@@ -1,6 +1,7 @@
 import Scene from '../core/Scene';
 import server from '../core/server';
 
+const SCENE_ID = 'experience';
 
 /**
  * Base class used to build a experience on the server side.
@@ -20,7 +21,7 @@ export default class Experience extends Scene {
    *  mapped to. _(note: is used as the id of the activity)_
    */
   constructor(clientType = server.config.defaultClientType) {
-    super('experience', clientType);
+    super(SCENE_ID, clientType);
 
     this._errorReporter = this.require('error-reporter');
 

@@ -4,7 +4,6 @@ import Scene from '../core/Scene';
 import sqlite from 'sqlite3';
 
 const sql = sqlite.verbose();
-const SCENE_ID = 'survey';
 const DATABASE_NAME = 'db/survey.db';
 
 // test query
@@ -70,6 +69,9 @@ const SQL_INSERT = {
 const SQL_SELECT = {
   userId: `SELECT last_insert_rowid() AS id FROM users`,
 }
+
+
+const SCENE_ID = 'survey';
 
 export default class Survey extends Scene {
   constructor(clientType, surveyConfig) {

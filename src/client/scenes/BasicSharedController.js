@@ -135,20 +135,20 @@ class _TriggerGui {
   set(val) { /* nothing to set here */ }
 }
 
-const SCENE_ID = 'conductor';
+const SCENE_ID = 'basic-shared-controller';
 
 /**
  * Scene definition
  */
-export default class Conductor extends Scene {
+export default class BasicSharedController extends Scene {
   /**
    * _<span class="warning">__WARNING__</span> This API is unstable, and
    * subject to change in further versions.
    */
-  constructor() {
+  constructor(guiOptions = {}) {
     super(SCENE_ID, true);
 
-    this._guiOptions = {};
+    this._guiOptions = guiOptions;
 
     this._errorReporter = this.require('error-reporter');
     this._sharedParams = this.require('shared-params');

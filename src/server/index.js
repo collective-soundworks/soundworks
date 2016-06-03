@@ -16,6 +16,7 @@ export { default as serviceManager } from './core/serviceManager';
 export { default as sockets } from './core/sockets';
 
 /* scenes */
+export { default as BasicSharedController } from './scenes/BasicSharedController';
 export { default as Experience } from './scenes/Experience';
 export { default as Survey } from './scenes/Survey';
 
