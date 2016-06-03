@@ -12,13 +12,31 @@ const SERVICE_ID = 'service:auth';
 class Auth extends Service {
   constructor() {
     super(SERVICE_ID);
+
+    const defaults = {
+      configItem: 'password'
+    }
+
+    this.configure(defaults);
+
+    /**
+     * @private
+     * @type {String|Object}
+     */
+    this._password = null;
+    this._sharedConfig = this.require('shared-config');
   }
 
+  /** @private */
   configure(options) {
-    if (!options.password)
-      throw new Error('`password` option is not defined');
-
     super.configure(options);
+  }
+
+  /** @private */
+  start() {
+    super.start();
+
+    this._password = this._sharedConfig.get(this.options.configItem);
   }
 
   connect(client) {
@@ -27,7 +45,14 @@ class Auth extends Service {
 
   _onAccessRequest(client) {
     return (password) => {
-      if (password !== this.options.password)
+      let match;
+
+      if (typeof this._password === 'string')
+        match = this._password;
+      else
+        match = this._password[client.type];
+
+      if (password !== match)
         this.send(client, 'refused');
       else
         this.send(client, 'granted');
