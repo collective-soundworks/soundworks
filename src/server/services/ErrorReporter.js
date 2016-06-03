@@ -35,18 +35,18 @@ class ErrorReporter extends Service {
     super(SERVICE_ID);
 
     const defaults = {
-      directoryConfig: 'errorReporterDirectory',
+      configItem: 'errorReporterDirectory',
     };
 
     this.configure(defaults);
     this._onError = this._onError.bind(this);
 
-    this._sharedConfigService = this.require('shared-config');
+    this._sharedConfig = this.require('shared-config');
   }
 
   /** @private */
   start() {
-    let dir = this._sharedConfigService.get(this.options.directoryConfig);
+    let dir = this._sharedConfig.get(this.options.configItem);
     dir = path.join(process.cwd(), dir);
     dir = path.normalize(dir); // @todo - check it does the job on windows
     fse.ensureDirSync(dir); // create directory if not exists

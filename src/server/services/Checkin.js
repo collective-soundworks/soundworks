@@ -39,12 +39,12 @@ class Checkin extends Service {
     super(SERVICE_ID);
 
     const defaults = {
-      setupConfigItem: 'setup',
+      configItem: 'setup',
     }
 
     this.configure(defaults);
     // use shared config service to share the setup
-    this._sharedConfigService = this.require('shared-config');
+    this._sharedConfig = this.require('shared-config');
   }
 
   /** @private */
@@ -55,7 +55,7 @@ class Checkin extends Service {
      * Setup retrieved from server configuration.
      * @type {Object}
      */
-    this.setup = this._sharedConfigService.get(this.options.setupConfigItem);
+    this.setup = this._sharedConfig.get(this.options.configItem);
 
     /**
      * Maximum number of clients checked in (may limit or be limited by the

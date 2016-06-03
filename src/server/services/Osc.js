@@ -33,21 +33,21 @@ class Osc extends Service {
     super(SERVICE_ID);
 
     const defaults = {
-      oscConfigItem: 'osc',
+      configItem: 'osc',
       // protocol: 'udp',
     }
 
     this.configure(defaults);
 
     this._listeners = [];
-    this._sharedConfigService = this.require('shared-config');
+    this._sharedConfig = this.require('shared-config');
 
     this._onMessage = this._onMessage.bind(this);
   }
 
   /** @private */
   start() {
-    const oscConfig = this._sharedConfigService.get(this.options.oscConfigItem);
+    const oscConfig = this._sharedConfig.get(this.options.configItem);
 
     this.osc = new osc.UDPPort({
       // This is the port we're listening on.

@@ -31,13 +31,13 @@ class Locator extends Service {
     super(SERVICE_ID);
 
     const defaults = {
-      areaConfigItem: 'setup.area',
+      configItem: 'setup.area',
     };
 
     this.configure(defaults);
 
     this._area = null;
-    this._sharedConfigService = this.require('shared-config');
+    this._sharedConfig = this.require('shared-config');
   }
 
   /** @private */
@@ -47,7 +47,7 @@ class Locator extends Service {
     const areaConfigItem = this.options.areaConfigItem;
 
     this.clientTypes.forEach((clientType) => {
-      this._sharedConfigService.share(areaConfigItem, clientType);
+      this._sharedConfig.share(areaConfigItem, clientType);
     });
   }
 
@@ -61,7 +61,7 @@ class Locator extends Service {
 
   /** @private */
   _onRequest(client) {
-    return () => this.send(client, 'aknowledge', this.options.areaConfigItem);
+    return () => this.send(client, 'aknowledge', this.options.configItem);
   }
 
   /** @private */

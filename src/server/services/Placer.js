@@ -46,24 +46,22 @@ class Placer extends Service {
     super(SERVICE_ID);
 
     const defaults = {
-      setupConfigItem: 'setup',
+      configItem: 'setup',
     };
 
     this.configure(defaults);
-    this._sharedConfigService = this.require('shared-config');
+    this._sharedConfig = this.require('shared-config');
   }
 
   /** @private */
   start() {
     super.start();
 
-    const setupConfigItem = this.options.setupConfigItem;
-
     /**
      * Setup defining dimensions and predefined positions (labels and/or coordinates).
      * @type {Object}
      */
-    this.setup = this._sharedConfigService.get(setupConfigItem);
+    this.setup = this._sharedConfig.get(this.options.configItem);
 
     if (!this.setup.maxClientsPerPosition)
       this.setup.maxClientsPerPosition = 1;
@@ -111,7 +109,7 @@ class Placer extends Service {
 
     // add path to shared config requirements for all client type
     this.clientTypes.forEach((clientType) => {
-      this._sharedConfigService.share(setupConfigItem, clientType);
+      this._sharedConfig.share(this.options.configItem, clientType);
     });
   }
 
@@ -171,11 +169,11 @@ class Placer extends Service {
   /** @private */
   _onRequest(client) {
     return () => {
-      const setupConfigItem = this.options.setupConfigItem;
+      const configItem = this.options.configItem;
       const disabledPositions = this.disabledPositions;
       // aknowledge
       if (this.numClients < this.setup.capacity)
-        this.send(client, 'aknowlegde', setupConfigItem, disabledPositions);
+        this.send(client, 'aknowlegde', configItem, disabledPositions);
       else
         this.send('reject', disabledPositions);
     }
