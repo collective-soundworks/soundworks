@@ -39,7 +39,6 @@ class Checkin extends Activity {
     super(SERVICE_ID);
 
     const defaults = {
-      order: 'ascending',
       setupConfigItem: 'setup',
     }
 
@@ -72,10 +71,8 @@ class Checkin extends Activity {
     this.clients = [];
 
     /** @private */
-    this.order = this.options; // 'ascending' | 'random'
-
-    this._availableIndices = [];
-    this._nextAscendingIndex = 0;
+    this._availableIndices = []; // array of available indices
+    this._nextAscendingIndex = 0; // next index when _availableIndices is empty
 
     const setup = this.options.setup;
 
@@ -87,19 +84,14 @@ class Checkin extends Activity {
       if (this.capacity > numPositions)
         this.capacity = numPositions;
     }
-
-    if (this.capacity === Infinity)
-      this.order = 'ascending';
-    else if (this.order === 'random') {
-      this._nextAscendingIndex = this.capacity;
-
-      for (let i = 0; i < this.capacity; i++)
-        this._availableIndices.push(i);
-    }
   }
 
   /** @private */
   _getRandomIndex() {
+    for (let i = this._nextAscendingIndex; i < this.capacity; i++)
+      this._availableIndices.push(i);
+
+    this._nextAscendingIndex = this.capacity;
     const numAvailable = this._availableIndices.length;
 
     if (numAvailable > 0) {
@@ -133,10 +125,10 @@ class Checkin extends Activity {
 
   /** @private */
   _onRequest(client) {
-    return () => {
+    return (order) => {
       let index = -1;
 
-      if (this.order === 'random')
+      if (order === 'random' && this.capacity !== Infinity)
         index = this._getRandomIndex();
       else // if (order === 'acsending')
         index = this._getAscendingIndex();
