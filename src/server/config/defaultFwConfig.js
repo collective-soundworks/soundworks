@@ -59,8 +59,6 @@ const defaultFwConfig = {
   socketIO: {
     // url: '',
     transports: ['websocket'],
-    pingTimeout: 60000, // configure client side too ?
-    pingInterval: 50000, // configure client side too ?
     // @note: EngineIO defaults
     // pingTimeout: 3000,
     // pingInterval: 1000,

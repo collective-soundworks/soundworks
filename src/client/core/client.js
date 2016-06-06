@@ -265,6 +265,11 @@ const client = {
   /**
    * Extend or override application view contents with the given object.
    * @param {Object} defs - Content to be used by activities.
+   * @see {@link module:soundworks/client.setViewTemplateDefinitions}
+   * @example
+   * client.setViewTemplateDefinitions({
+   *   'service:platform': { myValue: 'Welcome to the application' }
+   * });
    */
   setViewContentDefinitions(defs) {
     this.viewContent = Object.assign(this.viewContent, defs);
@@ -274,6 +279,13 @@ const client = {
   /**
    * Extend or override application view templates with the given object.
    * @param {Object} defs - Templates to be used by activities.
+   * @see {@link module:soundworks/client.setViewContentDefinitions}
+   * @example
+   * client.setViewTemplateDefinitions({
+   *   'service:platform': `
+   *     <p><%= myValue %></p>
+   *   `,
+   * });
    */
   setViewTemplateDefinitions(defs) {
     this.viewTemplates = Object.assign(this.viewTemplates, defs);

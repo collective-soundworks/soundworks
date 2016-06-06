@@ -36,7 +36,6 @@ const defaultViewContent = {
     rejected: false,
   },
 
-
   /**
    * Default content for the `checkin` service
    * @type {Object}

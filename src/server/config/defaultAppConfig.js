@@ -60,8 +60,8 @@ const defaultAppConfig = {
    */
   setup: {
     area: {
-      width: 10,
-      height: 10,
+      width: 1,
+      height: 1,
       background: undefined,
     },
     labels: undefined,
