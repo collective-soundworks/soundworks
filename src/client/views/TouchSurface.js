@@ -16,6 +16,7 @@ export default class TouchSurface {
 
     // cache bounding rect values
     window.addEventListener('resize', this._updateBoundingRect.bind(this));
+    this._updateBoundingRect();
 
     // listen events
     this.$el.addEventListener('touchstart', this._handleTouch((id, x, y, e) => {
@@ -59,9 +60,9 @@ export default class TouchSurface {
     if (!listeners) { return; }
 
     const index = listeners.indexOf(callback);
-    if (index >= 0) {
+
+    if (index !== -1)
       listeners.splice(index, 1);
-    }
   }
 
   _updateBoundingRect() {
@@ -70,10 +71,12 @@ export default class TouchSurface {
 
   _handleTouch(callback) {
     return (e) => {
-      e.preventDefault();
-
-      if (!this._elBoundingRect)
+      // if `_updateBoundingRect` has not been been called or
+      // has been called when $el was in `display:none` state
+      if (!this._elBoundingRect || 
+          (this._elBoundingRect.width === 0 && this._elBoundingRect.height === 0)) {
         this._updateBoundingRect();
+      }
 
       const touches = e.changedTouches;
       const boundingRect = this._elBoundingRect;
