@@ -1,10 +1,12 @@
 import { audioContext } from 'waves-audio';
 import { SuperLoader } from 'waves-loaders';
+import debug from 'debug';
 import SegmentedView from '../views/SegmentedView';
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
 
 const SERVICE_ID = 'service:loader';
+const log = debug('soundworks:services:loader');
 
 class LoaderView extends SegmentedView {
   onRender() {
@@ -31,8 +33,11 @@ function getIdFromFilePath(filePath) {
  * stored into AudioBuffer objects.
  *
  * @param {Object} options
+ * @param {Array<String>} options.assetsDomain - Prefix concatenated to all
+ *  given paths.
  * @param {Array<String>} options.files - List of files to load.
- * @param {Boolean} [options.showProgress=true] - Display the progress bar in the view.
+ * @param {Boolean} [options.showProgress=true] - Display the progress bar
+ *  in the view.
  *
  * @memberof module:soundworks/client
  * @example
@@ -220,13 +225,15 @@ class Loader extends Service {
       } else {
         this.data[id] = obj;
       }
+
+      log(this.data[id]);
     });
   }
 
   /** @private */
   _loadFiles(files, view = null, triggerReady = false) {
     const promise = new Promise((resolve, reject) => {
-      const filePaths = [];
+      let filePaths = [];
       const fileDescriptions = [];
 
       // prepare the files descriptions
@@ -237,6 +244,9 @@ class Loader extends Service {
         for (let id in files)
           this._appendFileDescription(filePaths, fileDescriptions, files[id], id);
       }
+
+      filePaths = filePaths.map((path) => this.options.assetsDomain + path);
+      log(filePaths);
 
       // load files
       if (filePaths.length > 0 && fileDescriptions.length > 0) {
