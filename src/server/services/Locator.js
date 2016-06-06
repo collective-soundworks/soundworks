@@ -44,7 +44,7 @@ class Locator extends Service {
   start() {
     super.start();
 
-    const areaConfigItem = this.options.areaConfigItem;
+    const areaConfigItem = this.options.configItem;
 
     this.clientTypes.forEach((clientType) => {
       this._sharedConfig.share(areaConfigItem, clientType);
