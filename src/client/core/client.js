@@ -254,11 +254,10 @@ const client = {
     this.viewContent = {};
     this.viewTemplates = {};
 
-    // @todo - update this
-    const appName = this.config.appName;
-    // const viewContent = Object.assign(defaultViewContent, { globals: { appName } });
-    this.setViewContentDefinitions({ globals: { appName } });
-    // this.setViewTemplateDefinitions(defaultViewTemplates);
+    this.setViewContentDefinitions({
+      globals: { appName: this.config.appName }
+    });
+
     this.setAppContainer(this.config.appContainer);
   },
 
@@ -280,8 +279,7 @@ const client = {
       else
         this.viewContent[key] = def;
     }
-    // @todo - make it first level recursive assign ?
-    // this.viewContent = Object.assign(this.viewContent, defs);
+
     Activity.setViewContentDefinitions(this.viewContent);
   },
 
