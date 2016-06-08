@@ -48,10 +48,10 @@ const defaultViewContent = {
  * @function
  * @name AbstractPlacerView.setArea
  * @param {Object} area - Definition of the area.
- * @attribute {Number} area.width - With of the area.
- * @attribute {Number} area.height - Height of the area.
- * @attribute {Number} [area.labels=[]] - Labels of the position.
- * @attribute {Number} [area.coordinates=[]] - Coordinates of the area.
+ * @property {Number} area.width - With of the area.
+ * @property {Number} area.height - Height of the area.
+ * @property {Number} [area.labels=[]] - Labels of the position.
+ * @property {Number} [area.coordinates=[]] - Coordinates of the area.
  */
 /**
  * Display the available positions.
