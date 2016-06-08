@@ -6,6 +6,36 @@ import serviceManager from '../core/serviceManager';
 
 const SERVICE_ID = 'service:checkin';
 
+const defaultViewTemplate = `
+<% if (label) { %>
+  <div class="section-top flex-middle">
+    <p class="big"><%= labelPrefix %></p>
+  </div>
+  <div class="section-center flex-center">
+    <div class="checkin-label">
+      <p class="huge bold"><%= label %></p>
+    </div>
+  </div>
+  <div class="section-bottom flex-middle">
+    <p class="small"><%= labelPostfix %></p>
+  </div>
+<% } else { %>
+  <div class="section-top"></div>
+  <div class="section-center flex-center">
+    <p><%= error ? errorMessage : wait %></p>
+  </div>
+  <div class="section-bottom"></div>
+<% } %>`;
+
+const defaultViewContent = {
+  labelPrefix: 'Go to',
+  labelPostfix: 'Touch the screen<br class="portrait-only" />when you are ready.',
+  error: false,
+  errorMessage: 'Sorry,<br/>no place available',
+  wait: 'Please wait...',
+  label: '',
+};
+
 /**
  * Interface of the client `'checkin'` service.
  *
@@ -49,6 +79,9 @@ class Checkin extends Service {
     };
 
     this.configure(defaults);
+
+    this._defaultViewTemplate = defaultViewTemplate;
+    this._defaultViewContent = defaultViewContent;
 
     this.require('platform', { showDialog: true });
     // bind callbacks to the current instance

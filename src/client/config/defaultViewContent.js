@@ -25,86 +25,86 @@ const defaultViewContent = {
    */
   'globals': {},
 
-  /**
-   * Default content for the `checkin` service
-   * @type {Object}
-   */
-  'service:auth': {
-    instructions: 'Login',
-    send: 'Send',
-    rejectMessage: `Sorry, you don't have access to this client`,
-    rejected: false,
-  },
+  // /**
+  //  * Default content for the `checkin` service
+  //  * @type {Object}
+  //  */
+  // 'service:auth': {
+  //   instructions: 'Login',
+  //   send: 'Send',
+  //   rejectMessage: `Sorry, you don't have access to this client`,
+  //   rejected: false,
+  // },
 
-  /**
-   * Default content for the `checkin` service
-   * @type {Object}
-   */
-  'service:checkin': {
-    labelPrefix: 'Go to',
-    labelPostfix: 'Touch the screen<br class="portrait-only" />when you are ready.',
-    error: false,
-    errorMessage: 'Sorry,<br/>no place available',
-    wait: 'Please wait...',
-    label: '',
-  },
+  // /**
+  //  * Default content for the `checkin` service
+  //  * @type {Object}
+  //  */
+  // 'service:checkin': {
+  //   labelPrefix: 'Go to',
+  //   labelPostfix: 'Touch the screen<br class="portrait-only" />when you are ready.',
+  //   error: false,
+  //   errorMessage: 'Sorry,<br/>no place available',
+  //   wait: 'Please wait...',
+  //   label: '',
+  // },
 
-  /**
-   * Default content for the `loader` service
-   * @type {Object}
-   */
-  'service:loader': {
-    loading: 'Loading sounds…',
-  },
+  // /*
+  //  * Default content for the `loader` service
+  //  * @type {Object}
+  //  */
+  // 'service:loader': {
+  //   loading: 'Loading sounds…',
+  // },
 
-  /**
-   * Default content for the `locator` service
-   * @type {Object}
-   */
-  'service:locator': {
-    instructions: 'Define your position in the area',
-    send: 'Send',
-    showBtn: false,
-  },
+  // /**
+  //  * Default content for the `locator` service
+  //  * @type {Object}
+  //  */
+  // 'service:locator': {
+  //   instructions: 'Define your position in the area',
+  //   send: 'Send',
+  //   showBtn: false,
+  // },
 
-  /**
-   * Default content for the `placer` service
-   * @type {Object}
-   */
-  'service:placer': {
-    instructions: 'Select your position',
-    send: 'Send',
-    reject: 'Sorry, no place is available',
-    showBtn: false,
-    rejected: false,
-  },
+  // /**
+  //  * Default content for the `placer` service
+  //  * @type {Object}
+  //  */
+  // 'service:placer': {
+  //   instructions: 'Select your position',
+  //   send: 'Send',
+  //   reject: 'Sorry, no place is available',
+  //   showBtn: false,
+  //   rejected: false,
+  // },
 
-  /**
-   * Default content for the `platform` service
-   * @type {Object}
-   */
-  'service:platform': {
-    isCompatible: null,
-    errorMessage: 'Sorry,<br />Your device is not compatible with the application.',
-    intro: 'Welcome to',
-    instructions: 'Touch the screen to join!',
-  },
+  // /**
+  //  * Default content for the `platform` service
+  //  * @type {Object}
+  //  */
+  // 'service:platform': {
+  //   isCompatible: null,
+  //   errorMessage: 'Sorry,<br />Your device is not compatible with the application.',
+  //   intro: 'Welcome to',
+  //   instructions: 'Touch the screen to join!',
+  // },
 
-  /**
-   * Default content for the `sync` service
-   * @type {Object}
-   */
-  'service:sync': {
-    wait: `Clock syncing,<br />stand by&hellip;`,
-  },
+  // /**
+  //  * Default content for the `sync` service
+  //  * @type {Object}
+  //  */
+  // 'service:sync': {
+  //   wait: `Clock syncing,<br />stand by&hellip;`,
+  // },
 
-  /** @private */
-  'survey': {
-    next: 'Next',
-    validate: 'Validate',
-    thanks: 'Thanks!',
-    length: '-',
-  },
+  // /** @private */
+  // 'survey': {
+  //   next: 'Next',
+  //   validate: 'Validate',
+  //   thanks: 'Thanks!',
+  //   length: '-',
+  // },
 };
 
 export default defaultViewContent;

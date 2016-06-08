@@ -86,6 +86,34 @@ const defaultDefinitions = [
 ];
 
 
+const defaultViewTemplate = `
+<% if (!isCompatible) { %>
+  <div class="section-top"></div>
+  <div class="section-center flex-center">
+    <p><%= errorMessage %></p>
+  </div>
+  <div class="section-bottom"></div>
+<% } else { %>
+  <div class="section-top flex-middle"></div>
+  <div class="section-center flex-center">
+      <p class="big">
+        <%= intro %>
+        <br />
+        <b><%= globals.appName %></b>
+      </p>
+  </div>
+  <div class="section-bottom flex-middle">
+    <p class="small soft-blink"><%= instructions %></p>
+  </div>
+<% } %>`;
+
+const defaultViewContent = {
+  isCompatible: null,
+  errorMessage: 'Sorry,<br />Your device is not compatible with the application.',
+  intro: 'Welcome to',
+  instructions: 'Touch the screen to join!',
+};
+
 const SERVICE_ID = 'service:platform';
 
 /**
@@ -134,6 +162,9 @@ class Platform extends Service {
     };
 
     this.configure(defaults);
+
+    this._defaultViewTemplate = defaultViewTemplate;
+    this._defaultViewContent = defaultViewContent;
 
     this._requiredFeatures = new Set();
     this._featureDefinitions = {};

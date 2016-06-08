@@ -142,7 +142,9 @@ class Activity extends Process {
    * @see {@link module:soundworks/client.defaultViewTemplates}
    */
   get viewTemplate() {
-    const viewTemplate = this._viewTemplate || this.viewTemplateDefinitions[this.id];
+    const viewTemplate = this._viewTemplate || 
+      this.viewTemplateDefinitions[this.id] ||
+      this._defaultViewTemplate;
     // if (!viewTemplate)
     //   throw new Error(`No view template defined for activity "${this.id}"`);
     return viewTemplate;
@@ -159,7 +161,9 @@ class Activity extends Process {
    * @see {@link module:soundworks/client.defaultViewContent}
    */
   get viewContent() {
-    const viewContent = this._viewContent || this.viewContentDefinitions[this.id];
+    const viewContent = this._viewContent || 
+      this.viewContentDefinitions[this.id] ||
+      this._defaultViewContent;
 
     if (viewContent)
       viewContent.globals = this.viewContentDefinitions.globals;

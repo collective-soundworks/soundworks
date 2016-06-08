@@ -3,8 +3,8 @@ import Activity from './Activity';
 import serviceManager from './serviceManager';
 import viewManager from './viewManager';
 import socket from './socket';
-import defaultViewContent from '../config/defaultViewContent';
-import defaultViewTemplates from '../config/defaultViewTemplates';
+// import defaultViewContent from '../config/defaultViewContent';
+// import defaultViewTemplates from '../config/defaultViewTemplates';
 import viewport from '../views/viewport';
 
 /**
@@ -254,11 +254,11 @@ const client = {
     this.viewContent = {};
     this.viewTemplates = {};
 
-    const appName = this.config.appName || defaultViewContent.globals.appName;
-    const viewContent = Object.assign(defaultViewContent, { globals: { appName } });
-
-    this.setViewContentDefinitions(viewContent);
-    this.setViewTemplateDefinitions(defaultViewTemplates);
+    // @todo - update this
+    const appName = this.config.appName;
+    // const viewContent = Object.assign(defaultViewContent, { globals: { appName } });
+    this.setViewContentDefinitions({ globals: { appName } });
+    // this.setViewTemplateDefinitions(defaultViewTemplates);
     this.setAppContainer(this.config.appContainer);
   },
 
@@ -267,12 +267,21 @@ const client = {
    * @param {Object} defs - Content to be used by activities.
    * @see {@link module:soundworks/client.setViewTemplateDefinitions}
    * @example
-   * client.setViewTemplateDefinitions({
+   * client.setViewContentDefinitions({
    *   'service:platform': { myValue: 'Welcome to the application' }
    * });
    */
   setViewContentDefinitions(defs) {
-    this.viewContent = Object.assign(this.viewContent, defs);
+    for (let key in defs) {
+      const def = defs[key];
+
+      if (this.viewContent[key])
+        Object.assign(this.viewContent[key], def);
+      else
+        this.viewContent[key] = def;
+    }
+    // @todo - make it first level recursive assign ?
+    // this.viewContent = Object.assign(this.viewContent, defs);
     Activity.setViewContentDefinitions(this.viewContent);
   },
 

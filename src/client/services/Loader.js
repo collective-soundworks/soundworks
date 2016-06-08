@@ -8,6 +8,24 @@ import serviceManager from '../core/serviceManager';
 const SERVICE_ID = 'service:loader';
 const log = debug('soundworks:services:loader');
 
+const defaultViewTemplate = `
+<div class="section-top flex-middle">
+  <p><%= loading %></p>
+</div>
+<div class="section-center flex-center">
+  <% if (showProgress) { %>
+  <div class="progress-wrap">
+    <div class="progress-bar"></div>
+  </div>
+  <% } %>
+</div>
+<div class="section-bottom"></div>`;
+
+
+const defaultViewContent = {
+  loading: 'Loading sounds…',
+};
+
 class LoaderView extends SegmentedView {
   onRender() {
     super.onRender();
@@ -95,8 +113,10 @@ class Loader extends Service {
       viewPriority: 4,
     };
 
+    this._defaultViewTemplate = defaultViewTemplate;
+    this._defaultViewContent = defaultViewContent;
+
     this.configure(defaults);
-    this.require('platform', { features: ['web-audio'] });
   }
 
   /** @private */

@@ -33,6 +33,33 @@ class AuthView extends SegmentedView {
   }
 }
 
+const defaultViewTemplate = `
+<% if (!rejected) { %>
+  <div class="section-top flex-middle">
+    <p><%= instructions %></p>
+  </div>
+  <div class="section-center flex-center">
+    <div>
+      <input type="password" id="password" />
+      <button class="btn" id="send"><%= send %></button>
+    </div>
+  </div>
+  <div class="section-bottom"></div>
+<% } else { %>
+  <div class="section-top"></div>
+  <div class="section-center flex-center">
+    <p><%= rejectMessage %></p>
+  </div>
+  <div class="section-bottom"></div>
+<% } %>`;
+
+const defaultViewContent = {
+  instructions: 'Login',
+  send: 'Send',
+  rejectMessage: `Sorry, you don't have access to this client`,
+  rejected: false,
+};
+
 /**
  * Interface of the client `auth` service.
  *
@@ -55,6 +82,9 @@ class Auth extends Service {
     };
 
     this.configure(defaults);
+
+    this._defaultViewTemplate = defaultViewTemplate;
+    this._defaultViewContent = defaultViewContent;
 
     this._onAccesGrantedResponse = this._onAccesGrantedResponse.bind(this);
     this._onAccesRefusedResponse = this._onAccesRefusedResponse.bind(this);

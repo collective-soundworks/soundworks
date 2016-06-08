@@ -6,6 +6,25 @@ import SquaredView from '../views/SquaredView';
 import TouchSurface from '../views/TouchSurface';
 
 
+const SERVICE_ID = 'service:locator';
+
+const defaultViewTemplate = `
+<div class="section-square"></div>
+<div class="section-float flex-middle">
+  <% if (!showBtn) { %>
+    <p class="small"><%= instructions %></p>
+  <% } else { %>
+    <button class="btn"><%= send %></button>
+  <% } %>
+</div>`;
+
+const defaultViewContent = {
+  instructions: 'Define your position in the area',
+  send: 'Send',
+  showBtn: false,
+};
+
+
 class _LocatorView extends SquaredView {
   constructor(template, content, events, options) {
     super(template, content, events, options);
@@ -105,8 +124,6 @@ class _LocatorView extends SquaredView {
 }
 
 
-const SERVICE_ID = 'service:locator';
-
 /**
  * Interface of the client `'locator'` service.
  *
@@ -144,6 +161,9 @@ class Locator extends Service {
     };
 
     this.configure(defaults);
+
+    this._defaultViewTemplate = defaultViewTemplate;
+    this._defaultViewContent = defaultViewContent;
 
     this._sharedConfig = this.require('shared-config');
 
