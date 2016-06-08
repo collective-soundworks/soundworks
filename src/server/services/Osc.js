@@ -34,7 +34,6 @@ class Osc extends Service {
 
     const defaults = {
       configItem: 'osc',
-      // protocol: 'udp',
     }
 
     this.configure(defaults);
@@ -48,6 +47,9 @@ class Osc extends Service {
   /** @private */
   start() {
     const oscConfig = this._sharedConfig.get(this.options.configItem);
+
+    if (this.oscConfig === null)
+      throw new Error(`"service:osc": server.config.${configItem} is not defined`);
 
     this.osc = new osc.UDPPort({
       // This is the port we're listening on.

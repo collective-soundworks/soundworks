@@ -4,7 +4,6 @@ import Scene from '../core/Scene';
 import sqlite from 'sqlite3';
 
 const sql = sqlite.verbose();
-const DATABASE_NAME = 'db/survey.db';
 
 // test query
 // const SQL_TEST_DEFINITION = `
@@ -90,7 +89,7 @@ export default class Survey extends Scene {
     this._db = null;
 
     const defaults = {
-      directoryConfig: 'dbDirectory',
+      configItem: 'dbDirectory',
       dbName: 'survey.db',
       dropTables: true,
     };
@@ -101,10 +100,12 @@ export default class Survey extends Scene {
   }
 
   start() {
-    const directoryConfig = this.options.directoryConfig;
-    let dir = this._sharedConfigService.get(directoryConfig)[directoryConfig];
-    dir = path.join(process.cwd(), dir);
-    dir = path.normalize(dir); // @todo - check it does the job on windows
+    const configItem = this.options.configItem;
+    let dir = this._sharedConfigService.get(configItem);
+
+    if (dir === null)
+      dir = path.join(process.cwd(), 'db');
+
     fse.ensureDirSync(dir); // create directory if not exists
 
     // create the database if not exist

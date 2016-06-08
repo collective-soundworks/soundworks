@@ -56,12 +56,16 @@ class Placer extends Service {
   /** @private */
   start() {
     super.start();
+    const configItem = this.options.configItem;
 
     /**
      * Setup defining dimensions and predefined positions (labels and/or coordinates).
      * @type {Object}
      */
-    this.setup = this._sharedConfig.get(this.options.configItem);
+    this.setup = this._sharedConfig.get(configItem);
+
+    if (this.setup === null)
+      throw new Error(`"service:placer": server.config.${configItem} is not defined`);
 
     if (!this.setup.maxClientsPerPosition)
       this.setup.maxClientsPerPosition = 1;

@@ -50,19 +50,23 @@ class Checkin extends Service {
   /** @private */
   start() {
     super.start();
+    const configItem = this.options.configItem;
 
     /**
      * Setup retrieved from server configuration.
      * @type {Object}
      */
-    this.setup = this._sharedConfig.get(this.options.configItem);
+    this.setup = this._sharedConfig.get(configItem);
+
+    if (this.setup === null)
+      throw new Error(`"service:checkin": server.config.${configItem} is not defined`);
 
     /**
      * Maximum number of clients checked in (may limit or be limited by the
      * number of predefined labels and/or coordinates).
      * @type {Number}
      */
-    this.capacity = getOpt(this.setup.capacity, Infinity, 1);
+    this.capacity = getOpt(this.setup && this.setup.capacity, Infinity, 1);
 
     /**
      * List of the clients checked in at their corresponding indices.

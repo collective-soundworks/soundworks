@@ -51,7 +51,7 @@ class SharedConfig extends Service {
     let value = server.config;
     // search item through config
     parts.forEach((attr) => {
-      if (value[attr])
+      if (value && value[attr])
         value = value[attr];
       else
         value = null;
@@ -84,7 +84,7 @@ class SharedConfig extends Service {
 
     const items = this._clientItemsMap[clientType];
     const serverConfig = server.config;
-    const data = {};
+    let data = {};
 
     // build data tree
     items.forEach((item) => {

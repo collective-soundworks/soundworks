@@ -44,10 +44,13 @@ class Locator extends Service {
   start() {
     super.start();
 
-    const areaConfigItem = this.options.configItem;
+    const configItem = this.options.configItem;
+
+    if (this._sharedConfig.get(configItem) === null)
+      throw new Error(`"service:locator": server.config.${configItem} is not defined`);
 
     this.clientTypes.forEach((clientType) => {
-      this._sharedConfig.share(areaConfigItem, clientType);
+      this._sharedConfig.share(configItem, clientType);
     });
   }
 

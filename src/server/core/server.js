@@ -12,12 +12,6 @@ import pem from 'pem';
 import serviceManager from './serviceManager';
 import sockets from './sockets';
 
-// import default configuration
-import { default as defaultAppConfig } from '../config/defaultAppConfig';
-import { default as defaultEnvConfig } from '../config/defaultEnvConfig';
-import { default as defaultFwConfig } from '../config/defaultFwConfig';
-
-
 /**
  * Server side entry point for a `soundworks` application.
  *
@@ -32,7 +26,7 @@ import { default as defaultFwConfig } from '../config/defaultFwConfig';
  * import * as soundworks from 'soundworks/server';
  * import MyExperience from './MyExperience';
  *
- * soundworks.server.init({ appName: 'MyApplication' });
+ * soundworks.server.init(config);
  * const myExperience = new MyExperience();
  * soundworks.server.start();
  */
@@ -111,18 +105,9 @@ const server = {
 
   /**
    * Initialize the server with the given config objects.
-   * @param {...Object} configs - configuration object to be merge with the
-   *  default `soundworks` config. (_Note:_ given objects are merged at 2 levels
-   *  of depth)
-   *
-   * @see {@link module:soundworks/server.app}
-   * @see {@link module:soundworks/server.env}
-   * @see {@link module:soundworks/server.fw}
+   * @param {...Object} configs - Configuration.
    */
   init(...configs) {
-    // merge default configuration objects
-    this.config = Object.assign(this.config, defaultAppConfig, defaultFwConfig, defaultEnvConfig);
-    // merge given configurations objects with defaults (1 level depth)
     configs.forEach((config) => {
       for (let key in config) {
         const entry = config[key];
@@ -137,6 +122,27 @@ const server = {
     });
   },
 
+  _populateDefaultConfig() {
+    // mandatory configuration options
+    if (this.config.port === undefined)
+       this.config.port = 8000;
+
+    if (this.config.enableGZipCompression === undefined)
+      this.config.enableGZipCompression = true;
+
+    if (this.config.publicDirectory === undefined)
+      this.config.publicDirectory = path.join(process.cwd(), 'public');
+
+    if (this.config.templateDirectory === undefined)
+      this.config.templateDirectory = path.join(process.cwd(), 'html');
+
+    if (this.config.defaultClient === undefined)
+      this.config.defaultClient = 'player';
+
+    if (this.config.socketIO === undefined)
+      this.config.socketIO = {};
+  },
+
   /**
    * Start the application:
    * - launch the HTTP server.
@@ -145,21 +151,27 @@ const server = {
    * - define routes and and activities mapping for all client types.
    */
   start() {
-    logger.initialize(this.config.logger);
+    this._populateDefaultConfig();
+
+    if (this.config.logger !== undefined)
+      logger.initialize(this.config.logger);
 
     // configure express
     const expressApp = new express();
     expressApp.set('port', process.env.PORT || this.config.port);
     expressApp.set('view engine', 'ejs');
 
-    // console.log(this.config.enableGZipCompression);
+    // compression
     if (this.config.enableGZipCompression)
       expressApp.use(compression());
 
-    expressApp.use(express.static(this.config.publicFolder));
+    // public folder
+    expressApp.use(express.static(this.config.publicDirectory));
 
+    // use https
+    const useHttps = this.config.useHttps || false;
     // launch http(s) server
-    if (!this.config.useHttps) {
+    if (!useHttps) {
       this._runHttpServer(expressApp);
     } else {
       const httpsInfos = this.config.httpsInfos;

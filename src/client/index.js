@@ -41,9 +41,6 @@ export { default as Loader } from './services/Loader';
 export { default as MotionInput } from './services/MotionInput';
 export { default as Scheduler } from './services/Scheduler';
 
-// config
-export { default as defaultViewTemplates } from './config/defaultViewTemplates';
-export { default as defaultViewContent } from './config/defaultViewContent';
 // views
 export { default as ButtonView } from './views/ButtonView';
 export { default as CanvasView } from './views/CanvasView';

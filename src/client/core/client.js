@@ -254,9 +254,8 @@ const client = {
     this.viewContent = {};
     this.viewTemplates = {};
 
-    this.setViewContentDefinitions({
-      globals: { appName: this.config.appName }
-    });
+    const appName = this.config.appName || 'Soundworks';
+    this.setViewContentDefinitions({ globals: { appName }});
 
     this.setAppContainer(this.config.appContainer);
   },

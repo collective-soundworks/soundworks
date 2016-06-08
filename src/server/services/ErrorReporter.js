@@ -1,7 +1,8 @@
-import Service from '../core/Service';
-import serviceManager from '../core/serviceManager';
 import fse  from 'fs-extra';
 import path from 'path';
+import Service from '../core/Service';
+import serviceManager from '../core/serviceManager';
+
 
 function padLeft(str, value, length) {
   str = str + '';
@@ -47,8 +48,10 @@ class ErrorReporter extends Service {
   /** @private */
   start() {
     let dir = this._sharedConfig.get(this.options.configItem);
-    dir = path.join(process.cwd(), dir);
-    dir = path.normalize(dir); // @todo - check it does the job on windows
+
+    if (dir)
+      path.join(process.cwd(), 'logs', 'clients');
+
     fse.ensureDirSync(dir); // create directory if not exists
 
     this.dir = dir;
