@@ -412,7 +412,8 @@ const server = {
       activities.forEach((activity) => activity.disconnect(client));
       client.destroy();
 
-      logger.info({ socket, clientType }, 'disconnect');
+      if (logger.info)
+        logger.info({ socket, clientType }, 'disconnect');
     });
 
     sockets.receive(client, 'handshake', (data) => {
@@ -421,7 +422,8 @@ const server = {
       activities.forEach((activity) => activity.connect(client));
       sockets.send(client, 'client:start', client.uuid);
 
-      logger.info({ socket, clientType }, 'handshake');
+      if (logger.info)
+        logger.info({ socket, clientType }, 'handshake');
     });
   },
 };

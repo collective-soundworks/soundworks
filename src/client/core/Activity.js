@@ -145,8 +145,7 @@ class Activity extends Process {
     const viewTemplate = this._viewTemplate || 
       this.viewTemplateDefinitions[this.id] ||
       this._defaultViewTemplate;
-    // if (!viewTemplate)
-    //   throw new Error(`No view template defined for activity "${this.id}"`);
+
     return viewTemplate;
   }
 
@@ -250,5 +249,8 @@ class Activity extends Process {
     socket.removeListener(`${this.id}:${channel}`, callback);
   }
 }
+
+Activity.prototype.viewTemplateDefinitions = {};
+Activity.prototype.viewContentDefinitions = {};
 
 export default Activity;

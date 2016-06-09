@@ -49,8 +49,8 @@ class ErrorReporter extends Service {
   start() {
     let dir = this._sharedConfig.get(this.options.configItem);
 
-    if (dir)
-      path.join(process.cwd(), 'logs', 'clients');
+    if (dir === null)
+      dir = path.join(process.cwd(), 'logs', 'clients');
 
     fse.ensureDirSync(dir); // create directory if not exists
 
