@@ -13,6 +13,75 @@ import serviceManager from './serviceManager';
 import sockets from './sockets';
 
 /**
+ * @typedef {Object} server~config
+ *
+ * @property {String} appName - Name of the application, used in the `.ejs`
+ *  template and by default in the `platform` service to populate its view.
+ * @property {String} env - Name of the environnement ('production' enable
+ *  cache in express application).
+ * @property {String} version - Version of application, can be used to force
+ *  reload css and js files from server (cf. `html/default.ejs`)
+ * @property {String} defaultClient - Name of the default client type,
+ *  i.e. the client that can access the application at its root URL
+ * @property {String} assetsDomain - Define from where the assets (static files)
+ *  should be loaded, these value could also refer to a separate server for
+ *  scalability reasons. This value should also be used client-side to configure
+ *  the `loader` service.
+ * @property {Number} port - Port used to open the http server, in production
+ *  this value is typically 80
+ *
+ * @property {Object} setup - Describe the location where the experience takes
+ *  places, theses values are used by the `placer`, `checkin` and `locator`
+ *  services. If one of these service is required, this entry mandatory.
+ * @property {Object} setup.area - Description of the area.
+ * @property {Number} setup.area.width - Width of the area.
+ * @property {Number} setup.area.height - Height of the area.
+ * @property {String} setup.area.background - Path to an image to be used in
+ *  the area representation.
+ * @property {Array} setup.labels - Optionnal list of predefined labels.
+ * @property {Array} setup.coordinates - Optionnal list of predefined coordinates.
+ * @property {Array} setup.maxClientsPerPosition - Maximum number of clients
+ *  allowed in a position.
+ * @property {Number} setup.capacity - Maximum number of positions (may limit
+ * or be limited by the number of labels and/or coordinates).
+ *
+ * @property {Object} socketIO - Socket.io configuration
+ * @property {String} socketIO.url - Optionnal url where the socket should
+ *  connect.
+ * @property {Array} socketIO.transports - List of the transport mecanims that
+ *  should be used to open or emulate the socket.
+ *
+ * @property {Boolean} useHttps -  Define if the HTTP server should be launched
+ *  using secure connections. For development purposes when set to `true` and no
+ *  certificates are given (cf. `httpsInfos`), a self-signed certificate is
+ *  created.
+ * @property {Object} httpsInfos - Paths to the key and certificate to be used
+ *  in order to launch the https server. Both entries are required otherwise a
+ *  self-signed certificate is generated.
+ * @property {String} httpsInfos.cert - Path to the certificate.
+ * @property {String} httpsInfos.key - Path to the key.
+ *
+ * @property {Object} osc - Configuration of the `osc` service.
+ * @property {String} osc.receiveAddress - IP of the currently running server.
+ * @property {Number} osc.receivePort - Port listening for incomming messages.
+ * @property {String} osc.sendAddress - IP of the remote application.
+ * @property {Number} osc.sendPort - Port where the remote application is
+ *  listening for messages
+ *
+ * @property {Boolean} enableGZipCompression - Define if the server should use
+ *  gzip compression for static files.
+ * @property {String} publicDirectory - Location of the public directory
+ *  (accessible through http(s) requests).
+ * @property {String} templateDirectory - Directory where the server templating
+ *  system looks for the `ejs` templates.
+ * @property {Object} logger - Configuration of the logger service, cf. Bunyan
+ *  documentation.
+ * @property {String} errorReporterDirectory - Directory where error reported
+ *  from the clients are written.
+ */
+
+
+/**
  * Server side entry point for a `soundworks` application.
  *
  * This object host configuration informations, as well as methods to
@@ -105,7 +174,7 @@ const server = {
 
   /**
    * Initialize the server with the given config objects.
-   * @param {...Object} configs - Configuration.
+   * @param {...server~config} configs - Configuration of the application.
    */
   init(...configs) {
     configs.forEach((config) => {

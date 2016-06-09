@@ -104,8 +104,6 @@ class _TriggerParam extends _Param {
   set(val) { /* nothing to set here */ }
 }
 
-
-
 const SERVICE_ID = 'service:shared-params';
 
 /**
@@ -125,14 +123,9 @@ const SERVICE_ID = 'service:shared-params';
  * `hasGUI` option set to true, allowing to create a special client aimed at
  * controlling the different parameters of the experience.
  *
- * __*The service must be used with its [server-side counterpart]{@link module:soundworks/server.SharedParams}*__
+ * To create a control surface, for this service,
  *
- * @param {Object} options
- * @param {Boolean} [options.hasGui=true] - Defines whether the service should display
- *  a GUI. If set to `true`, the service never set its `ready` signal to true and
- *  the client application stay in this state forever. The option should then be
- *  used create special clients (sometimes called `conductor`) aimed at
- *  controlling application parameters in real time.
+ * __*The service must be used with its [server-side counterpart]{@link module:soundworks/server.SharedParams}*__
  *
  * @memberof module:soundworks/client
  * @example
@@ -142,6 +135,8 @@ const SERVICE_ID = 'service:shared-params';
  * this.control.addParamListener('synth:gain', (value) => {
  *   this.synth.setGain(value);
  * });
+ *
+ * @see [`BasicSharedController` scene]{@link module:soundworks/client.BasicSharedController}
  */
 class SharedParams extends Service {
   /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */
@@ -150,9 +145,6 @@ class SharedParams extends Service {
 
     const defaults = { hasGui: false };
     this.configure(defaults);
-
-    /** @private */
-    // this._guiOptions = {};
 
     this._onInitResponse = this._onInitResponse.bind(this);
     this._onUpdateResponse = this._onUpdateResponse.bind(this);
@@ -166,9 +158,6 @@ class SharedParams extends Service {
      * @private
      */
     this.params = {};
-
-    // if (this.options.hasGui)
-    //   this.view = this.createView();
   }
 
   /** @private */

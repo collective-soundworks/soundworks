@@ -138,7 +138,14 @@ class _TriggerGui {
 const SCENE_ID = 'basic-shared-controller';
 
 /**
- * Scene definition
+ * The `BasicSharedController` scene propose a simple / default way to create
+ * a client controller for the `shared-params` service.
+ *
+ * Each controller comes with a set of options that can be passed to the
+ * constructor.
+ *
+ * @memberof module:soundworks/client
+ * @see [`shared-params` service]{@link module:soundworks/client.SharedParams}
  */
 export default class BasicSharedController extends Scene {
   /**
