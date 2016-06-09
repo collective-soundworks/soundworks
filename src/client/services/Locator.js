@@ -90,7 +90,7 @@ class LocatorView extends SquaredView {
     this.setViewComponent('.section-square', this.selector);
     this.render('.section-square');
 
-    this.surface = new TouchSurface(this.selector.$svg);
+    this.surface = new TouchSurface(this.selector.$svgContainer);
     this.surface.addListener('touchstart', this._onAreaTouchStart);
     this.surface.addListener('touchmove', this._onAreaTouchMove);
   }
