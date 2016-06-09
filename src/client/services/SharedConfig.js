@@ -6,7 +6,7 @@ import client from '../core/client';
 const SERVICE_ID = 'service:shared-config';
 
 /**
- * Interface of the client `'shared-config'` service.
+ * Interface for the client `'shared-config'` service.
  *
  * This service allows to share parts of the server configuration to the clients.
  *

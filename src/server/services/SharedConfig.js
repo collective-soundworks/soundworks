@@ -6,11 +6,11 @@ import server from '../core/server';
 const SERVICE_ID = 'service:shared-config';
 
 /**
- * Interface of the server `'shared-config'` service.
+ * Interface for the server `'shared-config'` service.
  *
  * This service can be use with its client-side counterpart in order to share
  * some server configuration items with the clients, or server-side only to act
- * as an accessor of the server configuration.
+ * as an accessor to the server configuration.
  *
  * __*The service can be use with its [client-side counterpart]{@link module:soundworks/client.SharedConfig}*__
  *
@@ -63,7 +63,7 @@ class SharedConfig extends Service {
   /**
    * Add a configuration item to be shared with a specific client.
    * @param {String} item - Key to the configuration item (_ex:_ `'setup.area'`)
-   * @param {String} clientType - Client type whom the data should be shared.
+   * @param {String} clientType - Client type with whom the data should be shared.
    */
   share(item, clientType) {
     if (!this._clientItemsMap[clientType])

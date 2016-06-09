@@ -3,6 +3,8 @@ import serviceManager from './serviceManager';
 import Signal from './Signal';
 
 /**
+ * Base class to be extended in order to create a new scene.
+ *
  * @memberof module:soundworks/client
  * @extends module:soundworks/client.Activity
  */

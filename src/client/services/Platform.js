@@ -147,11 +147,11 @@ const SERVICE_ID = 'service:platform';
 /**
  * Interface for the client `'platform'` service.
  *
- * This services is responsible to give general informations about the user's
+ * This services is responsible for giving general informations about the user's
  * device (cf. [`client.device`]{@link module:soundworks/client.client.platform})
- * as well as check availability and provide hooks to initialize the features
- * required by the application (audio, microphone, etc.).
- * If one of the required definitions is not available, an view is created with
+ * as well as checking availability and providing hooks in order to initialize
+ * the features required by the application (audio, microphone, etc.).
+ * If one of the required definitions is not available, a view is created with
  * an error message and the [`client.compatible`]{@link module:soundworks/client.client.compatible}
  * attribute is set to `false`.
  *
@@ -159,11 +159,12 @@ const SERVICE_ID = 'service:platform';
  * - 'web-audio'
  * - 'mobile-device'
  * - 'audio-input'
- * - 'full-screen' (this feature don't block the application, just applied if available)
+ * - 'full-screen' (this feature won't block the application, just applied if available)
+ * - 'wake-lock'
  *
- * Most of these feature requiring an interaction or a confirmation from the
- * user in order to be initialized correctly, be carefull when setting
- * `showDialog` option to `false`.
+ * Be carefull when setting `showDialog` option to `false` because most of these
+ * features require an interaction or a confirmation from the user in order to
+ * be initialized correctly,
  *
  * @see {@link module:soundworks/client.client}
  *

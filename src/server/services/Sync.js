@@ -4,7 +4,7 @@ import SyncModule from 'sync/server';
 
 const SERVICE_ID = 'service:sync';
 /**
- * Interface of the server `'sync'` service.
+ * Interface for the server `'sync'` service.
  *
  * This service acts as the master clock provider for the client sync service,
  * in order to synchronize the clocks of the different clients to its own clock.
@@ -49,7 +49,7 @@ class Sync extends Service {
   }
 
   /**
-   * Returns the current time in the sync clock, devired from `process.hrtime()`.
+   * Returns the current time in the sync clock, derived from `process.hrtime()`.
    * @return {Number} - Current sync time (in _seconds_).
    */
   getSyncTime() {

@@ -6,15 +6,15 @@ const SERVICE_ID = 'service:checkin';
 
 
 /**
- * Interface of the server `'checkin'` service.
+ * Interface for the server `'checkin'` service.
  *
  * This service is one of the provided services aimed at identifying clients inside
  * the experience along with the [`'locator'`]{@link module:soundworks/server.Locator}
  * and [`'placer'`]{@link module:soundworks/server.Placer} services.
  *
- * The `'checkin'` service is the more simple among these services as the server
- * simply assign a ticket to the client among the available ones. The ticket can
- * optionnaly be associated with coordinates or label according to the server
+ * The `'checkin'` service is the most simple among these services as the server
+ * simply assigns a ticket to the client among the available ones. The ticket can
+ * optionally be associated with coordinates or label according to the server
  * `setup` configuration.
  *
  * __*The service must be used with its [client-side counterpart]{@link module:soundworks/client.Checkin}*__
@@ -53,7 +53,7 @@ class Checkin extends Service {
     const configItem = this.options.configItem;
 
     /**
-     * Setup retrieved from server configuration.
+     * Setup retrieved from the server configuration.
      * @type {Object}
      */
     this.setup = this._sharedConfig.get(configItem);

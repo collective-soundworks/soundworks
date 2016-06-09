@@ -6,7 +6,7 @@ const SERVICE_ID = 'service:motion-input';
 
 
 /**
- * Interface of the client `'motion-input'` service.
+ * Interface for the client `'motion-input'` service.
  *
  * This service provides a wrapper for the
  * [`motionInput`]{@link https://github.com/collective-soundworks/motion-input}
@@ -104,7 +104,7 @@ class MotionInput extends Service {
   }
 
   /**
-   * Remove a listener from a given descriptor.
+   * Remove a listener of events triggered by a given descriptor.
    * @param {String} name - Descriptor name.
    * @param {Function} callback - Callback to remove.
    */

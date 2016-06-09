@@ -8,20 +8,20 @@ const SERVICE_ID = 'service:placer';
 const maxCapacity = 9999;
 
 /**
- * Interface of the server `'placer'` service.
+ * Interface for the server `'placer'` service.
  *
  * This service is one of the provided services aimed at identifying clients inside
  * the experience along with the [`'locator'`]{@link module:soundworks/server.Locator}
  * and [`'checkin'`]{@link module:soundworks/server.Checkin} services.
  *
- * The placer service is suited for situations where the experience has a set of
+ * The placer service is well-suited for situations where the experience has a set of
  * predefined places (located or not) and shall refuse clients when all places
- * are already associated with a client.
- * The definition of the capacity, maximum clients per available positions,
- * optionnal labels and coordinates used by the service, must be defined in the
- * `setup` entry of the server configuration and must follow the format specified
- * in {@link module:soundworks/server.appConfig.setup}. If no labels are provided
- * the service generate incrementals numbers matching the given capacity.
+ * are already assigned to a client.
+ * The capacity, maximum clients per available positions, optionnal labels
+ * and coordinates used by the service, should be defined in the `setup`
+ * entry of the server configuration and must follow the format specified in
+ * {@link module:soundworks/server.appConfig.setup}. If no label is provided
+ * the service will generate incremental numbers matching the given capacity.
  *
  * __*The service must be used with its [client-side counterpart]{@link module:soundworks/client.Placer}*__
  *
@@ -91,7 +91,7 @@ class Placer extends Service {
       this.capacity = maxCapacity;
 
     /**
-     * List of clients checked in with corresponing indices.
+     * List of clients checked in with corresponding indices.
      * @type {Object<Number, Array>}
      */
     this.clients = {};

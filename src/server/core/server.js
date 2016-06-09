@@ -13,7 +13,8 @@ import serviceManager from './serviceManager';
 import sockets from './sockets';
 
 /**
- * @typedef {Object} server~config
+ * @typedef {Object} module:soundworks/server.server~serverConfig
+ * @memberof module:soundworks/server.server
  *
  * @property {String} appName - Name of the application, used in the `.ejs`
  *  template and by default in the `platform` service to populate its view.
@@ -61,6 +62,8 @@ import sockets from './sockets';
  * @property {String} httpsInfos.cert - Path to the certificate.
  * @property {String} httpsInfos.key - Path to the key.
  *
+ * @property {String} password - Password to be used by the `auth` service.
+ *
  * @property {Object} osc - Configuration of the `osc` service.
  * @property {String} osc.receiveAddress - IP of the currently running server.
  * @property {Number} osc.receivePort - Port listening for incomming messages.
@@ -84,7 +87,7 @@ import sockets from './sockets';
 /**
  * Server side entry point for a `soundworks` application.
  *
- * This object host configuration informations, as well as methods to
+ * This object hosts configuration informations, as well as methods to
  * initialize and start the application. It is also responsible for creating
  * the static file (http) server as well as the socket server.
  *
@@ -111,7 +114,7 @@ const server = {
    * Configuration informations, all config objects passed to the
    * [`server.init`]{@link module:soundworks/server.server.init} are merged
    * into this object.
-   * @type {Object}
+   * @type {module:soundworks/server.server~serverConfig}
    */
   config: {},
 
@@ -174,7 +177,8 @@ const server = {
 
   /**
    * Initialize the server with the given config objects.
-   * @param {...server~config} configs - Configuration of the application.
+   * @param {...module:soundworks/server.server~serverConfig} configs -
+   *  Configuration of the application.
    */
   init(...configs) {
     configs.forEach((config) => {
@@ -214,10 +218,10 @@ const server = {
 
   /**
    * Start the application:
-   * - launch the HTTP server.
+   * - launch the http(s) server.
    * - launch the socket server.
    * - start all registered activities.
-   * - define routes and and activities mapping for all client types.
+   * - define routes and activities mapping for all client types.
    */
   start() {
     this._populateDefaultConfig();
@@ -283,6 +287,7 @@ const server = {
 
   /**
    * Launch a http server.
+   * @private
    */
   _runHttpServer(expressApp) {
     const httpServer = http.createServer(expressApp);
@@ -297,6 +302,7 @@ const server = {
 
   /**
    * Launch a https server.
+   * @private
    */
   _runHttpsServer(expressApp, key, cert) {
     const httpsServer = https.createServer({ key, cert }, expressApp);

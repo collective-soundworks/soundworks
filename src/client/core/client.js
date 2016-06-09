@@ -10,7 +10,7 @@ import viewport from '../views/viewport';
 /**
  * Client side entry point for a `soundworks` application.
  *
- * This object host general informations about the user, as well as methods
+ * This object hosts general informations about the user, as well as methods
  * to initialize and start the application.
  *
  * @memberof module:soundworks/client
@@ -34,9 +34,9 @@ const client = {
 
   /**
    * The type of the client, this can generally be considered as the role of the
-   * client in the application. This value is defined as argument of the
-   * [`client.init`]{@link module:soundworks/client.client.init} method and
-   * defaults to `'player'`.
+   * client in the application. This value is defined in the
+   * [`client.init`]{@link module:soundworks/server.server~serverConfig} object
+   * and defaults to `'player'`.
    *
    * @type {String}
    */

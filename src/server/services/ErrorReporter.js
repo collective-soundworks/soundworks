@@ -16,7 +16,7 @@ const SERVICE_ID = 'service:error-reporter';
  * Interface for the server `'error-reporter'` service.
  *
  * This service allows to log javascript errors that could occur during the
- * application life cycle. Errors are catch and send to the server in order
+ * application life cycle. Errors are caught and sent to the server in order
  * to be persisted in a file.
  * By default, the log file are located in the `logs/clients` directory inside
  * the application directory. This location can be changed by modifying the

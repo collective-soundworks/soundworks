@@ -53,11 +53,11 @@ class View {
      * @type {Object}
      * @property {String} [el='div'] - String to be used as argument of
      *  `document.createElement` to create the container of the view (`this.$el`).
-     * @property {String} [id=null] - String to used as the `id` of `this.$el`.
+     * @property {String} [id=null] - String to be used as the `id` of `this.$el`.
      * @property {Array<String>} [className=null] - Array of class to apply to
      *  `this.$el`.
-     * @property {Array<String>} [priority=0] - Priority of the view, the view
-     *  manager use this value to decide which view should be displayed first.
+     * @property {Array<String>} [priority=0] - Priority of the view, the view manager
+     *  uses this value in order to decide which view should be displayed first.
      * @name options
      * @instance
      * @memberof module:soundworks/client.View
@@ -175,6 +175,10 @@ class View {
    */
   _renderPartial(selector) {
     const $componentContainer = this.$el.querySelector(selector);
+
+    if ($componentContainer === null)
+      throw new Error(`selector ${selector} doesn't match any element`);
+
     const component = this._components[selector];
     $componentContainer.innerHTML = '';
 
@@ -226,8 +230,8 @@ class View {
   /**
    * Render the view according to the given template and content.
    * @param {String} [selector=null] - If not `null`, renders only the part of
-   *  the view inside the matched element, if this element contains a component
-   *  (sub-view), the component is rendered. Otherwise, render all the view .
+   *  the view inside the matched element. If this element contains a component
+   *  (sub-view), the component is rendered. Renders all the view otherwise.
    */
   render(selector = null) {
     if (selector !== null)
@@ -297,8 +301,8 @@ class View {
 
   /**
    * Callback for `viewport.resize` event, it maintains `this.$el` size
-   * to fit with the viewport size. The method is also called once when the
-   * view is actually inserted in the DOM.
+   * to fit the viewport size. The method is also called once when the
+   * view is actually inserted into the DOM.
    *
    * @param {Number} viewportWidth - Width of the viewport _(in pixels)_.
    * @param {Number} viewportHeight - Height of the viewport _(in pixels)_.

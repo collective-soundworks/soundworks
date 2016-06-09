@@ -9,7 +9,7 @@ const SERVICE_ID = 'service:auth';
 /**
  * Interface for the view of the `auth` service.
  *
- * @interface AuthView
+ * @interface AbstractAuthView
  * @extends module:soundworks/client.View
  */
 /**
@@ -17,7 +17,7 @@ const SERVICE_ID = 'service:auth';
  * on the view.
  *
  * @function
- * @name AuthView.onSend
+ * @name AbstractAuthView.onSend
  * @param {Function} callback - The callback given by the `auth` service.
  */
 class AuthView extends SegmentedView {
@@ -61,18 +61,22 @@ const defaultViewContent = {
 };
 
 /**
- * Interface of the client `auth` service.
+ * Interface for the client `auth` service.
  *
- * This service allows to lock the progression of another service until the
- * user
+ * This service allows to lock the application to specific users by adding a
+ * simple logging page to the client.
  *
- * __*The service must be used with its [server-side counterpart]{@link module:soundworks/server.Checkin}*__
+ * <span class="warning">__WARNING__</span>: This service shouldn't be considered
+ * secure from a production prespective.
+ *
+ * __*The service must be used with its [server-side counterpart]{@link module:soundworks/server.Auth}*__
  *
  * @memberof module:soundworks/client
  * @example
- * this.auth = this.require('auth', { secure: ['shared-params'] });
+ * this.auth = this.require('auth');
  */
 class Auth extends Service {
+  /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */
   constructor(options) {
     super(SERVICE_ID, true);
 

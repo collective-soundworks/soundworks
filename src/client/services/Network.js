@@ -4,7 +4,7 @@ import serviceManager from '../core/serviceManager';
 const SERVICE_ID = 'service:network';
 
 /**
- * Interface of the client `'network'` service.
+ * Interface for the client `'network'` service.
  *
  * This service provides a generic way to create client to client communications
  * through websockets without server side custom code.
@@ -15,7 +15,7 @@ const SERVICE_ID = 'service:network';
  * @example
  * // inside the experience constructor
  * this.network = this.require('network');
- * // when the experience has started, listen for events
+ * // after the experience has started, listens to events
  * this.network.receive('my:channel', (...args) => {
  *   // do something with `args`
  * });
@@ -62,7 +62,7 @@ class Network extends Service {
   }
 
   /**
-   * Send a message to all connected clients.
+   * Send a message to all the connected clients.
    * @param {String} channel - Channel of the message.
    * @param {...Mixed} values - Values to send in the message.
    */

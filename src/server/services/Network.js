@@ -4,7 +4,7 @@ import serviceManager from '../core/serviceManager';
 const SERVICE_ID = 'service:network';
 
 /**
- * Interface of the server `'network'` service.
+ * Interface for the server `'network'` service.
  *
  * This service provides a generic way to create client to client communications
  * through websockets without server side custom code.

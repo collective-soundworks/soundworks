@@ -107,7 +107,7 @@ class _TriggerParam extends _Param {
 const SERVICE_ID = 'service:shared-params';
 
 /**
- * Interface of the client `'shared-params'` service.
+ * Interface for the client `'shared-params'` service.
  *
  * This service is used to maintain and update global parameters used among
  * all connected clients. Each defined parameter can be of the following
@@ -119,11 +119,10 @@ const SERVICE_ID = 'service:shared-params';
  * - trigger
  *
  * This type and specific attributes of an parameter is configured server side.
- * The service is espacially usefull if a special client is defined with the
- * `hasGUI` option set to true, allowing to create a special client aimed at
- * controlling the different parameters of the experience.
  *
- * To create a control surface, for this service,
+ * To create a control surface, for this service, an dedicated scene:
+ * [`BasicSharedController`]{@link module:soundworks/client.BasicSharedController},
+ * is available
  *
  * __*The service must be used with its [server-side counterpart]{@link module:soundworks/server.SharedParams}*__
  *

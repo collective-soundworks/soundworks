@@ -19,9 +19,9 @@ const defaultViewContent = {
 };
 
 /**
- * Interface of the client `'sync'` service.
+ * Interface for the client `'sync'` service.
  *
- * This service synchronize the local audio clock of the client with the clock
+ * This service synchronizes the local audio clock of the client with the clock
  * of the server (master clock). It then internally relies on the `WebAudio`
  * clock and requires the platform to access this feature.
  *

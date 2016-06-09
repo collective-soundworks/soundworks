@@ -236,13 +236,13 @@ class _GraphicView extends SquaredView {
 
 
 /**
- * Interface of the `'placer'` service.
+ * Interface for the `'placer'` service.
  *
  * This service is one of the provided services aimed at identifying clients inside
  * the experience along with the [`'locator'`]{@link module:soundworks/client.Locator}
  * and [`'checkin'`]{@link module:soundworks/client.Checkin} services.
  *
- * The `'placer'` service allows a client to choose its place among a set of
+ * The `'placer'` service allows a client to choose its location among a set of
  * positions defined in the server's `setup` configuration entry.
  *
  * __*The service must be used with its [server-side counterpart]{@link module:soundworks/server.Placer}*__
@@ -252,7 +252,7 @@ class _GraphicView extends SquaredView {
  *
  * @param {Object} options
  * @param {String} [options.mode='list'] - Sets the interaction mode for the
- *  client to choose its position, the `'list'` mode propose a drop-down menu
+ *  client to choose its position, the `'list'` mode proposes a drop-down menu
  *  while the `'graphic'` mode (which requires located positions) proposes an
  *  interface representing the area and dots for each available location.
  *

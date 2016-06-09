@@ -8,7 +8,7 @@ const log = debug('soundworks:osc');
 const SERVICE_ID = 'service:osc';
 
 /**
- * Interface of the server `'osc'` service.
+ * Interface for the server `'osc'` service.
  *
  * This server-only service provides support for OSC communications with an extenal
  * software (e.g. Max). The configuration of the service (url and port) should be
@@ -20,7 +20,7 @@ const SERVICE_ID = 'service:osc';
  * @example
  * // inside the experience constructor
  * this.osc = this.require('osc');
- * // when the experience has started, listen for incomming message
+ * // when the experience has started, listen to incoming message
  * this.osc.receive('/osc/channel1', (values) => {
  *   // do something with `values`
  * });
@@ -110,11 +110,11 @@ class Osc extends Service {
   }
 
   /**
-   * Register callbacks for OSC mesages. The server listens for OSC messages
+   * Register callbacks for OSC mesages. The server listens to OSC messages
    * at the address and port defined in the configuration of the {@link server}.
    * @param {String} address - Wildcard of the OSC message.
    * @param {Function} callback - Callback function to be executed when an OSC
-   *  message is received on the given address.
+   *  message is received at the given address.
    */
   receive(address, callback) {
     const listener = { address, callback }

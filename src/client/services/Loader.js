@@ -26,6 +26,21 @@ const defaultViewContent = {
   loading: 'Loading sounds…',
 };
 
+
+/**
+ * Interface for the view of the `loader` service.
+ *
+ * @interface AbstractLoaderView
+ * @extends module:soundworks/client.View
+ */
+/**
+ * Method called when a new information about the currently loaded assets
+ * is received.
+ *
+ * @function
+ * @name AbstractLoaderView.onProgress
+ * @param {Number} percent - The purcentage of loaded assets.
+ */
 class LoaderView extends SegmentedView {
   onRender() {
     super.onRender();
@@ -44,10 +59,10 @@ function getIdFromFilePath(filePath) {
 }
 
 /**
- * Interface of the client `'loader'` service.
+ * Interface for the client `'loader'` service.
  *
- * This service allow to preload files and store them into buffers
- * before the start of the experience. Audio files will be converted and
+ * This service allows to preload files and store them into buffers
+ * before the beginning of the experience. Audio files will be converted and
  * stored into AudioBuffer objects.
  *
  * @param {Object} options
@@ -122,20 +137,20 @@ class Loader extends Service {
   /** @private */
   init() {
     /**
-     * @private
      * List of all loaded buffers.
+     * @private
      */
     this.buffers = [];
 
     /**
-    * @private
      * List of the loaded audio buffers created from the loaded audio files.
+     * @private
      */
     this.audioBuffers = {};
 
     /**
-    * @private
      * Data structure correponding to the structure of requested files.
+     * @private
      */
     this.data = {};
 

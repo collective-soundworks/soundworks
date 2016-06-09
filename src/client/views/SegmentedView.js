@@ -12,7 +12,7 @@ const defaultTemplate = `
  * The default Segmented view defines a layout with 3 verticals parts.
  *
  * Others ratios can be defined by creating a new template and defining the
- * ratios of the different elements by defining the ratio entry in the options.
+ * ratios of the different elements by overriding the `ratio` option.
  * The sum of all the ratios should be equal to 1.
  *
  * @memberof module:soundworks/client

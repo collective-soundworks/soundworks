@@ -5,11 +5,25 @@ import serviceManager from '../core/serviceManager';
 const SERVICE_ID = 'service:auth';
 
 /**
- * Interface of the server `'auth'` service.
+ * Interface for the server `'auth'` service.
  *
- * __*The service must be used with its [client-side counterpart]{@link module:soundworks/client.Checkin}*__
+ * This service allows to lock the application to specific users by adding a
+ * simple logging page to the client.
+ *
+ * <span class="warning">__WARNING__</span>: This service shouldn't be considered
+ * secure from a production prespective.
+ *
+ * __*The service must be used with its [client-side counterpart]{@link module:soundworks/client.Auth}*__
+ *
+ * @param {Object} options
+ * @param {String} [configItem='password'] - Path to the password in the server configuration.
+ *
+ * @memberof module:soundworks/server
+ * @example
+ * this.auth = this.require('auth');
  */
 class Auth extends Service {
+  /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */
   constructor() {
     super(SERVICE_ID);
 
@@ -39,10 +53,12 @@ class Auth extends Service {
     this._password = this._sharedConfig.get(this.options.configItem);
   }
 
+  /** @private */
   connect(client) {
     this.receive(client, 'password', this._onAccessRequest(client));
   }
 
+  /** @private */
   _onAccessRequest(client) {
     return (password) => {
       let match;

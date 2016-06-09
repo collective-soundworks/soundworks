@@ -67,9 +67,9 @@ const SERVICE_ID = 'service:scheduler';
  * the `'sync'` option as `'false'` to assure that the `'sync'` service is not
  * enabled).
  *
- * While this service has no direct server counterpart, it's dependency to the
- * [`sync`]{@link module:soundworks/client.Sync} service may require the existance
- * of a server. In addition, the service requires a device with `WebAudio` ability.
+ * While this service has no direct server counterpart, its dependency on the
+ * [`sync`]{@link module:soundworks/client.Sync} service may require the existence
+ * of a server. In addition, the service requires a device with `web-audio` ability.
  *
  * @param {Object} options
  * @param {Number} [options.period] - Period of the scheduler (defauts to current value).
@@ -78,7 +78,8 @@ const SERVICE_ID = 'service:scheduler';
  *
  * @memberof module:soundworks/client
  * @see [`wavesAudio.Scheduler`]{@link http://wavesjs.github.io/audio/#audio-scheduler}
- * @see [`sync service`]{@link module:soundworks/client.Sync}
+ * @see [`platform` service]{@link module:soundworks/client.Platform}
+ * @see [`sync` service]{@link module:soundworks/client.Sync}
  *
  * @example
  * // inside the experience constructor
@@ -249,7 +250,7 @@ class Scheduler extends Service {
   }
 
   /**
-   * Remove all scheduled functions and time engines (synchronized and not) from the scheduler.
+   * Remove all scheduled functions and time engines (synchronized or not) from the scheduler.
    */
   clear() {
     if(this._syncedQueue)

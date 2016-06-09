@@ -65,6 +65,7 @@ The services currently provided include, for example:
  * `placer` - lets the user chose an available ticket or predefined position
  * `locator` - lets the user indicate an approximate position on a map
  * `loader` - preloads audio and other content files
+ * `auth` - add a login page to specific client.
  * `sync` - provides a synchronized clock to all clients
  * `scheduler` - differs function calls and schedules recurrent events in reference to the synchronized clock or a local audio clock
  * `motion-input` - provides unified access to the mobile device's motion sensors (based on the `DeviceMotion` and `DeviceOrientation` APIs)

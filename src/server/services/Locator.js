@@ -5,7 +5,7 @@ const SERVICE_ID = 'service:locator';
 
 
 /**
- * Interface of the server `'locator'` service.
+ * Interface for the server `'locator'` service.
  *
  * This service is one of the provided services aimed at identifying clients inside
  * the experience along with the [`'placer'`]{@link module:soundworks/server.Placer}

@@ -6,7 +6,19 @@ import SignalAll from './SignalAll';
 
 const log = debug('soundworks:services');
 
-export default class Service extends Activity {
+
+/**
+ * Base class to be extended in order to create a new service.
+ *
+ * @memberof module:soundworks/client
+ * @extends module:soundworks/client.Activity
+ */
+class Service extends Activity {
+  /**
+   * @param {String} id - The id of the service (should be prefixed with `'service:'`).
+   * @param {Boolean} hasNetwork - Define if the service needs an access to the socket
+   *  connection.
+   */
   constructor(id, hasNetwork) {
     super(id, hasNetwork);
 
@@ -28,12 +40,23 @@ export default class Service extends Activity {
     this.requiredSignals.add(serviceManager.signals.start);
   }
 
+  /**
+   * Method to call in the service lifecycle when it should be considered as
+   * `ready` and thus allows all its dependent activities to start themselves.
+   */
   ready() {
     this.stop();
     log(`"${this.id}" ready`);
     this.signals.ready.set(true);
   }
 
+  /**
+   * Allow to require another service as a dependencies. When a service is
+   * dependent from another service its `start` method is delayed until all
+   * its dependencies are themselves `ready`.
+   * @param {String} id - id of the service to require.
+   * @param {Object} options - configuration object to be passed to the service.
+   */
   require(id, options) {
     const service = serviceManager.require(id, options);
     const signal = service.signals.ready;
@@ -46,16 +69,27 @@ export default class Service extends Activity {
     return service;
   }
 
+  /**
+   * Lifecycle method to initialize the service. Must be called manually.
+   * @example
+   * // in the `start` method implementation
+   * if (!this.hasStarted)
+   *   this.init();
+   */
   init() {}
 
+  /** @inheritdoc */
   start() {
     log(`"${this.id}" started`);
     super.start();
   }
 
+  /** @inheritdoc */
   stop() {
     log(`"${this.id}" stopped`);
     super.stop();
   }
 }
+
+export default Service;
 

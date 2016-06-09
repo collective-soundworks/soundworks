@@ -8,6 +8,7 @@
 
 # documentation default output
 /out
+/soundworks
 
 # junk files
 npm-debug.log
