@@ -6,6 +6,13 @@ export default class BasicSharedController extends Scene {
   constructor(clientType) {
     super(SCENE_ID, clientType);
 
-    this._sharedParams = this.require('shared-params');
+    /**
+     * Instance of the server-side `shared-params` service.
+     * @type {module:soundworks/server.SharedParams}
+     * @name sharedParams
+     * @instance
+     * @memberof module:soundworks/server.SharedParams
+     */
+    this.sharedParams = this.require('shared-params');
   }
 }

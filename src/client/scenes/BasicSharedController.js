@@ -158,7 +158,15 @@ export default class BasicSharedController extends Scene {
     this._guiOptions = guiOptions;
 
     this._errorReporter = this.require('error-reporter');
-    this._sharedParams = this.require('shared-params');
+
+    /**
+     * Instance of the client-side `shared-params` service.
+     * @type {module:soundworks/client.SharedParams}
+     * @name sharedParams
+     * @instance
+     * @memberof module:soundworks/client.SharedParams
+     */
+    this.sharedParams = this.require('shared-params');
   }
 
   init() {
@@ -173,8 +181,8 @@ export default class BasicSharedController extends Scene {
 
     this.show();
 
-    for (let name in this._sharedParams.params)
-      this.createGui(this._sharedParams.params[name]);
+    for (let name in this.sharedParams.params)
+      this.createGui(this.sharedParams.params[name]);
   }
 
   /**
