@@ -190,7 +190,6 @@ class SharedParams extends Service {
    *  the parameter value to. If not set, the value is sent to all the client types.
    */
   addBoolean(name, label, value, clientTypes = null) {
-    console.log(name, label, value, clientTypes = null);
     return new _BooleanItem(this, name, label, value, clientTypes);
   }
 
@@ -265,7 +264,9 @@ class SharedParams extends Service {
 
     if (param) {
       param.addListener(param.data.name, listener);
-      listener(param.data.value);
+
+      if (param.data.type !== 'trigger')
+        listener(param.data.value);
     } else {
       console.log('unknown shared parameter "' + name + '"');
     }
