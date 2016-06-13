@@ -107,7 +107,6 @@ const defaultDefinitions = [
         }
 
         $video.play();
-        console.log($video);
       }
     }
   }
