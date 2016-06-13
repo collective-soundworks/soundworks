@@ -26,7 +26,7 @@ export default class SpaceView extends View {
     this.area = null;
 
     /**
-     * The with of the rendered area in pixels.
+     * The width of the rendered area in pixels.
      * @type {Number}
      */
     this.areaWidth = null;
