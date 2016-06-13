@@ -3,14 +3,14 @@ import Activity from './Activity';
 import serviceManager from './serviceManager';
 import viewManager from './viewManager';
 import socket from './socket';
-import defaultViewContent from '../config/defaultViewContent';
-import defaultViewTemplates from '../config/defaultViewTemplates';
+// import defaultViewContent from '../config/defaultViewContent';
+// import defaultViewTemplates from '../config/defaultViewTemplates';
 import viewport from '../views/viewport';
 
 /**
  * Client side entry point for a `soundworks` application.
  *
- * This object host general informations about the user, as well as methods
+ * This object hosts general informations about the user, as well as methods
  * to initialize and start the application.
  *
  * @memberof module:soundworks/client
@@ -34,9 +34,9 @@ const client = {
 
   /**
    * The type of the client, this can generally be considered as the role of the
-   * client in the application. This value is defined as argument of the
-   * [`client.init`]{@link module:soundworks/client.client.init} method and
-   * defaults to `'player'`.
+   * client in the application. This value is defined in the
+   * [`client.init`]{@link module:soundworks/server.server~serverConfig} object
+   * and defaults to `'player'`.
    *
    * @type {String}
    */
@@ -195,23 +195,16 @@ const client = {
    * @todo - When handshake implemented, define if these informations should be part of it
    */
   _parseUrlParams() {
-    // let params = null;
     // handle path name first
     let pathname = window.location.pathname;
     // sanitize
     pathname = pathname
-      .replace(/^\//, '') // leading slash
-      .replace(new RegExp('^' + this.type + '/?'), '') // clientType
-      .replace(/\/$/, ''); // trailing slashe
+      .replace(/^\//, '')                               // leading slash
+      .replace(new RegExp('^' + this.type + '/?'), '')  // remove clientType
+      .replace(/\/$/, '');                              // trailing slash
 
     if (pathname.length > 0)
       this.urlParams = pathname.split('/');
-    // } else {
-    //   let hash = window.location.hash
-    //   hash = hash.substr(1); // remove leading '#'
-    //   params = hash.split('-'); // how to handle from server side config
-    // }
-    // this.urlParams = params;
   },
 
   /**
@@ -221,21 +214,33 @@ const client = {
    */
   _initSocket() {
     this.socket = socket.initialize(this.type, this.config.socketIO);
-    // send `urlParams` throught handshake to not polute the socket.io api
-    // and eventually be able to modify the transport system
-    this.socket.send('handshake', { urlParams: this.urlParams });
-    // wait for handshake to mark client as `ready`
-    this.socket.receive('client:start', (uuid) => {
-      // don't handle server restart for now.
-      this.uuid = uuid;
-      serviceManager.start();
 
-      // this.comm.receive('reconnect', () => console.info('reconnect'));
-      // this.comm.receive('disconnect', () => {
-      //   console.info('disconnect')
-      //   serviceManager.reset(); // can relaunch serviceManager on reconnection.
-      // });
-      // this.comm.receive('error', (err) => console.error(err));
+    // see: http://socket.io/docs/client-api/#socket
+    this.socket.addStateListener((eventName) => {
+      switch (eventName) {
+        case 'connect':
+          this.socket.send('handshake', { urlParams: this.urlParams });
+          // wait for handshake to mark client as `ready`
+          this.socket.receive('client:start', (uuid) => {
+            // don't handle server restart for now.
+            this.uuid = uuid;
+            serviceManager.start();
+          });
+          break;
+          // case 'reconnect':
+          //   // serviceManager.start();
+          //   break;
+          // case 'disconnect':
+          //   // can relaunch serviceManager on reconnection
+          //   // serviceManager.reset();
+          //   break;
+          // case 'connect_error':
+          // case 'reconnect_attempt':
+          // case 'reconnecting':
+          // case 'reconnect_error':
+          // case 'reconnect_failed':
+          //   break;
+      }
     });
   },
 
@@ -249,26 +254,44 @@ const client = {
     this.viewContent = {};
     this.viewTemplates = {};
 
-    const appName = this.config.appName || defaultViewContent.globals.appName;
-    const viewContent = Object.assign(defaultViewContent, { globals: { appName } });
+    const appName = this.config.appName || 'Soundworks';
+    this.setViewContentDefinitions({ globals: { appName }});
 
-    this.setViewContentDefinitions(viewContent);
-    this.setViewTemplateDefinitions(defaultViewTemplates);
     this.setAppContainer(this.config.appContainer);
   },
 
   /**
    * Extend or override application view contents with the given object.
    * @param {Object} defs - Content to be used by activities.
+   * @see {@link module:soundworks/client.setViewTemplateDefinitions}
+   * @example
+   * client.setViewContentDefinitions({
+   *   'service:platform': { myValue: 'Welcome to the application' }
+   * });
    */
   setViewContentDefinitions(defs) {
-    this.viewContent = Object.assign(this.viewContent, defs);
+    for (let key in defs) {
+      const def = defs[key];
+
+      if (this.viewContent[key])
+        Object.assign(this.viewContent[key], def);
+      else
+        this.viewContent[key] = def;
+    }
+
     Activity.setViewContentDefinitions(this.viewContent);
   },
 
   /**
    * Extend or override application view templates with the given object.
    * @param {Object} defs - Templates to be used by activities.
+   * @see {@link module:soundworks/client.setViewContentDefinitions}
+   * @example
+   * client.setViewTemplateDefinitions({
+   *   'service:platform': `
+   *     <p><%= myValue %></p>
+   *   `,
+   * });
    */
   setViewTemplateDefinitions(defs) {
     this.viewTemplates = Object.assign(this.viewTemplates, defs);

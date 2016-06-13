@@ -36,13 +36,12 @@ export default {
   broadcast(clientType, excludeClient, channel, ...args) {
     let namespaces;
 
-    if (typeof clientType === 'string') {
+    if (typeof clientType === 'string')
       namespaces = [`/${clientType}`];
-    } else if (Array.isArray(clientType)) {
+    else if (Array.isArray(clientType))
       namespaces = clientType.map(type => `/${type}`);
-    } else {
+    else
       namespaces = Object.keys(this.io.nsps);
-    }
 
     if (excludeClient) {
       const index = namespaces.indexOf('/' + excludeClient.type);

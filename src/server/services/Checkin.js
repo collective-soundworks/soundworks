@@ -1,4 +1,4 @@
-import Activity from '../core/Activity';
+import Service from '../core/Service';
 import { getOpt } from '../../utils/helpers';
 import serviceManager from '../core/serviceManager';
 
@@ -6,15 +6,15 @@ const SERVICE_ID = 'service:checkin';
 
 
 /**
- * Interface of the server `'checkin'` service.
+ * Interface for the server `'checkin'` service.
  *
  * This service is one of the provided services aimed at identifying clients inside
  * the experience along with the [`'locator'`]{@link module:soundworks/server.Locator}
  * and [`'placer'`]{@link module:soundworks/server.Placer} services.
  *
- * The `'checkin'` service is the more simple among these services as the server
- * simply assign a ticket to the client among the available ones. The ticket can
- * optionnaly be associated with coordinates or label according to the server
+ * The `'checkin'` service is the most simple among these services as the server
+ * simply assigns a ticket to the client among the available ones. The ticket can
+ * optionally be associated with coordinates or label according to the server
  * `setup` configuration.
  *
  * __*The service must be used with its [client-side counterpart]{@link module:soundworks/client.Checkin}*__
@@ -33,37 +33,40 @@ const SERVICE_ID = 'service:checkin';
  * // inside the experience constructor
  * this.checkin = this.require('checkin');
  */
-class Checkin extends Activity {
+class Checkin extends Service {
   /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */
   constructor() {
     super(SERVICE_ID);
 
     const defaults = {
-      order: 'ascending',
-      setupConfigItem: 'setup',
+      configItem: 'setup',
     }
 
     this.configure(defaults);
     // use shared config service to share the setup
-    this._sharedConfigService = this.require('shared-config');
+    this._sharedConfig = this.require('shared-config');
   }
 
   /** @private */
   start() {
     super.start();
+    const configItem = this.options.configItem;
 
     /**
-     * Setup retrieved from server configuration.
+     * Setup retrieved from the server configuration.
      * @type {Object}
      */
-    this.setup = this._sharedConfigService.get(this.options.setupConfigItem);
+    this.setup = this._sharedConfig.get(configItem);
+
+    if (this.setup === null)
+      throw new Error(`"service:checkin": server.config.${configItem} is not defined`);
 
     /**
      * Maximum number of clients checked in (may limit or be limited by the
      * number of predefined labels and/or coordinates).
      * @type {Number}
      */
-    this.capacity = getOpt(this.setup.capacity, Infinity, 1);
+    this.capacity = getOpt(this.setup && this.setup.capacity, Infinity, 1);
 
     /**
      * List of the clients checked in at their corresponding indices.
@@ -72,10 +75,8 @@ class Checkin extends Activity {
     this.clients = [];
 
     /** @private */
-    this.order = this.options; // 'ascending' | 'random'
-
-    this._availableIndices = [];
-    this._nextAscendingIndex = 0;
+    this._availableIndices = []; // array of available indices
+    this._nextAscendingIndex = 0; // next index when _availableIndices is empty
 
     const setup = this.options.setup;
 
@@ -87,19 +88,14 @@ class Checkin extends Activity {
       if (this.capacity > numPositions)
         this.capacity = numPositions;
     }
-
-    if (this.capacity === Infinity)
-      this.order = 'ascending';
-    else if (this.order === 'random') {
-      this._nextAscendingIndex = this.capacity;
-
-      for (let i = 0; i < this.capacity; i++)
-        this._availableIndices.push(i);
-    }
   }
 
   /** @private */
   _getRandomIndex() {
+    for (let i = this._nextAscendingIndex; i < this.capacity; i++)
+      this._availableIndices.push(i);
+
+    this._nextAscendingIndex = this.capacity;
     const numAvailable = this._availableIndices.length;
 
     if (numAvailable > 0) {
@@ -133,10 +129,10 @@ class Checkin extends Activity {
 
   /** @private */
   _onRequest(client) {
-    return () => {
+    return (order) => {
       let index = -1;
 
-      if (this.order === 'random')
+      if (order === 'random' && this.capacity !== Infinity)
         index = this._getRandomIndex();
       else // if (order === 'acsending')
         index = this._getAscendingIndex();

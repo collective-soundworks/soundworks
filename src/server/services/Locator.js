@@ -1,11 +1,11 @@
-import Activity from '../core/Activity';
+import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
 
 const SERVICE_ID = 'service:locator';
 
 
 /**
- * Interface of the server `'locator'` service.
+ * Interface for the server `'locator'` service.
  *
  * This service is one of the provided services aimed at identifying clients inside
  * the experience along with the [`'placer'`]{@link module:soundworks/server.Placer}
@@ -25,29 +25,32 @@ const SERVICE_ID = 'service:locator';
  * // inside the experience constructor
  * this.locator = this.require('locator');
  */
-class Locator extends Activity {
+class Locator extends Service {
   /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */
   constructor() {
     super(SERVICE_ID);
 
     const defaults = {
-      areaConfigItem: 'setup.area',
+      configItem: 'setup.area',
     };
 
     this.configure(defaults);
 
     this._area = null;
-    this._sharedConfigService = this.require('shared-config');
+    this._sharedConfig = this.require('shared-config');
   }
 
   /** @private */
   start() {
     super.start();
 
-    const areaConfigItem = this.options.areaConfigItem;
+    const configItem = this.options.configItem;
+
+    if (this._sharedConfig.get(configItem) === null)
+      throw new Error(`"service:locator": server.config.${configItem} is not defined`);
 
     this.clientTypes.forEach((clientType) => {
-      this._sharedConfigService.share(areaConfigItem, clientType);
+      this._sharedConfig.share(configItem, clientType);
     });
   }
 
@@ -61,7 +64,7 @@ class Locator extends Activity {
 
   /** @private */
   _onRequest(client) {
-    return () => this.send(client, 'aknowledge', this.options.areaConfigItem);
+    return () => this.send(client, 'aknowledge', this.options.configItem);
   }
 
   /** @private */

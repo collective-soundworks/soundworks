@@ -6,16 +6,46 @@ import serviceManager from '../core/serviceManager';
 
 const SERVICE_ID = 'service:checkin';
 
+const defaultViewTemplate = `
+<% if (label) { %>
+  <div class="section-top flex-middle">
+    <p class="big"><%= labelPrefix %></p>
+  </div>
+  <div class="section-center flex-center">
+    <div class="checkin-label">
+      <p class="huge bold"><%= label %></p>
+    </div>
+  </div>
+  <div class="section-bottom flex-middle">
+    <p class="small"><%= labelPostfix %></p>
+  </div>
+<% } else { %>
+  <div class="section-top"></div>
+  <div class="section-center flex-center">
+    <p><%= error ? errorMessage : wait %></p>
+  </div>
+  <div class="section-bottom"></div>
+<% } %>`;
+
+const defaultViewContent = {
+  labelPrefix: 'Go to',
+  labelPostfix: 'Touch the screen<br class="portrait-only" />when you are ready.',
+  error: false,
+  errorMessage: 'Sorry,<br/>no place available',
+  wait: 'Please wait...',
+  label: '',
+};
+
 /**
- * Interface of the client `'checkin'` service.
+ * Interface for the client `'checkin'` service.
  *
  * This service is one of the provided services aimed at identifying clients inside
  * the experience along with the [`'locator'`]{@link module:soundworks/client.Locator}
  * and [`'placer'`]{@link module:soundworks/client.Placer} services.
  *
- * The `'checkin'` service is the more simple among these services as the server
- * simply assign a ticket to the client among the available ones. The ticket can
- * optionnaly be associated with coordinates or label according to the server
+ * The `'checkin'` service is the most simple among these services as the server
+ * simply assigns a ticket to the client among the available ones. The ticket can
+ * optionally be associated with coordinates or labels according to the server
  * `setup` configuration.
  *
  * The service requires the ['platform']{@link module:soundworks/client.Platform}
@@ -29,7 +59,7 @@ const SERVICE_ID = 'service:checkin';
  *
  * @param {Object} options
  * @param {Boolean} [options.showDialog=false] - Define if the service should
- *  display a view informaing the client of it's position.
+ *  display a view informing the client of its position.
  *
  * @memberof module:soundworks/client
  * @example
@@ -43,11 +73,15 @@ class Checkin extends Service {
 
     const defaults = {
       showDialog: false,
+      order: 'ascending',
       viewCtor: SegmentedView,
       viewPriority: 6,
     };
 
     this.configure(defaults);
+
+    this._defaultViewTemplate = defaultViewTemplate;
+    this._defaultViewContent = defaultViewContent;
 
     this.require('platform', { showDialog: true });
     // bind callbacks to the current instance
@@ -89,7 +123,7 @@ class Checkin extends Service {
 
     this.setup = this._sharedConfigService
     // send request to the server
-    this.send('request');
+    this.send('request', this.options.order);
     // setup listeners for the server's response
     this.receive('position', this._onPositionResponse);
     this.receive('unavailable', this._onUnavailableResponse);

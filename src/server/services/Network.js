@@ -1,10 +1,10 @@
-import Activity from '../core/Activity';
+import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
 
 const SERVICE_ID = 'service:network';
 
 /**
- * Interface of the server `'network'` service.
+ * Interface for the server `'network'` service.
  *
  * This service provides a generic way to create client to client communications
  * through websockets without server side custom code.
@@ -16,7 +16,7 @@ const SERVICE_ID = 'service:network';
  * // inside the experience constructor
  * this.network = this.require('network');
  */
-class Network extends Activity {
+class Network extends Service {
   /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */
   constructor() {
     super(SERVICE_ID);

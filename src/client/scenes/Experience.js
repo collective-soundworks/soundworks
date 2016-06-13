@@ -12,8 +12,8 @@ import client from '../core/client';
  */
 class Experience extends Scene {
   /**
-   * @param {Boolean} [hasNetwork=true] - Define if the experience needs a
-   *  socket connection or not.
+   * @param {Boolean} [hasNetwork=true] - Define if the experience requires a
+   *  socket connection.
    */
   constructor(hasNetwork = true) {
     super('experience', hasNetwork);

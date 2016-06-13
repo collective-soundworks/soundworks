@@ -6,7 +6,51 @@ import SquaredView from '../views/SquaredView';
 import TouchSurface from '../views/TouchSurface';
 
 
-class _LocatorView extends SquaredView {
+const SERVICE_ID = 'service:locator';
+
+const defaultViewTemplate = `
+<div class="section-square"></div>
+<div class="section-float flex-middle">
+  <% if (!showBtn) { %>
+    <p class="small"><%= instructions %></p>
+  <% } else { %>
+    <button class="btn"><%= send %></button>
+  <% } %>
+</div>`;
+
+const defaultViewContent = {
+  instructions: 'Define your position in the area',
+  send: 'Send',
+  showBtn: false,
+};
+
+/**
+ * Interface for the view of the `locator` service.
+ *
+ * @interface AbstractLocatorView
+ * @extends module:soundworks/client.View
+ */
+/**
+ * Register the `area` definition to the view.
+ *
+ * @function
+ * @name AbstractLocatorView.setArea
+ * @param {Object} area - Definition of the area.
+ * @property {Number} area.width - With of the area.
+ * @property {Number} area.height - Height of the area.
+ * @property {Number} [area.labels=[]] - Labels of the position.
+ * @property {Number} [area.coordinates=[]] - Coordinates of the area.
+ */
+/**
+ * Register the callback to be applied when the user select a position.
+ *
+ * @function
+ * @name AbstractLocatorView.onSelect
+ * @param {Function} callback - Callback to be applied when a position is selected.
+ *  This callback should be called with the `index`, `label` and `coordinates` of
+ *  the requested position.
+ */
+class LocatorView extends SquaredView {
   constructor(template, content, events, options) {
     super(template, content, events, options);
 
@@ -33,7 +77,6 @@ class _LocatorView extends SquaredView {
     this._onSelect = callback;
   }
 
-  /** @inheritdoc */
   remove() {
     super.remove();
 
@@ -47,7 +90,7 @@ class _LocatorView extends SquaredView {
     this.setViewComponent('.section-square', this.selector);
     this.render('.section-square');
 
-    this.surface = new TouchSurface(this.selector.$svg);
+    this.surface = new TouchSurface(this.selector.$svgContainer);
     this.surface.addListener('touchstart', this._onAreaTouchStart);
     this.surface.addListener('touchmove', this._onAreaTouchMove);
   }
@@ -105,10 +148,8 @@ class _LocatorView extends SquaredView {
 }
 
 
-const SERVICE_ID = 'service:locator';
-
 /**
- * Interface of the client `'locator'` service.
+ * Interface for the client `'locator'` service.
  *
  * This service is one of the provided services aimed at identifying clients inside
  * the experience along with the [`'placer'`]{@link module:soundworks/client.Placer}
@@ -139,10 +180,14 @@ class Locator extends Service {
 
     const defaults = {
       random: false,
-      viewCtor: _LocatorView,
+      viewCtor: LocatorView,
+      viewPriority: 6,
     };
 
     this.configure(defaults);
+
+    this._defaultViewTemplate = defaultViewTemplate;
+    this._defaultViewContent = defaultViewContent;
 
     this._sharedConfig = this.require('shared-config');
 

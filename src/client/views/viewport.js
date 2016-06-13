@@ -1,6 +1,6 @@
 /**
- * Service to track the viewport size and orientation. All views are
- * automatically added as listeners of this helper via their
+ * Track the viewport size and orientation. All views are automatically
+ * added as listeners of this helper via their
  * [`View#onResize`]{@link module:soundworks/client.View#onResize}
  *
  * @namespace

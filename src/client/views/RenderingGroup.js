@@ -123,15 +123,12 @@ export default class RenderingGroup {
     this.canvasWidth = viewportWidth * pixelRatio;
     this.canvasHeight = viewportHeight * pixelRatio;
 
-    ctx.width = this.canvasWidth;
-    ctx.height = this.canvasHeight;
-
-    ctx.canvas.width = viewportWidth;
-    ctx.canvas.height = viewportHeight;
+    ctx.canvas.width = this.canvasWidth;
+    ctx.canvas.height = this.canvasHeight;
     ctx.canvas.style.width = `${viewportWidth}px`;
     ctx.canvas.style.height = `${viewportHeight}px`;
 
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    // ctx.scale(pixelRatio, pixelRatio);
 
     // propagate logical size to renderers
     for (let i = 0, l = this.renderers.length; i < l; i++)

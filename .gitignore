@@ -1,18 +1,20 @@
 # transpiled files
-# /client
-# /server
-# /utils
+/client
+/server
+/utils
 
 # others
 /node_modules
 
 # documentation default output
 /out
+/soundworks
 
 # junk files
 npm-debug.log
 .DS_Store
 Thumbs.db
-NOTES.md
 
+# ...
+NOTES.md
 CHANGELOG.md

@@ -6,7 +6,7 @@ const SERVICE_ID = 'service:motion-input';
 
 
 /**
- * Interface of the client `'motion-input'` service.
+ * Interface for the client `'motion-input'` service.
  *
  * This service provides a wrapper for the
  * [`motionInput`]{@link https://github.com/collective-soundworks/motion-input}
@@ -15,7 +15,7 @@ const SERVICE_ID = 'service:motion-input';
  * @memberof module:soundworks/client
  * @example
  * // in the experince constructor
- * this.motionInput = this.require('motioninput', { descriptors: ['energy'] });
+ * this.motionInput = this.require('motion-input', { descriptors: ['energy'] });
  * // when the experience has started
  * if (this.motionInput.isAvailable('energy')) {
  *   this.motionInput.addListener('energy', (data) => {
@@ -104,7 +104,7 @@ class MotionInput extends Service {
   }
 
   /**
-   * Remove a listener from a given descriptor.
+   * Remove a listener of events triggered by a given descriptor.
    * @param {String} name - Descriptor name.
    * @param {Function} callback - Callback to remove.
    */

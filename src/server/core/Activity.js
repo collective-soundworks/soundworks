@@ -6,17 +6,14 @@ import { EventEmitter } from 'events';
 // @todo - remove EventEmitter ? (Implement our own listeners)
 
 /**
- * Base class used to create any *Soundworks* Activity on the server side.
+ * Internal base class for services and scenes.
  *
- * While the sequence of user interactions and exchanges between client and server is determined on the client side, the server side activities are ready to receive requests from the corresponding client side activities as soon as a client is connected to the server.
- *
- * Each activity should have a connect and a disconnect method.
- * Any activity mapped to the type of client `'clientType'` (thanks to the {@link server#map} method) calls its connect method when such a client connects to the server, and its disconnect method when such a client disconnects from the server.
+ * @memberof module:soundworks/server
  */
 class Activity extends EventEmitter {
   /**
    * Creates an instance of the class.
-   * @param {String} id - The id of the activity.
+   * @param {String} id - Id of the activity.
    */
   constructor(id) {
     super();
@@ -25,7 +22,10 @@ class Activity extends EventEmitter {
      * The id of the activity. This value must match a client side
      * {@link src/client/core/Activity.js~Activity} id in order to create
      * a namespaced socket channel between the activity and its client side peer.
-     * @type {string}
+     * @type {String}
+     * @name id
+     * @instance
+     * @memberof module:soundworks/server.Activity
      */
     this.id = id;
 
@@ -33,13 +33,18 @@ class Activity extends EventEmitter {
      * Options of the activity. These values should be updated with the
      * `this.configure` method.
      * @type {Object}
+     * @name options
+     * @instance
+     * @memberof module:soundworks/server.Activity
      */
     this.options = {};
 
     /**
      * The client types on which the activity should be mapped.
      * @type {Set}
-     * @private
+     * @name clientTypes
+     * @instance
+     * @memberof module:soundworks/server.Activity
      */
     this.clientTypes = new Set();
 
@@ -90,7 +95,7 @@ class Activity extends EventEmitter {
   /**
    * Add the given activity as a requirement for the current activity.
    * @private
-   * @type {Activity} activity
+   * @param {module:soundworks/server.Activity} activity
    */
   addRequiredActivity(activity) {
     this.requiredActivities.add(activity);
@@ -108,19 +113,17 @@ class Activity extends EventEmitter {
   /**
    * Interface method to be implemented by activities. As part of an activity
    * lifecycle, the method should define the behavior of the activity when started
-   * (e.g. binding listeners). When this method id called, all configuration options
-   * should be set. Also, if the activity relies on another service,
-   * this dependency should be considered as instanciated.
+   * (e.g. binding listeners). When this method is called, all configuration options
+   * should be defined.
    * The method is automatically called by the server on startup.
    */
   start() {}
 
   /**
-   * Called when the `client` connects to the server.
-   *
-   * This method should handle the logic of the activity on the server side.
-   * For instance, it can take care of the communication with the client side activity by setting up WebSocket message listeners and sending WebSocket messages, or it can add the client to a list to keep track of all the connected clients.
-   * @param {Client} client Connected client.
+   * Called when the `client` connects to the server. This method should handle
+   * the particular logic of the activity on the server side according to the
+   * connected client (e.g. adding socket listeners).
+   * @param {module:soundworks/server.Client} client
    */
   connect(client) {
     // setup an object
@@ -128,21 +131,21 @@ class Activity extends EventEmitter {
   }
 
   /**
-   * Called when the client `client` disconnects from the server.
-   *
-   * This method should handle the logic when that happens.
-   * For instance, it can remove the socket message listeners, or remove the client from the list that keeps track of the connected clients.
-   * @param {Client} client Disconnected client.
+   * Called when the client `client` disconnects from the server. This method
+   * should handle the particular logic of the activity on the server side when
+   * a client disconnect (e.g. removing socket listeners).
+   * @param {module:soundworks/server.Client} client
    */
   disconnect(client) {
     // delete client.activities[this.id] // maybe needed by other activities
   }
 
   /**
-   * Listen a WebSocket message.
-   * @param {Client} client - The client that must listen to the message.
-   * @param {String} channel - The channel of the message (is automatically namespaced with the activity's name: `${this.id}:channel`).
-   * @param {...*} callback - The callback to execute when a message is received.
+   * Listen to a web socket message from a given client.
+   * @param {module:soundworks/server.Client} client - Client that must listen to the message.
+   * @param {String} channel - Channel of the message (is automatically namespaced
+   *  with the activity's name: `${this.id}:channel`).
+   * @param {Function} callback - Callback to execute when a message is received.
    */
   receive(client, channel, callback) {
     const namespacedChannel = `${this.id}:${channel}`;
@@ -150,9 +153,10 @@ class Activity extends EventEmitter {
   }
 
   /**
-   * Sends a WebSocket message to the client.
-   * @param {Client} client - The client to send the message to.
-   * @param {String} channel - The channel of the message (is automatically namespaced with the activity's name: `${this.id}:channel`).
+   * Send a web socket message to a given client.
+   * @param {module:soundworks/server.Client} client - Client to send the message to.
+   * @param {String} channel - Channel of the message (is automatically namespaced
+   * with the activity's id: `${this.id}:channel`).
    * @param {...*} args - Arguments of the message (as many as needed, of any type).
    */
   send(client, channel, ...args) {
@@ -161,9 +165,13 @@ class Activity extends EventEmitter {
   }
 
   /**
-   * Sends a message to all client of given `clientType` or `clientType`s. If not specified, the message is sent to all clients
-   * @param {String|Array} clientType - The `clientType`(s) that must receive the message.
-   * @param {String} channel - The channel of the message (is automatically namespaced with the activity's name: `${this.id}:channel`).
+   * Send a message to all client of given `clientType`(s).
+   * @param {String|Array<String>|null} clientType - The `clientType`(s) that should
+   *  receive the message. If `null`, the message is send to all clients.
+   * @param {module:soundworks/server.Client} excludeClient - Client to should
+   *  not receive the message (typically the original sender of the message).
+   * @param {String} channel - Channel of the message (is automatically namespaced
+   * with the activity's id: `${this.id}:channel`).
    * @param {...*} args - Arguments of the message (as many as needed, of any type).
    */
   broadcast(clientType, excludeClient, channel, ...args) {

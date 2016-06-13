@@ -1,50 +1,92 @@
 import client from '../core/client';
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
-// import localStorage from './localStorage';
 import SelectView from '../views/SelectView';
 import SpaceView from '../views/SpaceView';
 import SquaredView from '../views/SquaredView';
 
-//  /**
-//   * Interface of the view of the placer.
-//   */
-//  class AbstactPlacerView extends soundworks.View {
-//    /**
-//     * @param {Number} capacity - The maximum number of clients allowed.
-//     * @param {Array<String>} [labels=null] - An array of the labels for the positions
-//     * @param {Array<Array<Number>>} [coordinates=null] - An array of the coordinates of the positions
-//     * @param {Number} [maxClientsPerPosition=1] - The number of client allowed for each position.
-//     */
-//    displayPositions(capacity, labels = null, coordinates = null, maxClientsPerPosition = 1) {}
-//
-//    /**
-//     * @param {Array<Number>} disabledIndexes - Array of indexes of the disabled positions.
-//     */
-//    updateDisabledPositions(disabledIndexes) {}
-//
-//    /**
-//     * Called when no place left or when the choice of the user as been rejected by
-//     * the server. The view should be should update accordingly.
-//     * @param {Array<Number>} disabledIndexes - Array of indexes of the disabled positions.
-//     */
-//    reject(disabledIndexes) {}
-//
-//     /**
-//     * Register the area definition to the view.
-//     * @param {Object} area - The definition of the area.
-//     */
-//    setArea(area) {
-//      this._area = area;
-//    }
-//
-//    /**
-//     * @param {Function} callback - Callback to be applied when a position is selected.
-//     */
-//    onSelect(callback) {
-//      this._onSelect = callback;
-//    }
-//  }
+const SERVICE_ID = 'service:placer';
+
+const defaultViewTemplate = `
+<div class="section-square<%= mode === 'list' ? ' flex-middle' : '' %>">
+  <% if (rejected) { %>
+  <div class="fit-container flex-middle">
+    <p><%= reject %></p>
+  </div>
+  <% } %>
+</div>
+<div class="section-float flex-middle">
+  <% if (!rejected) { %>
+    <% if (mode === 'graphic') { %>
+      <p><%= instructions %></p>
+    <% } else if (mode === 'list') { %>
+      <% if (showBtn) { %>
+        <button class="btn"><%= send %></button>
+      <% } %>
+    <% } %>
+  <% } %>
+</div>`;
+
+const defaultViewContent = {
+  instructions: 'Select your position',
+  send: 'Send',
+  reject: 'Sorry, no place is available',
+  showBtn: false,
+  rejected: false,
+};
+
+
+/**
+ * Interface for the view of the `placer` service.
+ *
+ * @interface AbstractPlacerView
+ * @extends module:soundworks/client.View
+ */
+/**
+ * Register the `area` definition to the view.
+ *
+ * @function
+ * @name AbstractPlacerView.setArea
+ * @param {Object} area - Definition of the area.
+ * @property {Number} area.width - With of the area.
+ * @property {Number} area.height - Height of the area.
+ * @property {Number} [area.labels=[]] - Labels of the position.
+ * @property {Number} [area.coordinates=[]] - Coordinates of the area.
+ */
+/**
+ * Display the available positions.
+ *
+ * @function
+ * @name AbstractPlacerView.onSend
+ * @param {Number} capacity - The maximum number of clients allowed.
+ * @param {Array<String>} [labels=null] - An array of the labels for the positions
+ * @param {Array<Array<Number>>} [coordinates=null] - An array of the coordinates of the positions
+ * @param {Number} [maxClientsPerPosition=1] - Number of clients allowed for each position.
+ */
+/**
+ * Disable the given positions.
+ *
+ * @function
+ * @name AbstractPlacerView.updateDisabledPositions
+ * @param {Array<Number>} disabledIndexes - Array of indexes of the disabled positions.
+ */
+/**
+ * Define the behavior of the view when the position requested by the user is
+ * no longer available
+ *
+ * @function
+ * @name AbstractPlacerView.reject
+ * @param {Array<Number>} disabledIndexes - Array of indexes of the disabled positions.
+ */
+/**
+ * Register the callback to be applied when the user select a position.
+ *
+ * @function
+ * @name AbstratPlacerView.onSelect
+ * @param {Function} callback - Callback to be applied when a position is selected.
+ *  This callback should be called with the `index`, `label` and `coordinates` of
+ *  the requested position.
+ */
 
 class _ListView extends SquaredView {
   constructor(template, content, events, options) {
@@ -193,16 +235,14 @@ class _GraphicView extends SquaredView {
 }
 
 
-const SERVICE_ID = 'service:placer';
-
 /**
- * Interface of the `'placer'` service.
+ * Interface for the `'placer'` service.
  *
  * This service is one of the provided services aimed at identifying clients inside
  * the experience along with the [`'locator'`]{@link module:soundworks/client.Locator}
  * and [`'checkin'`]{@link module:soundworks/client.Checkin} services.
  *
- * The `'placer'` service allows a client to choose its place among a set of
+ * The `'placer'` service allows a client to choose its location among a set of
  * positions defined in the server's `setup` configuration entry.
  *
  * __*The service must be used with its [server-side counterpart]{@link module:soundworks/server.Placer}*__
@@ -212,7 +252,7 @@ const SERVICE_ID = 'service:placer';
  *
  * @param {Object} options
  * @param {String} [options.mode='list'] - Sets the interaction mode for the
- *  client to choose its position, the `'list'` mode propose a drop-down menu
+ *  client to choose its position, the `'list'` mode proposes a drop-down menu
  *  while the `'graphic'` mode (which requires located positions) proposes an
  *  interface representing the area and dots for each available location.
  *
@@ -234,6 +274,9 @@ class Placer extends Service {
     };
 
     this.configure(defaults);
+
+    this._defaultViewTemplate = defaultViewTemplate;
+    this._defaultViewContent = defaultViewContent;
 
     this._onAknowledgeResponse = this._onAknowledgeResponse.bind(this);
     this._onClientJoined = this._onClientJoined.bind(this);

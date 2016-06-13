@@ -1,7 +1,8 @@
-import Activity from '../core/Activity';
-import serviceManager from '../core/serviceManager';
 import fse  from 'fs-extra';
 import path from 'path';
+import Service from '../core/Service';
+import serviceManager from '../core/serviceManager';
+
 
 function padLeft(str, value, length) {
   str = str + '';
@@ -15,7 +16,7 @@ const SERVICE_ID = 'service:error-reporter';
  * Interface for the server `'error-reporter'` service.
  *
  * This service allows to log javascript errors that could occur during the
- * application life cycle. Errors are catch and send to the server in order
+ * application life cycle. Errors are caught and sent to the server in order
  * to be persisted in a file.
  * By default, the log file are located in the `logs/clients` directory inside
  * the application directory. This location can be changed by modifying the
@@ -29,26 +30,28 @@ const SERVICE_ID = 'service:error-reporter';
  *
  * @memberof module:soundworks/server
  */
-class ErrorReporter extends Activity {
+class ErrorReporter extends Service {
   /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */
   constructor() {
     super(SERVICE_ID);
 
     const defaults = {
-      directoryConfig: 'errorReporterDirectory',
+      configItem: 'errorReporterDirectory',
     };
 
     this.configure(defaults);
     this._onError = this._onError.bind(this);
 
-    this._sharedConfigService = this.require('shared-config');
+    this._sharedConfig = this.require('shared-config');
   }
 
   /** @private */
   start() {
-    let dir = this._sharedConfigService.get(this.options.directoryConfig);
-    dir = path.join(process.cwd(), dir);
-    dir = path.normalize(dir); // @todo - check it does the job on windows
+    let dir = this._sharedConfig.get(this.options.configItem);
+
+    if (dir === null)
+      dir = path.join(process.cwd(), 'logs', 'clients');
+
     fse.ensureDirSync(dir); // create directory if not exists
 
     this.dir = dir;

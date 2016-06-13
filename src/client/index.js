@@ -22,11 +22,12 @@ export { default as Signal } from './core/Signal';
 export { default as SignalAll } from './core/SignalAll';
 
 // scenes
-export { default as Conductor } from './scenes/Conductor';
+export { default as BasicSharedController } from './scenes/BasicSharedController';
 export { default as Experience } from './scenes/Experience';
 export { default as Survey } from './scenes/Survey';
 
 // services
+export { default as Auth } from './services/Auth';
 export { default as Checkin } from './services/Checkin';
 export { default as ErrorReporter } from './services/ErrorReporter';
 export { default as Locator } from './services/Locator';
@@ -40,9 +41,6 @@ export { default as Loader } from './services/Loader';
 export { default as MotionInput } from './services/MotionInput';
 export { default as Scheduler } from './services/Scheduler';
 
-// config
-export { default as defaultViewTemplates } from './config/defaultViewTemplates';
-export { default as defaultViewContent } from './config/defaultViewContent';
 // views
 export { default as ButtonView } from './views/ButtonView';
 export { default as CanvasView } from './views/CanvasView';

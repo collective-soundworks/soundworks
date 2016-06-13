@@ -1,6 +1,10 @@
 import View from './View';
 
-const svgTemplate = `<svg></svg>`;
+const svgTemplate = `
+<div class="svg-container">
+  <svg></svg>
+</div>`;
+
 const ns = 'http://www.w3.org/2000/svg';
 
 
@@ -22,7 +26,7 @@ export default class SpaceView extends View {
     this.area = null;
 
     /**
-     * The with of the rendered area in pixels.
+     * The width of the rendered area in pixels.
      * @type {Number}
      */
     this.areaWidth = null;
@@ -62,6 +66,7 @@ export default class SpaceView extends View {
 
   /** @inheritdoc */
   onRender() {
+    this.$svgContainer = this.$el.querySelector('.svg-container');
     this.$svg = this.$el.querySelector('svg');
     this.addDefinitions();
     this._renderArea();
@@ -118,20 +123,28 @@ export default class SpaceView extends View {
     const top = (containerHeight - svgHeight) / 2;
     const left = (containerWidth - svgWidth) / 2;
 
+    this.$svgContainer.style.width = svgWidth + 'px';
+    this.$svgContainer.style.height = svgHeight + 'px';
     this.$svg.setAttribute('width', svgWidth);
     this.$svg.setAttribute('height', svgHeight);
     // this.$svg.setAttribute('viewBox', `0 0 ${svgWidth} ${svgHeight}`);
     // center the svg into the parent
-    this.$svg.style.position = 'relative';
-    this.$svg.style.top = `${top}px`;
-    this.$svg.style.left = `${left}px`;
+    this.$svgContainer.style.position = 'absolute';
+    this.$svgContainer.style.top = `${top}px`;
+    this.$svgContainer.style.left = `${left}px`;
+
+    this.$svg.style.position = 'absolute';
+    this.$svg.style.top = `0px`;
+    this.$svg.style.left = `0px`;
 
     // display background if any
     if (area.background) {
-      this.$el.style.backgroundImage = area.background;
+      this.$el.style.backgroundImage = `url(${area.background})`;
       this.$el.style.backgroundPosition = '50% 50%';
       this.$el.style.backgroundRepeat = 'no-repeat';
-      this.$el.style.backgroundSize = 'cover';
+      this.$el.style.backgroundSize = 'contain';
+      // force $svg to be transparent
+      this.$svg.style.backgroundColor = 'transparent';
     }
 
     // update existing points position

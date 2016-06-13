@@ -1,10 +1,46 @@
+import { audioContext } from 'waves-audio';
 import { SuperLoader } from 'waves-loaders';
+import debug from 'debug';
 import SegmentedView from '../views/SegmentedView';
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
 
 const SERVICE_ID = 'service:loader';
+const log = debug('soundworks:services:loader');
 
+const defaultViewTemplate = `
+<div class="section-top flex-middle">
+  <p><%= loading %></p>
+</div>
+<div class="section-center flex-center">
+  <% if (showProgress) { %>
+  <div class="progress-wrap">
+    <div class="progress-bar"></div>
+  </div>
+  <% } %>
+</div>
+<div class="section-bottom"></div>`;
+
+
+const defaultViewContent = {
+  loading: 'Loading sounds…',
+};
+
+
+/**
+ * Interface for the view of the `loader` service.
+ *
+ * @interface AbstractLoaderView
+ * @extends module:soundworks/client.View
+ */
+/**
+ * Method called when a new information about the currently loaded assets
+ * is received.
+ *
+ * @function
+ * @name AbstractLoaderView.onProgress
+ * @param {Number} percent - The purcentage of loaded assets.
+ */
 class LoaderView extends SegmentedView {
   onRender() {
     super.onRender();
@@ -22,45 +58,19 @@ function getIdFromFilePath(filePath) {
   return fileName.split('.')[0];
 }
 
-function appendFileDescription(filePaths, fileDescriptions, fileDescr, id = undefined) {
-  let descr = undefined;
-
-  if(typeof fileDescr === 'string') {
-    // fileDescr = { my-sound-id: 'assets/audio-file-name.wav' } --> { my-sound-id: { audio: <AudioBuffer> } }
-    // fileDescr = 'assets/audio-file-name.wav' --> { audio-file-name: { audio: <AudioBuffer> } }
-    const path = fileDescr;
-
-    if(!id)
-      id = getIdFromFilePath(path);
-
-    const descr = { id, path };
-    filePaths.push(path);
-    fileDescriptions.push(descr);
-
-  } else if(id && typeof fileDescr === 'object') {
-    // fileDescr = { my-sound-id: { audio: 'assets/audio-file-name.wav', segmentation: 'assets/descriptor-file-name.json'] } --> { my-sound-id: { audio: <AudioBuffer>, segmentation: [<segments>] } }
-    for(let key in fileDescr) {
-      const path = fileDescr[key];
-
-      if(typeof path === 'string') {
-        const descr = { id, key, path };
-        filePaths.push(path);
-        fileDescriptions.push(descr);
-      }
-    }
-  }
-}
-
 /**
- * Interface of the client `'loader'` service.
+ * Interface for the client `'loader'` service.
  *
- * This service allow to preload files and store them into buffers
- * before the start of the experience. Audio files will be converted and
+ * This service allows to preload files and store them into buffers
+ * before the beginning of the experience. Audio files will be converted and
  * stored into AudioBuffer objects.
  *
  * @param {Object} options
+ * @param {Array<String>} options.assetsDomain - Prefix concatenated to all
+ *  given paths.
  * @param {Array<String>} options.files - List of files to load.
- * @param {Boolean} [options.showProgress=true] - Display the progress bar in the view.
+ * @param {Boolean} [options.showProgress=true] - Display the progress bar
+ *  in the view.
  *
  * @memberof module:soundworks/client
  * @example
@@ -110,6 +120,7 @@ class Loader extends Service {
     super(SERVICE_ID, false);
 
     const defaults = {
+      assetsDomain: '',
       showProgress: true,
       files: [],
       audioWrapTail: 0,
@@ -117,26 +128,29 @@ class Loader extends Service {
       viewPriority: 4,
     };
 
+    this._defaultViewTemplate = defaultViewTemplate;
+    this._defaultViewContent = defaultViewContent;
+
     this.configure(defaults);
   }
 
   /** @private */
   init() {
     /**
-     * @private
      * List of all loaded buffers.
+     * @private
      */
     this.buffers = [];
 
     /**
-    * @private
      * List of the loaded audio buffers created from the loaded audio files.
+     * @private
      */
     this.audioBuffers = {};
 
     /**
-    * @private
      * Data structure correponding to the structure of requested files.
+     * @private
      */
     this.data = {};
 
@@ -153,9 +167,9 @@ class Loader extends Service {
     if (!this.hasStarted)
       this.init();
 
-    // preload files
-    this._loadFiles(this.options.files, this.view, true);
     this.show();
+    // preload files (must be called after show)
+    this._loadFiles(this.options.files, this.view, true);
   }
 
   /** @private */
@@ -165,21 +179,114 @@ class Loader extends Service {
   }
 
   /** @private */
-  _loadFiles(files, view = null, signalReady = false) {
-    const promise = new Promise((resolve, reject) => {
-      const filePaths = [];
-      const fileDescriptions = [];
+  _appendFileDescription(filePaths, fileDescriptions, fileDescr, id = undefined) {
+    let descr = undefined;
 
-      if(Array.isArray(files)) {
-        for(let file of files)
-          appendFileDescription(filePaths, fileDescriptions, file);
+    if (typeof fileDescr === 'string') {
+      /**
+       * fileDescr = {
+       *   my-sound-id: 'assets/audio-file-name.wav'
+       * }
+       * // becomes
+       * {
+       *   my-sound-id: <AudioBuffer>
+       * }
+       * ... or
+       * fileDescr = 'assets/audio-file-name.wav'
+       * // becomes
+       * {
+       *   audio-file-name: <AudioBuffer>
+       * }
+       */
+      const path = fileDescr;
+
+      if (!id)
+        id = getIdFromFilePath(path);
+
+      const descr = { id, path };
+      filePaths.push(path);
+      fileDescriptions.push(descr);
+
+    } else if (id && typeof fileDescr === 'object') {
+      /**
+       * fileDescr = {
+       *   my-sound-id: {
+       *     audio: 'assets/audio-file-name.wav',
+       *     segmentation: 'assets/descriptor-file-name.json']
+       * }
+       * // becomes
+       * {
+       *   my-sound-id: {
+       *     audio: <AudioBuffer>,
+       *     segmentation: [<segments>]
+       *   }
+       * }
+       */
+      for (let key in fileDescr) {
+        const path = fileDescr[key];
+
+        if (typeof path === 'string') {
+          const descr = { id, key, path };
+          filePaths.push(path);
+          fileDescriptions.push(descr);
+        }
+      }
+    }
+  }
+
+  /**
+   * Populate the `audioBuffers` and `data` attribute according to the loader
+   * response and the given file descriptions.
+   * @private
+   */
+  _populateData(loadedObjects, fileDescriptions) {
+    loadedObjects.forEach((obj, i) => {
+      const descr = fileDescriptions[i];
+      const id = descr.id;
+      let key = descr.key;
+
+      this.buffers.push(obj);
+
+      if (obj instanceof AudioBuffer)
+        this.audioBuffers[id] = obj;
+
+      if (key) {
+        let data = this.data[id];
+
+        if(!data)
+          this.data[id] = data = {};
+
+        data[key] = obj;
       } else {
-        for (let id in files)
-          appendFileDescription(filePaths, fileDescriptions, files[id], id);
+        this.data[id] = obj;
       }
 
+      log(this.data[id]);
+    });
+  }
+
+  /** @private */
+  _loadFiles(files, view = null, triggerReady = false) {
+    const promise = new Promise((resolve, reject) => {
+      let filePaths = [];
+      const fileDescriptions = [];
+
+      // prepare the files descriptions
+      if (Array.isArray(files)) {
+        for (let file of files)
+          this._appendFileDescription(filePaths, fileDescriptions, file);
+      } else {
+        for (let id in files)
+          this._appendFileDescription(filePaths, fileDescriptions, files[id], id);
+      }
+
+      filePaths = filePaths.map((path) => this.options.assetsDomain + path);
+      log(filePaths);
+
+      // load files
       if (filePaths.length > 0 && fileDescriptions.length > 0) {
         const loader = new SuperLoader();
+        loader.setAudioContext(audioContext);
 
         if (view && view.onProgress) {
           const progressPerFile = filePaths.map(() => 0); // track files loading progress
@@ -194,42 +301,23 @@ class Loader extends Service {
           }
         };
 
-        loader.load(filePaths, { wrapAroundExtention: this.options.audioWrapTail })
+        loader
+          .load(filePaths, { wrapAroundExtention: this.options.audioWrapTail })
           .then((loadedObjects) => {
-            // for (let i = 0; i < loadedObjects.length; i++) {
-            loadedObjects.forEach((obj, i) => {
-              // const obj = loadedObjects[i];
-              const descr = fileDescriptions[i];
-              const id = descr.id;
-              let key = descr.key;
+            this._populateData(loadedObjects, fileDescriptions);
 
-              this.buffers.push(obj);
-
-              if (obj instanceof AudioBuffer)
-                this.audioBuffers[id] = obj;
-
-              if (key) {
-                let data = this.data[id];
-
-                if(!data)
-                  this.data[id] = data = {};
-
-                data[key] = obj;
-              } else {
-                this.data[id] = obj;
-              }
-            });
-
-            if (signalReady)
+            if (triggerReady)
               this.ready();
 
             resolve();
-          }, (error) => {
+          })
+          .catch((error) => {
             reject(error);
             console.error(error);
           });
+
       } else {
-        if (signalReady)
+        if (triggerReady)
           this.ready();
 
         resolve();

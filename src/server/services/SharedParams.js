@@ -1,4 +1,4 @@
-import Activity from '../core/Activity';
+import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
 import { EventEmitter } from 'events';
 
@@ -104,11 +104,10 @@ class _TriggerItem extends _ControlItem {
 const SERVICE_ID = 'service:shared-params';
 
 /**
- * Interface of the server `'shared-params'` service.
+ * Interface for the server `'shared-params'` service.
  *
- * This service allow to create shared parameters among to distributed
- * application. Each shared parameter can be of the following
- * data types:
+ * This service allows to create shared parameters among a distributed
+ * application. Each shared parameter can be of the following data types:
  * - boolean
  * - enum
  * - number
@@ -126,7 +125,7 @@ const SERVICE_ID = 'service:shared-params';
  * this.sharedParams = this.require('shared-params');
  * this.sharedParams.addBoolean('my:boolean', 'MyBoolean', false);
  */
-class SharedParams extends Activity {
+class SharedParams extends Service {
   /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */
   constructor(options = {}) {
     super(SERVICE_ID);
@@ -148,8 +147,8 @@ class SharedParams extends Activity {
   /**
    * Generic method to create shared parameters from an array of definitions.
    * A definition is an object with a 'type' property
-   * ('boolean' | 'enum' | 'number' | 'text' | 'trigger') a set of properties
-   * corresponding to the argument of the corresponding add<Type> method.
+   * ('boolean' | 'enum' | 'number' | 'text' | 'trigger') and a set of properties
+   * matching the arguments of the corresponding `add${type}` method.
    * @see {@link SharedParams#addBoolean}
    * @see {@link SharedParams#addEnum}
    * @see {@link SharedParams#addNumber}
@@ -191,7 +190,6 @@ class SharedParams extends Activity {
    *  the parameter value to. If not set, the value is sent to all the client types.
    */
   addBoolean(name, label, value, clientTypes = null) {
-    console.log(name, label, value, clientTypes = null);
     return new _BooleanItem(this, name, label, value, clientTypes);
   }
 
@@ -255,8 +253,8 @@ class SharedParams extends Activity {
    * @param {Mixed} value - Updated value of the parameter.
    */
   /**
-   * Add a listener to listen a specific parameter changes. The listener is called a first
-   * time when added to retrieve the current value of the parameter.
+   * Add a listener to listen to a specific parameter changes. The listener
+   * is called a first time when added to retrieve the current value of the parameter.
    * @param {String} name - Name of the parameter.
    * @param {module:soundworks/server.SharedParams~paramCallback} listener - Callback
    *  that handle the event.
@@ -266,14 +264,16 @@ class SharedParams extends Activity {
 
     if (param) {
       param.addListener(param.data.name, listener);
-      listener(param.data.value);
+
+      if (param.data.type !== 'trigger')
+        listener(param.data.value);
     } else {
       console.log('unknown shared parameter "' + name + '"');
     }
   }
 
   /**
-   * Remove a listener from listening a specific parameter changes.
+   * Remove a listener from listening to a specific parameter changes.
    * @param {String} name - Name of the event.
    * @param {module:soundworks/client.SharedParams~paramCallback} listener - The
    *  callback to remove.

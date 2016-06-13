@@ -10,14 +10,18 @@
 export { default as Client } from './core/Client';
 export { default as server } from './core/server';
 export { default as Activity } from './core/Activity';
+export { default as Scene } from './core/Scene';
+export { default as Service } from './core/Service';
 export { default as serviceManager } from './core/serviceManager';
 export { default as sockets } from './core/sockets';
 
 /* scenes */
+export { default as BasicSharedController } from './scenes/BasicSharedController';
 export { default as Experience } from './scenes/Experience';
 export { default as Survey } from './scenes/Survey';
 
 /* services */
+export { default as Auth } from './services/Auth';
 export { default as Osc } from './services/Osc';
 export { default as Checkin } from './services/Checkin';
 export { default as ErrorReporter } from './services/ErrorReporter';

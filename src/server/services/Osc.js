@@ -1,6 +1,6 @@
 import debug from 'debug';
 import osc from 'osc';
-import Activity from '../core/Activity';
+import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
 
 
@@ -8,7 +8,7 @@ const log = debug('soundworks:osc');
 const SERVICE_ID = 'service:osc';
 
 /**
- * Interface of the server `'osc'` service.
+ * Interface for the server `'osc'` service.
  *
  * This server-only service provides support for OSC communications with an extenal
  * software (e.g. Max). The configuration of the service (url and port) should be
@@ -20,34 +20,36 @@ const SERVICE_ID = 'service:osc';
  * @example
  * // inside the experience constructor
  * this.osc = this.require('osc');
- * // when the experience has started, listen for incomming message
+ * // when the experience has started, listen to incoming message
  * this.osc.receive('/osc/channel1', (values) => {
  *   // do something with `values`
  * });
  * // send a message
  * this.osc.send('/osc/channel2', [0.618, true]);
  */
-class Osc extends Activity {
+class Osc extends Service {
   /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */
   constructor() {
     super(SERVICE_ID);
 
     const defaults = {
-      oscConfigItem: 'osc',
-      // protocol: 'udp',
+      configItem: 'osc',
     }
 
     this.configure(defaults);
 
     this._listeners = [];
-    this._sharedConfigService = this.require('shared-config');
+    this._sharedConfig = this.require('shared-config');
 
     this._onMessage = this._onMessage.bind(this);
   }
 
   /** @private */
   start() {
-    const oscConfig = this._sharedConfigService.get(this.options.oscConfigItem);
+    const oscConfig = this._sharedConfig.get(this.options.configItem);
+
+    if (this.oscConfig === null)
+      throw new Error(`"service:osc": server.config.${configItem} is not defined`);
 
     this.osc = new osc.UDPPort({
       // This is the port we're listening on.
@@ -108,11 +110,11 @@ class Osc extends Activity {
   }
 
   /**
-   * Register callbacks for OSC mesages. The server listens for OSC messages
+   * Register callbacks for OSC mesages. The server listens to OSC messages
    * at the address and port defined in the configuration of the {@link server}.
    * @param {String} address - Wildcard of the OSC message.
    * @param {Function} callback - Callback function to be executed when an OSC
-   *  message is received on the given address.
+   *  message is received at the given address.
    */
   receive(address, callback) {
     const listener = { address, callback }

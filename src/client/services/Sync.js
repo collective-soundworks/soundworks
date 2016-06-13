@@ -6,10 +6,22 @@ import SyncModule from 'sync/client';
 
 const SERVICE_ID = 'service:sync';
 
+const defaultViewTemplate = `
+<div class="section-top"></div>
+<div class="section-center flex-center">
+  <p class="soft-blink"><%= wait %></p>
+</div>
+<div class="section-bottom"></div>
+`;
+
+const defaultViewContent = {
+  wait: `Clock syncing,<br />stand by&hellip;`,
+};
+
 /**
- * Interface of the client `'sync'` service.
+ * Interface for the client `'sync'` service.
  *
- * This service synchronize the local audio clock of the client with the clock
+ * This service synchronizes the local audio clock of the client with the clock
  * of the server (master clock). It then internally relies on the `WebAudio`
  * clock and requires the platform to access this feature.
  *
@@ -37,6 +49,10 @@ class Sync extends Service {
     }
 
     this.configure(defaults);
+
+    this._defaultViewTemplate = defaultViewTemplate;
+    this._defaultViewContent = defaultViewContent;
+
     this.require('platform', { features: 'web-audio' });
 
     this._syncStatusReport = this._syncStatusReport.bind(this);

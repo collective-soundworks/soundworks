@@ -1,4 +1,4 @@
-import Activity from '../core/Activity';
+import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
 import server from '../core/server';
 
@@ -6,11 +6,11 @@ import server from '../core/server';
 const SERVICE_ID = 'service:shared-config';
 
 /**
- * Interface of the server `'shared-config'` service.
+ * Interface for the server `'shared-config'` service.
  *
  * This service can be use with its client-side counterpart in order to share
  * some server configuration items with the clients, or server-side only to act
- * as an accessor of the server configuration.
+ * as an accessor to the server configuration.
  *
  * __*The service can be use with its [client-side counterpart]{@link module:soundworks/client.SharedConfig}*__
  *
@@ -23,7 +23,7 @@ const SERVICE_ID = 'service:shared-config';
  * // share this item with client of type `player`
  * this.sharedConfig.share('setup.area', 'player');
  */
-class SharedConfig extends Activity {
+class SharedConfig extends Service {
   /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */
   constructor() {
     super(SERVICE_ID);
@@ -51,7 +51,7 @@ class SharedConfig extends Activity {
     let value = server.config;
     // search item through config
     parts.forEach((attr) => {
-      if (value[attr])
+      if (value && value[attr])
         value = value[attr];
       else
         value = null;
@@ -63,7 +63,7 @@ class SharedConfig extends Activity {
   /**
    * Add a configuration item to be shared with a specific client.
    * @param {String} item - Key to the configuration item (_ex:_ `'setup.area'`)
-   * @param {String} clientType - Client type whom the data should be shared.
+   * @param {String} clientType - Client type with whom the data should be shared.
    */
   share(item, clientType) {
     if (!this._clientItemsMap[clientType])
@@ -84,7 +84,7 @@ class SharedConfig extends Activity {
 
     const items = this._clientItemsMap[clientType];
     const serverConfig = server.config;
-    const data = {};
+    let data = {};
 
     // build data tree
     items.forEach((item) => {

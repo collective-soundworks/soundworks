@@ -135,23 +135,38 @@ class _TriggerGui {
   set(val) { /* nothing to set here */ }
 }
 
-const SCENE_ID = 'conductor';
+const SCENE_ID = 'basic-shared-controller';
 
 /**
- * Scene definition
+ * The `BasicSharedController` scene propose a simple / default way to create
+ * a client controller for the `shared-params` service.
+ *
+ * Each controller comes with a set of options that can be passed to the
+ * constructor.
+ *
+ * @memberof module:soundworks/client
+ * @see [`shared-params` service]{@link module:soundworks/client.SharedParams}
  */
-export default class Conductor extends Scene {
+export default class BasicSharedController extends Scene {
   /**
    * _<span class="warning">__WARNING__</span> This API is unstable, and
    * subject to change in further versions.
    */
-  constructor() {
+  constructor(guiOptions = {}) {
     super(SCENE_ID, true);
 
-    this._guiOptions = {};
+    this._guiOptions = guiOptions;
 
     this._errorReporter = this.require('error-reporter');
-    this._sharedParams = this.require('shared-params');
+
+    /**
+     * Instance of the client-side `shared-params` service.
+     * @type {module:soundworks/client.SharedParams}
+     * @name sharedParams
+     * @instance
+     * @memberof module:soundworks/client.SharedParams
+     */
+    this.sharedParams = this.require('shared-params');
   }
 
   init() {
@@ -166,8 +181,8 @@ export default class Conductor extends Scene {
 
     this.show();
 
-    for (let name in this._sharedParams.params)
-      this.createGui(this._sharedParams.params[name]);
+    for (let name in this.sharedParams.params)
+      this.createGui(this.sharedParams.params[name]);
   }
 
   /**

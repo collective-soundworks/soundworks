@@ -1,4 +1,4 @@
-import Activity from '../core/Activity';
+import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
 import { getOpt } from '../../utils/helpers';
 
@@ -8,20 +8,20 @@ const SERVICE_ID = 'service:placer';
 const maxCapacity = 9999;
 
 /**
- * Interface of the server `'placer'` service.
+ * Interface for the server `'placer'` service.
  *
  * This service is one of the provided services aimed at identifying clients inside
  * the experience along with the [`'locator'`]{@link module:soundworks/server.Locator}
  * and [`'checkin'`]{@link module:soundworks/server.Checkin} services.
  *
- * The placer service is suited for situations where the experience has a set of
+ * The placer service is well-suited for situations where the experience has a set of
  * predefined places (located or not) and shall refuse clients when all places
- * are already associated with a client.
- * The definition of the capacity, maximum clients per available positions,
- * optionnal labels and coordinates used by the service, must be defined in the
- * `setup` entry of the server configuration and must follow the format specified
- * in {@link module:soundworks/server.appConfig.setup}. If no labels are provided
- * the service generate incrementals numbers matching the given capacity.
+ * are already assigned to a client.
+ * The capacity, maximum clients per available positions, optionnal labels
+ * and coordinates used by the service, should be defined in the `setup`
+ * entry of the server configuration and must follow the format specified in
+ * {@link module:soundworks/server.appConfig.setup}. If no label is provided
+ * the service will generate incremental numbers matching the given capacity.
  *
  * __*The service must be used with its [client-side counterpart]{@link module:soundworks/client.Placer}*__
  *
@@ -40,30 +40,32 @@ const maxCapacity = 9999;
  * // inside the experience constructor
  * this.placer = this.require('placer');
  */
-class Placer extends Activity {
+class Placer extends Service {
   /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */
   constructor() {
     super(SERVICE_ID);
 
     const defaults = {
-      setupConfigItem: 'setup',
+      configItem: 'setup',
     };
 
     this.configure(defaults);
-    this._sharedConfigService = this.require('shared-config');
+    this._sharedConfig = this.require('shared-config');
   }
 
   /** @private */
   start() {
     super.start();
-
-    const setupConfigItem = this.options.setupConfigItem;
+    const configItem = this.options.configItem;
 
     /**
      * Setup defining dimensions and predefined positions (labels and/or coordinates).
      * @type {Object}
      */
-    this.setup = this._sharedConfigService.get(setupConfigItem);
+    this.setup = this._sharedConfig.get(configItem);
+
+    if (this.setup === null)
+      throw new Error(`"service:placer": server.config.${configItem} is not defined`);
 
     if (!this.setup.maxClientsPerPosition)
       this.setup.maxClientsPerPosition = 1;
@@ -89,7 +91,7 @@ class Placer extends Activity {
       this.capacity = maxCapacity;
 
     /**
-     * List of clients checked in with corresponing indices.
+     * List of clients checked in with corresponding indices.
      * @type {Object<Number, Array>}
      */
     this.clients = {};
@@ -111,7 +113,7 @@ class Placer extends Activity {
 
     // add path to shared config requirements for all client type
     this.clientTypes.forEach((clientType) => {
-      this._sharedConfigService.share(setupConfigItem, clientType);
+      this._sharedConfig.share(this.options.configItem, clientType);
     });
   }
 
@@ -171,11 +173,11 @@ class Placer extends Activity {
   /** @private */
   _onRequest(client) {
     return () => {
-      const setupConfigItem = this.options.setupConfigItem;
+      const configItem = this.options.configItem;
       const disabledPositions = this.disabledPositions;
       // aknowledge
       if (this.numClients < this.setup.capacity)
-        this.send(client, 'aknowlegde', setupConfigItem, disabledPositions);
+        this.send(client, 'aknowlegde', configItem, disabledPositions);
       else
         this.send('reject', disabledPositions);
     }

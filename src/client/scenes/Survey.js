@@ -2,6 +2,36 @@ import Scene from '../core/Scene';
 import View from '../views/View';
 import SegmentedView from '../views/SegmentedView';
 
+const SCENE_ID = 'survey';
+
+const defaultViewTemplate = `
+<div class="section-top">
+  <% if (counter <= length) { %>
+    <p class="counter"><%= counter %> / <%= length %></p>
+  <% } %>
+</div>
+<% if (counter > length) { %>
+  <div class="section-center flex-center">
+    <p class="big"><%= thanks %></p>
+  </div>
+<% } else { %>
+  <div class="section-center"></div>
+<% } %>
+<div class="section-bottom flex-middle">
+  <% if (counter < length) { %>
+    <button class="btn"><%= next %></button>
+  <% } else if (counter === length) { %>
+    <button class="btn"><%= validate %></button>
+  <% } %>
+</div>`;
+
+const defaultViewContent = {
+  next: 'Next',
+  validate: 'Validate',
+  thanks: 'Thanks!',
+  length: '-',
+};
+
 /**
  * Renderers
  */
@@ -194,7 +224,6 @@ class SurveyView extends SegmentedView {
   }
 }
 
-const SCENE_ID = 'survey';
 
 /**
  * A scene to create surveys.
@@ -202,6 +231,9 @@ const SCENE_ID = 'survey';
 export default class Survey extends Scene {
   constructor() {
     super(SCENE_ID, true);
+
+    this._defaultViewTemplate = defaultViewTemplate;
+    this._defaultViewContent = defaultViewContent;
 
     /**
      * Object used to store the answers of the survey.

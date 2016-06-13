@@ -23,7 +23,7 @@ class Activity extends Process {
     super(id);
 
     /**
-     * If `true`, define if the activity has already been started once.
+     * If `true`, defines if the activity has already started once.
      * @type {Boolean}
      * @name hasStarted
      * @instance
@@ -142,9 +142,10 @@ class Activity extends Process {
    * @see {@link module:soundworks/client.defaultViewTemplates}
    */
   get viewTemplate() {
-    const viewTemplate = this._viewTemplate || this.viewTemplateDefinitions[this.id];
-    // if (!viewTemplate)
-    //   throw new Error(`No view template defined for activity "${this.id}"`);
+    const viewTemplate = this._viewTemplate || 
+      this.viewTemplateDefinitions[this.id] ||
+      this._defaultViewTemplate;
+
     return viewTemplate;
   }
 
@@ -159,7 +160,9 @@ class Activity extends Process {
    * @see {@link module:soundworks/client.defaultViewContent}
    */
   get viewContent() {
-    const viewContent = this._viewContent || this.viewContentDefinitions[this.id];
+    const viewContent = this._viewContent || 
+      this.viewContentDefinitions[this.id] ||
+      this._defaultViewContent;
 
     if (viewContent)
       viewContent.globals = this.viewContentDefinitions.globals;
@@ -187,8 +190,8 @@ class Activity extends Process {
 
   /**
    * Request the view manager to display the view. The call of this method
-   * doesn't garantee a synchronized rendering of the view as the view manager
-   * decide which view to display based on their priority.
+   * doesn't guarantee a synchronized rendering or any rendering at all as the
+   * view manager decides which view to display based on their priority.
    */
   show() {
     if (!this.view) { return; }
@@ -207,7 +210,7 @@ class Activity extends Process {
   }
 
   /**
-   * Sends a WebSocket message to the server side socket.
+   * Send a web socket message to the server on a given channel.
    * @param {String} channel - The channel of the message (is automatically
    *  namespaced with the activity's id: `${this.id}:channel`).
    * @param {...*} args - Arguments of the message (as many as needed, of any type).
@@ -217,7 +220,7 @@ class Activity extends Process {
   }
 
   /**
-   * Sends a WebSocket message to the server side socket.
+   * Send a web socket message to the server on a given channel.
    * @param {String} channel - The channel of the message (is automatically
    *  namespaced with the activity's id: `${this.id}:channel`).
    * @param {...*} args - Arguments of the message (as many as needed, of any type).
@@ -227,7 +230,7 @@ class Activity extends Process {
   }
 
   /**
-   * Listen a WebSocket message from the server.
+   * Listen to web socket messages from the server on a given channel.
    * @param {String} channel - The channel of the message (is automatically
    *  namespaced with the activity's id: `${this.id}:channel`).
    * @param {Function} callback - The callback to execute when a message is received.
@@ -237,7 +240,7 @@ class Activity extends Process {
   }
 
   /**
-   * Stop listening to a message from the server.
+   * Stop listening for messages from the server on a given channel.
    * @param {String} channel - The channel of the message (is automatically
    *  namespaced with the activity's id: `${this.id}:channel`).
    * @param {Function} callback - The callback to remove from the stack.
@@ -246,5 +249,8 @@ class Activity extends Process {
     socket.removeListener(`${this.id}:${channel}`, callback);
   }
 }
+
+Activity.prototype.viewTemplateDefinitions = {};
+Activity.prototype.viewContentDefinitions = {};
 
 export default Activity;

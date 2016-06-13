@@ -1,10 +1,10 @@
-import Activity from '../core/Activity';
+import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
 import SyncModule from 'sync/server';
 
 const SERVICE_ID = 'service:sync';
 /**
- * Interface of the server `'sync'` service.
+ * Interface for the server `'sync'` service.
  *
  * This service acts as the master clock provider for the client sync service,
  * in order to synchronize the clocks of the different clients to its own clock.
@@ -20,7 +20,7 @@ const SERVICE_ID = 'service:sync';
  * // when the experience has started
  * const syncTime = this.sync.getSyncTime();
  */
-class Sync extends Activity {
+class Sync extends Service {
   /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */
   constructor() {
     super(SERVICE_ID);
@@ -49,7 +49,7 @@ class Sync extends Activity {
   }
 
   /**
-   * Returns the current time in the sync clock, devired from `process.hrtime()`.
+   * Returns the current time in the sync clock, derived from `process.hrtime()`.
    * @return {Number} - Current sync time (in _seconds_).
    */
   getSyncTime() {
