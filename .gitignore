@@ -1,10 +1,11 @@
 # transpiled files
-/client
-/server
-/utils
+# /client
+# /server
+# /utils
 
 # others
 /node_modules
+/tests
 
 # documentation default output
 /out
