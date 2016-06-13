@@ -10,9 +10,12 @@ function socketSerializer(socket) {
  */
 const logger = {
   initialize(config) {
-    config.serializers = {
+    if (!config.serializers)
+      config.serializers = {};
+
+    Object.assign(config.serializers, {
       socket: socketSerializer
-    };
+    });
 
     const log = bunyan.createLogger(config);
 
