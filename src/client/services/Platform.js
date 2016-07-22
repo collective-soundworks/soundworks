@@ -54,6 +54,13 @@ const defaultDefinitions = [
   {
     id: 'audio-input',
     check: function() {
+      navigator.getUserMedia = (
+        navigator.getUserMedia ||
+        navigator.webkitGetUserMedia ||
+        navigator.mozGetUserMedia ||
+        navigator.msGetUserMedia
+      );
+
       return !!navigator.getUserMedia;
     },
     startHook: function() {
@@ -235,7 +242,7 @@ class Platform extends Service {
       this.init();
 
     // execute start hooks from the features definitions
-    if(client.compatible) {
+    if (client.compatible) {
       const startHooks = this.getStartHooks();
       startHooks.forEach((hook) => hook());
     }
