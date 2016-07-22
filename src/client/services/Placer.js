@@ -57,7 +57,7 @@ const defaultViewContent = {
  * Display the available positions.
  *
  * @function
- * @name AbstractPlacerView.onSend
+ * @name AbstractPlacerView.displayPositions
  * @param {Number} capacity - The maximum number of clients allowed.
  * @param {Array<String>} [labels=null] - An array of the labels for the positions
  * @param {Array<Array<Number>>} [coordinates=null] - An array of the coordinates of the positions

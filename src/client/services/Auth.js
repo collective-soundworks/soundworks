@@ -23,7 +23,7 @@ const SERVICE_ID = 'service:auth';
 class AuthView extends SegmentedView {
   onSend(callback) {
     this.installEvents({
-      'touchstart #send': () => {
+      'click #send': () => {
         const password = this.$el.querySelector('#password').value;
 
         if (password !== '')
