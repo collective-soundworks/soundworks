@@ -19,24 +19,24 @@ export default class TouchSurface {
     this._updateBoundingRect();
 
     // listen events
-    this.$el.addEventListener('touchstart', this._handleTouch((id, x, y, e) => {
+    this.$el.addEventListener('touchstart', this._handleTouch((id, x, y, t, e) => {
       this.touches[id] = [x, y];
-      this._propagate('touchstart', id, x, y, e);
+      this._propagate('touchstart', id, x, y, t, e);
     }));
 
-    this.$el.addEventListener('touchmove', this._handleTouch((id, x, y, e) => {
+    this.$el.addEventListener('touchmove', this._handleTouch((id, x, y, t, e) => {
       this.touches[id] = [x, y];
-      this._propagate('touchmove', id, x, y, e);
+      this._propagate('touchmove', id, x, y, t, e);
     }));
 
-    this.$el.addEventListener('touchend', this._handleTouch((id, x, y, e) => {
+    this.$el.addEventListener('touchend', this._handleTouch((id, x, y, t, e) => {
       delete this.touches[id];
-      this._propagate('touchend', id, x, y, e);
+      this._propagate('touchend', id, x, y, t, e);
     }));
 
-    this.$el.addEventListener('touchcancel', this._handleTouch((id, x, y, e) => {
+    this.$el.addEventListener('touchcancel', this._handleTouch((id, x, y, t, e) => {
       delete this.touches[id];
-      this._propagate('touchend', id, x, y, e);
+      this._propagate('touchend', id, x, y, t, e);
     }));
   }
 
@@ -89,15 +89,15 @@ export default class TouchSurface {
         this._normX = relX / boundingRect.width;
         this._normY = relY / boundingRect.height;
 
-        callback(touchId, this._normX, this._normY, touchEvent);
+        callback(touchId, this._normX, this._normY, touchEvent, e);
       }
     }
   }
 
-  _propagate(eventName, touchId, normX, normY, touchEvent) {
+  _propagate(eventName, touchId, normX, normY, touch, touchEvent) {
     const listeners = this._listeners[eventName];
     if (!listeners) { return; }
 
-    listeners.forEach((listener) => listener(touchId, normX, normY, touchEvent));
+    listeners.forEach((listener) => listener(touchId, normX, normY, touch, touchEvent));
   }
 }
