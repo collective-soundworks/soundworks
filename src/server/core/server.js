@@ -416,14 +416,34 @@ const server = {
         logger.info({ socket, clientType }, 'disconnect');
     });
 
-    sockets.receive(client, 'handshake', (data) => {
-      client.urlParams = data.urlParams;
-      // @todo - handle reconnection (ex: `data` contains an `uuid`)
-      activities.forEach((activity) => activity.connect(client));
-      sockets.send(client, 'client:start', client.uuid);
+    // check coherence between client-side and server-side service requirements
+    const serverRequiredServices = serviceManager.getRequiredServices(clientType);
+    const serverServicesList = serviceManager.getServiceList();
 
-      if (logger.info)
-        logger.info({ socket, clientType }, 'handshake');
+    sockets.receive(client, 'handshake', (data) => {
+      const clientRequiredServices = data.requiredServices;
+      const missingServices = [];
+
+      clientRequiredServices.forEach((serviceId) => {
+        if (
+          serverServicesList.indexOf(serviceId) !== -1 &&
+          serverRequiredServices.indexOf(serviceId) === -1
+        ) {
+          missingServices.push(serviceId);
+        }
+      });
+
+      if (missingServices.length > 0) {
+        sockets.send(client, 'services:error', missingServices);
+      } else {
+        client.urlParams = data.urlParams;
+        // @todo - handle reconnection (ex: `data` contains an `uuid`)
+        activities.forEach((activity) => activity.connect(client));
+        sockets.send(client, 'client:start', client.uuid);
+
+        if (logger.info)
+          logger.info({ socket, clientType }, 'handshake');
+        }
     });
   },
 };

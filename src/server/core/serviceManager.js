@@ -18,7 +18,7 @@ const serviceManager = {
     id = 'service:' + id;
 
     if (!_ctors[id])
-      throw new Error(`Service "${id}" does not exists`);
+      throw new Error(`Service "${id}" is not defined`);
 
     let instance = _instances[id];
 
@@ -43,6 +43,21 @@ const serviceManager = {
    */
   register(id, ctor) {
     _ctors[id] = ctor;
+  },
+
+  getRequiredServices(clientType) {
+    const services = [];
+
+    for (let id in _instances) {
+      if (_instances[id].clientTypes.has(clientType))
+        services.push(id);
+    }
+
+    return services;
+  },
+
+  getServiceList() {
+    return Object.keys(_ctors);
   },
 };
 

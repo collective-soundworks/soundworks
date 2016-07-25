@@ -219,12 +219,20 @@ const client = {
     this.socket.addStateListener((eventName) => {
       switch (eventName) {
         case 'connect':
-          this.socket.send('handshake', { urlParams: this.urlParams });
+          this.socket.send('handshake', {
+            urlParams: this.urlParams,
+            requiredServices: serviceManager.getRequiredServices(),
+          });
           // wait for handshake to mark client as `ready`
           this.socket.receive('client:start', (uuid) => {
             // don't handle server restart for now.
             this.uuid = uuid;
             serviceManager.start();
+          });
+
+          this.socket.receive('services:error', (data) => {
+            const services = data.join(', ');
+            throw new Error(`"${services}" required client-side but not required server-side`);
           });
           break;
           // case 'reconnect':

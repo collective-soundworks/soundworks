@@ -31,6 +31,9 @@ const serviceManager = {
    */
   start() {
     log('start');
+
+    const networkedServices = [];
+
     this.signals.start.set(true);
 
     if (!this._requiredSignals.length)
@@ -60,7 +63,7 @@ const serviceManager = {
     id = 'service:' + id;
 
     if (!_ctors[id])
-      throw new Error(`Service "${id}" does not exists`);
+      throw new Error(`Service "${id}" is not defined`);
 
     let instance = _instances[id];
 
@@ -83,6 +86,11 @@ const serviceManager = {
    */
   register(id, ctor) {
     _ctors[id] = ctor;
+  },
+
+
+  getRequiredServices() {
+    return Object.keys(_instances);
   },
 };
 
