@@ -31,11 +31,18 @@ class Activity extends Process {
      */
     this.hasStarted = false;
 
-    // register as a networked service
-    if (hasNetwork) {
-      this.hasNetwork = true;
+    /**
+     * Defines if the activity needs a connection to the server.
+     * @type {Boolean}
+     * @name hasNetwork
+     * @instance
+     * @memberof module:soundworks/client.Activity
+     */
+    this.hasNetwork = !!hasNetwork;
+
+    // register as a networked service, setup the socket connection
+    if (this.hasNetwork)
       socket.required = true;
-    }
 
     /**
      * View of the activity.
