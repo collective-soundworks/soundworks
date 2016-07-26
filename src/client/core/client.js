@@ -46,9 +46,10 @@ const client = {
    * Configuration informations from the server configuration if any.
    *
    * @type {Object}
+   * @see {@link module:soundworks/client.client~init}
    * @see {@link module:soundworks/client.SharedConfig}
    */
-  config: null,
+  config: {},
 
   /**
    * Array of optionnal parameters passed through the url
@@ -154,7 +155,7 @@ const client = {
     }, config.socketIO);
 
     // mix all other config and override with defined socket config
-    this.config = Object.assign({
+    Object.assign(this.config, {
       appContainer: '#container',
     }, config, { socketIO });
 
@@ -219,21 +220,27 @@ const client = {
     this.socket.addStateListener((eventName) => {
       switch (eventName) {
         case 'connect':
-          this.socket.send('handshake', {
-            urlParams: this.urlParams,
-            requiredServices: serviceManager.getRequiredServices(),
-          });
-          // wait for handshake to mark client as `ready`
+          const payload = { urlParams: this.urlParams };
+
+          if (this.config.env !== 'production') {
+            Object.assign(payload, {
+              requiredServices: serviceManager.getRequiredServices()
+            });
+          }
+
+          this.socket.send('handshake', payload);
+          // wait for handshake response to mark client as `ready`
           this.socket.receive('client:start', (uuid) => {
-            // don't handle server restart for now.
             this.uuid = uuid;
             serviceManager.start();
           });
 
-          this.socket.receive('services:error', (data) => {
-            const services = data.join(', ');
-            throw new Error(`"${services}" required client-side but not required server-side`);
-          });
+          if (this.config.env !== 'production') {
+            this.socket.receive('services:error', (data) => {
+              const msg = `"${data.join(', ')}" required client-side but not server-side`;
+              throw new Error(msg);
+            });
+          }
           break;
           // case 'reconnect':
           //   // serviceManager.start();

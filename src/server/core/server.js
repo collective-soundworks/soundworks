@@ -195,8 +195,11 @@ const server = {
     });
   },
 
+  /**
+   * Populate mandatory configuration options
+   * @private
+   */
   _populateDefaultConfig() {
-    // mandatory configuration options
     if (this.config.port === undefined)
        this.config.port = 8000;
 
@@ -270,6 +273,7 @@ const server = {
    * @param {String} clientType - Type of the client.
    * @param {String|RegExp} route - Template of the route that should be append.
    *  to the client type
+   *
    * @example
    * ```
    * // allow `conductor` clients to connect to `http://site.com/conductor/1`
@@ -421,29 +425,32 @@ const server = {
     const serverServicesList = serviceManager.getServiceList();
 
     sockets.receive(client, 'handshake', (data) => {
-      const clientRequiredServices = data.requiredServices;
-      const missingServices = [];
+      if (this.config.env !== 'production') {
+        const clientRequiredServices = data.requiredServices;
+        const missingServices = [];
 
-      clientRequiredServices.forEach((serviceId) => {
-        if (
-          serverServicesList.indexOf(serviceId) !== -1 &&
-          serverRequiredServices.indexOf(serviceId) === -1
-        ) {
-          missingServices.push(serviceId);
+        clientRequiredServices.forEach((serviceId) => {
+          if (
+            serverServicesList.indexOf(serviceId) !== -1 &&
+            serverRequiredServices.indexOf(serviceId) === -1
+          ) {
+            missingServices.push(serviceId);
+          }
+        });
+
+        if (missingServices.length > 0) {
+          sockets.send(client, 'services:error', missingServices);
+          return;
         }
-      });
+      }
 
-      if (missingServices.length > 0) {
-        sockets.send(client, 'services:error', missingServices);
-      } else {
-        client.urlParams = data.urlParams;
-        // @todo - handle reconnection (ex: `data` contains an `uuid`)
-        activities.forEach((activity) => activity.connect(client));
-        sockets.send(client, 'client:start', client.uuid);
+      client.urlParams = data.urlParams;
+      // @todo - handle reconnection (ex: `data` contains an `uuid`)
+      activities.forEach((activity) => activity.connect(client));
+      sockets.send(client, 'client:start', client.uuid);
 
-        if (logger.info)
-          logger.info({ socket, clientType }, 'handshake');
-        }
+      if (logger.info)
+        logger.info({ socket, clientType }, 'handshake');
     });
   },
 };
