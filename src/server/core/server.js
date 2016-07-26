@@ -5,7 +5,6 @@ import express from 'express';
 import fs from 'fs';
 import http from 'http';
 import https from 'https';
-import IO from 'socket.io';
 import logger from '../utils/logger';
 import path from 'path';
 import pem from 'pem';
@@ -103,13 +102,6 @@ import sockets from './sockets';
  * soundworks.server.start();
  */
 const server = {
-  /**
-   * SocketIO server.
-   * @type {Object}
-   * @private
-   */
-  io: null,
-
   /**
    * Configuration informations, all config objects passed to the
    * [`server.init`]{@link module:soundworks/server.server.init} are merged
@@ -324,12 +316,12 @@ const server = {
    * @private
    */
   _initSockets(httpServer) {
-    this.io = new IO(httpServer, this.config.socketIO);
-
-    if (this.config.cordova && this.config.cordova.socketIO) // IO add some configuration options to the object
+    // merge socket.io configuration for cordova
+    // @todo - move to template
+    if (this.config.cordova && this.config.cordova.socketIO)
       this.config.cordova.socketIO = Object.assign({}, this.config.socketIO, this.config.cordova.socketIO);
 
-    sockets.initialize(this.io);
+    sockets.initialize(httpServer, this.config.socketIO);
   },
 
   /**
@@ -396,11 +388,11 @@ const server = {
         const appIndex = tmpl({ data });
         res.send(appIndex);
       });
+    });
 
-      // socket connnection
-      this.io.of(clientType).on('connection', (socket) => {
-        this._onSocketConnection(clientType, socket, activities);
-      });
+    // socket connnection
+    sockets.onConnection(clientType, (socket) => {
+      this._onSocketConnection(clientType, socket, activities);
     });
   },
 

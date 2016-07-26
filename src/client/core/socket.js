@@ -1,5 +1,5 @@
 import debug from 'debug';
-import io from 'socket.io-client';
+import sio from 'socket.io-client';
 
 const log = debug('soundworks:socket');
 
@@ -24,7 +24,7 @@ const socket = {
   initialize(namespace, options) {
     const url = `${options.url}/${namespace}`;
 
-    this.socket = io(url, { transports: options.transports });
+    this.socket = sio(url, { transports: options.transports });
     log(`initialized - url: "${url}" - transports: ${options.transports}`);
 
     this._stateListeners = new Set();

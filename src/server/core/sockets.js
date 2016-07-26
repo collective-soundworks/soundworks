@@ -1,10 +1,23 @@
+import sio from 'socket.io';
+
 export default {
   /**
    * Initialize the object which socket.io
    * @private
    */
-  initialize(io) {
-    this.io = io;
+  initialize(httpServer, config) {
+    this.io = new sio(httpServer, config);;
+  },
+
+  /**
+   * Register the function to apply when a client of the given `clientType`
+   * is connecting to the server
+   * @param {String} clientType
+   * @param {Function} callback
+   * @private
+   */
+  onConnection(clientType, callback) {
+    this.io.of(clientType).on('connection', (socket) => callback(socket));
   },
 
   /**
@@ -28,9 +41,15 @@ export default {
   },
 
   /**
-   * Sends a message to all client of given `clientType` or `clientType`s. If not specified, the message is sent to all clients
-   * @param {String|Array} clientType - The `clientType`(s) that must receive the message.
-   * @param {String} channel - The channel of the message
+   * Sends a message to all client of given `clientType` or `clientType`s. If
+   * not specified, the message is sent to all clients.
+   *
+   * @param {String|Array} clientType - The `clientType`(s) that must receive
+   *  the message.
+   * @param {module:soundworks/server.Client} excludeClient - Optionnal
+   *  client to ignore when broadcasting the message, typically the client
+   *  at the origin of the message.
+   * @param {String} channel - Channel of the message
    * @param {...*} args - Arguments of the message (as many as needed, of any type).
    */
   broadcast(clientType, excludeClient, channel, ...args) {
