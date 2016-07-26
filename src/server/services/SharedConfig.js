@@ -51,7 +51,7 @@ class SharedConfig extends Service {
     let value = server.config;
     // search item through config
     parts.forEach((attr) => {
-      if (value && value[attr])
+      if (value && value[attr] !== undefined)
         value = value[attr];
       else
         value = null;
