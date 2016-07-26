@@ -173,7 +173,6 @@ class Auth extends Service {
 
   /** @private */
   _onAccesRefusedResponse() {
-    console.log('refused');
     this.view.content.rejected = true;
     this.view.render();
   }
