@@ -157,6 +157,7 @@ class Auth extends Service {
     this.send('password', password);
   }
 
+  /** @private */
   _resetPassword() {
     this._password = null;
     localStorage.removeItem('soundworks:service:auth');
