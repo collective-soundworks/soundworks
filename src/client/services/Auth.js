@@ -20,6 +20,14 @@ const SERVICE_ID = 'service:auth';
  * @name AbstractAuthView.onSend
  * @param {Function} callback - The callback given by the `auth` service.
  */
+/**
+ * Set the callback that should be executed when the reset action is executed
+ * on the view.
+ *
+ * @function
+ * @name AbstractAuthView.onReset
+ * @param {Function} callback - The callback given by the `auth` service.
+ */
 class AuthView extends SegmentedView {
   onSend(callback) {
     this.installEvents({
@@ -30,6 +38,10 @@ class AuthView extends SegmentedView {
           callback(password);
       }
     });
+  }
+
+  onReset(callback) {
+    this.installEvents({ 'click #reset': callback });
   }
 }
 
@@ -44,18 +56,23 @@ const defaultViewTemplate = `
       <button class="btn" id="send"><%= send %></button>
     </div>
   </div>
-  <div class="section-bottom"></div>
+  <div class="section-bottom flex-middle">
+    <button id="reset" class="btn"><%= reset %></button>
+  </div>
 <% } else { %>
   <div class="section-top"></div>
   <div class="section-center flex-center">
     <p><%= rejectMessage %></p>
   </div>
-  <div class="section-bottom"></div>
+  <div class="section-bottom flex-middle">
+    <button id="reset" class="btn"><%= reset %></button>
+  </div>
 <% } %>`;
 
 const defaultViewContent = {
   instructions: 'Login',
   send: 'Send',
+  reset: 'Reset',
   rejectMessage: `Sorry, you don't have access to this client`,
   rejected: false,
 };
@@ -93,6 +110,7 @@ class Auth extends Service {
     this._onAccesGrantedResponse = this._onAccesGrantedResponse.bind(this);
     this._onAccesRefusedResponse = this._onAccesRefusedResponse.bind(this);
     this._sendPassword = this._sendPassword.bind(this);
+    this._resetPassword = this._resetPassword.bind(this);
   }
 
   /** @private */
@@ -102,6 +120,7 @@ class Auth extends Service {
     this.viewCtor = this.options.viewCtor;
     this.view = this.createView();
     this.view.onSend(this._sendPassword);
+    this.view.onReset(this._resetPassword);
   }
 
   /** @private */
@@ -116,11 +135,10 @@ class Auth extends Service {
 
     const storedPassword = localStorage.getItem('soundworks:service:auth');
 
-    if (storedPassword !== null) {
+    if (storedPassword !== null)
       this._sendPassword(storedPassword);
-    } else {
-      this.show();
-    }
+
+    this.show();
   }
 
   /** @private */
@@ -139,6 +157,14 @@ class Auth extends Service {
     this.send('password', password);
   }
 
+  _resetPassword() {
+    this._password = null;
+    localStorage.removeItem('soundworks:service:auth');
+
+    this.view.content.rejected = false;
+    this.view.render();
+  }
+
   /** @private */
   _onAccesGrantedResponse() {
     localStorage.setItem('soundworks:service:auth', this._password);
@@ -147,6 +173,7 @@ class Auth extends Service {
 
   /** @private */
   _onAccesRefusedResponse() {
+    console.log('refused');
     this.view.content.rejected = true;
     this.view.render();
   }
