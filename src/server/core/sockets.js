@@ -12,12 +12,16 @@ export default {
   /**
    * Register the function to apply when a client of the given `clientType`
    * is connecting to the server
-   * @param {String} clientType
+   * @param {Array} clientTypes - The different type of client, should be namespaced
    * @param {Function} callback
    * @private
    */
-  onConnection(clientType, callback) {
-    this.io.of(clientType).on('connection', (socket) => callback(socket));
+  onConnection(clientTypes, callback) {
+    clientTypes.forEach((clientType) => {
+      this.io.of(clientType).on('connection', (socket) => {
+        callback(clientType, socket);
+      });
+    });
   },
 
   /**

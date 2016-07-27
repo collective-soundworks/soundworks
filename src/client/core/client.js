@@ -235,12 +235,15 @@ const client = {
             serviceManager.start();
           });
 
-          if (this.config.env !== 'production') {
-            this.socket.receive('services:error', (data) => {
-              const msg = `"${data.join(', ')}" required client-side but not server-side`;
-              throw new Error(msg);
-            });
-          }
+          this.socket.receive('client:error', (err) => {
+            switch (err.type) {
+              case 'services':
+                // can only append if env !== 'production'
+                const msg = `"${err.data.join(', ')}" required client-side but not server-side`;
+                throw new Error(msg);
+                break;
+            }
+          });
           break;
           // case 'reconnect':
           //   // serviceManager.start();

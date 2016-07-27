@@ -129,33 +129,8 @@ const server = {
    */
   _routes: {},
 
-
-  _clientConfigDefinition: (clientType, serverConfig, httpRequest) => {
-    return { clientType };
-  },
-
-  /**
-   * Map client types with an activity.
-   * @param {Array<String>} clientTypes - List of client type.
-   * @param {Activity} activity - Activity concerned with the given `clientTypes`.
-   * @private
-   */
-  _setMap(clientTypes, activity) {
-    clientTypes.forEach((clientType) => {
-      if (!this._clientTypeActivitiesMap[clientType])
-        this._clientTypeActivitiesMap[clientType] = new Set();
-
-      this._clientTypeActivitiesMap[clientType].add(activity);
-    });
-  },
-
-  /**
-   * Function used by activities to register themselves as active activities
-   * @param {Activity} activity - Activity to be registered.
-   * @private
-   */
-  setActivity(activity) {
-    this._activities.add(activity);
+  get clientTypes() {
+    return Object.keys(this._clientTypeActivitiesMap);
   },
 
   /**
@@ -165,6 +140,60 @@ const server = {
    */
   require(id, options) {
     return serviceManager.require(id, null, options);
+  },
+
+  /**
+   * Default for the module:soundworks/server.server~clientConfigDefinition
+   * @private
+   */
+  _clientConfigDefinition: (clientType, serverConfig, httpRequest) => {
+    return { clientType };
+  },
+
+  /**
+   * @callback module:soundworks/server.server~clientConfigDefinition
+   * @param {String} clientType - Type of the client.
+   * @param {Object} serverConfig - Configuration of the server.
+   * @param {Object} httpRequest - Http request for the `index.html`
+   * @return {Object}
+   */
+  /**
+   * Set the {@link module:soundworks/server.server~clientConfigDefinition} with
+   * a user defined function.
+   * @param {module:soundworks/server.server~clientConfigDefinition} func - A
+   *  function that returns the data that will be used to populate the `index.html`
+   *  template. The function could (and should) be used to pass configuration
+   *  to the soundworks client.
+   * @see {@link module:soundworks/client.client~init}
+   */
+  setClientConfigDefinition(func) {
+    this._clientConfigDefinition = func;
+  },
+
+  /**
+   * Register a route for a given `clientType`, allow to define a more complex
+   * routing (additionnal route parameters) for a given type of client.
+   * @param {String} clientType - Type of the client.
+   * @param {String|RegExp} route - Template of the route that should be append.
+   *  to the client type
+   *
+   * @example
+   * ```
+   * // allow `conductor` clients to connect to `http://site.com/conductor/1`
+   * server.registerRoute('conductor', '/:param')
+   * ```
+   */
+  defineRoute(clientType, route) {
+    this._routes[clientType] = route;
+  },
+
+  /**
+   * Function used by activities to register themselves as active activities
+   * @param {Activity} activity - Activity to be registered.
+   * @private
+   */
+  setActivity(activity) {
+    this._activities.add(activity);
   },
 
   /**
@@ -185,30 +214,6 @@ const server = {
         }
       }
     });
-  },
-
-  /**
-   * Populate mandatory configuration options
-   * @private
-   */
-  _populateDefaultConfig() {
-    if (this.config.port === undefined)
-       this.config.port = 8000;
-
-    if (this.config.enableGZipCompression === undefined)
-      this.config.enableGZipCompression = true;
-
-    if (this.config.publicDirectory === undefined)
-      this.config.publicDirectory = path.join(process.cwd(), 'public');
-
-    if (this.config.templateDirectory === undefined)
-      this.config.templateDirectory = path.join(process.cwd(), 'html');
-
-    if (this.config.defaultClient === undefined)
-      this.config.defaultClient = 'player';
-
-    if (this.config.socketIO === undefined)
-      this.config.socketIO = {};
   },
 
   /**
@@ -240,7 +245,7 @@ const server = {
     const useHttps = this.config.useHttps || false;
     // launch http(s) server
     if (!useHttps) {
-      this._runHttpServer(expressApp);
+      this._runServer(expressApp);
     } else {
       const httpsInfos = this.config.httpsInfos;
 
@@ -249,50 +254,74 @@ const server = {
         const key = fs.readFileSync(httpsInfos.key);
         const cert = fs.readFileSync(httpsInfos.cert);
 
-        this._runHttpsServer(expressApp, key, cert);
+        this._runSecureServer(expressApp, key, cert);
       // generate certificate on the fly (for development purposes)
       } else {
         pem.createCertificate({ days: 1, selfSigned: true }, (err, keys) => {
-          this._runHttpsServer(expressApp, keys.serviceKey, keys.certificate);
+          this._runSecureServer(expressApp, keys.serviceKey, keys.certificate);
         });
       }
     }
   },
 
-  /**
-   * Register a route for a given `clientType`, allow to define a more complex
-   * routing (additionnal route parameters) for a given type of client.
-   * @param {String} clientType - Type of the client.
-   * @param {String|RegExp} route - Template of the route that should be append.
-   *  to the client type
-   *
-   * @example
-   * ```
-   * // allow `conductor` clients to connect to `http://site.com/conductor/1`
-   * server.registerRoute('conductor', '/:param')
-   * ```
+   /**
+   * Populate mandatory configuration options
+   * @private
    */
-  defineRoute(clientType, route) {
-    this._routes[clientType] = route;
+  _populateDefaultConfig() {
+    if (this.config.port === undefined)
+       this.config.port = 8000;
+
+    if (this.config.enableGZipCompression === undefined)
+      this.config.enableGZipCompression = true;
+
+    if (this.config.publicDirectory === undefined)
+      this.config.publicDirectory = path.join(process.cwd(), 'public');
+
+    if (this.config.templateDirectory === undefined)
+      this.config.templateDirectory = path.join(process.cwd(), 'html');
+
+    if (this.config.defaultClient === undefined)
+      this.config.defaultClient = 'player';
+
+    if (this.config.socketIO === undefined)
+      this.config.socketIO = {};
   },
 
+  /**
+   * Map client types with an activity.
+   * @param {Array<String>} clientTypes - List of client type.
+   * @param {Activity} activity - Activity concerned with the given `clientTypes`.
+   * @private
+   */
+  _mapClientTypesToActivity(clientTypes, activity) {
+    clientTypes.forEach((clientType) => {
+      if (!this._clientTypeActivitiesMap[clientType])
+        this._clientTypeActivitiesMap[clientType] = new Set();
 
-  setClientConfigDefinition(func) {
-    this._clientConfigDefinition = func;
+      this._clientTypeActivitiesMap[clientType].add(activity);
+    });
   },
 
   /**
    * Launch a http server.
    * @private
    */
-  _runHttpServer(expressApp) {
+  _runServer(expressApp) {
     const httpServer = http.createServer(expressApp);
+
+    this._initActivities();
     this._initSockets(httpServer);
-    this._initActivities(expressApp);
+    this._initRouting(expressApp);
 
     httpServer.listen(expressApp.get('port'), function() {
       const url = `http://127.0.0.1:${expressApp.get('port')}`;
       console.log('[HTTP SERVER] Server listening on', url);
+    });
+
+    // socket connnection
+    sockets.onConnection(this.clientTypes, (clientType, socket) => {
+      this._onSocketConnection(clientType, socket);
     });
   },
 
@@ -300,14 +329,21 @@ const server = {
    * Launch a https server.
    * @private
    */
-  _runHttpsServer(expressApp, key, cert) {
+  _runSecureServer(expressApp, key, cert) {
     const httpsServer = https.createServer({ key, cert }, expressApp);
+
+    this._initActivities();
     this._initSockets(httpsServer);
-    this._initActivities(expressApp);
+    this._initRouting(expressApp);
 
     httpsServer.listen(expressApp.get('port'), function() {
       const url = `https://127.0.0.1:${expressApp.get('port')}`;
       console.log('[HTTPS SERVER] Server listening on', url);
+    });
+
+    // socket connnection
+    sockets.onConnection(this.clientTypes, (clientType, socket) => {
+      this._onSocketConnection(clientType, socket);
     });
   },
 
@@ -325,39 +361,38 @@ const server = {
   },
 
   /**
-   * Start all activities and map the routes (clientType / activities mapping).
+   * Map activities to their respective client type(s) and start them all.
    * @private
    */
-  _initActivities(expressApp) {
-    this._activities.forEach((activity) => activity.start());
-
+  _initActivities() {
     this._activities.forEach((activity) => {
-      this._setMap(activity.clientTypes, activity);
+      this._mapClientTypesToActivity(activity.clientTypes, activity);
     });
 
-    // map `clientType` to their respective activities
+    this._activities.forEach((activity) => activity.start());
+  },
+
+  /**
+   * Init routing for each client. The default client must be opened last.
+   * @private
+   */
+  _initRouting(expressApp) {
     for (let clientType in this._clientTypeActivitiesMap) {
-      if (clientType !== this.config.defaultClient) {
-        const activities = this._clientTypeActivitiesMap[clientType];
-        this._map(clientType, activities, expressApp);
-      }
+      if (clientType !== this.config.defaultClient)
+        this._openClientRoute(clientType, expressApp);
     }
 
-    // make sure `defaultClient` (aka `player`) is mapped last
     for (let clientType in this._clientTypeActivitiesMap) {
-      if (clientType === this.config.defaultClient) {
-        const activities = this._clientTypeActivitiesMap[clientType];
-        this._map(clientType, activities, expressApp);
-      }
+      if (clientType === this.config.defaultClient)
+        this._openClientRoute(clientType, expressApp);
     }
   },
 
   /**
-   * Map a client type to a route, a set of activities.
-   * Additionnally listen for their socket connection.
+   * Open the route for the given client.
    * @private
    */
-  _map(clientType, activities, expressApp) {
+  _openClientRoute(clientType, expressApp) {
     let route = '';
 
     if (this._routes[clientType])
@@ -389,19 +424,15 @@ const server = {
         res.send(appIndex);
       });
     });
-
-    // socket connnection
-    sockets.onConnection(clientType, (socket) => {
-      this._onSocketConnection(clientType, socket, activities);
-    });
   },
 
   /**
    * Socket connection callback.
    * @private
    */
-  _onSocketConnection(clientType, socket, activities) {
+  _onSocketConnection(clientType, socket) {
     const client = new Client(clientType, socket);
+    const activities = this._clientTypeActivitiesMap[clientType];
 
     // global lifecycle of the client
     sockets.receive(client, 'disconnect', () => {
@@ -431,7 +462,10 @@ const server = {
         });
 
         if (missingServices.length > 0) {
-          sockets.send(client, 'services:error', missingServices);
+          sockets.send(client, 'client:error', {
+            type: 'services',
+            data: missingServices,
+          });
           return;
         }
       }
