@@ -21,7 +21,7 @@ const socket = {
    * @param {String} options.url - The url where the socket should connect.
    * @param {Array<String>} options.transports - The transports to use for the socket (cf. socket.io).
    */
-  initialize(namespace, options) {
+  init(namespace, options) {
     const url = `${options.url}/${namespace}`;
 
     this.socket = sio(url, { transports: options.transports });

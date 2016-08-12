@@ -138,9 +138,9 @@ const client = {
    * @param {Object} [config={}]
    * @param {Object} [config.appContainer='#container'] - A css selector
    *  matching a DOM element where the views should be inserted.
-   * @param {Object} [config.socketIO.url=''] - The url where the socket should
+   * @param {Object} [config.websockets.url=''] - The url where the socket should
    *  connect _(unstable)_.
-   * @param {Object} [config.socketIO.transports=['websocket']] - The transport
+   * @param {Object} [config.websockets.transports=['websocket']] - The transport
    *  used to create the url (overrides default socket.io mecanism) _(unstable)_.
    */
   init(clientType = 'player', config = {}) {
@@ -149,15 +149,15 @@ const client = {
     // retrieve
     this._parseUrlParams();
     // if socket config given, mix it with defaults
-    const socketIO = Object.assign({
+    const websocketConfig = Object.assign({
       url: '',
       transports: ['websocket']
-    }, config.socketIO);
+    }, config.websockets);
 
     // mix all other config and override with defined socket config
     Object.assign(this.config, {
       appContainer: '#container',
-    }, config, { socketIO });
+    }, config, { websocketConfig });
 
     serviceManager.init();
 
@@ -214,7 +214,7 @@ const client = {
    * @private
    */
   _initSocket() {
-    this.socket = socket.initialize(this.type, this.config.socketIO);
+    this.socket = socket.init(this.type, this.config.websockets);
 
     // see: http://socket.io/docs/client-api/#socket
     this.socket.addStateListener((eventName) => {

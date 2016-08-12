@@ -9,7 +9,7 @@ function socketSerializer(socket) {
  * @private
  */
 const logger = {
-  initialize(config) {
+  init(config) {
     if (!config.serializers)
       config.serializers = {};
 

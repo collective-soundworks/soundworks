@@ -45,10 +45,10 @@ import sockets from './sockets';
  * @property {Number} setup.capacity - Maximum number of positions (may limit
  * or be limited by the number of labels and/or coordinates).
  *
- * @property {Object} socketIO - Socket.io configuration
- * @property {String} socketIO.url - Optionnal url where the socket should
+ * @property {Object} websockets - Websockets configuration (socket.io)
+ * @property {String} websockets.url - Optionnal url where the socket should
  *  connect.
- * @property {Array} socketIO.transports - List of the transport mecanims that
+ * @property {Array} websockets.transports - List of the transport mecanims that
  *  should be used to open or emulate the socket.
  *
  * @property {Boolean} useHttps -  Define if the HTTP server should be launched
@@ -227,7 +227,7 @@ const server = {
     this._populateDefaultConfig();
 
     if (this.config.logger !== undefined)
-      logger.initialize(this.config.logger);
+      logger.init(this.config.logger);
 
     // configure express
     const expressApp = new express();
@@ -284,8 +284,8 @@ const server = {
     if (this.config.defaultClient === undefined)
       this.config.defaultClient = 'player';
 
-    if (this.config.socketIO === undefined)
-      this.config.socketIO = {};
+    if (this.config.websockets === undefined)
+      this.config.websockets = {};
   },
 
   /**
@@ -304,6 +304,23 @@ const server = {
   },
 
   /**
+   * Init websocket server.
+   * @private
+   */
+  _initSockets(httpServer) {
+    // merge socket.io configuration for cordova
+    // @todo - move to template
+    if (this.config.cordova && this.config.cordova.websockets)
+      this.config.cordova.websockets = Object.assign({}, this.config.websockets, this.config.cordova.websockets);
+
+    sockets.init(httpServer, this.config.websockets);
+    // socket connnection
+    sockets.onConnection(this.clientTypes, (clientType, socket) => {
+      this._onSocketConnection(clientType, socket);
+    });
+  },
+
+  /**
    * Launch a http server.
    * @private
    */
@@ -311,7 +328,6 @@ const server = {
     const httpServer = http.createServer(expressApp);
 
     this._initActivities();
-    this._initSockets(httpServer);
     this._initRouting(expressApp);
 
     httpServer.listen(expressApp.get('port'), function() {
@@ -319,10 +335,7 @@ const server = {
       console.log('[HTTP SERVER] Server listening on', url);
     });
 
-    // socket connnection
-    sockets.onConnection(this.clientTypes, (clientType, socket) => {
-      this._onSocketConnection(clientType, socket);
-    });
+    this._initSockets(httpServer);
   },
 
   /**
@@ -333,7 +346,6 @@ const server = {
     const httpsServer = https.createServer({ key, cert }, expressApp);
 
     this._initActivities();
-    this._initSockets(httpsServer);
     this._initRouting(expressApp);
 
     httpsServer.listen(expressApp.get('port'), function() {
@@ -341,23 +353,7 @@ const server = {
       console.log('[HTTPS SERVER] Server listening on', url);
     });
 
-    // socket connnection
-    sockets.onConnection(this.clientTypes, (clientType, socket) => {
-      this._onSocketConnection(clientType, socket);
-    });
-  },
-
-  /**
-   * Init websocket server.
-   * @private
-   */
-  _initSockets(httpServer) {
-    // merge socket.io configuration for cordova
-    // @todo - move to template
-    if (this.config.cordova && this.config.cordova.socketIO)
-      this.config.cordova.socketIO = Object.assign({}, this.config.socketIO, this.config.cordova.socketIO);
-
-    sockets.initialize(httpServer, this.config.socketIO);
+    this._initSockets(httpsServer);
   },
 
   /**

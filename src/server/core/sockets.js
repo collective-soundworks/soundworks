@@ -5,7 +5,7 @@ export default {
    * Initialize the object which socket.io
    * @private
    */
-  initialize(httpServer, config) {
+  init(httpServer, config) {
     this.io = new sio(httpServer, config);;
   },
 
