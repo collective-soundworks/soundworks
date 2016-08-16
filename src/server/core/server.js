@@ -111,6 +111,12 @@ const server = {
   config: {},
 
   /**
+   * The url of the node server on the current machine.
+   * @private
+   */
+  _address: '',
+
+  /**
    * Mapping between a `clientType` and its related activities.
    * @private
    */
@@ -330,9 +336,9 @@ const server = {
     this._initActivities();
     this._initRouting(expressApp);
 
-    httpServer.listen(expressApp.get('port'), function() {
-      const url = `http://127.0.0.1:${expressApp.get('port')}`;
-      console.log('[HTTP SERVER] Server listening on', url);
+    httpServer.listen(expressApp.get('port'), () => {
+      this._address = `http://127.0.0.1:${expressApp.get('port')}`;
+      console.log('[HTTP SERVER] Server listening on', this._address);
     });
 
     this._initSockets(httpServer);
@@ -348,9 +354,9 @@ const server = {
     this._initActivities();
     this._initRouting(expressApp);
 
-    httpsServer.listen(expressApp.get('port'), function() {
-      const url = `https://127.0.0.1:${expressApp.get('port')}`;
-      console.log('[HTTPS SERVER] Server listening on', url);
+    httpsServer.listen(expressApp.get('port'), () => {
+      this._address = `https://127.0.0.1:${expressApp.get('port')}`;
+      console.log('[HTTPS SERVER] Server listening on', this._address);
     });
 
     this._initSockets(httpsServer);
