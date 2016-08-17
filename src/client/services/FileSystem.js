@@ -9,12 +9,44 @@ const isString = (value) => (typeof value === 'string' || value instanceof Strin
  * Interface for the client `'file-system'` service.
  *
  * This service allow to retrieve a list of file or directories from a given path.
+ * If a `list` option is given when requiring the service, the service marks
+ * itself as `ready` when the file list is returned by the server.
+ * The service can be used later to retrieve new lists, each required list is
+ * cached client-side to prevent useless network traffic.
+ *
+ * @param {Object} options
+ * @param {String|module:soundworks/server.FileSystem~ListConfig|Array<String>|Array<module:soundworks/server.FileSystem~ListConfig>} option.list -
+ *  List to
  *
  * __*The service must be used with its [client-side counterpart]{@link module:soundworks/client.FileSystem}*__
  *
  * @memberof module:soundworks/client
  * @example
+ * // require and configure the `file-system` service inside the experience
+ * // constructor, the list to retrive can be configured as a simple string
  * this.fileSystem = this.require('file-system', { list: 'audio' });
+ * // ... or as a full {@link module:soundworks/client.FileSystem~ListConfig}
+ * // object for better control over the returned list
+ * this.fileSystem = this.require('file-system', { list: {
+ *     path: 'audio',
+ *     match: /\.wav$/,
+ *     recursive: true,
+ *   }
+ * };
+ *
+ * // given the following file system
+ * // audio/
+ * //   voice.mp3
+ * //   voice.wav
+ * //   drum/
+ * //     kick.mp3
+ * //     kick.wav
+ * // the first query will return the following result:
+ * > ['/audio/voice.mp3', 'audio/voice.wav']
+ * // while the second one will return:
+ * > ['/audio/voice.wav', 'audio/drum/kick.wav']
+ *
+ * @see {@link module:soundworks/client.FileSystem~ListConfig}
  */
 class FileSystem extends Service {
   /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */
