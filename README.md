@@ -65,7 +65,7 @@ The services currently provided include, for example:
  * `placer` - lets the user chose an available ticket or predefined position
  * `locator` - lets the user indicate an approximate position on a map
  * `file-system` - allow to retrieve a file list from a given directory
- * `loader` - preloads audio and other content files
+ * `audio-buffer-manager` - preloads audio buffers and related JSON files descriptors
  * `auth` - add a simple login page to specific client
  * `sync` - provides a synchronized clock to all clients
  * `scheduler` - differs function calls and schedules recurrent events in reference to the synchronized clock or a local audio clock

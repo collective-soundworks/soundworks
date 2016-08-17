@@ -24,9 +24,9 @@ import sockets from './sockets';
  * @property {String} defaultClient - Name of the default client type,
  *  i.e. the client that can access the application at its root URL
  * @property {String} assetsDomain - Define from where the assets (static files)
- *  should be loaded, these value could also refer to a separate server for
- *  scalability reasons. This value should also be used client-side to configure
- *  the `loader` service.
+ *  should be loaded, this value can refer to a separate server for scalability.
+ *  The value should be used client-side to configure the `audio-buffer-manager`
+ *  service.
  * @property {Number} port - Port used to open the http server, in production
  *  this value is typically 80
  *
