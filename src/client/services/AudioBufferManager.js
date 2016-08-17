@@ -1,12 +1,21 @@
 import { audioContext } from 'waves-audio';
 import { SuperLoader } from 'waves-loaders';
 import debug from 'debug';
+import _path from 'path';
 import SegmentedView from '../views/SegmentedView';
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
 
 const SERVICE_ID = 'service:audio-buffer-manager';
 const log = debug('soundworks:services:audio-buffer-manager');
+
+function flatten(a) {
+  const r = [];
+  const f = (v) => { Array.isArray(v) ? v.forEach(f) : r.push(v) };
+  f(a);
+
+  return r;
+}
 
 const defaultViewTemplate = `
 <div class="section-top flex-middle">
@@ -25,7 +34,6 @@ const defaultViewTemplate = `
 const defaultViewContent = {
   loading: 'Loading sounds…',
 };
-
 
 /**
  * Interface for the view of the `audio-buffer-manager` service.
@@ -71,6 +79,11 @@ function getIdFromFilePath(filePath) {
  * @param {Array<String>} options.files - List of files to load.
  * @param {Boolean} [options.showProgress=true] - Display the progress bar
  *  in the view.
+ * @param {String|module:soundworks/client.FileSystem~ListConfig} [options.directories=null] -
+ *  Load all the files in particular directories. If setted this option relies
+ *  on the {@link module:soundworks/client.FileSystem} which itself relies on
+ *  its server counterpart, the audio-buffer-manager can then no longer be
+ *  considered as a client-only service.
  *
  * @memberof module:soundworks/client
  * @example
@@ -123,6 +136,7 @@ class AudioBufferManager extends Service {
       assetsDomain: '',
       showProgress: true,
       files: [],
+      directories: null,
       audioWrapTail: 0,
       viewCtor: AudioBufferManagerView,
       viewPriority: 4,
@@ -132,6 +146,15 @@ class AudioBufferManager extends Service {
     this._defaultViewContent = defaultViewContent;
 
     this.configure(defaults);
+  }
+
+  configure(options) {
+    super.configure(options);
+
+    const dir = this.options.directories;
+    if (dir) {
+      this._fileSystem = this.require('file-system', { list: dir });
+    }
   }
 
   /** @private */
@@ -168,8 +191,15 @@ class AudioBufferManager extends Service {
       this.init();
 
     this.show();
-    // preload files (must be called after show)
-    this._loadFiles(this.options.files, this.view, true);
+
+    // preload files (must be called after show (why ?))
+    if (this._fileSystem) {
+      this._fileSystem.getList(this.options.directories).then((list) => {
+        this._loadFiles(flatten(list), this.view, true);
+      });
+    } else {
+      this._loadFiles(this.options.files, this.view, true);
+    }
   }
 
   /** @private */
@@ -280,7 +310,7 @@ class AudioBufferManager extends Service {
           this._appendFileDescription(filePaths, fileDescriptions, files[id], id);
       }
 
-      filePaths = filePaths.map((path) => this.options.assetsDomain + path);
+      filePaths = filePaths.map((path) => _path.join(this.options.assetsDomain, path));
       log(filePaths);
 
       // load files
