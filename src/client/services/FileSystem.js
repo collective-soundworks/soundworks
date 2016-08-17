@@ -15,7 +15,7 @@ const isString = (value) => (typeof value === 'string' || value instanceof Strin
  * cached client-side to prevent useless network traffic.
  *
  * @param {Object} options
- * @param {String|module:soundworks/server.FileSystem~ListConfig|Array<String>|Array<module:soundworks/server.FileSystem~ListConfig>} option.list -
+ * @param {String|module:soundworks/client.FileSystem~ListConfig|Array<String>|Array<module:soundworks/client.FileSystem~ListConfig>} option.list -
  *  List to
  *
  * __*The service must be used with its [client-side counterpart]{@link module:soundworks/client.FileSystem}*__
@@ -80,7 +80,7 @@ class FileSystem extends Service {
   }
 
   /**
-   * @typedef {Object} module:soundworks/server.FileSystem~ListConfig
+   * @typedef {Object} module:soundworks/client.FileSystem~ListConfig
    * @property {String} path - Name of the folder to search into.
    * @property {RegExp} [match='*'] - RegExp used to filter the results.
    * @property {Boolean} [recursive=false] - Define if the search should be
@@ -91,7 +91,7 @@ class FileSystem extends Service {
   /**
    * Return a list of file according to the given configuration.
    *
-   * @param {String|module:soundworks/server.FileSystem~ListConfig|Array<String>|Array<module:soundworks/server.FileSystem~ListConfig>} config -
+   * @param {String|module:soundworks/client.FileSystem~ListConfig|Array<String>|Array<module:soundworks/client.FileSystem~ListConfig>} config -
    *  Details of the requested list(s). The requested files / directories must
    *  be publicly accessible.
    * @return {Promise<Array>|Promise<Array<Array>>} - Promise resolving with an
