@@ -2,7 +2,7 @@ export function linearToDecibel(val) {
   return 8.685889638065035 * Math.log(val); // 20 * log10(val)
 };
 
-export function decibelTolinear(val) {
+export function decibelToLinear(val) {
   return Math.exp(0.11512925464970229 * val); // pow(10, val / 20)
 };
 
@@ -18,7 +18,7 @@ export function linearToCent(val) {
   return 1731.23404906675611 * Math.log(val); // 1200 * log2(val)
 };
 
-export function centTolinear(val) {
+export function centToLinear(val) {
   return Math.exp(0.0005776226504666211 * val); // pow(2, val / 1200)
 };
 
