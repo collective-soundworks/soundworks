@@ -59,7 +59,7 @@ class Checkin extends Service {
     this.setup = this._sharedConfig.get(configItem);
 
     if (this.setup === null)
-      throw new Error(`"service:checkin": server.config.${configItem} is not defined`);
+      throw new Error(`"${SERVICE_ID}": server.config.${configItem} is not defined`);
 
     /**
      * Maximum number of clients checked in (may limit or be limited by the

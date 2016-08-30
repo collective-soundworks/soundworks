@@ -94,7 +94,7 @@ const defaultViewContent = {
  */
 class Auth extends Service {
   /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */
-  constructor(options) {
+  constructor() {
     super(SERVICE_ID, true);
 
     const defaults = {

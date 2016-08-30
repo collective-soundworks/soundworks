@@ -1,12 +1,21 @@
 import { audioContext } from 'waves-audio';
 import { SuperLoader } from 'waves-loaders';
 import debug from 'debug';
+import _path from 'path';
 import SegmentedView from '../views/SegmentedView';
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
 
-const SERVICE_ID = 'service:loader';
-const log = debug('soundworks:services:loader');
+const SERVICE_ID = 'service:audio-buffer-manager';
+const log = debug('soundworks:services:audio-buffer-manager');
+
+function flatten(a) {
+  const r = [];
+  const f = (v) => { Array.isArray(v) ? v.forEach(f) : r.push(v) };
+  f(a);
+
+  return r;
+}
 
 const defaultViewTemplate = `
 <div class="section-top flex-middle">
@@ -26,11 +35,10 @@ const defaultViewContent = {
   loading: 'Loading sounds…',
 };
 
-
 /**
- * Interface for the view of the `loader` service.
+ * Interface for the view of the `audio-buffer-manager` service.
  *
- * @interface AbstractLoaderView
+ * @interface AbstractAudioBufferManagerView
  * @extends module:soundworks/client.View
  */
 /**
@@ -38,10 +46,10 @@ const defaultViewContent = {
  * is received.
  *
  * @function
- * @name AbstractLoaderView.onProgress
+ * @name AbstractAudioBufferManagerView.onProgress
  * @param {Number} percent - The purcentage of loaded assets.
  */
-class LoaderView extends SegmentedView {
+class AudioBufferManagerView extends SegmentedView {
   onRender() {
     super.onRender();
     this.$progressBar = this.$el.querySelector('.progress-bar');
@@ -59,7 +67,7 @@ function getIdFromFilePath(filePath) {
 }
 
 /**
- * Interface for the client `'loader'` service.
+ * Interface for the client `'audio-buffer-manager'` service.
  *
  * This service allows to preload files and store them into buffers
  * before the beginning of the experience. Audio files will be converted and
@@ -71,18 +79,23 @@ function getIdFromFilePath(filePath) {
  * @param {Array<String>} options.files - List of files to load.
  * @param {Boolean} [options.showProgress=true] - Display the progress bar
  *  in the view.
+ * @param {String|module:soundworks/client.FileSystem~ListConfig} [options.directories=null] -
+ *  Load all the files in particular directories. If setted this option relies
+ *  on the {@link module:soundworks/client.FileSystem} which itself relies on
+ *  its server counterpart, the audio-buffer-manager can then no longer be
+ *  considered as a client-only service.
  *
  * @memberof module:soundworks/client
  * @example
- * // require and configure the loader inside the experience constructor,
- * // the files to load can be defined as an object with identifiers
- * this.loader = this.require('loader', { files: {
+ * // require and configure the `audio-buffer-manager` inside the experience
+ * // constructor, the files to load can be defined as an object with identifiers
+ * this.audioBufferManager = this.require('audio-buffer-manager', { files: {
  *   kick: 'sounds/kick_44kHz.mp3',
  *   snare: 'sounds/808snare.mp3'
  * }});
  *
  * // ... or as a group of objets associating different files to different keys
- * this.loader = this.require('loader', { files: {
+ * this.audioBufferManager = this.require('audio-buffer-manager', { files: {
  *   latin: {
  *     audio: 'loops/sheila-e-raspberry.mp3',
  *     segments: 'loops/sheila-e-raspberry-markers.json',
@@ -95,26 +108,26 @@ function getIdFromFilePath(filePath) {
  *
  * // ... when defining the files to load as a simple array,
  * // the identifiers are derived as the file names without path and extension
- * this.loader = this.require('loader', { files: [
+ * this.audioBufferManager = this.require('audio-buffer-manager', { files: [
  *   'sounds/drums/kick.mp3',
  *   'sounds/drums/snare.mp3'
  * ]});
  *
  * // the loaded objects can be retrieved according to their definition
- * const kickBuffer = this.loader.get('kick');
- * const audioBuffer = this.loader.get('jazz', 'audio');
- * const segmentArray = this.loader.get('jazz', 'segments');
+ * const kickBuffer = this.audioBufferManager.get('kick');
+ * const audioBuffer = this.audioBufferManager.get('jazz', 'audio');
+ * const segmentArray = this.audioBufferManager.get('jazz', 'segments');
  *
  * // ... audio buffers an be retrieved through their identifier
- * const snareBuffer = this.loader.getAudioBuffer('snare');
- * const jazzBuffer = this.loader.getAudioBuffer('jazz');
+ * const snareBuffer = this.audioBufferManager.getAudioBuffer('snare');
+ * const jazzBuffer = this.audioBufferManager.getAudioBuffer('jazz');
  *
  * // ... the buffers property contains an array of all loaded objects
  * // in the order of their definition
- * const kickBuffer = this.loader.buffers[0];
- * const snareBuffer = this.loader.buffers[1];
+ * const kickBuffer = this.audioBufferManager.buffers[0];
+ * const snareBuffer = this.audioBufferManager.buffers[1];
  */
-class Loader extends Service {
+class AudioBufferManager extends Service {
   /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */
   constructor() {
     super(SERVICE_ID, false);
@@ -123,8 +136,9 @@ class Loader extends Service {
       assetsDomain: '',
       showProgress: true,
       files: [],
+      directories: null,
       audioWrapTail: 0,
-      viewCtor: LoaderView,
+      viewCtor: AudioBufferManagerView,
       viewPriority: 4,
     };
 
@@ -132,6 +146,15 @@ class Loader extends Service {
     this._defaultViewContent = defaultViewContent;
 
     this.configure(defaults);
+  }
+
+  configure(options) {
+    super.configure(options);
+
+    const dir = this.options.directories;
+    if (dir) {
+      this._fileSystem = this.require('file-system', { list: dir });
+    }
   }
 
   /** @private */
@@ -168,8 +191,15 @@ class Loader extends Service {
       this.init();
 
     this.show();
-    // preload files (must be called after show)
-    this._loadFiles(this.options.files, this.view, true);
+
+    // preload files (must be called after show (why ?))
+    if (this._fileSystem) {
+      this._fileSystem.getList(this.options.directories).then((list) => {
+        this._loadFiles(flatten(list), this.view, true);
+      });
+    } else {
+      this._loadFiles(this.options.files, this.view, true);
+    }
   }
 
   /** @private */
@@ -280,7 +310,7 @@ class Loader extends Service {
           this._appendFileDescription(filePaths, fileDescriptions, files[id], id);
       }
 
-      filePaths = filePaths.map((path) => this.options.assetsDomain + path);
+      filePaths = filePaths.map((path) => _path.join(this.options.assetsDomain, path));
       log(filePaths);
 
       // load files
@@ -386,6 +416,6 @@ class Loader extends Service {
   }
 }
 
-serviceManager.register(SERVICE_ID, Loader);
+serviceManager.register(SERVICE_ID, AudioBufferManager);
 
-export default Loader;
+export default AudioBufferManager;
