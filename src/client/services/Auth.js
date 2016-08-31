@@ -5,6 +5,7 @@ import serviceManager from '../core/serviceManager';
 
 
 const SERVICE_ID = 'service:auth';
+const LOCAL_STORAGE_KEY = 'soundworks:${SERVICE_ID}';
 
 /**
  * Interface for the view of the `auth` service.
@@ -133,7 +134,7 @@ class Auth extends Service {
     this.receive('granted', this._onAccesGrantedResponse);
     this.receive('refused', this._onAccesRefusedResponse);
 
-    const storedPassword = localStorage.getItem('soundworks:service:auth');
+    const storedPassword = localStorage.getItem(LOCAL_STORAGE_KEY);
 
     if (storedPassword !== null)
       this._sendPassword(storedPassword);
@@ -151,6 +152,16 @@ class Auth extends Service {
     this.hide();
   }
 
+  /**
+   * Remove the stored password from local storage. This method is aimed at
+   * being called from inside an experience / controller. Any UI update
+   * resulting from the call of this method should then be handled from the
+   * experience.
+   */
+  logout() {
+    localStorage.removeItem(LOCAL_STORAGE_KEY);
+  }
+
   /** @private */
   _sendPassword(password) {
     this._password = password;
@@ -160,7 +171,7 @@ class Auth extends Service {
   /** @private */
   _resetPassword() {
     this._password = null;
-    localStorage.removeItem('soundworks:service:auth');
+    localStorage.removeItem(LOCAL_STORAGE_KEY);
 
     this.view.content.rejected = false;
     this.view.render();
@@ -168,7 +179,7 @@ class Auth extends Service {
 
   /** @private */
   _onAccesGrantedResponse() {
-    localStorage.setItem('soundworks:service:auth', this._password);
+    localStorage.setItem(LOCAL_STORAGE_KEY, this._password);
     this.ready();
   }
 
