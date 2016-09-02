@@ -11,7 +11,7 @@ const log = debug('soundworks:services:audio-buffer-manager');
 
 function flatten(a) {
   const r = [];
-  const f = (v) => { Array.isArray(v) ? v.forEach(f) : r.push(v) };
+  const f = (v) => Array.isArray(v) ? v.forEach(f) : r.push(v);
   f(a);
 
   return r;
@@ -151,10 +151,10 @@ class AudioBufferManager extends Service {
   configure(options) {
     super.configure(options);
 
-    const dir = this.options.directories;
-    if (dir) {
-      this._fileSystem = this.require('file-system', { list: dir });
-    }
+    const directories = this.options.directories;
+
+    if (directories !== null) {
+      this._fileSystem = this.require('file-system', { list: directories });
   }
 
   /** @private */
