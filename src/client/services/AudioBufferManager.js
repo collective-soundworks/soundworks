@@ -310,7 +310,7 @@ class AudioBufferManager extends Service {
           this._appendFileDescription(filePaths, fileDescriptions, files[id], id);
       }
 
-            // test absolute urls (or protocol relative)
+      // test absolute urls (or protocol relative)
       const isAbsolute = /^https?:\/\/|^\/\//i;
 
       filePaths = filePaths.map((path) => {
