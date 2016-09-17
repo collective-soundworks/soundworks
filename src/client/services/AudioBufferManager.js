@@ -148,12 +148,13 @@ class AudioBufferManager extends Service {
     this.configure(defaults);
   }
 
+  /** @private */
   configure(options) {
     super.configure(options);
 
     const directories = this.options.directories;
 
-    if (directories !== null) {
+    if (directories !== null)
       this._fileSystem = this.require('file-system', { list: directories });
   }
 
