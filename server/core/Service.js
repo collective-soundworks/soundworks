@@ -32,17 +32,16 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * @memberof module:soundworks/server
  * @extends module:soundworks/server.Activity
  */
-
 var Service = function (_Activity) {
   (0, _inherits3.default)(Service, _Activity);
 
   function Service() {
     (0, _classCallCheck3.default)(this, Service);
-    return (0, _possibleConstructorReturn3.default)(this, (0, _getPrototypeOf2.default)(Service).apply(this, arguments));
+    return (0, _possibleConstructorReturn3.default)(this, (Service.__proto__ || (0, _getPrototypeOf2.default)(Service)).apply(this, arguments));
   }
 
   return Service;
 }(_Activity3.default);
 
 exports.default = Service;
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIlNlcnZpY2UuanMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OztBQUFBOzs7Ozs7Ozs7Ozs7O0lBUU0sTzs7Ozs7Ozs7Ozs7a0JBRVMsTyIsImZpbGUiOiJTZXJ2aWNlLmpzIiwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IEFjdGl2aXR5IGZyb20gJy4uL2NvcmUvQWN0aXZpdHknO1xuXG4vKipcbiAqIEJhc2UgY2xhc3MgdG8gYmUgZXh0ZW5kZWQgaW4gb3JkZXIgdG8gY3JlYXRlIGEgbmV3IHNlcnZpY2UuXG4gKlxuICogQG1lbWJlcm9mIG1vZHVsZTpzb3VuZHdvcmtzL3NlcnZlclxuICogQGV4dGVuZHMgbW9kdWxlOnNvdW5kd29ya3Mvc2VydmVyLkFjdGl2aXR5XG4gKi9cbmNsYXNzIFNlcnZpY2UgZXh0ZW5kcyBBY3Rpdml0eSB7fVxuXG5leHBvcnQgZGVmYXVsdCBTZXJ2aWNlO1xuIl19
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIlNlcnZpY2UuanMiXSwibmFtZXMiOlsiU2VydmljZSJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OztBQUFBOzs7Ozs7QUFFQTs7Ozs7O0lBTU1BLE87Ozs7Ozs7Ozs7O2tCQUVTQSxPIiwiZmlsZSI6IlNlcnZpY2UuanMiLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgQWN0aXZpdHkgZnJvbSAnLi4vY29yZS9BY3Rpdml0eSc7XG5cbi8qKlxuICogQmFzZSBjbGFzcyB0byBiZSBleHRlbmRlZCBpbiBvcmRlciB0byBjcmVhdGUgYSBuZXcgc2VydmljZS5cbiAqXG4gKiBAbWVtYmVyb2YgbW9kdWxlOnNvdW5kd29ya3Mvc2VydmVyXG4gKiBAZXh0ZW5kcyBtb2R1bGU6c291bmR3b3Jrcy9zZXJ2ZXIuQWN0aXZpdHlcbiAqL1xuY2xhc3MgU2VydmljZSBleHRlbmRzIEFjdGl2aXR5IHt9XG5cbmV4cG9ydCBkZWZhdWx0IFNlcnZpY2U7XG4iXX0=
