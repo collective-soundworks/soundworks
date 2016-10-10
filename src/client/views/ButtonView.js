@@ -19,7 +19,7 @@ function convertName(name) {
 }
 
 const defaultTemplate = `
-  <% definitions.forEach((def, index) => { %>
+  <% definitions.forEach(function(def, index) { %>
     <button class="btn <%= def.state %>"
             data-index="<%= index %>"
             <%= def.state === 'disabled' ? 'disabled' : '' %>
@@ -28,7 +28,6 @@ const defaultTemplate = `
     </button>
   <% }); %>
 `;
-
 
 /**
  * View to display a list of buttons.
