@@ -32,7 +32,7 @@ const isString = (value) => (typeof value === 'string' || value instanceof Strin
  *     match: /\.wav$/,
  *     recursive: true,
  *   }
- * };
+ * });
  *
  * // given the following file system
  * // audio/
@@ -83,7 +83,7 @@ class FileSystem extends Service {
    * @typedef {Object} module:soundworks/client.FileSystem~ListConfig
    * @property {String} path - Name of the folder to search into.
    * @property {RegExp} [match='*'] - RegExp used to filter the results.
-   * @property {Boolean} [recursive=false] - Define if the search should be
+   * @property {Boolean} [recursive=false] - Flag whether the search should be
    *  recursive.
    * @property {Boolean} [directories=false] - If true only return directories,
    *  files otherwise.

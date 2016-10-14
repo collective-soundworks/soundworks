@@ -35,12 +35,12 @@ const defaultTemplate = `
  */
 export default class ButtonView extends View {
   /**
-   * @param {Array<Object>} definitions - An array of definitions for the buttons. Each definitions should contain a `label` and an optionnal `state` entry (valid values for `states` are `'selected'`, `'unselected'` or `'disabled'`).
+   * @param {Array<Object>} definitions - An array of button definitions. Each definition should contain a `label` and an optionnal `state` entry (valid values for `states` are `'selected'`, `'unselected'` or `'disabled'`).
    * @param {Function} onSelect - The callback to execute when a button is selected.
    * @param {Function} onUnselect - The callback to execute when a button is unselected.
    * @param {Object} options
    * @param {Object} [options.maxSelected=1] - The maximum possible selected buttons.
-   * @param {Object} [options.defaultState='unselected'] - The state to apply when not defined in the buttons definitions.
+   * @param {Object} [options.defaultState='unselected'] - The state to apply when not defined in the buttons' definitions.
    */
   constructor(definitions, onSelect, onUnselect, options) {
     const template = options.template || defaultTemplate;
@@ -56,12 +56,12 @@ export default class ButtonView extends View {
     const defaultState = options.defaultState || 'unselected';
     // populate `this._selected`
     this._definitions.forEach((def, index) => {
-      if (def.state === undefined) { def.state === defaultState; }
+      if (def.state === undefined) { def.state = defaultState; }
       if (def.state === 'selected') { this._selected.push(index); }
     });
 
     this.toggle = this.toggle.bind(this);
-    this.events = { 'click .btn': this.toggle }
+    this.events = { 'click .btn': this.toggle };
   }
 
   onRender() {
@@ -71,7 +71,7 @@ export default class ButtonView extends View {
 
   /**
    * Sets a definition and its related button to `selected`.
-   * @param {Number} index - Index of the definitions in the list of definitions.
+   * @param {Number} index - Index of the definition in the list of definitions.
    * @param {Element} $btn - The DOM element related to this definition.
    */
   _select(index, $btn) {
@@ -86,7 +86,7 @@ export default class ButtonView extends View {
 
   /**
    * Sets a definition and its related button to `unselected`.
-   * @param {Number} index - Index of the definitions in the list of definitions.
+   * @param {Number} index - Index of the definition in the list of definitions.
    * @param {Element} $btn - The DOM element related to this definition.
    */
   _unselect(index, $btn) {
@@ -104,7 +104,7 @@ export default class ButtonView extends View {
   }
 
   /**
-   * Toggle the state of a definitions and its related button.
+   * Toggle the state of a definition and its related button.
    * @param {Event} e - The event triggered by the user action (`click`).
    */
   toggle(e) {
@@ -123,7 +123,7 @@ export default class ButtonView extends View {
 
   /**
    * Unable the interaction with a definition and its related button.
-   * @param {Number} index - Index of the definitions in the list of definitions.
+   * @param {Number} index - Index of the definition in the list of definitions.
    */
   enable(index) {
     // set state 'unselected'
@@ -135,7 +135,7 @@ export default class ButtonView extends View {
 
   /**
    * Disable the interaction with a definition and its related button.
-   * @param {Number} index - Index of the definitions in the list of definitions.
+   * @param {Number} index - Index of the definition in the list of definitions.
    */
   disable(index) {
     const $target = this.$el.querySelector(`[data-index="${index}"]`);
