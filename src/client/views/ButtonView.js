@@ -66,14 +66,14 @@ export default class ButtonView extends View {
    * @param {Number} index - Index of the definition in the list of definitions.
    * @param {Element} $btn - The DOM element related to this definition.
    */
-  _push(index, $btn) {
+  _push(index, $btn, silently = false) {
     if (this._pushed.length >= this._maxPushed) {
       if(!this._steelOldest)
         return;
 
       const index = this._pushed[0];
       const $target = this.$el.querySelector(`[data-index="${index}"]`);
-      this._release(index, $target);
+      this._release(index, $target, silently);
     }
 
     const def = this._definitions[index];
@@ -83,7 +83,7 @@ export default class ButtonView extends View {
 
     this._pushed.push(index);
 
-    if(this._onPush)
+    if(!silently && this._onPush)
       this._onPush(index, def);
   }
 
@@ -92,7 +92,7 @@ export default class ButtonView extends View {
    * @param {Number} index - Index of the definition in the list of definitions.
    * @param {Element} $btn - The DOM element related to this definition.
    */
-  _release(index, $btn) {
+  _release(index, $btn, silently = false) {
     const def = this._definitions[index];
     def.state = 'released';
     $btn.classList.remove('pushed', 'disabled');
@@ -103,7 +103,7 @@ export default class ButtonView extends View {
     if (pushedIndex >= 0) {
       this._pushed.splice(pushedIndex, 1);
 
-      if(this._onRelease)
+      if(!silently && this._onRelease)
         this._onRelease(index, def);
     }
   }
@@ -147,7 +147,7 @@ export default class ButtonView extends View {
    * Unable the interaction with a definition and its related button.
    * @param {Number} index - Index of the definition in the list of definitions.
    */
-  enable(index) {
+  enableButton(index) {
     // set state 'released'
     const $target = this.$el.querySelector(`[data-index="${index}"]`);
     this._release(index, $target);
@@ -159,12 +159,40 @@ export default class ButtonView extends View {
    * Disable the interaction with a definition and its related button.
    * @param {Number} index - Index of the definition in the list of definitions.
    */
-  disable(index) {
+  disableButton(index) {
     const $target = this.$el.querySelector(`[data-index="${index}"]`);
     this._release(index, $target);
 
     $target.classList.remove('released');
     $target.classList.add('disabled');
     $target.setAttribute('disabled', true);
+  }
+
+  /**
+   * Set definition and related button to `pushed`.
+   * @param {Number} index - Index of the definition in the list of definitions.
+   * @param {Boolean} silently - Whether the calllback is called.
+   */
+  pushButton(index, silently = false) {
+    const def = this._definitions[index];
+
+    if(def.state !== 'pushed') {
+      const $target = this.$el.querySelector(`[data-index="${index}"]`);
+      this._push(index, $target, silently);
+    }
+  }
+
+  /**
+   * Set definition and related button to `released`.
+   * @param {Number} index - Index of the definition in the list of definitions.
+   * @param {Boolean} silently - Whether the calllback is called.
+   */
+  releaseButton(index, silently = false) {
+    const def = this._definitions[index];
+
+    if(def.state !== 'released') {
+      const $target = this.$el.querySelector(`[data-index="${index}"]`);
+      this._release(index, $target, silently);
+    }
   }
 }
