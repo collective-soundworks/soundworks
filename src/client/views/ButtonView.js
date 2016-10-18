@@ -1,30 +1,12 @@
 import View from './View';
 
-function toTitleCase(str) {
-  return str.replace(/\w\S*/g, function(txt) {
-    return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-  });
-}
-
-function convertName(name) {
-  var a = name.split('_');
-  var n = '';
-  for (var i = 0; i < a.length; i++) {
-    if (i === 0)
-      n += toTitleCase(a[i]);
-    else
-      n += ' ' + a[i];
-  }
-  return n;
-}
-
 const defaultTemplate = `
-  <% definitions.forEach((def, index) => { %>
+  <% definitions.forEach(function(def, index) { %>
     <button class="btn <%= def.state %>"
             data-index="<%= index %>"
             <%= def.state === 'disabled' ? 'disabled' : '' %>
     >
-      <%= convertName(def.label) %>
+      <%= def.label %>
     </button>
   <% }); %>
 `;
@@ -35,33 +17,43 @@ const defaultTemplate = `
  */
 export default class ButtonView extends View {
   /**
-   * @param {Array<Object>} definitions - An array of button definitions. Each definition should contain a `label` and an optionnal `state` entry (valid values for `states` are `'selected'`, `'unselected'` or `'disabled'`).
-   * @param {Function} onSelect - The callback to execute when a button is selected.
-   * @param {Function} onUnselect - The callback to execute when a button is unselected.
+   * @param {Array<Object>} definitions - An array of button definitions. Each definition should contain a `label` and an optionnal `state` entry (valid values for `states` are `'pushed'`, `'released'` or `'disabled'`).
+   * @param {Function} onPush - The callback to execute when a button is pushed.
+   * @param {Function} onRelease - The callback to execute when a button is released.
    * @param {Object} options
-   * @param {Object} [options.maxSelected=1] - The maximum possible selected buttons.
-   * @param {Object} [options.defaultState='unselected'] - The state to apply when not defined in the buttons' definitions.
+   * @param {Object} [options.toggleState=true] - Whether buttons are toggled or have to be held pushed.
+   * @param {Object} [options.maxPushed=1] - The maximum number of buttons that can be pushed simultaneously.
+   * @param {Object} [options.steelOldest=true] - Whether pushing one more button than allowed by `maxPushed` releases the button earliest pushed buttons or has no effect.
+   * @param {Object} [options.defaultState='released'] - The state to apply when not defined in the buttons' definitions.
    */
-  constructor(definitions, onSelect, onUnselect, options) {
+  constructor(definitions, onPush, onRelease, options = {}) {
     const template = options.template || defaultTemplate;
-    super(template, { definitions, convertName }, {}, { className: 'buttons' });
+    super(template, { definitions }, {}, { className: 'buttons' });
 
     this._definitions = definitions;
-    this._maxSelected = options.maxSelected || 1;
-    this._selected = [];
+    this._toggleState = (options.toggleState !== undefined) ? !!options.toggleState : true;
+    this._maxPushed = (options.maxPushed !== undefined) ? Math.max(1, options.maxPushed) : 1;
+    this._steelOldest = (options.steelOldest !== undefined) ? !!options.steelOldest : true;
 
-    this.onSelect = onSelect;
-    this.onUnselect = onUnselect;
+    this._pushed = []; // list of buttons currently pushed
 
-    const defaultState = options.defaultState || 'unselected';
-    // populate `this._selected`
+    this._onPush = onPush;
+    this._onRelease = onRelease;
+
+    const defaultState = options.defaultState || 'released';
+    // populate `this._pushed`
     this._definitions.forEach((def, index) => {
       if (def.state === undefined) { def.state = defaultState; }
-      if (def.state === 'selected') { this._selected.push(index); }
+      if (def.state === 'pushed') { this._pushed.push(index); }
     });
 
-    this.toggle = this.toggle.bind(this);
-    this.events = { 'click .btn': this.toggle };
+    this._handleTouchstart = this._handleTouchstart.bind(this);
+    this._handleTouchend = this._handleTouchend.bind(this);
+    this.events = {
+      'touchstart .btn': this._handleTouchstart,
+      'touchend .btn': this._handleTouchend,
+      'touchcancel .btn': this._handleTouchend,
+    };
   }
 
   onRender() {
@@ -70,55 +62,85 @@ export default class ButtonView extends View {
   }
 
   /**
-   * Sets a definition and its related button to `selected`.
+   * Sets a definition and its related button to `pushed`.
    * @param {Number} index - Index of the definition in the list of definitions.
    * @param {Element} $btn - The DOM element related to this definition.
    */
-  _select(index, $btn) {
-    const def = this._definitions[index];
-    $btn.classList.remove('unselected', 'disabled');
-    $btn.classList.add('selected');
-    def.state = 'selected';
+  _push(index, $btn) {
+    if (this._pushed.length >= this._maxPushed) {
+      if(!this._steelOldest)
+        return;
 
-    this._selected.push(index);
-    this.onSelect(index, def);
+      const index = this._pushed[0];
+      const $target = this.$el.querySelector(`[data-index="${index}"]`);
+      this._release(index, $target);
+    }
+
+    const def = this._definitions[index];
+    def.state = 'pushed';
+    $btn.classList.remove('released', 'disabled');
+    $btn.classList.add('pushed');
+
+    this._pushed.push(index);
+
+    if(this._onPush)
+      this._onPush(index, def);
   }
 
   /**
-   * Sets a definition and its related button to `unselected`.
+   * Sets a definition and its related button to `released`.
    * @param {Number} index - Index of the definition in the list of definitions.
    * @param {Element} $btn - The DOM element related to this definition.
    */
-  _unselect(index, $btn) {
+  _release(index, $btn) {
     const def = this._definitions[index];
-    $btn.classList.remove('selected', 'disabled');
-    $btn.classList.add('unselected');
-    def.state = 'unselected';
+    def.state = 'released';
+    $btn.classList.remove('pushed', 'disabled');
+    $btn.classList.add('released');
 
-    const selectedIndex = this._selected.indexOf(index);
+    const pushedIndex = this._pushed.indexOf(index);
 
-    if (selectedIndex !== -1) {
-      this._selected.splice(selectedIndex, 1);
-      this.onUnselect(index, def);
+    if (pushedIndex >= 0) {
+      this._pushed.splice(pushedIndex, 1);
+
+      if(this._onRelease)
+        this._onRelease(index, def);
     }
   }
 
   /**
-   * Toggle the state of a definition and its related button.
-   * @param {Event} e - The event triggered by the user action (`click`).
+   * Handle 'touchstart' event.
+   * @param {Event} e - The event.
    */
-  toggle(e) {
+  _handleTouchstart(e) {
+    e.preventDefault();
+
     const $target = e.target;
     const index = parseInt($target.getAttribute('data-index'));
     const def = this._definitions[index];
-    const currentState = def.state;
-    const executeMethod = currentState === 'selected' ? '_unselect' : '_select';
 
-    if (this._selected.length >= this._maxSelected && executeMethod === 'select') {
-      return;
+    if(this._toggleState) {
+      const currentState = def.state;
+
+      if(def.state === 'pushed')
+        this._release(index, $target);
+      else
+        this._push(index, $target);
+    } else {
+      this._push(index, $target);
     }
+  }
 
-    this[executeMethod](index, $target);
+  _handleTouchend(e) {
+    e.preventDefault();
+
+    if(!this._toggleState) {
+      const $target = e.target;
+      const index = parseInt($target.getAttribute('data-index'));
+      const def = this._definitions[index];
+
+      this._release(index, $target);
+    }
   }
 
   /**
@@ -126,9 +148,9 @@ export default class ButtonView extends View {
    * @param {Number} index - Index of the definition in the list of definitions.
    */
   enable(index) {
-    // set state 'unselected'
+    // set state 'released'
     const $target = this.$el.querySelector(`[data-index="${index}"]`);
-    this._unselect(index, $target);
+    this._release(index, $target);
 
     $target.removeAttribute('disabled');
   }
@@ -139,9 +161,9 @@ export default class ButtonView extends View {
    */
   disable(index) {
     const $target = this.$el.querySelector(`[data-index="${index}"]`);
-    this._unselect(index, $target);
+    this._release(index, $target);
 
-    $target.classList.remove('unselected');
+    $target.classList.remove('released');
     $target.classList.add('disabled');
     $target.setAttribute('disabled', true);
   }
