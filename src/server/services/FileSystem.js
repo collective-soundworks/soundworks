@@ -11,7 +11,7 @@ const isString = (value) => (typeof value === 'string' || value instanceof Strin
 /**
  * Interface for the server `'file-system'` service.
  *
- * This service allow to retrieve a list of file or folders from a given path.
+ * This service allow to retrieve a list of files or directories from a given path.
  *
  * __*The service must be used with its [server-side counterpart]{@link module:soundworks/server.FileSystem}*__
  *
@@ -26,6 +26,7 @@ class FileSystem extends Service {
 
     const defaults = {
       configItem: 'publicDirectory',
+      enableCache: true,
     };
 
     this.configure(defaults);
@@ -42,6 +43,8 @@ class FileSystem extends Service {
 
     if (!this._publicDir)
       throw new Error(`"${SERVICE_ID}": server.config.${configItem} is not defined`);
+
+    this._enableCache = !!this.options.enableCache;
   }
 
   connect(client) {
@@ -58,10 +61,10 @@ class FileSystem extends Service {
    *  files otherwise.
    */
   /**
-   * Return a list of file according to the given configuration.
+   * Return a list of files according to the given configuration.
    *
    * @param {String|module:soundworks/server.FileSystem~ListConfig|Array<String>|Array<module:soundworks/server.FileSystem~ListConfig>} config -
-   *  Details of the requested list(s).
+   *  Details of the requested file list(s).
    * @return {Promise<Array>|Promise<Array<Array>>} - Promise resolving with an
    *  an array containing the absolute paths of the files / directories.
    *  If `config` is an array, the results will be an array of arrays
@@ -70,25 +73,25 @@ class FileSystem extends Service {
    * @example:
    * // 1. Single list
    * // retrieve all the file in a folder
-   * fileSystem.getList('my-directory').then((list) => ... );
+   * fileSystem.listFiles('my-directory').then((files) => ... );
    * // or, retrieve all the `.wav` files inside a given folder,
    * //search recursively
-   * fileSystem.getList({
+   * fileSystem.listFiles({
    *   path: 'my-directory',
    *   match: /\.wav/,
    *   recursive: true,
-   * }).then((list) => ... );
+   * }).then((files) => ... );
    *
    * // 2. Multiple Requests
    * // retrieve all the file in 2 different folders, the returned value will be
-   * // an array containing the 2 lists
-   * fileSystem.getList(['my-directory1', 'my-directory2'])
+   * // an array containing the 2 file lists
+   * fileSystem.listFiles(['my-directory1', 'my-directory2'])
    *   .then((arrayList) => ... );
    * // or
-   * fileSystem.getList([{ ... }, { ... }])
+   * fileSystem.listFiles([{ ... }, { ... }])
    *   .then((arrayList) => ... );
    */
-  getList(config) {
+  listFiles(config) {
     let returnAll = true;
 
     if (!Array.isArray(config)) {
@@ -101,7 +104,7 @@ class FileSystem extends Service {
         item = { path: item };
 
       const { path, match, recursive, directories } = item;
-      return this._getList(path, match, recursive, directories);
+      return this._listFiles(path, match, recursive, directories);
     });
 
     if (returnAll === false)
@@ -123,7 +126,7 @@ class FileSystem extends Service {
    * @return {Array}
    * @private
    */
-  _getList(path = null, match = '*', recursive = false, directories = false) {
+  _listFiles(path = null, match = '*', recursive = false, directories = false) {
     if (path === null)
       throw new Error(`${SERVICE_ID} - path not defined`);
 
@@ -133,7 +136,7 @@ class FileSystem extends Service {
 
     const key = `${path}:${match}:${recursive}:${directories}`;
 
-    if (this._cache[key])
+    if (this._enableCache && this._cache[key])
       return Promise.resolve(this._cache[key]);
 
     const testCwd = new RegExp(`^${cwd}`);
@@ -171,11 +174,13 @@ class FileSystem extends Service {
           // remove `dir` the paths and test against the regExp
           results = results.filter((entry) => {
             entry = entry.replace(_path.join(dir, _path.sep), '');
-            return match.test(entry)
+            return match.test(entry);
           });
 
           // keep in cache and resolve promise
-          this._cache[key] = results;
+          if(this._enableCache)
+            this._cache[key] = results;
+
           resolve(results);
         }).on('error', function(err) {
           console.error(SERVICE_ID, '-', err.message);
@@ -204,7 +209,7 @@ class FileSystem extends Service {
       let publicDir = this._publicDir;
 
       if (!testCwd.test(publicDir))
-        publicDir = _path.join(cwd, publicDir)
+        publicDir = _path.join(cwd, publicDir);
 
       // force the search in the public directory
       function prependPath(item) {
@@ -222,7 +227,7 @@ class FileSystem extends Service {
       config = prependPath(config);
 
       // get results
-      this.getList(config).then((results) => {
+      this.listFiles(config).then((results) => {
         function formatToUrl(entry) {
           if (Array.isArray(entry))
             return entry.map(formatToUrl);
@@ -241,7 +246,7 @@ class FileSystem extends Service {
 
         this.send(client, `list:${id}`, results);
       });
-    }
+    };
   }
 }
 

@@ -46,7 +46,7 @@ class Sync extends Service {
       viewCtor: SegmentedView,
       viewPriority: 3,
       // @todo - add options to configure the sync service
-    }
+    };
 
     this.configure(defaults);
 
