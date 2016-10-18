@@ -8,10 +8,10 @@ const isString = (value) => (typeof value === 'string' || value instanceof Strin
 /**
  * Interface for the client `'file-system'` service.
  *
- * This service allow to retrieve a list of file or directories from a given path.
+ * This service allow to retrieve a list of files or directories from a given path.
  * If a `list` option is given when requiring the service, the service marks
  * itself as `ready` when the file list is returned by the server.
- * The service can be used later to retrieve new lists, each required list is
+ * The service can be used later to retrieve new file lists, each required list is
  * cached client-side to prevent useless network traffic.
  *
  * @param {Object} options
@@ -23,10 +23,10 @@ const isString = (value) => (typeof value === 'string' || value instanceof Strin
  * @memberof module:soundworks/client
  * @example
  * // require and configure the `file-system` service inside the experience
- * // constructor, the list to retrive can be configured as a simple string
+ * // constructor, the file list to be retrive can be configured as a simple string
  * this.fileSystem = this.require('file-system', { list: 'audio' });
  * // ... or as a full {@link module:soundworks/client.FileSystem~ListConfig}
- * // object for better control over the returned list
+ * // object for better control over the returned file list
  * this.fileSystem = this.require('file-system', { list: {
  *     path: 'audio',
  *     match: /\.wav$/,
@@ -63,7 +63,7 @@ class FileSystem extends Service {
 
   init() {
     if (this.options.list !== null)
-      this.getList(this.options.list);
+      this.listFiles(this.options.list);
     else
       this.ready();
   }
@@ -92,20 +92,20 @@ class FileSystem extends Service {
    * Return a list of file according to the given configuration.
    *
    * @param {String|module:soundworks/client.FileSystem~ListConfig|Array<String>|Array<module:soundworks/client.FileSystem~ListConfig>} config -
-   *  Details of the requested list(s). The requested files / directories must
+   *  Details of the requested list(s). The requested files or directories must
    *  be publicly accessible.
    * @return {Promise<Array>|Promise<Array<Array>>} - Promise resolving with an
-   *  an array containing the absolute urls of the files / directories.
+   *  an array containing the absolute urls of the files or directories.
    *  If `config` is an array, the results will be an array of arrays
    *  containing the result of each different request.
    *
    * @example:
    * // 1. Single list
    * // retrieve all the file in a folder
-   * fileSystem.getList('my-directory').then((list) => ... );
+   * fileSystem.listFiles('my-directory').then((list) => ... );
    * // or, retrieve all the `.wav` files inside a given folder,
    * //search recursively
-   * fileSystem.getList({
+   * fileSystem.listFiles({
    *   path: 'my-directory',
    *   match: /\.wav/,
    *   recursive: true,
@@ -114,13 +114,13 @@ class FileSystem extends Service {
    * // 2. Multiple Requests
    * // retrieve all the file in 2 different folders, the returned value will be
    * // an array containing the 2 lists
-   * fileSystem.getList(['my-directory1', 'my-directory2'])
+   * fileSystem.listFiles(['my-directory1', 'my-directory2'])
    *   .then((lists) => ... );
    * // or
-   * fileSystem.getList([{ ... }, { ... }])
+   * fileSystem.listFiles([{ ... }, { ... }])
    *   .then((lists) => ... );
    */
-  getList(config) {
+  listFiles(config) {
     // serialize the json config to properly handle RegExp, adapted from:
     // http://stackoverflow.com/questions/12075927/serialization-of-regexp#answer-33416684
     const _config = JSON.stringify(config, function(key, value) {
@@ -147,6 +147,7 @@ class FileSystem extends Service {
         resolve(results);
 
         if (this.options.list !== null && channel === 'list:0')
+          this.fileList = results;
           this.ready();
       });
 
