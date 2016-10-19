@@ -168,12 +168,6 @@ class AudioBufferManager extends Service {
   /** @private */
   init() {
     /**
-     * List of all loaded buffers.
-     * @private
-     */
-    this.buffers = [];
-
-    /**
      * List of the loaded audio buffers created from the loaded audio files.
      * @private
      */
@@ -262,10 +256,12 @@ class AudioBufferManager extends Service {
        */
       for (let i = 0; i < fileDescr.length; i++) {
         const path = fileDescr[i];
+        const key = i;
 
         if (typeof path === 'string') {
           const descr = {
             id,
+            key,
             path
           };
 
@@ -316,8 +312,6 @@ class AudioBufferManager extends Service {
       const id = descr.id;
       let key = descr.key;
 
-      this.buffers.push(obj);
-
       if (obj instanceof AudioBuffer) {
         let bufs = this.audioBuffers[id];
 
@@ -327,7 +321,7 @@ class AudioBufferManager extends Service {
         bufs.push(obj);
       }
 
-      if (key) {
+      if (key !== undefined) {
         let data = this.data[id];
 
         if (!data)
@@ -347,7 +341,7 @@ class AudioBufferManager extends Service {
    * @param {Object} files - Definition of files to load (same as require).
    * @returns {Promise} - A promise that is resolved when all files are loaded.
    */
-  loadFiles(files, view = null, triggerReady = false) {
+  loadFiles(files, view = null) {
     const promise = new Promise((resolve, reject) => {
       let filePaths = [];
       const fileDescriptions = [];
@@ -399,10 +393,7 @@ class AudioBufferManager extends Service {
           })
           .then((loadedObjects) => {
             this._populateData(loadedObjects, fileDescriptions);
-
-            if (triggerReady)
-              this.ready();
-
+            this.ready();
             resolve();
           })
           .catch((error) => {
@@ -410,9 +401,7 @@ class AudioBufferManager extends Service {
             console.error(error);
           });
       } else {
-        if (triggerReady)
-          this.ready();
-
+        this.ready();
         resolve();
       }
     });
@@ -420,18 +409,18 @@ class AudioBufferManager extends Service {
     return promise;
   }
 
-  loadDirectories(directories, view, triggerReady = false) {
+  loadDirectories(directories, view) {
     if (typeof directories === 'string' || Array.isArray(directories)) {
-      this._fileSystem.listFiles(directories)
+      this._fileSystem.getList(directories)
         .then((fileLists) => {
           const files = flatten(fileLists);
-          return this.loadFiles(files, view, triggerReady);
+          return this.loadFiles(files, view);
         }).catch((error) => reject(error));
     } else if (typeof directories === 'object') {
       const promise = new Promise((resolve, reject) => {
         const ids = Object.keys(directories);
 
-        this._fileSystem.listFiles(directories)
+        this._fileSystem.getList(directories)
           .then((fileLists) => {
             const files = {};
 
@@ -442,9 +431,7 @@ class AudioBufferManager extends Service {
 
             this.loadFiles(files, view, false)
               .then(() => {
-                if (triggerReady)
-                  this.ready();
-
+                this.ready();
                 resolve();
               }).catch((error) => reject(error));
           }).catch((error) => reject(error));
@@ -500,10 +487,11 @@ class AudioBufferManager extends Service {
   /**
    * Retrieve a single audio buffer associated to a given id.
    * @param {String} id - Object identifier.
+   * @param {Number} index - Audio buffer index (if array).
    * @returns {Promise} - Returns a single loaded audio buffer associated to the given id.
    */
-  getAudioBuffer(id = 'default') {
-    return this.audioBuffers[id][0];
+  getAudioBuffer(id = 'default', index = 0) {
+    return this.audioBuffers[id][index];
   }
 
   /**
