@@ -63,7 +63,7 @@ class FileSystem extends Service {
 
   init() {
     if (this.options.list !== null)
-      this.listFiles(this.options.list);
+      this.getList(this.options.list);
     else
       this.ready();
   }
@@ -102,10 +102,10 @@ class FileSystem extends Service {
    * @example:
    * // 1. Single list
    * // retrieve all the file in a folder
-   * fileSystem.listFiles('my-directory').then((list) => ... );
+   * fileSystem.getList('my-directory').then((list) => ... );
    * // or, retrieve all the `.wav` files inside a given folder,
    * //search recursively
-   * fileSystem.listFiles({
+   * fileSystem.getList({
    *   path: 'my-directory',
    *   match: /\.wav/,
    *   recursive: true,
@@ -114,13 +114,13 @@ class FileSystem extends Service {
    * // 2. Multiple Requests
    * // retrieve all the file in 2 different folders, the returned value will be
    * // an array containing the 2 lists
-   * fileSystem.listFiles(['my-directory1', 'my-directory2'])
+   * fileSystem.getList(['my-directory1', 'my-directory2'])
    *   .then((lists) => ... );
    * // or
-   * fileSystem.listFiles([{ ... }, { ... }])
+   * fileSystem.getList([{ ... }, { ... }])
    *   .then((lists) => ... );
    */
-  listFiles(config) {
+  getList(config) {
     // serialize the json config to properly handle RegExp, adapted from:
     // http://stackoverflow.com/questions/12075927/serialization-of-regexp#answer-33416684
     const _config = JSON.stringify(config, function(key, value) {
