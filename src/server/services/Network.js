@@ -35,7 +35,7 @@ class Network extends Service {
     return (values) => {
       const clientTypes = values.shift();
       this.broadcast(clientTypes, client, 'receive', ...values);
-    }
+    };
   }
 
   /** @private */

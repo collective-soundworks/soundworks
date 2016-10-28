@@ -180,7 +180,7 @@ class Placer extends Service {
         this.send(client, 'aknowlegde', configItem, disabledPositions);
       else
         this.send('reject', disabledPositions);
-    }
+    };
   }
 
   /** @private */
@@ -199,7 +199,7 @@ class Placer extends Service {
       } else {
         this.send(client, 'reject', this.disabledPositions);
       }
-    }
+    };
   }
 
   /** @private */

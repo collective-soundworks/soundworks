@@ -129,7 +129,7 @@ class LocatorView extends SquaredView {
       id: 'locator',
       x: normX * this._area.width,
       y: normY * this._area.height,
-    }
+    };
 
     this.selector.addPoint(this.position);
   }

@@ -142,7 +142,7 @@ class Scheduler extends Service {
     // enable sync at first request with option set to true
     if(sync && !this._sync) {
       this._sync = this.require('sync');
-      this._syncedQueue = new _SyncTimeSchedulingQueue(this._sync, this._scheduler)
+      this._syncedQueue = new _SyncTimeSchedulingQueue(this._sync, this._scheduler);
     }
 
     options.sync = sync;
@@ -258,7 +258,7 @@ class Scheduler extends Service {
 
     this._scheduler.clear();
   }
-};
+}
 
 serviceManager.register(SERVICE_ID, Scheduler);
 

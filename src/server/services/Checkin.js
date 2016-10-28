@@ -40,7 +40,7 @@ class Checkin extends Service {
 
     const defaults = {
       configItem: 'setup',
-    }
+    };
 
     this.configure(defaults);
     // use shared config service to share the setup
@@ -157,7 +157,7 @@ class Checkin extends Service {
       } else {
         this.send(client, 'unavailable');
       }
-    }
+    };
   }
 
   /** @private */

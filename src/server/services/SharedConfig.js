@@ -67,7 +67,7 @@ class SharedConfig extends Service {
    */
   share(item, clientType) {
     if (!this._clientItemsMap[clientType])
-      this._clientItemsMap[clientType] = new Set();;
+      this._clientItemsMap[clientType] = new Set();
 
     this._clientItemsMap[clientType].add(item);
   }
@@ -127,7 +127,7 @@ class SharedConfig extends Service {
 
       const config = this._getValues(client.type);
       this.send(client, 'config', config);
-    }
+    };
   }
 }
 

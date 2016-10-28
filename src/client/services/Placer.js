@@ -310,12 +310,13 @@ class Placer extends Service {
 
       } else {
         switch (this.options.mode) {
+          default:
+          case 'list':
+            this.viewCtor = _ListView;
+            break;
+
           case 'graphic':
             this.viewCtor = _GraphicView;
-            break;
-          case 'list':
-          default:
-            this.viewCtor = _ListView;
             break;
         }
 

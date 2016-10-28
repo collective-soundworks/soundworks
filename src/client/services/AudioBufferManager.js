@@ -61,11 +61,6 @@ class AudioBufferManagerView extends SegmentedView {
   }
 }
 
-function getIdFromFilePath(filePath) {
-  const fileName = filePath.split('/').pop();
-  return fileName.split('.')[0];
-}
-
 /**
  * Interface for the client `'audio-buffer-manager'` service.
  *
@@ -88,10 +83,29 @@ function getIdFromFilePath(filePath) {
  * @memberof module:soundworks/client
  * @example
  * // require and configure the `audio-buffer-manager` inside the experience
- * // constructor, the files to load can be defined as an object with identifiers
+ * // constructor
+ * // Defining a single array of audio files results in a single
+ * // array of audio buffers associated to the identifier `default`.
+ * this.audioBufferManager = this.require('audio-buffer-manager', { files: [
+ *   'sounds/drums/kick.mp3',
+ *   'sounds/drums/snare.mp3'
+ * ]});
+ *
+ * // ... in addition, files to load can be defined as an object with keys
+ * // identifying each audio buffer
  * this.audioBufferManager = this.require('audio-buffer-manager', { files: {
  *   kick: 'sounds/kick_44kHz.mp3',
  *   snare: 'sounds/808snare.mp3'
+ * }});
+ +
+ * // ... or as an object with keys identifying a whole array of audio buffers
+ * this.audioBufferManager = this.require('audio-buffer-manager', { files: {
+ *   instruments: [
+ *     'sounds/instruments/kick_44kHz.mp3',
+ *     'sounds/instruments/808snare.mp3'],
+ *   loops: [
+ *     'sounds/loops/sheila-e-raspberry.mp3',
+ *     'sounds/loops/nussbaum-shuffle.mp3'],
  * }});
  *
  * // ... or as a group of objets associating different files to different keys
@@ -106,13 +120,6 @@ function getIdFromFilePath(filePath) {
  *   },
  * }});
  *
- * // ... when defining the files to load as a simple array,
- * // the identifiers are derived as the file names without path and extension
- * this.audioBufferManager = this.require('audio-buffer-manager', { files: [
- *   'sounds/drums/kick.mp3',
- *   'sounds/drums/snare.mp3'
- * ]});
- *
  * // the loaded objects can be retrieved according to their definition
  * const kickBuffer = this.audioBufferManager.get('kick');
  * const audioBuffer = this.audioBufferManager.get('jazz', 'audio');
@@ -122,10 +129,9 @@ function getIdFromFilePath(filePath) {
  * const snareBuffer = this.audioBufferManager.getAudioBuffer('snare');
  * const jazzBuffer = this.audioBufferManager.getAudioBuffer('jazz');
  *
- * // ... the buffers property contains an array of all loaded objects
- * // in the order of their definition
- * const kickBuffer = this.audioBufferManager.buffers[0];
- * const snareBuffer = this.audioBufferManager.buffers[1];
+ * // ... as well as arrays of audio buffers
+ * const snareBuffer = this.audioBufferManager.getAudioBufferArray('instruments');
+ * const jazzBuffer = this.audioBufferManager.getAudioBufferArray('loops');
  */
 class AudioBufferManager extends Service {
   /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */
@@ -154,18 +160,15 @@ class AudioBufferManager extends Service {
 
     const directories = this.options.directories;
 
-    if (directories !== null)
-      this._fileSystem = this.require('file-system', { list: directories });
+    if (directories !== null) {
+      this._fileSystem = this.require('file-system', {
+        list: directories
+      });
+    }
   }
 
   /** @private */
   init() {
-    /**
-     * List of all loaded buffers.
-     * @private
-     */
-    this.buffers = [];
-
     /**
      * List of the loaded audio buffers created from the loaded audio files.
      * @private
@@ -194,12 +197,10 @@ class AudioBufferManager extends Service {
     this.show();
 
     // preload files (must be called after show (why ?))
-    if (this._fileSystem) {
-      this._fileSystem.getList(this.options.directories).then((list) => {
-        this._loadFiles(flatten(list), this.view, true);
-      });
+    if (this.options.directories !== null) {
+      this.loadDirectories();
     } else {
-      this._loadFiles(this.options.files, this.view, true);
+      this.loadFiles(this.options.files, this.view, true);
     }
   }
 
@@ -210,35 +211,67 @@ class AudioBufferManager extends Service {
   }
 
   /** @private */
-  _appendFileDescription(filePaths, fileDescriptions, fileDescr, id = undefined) {
-    let descr = undefined;
+  _appendFileDescription(filePaths, fileDescriptions, fileDescr, id = 'default') {
+    let descr;
 
     if (typeof fileDescr === 'string') {
       /**
        * fileDescr = {
-       *   my-sound-id: 'assets/audio-file-name.wav'
+       *   id: 'assets/audio-file-name.wav'
        * }
        * // becomes
        * {
-       *   my-sound-id: <AudioBuffer>
+       *   id: <AudioBuffer>
        * }
        * ... or
        * fileDescr = 'assets/audio-file-name.wav'
        * // becomes
        * {
-       *   audio-file-name: <AudioBuffer>
+       *   default: <AudioBuffer>
        * }
        */
       const path = fileDescr;
 
-      if (!id)
-        id = getIdFromFilePath(path);
+      const descr = {
+        id,
+        path
+      };
 
-      const descr = { id, path };
       filePaths.push(path);
       fileDescriptions.push(descr);
 
-    } else if (id && typeof fileDescr === 'object') {
+    } else if (Array.isArray(fileDescr)) {
+      /**
+       * fileDescr = {
+       *   my-sound-id: [
+       *     'assets/an-audio-file-name.wav',
+       *     'assets/another-audio-file-name.wav'
+       *   ],
+       * }
+       * // becomes
+       * {
+       *   my-sound-id: [
+       *     <AudioBuffer>,
+       *     <AudioBuffer>
+       *   ],
+       * }
+       */
+      for (let i = 0; i < fileDescr.length; i++) {
+        const path = fileDescr[i];
+        const key = i;
+
+        if (typeof path === 'string') {
+          const descr = {
+            id,
+            key,
+            path
+          };
+
+          filePaths.push(path);
+          fileDescriptions.push(descr);
+        }
+      }
+    } else if (typeof fileDescr === 'object') {
       /**
        * fileDescr = {
        *   my-sound-id: {
@@ -257,7 +290,12 @@ class AudioBufferManager extends Service {
         const path = fileDescr[key];
 
         if (typeof path === 'string') {
-          const descr = { id, key, path };
+          const descr = {
+            id,
+            key,
+            path
+          };
+
           filePaths.push(path);
           fileDescriptions.push(descr);
         }
@@ -276,15 +314,19 @@ class AudioBufferManager extends Service {
       const id = descr.id;
       let key = descr.key;
 
-      this.buffers.push(obj);
+      if (obj instanceof AudioBuffer) {
+        let bufs = this.audioBuffers[id];
 
-      if (obj instanceof AudioBuffer)
-        this.audioBuffers[id] = obj;
+        if (!bufs)
+          this.audioBuffers[id] = bufs = [];
 
-      if (key) {
+        bufs.push(obj);
+      }
+
+      if (key !== undefined) {
         let data = this.data[id];
 
-        if(!data)
+        if (!data)
           this.data[id] = data = {};
 
         data[key] = obj;
@@ -296,17 +338,23 @@ class AudioBufferManager extends Service {
     });
   }
 
-  /** @private */
-  _loadFiles(files, view = null, triggerReady = false) {
+  /**
+   * Load a defined set of files.
+   * @param {Object} files - Definition of files to load (same as require).
+   * @returns {Promise} - A promise that is resolved when all files are loaded.
+   */
+  loadFiles(files, view = null) {
     const promise = new Promise((resolve, reject) => {
       let filePaths = [];
       const fileDescriptions = [];
 
-      // prepare the files descriptions
-      if (Array.isArray(files)) {
+      // prepare the file descriptions
+      if (typeof files === 'string') {
+        this._appendFileDescription(filePaths, fileDescriptions, files);
+      } else if (Array.isArray(files)) {
         for (let file of files)
           this._appendFileDescription(filePaths, fileDescriptions, file);
-      } else {
+      } else if (typeof files === 'object') {
         for (let id in files)
           this._appendFileDescription(filePaths, fileDescriptions, files[id], id);
       }
@@ -342,28 +390,24 @@ class AudioBufferManager extends Service {
             totalProgress /= progressPerFile.length;
 
             view.onProgress(totalProgress * 100);
-          }
-        };
+          };
+        }
 
         loader
-          .load(filePaths, { wrapAroundExtention: this.options.audioWrapTail })
+          .load(filePaths, {
+            wrapAroundExtention: this.options.audioWrapTail
+          })
           .then((loadedObjects) => {
             this._populateData(loadedObjects, fileDescriptions);
-
-            if (triggerReady)
-              this.ready();
-
+            this.ready();
             resolve();
           })
           .catch((error) => {
             reject(error);
             console.error(error);
           });
-
       } else {
-        if (triggerReady)
-          this.ready();
-
+        this.ready();
         resolve();
       }
     });
@@ -371,6 +415,35 @@ class AudioBufferManager extends Service {
     return promise;
   }
 
+  loadDirectories(directories, view) {
+    if (typeof directories === 'string' || Array.isArray(directories)) {
+      this._fileSystem.getList(directories)
+        .then((fileLists) => {
+          const files = flatten(fileLists);
+          return this.loadFiles(files, view);
+        }).catch((error) => reject(error));
+    } else if (typeof directories === 'object') {
+      const promise = new Promise((resolve, reject) => {
+        const ids = Object.keys(directories);
+
+        this._fileSystem.getList(directories)
+          .then((fileLists) => {
+            const files = {};
+
+            for (let i = 0; i < fileLists.length; i++) {
+              const id = ids[i];
+              files[id] = fileLists[i];
+            }
+
+            this.loadFiles(files, view, false)
+              .then(() => {
+                this.ready();
+                resolve();
+              }).catch((error) => reject(error));
+          }).catch((error) => reject(error));
+      });
+    }
+  }
   /**
    * wrapAround, copy the begining input buffer to the end of an output buffer
    * @private
@@ -378,31 +451,28 @@ class AudioBufferManager extends Service {
    * @returns {arraybuffer} - The processed buffer (with frame copied from the begining to the end)
    */
   _wrapAround(inBuffer) {
-    var length = inBuffer.length + this.options.wrapAroundExtension * inBuffer.sampleRate;
+    const inLength = inBuffer.length;
+    const outLength = inLength + this.options.wrapAroundExtension * inBuffer.sampleRate;
+    const outBuffer = audioContext.createBuffer(inBuffer.numberOfChannels, outLength, inBuffer.sampleRate);
+    let arrayChData, arrayOutChData;
 
-    var outBuffer = audioContext.createBuffer(inBuffer.numberOfChannels, length, inBuffer.sampleRate);
-    var arrayChData, arrayOutChData;
+    for (let ch = 0; ch < inBuffer.numberOfChannels; ch++) {
+      arrayChData = inBuffer.getChannelData(ch);
+      arrayOutChData = outBuffer.getChannelData(ch);
 
-    for (var channel = 0; channel < inBuffer.numberOfChannels; channel++) {
-      arrayChData = inBuffer.getChannelData(channel);
-      arrayOutChData = outBuffer.getChannelData(channel);
+      for (let i = 0; i < inLength; i++)
+        arrayOutChData[i] = arrayChData[i];
 
-      arrayOutChData.forEach(function(sample, index) {
-        if (index < inBuffer.length) arrayOutChData[index] = arrayChData[index];
-        else arrayOutChData[index] = arrayChData[index - inBuffer.length];
-      });
+      for (let i = inLength; i < outLength; i++)
+        arrayOutChData[i] = arrayChData[i - inLength];
     }
 
     return outBuffer;
   }
 
-  /**
-   * Load a defined set of files.
-   * @param {Object} files - Definition of files to load (same as require).
-   * @returns {Promise} - A promise that is resolved when all files are loaded.
-   */
+  /** deprecated */
   load(files, view = null) {
-    return this._loadFiles(files, view);
+    return this.loadFiles(files, view);
   }
 
   /**
@@ -421,11 +491,21 @@ class AudioBufferManager extends Service {
   }
 
   /**
-   * Retrieve an audio buffer.
+   * Retrieve a single audio buffer associated to a given id.
    * @param {String} id - Object identifier.
-   * @returns {Promise} - Returns the loaded audio buffer.
+   * @param {Number} index - Audio buffer index (if array).
+   * @returns {Promise} - Returns a single loaded audio buffer associated to the given id.
    */
-  getAudioBuffer(id) {
+  getAudioBuffer(id = 'default', index = 0) {
+    return this.audioBuffers[id][index];
+  }
+
+  /**
+   * Retrieve an array of audio buffers associated to a given id.
+   * @param {String} id - Object identifier.
+   * @returns {Promise} - Returns an array of loaded audio buffers associated to the given id.
+   */
+  getAudioBufferArray(id = 'default') {
     return this.audioBuffers[id];
   }
 }

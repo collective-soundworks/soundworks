@@ -149,7 +149,7 @@ export default class SpaceView extends View {
 
     // update existing points position
     for (let [$shape, point] of this.shapePointMap) {
-      this.updatePoint(point)
+      this.updatePoint(point);
     }
 
     // expose the size of the area in pixel
@@ -202,7 +202,7 @@ export default class SpaceView extends View {
    * @param {Array<Object>} points - The new points to render.
    */
   setPoints(points) {
-    this.clearPoints()
+    this.clearPoints();
     this.addPoints(points);
   }
 

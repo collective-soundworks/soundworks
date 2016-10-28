@@ -34,7 +34,7 @@ class Osc extends Service {
 
     const defaults = {
       configItem: 'osc',
-    }
+    };
 
     this.configure(defaults);
 
@@ -79,7 +79,7 @@ class Osc extends Service {
   _onMessage(msg) {
     this._listeners.forEach((listener) => {
       if (msg.address === listener.address)
-        listener.callback(...msg.args)
+        listener.callback(...msg.args);
     });
 
     log(`message - address "${msg.address}"`, ...msg.args);
@@ -117,7 +117,7 @@ class Osc extends Service {
    *  message is received at the given address.
    */
   receive(address, callback) {
-    const listener = { address, callback }
+    const listener = { address, callback };
     this._listeners.push(listener);
   }
 

@@ -29,7 +29,7 @@ class Auth extends Service {
 
     const defaults = {
       configItem: 'password'
-    }
+    };
 
     this.configure(defaults);
 
@@ -72,7 +72,7 @@ class Auth extends Service {
         this.send(client, 'refused');
       else
         this.send(client, 'granted');
-    }
+    };
   }
 }
 

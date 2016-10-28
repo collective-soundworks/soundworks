@@ -8,10 +8,10 @@ const isString = (value) => (typeof value === 'string' || value instanceof Strin
 /**
  * Interface for the client `'file-system'` service.
  *
- * This service allow to retrieve a list of file or directories from a given path.
+ * This service allow to retrieve a list of files or directories from a given path.
  * If a `list` option is given when requiring the service, the service marks
  * itself as `ready` when the file list is returned by the server.
- * The service can be used later to retrieve new lists, each required list is
+ * The service can be used later to retrieve new file lists, each required list is
  * cached client-side to prevent useless network traffic.
  *
  * @param {Object} options
@@ -23,16 +23,16 @@ const isString = (value) => (typeof value === 'string' || value instanceof Strin
  * @memberof module:soundworks/client
  * @example
  * // require and configure the `file-system` service inside the experience
- * // constructor, the list to retrive can be configured as a simple string
+ * // constructor, the file list to be retrive can be configured as a simple string
  * this.fileSystem = this.require('file-system', { list: 'audio' });
  * // ... or as a full {@link module:soundworks/client.FileSystem~ListConfig}
- * // object for better control over the returned list
+ * // object for better control over the returned file list
  * this.fileSystem = this.require('file-system', { list: {
  *     path: 'audio',
  *     match: /\.wav$/,
  *     recursive: true,
  *   }
- * };
+ * });
  *
  * // given the following file system
  * // audio/
@@ -83,7 +83,7 @@ class FileSystem extends Service {
    * @typedef {Object} module:soundworks/client.FileSystem~ListConfig
    * @property {String} path - Name of the folder to search into.
    * @property {RegExp} [match='*'] - RegExp used to filter the results.
-   * @property {Boolean} [recursive=false] - Define if the search should be
+   * @property {Boolean} [recursive=false] - Flag whether the search should be
    *  recursive.
    * @property {Boolean} [directories=false] - If true only return directories,
    *  files otherwise.
@@ -92,10 +92,10 @@ class FileSystem extends Service {
    * Return a list of file according to the given configuration.
    *
    * @param {String|module:soundworks/client.FileSystem~ListConfig|Array<String>|Array<module:soundworks/client.FileSystem~ListConfig>} config -
-   *  Details of the requested list(s). The requested files / directories must
+   *  Details of the requested list(s). The requested files or directories must
    *  be publicly accessible.
    * @return {Promise<Array>|Promise<Array<Array>>} - Promise resolving with an
-   *  an array containing the absolute urls of the files / directories.
+   *  an array containing the absolute urls of the files or directories.
    *  If `config` is an array, the results will be an array of arrays
    *  containing the result of each different request.
    *
@@ -147,6 +147,7 @@ class FileSystem extends Service {
         resolve(results);
 
         if (this.options.list !== null && channel === 'list:0')
+          this.fileList = results;
           this.ready();
       });
 
