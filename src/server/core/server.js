@@ -203,23 +203,12 @@ const server = {
   },
 
   /**
-   * Initialize the server with the given config objects.
-   * @param {...module:soundworks/server.server~serverConfig} configs -
+   * Initialize the server with the given configuration.
+   * @param {module:soundworks/server.server~serverConfig} config -
    *  Configuration of the application.
    */
-  init(...configs) {
-    configs.forEach((config) => {
-      for (let key in config) {
-        const entry = config[key];
-
-        if (typeof entry === 'object' && entry !== null) {
-          this.config[key] = this.config[key] || {};
-          this.config[key] = Object.assign(this.config[key], entry);
-        } else {
-          this.config[key] = entry;
-        }
-      }
-    });
+  init(config) {
+    this.config = config;
   },
 
   /**
