@@ -48,7 +48,7 @@
     "screenfull": "^3.0.2",
     "socket.io": "^1.4.5",
     "socket.io-client": "^1.4.5",
-    "sqlite3": "^3.1.1",
+    "sqlite3": "^3.1.8",
     "sync": "collective-soundworks/sync#0.7.3",
     "uuid": "^2.0.1",
     "waves-audio": "wavesjs/audio#v0.3.3",
@@ -61,7 +61,7 @@
     "babel-plugin-transform-runtime": "^6.6.0",
     "babel-preset-es2015": "^6.14.0",
     "colors": "^1.1.2",
-    "jsdoc-template": "collective-soundworks/jsdoc-template",
-    "watch": "^0.19.2"
+    "jsdoc-template": "ircam-jstools/jsdoc-template",
+    "watch": "^1.0.1"
   }
 }
