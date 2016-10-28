@@ -11,6 +11,9 @@ import * as _audio from 'waves-audio';
 export const audio = _audio;
 export { audioContext } from 'waves-audio';
 
+// version (cf. bin/javascripts)
+export const version = '%version%';
+
 // core
 export { default as Activity } from './core/Activity';
 export { default as client } from './core/client';
