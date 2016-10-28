@@ -334,7 +334,11 @@ class AudioBufferManager extends Service {
           loader.progressCallback = (e) => {
             progressPerFile[e.index] = e.value;
 
-            let totalProgress = progressPerFile.reduce((prev, current) => prev + current, 0);
+            let totalProgress = 0;
+
+            for (let i = 0; i < progressPerFile.length; i++)
+              totalProgress += progressPerFile[i];
+
             totalProgress /= progressPerFile.length;
 
             view.onProgress(totalProgress * 100);
@@ -397,8 +401,8 @@ class AudioBufferManager extends Service {
    * @param {Object} files - Definition of files to load (same as require).
    * @returns {Promise} - A promise that is resolved when all files are loaded.
    */
-  load(files) {
-    return this._loadFiles(files);
+  load(files, view = null) {
+    return this._loadFiles(files, view);
   }
 
   /**

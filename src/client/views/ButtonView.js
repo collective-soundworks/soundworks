@@ -104,7 +104,7 @@ export default class ButtonView extends View {
 
   /**
    * Toggle the state of a definitions and its related button.
-   * @param {Event} e - The event triggered by the user action (`click`).
+   * @param {Event} e - The event triggered by the user action (e.g. `click`).
    */
   toggle(e) {
     const $target = e.target;
