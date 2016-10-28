@@ -25,8 +25,12 @@ var watchOptions = {
   ignoreDotFiles: true,
   ignoreUnreadableDir: true,
   ignoreNotPermitted: true,
-  interval: 2000, // watch internally use `fs.watchFile`
+  interval: 2, // watch internally use `fs.watchFile`
 };
+
+function getWatchOptions() {
+  return Object.assign({}, watchOptions);
+}
 
 /**
  * Watched directories
@@ -39,6 +43,37 @@ var distDirectory = path.join(cwd, '.');
  */
 var allowedExtentions = /\.ejs$|\.scss$|\.js$/;
 var excludeFiles = /^\./; // exclude hidden files
+
+
+/* --------------------------------------------------------------------------
+ * Process and execute the given command.
+ * -------------------------------------------------------------------------- */
+
+var command = process.argv[2];
+var args = process.argv.slice(3);
+var argv = {};
+for (var i = 0; i < args.length; i += 2) {
+  argv[args[i]] = args[i + 1];
+}
+
+switch (command) {
+  /**
+   * Watch the file system and transpile from es6 to es5.
+   */
+  case '--watch':
+    watchFiles(srcDirectory, distDirectory);
+    break;
+
+  /**
+   * Transpile all files in `src` from es6 to es5.
+   */
+  case '--transpile':
+    transpileFiles(srcDirectory, distDirectory);
+    break;
+}
+
+/* --------------------------------------------------------------------------
+ * -------------------------------------------------------------------------- */
 
 /**
  * Test the given filename, to ensure it can be processed by any command / tranpsiler
@@ -86,7 +121,7 @@ function _getFileList(folder, callback) {
  * Watch javascript source files.
  */
 function watchFiles(srcDirectory, distDirectory) {
-  watch.createMonitor(srcDirectory, watchOptions, function(monitor) {
+  watch.createMonitor(srcDirectory, getWatchOptions(), function(monitor) {
     var transpiler = javascripts.getTranspiler(srcDirectory, distDirectory, isAllowed, babelOptions);
 
     monitor.on('created', function(filename, stats) {
@@ -113,35 +148,4 @@ function transpileFiles(srcDirectory, distDirectory) {
     transpiler.transpile(undefined, files);
   });
 }
-
-
-/* --------------------------------------------------------------------------
- * Process and execute the given command.
- * -------------------------------------------------------------------------- */
-
-var command = process.argv[2];
-var args = process.argv.slice(3);
-var argv = {};
-for (var i = 0; i < args.length; i += 2) {
-  argv[args[i]] = args[i + 1];
-}
-
-switch (command) {
-  /**
-   * Watch the file system and transpile from es6 to es5.
-   */
-  case '--watch':
-    watchFiles(srcDirectory, distDirectory);
-    break;
-
-  /**
-   * Transpile all files in `src` from es6 to es5.
-   */
-  case '--transpile':
-    transpileFiles(srcDirectory, distDirectory);
-    break;
-}
-
-/* --------------------------------------------------------------------------
- * -------------------------------------------------------------------------- */
 
