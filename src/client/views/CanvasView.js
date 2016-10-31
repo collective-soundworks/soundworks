@@ -73,7 +73,7 @@ class CanvasView extends SegmentedView {
      * @memberof module:soundworks/client.CanvasView
      * @private
      */
-    this._renderingGroup = new RenderingGroup(this.ctx, this.options.preservePixelRatio);
+    this._renderingGroup = null;
 
     /**
      * Canvas DOM element to draw into.
@@ -115,7 +115,7 @@ class CanvasView extends SegmentedView {
   /** @private */
   onResize(viewportWidth, viewportHeight, orientation) {
     super.onResize(viewportWidth, viewportHeight, orientation);
-    this._renderingGroup.onResize(viewportWidth, viewportHeight);
+    this._renderingGroup.onResize(viewportWidth, viewportHeight, orientation);
 
     // add stacked renderers to the rendering group
     this._rendererStack.forEach((renderer) => this._renderingGroup.add(renderer));

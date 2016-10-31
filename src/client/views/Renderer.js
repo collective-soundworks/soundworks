@@ -46,12 +46,23 @@ class Renderer {
      * @readonly
      */
     this.canvasHeight = 0;
+
+    /**
+     * Orientation of the canvas.
+     * @type {String}
+     * @name orientation
+     * @instance
+     * @memberof module:soundworks/client.Renderer
+     * @readonly
+     */
+    this.orientation = null;
   }
 
   /** @private */
-  onResize(canvasWidth, canvasHeight) {
+  onResize(canvasWidth, canvasHeight, orientation) {
     this.canvasWidth = canvasWidth;
     this.canvasHeight = canvasHeight;
+    this.orientation = orientation;
   }
 
   /**
