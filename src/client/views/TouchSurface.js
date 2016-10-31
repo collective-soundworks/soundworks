@@ -4,8 +4,10 @@
  * the size of the container.
  *
  * @param {Element} $el - Element to listen for `touch` events.
+ *
+ * @memberof module:soundworks/client
  */
-export default class TouchSurface {
+class TouchSurface {
   constructor($el) {
     /**
      * Element to listen.
@@ -197,3 +199,5 @@ export default class TouchSurface {
       listeners.splice(index, 1);
   }
 }
+
+export default TouchSurface;

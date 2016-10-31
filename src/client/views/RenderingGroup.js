@@ -87,7 +87,7 @@ const loop = {
  *
  * @memberof module:soundworks/client
  */
-export default class RenderingGroup {
+class RenderingGroup {
   constructor(ctx, preservePixelRatio = false) {
     /**
      * 2d context of the canvas.
@@ -246,3 +246,5 @@ export default class RenderingGroup {
      }
   }
 }
+
+export default RenderingGroup;

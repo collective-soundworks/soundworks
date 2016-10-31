@@ -13,18 +13,28 @@ const defaultTemplate = `
 
 /**
  * View to display a list of buttons.
+ *
+ * @param {Array<Object>} definitions - An array of button definitions. Each
+ *  definition should contain a `label` and an optionnal `state` entry (valid
+ *  values for `states` are `'pushed'`, `'released'` or `'disabled'`).
+ * @param {Function} onPush - The callback to execute when a button is pushed.
+ * @param {Function} onRelease - The callback to execute when a button is
+ *  released.
+ * @param {Object} options
+ * @param {Object} [options.toggleState=true] - Whether buttons are toggled or
+ *  have to be held pushed.
+ * @param {Object} [options.maxPushed=1] - The maximum number of buttons that
+ *  can be pushed simultaneously.
+ * @param {Object} [options.steelOldest=true] - Whether pushing one more button
+ *  than allowed by `maxPushed` releases the button earliest pushed buttons or has no effect.
+ * @param {Object} [options.defaultState='released'] - The state to apply when
+ *  not defined in the buttons' definitions.
+ *
+ * @memberof module:soundworks/client
+ *
+ * @todo - not standard View API
  */
-export default class ButtonView extends View {
-  /**
-   * @param {Array<Object>} definitions - An array of button definitions. Each definition should contain a `label` and an optionnal `state` entry (valid values for `states` are `'pushed'`, `'released'` or `'disabled'`).
-   * @param {Function} onPush - The callback to execute when a button is pushed.
-   * @param {Function} onRelease - The callback to execute when a button is released.
-   * @param {Object} options
-   * @param {Object} [options.toggleState=true] - Whether buttons are toggled or have to be held pushed.
-   * @param {Object} [options.maxPushed=1] - The maximum number of buttons that can be pushed simultaneously.
-   * @param {Object} [options.steelOldest=true] - Whether pushing one more button than allowed by `maxPushed` releases the button earliest pushed buttons or has no effect.
-   * @param {Object} [options.defaultState='released'] - The state to apply when not defined in the buttons' definitions.
-   */
+class ButtonView extends View {
   constructor(definitions, onPush, onRelease, options = {}) {
     const template = options.template || defaultTemplate;
     super(template, { definitions }, {}, { className: 'buttons' });
@@ -62,6 +72,7 @@ export default class ButtonView extends View {
 
   /**
    * Sets a definition and its related button to `pushed`.
+   *
    * @param {Number} index - Index of the definition in the list of definitions.
    * @param {Element} $btn - The DOM element related to this definition.
    */
@@ -88,6 +99,7 @@ export default class ButtonView extends View {
 
   /**
    * Sets a definition and its related button to `released`.
+   *
    * @param {Number} index - Index of the definition in the list of definitions.
    * @param {Element} $btn - The DOM element related to this definition.
    */
@@ -109,7 +121,9 @@ export default class ButtonView extends View {
 
   /**
    * Handle 'touchstart' event.
+   *
    * @param {Event} e - The event.
+   * @private
    */
   _handleTouchstart(e) {
     e.preventDefault();
@@ -130,6 +144,12 @@ export default class ButtonView extends View {
     }
   }
 
+  /**
+   * Handle 'touchend' event.
+   *
+   * @param {Event} e - The event.
+   * @private
+   */
   _handleTouchend(e) {
     e.preventDefault();
 
@@ -144,6 +164,7 @@ export default class ButtonView extends View {
 
   /**
    * Unable the interaction with a definition and its related button.
+   *
    * @param {Number} index - Index of the definition in the list of definitions.
    */
   enableButton(index) {
@@ -156,6 +177,7 @@ export default class ButtonView extends View {
 
   /**
    * Disable the interaction with a definition and its related button.
+   *
    * @param {Number} index - Index of the definition in the list of definitions.
    */
   disableButton(index) {
@@ -169,6 +191,7 @@ export default class ButtonView extends View {
 
   /**
    * Set definition and related button to `pushed`.
+   *
    * @param {Number} index - Index of the definition in the list of definitions.
    * @param {Boolean} silently - Whether the calllback is called.
    */
@@ -183,6 +206,7 @@ export default class ButtonView extends View {
 
   /**
    * Set definition and related button to `released`.
+   *
    * @param {Number} index - Index of the definition in the list of definitions.
    * @param {Boolean} silently - Whether the calllback is called.
    */
@@ -195,3 +219,5 @@ export default class ButtonView extends View {
     }
   }
 }
+
+export default ButtonView;
