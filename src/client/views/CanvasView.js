@@ -125,7 +125,7 @@ class CanvasView extends SegmentedView {
   }
 
   /**
-   * Callback to be executed at the beginning of each `requestAnimationFrame`
+   * Callback to execute at the beginning of each `requestAnimationFrame`
    * cycle.
    * @callback module:soundworks/client.CanvasView~preRenderer
    *
