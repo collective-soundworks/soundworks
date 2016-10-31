@@ -15,31 +15,35 @@ const defaultTemplate = `
  * ratios of the different elements by overriding the `ratio` option.
  * The sum of all the ratios should be equal to 1.
  *
+ * _<span class="warning">__WARNING__</span> Views should preferably by
+ * created using {@link module:soundworks/client.Experience#createView}._
+ *
+ * @param {String} template - Template of the view.
+ * @param {Object} content - Object containing the variables used to populate
+ *  the template. {@link module:soundworks/client.View#content}.
+ * @param {Object} events - Event listeners to install to the view
+ *  {@link module:soundworks/client.View#events}.
+ * @param {Object} options - Options of the view.
+ *  {@link module:soundworks/client.View#options}.
+ *
  * @memberof module:soundworks/client
  * @extends {module:soundworks/client.View}
  */
 class SegmentedView extends View {
-  /**
-   * _<span class="warning">__WARNING__</span> Views should preferably by
-   * created using the [`Experience#createView`]{@link module:soundworks/client.Experience#createView}
-   * method._
-   *
-   * @param {String} template - Template of the view.
-   * @param {Object} content - Object containing the variables used to populate
-   *  the template. {@link module:soundworks/client.View#content}.
-   * @param {Object} events - Listeners to install in the view
-   *  {@link module:soundworks/client.View#events}.
-   * @param {Object} options - Options of the view.
-   *  {@link module:soundworks/client.View#options}.
-   */
   constructor(template, content = {}, events = {}, options = {}) {
     // fallback on default template if `template = null`
     template = !template ? defaultTemplate : template;
     super(template, content, events, options);
 
     /**
-     * An object containing selectors defined in the template associated with their vertical ratio, the ratio is applyed in both 'portrait' and 'landscape' orientation.
+     * Object associating selectors as defined in the given template associated
+     * with their vertical ratio, the ratio is applyed in both 'portrait' and
+     * 'landscape' orientation.
+     *
      * @type {Object<String:Number>}
+     * @name ratios
+     * @instance
+     * @memberof module:soundworks/client.SegmentedView
      */
     this.ratios = options.ratios || {
       '.section-top': 0.3,
@@ -47,16 +51,33 @@ class SegmentedView extends View {
       '.section-bottom': 0.2,
     };
 
+    /**
+     * An object containing selectors defined in the template associated
+     * with their vertical ratio, the ratio is applyed in both 'portrait'
+     * and 'landscape' orientation.
+     *
+     * @type {Object<String:Element>}
+     * @name ratios
+     * @instance
+     * @memberof module:soundworks/client.SegmentedView
+     * @private
+     */
     this._$sections = {};
   }
 
+  /** @private */
   onRender() {
     Object.keys(this.ratios).forEach((sel) => {
       const $el = this.$el.querySelector(sel);
+
+      if ($el === null)
+        throw new Error(`Unknow selector "${sel}"`);
+
       this._$sections[sel] = $el;
     });
   }
 
+  /** @private */
   onResize(width, height, orientation) {
     super.onResize(width, height, orientation);
 
