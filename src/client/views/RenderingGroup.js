@@ -167,7 +167,7 @@ export default class RenderingGroup {
    * @param {Number} dt - Delta time in seconds since the last rendering
    *  loop (`requestAnimationFrame`).
    */
-  preRender(ctx, dt) {}
+  preRender(ctx, dt, canvasWidth, canvasHeight) {}
 
   /**
    * Propagate `render` method to all the registered renderers.
@@ -178,7 +178,7 @@ export default class RenderingGroup {
     const ctx = this.ctx;
     const renderers = this.renderers;
 
-    this.preRender(ctx, dt);
+    this.preRender(ctx, dt, this.canvasWidth, this.canvasHeight);
 
     for (let i = 0, l = renderers.length; i < l; i++)
       renderers[i].render(ctx);
