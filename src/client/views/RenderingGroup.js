@@ -1,5 +1,7 @@
 /**
- * The main rendering loop handling the `requestAnimationFrame` and the `update` / `render` calls.
+ * Rendering loop handling the `requestAnimationFrame` and the `update` /
+ * `render` cycles.
+ *
  * @private
  */
 const loop = {
@@ -8,7 +10,7 @@ const loop = {
   _isRunning: false,
 
   /**
-   * @returns {Number} - The current time in seconds.
+   * @return {Number} - Current time in seconds.
    */
   getTime() {
     return 0.001 * (window.performance && window.performance.now ?

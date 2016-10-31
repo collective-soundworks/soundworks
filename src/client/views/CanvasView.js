@@ -14,7 +14,8 @@ const defaultCanvasTemplate = `
 /**
  * View designed for experiences where 2d graphical rendering is needed.
  * The view is basically a `SegmentedView` with a `canvas` element in
- * the background.
+ * the background and a set of helpers to handle the __renderers__ (objects
+ * that draw something into the canvas).
  *
  * _<span class="warning">__WARNING__</span> Views should preferably by
  * created using the [`Experience#createView`]{@link module:soundworks/client.Experience#createView}
@@ -30,6 +31,7 @@ const defaultCanvasTemplate = `
  *
  * @memberof module:soundworks/client
  * @extends {module:soundworks/client.SegmentedView}
+ *
  * @see {@link module:soundworks/client.View}
  * @see {@link module:soundworks/client.Renderer}
  */

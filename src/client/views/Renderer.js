@@ -1,19 +1,18 @@
 /**
- * Base class to implement in order to be used in conjonction with a
+ * Base class to extend in order to be used in conjonction with a
  * [`CanvasView`]{@link module:soundworks/client.CanvasView}. These classes
  * provide altogether a clean way to manage the `update` and `render` cycles
  * of an animation.
  *
+ * @param {Number} [updatePeriod=0] - Logical time (in _second_) between
+ *  each subsequent updates. If `0`, the update period is slaved on the
+ *  `requestAnimationFrame` period (which is appriopriate for most of the
+ *  use-cases).
+ *
  * @memberof module:soundworks/client
- * @see module:soundworks/client.CanvasView
+ * @see {@link module:soundworks/client.CanvasView}
  */
 class Renderer {
-  /**
-   * @param {Number} [updatePeriod=0] - Logical time (in _second_) between
-   *  each subsequent update calls. If `0`, the update period is then slaved on
-   *  the `requestAnimationFrame` period (which is appriopriate for most of the
-   *  use-cases).
-   */
   constructor(updatePeriod = 0) {
     this.updatePeriod = updatePeriod;
 
@@ -67,20 +66,24 @@ class Renderer {
 
   /**
    * Interface method called when the instance is added to a `CanvasView`.
-   * The width and height of the canvas should be available when the method
-   * is called.
+   * `this.canvasWidth` and `this.canvasHeight` should be available at this
+   * point.
    */
   init() {}
 
   /**
-   * Interface Method to update the properties (physics, etc.) of the renderer.
-   * @param {Number} dt - Logical time since the last update. If `this.updatePeriod`
-   *  is equal to zero 0, `dt` is the elasped time since the last render.
+   * Interface method that should host the code that updates the properties
+   * of the renderer (physics, etc.)
+   *
+   * @param {Number} dt - Logical time since the last update. If
+   *  `this.updatePeriod` is equal to zero 0, `dt` is the elasped time since
+   *  the last render.
    */
   update(dt) {}
 
   /**
-   * Interface method to draw into the canvas.
+   * Interface method that should host the code that draw into the canvas.
+   *
    * @param {CanvasRenderingContext2D} ctx - 2d context of the canvas.
    */
   render(ctx) {}
