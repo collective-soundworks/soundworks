@@ -18,6 +18,7 @@ class Renderer {
 
     /**
      * Current (logical) time of the renderer.
+     *
      * @type {Number}
      * @name currentTime
      * @instance
@@ -28,6 +29,7 @@ class Renderer {
 
     /**
      * Current width of the canvas.
+     *
      * @type {Number}
      * @name canvasWidth
      * @instance
@@ -38,6 +40,7 @@ class Renderer {
 
     /**
      * Current height of the canvas.
+     *
      * @type {Number}
      * @name canvasHeight
      * @instance
@@ -48,6 +51,7 @@ class Renderer {
 
     /**
      * Orientation of the canvas.
+     *
      * @type {String}
      * @name orientation
      * @instance
