@@ -3,34 +3,38 @@ import viewport from './viewport';
 import Delegate from 'dom-delegate';
 
 /**
- * Base class for the views.
+ * Base class for views.
+ *
+ * _<span class="warning">__WARNING__</span> Views should be created using
+ * {@link module:soundworks/client.Activity#createView} method._
+ *
+ * @param {String} template - Template of the view.
+ * @param {Object} content - Object containing the variables used to populate
+ *  the template. {@link module:soundworks/client.View#content}.
+ * @param {Object} events - Listeners to install in the view
+ *  {@link module:soundworks/client.View#events}.
+ * @param {Object} options - Options of the view.
+ *  {@link module:soundworks/client.View#options}.
  *
  * @memberof module:soundworks/client
  */
 class View {
-  /**
-   * _<span class="warning">__WARNING__</span> Views should preferably by
-   * created using the [`Experience#createView`]{@link module:soundworks/client.Experience#createView}
-   * method._
-   *
-   * @param {String} template - Template of the view.
-   * @param {Object} content - Object containing the variables used to populate
-   *  the template. {@link module:soundworks/client.View#content}.
-   * @param {Object} events - Listeners to install in the view
-   *  {@link module:soundworks/client.View#events}.
-   * @param {Object} options - Options of the view.
-   *  {@link module:soundworks/client.View#options}.
-   */
   constructor(template, content = {}, events = {}, options = {}) {
     /**
-     * A function created from the given `template`, to be called with `content` object.
+     * Function created from the given `template`, to be executed with the
+     * `content` object.
+     *
      * @type {Function}
+     * @name tmpl
+     * @instance
+     * @memberof module:soundworks/client.View
      * @private
      */
     this.tmpl = tmpl(template);
 
     /**
-     * Data to be used in order to populate the variables of the template.
+     * Data used to populate variables defined in the template.
+     *
      * @type {Object}
      * @name content
      * @instance
@@ -39,8 +43,9 @@ class View {
     this.content = content;
 
     /**
-     * Events to attach to the view. Each entry must follow the convention:
-     * `'eventName [cssSelector]': callbackFunction`
+     * Events to attach to the view. The key / value pairs must follow the
+     * convention: `'eventName [cssSelector]': callbackFunction`
+     *
      * @type {Object}
      * @name events
      * @instance
@@ -50,17 +55,20 @@ class View {
 
     /**
      * Options of the View.
+     *
      * @type {Object}
-     * @property {String} [el='div'] - String to be used as argument of
-     *  `document.createElement` to create the container of the view (`this.$el`).
-     * @property {String} [id=null] - String to be used as the `id` of `this.$el`.
-     * @property {Array<String>} [className=null] - Array of class to apply to
-     *  `this.$el`.
-     * @property {Array<String>} [priority=0] - Priority of the view, the view manager
-     *  uses this value in order to decide which view should be displayed first.
+     * @property {String} [el='div'] - Type of DOM element of the main container
+     *  of the view. Basically the argument of `document.createElement`.
+     * @property {String} [id=null] - Id of the main container.
+     * @property {Array<String>} [className=null] - Classes of the main container.
+     * @property {Array<String>} [priority=0] - Priority of the view. This value
+     *  is used by the `viewManager` to define which view should appear first.
      * @name options
      * @instance
      * @memberof module:soundworks/client.View
+     *
+     * @see {@link module:soundworks/client.view#$el}
+     * @see {@link module:soundworks/client.viewManager}
      */
     this.options = Object.assign({
       el: 'div',
@@ -71,24 +79,51 @@ class View {
 
     /**
      * Priority of the view.
+     *
      * @type {Number}
      * @name priority
      * @instance
      * @memberof module:soundworks/client.View
+     * @see {@link module:soundworks/client.viewManager}
      */
     this.priority = this.options.priority;
 
     /**
+     * Viewport width.
+     *
+     * @type {Number}
+     * @name viewWidth
+     * @instance
+     * @memberof module:soundworks/client.View
+     * @see {@link module:soundworks/client.viewport}
+     */
+    this.viewportWidth = null;
+
+    /**
+     * Viewport height.
+     *
+     * @type {Number}
+     * @name viewWidth
+     * @instance
+     * @memberof module:soundworks/client.View
+     * @see {@link module:soundworks/client.viewport}
+     */
+    this.viewportHeight = null;
+
+    /**
      * Orientation of the view ('portrait'|'landscape')
+     *
      * @type {String}
      * @name orientation
      * @instance
      * @memberof module:soundworks/client.View
+     * @see {@link module:soundworks/client.viewport}
      */
     this.orientation = null;
 
     /**
-     * Indicates whether the view is currently visible or not.
+     * Indicates if the view is visible or not.
+     *
      * @type {Boolean}
      * @name isVisible
      * @instance
@@ -98,6 +133,7 @@ class View {
 
     /**
      * If the view is a component, pointer to the parent view.
+     *
      * @type {module:soundworks/client.View}
      * @name parentView
      * @default null
@@ -107,7 +143,8 @@ class View {
     this.parentView = null;
 
     /**
-     * The container element of the view. Defaults to `<div>`.
+     * DOM element of the main container of the view. Defaults to `<div>`.
+     *
      * @type {Element}
      * @name $el
      * @instance
@@ -117,9 +154,15 @@ class View {
 
     /**
      * Store the components (sub-views) of the view.
+     *
+     * @type {Object}
+     * @name _components
+     * @instance
+     * @memberof module:soundworks/client.View
      * @private
      */
     this._components = {};
+
 
     this._delegate = new Delegate(this.$el);
     this.onResize = this.onResize.bind(this);
@@ -128,8 +171,9 @@ class View {
   }
 
   /**
-   * Add or remove a compound view inside the current view.
-   * @param {String} selector - Css selector matching an element of the template.
+   * Add or remove a component view inside the current view.
+   *
+   * @param {String} selector - Css selector defining the placeholder of the view.
    * @param {View} [view=null] - View to insert inside the selector. If `null`
    *  destroy the component.
    */
@@ -141,23 +185,15 @@ class View {
       delete this._components[selector];
     } else {
       this._components[selector] = view;
-      view.setParentView(this);
+      this.parentView = view;
     }
   }
 
   /**
-   * Sets the parent when is a component view.
-   * @param {View} view - Parent view.
+   * Execute a method on all the component views (sub-views).
    *
-   */
-  setParentView(view) {
-    this.parentView = view;
-  }
-
-  /**
-   * Execute a method on all the `components` (sub-views).
-   * @param {String} method - The name of the method to be executed.
-   * @param {...Mixed} args - Arguments for the given method.
+   * @param {String} method - Name of the method to execute.
+   * @param {...Mixed} args - Arguments to apply to the method.
    * @private
    */
   _executeViewComponentMethod(method, ...args) {
@@ -168,9 +204,11 @@ class View {
   }
 
   /**
-   * Render partially the view according to the given selector. If the selector
-   * is associated to a `component` (sub-views), the `component` is rendered.
-   * @param {String} selector - Css selector matching an element of the view.
+   * Partially re-render the view according to the given selector. If the
+   * selector is associated to a `component`, the `component` is rendered.
+   *
+   * @param {String} selector - Css selector of the element to render. The
+   *  element itself is not updated, only its content.
    * @private
    */
   _renderPartial(selector) {
@@ -201,7 +239,8 @@ class View {
   }
 
   /**
-   * Render the whole view and its component (sub-views).
+   * Render the whole view and its components.
+   *
    * @private
    */
   _renderAll() {
@@ -229,9 +268,10 @@ class View {
 
   /**
    * Render the view according to the given template and content.
+   *
    * @param {String} [selector=null] - If not `null`, renders only the part of
    *  the view inside the matched element. If this element contains a component
-   *  (sub-view), the component is rendered. Renders all the view otherwise.
+   *  (sub-view), the component is rendered. Render the whole view otherwise.
    */
   render(selector = null) {
     if (selector !== null)
@@ -245,7 +285,8 @@ class View {
 
   /**
    * Insert the view (`this.$el`) into the given element.
-   * @param {Element} $parent - Element inside which the view must be inserted.
+   *
+   * @param {Element} $parent - Element in which the view must be inserted.
    * @private
    */
   appendTo($parent) {
@@ -254,7 +295,8 @@ class View {
   }
 
   /**
-   * Show the view. This method should only be used by the `viewManager`.
+   * Show the view. Executed by the `viewManager`.
+   *
    * @private
    */
   show() {
@@ -268,8 +310,8 @@ class View {
   }
 
   /**
-   * Hide the view and uninstall events. This method should only be used by
-   * the `viewManager`.
+   * Hide the view and uninstall events. Executed by the `viewManager`.
+   *
    * @private
    */
   hide() {
@@ -283,8 +325,7 @@ class View {
   }
 
   /**
-   * Cleanly remove the view from it's container. This method should only be
-   * used by the `viewManager`.
+   * Remove the view from it's container. Executed by the `viewManager`.
    * @private
    */
   remove() {
@@ -294,18 +335,17 @@ class View {
   }
 
   /**
-   * Entry point when the DOM is created, is mainly exposed to cache some DOM
-   * elements.
+   * Interface method to extend, executed when the DOM is created.
    */
   onRender() {}
 
   /**
-   * Callback for `viewport.resize` event, it maintains `this.$el` size
-   * to fit the viewport size. The method is also called once when the
-   * view is actually inserted into the DOM.
+   * Callback executed on `resize` events. By default, maintains the size
+   * of the container to fit the viewport size. The method is also executed when
+   * the view is inserted in the DOM.
    *
-   * @param {Number} viewportWidth - Width of the viewport _(in pixels)_.
-   * @param {Number} viewportHeight - Height of the viewport _(in pixels)_.
+   * @param {Number} viewportWidth - Width of the viewport.
+   * @param {Number} viewportHeight - Height of the viewport.
    * @param {String} orientation - Orientation of the viewport.
    * @see {@link module:soundworks/client.viewport}
    */
@@ -326,10 +366,11 @@ class View {
   // EVENTS ----------------------------------------
 
   /**
-   * Install events on the view at any moment of its lifecycle.
+   * Install events on the view.
+   *
    * @param {Object<String, Function>} events - An object of events.
-   * @param {Boolean} [override=false] - Defines whether the previous events
-   *  are replaced with the new ones.
+   * @param {Boolean} [override=false] - Defines if the new events added to the
+   *  the old one or if they replace them.
    */
   installEvents(events, override = false) {
     if (this.isVisible)
@@ -343,7 +384,7 @@ class View {
 
   /**
    * Add event listeners on the view.
-   * @todo - remove delegation ?
+   *
    * @private
    */
   _delegateEvents() {
@@ -357,7 +398,7 @@ class View {
 
   /**
    * Remove event listeners from the view.
-   * @todo - remove delegation ?
+   *
    * @private
    */
   _undelegateEvents() {

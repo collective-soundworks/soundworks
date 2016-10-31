@@ -15,8 +15,8 @@ const defaultTemplate = `
  * ratios of the different elements by overriding the `ratio` option.
  * The sum of all the ratios should be equal to 1.
  *
- * _<span class="warning">__WARNING__</span> Views should preferably by
- * created using {@link module:soundworks/client.Experience#createView}._
+ * _<span class="warning">__WARNING__</span> Views should be created using
+ * {@link module:soundworks/client.Activity#createView} method._
  *
  * @param {String} template - Template of the view.
  * @param {Object} content - Object containing the variables used to populate
