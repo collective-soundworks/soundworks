@@ -68,6 +68,8 @@ const client = {
    *  mobile platform or not.
    * @property {String} audioFileExt - Audio file extension to use, depending on
    *  the platform.
+   * @property {String} interaction - Type of interaction allowed by the
+   *  viewport, `touch` or `mouse`
    *
    * @see {@link module:soundworks/client.Platform}
    */
@@ -75,6 +77,7 @@ const client = {
     os: null,
     isMobile: null,
     audioFileExt: '',
+    interaction: null,
   },
 
   /**

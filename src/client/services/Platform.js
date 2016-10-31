@@ -260,8 +260,16 @@ class Platform extends Service {
 
     // install events for interaction hook
     if (client.compatible) {
-      const event = client.platform.isMobile ? 'touchend' : 'click';
-      this.view.installEvents({ [event]: this._onInteraction.bind(this) });
+      this.view.installEvents({
+        touchstart: () => {
+          client.platform.interaction = 'touch';
+          this._onInteraction();
+        },
+        mousedown: () => {
+          client.platform.interaction = 'mouse';
+          this._onInteraction();
+        }
+      });
     }
   }
 
