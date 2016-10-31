@@ -16,25 +16,24 @@ const defaultCanvasTemplate = `
  * The view is basically a `SegmentedView` with a `canvas` element in
  * the background.
  *
+ * _<span class="warning">__WARNING__</span> Views should preferably by
+ * created using the [`Experience#createView`]{@link module:soundworks/client.Experience#createView}
+ * method._
+ *
+ * @param {String} template - Template of the view.
+ * @param {Object} content - Object containing the variables used to populate
+ *  the template. {@link module:soundworks/client.View#content}.
+ * @param {Object} events - Listeners to install in the view
+ *  {@link module:soundworks/client.View#events}.
+ * @param {Object} options - Options of the view.
+ *  {@link module:soundworks/client.View#options}.
+ *
  * @memberof module:soundworks/client
  * @extends {module:soundworks/client.SegmentedView}
  * @see {@link module:soundworks/client.View}
  * @see {@link module:soundworks/client.Renderer}
  */
 class CanvasView extends SegmentedView {
-  /**
-   * _<span class="warning">__WARNING__</span> Views should preferably by
-   * created using the [`Experience#createView`]{@link module:soundworks/client.Experience#createView}
-   * method._
-   *
-   * @param {String} template - Template of the view.
-   * @param {Object} content - Object containing the variables used to populate
-   *  the template. {@link module:soundworks/client.View#content}.
-   * @param {Object} events - Listeners to install in the view
-   *  {@link module:soundworks/client.View#events}.
-   * @param {Object} options - Options of the view.
-   *  {@link module:soundworks/client.View#options}.
-   */
   constructor(template, content, events, options) {
     template = template || defaultCanvasTemplate;
     options = Object.assign({
@@ -45,45 +44,75 @@ class CanvasView extends SegmentedView {
 
     /**
      * Temporary stack the renderers when the view is not visible.
+     *
      * @type {Set}
+     * @name _rendererStack
+     * @instance
+     * @memberof module:soundworks/client.CanvasView
+     * @private
      */
     this._rendererStack = new Set();
 
     /**
-     * Flag to track the first `render` call
+     * Flag to track the first `onRender` call.
+     *
      * @type {Boolean}
+     * @name _hasRenderedOnce
+     * @instance
+     * @memberof module:soundworks/client.CanvasView
+     * @private
      */
     this._hasRenderedOnce = false;
+
+    /**
+     * Default rendering group.
+     *
+     * @type {module:soundworks/client.RenderingGroup}
+     * @name _renderingGroup
+     * @instance
+     * @memberof module:soundworks/client.CanvasView
+     * @private
+     */
+    this._renderingGroup = new RenderingGroup(this.ctx, this.options.preservePixelRatio);
+
+    /**
+     * Canvas DOM element to draw into.
+     *
+     * @type {Element}
+     * @name $canvas
+     * @instance
+     * @memberof module:soundworks/client.$canvas
+     */
+    this.$canvas = null;
+
+    /**
+     * 2d context of the canvas.
+     *
+     * @type {CanvasRenderingContext2D}
+     * @name $canvas
+     * @instance
+     * @memberof module:soundworks/client.$canvas
+     */
+    this.ctx = null;
   }
 
+  /** @private */
   onRender() {
     super.onRender();
 
     if (!this._hasRenderedOnce) {
-      /**
-       * The canvas element to draw into.
-       * @type {Element}
-       */
       this.$canvas = this.$el.querySelector('canvas');
-
-      /**
-       * The 2d context of the canvas.
-       * @type {CanvasRenderingContext2D}
-       */
       this.ctx = this.$canvas.getContext('2d');
 
-      /**
-       * The default rendering group.
-       * @type {RenderingGroup}
-       * @private
-       */
-      this._renderingGroup = new RenderingGroup(this.ctx, this.options.preservePixelRatio);
+      const preservePixelRatio = this.options.preservePixelRatio
+      this._renderingGroup = new RenderingGroup(this.ctx, preservePixelRatio);
 
       // prevent creating a new rendering group each time the view is re-rendered
       this._hasRenderedOnce = true;
     }
   }
 
+  /** @private */
   onResize(viewportWidth, viewportHeight, orientation) {
     super.onResize(viewportWidth, viewportHeight, orientation);
     this._renderingGroup.onResize(viewportWidth, viewportHeight);
@@ -94,16 +123,21 @@ class CanvasView extends SegmentedView {
   }
 
   /**
+   * Callback to be executed at the beginning of each `requestAnimationFrame`
+   * cycle.
    * @callback module:soundworks/client.CanvasView~preRenderer
+   *
    * @param {CanvasRenderingContext2D} ctx - Context of the canvas.
-   * @param {Number} dt - Delta time in seconds since the last rendering cycle.
+   * @param {Number} dt - Delta time in seconds since last rendering.
+   * @param {Number} canvasWidth - Current width of the canvas.
+   * @param {Number} canvasHeight - Current height of the canvas.
    */
   /**
-   * Defines a function to be executed before all
-   * [`Renderer#render`]{@link module:soundworks/client.Renderer#render}
-   * at each cycle.
-   * @param {module:soundworks/client.CanvasView~preRenderer} callback - Function
-   *  to execute before aech rendering cycle.
+   * Register a function to be executed at the beginning of each
+   * `requestAnimationFrame` cycle.
+   *
+   * @param {module:soundworks/client.CanvasView~preRenderer} callback -
+   *  Function to execute before each rendering cycle.
    */
   setPreRender(callback) {
     this._renderingGroup.preRender = callback.bind(this._renderingGroup);
@@ -112,6 +146,7 @@ class CanvasView extends SegmentedView {
   /**
    * Add a renderer to the `RenderingGroup`. The renderer is automatically
    * activated when added to the group.
+   *
    * @param {module:soundworks/client.Renderer} renderer - Renderer to add.
    */
   addRenderer(renderer) {
@@ -124,6 +159,7 @@ class CanvasView extends SegmentedView {
   /**
    * Add a renderer to the `RenderingGroup`. The renderer is automatically
    * disactivated when removed from the group.
+   *
    * @param {module:soundworks/client.Renderer} renderer - Renderer to remove.
    */
   removeRenderer(renderer) {

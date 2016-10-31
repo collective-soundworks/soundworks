@@ -163,14 +163,19 @@ export default class RenderingGroup {
   /**
    * Entry point to apply global transformations to the canvas before each
    * renderer is rendered.
+   *
    * @param {CanvasRenderingContext2D} ctx - Context of the canvas.
    * @param {Number} dt - Delta time in seconds since the last rendering
    *  loop (`requestAnimationFrame`).
+   * @param {Number} canvasWidth - Current width of the canvas.
+   * @param {Number} canvasHeight - Current height of the canvas.
+
    */
   preRender(ctx, dt, canvasWidth, canvasHeight) {}
 
   /**
    * Propagate `render` method to all the registered renderers.
+   *
    * @param {Number} dt - Delta time in seconds since the last rendering
    *  loop (`requestAnimationFrame`).
    */
