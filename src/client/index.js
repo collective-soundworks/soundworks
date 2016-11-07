@@ -40,6 +40,7 @@ export { default as MotionInput } from './services/MotionInput';
 export { default as Network } from './services/Network';
 export { default as Placer } from './services/Placer';
 export { default as Platform } from './services/Platform';
+export { default as RawSocket } from './services/RawSocket';
 export { default as Scheduler } from './services/Scheduler';
 export { default as SharedConfig } from './services/SharedConfig';
 export { default as SharedParams } from './services/SharedParams';
