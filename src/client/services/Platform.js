@@ -7,17 +7,17 @@ import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
 
 /**
- * Structure of the definition of a feature to be tested.
+ * Definition of a feature to test.
  *
  * @typedef {Object} module:soundworks/client.Platform~definition
  * @property {String} id - Id of the definition.
  * @property {Function} check - A function that should return `true` if the
  *  feature is available on the platform, `false` otherwise.
+ * @property {Function} [startHook] - A function to be executed on start
+ *  (for example to ask access to microphone or geolocation).
  * @property {Function} [interactionHook] - A function to be executed on the
  *  first interaction (i.e. `click` or `touchstart`) of the user with application
  *  (for example, to initialize AudioContext on iOS devices).
- * @property {Function} [interactionHook] - A function to be executed on start
- *  (for example to ask access to microphone or geolocation).
  */
 const defaultDefinitions = [
   {
@@ -84,6 +84,7 @@ const defaultDefinitions = [
   },
   {
     // adapted from https://github.com/richtr/NoSleep.js/blob/master/NoSleep.js
+    // warning: cause 150% cpu use in chrome desktop...
     id: 'wake-lock',
     check: function() {
       // functionnality that cannot brake the application
@@ -153,44 +154,52 @@ const SERVICE_ID = 'service:platform';
 /**
  * Interface for the client `'platform'` service.
  *
- * This services is responsible for giving general informations about the user's
- * device (cf. [`client.device`]{@link module:soundworks/client.client.platform})
- * as well as checking availability and providing hooks in order to initialize
- * the features required by the application (audio, microphone, etc.).
+ * The `platform` services is responsible for giving general informations
+ * about the user's device as well as checking availability and providing hooks
+ * in order to initialize the features required by the application (audio,
+ * microphone, etc.).
  * If one of the required definitions is not available, a view is created with
- * an error message and the [`client.compatible`]{@link module:soundworks/client.client.compatible}
- * attribute is set to `false`.
+ * an error message and `client.compatible` is set to `false`.
  *
  * Available built-in definitions are:
  * - 'web-audio'
- * - 'mobile-device'
- * - 'audio-input'
- * - 'full-screen' (this feature won't block the application, just applied if available)
- * - 'wake-lock'
+ * - 'mobile-device': only-accept mobile devices in the application (based on
+ *   User-Agent sniffing)
+ * - 'audio-input': Android Only
+ * - 'full-screen': Android Only, this feature won't block the application if
+ *   not available.
+ * - 'wake-lock': deprecated, use with caution, has been observed consumming
+ *   150% cpu in chrome desktop.
  *
- * Be carefull when setting `showDialog` option to `false` because most of these
- * features require an interaction or a confirmation from the user in order to
- * be initialized correctly,
+ * Warning: when setting `showDialog` option to `false`, unexpected behaviors
+ * might occur because most of the features require an interaction or a
+ * confirmation from the user in order to be initialized correctly.
  *
- * @see {@link module:soundworks/client.client}
+ * _<span class="warning">__WARNING__</span> This class should never be
+ * instanciated manually_
  *
  * @param {Object} options
  * @param {Array<String>|String} options.features - Id(s) of the feature(s)
- *  required by the application.
- * @param {}
+ *  required by the application. Available build-in features are:
+ *  - 'web-audio'
+ *  - 'mobile-device': only accept mobile devices (recognition based User-Agent)
+ *  - 'audio-input': Android only
+ *  - 'full-screen': Android only
+ *  - 'wake-lock': deprecated, this feature should be used with caution as
+ *    it has been observed to use 150% of cpu in chrome desktop.
  *
  * @memberof module:soundworks/client
  * @example
  * // inside the experience constructor
  * this.platform = this.require('platform', { features: 'web-audio' });
+ *
+ * @see {@link module:soundworks/client.client#platform}
  */
 class Platform extends Service {
-  /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */
   constructor() {
     super(SERVICE_ID, false);
 
     const defaults = {
-      // wakeLock: false, // @todo - fix and transform into a feature
       showDialog: true,
       viewCtor: SegmentedView,
       viewPriority: 10,
@@ -263,10 +272,12 @@ class Platform extends Service {
       this.view.installEvents({
         touchstart: () => {
           client.platform.interaction = 'touch';
-          this._onInteraction();
         },
-        mousedown: () => {
-          client.platform.interaction = 'mouse';
+        click: () => {
+          // if not passed into touchstart callback, interaction is from mouse.
+          if (!client.platform.interaction)
+            client.platform.interaction = 'mouse';
+
           this._onInteraction();
         }
       });
@@ -281,27 +292,29 @@ class Platform extends Service {
 
   /**
    * Add a new feature definition or override an existing one.
+   *
    * @param {module:soundworks/client.Platform~definition} obj - Definition of
-   *  the feature to add to the existing ones.
+   *  the feature.
    */
   addFeatureDefinition(obj) {
     this._featureDefinitions[obj.id] = obj;
   }
 
   /**
-   * Require features avalability for the application.
+   * Require features for the application.
+   *
+   * @param {...String} features - Id(s) of the feature(s) to be required.
    * @private
-   * @param {...String} features - The id(s) of the feature(s) to be required.
    */
   requireFeature(...features) {
     features.forEach((id) => this._requiredFeatures.add(id));
   }
 
   /**
-   * Execute all `check` functions from the definition of the required features.
-   * @private
-   * @return {Boolean} - true if all checks pass, false otherwise.
+   * Execute all `check` functions defined in the required features.
    *
+   * @return {Boolean} - `true` if all checks pass, `false` otherwise.
+   * @private
    */
   resolveRequiredFeatures() {
     let result = true;
@@ -319,19 +332,21 @@ class Platform extends Service {
   }
 
   /**
-   * Returns the list of the functions to be executed on `start` lifecycle.
-   * @private
+   * Returns the list of the functions to be executed on the `start` lifecycle.
+   *
    * @return {Array}
+   * @private
    */
   getStartHooks() {
     return this._getHooks('startHook');
   }
 
   /**
-   * Returns the list of the functions to be executed when the user
-   * interacts with the application for the first time.
-   * @private
+   * Returns the list of the functions to be executed when the user interacts
+   * with the application for the first time (`touchstart` or `mousedown`.
+   *
    * @return {Array}
+   * @private
    */
   getInteractionHooks() {
     return this._getHooks('interactionHook');
@@ -354,6 +369,7 @@ class Platform extends Service {
   /**
    * Execute `interactions` hooks from the `platform` service.
    * Also activate the media according to the `options`.
+   *
    * @private
    */
   _onInteraction() {
@@ -365,7 +381,9 @@ class Platform extends Service {
   }
 
   /**
-   * Populate `client.platform` with the prefered audio file extention for the platform.
+   * Populate `client.platform` with the prefered audio file extention
+   * for the platform.
+   *
    * @private
    */
   _defineAudioFileExtention() {
@@ -382,6 +400,7 @@ class Platform extends Service {
 
   /**
    * Populate `client.platform` with the os name.
+   *
    * @private
    */
   _definePlatform() {
