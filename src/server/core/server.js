@@ -111,6 +111,13 @@ const server = {
   config: {},
 
   /**
+   * Instance of the http(s) server
+   * @type {HttpServer}
+   * @private
+   */
+  // server: null,
+
+  /**
    * The url of the node server on the current machine.
    * @private
    */
@@ -321,6 +328,8 @@ const server = {
    */
   _runServer(expressApp) {
     const httpServer = http.createServer(expressApp);
+    // expose the server before initailizing activities as they might need it.
+    // this.httpServer = httpServer;
 
     this._initActivities();
     this._initRouting(expressApp);
@@ -339,6 +348,8 @@ const server = {
    */
   _runSecureServer(expressApp, key, cert) {
     const httpsServer = https.createServer({ key, cert }, expressApp);
+    // expose the server before initailizing activities as they might need it.
+    // this.httpServer = httpsServer;
 
     this._initActivities();
     this._initRouting(expressApp);

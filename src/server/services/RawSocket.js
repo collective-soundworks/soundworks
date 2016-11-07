@@ -1,3 +1,4 @@
+import server from '../core/server';
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
 import { Server } from 'uws';
