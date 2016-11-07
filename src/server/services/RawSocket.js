@@ -11,8 +11,8 @@ const SERVICE_ID = 'service:raw-socket';
  * @private
  */
 const baseProtocol = [
-  { channel: 'system:handshake', type: 'Uint32' },
-  { channel: 'system:handshake-ack', type: 'Uint8' },
+  { channel: 'service:handshake', type: 'Uint32' },
+  { channel: 'service:handshake-ack', type: 'Uint8' },
 ];
 
 /**
@@ -106,7 +106,7 @@ class RawSocket extends Service {
       const viewCtor = global[`${type}Array`];
       const data = new viewCtor(buffer, viewCtor.BYTES_PER_ELEMENT);
 
-      if (channel === 'handshake')
+      if (channel === 'service:handshake')
         this._pairClientSocket(socket, data[0]);
       else
         this._propagateEvent(socket, channel, data);
@@ -126,7 +126,7 @@ class RawSocket extends Service {
     this._socketClientMap.set(socket, client);
     this._tokenClientMap.delete(token);
 
-    this.send(client, 'handshake-ack');
+    this.send(client, 'service:handshake-ack');
   }
 
   /**

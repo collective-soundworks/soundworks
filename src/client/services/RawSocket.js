@@ -1,9 +1,20 @@
+import SegmentedView from '../views/SegmentedView';
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
-import client from '../core/client';
 
 const SERVICE_ID = 'service:raw-socket';
 
+const defaultViewTemplate = `
+<div class="section-top"></div>
+<div class="section-center flex-center">
+  <p class="soft-blink"><%= wait %></p>
+</div>
+<div class="section-bottom"></div>
+`;
+
+const defaultViewContent = {
+  wait: `Opening socket,<br />stand by&hellip;`,
+};
 
 /**
  * Interface for the `raw-socket` service.
@@ -22,8 +33,14 @@ class RawSocket extends Service {
     super(SERVICE_ID, true);
 
     const defaults = {
-
+      viewCtor: SegmentedView,
+      viewPriority: 5,
     };
+
+    this.configure(defaults);
+
+    this._defaultViewTemplate = defaultViewTemplate;
+    this._defaultViewContent = defaultViewContent;
 
     /**
      * Listeners for the incomming messages.
@@ -44,7 +61,8 @@ class RawSocket extends Service {
 
   /** @private */
   init() {
-
+    this.viewCtor = this.options.viewCtor;
+    this.view = this.createView();
   }
 
   /** @private */
@@ -54,12 +72,15 @@ class RawSocket extends Service {
     if (!this.hasStarted)
       this.init();
 
+    this.show();
+
     super.send('request');
     super.receive('infos', this._onReceiveConnectionInfos);
   }
 
   /** @private */
   stop() {
+    this.hide();
     super.stop();
   }
 
@@ -93,7 +114,7 @@ class RawSocket extends Service {
     data[0] = token;
 
     this.socket.addEventListener('open', () => {
-      this.send('handshake', data);
+      this.send('service:handshake', data);
     });
 
     this.socket.addEventListener('message', this._onReceiveAcknoledgement);
@@ -111,7 +132,7 @@ class RawSocket extends Service {
 
     // ignore incomming messages that could occur if
     // acknoledgement was not yet received
-    if (channel === 'handshake-ack') {
+    if (channel === 'service:handshake-ack') {
       this.socket.removeEventListener('message', this._onReceiveAcknoledgement);
       this.socket.addEventListener('message', this._onMessage);
       this.ready();
@@ -128,7 +149,7 @@ class RawSocket extends Service {
     const index = new Uint8Array(e.data)[0];
 
     if (!this._protocol[index])
-      throw new Error('Invalid protocol index: ${index}');
+      throw new Error(`Invalid protocol index: ${index}`);
 
     const { channel, type } = this._protocol[index];
     const viewCtor = window[`${type}Array`];
@@ -165,7 +186,7 @@ class RawSocket extends Service {
     const index = this._channels.indexOf(channel);
 
     if (index === -1)
-      throw new Error('Undefined channel "${channel}"');
+      throw new Error(`Undefined channel "${channel}"`);
 
     const { type } = this._protocol[index];
     const viewCtor = window[`${type}Array`];
