@@ -55,26 +55,29 @@ const SERVICE_ID = 'service:scheduler';
 /**
  * Interface for the client `'scheduler'` service.
  *
- * This service provides a scheduler synchronised among all client using the
+ * The `scheduler` provides a scheduler synchronised among all client using the
  * [`sync`]{@link module:soundworks/client.Sync} service. It internally uses the
  * scheduler provided by the [`wavesjs`]{@link https://github.com/wavesjs/audio}
  * library.
  *
  * When setting the option `'sync'` to `'false'`, the scheduling is local
  * (without sunchronization to the other clients) and the `'sync'` service is
- * not required (attention: since its default value is `'true'`, all requests
+ * not required (warning: since its default value is `'true'`, all requests
  * of the `'scheduler'` service in the application have to explicitly specify
  * the `'sync'` option as `'false'` to assure that the `'sync'` service is not
  * enabled).
  *
  * While this service has no direct server counterpart, its dependency on the
- * [`sync`]{@link module:soundworks/client.Sync} service may require the existence
- * of a server. In addition, the service requires a device with `web-audio` ability.
+ * [`sync`]{@link module:soundworks/client.Sync} service may require the
+ * existence of a server. In addition, the service requires a device with
+ * `web-audio` ability.
  *
  * @param {Object} options
- * @param {Number} [options.period] - Period of the scheduler (defauts to current value).
- * @param {Number} [options.lookahead] - Lookahead of the scheduler (defauts to current value).
- * @param {Boolean} [options.sync = true] - Enable synchronized scheduling.
+ * @param {Number} [options.period] - Period of the scheduler (defauts to
+ *  current value).
+ * @param {Number} [options.lookahead] - Lookahead of the scheduler (defauts
+ *  to current value).
+ * @param {Boolean} [options.sync=true] - Enable synchronized scheduling.
  *
  * @memberof module:soundworks/client
  * @see [`wavesAudio.Scheduler`]{@link http://wavesjs.github.io/audio/#audio-scheduler}
@@ -115,8 +118,9 @@ class Scheduler extends Service {
 
   /**
    * Override default `configure` to configure the scheduler.
-   * @private
+   *
    * @param {Object} options - The options to apply to the service.
+   * @private
    */
   configure(options) {
     // check and set scheduler period option
@@ -186,15 +190,17 @@ class Scheduler extends Service {
 
   /**
    * Call a function at a given time.
+   *
    * @param {Function} fun - Function to be deferred.
    * @param {Number} time - The time at which the function should be executed.
-   * @param {Boolean} [synchronized=true] - Defines whether the function call should be
-   * @param {Boolean} [lookahead=false] - Defines whether the function is called anticipated
-   * (e.g. for audio events) or precisely at the given time (default).
+   * @param {Boolean} [synchronized=true] - Defines whether the function call
+   *  should be synchronized
+   * @param {Boolean} [lookahead=false] - Defines whether the function is called
+   *  anticipated (e.g. for audio events) or precisely at the given time (default).
    *
-   * Attention: The actual synchronization of the scheduled function depends not
+   * Warning: The actual synchronization of the scheduled function depends not
    * only of the `'synchronized'` option, but also of the configuration of the
-   * scheduler service. However, to assure a the desired synchronization, the
+   * scheduler service. However, to assure the desired synchronization, the
    * option has to be properly specified. Without specifying the option,
    * synchronized scheduling will be used when available.
    */
@@ -223,11 +229,13 @@ class Scheduler extends Service {
 
   /**
    * Add a time engine to the queue.
+   *
    * @param {Function} engine - Engine to schedule.
    * @param {Number} time - The time at which the function should be executed.
-   * @param {Boolean} [synchronized=true] - Defines whether the engine should be synchronized or not.
+   * @param {Boolean} [synchronized=true] - Defines whether the engine should
+   *  be synchronized or not.
    *
-   * Attention: The actual synchronization of the scheduled time engine depends
+   * Warning: The actual synchronization of the scheduled time engine depends
    * not only of the `'synchronized'` option, but also of the configuration of
    * the scheduler service. However, to assure a the desired synchronization,
    * the option has to be properly specified. Without specifying the option,
@@ -240,6 +248,7 @@ class Scheduler extends Service {
 
   /**
    * Remove the given engine from the queue.
+   *
    * @param {Function} engine - Engine to remove from the scheduler.
    */
   remove(engine) {
@@ -250,7 +259,8 @@ class Scheduler extends Service {
   }
 
   /**
-   * Remove all scheduled functions and time engines (synchronized or not) from the scheduler.
+   * Remove all scheduled functions and time engines (synchronized or not) from
+   * the scheduler.
    */
   clear() {
     if(this._syncedQueue)

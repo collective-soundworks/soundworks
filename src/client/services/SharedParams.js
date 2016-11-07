@@ -109,54 +109,59 @@ const SERVICE_ID = 'service:shared-params';
 /**
  * Interface for the client `'shared-params'` service.
  *
- * This service is used to maintain and update global parameters used among
- * all connected clients. Each defined parameter can be of the following
- * data types:
+ * The `shared-params` service is used to maintain and update global parameters
+ * used among all connected clients. Each defined parameter can be of the
+ * following data types:
  * - boolean
  * - enum
  * - number
  * - text
  * - trigger
  *
- * This type and specific attributes of an parameter is configured server side.
+ * The parameters are configured in the server side counterpart of the service.
  *
- * To create a control surface, for this service, an dedicated scene:
- * [`BasicSharedController`]{@link module:soundworks/client.BasicSharedController},
- * is available
+ * To create a control surface from the parameters definitions, a dedicated scene
+ * [`BasicSharedController`]{@link module:soundworks/client.BasicSharedController}
+ * is available.
  *
- * __*The service must be used with its [server-side counterpart]{@link module:soundworks/server.SharedParams}*__
+ * __*The service must be used along with its
+ * [server-side counterpart]{@link module:soundworks/server.SharedParams}*__
+ *
+ * _<span class="warning">__WARNING__</span> This class should never be
+ * instanciated manually_
  *
  * @memberof module:soundworks/client
+ *
  * @example
  * // inside the experience constructor
- * this.control = this.require('shared-params');
+ * this.sharedParams = this.require('shared-params');
  * // when the experience starts, listen for parameter updates
- * this.control.addParamListener('synth:gain', (value) => {
+ * this.sharedParams.addParamListener('synth:gain', (value) => {
  *   this.synth.setGain(value);
  * });
  *
  * @see [`BasicSharedController` scene]{@link module:soundworks/client.BasicSharedController}
  */
 class SharedParams extends Service {
-  /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */
   constructor() {
     super(SERVICE_ID, true);
 
-    const defaults = { hasGui: false };
+    const defaults = {};
     this.configure(defaults);
 
-    this._onInitResponse = this._onInitResponse.bind(this);
-    this._onUpdateResponse = this._onUpdateResponse.bind(this);
-  }
-
-  /** @private */
-  init() {
     /**
      * Dictionary of all the parameters and commands.
      * @type {Object}
+     * @name params
+     * @instance
+     * @memberof module:soundworks/client.SharedParams
+     *
      * @private
      */
     this.params = {};
+
+    this._onInitResponse = this._onInitResponse.bind(this);
+    this._onUpdateResponse = this._onUpdateResponse.bind(this);
   }
 
   /** @private */
@@ -195,73 +200,6 @@ class SharedParams extends Service {
     this.update(name, val, false);
   }
 
-  /**
-   * @callback module:soundworks/client.SharedParams~paramCallback
-   * @param {Mixed} value - Updated value of the shared parameter.
-   */
-  /**
-   * Add a listener to listen a specific parameter changes. The listener is called a first
-   * time when added to retrieve the current value of the parameter.
-   * @param {String} name - Name of the parameter.
-   * @param {module:soundworks/client.SharedParams~paramCallback} listener - Callback
-   *  that handle the event.
-   */
-  addParamListener(name, listener) {
-    const param = this.params[name];
-
-    if (param) {
-      param.addListener('update', listener);
-
-      if (param.type !== 'trigger')
-        listener(param.value);
-    } else {
-      console.log('unknown param "' + name + '"');
-    }
-  }
-
-  /**
-   * Remove a listener from listening a specific parameter changes.
-   * @param {String} name - Name of the parameter.
-   * @param {module:soundworks/client.SharedParams~paramCallback} listener - The
-   *  callback to remove.
-   */
-  removeParamListener(name, listener) {
-    const param = this.params[name];
-
-    if (param) {
-      param.removeListener('update', listener);
-    } else {
-      console.log('unknown param "' + name + '"');
-    }
-  }
-
-  /**
-   * Get the value of a given parameter.
-   * @param {String} name - The name of the parameter.
-   * @returns {Mixed} - The current value of the parameter.
-   */
-  getValue(name) {
-    return this.params[name].value;
-  }
-
-  /**
-   * Update the value of a parameter (used when `options.hasGUI=true`)
-   * @private
-   * @param {String} name - Name of the parameter.
-   * @param {Mixed} val - New value of the parameter.
-   * @param {Boolean} [sendToServer=true] - Flag whether the value should be
-   *  propagate to the server.
-   */
-  update(name, val, sendToServer = true) {
-    const param = this.params[name];
-
-    if (param) {
-      param.update(val, sendToServer);
-    } else {
-      console.log('unknown shared parameter "' + name + '"');
-    }
-  }
-
   /** @private */
   _createParam(init) {
     let param = null;
@@ -289,6 +227,75 @@ class SharedParams extends Service {
     }
 
     return param;
+  }
+
+  /**
+   * @callback module:soundworks/client.SharedParams~paramCallback
+   * @param {Mixed} value - Updated value of the shared parameter.
+   */
+
+  /**
+   * Add a listener to listen a specific parameter changes. The listener is
+   * executed immediately when added with the parameter current value.
+   *
+   * @param {String} name - Name of the parameter.
+   * @param {module:soundworks/client.SharedParams~paramCallback} listener -
+   *  Listener to add.
+   */
+  addParamListener(name, listener) {
+    const param = this.params[name];
+
+    if (param) {
+      param.addListener('update', listener);
+
+      if (param.type !== 'trigger')
+        listener(param.value);
+    } else {
+      console.log('unknown param "' + name + '"');
+    }
+  }
+
+  /**
+   * Remove a listener from listening a specific parameter changes.
+   *
+   * @param {String} name - Name of the parameter.
+   * @param {module:soundworks/client.SharedParams~paramCallback} listener -
+   *  Listener to remove.
+   */
+  removeParamListener(name, listener) {
+    const param = this.params[name];
+
+    if (param)
+      param.removeListener('update', listener);
+    else
+      console.log('unknown param "' + name + '"');
+  }
+
+  /**
+   * Get the value of a given parameter.
+   *
+   * @param {String} name - Name of the parameter.
+   * @returns {Mixed} - Current value of the parameter.
+   */
+  getValue(name) {
+    return this.params[name].value;
+  }
+
+  /**
+   * Update the value of a parameter (used when `options.hasGUI=true`)
+   *
+   * @param {String} name - Name of the parameter.
+   * @param {Mixed} val - New value of the parameter.
+   * @param {Boolean} [sendToServer=true] - Flag whether the value should be
+   *  propagated to the server.
+   */
+  update(name, val, sendToServer = true) {
+    const param = this.params[name];
+
+    if (param)
+      param.update(val, sendToServer);
+    else
+      console.log('unknown shared parameter "' + name + '"');
   }
 }
 

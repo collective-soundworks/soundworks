@@ -8,16 +8,24 @@ const SERVICE_ID = 'service:shared-config';
 /**
  * Interface for the client `'shared-config'` service.
  *
- * This service allows to share parts of the server configuration to the clients.
+ * The `shared-config` service allows clients to access items of the server
+ * configuration.
+ * All configuration items retrieved by the server are also stored in the
+ * `client.config` attribute.
  *
- * __*The service must be used with its [server-side counterpart]{@link module:soundworks/server.SharedConfig}*__
+ * __*The service must be used with its
+ * [server-side counterpart]{@link module:soundworks/server.SharedConfig}*__
+ *
+ * _<span class="warning">__WARNING__</span> This class should never be
+ * instanciated manually_
  *
  * @param {Object} options
  * @param {Array<String>} options.items - List of the configuration items
  *  required by the server. The given strings follow a convention defining a path
- *  to the required configuration item, for example `'setup.area'` will retrieve
- *  the value (here an object) corresponding to the `area` key inside the `setup`
- *  entry of the server configuration.
+ *  to the required configuration item.
+ *  _example:_ `'setup.area'` will retrieve the value (here an object)
+ *  corresponding to the `area` key inside the `setup` entry of the server
+ *  configuration.
  *
  * @memberof module:soundworks/client
  * @example
@@ -27,7 +35,6 @@ const SERVICE_ID = 'service:shared-config';
  * const areaWidth = this.sharedConfig.get('setup.area.width');
  */
 class SharedConfig extends Service {
-  /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */
   constructor() {
     super(SERVICE_ID, true);
 
@@ -80,8 +87,9 @@ class SharedConfig extends Service {
   }
 
   /**
-   * Retrieve a configuration value from its key item, as defined in server side
+   * Retrieve a configuration value from its key, as defined in server side
    * service's `addItem` method or in client-side `items` option.
+   *
    * @param {String} item - Key to the configuration item (_ex:_ `'setup.area'`)
    * @return {Mixed}
    */

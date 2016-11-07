@@ -74,8 +74,7 @@ class FileSystem extends Service {
    * // 1. Single list
    * // retrieve all the file in a folder
    * fileSystem.listFiles('my-directory').then((files) => ... );
-   * // or, retrieve all the `.wav` files inside a given folder,
-   * //search recursively
+   * // or, retrieve all the `.wav` files inside a given folder, search recursively
    * fileSystem.listFiles({
    *   path: 'my-directory',
    *   match: /\.wav/,

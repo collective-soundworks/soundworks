@@ -21,15 +21,21 @@ const defaultViewContent = {
 /**
  * Interface for the client `'sync'` service.
  *
- * This service synchronizes the local audio clock of the client with the clock
- * of the server (master clock). It then internally relies on the `WebAudio`
- * clock and requires the platform to access this feature.
+ * The `sync` service synchronizes the local audio clock of the client with the
+ * clock of the server (master clock). It internally relies on the `WebAudio`
+ * clock and then requires the `platform` service to access this feature.
  *
- * __*The service must be used with its [server-side counterpart]{@link module:soundworks/server.Sync}*__
+ * __*The service must be used with its
+ * [server-side counterpart]{@link module:soundworks/server.Sync}*__
  *
- * _Note:_ the service is based on [`github.com/collective-soundworks/sync`](https://github.com/collective-soundworks/sync).
+ * _<span class="warning">__WARNING__</span> This class should never be
+ * instanciated manually_
+ *
+ * _Note:_ the service is based on
+ * [`github.com/collective-soundworks/sync`](https://github.com/collective-soundworks/sync).
  *
  * @memberof module:soundworks/client
+ *
  * @example
  * // inside the experience constructor
  * this.sync = this.require('sync');
@@ -38,7 +44,6 @@ const defaultViewContent = {
  * const localTime = this.sync.getAudioTime(syncTime);
  */
 class Sync extends Service {
-  /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */
   constructor() {
     super(SERVICE_ID, true);
 
