@@ -30,6 +30,16 @@ let counter = 0;
  * It allows the transfert of `TypedArray` data wrapped with a minimal channel
  * mechanism (up to 256 channels).
  *
+ * The user-defined protocol must follow the convention:
+ * @example
+ * const protocol = [
+ *   { channel: 'my-channel', type: 'Float32' }
+ *   // ...
+ * ]
+ *
+ * Where the `channel` can be any string and the `type` can be interpolated
+ * to any `TypedArray` by concatenating `'Array'` at its end.
+ *
  * __*The service must be used with its [client-side counterpart]{@link module:soundworks/client.RawSocket}*__
  *
  * @memberof module:soundworks/server
