@@ -52,6 +52,7 @@
     "sync": "collective-soundworks/sync#0.7.3",
     "uuid": "^2.0.1",
     "uws": "^0.11.0",
+    "wav-encoder": "^1.1.0",
     "waves-audio": "wavesjs/audio#v0.3.3",
     "waves-basic-controllers": "wavesjs/basic-controllers#v0.6.1",
     "waves-loaders": "wavesjs/waves-loaders#v0.1.3"

@@ -149,7 +149,6 @@ const client = {
   init(clientType = 'player', config = {}) {
     this.type = clientType;
 
-    // retrieve
     this._parseUrlParams();
     // if socket config given, mix it with defaults
     const websocketConfig = Object.assign({

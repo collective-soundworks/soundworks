@@ -440,7 +440,7 @@ const server = {
 
     sockets.receive(client, 'handshake', (data) => {
       if (this.config.env !== 'production') {
-        const clientRequiredServices = data.requiredServices;
+        const clientRequiredServices = data.requiredServices || [];
         const missingServices = [];
 
         clientRequiredServices.forEach((serviceId) => {

@@ -44,6 +44,7 @@ export { default as RawSocket } from './services/RawSocket';
 export { default as Scheduler } from './services/Scheduler';
 export { default as SharedConfig } from './services/SharedConfig';
 export { default as SharedParams } from './services/SharedParams';
+export { default as SharedRecorder } from './services/SharedRecorder';
 export { default as Sync } from './services/Sync';
 
 // views

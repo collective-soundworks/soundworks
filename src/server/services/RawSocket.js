@@ -73,10 +73,23 @@ class RawSocket extends Service {
     this._clientSocketMap = new Map();
     this._socketClientMap = new Map();
 
+    this._protocol = baseProtocol;
+
     // retrieve service config + useHttps
     this._sharedConfig = this.require('shared-config');
 
     this._onConnection = this._onConnection.bind(this);
+  }
+
+  configure(options) {
+    if (options.protocol)
+      this._protocol = this._protocol.concat(options.protocol);
+
+    super.configure(options);
+  }
+
+  addProtocolDefinition(def) {
+    this._protocol.push(def);
   }
 
   /** @private */
@@ -87,7 +100,10 @@ class RawSocket extends Service {
     const config = this._sharedConfig.get(configItem);
 
     this._port = config.port;
-    this._protocol = baseProtocol.concat(config.protocol);
+
+    if (Array.isArray(config.protocol))
+      this._protocol = this.protocol.concat(config.protocol);
+
     this._channels = this._protocol.map((def) => def.channel);;
     // retrieve socket configuration
     this._wss = new Server({ port: this._port });
@@ -103,6 +119,13 @@ class RawSocket extends Service {
 
       super.send(client, 'infos', this._port, this._protocol, token);
     });
+  }
+
+  disconect(client) {
+    const socket = this._clientSocketMap.get(client);
+
+    this._clientSocketMap.delete(client);
+    this._socketClientMap.delete(socket);
   }
 
   /** @private */

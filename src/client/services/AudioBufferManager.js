@@ -481,10 +481,10 @@ class AudioBufferManager extends Service {
    * @param {String} key - Member key in group.
    * @returns {Promise} - Returns the loaded object.
    */
-  get(id, key = undefined) {
+  get(id, key = null) {
     const obj = this.data[id];
 
-    if (obj && key)
+    if (obj && (key !== null))
       return obj[key];
 
     return obj;
