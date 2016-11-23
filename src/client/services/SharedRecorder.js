@@ -11,7 +11,6 @@ class SharedRecorder extends Service {
     super(SERVICE_ID);
 
     const defaults = {
-      // filter: filter, // load every files by default
       recorder: false,
     };
 
@@ -21,10 +20,10 @@ class SharedRecorder extends Service {
     this._audioBufferManager = this.require('audio-buffer-manager');
     this._platfform = null;
 
+    this._gain = 1;
+
     this._listeners = new Map();
-
     this._streams = {};
-
     this._buffers = {};
     this._bufferNames = [];
 
@@ -39,6 +38,10 @@ class SharedRecorder extends Service {
     }
 
     super.configure(options);
+  }
+
+  setGain(value) {
+    this._gain = value;
   }
 
   init() {
@@ -176,6 +179,14 @@ class SharedRecorder extends Service {
       scriptProcessor.onaudioprocess = (e) => {
         const data = e.inputBuffer.getChannelData(0);
 
+        if (this._gain !== 1) {
+          const gain = this._gain;
+          const length = data.length;
+
+          for (let i = 0; i < length; i++)
+            data[i] *= gain;
+        }
+
         buffer.set(data, 1);
         this._rawSocket.send('shared-recorder:new-block', buffer);
 
@@ -201,7 +212,6 @@ class SharedRecorder extends Service {
   stopRecord(name) {
     if (!this._streams[name]) return;
 
-    console.log('stop', name);
     // send stop message
     const index = this._getIndex(name);
     const msg = new Uint8Array(1);
