@@ -120,8 +120,18 @@ const client = {
    * @see {@link module:soundworks/client.Checkin}
    * @see {@link module:soundworks/client.Locator}
    * @see {@link module:soundworks/client.Placer}
+   * @see {@link module:soundworks/client.Geolocation}
    */
   coordinates: null,
+
+  /**
+   * Full `geoposition` object as returned by `navigator.geolocation`, when
+   * using the `geolocation` service.
+   *
+   * @type {Object}
+   * @see {@link module:soundworks/client.Geolocation}
+   */
+  geoposition: null,
 
   /**
    * Socket object that handle communications with the server, if any.

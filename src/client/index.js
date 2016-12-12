@@ -35,6 +35,7 @@ export { default as Auth } from './services/Auth';
 export { default as Checkin } from './services/Checkin';
 export { default as ErrorReporter } from './services/ErrorReporter';
 export { default as FileSystem } from './services/FileSystem';
+export { default as Geolocation } from './services/Geolocation';
 export { default as Locator } from './services/Locator';
 export { default as MotionInput } from './services/MotionInput';
 export { default as Network } from './services/Network';
