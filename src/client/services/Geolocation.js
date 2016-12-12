@@ -6,6 +6,21 @@ import client from '../core/client';
 const SERVICE_ID = 'service:geolocation';
 const geolocation = navigator.geolocation;
 
+function geopositionToJson(geoposition) {
+  return {
+    timestamp: geoposition.timestamp,
+    coords: {
+      accuracy: geoposition.coords.accuracy,
+      altitude: geoposition.coords.altitude,
+      altitudeAccuracy: geoposition.coords.altitudeAccuracy,
+      heading: geoposition.coords.heading,
+      latitude: geoposition.coords.latitude,
+      longitude: geoposition.coords.longitude,
+      speed: geoposition.coords.speed
+    }
+  }
+}
+
 
 /**
  * Interface for the client `'geolocation'` service.
@@ -13,6 +28,8 @@ const geolocation = navigator.geolocation;
  * The `'geolocation'` service allows to retrieve the latitude and longitude
  * of the client using `gps`. The current values are store into the
  * `client.coordinates` member.
+ *
+ * __*The service must be used with its [server-side counterpart]{@link module:soundworks/server.Geolocation}*__
  *
  * @param {Object} options - Override default options.
  * @param {Number|'auto'} [options.refreshRate=0] - Interval (in milliseconds)
@@ -30,7 +47,7 @@ const geolocation = navigator.geolocation;
 class Geolocation extends Service {
   /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */
   constructor() {
-    super(SERVICE_ID, false);
+    super(SERVICE_ID, true);
 
     const defaults = {
       refreshRate: 0,
@@ -80,17 +97,17 @@ class Geolocation extends Service {
   }
 
   _onSuccess(position) {
-    // console.log(position);
-    const coords = position;
+    const coords = position.coords;
     const refreshRate = this.options.refreshRate;
 
     if (!this.signals.ready.get())
       this.ready();
 
-    client.coordinates = [coords.lat, coords.lng];
+    client.coordinates = [coords.latitude, coords.longitude];
     client.geoposition = position;
 
     this.emit('position', position);
+    this.send('position', geopositionToJson(position));
 
     if (refreshRate !== 'auto' && refreshRate > 0) {
       this._watchId = setTimeout(() => {

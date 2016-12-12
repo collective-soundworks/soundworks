@@ -28,6 +28,7 @@ export { default as Osc } from './services/Osc';
 export { default as Checkin } from './services/Checkin';
 export { default as ErrorReporter } from './services/ErrorReporter';
 export { default as FileSystem } from './services/FileSystem';
+export { default as Geolocation } from './services/Geolocation';
 export { default as Locator } from './services/Locator';
 export { default as Network } from './services/Network';
 export { default as Placer } from './services/Placer';

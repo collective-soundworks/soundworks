@@ -29,6 +29,12 @@ export default class Client {
     this.coordinates = null;
 
     /**
+     * Geoposition of the client as returned by `geolocation.getCurrentPosition`
+     * @typ {Object}
+     */
+    this.geoposition = null;
+
+    /**
      * Ticket index of the client.
      * @type {Number}
      */
