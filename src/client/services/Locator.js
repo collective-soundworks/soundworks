@@ -157,7 +157,7 @@ class LocatorView extends SquaredView {
  *
  * The `'locator'` service allows a client to give its approximate location inside
  * a graphical representation of the `area` as defined in the server's `setup`
- * configuration entry.
+ * configuration member.
  *
  * __*The service must be used with its [server-side counterpart]{@link module:soundworks/server.Locator}*__
  *
