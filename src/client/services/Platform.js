@@ -13,11 +13,15 @@ import serviceManager from '../core/serviceManager';
  * @property {String} id - Id of the definition.
  * @property {Function} check - A function that should return `true` if the
  *  feature is available on the platform, `false` otherwise.
- * @property {Function} [startHook] - A function to be executed on start
- *  (for example to ask access to microphone or geolocation).
- * @property {Function} [interactionHook] - A function to be executed on the
- *  first interaction (i.e. `click` or `touchstart`) of the user with application
- *  (for example, to initialize AudioContext on iOS devices).
+ * @property {Function} [startHook] - A function returning a `Promise` to be
+ *  executed on start (for example to ask access to microphone or geolocation).
+ *  The returned promise should be resolved on `true` is the process succeded or
+ *  `false` is the precess failed (e.g. permission not granted).
+ * @property {Function} [interactionHook] - A function returning a Promiseto be
+ *  executed on the first interaction (i.e. `click` or `touchstart`) of the user
+ *  with application (for example, to initialize AudioContext on iOS devices).
+ *  The returned promise should be resolved on `true` is the process succeded or
+ *  `false` is the precess failed (e.g. permission not granted).
  */
 const defaultDefinitions = [
   {
@@ -38,9 +42,11 @@ const defaultDefinitions = [
       o.frequency.value = 20;
       o.start(0);
 
-      // prevent android to stop audio by keping the oscillator active
+      // prevent android to stop audio by keeping the oscillator active
       if (client.platform.os !== 'android')
         o.stop(audioContext.currentTime + 0.01);
+
+      return Promise.resolve(true);
     }
   },
   {
@@ -64,10 +70,14 @@ const defaultDefinitions = [
       return !!navigator.getUserMedia;
     },
     startHook: function() {
-      navigator.getUserMedia({ audio: true }, function(stream) {
-        stream.getAudioTracks()[0].stop();
-      }, function (err) {
-        throw err;
+      return new Promise(function(resolve, reject) {
+        navigator.getUserMedia({ audio: true }, function(stream) {
+          stream.getAudioTracks()[0].stop();
+          resolve(true);
+        }, function (err) {
+          resolve(false);
+          console.error(err.stack);
+        });
       });
     }
   },
@@ -80,6 +90,24 @@ const defaultDefinitions = [
     interactionHook() {
       if (screenfull.enabled)
         screenfull.request();
+
+      return Promise.resolve(true);
+    }
+  },
+  {
+    id: 'geolocation',
+    check: function() {
+      return !!navigator.geolocation.getCurrentPosition;
+    },
+    startHook: function() {
+      return new Promise(function(resolve, reject) {
+        navigator.geolocation.getCurrentPosition((position) => {
+          resolve(true);
+        }, (err) => {
+          resolve(false);
+          console.error(err);
+        }, {});
+      });
     }
   },
   {
@@ -116,13 +144,15 @@ const defaultDefinitions = [
 
         $video.play();
       }
+
+      return Promise.resolve(true);
     }
   }
 ];
 
 
 const defaultViewTemplate = `
-<% if (!isCompatible) { %>
+<% if (isCompatible === false || resolvedHooks === false) { %>
   <div class="section-top"></div>
   <div class="section-center flex-center">
     <p><%= errorMessage %></p>
@@ -138,15 +168,22 @@ const defaultViewTemplate = `
       </p>
   </div>
   <div class="section-bottom flex-middle">
+    <% if (checking === true) { %>
+    <p class="small soft-blink"><%= checkingMessage %></p>
+    <% } else if (resolvedHooks === true) { %>
     <p class="small soft-blink"><%= instructions %></p>
+    <% } %>
   </div>
 <% } %>`;
 
 const defaultViewContent = {
   isCompatible: null,
-  errorMessage: 'Sorry,<br />Your device is not compatible with the application.',
+  resolvedHooks: null,
+  checking: false,
   intro: 'Welcome to',
   instructions: 'Touch the screen to join!',
+  checkingMessage: 'Please wait while checking compatiblity',
+  errorMessage: 'Sorry,<br />Your device is not compatible with the application.',
 };
 
 const SERVICE_ID = 'service:platform';
@@ -168,12 +205,9 @@ const SERVICE_ID = 'service:platform';
  * - 'audio-input': Android Only
  * - 'full-screen': Android Only, this feature won't block the application if
  *   not available.
+ * - 'geolocation': check if the navigator supports geolocation.
  * - 'wake-lock': deprecated, use with caution, has been observed consumming
  *   150% cpu in chrome desktop.
- *
- * Warning: when setting `showDialog` option to `false`, unexpected behaviors
- * might occur because most of the features require an interaction or a
- * confirmation from the user in order to be initialized correctly.
  *
  * _<span class="warning">__WARNING__</span> This class should never be
  * instanciated manually_
@@ -187,6 +221,12 @@ const SERVICE_ID = 'service:platform';
  *  - 'full-screen': Android only
  *  - 'wake-lock': deprecated, this feature should be used with caution as
  *    it has been observed to use 150% of cpu in chrome desktop.
+ *
+ * <!--
+ * Warning: when setting `showDialog` option to `false`, unexpected behaviors
+ * might occur because most of the features require an interaction or a
+ * confirmation from the user in order to be initialized correctly.
+ * -->
  *
  * @memberof module:soundworks/client
  * @example
@@ -235,9 +275,9 @@ class Platform extends Service {
   init() {
     this._defineAudioFileExtention();
     this._definePlatform();
-    // resolve required features from the application
-    client.compatible = this.resolveRequiredFeatures();
-    this.viewContent.isCompatible = client.compatible;
+
+    // this.viewContent._isCompatible = null;
+    // this.viewContent._startHooksResolved = null;
 
     this.viewCtor = this.options.viewCtor;
     this.view = this.createView();
@@ -250,37 +290,50 @@ class Platform extends Service {
     if (!this.hasStarted)
       this.init();
 
-    // execute start hooks from the features definitions
-    if (client.compatible) {
-      const startHooks = this.getStartHooks();
-      startHooks.forEach((hook) => hook());
-    }
+    // ### algorithm
+    // check required features
+    // if (false)
+    //   show 'sorry' screen
+    // else
+    //   show 'welcome' screen
+    //   execute start hook (promise)
+    //   if (promise === true)
+    //     show touch to start
+    //     bind events
+    //   if (promise === false)
+    //     show 'sorry' screen
 
-    // optionnaly skip the view if client is compatible
-    if (client.compatible && !this.options.showDialog) {
-      // bypass if features contains 'web-audio' and client.platform.os === 'ios'
-      if (this._requiredFeatures.has('web-audio') && client.platform.os === 'ios')
-        this.show();
-      else
-        this.ready();
-    } else {
+    // resolve required features from the application
+    client.compatible = this._checkRequiredFeatures();
+
+    if (!client.compatible) {
+      this.view.content.isCompatible = false;
       this.show();
-    }
+    } else {
+      this.view.content.isCompatible = true;
+      this.view.content.checking = true;
+      this.show();
 
-    // install events for interaction hook
-    if (client.compatible) {
-      this.view.installEvents({
-        touchstart: () => {
-          client.platform.interaction = 'touch';
-        },
-        click: () => {
-          // if not passed into touchstart callback, interaction is from mouse.
-          if (!client.platform.interaction)
-            client.platform.interaction = 'mouse';
+      // execute start hook
+      const startHooks = this._getStartHooks();
+      const startPromises = startHooks.map(hook => hook());
 
-          this._onInteraction();
+      Promise.all(startPromises).then((results) => {
+        // if one of the start hook failed
+        let resolved = true;
+        results.forEach((bool) => resolved = resolved && bool);
+
+        this.view.content.resolvedHooks = resolved;
+        this.view.content.checking = false;
+        this.view.render();
+
+        if (resolved) {
+          this.view.installEvents({
+            touchstart: this._onInteraction('touch'),
+            mousedown: this._onInteraction('mouse'),
+          });
         }
-      });
+      }).catch((err) => console.error(err.stack));
     }
   }
 
@@ -310,13 +363,40 @@ class Platform extends Service {
     features.forEach((id) => this._requiredFeatures.add(id));
   }
 
+
+  /**
+   * Execute `interactions` hooks from the `platform` service.
+   * Also activate the media according to the `options`.
+   *
+   * @private
+   */
+  _onInteraction(type) {
+    return () => {
+      client.platform.interaction = type;
+      // execute interaction hooks from the platform
+      const interactionHooks = this._getInteractionHooks();
+      const interactionPromises = interactionHooks.map((hook) => hook());
+      Promise.all(interactionPromises).then((results) => {
+        let resolved = true;
+        results.forEach((bool) => resolved = resolved && bool);
+
+        if (resolved) {
+          this.ready();
+        } else {
+          this.view.content.resolvedHooks = resolved;
+          this.view.render();
+        }
+      }).catch((err) => console.error(err.stack));
+    }
+  }
+
   /**
    * Execute all `check` functions defined in the required features.
    *
    * @return {Boolean} - `true` if all checks pass, `false` otherwise.
    * @private
    */
-  resolveRequiredFeatures() {
+  _checkRequiredFeatures() {
     let result = true;
 
     this._requiredFeatures.forEach((feature) => {
@@ -337,7 +417,7 @@ class Platform extends Service {
    * @return {Array}
    * @private
    */
-  getStartHooks() {
+  _getStartHooks() {
     return this._getHooks('startHook');
   }
 
@@ -348,7 +428,7 @@ class Platform extends Service {
    * @return {Array}
    * @private
    */
-  getInteractionHooks() {
+  _getInteractionHooks() {
     return this._getHooks('interactionHook');
   }
 
@@ -364,20 +444,6 @@ class Platform extends Service {
     });
 
     return hooks;
-  }
-
-  /**
-   * Execute `interactions` hooks from the `platform` service.
-   * Also activate the media according to the `options`.
-   *
-   * @private
-   */
-  _onInteraction() {
-    // execute interaction hooks from the platform
-    const interactionHooks = this.getInteractionHooks();
-    interactionHooks.forEach((hook) => hook());
-
-    this.ready();
   }
 
   /**
