@@ -40,7 +40,7 @@ class Geolocation extends Service {
       client.coordinates = [coords.latitude, coords.longitude];
       client.geoposition = position;
 
-      this.emit('position', client, geoposition);
+      this.emit('position', client, client.coordinates, client.geoposition);
     }
   }
 }
