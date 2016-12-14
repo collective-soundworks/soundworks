@@ -49,9 +49,14 @@ export default class Client {
 		/**
 		 * Used by the activities to associate data to a particular client.
 		 *
-		 * All the data associated with a activity whose `name` is `'activityName'` is accessible through the key `activityName`.
-		 * For instance, the {@link src/server/Checkin.js~Checkin} activity keeps track of client's checkin index and label in `this.activities.checkin.index` and `this.activities.checkin.label`.
-		 * Similarly, a {@link src/server/Performance.js~Performance} activity whose name is `'myPerformance'` could report the client's status in `this.activities.myPerformance.status`.
+		 * All the data associated with a activity whose `name` is `'activityName'`
+     * is accessible through the key `activityName`.
+		 * For instance, the {@link src/server/Checkin.js~Checkin} activity keeps
+     * track of client's checkin index and label in `this.activities.checkin.index`
+     * and `this.activities.checkin.label`.
+		 * Similarly, a {@link src/server/Performance.js~Performance} activity whose
+     * name is `'myPerformance'` could report the client's status in
+     * `this.activities.myPerformance.status`.
 		 * @type {Object}
 		 */
     this.activities = {};

@@ -76,6 +76,7 @@ export default class Experience extends Scene {
   exit(client) {
     // Remove the client from the `this.clients` array.
     const index = this.clients.indexOf(client);
+
     if (index >= 0)
       this.clients.splice(index, 1);
 
