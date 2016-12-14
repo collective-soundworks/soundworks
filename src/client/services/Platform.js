@@ -31,7 +31,7 @@ const defaultDefinitions = [
     },
     interactionHook: function() {
       if (!client.platform.isMobile)
-        return;
+        return Promise.resolve(true);
 
       const g = audioContext.createGain();
       g.connect(audioContext.destination);
@@ -376,6 +376,7 @@ class Platform extends Service {
       // execute interaction hooks from the platform
       const interactionHooks = this._getInteractionHooks();
       const interactionPromises = interactionHooks.map((hook) => hook());
+
       Promise.all(interactionPromises).then((results) => {
         let resolved = true;
         results.forEach((bool) => resolved = resolved && bool);
