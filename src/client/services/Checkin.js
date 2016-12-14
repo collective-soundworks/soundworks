@@ -125,7 +125,7 @@ class Checkin extends Service {
 
     // send request to the server
     this.send('request', this.options.order);
-    
+
     // setup listeners for the server's response
     this.receive('position', this._onPositionResponse);
     this.receive('unavailable', this._onUnavailableResponse);
@@ -147,7 +147,10 @@ class Checkin extends Service {
   _onPositionResponse(index, label, coordinates) {
     client.index = this.index = index;
     client.label = this.label = label;
-    client.coordinates = this.coordinates = coordinates;
+    this.coordinates = coordinates;
+
+    if (coordinates !== null && !client.coordinates)
+      client.coordinates = coordinates;
 
     if (this.options.showDialog) {
       const displayLabel = label || (index + 1).toString();

@@ -149,7 +149,9 @@ class Checkin extends Service {
           coordinates = setup.coordinates ? setup.coordinates[index] : undefined;
 
           client.label = label;
-          client.coordinates = coordinates;
+
+          if (client.coordinates === null)
+            client.coordinates = coordinates;
         }
 
         this.clients[index] = client;
