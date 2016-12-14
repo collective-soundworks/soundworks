@@ -21,6 +21,21 @@ const socket = {
    * @param {String} options.url - The url where the socket should connect.
    * @param {Array<String>} options.transports - The transports to use for the socket (cf. socket.io).
    */
+
+  // initialize(namespace, options) {
+  //   const url = `${options.url}/${namespace}`;
+  //   delete options.url;
+
+  //   this.socket = io(url, options);
+  //   log(`initialized - url: "${url}" - transports: ${options.transports}`);
+
+  //   this._stateListeners = new Set();
+  //   this._state = null;
+
+  //   this._listenSocketState();
+
+  //   return this;
+  // },
   init(namespace, options) {
     const url = `${options.url}/${namespace}`;
 
