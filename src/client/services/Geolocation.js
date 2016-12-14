@@ -52,6 +52,7 @@ class Geolocation extends Service {
     const defaults = {
       refreshRate: 0,
       enableHighAccuracy: true,
+      debug: false,
     };
 
     this.configure(defaults);
@@ -75,7 +76,20 @@ class Geolocation extends Service {
     const refreshRate = this.options.refreshRate;
     this._auto = refreshRate === 'auto' ? true : false;
 
-    this.resume();
+    if (this.options.debug === true) {
+      // create fake geoposition object
+      const dummy = {
+        timestamp: new Date().getTime(),
+        coords: {
+          latitude: Math.random() * 180 - 90,
+          longitude: Math.random() * 360 - 180,
+        },
+      };
+
+      this._onSuccess(dummy);
+    } else {
+      this.resume();
+    }
   }
 
   /**
