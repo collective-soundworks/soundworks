@@ -109,7 +109,7 @@ class Scheduler extends Service {
     const defaults = {
       lookahead: this._scheduler.lookahead,
       period: this._scheduler.period,
-      sync: undefined,
+      sync: undefined, // default to true ?
     };
 
     // call super.configure (activate sync option only if required)
@@ -140,11 +140,11 @@ class Scheduler extends Service {
     }
 
     // set sync option
-    const opt = (options.sync !== undefined)? options.sync: true; // default is true
-    const sync = (sync === undefined)? opt: (sync || opt); // truth will prevail
+    const opt = (options.sync !== undefined) ? options.sync : true; // default is true
+    const sync = (sync === undefined) ? opt : (sync || opt); // truth will prevail
 
     // enable sync at first request with option set to true
-    if(sync && !this._sync) {
+    if (sync && !this._sync) {
       this._sync = this.require('sync');
       this._syncedQueue = new _SyncTimeSchedulingQueue(this._sync, this._scheduler);
     }
