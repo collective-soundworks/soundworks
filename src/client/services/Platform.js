@@ -76,7 +76,7 @@ const defaultDefinitions = [
           resolve(true);
         }, function (err) {
           resolve(false);
-          console.error(err.stack);
+          throw err;
         });
       });
     }
@@ -102,10 +102,15 @@ const defaultDefinitions = [
     startHook: function() {
       return new Promise(function(resolve, reject) {
         navigator.geolocation.getCurrentPosition((position) => {
+          // populate client with first value
+          const coords = position.coords;
+          client.coordinates = [coords.latitude, coords.longitude];
+          client.geoposition = position;
+
           resolve(true);
         }, (err) => {
           resolve(false);
-          console.error(err);
+          throw err;
         }, {});
       });
     }
@@ -152,10 +157,16 @@ const defaultDefinitions = [
 
 
 const defaultViewTemplate = `
-<% if (isCompatible === false || resolvedHooks === false) { %>
+<% if (isCompatible === false) { %>
   <div class="section-top"></div>
   <div class="section-center flex-center">
-    <p><%= errorMessage %></p>
+    <p><%= errorCompatibleMessage %></p>
+  </div>
+  <div class="section-bottom"></div>
+<% } else if (resolvedHooks === false) { %>
+  <div class="section-top"></div>
+  <div class="section-center flex-center">
+    <p><%= errorHooksMessage %></p>
   </div>
   <div class="section-bottom"></div>
 <% } else { %>
@@ -183,7 +194,8 @@ const defaultViewContent = {
   intro: 'Welcome to',
   instructions: 'Touch the screen to join!',
   checkingMessage: 'Please wait while checking compatiblity',
-  errorMessage: 'Sorry,<br />Your device is not compatible with the application.',
+  errorCompatibleMessage: 'Sorry,<br />Your device is not compatible with the application.',
+  errorHooksMessage: `Sorry,<br />The application didn't obtain the necessary authorizations.`,
 };
 
 const SERVICE_ID = 'service:platform';
@@ -205,7 +217,11 @@ const SERVICE_ID = 'service:platform';
  * - 'audio-input': Android Only
  * - 'full-screen': Android Only, this feature won't block the application if
  *   not available.
- * - 'geolocation': check if the navigator supports geolocation.
+ * - 'geolocation': check if the navigator supports geolocation. The `coordinates`
+ *   and `geoposition` of the `client` are populated when the plaform service
+ *   resolves. (if no update of the coordinates are needed in the application,
+ *   requiring geolocation feature without using the Geolocation service should
+ *   suffice).
  * - 'wake-lock': deprecated, use with caution, has been observed consumming
  *   150% cpu in chrome desktop.
  *
@@ -276,9 +292,6 @@ class Platform extends Service {
     this._defineAudioFileExtention();
     this._definePlatform();
 
-    // this.viewContent._isCompatible = null;
-    // this.viewContent._startHooksResolved = null;
-
     this.viewCtor = this.options.viewCtor;
     this.view = this.createView();
   }
@@ -315,7 +328,7 @@ class Platform extends Service {
       this.show();
 
       // execute start hook
-      const startHooks = this._getStartHooks();
+      const startHooks = this._getHooks('startHook');
       const startPromises = startHooks.map(hook => hook());
 
       Promise.all(startPromises).then((results) => {
@@ -374,7 +387,7 @@ class Platform extends Service {
     return () => {
       client.platform.interaction = type;
       // execute interaction hooks from the platform
-      const interactionHooks = this._getInteractionHooks();
+      const interactionHooks = this._getHooks('interactionHook');
       const interactionPromises = interactionHooks.map((hook) => hook());
 
       Promise.all(interactionPromises).then((results) => {
@@ -412,27 +425,6 @@ class Platform extends Service {
     return result;
   }
 
-  /**
-   * Returns the list of the functions to be executed on the `start` lifecycle.
-   *
-   * @return {Array}
-   * @private
-   */
-  _getStartHooks() {
-    return this._getHooks('startHook');
-  }
-
-  /**
-   * Returns the list of the functions to be executed when the user interacts
-   * with the application for the first time (`touchstart` or `mousedown`.
-   *
-   * @return {Array}
-   * @private
-   */
-  _getInteractionHooks() {
-    return this._getHooks('interactionHook');
-  }
-
   /** @private */
   _getHooks(type) {
     const hooks = [];
@@ -456,13 +448,12 @@ class Platform extends Service {
   _defineAudioFileExtention() {
     const a = document.createElement('audio');
     // http://diveintohtml5.info/everything.html
-    if (!!(a.canPlayType && a.canPlayType('audio/mpeg;'))) {
+    if (!!(a.canPlayType && a.canPlayType('audio/mpeg;')))
       client.platform.audioFileExt = '.mp3';
-    } else if (!!(a.canPlayType && a.canPlayType('audio/ogg; codecs="vorbis"'))) {
+    else if (!!(a.canPlayType && a.canPlayType('audio/ogg; codecs="vorbis"')))
       client.platform.audioFileExt = '.ogg';
-    } else {
+    else
       client.platform.audioFileExt = '.wav';
-    }
   }
 
   /**

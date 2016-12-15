@@ -31,16 +31,16 @@ class Geolocation extends Service {
   }
 
   connect(client) {
-    this.receive(client, 'position', this._onPosition(client));
+    this.receive(client, 'geoposition', this._onGeoposition(client));
   }
 
-  _onPosition(client) {
+  _onGeoposition(client) {
     return (position) => {
       const coords = position.coords;
       client.coordinates = [coords.latitude, coords.longitude];
       client.geoposition = position;
 
-      this.emit('position', client, client.coordinates, client.geoposition);
+      this.emit('geoposition', client, client.coordinates, client.geoposition);
     }
   }
 }

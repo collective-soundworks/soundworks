@@ -21,6 +21,26 @@ function geopositionToJson(geoposition) {
   }
 }
 
+function getRandomGeoposition() {
+  return {
+    timestamp: new Date().getTime(),
+    coords: {
+      accuracy: 10,
+      altitude: 10,
+      altitudeAccuracy: 10,
+      heading: 0,
+      latitude: Math.random() * 180 - 90,
+      longitude: Math.random() * 360 - 180,
+      speed: 1,
+    }
+  };
+}
+
+function updateRandomGeoposition(geoposition) {
+  geoposition.timestamp = new Date().getTime();
+  geoposition.coords.latitude += (Math.random() * 1e-4) - (1e-4 / 2);
+  geoposition.coords.longitude += (Math.random() * 1e-4) - (1e-4 / 2);
+}
 
 /**
  * Interface for the client `'geolocation'` service.
@@ -32,12 +52,8 @@ function geopositionToJson(geoposition) {
  * __*The service must be used with its [server-side counterpart]{@link module:soundworks/server.Geolocation}*__
  *
  * @param {Object} options - Override default options.
- * @param {Number|'auto'} [options.refreshRate=0] - Interval (in milliseconds)
- *  at which a new call for location should be done (warning: as the underlying
- *  API is async, this value is indicative and subject to large jitter).
- *  - If 0, the current position is retrieved on service initialization and never
- *  refreshed.
- *  - If set to `auto`, the service relies on `watchPosition` default behavior.
+ * @param {'start'|'stop'} [options.state='start'] - Default state when the
+ *  service is launched.
  * @param {Boolean} [options.enableHighAccuracy=true] - Define if the application
  *  would like to receive the best possible results (cf. [https://dev.w3.org/geo/api/spec-source.html#high-accuracy](https://dev.w3.org/geo/api/spec-source.html#high-accuracy)).
  *
@@ -50,7 +66,7 @@ class Geolocation extends Service {
     super(SERVICE_ID, true);
 
     const defaults = {
-      refreshRate: 0,
+      state: 'start',
       enableHighAccuracy: true,
       debug: false,
     };
@@ -59,12 +75,15 @@ class Geolocation extends Service {
 
     this._onSuccess = this._onSuccess.bind(this);
     this._onError = this._onError.bind(this);
-    this._auto = null;
+    this._watchId = null;
+    this.state = null;
 
     this.require('platform', { features: ['geolocation'] });
   }
 
-  init() {}
+  configure(options) {
+    super.configure(options);
+  }
 
   start() {
     super.start();
@@ -72,62 +91,68 @@ class Geolocation extends Service {
     if (!this.hasStarted)
       this.init();
 
-    // refreshRate : 0, value in ms, 'auto'
-    const refreshRate = this.options.refreshRate;
-    this._auto = refreshRate === 'auto' ? true : false;
-
     if (this.options.debug === true) {
-      // create fake geoposition object
-      const dummy = {
-        timestamp: new Date().getTime(),
-        coords: {
-          latitude: Math.random() * 180 - 90,
-          longitude: Math.random() * 360 - 180,
-        },
-      };
+      const geoposition = getRandomGeoposition();
+      this._updateClient(geoposition);
+    }
+    // only sync values retrieved from `platform` with server before getting ready
+    this.emit('geoposition', client.geoposition);
+    this.send('geoposition', geopositionToJson(client.geoposition));
+    this.ready();
 
-      this._onSuccess(dummy);
+    this.setState(this.options.state);
+  }
+
+  /**
+   * Set the state of the service.
+   *
+   * @param {'start'|'stop'} String - New state of the service.
+   */
+  setState(state) {
+    if (this.state !== state) {
+      this.state = state;
+
+      if (this.state === 'start')
+        this._startWatch();
+      else
+        this._stopWatch();
+    }
+  }
+
+  /**
+   * Resume the refresh of the position.
+   */
+  _startWatch() {
+    if (this.options.debug === false) {
+      this._watchId = geolocation.watchPosition(this._onSuccess, this._onError, this.options);
     } else {
-      this.resume();
+      this._watchId = setInterval(() => {
+        updateRandomGeoposition(client.geoposition);
+        this._onSuccess(client.geoposition);
+      }, 3000);
     }
   }
 
   /**
    * Pause the refresh of the position.
    */
-  pause() {
-    if (this._auto)
+  _stopWatch() {
+    if (this.options.debug === false)
       navigator.clearWatch(this._watchId);
     else
-      clearTimeout(this._watchId);
+      clearInterval(this._watchId);
   }
 
-  /**
-   * Resume the refresh of the position.
-   */
-  resume() {
-    const method = this._auto ? 'watchPosition' : 'getCurrentPosition';
-    geolocation[method](this._onSuccess, this._onError, this.options);
+  _onSuccess(geoposition) {
+    this._updateClient(geoposition);
+    this.emit('geoposition', geoposition);
+    this.send('geoposition', geopositionToJson(geoposition));
   }
 
-  _onSuccess(position) {
-    const coords = position.coords;
-    const refreshRate = this.options.refreshRate;
-
-    if (!this.signals.ready.get())
-      this.ready();
-
+  _updateClient(geoposition) {
+    const coords = geoposition.coords;
     client.coordinates = [coords.latitude, coords.longitude];
-    client.geoposition = position;
-
-    this.emit('position', position);
-    this.send('position', geopositionToJson(position));
-
-    if (refreshRate !== 'auto' && refreshRate > 0) {
-      this._watchId = setTimeout(() => {
-        geolocation.getCurrentPosition(this._onSuccess, this._onError, this.options);
-      }, refreshRate);
-    }
+    client.geoposition = geoposition;
   }
 
   _onError(err) {
