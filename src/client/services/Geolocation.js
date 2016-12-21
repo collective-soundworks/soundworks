@@ -36,6 +36,7 @@ function getRandomGeoposition() {
   };
 }
 
+// this is quite a large update...
 function updateRandomGeoposition(geoposition) {
   geoposition.timestamp = new Date().getTime();
   geoposition.coords.latitude += (Math.random() * 1e-4) - (1e-4 / 2);
