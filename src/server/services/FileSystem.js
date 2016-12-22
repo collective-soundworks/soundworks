@@ -73,9 +73,9 @@ class FileSystem extends Service {
    * @example:
    * // 1. Single list
    * // retrieve all the file in a folder
-   * fileSystem.listFiles('my-directory').then((files) => ... );
+   * fileSystem.getList('my-directory').then((files) => ... );
    * // or, retrieve all the `.wav` files inside a given folder, search recursively
-   * fileSystem.listFiles({
+   * fileSystem.getList({
    *   path: 'my-directory',
    *   match: /\.wav/,
    *   recursive: true,
@@ -84,13 +84,13 @@ class FileSystem extends Service {
    * // 2. Multiple Requests
    * // retrieve all the file in 2 different folders, the returned value will be
    * // an array containing the 2 file lists
-   * fileSystem.listFiles(['my-directory1', 'my-directory2'])
+   * fileSystem.getList(['my-directory1', 'my-directory2'])
    *   .then((arrayList) => ... );
    * // or
-   * fileSystem.listFiles([{ ... }, { ... }])
+   * fileSystem.getList([{ ... }, { ... }])
    *   .then((arrayList) => ... );
    */
-  listFiles(config) {
+  getList(config) {
     let returnAll = true;
 
     if (!Array.isArray(config)) {
@@ -103,7 +103,7 @@ class FileSystem extends Service {
         item = { path: item };
 
       const { path, match, recursive, directories } = item;
-      return this._listFiles(path, match, recursive, directories);
+      return this._getList(path, match, recursive, directories);
     });
 
     if (returnAll === false)
@@ -125,7 +125,7 @@ class FileSystem extends Service {
    * @return {Array}
    * @private
    */
-  _listFiles(path = null, match = '*', recursive = false, directories = false) {
+  _getList(path = null, match = '*', recursive = false, directories = false) {
     if (path === null)
       throw new Error(`${SERVICE_ID} - path not defined`);
 
@@ -226,7 +226,7 @@ class FileSystem extends Service {
       config = prependPath(config);
 
       // get results
-      this.listFiles(config).then((results) => {
+      this.getList(config).then((results) => {
         function formatToUrl(entry) {
           if (Array.isArray(entry))
             return entry.map(formatToUrl);
