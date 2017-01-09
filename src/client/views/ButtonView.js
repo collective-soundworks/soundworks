@@ -1,6 +1,7 @@
 import View from './View';
 
 const defaultTemplate = `
+  <%= header %>
   <% definitions.forEach(function(def, index) { %>
     <button class="btn <%= def.state %>"
             data-index="<%= index %>"
@@ -9,6 +10,7 @@ const defaultTemplate = `
       <%= def.label %>
     </button>
   <% }); %>
+  <%= footer %>
 `;
 
 /**
@@ -37,17 +39,17 @@ const defaultTemplate = `
 class ButtonView extends View {
   constructor(definitions, onPush, onRelease, options = {}) {
     const template = options.template || defaultTemplate;
-    super(template, { definitions }, {}, { className: 'buttons' });
+    super(template, { definitions, header: options.header, footer: options.footer }, {}, { className: 'buttons' });
 
     this._definitions = definitions;
+    this._onPush = onPush;
+    this._onRelease = onRelease;
+
     this._toggleState = (options.toggleState !== undefined) ? !!options.toggleState : true;
     this._maxPushed = (options.maxPushed !== undefined) ? Math.max(1, options.maxPushed) : 1;
     this._steelOldest = (options.steelOldest !== undefined) ? !!options.steelOldest : true;
 
     this._pushed = []; // list of buttons currently pushed
-
-    this._onPush = onPush;
-    this._onRelease = onRelease;
 
     const defaultState = options.defaultState || 'released';
     // populate `this._pushed`
