@@ -49,7 +49,6 @@ export { default as SharedRecorder } from './services/SharedRecorder';
 export { default as Sync } from './services/Sync';
 
 // views
-export { default as ButtonView } from './views/ButtonView';
 export { default as CanvasView } from './views/CanvasView';
 export { default as Renderer } from './views/Renderer';
 export { default as RenderingGroup } from './views/RenderingGroup';
