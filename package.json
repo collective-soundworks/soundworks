@@ -43,7 +43,7 @@
     "fs-extra": "^1.0.0",
     "lodash.template": "^4.4.0",
     "mobile-detect": "^1.2.0",
-    "motion-input": "collective-soundworks/motion-input#1.0.2",
+    "motion-input": "collective-soundworks/motion-input#v1.0.3-b",
     "osc": "^2.0.1",
     "pem": "^1.9.4",
     "screenfull": "^3.0.2",
