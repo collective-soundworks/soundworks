@@ -197,7 +197,7 @@ const client = {
 
   /**
    * Retrieve an array of optionnal parameters from the url excluding the client type
-   * and store it in `this.config.urlParameters`.
+   * and store it in `this.urlParams`.
    * Parameters can be defined in two ways :
    * - as a regular route (ex: `/player/param1/param2`)
    * - as a hash (ex: `/player#param1-param2`)
@@ -208,6 +208,8 @@ const client = {
    * @todo - When handshake implemented, define if these informations should be part of it
    */
   _parseUrlParams() {
+    let pathParams = null;
+    let hashParams = null;
     // handle path name first
     let pathname = window.location.pathname;
     // sanitize
@@ -217,7 +219,24 @@ const client = {
       .replace(/\/$/, '');                              // trailing slash
 
     if (pathname.length > 0)
-      this.urlParams = pathname.split('/');
+      pathParams = pathname.split('/');
+
+    // handle hash
+    let hash = window.location.hash;
+    hash = hash.replace(/^#/, '');
+
+    if (hash.length > 0)
+      hashParams = hash.split('-');
+
+    if (pathParams || hashParams) {
+      this.urlParams = [];
+
+      if (pathParams)
+        pathParams.forEach((param) => this.urlParams.push(param));
+
+      if (hashParams)
+        hashParams.forEach((param) => this.urlParams.push(param));
+    }
   },
 
   /**

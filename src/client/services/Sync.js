@@ -50,6 +50,7 @@ class Sync extends Service {
     const defaults = {
       viewCtor: SegmentedView,
       viewPriority: 3,
+      useAudioTime: true,
       // @todo - add options to configure the sync service
     };
 
@@ -66,7 +67,11 @@ class Sync extends Service {
 
   /** @private */
   init() {
-    this._sync = new SyncModule(() => audioContext.currentTime);
+    const getTime = this.options.useAudioTime ?
+      () => audioContext.currentTime :
+      () => (new Date().getTime() * 0.001);
+
+    this._sync = new SyncModule(getTime);
     this._ready = false;
 
     this.viewCtor = this.options.viewCtor;
@@ -98,6 +103,11 @@ class Sync extends Service {
    *  `syncTime` (in _seconds_).
    */
   getAudioTime(syncTime) {
+    return this._sync.getLocalTime(syncTime);
+  }
+
+
+  getLocaltime(syncTime) {
     return this._sync.getLocalTime(syncTime);
   }
 

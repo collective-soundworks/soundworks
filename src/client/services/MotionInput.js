@@ -68,7 +68,7 @@ class MotionInput extends Service {
 
         this.ready();
       })
-      .catch((err) => console.stack(err.message));
+      .catch((err) => console.error(err.stack));
   }
 
   /** @private */

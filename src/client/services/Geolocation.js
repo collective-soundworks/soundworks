@@ -82,10 +82,7 @@ class Geolocation extends Service {
     this.require('platform', { features: ['geolocation'] });
   }
 
-  configure(options) {
-    super.configure(options);
-  }
-
+  /** @private */
   start() {
     super.start();
 
@@ -122,6 +119,7 @@ class Geolocation extends Service {
 
   /**
    * Resume the refresh of the position.
+   * @private
    */
   _startWatch() {
     if (this.options.debug === false) {
@@ -136,6 +134,7 @@ class Geolocation extends Service {
 
   /**
    * Pause the refresh of the position.
+   * @private
    */
   _stopWatch() {
     if (this.options.debug === false)
@@ -144,18 +143,21 @@ class Geolocation extends Service {
       clearInterval(this._watchId);
   }
 
+  /** @private */
   _onSuccess(geoposition) {
     this._updateClient(geoposition);
     this.emit('geoposition', geoposition);
     this.send('geoposition', geopositionToJson(geoposition));
   }
 
+  /** @private */
   _updateClient(geoposition) {
     const coords = geoposition.coords;
     client.coordinates = [coords.latitude, coords.longitude];
     client.geoposition = geoposition;
   }
 
+  /** @private */
   _onError(err) {
     console.error(err.stack);
   }
