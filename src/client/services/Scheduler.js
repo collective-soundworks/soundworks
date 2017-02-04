@@ -216,7 +216,7 @@ class Scheduler extends Service {
         advanceTime: function(time) {
           const delta = schedulerService.deltaTime;
 
-          if(delta > 0)
+          if (delta > 0)
             setTimeout(fun, 1000 * delta, time); // bridge scheduler lookahead with timeout
           else
             fun(time);
