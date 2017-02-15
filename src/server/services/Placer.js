@@ -175,7 +175,7 @@ class Placer extends Service {
     return () => {
       const configItem = this.options.configItem;
       const disabledPositions = this.disabledPositions;
-      // aknowledge
+      // acknowledge
       if (this.numClients < this.setup.capacity)
         this.send(client, 'aknowlegde', configItem, disabledPositions);
       else

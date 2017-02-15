@@ -211,13 +211,13 @@ class Locator extends Service {
     this.show();
 
     this.send('request');
-    this.receive('aknowledge', this._onAknowledgeResponse);
+    this.receive('acknowledge', this._onAknowledgeResponse);
   }
 
   /** @private */
   stop() {
     super.stop();
-    this.removeListener('aknowledge', this._onAknowledgeResponse);
+    this.removeListener('acknowledge', this._onAknowledgeResponse);
 
     this.hide();
   }
