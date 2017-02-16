@@ -29,11 +29,13 @@ class SyncSchedulerHook extends audio.TimeEngine {
     return nextTime;
   }
 
-  resetPosition(metricPosition = this.nextPosition) {
-    const syncTime = this.metricScheduler.getSyncTimeAtMetricPosition(metricPosition);
+  reschedule() {
+    const metricScheduler = this.metricScheduler;
+    const nextPosition = metricScheduler._engineQueue.time;
+    const syncTime = metricScheduler.getSyncTimeAtMetricPosition(nextPosition);
 
     if (syncTime !== this.nextTime) {
-      this.nextPosition = metricPosition;
+      this.nextPosition = nextPosition;
       this.nextTime = syncTime;
 
       this.resetTime(syncTime);
@@ -267,33 +269,30 @@ class MetricScheduler extends Service {
   }
 
   _rescheduleMetricEngines() {
-    let nextPosition = Infinity;
-    const engines = this._engineSet;
+    const syncTime = this.currentSyncTime;
+    const metricPosition = this.getMetricPositionAtSyncTime(syncTime);
 
-    if (engines.size > 0) {
-      const syncTime = this.currentSyncTime;
-      const metricPosition = this.getMetricPositionAtSyncTime(syncTime);
+    this._engineQueue.clear();
+
+    if (this._metricSpeed > 0) {
+      // position engines
+      const metricSpeed = this._metricSpeed;
       const queue = this._engineQueue;
 
-      queue.clear();
-
-      if (this._metricSpeed > 0) {
-        // position engines
-        for (let engine of engines) {
-          const nextEnginePosition = engine.syncPosition(syncTime, metricPosition, this._metricSpeed);
-          queue.insert(engine, nextEnginePosition);
-        }
-      } 
-      else {
-        // stop engines
-        for (let engine of engines)
+      for (let engine of this._engineSet) {
+        const nextEnginePosition = engine.syncPosition(syncTime, metricPosition, metricSpeed);
+        queue.insert(engine, nextEnginePosition);
+      }
+    } 
+    else {
+      // stop engines
+      for (let engine of this._engineSet) {
+        if(engine.syncSpeed)
           engine.syncSpeed(syncTime, metricPosition, 0);
       }
-
-      nextPosition = queue.time;
     }
 
-    this._syncSchedulerHook.resetPosition(nextPosition);
+    this._syncSchedulerHook.reschedule();
   }
 
   _clearEngines() {
@@ -303,7 +302,7 @@ class MetricScheduler extends Service {
     for (let [key, engine] of this._metronomeEngineMap)
       engine.destroy();
 
-    this._syncSchedulerHook.resetPosition(Infinity);
+    this._syncSchedulerHook.reschedule();
   }
 
   _advancePosition(syncTime, metricPosition, metricSpeed) {
@@ -458,15 +457,16 @@ class MetricScheduler extends Service {
     if (!this._callingEventListeners && this._metricSpeed > 0) {
       const syncTime = this.currentSyncTime;
       const nextEnginePosition = engine.syncPosition(syncTime, metricPosition, this._metricSpeed);
-      const nextPosition = this._engineQueue.insert(engine, nextEnginePosition);
-      this._syncSchedulerHook.resetPosition(nextPosition);
+
+      this._engineQueue.insert(engine, nextEnginePosition);
+      this._syncSchedulerHook.reschedule();
     }
   }
 
   remove(engine) {
     if (this._engineSet.delete(engine) && !this._callingEventListeners && this._metricSpeed > 0) {
-      const nextPosition = this._engineQueue.remove(engine);
-      this._syncSchedulerHook.resetPosition(nextPosition);
+      this._engineQueue.remove(engine);
+      this._syncSchedulerHook.reschedule();
     }
   }
 
