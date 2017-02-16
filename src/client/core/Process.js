@@ -10,6 +10,10 @@ import Signal from './Signal';
 class Process extends EventEmitter {
   constructor(id) {
     super();
+
+    if (id === undefined)
+      throw new Error(`Undefined id for process ${this.constructor.name}`);
+
     /**
      * Name of the process.
      * @type {String}
