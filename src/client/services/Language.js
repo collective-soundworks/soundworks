@@ -73,7 +73,7 @@ class Language extends Service {
   /** @private */
   stop() {
     super.stop();
-    // this.removeListener('aknowledge', this._onAknowledgeResponse);
+    // this.removeListener('acknowledge', this._onAknowledgeResponse);
 
     this.hide();
   }

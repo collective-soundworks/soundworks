@@ -9,9 +9,9 @@ import serviceManager from '../core/serviceManager';
 
 /** @private */
 class _Param extends EventEmitter {
-  constructor(control, type, name, label) {
+  constructor(parent, type, name, label) {
     super();
-    this.control = control;
+    this.parent = parent;
     this.type = type;
     this.name = name;
     this.label = label;
@@ -26,9 +26,9 @@ class _Param extends EventEmitter {
     this.emit('update', this.value); // call event listeners
 
     if (sendToServer)
-      this.control.send('update', this.name, this.value); // send to server
+      this.parent.send('update', this.name, this.value); // send to server
 
-    this.control.emit('update', this.name, this.value); // call control listeners
+    this.parent.emit('update', this.name, this.value); // call parent listeners
   }
 
   update(val, sendToServer = true) {
@@ -40,8 +40,8 @@ class _Param extends EventEmitter {
 
 /** @private */
 class _BooleanParam extends _Param {
-  constructor(control, name, label, init) {
-    super(control, 'boolean', name, label);
+  constructor(parent, name, label, init) {
+    super(parent, 'boolean', name, label);
     this.set(init);
   }
 
@@ -52,8 +52,8 @@ class _BooleanParam extends _Param {
 
 /** @private */
 class _EnumParam extends _Param {
-  constructor(control, name, label, options, init) {
-    super(control, 'enum', name, label);
+  constructor(parent, name, label, options, init) {
+    super(parent, 'enum', name, label);
     this.options = options;
     this.set(init);
   }
@@ -70,8 +70,8 @@ class _EnumParam extends _Param {
 
 /** @private */
 class _NumberParam extends _Param {
-  constructor(control, name, label, min, max, step, init) {
-    super(control, 'number', name, label);
+  constructor(parent, name, label, min, max, step, init) {
+    super(parent, 'number', name, label);
     this.min = min;
     this.max = max;
     this.step = step;
@@ -85,8 +85,8 @@ class _NumberParam extends _Param {
 
 /** @private */
 class _TextParam extends _Param {
-  constructor(control, name, label, init) {
-    super(control, 'text', name, label);
+  constructor(parent, name, label, init) {
+    super(parent, 'text', name, label);
     this.set(init);
   }
 
@@ -97,8 +97,8 @@ class _TextParam extends _Param {
 
 /** @private */
 class _TriggerParam extends _Param {
-  constructor(control, name, label) {
-    super(control, 'trigger', name, label);
+  constructor(parent, name, label) {
+    super(parent, 'trigger', name, label);
   }
 
   set(val) { /* nothing to set here */ }

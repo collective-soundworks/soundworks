@@ -168,6 +168,7 @@ class Activity extends EventEmitter {
    * Send a message to all client of given `clientType`(s).
    * @param {String|Array<String>|null} clientType - The `clientType`(s) that should
    *  receive the message. If `null`, the message is send to all clients.
+   *  If clientType is an array, the the message is send to clients of the given client types.
    * @param {module:soundworks/server.Client} excludeClient - Client to should
    *  not receive the message (typically the original sender of the message).
    * @param {String} channel - Channel of the message (is automatically namespaced
