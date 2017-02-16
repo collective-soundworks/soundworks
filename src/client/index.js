@@ -31,6 +31,7 @@ export { default as Survey } from './scenes/Survey';
 
 // services
 export { default as AudioBufferManager } from './services/AudioBufferManager';
+export { default as AudioScheduler } from './services/AudioScheduler';
 export { default as Auth } from './services/Auth';
 export { default as Checkin } from './services/Checkin';
 export { default as ErrorReporter } from './services/ErrorReporter';
@@ -38,16 +39,17 @@ export { default as FileSystem } from './services/FileSystem';
 export { default as Geolocation } from './services/Geolocation';
 export { default as Language } from './services/Language';
 export { default as Locator } from './services/Locator';
+export { default as MetricScheduler } from './services/MetricScheduler';
 export { default as MotionInput } from './services/MotionInput';
 export { default as Network } from './services/Network';
 export { default as Placer } from './services/Placer';
 export { default as Platform } from './services/Platform';
 export { default as RawSocket } from './services/RawSocket';
-export { default as Scheduler } from './services/Scheduler';
 export { default as SharedConfig } from './services/SharedConfig';
 export { default as SharedParams } from './services/SharedParams';
 export { default as SharedRecorder } from './services/SharedRecorder';
 export { default as Sync } from './services/Sync';
+export { default as SyncScheduler } from './services/SyncScheduler';
 
 // views
 export { default as CanvasView } from './views/CanvasView';
