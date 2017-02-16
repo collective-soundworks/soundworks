@@ -57,7 +57,7 @@ export default {
    * @param {...*} args - Arguments of the message (as many as needed, of any type).
    */
   broadcast(clientType, excludeClient, channel, ...args) {
-    if(!this.io)
+    if (!this.io) // @todo - remove that, fix server initialization order instead
       return;
 
     let namespaces;
@@ -78,8 +78,6 @@ export default {
       }
     }
 
-    namespaces.forEach((nsp) => {
-      this.io.of(nsp).emit(channel, ...args);
-    });
+    namespaces.forEach((nsp) => this.io.of(nsp).emit(channel, ...args));
   },
 };
