@@ -384,7 +384,10 @@ class Platform extends Service {
    * @private
    */
   _onInteraction(type) {
-    return () => {
+    return (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
       client.platform.interaction = type;
       // execute interaction hooks from the platform
       const interactionHooks = this._getHooks('interactionHook');
