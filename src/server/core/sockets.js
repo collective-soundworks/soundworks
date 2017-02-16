@@ -57,6 +57,9 @@ export default {
    * @param {...*} args - Arguments of the message (as many as needed, of any type).
    */
   broadcast(clientType, excludeClient, channel, ...args) {
+    if(!this.io)
+      return;
+
     let namespaces;
 
     if (typeof clientType === 'string')
