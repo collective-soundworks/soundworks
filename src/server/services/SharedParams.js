@@ -4,10 +4,10 @@ import { EventEmitter } from 'events';
 
 /** @private */
 class _ControlItem extends EventEmitter {
-  constructor(control, type, name, label, init = undefined, clientTypes = null) {
+  constructor(parent, type, name, label, init = undefined, clientTypes = null) {
     super();
 
-    this.control = control;
+    this.parent = parent;
     this.clientTypes = clientTypes;
 
     this.data = {
@@ -17,8 +17,8 @@ class _ControlItem extends EventEmitter {
       value: init,
     };
 
-    control.params[name] = this;
-    control._paramData.push(this.data);
+    parent.params[name] = this;
+    parent._paramData.push(this.data);
   }
 
   set(val) {
@@ -26,20 +26,20 @@ class _ControlItem extends EventEmitter {
   }
 
   update(val = undefined, excludeClient = null) {
-    let control = this.control;
+    let parent = this.parent;
     let data = this.data;
 
     this.set(val); // set value
     this.emit(data.name, data.value); // call param listeners
-    control.broadcast(this.clientTypes, excludeClient, 'update', data.name, data.value); // send to clients
-    control.emit('update', data.name, data.value); // call control listeners
+    parent.broadcast(this.clientTypes, excludeClient, 'update', data.name, data.value); // send to clients
+    parent.emit('update', data.name, data.value); // call parent listeners
   }
 }
 
 /** @private */
 class _BooleanItem extends _ControlItem {
-  constructor(control, name, label, init, clientTypes = null) {
-    super(control, 'boolean', name, label, init, clientTypes);
+  constructor(parent, name, label, init, clientTypes = null) {
+    super(parent, 'boolean', name, label, init, clientTypes);
   }
 
   set(val) {
@@ -49,8 +49,8 @@ class _BooleanItem extends _ControlItem {
 
 /** @private */
 class _EnumItem extends _ControlItem {
-  constructor(control, name, label, options, init, clientTypes = null) {
-    super(control, 'enum', name, label, init, clientTypes);
+  constructor(parent, name, label, options, init, clientTypes = null) {
+    super(parent, 'enum', name, label, init, clientTypes);
 
     this.data.options = options;
   }
@@ -68,8 +68,8 @@ class _EnumItem extends _ControlItem {
 
 /** @private */
 class _NumberItem extends _ControlItem {
-  constructor(control, name, label, min, max, step, init, clientTypes = null) {
-    super(control, 'number', name, label, init, clientTypes);
+  constructor(parent, name, label, min, max, step, init, clientTypes = null) {
+    super(parent, 'number', name, label, init, clientTypes);
 
     let data = this.data;
     data.min = min;
@@ -84,8 +84,8 @@ class _NumberItem extends _ControlItem {
 
 /** @private */
 class _TextItem extends _ControlItem {
-  constructor(control, name, label, init, clientTypes = null) {
-    super(control, 'text', name, label, init, clientTypes);
+  constructor(parent, name, label, init, clientTypes = null) {
+    super(parent, 'text', name, label, init, clientTypes);
   }
 
   set(val) {
@@ -95,8 +95,8 @@ class _TextItem extends _ControlItem {
 
 /** @private */
 class _TriggerItem extends _ControlItem {
-  constructor(control, name, label, clientTypes = null) {
-    super(control, 'trigger', name, label, undefined, clientTypes);
+  constructor(parent, name, label, clientTypes = null) {
+    super(parent, 'trigger', name, label, undefined, clientTypes);
   }
 }
 
@@ -183,8 +183,7 @@ class SharedParams extends Service {
   /**
    * Add a `boolean` parameter.
    * @param {String} name - Name of the parameter.
-   * @param {String} label - Label of the parameter (displayed on the control
-   *  GUI on the client side)
+   * @param {String} label - Label of the parameter (displayed on the GUI on the client side)
    * @param {Number} value - Initial value of the parameter (`true` or `false`).
    * @param {String[]} [clientTypes=null] - Array of the client types to send
    *  the parameter value to. If not set, the value is sent to all the client types.
@@ -196,8 +195,7 @@ class SharedParams extends Service {
   /**
    * Add an `enum` parameter.
    * @param {String} name - Name of the parameter.
-   * @param {String} label - Label of the parameter (displayed on the control
-   *  GUI on the client side).
+   * @param {String} label - Label of the parameter (displayed on the GUI on the client side).
    * @param {String[]} options - Different possible values of the parameter.
    * @param {Number} value - Initial value of the parameter (must be defined in `options`).
    * @param {String[]} [clientTypes=null] - Array of the client types to send
@@ -210,8 +208,7 @@ class SharedParams extends Service {
   /**
    * Add a `number` parameter.
    * @param {String} name - Name of the parameter.
-   * @param {String} label - Label of the parameter (displayed on the control
-   *  GUI on the client side).
+   * @param {String} label - Label of the parameter (displayed on the GUI on the client side).
    * @param {Number} min - Minimum value of the parameter.
    * @param {Number} max - Maximum value of the parameter.
    * @param {Number} step - Step by which the parameter value is increased or decreased.
@@ -226,8 +223,7 @@ class SharedParams extends Service {
   /**
    * Add a `text` parameter.
    * @param {String} name - Name of the parameter.
-   * @param {String} label - Label of the parameter (displayed on the control
-   *  GUI on the client side).
+   * @param {String} label - Label of the parameter (displayed on the GUI on the client side).
    * @param {Number} value - Initial value of the parameter.
    * @param {String[]} [clientTypes=null] - Array of the client types to send
    *  the parameter value to. If not set, the value is sent to all the client types.
@@ -239,8 +235,7 @@ class SharedParams extends Service {
   /**
    * Add a trigger (not really a parameter).
    * @param {String} name - Name of the trigger.
-   * @param {String} label - Label of the trigger (displayed on the control
-   *  GUI on the client side).
+   * @param {String} label - Label of the trigger (displayed on the GUI on the client side).
    * @param {String[]} [clientTypes=null] - Array of the client types to send
    *  the trigger to. If not set, the value is sent to all the client types.
    */
