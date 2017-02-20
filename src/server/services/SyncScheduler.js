@@ -30,6 +30,10 @@ class SyncScheduler extends Service {
     return this._sync.getSyncTime();
   }
 
+  get syncTime() {
+    return this._sync.getSyncTime();
+  }
+
   /** @private */
   connect(client) {
     super.connect(client);

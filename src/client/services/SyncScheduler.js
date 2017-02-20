@@ -22,7 +22,6 @@ class SyncTimeSchedulingQueue extends audio.SchedulingQueue {
   }
 
   advanceTime(audioTime) {
-    const syncTime = this.sync.getSyncTime(audioTime);
     const nextSyncTime = super.advanceTime(this.nextSyncTime);
     const nextAudioTime = this.sync.getAudioTime(nextSyncTime);
 
@@ -32,7 +31,7 @@ class SyncTimeSchedulingQueue extends audio.SchedulingQueue {
   }
 
   resetTime(syncTime) {
-    if(syncTime === undefined)
+    if (syncTime === undefined)
       syncTime = this.sync.getSyncTime();
 
     this.nextSyncTime = syncTime;
@@ -109,11 +108,19 @@ class SyncScheduler extends Service {
     this.ready();
   }
 
+  get audioTime() {
+    return audioScheduler.currentTime;
+  }
+
   /**
    * Current sync time of the scheduler.
    */
-  get currentTime() {
+  get syncTime() {
     return this._syncedQueue.currentTime;
+  }
+
+  get currentTime() {
+    return this._syncScheduler.currentTime;
   }
 
   /**

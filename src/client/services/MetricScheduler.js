@@ -5,6 +5,8 @@ const audioScheduler = audio.getScheduler();
 
 const SERVICE_ID = 'service:metric-scheduler';
 
+const EPSILON = 1e-12;
+
 class SyncSchedulerHook extends audio.TimeEngine {
   constructor(syncScheduler, metricScheduler) {
     super();
@@ -73,7 +75,6 @@ class SyncEventEngine extends audio.TimeEngine {
 
     this.resetTime(syncTime);
   }
-
 
   reset(syncTime, metricPosition, tempo, tempoUnit, event) {
     this.syncTime = undefined;
@@ -147,24 +148,32 @@ class MetronomeEngine extends audio.TimeEngine {
 
   // return position of next measure
   syncPosition(syncTime, metricPosition, metricSpeed) {
-    let nextMeasurePosition = this.startPosition;
+    const startPosition = this.startPosition;
+
+    // metricPosition -= EPSILON;
+    console.log('syncPosition.1:', startPosition, metricPosition);
 
     if (this.beatEngine)
       this.beatEngine.resetTime(Infinity);
 
-    if (metricPosition >= this.startPosition) {
-      const relativePosition = metricPosition - this.startPosition;
+    // since we are anyway a little in advance, make sure that we don't skip
+    // the start point due to rounding errors
+    metricPosition -= EPSILON;
+
+    this.beatPeriod = this.beatLength / metricSpeed;
+    this.beatCount = 0;
+
+    if (metricPosition >= startPosition) {
+      const relativePosition = metricPosition - startPosition;
       const floatMeasures = relativePosition / this.measureLength;
       const measureCount = Math.ceil(floatMeasures);
 
-      this.beatPeriod = this.beatLength / metricSpeed;
       this.measureCount = measureCount - 1;
-      this.beatCount = 0;
-
-      nextMeasurePosition = measureCount * this.measureLength;
+      return startPosition + measureCount * this.measureLength;
     }
 
-    return nextMeasurePosition;
+    this.measureCount = -1;
+    return startPosition;
   }
 
   // generate next measure
@@ -174,6 +183,7 @@ class MetronomeEngine extends audio.TimeEngine {
     this.measureCount++;
     this.beatCount = 0;
 
+    // whether metronome continues (default is true)
     const cont = this.callback(this.measureCount, 0);
 
     if (cont === undefined || cont === true) {
@@ -269,7 +279,7 @@ class MetricScheduler extends Service {
   }
 
   _rescheduleMetricEngines() {
-    const syncTime = this.currentSyncTime;
+    const syncTime = this.syncTime;
     const metricPosition = this.getMetricPositionAtSyncTime(syncTime);
 
     this._engineQueue.clear();
@@ -301,6 +311,8 @@ class MetricScheduler extends Service {
 
     for (let [key, engine] of this._metronomeEngineMap)
       engine.destroy();
+
+    this._metronomeEngineMap.clear();
 
     this._syncSchedulerHook.reschedule();
   }
@@ -336,7 +348,7 @@ class MetricScheduler extends Service {
   _setSyncEvent(syncTime, metricPosition, tempo, tempoUnit, event) {
     this._clearSyncEvent();
 
-    if (syncTime > this.currentSyncTime)
+    if (syncTime > this.syncTime)
       this._syncEventEngine.set(syncTime, metricPosition, tempo, tempoUnit, event);
     else
       this._sync(syncTime, metricPosition, tempo, tempoUnit, event);
@@ -356,16 +368,24 @@ class MetricScheduler extends Service {
     this._setSyncEvent(syncTime, metricPosition, tempo, tempoUnit, event);
   }
 
-  get currentAudioTime() {
+  get audioTime() {
     return audioScheduler.currentTime;
   }
 
-  get currentSyncTime() {
-    return this._syncScheduler.currentTime;
+  get syncTime() {
+    return this._syncScheduler.syncTime;
   }
 
-  get currentMetricPosition() {
-    return this._metricPosition + (this._syncScheduler.currentTime - this._syncTime) * this._metricSpeed;
+  get currentTime() {
+    return this._syncScheduler.syncTime;
+  }
+
+  get metricPosition() {
+    return this._metricPosition + (this._syncScheduler.syncTime - this._syncTime) * this._metricSpeed;
+  }
+
+  get currentPosition() {
+    return this.metricPosition;
   }
 
   /**
@@ -448,14 +468,14 @@ class MetricScheduler extends Service {
     }
   }
 
-  add(engine, startPosition = this.currentMetricPosition) {
+  add(engine, startPosition = this.metricPosition) {
     this._engineSet.add(engine);
 
-    const metricPosition = Math.max(startPosition, this.currentMetricPosition);
+    const metricPosition = Math.max(startPosition, this.metricPosition);
 
     // schedule engine
     if (!this._callingEventListeners && this._metricSpeed > 0) {
-      const syncTime = this.currentSyncTime;
+      const syncTime = this.syncTime;
       const nextEnginePosition = engine.syncPosition(syncTime, metricPosition, this._metricSpeed);
 
       this._engineQueue.insert(engine, nextEnginePosition);
@@ -464,6 +484,13 @@ class MetricScheduler extends Service {
   }
 
   remove(engine) {
+    const syncTime = this.syncTime;
+    const metricPosition = this.getMetricPositionAtSyncTime(syncTime);
+
+    // stop engine
+    if (engine.syncSpeed)
+      engine.syncSpeed(syncTime, metricPosition, 0);
+
     if (this._engineSet.delete(engine) && !this._callingEventListeners && this._metricSpeed > 0) {
       this._engineQueue.remove(engine);
       this._syncSchedulerHook.reschedule();
@@ -479,7 +506,7 @@ class MetricScheduler extends Service {
    * @param {Integer} startPosition - metric start position of the beat
    */
   addMetronome(callback, numBeats = 4, measureDiv = 4, tempoScale = 1, startPosition = 0) {
-    const beatLength = tempoScale / measureDiv;
+    const beatLength = 1 / (measureDiv * tempoScale);
     const engine = new MetronomeEngine(startPosition, numBeats, beatLength, callback);
 
     this._metronomeEngineMap.set(callback, engine);
@@ -490,7 +517,7 @@ class MetricScheduler extends Service {
    * Remove periodic callback.
    * @param {Function} callback callback function
    */
-  removeMetronome(callback) {
+  removeMetronome(callback /*, endPosition */) {
     const engine = this._metronomeEngineMap.get(callback);
 
     if (engine) {

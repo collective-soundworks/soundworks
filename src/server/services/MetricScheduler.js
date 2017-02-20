@@ -56,7 +56,7 @@ class MetricScheduler extends Service {
   _setSync(syncTime, metricPosition, tempo, tempoUnit, event) {
     this._resetSync();
 
-    if (syncTime <= this.currentSyncTime) {
+    if (syncTime <= this.syncTime) {
       this._syncTime = syncTime;
       this._metricPosition = metricPosition;
       this._tempo = tempo;
@@ -71,7 +71,7 @@ class MetricScheduler extends Service {
 
   /** @private */
   _updateSync() {
-    if (this.currentSyncTime >= this._nextSyncTime) {
+    if (this.syncTime >= this._nextSyncTime) {
       const event = this._nextSyncEvent;
       this._syncTime = event.syncTime;
       this._metricPosition = event.metricPosition;
@@ -96,11 +96,15 @@ class MetricScheduler extends Service {
     this.broadcast(null, null, 'clear');
   }
 
-  get currentSyncTime() {
+  get currentTime() {
     return this._syncScheduler.currentTime;
   }
 
-  get currentMetricPosition() {
+  get syncTime() {
+    return this._syncScheduler.currentTime;
+  }
+
+  get metricPosition() {
     return this._metricPosition + (this._syncScheduler.currentTime - this._syncTime) * this._metricSpeed;
   }
 
