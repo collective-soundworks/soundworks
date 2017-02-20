@@ -9,17 +9,9 @@ import serviceManager from '../core/serviceManager';
 const SERVICE_ID = 'service:audio-buffer-manager';
 const log = debug('soundworks:services:audio-buffer-manager');
 
-function flatten(a) {
-  const r = [];
-  const f = (v) => Array.isArray(v) ? v.forEach(f) : r.push(v);
-  f(a);
-
-  return r;
-}
-
 const defaultViewTemplate = `
 <div class="section-top flex-middle">
-  <p><%= loading %></p>
+  <p><%= status %></p>
 </div>
 <div class="section-center flex-center">
   <% if (showProgress) { %>
@@ -32,8 +24,114 @@ const defaultViewTemplate = `
 
 
 const defaultViewContent = {
-  loading: 'Loading sounds…',
+  status: null,
+  loading: 'Loading sounds...',
+  decoding: 'Decoding sounds...',
 };
+
+function flattenLists(a) {
+  const ret = [];
+  const fun = (val) => Array.isArray(val) ? val.forEach(fun) : ret.push(val);
+  fun(a);
+  return ret;
+}
+
+function clonePathObj(value) {
+  if (typeof value === 'object') {
+    const clone = (Array.isArray(value)) ? [] : {};
+
+    for (let key in value)
+      clone[key] = clonePathObj(value[key]);
+
+    return clone;
+  } else if (typeof value === 'string') {
+    return value;
+  }
+}
+
+function decomposePathObj(obj, pathList, refList) {
+  for (let key in obj) {
+    const value = obj[key];
+
+    if (typeof value === 'string') {
+      pathList.push(value);
+      refList.push({ obj, key });
+      obj[key] = null;
+    } else if (typeof value === 'object') {
+      decomposePathObj(value, pathList, refList);
+    } else {
+      throw new Error(`[${SERVICE_ID}] Invalid element in file definition object`);
+    }
+  }
+}
+
+function createObjFromPathList(pathList, commonPath) {
+  let obj = [];
+
+  for (let path of pathList) {
+    let subPathIndex = path.indexOf(commonPath);
+
+    if (subPathIndex >= 0) {
+      subPathIndex += commonPath.length;
+
+      if (path[subPathIndex] === '/')
+        subPathIndex++;
+
+      const subPath = path.substring(subPathIndex);
+      const nodes = subPath.split('/');
+      const depth = nodes.length;
+      let ref = obj;
+      let i;
+
+      for (i = 0; i < depth - 1; i++) {
+        const key = nodes[i];
+
+        if (ref[key] === undefined)
+          ref[key] = [];
+
+        ref = ref[key];
+      }
+
+      ref.push(path);
+    }
+
+    // transform empty array to object
+    if (obj.length === 0)
+      obj = Object.assign({}, obj);
+  }
+
+  return obj;
+}
+
+function populateRefList(refList, loadedObjList) {
+  const length = refList.length;
+
+  if (length !== loadedObjList.length) {
+    throw new Error(`[${SERVICE_ID}] Loaded Buffers do not match file definion`);
+  }
+
+  for (let i = 0; i < length; i++) {
+    const ref = refList[i];
+    const obj = ref.obj;
+    const key = ref.key;
+
+    obj[key] = loadedObjList[i];
+  }
+}
+
+function prefixPaths(pathList, prefix) {
+  // test absolute urls (or protocol relative)
+  const isAbsolute = /^https?:\/\/|^\/\//i;
+
+  pathList = pathList.map((path) => {
+    if (isAbsolute.test(path) || path[0] === '/')
+      return path;
+    else
+      return prefix + path;
+  });
+
+  return pathList;
+}
 
 /**
  * Interface for the view of the `audio-buffer-manager` service.
@@ -50,12 +148,23 @@ const defaultViewContent = {
  * @param {Number} percent - The purcentage of loaded assets.
  */
 class AudioBufferManagerView extends SegmentedView {
+  constructor(...args) {
+    super(...args);
+
+    this.content.status = this.content.loading;
+  }
+
   onRender() {
     super.onRender();
     this.$progressBar = this.$el.querySelector('.progress-bar');
   }
 
   onProgress(percent) {
+    if (percent === 100) {
+      this.content.status = this.content.decoding;
+      this.render('.section-top');
+    }
+
     if (this.content.showProgress)
       this.$progressBar.style.width = `${percent}%`;
   }
@@ -71,7 +180,12 @@ class AudioBufferManagerView extends SegmentedView {
  * @param {Object} options
  * @param {Array<String>} options.assetsDomain - Prefix concatenated to all
  *  given paths.
- * @param {Array<String>} options.files - List of files to load.
+ * @param {Object} options.files - Definition of files to load.
+ * @param {Object} options.directories - Definition of directories to load.
+ * @param {RegEx} options.match - RegEx the files have to match (directories only).
+ * @param {Boolean} options.recursive - Flag whether the sub-directories of defined 
+ *  directories are considered.
+ * @param {Array<String>} options.directories - List of directories to load.
  * @param {Boolean} [options.showProgress=true] - Display the progress bar
  *  in the view.
  * @param {String|module:soundworks/client.FileSystem~ListConfig} [options.directories=null] -
@@ -86,19 +200,36 @@ class AudioBufferManagerView extends SegmentedView {
  * // constructor
  * // Defining a single array of audio files results in a single
  * // array of audio buffers associated to the identifier `default`.
+ *
+ * // There are three different ways to specify the files to be loaded and the 
+ * // data structure in which the loaded data objects are arranged:
+ * // 
+ * // (1.) The files and structure are defined by an object of any depth that 
+ * // contains explicit file paths. All specified files are loaded and the 
+ * // loaded data objects are stored into an object of the same structure as 
+ * // the definition object.
+ *
  * this.audioBufferManager = this.require('audio-buffer-manager', { files: [
  *   'sounds/drums/kick.mp3',
  *   'sounds/drums/snare.mp3'
  * ]});
- *
- * // ... in addition, files to load can be defined as an object with keys
- * // identifying each audio buffer
+ * //
  * this.audioBufferManager = this.require('audio-buffer-manager', { files: {
  *   kick: 'sounds/kick_44kHz.mp3',
  *   snare: 'sounds/808snare.mp3'
  * }});
- +
- * // ... or as an object with keys identifying a whole array of audio buffers
+ *
+ * this.audioBufferManager = this.require('audio-buffer-manager', { files: {
+ *   latin: {
+ *     audio: 'loops/sheila-e-raspberry.mp3',
+ *     markers: 'loops/sheila-e-raspberry-markers.json',
+ *   },
+ *   jazz: {
+ *     audio: 'loops/nussbaum-shuffle.mp3',
+ *     markers: 'loops/nussbaum-shuffle-markers.json',
+ *   },
+ * }});
+ *
  * this.audioBufferManager = this.require('audio-buffer-manager', { files: {
  *   instruments: [
  *     'sounds/instruments/kick_44kHz.mp3',
@@ -108,30 +239,41 @@ class AudioBufferManagerView extends SegmentedView {
  *     'sounds/loops/nussbaum-shuffle.mp3'],
  * }});
  *
- * // ... or as a group of objets associating different files to different keys
- * this.audioBufferManager = this.require('audio-buffer-manager', { files: {
- *   latin: {
- *     audio: 'loops/sheila-e-raspberry.mp3',
- *     segments: 'loops/sheila-e-raspberry-markers.json',
+ * // (2.) The files to load and the resulting data structure are defined by 
+ * // an object that contains directory paths. All (matching) files in the 
+ * // given directories are loaded into arrays of objects without considering 
+ * // sub-directories. The arrays of loaded data objects are arranged in the 
+ * // same data structure as the definition object.
+ *
+ * this.audioBufferManager = this.require('audio-buffer-manager', { 
+ *   directories: { 
+ *     instruments: 'sounds/instruments',
+ *     loops: 'sounds/loops',
  *   },
- *   jazz: {
- *     audio: 'loops/nussbaum-shuffle.mp3',
- *     segments: 'loops/nussbaum-shuffle-markers.json',
- *   },
- * }});
+ *   recursive: false,
+ * });
+ * 
+ * // (3.) The files to load and the resulting data structure are defined by an 
+ * // object that contains directory paths. All (matching) files in the given 
+ * // directories and their sub-directories are loaded into arrays of objects 
+ * // stored in data structures that reproduce the repective sub-directory 
+ * // trees. The resulting data structure corresponds to the structure of the 
+ * // definition object extended by the defined sub-directoriy trees.
  *
- * // the loaded objects can be retrieved according to their definition
- * const kickBuffer = this.audioBufferManager.get('kick');
- * const audioBuffer = this.audioBufferManager.get('jazz', 'audio');
- * const segmentArray = this.audioBufferManager.get('jazz', 'segments');
+ * this.audioBufferManager = this.require('audio-buffer-manager', { directories: 'sounds', recursive: true });
+ * 
+ * // Please note that the - alphabetic - order of the loaded buffer arrays in 
+ * // (2.) and (3.) – dang, ding, dong – is different as the order explicitly 
+ * // defined in the first example – ding, dang, dong. Consider prefixing the 
+ * // file names with indices to load buffer arrays from directories in a 
+ * // specific order.
  *
- * // ... audio buffers an be retrieved through their identifier
- * const snareBuffer = this.audioBufferManager.getAudioBuffer('snare');
- * const jazzBuffer = this.audioBufferManager.getAudioBuffer('jazz');
- *
- * // ... as well as arrays of audio buffers
- * const snareBuffer = this.audioBufferManager.getAudioBufferArray('instruments');
- * const jazzBuffer = this.audioBufferManager.getAudioBufferArray('loops');
+ * // The loaded objects can be retrieved according to their definition, as for example :
+ * const kickBuffer = this.audioBufferManager.data.kick;
+ * const audioBuffer = this.audioBufferManager.data.latin.audio;
+ * const markerArray = this.audioBufferManager.data.jazz.markers;
+ * const snareBuffer = this.audioBufferManager.data.instruments[1];
+ * const nussbaumLoop = this.audioBufferManager.data.loops[1];
  */
 class AudioBufferManager extends Service {
   /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */
@@ -141,8 +283,10 @@ class AudioBufferManager extends Service {
     const defaults = {
       assetsDomain: '',
       showProgress: true,
-      files: [],
+      files: null,
       directories: null,
+      match: '*',
+      recursive: false,
       audioWrapTail: 0,
       viewCtor: AudioBufferManagerView,
       viewPriority: 4,
@@ -161,25 +305,17 @@ class AudioBufferManager extends Service {
     const directories = this.options.directories;
 
     if (directories !== null) {
-      this._fileSystem = this.require('file-system', {
-        list: directories
-      });
+      this._fileSystem = this.require('file-system');
     }
   }
 
   /** @private */
   init() {
     /**
-     * List of the loaded audio buffers created from the loaded audio files.
-     * @private
-     */
-    this.audioBuffers = {};
-
-    /**
      * Data structure correponding to the structure of requested files.
      * @private
      */
-    this.data = {};
+    this.data = [];
 
     // prepare view
     this.viewContent.showProgress = this.options.showProgress;
@@ -196,11 +332,14 @@ class AudioBufferManager extends Service {
 
     this.show();
 
-    // preload files (must be called after show (why ?))
-    if (this.options.directories !== null) {
-      this.loadDirectories();
+    if (this.options.files || this.options.directories) {
+      if (this.options.files)
+        this.loadFiles(this.options.files, this.view);
+
+      if (this.options.directories)
+        this.loadDirectories(this.options.directories, this.options.match, this.options.recursive, this.view);
     } else {
-      this.loadFiles(this.options.files, this.view, true);
+      this.ready();
     }
   }
 
@@ -210,174 +349,35 @@ class AudioBufferManager extends Service {
     super.stop();
   }
 
-  /** @private */
-  _appendFileDescription(filePaths, fileDescriptions, fileDescr, id = 'default') {
-    let descr;
-
-    if (typeof fileDescr === 'string') {
-      /**
-       * fileDescr = {
-       *   id: 'assets/audio-file-name.wav'
-       * }
-       * // becomes
-       * {
-       *   id: <AudioBuffer>
-       * }
-       * ... or
-       * fileDescr = 'assets/audio-file-name.wav'
-       * // becomes
-       * {
-       *   default: <AudioBuffer>
-       * }
-       */
-      const path = fileDescr;
-
-      const descr = {
-        id,
-        path
-      };
-
-      filePaths.push(path);
-      fileDescriptions.push(descr);
-
-    } else if (Array.isArray(fileDescr)) {
-      /**
-       * fileDescr = {
-       *   my-sound-id: [
-       *     'assets/an-audio-file-name.wav',
-       *     'assets/another-audio-file-name.wav'
-       *   ],
-       * }
-       * // becomes
-       * {
-       *   my-sound-id: [
-       *     <AudioBuffer>,
-       *     <AudioBuffer>
-       *   ],
-       * }
-       */
-      for (let i = 0; i < fileDescr.length; i++) {
-        const path = fileDescr[i];
-        const key = i;
-
-        if (typeof path === 'string') {
-          const descr = {
-            id,
-            key,
-            path
-          };
-
-          filePaths.push(path);
-          fileDescriptions.push(descr);
-        }
-      }
-    } else if (typeof fileDescr === 'object') {
-      /**
-       * fileDescr = {
-       *   my-sound-id: {
-       *     audio: 'assets/audio-file-name.wav',
-       *     segmentation: 'assets/descriptor-file-name.json']
-       * }
-       * // becomes
-       * {
-       *   my-sound-id: {
-       *     audio: <AudioBuffer>,
-       *     segmentation: [<segments>]
-       *   }
-       * }
-       */
-      for (let key in fileDescr) {
-        const path = fileDescr[key];
-
-        if (typeof path === 'string') {
-          const descr = {
-            id,
-            key,
-            path
-          };
-
-          filePaths.push(path);
-          fileDescriptions.push(descr);
-        }
-      }
-    }
-  }
-
   /**
-   * Populate the `audioBuffers` and `data` attribute according to the loader
-   * response and the given file descriptions.
-   * @private
+   * Load files defined as a set of file paths.
+   * @param {Object} defObj - Definition of files to load
+   * @returns {Promise} - Promise resolved with the resulting data structure
    */
-  _populateData(loadedObjects, fileDescriptions) {
-    loadedObjects.forEach((obj, i) => {
-      const descr = fileDescriptions[i];
-      const id = descr.id;
-      let key = descr.key;
+  loadFiles(defObj, view = null) {
+    if (typeof defObj === 'string')
+      defObj = [defObj];
 
-      if (obj instanceof AudioBuffer) {
-        let bufs = this.audioBuffers[id];
-
-        if (!bufs)
-          this.audioBuffers[id] = bufs = [];
-
-        bufs.push(obj);
-      }
-
-      if (key !== undefined) {
-        let data = this.data[id];
-
-        if (!data)
-          this.data[id] = data = {};
-
-        data[key] = obj;
-      } else {
-        this.data[id] = obj;
-      }
-
-      log(this.data[id]);
-    });
-  }
-
-  /**
-   * Load a defined set of files.
-   * @param {Object} files - Definition of files to load (same as require).
-   * @returns {Promise} - A promise that is resolved when all files are loaded.
-   */
-  loadFiles(files, view = null) {
     const promise = new Promise((resolve, reject) => {
-      let filePaths = [];
-      const fileDescriptions = [];
+      let pathList = [];
+      let refList = [];
 
-      // prepare the file descriptions
-      if (typeof files === 'string') {
-        this._appendFileDescription(filePaths, fileDescriptions, files);
-      } else if (Array.isArray(files)) {
-        for (let file of files)
-          this._appendFileDescription(filePaths, fileDescriptions, file);
-      } else if (typeof files === 'object') {
-        for (let id in files)
-          this._appendFileDescription(filePaths, fileDescriptions, files[id], id);
-      }
+      // create data object copying the strcuture of the file definion object
+      const dataObj = clonePathObj(defObj);
+      decomposePathObj(dataObj, pathList, refList);
 
-      // test absolute urls (or protocol relative)
-      const isAbsolute = /^https?:\/\/|^\/\//i;
+      // prefix relative paths with assetsDomain
+      pathList = prefixPaths(pathList, this.options.assetsDomain);
 
-      filePaths = filePaths.map((path) => {
-        if (isAbsolute.test(path))
-          return path;
-        else
-          return this.options.assetsDomain + path;
-      });
-
-      log(filePaths);
+      log(pathList);
 
       // load files
-      if (filePaths.length > 0 && fileDescriptions.length > 0) {
+      if (pathList.length > 0) {
         const loader = new SuperLoader();
         loader.setAudioContext(audioContext);
 
         if (view && view.onProgress) {
-          const progressPerFile = filePaths.map(() => 0); // track files loading progress
+          const progressPerFile = pathList.map(() => 0); // track files loading progress
 
           loader.progressCallback = (e) => {
             progressPerFile[e.index] = e.value;
@@ -394,13 +394,17 @@ class AudioBufferManager extends Service {
         }
 
         loader
-          .load(filePaths, {
-            wrapAroundExtention: this.options.audioWrapTail
+          .load(pathList, {
+            wrapAroundExtention: this.options.audioWrapTail,
           })
-          .then((loadedObjects) => {
-            this._populateData(loadedObjects, fileDescriptions);
+          .then((loadedObjList) => {
+            // place loaded objects (i.e. audio buffers and json files) into the structure of the file definition object
+            populateRefList(refList, loadedObjList);
+
+            // mix loaded objects into data
+            Object.assign(this.data, dataObj);
             this.ready();
-            resolve();
+            resolve(dataObj);
           })
           .catch((error) => {
             reject(error);
@@ -408,42 +412,89 @@ class AudioBufferManager extends Service {
           });
       } else {
         this.ready();
-        resolve();
+        resolve([]);
       }
     });
 
     return promise;
   }
 
-  loadDirectories(directories, view) {
-    if (typeof directories === 'string' || Array.isArray(directories)) {
-      this._fileSystem.getList(directories)
-        .then((fileLists) => {
-          const files = flatten(fileLists);
-          return this.loadFiles(files, view);
-        }).catch((error) => reject(error));
-    } else if (typeof directories === 'object') {
-      const promise = new Promise((resolve, reject) => {
-        const ids = Object.keys(directories);
-
-        this._fileSystem.getList(directories)
-          .then((fileLists) => {
-            const files = {};
-
-            for (let i = 0; i < fileLists.length; i++) {
-              const id = ids[i];
-              files[id] = fileLists[i];
-            }
-
-            this.loadFiles(files, view, false)
-              .then(() => {
-                this.ready();
-                resolve();
-              }).catch((error) => reject(error));
-          }).catch((error) => reject(error));
-      });
+  /**
+   * Load files defined as a set of directory paths.
+   * @param {Object} defObj - Definition of files to load
+   * @returns {Promise} - Promise resolved with the resulting data structure
+   */
+  loadDirectories(defObj, match = null, recursive = null, view = null) {
+    // when just giving a string (directory path) as definition, 
+    // we have to wrap it temporarily into a dummy object 
+    if (typeof defObj === 'string') {
+      const rootObj = { '#': defObj };
+      defObj = rootObj;
     }
+
+    const promise = new Promise((resolve, reject) => {
+      let dirPathList = [];
+      let dirRefList = [];
+      let fileDefObj = clonePathObj(defObj); // clone definition object
+
+      // decompose directory definition into list of directory paths (strings)
+      decomposePathObj(fileDefObj, dirPathList, dirRefList);
+
+      if (recursive === null)
+        recursive = this.options.recursive;
+
+      if (match === null)
+        match = this.options.match;
+
+      // replace directory paths by objects undestood by file system service
+      const dirDefList = dirPathList.map((path) => {
+        return { path, match, recursive };
+      });
+
+      this._fileSystem.getList(dirDefList)
+        .then((filePathListList) => {
+          if (!recursive) {
+            // replace directory paths in initial definition by arrays of file paths
+            // to create a complete file definition object
+            populateRefList(dirRefList, filePathListList);
+          } else {
+            // create sub directory file definitions (list of file paths structured into sub directory trees derived from file paths)
+            const subDirList = [];
+            const length = filePathListList.length;
+
+            if (length === dirPathList.length) {
+              for (let i = 0; i < length; i++) {
+                const dirPath = dirPathList[i];
+                const pathList = filePathListList[i];
+                const subDir = createObjFromPathList(pathList, dirPath);
+                subDirList.push(subDir);
+              }
+
+              // replace directory paths in initial definition by sub directory file definitions
+              // to create a complete file definition object
+              populateRefList(dirRefList, subDirList);
+            } else {
+              throw new Error(`[${SERVICE_ID}] Cannot retrieve file paths from defined directories`);
+            }
+          }
+
+          // unwrap subDir from dummy object if it has been defined 
+          // by a single string (directory path)
+          if (fileDefObj['#'] !== undefined)
+            fileDefObj = fileDefObj['#'];
+
+          // load files
+          this.loadFiles(fileDefObj, view)
+            .then((data) => {
+              this.ready();
+              resolve(data);
+            }).catch((error) => reject(error));
+        }).catch((error) => reject(error));
+    });
+
+    return promise;
   }
+
   /**
    * wrapAround, copy the begining input buffer to the end of an output buffer
    * @private

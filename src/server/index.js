@@ -23,6 +23,7 @@ export { default as Experience } from './scenes/Experience';
 export { default as Survey } from './scenes/Survey';
 
 /* services */
+export { default as AudioBufferManager } from './services/AudioBufferManager';
 export { default as Auth } from './services/Auth';
 export { default as Osc } from './services/Osc';
 export { default as Checkin } from './services/Checkin';
