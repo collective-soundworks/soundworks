@@ -183,7 +183,8 @@ class AudioBufferManagerView extends SegmentedView {
  * @param {Object} options.files - Definition of files to load.
  * @param {Object} options.directories - Definition of directories to load.
  * @param {RegEx} options.match - RegEx the files have to match (directories only).
- * @param {Boolean} options.recursive - RegEx the files have to match (directories only).
+ * @param {Boolean} options.recursive - Flag whether the sub-directories of defined 
+ *  directories are considered.
  * @param {Array<String>} options.directories - List of directories to load.
  * @param {Boolean} [options.showProgress=true] - Display the progress bar
  *  in the view.
