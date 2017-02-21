@@ -61,6 +61,7 @@ class MetricScheduler extends Service {
       this._metricPosition = metricPosition;
       this._tempo = tempo;
       this._tempoUnit = tempoUnit;
+      this._metricSpeed = 60 / (tempo * tempoUnit);
     } else {
       this._nextSyncEvent = { syncTime, metricPosition, tempo, tempoUnit, event };
       this._nextSyncTime = syncTime;
@@ -105,7 +106,10 @@ class MetricScheduler extends Service {
   }
 
   get metricPosition() {
-    return this._metricPosition + (this._syncScheduler.currentTime - this._syncTime) * this._metricSpeed;
+    if (this._tempo > 0)
+      return this._metricPosition + (this._syncScheduler.syncTime - this._syncTime) * this._metricSpeed;
+
+    return this._metricPosition;
   }
 
   /**
@@ -114,7 +118,10 @@ class MetricScheduler extends Service {
    * @return {Number} - metric position
    */
   getMetricPositionAtSyncTime(syncTime) {
-    return this._metricPosition + (syncTime - this._syncTime) * this._metricSpeed;
+    if (this._tempo > 0)
+      return this._metricPosition + (syncTime - this._syncTime) * this._metricSpeed;
+
+    return this._metricPosition;
   }
 
   /**
@@ -123,7 +130,12 @@ class MetricScheduler extends Service {
    * @return {Number} - time
    */
   getSyncTimeAtMetricPosition(metricPosition) {
-    return this._syncTime + (metricPosition - this._metricPosition) / this._metricSpeed;
+    const metricSpeed = this._metricSpeed;
+
+    if (metricPosition < Infinity && metricSpeed > 0)
+      return this._syncTime + (metricPosition - this._metricPosition) / metricSpeed;
+
+    return Infinity;
   }
 
   /** @private */
