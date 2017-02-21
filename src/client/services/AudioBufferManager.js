@@ -38,10 +38,18 @@ function flattenLists(a) {
 
 function clonePathObj(value) {
   if (typeof value === 'object') {
-    const clone = (Array.isArray(value)) ? [] : {};
+    const className = value.constructor.name;
+    let clone = null;
+
+    if (className === 'Object')
+      clone = {};
+    else if (className === 'Array')
+      clone = [];
+    else
+      return value;
 
     for (let key in value)
-      clone[key] = clonePathObj(value[key], dirs);
+      clone[key] = clonePathObj(value[key]);
 
     return clone;
   }
@@ -69,8 +77,6 @@ function decomposePathObj(obj, pathList, refList, dirs = false) {
       obj[key] = null;
     } else if (typeof value === 'object') {
       decomposePathObj(value, pathList, refList, dirs);
-    } else {
-      throw new Error(`[${SERVICE_ID}] Invalid element in file definition object`);
     }
   }
 }
@@ -364,12 +370,12 @@ class AudioBufferManager extends Service {
    * @returns {Promise} - Promise resolved with the resulting data structure
    */
   loadFiles(defObj, view = null) {
-    if (typeof defObj === 'string')
-      defObj = [defObj];
-
     const promise = new Promise((resolve, reject) => {
       let pathList = [];
       let refList = [];
+
+      if (typeof defObj === 'string')
+        defObj = [defObj];
 
       // create data object copying the strcuture of the file definion object
       const dataObj = clonePathObj(defObj);
@@ -434,20 +440,18 @@ class AudioBufferManager extends Service {
    * @returns {Promise} - Promise resolved with the resulting data structure
    */
   loadDirectories(defObj, view = null) {
-    // when just giving a string (directory path) as definition, 
-    // we have to wrap it temporarily into a dummy object 
-    if (typeof defObj === 'string') {
-      const rootObj = { '#': defObj };
-      defObj = rootObj;
-    }
-
     const promise = new Promise((resolve, reject) => {
-      let dirPathList = [];
+      let dirDefList = [];
       let dirRefList = [];
+
+      // for the case that just a directory object is given as definition, 
+      // we have to wrap it temporarily into a dummy object 
+      defObj = { def: defObj };
+
       let fileDefObj = clonePathObj(defObj); // clone definition object
 
       // decompose directory definition into list of directory paths (strings)
-      decomposePathObj(fileDefObj, dirPathList, dirRefList, true);
+      decomposePathObj(fileDefObj, dirDefList, dirRefList, true);
 
       this._fileSystem.getList(dirDefList)
         .then((filePathListList) => {
@@ -455,9 +459,9 @@ class AudioBufferManager extends Service {
           const length = filePathListList.length;
 
           // create sub directory file definitions (list of file paths structured into sub directory trees derived from file paths)
-          if (length === dirPathList.length) {
+          if (length === dirDefList.length) {
             for (let i = 0; i < length; i++) {
-              const dirPath = dirPathList[i];
+              const dirPath = dirDefList[i].path;
               const pathList = filePathListList[i];
               const subDir = createObjFromPathList(pathList, dirPath);
               subDirList.push(subDir);
@@ -470,10 +474,8 @@ class AudioBufferManager extends Service {
             throw new Error(`[${SERVICE_ID}] Cannot retrieve file paths from defined directories`);
           }
 
-          // unwrap subDir from dummy object if it has been defined 
-          // by a single string (directory path)
-          if (fileDefObj['#'] !== undefined)
-            fileDefObj = fileDefObj['#'];
+          // unwrap subDir from dummy object
+          fileDefObj = fileDefObj.def;
 
           // load files
           this.loadFiles(fileDefObj, view)
