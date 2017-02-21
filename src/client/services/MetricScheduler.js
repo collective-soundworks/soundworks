@@ -150,9 +150,6 @@ class MetronomeEngine extends audio.TimeEngine {
   syncPosition(syncTime, metricPosition, metricSpeed) {
     const startPosition = this.startPosition;
 
-    // metricPosition -= EPSILON;
-    console.log('syncPosition.1:', startPosition, metricPosition);
-
     if (this.beatEngine)
       this.beatEngine.resetTime(Infinity);
 
@@ -381,7 +378,10 @@ class MetricScheduler extends Service {
   }
 
   get metricPosition() {
-    return this._metricPosition + (this._syncScheduler.syncTime - this._syncTime) * this._metricSpeed;
+    if (this._tempo > 0)
+      return this._metricPosition + (this._syncScheduler.syncTime - this._syncTime) * this._metricSpeed;
+
+    return this._metricPosition;
   }
 
   get currentPosition() {
@@ -402,7 +402,10 @@ class MetricScheduler extends Service {
    * @return {Number} - metric position
    */
   getMetricPositionAtSyncTime(syncTime) {
-    return this._metricPosition + (syncTime - this._syncTime) * this._metricSpeed;
+    if (this._tempo > 0)
+      return this._metricPosition + (syncTime - this._syncTime) * this._metricSpeed;
+
+    return this._metricPosition;
   }
 
   /**
