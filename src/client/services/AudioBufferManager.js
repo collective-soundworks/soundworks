@@ -272,11 +272,27 @@ class AudioBufferManagerView extends SegmentedView {
  * });
  * 
  * // When 'recursive' is set to true, all (matching) files in the given 
- * // directories and their sub-directories are loaded an array of objects 
- * // stored in a data structure that reproduces the defined sub-directory 
- * // tree. The resulting data structure corresponds to the structure of the 
- * // definition object extended by the defined sub-directoriy trees.
+ * // directories and their sub-directories are loaded as arrays of objects.
+ * // With the option 'flatten' set to true, all files in the defined directory 
+ * // and its sub-directories are loaded into a single array. When the option
+ * // 'flatten' set to false, the files of each sub-directory are assembled
+ * // into an array and all of these arrays are arranged to a data structure 
+ * // that reproduces the sub-directory tree of the defined directories.
+ * // The resulting data structure corresponds to the structure of the 
+ * // definition object extended by the defined sub-directory trees.
  *
+ * // The following option results in a single array of pre-loaded files:
+ * this.audioBufferManager = this.require('audio-buffer-manager', { 
+ *   directories: { 
+ *     path: 'sounds', 
+ *     recursive: true,
+ *     flatten: true,
+ *     match: /\.mp3/,
+ *   },
+ * });
+ *
+ * // This variant results in a data structure that reproduces the 
+ * // sub-directory tree of the 'sounds' directory:
  * this.audioBufferManager = this.require('audio-buffer-manager', { 
  *   directories: { 
  *     path: 'sounds', 
@@ -462,8 +478,13 @@ class AudioBufferManager extends Service {
           if (length === dirDefList.length) {
             for (let i = 0; i < length; i++) {
               const dirPath = dirDefList[i].path;
+              const flatten = !!dirDefList[i].flatten;
               const pathList = filePathListList[i];
-              const subDir = createObjFromPathList(pathList, dirPath);
+              let subDir = pathList;
+
+              if(!flatten)
+                subDir = createObjFromPathList(pathList, dirPath);
+
               subDirList.push(subDir);
             }
 
