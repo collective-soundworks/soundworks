@@ -41,24 +41,34 @@ function clonePathObj(value) {
     const clone = (Array.isArray(value)) ? [] : {};
 
     for (let key in value)
-      clone[key] = clonePathObj(value[key]);
+      clone[key] = clonePathObj(value[key], dirs);
 
     return clone;
-  } else if (typeof value === 'string') {
-    return value;
   }
+
+  return value;
 }
 
-function decomposePathObj(obj, pathList, refList) {
+const regexp = /\.[a-zA-Z0-9]{3,4}$/;
+
+function isFilePath(str) {
+  return (typeof str === 'string' && regexp.test(str));
+}
+
+function isDirSpec(obj) {
+  return (typeof obj === 'object' && typeof obj.path === 'string');
+}
+
+function decomposePathObj(obj, pathList, refList, dirs = false) {
   for (let key in obj) {
     const value = obj[key];
 
-    if (typeof value === 'string') {
+    if ((!dirs && isFilePath(value)) || (dirs && isDirSpec(value))) {
       pathList.push(value);
       refList.push({ obj, key });
       obj[key] = null;
     } else if (typeof value === 'object') {
-      decomposePathObj(value, pathList, refList);
+      decomposePathObj(value, pathList, refList, dirs);
     } else {
       throw new Error(`[${SERVICE_ID}] Invalid element in file definition object`);
     }
@@ -182,9 +192,6 @@ class AudioBufferManagerView extends SegmentedView {
  *  given paths.
  * @param {Object} options.files - Definition of files to load.
  * @param {Object} options.directories - Definition of directories to load.
- * @param {RegExp} options.match - RegExp the files have to match (directories only).
- * @param {Boolean} options.recursive - Flag whether the sub-directories of defined 
- *  directories are considered.
  * @param {Array<String>} options.directories - List of directories to load.
  * @param {Boolean} [options.showProgress=true] - Display the progress bar
  *  in the view.
@@ -201,7 +208,7 @@ class AudioBufferManagerView extends SegmentedView {
  * // Defining a single array of audio files results in a single
  * // array of audio buffers associated to the identifier `default`.
  *
- * // There are three different ways to specify the files to be loaded and the 
+ * // There are two different ways to specify the files to be loaded and the 
  * // data structure in which the loaded data objects are arranged:
  * // 
  * // (1.) With the 'files' option, the files and structure are defined by an 
@@ -239,35 +246,39 @@ class AudioBufferManagerView extends SegmentedView {
  *     'sounds/loops/nussbaum-shuffle.mp3'],
  * }});
  *
- * // The 'directories' option can be used to load the files of a given 
- * // directory. The option can be used in conjuction with the option 'match'
- * // (to filter the loaded files with a RegExp) and the option 'recursive' 
- * // that determines whether sub-directories are considered or not.
+ * //(2.) The 'directories' option can be used to load the files of a 
+ * // given directory. Each directory is specified by an object that has a
+ * // property 'path' with the directory path and optionally the keys 
+ * // 'recursive' (specifying whether the directory's sub-directories are 
+ * // considered) and a key 'match' (specifying a regexp to select the files
+ * // in the given directory).
  * 
- * // (2.) With the option 'recursive' set to false, the files to load and the 
- * // resulting data structure are defined by an object that contains directory 
- * // paths. All (matching) files in the given directories are loaded into 
- * // arrays of objects without considering sub-directories. 
- * // The arrays of loaded data objects are arranged in the same data structure
- * // as the definition object.
+ * // With the option 'recursive' set to false, all (matching) files
+ * // in a given directoriy are loaded into an arrays of objects without 
+ * // considering sub-directories. The arrays of loaded data objects are 
+ * // arranged in the same data structure as the definition object.
  *
  * this.audioBufferManager = this.require('audio-buffer-manager', { 
  *   directories: { 
- *     instruments: 'sounds/instruments',
- *     loops: 'sounds/loops',
+ *     instruments: { path: 'sounds/instruments', recursive: false },
+ *     loops: { path: 'sounds/instruments', recursive: false },
  *   },
- *   recursive: false,
- *   match: /\.mp3/,
  * });
  * 
- * // (3.) When 'recursive' is set to false, all (matching) files in the given 
- * // directories and their sub-directories are loaded into arrays of objects 
- * // stored in data structures that reproduce the respective sub-directory 
- * // trees. The resulting data structure corresponds to the structure of the 
+ * // When 'recursive' is set to true, all (matching) files in the given 
+ * // directories and their sub-directories are loaded an array of objects 
+ * // stored in a data structure that reproduces the defined sub-directory 
+ * // tree. The resulting data structure corresponds to the structure of the 
  * // definition object extended by the defined sub-directoriy trees.
  *
- * this.audioBufferManager = this.require('audio-buffer-manager', { directories: 'sounds', recursive: true });
- * 
+ * this.audioBufferManager = this.require('audio-buffer-manager', { 
+ *   directories: { 
+ *     path: 'sounds', 
+ *     recursive: true,
+ *     match: /\.mp3/,
+ *   },
+ * });
+ *
  * // The loaded objects can be retrieved according to their definition, as for example :
  * const kickBuffer = this.audioBufferManager.data.kick;
  * const audioBuffer = this.audioBufferManager.data.latin.audio;
@@ -285,8 +296,6 @@ class AudioBufferManager extends Service {
       showProgress: true,
       files: null,
       directories: null,
-      match: '*',
-      recursive: false,
       audioWrapTail: 0,
       viewCtor: AudioBufferManagerView,
       viewPriority: 4,
@@ -337,7 +346,7 @@ class AudioBufferManager extends Service {
         this.loadFiles(this.options.files, this.view);
 
       if (this.options.directories)
-        this.loadDirectories(this.options.directories, this.options.match, this.options.recursive, this.view);
+        this.loadDirectories(this.options.directories, this.view);
     } else {
       this.ready();
     }
@@ -364,7 +373,7 @@ class AudioBufferManager extends Service {
 
       // create data object copying the strcuture of the file definion object
       const dataObj = clonePathObj(defObj);
-      decomposePathObj(dataObj, pathList, refList);
+      decomposePathObj(dataObj, pathList, refList, false);
 
       // prefix relative paths with assetsDomain
       pathList = prefixPaths(pathList, this.options.assetsDomain);
@@ -424,7 +433,7 @@ class AudioBufferManager extends Service {
    * @param {Object} defObj - Definition of files to load
    * @returns {Promise} - Promise resolved with the resulting data structure
    */
-  loadDirectories(defObj, match = null, recursive = null, view = null) {
+  loadDirectories(defObj, view = null) {
     // when just giving a string (directory path) as definition, 
     // we have to wrap it temporarily into a dummy object 
     if (typeof defObj === 'string') {
@@ -438,44 +447,27 @@ class AudioBufferManager extends Service {
       let fileDefObj = clonePathObj(defObj); // clone definition object
 
       // decompose directory definition into list of directory paths (strings)
-      decomposePathObj(fileDefObj, dirPathList, dirRefList);
-
-      if (recursive === null)
-        recursive = this.options.recursive;
-
-      if (match === null)
-        match = this.options.match;
-
-      // replace directory paths by objects undestood by file system service
-      const dirDefList = dirPathList.map((path) => {
-        return { path, match, recursive };
-      });
+      decomposePathObj(fileDefObj, dirPathList, dirRefList, true);
 
       this._fileSystem.getList(dirDefList)
         .then((filePathListList) => {
-          if (!recursive) {
-            // replace directory paths in initial definition by arrays of file paths
-            // to create a complete file definition object
-            populateRefList(dirRefList, filePathListList);
-          } else {
-            // create sub directory file definitions (list of file paths structured into sub directory trees derived from file paths)
-            const subDirList = [];
-            const length = filePathListList.length;
+          const subDirList = [];
+          const length = filePathListList.length;
 
-            if (length === dirPathList.length) {
-              for (let i = 0; i < length; i++) {
-                const dirPath = dirPathList[i];
-                const pathList = filePathListList[i];
-                const subDir = createObjFromPathList(pathList, dirPath);
-                subDirList.push(subDir);
-              }
-
-              // replace directory paths in initial definition by sub directory file definitions
-              // to create a complete file definition object
-              populateRefList(dirRefList, subDirList);
-            } else {
-              throw new Error(`[${SERVICE_ID}] Cannot retrieve file paths from defined directories`);
+          // create sub directory file definitions (list of file paths structured into sub directory trees derived from file paths)
+          if (length === dirPathList.length) {
+            for (let i = 0; i < length; i++) {
+              const dirPath = dirPathList[i];
+              const pathList = filePathListList[i];
+              const subDir = createObjFromPathList(pathList, dirPath);
+              subDirList.push(subDir);
             }
+
+            // replace directory paths in initial definition by sub directory file definitions
+            // to create a complete file definition object
+            populateRefList(dirRefList, subDirList);
+          } else {
+            throw new Error(`[${SERVICE_ID}] Cannot retrieve file paths from defined directories`);
           }
 
           // unwrap subDir from dummy object if it has been defined 
