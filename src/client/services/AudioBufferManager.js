@@ -182,7 +182,7 @@ class AudioBufferManagerView extends SegmentedView {
  *  given paths.
  * @param {Object} options.files - Definition of files to load.
  * @param {Object} options.directories - Definition of directories to load.
- * @param {RegEx} options.match - RegEx the files have to match (directories only).
+ * @param {RegExp} options.match - RegExp the files have to match (directories only).
  * @param {Boolean} options.recursive - Flag whether the sub-directories of defined 
  *  directories are considered.
  * @param {Array<String>} options.directories - List of directories to load.
@@ -204,16 +204,16 @@ class AudioBufferManagerView extends SegmentedView {
  * // There are three different ways to specify the files to be loaded and the 
  * // data structure in which the loaded data objects are arranged:
  * // 
- * // (1.) The files and structure are defined by an object of any depth that 
- * // contains explicit file paths. All specified files are loaded and the 
- * // loaded data objects are stored into an object of the same structure as 
- * // the definition object.
+ * // (1.) With the 'files' option, the files and structure are defined by an 
+ * // object of any depth that contains file paths. All specified files are 
+ * // loaded and the loaded data objects are stored into an object of the same 
+ * // structure as the definition object.
  *
  * this.audioBufferManager = this.require('audio-buffer-manager', { files: [
  *   'sounds/drums/kick.mp3',
  *   'sounds/drums/snare.mp3'
  * ]});
- * //
+ *
  * this.audioBufferManager = this.require('audio-buffer-manager', { files: {
  *   kick: 'sounds/kick_44kHz.mp3',
  *   snare: 'sounds/808snare.mp3'
@@ -239,11 +239,17 @@ class AudioBufferManagerView extends SegmentedView {
  *     'sounds/loops/nussbaum-shuffle.mp3'],
  * }});
  *
- * // (2.) The files to load and the resulting data structure are defined by 
- * // an object that contains directory paths. All (matching) files in the 
- * // given directories are loaded into arrays of objects without considering 
- * // sub-directories. The arrays of loaded data objects are arranged in the 
- * // same data structure as the definition object.
+ * // The 'directories' option can be used to load the files of a given 
+ * // directory. The option can be used in conjuction with the option 'match'
+ * // (to filter the loaded files with a RegExp) and the option 'recursive' 
+ * // that determines whether sub-directories are considered or not.
+ * 
+ * // (2.) With the option 'recursive' set to false, the files to load and the 
+ * // resulting data structure are defined by an object that contains directory 
+ * // paths. All (matching) files in the given directories are loaded into 
+ * // arrays of objects without considering sub-directories. 
+ * // The arrays of loaded data objects are arranged in the same data structure
+ * // as the definition object.
  *
  * this.audioBufferManager = this.require('audio-buffer-manager', { 
  *   directories: { 
@@ -251,23 +257,17 @@ class AudioBufferManagerView extends SegmentedView {
  *     loops: 'sounds/loops',
  *   },
  *   recursive: false,
+ *   match: /\.mp3/,
  * });
  * 
- * // (3.) The files to load and the resulting data structure are defined by an 
- * // object that contains directory paths. All (matching) files in the given 
+ * // (3.) When 'recursive' is set to false, all (matching) files in the given 
  * // directories and their sub-directories are loaded into arrays of objects 
- * // stored in data structures that reproduce the repective sub-directory 
+ * // stored in data structures that reproduce the respective sub-directory 
  * // trees. The resulting data structure corresponds to the structure of the 
  * // definition object extended by the defined sub-directoriy trees.
  *
  * this.audioBufferManager = this.require('audio-buffer-manager', { directories: 'sounds', recursive: true });
  * 
- * // Please note that the - alphabetic - order of the loaded buffer arrays in 
- * // (2.) and (3.) – dang, ding, dong – is different as the order explicitly 
- * // defined in the first example – ding, dang, dong. Consider prefixing the 
- * // file names with indices to load buffer arrays from directories in a 
- * // specific order.
- *
  * // The loaded objects can be retrieved according to their definition, as for example :
  * const kickBuffer = this.audioBufferManager.data.kick;
  * const audioBuffer = this.audioBufferManager.data.latin.audio;
