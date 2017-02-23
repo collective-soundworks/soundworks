@@ -159,6 +159,8 @@ class MetricScheduler extends Service {
    * @return {Number} - time
    */
   getSyncTimeAtMetricPosition(metricPosition) {
+    this._updateSync();
+
     const metricSpeed = this._metricSpeed;
 
     if (metricPosition < Infinity && metricSpeed > 0)
