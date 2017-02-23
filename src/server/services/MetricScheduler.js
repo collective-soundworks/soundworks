@@ -67,7 +67,6 @@ class MetricScheduler extends Service {
       this._nextSyncTime = syncTime;
     }
 
-    console.log('setSync', this._metricSpeed);
     this.broadcast(null, null, 'sync', syncTime, metricPosition, tempo, tempoUnit, event);
   }
 
@@ -82,8 +81,6 @@ class MetricScheduler extends Service {
       this._metricSpeed = tempo * tempoUnit / 60;
       this._nextSyncTime = Infinity;
     }
-
-    console.log('updateSync', this._metricSpeed);
   }
 
   /** @private */
@@ -117,8 +114,6 @@ class MetricScheduler extends Service {
 
   get metricPosition() {
     this._updateSync();
-
-    console.log('metricPosition', this._metricPosition, this._metricSpeed);
 
     if (this._tempo > 0)
       return this._metricPosition + (this.syncTime - this._syncTime) * this._metricSpeed;
