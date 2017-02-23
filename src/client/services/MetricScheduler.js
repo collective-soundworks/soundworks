@@ -269,7 +269,7 @@ class MetricScheduler extends Service {
       };
 
       for (let callback of listeners)
-        callback(data);
+        callback(event, data);
 
       this._callingEventListeners = false;
     }
@@ -464,27 +464,35 @@ class MetricScheduler extends Service {
    * @param {Boolean} [lookahead=false] - Defines whether the function is called
    *  anticipated (e.g. for audio events) or precisely at the given time (default).
    */
-  defer(fun, metricPosition, lookahead = false) {
-    const scheduler = this._engineQueue;
+  addEvent(fun, metricPosition, lookahead = false) {
     const schedulerService = this;
-    let engine;
+    const engine = {
+      timeout: null,
+      syncSpeed(time, position, speed) {
+        if (speed === 0)
+          clearTimeout(this.timeout);
+      },
+      syncPosition(time, position, speed) {
+        clearTimeout(this.timeout);
 
-    if (lookahead) {
-      scheduler.defer(fun, metricPosition);
-    } else {
-      engine = {
-        advanceTime: function(metricPosition) {
-          const delta = schedulerService.deltaTime;
+        if (metricPosition >= position)
+          return metricPosition;
 
-          if (delta > 0)
-            setTimeout(fun, 1000 * delta, metricPosition); // bridge scheduler lookahead with timeout
-          else
-            fun(metricPosition);
-        },
-      };
+        return Infinity;
+      },
+      advancePosition(time, position, speed) {
+        const delta = schedulerService.deltaTime;
 
-      scheduler.add(engine, metricPosition); // add without checks
-    }
+        if (delta > 0)
+          this.timeout = setTimeout(fun, 1000 * delta, position); // bridge scheduler lookahead with timeout
+        else
+          fun(position);
+
+        return Infinity;
+      },
+    };
+
+    this.add(engine, metricPosition); // add without checks
   }
 
   add(engine, startPosition = this.metricPosition) {

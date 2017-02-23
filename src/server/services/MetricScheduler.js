@@ -61,7 +61,7 @@ class MetricScheduler extends Service {
       this._metricPosition = metricPosition;
       this._tempo = tempo;
       this._tempoUnit = tempoUnit;
-      this._metricSpeed = 60 / (tempo * tempoUnit);
+      this._metricSpeed = tempo * tempoUnit / 60;
     } else {
       this._nextSyncEvent = { syncTime, metricPosition, tempo, tempoUnit, event };
       this._nextSyncTime = syncTime;
@@ -73,11 +73,13 @@ class MetricScheduler extends Service {
   /** @private */
   _updateSync() {
     if (this.syncTime >= this._nextSyncTime) {
-      const event = this._nextSyncEvent;
-      this._syncTime = event.syncTime;
-      this._metricPosition = event.metricPosition;
-      this._tempo = event.tempo;
-      this._tempoUnit = event.tempoUnit;
+      const { syncTime, metricPosition, tempo, tempoUnit } = this._nextSyncEvent;
+      this._syncTime = syncTime;
+      this._metricPosition = metricPosition;
+      this._tempo = tempo;
+      this._tempoUnit = tempoUnit;
+      this._metricSpeed = tempo * tempoUnit / 60;
+      this._nextSyncTime = Infinity;
     }
   }
 
@@ -86,10 +88,15 @@ class MetricScheduler extends Service {
     return () => {
       this._updateSync();
       this.send(client, 'init', this._syncTime, this._metricPosition, this._tempo, this._tempoUnit);
+
+      if (this._nextSyncTime < Infinity) {
+        const { syncTime, metricPosition, tempo, tempoUnit, event } = this._nextSyncEvent;
+        this.send(client, 'sync', syncTime, metricPosition, tempo, tempoUnit, event);
+      }
     };
   }
 
-  sync(syncTime, metricPosition, tempo = this._tempo, tempoUnit = this._tempoUnit, event = undefined) {
+  sync(syncTime, metricPosition, tempo, tempoUnit, event = undefined) {
     this._setSync(syncTime, metricPosition, tempo, tempoUnit, event);
   }
 
@@ -106,8 +113,10 @@ class MetricScheduler extends Service {
   }
 
   get metricPosition() {
+    this._updateSync();
+
     if (this._tempo > 0)
-      return this._metricPosition + (this._syncScheduler.syncTime - this._syncTime) * this._metricSpeed;
+      return this._metricPosition + (this.syncTime - this._syncTime) * this._metricSpeed;
 
     return this._metricPosition;
   }
@@ -136,6 +145,8 @@ class MetricScheduler extends Service {
    * @return {Number} - metric position
    */
   getMetricPositionAtSyncTime(syncTime) {
+    this._updateSync();
+
     if (this._tempo > 0)
       return this._metricPosition + (syncTime - this._syncTime) * this._metricSpeed;
 

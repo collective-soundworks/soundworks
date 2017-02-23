@@ -72,11 +72,44 @@ function decomposePathObj(obj, pathList, refList, dirs = false) {
     const value = obj[key];
 
     if ((!dirs && isFilePath(value)) || (dirs && isDirSpec(value))) {
-      pathList.push(value);
-      refList.push({ obj, key });
+      const ref = { obj, key };
+      let index = -1;
+
+      if (!dirs)
+        index = pathList.indexOf(value);
+
+      if (index === -1) {
+        const length = pathList.push(value);
+
+        index = length - 1;
+        refList[index] = [];
+      }
+
+      refList[index].push(ref);
+
       obj[key] = null;
     } else if (typeof value === 'object') {
       decomposePathObj(value, pathList, refList, dirs);
+    }
+  }
+}
+
+function populateRefList(refList, loadedObjList) {
+  const length = refList.length;
+
+  if (length !== loadedObjList.length) {
+    throw new Error(`[${SERVICE_ID}] Loaded Buffers do not match file definion`);
+  }
+
+  for (let i = 0; i < length; i++) {
+    const refs = refList[i];
+
+    for (let j = 0, l = refs.length; j < l; j++) {
+      const ref = refs[j];
+      const obj = ref.obj;
+      const key = ref.key;
+
+      obj[key] = loadedObjList[i];
     }
   }
 }
@@ -117,22 +150,6 @@ function createObjFromPathList(pathList, commonPath) {
   }
 
   return obj;
-}
-
-function populateRefList(refList, loadedObjList) {
-  const length = refList.length;
-
-  if (length !== loadedObjList.length) {
-    throw new Error(`[${SERVICE_ID}] Loaded Buffers do not match file definion`);
-  }
-
-  for (let i = 0; i < length; i++) {
-    const ref = refList[i];
-    const obj = ref.obj;
-    const key = ref.key;
-
-    obj[key] = loadedObjList[i];
-  }
 }
 
 function prefixPaths(pathList, prefix) {
@@ -214,12 +231,12 @@ class AudioBufferManagerView extends SegmentedView {
  * // Defining a single array of audio files results in a single
  * // array of audio buffers associated to the identifier `default`.
  *
- * // There are two different ways to specify the files to be loaded and the 
+ * // There are two different ways to specify the files to be loaded and the
  * // data structure in which the loaded data objects are arranged:
- * // 
- * // (1.) With the 'files' option, the files and structure are defined by an 
- * // object of any depth that contains file paths. All specified files are 
- * // loaded and the loaded data objects are stored into an object of the same 
+ * //
+ * // (1.) With the 'files' option, the files and structure are defined by an
+ * // object of any depth that contains file paths. All specified files are
+ * // loaded and the loaded data objects are stored into an object of the same
  * // structure as the definition object.
  *
  * this.audioBufferManager = this.require('audio-buffer-manager', { files: [
@@ -252,50 +269,50 @@ class AudioBufferManagerView extends SegmentedView {
  *     'sounds/loops/nussbaum-shuffle.mp3'],
  * }});
  *
- * //(2.) The 'directories' option can be used to load the files of a 
+ * //(2.) The 'directories' option can be used to load the files of a
  * // given directory. Each directory is specified by an object that has a
- * // property 'path' with the directory path and optionally the keys 
- * // 'recursive' (specifying whether the directory's sub-directories are 
+ * // property 'path' with the directory path and optionally the keys
+ * // 'recursive' (specifying whether the directory's sub-directories are
  * // considered) and a key 'match' (specifying a regexp to select the files
  * // in the given directory).
- * 
+ *
  * // With the option 'recursive' set to false, all (matching) files
- * // in a given directoriy are loaded into an arrays of objects without 
- * // considering sub-directories. The arrays of loaded data objects are 
+ * // in a given directoriy are loaded into an arrays of objects without
+ * // considering sub-directories. The arrays of loaded data objects are
  * // arranged in the same data structure as the definition object.
  *
- * this.audioBufferManager = this.require('audio-buffer-manager', { 
- *   directories: { 
+ * this.audioBufferManager = this.require('audio-buffer-manager', {
+ *   directories: {
  *     instruments: { path: 'sounds/instruments', recursive: false },
  *     loops: { path: 'sounds/instruments', recursive: false },
  *   },
  * });
- * 
- * // When 'recursive' is set to true, all (matching) files in the given 
+ *
+ * // When 'recursive' is set to true, all (matching) files in the given
  * // directories and their sub-directories are loaded as arrays of objects.
- * // With the option 'flatten' set to true, all files in the defined directory 
+ * // With the option 'flatten' set to true, all files in the defined directory
  * // and its sub-directories are loaded into a single array. When the option
  * // 'flatten' set to false, the files of each sub-directory are assembled
- * // into an array and all of these arrays are arranged to a data structure 
+ * // into an array and all of these arrays are arranged to a data structure
  * // that reproduces the sub-directory tree of the defined directories.
- * // The resulting data structure corresponds to the structure of the 
+ * // The resulting data structure corresponds to the structure of the
  * // definition object extended by the defined sub-directory trees.
  *
  * // The following option results in a single array of pre-loaded files:
- * this.audioBufferManager = this.require('audio-buffer-manager', { 
- *   directories: { 
- *     path: 'sounds', 
+ * this.audioBufferManager = this.require('audio-buffer-manager', {
+ *   directories: {
+ *     path: 'sounds',
  *     recursive: true,
  *     flatten: true,
  *     match: /\.mp3/,
  *   },
  * });
  *
- * // This variant results in a data structure that reproduces the 
+ * // This variant results in a data structure that reproduces the
  * // sub-directory tree of the 'sounds' directory:
- * this.audioBufferManager = this.require('audio-buffer-manager', { 
- *   directories: { 
- *     path: 'sounds', 
+ * this.audioBufferManager = this.require('audio-buffer-manager', {
+ *   directories: {
+ *     path: 'sounds',
  *     recursive: true,
  *     match: /\.mp3/,
  *   },
@@ -400,7 +417,7 @@ class AudioBufferManager extends Service {
       // prefix relative paths with assetsDomain
       pathList = prefixPaths(pathList, this.options.assetsDomain);
 
-      log(pathList);
+      log(pathList, refList);
 
       // load files
       if (pathList.length > 0) {
@@ -460,8 +477,8 @@ class AudioBufferManager extends Service {
       let dirDefList = [];
       let dirRefList = [];
 
-      // for the case that just a directory object is given as definition, 
-      // we have to wrap it temporarily into a dummy object 
+      // for the case that just a directory object is given as definition,
+      // we have to wrap it temporarily into a dummy object
       defObj = { def: defObj };
 
       let fileDefObj = clonePathObj(defObj); // clone definition object
