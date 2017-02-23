@@ -32,10 +32,10 @@ class MetricScheduler extends Service {
 
   /** @private */
   configure(options) {
-    if(options.tempo !== undefined)
+    if (options.tempo !== undefined)
       this._tempo = options.tempo;
 
-    if(options.tempoUnit !== undefined)
+    if (options.tempoUnit !== undefined)
       this._tempoUnit = options.tempoUnit;
 
     super.configure(options);
@@ -110,6 +110,24 @@ class MetricScheduler extends Service {
       return this._metricPosition + (this._syncScheduler.syncTime - this._syncTime) * this._metricSpeed;
 
     return this._metricPosition;
+  }
+
+  /**
+   * Current tempo.
+   * @return {Number} - Tempo in BPM.
+   */
+  get tempo() {
+    this._updateSync();
+    return this._tempo;
+  }
+
+  /**
+   * Current tempo unit.
+   * @return {Number} - Tempo unit in respect to whole note.
+   */
+  get tempoUnit() {
+    this._updateSync();
+    return this._tempoUnit;
   }
 
   /**

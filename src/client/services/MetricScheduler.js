@@ -243,7 +243,7 @@ class MetricScheduler extends Service {
       this.init();
 
     this._syncSchedulerHook = new SyncSchedulerHook(this._syncScheduler, this);
-    this._syncEventEngine = new SyncEventEngine(this._syncScheduler, this);;
+    this._syncEventEngine = new SyncEventEngine(this._syncScheduler, this);
 
     this.send('request');
     this.receive('init', this._onInit);
@@ -397,6 +397,22 @@ class MetricScheduler extends Service {
   }
 
   /**
+   * Current tempo.
+   * @return {Number} - Tempo in BPM.
+   */
+  get tempo() {
+    return this._tempo;
+  }
+
+  /**
+   * Current tempo unit.
+   * @return {Number} - Tempo unit in respect to whole note.
+   */
+  get tempoUnit() {
+    return this._tempoUnit;
+  }
+
+  /**
    * Get metric position corrsponding to a given sync time (regarding the current tempo).
    * @param  {Number} time - time
    * @return {Number} - metric position
@@ -504,12 +520,12 @@ class MetricScheduler extends Service {
    * Add a periodic callback starting at a given metric position.
    * @param {Function} callback - callback function (cycle, beat)
    * @param {Integer} numBeats - number of beats (time signature numerator)
-   * @param {Number} measureDiv - divisions per measure (time signature denominator)
+   * @param {Number} metricDiv - metric division of whole note (time signature denominator)
    * @param {Number} tempoScale - linear tempo scale factor (in respect to master tempo)
    * @param {Integer} startPosition - metric start position of the beat
    */
-  addMetronome(callback, numBeats = 4, measureDiv = 4, tempoScale = 1, startPosition = 0) {
-    const beatLength = 1 / (measureDiv * tempoScale);
+  addMetronome(callback, numBeats = 4, metricDiv = 4, tempoScale = 1, startPosition = 0) {
+    const beatLength = 1 / (metricDiv * tempoScale);
     const engine = new MetronomeEngine(startPosition, numBeats, beatLength, callback);
 
     this._metronomeEngineMap.set(callback, engine);
