@@ -32,10 +32,10 @@ class MetricScheduler extends Service {
 
   /** @private */
   configure(options) {
-    if(options.tempo !== undefined)
+    if (options.tempo !== undefined)
       this._tempo = options.tempo;
 
-    if(options.tempoUnit !== undefined)
+    if (options.tempoUnit !== undefined)
       this._tempoUnit = options.tempoUnit;
 
     super.configure(options);
@@ -119,6 +119,10 @@ class MetricScheduler extends Service {
       return this._metricPosition + (this.syncTime - this._syncTime) * this._metricSpeed;
 
     return this._metricPosition;
+  }
+
+  get currentPosition() {
+    return this.metricPosition;
   }
 
   /**
