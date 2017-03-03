@@ -98,6 +98,10 @@ class CanvasView extends SegmentedView {
     this.ctx = null;
   }
 
+  get pixelRatio() {
+    return this._renderingGroup.pixelRatio;
+  }
+
   /** @private */
   onRender() {
     super.onRender();
