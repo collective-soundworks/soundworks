@@ -126,6 +126,24 @@ class MetricScheduler extends Service {
   }
 
   /**
+   * Current tempo.
+   * @return {Number} - Tempo in BPM.
+   */
+  get tempo() {
+    this._updateSync();
+    return this._tempo;
+  }
+
+  /**
+   * Current tempo unit.
+   * @return {Number} - Tempo unit in respect to whole note.
+   */
+  get tempoUnit() {
+    this._updateSync();
+    return this._tempoUnit;
+  }
+
+  /**
    * Get metric position corrsponding to a given sync time (regarding the current tempo).
    * @param  {Number} time - time
    * @return {Number} - metric position
@@ -145,6 +163,8 @@ class MetricScheduler extends Service {
    * @return {Number} - time
    */
   getSyncTimeAtMetricPosition(metricPosition) {
+    this._updateSync();
+
     const metricSpeed = this._metricSpeed;
 
     if (metricPosition < Infinity && metricSpeed > 0)
