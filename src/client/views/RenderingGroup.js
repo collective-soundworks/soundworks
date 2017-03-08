@@ -222,6 +222,7 @@ class RenderingGroup {
     this.currentTime = loop.getTime();
     // update the current time of the renderer
     renderer.currentTime = this.currentTime;
+    renderer.pixelRatio = this.pixelRatio;
     renderer.onResize(this.canvasWidth, this.canvasHeight);
     renderer.init();
     // if first renderer added, start the loop

@@ -106,17 +106,28 @@ class CanvasView extends SegmentedView {
   onRender() {
     super.onRender();
 
-    if (!this._hasRenderedOnce) {
-      this.$canvas = this.$el.querySelector('canvas');
-      this.ctx = this.$canvas.getContext('2d');
+    this.$canvas = this.$el.querySelector('canvas');
+    this.ctx = this.$canvas.getContext('2d');
 
+    // update the rendering group if the canvas instance has changed after a render
+    if (this._renderingGroup)
+      this._renderingGroup.ctx = this.ctx;
+
+    if (!this._hasRenderedOnce) {
       const preservePixelRatio = this.options.preservePixelRatio
       this._renderingGroup = new RenderingGroup(this.ctx, preservePixelRatio);
 
       // prevent creating a new rendering group each time the view is re-rendered
       this._hasRenderedOnce = true;
+      this.init();
     }
   }
+
+  /**
+   * Entry point called when the renderingGroup for the view is ready.
+   * Basically allows to instanciate some renderers from inside the view.
+   */
+  init() {}
 
   /** @private */
   onResize(viewportWidth, viewportHeight, orientation) {
