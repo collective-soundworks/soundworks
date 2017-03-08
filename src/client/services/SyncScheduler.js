@@ -132,6 +132,15 @@ class SyncScheduler extends Service {
   }
 
   /**
+   * Get sync time corresponding to given audio time.
+   * @param  {Number} audioTime - audio time
+   * @return {Number} - sync time corresponding to given audio time
+   */
+  getSyncTimeAtAudioTime(audioTime) {
+    return this.sync.getSyncTime(audioTime);
+  }
+
+  /**
    * Call a function at a given time.
    *
    * @param {Function} fun - Function to be deferred.

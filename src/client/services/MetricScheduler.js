@@ -413,6 +413,20 @@ class MetricScheduler extends Service {
   }
 
   /**
+   * Get metric position corrsponding to a given audio time (regarding the current tempo).
+   * @param  {Number} time - time
+   * @return {Number} - metric position
+   */
+  getMetricPositionAtAudioTime(audioTime) {
+    if (this._tempo > 0) {
+      const syncTime = this._syncScheduler.getSyncTimeAtAudioTime(audioTime);
+      return this._metricPosition + (syncTime - this._syncTime) * this._metricSpeed;
+    }
+
+    return this._metricPosition;
+  }
+
+  /**
    * Get metric position corrsponding to a given sync time (regarding the current tempo).
    * @param  {Number} time - time
    * @return {Number} - metric position
