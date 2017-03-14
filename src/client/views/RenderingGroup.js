@@ -146,6 +146,7 @@ class RenderingGroup {
 
     this.canvasWidth = viewportWidth * pixelRatio;
     this.canvasHeight = viewportHeight * pixelRatio;
+    this.orientation = orientation;
 
     ctx.canvas.width = this.canvasWidth;
     ctx.canvas.height = this.canvasHeight;
@@ -223,7 +224,7 @@ class RenderingGroup {
     // update the current time of the renderer
     renderer.currentTime = this.currentTime;
     renderer.pixelRatio = this.pixelRatio;
-    renderer.onResize(this.canvasWidth, this.canvasHeight);
+    renderer.onResize(this.canvasWidth, this.canvasHeight, this.orientation);
     renderer.init();
     // if first renderer added, start the loop
     if (this.renderers.length === 1)
