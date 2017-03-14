@@ -116,6 +116,18 @@ const defaultDefinitions = [
     }
   },
   {
+    id: 'geolocation-mock',
+    check: function() {
+      return true;
+    },
+    startHook: function() {
+      const lat = Math.random() * 360 - 180;
+      const lng = Math.random() * 180 - 90;
+      client.coordinates = [lat, lng];
+      return Promise.resolve(true);
+    }
+  },
+  {
     // adapted from https://github.com/richtr/NoSleep.js/blob/master/NoSleep.js
     // warning: cause 150% cpu use in chrome desktop...
     id: 'wake-lock',

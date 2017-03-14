@@ -69,17 +69,32 @@ class Geolocation extends Service {
     const defaults = {
       state: 'start',
       enableHighAccuracy: true,
-      debug: false,
+      // bypass: false,
     };
 
-    this.configure(defaults);
+    this.platform = this.require('platform');
 
     this._onSuccess = this._onSuccess.bind(this);
     this._onError = this._onError.bind(this);
     this._watchId = null;
     this.state = null;
+  }
 
-    this.require('platform', { features: ['geolocation'] });
+  configure(options) {
+    const _options = Object.assign({}, this.defaults, options);
+
+    if (!this.options.feature) {
+      let feature = 'geolocation';
+
+      if (options.bypass !== undefined && options.bypass === true)
+        feature = 'geolocation-mock';
+
+      console.log(feature);
+      this.options.feature = feature;
+      this.platform.requireFeature(feature);
+    }
+
+    super.configure(options);
   }
 
   /** @private */
@@ -89,10 +104,12 @@ class Geolocation extends Service {
     if (!this.hasStarted)
       this.init();
 
-    if (this.options.debug === true) {
+    // console.log('here');
+    if (this.options.feature === 'geolocation-mock') {
       const geoposition = getRandomGeoposition();
       this._updateClient(geoposition);
     }
+
     // only sync values retrieved from `platform` with server before getting ready
     this.emit('geoposition', client.geoposition);
     this.send('geoposition', geopositionToJson(client.geoposition));
@@ -138,7 +155,7 @@ class Geolocation extends Service {
    */
   _stopWatch() {
     if (this.options.debug === false)
-      navigator.clearWatch(this._watchId);
+      navigator.geolocation.clearWatch(this._watchId);
     else
       clearInterval(this._watchId);
   }
