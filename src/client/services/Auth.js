@@ -5,7 +5,7 @@ import serviceManager from '../core/serviceManager';
 
 
 const SERVICE_ID = 'service:auth';
-const LOCAL_STORAGE_KEY = 'soundworks:${SERVICE_ID}';
+const LOCAL_STORAGE_KEY = `soundworks:${SERVICE_ID}`;
 
 /**
  * Interface for the view of the `auth` service.
