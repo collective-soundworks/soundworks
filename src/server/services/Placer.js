@@ -179,7 +179,7 @@ class Placer extends Service {
       if (this.numClients < this.setup.capacity)
         this.send(client, 'aknowlegde', configItem, disabledPositions);
       else
-        this.send('reject', disabledPositions);
+        this.send(client, 'reject', disabledPositions);
     };
   }
 
