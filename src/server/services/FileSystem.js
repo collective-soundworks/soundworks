@@ -1,6 +1,7 @@
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
 import fse from 'fs-extra';
+import klaw from 'klaw';
 import _path from 'path';
 
 const SERVICE_ID = 'service:file-system';
@@ -146,8 +147,9 @@ class FileSystem extends Service {
     if (!testCwd.test(dir))
       dir = _path.join(cwd, dir);
 
+    console.log(dir);
     const promise = new Promise((resolve, reject) => {
-      fse.walk(dir)
+      klaw(dir)
         .on('data', (item) => {
           const basename = _path.basename(item.path);
           const dirname = _path.dirname(item.path);
@@ -177,7 +179,7 @@ class FileSystem extends Service {
           });
 
           // keep in cache and resolve promise
-          if(this._enableCache)
+          if (this._enableCache)
             this._cache[key] = results;
 
           resolve(results);
@@ -226,25 +228,27 @@ class FileSystem extends Service {
       config = prependPath(config);
 
       // get results
-      this.getList(config).then((results) => {
-        function formatToUrl(entry) {
-          if (Array.isArray(entry))
-            return entry.map(formatToUrl);
+      this.getList(config)
+        .then((results) => {
+          function formatToUrl(entry) {
+            if (Array.isArray(entry))
+              return entry.map(formatToUrl);
 
-          entry = entry.replace(publicDir, '');
-          entry = entry.replace('\\', '/'); // window paths to url
+            entry = entry.replace(publicDir, '');
+            entry = entry.replace('\\', '/'); // window paths to url
 
-          if (!/^\//.test(entry))
-            entry = '/' + entry;
+            if (!/^\//.test(entry))
+              entry = '/' + entry;
 
-          return entry;
-        }
+            return entry;
+          }
 
-        // remove all file system informations and create an absolute url
-        results = formatToUrl(results);
+          // remove all file system informations and create an absolute url
+          results = formatToUrl(results);
 
-        this.send(client, `list:${id}`, results);
-      });
+          this.send(client, `list:${id}`, results);
+        })
+        .catch((err) => console.error(err.stack));
     };
   }
 }
