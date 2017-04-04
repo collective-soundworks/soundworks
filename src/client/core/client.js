@@ -141,7 +141,7 @@ const client = {
    * @type {module:soundworks/client.socket}
    * @private
    */
-  socket: null,
+  socket: socket,
 
   /**
    * Initialize the application.
@@ -245,7 +245,7 @@ const client = {
    * @private
    */
   _initSocket() {
-    this.socket = socket.init(this.type, this.config.websockets);
+    this.socket.init(this.type, this.config.websockets);
 
     // see: http://socket.io/docs/client-api/#socket
     this.socket.addStateListener((eventName) => {
