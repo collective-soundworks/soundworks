@@ -1,10 +1,7 @@
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
-import client from '../core/client';
-
 
 const SERVICE_ID = 'service:geolocation';
-
 
 /**
  * Interface for the server `'geolocation'` service.
