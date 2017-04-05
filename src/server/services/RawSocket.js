@@ -1,7 +1,11 @@
 import server from '../core/server';
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
-import { Server } from 'uws';
+import http from 'http';
+import https from 'https';
+import pem from 'pem';
+import express from 'express';
+import fs from 'fs';
 
 const SERVICE_ID = 'service:raw-socket';
 
@@ -106,8 +110,47 @@ class RawSocket extends Service {
 
     this._channels = this._protocol.map((def) => def.channel);;
     // retrieve socket configuration
-    this._wss = new Server({ port: this._port });
-    this._wss.on('connection', this._onConnection);
+
+    // init express app
+    let app = express();
+
+    // check http / https mode
+    let useHttps = server.config.useHttps;
+
+    // launch http(s) server
+    if (!useHttps) {
+      let httpServer = http.createServer(app);
+      this.runServer(httpServer);
+    } else {
+      const httpsInfos = server.config.httpsInfos;
+
+      // use given certificate
+      if (httpsInfos.key && httpsInfos.cert) {
+        const key = fs.readFileSync(httpsInfos.key);
+        const cert = fs.readFileSync(httpsInfos.cert);
+
+        let httpsServer = https.createServer({ key: key, cert: cert }, app);
+        this.runServer(httpsServer);
+      // generate certificate on the fly (for development purposes)
+      } else {
+        pem.createCertificate({ days: 1, selfSigned: true }, (err, keys) => {
+          let httpsServer = https.createServer({ key: keys.serviceKey, cert: keys.certificate }, app);
+          this.runServer(httpsServer);
+        });
+      }
+    }
+
+  }
+
+  runServer(server){
+    server.listen(this._port, () => {
+      // console.log(SERVICE_ID, ': Https server listening on port:', this._port);
+    });
+
+    var WebSocketServer = require('ws').Server;
+    this._wss = new WebSocketServer({ server: server });
+
+    this._wss.on('connection', this._onConnection);    
   }
 
   /** @private */
@@ -131,6 +174,7 @@ class RawSocket extends Service {
   /** @private */
   _onConnection(socket) {
     socket.on('message', (buffer) => {
+      buffer = new Uint8Array(buffer).buffer;
       const index = new Uint8Array(buffer)[0];
 
       if (!this._protocol[index])

@@ -103,7 +103,7 @@ class RawSocket extends Service {
 
     this.removeListener('connection-infos', this._onReceiveConnectionInfos);
 
-    const socketProtocol = window.location.protocol.replace(/^http[s]?/, 'ws');
+    const socketProtocol = window.location.protocol.replace(/^http?/, 'ws');
     const socketHostname = window.location.hostname;
     const url = `${socketProtocol}//${socketHostname}:${port}`;
 
