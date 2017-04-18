@@ -148,7 +148,6 @@ class SharedRecorder extends Service {
   }
 
   startRecord(name) {
-    console.log('start', name);
     const infos = this._buffers[name];
     const stream = this._streams[name];
 
