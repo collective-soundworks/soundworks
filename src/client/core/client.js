@@ -161,15 +161,16 @@ const client = {
 
     this._parseUrlParams();
     // if socket config given, mix it with defaults
-    const websocketConfig = Object.assign({
+    const websockets = Object.assign({
       url: '',
-      transports: ['websocket']
+      transports: ['websocket'],
+      path: '',
     }, config.websockets);
 
     // mix all other config and override with defined socket config
     Object.assign(this.config, {
       appContainer: '#container',
-    }, config, { websocketConfig });
+    }, config, { websockets });
 
     serviceManager.init();
 
@@ -245,7 +246,7 @@ const client = {
    * @private
    */
   _initSocket() {
-    this.socket.init(this.type, this.config.websockets);
+    socket.init(this.type, this.config.websockets);
 
     // see: http://socket.io/docs/client-api/#socket
     this.socket.addStateListener((eventName) => {
