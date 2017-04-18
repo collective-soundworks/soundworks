@@ -236,11 +236,15 @@ const server = {
     // public folder
     expressApp.use(express.static(this.config.publicDirectory));
 
+    this._initActivities();
+    this._initRouting(expressApp);
+
     // use https
     const useHttps = this.config.useHttps || false;
     // launch http(s) server
     if (!useHttps) {
-      this._runServer(expressApp);
+      const server = this._createHttpServer(expressApp);
+      this._initSockets(server);
     } else {
       const httpsInfos = this.config.httpsInfos;
 
@@ -249,14 +253,91 @@ const server = {
         const key = fs.readFileSync(httpsInfos.key);
         const cert = fs.readFileSync(httpsInfos.cert);
 
-        this._runSecureServer(expressApp, key, cert);
+        const server = this._createHttpsServer(expressApp, key, cert);
+        this._initSockets(server);
       // generate certificate on the fly (for development purposes)
       } else {
         pem.createCertificate({ days: 1, selfSigned: true }, (err, keys) => {
-          this._runSecureServer(expressApp, keys.serviceKey, keys.certificate);
+          const server = this._createHttpsServer(expressApp, keys.serviceKey, keys.certificate);
+          this._initSockets(server);
         });
       }
     }
+  },
+
+  /**
+   * Launch a http server.
+   * @private
+   */
+  _createHttpServer(middleware) {
+    const httpServer = http.createServer(middleware);
+
+    httpServer.listen(expressApp.get('port'), () => {
+      this._address = `http://127.0.0.1:${expressApp.get('port')}`;
+      console.log('[HTTP SERVER] Server listening on', this._address);
+    });
+
+    return httpServer;
+  },
+
+  /**
+   * Launch a https server.
+   * @private
+   */
+  _createHttpsServer(middleware, key, cert) {
+    const httpsServer = https.createServer({ key, cert }, middleware);
+
+    httpsServer.listen(expressApp.get('port'), () => {
+      this._address = `https://127.0.0.1:${expressApp.get('port')}`;
+      console.log('[HTTPS SERVER] Server listening on', this._address);
+    });
+
+    return httpsServer;
+  },
+
+  /**
+   * Map activities to their respective client type(s) and start them all.
+   * @private
+   */
+  _initActivities() {
+    this._activities.forEach((activity) => {
+      this._mapClientTypesToActivity(activity.clientTypes, activity);
+    });
+
+    this._activities.forEach((activity) => activity.start());
+  },
+
+  /**
+   * Init routing for each client. The default client must be opened last.
+   * @private
+   */
+  _initRouting(expressApp) {
+    for (let clientType in this._clientTypeActivitiesMap) {
+      if (clientType !== this.config.defaultClient)
+        this._openClientRoute(clientType, expressApp);
+    }
+
+    for (let clientType in this._clientTypeActivitiesMap) {
+      if (clientType === this.config.defaultClient)
+        this._openClientRoute(clientType, expressApp);
+    }
+  },
+
+  /**
+   * Init websocket server.
+   * @private
+   */
+  _initSockets(httpServer) {
+    // merge socket.io configuration for cordova
+    // @todo - move to template
+    if (this.config.cordova && this.config.cordova.websockets)
+      this.config.cordova.websockets = Object.assign({}, this.config.websockets, this.config.cordova.websockets);
+
+    sockets.init(httpServer, this.config.websockets);
+    // socket connnection
+    sockets.onConnection(this.clientTypes, (clientType, socket) => {
+      this._onSocketConnection(clientType, socket);
+    });
   },
 
    /**
@@ -296,87 +377,6 @@ const server = {
 
       this._clientTypeActivitiesMap[clientType].add(activity);
     });
-  },
-
-  /**
-   * Init websocket server.
-   * @private
-   */
-  _initSockets(httpServer) {
-    // merge socket.io configuration for cordova
-    // @todo - move to template
-    if (this.config.cordova && this.config.cordova.websockets)
-      this.config.cordova.websockets = Object.assign({}, this.config.websockets, this.config.cordova.websockets);
-
-    sockets.init(httpServer, this.config.websockets);
-    // socket connnection
-    sockets.onConnection(this.clientTypes, (clientType, socket) => {
-      this._onSocketConnection(clientType, socket);
-    });
-  },
-
-  /**
-   * Launch a http server.
-   * @private
-   */
-  _runServer(expressApp) {
-    const httpServer = http.createServer(expressApp);
-
-    this._initActivities();
-    this._initRouting(expressApp);
-
-    httpServer.listen(expressApp.get('port'), () => {
-      this._address = `http://127.0.0.1:${expressApp.get('port')}`;
-      console.log('[HTTP SERVER] Server listening on', this._address);
-    });
-
-    this._initSockets(httpServer);
-  },
-
-  /**
-   * Launch a https server.
-   * @private
-   */
-  _runSecureServer(expressApp, key, cert) {
-    const httpsServer = https.createServer({ key, cert }, expressApp);
-
-    this._initActivities();
-    this._initRouting(expressApp);
-
-    httpsServer.listen(expressApp.get('port'), () => {
-      this._address = `https://127.0.0.1:${expressApp.get('port')}`;
-      console.log('[HTTPS SERVER] Server listening on', this._address);
-    });
-
-    this._initSockets(httpsServer);
-  },
-
-  /**
-   * Map activities to their respective client type(s) and start them all.
-   * @private
-   */
-  _initActivities() {
-    this._activities.forEach((activity) => {
-      this._mapClientTypesToActivity(activity.clientTypes, activity);
-    });
-
-    this._activities.forEach((activity) => activity.start());
-  },
-
-  /**
-   * Init routing for each client. The default client must be opened last.
-   * @private
-   */
-  _initRouting(expressApp) {
-    for (let clientType in this._clientTypeActivitiesMap) {
-      if (clientType !== this.config.defaultClient)
-        this._openClientRoute(clientType, expressApp);
-    }
-
-    for (let clientType in this._clientTypeActivitiesMap) {
-      if (clientType === this.config.defaultClient)
-        this._openClientRoute(clientType, expressApp);
-    }
   },
 
   /**
