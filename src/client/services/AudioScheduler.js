@@ -88,14 +88,18 @@ class AudioScheduler extends Service {
     this.ready();
   }
 
-  get currentTime() {
-    return audioScheduler.currentTime;
-  }
-
   /**
    * Current audio time of the scheduler.
    */
   get audioTime() {
+    return this._scheduler.currentTime;
+  }
+
+  /**
+   * Current audio time of the scheduler.
+   * @alias audioTime
+   */
+  get currentTime() {
     return this._scheduler.currentTime;
   }
 
