@@ -5,7 +5,7 @@ import Signal from './Signal';
  * Dependencies are added through the `add` method.
  * @private
  */
-export default class SignalAll extends Signal {
+class SignalAll extends Signal {
   constructor() {
     super();
     this._dependencies = new Set();
@@ -30,3 +30,5 @@ export default class SignalAll extends Signal {
 
   set(value) { /* noop */ }
 }
+
+export default SignalAll;

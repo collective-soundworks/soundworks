@@ -2,7 +2,7 @@
  *
  *
  */
-export default class Signal {
+class Signal {
   constructor() {
     this._state = false;
     this._observers = new Set();
@@ -29,3 +29,5 @@ export default class Signal {
     this._observers.delete(observer);
   }
 }
+
+export default Signal;
