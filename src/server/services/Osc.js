@@ -66,6 +66,8 @@ class Osc extends Service {
 
       log(`[OSC over UDP] Receiving on ${receive}`);
       log(`[OSC over UDP] Sending on ${send}`);
+
+      this.ready();
     });
 
     this.osc.on('message', this._onMessage);

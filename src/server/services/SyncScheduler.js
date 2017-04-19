@@ -24,6 +24,8 @@ class SyncScheduler extends Service {
   /** @private */
   start() {
     super.start();
+
+    this.ready();
   }
 
   get currentTime() {

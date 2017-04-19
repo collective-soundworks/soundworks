@@ -145,7 +145,7 @@ const server = {
    * @param {Object} options - Options to configure the service.
    */
   require(id, options) {
-    return serviceManager.require(id, null, options);
+    return serviceManager.require(id, options);
   },
 
   /**
@@ -209,6 +209,8 @@ const server = {
    */
   init(config) {
     this.config = config;
+
+    serviceManager.init();
   },
 
   /**
@@ -237,7 +239,7 @@ const server = {
     expressApp.use(express.static(this.config.publicDirectory));
 
     // --------------------------------------------------------
-    // @todo - move to this lifecycle
+    // @todo - update to this lifecycle
     // --------------------------------------------------------
     // create express app
     // create clientType / activity maps
@@ -284,8 +286,8 @@ const server = {
   _createHttpServer(middleware) {
     const httpServer = http.createServer(middleware);
 
-    httpServer.listen(expressApp.get('port'), () => {
-      this._address = `http://127.0.0.1:${expressApp.get('port')}`;
+    httpServer.listen(middleware.get('port'), () => {
+      this._address = `http://127.0.0.1:${middleware.get('port')}`;
       console.log('[HTTP SERVER] Server listening on', this._address);
     });
 
@@ -299,8 +301,8 @@ const server = {
   _createHttpsServer(middleware, key, cert) {
     const httpsServer = https.createServer({ key, cert }, middleware);
 
-    httpsServer.listen(expressApp.get('port'), () => {
-      this._address = `https://127.0.0.1:${expressApp.get('port')}`;
+    httpsServer.listen(middleware.get('port'), () => {
+      this._address = `https://127.0.0.1:${middleware.get('port')}`;
       console.log('[HTTPS SERVER] Server listening on', this._address);
     });
 
@@ -316,9 +318,9 @@ const server = {
       this._mapClientTypesToActivity(activity.clientTypes, activity);
     });
 
-    this._activities.forEach((activity) => activity.start());
+    // this._activities.forEach((activity) => activity.start());
     // should start the serviceManager instead of starting the activities directly
-    // serviceManager.start();
+    serviceManager.start();
   },
 
   /**

@@ -115,6 +115,8 @@ class Placer extends Service {
     this.clientTypes.forEach((clientType) => {
       this._sharedConfig.share(this.options.configItem, clientType);
     });
+
+    this.ready();
   }
 
   /**

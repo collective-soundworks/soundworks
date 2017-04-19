@@ -51,6 +51,8 @@ class Auth extends Service {
     super.start();
 
     this._password = this._sharedConfig.get(this.options.configItem);
+
+    this.ready();
   }
 
   /** @private */

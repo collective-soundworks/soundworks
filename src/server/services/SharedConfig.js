@@ -32,6 +32,12 @@ class SharedConfig extends Service {
     this._clientItemsMap = {};
   }
 
+  start() {
+    super.start();
+
+    this.ready();
+  }
+
   /** @inheritdoc */
   connect(client) {
     this.receive(client, 'request', this._onRequest(client));

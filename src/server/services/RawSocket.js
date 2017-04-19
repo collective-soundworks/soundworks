@@ -108,6 +108,8 @@ class RawSocket extends Service {
     // retrieve socket configuration
     this._wss = new Server({ port: this._port });
     this._wss.on('connection', this._onConnection);
+
+    this.ready();
   }
 
   /** @private */

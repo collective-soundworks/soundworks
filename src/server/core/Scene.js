@@ -1,4 +1,5 @@
-import Activity from '../core/Activity';
+import Activity from './Activity';
+import serviceManager from './serviceManager';
 
 /**
  * Base class to be extended in order to create a new scene.
@@ -10,15 +11,10 @@ class Scene extends Activity {
   constructor(id, clientType) {
     super(id);
 
-    this.addClientType(clientType);
-    // add serviceManager.signals.ready as requiredSignal
-    // this.requiredSignals.add(serviceManager.signals.ready);
+    this.addClientTypes(clientType);
+    // wait for service manager to ready before starting scene
+    this.requiredSignals.add(serviceManager.signals.ready);
   }
-
-  // override require
-  // require(id, options) {
-  //   return serviceManager.require(id, this, options);
-  // }
 }
 
 export default Scene;

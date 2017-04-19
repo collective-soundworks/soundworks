@@ -88,6 +88,8 @@ class Checkin extends Service {
       if (this.capacity > numPositions)
         this.capacity = numPositions;
     }
+
+    this.ready();
   }
 
   /** @private */
