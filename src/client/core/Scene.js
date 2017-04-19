@@ -1,6 +1,6 @@
 import Activity from './Activity';
 import serviceManager from './serviceManager';
-import Signal from './Signal';
+import Signal from '../../utils/Signal';
 
 /**
  * Base class to be extended in order to create a new scene.
@@ -21,7 +21,7 @@ class Scene extends Activity {
       } */
     });
 
-
+    // @remove
     this.signals.done = new Signal();
     this.requiredSignals.add(serviceManager.signals.ready);
   }
@@ -49,6 +49,8 @@ class Scene extends Activity {
    * Mark the `Scene` as terminated. The call of this method is a
    * responsibility of the client code.
    * @private
+   *
+   * @remove
    */
   done() {
     this.hide();

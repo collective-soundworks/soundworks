@@ -7,6 +7,27 @@ const _instances = {};
  * are instanciated only once.
  */
 const serviceManager = {
+  // // add an init method
+  // /**
+  //  *
+  //  *
+  //  */
+  // init() {
+  //   this._requireSignals = new SignalAll();
+  //   this._requireSignals.addObserver(() => this.ready());
+  // }
+
+  // start() {
+  //   this.signals.start.set(true);
+
+  //   if (this._requireSignals.length === 0)
+  //     this.ready();
+  // }
+
+  // ready() {
+  //   this.signals.ready.set(true);
+  // }
+
   /**
    * Retrieve a service according to the given id. If the service as not beeen
    * requested yet, it is instanciated.

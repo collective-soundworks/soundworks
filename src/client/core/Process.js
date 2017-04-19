@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import Signal from './Signal';
+import Signal from '../../utils/Signal';
 
 /**
  * A process defines the simpliest unit of the framework.

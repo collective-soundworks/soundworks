@@ -236,6 +236,18 @@ const server = {
     // public folder
     expressApp.use(express.static(this.config.publicDirectory));
 
+    // --------------------------------------------------------
+    // @todo - move to this lifecycle
+    // --------------------------------------------------------
+    // create express app
+    // create clientType / activity maps
+    // init routing
+    // create http server
+    // create socket server
+    // execute serviceManager.start
+    // when serviceManager.ready
+    // httpServer.listen (as its async, we should be sure it the last init step)
+
     this._initActivities();
     this._initRouting(expressApp);
 
@@ -305,6 +317,8 @@ const server = {
     });
 
     this._activities.forEach((activity) => activity.start());
+    // should start the serviceManager instead of starting the activities directly
+    // serviceManager.start();
   },
 
   /**
@@ -330,8 +344,8 @@ const server = {
   _initSockets(httpServer) {
     // merge socket.io configuration for cordova
     // @todo - move to template
-    if (this.config.cordova && this.config.cordova.websockets)
-      this.config.cordova.websockets = Object.assign({}, this.config.websockets, this.config.cordova.websockets);
+    // if (this.config.cordova && this.config.cordova.websockets)
+    //   this.config.cordova.websockets = Object.assign({}, this.config.websockets, this.config.cordova.websockets);
 
     sockets.init(httpServer, this.config.websockets);
     // socket connnection
@@ -439,6 +453,8 @@ const server = {
     const serverServicesList = serviceManager.getServiceList();
 
     sockets.receive(client, 'handshake', (data) => {
+      // in development, if service required client-side but not server-side,
+      // complain properly client-side.
       if (this.config.env !== 'production') {
         const clientRequiredServices = data.requiredServices || [];
         const missingServices = [];

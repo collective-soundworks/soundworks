@@ -1,4 +1,3 @@
-import Signal from './Signal';
 import Activity from './Activity';
 import serviceManager from './serviceManager';
 import viewManager from './viewManager';

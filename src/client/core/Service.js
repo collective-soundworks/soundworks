@@ -1,8 +1,7 @@
 import Activity from './Activity';
 import debug from 'debug';
 import serviceManager from './serviceManager';
-import Signal from './Signal';
-import SignalAll from './SignalAll';
+import Signal from '../../utils/Signal';
 
 const log = debug('soundworks:services');
 
