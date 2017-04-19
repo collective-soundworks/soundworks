@@ -1,40 +1,9 @@
 import client from '../core/client';
 import Service from '../core/Service';
-import SegmentedView from '../views/SegmentedView';
 import serviceManager from '../core/serviceManager';
 
 
 const SERVICE_ID = 'service:checkin';
-
-const defaultViewTemplate = `
-<% if (label) { %>
-  <div class="section-top flex-middle">
-    <p class="big"><%= labelPrefix %></p>
-  </div>
-  <div class="section-center flex-center">
-    <div class="checkin-label">
-      <p class="huge bold"><%= label %></p>
-    </div>
-  </div>
-  <div class="section-bottom flex-middle">
-    <p class="small"><%= labelPostfix %></p>
-  </div>
-<% } else { %>
-  <div class="section-top"></div>
-  <div class="section-center flex-center">
-    <p><%= error ? errorMessage : wait %></p>
-  </div>
-  <div class="section-bottom"></div>
-<% } %>`;
-
-const defaultViewContent = {
-  labelPrefix: 'Go to',
-  labelPostfix: 'Touch the screen<br class="portrait-only" />when you are ready.',
-  error: false,
-  errorMessage: 'Sorry,<br/>no place available',
-  wait: 'Please wait...',
-  label: '',
-};
 
 /**
  * Interface for the client `'checkin'` service.
@@ -74,23 +43,13 @@ class Checkin extends Service {
     const defaults = {
       showDialog: false,
       order: 'ascending',
-      viewCtor: SegmentedView,
       viewPriority: 6,
     };
 
     this.configure(defaults);
 
-    this._defaultViewTemplate = defaultViewTemplate;
-    this._defaultViewContent = defaultViewContent;
+    this.require('platform');
 
-    this.require('platform', { showDialog: true });
-    // bind callbacks to the current instance
-    this._onPositionResponse = this._onPositionResponse.bind(this);
-    this._onUnavailableResponse = this._onUnavailableResponse.bind(this);
-  }
-
-  /** @private */
-  init() {
     /**
      * Index given by the server.
      * @type {Number}
@@ -109,17 +68,14 @@ class Checkin extends Service {
      */
     this.coordinates = null;
 
-    // view should be always be created in case of unavailability
-    this.viewCtor = this.options.viewCtor;
-    this.view = this.createView();
+    // bind callbacks to the current instance
+    this._onPositionResponse = this._onPositionResponse.bind(this);
+    this._onUnavailableResponse = this._onUnavailableResponse.bind(this);
   }
 
   /** @private */
   start() {
     super.start();
-
-    if (!this.hasStarted)
-      this.init();
 
     this.setup = this._sharedConfigService;
 
@@ -154,10 +110,8 @@ class Checkin extends Service {
 
     if (this.options.showDialog) {
       const displayLabel = label || (index + 1).toString();
-      const eventName = client.platform.isMobile ? 'click' : 'touchstart';
-
-      this.viewContent.label = displayLabel;
-      this.view.installEvents({ [eventName]: () => this.ready() });
+      this.view.updateLabel(displayLabel);
+      this.view.setReadyCallback(this.ready.bind(this));
       this.view.render();
     } else {
       this.ready();
@@ -166,7 +120,7 @@ class Checkin extends Service {
 
   /** @private */
   _onUnavailableResponse() {
-    this.viewContent.error = true;
+    this.view.setErrorStatus(true);
     this.view.render();
   }
 }

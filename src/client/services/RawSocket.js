@@ -4,18 +4,6 @@ import serviceManager from '../core/serviceManager';
 
 const SERVICE_ID = 'service:raw-socket';
 
-const defaultViewTemplate = `
-<div class="section-top"></div>
-<div class="section-center flex-center">
-  <p class="soft-blink"><%= wait %></p>
-</div>
-<div class="section-bottom"></div>
-`;
-
-const defaultViewContent = {
-  wait: `Opening socket,<br />stand by&hellip;`,
-};
-
 /**
  * Interface for the `raw-socket` service.
  *
@@ -39,9 +27,6 @@ class RawSocket extends Service {
 
     this.configure(defaults);
 
-    this._defaultViewTemplate = defaultViewTemplate;
-    this._defaultViewContent = defaultViewContent;
-
     /**
      * Listeners for the incomming messages.
      *
@@ -60,18 +45,8 @@ class RawSocket extends Service {
   }
 
   /** @private */
-  init() {
-    this.viewCtor = this.options.viewCtor;
-    this.view = this.createView();
-  }
-
-  /** @private */
   start() {
     super.start();
-
-    if (!this.hasStarted)
-      this.init();
-
     this.show();
 
     super.send('request');

@@ -5,36 +5,6 @@ import SelectView from '../views/SelectView';
 import SpaceView from '../views/SpaceView';
 import SquaredView from '../views/SquaredView';
 
-const SERVICE_ID = 'service:placer';
-
-const defaultViewTemplate = `
-<div class="section-square<%= mode === 'list' ? ' flex-middle' : '' %>">
-  <% if (rejected) { %>
-  <div class="fit-container flex-middle">
-    <p><%= reject %></p>
-  </div>
-  <% } %>
-</div>
-<div class="section-float flex-middle">
-  <% if (!rejected) { %>
-    <% if (mode === 'graphic') { %>
-      <p><%= instructions %></p>
-    <% } else if (mode === 'list') { %>
-      <% if (showBtn) { %>
-        <button class="btn"><%= send %></button>
-      <% } %>
-    <% } %>
-  <% } %>
-</div>`;
-
-const defaultViewContent = {
-  instructions: 'Select your position',
-  send: 'Send',
-  reject: 'Sorry, no place is available',
-  showBtn: false,
-  rejected: false,
-};
-
 
 /**
  * Interface for the view of the `placer` service.
@@ -82,158 +52,13 @@ const defaultViewContent = {
  * Register the callback to be applied when the user select a position.
  *
  * @function
- * @name AbstratPlacerView.onSelect
+ * @name AbstratPlacerView.setSelectCallback
  * @param {Function} callback - Callback to be applied when a position is selected.
  *  This callback should be called with the `index`, `label` and `coordinates` of
  *  the requested position.
  */
 
-class _ListView extends SquaredView {
-  constructor(template, content, events, options) {
-    super(template, content, events, options);
-
-    this._onSelectionChange = this._onSelectionChange.bind(this);
-  }
-
-  _onSelectionChange(e) {
-    this.content.showBtn = true;
-    this.render('.section-float');
-    this.installEvents({
-      'click .btn': (e) => {
-        const position = this.selector.value;
-
-        if (position)
-          this._onSelect(position.index, position.label, position.coordinates);
-      }
-    });
-  }
-
-  setArea(area) { /* no need for area */ }
-
-  displayPositions(capacity, labels = null, coordinates = null, maxClientsPerPosition = 1) {
-    this.positions = [];
-    this.numberPositions = capacity / maxClientsPerPosition;
-
-    for (let index = 0; index < this.numberPositions; index++) {
-      const label = labels !== null ? labels[index] : (index + 1).toString();
-      const position = { index: index, label: label };
-
-      if (coordinates)
-        position.coordinates = coordinates[index];
-
-      this.positions.push(position);
-    }
-
-    this.selector = new SelectView({
-      instructions: this.content.instructions,
-      entries: this.positions,
-    });
-
-    this.setViewComponent('.section-square', this.selector);
-    this.render('.section-square');
-
-    this.selector.installEvents({
-      'change': this._onSelectionChange,
-    });
-  }
-
-  updateDisabledPositions(indexes) {
-    for (let index = 0; index < this.numberPositions; index++) {
-      if (indexes.indexOf(index) === -1)
-        this.selector.enableIndex(index);
-      else
-        this.selector.disableIndex(index);
-    }
-  }
-
-  onSelect(callback) {
-    this._onSelect = callback;
-  }
-
-  reject(disabledPositions) {
-    if (disabledPositions.length >= this.numberPositions) {
-      this.setViewComponent('.section-square');
-      this.content.rejected = true;
-      this.render();
-    } else {
-      this.disablePositions(disabledPositions);
-    }
-  }
-}
-
-class _GraphicView extends SquaredView {
-  constructor(template, content, events, options) {
-    super(template, content, events, options);
-
-    this._area = null;
-    this._disabledPositions = [];
-    this._onSelectionChange = this._onSelectionChange.bind(this);
-  }
-
-  _onSelectionChange(e) {
-    const position = this.selector.shapePointMap.get(e.target);
-    const disabledIndex = this._disabledPositions.indexOf(position.index);
-
-    if (disabledIndex === -1)
-      this._onSelect(position.id, position.label, [position.x, position.y]);
-  }
-
-  setArea(area) {
-    this._area = area;
-  }
-
-  displayPositions(capacity, labels = null, coordinates = null, maxClientsPerPosition = 1) {
-    this.numberPositions = capacity / maxClientsPerPosition;
-    this.positions = [];
-
-    for (let i = 0; i < this.numberPositions; i++) {
-      const label = labels !== null ? labels[i] : (i + 1).toString();
-      const position = { id: i, label: label };
-      const coords = coordinates[i];
-      position.x = coords[0];
-      position.y = coords[1];
-
-      this.positions.push(position);
-    }
-
-    this.selector = new SpaceView();
-    this.selector.setArea(this._area);
-    this.setViewComponent('.section-square', this.selector);
-    this.render('.section-square');
-
-    this.selector.setPoints(this.positions);
-
-    this.selector.installEvents({
-      'click .point': this._onSelectionChange
-    });
-  }
-
-  updateDisabledPositions(indexes) {
-    this._disabledPositions = indexes;
-
-    for (let index = 0; index < this.numberPositions; index++) {
-      const position = this.positions[index];
-      const isDisabled = indexes.indexOf(index) !== -1;
-      position.selected = isDisabled ? true : false;
-      this.selector.updatePoint(position);
-    }
-  }
-
-  onSelect(callback) {
-    this._onSelect = callback;
-  }
-
-  reject(disabledPositions) {
-    if (disabledPositions.length >= this.numberPositions) {
-      this.setViewComponent('.section-square');
-      this.content.rejected = true;
-      this.render();
-    } else {
-      this.view.updateDisabledPositions(disabledPositions);
-    }
-  }
-}
-
+const SERVICE_ID = 'service:placer';
 
 /**
  * Interface for the `'placer'` service.
@@ -268,28 +93,11 @@ class Placer extends Service {
 
     const defaults = {
       mode: 'list',
-      view: null,
-      viewCtor: null,
       viewPriority: 6,
     };
 
     this.configure(defaults);
 
-    this._defaultViewTemplate = defaultViewTemplate;
-    this._defaultViewContent = defaultViewContent;
-
-    this._onAknowledgeResponse = this._onAknowledgeResponse.bind(this);
-    this._onClientJoined = this._onClientJoined.bind(this);
-    this._onClientLeaved = this._onClientLeaved.bind(this);
-    this._onSelect = this._onSelect.bind(this);
-    this._onConfirmResponse = this._onConfirmResponse.bind(this);
-    this._onRejectResponse = this._onRejectResponse.bind(this);
-
-    this._sharedConfigService = this.require('shared-config');
-  }
-
-  /** @private */
-  init() {
     /**
      * Index of the position selected by the user.
      * @type {Number}
@@ -302,38 +110,21 @@ class Placer extends Service {
      */
     this.label = null;
 
-    // allow to pass any view
-    if (this.options.view !== null) {
-      this.view = this.options.view;
-    } else {
-      if (this.options.viewCtor !== null) {
+    this._onAknowledgeResponse = this._onAknowledgeResponse.bind(this);
+    this._onClientJoined = this._onClientJoined.bind(this);
+    this._onClientLeaved = this._onClientLeaved.bind(this);
+    this._onSelect = this._onSelect.bind(this);
+    this._onConfirmResponse = this._onConfirmResponse.bind(this);
+    this._onRejectResponse = this._onRejectResponse.bind(this);
 
-      } else {
-        switch (this.options.mode) {
-          default:
-          case 'list':
-            this.viewCtor = _ListView;
-            break;
-
-          case 'graphic':
-            this.viewCtor = _GraphicView;
-            break;
-        }
-
-        this.viewContent.mode = this.options.mode;
-        this.view = this.createView();
-      }
-    }
+    this._sharedConfigService = this.require('shared-config');
   }
 
   /** @private */
   start() {
     super.start();
-
-    if (!this.hasStarted)
-      this.init();
-
     this.show();
+
     this.send('request');
 
     this.receive('aknowlegde', this._onAknowledgeResponse);
@@ -368,7 +159,7 @@ class Placer extends Service {
 
     this.view.displayPositions(capacity, labels, coordinates, maxClientsPerPosition);
     this.view.updateDisabledPositions(disabledPositions);
-    this.view.onSelect(this._onSelect);
+    this.view.setSelectCallack(this._onSelect);
   }
 
   /** @private */

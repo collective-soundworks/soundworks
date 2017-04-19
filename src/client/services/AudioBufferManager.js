@@ -2,32 +2,12 @@ import { audioContext } from 'waves-audio';
 import { SuperLoader } from 'waves-loaders';
 import debug from 'debug';
 import _path from 'path';
-import SegmentedView from '../views/SegmentedView';
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
 
 const SERVICE_ID = 'service:audio-buffer-manager';
 const log = debug('soundworks:services:audio-buffer-manager');
 
-const defaultViewTemplate = `
-<div class="section-top flex-middle">
-  <p><%= status %></p>
-</div>
-<div class="section-center flex-center">
-  <% if (showProgress) { %>
-  <div class="progress-wrap">
-    <div class="progress-bar"></div>
-  </div>
-  <% } %>
-</div>
-<div class="section-bottom"></div>`;
-
-
-const defaultViewContent = {
-  status: null,
-  loading: 'Loading sounds...',
-  decoding: 'Decoding sounds...',
-};
 
 function flattenLists(a) {
   const ret = [];
@@ -180,28 +160,6 @@ function prefixPaths(pathList, prefix) {
  * @name AbstractAudioBufferManagerView.onProgress
  * @param {Number} percent - The purcentage of loaded assets.
  */
-class AudioBufferManagerView extends SegmentedView {
-  constructor(...args) {
-    super(...args);
-
-    this.content.status = this.content.loading;
-  }
-
-  onRender() {
-    super.onRender();
-    this.$progressBar = this.$el.querySelector('.progress-bar');
-  }
-
-  onProgress(percent) {
-    if (percent === 100) {
-      this.content.status = this.content.decoding;
-      this.render('.section-top');
-    }
-
-    if (this.content.showProgress)
-      this.$progressBar.style.width = `${percent}%`;
-  }
-}
 
 /**
  * Interface for the client `'audio-buffer-manager'` service.
@@ -332,16 +290,19 @@ class AudioBufferManager extends Service {
 
     const defaults = {
       assetsDomain: '',
-      showProgress: true,
       files: null,
       directories: null,
       audioWrapTail: 0,
-      viewCtor: AudioBufferManagerView,
       viewPriority: 4,
     };
 
-    this._defaultViewTemplate = defaultViewTemplate;
-    this._defaultViewContent = defaultViewContent;
+    this.view = null;
+
+    /**
+     * Data structure correponding to the structure of requested files.
+     * @private
+     */
+    this.data = [];
 
     this.configure(defaults);
   }
@@ -358,25 +319,8 @@ class AudioBufferManager extends Service {
   }
 
   /** @private */
-  init() {
-    /**
-     * Data structure correponding to the structure of requested files.
-     * @private
-     */
-    this.data = [];
-
-    // prepare view
-    this.viewContent.showProgress = this.options.showProgress;
-    this.viewCtor = this.options.viewCtor;
-    this.view = this.createView();
-  }
-
-  /** @private */
   start() {
     super.start();
-
-    if (!this.hasStarted)
-      this.init();
 
     this.show();
 
@@ -437,7 +381,7 @@ class AudioBufferManager extends Service {
 
             totalProgress /= progressPerFile.length;
 
-            view.onProgress(totalProgress * 100);
+            view.onProgress(totalProgress);
           };
         }
 

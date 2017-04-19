@@ -89,7 +89,6 @@ class Geolocation extends Service {
       if (options.bypass !== undefined && options.bypass === true)
         feature = 'geolocation-mock';
 
-      console.log(feature);
       this.options.feature = feature;
       this.platform.requireFeature(feature);
     }
@@ -101,10 +100,6 @@ class Geolocation extends Service {
   start() {
     super.start();
 
-    if (!this.hasStarted)
-      this.init();
-
-    // console.log('here');
     if (this.options.feature === 'geolocation-mock') {
       const geoposition = getRandomGeoposition();
       this._updateClient(geoposition);

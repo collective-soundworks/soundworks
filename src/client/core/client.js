@@ -167,13 +167,14 @@ const client = {
     }, config.websockets);
 
     // mix all other config and override with defined socket config
-    Object.assign(this.config, {
-      appContainer: '#container',
-    }, config, { websockets });
+    Object.assign(this.config, config, { websockets });
 
     serviceManager.init();
+    viewport.init();
 
-    this._initViews();
+    const el = config.appContainer;
+    const $container = el instanceof Element ? el : document.querySelector(el);
+    viewManager.setViewContainer($container);
   },
 
   /**
@@ -292,72 +293,6 @@ const client = {
       }
     });
   },
-
-  /**
-   * Initialize view templates for all activities.
-   * @private
-   */
-  _initViews() {
-    viewport.init();
-    // initialize views with default view content and templates
-    this.viewContent = {};
-    this.viewTemplates = {};
-
-    const appName = this.config.appName || 'Soundworks';
-    this.setViewContentDefinitions({ globals: { appName }});
-
-    this.setAppContainer(this.config.appContainer);
-  },
-
-  /**
-   * Extend or override application view contents with the given object.
-   * @param {Object} defs - Content to be used by activities.
-   * @see {@link module:soundworks/client.setViewTemplateDefinitions}
-   * @example
-   * client.setViewContentDefinitions({
-   *   'service:platform': { myValue: 'Welcome to the application' }
-   * });
-   */
-  setViewContentDefinitions(defs) {
-    for (let key in defs) {
-      const def = defs[key];
-
-      if (this.viewContent[key])
-        Object.assign(this.viewContent[key], def);
-      else
-        this.viewContent[key] = def;
-    }
-
-    Activity.setViewContentDefinitions(this.viewContent);
-  },
-
-  /**
-   * Extend or override application view templates with the given object.
-   * @param {Object} defs - Templates to be used by activities.
-   * @see {@link module:soundworks/client.setViewContentDefinitions}
-   * @example
-   * client.setViewTemplateDefinitions({
-   *   'service:platform': `
-   *     <p><%= myValue %></p>
-   *   `,
-   * });
-   */
-  setViewTemplateDefinitions(defs) {
-    this.viewTemplates = Object.assign(this.viewTemplates, defs);
-    Activity.setViewTemplateDefinitions(this.viewTemplates);
-  },
-
-  /**
-   * Set the DOM elemnt that will be the container for all views.
-   * @private
-   * @param {String|Element} el - DOM element (or css selector matching
-   *  an existing element) to be used as the container of the application.
-   */
-  setAppContainer(el) {
-    const $container = el instanceof Element ? el : document.querySelector(el);
-    viewManager.setViewContainer($container);
-  },
-
 };
 
 export default client;
