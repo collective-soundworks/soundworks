@@ -2,6 +2,17 @@ import tmpl from 'lodash.template';
 import viewport from './viewport';
 import Delegate from 'dom-delegate';
 
+
+/**
+ * AbstractView
+ *
+ *  - show
+ *  - hide
+ *  - render
+ *  - remove
+ *
+ */
+
 /**
  * Base class for views.
  *
@@ -132,17 +143,6 @@ class View {
     this.isVisible = false;
 
     /**
-     * If the view is a component, pointer to the parent view.
-     *
-     * @type {module:soundworks/client.View}
-     * @name parentView
-     * @default null
-     * @instance
-     * @memberof module:soundworks/client.View
-     */
-    this.parentView = null;
-
-    /**
      * DOM element of the main container of the view. Defaults to `<div>`.
      *
      * @type {Element}
@@ -152,55 +152,11 @@ class View {
      */
     this.$el = document.createElement(this.options.el);
 
-    /**
-     * Store the components (sub-views) of the view.
-     *
-     * @type {Object}
-     * @name _components
-     * @instance
-     * @memberof module:soundworks/client.View
-     * @private
-     */
-    this._components = {};
-
-
+    // initialize event delegation
     this._delegate = new Delegate(this.$el);
     this.onResize = this.onResize.bind(this);
 
     this.installEvents(this.events, false);
-  }
-
-  /**
-   * Add or remove a component view inside the current view.
-   *
-   * @param {String} selector - Css selector defining the placeholder of the view.
-   * @param {View} [view=null] - View to insert inside the selector. If `null`
-   *  destroy the component.
-   */
-  setViewComponent(selector, view = null) {
-    const prevView = this._components[selector];
-    if (prevView instanceof View) { prevView.remove(); }
-
-    if (view === null) {
-      delete this._components[selector];
-    } else {
-      this._components[selector] = view;
-      this.parentView = view;
-    }
-  }
-
-  /**
-   * Execute a method on all the component views (sub-views).
-   *
-   * @param {String} method - Name of the method to execute.
-   * @param {...Mixed} args - Arguments to apply to the method.
-   * @private
-   */
-  _executeViewComponentMethod(method, ...args) {
-    for (let selector in this._components) {
-      const view = this._components[selector];
-      view[method](...args);
-    }
   }
 
   /**
@@ -212,30 +168,17 @@ class View {
    * @private
    */
   _renderPartial(selector) {
-    const $componentContainer = this.$el.querySelector(selector);
+    const $container = this.$el.querySelector(selector);
 
-    if ($componentContainer === null)
+    if ($container === null)
       throw new Error(`selector ${selector} doesn't match any element`);
 
-    const component = this._components[selector];
-    $componentContainer.innerHTML = '';
+    const html = this.tmpl(this.content);
+    const $tmp = document.createElement('div');
 
-    if (component) {
-      component.render();
-      component.appendTo($componentContainer);
-      component.onRender();
-
-      if (this.isVisible)
-        component.show();
-      else
-        component.hide();
-    } else {
-      const html = this.tmpl(this.content);
-      const $tmp = document.createElement('div');
-      $tmp.innerHTML = html;
-      $componentContainer.innerHTML = $tmp.querySelector(selector).innerHTML;
-      this.onRender();
-    }
+    $tmp.innerHTML = html;
+    $container.innerHTML = $tmp.querySelector(selector).innerHTML;
+    this.onRender();
   }
 
   /**
@@ -259,9 +202,6 @@ class View {
     const html = this.tmpl(this.content);
     this.$el.innerHTML = html;
     this.onRender();
-
-    for (let selector in this._components)
-      this._renderPartial(selector);
   }
 
   // LIFE CYCLE METHODS ----------------------------------
@@ -280,18 +220,7 @@ class View {
       this._renderAll();
 
     if (this.isVisible)
-      this.onResize(viewport.width, viewport.height, viewport.orientation, true);
-  }
-
-  /**
-   * Insert the view (`this.$el`) into the given element.
-   *
-   * @param {Element} $parent - Element in which the view must be inserted.
-   * @private
-   */
-  appendTo($parent) {
-    this.$parent = $parent;
-    $parent.appendChild(this.$el);
+      this.onResize(viewport.width, viewport.height, viewport.orientation);
   }
 
   /**
@@ -305,8 +234,6 @@ class View {
     // must resize before child component
     this._delegateEvents();
     viewport.addResizeListener(this.onResize);
-
-    this._executeViewComponentMethod('show');
   }
 
   /**
@@ -320,8 +247,6 @@ class View {
 
     this._undelegateEvents();
     viewport.removeResizeListener(this.onResize);
-
-    this._executeViewComponentMethod('hide');
   }
 
   /**
@@ -331,7 +256,6 @@ class View {
   remove() {
     this.hide();
     this.$el.remove();
-    this._executeViewComponentMethod('remove');
   }
 
   /**
@@ -349,7 +273,7 @@ class View {
    * @param {String} orientation - Orientation of the viewport.
    * @see {@link module:soundworks/client.viewport}
    */
-  onResize(viewportWidth, viewportHeight, orientation, propagate = false) {
+  onResize(viewportWidth, viewportHeight, orientation) {
     this.viewportWidth = viewportWidth;
     this.viewportHeight = viewportHeight;
     this.orientation = orientation;
@@ -358,9 +282,6 @@ class View {
     this.$el.style.height = `${viewportHeight}px`;
     this.$el.classList.remove('portrait', 'landscape');
     this.$el.classList.add(orientation);
-
-    if (propagate)
-      this._executeViewComponentMethod('onResize', viewportWidth, viewportHeight, orientation);
   }
 
   // EVENTS ----------------------------------------

@@ -20,11 +20,11 @@ const viewManager = {
 
     _stack.add(view);
     view.hide();
-    view.appendTo(_$container);
+    _$container.appendChild(view.$el);
 
     // trigger `_updateView` only once when several view are registered at once.
     if (!this._timeoutId)
-      this.timeoutId = setTimeout(() => { this._updateView(); }, 0);
+      this.timeoutId = setTimeout(() => this._updateView(), 0);
   },
 
   /**
@@ -37,7 +37,7 @@ const viewManager = {
     view.remove();
     _stack.delete(view);
 
-    setTimeout(() => { this._updateView(); }, 0);
+    setTimeout(() => this._updateView(), 0);
   },
 
   /**
