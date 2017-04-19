@@ -227,86 +227,58 @@ const server = {
       logger.init(this.config.logger);
 
     // configure express
-    const expressApp = new express();
-    expressApp.set('port', process.env.PORT || this.config.port);
-    expressApp.set('view engine', 'ejs');
-
+    const expressMiddleware = new express();
+    expressMiddleware.set('port', process.env.PORT || this.config.port);
+    expressMiddleware.set('view engine', 'ejs');
     // compression
     if (this.config.enableGZipCompression)
-      expressApp.use(compression());
-
+      expressMiddleware.use(compression());
     // public folder
-    expressApp.use(express.static(this.config.publicDirectory));
-
-    // --------------------------------------------------------
-    // @todo - update to this lifecycle
-    // --------------------------------------------------------
-    // create express app
-    // create clientType / activity maps
-    // init routing
-    // create http server
-    // create socket server
-    // execute serviceManager.start
-    // when serviceManager.ready
-    // httpServer.listen (as its async, we should be sure it the last init step)
+    expressMiddleware.use(express.static(this.config.publicDirectory));
 
     this._initActivities();
-    this._initRouting(expressApp);
+    this._initRouting(expressMiddleware);
 
-    // use https
     const useHttps = this.config.useHttps || false;
-    // launch http(s) server
-    if (!useHttps) {
-      const server = this._createHttpServer(expressApp);
-      this._initSockets(server);
-    } else {
-      const httpsInfos = this.config.httpsInfos;
 
-      // use given certificate
-      if (httpsInfos.key && httpsInfos.cert) {
-        const key = fs.readFileSync(httpsInfos.key);
-        const cert = fs.readFileSync(httpsInfos.cert);
-
-        const server = this._createHttpsServer(expressApp, key, cert);
-        this._initSockets(server);
-      // generate certificate on the fly (for development purposes)
+    new Promise((resolve, reject) => {
+      // launch http(s) server
+      if (!useHttps) {
+        const httpServer = http.createServer(expressMiddleware);
+        resolve(httpServer);
       } else {
-        pem.createCertificate({ days: 1, selfSigned: true }, (err, keys) => {
-          const server = this._createHttpsServer(expressApp, keys.serviceKey, keys.certificate);
-          this._initSockets(server);
-        });
+        const httpsInfos = this.config.httpsInfos;
+        // use given certificate
+        if (httpsInfos.key && httpsInfos.cert) {
+          const key = fs.readFileSync(httpsInfos.key);
+          const cert = fs.readFileSync(httpsInfos.cert);
+          const httpsServer = https.createServer({ key, cert }, expressMiddleware);
+          resolve(httpsServer);
+        // generate certificate on the fly (for development purposes)
+        } else {
+          pem.createCertificate({ days: 1, selfSigned: true }, (err, keys) => {
+            const httpsServer = https.createServer({
+              key: keys.serviceKey,
+              cert: keys.certificate,
+            }, expressMiddleware);
+
+            resolve(httpsServer);
+          });
+        }
       }
-    }
-  },
+    }).then((httpServer) => {
+      this._initSockets(httpServer);
 
-  /**
-   * Launch a http server.
-   * @private
-   */
-  _createHttpServer(middleware) {
-    const httpServer = http.createServer(middleware);
+      serviceManager.signals.ready.addObserver(() => {
+        httpServer.listen(expressMiddleware.get('port'), () => {
+          const protocol = useHttps ? 'https' : 'http';
+          this._address = `${protocol}://127.0.0.1:${expressMiddleware.get('port')}`;
+          console.log(`[${protocol.toUpperCase()} SERVER] Server listening on`, this._address);
+        });
+      });
 
-    httpServer.listen(middleware.get('port'), () => {
-      this._address = `http://127.0.0.1:${middleware.get('port')}`;
-      console.log('[HTTP SERVER] Server listening on', this._address);
-    });
-
-    return httpServer;
-  },
-
-  /**
-   * Launch a https server.
-   * @private
-   */
-  _createHttpsServer(middleware, key, cert) {
-    const httpsServer = https.createServer({ key, cert }, middleware);
-
-    httpsServer.listen(middleware.get('port'), () => {
-      this._address = `https://127.0.0.1:${middleware.get('port')}`;
-      console.log('[HTTPS SERVER] Server listening on', this._address);
-    });
-
-    return httpsServer;
+      serviceManager.start();
+    }).catch((err) => console.error(err.stack));
   },
 
   /**
@@ -317,10 +289,6 @@ const server = {
     this._activities.forEach((activity) => {
       this._mapClientTypesToActivity(activity.clientTypes, activity);
     });
-
-    // this._activities.forEach((activity) => activity.start());
-    // should start the serviceManager instead of starting the activities directly
-    serviceManager.start();
   },
 
   /**
@@ -344,11 +312,6 @@ const server = {
    * @private
    */
   _initSockets(httpServer) {
-    // merge socket.io configuration for cordova
-    // @todo - move to template
-    // if (this.config.cordova && this.config.cordova.websockets)
-    //   this.config.cordova.websockets = Object.assign({}, this.config.websockets, this.config.cordova.websockets);
-
     sockets.init(httpServer, this.config.websockets);
     // socket connnection
     sockets.onConnection(this.clientTypes, (clientType, socket) => {

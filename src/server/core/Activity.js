@@ -144,7 +144,6 @@ class Activity extends EventEmitter {
    * @param {module:soundworks/server.Client} client
    */
   connect(client) {
-    // setup an object
     client.activities[this.id] = {};
   }
 
