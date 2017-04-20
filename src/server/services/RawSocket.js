@@ -5,7 +5,6 @@ import { Server as WebSocketServer } from 'ws';
 import http from 'http';
 import https from 'https';
 import pem from 'pem';
-import express from 'express';
 import fs from 'fs';
 
 const SERVICE_ID = 'service:raw-socket';
@@ -126,12 +125,12 @@ class RawSocket extends Service {
         const key = fs.readFileSync(httpsInfos.key);
         const cert = fs.readFileSync(httpsInfos.cert);
 
-        let httpsServer = https.createServer({ key: key, cert: cert }, app);
+        let httpsServer = https.createServer({ key: key, cert: cert });
         this.runServer(httpsServer);
       // generate certificate on the fly (for development purposes)
       } else {
         pem.createCertificate({ days: 1, selfSigned: true }, (err, keys) => {
-          let httpsServer = https.createServer({ key: keys.serviceKey, cert: keys.certificate }, app);
+          let httpsServer = https.createServer({ key: keys.serviceKey, cert: keys.certificate });
           this.runServer(httpsServer);
         });
       }
