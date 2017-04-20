@@ -25,6 +25,8 @@ class Geolocation extends Service {
 
   start() {
     super.start();
+
+    this.ready();
   }
 
   connect(client) {

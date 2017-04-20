@@ -28,7 +28,9 @@ class SharedRecorder extends Service {
   }
 
   start() {
+    super.start();
 
+    this.ready();
   }
 
   connect(client) {

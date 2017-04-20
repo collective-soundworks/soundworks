@@ -30,17 +30,10 @@ class ErrorReporter extends Service {
   }
 
   /** @private */
-  init() {
-    window.addEventListener('error', this._onError);
-  }
-
-  /** @private */
   start() {
     super.start();
 
-    if (!this.hasStarted)
-      this.init();
-
+    window.addEventListener('error', this._onError);
     this.ready();
   }
 

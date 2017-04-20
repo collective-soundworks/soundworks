@@ -6,18 +6,6 @@ import SyncModule from 'sync/client';
 
 const SERVICE_ID = 'service:sync';
 
-const defaultViewTemplate = `
-<div class="section-top"></div>
-<div class="section-center flex-center">
-  <p class="soft-blink"><%= wait %></p>
-</div>
-<div class="section-bottom"></div>
-`;
-
-const defaultViewContent = {
-  wait: `Clock syncing,<br />stand by&hellip;`,
-};
-
 /**
  * Interface for the client `'sync'` service.
  *
@@ -48,7 +36,6 @@ class Sync extends Service {
     super(SERVICE_ID, true);
 
     const defaults = {
-      viewCtor: SegmentedView,
       viewPriority: 3,
       useAudioTime: true,
       // @todo - add options to configure the sync service
@@ -56,8 +43,12 @@ class Sync extends Service {
 
     this.configure(defaults);
 
-    this._defaultViewTemplate = defaultViewTemplate;
-    this._defaultViewContent = defaultViewContent;
+    const getTime = this.options.useAudioTime ?
+      () => audioContext.currentTime :
+      () => (new Date().getTime() * 0.001);
+
+    this._sync = new SyncModule(getTime);
+    this._ready = false;
 
     this.require('platform', { features: 'web-audio' });
 
@@ -66,26 +57,10 @@ class Sync extends Service {
   }
 
   /** @private */
-  init() {
-    const getTime = this.options.useAudioTime ?
-      () => audioContext.currentTime :
-      () => (new Date().getTime() * 0.001);
-
-    this._sync = new SyncModule(getTime);
-    this._ready = false;
-
-    this.viewCtor = this.options.viewCtor;
-    this.view = this.createView();
-  }
-
-  /** @private */
   start() {
     super.start();
-
-    if (!this.hasStarted)
-      this.init();
-
     this.show();
+
     this._sync.start(this.send, this.receive, this._syncStatusReport);
   }
 

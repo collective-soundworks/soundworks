@@ -22,6 +22,12 @@ class Network extends Service {
     super(SERVICE_ID);
   }
 
+  start() {
+    super.start();
+
+    this.ready();
+  }
+
   /** @private */
   connect(client) {
     super.connect(client);

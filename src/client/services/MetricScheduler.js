@@ -239,9 +239,6 @@ class MetricScheduler extends Service {
   start() {
     super.start();
 
-    if (!this.hasStarted)
-      this.init();
-
     this._syncSchedulerHook = new SyncSchedulerHook(this._syncScheduler, this);
     this._syncEventEngine = new SyncEventEngine(this._syncScheduler, this);
 

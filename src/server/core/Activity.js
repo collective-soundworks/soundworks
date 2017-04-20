@@ -2,6 +2,8 @@ import sockets from './sockets';
 import server from './server';
 import serviceManager from './serviceManager';
 import { EventEmitter } from 'events';
+import Signal from '../../utils/Signal';
+import SignalAll from '../../utils/SignalAll';
 
 // @todo - remove EventEmitter ? (Implement our own listeners)
 
@@ -57,6 +59,14 @@ class Activity extends EventEmitter {
 
     // register as existing to the server
     server.setActivity(this);
+
+    this.start = this.start.bind(this);
+
+    this.requiredSignals = new SignalAll();
+    this.requiredSignals.addObserver(this.start);
+    // wait for serviceManager.start
+    this.requiredSignals.add(serviceManager.signals.start);
+
   }
 
   /**
@@ -73,22 +83,22 @@ class Activity extends EventEmitter {
    * @param {String|Array} val - The client type(s) on which the activity
    *  should be mapped
    */
-  addClientType(value) {
+  addClientTypes(type) {
     if (arguments.length === 1) {
-      if (typeof value === 'string')
-        value = [value];
+      if (typeof type === 'string')
+        type = [type];
     } else {
-      value = Array.from(arguments);
+      type = Array.from(arguments);
     }
 
     // add client types to current activity
-    value.forEach((clientType) => {
+    type.forEach((clientType) => {
       this.clientTypes.add(clientType);
     });
 
     // propagate value to required activities
     this.requiredActivities.forEach((activity) => {
-      activity.addClientType(value);
+      activity.addClientTypes(type);
     });
   }
 
@@ -106,8 +116,16 @@ class Activity extends EventEmitter {
    * @param {String} id - The id of the service.
    * @param {Object} options - Some options to configure the service.
    */
+  // make abstract, should be implemented by child classes (Scene and Service)
   require(id, options) {
-    return serviceManager.require(id, this, options);
+    const instance = serviceManager.require(id, options);
+
+    this.addRequiredActivity(instance);
+    this.requiredSignals.add(instance.signals.ready);
+
+    instance.addClientTypes(this.clientTypes);
+
+    return instance;
   }
 
   /**
@@ -126,7 +144,6 @@ class Activity extends EventEmitter {
    * @param {module:soundworks/server.Client} client
    */
   connect(client) {
-    // setup an object
     client.activities[this.id] = {};
   }
 

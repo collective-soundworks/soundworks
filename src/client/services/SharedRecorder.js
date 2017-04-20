@@ -40,19 +40,8 @@ class SharedRecorder extends Service {
     super.configure(options);
   }
 
-  setGain(value) {
-    this._gain = value;
-  }
-
-  init() {
-
-  }
-
   start() {
     super.start();
-
-    if (!this.hasStarted)
-      this.init();
 
     this.receive('available-file', this._onAvailableFile);
 
@@ -61,8 +50,8 @@ class SharedRecorder extends Service {
     this.ready();
   }
 
-  stop() {
-
+  setGain(value) {
+    this._gain = value;
   }
 
   /** Consumer interface */
@@ -148,7 +137,6 @@ class SharedRecorder extends Service {
   }
 
   startRecord(name) {
-    console.log('start', name);
     const infos = this._buffers[name];
     const stream = this._streams[name];
 

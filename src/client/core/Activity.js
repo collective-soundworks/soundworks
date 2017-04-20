@@ -1,6 +1,6 @@
 import Process from './Process';
-import Signal from './Signal';
-import SignalAll from './SignalAll';
+import Signal from '../../utils/Signal';
+import SignalAll from '../../utils/SignalAll';
 import socket from './socket';
 import View from '../views/View';
 import viewManager from './viewManager';
@@ -54,42 +54,6 @@ class Activity extends Process {
     this.view = null;
 
     /**
-     * Events to bind to the view. (mimic the Backbone's syntax).
-     * @type {Object}
-     * @name viewEvents
-     * @instance
-     * @memberof module:soundworks/client.Activity
-     * @example
-     * this.viewEvents = {
-     *   "touchstart .button": (e) => {
-     *     // do somthing
-     *   },
-     *   // etc...
-     * };
-     */
-    this.viewEvents = {};
-
-    /**
-     * Additionnal options to pass to the view.
-     * @type {Object}
-     * @name viewOptions
-     * @instance
-     * @memberof module:soundworks/client.Activity
-     */
-    this.viewOptions = {};
-
-    /**
-     * View constructor to be used in
-     * [`Activity#createView`]{@link module:soundworks/client.Activity#createView}.
-     * @type {module:soundworks/client.View}
-     * @default module:soundworks/client.View
-     * @name viewCtor
-     * @instance
-     * @memberof module:soundworks/client.Activity
-     */
-    this.viewCtor = View;
-
-    /**
      * Options of the activity.
      * @type {Object}
      * @name options
@@ -125,74 +89,12 @@ class Activity extends Process {
   }
 
   /**
-   * Share the defined view templates with all `Activity` instances.
-   * @param {Object} defs - An object containing the view templates.
-   * @private
+   * Set the view of service.
+   *
+   * @param {Object} view - any object compliant with the view interface.
    */
-  static setViewTemplateDefinitions(defs) {
-    Activity.prototype.viewTemplateDefinitions = defs;
-  }
-
-  /**
-   * Share the view content configuration (name and data) with all the
-   * `Activity` instances
-   * @param {Object} defs - The view contents of the application.
-   * @private
-   */
-  static setViewContentDefinitions(defs) {
-    Activity.prototype.viewContentDefinitions = defs;
-  }
-
-  /**
-   * The template related to the `id` of the activity.
-   * @type {String}
-   * @see {@link module:soundworks/client.defaultViewTemplates}
-   */
-  get viewTemplate() {
-    const viewTemplate = this._viewTemplate || 
-      this.viewTemplateDefinitions[this.id] ||
-      this._defaultViewTemplate;
-
-    return viewTemplate;
-  }
-
-  set viewTemplate(tmpl) {
-    this._viewTemplate = tmpl;
-  }
-
-  /**
-   * The view contents related to the `id` of the activity. The object is
-   * extended with a pointer to the `globals` entry of the defined view contents.
-   * @type {Object}
-   * @see {@link module:soundworks/client.defaultViewContent}
-   */
-  get viewContent() {
-    const viewContent = this._viewContent || 
-      this.viewContentDefinitions[this.id] ||
-      this._defaultViewContent;
-
-    if (viewContent)
-      viewContent.globals = this.viewContentDefinitions.globals;
-
-    return viewContent;
-  }
-
-  set viewContent(obj) {
-    this._viewContent = obj;
-  }
-
-  /**
-   * Create the view of the activity according to its `viewCtor`, `viewTemplate`,
-   * `viewContent`, `viewEvents` and `viewOptions` attributes.
-   */
-  createView() {
-    const options = Object.assign({
-      id: this.id.replace(/\:/g, '-'),
-      className: 'activity',
-      priority: this.options.viewPriority,
-    }, this.viewOptions);
-
-    return new this.viewCtor(this.viewTemplate, this.viewContent, this.viewEvents, options);
+  setView(view) {
+    this.view = view;
   }
 
   /**
@@ -201,19 +103,18 @@ class Activity extends Process {
    * view manager decides which view to display based on their priority.
    */
   show() {
-    if (!this.view) { return; }
-
-    this.view.render();
-    viewManager.register(this.view);
+    if (this.view) {
+      this.view.render();
+      viewManager.register(this.view);
+    }
   }
 
   /**
    * Hide the view of the activity if it owns one.
    */
   hide() {
-    if (!this.view) { return; }
-
-    viewManager.remove(this.view);
+    if (this.view)
+      viewManager.remove(this.view);
   }
 
   /**

@@ -52,6 +52,8 @@ class Locator extends Service {
     this.clientTypes.forEach((clientType) => {
       this._sharedConfig.share(configItem, clientType);
     });
+
+    this.ready();
   }
 
   /** @private */

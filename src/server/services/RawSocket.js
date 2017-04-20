@@ -1,6 +1,7 @@
 import server from '../core/server';
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
+import { Server as WebSocketServer } from 'ws';
 import http from 'http';
 import https from 'https';
 import pem from 'pem';
@@ -108,18 +109,14 @@ class RawSocket extends Service {
     if (Array.isArray(config.protocol))
       this._protocol = this.protocol.concat(config.protocol);
 
-    this._channels = this._protocol.map((def) => def.channel);;
-    // retrieve socket configuration
-
-    // init express app
-    let app = express();
+    this._channels = this._protocol.map((def) => def.channel);
 
     // check http / https mode
     let useHttps = server.config.useHttps;
 
     // launch http(s) server
     if (!useHttps) {
-      let httpServer = http.createServer(app);
+      let httpServer = http.createServer();
       this.runServer(httpServer);
     } else {
       const httpsInfos = server.config.httpsInfos;
@@ -139,18 +136,16 @@ class RawSocket extends Service {
         });
       }
     }
-
   }
 
   runServer(server){
     server.listen(this._port, () => {
       // console.log(SERVICE_ID, ': Https server listening on port:', this._port);
     });
-
-    var WebSocketServer = require('ws').Server;
+    
     this._wss = new WebSocketServer({ server: server });
-
-    this._wss.on('connection', this._onConnection);    
+    this._wss.on('connection', this._onConnection); 
+    this.ready();    
   }
 
   /** @private */

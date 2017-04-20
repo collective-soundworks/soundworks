@@ -61,18 +61,13 @@ class FileSystem extends Service {
     this._requestId = 0;
   }
 
-  init() {
+  start() {
+    super.start();
+
     if (this.options.list !== null)
       this.getList(this.options.list);
     else
       this.ready();
-  }
-
-  start() {
-    super.start();
-
-    if (!this.hasStarted)
-      this.init();
   }
 
   stop() {

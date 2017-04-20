@@ -1,8 +1,7 @@
 import Activity from './Activity';
 import debug from 'debug';
 import serviceManager from './serviceManager';
-import Signal from './Signal';
-import SignalAll from './SignalAll';
+import Signal from '../../utils/Signal';
 
 const log = debug('soundworks:services');
 
@@ -38,16 +37,8 @@ class Service extends Activity {
     this.signals.ready = new Signal();
     // add the serviceManager bootstart signal to the required signals
     this.requiredSignals.add(serviceManager.signals.start);
-  }
 
-  /**
-   * Method to call in the service lifecycle when it should be considered as
-   * `ready` and thus allows all its dependent activities to start themselves.
-   */
-  ready() {
-    this.stop();
-    log(`"${this.id}" ready`);
-    this.signals.ready.set(true);
+    this.ready = this.ready.bind(this);
   }
 
   /**
@@ -70,13 +61,15 @@ class Service extends Activity {
   }
 
   /**
-   * Lifecycle method to initialize the service. Must be called manually.
-   * @example
-   * // in the `start` method implementation
-   * if (!this.hasStarted)
-   *   this.init();
+   * Method to call in the service lifecycle when it should be considered as
+   * `ready` and thus allows all its dependent activities to start themselves.
    */
-  init() {}
+  ready() {
+    log(`"${this.id}" ready`);
+
+    this.stop();
+    this.signals.ready.set(true);
+  }
 
   /** @inheritdoc */
   start() {

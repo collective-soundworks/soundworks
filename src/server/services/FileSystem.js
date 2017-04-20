@@ -46,6 +46,8 @@ class FileSystem extends Service {
       throw new Error(`"${SERVICE_ID}": server.config.${configItem} is not defined`);
 
     this._enableCache = !!this.options.enableCache;
+
+    this.ready();
   }
 
   connect(client) {

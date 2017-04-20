@@ -2,7 +2,6 @@ import { audioContext } from 'waves-audio';
 import client from '../core/client';
 import MobileDetect from 'mobile-detect';
 import screenfull from 'screenfull';
-import SegmentedView from '../views/SegmentedView';
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
 
@@ -167,49 +166,6 @@ const defaultDefinitions = [
   }
 ];
 
-
-const defaultViewTemplate = `
-<% if (isCompatible === false) { %>
-  <div class="section-top"></div>
-  <div class="section-center flex-center">
-    <p><%= errorCompatibleMessage %></p>
-  </div>
-  <div class="section-bottom"></div>
-<% } else if (resolvedHooks === false) { %>
-  <div class="section-top"></div>
-  <div class="section-center flex-center">
-    <p><%= errorHooksMessage %></p>
-  </div>
-  <div class="section-bottom"></div>
-<% } else { %>
-  <div class="section-top flex-middle"></div>
-  <div class="section-center flex-center">
-      <p class="big">
-        <%= intro %>
-        <br />
-        <b><%= globals.appName %></b>
-      </p>
-  </div>
-  <div class="section-bottom flex-middle">
-    <% if (checking === true) { %>
-    <p class="small soft-blink"><%= checkingMessage %></p>
-    <% } else if (resolvedHooks === true) { %>
-    <p class="small soft-blink"><%= instructions %></p>
-    <% } %>
-  </div>
-<% } %>`;
-
-const defaultViewContent = {
-  isCompatible: null,
-  resolvedHooks: null,
-  checking: false,
-  intro: 'Welcome to',
-  instructions: 'Touch the screen to join!',
-  checkingMessage: 'Please wait while checking compatiblity',
-  errorCompatibleMessage: 'Sorry,<br />Your device is not compatible with the application.',
-  errorHooksMessage: `Sorry,<br />The application didn't obtain the necessary authorizations.`,
-};
-
 const SERVICE_ID = 'service:platform';
 
 /**
@@ -236,6 +192,15 @@ const SERVICE_ID = 'service:platform';
  *   suffice).
  * - 'wake-lock': deprecated, use with caution, has been observed consumming
  *   150% cpu in chrome desktop.
+ *
+ *
+ * View:
+ * The view of the `platform` service should comply with the following defintion
+ * setTouchstartCallback
+ * setMousedownCallback
+ * updateCheckingStatus
+ * updateIsCompatibleStatus
+ * updateHasAuthorizationsStatus
  *
  * _<span class="warning">__WARNING__</span> This class should never be
  * instanciated manually_
@@ -269,14 +234,16 @@ class Platform extends Service {
 
     const defaults = {
       showDialog: true,
-      viewCtor: SegmentedView,
+      view: null,
       viewPriority: 10,
     };
 
     this.configure(defaults);
 
-    this._defaultViewTemplate = defaultViewTemplate;
-    this._defaultViewContent = defaultViewContent;
+    this.view = null;
+
+    // this._defaultViewTemplate = defaultViewTemplate;
+    // this._defaultViewContent = defaultViewContent;
 
     this._requiredFeatures = new Set();
     this._featureDefinitions = {};
@@ -299,44 +266,43 @@ class Platform extends Service {
     super.configure(options);
   }
 
-  /** @private */
-  init() {
-    this._defineAudioFileExtention();
-    this._definePlatform();
-
-    this.viewCtor = this.options.viewCtor;
-    this.view = this.createView();
-  }
-
-  /** @private */
+  /**
+   * @private
+   *
+   * algorithm:
+   *
+   *   check required features
+   *   if (false)
+   *     show 'sorry' screen
+   *   else
+   *     show 'welcome' screen
+   *     execute start hook (promise)
+   *     if (promise === true)
+   *       show touch to start
+   *       bind events
+   *     if (promise === false)
+   *       show 'sorry' screen
+   */
   start() {
     super.start();
 
-    if (!this.hasStarted)
-      this.init();
-
-    // ### algorithm
-    // check required features
-    // if (false)
-    //   show 'sorry' screen
-    // else
-    //   show 'welcome' screen
-    //   execute start hook (promise)
-    //   if (promise === true)
-    //     show touch to start
-    //     bind events
-    //   if (promise === false)
-    //     show 'sorry' screen
+    this._defineAudioFileExtention();
+    this._definePlatform();
 
     // resolve required features from the application
     client.compatible = this._checkRequiredFeatures();
 
+    // default view values
+    this.view.updateCheckingStatus(false);
+    this.view.updateIsCompatibleStatus(null);
+    this.view.updateHasAuthorizationsStatus(null);
+
     if (!client.compatible) {
-      this.view.content.isCompatible = false;
+      this.view.updateIsCompatibleStatus(false);
       this.show();
     } else {
-      this.view.content.isCompatible = true;
-      this.view.content.checking = true;
+      this.view.updateIsCompatibleStatus(true);
+      this.view.updateCheckingStatus(true);
       this.show();
 
       // execute start hook
@@ -345,18 +311,16 @@ class Platform extends Service {
 
       Promise.all(startPromises).then((results) => {
         // if one of the start hook failed
-        let resolved = true;
-        results.forEach((bool) => resolved = resolved && bool);
+        let hasAuthorizations = true;
+        results.forEach((success) => hasAuthorizations = hasAuthorizations && success);
 
-        this.view.content.resolvedHooks = resolved;
-        this.view.content.checking = false;
+        this.view.updateHasAuthorizationsStatus(hasAuthorizations);
+        this.view.updateCheckingStatus(false);
         this.view.render();
 
-        if (resolved) {
-          this.view.installEvents({
-            touchstart: this._onInteraction('touch'),
-            mousedown: this._onInteraction('mouse'),
-          });
+        if (hasAuthorizations) {
+          this.view.setTouchStartCallback(this._onInteraction('touch'));
+          this.view.setMouseDownCallback(this._onInteraction('mouse'));
         }
       }).catch((err) => console.error(err.stack));
     }
@@ -412,7 +376,7 @@ class Platform extends Service {
         if (resolved) {
           this.ready();
         } else {
-          this.view.content.resolvedHooks = resolved;
+          this.view.updateHasAuthorizationsStatus(resolved);
           this.view.render();
         }
       }).catch((err) => console.error(err.stack));

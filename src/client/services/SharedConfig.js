@@ -45,6 +45,14 @@ class SharedConfig extends Service {
      */
     this._items = [];
 
+    /**
+     * Object containing all the configuration items shared by the server. The
+     * object is flattened in order to minimize the needed communications between
+     * the client and the server.
+     * @type {Object}
+     */
+    this.data = null;
+
     this._onConfigResponse = this._onConfigResponse.bind(this);
   }
 
@@ -59,22 +67,8 @@ class SharedConfig extends Service {
   }
 
   /** @private */
-  init() {
-    /**
-     * Object containing all the configuration items shared by the server. The
-     * object is flattened in order to minimize the needed communications between
-     * the client and the server.
-     * @type {Object}
-     */
-    this.data = null;
-  }
-
-  /** @private */
   start() {
     super.start();
-
-    if (!this.hasStarted)
-      this.init();
 
     this.send('request', this._items);
     this.receive('config', this._onConfigResponse);

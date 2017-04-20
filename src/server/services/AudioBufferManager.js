@@ -19,6 +19,12 @@ class AudioBufferManager extends Service {
 
     this._fileSystem = this.require('file-system');
   }
+
+  start() {
+    super.start();
+
+    this.ready();
+  }
 }
 
 serviceManager.register(SERVICE_ID, AudioBufferManager);

@@ -44,6 +44,8 @@ class MetricScheduler extends Service {
   /** @private */
   start() {
     super.start();
+
+    this.ready();
   }
 
   /** @private */

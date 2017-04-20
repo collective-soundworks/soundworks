@@ -108,6 +108,9 @@ class SyncScheduler extends Service {
     this.ready();
   }
 
+  /**
+   * Current audio time of the scheduler.
+   */
   get audioTime() {
     return audioScheduler.currentTime;
   }
@@ -119,8 +122,12 @@ class SyncScheduler extends Service {
     return this._syncedQueue.currentTime;
   }
 
+  /**
+   * Current sync time of the scheduler.
+   * @alias syncTime
+   */
   get currentTime() {
-    return this._syncScheduler.currentTime;
+    return this._syncedQueue.currentTime;
   }
 
   /**

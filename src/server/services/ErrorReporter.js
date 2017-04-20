@@ -47,6 +47,8 @@ class ErrorReporter extends Service {
 
   /** @private */
   start() {
+    super.start();
+
     let dir = this._sharedConfig.get(this.options.configItem);
 
     if (dir === null)
@@ -55,6 +57,8 @@ class ErrorReporter extends Service {
     fse.ensureDirSync(dir); // create directory if not exists
 
     this.dir = dir;
+
+    this.ready();
   }
 
   /** @private */

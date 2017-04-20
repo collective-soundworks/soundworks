@@ -29,54 +29,8 @@ const LOCAL_STORAGE_KEY = `soundworks:${SERVICE_ID}`;
  * @name AbstractAuthView.onReset
  * @param {Function} callback - The callback given by the `auth` service.
  */
-class AuthView extends SegmentedView {
-  onSend(callback) {
-    this.installEvents({
-      'click #send': () => {
-        const password = this.$el.querySelector('#password').value;
 
-        if (password !== '')
-          callback(password);
-      }
-    });
-  }
 
-  onReset(callback) {
-    this.installEvents({ 'click #reset': callback });
-  }
-}
-
-const defaultViewTemplate = `
-<% if (!rejected) { %>
-  <div class="section-top flex-middle">
-    <p><%= instructions %></p>
-  </div>
-  <div class="section-center flex-center">
-    <div>
-      <input type="password" id="password" />
-      <button class="btn" id="send"><%= send %></button>
-    </div>
-  </div>
-  <div class="section-bottom flex-middle">
-    <button id="reset" class="btn"><%= reset %></button>
-  </div>
-<% } else { %>
-  <div class="section-top"></div>
-  <div class="section-center flex-center">
-    <p><%= rejectMessage %></p>
-  </div>
-  <div class="section-bottom flex-middle">
-    <button id="reset" class="btn"><%= reset %></button>
-  </div>
-<% } %>`;
-
-const defaultViewContent = {
-  instructions: 'Login',
-  send: 'Send',
-  reset: 'Reset',
-  rejectMessage: `Sorry, you don't have access to this client`,
-  rejected: false,
-};
 
 /**
  * Interface for the client `auth` service.
@@ -105,8 +59,7 @@ class Auth extends Service {
 
     this.configure(defaults);
 
-    this._defaultViewTemplate = defaultViewTemplate;
-    this._defaultViewContent = defaultViewContent;
+    this._password = null;
 
     this._onAccesGrantedResponse = this._onAccesGrantedResponse.bind(this);
     this._onAccesRefusedResponse = this._onAccesRefusedResponse.bind(this);
@@ -115,21 +68,11 @@ class Auth extends Service {
   }
 
   /** @private */
-  init() {
-    this._password = null;
-
-    this.viewCtor = this.options.viewCtor;
-    this.view = this.createView();
-    this.view.onSend(this._sendPassword);
-    this.view.onReset(this._resetPassword);
-  }
-
-  /** @private */
   start() {
     super.start();
 
-    if (!this.hasStarted)
-      this.init();
+    this.view.setSendPasswordCallback(this._sendPassword);
+    this.view.setResetCallback(this._resetPassword);
 
     this.receive('granted', this._onAccesGrantedResponse);
     this.receive('refused', this._onAccesRefusedResponse);
@@ -173,7 +116,7 @@ class Auth extends Service {
     this._password = null;
     localStorage.removeItem(LOCAL_STORAGE_KEY);
 
-    this.view.content.rejected = false;
+    this.view.updateRejectedStatus(false);
     this.view.render();
   }
 
@@ -185,7 +128,7 @@ class Auth extends Service {
 
   /** @private */
   _onAccesRefusedResponse() {
-    this.view.content.rejected = true;
+    this.view.updateRejectedStatus(true);
     this.view.render();
   }
 }

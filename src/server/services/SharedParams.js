@@ -144,6 +144,12 @@ class SharedParams extends Service {
     this._paramData = [];
   }
 
+  start() {
+    super.start();
+
+    this.ready();
+  }
+
   /**
    * Generic method to create shared parameters from an array of definitions.
    * A definition is an object with a 'type' property

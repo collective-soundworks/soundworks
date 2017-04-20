@@ -1,20 +1,48 @@
+import Signal from '../../utils/Signal';
+import SignalAll from '../../utils/SignalAll';
+
 const _ctors = {};
 const _instances = {};
-
 
 /**
  * Manager the services and their relations. Acts as a factory to ensure services
  * are instanciated only once.
  */
 const serviceManager = {
+  // add an init method
+  /**
+   *
+   *
+   */
+  init() {
+    this._ready = this._ready.bind(this);
+
+    this.signals = {};
+    this.signals.start = new Signal();
+    this.signals.ready = new Signal();
+
+    this._requiredSignals = new SignalAll();
+    this._requiredSignals.addObserver(this._ready);
+  },
+
+  start() {
+    this.signals.start.set(true);
+
+    if (this._requiredSignals.length === 0)
+      this._ready();
+  },
+
+  _ready() {
+    this.signals.ready.set(true);
+  },
+
   /**
    * Retrieve a service according to the given id. If the service as not beeen
    * requested yet, it is instanciated.
    * @param {String} id - The id of the registered service
-   * @param {Activity} consumer - The activity instance requering the service.
    * @param {Object} options - The options to configure the service.
    */
-  require(id, consumer = null, options = {}) {
+  require(id, options = {}) {
     id = 'service:' + id;
 
     if (!_ctors[id])
@@ -25,11 +53,6 @@ const serviceManager = {
     if (!instance) {
       instance = new _ctors[id];
       _instances[id] = instance;
-    }
-
-    if (consumer !== null) {
-      consumer.addRequiredActivity(instance);
-      instance.addClientType(consumer.clientTypes);
     }
 
     instance.configure(options);

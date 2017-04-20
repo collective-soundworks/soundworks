@@ -145,7 +145,7 @@ const server = {
    * @param {Object} options - Options to configure the service.
    */
   require(id, options) {
-    return serviceManager.require(id, null, options);
+    return serviceManager.require(id, options);
   },
 
   /**
@@ -209,6 +209,8 @@ const server = {
    */
   init(config) {
     this.config = config;
+
+    serviceManager.init();
   },
 
   /**
@@ -225,38 +227,96 @@ const server = {
       logger.init(this.config.logger);
 
     // configure express
-    const expressApp = new express();
-    expressApp.set('port', process.env.PORT || this.config.port);
-    expressApp.set('view engine', 'ejs');
-
+    const expressMiddleware = new express();
+    expressMiddleware.set('port', process.env.PORT || this.config.port);
+    expressMiddleware.set('view engine', 'ejs');
     // compression
     if (this.config.enableGZipCompression)
-      expressApp.use(compression());
-
+      expressMiddleware.use(compression());
     // public folder
-    expressApp.use(express.static(this.config.publicDirectory));
+    expressMiddleware.use(express.static(this.config.publicDirectory));
 
-    // use https
+    this._initActivities();
+    this._initRouting(expressMiddleware);
+
     const useHttps = this.config.useHttps || false;
-    // launch http(s) server
-    if (!useHttps) {
-      this._runServer(expressApp);
-    } else {
-      const httpsInfos = this.config.httpsInfos;
 
-      // use given certificate
-      if (httpsInfos.key && httpsInfos.cert) {
-        const key = fs.readFileSync(httpsInfos.key);
-        const cert = fs.readFileSync(httpsInfos.cert);
-
-        this._runSecureServer(expressApp, key, cert);
-      // generate certificate on the fly (for development purposes)
+    new Promise((resolve, reject) => {
+      // launch http(s) server
+      if (!useHttps) {
+        const httpServer = http.createServer(expressMiddleware);
+        resolve(httpServer);
       } else {
-        pem.createCertificate({ days: 1, selfSigned: true }, (err, keys) => {
-          this._runSecureServer(expressApp, keys.serviceKey, keys.certificate);
-        });
+        const httpsInfos = this.config.httpsInfos;
+        // use given certificate
+        if (httpsInfos.key && httpsInfos.cert) {
+          const key = fs.readFileSync(httpsInfos.key);
+          const cert = fs.readFileSync(httpsInfos.cert);
+          const httpsServer = https.createServer({ key, cert }, expressMiddleware);
+          resolve(httpsServer);
+        // generate certificate on the fly (for development purposes)
+        } else {
+          pem.createCertificate({ days: 1, selfSigned: true }, (err, keys) => {
+            const httpsServer = https.createServer({
+              key: keys.serviceKey,
+              cert: keys.certificate,
+            }, expressMiddleware);
+
+            resolve(httpsServer);
+          });
+        }
       }
+    }).then((httpServer) => {
+      this._initSockets(httpServer);
+
+      serviceManager.signals.ready.addObserver(() => {
+        httpServer.listen(expressMiddleware.get('port'), () => {
+          const protocol = useHttps ? 'https' : 'http';
+          this._address = `${protocol}://127.0.0.1:${expressMiddleware.get('port')}`;
+          console.log(`[${protocol.toUpperCase()} SERVER] Server listening on`, this._address);
+        });
+      });
+
+      serviceManager.start();
+    }).catch((err) => console.error(err.stack));
+  },
+
+  /**
+   * Map activities to their respective client type(s) and start them all.
+   * @private
+   */
+  _initActivities() {
+    this._activities.forEach((activity) => {
+      this._mapClientTypesToActivity(activity.clientTypes, activity);
+    });
+  },
+
+  /**
+   * Init routing for each client. The default client must be opened last.
+   * @private
+   */
+  _initRouting(expressApp) {
+    for (let clientType in this._clientTypeActivitiesMap) {
+      if (clientType !== this.config.defaultClient)
+        this._openClientRoute(clientType, expressApp);
     }
+
+    for (let clientType in this._clientTypeActivitiesMap) {
+      if (clientType === this.config.defaultClient)
+        this._openClientRoute(clientType, expressApp);
+    }
+  },
+
+  /**
+   * Init websocket server.
+   * @private
+   */
+  _initSockets(httpServer) {
+    sockets.init(httpServer, this.config.websockets);
+    // socket connnection
+    sockets.onConnection(this.clientTypes, (clientType, socket) => {
+      this._onSocketConnection(clientType, socket);
+    });
   },
 
    /**
@@ -296,87 +356,6 @@ const server = {
 
       this._clientTypeActivitiesMap[clientType].add(activity);
     });
-  },
-
-  /**
-   * Init websocket server.
-   * @private
-   */
-  _initSockets(httpServer) {
-    // merge socket.io configuration for cordova
-    // @todo - move to template
-    if (this.config.cordova && this.config.cordova.websockets)
-      this.config.cordova.websockets = Object.assign({}, this.config.websockets, this.config.cordova.websockets);
-
-    sockets.init(httpServer, this.config.websockets);
-    // socket connnection
-    sockets.onConnection(this.clientTypes, (clientType, socket) => {
-      this._onSocketConnection(clientType, socket);
-    });
-  },
-
-  /**
-   * Launch a http server.
-   * @private
-   */
-  _runServer(expressApp) {
-    const httpServer = http.createServer(expressApp);
-
-    this._initActivities();
-    this._initRouting(expressApp);
-
-    httpServer.listen(expressApp.get('port'), () => {
-      this._address = `http://127.0.0.1:${expressApp.get('port')}`;
-      console.log('[HTTP SERVER] Server listening on', this._address);
-    });
-
-    this._initSockets(httpServer);
-  },
-
-  /**
-   * Launch a https server.
-   * @private
-   */
-  _runSecureServer(expressApp, key, cert) {
-    const httpsServer = https.createServer({ key, cert }, expressApp);
-
-    this._initActivities();
-    this._initRouting(expressApp);
-
-    httpsServer.listen(expressApp.get('port'), () => {
-      this._address = `https://127.0.0.1:${expressApp.get('port')}`;
-      console.log('[HTTPS SERVER] Server listening on', this._address);
-    });
-
-    this._initSockets(httpsServer);
-  },
-
-  /**
-   * Map activities to their respective client type(s) and start them all.
-   * @private
-   */
-  _initActivities() {
-    this._activities.forEach((activity) => {
-      this._mapClientTypesToActivity(activity.clientTypes, activity);
-    });
-
-    this._activities.forEach((activity) => activity.start());
-  },
-
-  /**
-   * Init routing for each client. The default client must be opened last.
-   * @private
-   */
-  _initRouting(expressApp) {
-    for (let clientType in this._clientTypeActivitiesMap) {
-      if (clientType !== this.config.defaultClient)
-        this._openClientRoute(clientType, expressApp);
-    }
-
-    for (let clientType in this._clientTypeActivitiesMap) {
-      if (clientType === this.config.defaultClient)
-        this._openClientRoute(clientType, expressApp);
-    }
   },
 
   /**
@@ -439,6 +418,8 @@ const server = {
     const serverServicesList = serviceManager.getServiceList();
 
     sockets.receive(client, 'handshake', (data) => {
+      // in development, if service required client-side but not server-side,
+      // complain properly client-side.
       if (this.config.env !== 'production') {
         const clientRequiredServices = data.requiredServices || [];
         const missingServices = [];

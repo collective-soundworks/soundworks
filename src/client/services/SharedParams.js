@@ -168,9 +168,6 @@ class SharedParams extends Service {
   start() {
     super.start();
 
-    if (!this.hasStarted)
-      this.init();
-
     this.send('request');
 
     this.receive('init', this._onInitResponse);
