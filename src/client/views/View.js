@@ -30,7 +30,7 @@ import Delegate from 'dom-delegate';
  * @memberof module:soundworks/client
  */
 class View {
-  constructor(template, content = {}, events = {}, options = {}) {
+  constructor(template, model = {}, events = {}, options = {}) {
     /**
      * Function created from the given `template`, to be executed with the
      * `content` object.
@@ -41,7 +41,7 @@ class View {
      * @memberof module:soundworks/client.View
      * @private
      */
-    this.tmpl = tmpl(template);
+    this._tmpl = tmpl(template);
 
     /**
      * Data used to populate variables defined in the template.
@@ -51,7 +51,7 @@ class View {
      * @instance
      * @memberof module:soundworks/client.View
      */
-    this.content = content;
+    this.model = model; // model
 
     /**
      * Events to attach to the view. The key / value pairs must follow the
@@ -159,6 +159,14 @@ class View {
     this.installEvents(this.events, false);
   }
 
+  set template(template) {
+    this._tmpl = tmpl(template);
+  }
+
+  appendTo($container) {
+    $container.appendChild(this.$el);
+  }
+
   /**
    * Partially re-render the view according to the given selector. If the
    * selector is associated to a `component`, the `component` is rendered.
@@ -173,7 +181,7 @@ class View {
     if ($container === null)
       throw new Error(`selector ${selector} doesn't match any element`);
 
-    const html = this.tmpl(this.content);
+    const html = this._tmpl(this.model);
     const $tmp = document.createElement('div');
 
     $tmp.innerHTML = html;
@@ -199,7 +207,7 @@ class View {
     }
 
     // render template and insert it in the main element
-    const html = this.tmpl(this.content);
+    const html = this._tmpl(this.model);
     this.$el.innerHTML = html;
     this.onRender();
   }
