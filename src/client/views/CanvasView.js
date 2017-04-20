@@ -140,8 +140,8 @@ class CanvasView extends SegmentedView {
   }
 
   /**
-   * Callback to execute at the beginning of each `requestAnimationFrame`
-   * cycle.
+   * Callback executed at the beginning of each `requestAnimationFrame`
+   * cycle, before the execution of the renderers.
    * @callback module:soundworks/client.CanvasView~preRenderer
    *
    * @param {CanvasRenderingContext2D} ctx - Context of the canvas.
@@ -150,14 +150,35 @@ class CanvasView extends SegmentedView {
    * @param {Number} canvasHeight - Current height of the canvas.
    */
   /**
-   * Register a function to be executed at the beginning of each
+   * Register a function to execute at the beginning of each
    * `requestAnimationFrame` cycle.
    *
    * @param {module:soundworks/client.CanvasView~preRenderer} callback -
    *  Function to execute before each rendering cycle.
    */
   setPreRender(callback) {
-    this._renderingGroup.preRender = callback.bind(this._renderingGroup);
+    this._renderingGroup.preRender = callback;
+  }
+
+  /**
+   * Callback executed at the end of each `requestAnimationFrame`
+   * cycle, after the execution of the renderers.
+   * @callback module:soundworks/client.CanvasView~postRenderer
+   *
+   * @param {CanvasRenderingContext2D} ctx - Context of the canvas.
+   * @param {Number} dt - Delta time in seconds since last rendering.
+   * @param {Number} canvasWidth - Current width of the canvas.
+   * @param {Number} canvasHeight - Current height of the canvas.
+   */
+  /**
+   * Register a function to execute at the end of each
+   * `requestAnimationFrame` cycle.
+   *
+   * @param {module:soundworks/client.CanvasView~postRenderer} callback -
+   *  Function to execute before each rendering cycle.
+   */
+  setPostRender(callback) {
+    this._renderingGroup.postRender = callback;
   }
 
   /**

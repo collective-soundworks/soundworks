@@ -110,6 +110,13 @@ class RenderingGroup {
     this.renderers = [];
 
     /**
+     * Hooks executed at the beginning and end of each rAF call.
+     * @private
+     */
+    this.preRender = null;
+    this.postRender = null;
+
+    /**
      * Pixel ratio of the device, set to 1 if `false`.
      *
      * @type {Number}
@@ -159,18 +166,6 @@ class RenderingGroup {
   }
 
   /**
-   * Entry point to apply global transformations to the canvas before each
-   * renderer is rendered.
-   *
-   * @param {CanvasRenderingContext2D} ctx - Context of the canvas.
-   * @param {Number} dt - Delta time in seconds since the last rendering
-   *  loop (`requestAnimationFrame`).
-   * @param {Number} canvasWidth - Current width of the canvas.
-   * @param {Number} canvasHeight - Current height of the canvas.
-   */
-  preRender(ctx, dt, canvasWidth, canvasHeight) {}
-
-  /**
    * Propagate `update` to all registered renderers. The `update` method
    * for each renderer is called according to their update period.
    *
@@ -203,13 +198,16 @@ class RenderingGroup {
    *  `requestAnimationFrame` call.
    */
   render(dt) {
-    const ctx = this.ctx;
-    const renderers = this.renderers;
+    const { ctx, renderers } = this;
 
-    this.preRender(ctx, dt, this.canvasWidth, this.canvasHeight);
+    if (this.preRender !== null)
+      this.preRender(ctx, dt, this.canvasWidth, this.canvasHeight);
 
     for (let i = 0, l = renderers.length; i < l; i++)
       renderers[i].render(ctx);
+
+    if (this.postRender !== null)
+      this.postRender(ctx, dt, this.canvasWidth, this.canvasHeight);
   }
 
   /**
