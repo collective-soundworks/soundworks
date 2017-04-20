@@ -22,19 +22,6 @@ class Experience extends Scene {
       this._errorReporter = this.require('error-reporter');
   }
 
-  /**
-   * Interface method to implement in each experience. This method is part of the
-   * experience lifecycle and should be called when
-   * [`Experience#start`]{@link module:soundworks/client.Experience#start}
-   * is called for the first time.
-   *
-   * @example
-   * // in MyExperience#start
-   * if (this.hasStarted)
-   *   this.init();
-   */
-  init() {}
-
   createView() {
     if (this.viewOptions) {
       if (Array.isArray(this.viewOptions.className))

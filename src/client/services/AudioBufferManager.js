@@ -294,6 +294,7 @@ class AudioBufferManager extends Service {
       directories: null,
       audioWrapTail: 0,
       viewPriority: 4,
+      debug: false, // if set to true, the service never "ready" to debug the view
     };
 
     this.view = null;
@@ -339,6 +340,11 @@ class AudioBufferManager extends Service {
   stop() {
     this.hide();
     super.stop();
+  }
+
+  ready() {
+    if (this.options.debug === false)
+      super.ready();
   }
 
   /**

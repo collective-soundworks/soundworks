@@ -154,6 +154,8 @@ class Placer extends Service {
     const coordinates = setup.coordinates;
     const maxClientsPerPosition = setup.maxClientsPerPosition;
 
+    this.nbrPositions = capacity / maxClientsPerPosition;
+
     if (area)
       this.view.setArea(area);
 
@@ -178,7 +180,10 @@ class Placer extends Service {
 
   /** @private */
   _onClientJoined(disabledPositions) {
-    this.view.updateDisabledPositions(disabledPositions);
+    if (disabledPositions.length >= this.nbrPositions)
+      this.view.reject(disabledPositions);
+    else
+      this.view.updateDisabledPositions(disabledPositions);
   }
 
   /** @private */
@@ -188,7 +193,10 @@ class Placer extends Service {
 
   /** @private */
   _onRejectResponse(disabledPositions) {
-    this.view.reject(disabledPositions);
+    if (disabledPositions.length >= this.nbrPositions)
+      this.view.reject(disabledPositions);
+    else
+      this.view.updateDisabledPositions(disabledPositions);
   }
 }
 

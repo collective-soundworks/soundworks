@@ -51,7 +51,7 @@ class Activity extends Process {
      * @instance
      * @memberof module:soundworks/client.Activity
      */
-    this.view = null;
+    this._view = null;
 
     /**
      * Options of the activity.
@@ -93,8 +93,12 @@ class Activity extends Process {
    *
    * @param {Object} view - any object compliant with the view interface.
    */
-  setView(view) {
-    this.view = view;
+  set view(view) {
+    this._view = view;
+  }
+
+  get view() {
+    return this._view;
   }
 
   /**
@@ -103,9 +107,9 @@ class Activity extends Process {
    * view manager decides which view to display based on their priority.
    */
   show() {
-    if (this.view) {
-      this.view.render();
-      viewManager.register(this.view);
+    if (this._view) {
+      this._view.render();
+      viewManager.register(this._view);
     }
   }
 
@@ -113,8 +117,8 @@ class Activity extends Process {
    * Hide the view of the activity if it owns one.
    */
   hide() {
-    if (this.view)
-      viewManager.remove(this.view);
+    if (this._view)
+      viewManager.remove(this._view);
   }
 
   /**

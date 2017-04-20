@@ -120,7 +120,7 @@ class Checkin extends Service {
 
   /** @private */
   _onUnavailableResponse() {
-    this.view.setErrorStatus(true);
+    this.view.updateErrorStatus(true);
     this.view.render();
   }
 }

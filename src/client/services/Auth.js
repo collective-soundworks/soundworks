@@ -54,7 +54,6 @@ class Auth extends Service {
 
     const defaults = {
       viewPriority: 100,
-      viewCtor: AuthView,
     };
 
     this.configure(defaults);
