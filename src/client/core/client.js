@@ -174,7 +174,7 @@ const client = {
 
     const el = config.appContainer;
     const $container = el instanceof Element ? el : document.querySelector(el);
-    viewManager.setViewContainer($container);
+    viewManager.setAppContainer($container);
   },
 
   /**
