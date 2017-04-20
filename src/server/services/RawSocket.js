@@ -1,7 +1,7 @@
 import server from '../core/server';
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
-import { Server as WebSocketServer } from 'ws';
+import { Server as WebSocketServer } from 'uws';
 import http from 'http';
 import https from 'https';
 import pem from 'pem';
@@ -141,10 +141,10 @@ class RawSocket extends Service {
     server.listen(this._port, () => {
       // console.log(SERVICE_ID, ': Https server listening on port:', this._port);
     });
-    
+
     this._wss = new WebSocketServer({ server: server });
-    this._wss.on('connection', this._onConnection); 
-    this.ready();    
+    this._wss.on('connection', this._onConnection);
+    this.ready();
   }
 
   /** @private */
