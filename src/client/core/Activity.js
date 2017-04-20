@@ -105,20 +105,20 @@ class Activity extends Process {
    * Request the view manager to display the view. The call of this method
    * doesn't guarantee a synchronized rendering or any rendering at all as the
    * view manager decides which view to display based on their priority.
+   *
+   * @return {Promise} - a promise that resolves when the view is actually
+   *  displayed in the application.
    */
   show() {
-    if (this._view) {
-      this._view.render();
-      viewManager.register(this._view);
-    }
+    this._view.render();
+    return viewManager.register(this._view);
   }
 
   /**
    * Hide the view of the activity if it owns one.
    */
   hide() {
-    if (this._view)
-      viewManager.remove(this._view);
+    viewManager.remove(this._view);
   }
 
   /**
