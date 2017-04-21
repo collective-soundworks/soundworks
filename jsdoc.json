@@ -9,19 +9,21 @@
       "src/client/core/Scene.js",
       "src/client/core/Service.js",
 
+      "src/client/services/AudioBufferManager.js",
+      "src/client/services/AudioScheduler.js",
       "src/client/services/Auth.js",
       "src/client/services/Checkin.js",
       "src/client/services/ErrorReporter.js",
-      "src/client/services/Loader.js",
       "src/client/services/Locator.js",
+      "src/client/services/MetricScheduler.js",
       "src/client/services/MotionInput.js",
       "src/client/services/Network.js",
       "src/client/services/Placer.js",
       "src/client/services/Platform.js",
-      "src/client/services/Scheduler.js",
       "src/client/services/SharedConfig.js",
       "src/client/services/SharedParams.js",
       "src/client/services/Sync.js",
+      "src/client/services/SyncScheduler.js",
 
       "src/client/scenes/Experience.js",
 
@@ -42,25 +44,29 @@
       "src/server/services/Checkin.js",
       "src/server/services/ErrorReporter.js",
       "src/server/services/Locator.js",
+      "src/server/services/MetricScheduler.js",
       "src/server/services/Network.js",
       "src/server/services/Osc.js",
       "src/server/services/Placer.js",
       "src/server/services/SharedConfig.js",
       "src/server/services/SharedParams.js",
-      "src/server/services/Sync.js"
+      "src/server/services/Sync.js",
+      "src/server/services/SyncScheduler.js"
     ]
   },
   "plugins": [
     "plugins/markdown"
   ],
   "opts": {
-    "destination": "./out",
     "projectTitle": "Soundworks",
-    "template": "node_modules/jsdoc-template"
+    "template": "node_modules/jsdoc-template",
+    "destination": "./docs",
+    "encoding": "utf8"
   },
   "templates": {
     "default": {
       "useLongnameInNav": true
-    }
+    },
+    "footer": ""
   }
 }
