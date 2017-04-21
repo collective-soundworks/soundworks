@@ -5,58 +5,93 @@ import SelectView from '../views/SelectView';
 import SpaceView from '../views/SpaceView';
 import SquaredView from '../views/SquaredView';
 
-
 /**
- * Interface for the view of the `placer` service.
+ * API of a compliant view for the `placer` service.
  *
+ * @memberof module:soundworks/client
  * @interface AbstractPlacerView
- * @extends module:soundworks/client.View
+ * @extends module:soundworks/client.AbstractView
+ * @abstract
  */
 /**
- * Register the `area` definition to the view.
+ * Set and display the `area` definition (as defined in server configuration).
  *
+ * @name setReadyCallback
+ * @memberof module:soundworks/client.AbstractPlacerView
  * @function
- * @name AbstractPlacerView.setArea
+ * @abstract
+ * @instance
+ *
  * @param {Object} area - Definition of the area.
- * @property {Number} area.width - With of the area.
- * @property {Number} area.height - Height of the area.
- * @property {Number} [area.labels=[]] - Labels of the position.
- * @property {Number} [area.coordinates=[]] - Coordinates of the area.
+ * @param {Number} area.width - With of the area.
+ * @param {Number} area.height - Height of the area.
+ * @param {Number} [area.labels=[]] - Labels of the position.
+ * @param {Number} [area.coordinates=[]] - Coordinates of the area.
+ */
+/**
+ * Register the callback to be executed when the user select a position.
+ *
+ * @name setSelectCallback
+ * @memberof module:soundworks/client.AbstractPlacerView
+ * @function
+ * @abstract
+ * @instance
+ *
+ * @param {String} callback - Callback to execute when the user select a position.
+ *  This callback should be called with the `index`, `label` and `coordinates` of
+ *  the requested position.
  */
 /**
  * Display the available positions.
  *
+ * @name displayPosition
+ * @memberof module:soundworks/client.AbstractPlacerView
  * @function
- * @name AbstractPlacerView.displayPositions
+ * @abstract
+ * @instance
+ *
  * @param {Number} capacity - The maximum number of clients allowed.
  * @param {Array<String>} [labels=null] - An array of the labels for the positions
  * @param {Array<Array<Number>>} [coordinates=null] - An array of the coordinates of the positions
  * @param {Number} [maxClientsPerPosition=1] - Number of clients allowed for each position.
  */
 /**
- * Disable the given positions.
+ * Update the view accroding to the disabled positions.
  *
+ * @name updateDisabledPositions
+ * @memberof module:soundworks/client.AbstractPlacerView
  * @function
- * @name AbstractPlacerView.updateDisabledPositions
- * @param {Array<Number>} disabledIndexes - Array of indexes of the disabled positions.
+ * @abstract
+ * @instance
+ *
+ * @param {Array<Number>} disabledPositions - Array containing the indexes of
+ *  the disabled positions.
  */
 /**
- * Define the behavior of the view when the position requested by the user is
- * no longer available
+ * Update the view when the position selected by the user is no longer available.
  *
+ * @name reject
+ * @memberof module:soundworks/client.AbstractPlacerView
  * @function
- * @name AbstractPlacerView.reject
- * @param {Array<Number>} disabledIndexes - Array of indexes of the disabled positions.
+ * @abstract
+ * @instance
+ *
+ * @param {Array<Number>} disabledPositions - Array containing the indexes of
+ *  the disabled positions.
  */
+
 /**
- * Register the callback to be applied when the user select a position.
+ * Callback to execute when the user select a position.
  *
- * @function
- * @name AbstratPlacerView.setSelectCallback
- * @param {Function} callback - Callback to be applied when a position is selected.
- *  This callback should be called with the `index`, `label` and `coordinates` of
- *  the requested position.
+ * @callback
+ * @name selectCallback
+ * @memberof module:soundworks/client.AbstractPlacerView
+ * @param {Number} index - Index of the selected location.
+ * @param {String} label - Label of the selected location if any.
+ * @param {Array<Number>} coordinates - Coordinates (`[x, y]`) of the selected
+ *  location if any.
  */
+
 
 const SERVICE_ID = 'service:placer';
 

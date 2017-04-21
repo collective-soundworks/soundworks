@@ -90,14 +90,17 @@ class AudioScheduler extends Service {
 
   /**
    * Current audio time of the scheduler.
+   * @type {Number}
+   * @instance
    */
   get audioTime() {
     return this._scheduler.currentTime;
   }
 
   /**
-   * Current audio time of the scheduler.
-   * @alias audioTime
+   * Current audio time of the scheduler (alias `this.audioTime`).
+   * @type {Number}
+   * @instance
    */
   get currentTime() {
     return this._scheduler.currentTime;
@@ -106,6 +109,8 @@ class AudioScheduler extends Service {
   /**
    * Difference between the scheduler's logical audio time and the `currentTime`
    * of the audio context.
+   * @type {Number}
+   * @instance
    */
   get deltaTime() {
     return this._scheduler.currentTime - audio.audioContext.currentTime;

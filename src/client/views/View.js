@@ -31,8 +31,9 @@ import Delegate from 'dom-delegate';
  * }
  */
 /**
- * Method called when the view is inserted in the DOM by the `viewManager`. The
- * DOM element should not be mutated during the whole lifecycle of the view.
+ * Method called when the view has to be updated. The returned DOM element
+ * should contain the whole view content and should not be mutated during the
+ * whole lifecycle of the view.
  *
  * @name render
  * @memberof module:soundworks/client.AbstractView

@@ -5,9 +5,28 @@ import _path from 'path';
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
 
+/**
+ * API of a compliant view for the `audio-buffer-manager` service.
+ *
+ * @memberof module:soundworks/client
+ * @interface AbstractAudioBufferManagerView
+ * @extends module:soundworks/client.AbstractView
+ * @abstract
+ */
+/**
+ * Update the progress bar of the view with the given ratio.
+ *
+ * @name setProgressRatio
+ * @memberof module:soundworks/client.AbstractAudioBufferManagerView
+ * @function
+ * @abstract
+ * @instance
+ *
+ * @param {Number} ratio - Progress ratio of the loaded assets (between 0 and 1).
+ */
+
 const SERVICE_ID = 'service:audio-buffer-manager';
 const log = debug('soundworks:services:audio-buffer-manager');
-
 
 function flattenLists(a) {
   const ret = [];
@@ -145,21 +164,6 @@ function prefixPaths(pathList, prefix) {
 
   return pathList;
 }
-
-/**
- * Interface for the view of the `audio-buffer-manager` service.
- *
- * @interface AbstractAudioBufferManagerView
- * @extends module:soundworks/client.View
- */
-/**
- * Method called when a new information about the currently loaded assets
- * is received.
- *
- * @function
- * @name AbstractAudioBufferManagerView.onProgress
- * @param {Number} percent - The purcentage of loaded assets.
- */
 
 /**
  * Interface for the client `'audio-buffer-manager'` service.
@@ -374,7 +378,7 @@ class AudioBufferManager extends Service {
         const loader = new SuperLoader();
         loader.setAudioContext(audioContext);
 
-        if (view && view.onProgress) {
+        if (view && view.setProgressRatio) {
           const progressPerFile = pathList.map(() => 0); // track files loading progress
 
           loader.progressCallback = (e) => {
@@ -387,7 +391,7 @@ class AudioBufferManager extends Service {
 
             totalProgress /= progressPerFile.length;
 
-            view.onProgress(totalProgress);
+            view.setProgressRatio(totalProgress);
           };
         }
 

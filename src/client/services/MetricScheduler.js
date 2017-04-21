@@ -362,6 +362,10 @@ class MetricScheduler extends Service {
     this._setSyncEvent(syncTime, metricPosition, tempo, tempoUnit, event);
   }
 
+  /**
+   * Current audio time.
+   * @type {Number}
+   */
   get audioTime() {
     return audioScheduler.currentTime;
   }

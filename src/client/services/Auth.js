@@ -3,34 +3,73 @@ import Service from '../core/Service';
 import SegmentedView from '../views/SegmentedView';
 import serviceManager from '../core/serviceManager';
 
+/**
+ * API of a compliant view for the `auth` service.
+ *
+ * @memberof module:soundworks/client
+ * @interface AbstractAuthView
+ * @extends module:soundworks/client.AbstractView
+ * @abstract
+ */
+/**
+ * Register the function that should be executed when the password is submitted
+ * by the user.
+ *
+ * @name setSendPasswordCallback
+ * @memberof module:soundworks/client.AbstractAuthView
+ * @function
+ * @abstract
+ * @instance
+ *
+ * @param {sendPasswordCallback} callback - Callback to execute when the user
+ *  submit the password
+ */
+/**
+ * Register the function that should be executed when the password is reset
+ * by the user.
+ *
+ * @name setResetPasswordCallback
+ * @memberof module:soundworks/client.AbstractAuthView
+ * @function
+ * @abstract
+ * @instance
+ *
+ * @param {setResetCallback} callback -
+ *  Callback to execute when the user reset the password
+ */
+/**
+ * Update the view according to the response to the submitted password.
+ *
+ * @name updateRejectedStatus
+ * @memberof module:soundworks/client.AbstractAuthView
+ * @function
+ * @abstract
+ * @instance
+ *
+ * @param {Boolean} value - `true` if the submitted password is rejected,
+ *  `false` when the password is reset.
+ */
+
+/**
+ * Callback to execute when the user submit the password.
+ *
+ * @callback
+ * @name sendPasswordCallback
+ * @memberof module:soundworks/client.AbstractAuthView
+ *
+ * @param {String} password - Password given by the user.
+ */
+/**
+ * Callback to execute when the user reset the password.
+ *
+ * @callback
+ * @name resetCallback
+ * @memberof module:soundworks/client.AbstractAuthView
+ */
+
 
 const SERVICE_ID = 'service:auth';
 const LOCAL_STORAGE_KEY = `soundworks:${SERVICE_ID}`;
-
-/**
- * Interface for the view of the `auth` service.
- *
- * @interface AbstractAuthView
- * @extends module:soundworks/client.View
- */
-/**
- * Set the callback that should be executed when the send action is executed
- * on the view.
- *
- * @function
- * @name AbstractAuthView.onSend
- * @param {Function} callback - The callback given by the `auth` service.
- */
-/**
- * Set the callback that should be executed when the reset action is executed
- * on the view.
- *
- * @function
- * @name AbstractAuthView.onReset
- * @param {Function} callback - The callback given by the `auth` service.
- */
-
-
 
 /**
  * Interface for the client `auth` service.
@@ -116,7 +155,6 @@ class Auth extends Service {
     localStorage.removeItem(LOCAL_STORAGE_KEY);
 
     this.view.updateRejectedStatus(false);
-    this.view.render();
   }
 
   /** @private */
@@ -128,7 +166,6 @@ class Auth extends Service {
   /** @private */
   _onAccesRefusedResponse() {
     this.view.updateRejectedStatus(true);
-    this.view.render();
   }
 }
 

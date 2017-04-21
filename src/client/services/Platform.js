@@ -6,9 +6,96 @@ import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
 
 /**
- * Definition of a feature to test.
+ * API of a compliant view for the `platform` service.
+ *
+ * @memberof module:soundworks/client
+ * @interface AbstractPlatformView
+ * @extends module:soundworks/client.AbstractView
+ * @abstract
+ */
+/**
+ * Register the callback to execute when the user touches the screen for the first time.
+ *
+ * @name setTouchStartCallback
+ * @memberof module:soundworks/client.AbstractPlatformView
+ * @function
+ * @abstract
+ * @instance
+ *
+ * @param {touchStartCallback} callback - Callback to execute when the user
+ *  touches the screen for the first time.
+ */
+/**
+ * Register the callback to execute when the user clicks the screen for the first time.
+ *
+ * @name setMousedownCallback
+ * @memberof module:soundworks/client.AbstractPlatformView
+ * @function
+ * @abstract
+ * @instance
+ *
+ * @param {mouseDownCallback} callback - Callback to execute when the user
+ *  clicks the screen for the first time.
+ */
+/**
+ * Update the view to notify that the compatibility checks are terminated.
+ *
+ * @name updateCheckingStatus
+ * @memberof module:soundworks/client.AbstractPlatformView
+ * @function
+ * @abstract
+ * @instance
+ *
+ * @param {Boolean} value
+ */
+/**
+ * Update the view to notify if the device is compatible or not.
+ *
+ * @name updateIsCompatibleStatus
+ * @memberof module:soundworks/client.AbstractPlatformView
+ * @function
+ * @abstract
+ * @instance
+ *
+ * @param {Boolean} value
+ */
+/**
+ * Update the view to notify if the application obtained all the authorizations
+ * or not.
+ *
+ * @name updateHasAuthorizationsStatus
+ * @memberof module:soundworks/client.AbstractPlatformView
+ * @function
+ * @abstract
+ * @instance
+ *
+ * @param {Boolean} value
+ */
+
+/**
+ * Callback to execute when the user touches the screen for the first time.
+ *
+ * @callback
+ * @name touchStartCallback
+ * @memberof module:soundworks/client.AbstractPlatformView
+ *
+ * @param {String} password - Password given by the user.
+ */
+/**
+ * Callback to execute when the user clicks the screen for the first time.
+ *
+ * @callback
+ * @name mouseDownCallback
+ * @memberof module:soundworks/client.AbstractPlatformView
+ */
+
+
+
+/**
+ * Structure of the definition for the test of a feature.
  *
  * @typedef {Object} module:soundworks/client.Platform~definition
+ *
  * @property {String} id - Id of the definition.
  * @property {Function} check - A function that should return `true` if the
  *  feature is available on the platform, `false` otherwise.
@@ -190,17 +277,9 @@ const SERVICE_ID = 'service:platform';
  *   resolves. (if no update of the coordinates are needed in the application,
  *   requiring geolocation feature without using the Geolocation service should
  *   suffice).
- * - 'wake-lock': deprecated, use with caution, has been observed consumming
+ * - 'wake-lock': use with caution, has been observed consumming
  *   150% cpu in chrome desktop.
  *
- *
- * View:
- * The view of the `platform` service should comply with the following defintion
- * setTouchstartCallback
- * setMousedownCallback
- * updateCheckingStatus
- * updateIsCompatibleStatus
- * updateHasAuthorizationsStatus
  *
  * _<span class="warning">__WARNING__</span> This class should never be
  * instanciated manually_
@@ -212,8 +291,10 @@ const SERVICE_ID = 'service:platform';
  *  - 'mobile-device': only accept mobile devices (recognition based User-Agent)
  *  - 'audio-input': Android only
  *  - 'full-screen': Android only
- *  - 'wake-lock': deprecated, this feature should be used with caution as
- *    it has been observed to use 150% of cpu in chrome desktop.
+ *  - 'geolocation': accept geolocalized devices. Populate the client with
+ *     current position
+ *  - 'wake-lock': this feature should be used with caution as
+ *     it has been observed to use 150% of cpu in chrome desktop.
  *
  * <!--
  * Warning: when setting `showDialog` option to `false`, unexpected behaviors
@@ -267,21 +348,20 @@ class Platform extends Service {
   }
 
   /**
-   * @private
-   *
-   * algorithm:
-   *
-   *   check required features
-   *   if (false)
+   *  Start the client.
+   *  Algorithm:
+   *  - check required features
+   *  - if (false)
    *     show 'sorry' screen
-   *   else
+   *  - else
    *     show 'welcome' screen
    *     execute start hook (promise)
-   *     if (promise === true)
-   *       show touch to start
-   *       bind events
-   *     if (promise === false)
-   *       show 'sorry' screen
+   *     - if (promise === true)
+   *        show touch to start
+   *        bind events
+   *     - else
+   *        show 'sorry' screen
+   * @private
    */
   start() {
     super.start();
@@ -316,7 +396,6 @@ class Platform extends Service {
 
         this.view.updateHasAuthorizationsStatus(hasAuthorizations);
         this.view.updateCheckingStatus(false);
-        this.view.render();
 
         if (hasAuthorizations) {
           this.view.setTouchStartCallback(this._onInteraction('touch'));
@@ -333,9 +412,10 @@ class Platform extends Service {
   }
 
   /**
-   * Add a new feature definition or override an existing one.
+   * Structure of the definition for the test of a feature.
    *
    * @param {module:soundworks/client.Platform~definition} obj - Definition of
+ *
    *  the feature.
    */
   addFeatureDefinition(obj) {
@@ -377,7 +457,6 @@ class Platform extends Service {
           this.ready();
         } else {
           this.view.updateHasAuthorizationsStatus(resolved);
-          this.view.render();
         }
       }).catch((err) => console.error(err.stack));
     }

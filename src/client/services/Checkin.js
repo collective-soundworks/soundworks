@@ -2,6 +2,59 @@ import client from '../core/client';
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
 
+/**
+ * API of a compliant view for the `checkin` service.
+ *
+ * @memberof module:soundworks/client
+ * @interface AbstractCheckinView
+ * @extends module:soundworks/client.AbstractView
+ * @abstract
+ */
+/**
+ * Register the function that should be executed when the user is ready to
+ * continue.
+ *
+ * @name setReadyCallback
+ * @memberof module:soundworks/client.AbstractCheckinView
+ * @function
+ * @abstract
+ * @instance
+ *
+ * @param {readyCallback} callback - Callback to execute when the user
+ *  is ready to continue.
+ */
+/**
+ * Update the label retrieved by the server.
+ *
+ * @name updateLabel
+ * @memberof module:soundworks/client.AbstractCheckinView
+ * @function
+ * @abstract
+ * @instance
+ *
+ * @param {String} label - Label to be displayed in the view.
+ */
+/**
+ * Method executed when an error is received from the server (when no place is
+ * is available in the experience).
+ *
+ * @name updateErrorStatus
+ * @memberof module:soundworks/client.AbstractCheckinView
+ * @function
+ * @abstract
+ * @instance
+ *
+ * @param {Boolean} value
+ */
+
+/**
+ * Callback to execute when the user is ready to continue.
+ *
+ * @callback
+ * @name readyCallback
+ * @memberof module:soundworks/client.AbstractCheckinView
+ */
+
 
 const SERVICE_ID = 'service:checkin';
 
@@ -112,7 +165,6 @@ class Checkin extends Service {
       const displayLabel = label || (index + 1).toString();
       this.view.updateLabel(displayLabel);
       this.view.setReadyCallback(this.ready.bind(this));
-      this.view.render();
     } else {
       this.ready();
     }
@@ -121,7 +173,6 @@ class Checkin extends Service {
   /** @private */
   _onUnavailableResponse() {
     this.view.updateErrorStatus(true);
-    this.view.render();
   }
 }
 

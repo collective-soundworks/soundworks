@@ -110,6 +110,8 @@ class SyncScheduler extends Service {
 
   /**
    * Current audio time of the scheduler.
+   * @instance
+   * @type {Number}
    */
   get audioTime() {
     return audioScheduler.currentTime;
@@ -117,14 +119,17 @@ class SyncScheduler extends Service {
 
   /**
    * Current sync time of the scheduler.
+   * @instance
+   * @type {Number}
    */
   get syncTime() {
     return this._syncedQueue.currentTime;
   }
 
   /**
-   * Current sync time of the scheduler.
-   * @alias syncTime
+   * Current sync time of the scheduler (alias `this.syncTime`).
+   * @instance
+   * @type {Number}
    */
   get currentTime() {
     return this._syncedQueue.currentTime;
@@ -133,6 +138,8 @@ class SyncScheduler extends Service {
   /**
    * Difference between the scheduler's logical audio time and the `currentTime`
    * of the audio context.
+   * @instance
+   * @type {Number}
    */
   get deltaTime() {
     return audioScheduler.currentTime - audio.audioContext.currentTime;
@@ -140,6 +147,7 @@ class SyncScheduler extends Service {
 
   /**
    * Get sync time corresponding to given audio time.
+   *
    * @param  {Number} audioTime - audio time.
    * @return {Number} - sync time corresponding to given audio time.
    */
@@ -149,6 +157,7 @@ class SyncScheduler extends Service {
 
   /**
    * Get audio time corresponding to given sync time.
+   *
    * @param  {Number} syncTime - sync time.
    * @return {Number} - audio time corresponding to given sync time.
    */

@@ -2,35 +2,56 @@ import client from '../core/client';
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
 
-const SERVICE_ID = 'service:locator';
-
 /**
- * Interface for the view of the `locator` service.
+ * API of a compliant view for the `locator` service.
  *
+ * @memberof module:soundworks/client
  * @interface AbstractLocatorView
- * @extends module:soundworks/client.View
+ * @extends module:soundworks/client.AbstractView
+ * @abstract
  */
 /**
- * Register the `area` definition to the view.
+ * Set and display the `area` definition (as defined in server configuration).
  *
+ * @name setArea
+ * @memberof module:soundworks/client.AbstractLocatorView
  * @function
- * @name AbstractLocatorView.setArea
- * @param {Object} area - Definition of the area.
- * @property {Number} area.width - With of the area.
- * @property {Number} area.height - Height of the area.
- * @property {Number} [area.labels=[]] - Labels of the position.
- * @property {Number} [area.coordinates=[]] - Coordinates of the area.
+ * @abstract
+ * @instance
+ *
+ * @param {Object} area - Area defintion as declared in server configuration.
+ * @param {Number} area.width - With of the area.
+ * @param {Number} area.height - Height of the area.
+ * @param {Number} [area.labels=[]] - Labels of the position.
+ * @param {Number} [area.coordinates=[]] - Coordinates of the area.
  */
 /**
- * Register the callback to be applied when the user select a position.
+ * Register the callback to be executed when the user select a position.
  *
+ * @name setSelectCallback
+ * @memberof module:soundworks/client.AbstractLocatorView
  * @function
- * @name AbstractLocatorView.onSelect
- * @param {Function} callback - Callback to be applied when a position is selected.
- *  This callback should be called with the `index`, `label` and `coordinates` of
- *  the requested position.
+ * @abstract
+ * @instance
+ *
+ * @param {selectCallback} callback - Callback to be executed
+ *  when a position is selected. This callback should be called with the `index`,
+ * `label` and `coordinates` of the requested position.
  */
 
+/**
+ * Callback to execute when the user select a position.
+ *
+ * @callback
+ * @name selectCallback
+ * @memberof module:soundworks/client.AbstractLocatorView
+ * @param {Number} index - Index of the selected location.
+ * @param {String} label - Label of the selected location if any.
+ * @param {Array<Number>} coordinates - Coordinates (`[x, y]`) of the selected
+ *  location if any.
+ */
+
+const SERVICE_ID = 'service:locator';
 
 /**
  * Interface for the client `'locator'` service.
