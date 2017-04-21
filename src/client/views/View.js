@@ -2,15 +2,54 @@ import tmpl from 'lodash.template';
 import viewport from './viewport';
 import Delegate from 'dom-delegate';
 
-
 /**
- * AbstractView
+ * Interface required to create a soundworks compatible view.
  *
- *  - show
- *  - hide
- *  - render
- *  - remove
+ * To comply with the soundwork's internal view system (cf. viewManager) any
+ * view should implement an interface composed of 2 methods: `render` and `remove`
  *
+ * @memberof module:soundworks/client
+ * @interface AbstractView
+ * @abstract
+ *
+ * @example
+ * // minimal implementation of a soundworks compliant view
+ * class MyView {
+ *   constructor(text) {
+ *     this.msg = msg;
+ *     this.$el = document.createElement('div');
+ *   }
+ *
+ *   render() {
+ *     this.$el.innerHTML = `<h1>${this.msg}</h1>`;
+ *     return this.$el;
+ *   }
+ *
+ *   remove() {
+ *     this.$el.remove();
+ *   }
+ * }
+ */
+/**
+ * Method called when the view is inserted in the DOM by the `viewManager`. The
+ * DOM element should not be mutated during the whole lifecycle of the view.
+ *
+ * @name render
+ * @memberof module:soundworks/client.AbstractView
+ * @function
+ * @abstract
+ * @instance
+ *
+ * @return {Element} - immutable DOM element containing the view.
+ */
+/**
+ * Method called when the view is removed in the DOM by the `viewManager`.
+ *
+ * @name remove
+ * @memberof module:soundworks/client.AbstractView
+ * @function
+ * @abstract
+ * @instance
  */
 
 /**
@@ -85,19 +124,7 @@ class View {
       el: 'div',
       id: null,
       className: null,
-      priority: 0,
     }, options);
-
-    /**
-     * Priority of the view.
-     *
-     * @type {Number}
-     * @name priority
-     * @instance
-     * @memberof module:soundworks/client.View
-     * @see {@link module:soundworks/client.viewManager}
-     */
-    this.priority = this.options.priority;
 
     /**
      * Viewport width.
@@ -140,7 +167,7 @@ class View {
      * @instance
      * @memberof module:soundworks/client.View
      */
-    this.isVisible = false;
+    this.isVisible = true;
 
     /**
      * DOM element of the main container of the view. Defaults to `<div>`.
@@ -229,6 +256,8 @@ class View {
 
     if (this.isVisible)
       this.onResize(viewport.width, viewport.height, viewport.orientation);
+
+    return this.$el;
   }
 
   /**
@@ -239,6 +268,7 @@ class View {
   show() {
     this.$el.style.display = 'block';
     this.isVisible = true;
+
     // must resize before child component
     this._delegateEvents();
     viewport.addResizeListener(this.onResize);

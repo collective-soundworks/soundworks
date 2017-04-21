@@ -110,8 +110,7 @@ class Activity extends Process {
    *  displayed in the application.
    */
   show() {
-    this._view.render();
-    return viewManager.register(this._view);
+    return viewManager.register(this._view, this.options.viewPriority);
   }
 
   /**

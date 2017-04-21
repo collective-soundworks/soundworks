@@ -1,8 +1,8 @@
 import debug from 'debug';
 
 const log = debug('soundworks:viewManager');
-const stack = new Set();
-const viewPromiseMap = new Map();
+const viewInfosMap = new Map();
+
 let $container = null;
 
 /**
@@ -10,6 +10,8 @@ let $container = null;
  */
 const viewManager = {
   _timeoutId: null,
+
+  _visibleView: null,
 
   /**
    * Sets the container of the views for all `Activity` instances. Is called by
@@ -26,16 +28,16 @@ const viewManager = {
    * actually displayed is defined by its priority and activities lifecycle.
    * @param {View} view - A view to add to the stack.
    */
-  register(view) {
+  register(view, priority) {
     log(`register - id: "${view.options.id}" - priority: ${view.priority}`);
 
-    stack.add(view);
-    view.hide();
-    view.appendTo($container);
+    const infos = {};
+    infos.html = view.render();
+    infos.priority = priority;
+    const promise = new Promise((resolve, reject) => infos.promise = resolve);
 
-    const promise = new Promise((resolve, reject) => {
-      viewPromiseMap.set(view, resolve);
-    });
+    viewInfosMap.set(view, infos);
+
     // trigger `_updateView` only once when several view are registered at once.
     if (!this._timeoutId)
       this._timeoutId = setTimeout(() => this._updateView(), 0);
@@ -50,10 +52,13 @@ const viewManager = {
   remove(view) {
     log(`remove - id: "${view.options.id}" - priority: ${view.priority}`);
 
-    view.remove();
-    // clean dictionnaries
-    stack.delete(view);
-    viewPromiseMap.delete(view);
+    // clean dictionnary
+    viewInfosMap.delete(view);
+
+    if (this._visibleView === view) {
+      this._visibleView.remove();
+      this._visibleView = null;
+    }
 
     if (!this._timeoutId)
       this._timeoutId = setTimeout(() => this._updateView(), 0);
@@ -64,16 +69,13 @@ const viewManager = {
    * @private
    */
   _updateView() {
-    let visibleView = null;
-    let priority = -Infinity;
+    const visibleView = this._visibleView;
+    let nextViewPriority = -Infinity;
     let nextView = null;
 
-    stack.forEach(function(view) {
-      if (view.isVisible)
-        visibleView = view;
-
-      if (view.priority > priority) {
-        priority = view.priority;
+    viewInfosMap.forEach((infos, view) => {
+      if (infos.priority > nextViewPriority) {
+        nextViewPriority = infos.priority;
         nextView = view;
       }
     });
@@ -82,16 +84,23 @@ const viewManager = {
 
     if (nextView) {
       if (visibleView === null) {
-        log(`show view - id: "${nextView.options.id}" - priority: ${priority}`);
-        nextView.show();
+        const html = viewInfosMap.get(nextView).html;
+        $container.appendChild(html);
         // resolve the promise created when the view were registered
-        viewPromiseMap.get(nextView)();
-      } else if (visibleView.priority < nextView.priority) {
-        log(`show view - id: "${nextView.options.id}" - priority: ${priority}`);
-        visibleView.hide(); // hide but keep in stack
-        nextView.show();
-        // resolve the promise created when the view were registered
-        viewPromiseMap.get(nextView)();
+        viewInfosMap.get(nextView).promise();
+        this._visibleView = nextView;
+      } else {
+        const visibleViewPriority = viewInfosMap.get(this._visibleView).priority;
+
+        if (visibleViewPriority < nextViewPriority) {
+          visibleView.remove(); // hide but keep in stack
+
+          const html = viewInfosMap.get(nextView).html;
+          $container.appendChild(html);
+
+          viewInfosMap.get(nextView).promise();
+          this._visibleView = nextView;
+        }
       }
     }
 
