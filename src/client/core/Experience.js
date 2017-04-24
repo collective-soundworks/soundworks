@@ -1,5 +1,6 @@
-import Scene from '../core/Scene';
-import client from '../core/client';
+import Activity from './Activity';
+import serviceManager from './serviceManager';
+
 
 /**
  * Base class to be extended in order to create the client-side of a custom
@@ -8,31 +9,33 @@ import client from '../core/client';
  * The user defined `Experience` is the main component of a soundworks application.
  *
  * @memberof module:soundworks/client
- * @extends module:soundworks/client.Scene
+ * @extends module:soundworks/client.Activity
  */
-class Experience extends Scene {
+class Experience extends Activity {
   /**
    * @param {Boolean} [hasNetwork=true] - Define if the experience requires a
    *  socket connection.
    */
   constructor(hasNetwork = true) {
     super('experience', hasNetwork);
+
+    this.start = this.start.bind(this);
+
+    this.requiredSignals.addObserver(this.start);
+    this.waitFor(serviceManager.signals.ready);
+
     // if the experience has network, require errorReporter service by default
     if (hasNetwork)
       this._errorReporter = this.require('error-reporter');
   }
 
-  createView() {
-    if (this.viewOptions) {
-      if (Array.isArray(this.viewOptions.className))
-        this.viewOptions.clientType.push(client.type);
-      else if (typeof this.viewOptions.className === 'string')
-        this.viewOptions.className = [this.viewOptions.className, client.type];
-      else
-        this.viewOptions.className = client.type;
-    }
-
-    return super.createView();
+  /**
+   * Returns a service configured with the given options.
+   * @param {String} id - The identifier of the service.
+   * @param {Object} options - The options to configure the service.
+   */
+  require(id, options) {
+    return serviceManager.require(id, options);
   }
 
   /**
@@ -48,12 +51,12 @@ class Experience extends Scene {
   }
 
   /** @private */
-  done() {
-    if (this.hasNetwork)
-      this.send('exit');
+  // done() {
+  //   if (this.hasNetwork)
+  //     this.send('exit');
 
-    super.done();
-  }
+  //   super.done();
+  // }
 }
 
 export default Experience;

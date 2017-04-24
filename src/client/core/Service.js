@@ -36,7 +36,7 @@ class Service extends Activity {
      */
     this.signals.ready = new Signal();
     // add the serviceManager bootstart signal to the required signals
-    this.requiredSignals.add(serviceManager.signals.start);
+    this.waitFor(serviceManager.signals.start);
 
     this.ready = this.ready.bind(this);
   }
@@ -53,7 +53,7 @@ class Service extends Activity {
     const signal = service.signals.ready;
 
     if (signal)
-      this.requiredSignals.add(signal);
+      this.waitFor(signal);
     else
       throw new Error(`signal "continue" doesn't exist on service :`, service);
 

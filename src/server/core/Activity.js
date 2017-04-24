@@ -65,7 +65,7 @@ class Activity extends EventEmitter {
     this.requiredSignals = new SignalAll();
     this.requiredSignals.addObserver(this.start);
     // wait for serviceManager.start
-    this.requiredSignals.add(serviceManager.signals.start);
+    this.waitFor(serviceManager.signals.start);
 
   }
 
@@ -112,6 +112,16 @@ class Activity extends EventEmitter {
   }
 
   /**
+   * Add a signal to the required signals in order for the `Scene` instance
+   * to start.
+   * @param {Signal} signal - The signal that must be waited for.
+   * @private
+   */
+  waitFor(signal) {
+    this.requiredSignals.add(signal);
+  }
+
+  /**
    * Retrieve a service. The required service is added to the `requiredActivities`.
    * @param {String} id - The id of the service.
    * @param {Object} options - Some options to configure the service.
@@ -121,7 +131,7 @@ class Activity extends EventEmitter {
     const instance = serviceManager.require(id, options);
 
     this.addRequiredActivity(instance);
-    this.requiredSignals.add(instance.signals.ready);
+    this.waitFor(instance.signals.ready);
 
     instance.addClientTypes(this.clientTypes);
 
