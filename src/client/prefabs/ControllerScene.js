@@ -1,6 +1,5 @@
 import * as controllers from 'basic-controllers';
-import client from '../core/client';
-import Scene from '../core/Scene';
+import View from '../views/View';
 
 controllers.setTheme('dark');
 
@@ -158,8 +157,8 @@ class _TriggerGui {
 const SCENE_ID = 'basic-shared-controller';
 
 /**
- * The `BasicSharedController` scene propose a simple / default way to create
- * a client controller for the `shared-params` service.
+ * The `ControllerScene` scene propose a simple / default way to create
+ * a controller view for the `shared-params` service.
  *
  * Each controller comes with a set of options that can be passed to the
  * constructor.
@@ -167,42 +166,43 @@ const SCENE_ID = 'basic-shared-controller';
  * @memberof module:soundworks/client
  * @see [`shared-params` service]{@link module:soundworks/client.SharedParams}
  */
-export default class BasicSharedController extends Scene {
+class ControllerScene {
   /**
    * _<span class="warning">__WARNING__</span> This API is unstable, and
    * subject to change in further versions.
    */
-  constructor(guiOptions = {}) {
-    super(SCENE_ID, true);
+  constructor(experience, sharedParams) {
+    if (!sharedParams)
+      throw new Error('This service requires the "shared params" service');
 
-    this._guiOptions = guiOptions;
+    this._guiOptions = {};
 
-    this._errorReporter = this.require('error-reporter');
-
-    /**
-     * Instance of the client-side `shared-params` service.
-     * @type {module:soundworks/client.SharedParams}
-     * @name sharedParams
-     * @instance
-     * @memberof module:soundworks/client.SharedParams
-     */
-    this.sharedParams = this.require('shared-params');
+    this.experience = experience;
+    this.sharedParams = sharedParams;
   }
 
-  init() {
-    this.view = this.createView();
+  enter() {
+    this.view = new View();
+    this.view.options.id = 'basic-shared-controller';
+
+    this.view.render();
+    this.view.appendTo(this.experience.container);
+
+    for (let name in this.sharedParams.params) {
+      const param = this.sharedParams.params[name];
+      const gui = this._createGui(param);
+
+      param.addListener('update', (val) => gui.set(val));
+    }
   }
 
-  start() {
-    super.start();
+  exit() {
+    for (let name in this.sharedParams.params) {
+      const param = this.sharedParams.params[name];
+      param.removeListener('update');
+    }
 
-    if (!this.hasStarted)
-      this.init();
-
-    this.show();
-
-    for (let name in this.sharedParams.params)
-      this.createGui(this.sharedParams.params[name]);
+    this.view.remove();
   }
 
   /**
@@ -221,7 +221,7 @@ export default class BasicSharedController extends Scene {
   }
 
   /** @private */
-  createGui(param) {
+  _createGui(param) {
     const config = Object.assign({
       show: true,
       confirm: false,
@@ -250,6 +250,8 @@ export default class BasicSharedController extends Scene {
         break;
     }
 
-    param.addListener('update', (val) => gui.set(val));
+    return gui
   }
 }
+
+export default ControllerScene;

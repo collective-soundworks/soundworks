@@ -20,15 +20,6 @@ export { default as client } from './core/client';
 export { default as Experience } from './core/Experience';
 export { default as Process } from './core/Process';
 export { default as Service } from './core/Service';
-export { default as serviceManager } from './core/serviceManager';
-// export { default as socket } from './core/socket';
-
-export { default as Signal } from '../utils/Signal';
-export { default as SignalAll } from '../utils/SignalAll';
-
-// scenes
-// export { default as BasicSharedController } from './scenes/BasicSharedController';
-// export { default as Survey } from './scenes/Survey';
 
 // services
 export { default as AudioBufferManager } from './services/AudioBufferManager';
@@ -63,3 +54,7 @@ export { default as SquaredView } from './views/SquaredView';
 export { default as TouchSurface } from './views/TouchSurface';
 export { default as View } from './views/View';
 export { default as viewport } from './views/viewport';
+
+// prefabs
+export { default as ControllerScene } from './prefabs/ControllerScene';
+export { default as ControllerExperience } from './prefabs/ControllerExperience';

@@ -1,12 +1,10 @@
-import Scene from '../core/Scene';
+import Experience from '../core/Experience';
 
-const SCENE_ID = 'basic-shared-controller';
+const Experience_ID = 'basic-shared-controller';
 
-export default class BasicSharedController extends Scene {
-  constructor(clientType) {
-    super(SCENE_ID, clientType);
-
-    this._errorReporter = this.require('error-reporter');
+export default class BasicSharedController extends Experience {
+  constructor(clientTypes, options = {}) {
+    super(clientTypes);
 
     /**
      * Instance of the server-side `shared-params` service.
@@ -16,5 +14,8 @@ export default class BasicSharedController extends Scene {
      * @memberof module:soundworks/server.SharedParams
      */
     this.sharedParams = this.require('shared-params');
+
+    if (options.auth)
+      this.auth = this.require('auth');
   }
 }

@@ -14,15 +14,6 @@ export { default as Activity } from './core/Activity';
 export { default as Experience } from './core/Experience';
 export { default as server } from './core/server';
 export { default as Service } from './core/Service';
-export { default as serviceManager } from './core/serviceManager';
-export { default as sockets } from './core/sockets';
-
-export { default as Signal } from '../utils/Signal';
-export { default as SignalAll } from '../utils/SignalAll';
-
-/* scenes */
-// export { default as BasicSharedController } from './scenes/BasicSharedController';
-// export { default as Survey } from './scenes/Survey';
 
 /* services */
 export { default as AudioBufferManager } from './services/AudioBufferManager';
@@ -42,3 +33,6 @@ export { default as SharedParams } from './services/SharedParams';
 export { default as SharedRecorder } from './services/SharedRecorder';
 export { default as Sync } from './services/Sync';
 export { default as SyncScheduler } from './services/SyncScheduler';
+
+/* prefabs */
+export { default as ControllerExperience } from './prefabs/ControllerExperience';
