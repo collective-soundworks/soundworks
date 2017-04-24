@@ -6,7 +6,7 @@
 
       "src/client/core/client.js",
       "src/client/core/Activity.js",
-      "src/client/core/Scene.js",
+      "src/client/core/Experience.js",
       "src/client/core/Service.js",
 
       "src/client/services/AudioBufferManager.js",
@@ -25,8 +25,6 @@
       "src/client/services/Sync.js",
       "src/client/services/SyncScheduler.js",
 
-      "src/client/scenes/Experience.js",
-
       "src/client/views/CanvasView.js",
       "src/client/views/Renderer.js",
       "src/client/views/SegmentedView.js",
@@ -37,7 +35,7 @@
 
       "src/server/core/server.js",
       "src/server/core/Activity.js",
-      "src/server/core/Scene.js",
+      "src/server/core/Experience.js",
       "src/server/core/Service.js",
 
       "src/server/services/Auth.js",

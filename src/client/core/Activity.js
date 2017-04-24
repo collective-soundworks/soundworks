@@ -80,7 +80,7 @@ class Activity extends Process {
    */
   require() {}
 
-    /**
+  /**
    * Add a signal to the required signals in order for the `Scene` instance
    * to start.
    * @param {Signal} signal - The signal that must be waited for.
