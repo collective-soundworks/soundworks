@@ -168,7 +168,7 @@ class View {
      * @instance
      * @memberof module:soundworks/client.View
      */
-    this.isVisible = true;
+    this.isVisible = false;
 
     /**
      * DOM element of the main container of the view. Defaults to `<div>`.
@@ -255,7 +255,9 @@ class View {
     else
       this._renderAll();
 
-    if (this.isVisible)
+    if (!this.isVisible)
+      this.show();
+    else
       this.onResize(viewport.width, viewport.height, viewport.orientation);
 
     return this.$el;
@@ -269,7 +271,6 @@ class View {
   show() {
     this.$el.style.display = 'block';
     this.isVisible = true;
-
     // must resize before child component
     this._delegateEvents();
     viewport.addResizeListener(this.onResize);

@@ -1,6 +1,6 @@
 /**
  * Helper to handle `touch` events on a given element. Decompose a multitouch
- * event in several parallel events, proapgate normalized values according to
+ * event in several parallel events, propagate normalized values according to
  * the size of the container.
  *
  * @param {Element} $el - Element to listen for `touch` events.
@@ -78,6 +78,8 @@ class TouchSurface {
     this.$el.addEventListener('touchmove', this._handleTouchMove);
     this.$el.addEventListener('touchend', this._handleTouchEnd);
     this.$el.addEventListener('touchcancel', this._handleTouchEnd);
+
+    // fallback for mouse interactions
   }
 
   /**
@@ -111,6 +113,7 @@ class TouchSurface {
    */
   _handleTouch(callback) {
     return (e) => {
+      e.preventDefault();
       // if `_updateBoundingRect` has not been been called or
       // has been called when $el was in `display:none` state
       if (!this._elBoundingRect || 
@@ -149,11 +152,12 @@ class TouchSurface {
    */
   _propagate(eventName, touchId, normX, normY, touchEvent, originalEvent) {
     const listeners = this._listeners[eventName];
-    if (!listeners) { return; }
 
-    listeners.forEach((listener) => {
-      listener(touchId, normX, normY, touchEvent, originalEvent);
-    });
+    if (listeners.length) {
+      listeners.forEach((listener) => {
+        listener(touchId, normX, normY, touchEvent, originalEvent);
+      });
+    }
   }
 
   /**
@@ -175,9 +179,8 @@ class TouchSurface {
    * @param {module:soundworks/client.TouchSurface~EventListener} callback
    */
   addListener(eventName, callback) {
-    if (!this._listeners[eventName]) {
+    if (!this._listeners[eventName])
       this._listeners[eventName] = [];
-    }
 
     this._listeners[eventName].push(callback);
   }
