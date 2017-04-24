@@ -29,7 +29,7 @@ const viewManager = {
    * @param {View} view - A view to add to the stack.
    */
   register(view, priority) {
-    log(`register - id: "${view.options.id}" - priority: ${view.priority}`);
+    log(`register - id: "${view.options.id}" - priority: ${priority}`);
 
     const infos = {};
     infos.html = view.render();
@@ -50,7 +50,7 @@ const viewManager = {
    * @param {View} view - A view to remove from the stack.
    */
   remove(view) {
-    log(`remove - id: "${view.options.id}" - priority: ${view.priority}`);
+    log(`remove - id: "${view.options.id}"`);
 
     // clean dictionnary
     viewInfosMap.delete(view);
