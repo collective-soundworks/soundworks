@@ -178,6 +178,21 @@ const client = {
   },
 
   /**
+   * Register a function to be executed when a service is instanciated.
+   *
+   * @param {serviceManager~serviceInstanciationHook} func - Function to
+   *  register has a hook to be execute when a service is created.
+   */
+  /**
+   * @callback serviceManager~serviceInstanciationHook
+   * @param {String} id - id of the instanciated service.
+   * @param {Service} instance - instance of the service.
+   */
+  setServiceInstanciationHook(func) {
+    serviceManager.setServiceInstanciationHook(func);
+  },
+
+  /**
    * Start the application.
    */
   start() {
