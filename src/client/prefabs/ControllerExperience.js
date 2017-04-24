@@ -13,6 +13,7 @@ class ControllerExperience extends Experience {
     super();
 
     this.sharedParams = this.require('shared-params');
+    this.controllerScene = new ControllerScene(this, this.sharedParams);
 
     if (options.auth)
       this.auth = this.require('auth');
@@ -24,7 +25,6 @@ class ControllerExperience extends Experience {
     this.view = new View();
     this.show();
 
-    this.controllerScene = new ControllerScene(this, this.sharedParams);
     this.controllerScene.enter();
   }
 
