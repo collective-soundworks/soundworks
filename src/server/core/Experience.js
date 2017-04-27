@@ -11,6 +11,8 @@ import serviceManager from './serviceManager';
  * The base class also keeps track of the clients who are currently in the performance (*i.e.* who entered but not exited yet) in the array `this.clients`.
  *
  * (See also {@link src/client/scene/Experience.js~Experience} on the client side.)
+ *
+ * @memberof module:soundworks/server
  */
 class Experience extends Activity {
   constructor(clientTypes) {

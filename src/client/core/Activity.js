@@ -45,15 +45,6 @@ class Activity extends Process {
       socket.required = true;
 
     /**
-     * View of the activity.
-     * @type {module:soundworks/client.View}
-     * @name view
-     * @instance
-     * @memberof module:soundworks/client.Activity
-     */
-    this._view = null;
-
-    /**
      * Options of the activity.
      * @type {Object}
      * @name options
@@ -61,6 +52,16 @@ class Activity extends Process {
      * @memberof module:soundworks/client.Activity
      */
     this.options = { viewPriority: 0 };
+
+    /**
+     * View of the activity.
+     * @type {module:soundworks/client.View}
+     * @name view
+     * @instance
+     * @memberof module:soundworks/client.Activity
+     * @private
+     */
+    this._view = null;
 
     /**
      * Define which signal the `Activity` requires to start.
@@ -75,7 +76,7 @@ class Activity extends Process {
   }
 
   /**
-   * Interface method to be implemented in child classes.
+   * Interface method to implement in child classes.
    * Define what to do when a service is required by an `Activity`.
    */
   require() {}
@@ -132,6 +133,7 @@ class Activity extends Process {
 
   /**
    * Send a web socket message to the server on a given channel.
+   *
    * @param {String} channel - The channel of the message (is automatically
    *  namespaced with the activity's id: `${this.id}:channel`).
    * @param {...*} args - Arguments of the message (as many as needed, of any type).
@@ -142,6 +144,7 @@ class Activity extends Process {
 
   /**
    * Send a web socket message to the server on a given channel.
+   *
    * @param {String} channel - The channel of the message (is automatically
    *  namespaced with the activity's id: `${this.id}:channel`).
    * @param {...*} args - Arguments of the message (as many as needed, of any type).
@@ -152,6 +155,7 @@ class Activity extends Process {
 
   /**
    * Listen to web socket messages from the server on a given channel.
+   *
    * @param {String} channel - The channel of the message (is automatically
    *  namespaced with the activity's id: `${this.id}:channel`).
    * @param {Function} callback - The callback to execute when a message is received.
@@ -162,11 +166,12 @@ class Activity extends Process {
 
   /**
    * Stop listening for messages from the server on a given channel.
+   *
    * @param {String} channel - The channel of the message (is automatically
    *  namespaced with the activity's id: `${this.id}:channel`).
    * @param {Function} callback - The callback to remove from the stack.
    */
-  removeListener(channel, callback) {
+  stopReceiving(channel, callback) {
     socket.removeListener(`${this.id}:${channel}`, callback);
   }
 }
