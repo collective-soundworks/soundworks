@@ -12,17 +12,17 @@
  * @memberof module:soundworks/client
  * @see {@link module:soundworks/client.CanvasView}
  */
-class Renderer {
+class Canvas2dRenderer {
   constructor(updatePeriod = 0) {
     this.updatePeriod = updatePeriod;
 
     /**
-     * Current (logical) time of the renderer.
+     * Current (logical) time of the Canvas2dRenderer.
      *
      * @type {Number}
      * @name currentTime
      * @instance
-     * @memberof module:soundworks/client.Renderer
+     * @memberof module:soundworks/client.Canvas2dRenderer
      * @readonly
      */
     this.currentTime = null;
@@ -33,7 +33,7 @@ class Renderer {
      * @type {Number}
      * @name canvasWidth
      * @instance
-     * @memberof module:soundworks/client.Renderer
+     * @memberof module:soundworks/client.Canvas2dRenderer
      * @readonly
      */
     this.canvasWidth = 0;
@@ -44,7 +44,7 @@ class Renderer {
      * @type {Number}
      * @name canvasHeight
      * @instance
-     * @memberof module:soundworks/client.Renderer
+     * @memberof module:soundworks/client.Canvas2dRenderer
      * @readonly
      */
     this.canvasHeight = 0;
@@ -55,7 +55,7 @@ class Renderer {
      * @type {String}
      * @name orientation
      * @instance
-     * @memberof module:soundworks/client.Renderer
+     * @memberof module:soundworks/client.Canvas2dRenderer
      * @readonly
      */
     this.orientation = null;
@@ -77,7 +77,7 @@ class Renderer {
 
   /**
    * Interface method that should host the code that updates the properties
-   * of the renderer (physics, etc.)
+   * of the Canvas2dRenderer (physics, etc.)
    *
    * @param {Number} dt - Logical time since the last update. If
    *  `this.updatePeriod` is equal to zero 0, `dt` is the elasped time since
@@ -93,4 +93,4 @@ class Renderer {
   render(ctx) {}
 }
 
-export default Renderer;
+export default Canvas2dRenderer;
