@@ -32,6 +32,12 @@ class SharedConfig extends Service {
     this._clientItemsMap = {};
   }
 
+  start() {
+    super.start();
+
+    this.ready();
+  }
+
   /** @inheritdoc */
   connect(client) {
     this.receive(client, 'request', this._onRequest(client));
@@ -51,7 +57,7 @@ class SharedConfig extends Service {
     let value = server.config;
     // search item through config
     parts.forEach((attr) => {
-      if (value && value[attr])
+      if (value && value[attr] !== undefined)
         value = value[attr];
       else
         value = null;
@@ -67,7 +73,7 @@ class SharedConfig extends Service {
    */
   share(item, clientType) {
     if (!this._clientItemsMap[clientType])
-      this._clientItemsMap[clientType] = new Set();;
+      this._clientItemsMap[clientType] = new Set();
 
     this._clientItemsMap[clientType].add(item);
   }
@@ -127,7 +133,7 @@ class SharedConfig extends Service {
 
       const config = this._getValues(client.type);
       this.send(client, 'config', config);
-    }
+    };
   }
 }
 

@@ -40,7 +40,7 @@ class Checkin extends Service {
 
     const defaults = {
       configItem: 'setup',
-    }
+    };
 
     this.configure(defaults);
     // use shared config service to share the setup
@@ -59,7 +59,7 @@ class Checkin extends Service {
     this.setup = this._sharedConfig.get(configItem);
 
     if (this.setup === null)
-      throw new Error(`"service:checkin": server.config.${configItem} is not defined`);
+      throw new Error(`"${SERVICE_ID}": server.config.${configItem} is not defined`);
 
     /**
      * Maximum number of clients checked in (may limit or be limited by the
@@ -88,6 +88,8 @@ class Checkin extends Service {
       if (this.capacity > numPositions)
         this.capacity = numPositions;
     }
+
+    this.ready();
   }
 
   /** @private */
@@ -149,7 +151,9 @@ class Checkin extends Service {
           coordinates = setup.coordinates ? setup.coordinates[index] : undefined;
 
           client.label = label;
-          client.coordinates = coordinates;
+
+          if (client.coordinates === null)
+            client.coordinates = coordinates;
         }
 
         this.clients[index] = client;
@@ -157,7 +161,7 @@ class Checkin extends Service {
       } else {
         this.send(client, 'unavailable');
       }
-    }
+    };
   }
 
   /** @private */

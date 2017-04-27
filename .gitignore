@@ -3,13 +3,12 @@
 # /server
 # /utils
 
+# documentation
+/docs
+
 # others
 /node_modules
 /tests
-
-# documentation default output
-/out
-/soundworks
 
 # junk files
 npm-debug.log

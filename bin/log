@@ -20,14 +20,12 @@ var log = {
   transpileSuccess: function(src, dest, startTime) {
     var time = getDeltaTime(startTime);
     var msg = prefix + '%s: successfully transpiled to "%s" (%sms)'.green;
-
     console.log(msg, toRel(src), toRel(dest), time);
   },
 
   transpileError: function(err) {
     var parts = err.message.split(':');
     var msg = prefix + '%s'.red;
-
     console.log(msg, toRel(err.message));
     console.log(err.codeFrame);
   },

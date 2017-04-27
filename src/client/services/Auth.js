@@ -3,62 +3,73 @@ import Service from '../core/Service';
 import SegmentedView from '../views/SegmentedView';
 import serviceManager from '../core/serviceManager';
 
+/**
+ * API of a compliant view for the `auth` service.
+ *
+ * @memberof module:soundworks/client
+ * @interface AbstractAuthView
+ * @extends module:soundworks/client.AbstractView
+ * @abstract
+ */
+/**
+ * Register the function that should be executed when the password is submitted
+ * by the user.
+ *
+ * @name setSendPasswordCallback
+ * @memberof module:soundworks/client.AbstractAuthView
+ * @function
+ * @abstract
+ * @instance
+ *
+ * @param {sendPasswordCallback} callback - Callback to execute when the user
+ *  submit the password
+ */
+/**
+ * Register the function that should be executed when the password is reset
+ * by the user.
+ *
+ * @name setResetPasswordCallback
+ * @memberof module:soundworks/client.AbstractAuthView
+ * @function
+ * @abstract
+ * @instance
+ *
+ * @param {setResetCallback} callback -
+ *  Callback to execute when the user reset the password
+ */
+/**
+ * Update the view according to the response to the submitted password.
+ *
+ * @name updateRejectedStatus
+ * @memberof module:soundworks/client.AbstractAuthView
+ * @function
+ * @abstract
+ * @instance
+ *
+ * @param {Boolean} value - `true` if the submitted password is rejected,
+ *  `false` when the password is reset.
+ */
+
+/**
+ * Callback to execute when the user submit the password.
+ *
+ * @callback
+ * @name sendPasswordCallback
+ * @memberof module:soundworks/client.AbstractAuthView
+ *
+ * @param {String} password - Password given by the user.
+ */
+/**
+ * Callback to execute when the user reset the password.
+ *
+ * @callback
+ * @name resetCallback
+ * @memberof module:soundworks/client.AbstractAuthView
+ */
+
 
 const SERVICE_ID = 'service:auth';
-
-/**
- * Interface for the view of the `auth` service.
- *
- * @interface AbstractAuthView
- * @extends module:soundworks/client.View
- */
-/**
- * Set the callback that should be executed when the send action is executed
- * on the view.
- *
- * @function
- * @name AbstractAuthView.onSend
- * @param {Function} callback - The callback given by the `auth` service.
- */
-class AuthView extends SegmentedView {
-  onSend(callback) {
-    this.installEvents({
-      'touchstart #send': () => {
-        const password = this.$el.querySelector('#password').value;
-
-        if (password !== '')
-          callback(password);
-      }
-    });
-  }
-}
-
-const defaultViewTemplate = `
-<% if (!rejected) { %>
-  <div class="section-top flex-middle">
-    <p><%= instructions %></p>
-  </div>
-  <div class="section-center flex-center">
-    <div>
-      <input type="password" id="password" />
-      <button class="btn" id="send"><%= send %></button>
-    </div>
-  </div>
-  <div class="section-bottom"></div>
-<% } else { %>
-  <div class="section-top"></div>
-  <div class="section-center flex-center">
-    <p><%= rejectMessage %></p>
-  </div>
-  <div class="section-bottom"></div>
-<% } %>`;
-
-const defaultViewContent = {
-  instructions: 'Login',
-  send: 'Send',
-  rejectMessage: `Sorry, you don't have access to this client`,
-  rejected: false,
-};
+const LOCAL_STORAGE_KEY = `soundworks:${SERVICE_ID}`;
 
 /**
  * Interface for the client `auth` service.
@@ -77,50 +88,39 @@ const defaultViewContent = {
  */
 class Auth extends Service {
   /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */
-  constructor(options) {
+  constructor() {
     super(SERVICE_ID, true);
 
     const defaults = {
       viewPriority: 100,
-      viewCtor: AuthView,
     };
 
     this.configure(defaults);
 
-    this._defaultViewTemplate = defaultViewTemplate;
-    this._defaultViewContent = defaultViewContent;
+    this._password = null;
 
     this._onAccesGrantedResponse = this._onAccesGrantedResponse.bind(this);
     this._onAccesRefusedResponse = this._onAccesRefusedResponse.bind(this);
     this._sendPassword = this._sendPassword.bind(this);
-  }
-
-  /** @private */
-  init() {
-    this._password = null;
-
-    this.viewCtor = this.options.viewCtor;
-    this.view = this.createView();
-    this.view.onSend(this._sendPassword);
+    this._resetPassword = this._resetPassword.bind(this);
   }
 
   /** @private */
   start() {
     super.start();
 
-    if (!this.hasStarted)
-      this.init();
+    this.view.setSendPasswordCallback(this._sendPassword);
+    this.view.setResetCallback(this._resetPassword);
 
     this.receive('granted', this._onAccesGrantedResponse);
     this.receive('refused', this._onAccesRefusedResponse);
 
-    const storedPassword = localStorage.getItem('soundworks:service:auth');
+    const storedPassword = localStorage.getItem(LOCAL_STORAGE_KEY);
 
-    if (storedPassword !== null) {
+    if (storedPassword !== null)
       this._sendPassword(storedPassword);
-    } else {
-      this.show();
-    }
+
+    this.show();
   }
 
   /** @private */
@@ -133,6 +133,16 @@ class Auth extends Service {
     this.hide();
   }
 
+  /**
+   * Remove the stored password from local storage. This method is aimed at
+   * being called from inside an experience / controller. Any UI update
+   * resulting from the call of this method should then be handled from the
+   * experience.
+   */
+  logout() {
+    localStorage.removeItem(LOCAL_STORAGE_KEY);
+  }
+
   /** @private */
   _sendPassword(password) {
     this._password = password;
@@ -140,15 +150,22 @@ class Auth extends Service {
   }
 
   /** @private */
+  _resetPassword() {
+    this._password = null;
+    localStorage.removeItem(LOCAL_STORAGE_KEY);
+
+    this.view.updateRejectedStatus(false);
+  }
+
+  /** @private */
   _onAccesGrantedResponse() {
-    localStorage.setItem('soundworks:service:auth', this._password);
+    localStorage.setItem(LOCAL_STORAGE_KEY, this._password);
     this.ready();
   }
 
   /** @private */
   _onAccesRefusedResponse() {
-    this.view.content.rejected = true;
-    this.view.render();
+    this.view.updateRejectedStatus(true);
   }
 }
 

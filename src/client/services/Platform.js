@@ -2,22 +2,112 @@ import { audioContext } from 'waves-audio';
 import client from '../core/client';
 import MobileDetect from 'mobile-detect';
 import screenfull from 'screenfull';
-import SegmentedView from '../views/SegmentedView';
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
 
 /**
- * Structure of the definition of a feature to be tested.
+ * API of a compliant view for the `platform` service.
+ *
+ * @memberof module:soundworks/client
+ * @interface AbstractPlatformView
+ * @extends module:soundworks/client.AbstractView
+ * @abstract
+ */
+/**
+ * Register the callback to execute when the user touches the screen for the first time.
+ *
+ * @name setTouchStartCallback
+ * @memberof module:soundworks/client.AbstractPlatformView
+ * @function
+ * @abstract
+ * @instance
+ *
+ * @param {touchStartCallback} callback - Callback to execute when the user
+ *  touches the screen for the first time.
+ */
+/**
+ * Register the callback to execute when the user clicks the screen for the first time.
+ *
+ * @name setMousedownCallback
+ * @memberof module:soundworks/client.AbstractPlatformView
+ * @function
+ * @abstract
+ * @instance
+ *
+ * @param {mouseDownCallback} callback - Callback to execute when the user
+ *  clicks the screen for the first time.
+ */
+/**
+ * Update the view to notify that the compatibility checks are terminated.
+ *
+ * @name updateCheckingStatus
+ * @memberof module:soundworks/client.AbstractPlatformView
+ * @function
+ * @abstract
+ * @instance
+ *
+ * @param {Boolean} value
+ */
+/**
+ * Update the view to notify if the device is compatible or not.
+ *
+ * @name updateIsCompatibleStatus
+ * @memberof module:soundworks/client.AbstractPlatformView
+ * @function
+ * @abstract
+ * @instance
+ *
+ * @param {Boolean} value
+ */
+/**
+ * Update the view to notify if the application obtained all the authorizations
+ * or not.
+ *
+ * @name updateHasAuthorizationsStatus
+ * @memberof module:soundworks/client.AbstractPlatformView
+ * @function
+ * @abstract
+ * @instance
+ *
+ * @param {Boolean} value
+ */
+
+/**
+ * Callback to execute when the user touches the screen for the first time.
+ *
+ * @callback
+ * @name touchStartCallback
+ * @memberof module:soundworks/client.AbstractPlatformView
+ *
+ * @param {String} password - Password given by the user.
+ */
+/**
+ * Callback to execute when the user clicks the screen for the first time.
+ *
+ * @callback
+ * @name mouseDownCallback
+ * @memberof module:soundworks/client.AbstractPlatformView
+ */
+
+
+
+/**
+ * Structure of the definition for the test of a feature.
  *
  * @typedef {Object} module:soundworks/client.Platform~definition
+ *
  * @property {String} id - Id of the definition.
  * @property {Function} check - A function that should return `true` if the
  *  feature is available on the platform, `false` otherwise.
- * @property {Function} [interactionHook] - A function to be executed on the
- *  first interaction (i.e. `click` or `touchstart`) of the user with application
- *  (for example, to initialize AudioContext on iOS devices).
- * @property {Function} [interactionHook] - A function to be executed on start
- *  (for example to ask access to microphone or geolocation).
+ * @property {Function} [startHook] - A function returning a `Promise` to be
+ *  executed on start (for example to ask access to microphone or geolocation).
+ *  The returned promise should be resolved on `true` is the process succeded or
+ *  `false` is the precess failed (e.g. permission not granted).
+ * @property {Function} [interactionHook] - A function returning a Promiseto be
+ *  executed on the first interaction (i.e. `click` or `touchstart`) of the user
+ *  with application (for example, to initialize AudioContext on iOS devices).
+ *  The returned promise should be resolved on `true` is the process succeded or
+ *  `false` is the precess failed (e.g. permission not granted).
  */
 const defaultDefinitions = [
   {
@@ -27,7 +117,7 @@ const defaultDefinitions = [
     },
     interactionHook: function() {
       if (!client.platform.isMobile)
-        return;
+        return Promise.resolve(true);
 
       const g = audioContext.createGain();
       g.connect(audioContext.destination);
@@ -38,9 +128,11 @@ const defaultDefinitions = [
       o.frequency.value = 20;
       o.start(0);
 
-      // prevent android to stop audio by keping the oscillator active
+      // prevent android to stop audio by keeping the oscillator active
       if (client.platform.os !== 'android')
         o.stop(audioContext.currentTime + 0.01);
+
+      return Promise.resolve(true);
     }
   },
   {
@@ -54,13 +146,24 @@ const defaultDefinitions = [
   {
     id: 'audio-input',
     check: function() {
+      navigator.getUserMedia = (
+        navigator.getUserMedia ||
+        navigator.webkitGetUserMedia ||
+        navigator.mozGetUserMedia ||
+        navigator.msGetUserMedia
+      );
+
       return !!navigator.getUserMedia;
     },
     startHook: function() {
-      navigator.getUserMedia({ audio: true }, function(stream) {
-        stream.getAudioTracks()[0].stop();
-      }, function (err) {
-        throw err;
+      return new Promise(function(resolve, reject) {
+        navigator.getUserMedia({ audio: true }, function(stream) {
+          stream.getAudioTracks()[0].stop();
+          resolve(true);
+        }, function (err) {
+          resolve(false);
+          throw err;
+        });
       });
     }
   },
@@ -73,10 +176,46 @@ const defaultDefinitions = [
     interactionHook() {
       if (screenfull.enabled)
         screenfull.request();
+
+      return Promise.resolve(true);
+    }
+  },
+  {
+    id: 'geolocation',
+    check: function() {
+      return !!navigator.geolocation.getCurrentPosition;
+    },
+    startHook: function() {
+      return new Promise(function(resolve, reject) {
+        navigator.geolocation.getCurrentPosition((position) => {
+          // populate client with first value
+          const coords = position.coords;
+          client.coordinates = [coords.latitude, coords.longitude];
+          client.geoposition = position;
+
+          resolve(true);
+        }, (err) => {
+          resolve(false);
+          throw err;
+        }, {});
+      });
+    }
+  },
+  {
+    id: 'geolocation-mock',
+    check: function() {
+      return true;
+    },
+    startHook: function() {
+      const lat = Math.random() * 360 - 180;
+      const lng = Math.random() * 180 - 90;
+      client.coordinates = [lat, lng];
+      return Promise.resolve(true);
     }
   },
   {
     // adapted from https://github.com/richtr/NoSleep.js/blob/master/NoSleep.js
+    // warning: cause 150% cpu use in chrome desktop...
     id: 'wake-lock',
     check: function() {
       // functionnality that cannot brake the application
@@ -108,91 +247,84 @@ const defaultDefinitions = [
 
         $video.play();
       }
+
+      return Promise.resolve(true);
     }
   }
 ];
-
-
-const defaultViewTemplate = `
-<% if (!isCompatible) { %>
-  <div class="section-top"></div>
-  <div class="section-center flex-center">
-    <p><%= errorMessage %></p>
-  </div>
-  <div class="section-bottom"></div>
-<% } else { %>
-  <div class="section-top flex-middle"></div>
-  <div class="section-center flex-center">
-      <p class="big">
-        <%= intro %>
-        <br />
-        <b><%= globals.appName %></b>
-      </p>
-  </div>
-  <div class="section-bottom flex-middle">
-    <p class="small soft-blink"><%= instructions %></p>
-  </div>
-<% } %>`;
-
-const defaultViewContent = {
-  isCompatible: null,
-  errorMessage: 'Sorry,<br />Your device is not compatible with the application.',
-  intro: 'Welcome to',
-  instructions: 'Touch the screen to join!',
-};
 
 const SERVICE_ID = 'service:platform';
 
 /**
  * Interface for the client `'platform'` service.
  *
- * This services is responsible for giving general informations about the user's
- * device (cf. [`client.device`]{@link module:soundworks/client.client.platform})
- * as well as checking availability and providing hooks in order to initialize
- * the features required by the application (audio, microphone, etc.).
+ * The `platform` services is responsible for giving general informations
+ * about the user's device as well as checking availability and providing hooks
+ * in order to initialize the features required by the application (audio,
+ * microphone, etc.).
  * If one of the required definitions is not available, a view is created with
- * an error message and the [`client.compatible`]{@link module:soundworks/client.client.compatible}
- * attribute is set to `false`.
+ * an error message and `client.compatible` is set to `false`.
  *
  * Available built-in definitions are:
  * - 'web-audio'
- * - 'mobile-device'
- * - 'audio-input'
- * - 'full-screen' (this feature won't block the application, just applied if available)
- * - 'wake-lock'
+ * - 'mobile-device': only-accept mobile devices in the application (based on
+ *   User-Agent sniffing)
+ * - 'audio-input': Android Only
+ * - 'full-screen': Android Only, this feature won't block the application if
+ *   not available.
+ * - 'geolocation': check if the navigator supports geolocation. The `coordinates`
+ *   and `geoposition` of the `client` are populated when the plaform service
+ *   resolves. (if no update of the coordinates are needed in the application,
+ *   requiring geolocation feature without using the Geolocation service should
+ *   suffice).
+ * - 'wake-lock': use with caution, has been observed consumming
+ *   150% cpu in chrome desktop.
  *
- * Be carefull when setting `showDialog` option to `false` because most of these
- * features require an interaction or a confirmation from the user in order to
- * be initialized correctly,
  *
- * @see {@link module:soundworks/client.client}
+ * _<span class="warning">__WARNING__</span> This class should never be
+ * instanciated manually_
  *
  * @param {Object} options
  * @param {Array<String>|String} options.features - Id(s) of the feature(s)
- *  required by the application.
- * @param {}
+ *  required by the application. Available build-in features are:
+ *  - 'web-audio'
+ *  - 'mobile-device': only accept mobile devices (recognition based User-Agent)
+ *  - 'audio-input': Android only
+ *  - 'full-screen': Android only
+ *  - 'geolocation': accept geolocalized devices. Populate the client with
+ *     current position
+ *  - 'wake-lock': this feature should be used with caution as
+ *     it has been observed to use 150% of cpu in chrome desktop.
+ *
+ * <!--
+ * Warning: when setting `showDialog` option to `false`, unexpected behaviors
+ * might occur because most of the features require an interaction or a
+ * confirmation from the user in order to be initialized correctly.
+ * -->
  *
  * @memberof module:soundworks/client
  * @example
  * // inside the experience constructor
  * this.platform = this.require('platform', { features: 'web-audio' });
+ *
+ * @see {@link module:soundworks/client.client#platform}
  */
 class Platform extends Service {
-  /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */
   constructor() {
     super(SERVICE_ID, false);
 
     const defaults = {
-      // wakeLock: false, // @todo - fix and transform into a feature
       showDialog: true,
-      viewCtor: SegmentedView,
+      view: null,
       viewPriority: 10,
     };
 
     this.configure(defaults);
 
-    this._defaultViewTemplate = defaultViewTemplate;
-    this._defaultViewContent = defaultViewContent;
+    this.view = null;
+
+    // this._defaultViewTemplate = defaultViewTemplate;
+    // this._defaultViewContent = defaultViewContent;
 
     this._requiredFeatures = new Set();
     this._featureDefinitions = {};
@@ -215,46 +347,61 @@ class Platform extends Service {
     super.configure(options);
   }
 
-  /** @private */
-  init() {
-    this._defineAudioFileExtention();
-    this._definePlatform();
-    // resolve required features from the application
-    client.compatible = this.resolveRequiredFeatures();
-    this.viewContent.isCompatible = client.compatible;
-
-    this.viewCtor = this.options.viewCtor;
-    this.view = this.createView();
-  }
-
-  /** @private */
+  /**
+   *  Start the client.
+   *  Algorithm:
+   *  - check required features
+   *  - if (false)
+   *     show 'sorry' screen
+   *  - else
+   *     show 'welcome' screen
+   *     execute start hook (promise)
+   *     - if (promise === true)
+   *        show touch to start
+   *        bind events
+   *     - else
+   *        show 'sorry' screen
+   * @private
+   */
   start() {
     super.start();
 
-    if (!this.hasStarted)
-      this.init();
+    this._defineAudioFileExtention();
+    this._definePlatform();
 
-    // execute start hooks from the features definitions
-    if(client.compatible) {
-      const startHooks = this.getStartHooks();
-      startHooks.forEach((hook) => hook());
-    }
+    // resolve required features from the application
+    client.compatible = this._checkRequiredFeatures();
 
-    // optionnaly skip the view if client is compatible
-    if (client.compatible && !this.options.showDialog) {
-      // bypass if features contains 'web-audio' and client.platform.os === 'ios'
-      if (this._requiredFeatures.has('web-audio') && client.platform.os === 'ios')
-        this.show();
-      else
-        this.ready();
-    } else {
+    // default view values
+    this.view.updateCheckingStatus(false);
+    this.view.updateIsCompatibleStatus(null);
+    this.view.updateHasAuthorizationsStatus(null);
+
+    if (!client.compatible) {
+      this.view.updateIsCompatibleStatus(false);
       this.show();
-    }
+    } else {
+      this.view.updateIsCompatibleStatus(true);
+      this.view.updateCheckingStatus(true);
+      this.show();
 
-    // install events for interaction hook
-    if (client.compatible) {
-      const event = client.platform.isMobile ? 'touchend' : 'click';
-      this.view.installEvents({ [event]: this._onInteraction.bind(this) });
+      // execute start hook
+      const startHooks = this._getHooks('startHook');
+      const startPromises = startHooks.map(hook => hook());
+
+      Promise.all(startPromises).then((results) => {
+        // if one of the start hook failed
+        let hasAuthorizations = true;
+        results.forEach((success) => hasAuthorizations = hasAuthorizations && success);
+
+        this.view.updateHasAuthorizationsStatus(hasAuthorizations);
+        this.view.updateCheckingStatus(false);
+
+        if (hasAuthorizations) {
+          this.view.setTouchStartCallback(this._onInteraction('touch'));
+          this.view.setMouseDownCallback(this._onInteraction('mouse'));
+        }
+      }).catch((err) => console.error(err.stack));
     }
   }
 
@@ -265,30 +412,63 @@ class Platform extends Service {
   }
 
   /**
-   * Add a new feature definition or override an existing one.
+   * Structure of the definition for the test of a feature.
+   *
    * @param {module:soundworks/client.Platform~definition} obj - Definition of
-   *  the feature to add to the existing ones.
+ *
+   *  the feature.
    */
   addFeatureDefinition(obj) {
     this._featureDefinitions[obj.id] = obj;
   }
 
   /**
-   * Require features avalability for the application.
+   * Require features for the application.
+   *
+   * @param {...String} features - Id(s) of the feature(s) to be required.
    * @private
-   * @param {...String} features - The id(s) of the feature(s) to be required.
    */
   requireFeature(...features) {
     features.forEach((id) => this._requiredFeatures.add(id));
   }
 
+
   /**
-   * Execute all `check` functions from the definition of the required features.
-   * @private
-   * @return {Boolean} - true if all checks pass, false otherwise.
+   * Execute `interactions` hooks from the `platform` service.
+   * Also activate the media according to the `options`.
    *
+   * @private
    */
-  resolveRequiredFeatures() {
+  _onInteraction(type) {
+    return (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      client.platform.interaction = type;
+      // execute interaction hooks from the platform
+      const interactionHooks = this._getHooks('interactionHook');
+      const interactionPromises = interactionHooks.map((hook) => hook());
+
+      Promise.all(interactionPromises).then((results) => {
+        let resolved = true;
+        results.forEach((bool) => resolved = resolved && bool);
+
+        if (resolved) {
+          this.ready();
+        } else {
+          this.view.updateHasAuthorizationsStatus(resolved);
+        }
+      }).catch((err) => console.error(err.stack));
+    }
+  }
+
+  /**
+   * Execute all `check` functions defined in the required features.
+   *
+   * @return {Boolean} - `true` if all checks pass, `false` otherwise.
+   * @private
+   */
+  _checkRequiredFeatures() {
     let result = true;
 
     this._requiredFeatures.forEach((feature) => {
@@ -301,25 +481,6 @@ class Platform extends Service {
     });
 
     return result;
-  }
-
-  /**
-   * Returns the list of the functions to be executed on `start` lifecycle.
-   * @private
-   * @return {Array}
-   */
-  getStartHooks() {
-    return this._getHooks('startHook');
-  }
-
-  /**
-   * Returns the list of the functions to be executed when the user
-   * interacts with the application for the first time.
-   * @private
-   * @return {Array}
-   */
-  getInteractionHooks() {
-    return this._getHooks('interactionHook');
   }
 
   /** @private */
@@ -337,36 +498,25 @@ class Platform extends Service {
   }
 
   /**
-   * Execute `interactions` hooks from the `platform` service.
-   * Also activate the media according to the `options`.
-   * @private
-   */
-  _onInteraction() {
-    // execute interaction hooks from the platform
-    const interactionHooks = this.getInteractionHooks();
-    interactionHooks.forEach((hook) => hook());
-
-    this.ready();
-  }
-
-  /**
-   * Populate `client.platform` with the prefered audio file extention for the platform.
+   * Populate `client.platform` with the prefered audio file extention
+   * for the platform.
+   *
    * @private
    */
   _defineAudioFileExtention() {
     const a = document.createElement('audio');
     // http://diveintohtml5.info/everything.html
-    if (!!(a.canPlayType && a.canPlayType('audio/mpeg;'))) {
+    if (!!(a.canPlayType && a.canPlayType('audio/mpeg;')))
       client.platform.audioFileExt = '.mp3';
-    } else if (!!(a.canPlayType && a.canPlayType('audio/ogg; codecs="vorbis"'))) {
+    else if (!!(a.canPlayType && a.canPlayType('audio/ogg; codecs="vorbis"')))
       client.platform.audioFileExt = '.ogg';
-    } else {
+    else
       client.platform.audioFileExt = '.wav';
-    }
   }
 
   /**
    * Populate `client.platform` with the os name.
+   *
    * @private
    */
   _definePlatform() {

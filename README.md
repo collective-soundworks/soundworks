@@ -27,7 +27,7 @@ Please refer to the repository's README file for further instructions and docume
 ## Basic Concepts
 
 The framework is implemented in ES2015 using the *Babel* JavaScript compiler.
-It provides scripts to support the development of applications based on ES2015 functions and abstraction such `class`, `import` and `export`.
+It provides scripts to support the development of applications based on ES2015 functions and abstraction such as `class`, `import` and `export`.
 
 ### Different Client Types
 
@@ -39,7 +39,7 @@ An additional client type `referee` of the same application would, for example, 
 
 Apart from `player`, different client types occurring in applications that we have developed with *Soundworks* include, for example:
  * `soloist` - a participant with a soloist role in a musical application
- * `conductor`- a web client for controlling the global parameters of an application
+ * `controller`- a web client for controlling the global parameters of an application
  * `shared-env` - a graphical representation or audio rendering projected into the environment of the application (i.e. by a video projector and/or public sound system)
 
 Generally, each client type is mapped to an *experience* implemented on both sides of the application, the client and, optionally, the server.
@@ -64,12 +64,14 @@ The services currently provided include, for example:
  * `checkin` - automatically assigns a ticket or predefined position (i.e. number or label with optional coordinates) to the user
  * `placer` - lets the user chose an available ticket or predefined position
  * `locator` - lets the user indicate an approximate position on a map
- * `loader` - preloads audio and other content files
- * `auth` - add a login page to specific client.
+ * `file-system` - allow to retrieve a file list from a given directory
+ * `audio-buffer-manager` - preloads audio buffers and related JSON files descriptors
+ * `auth` - add a simple login page to specific client
  * `sync` - provides a synchronized clock to all clients
  * `scheduler` - differs function calls and schedules recurrent events in reference to the synchronized clock or a local audio clock
  * `motion-input` - provides unified access to the mobile device's motion sensors (based on the `DeviceMotion` and `DeviceOrientation` APIs)
  * `shared-params` - global variables and commands shared by the clients of defined types
+ * `shared-config` - retrieves configuration constants from the server
 
  The framework provides an API for extending the set of available services.
 

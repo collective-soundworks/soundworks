@@ -6,61 +6,75 @@
 
       "src/client/core/client.js",
       "src/client/core/Activity.js",
-      "src/client/core/Scene.js",
+      "src/client/core/Experience.js",
       "src/client/core/Service.js",
 
+      "src/client/services/AudioBufferManager.js",
+      "src/client/services/AudioScheduler.js",
       "src/client/services/Auth.js",
       "src/client/services/Checkin.js",
       "src/client/services/ErrorReporter.js",
-      "src/client/services/Loader.js",
+      "src/client/services/FileSystem.js",
+      "src/client/services/Geolocation.js",
       "src/client/services/Locator.js",
+      "src/client/services/MetricScheduler.js",
       "src/client/services/MotionInput.js",
       "src/client/services/Network.js",
       "src/client/services/Placer.js",
       "src/client/services/Platform.js",
-      "src/client/services/Scheduler.js",
+      "src/client/services/RawSocket.js",
       "src/client/services/SharedConfig.js",
       "src/client/services/SharedParams.js",
+      "src/client/services/SharedRecorder.js",
       "src/client/services/Sync.js",
+      "src/client/services/SyncScheduler.js",
 
-      "src/client/scenes/Experience.js",
-
+      "src/client/views/Canvas2dRenderer.js",
+      "src/client/views/CanvasRenderingGroup.js",
       "src/client/views/CanvasView.js",
-      "src/client/views/Renderer.js",
       "src/client/views/SegmentedView.js",
       "src/client/views/View.js",
       "src/client/views/viewport.js",
 
       "src/server/index.js",
 
-      "src/server/core/server.js",
       "src/server/core/Activity.js",
-      "src/server/core/Scene.js",
+      "src/server/core/Client.js",
+      "src/server/core/Experience.js",
+      "src/server/core/server.js",
       "src/server/core/Service.js",
 
+      "src/server/services/AudioBufferManager.js",
       "src/server/services/Auth.js",
       "src/server/services/Checkin.js",
       "src/server/services/ErrorReporter.js",
+      "src/server/services/Geolocation.js",
       "src/server/services/Locator.js",
+      "src/server/services/MetricScheduler.js",
       "src/server/services/Network.js",
       "src/server/services/Osc.js",
       "src/server/services/Placer.js",
+      "src/server/services/RawSocket.js",
       "src/server/services/SharedConfig.js",
       "src/server/services/SharedParams.js",
-      "src/server/services/Sync.js"
+      "src/server/services/SharedRecorder.js",
+      "src/server/services/Sync.js",
+      "src/server/services/SyncScheduler.js"
     ]
   },
   "plugins": [
     "plugins/markdown"
   ],
   "opts": {
-    "destination": "./out",
     "projectTitle": "Soundworks",
-    "template": "node_modules/jsdoc-template"
+    "template": "node_modules/jsdoc-template",
+    "destination": "./docs",
+    "encoding": "utf8"
   },
   "templates": {
     "default": {
       "useLongnameInNav": true
-    }
+    },
+    "footer": ""
   }
 }

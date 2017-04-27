@@ -1,8 +1,9 @@
 import debug from 'debug';
 
 const log = debug('soundworks:viewManager');
-const _stack = new Set();
-let _$container = null;
+const viewInfosMap = new Map();
+
+let $container = null;
 
 /**
  * Handle activities' (services and scenes) views according to their priorities.
@@ -10,35 +11,7 @@ let _$container = null;
 const viewManager = {
   _timeoutId: null,
 
-  /**
-   * Register a view into the stack of views to display. The fact that the view is
-   * actually displayed is defined by its priority and activities lifecycle.
-   * @param {View} view - A view to add to the stack.
-   */
-  register(view) {
-    log(`register - id: "${view.options.id}" - priority: ${view.priority}`);
-
-    _stack.add(view);
-    view.hide();
-    view.appendTo(_$container);
-
-    // trigger `_updateView` only once when several view are registered at once.
-    if (!this._timeoutId)
-      this.timeoutId = setTimeout(() => { this._updateView(); }, 0);
-  },
-
-  /**
-   * Remove view from the stack of views to display.
-   * @param {View} view - A view to remove from the stack.
-   */
-  remove(view) {
-    log(`remove - id: "${view.options.id}" - priority: ${view.priority}`);
-
-    view.remove();
-    _stack.delete(view);
-
-    setTimeout(() => { this._updateView(); }, 0);
-  },
+  _visibleView: null,
 
   /**
    * Sets the container of the views for all `Activity` instances. Is called by
@@ -46,8 +19,49 @@ const viewManager = {
    * @param {Element} $el - The element to use as a container for the view.
    * @private
    */
-  setViewContainer($el) {
-    _$container = $el;
+  setAppContainer($el) {
+    $container = $el;
+  },
+
+  /**
+   * Register a view into the stack of views to display. The fact that the view is
+   * actually displayed is defined by its priority and activities lifecycle.
+   * @param {View} view - A view to add to the stack.
+   */
+  register(view, priority) {
+    log(`register - id: "${view.options.id}" - priority: ${priority}`);
+
+    const infos = {};
+    infos.$el = view.render();
+    infos.priority = priority;
+    const promise = new Promise((resolve, reject) => infos.promise = resolve);
+
+    viewInfosMap.set(view, infos);
+
+    // trigger `_updateView` only once when several view are registered at once.
+    clearTimeout(this._timeoutId);
+    this._timeoutId = setTimeout(() => this._updateView(), 0);
+
+    return promise;
+  },
+
+  /**
+   * Remove view from the stack of views to display.
+   * @param {View} view - A view to remove from the stack.
+   */
+  remove(view) {
+    log(`remove - id: "${view.options.id}"`);
+
+    // clean dictionnary
+    viewInfosMap.delete(view);
+
+    if (this._visibleView === view) {
+      this._visibleView.remove();
+      this._visibleView = null;
+    }
+
+    clearTimeout(this._timeoutId);
+    this._timeoutId = setTimeout(() => this._updateView(), 0);
   },
 
   /**
@@ -55,34 +69,40 @@ const viewManager = {
    * @private
    */
   _updateView() {
-    let visibleView;
-    let priority = -Infinity;
+    const visibleView = this._visibleView;
+    let nextViewPriority = -Infinity;
     let nextView = null;
 
-    _stack.forEach(function(view) {
-      if (view.isVisible)
-        visibleView = true;
-
-      if (view.priority > priority) {
-        priority = view.priority;
+    viewInfosMap.forEach((infos, view) => {
+      if (infos.priority > nextViewPriority) {
+        nextViewPriority = infos.priority;
         nextView = view;
       }
     });
 
+    log(`update view - next: "${nextView.options.id}" - visible: "${visibleView ? visibleView.options.id : 'Ø'}"`);
+
     if (nextView) {
-      if (!visibleView) {
-        log(`update view - id: "${nextView.options.id}" - priority: ${priority}`);
-
+      if (visibleView === null) {
+        $container.appendChild(viewInfosMap.get(nextView).$el);
         nextView.show();
-      } else if (visibleView.priority < nextView.priority) {
-        log(`update view - id: "${nextView.options.id}" - priority: ${priority}`);
+        // resolve the promise created when the view were registered
+        viewInfosMap.get(nextView).promise();
+        this._visibleView = nextView;
+      } else {
+        const visibleViewPriority = viewInfosMap.get(this._visibleView).priority;
 
-        visibleView.hide(); // hide but keep in stack
-        nextView.show();
+        if (visibleViewPriority < nextViewPriority) {
+          visibleView.remove(); // hide but keep in stack
+
+          $container.appendChild(viewInfosMap.get(nextView).$el);
+          nextView.show();
+
+          viewInfosMap.get(nextView).promise();
+          this._visibleView = nextView;
+        }
       }
     }
-
-    this.timeoutId = null;
   },
 };
 

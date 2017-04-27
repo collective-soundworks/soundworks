@@ -67,7 +67,8 @@ class MotionInput extends Service {
         });
 
         this.ready();
-      });
+      })
+      .catch((err) => console.error(err.stack));
   }
 
   /** @private */

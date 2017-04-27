@@ -5,7 +5,6 @@ import express from 'express';
 import fs from 'fs';
 import http from 'http';
 import https from 'https';
-import IO from 'socket.io';
 import logger from '../utils/logger';
 import path from 'path';
 import pem from 'pem';
@@ -25,9 +24,9 @@ import sockets from './sockets';
  * @property {String} defaultClient - Name of the default client type,
  *  i.e. the client that can access the application at its root URL
  * @property {String} assetsDomain - Define from where the assets (static files)
- *  should be loaded, these value could also refer to a separate server for
- *  scalability reasons. This value should also be used client-side to configure
- *  the `loader` service.
+ *  should be loaded, this value can refer to a separate server for scalability.
+ *  The value should be used client-side to configure the `audio-buffer-manager`
+ *  service.
  * @property {Number} port - Port used to open the http server, in production
  *  this value is typically 80
  *
@@ -46,10 +45,10 @@ import sockets from './sockets';
  * @property {Number} setup.capacity - Maximum number of positions (may limit
  * or be limited by the number of labels and/or coordinates).
  *
- * @property {Object} socketIO - Socket.io configuration
- * @property {String} socketIO.url - Optionnal url where the socket should
+ * @property {Object} websockets - Websockets configuration (socket.io)
+ * @property {String} websockets.url - Optionnal url where the socket should
  *  connect.
- * @property {Array} socketIO.transports - List of the transport mecanims that
+ * @property {Array} websockets.transports - List of the transport mecanims that
  *  should be used to open or emulate the socket.
  *
  * @property {Boolean} useHttps -  Define if the HTTP server should be launched
@@ -104,19 +103,18 @@ import sockets from './sockets';
  */
 const server = {
   /**
-   * SocketIO server.
-   * @type {Object}
-   * @private
-   */
-  io: null,
-
-  /**
    * Configuration informations, all config objects passed to the
    * [`server.init`]{@link module:soundworks/server.server.init} are merged
    * into this object.
    * @type {module:soundworks/server.server~serverConfig}
    */
   config: {},
+
+  /**
+   * The url of the node server on the current machine.
+   * @private
+   */
+  _address: '',
 
   /**
    * Mapping between a `clientType` and its related activities.
@@ -137,24 +135,62 @@ const server = {
    */
   _routes: {},
 
+  get clientTypes() {
+    return Object.keys(this._clientTypeActivitiesMap);
+  },
 
+  /**
+   * Return a service configured with the given options.
+   * @param {String} id - Identifier of the service.
+   * @param {Object} options - Options to configure the service.
+   */
+  require(id, options) {
+    return serviceManager.require(id, options);
+  },
+
+  /**
+   * Default for the module:soundworks/server.server~clientConfigDefinition
+   * @private
+   */
   _clientConfigDefinition: (clientType, serverConfig, httpRequest) => {
     return { clientType };
   },
 
   /**
-   * Map client types with an activity.
-   * @param {Array<String>} clientTypes - List of client type.
-   * @param {Activity} activity - Activity concerned with the given `clientTypes`.
-   * @private
+   * @callback module:soundworks/server.server~clientConfigDefinition
+   * @param {String} clientType - Type of the client.
+   * @param {Object} serverConfig - Configuration of the server.
+   * @param {Object} httpRequest - Http request for the `index.html`
+   * @return {Object}
    */
-  _setMap(clientTypes, activity) {
-    clientTypes.forEach((clientType) => {
-      if (!this._clientTypeActivitiesMap[clientType])
-        this._clientTypeActivitiesMap[clientType] = new Set();
+  /**
+   * Set the {@link module:soundworks/server.server~clientConfigDefinition} with
+   * a user defined function.
+   * @param {module:soundworks/server.server~clientConfigDefinition} func - A
+   *  function that returns the data that will be used to populate the `index.html`
+   *  template. The function could (and should) be used to pass configuration
+   *  to the soundworks client.
+   * @see {@link module:soundworks/client.client~init}
+   */
+  setClientConfigDefinition(func) {
+    this._clientConfigDefinition = func;
+  },
 
-      this._clientTypeActivitiesMap[clientType].add(activity);
-    });
+  /**
+   * Register a route for a given `clientType`, allow to define a more complex
+   * routing (additionnal route parameters) for a given type of client.
+   * @param {String} clientType - Type of the client.
+   * @param {String|RegExp} route - Template of the route that should be append.
+   *  to the client type
+   *
+   * @example
+   * ```
+   * // allow `conductor` clients to connect to `http://site.com/conductor/1`
+   * server.registerRoute('conductor', '/:param')
+   * ```
+   */
+  defineRoute(clientType, route) {
+    this._routes[clientType] = route;
   },
 
   /**
@@ -167,36 +203,127 @@ const server = {
   },
 
   /**
-   * Return a service configured with the given options.
-   * @param {String} id - Identifier of the service.
-   * @param {Object} options - Options to configure the service.
+   * Initialize the server with the given configuration.
+   * @param {module:soundworks/server.server~serverConfig} config -
+   *  Configuration of the application.
    */
-  require(id, options) {
-    return serviceManager.require(id, null, options);
+  init(config) {
+    this.config = config;
+
+    serviceManager.init();
   },
 
   /**
-   * Initialize the server with the given config objects.
-   * @param {...module:soundworks/server.server~serverConfig} configs -
-   *  Configuration of the application.
+   * Start the application:
+   * - launch the http(s) server.
+   * - launch the socket server.
+   * - start all registered activities.
+   * - define routes and activities mapping for all client types.
    */
-  init(...configs) {
-    configs.forEach((config) => {
-      for (let key in config) {
-        const entry = config[key];
+  start() {
+    this._populateDefaultConfig();
 
-        if (typeof entry === 'object' && entry !== null) {
-          this.config[key] = this.config[key] || {};
-          this.config[key] = Object.assign(this.config[key], entry);
+    if (this.config.logger !== undefined)
+      logger.init(this.config.logger);
+
+    // configure express
+    const expressMiddleware = new express();
+    expressMiddleware.set('port', process.env.PORT || this.config.port);
+    expressMiddleware.set('view engine', 'ejs');
+    // compression
+    if (this.config.enableGZipCompression)
+      expressMiddleware.use(compression());
+    // public folder
+    expressMiddleware.use(express.static(this.config.publicDirectory));
+
+    this._initActivities();
+    this._initRouting(expressMiddleware);
+
+    const useHttps = this.config.useHttps || false;
+
+    new Promise((resolve, reject) => {
+      // launch http(s) server
+      if (!useHttps) {
+        const httpServer = http.createServer(expressMiddleware);
+        resolve(httpServer);
+      } else {
+        const httpsInfos = this.config.httpsInfos;
+        // use given certificate
+        if (httpsInfos.key && httpsInfos.cert) {
+          const key = fs.readFileSync(httpsInfos.key);
+          const cert = fs.readFileSync(httpsInfos.cert);
+          const httpsServer = https.createServer({ key, cert }, expressMiddleware);
+          resolve(httpsServer);
+        // generate certificate on the fly (for development purposes)
         } else {
-          this.config[key] = entry;
+          pem.createCertificate({ days: 1, selfSigned: true }, (err, keys) => {
+            const httpsServer = https.createServer({
+              key: keys.serviceKey,
+              cert: keys.certificate,
+            }, expressMiddleware);
+
+            resolve(httpsServer);
+          });
         }
       }
+    }).then((httpServer) => {
+      this._initSockets(httpServer);
+
+      serviceManager.signals.ready.addObserver(() => {
+        httpServer.listen(expressMiddleware.get('port'), () => {
+          const protocol = useHttps ? 'https' : 'http';
+          this._address = `${protocol}://127.0.0.1:${expressMiddleware.get('port')}`;
+          console.log(`[${protocol.toUpperCase()} SERVER] Server listening on`, this._address);
+        });
+      });
+
+      serviceManager.start();
+    }).catch((err) => console.error(err.stack));
+  },
+
+  /**
+   * Map activities to their respective client type(s) and start them all.
+   * @private
+   */
+  _initActivities() {
+    this._activities.forEach((activity) => {
+      this._mapClientTypesToActivity(activity.clientTypes, activity);
     });
   },
 
+  /**
+   * Init routing for each client. The default client must be opened last.
+   * @private
+   */
+  _initRouting(expressApp) {
+    for (let clientType in this._clientTypeActivitiesMap) {
+      if (clientType !== this.config.defaultClient)
+        this._openClientRoute(clientType, expressApp);
+    }
+
+    for (let clientType in this._clientTypeActivitiesMap) {
+      if (clientType === this.config.defaultClient)
+        this._openClientRoute(clientType, expressApp);
+    }
+  },
+
+  /**
+   * Init websocket server.
+   * @private
+   */
+  _initSockets(httpServer) {
+    sockets.init(httpServer, this.config.websockets);
+    // socket connnection
+    sockets.onConnection(this.clientTypes, (clientType, socket) => {
+      this._onSocketConnection(clientType, socket);
+    });
+  },
+
+   /**
+   * Populate mandatory configuration options
+   * @private
+   */
   _populateDefaultConfig() {
-    // mandatory configuration options
     if (this.config.port === undefined)
        this.config.port = 8000;
 
@@ -212,156 +339,30 @@ const server = {
     if (this.config.defaultClient === undefined)
       this.config.defaultClient = 'player';
 
-    if (this.config.socketIO === undefined)
-      this.config.socketIO = {};
+    if (this.config.websockets === undefined)
+      this.config.websockets = {};
   },
 
   /**
-   * Start the application:
-   * - launch the http(s) server.
-   * - launch the socket server.
-   * - start all registered activities.
-   * - define routes and activities mapping for all client types.
-   */
-  start() {
-    this._populateDefaultConfig();
-
-    if (this.config.logger !== undefined)
-      logger.initialize(this.config.logger);
-
-    // configure express
-    const expressApp = new express();
-    expressApp.set('port', process.env.PORT || this.config.port);
-    expressApp.set('view engine', 'ejs');
-
-    // compression
-    if (this.config.enableGZipCompression)
-      expressApp.use(compression());
-
-    // public folder
-    expressApp.use(express.static(this.config.publicDirectory));
-
-    // use https
-    const useHttps = this.config.useHttps || false;
-    // launch http(s) server
-    if (!useHttps) {
-      this._runHttpServer(expressApp);
-    } else {
-      const httpsInfos = this.config.httpsInfos;
-
-      // use given certificate
-      if (httpsInfos.key && httpsInfos.cert) {
-        const key = fs.readFileSync(httpsInfos.key);
-        const cert = fs.readFileSync(httpsInfos.cert);
-
-        this._runHttpsServer(expressApp, key, cert);
-      // generate certificate on the fly (for development purposes)
-      } else {
-        pem.createCertificate({ days: 1, selfSigned: true }, (err, keys) => {
-          this._runHttpsServer(expressApp, keys.serviceKey, keys.certificate);
-        });
-      }
-    }
-  },
-
-  /**
-   * Register a route for a given `clientType`, allow to define a more complex
-   * routing (additionnal route parameters) for a given type of client.
-   * @param {String} clientType - Type of the client.
-   * @param {String|RegExp} route - Template of the route that should be append.
-   *  to the client type
-   * @example
-   * ```
-   * // allow `conductor` clients to connect to `http://site.com/conductor/1`
-   * server.registerRoute('conductor', '/:param')
-   * ```
-   */
-  defineRoute(clientType, route) {
-    this._routes[clientType] = route;
-  },
-
-
-  setClientConfigDefinition(func) {
-    this._clientConfigDefinition = func;
-  },
-
-  /**
-   * Launch a http server.
+   * Map client types with an activity.
+   * @param {Array<String>} clientTypes - List of client type.
+   * @param {Activity} activity - Activity concerned with the given `clientTypes`.
    * @private
    */
-  _runHttpServer(expressApp) {
-    const httpServer = http.createServer(expressApp);
-    this._initSockets(httpServer);
-    this._initActivities(expressApp);
+  _mapClientTypesToActivity(clientTypes, activity) {
+    clientTypes.forEach((clientType) => {
+      if (!this._clientTypeActivitiesMap[clientType])
+        this._clientTypeActivitiesMap[clientType] = new Set();
 
-    httpServer.listen(expressApp.get('port'), function() {
-      const url = `http://127.0.0.1:${expressApp.get('port')}`;
-      console.log('[HTTP SERVER] Server listening on', url);
+      this._clientTypeActivitiesMap[clientType].add(activity);
     });
   },
 
   /**
-   * Launch a https server.
+   * Open the route for the given client.
    * @private
    */
-  _runHttpsServer(expressApp, key, cert) {
-    const httpsServer = https.createServer({ key, cert }, expressApp);
-    this._initSockets(httpsServer);
-    this._initActivities(expressApp);
-
-    httpsServer.listen(expressApp.get('port'), function() {
-      const url = `https://127.0.0.1:${expressApp.get('port')}`;
-      console.log('[HTTPS SERVER] Server listening on', url);
-    });
-  },
-
-  /**
-   * Init websocket server.
-   * @private
-   */
-  _initSockets(httpServer) {
-    this.io = new IO(httpServer, this.config.socketIO);
-
-    if (this.config.cordova && this.config.cordova.socketIO) // IO add some configuration options to the object
-      this.config.cordova.socketIO = Object.assign({}, this.config.socketIO, this.config.cordova.socketIO);
-
-    sockets.initialize(this.io);
-  },
-
-  /**
-   * Start all activities and map the routes (clientType / activities mapping).
-   * @private
-   */
-  _initActivities(expressApp) {
-    this._activities.forEach((activity) => activity.start());
-
-    this._activities.forEach((activity) => {
-      this._setMap(activity.clientTypes, activity);
-    });
-
-    // map `clientType` to their respective activities
-    for (let clientType in this._clientTypeActivitiesMap) {
-      if (clientType !== this.config.defaultClient) {
-        const activities = this._clientTypeActivitiesMap[clientType];
-        this._map(clientType, activities, expressApp);
-      }
-    }
-
-    // make sure `defaultClient` (aka `player`) is mapped last
-    for (let clientType in this._clientTypeActivitiesMap) {
-      if (clientType === this.config.defaultClient) {
-        const activities = this._clientTypeActivitiesMap[clientType];
-        this._map(clientType, activities, expressApp);
-      }
-    }
-  },
-
-  /**
-   * Map a client type to a route, a set of activities.
-   * Additionnally listen for their socket connection.
-   * @private
-   */
-  _map(clientType, activities, expressApp) {
+  _openClientRoute(clientType, expressApp) {
     let route = '';
 
     if (this._routes[clientType])
@@ -392,11 +393,6 @@ const server = {
         const appIndex = tmpl({ data });
         res.send(appIndex);
       });
-
-      // socket connnection
-      this.io.of(clientType).on('connection', (socket) => {
-        this._onSocketConnection(clientType, socket, activities);
-      });
     });
   },
 
@@ -404,8 +400,9 @@ const server = {
    * Socket connection callback.
    * @private
    */
-  _onSocketConnection(clientType, socket, activities) {
+  _onSocketConnection(clientType, socket) {
     const client = new Client(clientType, socket);
+    const activities = this._clientTypeActivitiesMap[clientType];
 
     // global lifecycle of the client
     sockets.receive(client, 'disconnect', () => {
@@ -416,7 +413,35 @@ const server = {
         logger.info({ socket, clientType }, 'disconnect');
     });
 
+    // check coherence between client-side and server-side service requirements
+    const serverRequiredServices = serviceManager.getRequiredServices(clientType);
+    const serverServicesList = serviceManager.getServiceList();
+
     sockets.receive(client, 'handshake', (data) => {
+      // in development, if service required client-side but not server-side,
+      // complain properly client-side.
+      if (this.config.env !== 'production') {
+        const clientRequiredServices = data.requiredServices || [];
+        const missingServices = [];
+
+        clientRequiredServices.forEach((serviceId) => {
+          if (
+            serverServicesList.indexOf(serviceId) !== -1 &&
+            serverRequiredServices.indexOf(serviceId) === -1
+          ) {
+            missingServices.push(serviceId);
+          }
+        });
+
+        if (missingServices.length > 0) {
+          sockets.send(client, 'client:error', {
+            type: 'services',
+            data: missingServices,
+          });
+          return;
+        }
+      }
+
       client.urlParams = data.urlParams;
       // @todo - handle reconnection (ex: `data` contains an `uuid`)
       activities.forEach((activity) => activity.connect(client));

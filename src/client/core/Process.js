@@ -1,5 +1,5 @@
-import { EventEmitter } from 'events';
-import Signal from './Signal';
+import EventEmitter from '../../utils/EventEmitter';
+import Signal from '../../utils/Signal';
 
 /**
  * A process defines the simpliest unit of the framework.
@@ -10,15 +10,23 @@ import Signal from './Signal';
 class Process extends EventEmitter {
   constructor(id) {
     super();
+
+    if (id === undefined)
+      throw new Error(`Undefined id for process ${this.constructor.name}`);
+
     /**
      * Name of the process.
+     * @name id
      * @type {String}
+     * @instanceof Process
      */
     this.id = id;
 
     /**
      * Signals defining the process state.
+     * @name signal
      * @type {Object}
+     * @instanceof Process
      */
     this.signals = {};
     this.signals.active = new Signal();

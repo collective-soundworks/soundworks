@@ -1,8 +1,7 @@
-import * as basicControllers from 'waves-basic-controllers';
-import client from '../core/client';
-import Scene from '../core/Scene';
+import * as controllers from 'basic-controllers';
+import View from '../views/View';
 
-basicControllers.disableStyles();
+controllers.setTheme('dark');
 
 /* --------------------------------------------------------- */
 /* GUIs
@@ -13,17 +12,18 @@ class _BooleanGui {
   constructor($container, param, guiOptions) {
     const { label, value } = param;
 
-    this.controller = new basicControllers.Toggle(label, value);
-    $container.appendChild(this.controller.render());
-    this.controller.onRender();
+    this.controller = new controllers.Toggle({
+      label: label,
+      default: value,
+      container: $container,
+      callback: (value) => {
+        if (guiOptions.confirm) {
+          const msg = `Are you sure you want to propagate "${param.name}:${value}"`;
+          if (!window.confirm(msg)) { return; }
+        }
 
-    this.controller.on('change', (value) => {
-      if (guiOptions.confirm) {
-        const msg = `Are you sure you want to propagate "${param.name}:${value}"`;
-        if (!window.confirm(msg)) { return; }
+        param.update(value);
       }
-
-      param.update(value);
     });
   }
 
@@ -38,19 +38,21 @@ class _EnumGui {
     const { label, options, value } = param;
 
     const ctor = guiOptions.type === 'buttons' ?
-      basicControllers.SelectButtons : basicControllers.SelectList
+      controllers.SelectButtons : controllers.SelectList
 
-    this.controller = new ctor(label, options, value);
-    $container.appendChild(this.controller.render());
-    this.controller.onRender();
+    this.controller = new ctor({
+      label: label,
+      options: options,
+      default: value,
+      container: $container,
+      callback: (value) => {
+        if (guiOptions.confirm) {
+          const msg = `Are you sure you want to propagate "${param.name}:${value}"`;
+          if (!window.confirm(msg)) { return; }
+        }
 
-    this.controller.on('change', (value) => {
-      if (guiOptions.confirm) {
-        const msg = `Are you sure you want to propagate "${param.name}:${value}"`;
-        if (!window.confirm(msg)) { return; }
+        param.update(value);
       }
-
-      param.update(value);
     });
   }
 
@@ -64,15 +66,29 @@ class _NumberGui {
   constructor($container, param, guiOptions) {
     const { label, min, max, step, value } = param;
 
-    if (guiOptions.type === 'slider')
-      this.controller = new basicControllers.Slider(label, min, max, step, value, guiOptions.param, guiOptions.size);
-    else
-      this.controller = new basicControllers.NumberBox(label, min, max, step, value);
+    if (guiOptions.type === 'slider') {
+      this.controller = new controllers.Slider({
+        label: label,
+        min: min,
+        max: max,
+        step: step,
+        default: value,
+        unit: guiOptions.param ? guiOptions.param : '',
+        size: guiOptions.size,
+        container: $container,
+      });
+    } else {
+      this.controller = new controllers.NumberBox({
+        label: label,
+        min: min,
+        max: max,
+        step: step,
+        default: value,
+        container: $container,
+      });
+    }
 
-    $container.appendChild(this.controller.render());
-    this.controller.onRender();
-
-    this.controller.on('change', (value) => {
+    this.controller.addListener((value) => {
       if (guiOptions.confirm) {
         const msg = `Are you sure you want to propagate "${param.name}:${value}"`;
         if (!window.confirm(msg)) { return; }
@@ -92,12 +108,15 @@ class _TextGui {
   constructor($container, param, guiOptions) {
     const { label, value } = param;
 
-    this.controller = new basicControllers.Text(label, value, guiOptions.readOnly);
-    $container.appendChild(this.controller.render());
-    this.controller.onRender();
+    this.controller = new controllers.Text({
+      label: label,
+      default: value,
+      readonly: guiOptions.readonly,
+      container: $container,
+    });
 
-    if (!guiOptions.readOnly) {
-      this.controller.on('change', (value) => {
+    if (!guiOptions.readonly) {
+      this.controller.addListener((value) => {
         if (guiOptions.confirm) {
           const msg = `Are you sure you want to propagate "${param.name}"`;
           if (!window.confirm(msg)) { return; }
@@ -118,17 +137,17 @@ class _TriggerGui {
   constructor($container, param, guiOptions) {
     const { label } = param;
 
-    this.controller = new basicControllers.Buttons('', [label]);
-    $container.appendChild(this.controller.render());
-    this.controller.onRender();
+    this.controller = new controllers.TriggerButtons({
+      options: [label],
+      container: $container,
+      callback: () => {
+        if (guiOptions.confirm) {
+          const msg = `Are you sure you want to propagate "${param.name}"`;
+          if (!window.confirm(msg)) { return; }
+        }
 
-    this.controller.on('change', () => {
-      if (guiOptions.confirm) {
-        const msg = `Are you sure you want to propagate "${param.name}"`;
-        if (!window.confirm(msg)) { return; }
+        param.update();
       }
-
-      param.update();
     });
   }
 
@@ -138,8 +157,8 @@ class _TriggerGui {
 const SCENE_ID = 'basic-shared-controller';
 
 /**
- * The `BasicSharedController` scene propose a simple / default way to create
- * a client controller for the `shared-params` service.
+ * The `ControllerScene` scene propose a simple / default way to create
+ * a controller view for the `shared-params` service.
  *
  * Each controller comes with a set of options that can be passed to the
  * constructor.
@@ -147,42 +166,43 @@ const SCENE_ID = 'basic-shared-controller';
  * @memberof module:soundworks/client
  * @see [`shared-params` service]{@link module:soundworks/client.SharedParams}
  */
-export default class BasicSharedController extends Scene {
+class ControllerScene {
   /**
    * _<span class="warning">__WARNING__</span> This API is unstable, and
    * subject to change in further versions.
    */
-  constructor(guiOptions = {}) {
-    super(SCENE_ID, true);
+  constructor(experience, sharedParams) {
+    if (!sharedParams)
+      throw new Error('This service requires the "shared params" service');
 
-    this._guiOptions = guiOptions;
+    this._guiOptions = {};
 
-    this._errorReporter = this.require('error-reporter');
-
-    /**
-     * Instance of the client-side `shared-params` service.
-     * @type {module:soundworks/client.SharedParams}
-     * @name sharedParams
-     * @instance
-     * @memberof module:soundworks/client.SharedParams
-     */
-    this.sharedParams = this.require('shared-params');
+    this.experience = experience;
+    this.sharedParams = sharedParams;
   }
 
-  init() {
-    this.view = this.createView();
+  enter() {
+    this.view = new View();
+    this.view.options.id = 'basic-shared-controller';
+
+    this.view.render();
+    this.view.appendTo(this.experience.container);
+
+    for (let name in this.sharedParams.params) {
+      const param = this.sharedParams.params[name];
+      const gui = this._createGui(param);
+
+      param.addListener('update', (val) => gui.set(val));
+    }
   }
 
-  start() {
-    super.start();
+  exit() {
+    for (let name in this.sharedParams.params) {
+      const param = this.sharedParams.params[name];
+      param.removeListener('update');
+    }
 
-    if (!this.hasStarted)
-      this.init();
-
-    this.show();
-
-    for (let name in this.sharedParams.params)
-      this.createGui(this.sharedParams.params[name]);
+    this.view.remove();
   }
 
   /**
@@ -201,7 +221,7 @@ export default class BasicSharedController extends Scene {
   }
 
   /** @private */
-  createGui(param) {
+  _createGui(param) {
     const config = Object.assign({
       show: true,
       confirm: false,
@@ -230,6 +250,8 @@ export default class BasicSharedController extends Scene {
         break;
     }
 
-    param.addListener('update', (val) => gui.set(val));
+    return gui
   }
 }
+
+export default ControllerScene;

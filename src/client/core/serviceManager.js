@@ -1,7 +1,7 @@
 import client from './client';
 import debug from 'debug';
-import Signal from './Signal';
-import SignalAll from './SignalAll';
+import Signal from '../../utils/Signal';
+import SignalAll from '../../utils/SignalAll';
 
 const log = debug('soundworks:serviceManager');
 
@@ -13,6 +13,8 @@ const _ctors = {};
  * Lazy instanciate an instance of the given type and retrieve it on each call.
  */
 const serviceManager = {
+  _serviceInstanciationHook: null,
+
   /**
    * Initialize the manager.
    */
@@ -31,6 +33,9 @@ const serviceManager = {
    */
   start() {
     log('start');
+
+    const networkedServices = [];
+
     this.signals.start.set(true);
 
     if (!this._requiredSignals.length)
@@ -46,11 +51,6 @@ const serviceManager = {
     this.signals.ready.set(true);
   },
 
-  // reset() {
-  //   this.signals.start.set(false);
-  //   this.signals.ready.set(false);
-  // },
-
   /**
    * Returns an instance of a service with options to be applied to its constructor.
    * @param {String} id - The id of the service.
@@ -60,12 +60,20 @@ const serviceManager = {
     id = 'service:' + id;
 
     if (!_ctors[id])
-      throw new Error(`Service "${id}" does not exists`);
+      throw new Error(`Service "${id}" is not defined`);
 
     let instance = _instances[id];
 
     if (!instance) {
+      // throw an error if manager already started
+      if (this.signals.start.get() === true)
+        throw new Error(`Service "${id}" required after application start`);
+
       instance = new _ctors[id]();
+
+      if (this._serviceInstanciationHook !== null)
+        this._serviceInstanciationHook(id, instance);
+
       // add the instance ready signal as required for the manager
       this._requiredSignals.add(instance.signals.ready);
       // store instance
@@ -77,12 +85,32 @@ const serviceManager = {
   },
 
   /**
+   * Register a function to be executed when a service is instanciated.
+   *
+   * @param {serviceManager~serviceInstanciationHook} func - Function to
+   *  register has a hook to be execute when a service is created.
+   */
+  /**
+   * @callback serviceManager~serviceInstanciationHook
+   * @param {String} id - id of the instanciated service.
+   * @param {Service} instance - instance of the service.
+   */
+  setServiceInstanciationHook(func) {
+    this._serviceInstanciationHook = func;
+  },
+
+  /**
    * Register a service with a given id.
    * @param {String} id - The id of the service.
    * @param {Function} ctor - The constructor of the service.
    */
   register(id, ctor) {
     _ctors[id] = ctor;
+  },
+
+
+  getRequiredServices() {
+    return Object.keys(_instances);
   },
 };
 

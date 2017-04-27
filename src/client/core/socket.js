@@ -1,5 +1,5 @@
 import debug from 'debug';
-import io from 'socket.io-client';
+import sio from 'socket.io-client';
 
 const log = debug('soundworks:socket');
 
@@ -10,33 +10,41 @@ const socket = {
   socket: null,
 
   /**
-   * Is set to `true` when a `Activity` is instanciated. Is checked by the `client` to initialize the connection or not.
+   * Is set to `true` when a `Activity` that requires network is instanciated.
+   * Is checked by the `client` to initialize the connection or not.
    */
   required: false,
 
   /**
-   * Initialize a namespaced connection with given transport options.
+   * Initialize a namespaced connection with given options.
+   *
    * @param {String} namespace - Correspond to the `client.type` {@link client}.
    * @param {Object} options - Options of the socket.
    * @param {String} options.url - The url where the socket should connect.
    * @param {Array<String>} options.transports - The transports to use for the socket (cf. socket.io).
+   * @param {Array<String>} options.path - Defines where socket should find the `socket.io` file.
    */
-  initialize(namespace, options) {
-    const url = `${options.url}/${namespace}`;
+  init(namespace, options) {
+    this.socket = sio(`${options.url}/${namespace}`, {
+      transports: options.transports,
+      path: options.path,
+    });
 
-    this.socket = io(url, { transports: options.transports });
-    log(`initialized - url: "${url}" - transports: ${options.transports}`);
+    log(`initialized
+          - url: ${options.url}/${namespace}
+          - transports: ${options.transports}
+          - path: ${options.path}
+    `);
 
     this._stateListeners = new Set();
     this._state = null;
 
     this._listenSocketState();
-
-    return this;
   },
 
   /**
    * Listen to the different states of the socket.
+   *
    * @param {Function} callback - The function to be called when the state
    *  of the socket changes, the given function is called with the name of the
    *  event as argument.
@@ -63,12 +71,14 @@ const socket = {
       this.socket.on(eventName, () => {
         this._state = eventName;
         this._stateListeners.forEach((listener) => listener(this._state));
+        log(`state - ${this._state}`);
       });
     });
   },
 
   /**
    * Sends a WebSocket message to the server side socket.
+   *
    * @param {String} channel - The channel of the message.
    * @param {...*} args - Arguments of the message (as many as needed, of any type).
    */
@@ -84,6 +94,7 @@ const socket = {
 
   /**
    * Listen a WebSocket message from the server.
+   *
    * @param {String} channel - The channel of the message.
    * @param {...*} callback - The callback to execute when a message is received.
    */
@@ -95,6 +106,7 @@ const socket = {
 
   /**
    * Stop listening to a message from the server.
+   *
    * @param {String} channel - The channel of the message.
    * @param {...*} callback - The callback to cancel.
    */

@@ -22,6 +22,12 @@ class Network extends Service {
     super(SERVICE_ID);
   }
 
+  start() {
+    super.start();
+
+    this.ready();
+  }
+
   /** @private */
   connect(client) {
     super.connect(client);
@@ -35,7 +41,7 @@ class Network extends Service {
     return (values) => {
       const clientTypes = values.shift();
       this.broadcast(clientTypes, client, 'receive', ...values);
-    }
+    };
   }
 
   /** @private */

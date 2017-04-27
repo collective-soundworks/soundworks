@@ -1,7 +1,5 @@
-import Scene from '../core/Scene';
-import server from '../core/server';
-
-const SCENE_ID = 'experience';
+import Activity from './Activity';
+import serviceManager from './serviceManager';
 
 /**
  * Base class used to build a experience on the server side.
@@ -13,24 +11,25 @@ const SCENE_ID = 'experience';
  * The base class also keeps track of the clients who are currently in the performance (*i.e.* who entered but not exited yet) in the array `this.clients`.
  *
  * (See also {@link src/client/scene/Experience.js~Experience} on the client side.)
+ *
+ * @memberof module:soundworks/server
  */
-export default class Experience extends Scene {
-  /**
-   * Creates an instance of the class.
-   * @param {String} clientType - The client type the experience should be
-   *  mapped to. _(note: is used as the id of the activity)_
-   */
-  constructor(clientType = server.config.defaultClientType) {
-    super(SCENE_ID, clientType);
-
-    this._errorReporter = this.require('error-reporter');
+class Experience extends Activity {
+  constructor(clientTypes) {
+    super('experience');
 
     /**
      * List of the clients who are currently in the performance (*i.e.* who entered the performance and have not exited it yet).
      * @type {Client[]}
      */
     this.clients = [];
+
+    this.addClientTypes(clientTypes);
+    this.waitFor(serviceManager.signals.ready);
+
+    this._errorReporter = this.require('error-reporter');
   }
+
 
   /**
    * Called when the client connects to the server.
@@ -76,6 +75,7 @@ export default class Experience extends Scene {
   exit(client) {
     // Remove the client from the `this.clients` array.
     const index = this.clients.indexOf(client);
+
     if (index >= 0)
       this.clients.splice(index, 1);
 
@@ -83,3 +83,5 @@ export default class Experience extends Scene {
     client.activities[this.id].entered = false;
   }
 }
+
+export default Experience;

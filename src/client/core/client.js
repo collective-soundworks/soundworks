@@ -1,4 +1,3 @@
-import Signal from './Signal';
 import Activity from './Activity';
 import serviceManager from './serviceManager';
 import viewManager from './viewManager';
@@ -46,9 +45,10 @@ const client = {
    * Configuration informations from the server configuration if any.
    *
    * @type {Object}
+   * @see {@link module:soundworks/client.client~init}
    * @see {@link module:soundworks/client.SharedConfig}
    */
-  config: null,
+  config: {},
 
   /**
    * Array of optionnal parameters passed through the url
@@ -67,6 +67,8 @@ const client = {
    *  mobile platform or not.
    * @property {String} audioFileExt - Audio file extension to use, depending on
    *  the platform.
+   * @property {String} interaction - Type of interaction allowed by the
+   *  viewport, `touch` or `mouse`
    *
    * @see {@link module:soundworks/client.Platform}
    */
@@ -74,6 +76,7 @@ const client = {
     os: null,
     isMobile: null,
     audioFileExt: '',
+    interaction: null,
   },
 
   /**
@@ -116,8 +119,18 @@ const client = {
    * @see {@link module:soundworks/client.Checkin}
    * @see {@link module:soundworks/client.Locator}
    * @see {@link module:soundworks/client.Placer}
+   * @see {@link module:soundworks/client.Geolocation}
    */
   coordinates: null,
+
+  /**
+   * Full `geoposition` object as returned by `navigator.geolocation`, when
+   * using the `geolocation` service.
+   *
+   * @type {Object}
+   * @see {@link module:soundworks/client.Geolocation}
+   */
+  geoposition: null,
 
   /**
    * Socket object that handle communications with the server, if any.
@@ -127,7 +140,7 @@ const client = {
    * @type {module:soundworks/client.socket}
    * @private
    */
-  socket: null,
+  socket: socket,
 
   /**
    * Initialize the application.
@@ -137,30 +150,46 @@ const client = {
    * @param {Object} [config={}]
    * @param {Object} [config.appContainer='#container'] - A css selector
    *  matching a DOM element where the views should be inserted.
-   * @param {Object} [config.socketIO.url=''] - The url where the socket should
+   * @param {Object} [config.websockets.url=''] - The url where the socket should
    *  connect _(unstable)_.
-   * @param {Object} [config.socketIO.transports=['websocket']] - The transport
+   * @param {Object} [config.websockets.transports=['websocket']] - The transport
    *  used to create the url (overrides default socket.io mecanism) _(unstable)_.
    */
   init(clientType = 'player', config = {}) {
     this.type = clientType;
 
-    // retrieve
     this._parseUrlParams();
     // if socket config given, mix it with defaults
-    const socketIO = Object.assign({
+    const websockets = Object.assign({
       url: '',
-      transports: ['websocket']
-    }, config.socketIO);
+      transports: ['websocket'],
+      path: '',
+    }, config.websockets);
 
     // mix all other config and override with defined socket config
-    this.config = Object.assign({
-      appContainer: '#container',
-    }, config, { socketIO });
+    Object.assign(this.config, config, { websockets });
 
     serviceManager.init();
+    viewport.init();
 
-    this._initViews();
+    const el = config.appContainer;
+    const $container = el instanceof Element ? el : document.querySelector(el);
+    viewManager.setAppContainer($container);
+  },
+
+  /**
+   * Register a function to be executed when a service is instanciated.
+   *
+   * @param {serviceManager~serviceInstanciationHook} func - Function to
+   *  register has a hook to be execute when a service is created.
+   */
+  /**
+   * @callback serviceManager~serviceInstanciationHook
+   * @param {String} id - id of the instanciated service.
+   * @param {Service} instance - instance of the service.
+   */
+  setServiceInstanciationHook(func) {
+    serviceManager.setServiceInstanciationHook(func);
   },
 
   /**
@@ -184,7 +213,7 @@ const client = {
 
   /**
    * Retrieve an array of optionnal parameters from the url excluding the client type
-   * and store it in `this.config.urlParameters`.
+   * and store it in `this.urlParams`.
    * Parameters can be defined in two ways :
    * - as a regular route (ex: `/player/param1/param2`)
    * - as a hash (ex: `/player#param1-param2`)
@@ -195,6 +224,8 @@ const client = {
    * @todo - When handshake implemented, define if these informations should be part of it
    */
   _parseUrlParams() {
+    let pathParams = null;
+    let hashParams = null;
     // handle path name first
     let pathname = window.location.pathname;
     // sanitize
@@ -204,7 +235,24 @@ const client = {
       .replace(/\/$/, '');                              // trailing slash
 
     if (pathname.length > 0)
-      this.urlParams = pathname.split('/');
+      pathParams = pathname.split('/');
+
+    // handle hash
+    let hash = window.location.hash;
+    hash = hash.replace(/^#/, '');
+
+    if (hash.length > 0)
+      hashParams = hash.split('-');
+
+    if (pathParams || hashParams) {
+      this.urlParams = [];
+
+      if (pathParams)
+        pathParams.forEach((param) => this.urlParams.push(param));
+
+      if (hashParams)
+        hashParams.forEach((param) => this.urlParams.push(param));
+    }
   },
 
   /**
@@ -213,18 +261,35 @@ const client = {
    * @private
    */
   _initSocket() {
-    this.socket = socket.initialize(this.type, this.config.socketIO);
+    socket.init(this.type, this.config.websockets);
 
     // see: http://socket.io/docs/client-api/#socket
     this.socket.addStateListener((eventName) => {
       switch (eventName) {
         case 'connect':
-          this.socket.send('handshake', { urlParams: this.urlParams });
-          // wait for handshake to mark client as `ready`
+          const payload = { urlParams: this.urlParams };
+
+          if (this.config.env !== 'production') {
+            Object.assign(payload, {
+              requiredServices: serviceManager.getRequiredServices()
+            });
+          }
+
+          this.socket.send('handshake', payload);
+          // wait for handshake response to mark client as `ready`
           this.socket.receive('client:start', (uuid) => {
-            // don't handle server restart for now.
             this.uuid = uuid;
             serviceManager.start();
+          });
+
+          this.socket.receive('client:error', (err) => {
+            switch (err.type) {
+              case 'services':
+                // can only append if env !== 'production'
+                const msg = `"${err.data.join(', ')}" required client-side but not server-side`;
+                throw new Error(msg);
+                break;
+            }
           });
           break;
           // case 'reconnect':
@@ -243,72 +308,6 @@ const client = {
       }
     });
   },
-
-  /**
-   * Initialize view templates for all activities.
-   * @private
-   */
-  _initViews() {
-    viewport.init();
-    // initialize views with default view content and templates
-    this.viewContent = {};
-    this.viewTemplates = {};
-
-    const appName = this.config.appName || 'Soundworks';
-    this.setViewContentDefinitions({ globals: { appName }});
-
-    this.setAppContainer(this.config.appContainer);
-  },
-
-  /**
-   * Extend or override application view contents with the given object.
-   * @param {Object} defs - Content to be used by activities.
-   * @see {@link module:soundworks/client.setViewTemplateDefinitions}
-   * @example
-   * client.setViewContentDefinitions({
-   *   'service:platform': { myValue: 'Welcome to the application' }
-   * });
-   */
-  setViewContentDefinitions(defs) {
-    for (let key in defs) {
-      const def = defs[key];
-
-      if (this.viewContent[key])
-        Object.assign(this.viewContent[key], def);
-      else
-        this.viewContent[key] = def;
-    }
-
-    Activity.setViewContentDefinitions(this.viewContent);
-  },
-
-  /**
-   * Extend or override application view templates with the given object.
-   * @param {Object} defs - Templates to be used by activities.
-   * @see {@link module:soundworks/client.setViewContentDefinitions}
-   * @example
-   * client.setViewTemplateDefinitions({
-   *   'service:platform': `
-   *     <p><%= myValue %></p>
-   *   `,
-   * });
-   */
-  setViewTemplateDefinitions(defs) {
-    this.viewTemplates = Object.assign(this.viewTemplates, defs);
-    Activity.setViewTemplateDefinitions(this.viewTemplates);
-  },
-
-  /**
-   * Set the DOM elemnt that will be the container for all views.
-   * @private
-   * @param {String|Element} el - DOM element (or css selector matching
-   *  an existing element) to be used as the container of the application.
-   */
-  setAppContainer(el) {
-    const $container = el instanceof Element ? el : document.querySelector(el);
-    viewManager.setViewContainer($container);
-  },
-
 };
 
 export default client;

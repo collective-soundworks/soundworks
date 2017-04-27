@@ -1,239 +1,99 @@
 import client from '../core/client';
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
-import SelectView from '../views/SelectView';
-import SpaceView from '../views/SpaceView';
-import SquaredView from '../views/SquaredView';
-
-const SERVICE_ID = 'service:placer';
-
-const defaultViewTemplate = `
-<div class="section-square<%= mode === 'list' ? ' flex-middle' : '' %>">
-  <% if (rejected) { %>
-  <div class="fit-container flex-middle">
-    <p><%= reject %></p>
-  </div>
-  <% } %>
-</div>
-<div class="section-float flex-middle">
-  <% if (!rejected) { %>
-    <% if (mode === 'graphic') { %>
-      <p><%= instructions %></p>
-    <% } else if (mode === 'list') { %>
-      <% if (showBtn) { %>
-        <button class="btn"><%= send %></button>
-      <% } %>
-    <% } %>
-  <% } %>
-</div>`;
-
-const defaultViewContent = {
-  instructions: 'Select your position',
-  send: 'Send',
-  reject: 'Sorry, no place is available',
-  showBtn: false,
-  rejected: false,
-};
-
+import SelectView from '../prefabs/SelectView';
+import SpaceView from '../prefabs/SpaceView';
+import SquaredView from '../prefabs/SquaredView';
 
 /**
- * Interface for the view of the `placer` service.
+ * API of a compliant view for the `placer` service.
  *
+ * @memberof module:soundworks/client
  * @interface AbstractPlacerView
- * @extends module:soundworks/client.View
+ * @extends module:soundworks/client.AbstractView
+ * @abstract
  */
 /**
- * Register the `area` definition to the view.
+ * Set and display the `area` definition (as defined in server configuration).
  *
+ * @name setReadyCallback
+ * @memberof module:soundworks/client.AbstractPlacerView
  * @function
- * @name AbstractPlacerView.setArea
+ * @abstract
+ * @instance
+ *
  * @param {Object} area - Definition of the area.
- * @property {Number} area.width - With of the area.
- * @property {Number} area.height - Height of the area.
- * @property {Number} [area.labels=[]] - Labels of the position.
- * @property {Number} [area.coordinates=[]] - Coordinates of the area.
+ * @param {Number} area.width - With of the area.
+ * @param {Number} area.height - Height of the area.
+ * @param {Number} [area.labels=[]] - Labels of the position.
+ * @param {Number} [area.coordinates=[]] - Coordinates of the area.
+ */
+/**
+ * Register the callback to be executed when the user select a position.
+ *
+ * @name setSelectCallback
+ * @memberof module:soundworks/client.AbstractPlacerView
+ * @function
+ * @abstract
+ * @instance
+ *
+ * @param {String} callback - Callback to execute when the user select a position.
+ *  This callback should be called with the `index`, `label` and `coordinates` of
+ *  the requested position.
  */
 /**
  * Display the available positions.
  *
+ * @name displayPosition
+ * @memberof module:soundworks/client.AbstractPlacerView
  * @function
- * @name AbstractPlacerView.onSend
+ * @abstract
+ * @instance
+ *
  * @param {Number} capacity - The maximum number of clients allowed.
  * @param {Array<String>} [labels=null] - An array of the labels for the positions
  * @param {Array<Array<Number>>} [coordinates=null] - An array of the coordinates of the positions
  * @param {Number} [maxClientsPerPosition=1] - Number of clients allowed for each position.
  */
 /**
- * Disable the given positions.
+ * Update the view accroding to the disabled positions.
  *
+ * @name updateDisabledPositions
+ * @memberof module:soundworks/client.AbstractPlacerView
  * @function
- * @name AbstractPlacerView.updateDisabledPositions
- * @param {Array<Number>} disabledIndexes - Array of indexes of the disabled positions.
+ * @abstract
+ * @instance
+ *
+ * @param {Array<Number>} disabledPositions - Array containing the indexes of
+ *  the disabled positions.
  */
 /**
- * Define the behavior of the view when the position requested by the user is
- * no longer available
+ * Update the view when the position selected by the user is no longer available.
  *
+ * @name reject
+ * @memberof module:soundworks/client.AbstractPlacerView
  * @function
- * @name AbstractPlacerView.reject
- * @param {Array<Number>} disabledIndexes - Array of indexes of the disabled positions.
+ * @abstract
+ * @instance
+ *
+ * @param {Array<Number>} disabledPositions - Array containing the indexes of
+ *  the disabled positions.
  */
+
 /**
- * Register the callback to be applied when the user select a position.
+ * Callback to execute when the user select a position.
  *
- * @function
- * @name AbstratPlacerView.onSelect
- * @param {Function} callback - Callback to be applied when a position is selected.
- *  This callback should be called with the `index`, `label` and `coordinates` of
- *  the requested position.
+ * @callback
+ * @name selectCallback
+ * @memberof module:soundworks/client.AbstractPlacerView
+ * @param {Number} index - Index of the selected location.
+ * @param {String} label - Label of the selected location if any.
+ * @param {Array<Number>} coordinates - Coordinates (`[x, y]`) of the selected
+ *  location if any.
  */
 
-class _ListView extends SquaredView {
-  constructor(template, content, events, options) {
-    super(template, content, events, options);
 
-    this._onSelectionChange = this._onSelectionChange.bind(this);
-  }
-
-  _onSelectionChange(e) {
-    this.content.showBtn = true;
-    this.render('.section-float');
-    this.installEvents({
-      'click .btn': (e) => {
-        const position = this.selector.value;
-
-        if (position)
-          this._onSelect(position.index, position.label, position.coordinates);
-      }
-    });
-  }
-
-  setArea(area) { /* no need for area */ }
-
-  displayPositions(capacity, labels = null, coordinates = null, maxClientsPerPosition = 1) {
-    this.positions = [];
-    this.numberPositions = capacity / maxClientsPerPosition;
-
-    for (let index = 0; index < this.numberPositions; index++) {
-      const label = labels !== null ? labels[index] : (index + 1).toString();
-      const position = { index: index, label: label };
-
-      if (coordinates)
-        position.coordinates = coordinates[index];
-
-      this.positions.push(position);
-    }
-
-    this.selector = new SelectView({
-      instructions: this.content.instructions,
-      entries: this.positions,
-    });
-
-    this.setViewComponent('.section-square', this.selector);
-    this.render('.section-square');
-
-    this.selector.installEvents({
-      'change': this._onSelectionChange,
-    });
-  }
-
-  updateDisabledPositions(indexes) {
-    for (let index = 0; index < this.numberPositions; index++) {
-      if (indexes.indexOf(index) === -1)
-        this.selector.enableIndex(index);
-      else
-        this.selector.disableIndex(index);
-    }
-  }
-
-  onSelect(callback) {
-    this._onSelect = callback;
-  }
-
-  reject(disabledPositions) {
-    if (disabledPositions.length >= this.numberPositions) {
-      this.setViewComponent('.section-square');
-      this.content.rejected = true;
-      this.render();
-    } else {
-      this.disablePositions(disabledPositions);
-    }
-  }
-}
-
-class _GraphicView extends SquaredView {
-  constructor(template, content, events, options) {
-    super(template, content, events, options);
-
-    this._area = null;
-    this._disabledPositions = [];
-    this._onSelectionChange = this._onSelectionChange.bind(this);
-  }
-
-  _onSelectionChange(e) {
-    const position = this.selector.shapePointMap.get(e.target);
-    const disabledIndex = this._disabledPositions.indexOf(position.index);
-
-    if (disabledIndex === -1)
-      this._onSelect(position.id, position.label, [position.x, position.y]);
-  }
-
-  setArea(area) {
-    this._area = area;
-  }
-
-  displayPositions(capacity, labels = null, coordinates = null, maxClientsPerPosition = 1) {
-    this.numberPositions = capacity / maxClientsPerPosition;
-    this.positions = [];
-
-    for (let i = 0; i < this.numberPositions; i++) {
-      const label = labels !== null ? labels[i] : (i + 1).toString();
-      const position = { id: i, label: label };
-      const coords = coordinates[i];
-      position.x = coords[0];
-      position.y = coords[1];
-
-      this.positions.push(position);
-    }
-
-    this.selector = new SpaceView();
-    this.selector.setArea(this._area);
-    this.setViewComponent('.section-square', this.selector);
-    this.render('.section-square');
-
-    this.selector.setPoints(this.positions);
-
-    this.selector.installEvents({
-      'click .point': this._onSelectionChange
-    });
-  }
-
-  updateDisabledPositions(indexes) {
-    this._disabledPositions = indexes;
-
-    for (let index = 0; index < this.numberPositions; index++) {
-      const position = this.positions[index];
-      const isDisabled = indexes.indexOf(index) !== -1;
-      position.selected = isDisabled ? true : false;
-      this.selector.updatePoint(position);
-    }
-  }
-
-  onSelect(callback) {
-    this._onSelect = callback;
-  }
-
-  reject(disabledPositions) {
-    if (disabledPositions.length >= this.numberPositions) {
-      this.setViewComponent('.section-square');
-      this.content.rejected = true;
-      this.render();
-    } else {
-      this.view.updateDisabledPositions(disabledPositions);
-    }
-  }
-}
-
+const SERVICE_ID = 'service:placer';
 
 /**
  * Interface for the `'placer'` service.
@@ -268,28 +128,11 @@ class Placer extends Service {
 
     const defaults = {
       mode: 'list',
-      view: null,
-      viewCtor: null,
       viewPriority: 6,
     };
 
     this.configure(defaults);
 
-    this._defaultViewTemplate = defaultViewTemplate;
-    this._defaultViewContent = defaultViewContent;
-
-    this._onAknowledgeResponse = this._onAknowledgeResponse.bind(this);
-    this._onClientJoined = this._onClientJoined.bind(this);
-    this._onClientLeaved = this._onClientLeaved.bind(this);
-    this._onSelect = this._onSelect.bind(this);
-    this._onConfirmResponse = this._onConfirmResponse.bind(this);
-    this._onRejectResponse = this._onRejectResponse.bind(this);
-
-    this._sharedConfigService = this.require('shared-config');
-  }
-
-  /** @private */
-  init() {
     /**
      * Index of the position selected by the user.
      * @type {Number}
@@ -302,37 +145,21 @@ class Placer extends Service {
      */
     this.label = null;
 
-    // allow to pass any view
-    if (this.options.view !== null) {
-      this.view = this.options.view;
-    } else {
-      if (this.options.viewCtor !== null) {
+    this._onAknowledgeResponse = this._onAknowledgeResponse.bind(this);
+    this._onClientJoined = this._onClientJoined.bind(this);
+    this._onClientLeaved = this._onClientLeaved.bind(this);
+    this._onSelect = this._onSelect.bind(this);
+    this._onConfirmResponse = this._onConfirmResponse.bind(this);
+    this._onRejectResponse = this._onRejectResponse.bind(this);
 
-      } else {
-        switch (this.options.mode) {
-          case 'graphic':
-            this.viewCtor = _GraphicView;
-            break;
-          case 'list':
-          default:
-            this.viewCtor = _ListView;
-            break;
-        }
-
-        this.viewContent.mode = this.options.mode;
-        this.view = this.createView();
-      }
-    }
+    this._sharedConfigService = this.require('shared-config');
   }
 
   /** @private */
   start() {
     super.start();
-
-    if (!this.hasStarted)
-      this.init();
-
     this.show();
+
     this.send('request');
 
     this.receive('aknowlegde', this._onAknowledgeResponse);
@@ -362,12 +189,14 @@ class Placer extends Service {
     const coordinates = setup.coordinates;
     const maxClientsPerPosition = setup.maxClientsPerPosition;
 
+    this.nbrPositions = capacity / maxClientsPerPosition;
+
     if (area)
       this.view.setArea(area);
 
     this.view.displayPositions(capacity, labels, coordinates, maxClientsPerPosition);
     this.view.updateDisabledPositions(disabledPositions);
-    this.view.onSelect(this._onSelect);
+    this.view.setSelectCallack(this._onSelect);
   }
 
   /** @private */
@@ -386,7 +215,10 @@ class Placer extends Service {
 
   /** @private */
   _onClientJoined(disabledPositions) {
-    this.view.updateDisabledPositions(disabledPositions);
+    if (disabledPositions.length >= this.nbrPositions)
+      this.view.reject(disabledPositions);
+    else
+      this.view.updateDisabledPositions(disabledPositions);
   }
 
   /** @private */
@@ -396,7 +228,10 @@ class Placer extends Service {
 
   /** @private */
   _onRejectResponse(disabledPositions) {
-    this.view.reject(disabledPositions);
+    if (disabledPositions.length >= this.nbrPositions)
+      this.view.reject(disabledPositions);
+    else
+      this.view.updateDisabledPositions(disabledPositions);
   }
 }
 

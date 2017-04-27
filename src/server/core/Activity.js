@@ -1,7 +1,9 @@
 import sockets from './sockets';
 import server from './server';
 import serviceManager from './serviceManager';
-import { EventEmitter } from 'events';
+import EventEmitter from '../../utils/EventEmitter';
+import Signal from '../../utils/Signal';
+import SignalAll from '../../utils/SignalAll';
 
 // @todo - remove EventEmitter ? (Implement our own listeners)
 
@@ -57,6 +59,14 @@ class Activity extends EventEmitter {
 
     // register as existing to the server
     server.setActivity(this);
+
+    this.start = this.start.bind(this);
+
+    this.requiredSignals = new SignalAll();
+    this.requiredSignals.addObserver(this.start);
+    // wait for serviceManager.start
+    this.waitFor(serviceManager.signals.start);
+
   }
 
   /**
@@ -73,22 +83,22 @@ class Activity extends EventEmitter {
    * @param {String|Array} val - The client type(s) on which the activity
    *  should be mapped
    */
-  addClientType(value) {
+  addClientTypes(type) {
     if (arguments.length === 1) {
-      if (typeof value === 'string')
-        value = [value];
+      if (typeof type === 'string')
+        type = [type];
     } else {
-      value = Array.from(arguments);
+      type = Array.from(arguments);
     }
 
     // add client types to current activity
-    value.forEach((clientType) => {
+    type.forEach((clientType) => {
       this.clientTypes.add(clientType);
     });
 
     // propagate value to required activities
     this.requiredActivities.forEach((activity) => {
-      activity.addClientType(value);
+      activity.addClientTypes(type);
     });
   }
 
@@ -102,12 +112,30 @@ class Activity extends EventEmitter {
   }
 
   /**
+   * Add a signal to the required signals in order for the `Scene` instance
+   * to start.
+   * @param {Signal} signal - The signal that must be waited for.
+   * @private
+   */
+  waitFor(signal) {
+    this.requiredSignals.add(signal);
+  }
+
+  /**
    * Retrieve a service. The required service is added to the `requiredActivities`.
    * @param {String} id - The id of the service.
    * @param {Object} options - Some options to configure the service.
    */
+  // make abstract, should be implemented by child classes (Scene and Service)
   require(id, options) {
-    return serviceManager.require(id, this, options);
+    const instance = serviceManager.require(id, options);
+
+    this.addRequiredActivity(instance);
+    this.waitFor(instance.signals.ready);
+
+    instance.addClientTypes(this.clientTypes);
+
+    return instance;
   }
 
   /**
@@ -126,7 +154,6 @@ class Activity extends EventEmitter {
    * @param {module:soundworks/server.Client} client
    */
   connect(client) {
-    // setup an object
     client.activities[this.id] = {};
   }
 
@@ -168,6 +195,7 @@ class Activity extends EventEmitter {
    * Send a message to all client of given `clientType`(s).
    * @param {String|Array<String>|null} clientType - The `clientType`(s) that should
    *  receive the message. If `null`, the message is send to all clients.
+   *  If clientType is an array, the the message is send to clients of the given client types.
    * @param {module:soundworks/server.Client} excludeClient - Client to should
    *  not receive the message (typically the original sender of the message).
    * @param {String} channel - Channel of the message (is automatically namespaced

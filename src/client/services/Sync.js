@@ -6,30 +6,24 @@ import SyncModule from 'sync/client';
 
 const SERVICE_ID = 'service:sync';
 
-const defaultViewTemplate = `
-<div class="section-top"></div>
-<div class="section-center flex-center">
-  <p class="soft-blink"><%= wait %></p>
-</div>
-<div class="section-bottom"></div>
-`;
-
-const defaultViewContent = {
-  wait: `Clock syncing,<br />stand by&hellip;`,
-};
-
 /**
  * Interface for the client `'sync'` service.
  *
- * This service synchronizes the local audio clock of the client with the clock
- * of the server (master clock). It then internally relies on the `WebAudio`
- * clock and requires the platform to access this feature.
+ * The `sync` service synchronizes the local audio clock of the client with the
+ * clock of the server (master clock). It internally relies on the `WebAudio`
+ * clock and then requires the `platform` service to access this feature.
  *
- * __*The service must be used with its [server-side counterpart]{@link module:soundworks/server.Sync}*__
+ * __*The service must be used with its
+ * [server-side counterpart]{@link module:soundworks/server.Sync}*__
  *
- * _Note:_ the service is based on [`github.com/collective-soundworks/sync`](https://github.com/collective-soundworks/sync).
+ * _<span class="warning">__WARNING__</span> This class should never be
+ * instanciated manually_
+ *
+ * _Note:_ the service is based on
+ * [`github.com/collective-soundworks/sync`](https://github.com/collective-soundworks/sync).
  *
  * @memberof module:soundworks/client
+ *
  * @example
  * // inside the experience constructor
  * this.sync = this.require('sync');
@@ -38,20 +32,23 @@ const defaultViewContent = {
  * const localTime = this.sync.getAudioTime(syncTime);
  */
 class Sync extends Service {
-  /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */
   constructor() {
     super(SERVICE_ID, true);
 
     const defaults = {
-      viewCtor: SegmentedView,
       viewPriority: 3,
+      useAudioTime: true,
       // @todo - add options to configure the sync service
-    }
+    };
 
     this.configure(defaults);
 
-    this._defaultViewTemplate = defaultViewTemplate;
-    this._defaultViewContent = defaultViewContent;
+    const getTime = this.options.useAudioTime ?
+      () => audioContext.currentTime :
+      () => (new Date().getTime() * 0.001);
+
+    this._sync = new SyncModule(getTime);
+    this._ready = false;
 
     this.require('platform', { features: 'web-audio' });
 
@@ -60,22 +57,10 @@ class Sync extends Service {
   }
 
   /** @private */
-  init() {
-    this._sync = new SyncModule(() => audioContext.currentTime);
-    this._ready = false;
-
-    this.viewCtor = this.options.viewCtor;
-    this.view = this.createView();
-  }
-
-  /** @private */
   start() {
     super.start();
-
-    if (!this.hasStarted)
-      this.init();
-
     this.show();
+
     this._sync.start(this.send, this.receive, this._syncStatusReport);
   }
 
@@ -93,6 +78,11 @@ class Sync extends Service {
    *  `syncTime` (in _seconds_).
    */
   getAudioTime(syncTime) {
+    return this._sync.getLocalTime(syncTime);
+  }
+
+
+  getLocaltime(syncTime) {
     return this._sync.getLocalTime(syncTime);
   }
 

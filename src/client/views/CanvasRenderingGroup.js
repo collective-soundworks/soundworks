@@ -1,5 +1,7 @@
 /**
- * The main rendering loop handling the `requestAnimationFrame` and the `update` / `render` calls.
+ * Rendering loop handling the `requestAnimationFrame` and the `update` /
+ * `render` cycles.
+ *
  * @private
  */
 const loop = {
@@ -8,7 +10,7 @@ const loop = {
   _isRunning: false,
 
   /**
-   * @returns {Number} - The current time in seconds.
+   * @return {Number} - Current time in seconds.
    */
   getTime() {
     return 0.001 * (window.performance && window.performance.now ?
@@ -72,29 +74,55 @@ const loop = {
 };
 
 /**
- * This class allow to register several renderers on a single full screen
- * canvas. Calls the `requireStart` and `requireStop` of the main rendering
- * loop when a `Renderer` instance is added or removed.
+ * Handle a group of renderers on a single full screen canvas.
  *
- * This class should be considered as private, and is hidden into the
- * {@link module:soundworks/client.CanvasView} for most of the usecases.
+ * <span class="warning">This class is a property of
+ * {@link module:soundworks/client.CanvasView} should be considered private.</span>
+ *
+ * @param {CanvasRenderingContext2D} ctx - Canvas context in which
+ *  the renderer should draw.
+ * @param {Boolean} [preservePixelRatio=false] - Define if the canvas should
+ *  take account of the device pixel ratio for the drawing. When set to `true`,
+ *  quality if favored over performance.
+ *
+ * @memberof module:soundworks/client
  */
-export default class RenderingGroup {
-  /**
-   * @param {CanvasRenderingContext2D} ctx - Canvas context in which
-   *  the renderer should draw.
-   * @param {Boolean} [preservePixelRatio=false] - Define if the canvas should
-   *  take account of the device pixel ratio for the drawing. When set to `true`,
-   *  quality if favored over performance.
-   */
+class Canvas2dRenderingGroup {
   constructor(ctx, preservePixelRatio = false) {
+    /**
+     * 2d context of the canvas.
+     *
+     * @type {CanvasRenderingContext2D}
+     * @name ctx
+     * @instance
+     * @memberof module:soundworks/client.Canvas2dRenderingGroup
+     */
     this.ctx = ctx;
+
+    /**
+     * Stack of the registered renderers.
+     *
+     * @type {Array<module:soundworks/client.Renderer>}
+     * @name renderers
+     * @instance
+     * @memberof module:soundworks/client.Canvas2dRenderingGroup
+     */
     this.renderers = [];
 
     /**
-     * Pixel ratio of the device, if `preservePixelRatio` is `false`,
-     * this value is forced to 1
+     * Hooks executed at the beginning and end of each rAF call.
+     * @private
+     */
+    this.preRender = null;
+    this.postRender = null;
+
+    /**
+     * Pixel ratio of the device, set to 1 if `false`.
+     *
      * @type {Number}
+     * @name pixelRatio
+     * @instance
+     * @memberof module:soundworks/client.Canvas2dRenderingGroup
      */
     this.pixelRatio = (function(ctx) {
       const dPR = window.devicePixelRatio || 1;
@@ -112,34 +140,37 @@ export default class RenderingGroup {
   }
 
   /**
-   * Updates the size of the canvas. Propagate values to all registered renderers.
+   * Updates the size of the canvas. Propagate new logical `width` and `height`
+   * according to `this.pixelRatio` to all registered renderers.
+   *
    * @param {Number} viewportWidth - Width of the viewport.
    * @param {Number} viewportHeight - Height of the viewport.
+   * @param {Number} orientation - Orientation of the viewport.
    */
-  onResize(viewportWidth, viewportHeight) {
+  onResize(viewportWidth, viewportHeight, orientation) {
     const ctx = this.ctx;
     const pixelRatio = this.pixelRatio;
 
     this.canvasWidth = viewportWidth * pixelRatio;
     this.canvasHeight = viewportHeight * pixelRatio;
+    this.orientation = orientation;
 
     ctx.canvas.width = this.canvasWidth;
     ctx.canvas.height = this.canvasHeight;
     ctx.canvas.style.width = `${viewportWidth}px`;
     ctx.canvas.style.height = `${viewportHeight}px`;
 
-    // ctx.scale(pixelRatio, pixelRatio);
-
     // propagate logical size to renderers
     for (let i = 0, l = this.renderers.length; i < l; i++)
-      this.renderers[i].onResize(this.canvasWidth, this.canvasHeight);
+      this.renderers[i].onResize(this.canvasWidth, this.canvasHeight, orientation);
   }
 
   /**
-   * Propagate the `update` to all registered renderers. The `update` method
+   * Propagate `update` to all registered renderers. The `update` method
    * for each renderer is called according to their update period.
+   *
    * @param {Number} time - Current time.
-   * @param {Number} dt - Delta time in seconds since the last update.
+   * @param {Number} dt - Delta time in seconds since last update.
    */
   update(time, dt) {
     const renderers = this.renderers;
@@ -161,39 +192,37 @@ export default class RenderingGroup {
   }
 
   /**
-   * Entry point to apply global transformations to the canvas before each
-   * renderer is rendered.
-   * @param {CanvasRenderingContext2D} ctx - Context of the canvas.
-   * @param {Number} dt - Delta time in seconds since the last rendering
-   *  loop (`requestAnimationFrame`).
-   */
-  preRender(ctx, dt) {}
-
-  /**
-   * Propagate `render` method to all the registered renderers.
-   * @param {Number} dt - Delta time in seconds since the last rendering
-   *  loop (`requestAnimationFrame`).
+   * Propagate `render` to all the registered renderers.
+   *
+   * @param {Number} dt - Delta time in seconds since the last
+   *  `requestAnimationFrame` call.
    */
   render(dt) {
-    const ctx = this.ctx;
-    const renderers = this.renderers;
+    const { ctx, renderers } = this;
 
-    this.preRender(ctx, dt);
+    if (this.preRender !== null)
+      this.preRender(ctx, dt, this.canvasWidth, this.canvasHeight);
 
     for (let i = 0, l = renderers.length; i < l; i++)
       renderers[i].render(ctx);
+
+    if (this.postRender !== null)
+      this.postRender(ctx, dt, this.canvasWidth, this.canvasHeight);
   }
 
   /**
    * Add a `Renderer` instance to the group.
-   * @param {Renderer} renderer - Renderer to be added.
+   *
+   * @param {module:soundworks/client.Renderer} renderer - Renderer to add to
+   *  the group.
    */
   add(renderer) {
     this.renderers.push(renderer);
     this.currentTime = loop.getTime();
     // update the current time of the renderer
     renderer.currentTime = this.currentTime;
-    renderer.onResize(this.canvasWidth, this.canvasHeight);
+    renderer.pixelRatio = this.pixelRatio;
+    renderer.onResize(this.canvasWidth, this.canvasHeight, this.orientation);
     renderer.init();
     // if first renderer added, start the loop
     if (this.renderers.length === 1)
@@ -202,7 +231,9 @@ export default class RenderingGroup {
 
   /**
    * Remove a `Renderer` instance from the group.
-   * @param {Renderer} renderer - Eenderer to remove.
+   *
+   * @param {module:soundworks/client.Renderer} renderer - Renderer to remove
+   *  from the group.
    */
   remove(renderer) {
     const index = this.renderers.indexOf(renderer);
@@ -215,3 +246,5 @@ export default class RenderingGroup {
      }
   }
 }
+
+export default Canvas2dRenderingGroup;
