@@ -30,7 +30,9 @@ class EventEmitter {
    */
   removeListener(channel, callback) {
     const stack = this._events.get(channel);
-    stack.delete(callback);
+
+    if (stack)
+      stack.delete(callback);
   }
 
   /**
@@ -40,7 +42,9 @@ class EventEmitter {
    */
   emit(channel, ...args) {
     const stack = this._events.get(channel);
-    stach.forEach((callback) => callback(...args));
+
+    if (stack)
+      stach.forEach((callback) => callback(...args));
   }
 }
 
