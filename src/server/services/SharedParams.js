@@ -1,6 +1,6 @@
+import EventEmitter from '../../utils/EventEmitter';
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
-import { EventEmitter } from 'events';
 
 /** @private */
 class _ControlItem extends EventEmitter {

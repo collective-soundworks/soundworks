@@ -1,7 +1,7 @@
 import sockets from './sockets';
 import server from './server';
 import serviceManager from './serviceManager';
-import { EventEmitter } from 'events';
+import EventEmitter from '../../utils/EventEmitter';
 import Signal from '../../utils/Signal';
 import SignalAll from '../../utils/SignalAll';
 

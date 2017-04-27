@@ -1,4 +1,4 @@
-import { EventEmitter } from 'events';
+import EventEmitter from '../../utils/EventEmitter';
 import Signal from '../../utils/Signal';
 
 /**
@@ -16,13 +16,17 @@ class Process extends EventEmitter {
 
     /**
      * Name of the process.
+     * @name id
      * @type {String}
+     * @instanceof Process
      */
     this.id = id;
 
     /**
      * Signals defining the process state.
+     * @name signal
      * @type {Object}
+     * @instanceof Process
      */
     this.signals = {};
     this.signals.active = new Signal();
