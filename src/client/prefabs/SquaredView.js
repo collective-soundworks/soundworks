@@ -18,7 +18,7 @@ const defaultTemplate = `
  * @param {Object} options - Options of the view.
  *  {@link module:soundworks/client.View#options}.
  *
- * @memberof soundworks/client
+ * @memberof module:soundworks/client
  */
 class SquaredView extends View {
   constructor(template, content = {}, events = {}, options = {}) {

@@ -2,8 +2,10 @@ import uuid from 'uuid';
 
 /**
  * Server side representation of a client.
+ *
+ * @memberof module:soundworks/server
  */
-export default class Client {
+class Client {
 	/**
 	 * @param {String} clientType - Client type of the connected client.
 	 * @param {Socket} socket - Socket object used to comminuate with the client.
@@ -12,37 +14,55 @@ export default class Client {
 	constructor(clientType, socket) {
 		/**
 		 * Client type (specified when initializing the {@link client} object on the client side with {@link client.init}).
-		 * @type {String}
+		 * @name type
+     * @type {String}
+     * @memberof module:soundworks/server.Client
+     * @instance
 		 */
     this.type = clientType;
 
 		/**
 		 * Index of the client.
-		 * @type {Number}
+		 * @name uuid
+     * @type {Number}
+     * @memberof module:soundworks/server.Client
+     * @instance
 		 */
     this.uuid = uuid.v4();
 
 		/**
 		 * Coordinates of the client, stored as an `[x:Number, y:Number]` array.
-		 * @type {Array<Number>}
+		 * @name coordinates
+     * @type {Array<Number>}
+     * @memberof module:soundworks/server.Client
+     * @instance
 		 */
     this.coordinates = null;
 
     /**
      * Geoposition of the client as returned by `geolocation.getCurrentPosition`
+     * @name geoposition
      * @typ {Object}
+     * @memberof module:soundworks/server.Client
+     * @instance
      */
     this.geoposition = null;
 
     /**
      * Ticket index of the client.
+     * @name index
      * @type {Number}
+     * @memberof module:soundworks/server.Client
+     * @instance
      */
     this.index = null;
 
     /**
      * Ticket label of the client.
+     * @name label
      * @type {Number}
+     * @memberof module:soundworks/server.Client
+     * @instance
      */
     this.label = null;
 
@@ -57,7 +77,11 @@ export default class Client {
 		 * Similarly, a {@link src/server/Performance.js~Performance} activity whose
      * name is `'myPerformance'` could report the client's status in
      * `this.activities.myPerformance.status`.
-		 * @type {Object}
+		 *
+     * @name activities
+     * @type {Object}
+     * @memberof module:soundworks/server.Client
+     * @instance
 		 */
     this.activities = {};
 
@@ -92,3 +116,5 @@ export default class Client {
     this.uuid = null;
   }
 }
+
+export default Client;

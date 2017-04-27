@@ -13,7 +13,6 @@ const SERVICE_ID = 'service:geolocation';
  * __*The service must be used with its [client-side counterpart]{@link module:soundworks/client.Geolocation}*__
  *
  * @memberof module:soundworks/server
- * @example
  */
 class Geolocation extends Service {
   constructor() {

@@ -59,7 +59,6 @@ function updateRandomGeoposition(geoposition) {
  *  would like to receive the best possible results (cf. [https://dev.w3.org/geo/api/spec-source.html#high-accuracy](https://dev.w3.org/geo/api/spec-source.html#high-accuracy)).
  *
  * @memberof module:soundworks/client
- * @example
  */
 class Geolocation extends Service {
   /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */

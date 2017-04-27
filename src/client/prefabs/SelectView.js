@@ -12,8 +12,6 @@ const defaultTemplate = `
  * View with a drop down list.
  *
  * @memberof module:soundworks/client
- *
- * @todo - Review API, non standard
  */
 class SelectView extends View {
   constructor(content, events = {}, options = {}) {

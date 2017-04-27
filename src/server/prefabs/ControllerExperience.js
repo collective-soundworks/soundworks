@@ -2,7 +2,12 @@ import Experience from '../core/Experience';
 
 const Experience_ID = 'basic-shared-controller';
 
-export default class BasicSharedController extends Experience {
+/**
+ * Server-side experience to create 1 liner controllers
+ *
+ * @memberof module:soundworks/server
+ */
+class ControllerExperience extends Experience {
   constructor(clientTypes, options = {}) {
     super(clientTypes);
 
@@ -11,7 +16,7 @@ export default class BasicSharedController extends Experience {
      * @type {module:soundworks/server.SharedParams}
      * @name sharedParams
      * @instance
-     * @memberof module:soundworks/server.SharedParams
+     * @memberof module:soundworks/server.ControllerExperience
      */
     this.sharedParams = this.require('shared-params');
 
@@ -19,3 +24,5 @@ export default class BasicSharedController extends Experience {
       this.auth = this.require('auth');
   }
 }
+
+export default ControllerExperience

@@ -4,9 +4,9 @@ import ControllerScene from './ControllerScene';
 
 
 /**
- * Predefined experience to create a shared controller in 1 line
+ * Predefined experience to create a 1 line shared controller
  *
- *
+ * @memberof module:soundworks/client
  */
 class ControllerExperience extends Experience {
   constructor(options = {}) {
