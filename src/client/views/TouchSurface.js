@@ -153,7 +153,7 @@ class TouchSurface {
   _propagate(eventName, touchId, normX, normY, touchEvent, originalEvent) {
     const listeners = this._listeners[eventName];
 
-    if (listeners.length) {
+    if (listeners && listeners.length) {
       listeners.forEach((listener) => {
         listener(touchId, normX, normY, touchEvent, originalEvent);
       });

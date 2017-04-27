@@ -1,5 +1,5 @@
 import SegmentedView from './SegmentedView';
-import RenderingGroup from './RenderingGroup';
+import CanvasRenderingGroup from './CanvasRenderingGroup';
 
 
 const defaultCanvasTemplate = `
@@ -69,7 +69,7 @@ class CanvasView extends SegmentedView {
     /**
      * Default rendering group.
      *
-     * @type {module:soundworks/client.RenderingGroup}
+     * @type {module:soundworks/client.CanvasRenderingGroup}
      * @name _renderingGroup
      * @instance
      * @memberof module:soundworks/client.CanvasView
@@ -115,7 +115,7 @@ class CanvasView extends SegmentedView {
 
     if (!this._hasRenderedOnce) {
       const preservePixelRatio = this.options.preservePixelRatio
-      this._renderingGroup = new RenderingGroup(this.ctx, preservePixelRatio);
+      this._renderingGroup = new CanvasRenderingGroup(this.ctx, preservePixelRatio);
 
       // prevent creating a new rendering group each time the view is re-rendered
       this._hasRenderedOnce = true;

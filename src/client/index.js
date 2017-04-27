@@ -44,13 +44,10 @@ export { default as Sync } from './services/Sync';
 export { default as SyncScheduler } from './services/SyncScheduler';
 
 // views
+export { default as Canvas2dRenderer } from './views/Canvas2dRenderer';
+export { default as CanvasRenderingGroup } from './views/CanvasRenderingGroup';
 export { default as CanvasView } from './views/CanvasView';
-export { default as Renderer } from './views/Renderer';
-export { default as RenderingGroup } from './views/RenderingGroup';
 export { default as SegmentedView } from './views/SegmentedView';
-export { default as SelectView } from './views/SelectView';
-export { default as SpaceView } from './views/SpaceView';
-export { default as SquaredView } from './views/SquaredView';
 export { default as TouchSurface } from './views/TouchSurface';
 export { default as View } from './views/View';
 export { default as viewport } from './views/viewport';
@@ -58,3 +55,6 @@ export { default as viewport } from './views/viewport';
 // prefabs
 export { default as ControllerScene } from './prefabs/ControllerScene';
 export { default as ControllerExperience } from './prefabs/ControllerExperience';
+export { default as SelectView } from './prefabs/SelectView';
+export { default as SpaceView } from './prefabs/SpaceView';
+export { default as SquaredView } from './prefabs/SquaredView';

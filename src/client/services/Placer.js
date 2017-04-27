@@ -1,9 +1,9 @@
 import client from '../core/client';
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
-import SelectView from '../views/SelectView';
-import SpaceView from '../views/SpaceView';
-import SquaredView from '../views/SquaredView';
+import SelectView from '../prefabs/SelectView';
+import SpaceView from '../prefabs/SpaceView';
+import SquaredView from '../prefabs/SquaredView';
 
 /**
  * API of a compliant view for the `placer` service.
