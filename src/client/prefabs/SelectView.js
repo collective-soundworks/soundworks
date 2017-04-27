@@ -1,4 +1,4 @@
-import View from './View';
+import View from '../views/View';
 
 const defaultTemplate = `
   <option class="small"><%= instructions %></option>

@@ -1,5 +1,4 @@
-import View from './View';
-
+import View from '../views/View';
 
 const defaultTemplate = `
   <div class="section-square flex-middle"></div>
