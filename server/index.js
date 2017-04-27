@@ -13,15 +13,6 @@ Object.defineProperty(exports, 'Client', {
   }
 });
 
-var _server = require('./core/server');
-
-Object.defineProperty(exports, 'server', {
-  enumerable: true,
-  get: function get() {
-    return _interopRequireDefault(_server).default;
-  }
-});
-
 var _Activity = require('./core/Activity');
 
 Object.defineProperty(exports, 'Activity', {
@@ -31,12 +22,21 @@ Object.defineProperty(exports, 'Activity', {
   }
 });
 
-var _Scene = require('./core/Scene');
+var _Experience = require('./core/Experience');
 
-Object.defineProperty(exports, 'Scene', {
+Object.defineProperty(exports, 'Experience', {
   enumerable: true,
   get: function get() {
-    return _interopRequireDefault(_Scene).default;
+    return _interopRequireDefault(_Experience).default;
+  }
+});
+
+var _server = require('./core/server');
+
+Object.defineProperty(exports, 'server', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_server).default;
   }
 });
 
@@ -49,48 +49,12 @@ Object.defineProperty(exports, 'Service', {
   }
 });
 
-var _serviceManager = require('./core/serviceManager');
+var _AudioBufferManager = require('./services/AudioBufferManager');
 
-Object.defineProperty(exports, 'serviceManager', {
+Object.defineProperty(exports, 'AudioBufferManager', {
   enumerable: true,
   get: function get() {
-    return _interopRequireDefault(_serviceManager).default;
-  }
-});
-
-var _sockets = require('./core/sockets');
-
-Object.defineProperty(exports, 'sockets', {
-  enumerable: true,
-  get: function get() {
-    return _interopRequireDefault(_sockets).default;
-  }
-});
-
-var _BasicSharedController = require('./scenes/BasicSharedController');
-
-Object.defineProperty(exports, 'BasicSharedController', {
-  enumerable: true,
-  get: function get() {
-    return _interopRequireDefault(_BasicSharedController).default;
-  }
-});
-
-var _Experience = require('./scenes/Experience');
-
-Object.defineProperty(exports, 'Experience', {
-  enumerable: true,
-  get: function get() {
-    return _interopRequireDefault(_Experience).default;
-  }
-});
-
-var _Survey = require('./scenes/Survey');
-
-Object.defineProperty(exports, 'Survey', {
-  enumerable: true,
-  get: function get() {
-    return _interopRequireDefault(_Survey).default;
+    return _interopRequireDefault(_AudioBufferManager).default;
   }
 });
 
@@ -130,12 +94,39 @@ Object.defineProperty(exports, 'ErrorReporter', {
   }
 });
 
+var _FileSystem = require('./services/FileSystem');
+
+Object.defineProperty(exports, 'FileSystem', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_FileSystem).default;
+  }
+});
+
+var _Geolocation = require('./services/Geolocation');
+
+Object.defineProperty(exports, 'Geolocation', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_Geolocation).default;
+  }
+});
+
 var _Locator = require('./services/Locator');
 
 Object.defineProperty(exports, 'Locator', {
   enumerable: true,
   get: function get() {
     return _interopRequireDefault(_Locator).default;
+  }
+});
+
+var _MetricScheduler = require('./services/MetricScheduler');
+
+Object.defineProperty(exports, 'MetricScheduler', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_MetricScheduler).default;
   }
 });
 
@@ -157,6 +148,15 @@ Object.defineProperty(exports, 'Placer', {
   }
 });
 
+var _RawSocket = require('./services/RawSocket');
+
+Object.defineProperty(exports, 'RawSocket', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_RawSocket).default;
+  }
+});
+
 var _SharedConfig = require('./services/SharedConfig');
 
 Object.defineProperty(exports, 'SharedConfig', {
@@ -175,6 +175,15 @@ Object.defineProperty(exports, 'SharedParams', {
   }
 });
 
+var _SharedRecorder = require('./services/SharedRecorder');
+
+Object.defineProperty(exports, 'SharedRecorder', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_SharedRecorder).default;
+  }
+});
+
 var _Sync = require('./services/Sync');
 
 Object.defineProperty(exports, 'Sync', {
@@ -184,5 +193,35 @@ Object.defineProperty(exports, 'Sync', {
   }
 });
 
+var _SyncScheduler = require('./services/SyncScheduler');
+
+Object.defineProperty(exports, 'SyncScheduler', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_SyncScheduler).default;
+  }
+});
+
+var _ControllerExperience = require('./prefabs/ControllerExperience');
+
+Object.defineProperty(exports, 'ControllerExperience', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_ControllerExperience).default;
+  }
+});
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImluZGV4LmpzIl0sIm5hbWVzIjpbImRlZmF1bHQiXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7OzJDQVNTQSxPOzs7Ozs7Ozs7MkNBQ0FBLE87Ozs7Ozs7Ozs2Q0FDQUEsTzs7Ozs7Ozs7OzBDQUNBQSxPOzs7Ozs7Ozs7NENBQ0FBLE87Ozs7Ozs7OzttREFDQUEsTzs7Ozs7Ozs7OzRDQUNBQSxPOzs7Ozs7Ozs7MERBR0FBLE87Ozs7Ozs7OzsrQ0FDQUEsTzs7Ozs7Ozs7OzJDQUNBQSxPOzs7Ozs7Ozs7eUNBR0FBLE87Ozs7Ozs7Ozt3Q0FDQUEsTzs7Ozs7Ozs7OzRDQUNBQSxPOzs7Ozs7Ozs7a0RBQ0FBLE87Ozs7Ozs7Ozs0Q0FDQUEsTzs7Ozs7Ozs7OzRDQUNBQSxPOzs7Ozs7Ozs7MkNBQ0FBLE87Ozs7Ozs7OztpREFDQUEsTzs7Ozs7Ozs7O2lEQUNBQSxPOzs7Ozs7Ozs7eUNBQ0FBLE8iLCJmaWxlIjoiaW5kZXguanMiLCJzb3VyY2VzQ29udGVudCI6WyIvKipcbiAqIFNlcnZlci1zaWRlIGVudHJ5IHBvaW50IG9mIHRoZSAqc291bmR3b3JrcyogZnJhbWV3b3JrLlxuICpcbiAqIEBtb2R1bGUgc291bmR3b3Jrcy9zZXJ2ZXJcbiAqIEBleGFtcGxlXG4gKiBpbXBvcnQgKiBhcyBzb3VuZHdvcmtzIGZyb20gJ3NvdW5kd29ya3Mvc2VydmVyJztcbiAqL1xuXG4vKiBjb3JlICovXG5leHBvcnQgeyBkZWZhdWx0IGFzIENsaWVudCB9IGZyb20gJy4vY29yZS9DbGllbnQnO1xuZXhwb3J0IHsgZGVmYXVsdCBhcyBzZXJ2ZXIgfSBmcm9tICcuL2NvcmUvc2VydmVyJztcbmV4cG9ydCB7IGRlZmF1bHQgYXMgQWN0aXZpdHkgfSBmcm9tICcuL2NvcmUvQWN0aXZpdHknO1xuZXhwb3J0IHsgZGVmYXVsdCBhcyBTY2VuZSB9IGZyb20gJy4vY29yZS9TY2VuZSc7XG5leHBvcnQgeyBkZWZhdWx0IGFzIFNlcnZpY2UgfSBmcm9tICcuL2NvcmUvU2VydmljZSc7XG5leHBvcnQgeyBkZWZhdWx0IGFzIHNlcnZpY2VNYW5hZ2VyIH0gZnJvbSAnLi9jb3JlL3NlcnZpY2VNYW5hZ2VyJztcbmV4cG9ydCB7IGRlZmF1bHQgYXMgc29ja2V0cyB9IGZyb20gJy4vY29yZS9zb2NrZXRzJztcblxuLyogc2NlbmVzICovXG5leHBvcnQgeyBkZWZhdWx0IGFzIEJhc2ljU2hhcmVkQ29udHJvbGxlciB9IGZyb20gJy4vc2NlbmVzL0Jhc2ljU2hhcmVkQ29udHJvbGxlcic7XG5leHBvcnQgeyBkZWZhdWx0IGFzIEV4cGVyaWVuY2UgfSBmcm9tICcuL3NjZW5lcy9FeHBlcmllbmNlJztcbmV4cG9ydCB7IGRlZmF1bHQgYXMgU3VydmV5IH0gZnJvbSAnLi9zY2VuZXMvU3VydmV5JztcblxuLyogc2VydmljZXMgKi9cbmV4cG9ydCB7IGRlZmF1bHQgYXMgQXV0aCB9IGZyb20gJy4vc2VydmljZXMvQXV0aCc7XG5leHBvcnQgeyBkZWZhdWx0IGFzIE9zYyB9IGZyb20gJy4vc2VydmljZXMvT3NjJztcbmV4cG9ydCB7IGRlZmF1bHQgYXMgQ2hlY2tpbiB9IGZyb20gJy4vc2VydmljZXMvQ2hlY2tpbic7XG5leHBvcnQgeyBkZWZhdWx0IGFzIEVycm9yUmVwb3J0ZXIgfSBmcm9tICcuL3NlcnZpY2VzL0Vycm9yUmVwb3J0ZXInO1xuZXhwb3J0IHsgZGVmYXVsdCBhcyBMb2NhdG9yIH0gZnJvbSAnLi9zZXJ2aWNlcy9Mb2NhdG9yJztcbmV4cG9ydCB7IGRlZmF1bHQgYXMgTmV0d29yayB9IGZyb20gJy4vc2VydmljZXMvTmV0d29yayc7XG5leHBvcnQgeyBkZWZhdWx0IGFzIFBsYWNlciB9IGZyb20gJy4vc2VydmljZXMvUGxhY2VyJztcbmV4cG9ydCB7IGRlZmF1bHQgYXMgU2hhcmVkQ29uZmlnIH0gZnJvbSAnLi9zZXJ2aWNlcy9TaGFyZWRDb25maWcnO1xuZXhwb3J0IHsgZGVmYXVsdCBhcyBTaGFyZWRQYXJhbXMgfSBmcm9tICcuL3NlcnZpY2VzL1NoYXJlZFBhcmFtcyc7XG5leHBvcnQgeyBkZWZhdWx0IGFzIFN5bmMgfSBmcm9tICcuL3NlcnZpY2VzL1N5bmMnO1xuIl19
+
+/**
+ * Server-side entry point of the *soundworks* framework.
+ *
+ * @module soundworks/server
+ * @example
+ * import * as soundworks from 'soundworks/server';
+ */
+
+var version = exports.version = '2.0.0';
+
+/* core */
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImluZGV4LmpzIl0sIm5hbWVzIjpbImRlZmF1bHQiLCJ2ZXJzaW9uIl0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7OzsyQ0FXU0EsTzs7Ozs7Ozs7OzZDQUNBQSxPOzs7Ozs7Ozs7K0NBQ0FBLE87Ozs7Ozs7OzsyQ0FDQUEsTzs7Ozs7Ozs7OzRDQUNBQSxPOzs7Ozs7Ozs7dURBR0FBLE87Ozs7Ozs7Ozt5Q0FDQUEsTzs7Ozs7Ozs7O3dDQUNBQSxPOzs7Ozs7Ozs7NENBQ0FBLE87Ozs7Ozs7OztrREFDQUEsTzs7Ozs7Ozs7OytDQUNBQSxPOzs7Ozs7Ozs7Z0RBQ0FBLE87Ozs7Ozs7Ozs0Q0FDQUEsTzs7Ozs7Ozs7O29EQUNBQSxPOzs7Ozs7Ozs7NENBQ0FBLE87Ozs7Ozs7OzsyQ0FDQUEsTzs7Ozs7Ozs7OzhDQUNBQSxPOzs7Ozs7Ozs7aURBQ0FBLE87Ozs7Ozs7OztpREFDQUEsTzs7Ozs7Ozs7O21EQUNBQSxPOzs7Ozs7Ozs7eUNBQ0FBLE87Ozs7Ozs7OztrREFDQUEsTzs7Ozs7Ozs7O3lEQUdBQSxPOzs7Ozs7QUFyQ1Q7Ozs7Ozs7O0FBUU8sSUFBTUMsNEJBQVUsV0FBaEI7O0FBRVAiLCJmaWxlIjoiaW5kZXguanMiLCJzb3VyY2VzQ29udGVudCI6WyIvKipcbiAqIFNlcnZlci1zaWRlIGVudHJ5IHBvaW50IG9mIHRoZSAqc291bmR3b3JrcyogZnJhbWV3b3JrLlxuICpcbiAqIEBtb2R1bGUgc291bmR3b3Jrcy9zZXJ2ZXJcbiAqIEBleGFtcGxlXG4gKiBpbXBvcnQgKiBhcyBzb3VuZHdvcmtzIGZyb20gJ3NvdW5kd29ya3Mvc2VydmVyJztcbiAqL1xuXG5leHBvcnQgY29uc3QgdmVyc2lvbiA9ICcldmVyc2lvbiUnO1xuXG4vKiBjb3JlICovXG5leHBvcnQgeyBkZWZhdWx0IGFzIENsaWVudCB9IGZyb20gJy4vY29yZS9DbGllbnQnO1xuZXhwb3J0IHsgZGVmYXVsdCBhcyBBY3Rpdml0eSB9IGZyb20gJy4vY29yZS9BY3Rpdml0eSc7XG5leHBvcnQgeyBkZWZhdWx0IGFzIEV4cGVyaWVuY2UgfSBmcm9tICcuL2NvcmUvRXhwZXJpZW5jZSc7XG5leHBvcnQgeyBkZWZhdWx0IGFzIHNlcnZlciB9IGZyb20gJy4vY29yZS9zZXJ2ZXInO1xuZXhwb3J0IHsgZGVmYXVsdCBhcyBTZXJ2aWNlIH0gZnJvbSAnLi9jb3JlL1NlcnZpY2UnO1xuXG4vKiBzZXJ2aWNlcyAqL1xuZXhwb3J0IHsgZGVmYXVsdCBhcyBBdWRpb0J1ZmZlck1hbmFnZXIgfSBmcm9tICcuL3NlcnZpY2VzL0F1ZGlvQnVmZmVyTWFuYWdlcic7XG5leHBvcnQgeyBkZWZhdWx0IGFzIEF1dGggfSBmcm9tICcuL3NlcnZpY2VzL0F1dGgnO1xuZXhwb3J0IHsgZGVmYXVsdCBhcyBPc2MgfSBmcm9tICcuL3NlcnZpY2VzL09zYyc7XG5leHBvcnQgeyBkZWZhdWx0IGFzIENoZWNraW4gfSBmcm9tICcuL3NlcnZpY2VzL0NoZWNraW4nO1xuZXhwb3J0IHsgZGVmYXVsdCBhcyBFcnJvclJlcG9ydGVyIH0gZnJvbSAnLi9zZXJ2aWNlcy9FcnJvclJlcG9ydGVyJztcbmV4cG9ydCB7IGRlZmF1bHQgYXMgRmlsZVN5c3RlbSB9IGZyb20gJy4vc2VydmljZXMvRmlsZVN5c3RlbSc7XG5leHBvcnQgeyBkZWZhdWx0IGFzIEdlb2xvY2F0aW9uIH0gZnJvbSAnLi9zZXJ2aWNlcy9HZW9sb2NhdGlvbic7XG5leHBvcnQgeyBkZWZhdWx0IGFzIExvY2F0b3IgfSBmcm9tICcuL3NlcnZpY2VzL0xvY2F0b3InO1xuZXhwb3J0IHsgZGVmYXVsdCBhcyBNZXRyaWNTY2hlZHVsZXIgfSBmcm9tICcuL3NlcnZpY2VzL01ldHJpY1NjaGVkdWxlcic7XG5leHBvcnQgeyBkZWZhdWx0IGFzIE5ldHdvcmsgfSBmcm9tICcuL3NlcnZpY2VzL05ldHdvcmsnO1xuZXhwb3J0IHsgZGVmYXVsdCBhcyBQbGFjZXIgfSBmcm9tICcuL3NlcnZpY2VzL1BsYWNlcic7XG5leHBvcnQgeyBkZWZhdWx0IGFzIFJhd1NvY2tldCB9IGZyb20gJy4vc2VydmljZXMvUmF3U29ja2V0JztcbmV4cG9ydCB7IGRlZmF1bHQgYXMgU2hhcmVkQ29uZmlnIH0gZnJvbSAnLi9zZXJ2aWNlcy9TaGFyZWRDb25maWcnO1xuZXhwb3J0IHsgZGVmYXVsdCBhcyBTaGFyZWRQYXJhbXMgfSBmcm9tICcuL3NlcnZpY2VzL1NoYXJlZFBhcmFtcyc7XG5leHBvcnQgeyBkZWZhdWx0IGFzIFNoYXJlZFJlY29yZGVyIH0gZnJvbSAnLi9zZXJ2aWNlcy9TaGFyZWRSZWNvcmRlcic7XG5leHBvcnQgeyBkZWZhdWx0IGFzIFN5bmMgfSBmcm9tICcuL3NlcnZpY2VzL1N5bmMnO1xuZXhwb3J0IHsgZGVmYXVsdCBhcyBTeW5jU2NoZWR1bGVyIH0gZnJvbSAnLi9zZXJ2aWNlcy9TeW5jU2NoZWR1bGVyJztcblxuLyogcHJlZmFicyAqL1xuZXhwb3J0IHsgZGVmYXVsdCBhcyBDb250cm9sbGVyRXhwZXJpZW5jZSB9IGZyb20gJy4vcHJlZmFicy9Db250cm9sbGVyRXhwZXJpZW5jZSc7XG4iXX0=
