@@ -20,7 +20,7 @@ class EventEmitter {
       this._events.set(channel, new Set());
 
     const stack = this._events.get(channel);
-    stack.push(callback);
+    stack.add(callback);
   }
 
   /**
