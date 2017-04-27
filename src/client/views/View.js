@@ -31,6 +31,17 @@ import Delegate from 'dom-delegate';
  * }
  */
 /**
+ * Method called when the view is inserted into the DOM by the service manager.
+ *
+ * @name show
+ * @memberof module:soundworks/client.AbstractView
+ * @function
+ * @abstract
+ * @instance
+ *
+ * @return {Element} - immutable DOM element containing the view.
+ */
+/**
  * Method called when the view has to be updated. The returned DOM element
  * should contain the whole view content and should not be mutated during the
  * whole lifecycle of the view.
@@ -255,9 +266,7 @@ class View {
     else
       this._renderAll();
 
-    if (!this.isVisible)
-      this.show();
-    else
+    if (this.isVisible)
       this.onResize(viewport.width, viewport.height, viewport.orientation);
 
     return this.$el;

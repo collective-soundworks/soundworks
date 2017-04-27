@@ -32,15 +32,15 @@ const viewManager = {
     log(`register - id: "${view.options.id}" - priority: ${priority}`);
 
     const infos = {};
-    infos.html = view.render();
+    infos.$el = view.render();
     infos.priority = priority;
     const promise = new Promise((resolve, reject) => infos.promise = resolve);
 
     viewInfosMap.set(view, infos);
 
     // trigger `_updateView` only once when several view are registered at once.
-    if (!this._timeoutId)
-      this._timeoutId = setTimeout(() => this._updateView(), 0);
+    clearTimeout(this._timeoutId);
+    this._timeoutId = setTimeout(() => this._updateView(), 0);
 
     return promise;
   },
@@ -60,8 +60,8 @@ const viewManager = {
       this._visibleView = null;
     }
 
-    if (!this._timeoutId)
-      this._timeoutId = setTimeout(() => this._updateView(), 0);
+    clearTimeout(this._timeoutId);
+    this._timeoutId = setTimeout(() => this._updateView(), 0);
   },
 
   /**
@@ -84,8 +84,8 @@ const viewManager = {
 
     if (nextView) {
       if (visibleView === null) {
-        const html = viewInfosMap.get(nextView).html;
-        $container.appendChild(html);
+        $container.appendChild(viewInfosMap.get(nextView).$el);
+        nextView.show();
         // resolve the promise created when the view were registered
         viewInfosMap.get(nextView).promise();
         this._visibleView = nextView;
@@ -95,16 +95,14 @@ const viewManager = {
         if (visibleViewPriority < nextViewPriority) {
           visibleView.remove(); // hide but keep in stack
 
-          const html = viewInfosMap.get(nextView).html;
-          $container.appendChild(html);
+          $container.appendChild(viewInfosMap.get(nextView).$el);
+          nextView.show();
 
           viewInfosMap.get(nextView).promise();
           this._visibleView = nextView;
         }
       }
     }
-
-    this._timeoutId = null;
   },
 };
 
