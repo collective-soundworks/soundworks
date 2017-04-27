@@ -87,7 +87,7 @@ const loop = {
  *
  * @memberof module:soundworks/client
  */
-class RenderingGroup {
+class Canvas2dRenderingGroup {
   constructor(ctx, preservePixelRatio = false) {
     /**
      * 2d context of the canvas.
@@ -95,7 +95,7 @@ class RenderingGroup {
      * @type {CanvasRenderingContext2D}
      * @name ctx
      * @instance
-     * @memberof module:soundworks/client.RenderingGroup
+     * @memberof module:soundworks/client.Canvas2dRenderingGroup
      */
     this.ctx = ctx;
 
@@ -105,7 +105,7 @@ class RenderingGroup {
      * @type {Array<module:soundworks/client.Renderer>}
      * @name renderers
      * @instance
-     * @memberof module:soundworks/client.RenderingGroup
+     * @memberof module:soundworks/client.Canvas2dRenderingGroup
      */
     this.renderers = [];
 
@@ -122,7 +122,7 @@ class RenderingGroup {
      * @type {Number}
      * @name pixelRatio
      * @instance
-     * @memberof module:soundworks/client.RenderingGroup
+     * @memberof module:soundworks/client.Canvas2dRenderingGroup
      */
     this.pixelRatio = (function(ctx) {
       const dPR = window.devicePixelRatio || 1;
@@ -247,4 +247,4 @@ class RenderingGroup {
   }
 }
 
-export default RenderingGroup;
+export default Canvas2dRenderingGroup;
