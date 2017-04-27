@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Soundworks - Home</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+    <link type="text/css" rel="stylesheet" href="styles/overrides.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <!-- if home page assume a title is already present in README -->
+    
+
+    
+
+
+
+    
+
+<!-- why is it used for ? -->
+
+
+
+
+
+
+
+
+
+
+    
+
+<!-- why is it used for ? -->
+
+
+
+  <section>
+    <article>
+      <div id="metas">
+        
+          <a id="github" href="https://github.com/collective-soundworks/soundworks">
+            <svg aria-hidden="true" class="octicon octicon-mark-github" height="28" version="1.1" viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path></svg>
+          </a>
+        
+        
+          <a id="release" target="_blank" href="https://github.com/collective-soundworks/soundworks/releases/tag/v2.0.0">
+            v2.0.0
+          </a>
+        
+      </div>
+
+      <h1>Soundworks</h1><p><strong><em>Soundworks</em></strong> is a framework to create collaborative/collective audiovisual experiences where users interact through their mobile devices.
+The framework is entirely based on web APIs with a <em>Node.js</em> server and provides a set of services to easily setup the infrastructure and the most basic functionalities of an application.</p>
+<p>The fundamental motivation behind all design choices of the framework is to allow developers to focus on the implementation of audiovisual rendering and interaction design based on web standards.</p>
+<p>A <em>Soundworks</em> application is typically organized in a client part (i.e. running in the web browser of the client devices) and an optional server part (i.e. running in Node.js).
+The server part of an application allows the connected clients to exchange data and to influence each other's audiovisual rendering.
+<em>Client-only</em> applications created with the frameworks can be deployed through a simple HTTP server instead of Node.js.</p>
+<h2>Getting Started</h2><h3>Requirements</h3><p>Developing <em>Soundworks</em> applications requires <a href="https://nodejs.org/"><em>Node.js</em></a> (&gt;= 0.12).</p>
+<p>The framework heavily relies on the <a href="https://www.w3.org/TR/webaudio/"><em>Web Audio API</em></a> as well as on other upcoming standards, which may limit the compatible platforms (i.e. browsers) on the client side of the applications.</p>
+<h3>Template</h3><p>The recommended way of developing a <em>Soundworks</em> application is to start from the <strong><em>template</em></strong> at <a href="https://github.com/collective-soundworks/soundworks-template/">https://github.com/collective-soundworks/soundworks-template/</a>.</p>
+<p>The template includes comprehensive comments in the code.
+Please refer to the repository's README file for further instructions and documentation.</p>
+<h2>Basic Concepts</h2><p>The framework is implemented in ES2015 using the <em>Babel</em> JavaScript compiler.
+It provides scripts to support the development of applications based on ES2015 functions and abstraction such as <code>class</code>, <code>import</code> and <code>export</code>.</p>
+<h3>Different Client Types</h3><p>A <em>Soundworks</em> application can implement one or multiple <em>types</em> of clients. Generally, different <strong><em>client types</em></strong> correspond to different roles participants or connected objects (e.g. audiovisual rendering devices) take in an application scenario.
+Technically, a <em>client type</em> corresponds to an URL that allows to connect to the application server - and, ultimately, a <em>Socket.IO namespace</em>.</p>
+<p>By default, the <code>player</code> <em>client type</em> is associated to the base URL of the application (e.g. http://my.soudworks-app.mobi/).
+An additional client type <code>referee</code> of the same application would, for example, use the same URL extended by &quot;referee/&quot; (i.e. http://my.soudworks-app.mobi/referee/).</p>
+<p>Apart from <code>player</code>, different client types occurring in applications that we have developed with <em>Soundworks</em> include, for example:</p>
+<ul>
+<li><code>soloist</code> - a participant with a soloist role in a musical application</li>
+<li><code>controller</code>- a web client for controlling the global parameters of an application</li>
+<li><code>shared-env</code> - a graphical representation or audio rendering projected into the environment of the application (i.e. by a video projector and/or public sound system)</li>
+</ul>
+<p>Generally, each client type is mapped to an <em>experience</em> implemented on both sides of the application, the client and, optionally, the server.</p>
+<h3>The Experience</h3><p>The actual scenario of a <em>Soundworks</em> application, the <strong><em>experience</em></strong>, is implemented as extensions of the <code>ClientExperience</code> and <code>ServerExperience</code> classes.</p>
+<p>The implementation of the client side of an application essentially consists of a <code>ClientExperience</code> that generally defines the interactions and the audiovisual rendering on the users' mobile devices.
+The corresponding <code>ServerExperience</code> determines the interactions between the connected clients by implementing how the server reacts on the connection of web clients of given types and on messages received from these clients.</p>
+<p>The experiences can require and configure a set of services provided by the <em>Soundworks</em> framework (see below).</p>
+<p>On the client side, the <code>ClientExperience</code> of a given client type is started when the required services are ready.
+On the server side, the methods <code>enter</code> and <code>exit</code> of <code>ServerExperience</code> are called when a client of the corresponding client type connects to or disconnects from the applications - after having announced the connection or disconnection to concerned services.</p>
+<h3>A set of Services</h3><p>Apart from the abstractions mentioned above, the most important aspect of the framework is to provide a set of <strong><em>services</em></strong> to an application.
+The services currently provided include, for example:</p>
+<ul>
+<li><code>platform</code> - checks for the compatibility of the application with the user's device, OS, and browser and shows a welcome screen when needed.</li>
+<li><code>checkin</code> - automatically assigns a ticket or predefined position (i.e. number or label with optional coordinates) to the user</li>
+<li><code>placer</code> - lets the user chose an available ticket or predefined position</li>
+<li><code>locator</code> - lets the user indicate an approximate position on a map</li>
+<li><code>file-system</code> - allow to retrieve a file list from a given directory</li>
+<li><code>audio-buffer-manager</code> - preloads audio buffers and related JSON files descriptors</li>
+<li><code>auth</code> - add a simple login page to specific client</li>
+<li><code>sync</code> - provides a synchronized clock to all clients</li>
+<li><code>scheduler</code> - differs function calls and schedules recurrent events in reference to the synchronized clock or a local audio clock</li>
+<li><code>motion-input</code> - provides unified access to the mobile device's motion sensors (based on the <code>DeviceMotion</code> and <code>DeviceOrientation</code> APIs)</li>
+<li><code>shared-params</code> - global variables and commands shared by the clients of defined types</li>
+<li><p><code>shared-config</code> - retrieves configuration constants from the server</p>
+<p>The framework provides an API for extending the set of available services.</p>
+</li>
+</ul>
+<h3>Views and View Templates</h3><p>The graphical rendering and interaction on a client screen is managed through <strong><em>views</em></strong> with <strong><em>view templates</em></strong> (strongly inspired by the <em>backbone</em> view API).
+The framework provides the possibility to define the HTML content of a view through view templates based on the <em>lowdash</em>/<em>underscore</em> syntax.
+In addition, the views and view templates allow for defining callbacks for user input events (e.g. <em>touch</em> and <em>click</em> events) and for reacting on device orientation changes.</p>
+<p>The views of an experience as well as of the provided services can be customized through CSS/SASS styles and by changing the content fitting the associated view templates.
+Different configurations of an application may include customized view content to generate different variants and localizations of the same screens.</p>
+<p>The content fitting a view template can be changed dynamically (e.g. depending on a user interaction) whereby the view can be updated partially (i.e. only a specific HTML tag).
+Default CSS/SASS styles for the provided templates (used by the services and experiences) are part of the <em>Soundworks</em> application template.</p>
+<p>An advanced way of creating customized views consists in choosing alternative view templates and/or views among a set of provided templates and view classes.
+The <code>CanvasView</code> class, for example, implements a formalism that facilitates the implementation of canvas-based rendering through a <code>Renderer</code> abstraction.</p>
+<p>Ultimately, developers can create customized views extending the <code>View</code> base class or one of the provided view classes.</p>
+<h2>Further Examples</h2><p>Apart from the template, the <a href="https://github.com/collective-soundworks"><em>collective-soundworks</em></a> GitHub project includes the following example applications with comprehensively commented code:</p>
+<ul>
+<li>Soundfield - <a href="https://github.com/collective-soundworks/soundworks-soundfield/">https://github.com/collective-soundworks/soundworks-soundfield/</a></li>
+<li>Drops - <a href="https://github.com/collective-soundworks/soundworks-drops/">https://github.com/collective-soundworks/soundworks-drops/</a></li>
+</ul>
+<p>Please refer to the repositories' README file for further instructions and documentation.</p>
+<h2>License and Credits</h2><p>The <em>Soundworks</em> framework is released under the <a href="https://opensource.org/licenses/BSD-3-Clause">BSD 3-Clause</a> license.</p>
+<p><em>Soundworks</em> has been initiated by <a href="mailto:Nobert.Schnell@ircam.fr">Norbert Schnell</a>, <a href="mailto:Sebastien Robaszkiewicz@gmail.com">Sebastien Robaszkiewicz</a>, and <a href="mailto:Benjamin.Matuszewski@ircam.fr">Benjamin Matuszewski</a> at the <a href="http://ismm.ircam.fr/">ISMM</a> team at <a href="http://www.ircam.fr/">Ircam - Centre Pompidou</a> in the framework of the <a href="http://cosima.ircam.fr/"><em>CoSiMa</em></a> research project supported by the <a href="http://www.agence-nationale-recherche.fr/en/">French National Research Agency (ANR)</a>.</p>
+<p>The framework integrates parts of the <a href="https://github.com/wavesjs">WaveJS library</a>.</p>
+    </article>
+  </section>
+
+
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-soundworks_client.html">soundworks/client</a></li><li><a href="module-soundworks_server.html">soundworks/server</a></li></ul><h3>Classes</h3><ul><li><a href="module-soundworks_client.Activity.html">soundworks/client.Activity</a></li><li><a href="module-soundworks_client.AudioBufferManager.html">soundworks/client.AudioBufferManager</a></li><li><a href="module-soundworks_client.AudioScheduler.html">soundworks/client.AudioScheduler</a></li><li><a href="module-soundworks_client.Auth.html">soundworks/client.Auth</a></li><li><a href="module-soundworks_client.Canvas2dRenderer.html">soundworks/client.Canvas2dRenderer</a></li><li><a href="module-soundworks_client.Canvas2dRenderingGroup.html">soundworks/client.Canvas2dRenderingGroup</a></li><li><a href="module-soundworks_client.CanvasView.html">soundworks/client.CanvasView</a></li><li><a href="module-soundworks_client.Checkin.html">soundworks/client.Checkin</a></li><li><a href="module-soundworks_client.ErrorReporter.html">soundworks/client.ErrorReporter</a></li><li><a href="module-soundworks_client.Experience.html">soundworks/client.Experience</a></li><li><a href="module-soundworks_client.FileSystem.html">soundworks/client.FileSystem</a></li><li><a href="module-soundworks_client.Geolocation.html">soundworks/client.Geolocation</a></li><li><a href="module-soundworks_client.Locator.html">soundworks/client.Locator</a></li><li><a href="module-soundworks_client.MotionInput.html">soundworks/client.MotionInput</a></li><li><a href="module-soundworks_client.Network.html">soundworks/client.Network</a></li><li><a href="module-soundworks_client.Placer.html">soundworks/client.Placer</a></li><li><a href="module-soundworks_client.Platform.html">soundworks/client.Platform</a></li><li><a href="module-soundworks_client.RawSocket.html">soundworks/client.RawSocket</a></li><li><a href="module-soundworks_client.SegmentedView.html">soundworks/client.SegmentedView</a></li><li><a href="module-soundworks_client.Service.html">soundworks/client.Service</a></li><li><a href="module-soundworks_client.SharedConfig.html">soundworks/client.SharedConfig</a></li><li><a href="module-soundworks_client.SharedParams.html">soundworks/client.SharedParams</a></li><li><a href="module-soundworks_client.Sync.html">soundworks/client.Sync</a></li><li><a href="module-soundworks_client.SyncScheduler.html">soundworks/client.SyncScheduler</a></li><li><a href="module-soundworks_client.View.html">soundworks/client.View</a></li><li><a href="module-soundworks_server.Activity.html">soundworks/server.Activity</a></li><li><a href="module-soundworks_server.AudioBufferManager.html">soundworks/server.AudioBufferManager</a></li><li><a href="module-soundworks_server.Auth.html">soundworks/server.Auth</a></li><li><a href="module-soundworks_server.Checkin.html">soundworks/server.Checkin</a></li><li><a href="module-soundworks_server.Client.html">soundworks/server.Client</a></li><li><a href="module-soundworks_server.ErrorReporter.html">soundworks/server.ErrorReporter</a></li><li><a href="module-soundworks_server.Experience.html">soundworks/server.Experience</a></li><li><a href="module-soundworks_server.Geolocation.html">soundworks/server.Geolocation</a></li><li><a href="module-soundworks_server.Locator.html">soundworks/server.Locator</a></li><li><a href="module-soundworks_server.MetricScheduler.html">soundworks/server.MetricScheduler</a></li><li><a href="module-soundworks_server.Network.html">soundworks/server.Network</a></li><li><a href="module-soundworks_server.Osc.html">soundworks/server.Osc</a></li><li><a href="module-soundworks_server.Placer.html">soundworks/server.Placer</a></li><li><a href="module-soundworks_server.RawSocket.html">soundworks/server.RawSocket</a></li><li><a href="module-soundworks_server.Service.html">soundworks/server.Service</a></li><li><a href="module-soundworks_server.SharedConfig.html">soundworks/server.SharedConfig</a></li><li><a href="module-soundworks_server.SharedParams.html">soundworks/server.SharedParams</a></li><li><a href="module-soundworks_server.Sync.html">soundworks/server.Sync</a></li><li><a href="module-soundworks_server.SyncScheduler.html">soundworks/server.SyncScheduler</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-soundworks_client.client.html">soundworks/client.client</a></li><li><a href="module-soundworks_client.viewport.html">soundworks/client.viewport</a></li><li><a href="module-soundworks_server.server.html">soundworks/server.server</a></li></ul><h3>Interfaces</h3><ul><li><a href="module-soundworks_client.AbstractAudioBufferManagerView.html">soundworks/client.AbstractAudioBufferManagerView</a></li><li><a href="module-soundworks_client.AbstractAuthView.html">soundworks/client.AbstractAuthView</a></li><li><a href="module-soundworks_client.AbstractCheckinView.html">soundworks/client.AbstractCheckinView</a></li><li><a href="module-soundworks_client.AbstractLocatorView.html">soundworks/client.AbstractLocatorView</a></li><li><a href="module-soundworks_client.AbstractPlacerView.html">soundworks/client.AbstractPlacerView</a></li><li><a href="module-soundworks_client.AbstractPlatformView.html">soundworks/client.AbstractPlatformView</a></li><li><a href="module-soundworks_client.AbstractView.html">soundworks/client.AbstractView</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    
+        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Thu Apr 27 2017 17:31:29 GMT+0200 (CEST)
+    
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

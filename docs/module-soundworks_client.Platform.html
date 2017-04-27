@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Soundworks - Class: Platform</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+    <link type="text/css" rel="stylesheet" href="styles/overrides.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <!-- if home page assume a title is already present in README -->
+    
+    <h1 class="page-title">Class: Platform</h1>
+    
+
+    
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>
+            <span class="ancestors"><a href="module-soundworks_client.html">soundworks/client</a>.</span>Platform</h2>
+        
+            <div class="class-description"><p>Interface for the client <code>'platform'</code> service.</p>
+<p>The <code>platform</code> services is responsible for giving general informations
+about the user's device as well as checking availability and providing hooks
+in order to initialize the features required by the application (audio,
+microphone, etc.).
+If one of the required definitions is not available, a view is created with
+an error message and <code>client.compatible</code> is set to <code>false</code>.</p>
+<p>Available built-in definitions are:</p>
+<ul>
+<li>'web-audio'</li>
+<li>'mobile-device': only-accept mobile devices in the application (based on
+User-Agent sniffing)</li>
+<li>'audio-input': Android Only</li>
+<li>'full-screen': Android Only, this feature won't block the application if
+not available.</li>
+<li>'geolocation': check if the navigator supports geolocation. The <code>coordinates</code>
+and <code>geoposition</code> of the <code>client</code> are populated when the plaform service
+resolves. (if no update of the coordinates are needed in the application,
+requiring geolocation feature without using the Geolocation service should
+suffice).</li>
+<li>'wake-lock': use with caution, has been observed consumming
+150% cpu in chrome desktop.</li>
+</ul>
+<p><em><span class="warning"><strong>WARNING</strong></span> This class should never be
+instanciated manually</em></p></div>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+
+    
+    <h2>Constructor</h2>
+    
+
+    <h4 class="name" id="Platform"><span class="type-signature"></span>new Platform<span class="signature">(options)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>features</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;String></span>
+|
+
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Id(s) of the feature(s)
+ required by the application. Available build-in features are:</p>
+<ul>
+<li>'web-audio'</li>
+<li>'mobile-device': only accept mobile devices (recognition based User-Agent)</li>
+<li>'audio-input': Android only</li>
+<li>'full-screen': Android only</li>
+<li>'geolocation': accept geolocalized devices. Populate the client with
+ current position</li>
+<li>'wake-lock': this feature should be used with caution as
+ it has been observed to use 150% of cpu in chrome desktop.</li>
+</ul>
+<!--
+Warning: when setting `showDialog` option to `false`, unexpected behaviors
+might occur because most of the features require an interaction or a
+confirmation from the user in order to be initialized correctly.
+--></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="client_services_Platform.js.html">client/services/Platform.js</a>, <a href="client_services_Platform.js.html#line312">line 312</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li>module:soundworks/client.client#platform</li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>// inside the experience constructor
+this.platform = this.require('platform', { features: 'web-audio' });</code></pre>
+
+
+
+    
+    </div>
+
+    
+
+    
+
+    
+
+     
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    <h4 class="name" id="addFeatureDefinition"><span class="type-signature"></span>addFeatureDefinition<span class="signature">(obj)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    <p>Structure of the definition for the test of a feature.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>obj</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="module-soundworks_client.Platform.html#~definition">module:soundworks/client.Platform~definition</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Definition of</p>
+<p> the feature.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="client_services_Platform.js.html">client/services/Platform.js</a>, <a href="client_services_Platform.js.html#line421">line 421</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+    
+
+    
+        <h3 class="subsection-title">Type Definitions</h3>
+
+        
+                
+<h4 class="name" id="~definition">definition</h4>
+
+
+
+
+<div class="description">
+    <p>Structure of the definition for the test of a feature.</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Object</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>id</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Id of the definition.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>check</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>A function that should return <code>true</code> if the
+ feature is available on the platform, <code>false</code> otherwise.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>startHook</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>A function returning a <code>Promise</code> to be
+ executed on start (for example to ask access to microphone or geolocation).
+ The returned promise should be resolved on <code>true</code> is the process succeded or
+ <code>false</code> is the precess failed (e.g. permission not granted).</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>interactionHook</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>A function returning a Promiseto be
+ executed on the first interaction (i.e. <code>click</code> or <code>touchstart</code>) of the user
+ with application (for example, to initialize AudioContext on iOS devices).
+ The returned promise should be resolved on <code>true</code> is the process succeded or
+ <code>false</code> is the precess failed (e.g. permission not granted).</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="client_services_Platform.js.html">client/services/Platform.js</a>, <a href="client_services_Platform.js.html#line94">line 94</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+            
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-soundworks_client.html">soundworks/client</a></li><li><a href="module-soundworks_server.html">soundworks/server</a></li></ul><h3>Classes</h3><ul><li><a href="module-soundworks_client.Activity.html">soundworks/client.Activity</a></li><li><a href="module-soundworks_client.AudioBufferManager.html">soundworks/client.AudioBufferManager</a></li><li><a href="module-soundworks_client.AudioScheduler.html">soundworks/client.AudioScheduler</a></li><li><a href="module-soundworks_client.Auth.html">soundworks/client.Auth</a></li><li><a href="module-soundworks_client.Canvas2dRenderer.html">soundworks/client.Canvas2dRenderer</a></li><li><a href="module-soundworks_client.Canvas2dRenderingGroup.html">soundworks/client.Canvas2dRenderingGroup</a></li><li><a href="module-soundworks_client.CanvasView.html">soundworks/client.CanvasView</a></li><li><a href="module-soundworks_client.Checkin.html">soundworks/client.Checkin</a></li><li><a href="module-soundworks_client.ErrorReporter.html">soundworks/client.ErrorReporter</a></li><li><a href="module-soundworks_client.Experience.html">soundworks/client.Experience</a></li><li><a href="module-soundworks_client.FileSystem.html">soundworks/client.FileSystem</a></li><li><a href="module-soundworks_client.Geolocation.html">soundworks/client.Geolocation</a></li><li><a href="module-soundworks_client.Locator.html">soundworks/client.Locator</a></li><li><a href="module-soundworks_client.MotionInput.html">soundworks/client.MotionInput</a></li><li><a href="module-soundworks_client.Network.html">soundworks/client.Network</a></li><li><a href="module-soundworks_client.Placer.html">soundworks/client.Placer</a></li><li><a href="module-soundworks_client.Platform.html">soundworks/client.Platform</a></li><li><a href="module-soundworks_client.RawSocket.html">soundworks/client.RawSocket</a></li><li><a href="module-soundworks_client.SegmentedView.html">soundworks/client.SegmentedView</a></li><li><a href="module-soundworks_client.Service.html">soundworks/client.Service</a></li><li><a href="module-soundworks_client.SharedConfig.html">soundworks/client.SharedConfig</a></li><li><a href="module-soundworks_client.SharedParams.html">soundworks/client.SharedParams</a></li><li><a href="module-soundworks_client.Sync.html">soundworks/client.Sync</a></li><li><a href="module-soundworks_client.SyncScheduler.html">soundworks/client.SyncScheduler</a></li><li><a href="module-soundworks_client.View.html">soundworks/client.View</a></li><li><a href="module-soundworks_server.Activity.html">soundworks/server.Activity</a></li><li><a href="module-soundworks_server.AudioBufferManager.html">soundworks/server.AudioBufferManager</a></li><li><a href="module-soundworks_server.Auth.html">soundworks/server.Auth</a></li><li><a href="module-soundworks_server.Checkin.html">soundworks/server.Checkin</a></li><li><a href="module-soundworks_server.Client.html">soundworks/server.Client</a></li><li><a href="module-soundworks_server.ErrorReporter.html">soundworks/server.ErrorReporter</a></li><li><a href="module-soundworks_server.Experience.html">soundworks/server.Experience</a></li><li><a href="module-soundworks_server.Geolocation.html">soundworks/server.Geolocation</a></li><li><a href="module-soundworks_server.Locator.html">soundworks/server.Locator</a></li><li><a href="module-soundworks_server.MetricScheduler.html">soundworks/server.MetricScheduler</a></li><li><a href="module-soundworks_server.Network.html">soundworks/server.Network</a></li><li><a href="module-soundworks_server.Osc.html">soundworks/server.Osc</a></li><li><a href="module-soundworks_server.Placer.html">soundworks/server.Placer</a></li><li><a href="module-soundworks_server.RawSocket.html">soundworks/server.RawSocket</a></li><li><a href="module-soundworks_server.Service.html">soundworks/server.Service</a></li><li><a href="module-soundworks_server.SharedConfig.html">soundworks/server.SharedConfig</a></li><li><a href="module-soundworks_server.SharedParams.html">soundworks/server.SharedParams</a></li><li><a href="module-soundworks_server.Sync.html">soundworks/server.Sync</a></li><li><a href="module-soundworks_server.SyncScheduler.html">soundworks/server.SyncScheduler</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-soundworks_client.client.html">soundworks/client.client</a></li><li><a href="module-soundworks_client.viewport.html">soundworks/client.viewport</a></li><li><a href="module-soundworks_server.server.html">soundworks/server.server</a></li></ul><h3>Interfaces</h3><ul><li><a href="module-soundworks_client.AbstractAudioBufferManagerView.html">soundworks/client.AbstractAudioBufferManagerView</a></li><li><a href="module-soundworks_client.AbstractAuthView.html">soundworks/client.AbstractAuthView</a></li><li><a href="module-soundworks_client.AbstractCheckinView.html">soundworks/client.AbstractCheckinView</a></li><li><a href="module-soundworks_client.AbstractLocatorView.html">soundworks/client.AbstractLocatorView</a></li><li><a href="module-soundworks_client.AbstractPlacerView.html">soundworks/client.AbstractPlacerView</a></li><li><a href="module-soundworks_client.AbstractPlatformView.html">soundworks/client.AbstractPlatformView</a></li><li><a href="module-soundworks_client.AbstractView.html">soundworks/client.AbstractView</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    
+        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Thu Apr 27 2017 17:31:29 GMT+0200 (CEST)
+    
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
