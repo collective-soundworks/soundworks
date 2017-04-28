@@ -80,9 +80,9 @@ const viewManager = {
       }
     });
 
-    log(`update view - next: "${nextView.options.id}" - visible: "${visibleView ? visibleView.options.id : 'Ø'}"`);
-
     if (nextView) {
+      log(`update view - next: "${nextView.options.id}"`);
+
       if (visibleView === null) {
         $container.appendChild(viewInfosMap.get(nextView).$el);
         nextView.show();
