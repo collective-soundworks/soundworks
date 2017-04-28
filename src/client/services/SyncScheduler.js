@@ -100,11 +100,7 @@ class SyncScheduler extends Service {
   start() {
     super.start();
 
-    if (!this.hasStarted)
-      this.init();
-
     this._syncedQueue = new SyncTimeSchedulingQueue(this._sync, audioScheduler);
-
     this.ready();
   }
 
