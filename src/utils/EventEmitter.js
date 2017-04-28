@@ -44,7 +44,7 @@ class EventEmitter {
     const stack = this._events.get(channel);
 
     if (stack)
-      stach.forEach((callback) => callback(...args));
+      stack.forEach((callback) => callback(...args));
   }
 }
 
