@@ -81,10 +81,6 @@ class AudioScheduler extends Service {
   /** @private */
   start() {
     super.start();
-
-    if (!this.hasStarted)
-      this.init();
-
     this.ready();
   }
 
