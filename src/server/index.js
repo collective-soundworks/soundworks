@@ -14,6 +14,7 @@ export { default as Activity } from './core/Activity';
 export { default as Experience } from './core/Experience';
 export { default as server } from './core/server';
 export { default as Service } from './core/Service';
+export { default as serviceManager } from './core/serviceManager';
 
 /* services */
 export { default as AudioBufferManager } from './services/AudioBufferManager';

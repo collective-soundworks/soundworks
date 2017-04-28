@@ -20,6 +20,7 @@ export { default as client } from './core/client';
 export { default as Experience } from './core/Experience';
 export { default as Process } from './core/Process';
 export { default as Service } from './core/Service';
+export { default as serviceManager } from './core/serviceManager';
 
 // services
 export { default as AudioBufferManager } from './services/AudioBufferManager';

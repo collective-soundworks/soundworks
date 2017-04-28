@@ -68,25 +68,27 @@ class SharedRecorder extends Service {
 
       const bufferId = `${uuid}:${infos.index}`;
       this.buffers[bufferId] = infos;
+
+      console.log('create buffer');
     };
   }
 
   _startRecord(client) {
     return (data) => {
-      console.log('start');
       const index = data[0];
       const infos = this._getBufferInfos(client, index);
       infos.pointer = 0;
       infos.chunkIndex = 0;
       infos.full = false;
+      console.log('start', index);
     }
   }
 
   _stopRecord(client) {
     return (data) => {
-      console.log('stop');
       const index = data[0];
       const infos = this._getBufferInfos(client, index);
+      console.log('stop', index);
 
       // finalize current chunk with available data
       const start = infos.chunkIndex * infos.chunkHop;
