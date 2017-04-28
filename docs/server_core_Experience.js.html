@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Soundworks - Source: server/core/Experience.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+    <link type="text/css" rel="stylesheet" href="styles/overrides.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <!-- if home page assume a title is already present in README -->
+    
+    <h1 class="page-title">Source: server/core/Experience.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import Activity from './Activity';
+import serviceManager from './serviceManager';
+
+/**
+ * Base class used to build a experience on the server side.
+ *
+ * Along with the classic {@link src/server/core/Activity#connect} and {@link src/server/core/Activity#disconnect} methods, the base class has two additional methods:
+ * - {@link Experience#enter}: called when the client enters the `Experience` (*i.e.* when the {@link src/client/scene/Experience.js~Experience} on the client side calls its {@link src/client/scene/Experience.js~Experience#start} method);
+ * - {@link Experience#exit}: called when the client leaves the `Experience` (*i.e.* when the {@link src/client/scene/Experience.js~Experience} on the client side calls its {@link src/client/scene/Experience.js~Experience#done} method, or if the client disconnected from the server).
+ *
+ * The base class also keeps track of the clients who are currently in the performance (*i.e.* who entered but not exited yet) in the array `this.clients`.
+ *
+ * (See also {@link src/client/scene/Experience.js~Experience} on the client side.)
+ *
+ * @memberof module:soundworks/server
+ */
+class Experience extends Activity {
+  constructor(clientTypes) {
+    super('experience');
+
+    /**
+     * List of the clients who are currently in the performance (*i.e.* who entered the performance and have not exited it yet).
+     * @type {Client[]}
+     */
+    this.clients = [];
+
+    this.addClientTypes(clientTypes);
+    this.waitFor(serviceManager.signals.ready);
+
+    this._errorReporter = this.require('error-reporter');
+  }
+
+
+  /**
+   * Called when the client connects to the server.
+   * @param {Client} client Connected client.
+   */
+  connect(client) {
+    super.connect(client);
+
+    // Listen for the `'enter'` and `'exit'` socket messages from the client.
+    this.receive(client, 'enter', () => this.enter(client));
+    this.receive(client, 'exit', () => this.exit(client));
+  }
+
+  /**
+   * Called when the client disconnects from the server.
+   * @param {Client} client Disconnected client.
+   */
+  disconnect(client) {
+    super.disconnect(client);
+
+    // Call the `exit` method if the client previously entered the performance.
+    if (client.activities[this.id] &amp;&amp; client.activities[this.id].entered)
+      this.exit(client);
+  }
+
+  /**
+   * Called when the client starts the performance on the client side.
+   * @param {Client} client Client who enters the performance.
+   */
+  enter(client) {
+    // add the client to the `this.clients` array
+    this.clients.push(client);
+    // set flag
+    client.activities[this.id].entered = true;
+  }
+
+  /**
+   * Called when the client exits the performance on the client side (*i.e.*
+   * when the `done` method of the client side experience is called, or when
+   * the client disconnects from the server).
+   * @param {Client} client - Client who exits the performance.
+   */
+  exit(client) {
+    // Remove the client from the `this.clients` array.
+    const index = this.clients.indexOf(client);
+
+    if (index >= 0)
+      this.clients.splice(index, 1);
+
+    // Remove flag.
+    client.activities[this.id].entered = false;
+  }
+}
+
+export default Experience;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-soundworks_client.html">soundworks/client</a></li><li><a href="module-soundworks_server.html">soundworks/server</a></li></ul><h3>Classes</h3><ul><li><a href="module-soundworks_client.Activity.html">soundworks/client.Activity</a></li><li><a href="module-soundworks_client.AudioBufferManager.html">soundworks/client.AudioBufferManager</a></li><li><a href="module-soundworks_client.AudioScheduler.html">soundworks/client.AudioScheduler</a></li><li><a href="module-soundworks_client.Auth.html">soundworks/client.Auth</a></li><li><a href="module-soundworks_client.Canvas2dRenderer.html">soundworks/client.Canvas2dRenderer</a></li><li><a href="module-soundworks_client.Canvas2dRenderingGroup.html">soundworks/client.Canvas2dRenderingGroup</a></li><li><a href="module-soundworks_client.CanvasView.html">soundworks/client.CanvasView</a></li><li><a href="module-soundworks_client.Checkin.html">soundworks/client.Checkin</a></li><li><a href="module-soundworks_client.ErrorReporter.html">soundworks/client.ErrorReporter</a></li><li><a href="module-soundworks_client.Experience.html">soundworks/client.Experience</a></li><li><a href="module-soundworks_client.FileSystem.html">soundworks/client.FileSystem</a></li><li><a href="module-soundworks_client.Geolocation.html">soundworks/client.Geolocation</a></li><li><a href="module-soundworks_client.Locator.html">soundworks/client.Locator</a></li><li><a href="module-soundworks_client.MotionInput.html">soundworks/client.MotionInput</a></li><li><a href="module-soundworks_client.Network.html">soundworks/client.Network</a></li><li><a href="module-soundworks_client.Placer.html">soundworks/client.Placer</a></li><li><a href="module-soundworks_client.Platform.html">soundworks/client.Platform</a></li><li><a href="module-soundworks_client.RawSocket.html">soundworks/client.RawSocket</a></li><li><a href="module-soundworks_client.SegmentedView.html">soundworks/client.SegmentedView</a></li><li><a href="module-soundworks_client.Service.html">soundworks/client.Service</a></li><li><a href="module-soundworks_client.SharedConfig.html">soundworks/client.SharedConfig</a></li><li><a href="module-soundworks_client.SharedParams.html">soundworks/client.SharedParams</a></li><li><a href="module-soundworks_client.Sync.html">soundworks/client.Sync</a></li><li><a href="module-soundworks_client.SyncScheduler.html">soundworks/client.SyncScheduler</a></li><li><a href="module-soundworks_client.View.html">soundworks/client.View</a></li><li><a href="module-soundworks_server.Activity.html">soundworks/server.Activity</a></li><li><a href="module-soundworks_server.AudioBufferManager.html">soundworks/server.AudioBufferManager</a></li><li><a href="module-soundworks_server.Auth.html">soundworks/server.Auth</a></li><li><a href="module-soundworks_server.Checkin.html">soundworks/server.Checkin</a></li><li><a href="module-soundworks_server.Client.html">soundworks/server.Client</a></li><li><a href="module-soundworks_server.ErrorReporter.html">soundworks/server.ErrorReporter</a></li><li><a href="module-soundworks_server.Experience.html">soundworks/server.Experience</a></li><li><a href="module-soundworks_server.Geolocation.html">soundworks/server.Geolocation</a></li><li><a href="module-soundworks_server.Locator.html">soundworks/server.Locator</a></li><li><a href="module-soundworks_server.MetricScheduler.html">soundworks/server.MetricScheduler</a></li><li><a href="module-soundworks_server.Network.html">soundworks/server.Network</a></li><li><a href="module-soundworks_server.Osc.html">soundworks/server.Osc</a></li><li><a href="module-soundworks_server.Placer.html">soundworks/server.Placer</a></li><li><a href="module-soundworks_server.RawSocket.html">soundworks/server.RawSocket</a></li><li><a href="module-soundworks_server.Service.html">soundworks/server.Service</a></li><li><a href="module-soundworks_server.SharedConfig.html">soundworks/server.SharedConfig</a></li><li><a href="module-soundworks_server.SharedParams.html">soundworks/server.SharedParams</a></li><li><a href="module-soundworks_server.Sync.html">soundworks/server.Sync</a></li><li><a href="module-soundworks_server.SyncScheduler.html">soundworks/server.SyncScheduler</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-soundworks_client.client.html">soundworks/client.client</a></li><li><a href="module-soundworks_client.viewport.html">soundworks/client.viewport</a></li><li><a href="module-soundworks_server.server.html">soundworks/server.server</a></li></ul><h3>Interfaces</h3><ul><li><a href="module-soundworks_client.AbstractAudioBufferManagerView.html">soundworks/client.AbstractAudioBufferManagerView</a></li><li><a href="module-soundworks_client.AbstractAuthView.html">soundworks/client.AbstractAuthView</a></li><li><a href="module-soundworks_client.AbstractCheckinView.html">soundworks/client.AbstractCheckinView</a></li><li><a href="module-soundworks_client.AbstractLocatorView.html">soundworks/client.AbstractLocatorView</a></li><li><a href="module-soundworks_client.AbstractPlacerView.html">soundworks/client.AbstractPlacerView</a></li><li><a href="module-soundworks_client.AbstractPlatformView.html">soundworks/client.AbstractPlatformView</a></li><li><a href="module-soundworks_client.AbstractView.html">soundworks/client.AbstractView</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    
+        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Fri Apr 28 2017 11:29:47 GMT+0200 (CEST)
+    
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
