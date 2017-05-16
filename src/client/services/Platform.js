@@ -295,12 +295,11 @@ const SERVICE_ID = 'service:platform';
  *     current position
  *  - 'wake-lock': this feature should be used with caution as
  *     it has been observed to use 150% of cpu in chrome desktop.
- *
- * <!--
- * Warning: when setting `showDialog` option to `false`, unexpected behaviors
- * might occur because most of the features require an interaction or a
- * confirmation from the user in order to be initialized correctly.
- * -->
+ * @param {Boolean} [options.showDialog=true] - If set to `false`, the service
+ *  execute all hooks without waiting for a user interaction and doesn't show
+ *  the service's view. This option should only be used on controlled
+ *  environnements where the target platform is known for working without
+ *  this need (e.g. is not iOS).
  *
  * @memberof module:soundworks/client
  * @example
