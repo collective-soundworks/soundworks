@@ -295,12 +295,11 @@ const SERVICE_ID = 'service:platform';
  *     current position
  *  - 'wake-lock': this feature should be used with caution as
  *     it has been observed to use 150% of cpu in chrome desktop.
- *
- * <!--
- * Warning: when setting `showDialog` option to `false`, unexpected behaviors
- * might occur because most of the features require an interaction or a
- * confirmation from the user in order to be initialized correctly.
- * -->
+ * @param {Boolean} [options.showDialog=true] - If set to `false`, the service
+ *  execute all hooks without waiting for a user interaction and doesn't show
+ *  the service's view. This option should only be used on controlled
+ *  environnements where the target platform is known for working without
+ *  this need (e.g. is not iOS).
  *
  * @memberof module:soundworks/client
  * @example
@@ -372,36 +371,56 @@ class Platform extends Service {
     // resolve required features from the application
     client.compatible = this._checkRequiredFeatures();
 
-    // default view values
-    this.view.updateCheckingStatus(false);
-    this.view.updateIsCompatibleStatus(null);
-    this.view.updateHasAuthorizationsStatus(null);
+    // handle `showDisplay === false`
+    if (this.options.showDisplay === false) {
+      if (client.compatible) {
+        const startPromises = this._getHooks('startHook');
+        const interactionPromises = this._getHooks('interactionHook');
+        const promises = [].concat(startPromises, interactionPromises);
 
-    if (!client.compatible) {
-      this.view.updateIsCompatibleStatus(false);
-      this.show();
+        Promise.all(promises).then(results => {
+          let resolved = true;
+          results.forEach(bool => resolved = resolved && bool);
+
+          if (resolved)
+            this.ready();
+          else
+            throw new Error(`service:platform - didn't obtain the necessary authorizations`);
+        })
+      } else {
+        throw new Error('service:platform - client not compatible');
+      }
     } else {
-      this.view.updateIsCompatibleStatus(true);
-      this.view.updateCheckingStatus(true);
-      this.show();
+      // default view values
+      this.view.updateCheckingStatus(false);
+      this.view.updateIsCompatibleStatus(null);
+      this.view.updateHasAuthorizationsStatus(null);
 
-      // execute start hook
-      const startHooks = this._getHooks('startHook');
-      const startPromises = startHooks.map(hook => hook());
+      if (!client.compatible) {
+        this.view.updateIsCompatibleStatus(false);
+        this.show();
+      } else {
+        this.view.updateIsCompatibleStatus(true);
+        this.view.updateCheckingStatus(true);
+        this.show();
 
-      Promise.all(startPromises).then((results) => {
-        // if one of the start hook failed
-        let hasAuthorizations = true;
-        results.forEach((success) => hasAuthorizations = hasAuthorizations && success);
+        // execute start hook
+        const startPromises = this._getHooks('startHook');
 
-        this.view.updateHasAuthorizationsStatus(hasAuthorizations);
-        this.view.updateCheckingStatus(false);
+        Promise.all(startPromises).then(results => {
+          // if one of the start hook failed
+          let hasAuthorizations = true;
+          results.forEach(success => hasAuthorizations = hasAuthorizations && success);
 
-        if (hasAuthorizations) {
-          this.view.setTouchStartCallback(this._onInteraction('touch'));
-          this.view.setMouseDownCallback(this._onInteraction('mouse'));
-        }
-      }).catch((err) => console.error(err.stack));
+          this.view.updateHasAuthorizationsStatus(hasAuthorizations);
+          this.view.updateCheckingStatus(false);
+
+          if (hasAuthorizations) {
+            this.view.setTouchStartCallback(this._onInteraction('touch'));
+            this.view.setMouseDownCallback(this._onInteraction('mouse'));
+          }
+        }).catch((err) => console.error(err.stack));
+      }
     }
   }
 
@@ -446,12 +465,11 @@ class Platform extends Service {
 
       client.platform.interaction = type;
       // execute interaction hooks from the platform
-      const interactionHooks = this._getHooks('interactionHook');
-      const interactionPromises = interactionHooks.map((hook) => hook());
+      const interactionPromises = this._getHooks('interactionHook');
 
       Promise.all(interactionPromises).then((results) => {
         let resolved = true;
-        results.forEach((bool) => resolved = resolved && bool);
+        results.forEach(bool => resolved = resolved && bool);
 
         if (resolved) {
           this.ready();
@@ -471,7 +489,7 @@ class Platform extends Service {
   _checkRequiredFeatures() {
     let result = true;
 
-    this._requiredFeatures.forEach((feature) => {
+    this._requiredFeatures.forEach(feature => {
       const checkFunction = this._featureDefinitions[feature].check;
 
       if (!(typeof checkFunction === 'function'))
@@ -487,14 +505,15 @@ class Platform extends Service {
   _getHooks(type) {
     const hooks = [];
 
-    this._requiredFeatures.forEach((feature) => {
+    this._requiredFeatures.forEach(feature => {
       const hook = this._featureDefinitions[feature][type];
 
       if (hook)
         hooks.push(hook);
     });
 
-    return hooks;
+    // return an array of Promises instead of function
+    return hooks.map(hook => hook());
   }
 
   /**
