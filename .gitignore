@@ -1,10 +1,10 @@
 # transpiled files
-/client
-/server
-/utils
+# /client
+# /server
+# /utils
 
 # documentation
-/docs
+# /docs
 
 # others
 /node_modules

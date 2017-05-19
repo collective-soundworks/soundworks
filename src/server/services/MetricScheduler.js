@@ -21,6 +21,7 @@ class MetricScheduler extends Service {
     this._metricPosition = 0;
     this._tempo = 60; // tempo in beats per minute (BPM)
     this._tempoUnit = 0.25; // tempo unit expressed in fractions of a whole note
+    this._metricSpeed = 0.25;
 
     this._nextSyncEvent = null;
     this._nextSyncTime = Infinity;
@@ -37,6 +38,8 @@ class MetricScheduler extends Service {
 
     if (options.tempoUnit !== undefined)
       this._tempoUnit = options.tempoUnit;
+
+    this._metricSpeed = this._tempo * this._tempoUnit / 60;
 
     super.configure(options);
   }
