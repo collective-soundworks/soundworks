@@ -123,6 +123,18 @@ const server = {
   _clientTypeActivitiesMap: {},
 
   /**
+   * express instance, can allow to expose additionnal routes (e.g. REST API).
+   * @unstable
+   */
+  router: null,
+
+  /**
+   * HTTP(S) server instance.
+   * @unstable
+   */
+  httpServer: null,
+
+  /**
    * Required activities that must be started.
    * @private
    */
@@ -238,10 +250,12 @@ const server = {
 
     this._initActivities();
     this._initRouting(expressMiddleware);
+    // expose router to allow adding some routes (e.g. REST API)
+    this.router = expressMiddleware;
 
     const useHttps = this.config.useHttps || false;
 
-    new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       // launch http(s) server
       if (!useHttps) {
         const httpServer = http.createServer(expressMiddleware);
@@ -268,6 +282,8 @@ const server = {
       }
     }).then((httpServer) => {
       this._initSockets(httpServer);
+
+      this.httpServer = httpServer
 
       serviceManager.signals.ready.addObserver(() => {
         httpServer.listen(expressMiddleware.get('port'), () => {

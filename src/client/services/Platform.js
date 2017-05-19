@@ -371,8 +371,8 @@ class Platform extends Service {
     // resolve required features from the application
     client.compatible = this._checkRequiredFeatures();
 
-    // handle `showDisplay === false`
-    if (this.options.showDisplay === false) {
+    // handle `showDialog === false`
+    if (this.options.showDialog === false) {
       if (client.compatible) {
         const startPromises = this._getHooks('startHook');
         const interactionPromises = this._getHooks('interactionHook');
