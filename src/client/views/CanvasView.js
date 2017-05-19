@@ -195,7 +195,7 @@ class CanvasView extends SegmentedView {
   }
 
   /**
-   * Add a renderer to the `RenderingGroup`. The renderer is automatically
+   * Remove a renderer from the `RenderingGroup`. The renderer is automatically
    * disactivated when removed from the group.
    *
    * @param {module:soundworks/client.Renderer} renderer - Renderer to remove.
