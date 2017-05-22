@@ -180,6 +180,18 @@ class Activity extends EventEmitter {
   }
 
   /**
+   * Stop listening for messages from the server on a given channel.
+   *
+   * @param {module:soundworks/server.Client} client - Client that must listen to the message.
+   * @param {String} channel - The channel of the message (is automatically
+   *  namespaced with the activity's id: `${this.id}:channel`).
+   * @param {Function} callback - The callback to remove from the stack.
+   */
+  stopReceiving(client, channel, callback) {
+    sockets.removeListener(client, `${this.id}:${channel}`, callback);
+  }
+
+  /**
    * Send a web socket message to a given client.
    * @param {module:soundworks/server.Client} client - Client to send the message to.
    * @param {String} channel - Channel of the message (is automatically namespaced
