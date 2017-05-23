@@ -8,7 +8,7 @@
  * @memberof module:soundworks/client
  */
 class TouchSurface {
-  constructor($el) {
+  constructor($el, options = {}) {
     /**
      * Element to listen.
      *
@@ -50,6 +50,8 @@ class TouchSurface {
      * @private
      */
     this._listeners = {};
+
+    this._normalizeCoordinates = (options.normalizeCoordinates !== undefined) ? options.normalizeCoordinates : true;
 
     // cache bounding rect values and listen for window resize
     this._updateBoundingRect = this._updateBoundingRect.bind(this);
@@ -103,7 +105,15 @@ class TouchSurface {
    * @private
    */
   _updateBoundingRect() {
-    this._elBoundingRect = this.$el.getBoundingClientRect();
+    //this._elBoundingRect = this.$el.getBoundingClientRect();
+    this._elBoundingRect = {
+      top: 0,
+      bottom: 0,
+      left: 0,
+      right: 0,
+      width: window.innerWidth,
+      height: window.innerHeight,
+    };
   }
 
   /**
@@ -127,14 +137,18 @@ class TouchSurface {
       for (let i = 0; i < touches.length; i++) {
         const touchEvent = touches[i];
         const touchId = touchEvent.identifier;
-        const relX = touchEvent.clientX - boundingRect.left;
-        const relY = touchEvent.clientY - boundingRect.top;
-        const normX = relX / boundingRect.width;
-        const normY = relY / boundingRect.height;
 
-        callback(touchId, normX, normY, touchEvent, e);
+        if(this._normalizeCoordinates) {
+          const relX = touchEvent.clientX - boundingRect.left;
+          const relY = touchEvent.clientY - boundingRect.top;
+          const normX = relX / boundingRect.width;
+          const normY = relY / boundingRect.height;
+          callback(touchId, normX, normY, touchEvent, e);
+        } else {
+          callback(touchId, touchEvent.clientX , touchEvent.clientY, touchEvent, e);
+        }
       }
-    }
+    };
   }
 
   /**
@@ -142,20 +156,19 @@ class TouchSurface {
    *
    * @param {String} eventName - Type of event.
    * @param {Number} touchId - Id of the touch event.
-   * @param {Number} normX - Normalized position of the touch in the x axis
-   *  according to the width of the element.
-   * @param {Number} normY - Normalized position of the touch in the y axis
+   * @param {Number} x - x-position (maybe normalized to the elements width depending on normalizeCoordinates option)
+   * @param {Number} y - y-position (maybe normalized to the elements height depending on normalizeCoordinates option)
    *  according to the height of the element.
    * @param {Object} touchEvent - Original touch event (`e.changedTouches[n]`).
    * @param {Object} originalEvent - Original event.
    * @private
    */
-  _propagate(eventName, touchId, normX, normY, touchEvent, originalEvent) {
+  _propagate(eventName, touchId, x, y, touchEvent, originalEvent) {
     const listeners = this._listeners[eventName];
 
     if (listeners && listeners.length) {
       listeners.forEach((listener) => {
-        listener(touchId, normX, normY, touchEvent, originalEvent);
+        listener(touchId, x, y, touchEvent, originalEvent);
       });
     }
   }
@@ -165,8 +178,8 @@ class TouchSurface {
    *
    * @callback module:soundworks/client.TouchSurface~EventListener
    * @param {Number} touchId - Id of the touch.
-   * @param {Number} normX - Normalized position in the x axis.
-   * @param {Number} normY - Normalized position in the y axis.
+   * @param {Number} x - x-position (maybe normalized to the elements width depending on normalizeCoordinates option)
+   * @param {Number} y - y-position (maybe normalized to the elements height depending on normalizeCoordinates option)
    * @param {Touch} touchEvent - The original Touch event.
    * @param {Event} originalEvent - The original event.
    */
