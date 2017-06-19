@@ -1,3 +1,6 @@
+/**
+ * Lightweight EventEmitter mimicing node EventEmitter's API.
+ */
 class EventEmitter {
   constructor() {
     /**
