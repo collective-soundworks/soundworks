@@ -156,7 +156,7 @@ function prefixPaths(pathList, prefix) {
   const isAbsolute = /^https?:\/\/|^\/\//i;
 
   pathList = pathList.map((path) => {
-    if (isAbsolute.test(path) || path[0] === '/')
+    if (isAbsolute.test(path) || prefix === '/')
       return path;
     else
       return prefix + path;
