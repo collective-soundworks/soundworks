@@ -250,7 +250,7 @@ class ControllerScene {
         break;
     }
 
-    return gui
+    return gui;
   }
 }
 

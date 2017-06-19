@@ -99,12 +99,11 @@ class BeatEngine extends audio.TimeEngine {
   advanceTime(audioTime) {
     const metro = this.metro;
 
+    const cont = metro.callback(metro.measureCount, metro.beatCount);
     metro.beatCount++;
 
-    const cont = metro.callback(metro.measureCount, metro.beatCount);
-
     if (cont === undefined || cont === true) {
-      if (metro.beatCount >= metro.numBeats - 1)
+      if (metro.beatCount >= metro.numBeats)
         return Infinity;
 
       return audioTime + metro.beatPeriod;
@@ -123,12 +122,13 @@ class BeatEngine extends audio.TimeEngine {
 }
 
 class MetronomeEngine extends audio.TimeEngine {
-  constructor(startPosition, numBeats, beatLength, callback) {
+  constructor(startPosition, numBeats, beatLength, startOnBeat, callback) {
     super();
 
     this.startPosition = startPosition;
     this.numBeats = numBeats;
     this.beatLength = beatLength;
+    this.startOnBeat = startOnBeat;
     this.callback = callback;
 
     this.measureLength = numBeats * beatLength;
@@ -163,13 +163,32 @@ class MetronomeEngine extends audio.TimeEngine {
     if (metricPosition >= startPosition) {
       const relativePosition = metricPosition - startPosition;
       const floatMeasures = relativePosition / this.measureLength;
-      const measureCount = Math.ceil(floatMeasures);
+      let measureCount = Math.floor(floatMeasures);
+      const measurePhase = floatMeasures - measureCount;
 
-      this.measureCount = measureCount - 1;
+      if (this.beatEngine && this.startOnBeat) {
+        const floatBeats = this.numBeats * measurePhase;
+        const nextBeatCount = Math.ceil(floatBeats) % this.numBeats;
+
+        this.measureCount = measureCount; // current measure
+        this.beatCount = nextBeatCount; // next beat
+
+        if(nextBeatCount !== 0) {
+          const audioTime = audioScheduler.currentTime;
+          const nextBeatDelay = (nextBeatCount - floatBeats) * this.beatPeriod;
+          this.beatEngine.resetTime(audioTime + nextBeatDelay);
+        }
+      }
+
+      if(measurePhase > 0)
+        measureCount++;
+
+      this.measureCount = measureCount;
+
       return startPosition + measureCount * this.measureLength;
     }
 
-    this.measureCount = -1;
+    this.measureCount = 0;
     return startPosition;
   }
 
@@ -177,11 +196,11 @@ class MetronomeEngine extends audio.TimeEngine {
   advancePosition(syncTime, metricPosition, metricSpeed) {
     const audioTime = audioScheduler.currentTime;
 
-    this.measureCount++;
-    this.beatCount = 0;
-
     // whether metronome continues (default is true)
     const cont = this.callback(this.measureCount, 0);
+
+    this.measureCount++;
+    this.beatCount = 1;
 
     if (cont === undefined || cont === true) {
       if (this.beatEngine)
@@ -291,7 +310,7 @@ class MetricScheduler extends Service {
     else {
       // stop engines
       for (let engine of this._engineSet) {
-        if(engine.syncSpeed)
+        if (engine.syncSpeed)
           engine.syncSpeed(syncTime, metricPosition, 0);
       }
     }
@@ -563,9 +582,9 @@ class MetricScheduler extends Service {
    * @param {Number} tempoScale - linear tempo scale factor (in respect to master tempo)
    * @param {Integer} startPosition - metric start position of the beat
    */
-  addMetronome(callback, numBeats = 4, metricDiv = 4, tempoScale = 1, startPosition = 0) {
+  addMetronome(callback, numBeats = 4, metricDiv = 4, tempoScale = 1, startPosition = 0, startOnBeat = false) {
     const beatLength = 1 / (metricDiv * tempoScale);
-    const engine = new MetronomeEngine(startPosition, numBeats, beatLength, callback);
+    const engine = new MetronomeEngine(startPosition, numBeats, beatLength, startOnBeat, callback);
 
     this._metronomeEngineMap.set(callback, engine);
     this.add(engine, startPosition);
@@ -575,7 +594,7 @@ class MetricScheduler extends Service {
    * Remove periodic callback.
    * @param {Function} callback callback function
    */
-  removeMetronome(callback /*, endPosition */) {
+  removeMetronome(callback /*, endPosition */ ) {
     const engine = this._metronomeEngineMap.get(callback);
 
     if (engine) {

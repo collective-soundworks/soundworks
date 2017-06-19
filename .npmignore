@@ -1,6 +1,5 @@
-conf.json
 docs
-src
-bin
+#src
+#bin
 CHANGELOG.md
 DEV.md

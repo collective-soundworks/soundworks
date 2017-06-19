@@ -44,6 +44,18 @@ export default {
     client.socket.emit(channel, ...args);
   },
 
+
+  /**
+   * Stop listening to a message from the server.
+   *
+   * @param {Client} client - The client to send the message to.
+   * @param {String} channel - The channel of the message.
+   * @param {...*} callback - The callback to cancel.
+   */
+  removeListener(client, channel, callback) {
+    client.socket.removeListener(channel, callback);
+  },
+
   /**
    * Sends a message to all client of given `clientType` or `clientType`s. If
    * not specified, the message is sent to all clients.
