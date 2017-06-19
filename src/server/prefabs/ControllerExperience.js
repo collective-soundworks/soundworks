@@ -1,7 +1,5 @@
 import Experience from '../core/Experience';
 
-const Experience_ID = 'basic-shared-controller';
-
 /**
  * Server-side experience to create 1 liner controllers
  *

@@ -149,7 +149,7 @@ class FileSystem extends Service {
     if (!testCwd.test(dir))
       dir = _path.join(cwd, dir);
 
-    console.log(dir);
+    // console.log(dir);
     const promise = new Promise((resolve, reject) => {
       klaw(dir)
         .on('data', (item) => {
@@ -174,7 +174,7 @@ class FileSystem extends Service {
               results.push(item.path);
           }
         }).on('end', () => {
-          // remove `dir` the paths and test against the regExp
+          // remove `dir` from the paths and test against the regExp
           results = results.filter((entry) => {
             entry = entry.replace(_path.join(dir, _path.sep), '');
             return match.test(entry);
