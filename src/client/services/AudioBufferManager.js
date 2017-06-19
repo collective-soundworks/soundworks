@@ -178,8 +178,6 @@ function prefixPaths(pathList, prefix) {
  * @param {Object} options.files - Definition of files to load.
  * @param {Object} options.directories - Definition of directories to load.
  * @param {Array<String>} options.directories - List of directories to load.
- * @param {Boolean} [options.showProgress=true] - Display the progress bar
- *  in the view.
  * @param {String|module:soundworks/client.FileSystem~ListConfig} [options.directories=null] -
  *  Load all the files in particular directories. If setted this option relies
  *  on the {@link module:soundworks/client.FileSystem} which itself relies on
