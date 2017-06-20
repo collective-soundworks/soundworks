@@ -216,13 +216,31 @@ const server = {
 
   /**
    * Initialize the server with the given configuration.
+   * At the end of the init step the express router is available.
+   *
    * @param {module:soundworks/server.server~serverConfig} config -
    *  Configuration of the application.
    */
   init(config) {
     this.config = config;
+    this._populateDefaultConfig();
 
     serviceManager.init();
+
+    if (this.config.logger !== undefined)
+      logger.init(this.config.logger);
+
+    // configure express
+    this.router = new express();
+    this.router.set('port', process.env.PORT || this.config.port);
+    this.router.set('view engine', 'ejs');
+    // compression
+    if (this.config.enableGZipCompression)
+      this.router.use(compression());
+    // public folder
+    this.router.use(express.static(this.config.publicDirectory));
+
+    return Promise.resolve();
   },
 
   /**
@@ -233,32 +251,15 @@ const server = {
    * - define routes and activities mapping for all client types.
    */
   start() {
-    this._populateDefaultConfig();
-
-    if (this.config.logger !== undefined)
-      logger.init(this.config.logger);
-
-    // configure express
-    const expressMiddleware = new express();
-    expressMiddleware.set('port', process.env.PORT || this.config.port);
-    expressMiddleware.set('view engine', 'ejs');
-    // compression
-    if (this.config.enableGZipCompression)
-      expressMiddleware.use(compression());
-    // public folder
-    expressMiddleware.use(express.static(this.config.publicDirectory));
-
     this._initActivities();
-    this._initRouting(expressMiddleware);
+    this._initRouting(this.router);
     // expose router to allow adding some routes (e.g. REST API)
-    this.router = expressMiddleware;
-
     const useHttps = this.config.useHttps || false;
 
     return new Promise((resolve, reject) => {
       // launch http(s) server
       if (!useHttps) {
-        const httpServer = http.createServer(expressMiddleware);
+        const httpServer = http.createServer(this.router);
         resolve(httpServer);
       } else {
         const httpsInfos = this.config.httpsInfos;
@@ -266,7 +267,7 @@ const server = {
         if (httpsInfos.key && httpsInfos.cert) {
           const key = fs.readFileSync(httpsInfos.key);
           const cert = fs.readFileSync(httpsInfos.cert);
-          const httpsServer = https.createServer({ key, cert }, expressMiddleware);
+          const httpsServer = https.createServer({ key, cert }, this.router);
           resolve(httpsServer);
         // generate certificate on the fly (for development purposes)
         } else {
@@ -274,7 +275,7 @@ const server = {
             const httpsServer = https.createServer({
               key: keys.serviceKey,
               cert: keys.certificate,
-            }, expressMiddleware);
+            }, this.router);
 
             resolve(httpsServer);
           });
@@ -286,9 +287,9 @@ const server = {
       this.httpServer = httpServer
 
       serviceManager.signals.ready.addObserver(() => {
-        httpServer.listen(expressMiddleware.get('port'), () => {
+        httpServer.listen(this.router.get('port'), () => {
           const protocol = useHttps ? 'https' : 'http';
-          this._address = `${protocol}://127.0.0.1:${expressMiddleware.get('port')}`;
+          this._address = `${protocol}://127.0.0.1:${this.router.get('port')}`;
           console.log(`[${protocol.toUpperCase()} SERVER] Server listening on`, this._address);
         });
       });
