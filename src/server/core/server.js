@@ -234,12 +234,7 @@ const server = {
     this.router = new express();
     this.router.set('port', process.env.PORT || this.config.port);
     this.router.set('view engine', 'ejs');
-    // compression
-    if (this.config.enableGZipCompression)
-      this.router.use(compression());
-    // public folder
-    this.router.use(express.static(this.config.publicDirectory));
-
+    // allow promise based syntax for server initialization
     return Promise.resolve();
   },
 
@@ -251,6 +246,13 @@ const server = {
    * - define routes and activities mapping for all client types.
    */
   start() {
+    // compression
+    if (this.config.enableGZipCompression)
+      this.router.use(compression());
+
+    // public folder
+    this.router.use(express.static(this.config.publicDirectory));
+
     this._initActivities();
     this._initRouting(this.router);
     // expose router to allow adding some routes (e.g. REST API)
@@ -309,18 +311,18 @@ const server = {
   },
 
   /**
-   * Init routing for each client. The default client must be opened last.
+   * Init routing for each client. The default client route must be created last.
    * @private
    */
-  _initRouting(expressApp) {
+  _initRouting(router) {
     for (let clientType in this._clientTypeActivitiesMap) {
       if (clientType !== this.config.defaultClient)
-        this._openClientRoute(clientType, expressApp);
+        this._openClientRoute(clientType, router);
     }
 
     for (let clientType in this._clientTypeActivitiesMap) {
       if (clientType === this.config.defaultClient)
-        this._openClientRoute(clientType, expressApp);
+        this._openClientRoute(clientType, router);
     }
   },
 
@@ -379,7 +381,7 @@ const server = {
    * Open the route for the given client.
    * @private
    */
-  _openClientRoute(clientType, expressApp) {
+  _openClientRoute(clientType, router) {
     let route = '';
 
     if (this._routes[clientType])
@@ -405,7 +407,7 @@ const server = {
       const tmpl = ejs.compile(tmplString);
 
       // http request
-      expressApp.get(route, (req, res) => {
+      router.get(route, (req, res) => {
         const data = this._clientConfigDefinition(clientType, this.config, req);
         const appIndex = tmpl({ data });
         res.send(appIndex);
