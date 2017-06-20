@@ -230,7 +230,9 @@ const server = {
     if (this.config.logger !== undefined)
       logger.init(this.config.logger);
 
-    // configure express
+    // instanciate and configure express
+    // this allows to hook middleware and routes (e.g. cors) in the express
+    // instance between `server.init` and `server.start`
     this.router = new express();
     this.router.set('port', process.env.PORT || this.config.port);
     this.router.set('view engine', 'ejs');
