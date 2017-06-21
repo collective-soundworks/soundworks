@@ -46,6 +46,7 @@
     "lodash.template": "^4.4.0",
     "mobile-detect": "^1.3.6",
     "motion-input": "collective-soundworks/motion-input#v1.0.4-b",
+    "node-audio-slicer": "0.0.4",
     "osc": "^2.0.1",
     "pem": "^1.9.4",
     "screenfull": "^3.2.0",
