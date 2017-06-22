@@ -21,15 +21,14 @@ const SERVICE_ID = 'service:audio-stream-manager';
  * @param {Object} options
  * @param {Array<String>} options.audioFiles - list of paths towards would-be-streamable audio files.
  * @param {Bool} options.compress - Generate .mp3 stream chunks if set to true. Keep input file extension otherwise.
- * @param {Number} options.duration - Audio chunks duration (in sec)
+ * @param {Number} options.duration - Audio chunks duration (in sec).
  * @param {Number} options.overlap - Duration of additional audio samples added to head and tail of streamed audio 
  *  buffers. Paired with a fade-in fade-out mechanism on client's side, this allows to hide distortions induced by 
  *  mp3 encoding of audio chunks not starting / finishing with zeroed samples.
  *
  * @memberof module:soundworks/server
  * @example
- * // require and configure `audio-stream-manager` service (inside experience constructor)
- * 
+ * // Require and configure `audio-stream-manager` service (inside experience constructor).
  * // define list of "streamable" audio files
  * let audioFiles = [
  *   './public/stream/my-audio-file.wav',
@@ -40,7 +39,7 @@ const SERVICE_ID = 'service:audio-stream-manager';
  */
 
 class AudioStreamManager extends Service {
-  /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */
+  /** _<span class="warning">__WARNING__</span> This class should never be instantiated manually_ */
   constructor() {
     super(SERVICE_ID);
 
@@ -89,10 +88,10 @@ class AudioStreamManager extends Service {
   }
 
   /*
-  * Segment audio files listed into audioFiles into chunks for streaming.
-  * @param {Array<String>} audioFiles - list of paths towards audio files to chunk.
-  * @param {Object} callback - Function to call when slicing completed.
-  */
+   * Segment audio files listed into audioFiles into chunks for streaming.
+   * @param {Array<String>} audioFiles - list of paths towards audio files to chunk.
+   * @param {Object} callback - Function to call when slicing completed.
+   */
   prepareStreamChunks(audioFiles, callback) {
     // output array
     let bufferInfos = [];

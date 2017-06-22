@@ -6,6 +6,29 @@ import serviceManager from '../core/serviceManager';
 const SERVICE_ID = 'service:audio-stream-manager';
 const log = debug('soundworks:services:audio-stream-manager');
 
+// TODO:
+// - support streaming of files of total duration shorter than packet duration
+
+
+// load an audio buffer from server's disk (based on XMLHttpRequest)
+function loadAudioBuffer(chunkName) {
+  const promise = new Promise((resolve, reject) => {
+    // create request
+    var request = new XMLHttpRequest();
+    request.open('GET', chunkName, true);
+    request.responseType = 'arraybuffer';
+    // define request callback
+    request.onload = () => {
+        audioContext.decodeAudioData(request.response, (buffer) => {
+          resolve(buffer);
+        }, (e) => { reject(e); });
+      }
+      // send request
+    request.send();
+  });
+  return promise;
+}
+
 /**
  * Interface for the client `'audio-stream-manager'` service.
  *
@@ -41,7 +64,7 @@ const log = debug('soundworks:services:audio-stream-manager');
  * audioStream.start(); // start audio stream
  */
 
-export default class AudioStreamManager extends Service {
+class AudioStreamManager extends Service {
   /** _<span class="warning">__WARNING__</span> This class should never be instantiated manually_ */
   constructor() {
     super(SERVICE_ID, false);
@@ -94,41 +117,22 @@ export default class AudioStreamManager extends Service {
 
 }
 
-// register service
+// register / export service
 serviceManager.register(SERVICE_ID, AudioStreamManager);
-
-
-// TODO:
-// - support streaming of files of total duration shorter than packet duration
+export default AudioStreamManager;
 
 /**
- * load an audio buffer from server's disk (based on XMLHttpRequest)
- */
-function loadAudioBuffer(chunkName) {
-  const promise = new Promise((resolve, reject) => {
-    // create request
-    var request = new XMLHttpRequest();
-    request.open('GET', chunkName, true);
-    request.responseType = 'arraybuffer';
-    // define request callback
-    request.onload = () => {
-        audioContext.decodeAudioData(request.response, (buffer) => {
-          resolve(buffer);
-        }, (e) => { reject(e); });
-      }
-      // send request
-    request.send();
-  });
-  return promise;
-}
-
-/**
- * an audio stream behaves as would a media element source.
- * @private
- * @param {arraybuffer} inBuffer {arraybuffer} - The input buffer
- * @returns {arraybuffer} - The processed buffer (with frame copied from the beginning to the end)
+ * An audio stream node, behaving as would a mediaElementSource node.
+ *
+ * @param {Object} bufferInfos - Map of streamable buffer chunks infos.
+ * @param {Object} syncService - Soundworks sync service, used for sync mode.
+ * @param {Number} monitorInterval - See AudioStreamManager's.
+ * @param {Number} requiredAdvanceThreshold - See AudioStreamManager's.
+ *
+ * @memberof module:soundworks/client.AudioStreamManager
  */
 class AudioStream {
+  /** _<span class="warning">__WARNING__</span> This class should never be instantiated manually_ */
   constructor(bufferInfos, syncService, monitorInterval, requiredAdvanceThreshold) {
 
     // arguments
@@ -156,7 +160,8 @@ class AudioStream {
   }
 
   /**
-   * Init / reset local attributes (at stream creation and stop() )
+   * Init / reset local attributes (at stream creation and stop() ).
+   * @private
    **/
   _reset() {
     this._offsetInFirstBuffer = 0;
@@ -173,8 +178,10 @@ class AudioStream {
    **/
   set url(fileName) {
     // discard if currently playing
-    if (this.isPlaying()) { console.warn('set url ignored while playing');
-      return; }
+    if (this.isPlaying()) {
+      console.warn('set url ignored while playing');
+      return;
+    }
     // check if url corresponds with a streamable file
     if (this.bufferInfos.get(fileName)) { this._url = fileName; }
     // discard otherwise
@@ -182,7 +189,7 @@ class AudioStream {
   }
 
   /**
-   * Enable / disable synchronized mode. in non sync. mode, the stream audio
+   * Set/Get synchronized mode status. in non sync. mode, the stream audio
    * will start whenever the first audio buffer is downloaded. in sync. mode, 
    * the stream audio will start (again asa the audio buffer is downloaded) 
    * with an offset in the buffer, as if it started playing exactly when the 
@@ -190,29 +197,32 @@ class AudioStream {
    * @param {Bool} val - enable / disable sync
    **/
   set sync(val) {
-    if (this.isPlaying()) { console.warn('set sync ignored while playing');
-      return; }
+    if (this.isPlaying()) {
+      console.warn('set sync ignored while playing');
+      return;
+    }
     this._sync = val;
   }
-  /**
-   * Return sync status
-   **/  
   get sync() {
-    return this._sync;
-  }
+    return this._sync; }
 
   /**
-   * Set loop mode. onended() method not called if loop enabled.
+   * Set/Get loop mode. onended() method not called if loop enabled.
    * @param {Bool} val - enable / disable sync
    **/
   set loop(val) {
-    if (this.isPlaying()) { console.warn('set loop ignored while playing');
-      return; }
+    if (this.isPlaying()) {
+      console.warn('set loop ignored while playing');
+      return;
+    }
     this._loop = val;
   }
+  get loop() {
+    return this._loop; }
+
 
   /**
-   * Return duration of audio file currently loaded.
+   * Return the total duration (in secs) of the audio file currently streamed.
    **/
   get duration() {
     let bufferInfo = this.bufferInfos.get(this._url);
@@ -222,7 +232,7 @@ class AudioStream {
   }
 
   /**
-   * Connect audio stream to an audio node
+   * Connect audio stream to an audio node.
    * @param {AudioNode} node - node to connect to.
    **/
   connect(node) {
@@ -230,7 +240,7 @@ class AudioStream {
   }
 
   /**
-   * Meethod called when stream finished playing (on if loop disabled).
+   * Method called when stream finished playing on its own (won't fire if loop enabled).
    **/
   onended() {}
 
@@ -239,12 +249,14 @@ class AudioStream {
    **/
   isPlaying() {
     if (this._chunkRequestCallbackInterval === undefined) {
-      return false; } else {
-      return true }
+      return false;
+    } else {
+      return true
+    }
   }
 
   /** 
-   * Start streaming audio source (offset is time in buffer from which to start)
+   * Start streaming audio source.
    * @param {Number} offset - time in buffer from which to start (in sec).
    **/
   start(offset) {
@@ -302,7 +314,8 @@ class AudioStream {
 
   /** 
    * Check if we have enough "local buffer time" for the audio stream, 
-   * request new buffer chunks otherwise
+   * request new buffer chunks otherwise.
+   * @private
    **/
   _chunkRequestCallback() {
 
@@ -314,7 +327,8 @@ class AudioStream {
 
       // mechanism to force await first buffer to offset whole queue in unsync mode
       if (this._firstPacketState == 1 && !this._sync) {
-        return; }
+        return;
+      }
 
       // get current working chunk info
       const metaBuffer = bufferInfo[this._currentBufferIndex];
@@ -332,7 +346,8 @@ class AudioStream {
       loadAudioBuffer(chunkName).then((buffer) => {
         // discard if stop required since
         if (this._stopRequired) {
-          return; }
+          return;
+        }
         this._addBufferToQueue(buffer, ctx_startTime, metaBuffer.overlapStart, metaBuffer.overlapEnd);
         // mark that first packet arrived and that we can ask for more
         if (this._firstPacketState == 1 && !this._sync) { this._firstPacketState = 2; }
@@ -366,7 +381,6 @@ class AudioStream {
   }
 
   /**
-   * @private
    * Add audio buffer to stream queue.
    * @param {AudioBuffer} buffer - Audio buffer to add to playing queue.
    * @param {Number} startTime - Time at which audio buffer playing is due.
@@ -375,6 +389,7 @@ class AudioStream {
    *  perceiving potential .mp3 encoding artifacts introduced when buffer starts with non-zero value)
    * @param {Number} overlapEnd - Duration (in sec) of the additional audio content added at audio 
    * buffer's tail.
+   * @private
    **/
   _addBufferToQueue(buffer, startTime, overlapStart, overlapEnd) {
 
@@ -468,7 +483,8 @@ class AudioStream {
   /**
    * local stop: end streaming requests, clear streaming callbacks, etc.
    * in short, stop all but stop the audio sources, to use _drop() rather 
-   * than stop() in "audio file over and not loop" scenario
+   * than stop() in "audio file over and not loop" scenario.
+   * @private
    **/
   _drop() {
     // reset local values
