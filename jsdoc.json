@@ -10,6 +10,7 @@
       "src/client/core/Service.js",
 
       "src/client/services/AudioBufferManager.js",
+      "src/client/services/AudioStreamManager.js",
       "src/client/services/AudioScheduler.js",
       "src/client/services/Auth.js",
       "src/client/services/Checkin.js",
@@ -45,6 +46,7 @@
       "src/server/core/Service.js",
 
       "src/server/services/AudioBufferManager.js",
+      "src/server/services/AudioStreamManager.js",
       "src/server/services/Auth.js",
       "src/server/services/Checkin.js",
       "src/server/services/ErrorReporter.js",
