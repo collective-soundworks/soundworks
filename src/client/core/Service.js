@@ -24,7 +24,7 @@ class Service extends Activity {
     this.requiredSignals.addObserver((value) => {
       if (value) {
         this.start();
-        this.hasStarted = true;
+        this.hasStarted = true; // keep this for Orbe/Nodal compatibility
       } else {
         this.stop();
       }

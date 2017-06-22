@@ -1,7 +1,6 @@
 import { audioContext } from 'waves-audio';
 import { SuperLoader } from 'waves-loaders';
 import debug from 'debug';
-import _path from 'path';
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
 
@@ -316,9 +315,8 @@ class AudioBufferManager extends Service {
 
     const directories = this.options.directories;
 
-    if (directories !== null) {
+    if (directories !== null)
       this._fileSystem = this.require('file-system');
-    }
   }
 
   /** @private */
@@ -523,25 +521,6 @@ class AudioBufferManager extends Service {
       return obj[key];
 
     return obj;
-  }
-
-  /**
-   * Retrieve a single audio buffer associated to a given id.
-   * @param {String} id - Object identifier.
-   * @param {Number} index - Audio buffer index (if array).
-   * @returns {Promise} - Returns a single loaded audio buffer associated to the given id.
-   */
-  getAudioBuffer(id = 'default', index = 0) {
-    return this.audioBuffers[id][index];
-  }
-
-  /**
-   * Retrieve an array of audio buffers associated to a given id.
-   * @param {String} id - Object identifier.
-   * @returns {Promise} - Returns an array of loaded audio buffers associated to the given id.
-   */
-  getAudioBufferArray(id = 'default') {
-    return this.audioBuffers[id];
   }
 }
 
