@@ -175,6 +175,8 @@ const client = {
     const el = config.appContainer;
     const $container = el instanceof Element ? el : document.querySelector(el);
     viewManager.setAppContainer($container);
+
+    return Promise.resolve();
   },
 
   /**
@@ -253,6 +255,8 @@ const client = {
       if (hashParams)
         hashParams.forEach((param) => this.urlParams.push(param));
     }
+
+    console.log('soundworks', this.urlParams);
   },
 
   /**
