@@ -24,6 +24,7 @@ export { default as serviceManager } from './core/serviceManager';
 
 // services
 export { default as AudioBufferManager } from './services/AudioBufferManager';
+export { default as AudioStreamManager } from './services/AudioStreamManager';
 export { default as AudioScheduler } from './services/AudioScheduler';
 export { default as Auth } from './services/Auth';
 export { default as Checkin } from './services/Checkin';
