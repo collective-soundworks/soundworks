@@ -67,7 +67,7 @@ const serviceManager = {
     if (!instance) {
       // throw an error if manager already started
       if (this.signals.start.get() === true)
-        throw new Error(`Service "${id}" required after application start`);
+        throw new Error(`Service "${id}" required after serviceManager start`);
 
       instance = new _ctors[id]();
 
