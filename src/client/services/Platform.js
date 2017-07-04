@@ -156,6 +156,7 @@ const defaultDefinitions = [
       return !!navigator.getUserMedia;
     },
     startHook: function() {
+      // @todo - use new navigator.mediaDevices if available
       return new Promise(function(resolve, reject) {
         navigator.getUserMedia({ audio: true }, function(stream) {
           stream.getAudioTracks()[0].stop();
