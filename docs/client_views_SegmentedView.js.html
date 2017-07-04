@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Soundworks - Source: client/views/SegmentedView.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+    <link type="text/css" rel="stylesheet" href="styles/overrides.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <!-- if home page assume a title is already present in README -->
+    
+    <h1 class="page-title">Source: client/views/SegmentedView.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import View from './View';
+
+const defaultTemplate = `
+  &lt;div class="section-top flex-middle">&lt;p>&lt;%= top %>&lt;/p>&lt;/div>
+  &lt;div class="section-center flex-center">&lt;p>&lt;%= center %>&lt;/p>&lt;/div>
+  &lt;div class="section-bottom flex-middle">&lt;p>&lt;%= bottom %>&lt;/p>&lt;/div>
+`;
+
+/**
+ * Create views which keep defined vertical ratios among elements. These ratios
+ * are kept between the different parts in portrait and landscape orientation.
+ * The default Segmented view defines a layout with 3 verticals parts.
+ *
+ * Others ratios can be defined by creating a new template and defining the
+ * ratios of the different elements by overriding the `ratio` option.
+ * The sum of all the ratios should be equal to 1.
+ *
+ * _&lt;span class="warning">__WARNING__&lt;/span> Views should be created using
+ * {@link module:soundworks/client.Activity#createView} method._
+ *
+ * @param {String} template - Template of the view.
+ * @param {Object} content - Object containing the variables used to populate
+ *  the template. {@link module:soundworks/client.View#content}.
+ * @param {Object} events - Event listeners to install to the view
+ *  {@link module:soundworks/client.View#events}.
+ * @param {Object} options - Options of the view.
+ *  {@link module:soundworks/client.View#options}.
+ *
+ * @memberof module:soundworks/client
+ * @extends {module:soundworks/client.View}
+ */
+class SegmentedView extends View {
+  constructor(template, content = {}, events = {}, options = {}) {
+    // fallback on default template if `template = null`
+    template = !template ? defaultTemplate : template;
+    super(template, content, events, options);
+
+    /**
+     * Object associating selectors as defined in the given template associated
+     * with their vertical ratio, the ratio is applyed in both 'portrait' and
+     * 'landscape' orientation.
+     *
+     * @type {Object&lt;String:Number>}
+     * @name ratios
+     * @instance
+     * @memberof module:soundworks/client.SegmentedView
+     */
+    this.ratios = options.ratios || {
+      '.section-top': 0.3,
+      '.section-center': 0.5,
+      '.section-bottom': 0.2,
+    };
+
+    /**
+     * An object containing selectors defined in the template associated
+     * with their vertical ratio, the ratio is applyed in both 'portrait'
+     * and 'landscape' orientation.
+     *
+     * @type {Object&lt;String:Element>}
+     * @name ratios
+     * @instance
+     * @memberof module:soundworks/client.SegmentedView
+     * @private
+     */
+    this._$sections = {};
+  }
+
+  /** @private */
+  onRender() {
+    Object.keys(this.ratios).forEach((sel) => {
+      const $el = this.$el.querySelector(sel);
+
+      if ($el === null)
+        throw new Error(`Unknow selector "${sel}"`);
+
+      this._$sections[sel] = $el;
+    });
+  }
+
+  /** @private */
+  onResize(width, height, orientation) {
+    super.onResize(width, height, orientation);
+
+    for (let sel in this.ratios) {
+      const ratio = this.ratios[sel];
+      const $el = this._$sections[sel];
+
+      $el.style.minHeight = `${ratio * height}px`;
+    }
+  }
+}
+
+export default SegmentedView;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-soundworks_client.html">soundworks/client</a></li><li><a href="module-soundworks_server.html">soundworks/server</a></li></ul><h3>Classes</h3><ul><li><a href="module-soundworks_client.Activity.html">soundworks/client.Activity</a></li><li><a href="module-soundworks_client.AudioBufferManager.html">soundworks/client.AudioBufferManager</a></li><li><a href="module-soundworks_client.AudioScheduler.html">soundworks/client.AudioScheduler</a></li><li><a href="module-soundworks_client.AudioStreamManager.html">soundworks/client.AudioStreamManager</a></li><li><a href="module-soundworks_client.AudioStreamManager.AudioStream.html">soundworks/client.AudioStreamManager.AudioStream</a></li><li><a href="module-soundworks_client.Auth.html">soundworks/client.Auth</a></li><li><a href="module-soundworks_client.Canvas2dRenderer.html">soundworks/client.Canvas2dRenderer</a></li><li><a href="module-soundworks_client.Canvas2dRenderingGroup.html">soundworks/client.Canvas2dRenderingGroup</a></li><li><a href="module-soundworks_client.CanvasView.html">soundworks/client.CanvasView</a></li><li><a href="module-soundworks_client.Checkin.html">soundworks/client.Checkin</a></li><li><a href="module-soundworks_client.ErrorReporter.html">soundworks/client.ErrorReporter</a></li><li><a href="module-soundworks_client.Experience.html">soundworks/client.Experience</a></li><li><a href="module-soundworks_client.FileSystem.html">soundworks/client.FileSystem</a></li><li><a href="module-soundworks_client.Geolocation.html">soundworks/client.Geolocation</a></li><li><a href="module-soundworks_client.Locator.html">soundworks/client.Locator</a></li><li><a href="module-soundworks_client.MotionInput.html">soundworks/client.MotionInput</a></li><li><a href="module-soundworks_client.Network.html">soundworks/client.Network</a></li><li><a href="module-soundworks_client.Placer.html">soundworks/client.Placer</a></li><li><a href="module-soundworks_client.Platform.html">soundworks/client.Platform</a></li><li><a href="module-soundworks_client.RawSocket.html">soundworks/client.RawSocket</a></li><li><a href="module-soundworks_client.SegmentedView.html">soundworks/client.SegmentedView</a></li><li><a href="module-soundworks_client.Service.html">soundworks/client.Service</a></li><li><a href="module-soundworks_client.SharedConfig.html">soundworks/client.SharedConfig</a></li><li><a href="module-soundworks_client.SharedParams.html">soundworks/client.SharedParams</a></li><li><a href="module-soundworks_client.Sync.html">soundworks/client.Sync</a></li><li><a href="module-soundworks_client.SyncScheduler.html">soundworks/client.SyncScheduler</a></li><li><a href="module-soundworks_client.View.html">soundworks/client.View</a></li><li><a href="module-soundworks_server.Activity.html">soundworks/server.Activity</a></li><li><a href="module-soundworks_server.AudioBufferManager.html">soundworks/server.AudioBufferManager</a></li><li><a href="module-soundworks_server.AudioStreamManager.html">soundworks/server.AudioStreamManager</a></li><li><a href="module-soundworks_server.Auth.html">soundworks/server.Auth</a></li><li><a href="module-soundworks_server.Checkin.html">soundworks/server.Checkin</a></li><li><a href="module-soundworks_server.Client.html">soundworks/server.Client</a></li><li><a href="module-soundworks_server.ErrorReporter.html">soundworks/server.ErrorReporter</a></li><li><a href="module-soundworks_server.Experience.html">soundworks/server.Experience</a></li><li><a href="module-soundworks_server.Geolocation.html">soundworks/server.Geolocation</a></li><li><a href="module-soundworks_server.Locator.html">soundworks/server.Locator</a></li><li><a href="module-soundworks_server.MetricScheduler.html">soundworks/server.MetricScheduler</a></li><li><a href="module-soundworks_server.Network.html">soundworks/server.Network</a></li><li><a href="module-soundworks_server.Osc.html">soundworks/server.Osc</a></li><li><a href="module-soundworks_server.Placer.html">soundworks/server.Placer</a></li><li><a href="module-soundworks_server.RawSocket.html">soundworks/server.RawSocket</a></li><li><a href="module-soundworks_server.Service.html">soundworks/server.Service</a></li><li><a href="module-soundworks_server.SharedConfig.html">soundworks/server.SharedConfig</a></li><li><a href="module-soundworks_server.SharedParams.html">soundworks/server.SharedParams</a></li><li><a href="module-soundworks_server.Sync.html">soundworks/server.Sync</a></li><li><a href="module-soundworks_server.SyncScheduler.html">soundworks/server.SyncScheduler</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-soundworks_client.client.html">soundworks/client.client</a></li><li><a href="module-soundworks_client.viewport.html">soundworks/client.viewport</a></li><li><a href="module-soundworks_server.server.html">soundworks/server.server</a></li></ul><h3>Interfaces</h3><ul><li><a href="module-soundworks_client.AbstractAudioBufferManagerView.html">soundworks/client.AbstractAudioBufferManagerView</a></li><li><a href="module-soundworks_client.AbstractAuthView.html">soundworks/client.AbstractAuthView</a></li><li><a href="module-soundworks_client.AbstractCheckinView.html">soundworks/client.AbstractCheckinView</a></li><li><a href="module-soundworks_client.AbstractLocatorView.html">soundworks/client.AbstractLocatorView</a></li><li><a href="module-soundworks_client.AbstractPlacerView.html">soundworks/client.AbstractPlacerView</a></li><li><a href="module-soundworks_client.AbstractPlatformView.html">soundworks/client.AbstractPlatformView</a></li><li><a href="module-soundworks_client.AbstractView.html">soundworks/client.AbstractView</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    
+        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue Jul 04 2017 10:45:02 GMT+0200 (CEST)
+    
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

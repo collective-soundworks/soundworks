@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Soundworks - Source: client/views/CanvasView.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+    <link type="text/css" rel="stylesheet" href="styles/overrides.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <!-- if home page assume a title is already present in README -->
+    
+    <h1 class="page-title">Source: client/views/CanvasView.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import SegmentedView from './SegmentedView';
+import CanvasRenderingGroup from './CanvasRenderingGroup';
+
+
+const defaultCanvasTemplate = `
+  &lt;canvas class="background">&lt;/canvas>
+  &lt;div class="foreground">
+    &lt;div class="section-top flex-middle">&lt;%= top %>&lt;/div>
+    &lt;div class="section-center flex-center">&lt;%= center %>&lt;/div>
+    &lt;div class="section-bottom flex-middle">&lt;%= bottom %>&lt;/div>
+  &lt;/div>
+`;
+
+/**
+ * View designed for experiences where 2d graphical rendering is needed.
+ * The view is basically a `SegmentedView` with a `canvas` element in
+ * the background and a set of helpers to handle the __renderers__ (objects
+ * that draw something into the canvas).
+ *
+ * _&lt;span class="warning">__WARNING__&lt;/span> Views should preferably by
+ * created using the [`Experience#createView`]{@link module:soundworks/client.Experience#createView}
+ * method._
+ *
+ * @param {String} template - Template of the view.
+ * @param {Object} content - Object containing the variables used to populate
+ *  the template. {@link module:soundworks/client.View#content}.
+ * @param {Object} events - Listeners to install in the view
+ *  {@link module:soundworks/client.View#events}.
+ * @param {Object} options - Options of the view.
+ *  {@link module:soundworks/client.View#options}.
+ *
+ * @memberof module:soundworks/client
+ * @extends {module:soundworks/client.SegmentedView}
+ *
+ * @see {@link module:soundworks/client.View}
+ * @see {@link module:soundworks/client.Renderer}
+ */
+class CanvasView extends SegmentedView {
+  constructor(template, content, events, options) {
+    template = template || defaultCanvasTemplate;
+    options = Object.assign({
+      preservePixelRatio: false,
+    }, options);
+
+    super(template, content, events, options);
+
+    /**
+     * Temporary stack the renderers when the view is not visible.
+     *
+     * @type {Set}
+     * @name _rendererStack
+     * @instance
+     * @memberof module:soundworks/client.CanvasView
+     * @private
+     */
+    this._rendererStack = new Set();
+
+    /**
+     * Flag to track the first `onRender` call.
+     *
+     * @type {Boolean}
+     * @name _hasRenderedOnce
+     * @instance
+     * @memberof module:soundworks/client.CanvasView
+     * @private
+     */
+    this._hasRenderedOnce = false;
+
+    /**
+     * Default rendering group.
+     *
+     * @type {module:soundworks/client.CanvasRenderingGroup}
+     * @name _renderingGroup
+     * @instance
+     * @memberof module:soundworks/client.CanvasView
+     * @private
+     */
+    this._renderingGroup = null;
+
+    /**
+     * Canvas DOM element to draw into.
+     *
+     * @type {Element}
+     * @name $canvas
+     * @instance
+     * @memberof module:soundworks/client.$canvas
+     */
+    this.$canvas = null;
+
+    /**
+     * 2d context of the canvas.
+     *
+     * @type {CanvasRenderingContext2D}
+     * @name $canvas
+     * @instance
+     * @memberof module:soundworks/client.$canvas
+     */
+    this.ctx = null;
+  }
+
+  get pixelRatio() {
+    return this._renderingGroup.pixelRatio;
+  }
+
+  /** @private */
+  onRender() {
+    super.onRender();
+
+    this.$canvas = this.$el.querySelector('canvas');
+    this.ctx = this.$canvas.getContext('2d');
+
+    // update the rendering group if the canvas instance has changed after a render
+    if (this._renderingGroup)
+      this._renderingGroup.ctx = this.ctx;
+
+    if (!this._hasRenderedOnce) {
+      const preservePixelRatio = this.options.preservePixelRatio
+      this._renderingGroup = new CanvasRenderingGroup(this.ctx, preservePixelRatio);
+
+      // prevent creating a new rendering group each time the view is re-rendered
+      this._hasRenderedOnce = true;
+      this.init();
+    }
+  }
+
+  /**
+   * Entry point called when the renderingGroup for the view is ready.
+   * Basically allows to instanciate some renderers from inside the view.
+   */
+  init() {}
+
+  /** @private */
+  onResize(viewportWidth, viewportHeight, orientation) {
+    super.onResize(viewportWidth, viewportHeight, orientation);
+    this._renderingGroup.onResize(viewportWidth, viewportHeight, orientation);
+
+    // add stacked renderers to the rendering group
+    this._rendererStack.forEach((renderer) => this._renderingGroup.add(renderer));
+    this._rendererStack.clear();
+  }
+
+  /**
+   * Callback executed at the beginning of each `requestAnimationFrame`
+   * cycle, before the execution of the renderers.
+   * @callback module:soundworks/client.CanvasView~preRenderer
+   *
+   * @param {CanvasRenderingContext2D} ctx - Context of the canvas.
+   * @param {Number} dt - Delta time in seconds since last rendering.
+   * @param {Number} canvasWidth - Current width of the canvas.
+   * @param {Number} canvasHeight - Current height of the canvas.
+   */
+  /**
+   * Register a function to execute at the beginning of each
+   * `requestAnimationFrame` cycle.
+   *
+   * @param {module:soundworks/client.CanvasView~preRenderer} callback -
+   *  Function to execute before each rendering cycle.
+   */
+  setPreRender(callback) {
+    this._renderingGroup.preRender = callback;
+  }
+
+  /**
+   * Callback executed at the end of each `requestAnimationFrame`
+   * cycle, after the execution of the renderers.
+   * @callback module:soundworks/client.CanvasView~postRenderer
+   *
+   * @param {CanvasRenderingContext2D} ctx - Context of the canvas.
+   * @param {Number} dt - Delta time in seconds since last rendering.
+   * @param {Number} canvasWidth - Current width of the canvas.
+   * @param {Number} canvasHeight - Current height of the canvas.
+   */
+  /**
+   * Register a function to execute at the end of each
+   * `requestAnimationFrame` cycle.
+   *
+   * @param {module:soundworks/client.CanvasView~postRenderer} callback -
+   *  Function to execute before each rendering cycle.
+   */
+  setPostRender(callback) {
+    this._renderingGroup.postRender = callback;
+  }
+
+  /**
+   * Add a renderer to the `RenderingGroup`. The renderer is automatically
+   * activated when added to the group.
+   *
+   * @param {module:soundworks/client.Renderer} renderer - Renderer to add.
+   */
+  addRenderer(renderer) {
+    if (this.isVisible)
+      this._renderingGroup.add(renderer);
+    else
+      this._rendererStack.add(renderer);
+  }
+
+  /**
+   * Remove a renderer from the `RenderingGroup`. The renderer is automatically
+   * disactivated when removed from the group.
+   *
+   * @param {module:soundworks/client.Renderer} renderer - Renderer to remove.
+   */
+  removeRenderer(renderer) {
+    if (this.isVisible)
+      this._renderingGroup.remove(renderer);
+    else
+      this._rendererStack.delete(renderer);
+  }
+}
+
+export default CanvasView;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-soundworks_client.html">soundworks/client</a></li><li><a href="module-soundworks_server.html">soundworks/server</a></li></ul><h3>Classes</h3><ul><li><a href="module-soundworks_client.Activity.html">soundworks/client.Activity</a></li><li><a href="module-soundworks_client.AudioBufferManager.html">soundworks/client.AudioBufferManager</a></li><li><a href="module-soundworks_client.AudioScheduler.html">soundworks/client.AudioScheduler</a></li><li><a href="module-soundworks_client.AudioStreamManager.html">soundworks/client.AudioStreamManager</a></li><li><a href="module-soundworks_client.AudioStreamManager.AudioStream.html">soundworks/client.AudioStreamManager.AudioStream</a></li><li><a href="module-soundworks_client.Auth.html">soundworks/client.Auth</a></li><li><a href="module-soundworks_client.Canvas2dRenderer.html">soundworks/client.Canvas2dRenderer</a></li><li><a href="module-soundworks_client.Canvas2dRenderingGroup.html">soundworks/client.Canvas2dRenderingGroup</a></li><li><a href="module-soundworks_client.CanvasView.html">soundworks/client.CanvasView</a></li><li><a href="module-soundworks_client.Checkin.html">soundworks/client.Checkin</a></li><li><a href="module-soundworks_client.ErrorReporter.html">soundworks/client.ErrorReporter</a></li><li><a href="module-soundworks_client.Experience.html">soundworks/client.Experience</a></li><li><a href="module-soundworks_client.FileSystem.html">soundworks/client.FileSystem</a></li><li><a href="module-soundworks_client.Geolocation.html">soundworks/client.Geolocation</a></li><li><a href="module-soundworks_client.Locator.html">soundworks/client.Locator</a></li><li><a href="module-soundworks_client.MotionInput.html">soundworks/client.MotionInput</a></li><li><a href="module-soundworks_client.Network.html">soundworks/client.Network</a></li><li><a href="module-soundworks_client.Placer.html">soundworks/client.Placer</a></li><li><a href="module-soundworks_client.Platform.html">soundworks/client.Platform</a></li><li><a href="module-soundworks_client.RawSocket.html">soundworks/client.RawSocket</a></li><li><a href="module-soundworks_client.SegmentedView.html">soundworks/client.SegmentedView</a></li><li><a href="module-soundworks_client.Service.html">soundworks/client.Service</a></li><li><a href="module-soundworks_client.SharedConfig.html">soundworks/client.SharedConfig</a></li><li><a href="module-soundworks_client.SharedParams.html">soundworks/client.SharedParams</a></li><li><a href="module-soundworks_client.Sync.html">soundworks/client.Sync</a></li><li><a href="module-soundworks_client.SyncScheduler.html">soundworks/client.SyncScheduler</a></li><li><a href="module-soundworks_client.View.html">soundworks/client.View</a></li><li><a href="module-soundworks_server.Activity.html">soundworks/server.Activity</a></li><li><a href="module-soundworks_server.AudioBufferManager.html">soundworks/server.AudioBufferManager</a></li><li><a href="module-soundworks_server.AudioStreamManager.html">soundworks/server.AudioStreamManager</a></li><li><a href="module-soundworks_server.Auth.html">soundworks/server.Auth</a></li><li><a href="module-soundworks_server.Checkin.html">soundworks/server.Checkin</a></li><li><a href="module-soundworks_server.Client.html">soundworks/server.Client</a></li><li><a href="module-soundworks_server.ErrorReporter.html">soundworks/server.ErrorReporter</a></li><li><a href="module-soundworks_server.Experience.html">soundworks/server.Experience</a></li><li><a href="module-soundworks_server.Geolocation.html">soundworks/server.Geolocation</a></li><li><a href="module-soundworks_server.Locator.html">soundworks/server.Locator</a></li><li><a href="module-soundworks_server.MetricScheduler.html">soundworks/server.MetricScheduler</a></li><li><a href="module-soundworks_server.Network.html">soundworks/server.Network</a></li><li><a href="module-soundworks_server.Osc.html">soundworks/server.Osc</a></li><li><a href="module-soundworks_server.Placer.html">soundworks/server.Placer</a></li><li><a href="module-soundworks_server.RawSocket.html">soundworks/server.RawSocket</a></li><li><a href="module-soundworks_server.Service.html">soundworks/server.Service</a></li><li><a href="module-soundworks_server.SharedConfig.html">soundworks/server.SharedConfig</a></li><li><a href="module-soundworks_server.SharedParams.html">soundworks/server.SharedParams</a></li><li><a href="module-soundworks_server.Sync.html">soundworks/server.Sync</a></li><li><a href="module-soundworks_server.SyncScheduler.html">soundworks/server.SyncScheduler</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-soundworks_client.client.html">soundworks/client.client</a></li><li><a href="module-soundworks_client.viewport.html">soundworks/client.viewport</a></li><li><a href="module-soundworks_server.server.html">soundworks/server.server</a></li></ul><h3>Interfaces</h3><ul><li><a href="module-soundworks_client.AbstractAudioBufferManagerView.html">soundworks/client.AbstractAudioBufferManagerView</a></li><li><a href="module-soundworks_client.AbstractAuthView.html">soundworks/client.AbstractAuthView</a></li><li><a href="module-soundworks_client.AbstractCheckinView.html">soundworks/client.AbstractCheckinView</a></li><li><a href="module-soundworks_client.AbstractLocatorView.html">soundworks/client.AbstractLocatorView</a></li><li><a href="module-soundworks_client.AbstractPlacerView.html">soundworks/client.AbstractPlacerView</a></li><li><a href="module-soundworks_client.AbstractPlatformView.html">soundworks/client.AbstractPlatformView</a></li><li><a href="module-soundworks_client.AbstractView.html">soundworks/client.AbstractView</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    
+        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue Jul 04 2017 10:45:02 GMT+0200 (CEST)
+    
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
