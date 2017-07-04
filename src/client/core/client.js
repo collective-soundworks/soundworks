@@ -255,8 +255,6 @@ const client = {
       if (hashParams)
         hashParams.forEach((param) => this.urlParams.push(param));
     }
-
-    console.log('soundworks', this.urlParams);
   },
 
   /**
