@@ -199,7 +199,7 @@ const client = {
    */
   start() {
     if (socket.required)
-      this._initSocket();
+      this._initSocket(() => serviceManager.start());
     else
       serviceManager.start();
   },
@@ -264,7 +264,7 @@ const client = {
    * @todo - refactor handshake.
    * @private
    */
-  _initSocket() {
+  _initSocket(callback) {
     socket.init(this.type, this.config.websockets);
 
     // see: http://socket.io/docs/client-api/#socket
@@ -283,7 +283,7 @@ const client = {
           // wait for handshake response to mark client as `ready`
           this.socket.receive('client:start', (uuid) => {
             this.uuid = uuid;
-            serviceManager.start();
+            callback();
           });
 
           this.socket.receive('client:error', (err) => {
