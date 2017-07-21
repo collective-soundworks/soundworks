@@ -55,7 +55,11 @@ function clonePathObj(value) {
   return value;
 }
 
-const regexp = /\.[a-zA-Z0-9]{3,4}$/;
+// const regexp = /\.[a-zA-Z0-9]{3,4}$/;
+
+// supported media formats + json
+// https://developer.mozilla.org/en-US/docs/Web/HTML/Supported_media_formats
+const regexp = /\.(wav|mp3|mp4|aac|aif|aiff|ogg|webm|json)$/i;
 
 function isFilePath(str) {
   return (typeof str === 'string' && regexp.test(str));
