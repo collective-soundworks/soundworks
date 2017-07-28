@@ -40,6 +40,7 @@ class CanvasView extends SegmentedView {
     template = template || defaultCanvasTemplate;
     options = Object.assign({
       preservePixelRatio: false,
+      skipFrames: 0,
     }, options);
 
     super(template, content, events, options);
@@ -114,8 +115,9 @@ class CanvasView extends SegmentedView {
       this._renderingGroup.ctx = this.ctx;
 
     if (!this._hasRenderedOnce) {
-      const preservePixelRatio = this.options.preservePixelRatio
-      this._renderingGroup = new CanvasRenderingGroup(this.ctx, preservePixelRatio);
+      const preservePixelRatio = this.options.preservePixelRatio;
+      const skipFrames = this.options.skipFrames;
+      this._renderingGroup = new CanvasRenderingGroup(this.ctx, preservePixelRatio, skipFrames);
 
       // prevent creating a new rendering group each time the view is re-rendered
       this._hasRenderedOnce = true;

@@ -88,7 +88,7 @@ const loop = {
  * @memberof module:soundworks/client
  */
 class Canvas2dRenderingGroup {
-  constructor(ctx, preservePixelRatio = false) {
+  constructor(ctx, preservePixelRatio = false, skipFrames = 0) {
     /**
      * 2d context of the canvas.
      *
@@ -134,6 +134,10 @@ class Canvas2dRenderingGroup {
 
       return preservePixelRatio ? (dPR / bPR) : 1;
     }(this.ctx));
+
+    this.frameCount = 0;
+    this.skipFrames = skipFrames;
+    this.accumDt = 0;
 
     // register the group into the loop
     loop.registerRenderingGroup(this);
@@ -198,16 +202,25 @@ class Canvas2dRenderingGroup {
    *  `requestAnimationFrame` call.
    */
   render(dt) {
-    const { ctx, renderers } = this;
+    let accumDt = this.accumDt + dt;
 
-    if (this.preRender !== null)
-      this.preRender(ctx, dt, this.canvasWidth, this.canvasHeight);
+    if (this.frameCount === 0) {
+      const { ctx, renderers } = this;
 
-    for (let i = 0, l = renderers.length; i < l; i++)
-      renderers[i].render(ctx);
+      if (this.preRender !== null)
+        this.preRender(ctx, accumDt, this.canvasWidth, this.canvasHeight);
 
-    if (this.postRender !== null)
-      this.postRender(ctx, dt, this.canvasWidth, this.canvasHeight);
+      for (let i = 0, l = renderers.length; i < l; i++)
+        renderers[i].render(ctx);
+
+      if (this.postRender !== null)
+        this.postRender(ctx, accumDt, this.canvasWidth, this.canvasHeight);
+
+      accumDt = 0;
+    }
+
+    this.frameCount = (this.frameCount + 1) % this.skipFrames;
+    this.accumDt = accumDt;
   }
 
   /**
@@ -243,7 +256,7 @@ class Canvas2dRenderingGroup {
       // if last renderer removed, stop the loop
       if (this.renderers.length === 0)
         loop.requireStop();
-     }
+    }
   }
 }
 
