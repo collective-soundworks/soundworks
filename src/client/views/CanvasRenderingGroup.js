@@ -136,7 +136,7 @@ class Canvas2dRenderingGroup {
     }(this.ctx));
 
     this.frameCount = 0;
-    this.skipFrames = skipFrames;
+    this.frameModulo = skipFrames + 1;
     this.accumDt = 0;
 
     // register the group into the loop
@@ -219,7 +219,7 @@ class Canvas2dRenderingGroup {
       accumDt = 0;
     }
 
-    this.frameCount = (this.frameCount + 1) % this.skipFrames;
+    this.frameCount = (this.frameCount + 1) % this.frameModulo;
     this.accumDt = accumDt;
   }
 
