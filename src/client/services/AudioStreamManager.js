@@ -245,6 +245,19 @@ class AudioStream {
   onended() {}
 
   /**
+   * Method called when stream drops a packet (arrived too late).
+   **/
+  ondrop() {
+    console.warn('audiostream: too long loading, discarding buffer');
+  }
+
+  /**
+   * Method called when stream received a packet late, but not too much to drop it (gap in audio).
+   * @param {Number} time - delay time.
+   **/
+  onlate(time) {}  
+
+  /**
    * Return true if stream is playing, false otherwise.
    **/
   isPlaying() {
@@ -415,7 +428,7 @@ class AudioStream {
 
     // if then relStartTime is above source buffer duration
     if (-relStartTime >= buffer.duration) {
-      console.warn('audiostream: too long loading, discarding buffer');
+      this.ondrop();
       return;
     }
 
@@ -446,7 +459,10 @@ class AudioStream {
 
     // start source now (not from beginning since we're already late)
     const now = audioContext.currentTime;
-    if (relStartTime < 0) { src.start(now, -relStartTime); }
+    if (relStartTime < 0) { 
+      this.onlate(-relStartTime);
+      src.start(now, -relStartTime); 
+    }
     // start source delayed (from beginning in abs(relStartTime) seconds)
     else { src.start(now + relStartTime, 0); }
     // keep ref. to source
