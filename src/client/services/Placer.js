@@ -396,6 +396,7 @@ class Placer extends Service {
 
   /** @private */
   _onRejectResponse(disabledPositions) {
+    console.log(disabledPositions);
     this.view.reject(disabledPositions);
   }
 }
