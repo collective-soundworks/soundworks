@@ -70,6 +70,7 @@ class AudioStreamManager extends Service {
     super(SERVICE_ID, false);
     // locals
     this.bufferInfos = new Map();
+    this.syncStartTime = 0; // Define general offset in sync loop (in sec) (not propagated to already created audio streams when modified)
     // configure options
     const defaults = {
       monitorInterval: 1, // in seconds
@@ -112,7 +113,7 @@ class AudioStreamManager extends Service {
    * Return a new audio stream node.
    */
   getAudioStream() {
-    return new AudioStream(this.bufferInfos, this.syncService, this.options.monitorInterval, this.options.requiredAdvanceThreshold);
+    return new AudioStream(this.bufferInfos, this.syncService, this.options.monitorInterval, this.options.requiredAdvanceThreshold, this.syncStartTime);
   }
 
 }
@@ -133,7 +134,7 @@ export default AudioStreamManager;
  */
 class AudioStream {
   /** _<span class="warning">__WARNING__</span> This class should never be instantiated manually_ */
-  constructor(bufferInfos, syncService, monitorInterval, requiredAdvanceThreshold) {
+  constructor(bufferInfos, syncService, monitorInterval, requiredAdvanceThreshold, syncStartTime) {
 
     // arguments
     this.bufferInfos = bufferInfos;
@@ -146,6 +147,7 @@ class AudioStream {
     this._loop = false;
     this._metaData = undefined;
     this._out = audioContext.createGain();
+    this._syncStartTime = syncStartTime;
 
     // stream monitoring
     this._chunkRequestCallbackInterval = undefined;
@@ -293,14 +295,14 @@ class AudioStream {
     // unflag stop required
     this._stopRequired = false;
 
-    // if sync, either use offset for quatization start or sync with running loop 
+    // if sync, either use offset for quatization start or sync with running loop
     if (this._sync) {
       // quantization mode: start with offset in file to match period (offset must be computed accordingly, in parent who calls this method)
       if (offset !== undefined) { 
         if (offset >= duration) {  console.error('req. offset above file duration', offset, duration); }
       }
       // sync in "running loop" mode
-      else { offset = this.syncService.getSyncTime() % duration; }
+      else { offset = ( this.syncService.getSyncTime() - this._syncStartTime ) % duration; }
     }
     // set default offset if not defined
     else { offset = (offset !== undefined) ? offset : 0; }
