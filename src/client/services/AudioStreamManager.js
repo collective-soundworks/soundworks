@@ -33,7 +33,7 @@ function loadAudioBuffer(chunkName) {
  * Interface for the client `'audio-stream-manager'` service.
  *
  * This service allows to stream audio buffers to the client during the experience
- * (not preloaded). Input audio files are segmented by the server upon startup and 
+ * (not preloaded). Input audio files are segmented by the server upon startup and
  * sent to the clients upon request. Service only accepts .wav files at the moment.
  * Service main objective is to 1) enable synced streaming between clients (not precise
  * if based on mediaElementSources), and 2) provide an equivalent to the mediaElementSource
@@ -43,9 +43,9 @@ function loadAudioBuffer(chunkName) {
  * __*The service must be used with its [server-side counterpart]{@link module:soundworks/server.AudioStreamManager}*__
  *
  * @param {Object} options
- * @param {Number} options.monitorInterval - Interval time (in sec) at which the client will check if it has enough 
+ * @param {Number} options.monitorInterval - Interval time (in sec) at which the client will check if it has enough
  *  preloaded audio data to ensure streaming or if it needs to require some more.
- * @param {Number} options.requiredAdvanceThreshold - Threshold time (in sec) of preloaded audio data below which 
+ * @param {Number} options.requiredAdvanceThreshold - Threshold time (in sec) of preloaded audio data below which
  *  the client will require a new audio chunk.
  *
  * @memberof module:soundworks/client
@@ -150,6 +150,7 @@ class AudioStream {
     this._syncStartTime = syncStartTime;
 
     // stream monitoring
+    console.log('GET NEW AUDIO STREAM')
     this._chunkRequestCallbackInterval = undefined;
     this._ctx_time_when_queue_ends = 0;
     this._srcMap = new Map();
@@ -159,6 +160,7 @@ class AudioStream {
     // bind
     this._chunkRequestCallback = this._chunkRequestCallback.bind(this);
     this.onended = this.onended.bind(this);
+    this._drop = this._drop.bind(this);
   }
 
   /**
@@ -171,10 +173,11 @@ class AudioStream {
     this._ctxStartTime = -1;
     this._unsyncStartOffset = undefined;
     this._currentBufferIndex = -1;
+    console.log('c', this._currentBufferIndex);
     this._firstPacketState = 0;
   }
 
-  /** 
+  /**
    * Define url of audio file to stream, send meta data request to server concerning this file.
    * @param {String} url - requested file name, without extension
    **/
@@ -192,9 +195,9 @@ class AudioStream {
 
   /**
    * Set/Get synchronized mode status. in non sync. mode, the stream audio
-   * will start whenever the first audio buffer is downloaded. in sync. mode, 
-   * the stream audio will start (again asa the audio buffer is downloaded) 
-   * with an offset in the buffer, as if it started playing exactly when the 
+   * will start whenever the first audio buffer is downloaded. in sync. mode,
+   * the stream audio will start (again asa the audio buffer is downloaded)
+   * with an offset in the buffer, as if it started playing exactly when the
    * start() command was issued.
    * @param {Bool} val - enable / disable sync
    **/
@@ -257,7 +260,7 @@ class AudioStream {
    * Method called when stream received a packet late, but not too much to drop it (gap in audio).
    * @param {Number} time - delay time.
    **/
-  onlate(time) {}  
+  onlate(time) {}
 
   /**
    * Return true if stream is playing, false otherwise.
@@ -270,11 +273,17 @@ class AudioStream {
     }
   }
 
-  /** 
+  /**
    * Start streaming audio source.
    * @param {Number} offset - time in buffer from which to start (in sec).
    **/
-  start(offset) {
+  start(offset = 0) {
+    console.log('START');
+    // cannot start twice without stopping in between
+    if (this.isPlaying()) {
+      console.warn('start discarded, must stop first');
+      return;
+    }
 
     // check if we dispose of valid url to execute start
     if (this._url === undefined) {
@@ -298,9 +307,9 @@ class AudioStream {
     // if sync, either use offset for quatization start or sync with running loop
     if (this._sync) {
       // quantization mode: start with offset in file to match period (offset must be computed accordingly, in parent who calls this method)
-      if (offset !== undefined) { 
-        if (offset >= duration) {  console.error('req. offset above file duration', offset, duration); }
-      }
+      if (offset >= duration) {  console.error('req. offset above file duration', offset, duration); }
+      // discard if start required in sync mode while running clock - syncStartTime beyond file duration
+      if( (this.syncService.getSyncTime() - this._syncStartTime) > duration && !this._loop ){ return; }
       // sync in "running loop" mode
       else { offset = ( this.syncService.getSyncTime() - this._syncStartTime ) % duration; }
     }
@@ -316,19 +325,27 @@ class AudioStream {
       // if index corresponds to the buffer after the one we want || last index in buffer
       if (index === bufferInfo.length || offset < bufferInfo[index].start) {
         this._currentBufferIndex = index - 1;
+        console.log('a', this._currentBufferIndex);
         this._offsetInFirstBuffer = offset - bufferInfo[this._currentBufferIndex].start;
         // console.log('global offset:', offset, 'local offset:', this._offsetInFirstBuffer, 'file starts at:', bufferInfo[this._currentBufferIndex].start, 'total dur:', duration);
       }
       index += 1;
     }
 
+    // double start scenarios:
+    console.log('start:', this._chunkRequestCallbackInterval)
+    if( this._chunkRequestCallbackInterval !== undefined ){
+      clearInterval(this._chunkRequestCallbackInterval);
+    }
+
     // start stream request chunks callback
+    console.log('about to start callback', this._currentBufferIndex)
     this._chunkRequestCallback(); // start with one call right now
     this._chunkRequestCallbackInterval = setInterval(this._chunkRequestCallback, this.monitorInterval);
   }
 
-  /** 
-   * Check if we have enough "local buffer time" for the audio stream, 
+  /**
+   * Check if we have enough "local buffer time" for the audio stream,
    * request new buffer chunks otherwise.
    * @private
    **/
@@ -336,7 +353,7 @@ class AudioStream {
 
     // get array of streamed chunks info
     let bufferInfo = this.bufferInfos.get(this._url);
-
+    console.log('in callback', this._currentBufferIndex);
     // loop: do we need to request more chunks? if so, do, increment time flag, ask again
     while (this._ctx_time_when_queue_ends - this.syncService.getSyncTime() <= this.requiredAdvanceThreshold) {
 
@@ -347,9 +364,10 @@ class AudioStream {
 
       // get current working chunk info
       const metaBuffer = bufferInfo[this._currentBufferIndex];
+      // console.log('1', bufferInfo, this._currentBufferIndex, metaBuffer);
 
       // get context absolute time at which current buffer must be started
-      // this "const" here allows to define a unique ctx_startTime per while loop that will 
+      // this "const" here allows to define a unique ctx_startTime per while loop that will
       // be used in its corresponding loadAudioBuffer callback. (hence not to worry in sync.
       // mode if the first loaded audio buffer is not the first requested)
       const ctx_startTime = this._ctx_time_when_queue_ends - metaBuffer.overlapStart;
@@ -363,6 +381,7 @@ class AudioStream {
         if (this._stopRequired) {
           return;
         }
+        // console.log('2', metaBuffer);
         this._addBufferToQueue(buffer, ctx_startTime, metaBuffer.overlapStart, metaBuffer.overlapEnd);
         // mark that first packet arrived and that we can ask for more
         if (this._firstPacketState == 1 && !this._sync) { this._firstPacketState = 2; }
@@ -382,10 +401,14 @@ class AudioStream {
 
       // check if reached end of chunk list (i.e. end of file) at next iteration
       if (this._currentBufferIndex === bufferInfo.length) {
-        if (this._loop) { this._currentBufferIndex = 0; } else {
+        if (this._loop) {
+          this._currentBufferIndex = 0;
+          console.log('d', this._currentBufferIndex);
+        } else {
           // soft stop
+          console.log('no loop, end!')
           this._drop();
-          // activate onended callback (todo: should be called by last AudioBufferSource rather than with setTimeout) 
+          // activate onended callback (todo: should be called by last AudioBufferSource rather than with setTimeout)
           const timeBeforeEnd = this._ctx_time_when_queue_ends - this.syncService.getSyncTime();
           setTimeout(() => { this.onended(); }, timeBeforeEnd * 1000);
           return;
@@ -399,10 +422,10 @@ class AudioStream {
    * Add audio buffer to stream queue.
    * @param {AudioBuffer} buffer - Audio buffer to add to playing queue.
    * @param {Number} startTime - Time at which audio buffer playing is due.
-   * @param {Number} overlapStart - Duration (in sec) of the additional audio content added by the 
+   * @param {Number} overlapStart - Duration (in sec) of the additional audio content added by the
    *  node-audio-slicer (on server side) at audio buffer's head (used in fade-in mechanism to avoid
    *  perceiving potential .mp3 encoding artifacts introduced when buffer starts with non-zero value)
-   * @param {Number} overlapEnd - Duration (in sec) of the additional audio content added at audio 
+   * @param {Number} overlapEnd - Duration (in sec) of the additional audio content added at audio
    * buffer's tail.
    * @private
    **/
@@ -461,9 +484,9 @@ class AudioStream {
 
     // start source now (not from beginning since we're already late)
     const now = audioContext.currentTime;
-    if (relStartTime < 0) { 
+    if (relStartTime < 0) {
       this.onlate(-relStartTime);
-      src.start(now, -relStartTime); 
+      src.start(now, -relStartTime);
     }
     // start source delayed (from beginning in abs(relStartTime) seconds)
     else { src.start(now + relStartTime, 0); }
@@ -473,14 +496,15 @@ class AudioStream {
     src.onended = () => { this._srcMap.delete(startTime); };
   }
 
-  /** 
-   * Stop the audio stream. Mimics AudioBufferSourceNode stop() method. A stopped 
+  /**
+   * Stop the audio stream. Mimics AudioBufferSourceNode stop() method. A stopped
    * audio stream can be started (no need to create a new one as required when using
    * an AudioBufferSourceNode).
    * @param {Number} when - offset time (in sec) from now (when command issued) at which
    *  the audio stream should stop playing.
    **/
   stop(when = 0) {
+    console.log('STOP');
     // no need to stop if not started
     if (!this.isPlaying()) {
       console.warn('stop discarded, must start first');
@@ -500,16 +524,19 @@ class AudioStream {
 
   /**
    * local stop: end streaming requests, clear streaming callbacks, etc.
-   * in short, stop all but stop the audio sources, to use _drop() rather 
+   * in short, stop all but stop the audio sources, to use _drop() rather
    * than stop() in "audio file over and not loop" scenario.
    * @private
    **/
   _drop() {
+    console.log('DROP')
     // reset local values
     this._reset();
     // kill callback
+    console.log('clearing interval...', this._chunkRequestCallbackInterval)
     clearInterval(this._chunkRequestCallbackInterval);
     this._chunkRequestCallbackInterval = undefined;
+    console.log('interval cleared', this._chunkRequestCallbackInterval)
   }
 
 }
