@@ -9,7 +9,7 @@ const SERVICE_ID = 'service:audio-stream-manager';
  * Interface for the server `'audio-stream-manager'` service.
  *
  * This service allows to stream audio buffers to the client during the experience
- * (not preloaded). Input audio files are segmented by the server upon startup and 
+ * (not preloaded). Input audio files are segmented by the server upon startup and
  * sent to the clients upon request. Service only accepts .wav files at the moment.
  * Service main objective is to 1) enable synced streaming between clients (not precise
  * if based on mediaElementSources), and 2) provide an equivalent to the mediaElementSource
@@ -22,8 +22,8 @@ const SERVICE_ID = 'service:audio-stream-manager';
  * @param {Array<String>} options.audioFiles - list of paths towards would-be-streamable audio files.
  * @param {Bool} options.compress - Generate .mp3 stream chunks if set to true. Keep input file extension otherwise.
  * @param {Number} options.duration - Audio chunks duration (in sec).
- * @param {Number} options.overlap - Duration of additional audio samples added to head and tail of streamed audio 
- *  buffers. Paired with a fade-in fade-out mechanism on client's side, this allows to hide distortions induced by 
+ * @param {Number} options.overlap - Duration of additional audio samples added to head and tail of streamed audio
+ *  buffers. Paired with a fade-in fade-out mechanism on client's side, this allows to hide distortions induced by
  *  mp3 encoding of audio chunks not starting / finishing with zeroed samples.
  *
  * @memberof module:soundworks/server
@@ -84,7 +84,7 @@ class AudioStreamManager extends Service {
 
   /** @private */
   _onRequest(client) {
-    return () => { this.send(client, 'acknowlegde', this.bufferInfos); };
+    return () => this.send(client, 'acknowlegde', this.bufferInfos);
   }
 
   /*
