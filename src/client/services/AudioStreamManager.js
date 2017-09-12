@@ -151,6 +151,7 @@ class AudioStream {
     this._syncStartTime = syncStartTime;
 
     // stream monitoring
+    console.log('GET NEW AUDIO STREAM')
     this._chunkRequestCallbackInterval = undefined;
     this._ctxTimeWhenQueueEnds = 0;
     this._srcMap = new Map();
@@ -160,6 +161,7 @@ class AudioStream {
     // bind
     this._chunkRequestCallback = this._chunkRequestCallback.bind(this);
     this.onended = this.onended.bind(this);
+    this._drop = this._drop.bind(this);
   }
 
   /**
@@ -172,6 +174,7 @@ class AudioStream {
     this._ctxStartTime = -1;
     this._unsyncStartOffset = undefined;
     this._currentBufferIndex = -1;
+    console.log('c', this._currentBufferIndex);
     this._firstPacketState = 0;
   }
 
@@ -279,6 +282,12 @@ class AudioStream {
    * @param {Number} offset - time in buffer from which to start (in sec).
    **/
   start(offset = 0) {
+    console.log('START');
+    // cannot start twice without stopping in between
+    if (this.isPlaying()) {
+      console.warn('start discarded, must stop first');
+      return;
+    }
 
     // check if we dispose of valid url to execute start
     if (this._url === null) {
@@ -301,12 +310,19 @@ class AudioStream {
 
     // if sync, either use offset for quatization start or sync with running loop
     if (this._sync) {
+
       // quantization mode: start with offset in file to match period
       // (offset must be computed accordingly, in parent who calls this method)
       // if (offset !== undefined) {
       //   if (offset >= duration)
       //     console.error('req. offset above file duration', offset, duration);
       // }
+
+      // // quantization mode: start with offset in file to match period (offset must be computed accordingly, in parent who calls this method)
+      // if (offset >= duration) {  console.error('req. offset above file duration', offset, duration); }
+      // // discard if start required in sync mode while running clock - syncStartTime beyond file duration
+      // if( (this.syncService.getSyncTime() - this._syncStartTime) > duration && !this._loop ){ return; }
+
       // sync in "running loop" mode
       // else {
       offset = (this.syncService.getSyncTime() - this._syncStartTime + offset) % duration;
@@ -323,13 +339,21 @@ class AudioStream {
       // if index corresponds to the buffer after the one we want || last index in buffer
       if (index === bufferInfo.length || offset < bufferInfo[index].start) {
         this._currentBufferIndex = index - 1;
+        console.log('a', this._currentBufferIndex);
         this._offsetInFirstBuffer = offset - bufferInfo[this._currentBufferIndex].start;
         // console.log('global offset:', offset, 'local offset:', this._offsetInFirstBuffer, 'file starts at:', bufferInfo[this._currentBufferIndex].start, 'total dur:', duration);
       }
       index += 1;
     }
 
+    // double start scenarios:
+    console.log('start:', this._chunkRequestCallbackInterval)
+    if( this._chunkRequestCallbackInterval !== undefined ){
+      clearInterval(this._chunkRequestCallbackInterval);
+    }
+
     // start stream request chunks callback
+    console.log('about to start callback', this._currentBufferIndex)
     this._chunkRequestCallback(); // start with one call right now
     this._chunkRequestCallbackInterval = setInterval(this._chunkRequestCallback, this.monitorInterval);
   }
@@ -343,7 +367,7 @@ class AudioStream {
 
     // get array of streamed chunks info
     let bufferInfo = this.bufferInfos.get(this._url);
-
+    console.log('in callback', this._currentBufferIndex);
     // loop: do we need to request more chunks? if so, do, increment time flag, ask again
     while (this._ctxTimeWhenQueueEnds - this.syncService.getSyncTime() <= this.requiredAdvanceThreshold) {
 
@@ -354,6 +378,7 @@ class AudioStream {
 
       // get current working chunk info
       const metaBuffer = bufferInfo[this._currentBufferIndex];
+      // console.log('1', bufferInfo, this._currentBufferIndex, metaBuffer);
 
       // get context absolute time at which current buffer must be started
       // this "const" here allows to define a unique ctx_startTime per while loop that will
@@ -370,6 +395,7 @@ class AudioStream {
         if (this._stopRequired) {
           return;
         }
+        // console.log('2', metaBuffer);
         this._addBufferToQueue(buffer, ctx_startTime, metaBuffer.overlapStart, metaBuffer.overlapEnd);
         // mark that first packet arrived and that we can ask for more
         if (this._firstPacketState == 1 && !this._sync) { this._firstPacketState = 2; }
@@ -391,11 +417,15 @@ class AudioStream {
       if (this._currentBufferIndex === bufferInfo.length) {
         if (this._loop) {
           this._currentBufferIndex = 0;
+          console.log('d', this._currentBufferIndex);
+
         } else {
           // soft stop
+          console.log('no loop, end!')
           this._drop();
           // activate onended callback (todo: should be called by last AudioBufferSource rather than with setTimeout)
-          const timeBeforeEnd = this._ctxTimeWhenQueueEnds - this.syncService.getSyncTime();
+          const timeBeforeEnd = this._ctx_time_when_queue_ends - this.syncService.getSyncTime();
+
           setTimeout(() => { this.onended(); }, timeBeforeEnd * 1000);
           return;
         }
@@ -490,6 +520,7 @@ class AudioStream {
    *  the audio stream should stop playing.
    **/
   stop(when = 0) {
+    console.log('STOP');
     // no need to stop if not started
     if (!this.isPlaying()) {
       console.warn('stop discarded, must start first');
@@ -515,11 +546,14 @@ class AudioStream {
    * @private
    **/
   _drop() {
+    console.log('DROP')
     // reset local values
     this._reset();
     // kill callback
+    console.log('clearing interval...', this._chunkRequestCallbackInterval)
     clearInterval(this._chunkRequestCallbackInterval);
     this._chunkRequestCallbackInterval = undefined;
+    console.log('interval cleared', this._chunkRequestCallbackInterval)
   }
 
 }
