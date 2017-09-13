@@ -43,17 +43,16 @@ class AudioStreamManager extends Service {
   constructor() {
     super(SERVICE_ID);
 
-    // services
-    this._sync = this.require('sync');
-
-    // config
     const defaults = {
-      audioFiles: '',
+      audioFiles: null,
       compress: true,
       duration: 4,
       overlap: 0.1
     };
+
     this.configure(defaults);
+
+    this._sync = this.require('sync');
   }
 
   /** @private */
@@ -65,16 +64,14 @@ class AudioStreamManager extends Service {
   start() {
     super.start();
 
-    // skip chunk creation if no audio file defined in input list
-    if (this.options.audioFiles === '') { 
+    if (this.options.audioFiles === null) { 
       this.ready();
-      return;
+    } else {
+      this.prepareStreamChunks(this.options.audioFiles, (bufferInfos) => {
+        this.bufferInfos = bufferInfos;
+        this.ready();
+      });
     }
-
-    this.prepareStreamChunks(this.options.audioFiles, (bufferInfos) => {
-      this.bufferInfos = bufferInfos;
-      this.ready();
-    });
   }
 
   /** @private */
@@ -87,32 +84,27 @@ class AudioStreamManager extends Service {
     return () => this.send(client, 'acknowlegde', this.bufferInfos);
   }
 
-  /*
+  /**
    * Segment audio files listed into audioFiles into chunks for streaming.
+   *
    * @param {Array<String>} audioFiles - list of paths towards audio files to chunk.
    * @param {Object} callback - Function to call when slicing completed.
    */
   prepareStreamChunks(audioFiles, callback) {
-    // output array
-    let bufferInfos = [];
+    const bufferInfos = [];
 
-    // init slicer
-    let slicer = new Slicer({
+    const slicer = new Slicer({
       compress: this.options.compress,
       duration: this.options.duration,
       overlap: this.options.overlap
     });
 
-    // loop over input audio files
     audioFiles.forEach((item, id) => {
-      // slice current audio file
       slicer.slice(item, (chunkList) => {
-        // feed local array
         bufferInfos.push(chunkList);
         // return local map when all file processed
-        if (bufferInfos.length >= audioFiles.length) {
+        if (bufferInfos.length >= audioFiles.length)
           callback(bufferInfos);
-        }
       });
     });
   }
