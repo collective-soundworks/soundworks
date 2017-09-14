@@ -81,7 +81,6 @@ class Sync extends Service {
     return this._sync.getLocalTime(syncTime);
   }
 
-
   getLocalTime(syncTime) {
     return this._sync.getLocalTime(syncTime);
   }

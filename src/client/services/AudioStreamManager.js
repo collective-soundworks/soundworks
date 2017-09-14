@@ -97,6 +97,7 @@ class AudioStreamManager extends Service {
     super.start();
     // send request for infos on "streamable" audio files
     this.receive('acknowlegde', this._onAcknowledgeResponse);
+    this.receive('syncStartTime', value => this.syncStartTime = value);
     this.send('request');
 
     // @todo - should receive a sync start time from server
@@ -123,6 +124,8 @@ class AudioStreamManager extends Service {
    * Return a new audio stream node.
    */
   getAudioStream() {
+    console.log(this.syncStartTime, this.syncService.getSyncTime());
+
     return new AudioStream(
       this.bufferInfos,
       this.syncService,
@@ -322,17 +325,18 @@ class AudioStream {
     // console.log('offset', offset);
     // console.log('duration', duration);
 
-    if (offset >= duration || offset < 0) {
-      console.warn(`[WARNING] - start() discarded, requested offset (${offset} sec) larger than file duration (${duration} sec)`);
+    if (offset >= duration) {
+      console.warn(`[WARNING] - start() discarded, requested offset
+        (${offset} sec) larger than file duration (${duration} sec)`);
       return;
     }
 
     // find index of the chunk corresponding to given offset
     let index = 0;
     let offsetInFirstChunk = 0;
-    const lastChunkIndex = bufferInfo.length - 1;
+    // console.log(bufferInfo, index, bufferInfo[index]);
 
-    while (this._currentChunkIndex === -1) {
+    while (this._currentChunkIndex === -1 && index < bufferInfo.length) {
       const chunkInfos = bufferInfo[index];
       const start = chunkInfos.start;
       const end = start + chunkInfos.duration;
@@ -345,8 +349,12 @@ class AudioStream {
       index += 1;
     }
 
-    // console.log('AudioStream.start()', this._url, this._currentChunkIndex);
+    // handle negative offset, pick first chunk. This can be usefull to start
+    // synced stream while give them some delay to preload the first chunk
+    if (this._currentChunkIndex === -1 && offset < 0)
+      this._currentChunkIndex = 0;
 
+    // console.log('AudioStream.start()', this._url, this._currentChunkIndex);
     this._stopRequired = false;
     this._queueEndTime = this.syncService.getSyncTime() - offsetInFirstChunk;
 
