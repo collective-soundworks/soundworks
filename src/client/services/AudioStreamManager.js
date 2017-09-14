@@ -124,8 +124,7 @@ class AudioStreamManager extends Service {
    * Return a new audio stream node.
    */
   getAudioStream() {
-    console.log(this.syncStartTime, this.syncService.getSyncTime());
-
+    // console.log(this.syncStartTime, this.syncService.getSyncTime());
     return new AudioStream(
       this.bufferInfos,
       this.syncService,

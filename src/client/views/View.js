@@ -92,7 +92,9 @@ class View {
      * @memberof module:soundworks/client.View
      * @private
      */
-    this._tmpl = tmpl(template);
+    this._tmpl = null;
+
+    this.template = template;
 
     /**
      * Data used to populate variables defined in the template.
@@ -199,7 +201,11 @@ class View {
   }
 
   set template(template) {
-    this._tmpl = tmpl(template);
+    try {
+      this._tmpl = tmpl(template);
+    } catch(err) {
+      throw new Error('Invalid template (make sure you do not use es6 syntax in Safari mobile): ' + template);
+    }
   }
 
   appendTo($container) {
