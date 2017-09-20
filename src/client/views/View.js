@@ -365,10 +365,10 @@ class View {
    */
   _delegateEvents() {
     for (let key in this.events) {
-      const [event, selector] = key.split(/ +/);
+      const [event, ...selector] = key.split(/ +/);
       const callback = this.events[key];
 
-      this._delegate.on(event, selector || null, callback);
+      this._delegate.on(event, selector.length ? selector.join(' ') : null, callback);
     }
   }
 
