@@ -74,6 +74,8 @@ import sockets from './sockets';
  *  gzip compression for static files.
  * @property {String} publicDirectory - Location of the public directory
  *  (accessible through http(s) requests).
+ * @property {Object} serveStaticOptions - Options for the serve static middleware
+ *  cf. [https://github.com/expressjs/serve-static](https://github.com/expressjs/serve-static)
  * @property {String} templateDirectory - Directory where the server templating
  *  system looks for the `ejs` templates.
  * @property {Object} logger - Configuration of the logger service, cf. Bunyan
@@ -109,6 +111,13 @@ const server = {
    * @type {module:soundworks/server.server~serverConfig}
    */
   config: {},
+
+  /**
+   * Constructor used to instanciate `Client` instances.
+   * @type {module:soundworks/server.Client}
+   * @default module:soundworks/server.Client
+   */
+  clientCtor: Client,
 
   /**
    * The url of the node server on the current machine.
@@ -253,7 +262,9 @@ const server = {
       this.router.use(compression());
 
     // public folder
-    this.router.use(express.static(this.config.publicDirectory));
+    const { publicDirectory, serveStaticOptions } = this.config;
+    const staticMiddleware = express.static(publicDirectory, serveStaticOptions);
+    this.router.use(staticMiddleware);
 
     this._initActivities();
     this._initRouting(this.router);
@@ -354,6 +365,9 @@ const server = {
     if (this.config.publicDirectory === undefined)
       this.config.publicDirectory = path.join(process.cwd(), 'public');
 
+    if (this.config.serveStaticOptions === undefined)
+      this.config.serveStaticOptions = {};
+
     if (this.config.templateDirectory === undefined)
       this.config.templateDirectory = path.join(process.cwd(), 'html');
 
@@ -422,7 +436,7 @@ const server = {
    * @private
    */
   _onSocketConnection(clientType, socket) {
-    const client = new Client(clientType, socket);
+    const client = new this.clientCtor(clientType, socket);
     const activities = this._clientTypeActivitiesMap[clientType];
 
     // global lifecycle of the client
