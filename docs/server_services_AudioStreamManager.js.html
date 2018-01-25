@@ -41,7 +41,7 @@ const SERVICE_ID = 'service:audio-stream-manager';
  * Interface for the server `'audio-stream-manager'` service.
  *
  * This service allows to stream audio buffers to the client during the experience
- * (not preloaded). Input audio files are segmented by the server upon startup and 
+ * (not preloaded). Input audio files are segmented by the server upon startup and
  * sent to the clients upon request. Service only accepts .wav files at the moment.
  * Service main objective is to 1) enable synced streaming between clients (not precise
  * if based on mediaElementSources), and 2) provide an equivalent to the mediaElementSource
@@ -54,8 +54,8 @@ const SERVICE_ID = 'service:audio-stream-manager';
  * @param {Array&lt;String>} options.audioFiles - list of paths towards would-be-streamable audio files.
  * @param {Bool} options.compress - Generate .mp3 stream chunks if set to true. Keep input file extension otherwise.
  * @param {Number} options.duration - Audio chunks duration (in sec).
- * @param {Number} options.overlap - Duration of additional audio samples added to head and tail of streamed audio 
- *  buffers. Paired with a fade-in fade-out mechanism on client's side, this allows to hide distortions induced by 
+ * @param {Number} options.overlap - Duration of additional audio samples added to head and tail of streamed audio
+ *  buffers. Paired with a fade-in fade-out mechanism on client's side, this allows to hide distortions induced by
  *  mp3 encoding of audio chunks not starting / finishing with zeroed samples.
  *
  * @memberof module:soundworks/server
@@ -75,17 +75,31 @@ class AudioStreamManager extends Service {
   constructor() {
     super(SERVICE_ID);
 
-    // services
-    this._sync = this.require('sync');
-
-    // config
     const defaults = {
-      audioFiles: '',
+      audioFiles: null,
       compress: true,
       duration: 4,
       overlap: 0.1
     };
+
     this.configure(defaults);
+
+    this._sync = this.require('sync');
+
+    this._clients = new Set();
+  }
+
+  /**
+   * Set common (sync) start time for AudioStream in sync mode.
+   * The value is propagated to every connected clients and newly connected
+   * clients.
+   */
+  set syncStartTime(time) {
+    this._syncStartTime = time;
+
+    this._clients.forEach(client => {
+      this.send(client, 'syncStartTime', this._syncStartTime);
+    });
   }
 
   /** @private */
@@ -97,54 +111,58 @@ class AudioStreamManager extends Service {
   start() {
     super.start();
 
-    // skip chunk creation if no audio file defined in input list
-    if (this.options.audioFiles === '') { 
+    if (this.options.audioFiles === null) { 
       this.ready();
-      return;
+    } else {
+      this.prepareStreamChunks(this.options.audioFiles, (bufferInfos) => {
+        this.bufferInfos = bufferInfos;
+        this.ready();
+      });
     }
-
-    this.prepareStreamChunks(this.options.audioFiles, (bufferInfos) => {
-      this.bufferInfos = bufferInfos;
-      this.ready();
-    });
   }
 
   /** @private */
   connect(client) {
+    this._clients.add(client);
     this.receive(client, 'request', this._onRequest(client));
+  }
+
+  disconnect(client) {
+    this._clients.delete(client);
   }
 
   /** @private */
   _onRequest(client) {
-    return () => { this.send(client, 'acknowlegde', this.bufferInfos); };
+    return () => {
+      this.send(client, 'acknowlegde', this.bufferInfos);
+
+      // has already started in sync mode
+      if (this._syncStartTime !== null)
+        this.send(client, 'syncStartTime', this._syncStartTime);
+    }
   }
 
-  /*
+  /**
    * Segment audio files listed into audioFiles into chunks for streaming.
+   *
    * @param {Array&lt;String>} audioFiles - list of paths towards audio files to chunk.
    * @param {Object} callback - Function to call when slicing completed.
    */
   prepareStreamChunks(audioFiles, callback) {
-    // output array
-    let bufferInfos = [];
+    const bufferInfos = [];
 
-    // init slicer
-    let slicer = new Slicer({
+    const slicer = new Slicer({
       compress: this.options.compress,
       duration: this.options.duration,
       overlap: this.options.overlap
     });
 
-    // loop over input audio files
     audioFiles.forEach((item, id) => {
-      // slice current audio file
       slicer.slice(item, (chunkList) => {
-        // feed local array
         bufferInfos.push(chunkList);
         // return local map when all file processed
-        if (bufferInfos.length >= audioFiles.length) {
+        if (bufferInfos.length >= audioFiles.length)
           callback(bufferInfos);
-        }
       });
     });
   }
@@ -153,7 +171,8 @@ class AudioStreamManager extends Service {
 
 serviceManager.register(SERVICE_ID, AudioStreamManager);
 
-export default AudioStreamManager;</code></pre>
+export default AudioStreamManager;
+</code></pre>
         </article>
     </section>
 
@@ -170,7 +189,7 @@ export default AudioStreamManager;</code></pre>
 
 <footer>
     
-        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue Jul 04 2017 10:45:02 GMT+0200 (CEST)
+        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Thu Jan 25 2018 17:09:21 GMT+0100 (CET)
     
 </footer>
 

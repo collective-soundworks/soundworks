@@ -37,12 +37,13 @@
         
             <div class="class-description"><p>Interface for the client <code>'audio-stream-manager'</code> service.</p>
 <p>This service allows to stream audio buffers to the client during the experience
-(not preloaded). Input audio files are segmented by the server upon startup and 
-sent to the clients upon request. Service only accepts .wav files at the moment.
-Service main objective is to 1) enable synced streaming between clients (not precise
-if based on mediaElementSources), and 2) provide an equivalent to the mediaElementSource
-object (streaming as a Web Audio API node) that could be plugged to any other node in Safari
-(bypassing e.g. gain or analyzer nodes when plugged to mediaElementSource).</p>
+(not preloaded). Input audio files are segmented by the server upon startup
+and sent to the clients upon request. Service only accepts .wav files at the
+moment. The service main objective is to 1) enable synced streaming between
+clients (not precise if based on mediaElementSources), and 2) provide an
+equivalent to the mediaElementSource object (streaming as a Web Audio API
+node) that could be plugged to any other node in Safari (bypassing e.g. gain
+or analyzer nodes when plugged to mediaElementSource).</p>
 <p><strong><em>The service must be used with its <a href="module-soundworks_server.AudioStreamManager.html">server-side counterpart</a></em></strong></p></div>
         
     
@@ -158,8 +159,9 @@ object (streaming as a Web Audio API node) that could be plugged to any other no
 
             
 
-            <td class="description last"><p>Interval time (in sec) at which the client will check if it has enough 
- preloaded audio data to ensure streaming or if it needs to require some more.</p></td>
+            <td class="description last"><p>Interval time (in sec) at which the
+ client will check if it has enough preloaded audio data to ensure streaming
+ or if it needs to require some more.</p></td>
         </tr>
 
     
@@ -182,8 +184,8 @@ object (streaming as a Web Audio API node) that could be plugged to any other no
 
             
 
-            <td class="description last"><p>Threshold time (in sec) of preloaded audio data below which 
- the client will require a new audio chunk.</p></td>
+            <td class="description last"><p>Threshold time (in sec) of
+ preloaded audio data below which the client will require a new audio chunk.</p></td>
         </tr>
 
     
@@ -231,7 +233,7 @@ object (streaming as a Web Audio API node) that could be plugged to any other no
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="client_services_AudioStreamManager.js.html">client/services/AudioStreamManager.js</a>, <a href="client_services_AudioStreamManager.js.html#line67">line 67</a>
+        <a href="client_services_AudioStreamManager.js.html">client/services/AudioStreamManager.js</a>, <a href="client_services_AudioStreamManager.js.html#line72">line 72</a>
     </li></ul></dd>
     
 
@@ -259,16 +261,21 @@ object (streaming as a Web Audio API node) that could be plugged to any other no
     <h5>Example</h5>
     
     <pre class="prettyprint"><code>// require the `audio-stream-manager` (in experience constructor)
-this.audioStreamManager = this.require('audio-stream-manager', {monitorInterval: 1, requiredAdvanceThreshold: 10});
+this.audioStreamManager = this.require('audio-stream-manager', {
+  monitorInterval: 1,
+  requiredAdvanceThreshold: 10
+});
 
 // request new audio stream from the stream manager (in experience start method)
-let audioStream = this.audioStreamManager.getAudioStream();
+const audioStream = this.audioStreamManager.getAudioStream();
 // setup and start audio stream
 audioStream.url = 'my-audio-file-name'; // without extension
-audioStream.connect( audioContext.destination ); // connect as you would any audio node from the web audio api
+// connect as you would any audio node from the web audio api
+audioStream.connect(audioContext.destination);
 audioStream.loop = false; // disable loop
 audioStream.sync = false; // disable synchronization
-audioStream.onended = function(){ console.log('stream ended'); }; // mimics AudioBufferSourceNode onended method
+// mimics AudioBufferSourceNode onended method
+audioStream.onended = function(){ console.log('stream ended'); };
 audioStream.start(); // start audio stream</code></pre>
 
 
@@ -354,7 +361,7 @@ audioStream.start(); // start audio stream</code></pre>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="client_services_AudioStreamManager.js.html">client/services/AudioStreamManager.js</a>, <a href="client_services_AudioStreamManager.js.html#line114">line 114</a>
+        <a href="client_services_AudioStreamManager.js.html">client/services/AudioStreamManager.js</a>, <a href="client_services_AudioStreamManager.js.html#line126">line 126</a>
     </li></ul></dd>
     
 
@@ -403,7 +410,7 @@ audioStream.start(); // start audio stream</code></pre>
 
 <footer>
     
-        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue Jul 04 2017 10:45:02 GMT+0200 (CEST)
+        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Thu Jan 25 2018 17:09:21 GMT+0100 (CET)
     
 </footer>
 
