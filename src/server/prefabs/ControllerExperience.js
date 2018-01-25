@@ -23,4 +23,4 @@ class ControllerExperience extends Experience {
   }
 }
 
-export default ControllerExperience
+export default ControllerExperience;
