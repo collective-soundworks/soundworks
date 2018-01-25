@@ -146,7 +146,7 @@ class FileSystem extends Service {
     let results = [];
 
     // make the given path absolute if not
-    if (!testCwd.test(dir))
+    if (!dir.startsWith(cwd) && !testCwd.test(dir))
       dir = _path.join(cwd, dir);
 
     // console.log(dir);
@@ -211,7 +211,7 @@ class FileSystem extends Service {
       const testCwd = new RegExp(`^${cwd}`);
       let publicDir = this._publicDir;
 
-      if (!testCwd.test(publicDir))
+      if (!publicDir.startsWith(cwd) && !testCwd.test(publicDir))
         publicDir = _path.join(cwd, publicDir);
 
       // force the search in the public directory

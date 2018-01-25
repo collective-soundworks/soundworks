@@ -199,6 +199,13 @@ class MetronomeEngine extends audio.TimeEngine {
     // whether metronome continues (default is true)
     const cont = this.callback(this.measureCount, 0);
 
+    // @fixme / recheck - outputs:
+    // 14 0
+    // 15 1
+    // 15 2
+    // 15 3
+    // 15 0
+    // 16 1
     this.measureCount++;
     this.beatCount = 1;
 

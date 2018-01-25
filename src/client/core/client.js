@@ -1,9 +1,7 @@
 import Activity from './Activity';
 import serviceManager from './serviceManager';
-import viewManager from './viewManager';
 import socket from './socket';
-// import defaultViewContent from '../config/defaultViewContent';
-// import defaultViewTemplates from '../config/defaultViewTemplates';
+import viewManager from './viewManager';
 import viewport from '../views/viewport';
 
 /**
