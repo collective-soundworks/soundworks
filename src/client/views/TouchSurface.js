@@ -105,15 +105,15 @@ class TouchSurface {
    * @private
    */
   _updateBoundingRect() {
-    //this._elBoundingRect = this.$el.getBoundingClientRect();
-    this._elBoundingRect = {
-      top: 0,
-      bottom: 0,
-      left: 0,
-      right: 0,
-      width: window.innerWidth,
-      height: window.innerHeight,
-    };
+    this._elBoundingRect = this.$el.getBoundingClientRect();
+    // this._elBoundingRect = {
+    //   top: 0,
+    //   bottom: 0,
+    //   left: 0,
+    //   right: 0,
+    //   width: window.innerWidth,
+    //   height: window.innerHeight,
+    // };
   }
 
   /**
@@ -138,7 +138,7 @@ class TouchSurface {
         const touchEvent = touches[i];
         const touchId = touchEvent.identifier;
 
-        if(this._normalizeCoordinates) {
+        if (this._normalizeCoordinates) {
           const relX = touchEvent.clientX - boundingRect.left;
           const relY = touchEvent.clientY - boundingRect.top;
           const normX = relX / boundingRect.width;
