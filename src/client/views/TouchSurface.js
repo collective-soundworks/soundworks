@@ -106,6 +106,12 @@ class TouchSurface {
    */
   _updateBoundingRect() {
     this._elBoundingRect = this.$el.getBoundingClientRect();
+
+    // this has been introduced in 6c8234bb83d2df3e56f1b21a0caea4e4ef657eb4 and
+    // breaks a lot of things... respecify the behavior when
+    // normalizeCoordinates === false, because is not related to the given
+    // element (this.$el) as implemented.
+    // (the only app that depends on this option is probably coloop, so check it)
     // this._elBoundingRect = {
     //   top: 0,
     //   bottom: 0,
