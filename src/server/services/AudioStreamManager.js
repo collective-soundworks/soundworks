@@ -28,16 +28,15 @@ const SERVICE_ID = 'service:audio-stream-manager';
  *
  * @memberof module:soundworks/server
  * @example
- * // Require and configure `audio-stream-manager` service (inside experience constructor).
  * // define list of "streamable" audio files
  * let audioFiles = [
  *   './public/stream/my-audio-file.wav',
  *   './public/stream/another-audio-file.wav',
  * ];
+ *
  * // require service
- * this.audioStreamManager = this.require('audio-stream-manager', {audioFiles: audioFiles});
+ * this.audioStreamManager = this.require('audio-stream-manager', { audioFiles });
  */
-
 class AudioStreamManager extends Service {
   /** _<span class="warning">__WARNING__</span> This class should never be instantiated manually_ */
   constructor() {
@@ -47,7 +46,7 @@ class AudioStreamManager extends Service {
       audioFiles: null,
       compress: true,
       duration: 4,
-      overlap: 0.1
+      overlap: 0.1,
     };
 
     this.configure(defaults);
@@ -82,7 +81,7 @@ class AudioStreamManager extends Service {
     if (this.options.audioFiles === null) { 
       this.ready();
     } else {
-      this.prepareStreamChunks(this.options.audioFiles, (bufferInfos) => {
+      this.prepareStreamChunks(this.options.audioFiles, bufferInfos => {
         this.bufferInfos = bufferInfos;
         this.ready();
       });
@@ -125,14 +124,26 @@ class AudioStreamManager extends Service {
       overlap: this.options.overlap
     });
 
-    audioFiles.forEach((item, id) => {
-      slicer.slice(item, (chunkList) => {
+    // try avoid hardcore parallel processing that crashes the server
+    // (ulimit issue) when lots of audioFiles to process
+    let index = 0;
+
+    function sliceNext() {
+      const item = audioFiles[index];
+
+      slicer.slice(item, chunkList => {
         bufferInfos.push(chunkList);
-        // return local map when all file processed
-        if (bufferInfos.length >= audioFiles.length)
+
+        index += 1;
+
+        if (index >= audioFiles.length)
           callback(bufferInfos);
+        else
+          sliceNext();
       });
-    });
+    }
+
+    sliceNext();
   }
 
 }
