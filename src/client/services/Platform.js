@@ -136,6 +136,35 @@ const defaultDefinitions = [
     }
   },
   {
+    id: 'fix-ios-samplerate',
+    check: function() {
+      return true;
+    },
+    interactionHook: function() {
+      if (client.platform.os === 'ios') {
+        // in ipod, when the problem occurs, sampleRate has been observed
+        // to be set at 16000Hz, as no exhaustive testing has been done
+        // assume < 40000 is a bad value.
+        const localStorageKey = 'soundworks:fix-ios-samplerate';
+
+        if (audioContext.sampleRate < 40000) {
+          window.localStorage.setItem(localStorageKey, true);
+          window.location.reload(true);
+          return;
+        }
+
+        const hasReloaded = !!window.localStorage.getItem(localStorageKey);
+
+        if (hasReloaded) {
+          window.localStorage.removeItem(localStorageKey);
+          client.platform.hasReloaded = true;
+        }
+      }
+
+      return Promise.resolve(true);
+    },
+  },
+  {
     // @note: `touch` feature workaround
     // cf. http://www.stucox.com/blog/you-cant-detect-a-touchscreen/
     id: 'mobile-device',
@@ -340,7 +369,12 @@ class Platform extends Service {
       if (typeof features === 'string')
         features = [features];
 
+      if (features.indexOf('web-audio') !== -1)
+        features.push('fix-ios-samplerate');
+
+      console.log(features);
       this.requireFeature(...features);
+
       delete options.features;
     }
 
