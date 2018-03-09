@@ -105,15 +105,21 @@ class TouchSurface {
    * @private
    */
   _updateBoundingRect() {
-    //this._elBoundingRect = this.$el.getBoundingClientRect();
-    this._elBoundingRect = {
-      top: 0,
-      bottom: 0,
-      left: 0,
-      right: 0,
-      width: window.innerWidth,
-      height: window.innerHeight,
-    };
+    this._elBoundingRect = this.$el.getBoundingClientRect();
+
+    // this has been introduced in 6c8234bb83d2df3e56f1b21a0caea4e4ef657eb4 and
+    // breaks a lot of things... respecify the behavior when
+    // normalizeCoordinates === false, because is not related to the given
+    // element (this.$el) as implemented.
+    // (the only app that depends on this option is probably coloop, so check it)
+    // this._elBoundingRect = {
+    //   top: 0,
+    //   bottom: 0,
+    //   left: 0,
+    //   right: 0,
+    //   width: window.innerWidth,
+    //   height: window.innerHeight,
+    // };
   }
 
   /**
@@ -138,7 +144,7 @@ class TouchSurface {
         const touchEvent = touches[i];
         const touchId = touchEvent.identifier;
 
-        if(this._normalizeCoordinates) {
+        if (this._normalizeCoordinates) {
           const relX = touchEvent.clientX - boundingRect.left;
           const relY = touchEvent.clientY - boundingRect.top;
           const normX = relX / boundingRect.width;
