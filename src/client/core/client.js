@@ -1,4 +1,3 @@
-import Activity from './Activity';
 import serviceManager from './serviceManager';
 import socket from './socket';
 import viewManager from './viewManager';

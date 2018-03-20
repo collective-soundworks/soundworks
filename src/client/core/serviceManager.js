@@ -1,4 +1,3 @@
-import client from './client';
 import debug from 'debug';
 import Signal from '../../utils/Signal';
 import SignalAll from '../../utils/SignalAll';
