@@ -149,8 +149,6 @@ class AudioStreamManager extends Service {
 class AudioStream {
   /** _<span class="warning">__WARNING__</span> This class should never be instantiated manually_ */
   constructor(bufferInfos, syncService, monitorInterval, requiredAdvanceThreshold, syncStartTime) {
-    console.log('AudioStream', bufferInfos);
-
     // arguments
     this.bufferInfos = bufferInfos;
     this.syncService = syncService;
@@ -161,6 +159,7 @@ class AudioStream {
     // local attr.
     this._sync = false;
     this._loop = false;
+    this._periodic = false;
     this._metaData = undefined;
     this._url = null;
 
@@ -213,7 +212,7 @@ class AudioStream {
   /**
    * Set/Get synchronized mode status. in non sync. mode, the stream audio
    * will start whenever the first audio buffer is downloaded. in sync. mode,
-   * the stream audio will start (again asa the audio buffer is downloaded)
+   * the stream audio will start (again whan the audio buffer is downloaded)
    * with an offset in the buffer, as if it started playing exactly when the
    * start() command was issued.
    *
@@ -247,6 +246,25 @@ class AudioStream {
 
   get loop() {
     return this._loop;
+  }
+
+  /**
+   * Set/Get periodic mode. we don't want the stream to be synchronized to
+   * a common origin, but have them aligned on a grid. aka, we don't wan't to
+   * compensate for the loading time, when starting with an offset.
+   * @param {Bool} val - enable / disable periodic
+   */
+  set periodic(val) {
+    if (this.isPlaying) {
+      console.warn('[WARNING] - Cannot set loop while playing');
+      return;
+    }
+
+    this._periodic = val;
+  }
+
+  get periodic() {
+    return this._periodic;
   }
 
   /**
@@ -290,6 +308,7 @@ class AudioStream {
 
   /**
    * Start streaming audio source.
+   * @warning - offset doesn't seem to make sens when not loop and not periodic
    *
    * @param {Number} offset - time in buffer from which to start (in sec)
    */
@@ -532,14 +551,15 @@ class AudioStream {
 
     const syncTime = this.syncService.getSyncTime();
     const now = audioContext.currentTime;
-    let offset = startTime - this.syncService.getSyncTime();
+    let offset = startTime - syncTime;
 
     // - in `non sync` scenario, we want to take in account the latency induced
     // by the loading of the first chunk. This latency must then be applied
     // to all subsequent chunks.
     // - in `sync` scenarios, we just let the logical start time and computed
     // offset do their job...
-    if (!this._sync) {
+    // - in `periodic` scenarios we don't want to compensate for the loading time
+    if (!this._sync && !this._periodic) {
       //
       if (this._firstChunkNetworkLatencyOffset === undefined)
         this._firstChunkNetworkLatencyOffset = offset;
