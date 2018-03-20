@@ -1,6 +1,7 @@
 import { audioContext } from 'waves-audio';
 import client from '../core/client';
 import MobileDetect from 'mobile-detect';
+import NoSleep from 'nosleep.js';
 import screenfull from 'screenfull';
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
@@ -252,31 +253,8 @@ const defaultDefinitions = [
       return true;
     },
     interactionHook: function() {
-      if (client.platform.os === 'ios') {
-        setInterval(() => {
-          window.location = window.location;
-          setTimeout(window.stop, 0);
-        }, 30000)
-      } else {
-        var medias = {
-          webm: "data:video/webm;base64,GkXfo0AgQoaBAUL3gQFC8oEEQvOBCEKCQAR3ZWJtQoeBAkKFgQIYU4BnQI0VSalmQCgq17FAAw9CQE2AQAZ3aGFtbXlXQUAGd2hhbW15RIlACECPQAAAAAAAFlSua0AxrkAu14EBY8WBAZyBACK1nEADdW5khkAFVl9WUDglhohAA1ZQOIOBAeBABrCBCLqBCB9DtnVAIueBAKNAHIEAAIAwAQCdASoIAAgAAUAmJaQAA3AA/vz0AAA=",
-          mp4: "data:video/mp4;base64,AAAAHGZ0eXBpc29tAAACAGlzb21pc28ybXA0MQAAAAhmcmVlAAAAG21kYXQAAAGzABAHAAABthADAowdbb9/AAAC6W1vb3YAAABsbXZoZAAAAAB8JbCAfCWwgAAAA+gAAAAAAAEAAAEAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAIVdHJhawAAAFx0a2hkAAAAD3wlsIB8JbCAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAQAAAAAAIAAAACAAAAAABsW1kaWEAAAAgbWRoZAAAAAB8JbCAfCWwgAAAA+gAAAAAVcQAAAAAAC1oZGxyAAAAAAAAAAB2aWRlAAAAAAAAAAAAAAAAVmlkZW9IYW5kbGVyAAAAAVxtaW5mAAAAFHZtaGQAAAABAAAAAAAAAAAAAAAkZGluZgAAABxkcmVmAAAAAAAAAAEAAAAMdXJsIAAAAAEAAAEcc3RibAAAALhzdHNkAAAAAAAAAAEAAACobXA0dgAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAIAAgASAAAAEgAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABj//wAAAFJlc2RzAAAAAANEAAEABDwgEQAAAAADDUAAAAAABS0AAAGwAQAAAbWJEwAAAQAAAAEgAMSNiB9FAEQBFGMAAAGyTGF2YzUyLjg3LjQGAQIAAAAYc3R0cwAAAAAAAAABAAAAAQAAAAAAAAAcc3RzYwAAAAAAAAABAAAAAQAAAAEAAAABAAAAFHN0c3oAAAAAAAAAEwAAAAEAAAAUc3RjbwAAAAAAAAABAAAALAAAAGB1ZHRhAAAAWG1ldGEAAAAAAAAAIWhkbHIAAAAAAAAAAG1kaXJhcHBsAAAAAAAAAAAAAAAAK2lsc3QAAAAjqXRvbwAAABtkYXRhAAAAAQAAAABMYXZmNTIuNzguMw=="
-        };
-
-        const $video = document.createElement('video');
-        $video.setAttribute('loop', '');
-
-        for (let type in medias) {
-          const dataURI = medias[type];
-          const $source = document.createElement('source');
-          $source.src = dataURI;
-          $source.type = `video/${type}`;
-
-          $video.appendChild($source);
-        }
-
-        $video.play();
-      }
+      const noSleep = new NoSleep();
+      noSleep.enable();
 
       return Promise.resolve(true);
     }
@@ -372,7 +350,6 @@ class Platform extends Service {
       if (features.indexOf('web-audio') !== -1)
         features.push('fix-ios-samplerate');
 
-      console.log(features);
       this.requireFeature(...features);
 
       delete options.features;
@@ -451,8 +428,14 @@ class Platform extends Service {
           this.view.updateCheckingStatus(false);
 
           if (hasAuthorizations) {
-            this.view.setTouchStartCallback(this._onInteraction('touch'));
-            this.view.setMouseDownCallback(this._onInteraction('mouse'));
+            // move to 'touchend' and 'mouseup' because 'touchstart' is no
+            // longer recognized as a user gesture in android
+            // @todo - define what to do with the template...
+            // cf. https://docs.google.com/document/d/1oF1T3O7_E4t1PYHV6gyCwHxOi3ystm0eSL5xZu7nvOg/edit#heading=h.qq59ev3u8fba
+            this.view.$el.addEventListener('touchend', this._onInteraction('touch'));
+            this.view.$el.addEventListener('mouseup', this._onInteraction('mouse'));
+            // this.view.setTouchStartCallback(this._onInteraction('touch'));
+            // this.view.setMouseDownCallback(this._onInteraction('mouse'));
           }
         }).catch((err) => console.error(err.stack));
       }
@@ -469,7 +452,6 @@ class Platform extends Service {
    * Structure of the definition for the test of a feature.
    *
    * @param {module:soundworks/client.Platform~definition} obj - Definition of
- *
    *  the feature.
    */
   addFeatureDefinition(obj) {
@@ -498,6 +480,9 @@ class Platform extends Service {
       e.preventDefault();
       e.stopPropagation();
 
+      const noSleep = new NoSleep();
+      noSleep.enable();
+
       client.platform.interaction = type;
       // execute interaction hooks from the platform
       const interactionPromises = this._getHooks('interactionHook');
@@ -511,7 +496,7 @@ class Platform extends Service {
         } else {
           this.view.updateHasAuthorizationsStatus(resolved);
         }
-      }).catch((err) => console.error(err.stack));
+      }).catch(err => console.error(err.stack));
     }
   }
 
