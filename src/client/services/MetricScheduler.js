@@ -195,10 +195,11 @@ class MetronomeEngine extends audio.TimeEngine {
   advancePosition(syncTime, metricPosition, metricSpeed) {
     const audioTime = audioScheduler.currentTime;
 
+    this.measureCount++;
+
     // whether metronome continues (default is true)
     const cont = this.callback(this.measureCount, 0);
 
-    this.measureCount++;
     this.beatCount = 1;
 
     if (cont === undefined || cont === true) {
