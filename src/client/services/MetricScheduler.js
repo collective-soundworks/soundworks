@@ -179,10 +179,10 @@ class MetronomeEngine extends audio.TimeEngine {
         }
       }
 
-      this.measureCount = measureCount;
-
       if(measurePhase > 0)
         measureCount++;
+
+      this.measureCount = measureCount - 1;
 
       return startPosition + measureCount * this.measureLength;
     }
