@@ -170,7 +170,6 @@ class MetronomeEngine extends audio.TimeEngine {
         const floatBeats = this.numBeats * measurePhase;
         const nextBeatCount = Math.ceil(floatBeats) % this.numBeats;
 
-        this.measureCount = measureCount; // current measure
         this.beatCount = nextBeatCount; // next beat
 
         if(nextBeatCount !== 0) {
@@ -180,10 +179,10 @@ class MetronomeEngine extends audio.TimeEngine {
         }
       }
 
+      this.measureCount = measureCount;
+
       if(measurePhase > 0)
         measureCount++;
-
-      this.measureCount = measureCount;
 
       return startPosition + measureCount * this.measureLength;
     }
@@ -196,11 +195,10 @@ class MetronomeEngine extends audio.TimeEngine {
   advancePosition(syncTime, metricPosition, metricSpeed) {
     const audioTime = audioScheduler.currentTime;
 
-    this.measureCount++;
-
     // whether metronome continues (default is true)
     const cont = this.callback(this.measureCount, 0);
 
+    this.measureCount++;
     this.beatCount = 1;
 
     if (cont === undefined || cont === true) {
