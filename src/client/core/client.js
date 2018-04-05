@@ -52,7 +52,7 @@ const client = {
    *
    * @type {Array}
    */
-   urlParams: null,
+  urlParams: null,
 
   /**
    * Information about the client platform. The properties are set by the
