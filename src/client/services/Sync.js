@@ -61,7 +61,10 @@ class Sync extends Service {
     super.start();
     this.show();
 
-    this._sync.start(this.send, this.receive, this._syncStatusReport);
+    const sendFunction = (...args) => this.send('ping', ...args);
+    const receiveFunction = callback => this.receive('pong', callback);
+
+    this._sync.start(sendFunction, receiveFunction, this._syncStatusReport);
   }
 
   /** @private */
@@ -104,15 +107,13 @@ class Sync extends Service {
     this._reportListeners.push(callback);
   }
 
-  _syncStatusReport(channel, report) {
-    if (channel === 'sync:status') {
-      if (report.status === 'training' || report.status === 'sync') {
-        this._reportListeners.forEach((callback) =>  callback(report));
+  _syncStatusReport(report) {
+    if (report.status === 'training' || report.status === 'sync') {
+      this._reportListeners.forEach((callback) =>  callback(report));
 
-        if (!this._ready) {
-          this._ready = true;
-          this.ready();
-        }
+      if (!this._ready) {
+        this._ready = true;
+        this.ready();
       }
     }
   }
