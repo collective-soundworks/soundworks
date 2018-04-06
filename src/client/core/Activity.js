@@ -176,7 +176,4 @@ class Activity extends Process {
   }
 }
 
-Activity.prototype.viewTemplateDefinitions = {};
-Activity.prototype.viewContentDefinitions = {};
-
 export default Activity;
