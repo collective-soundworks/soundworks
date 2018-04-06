@@ -1,4 +1,3 @@
-import Activity from './Activity';
 import serviceManager from './serviceManager';
 import socket from './socket';
 import viewManager from './viewManager';
@@ -53,7 +52,7 @@ const client = {
    *
    * @type {Array}
    */
-   urlParams: null,
+  urlParams: null,
 
   /**
    * Information about the client platform. The properties are set by the

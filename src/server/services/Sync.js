@@ -1,6 +1,6 @@
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
-import SyncModule from 'sync/server';
+import SyncServer from 'sync/server';
 
 const SERVICE_ID = 'service:sync';
 /**
@@ -25,12 +25,14 @@ class Sync extends Service {
   constructor() {
     super(SERVICE_ID);
 
-    this._hrtimeStart = process.hrtime();
+    const startTime = process.hrtime();
 
-    this._sync = new SyncModule(() => {
-      const time = process.hrtime(this._hrtimeStart);
-      return time[0] + time[1] * 1e-9;
-    });
+    const getTimeFunction = () => {
+      const now = process.hrtime(startTime);
+      return now[0] + now[1] * 1e-9;
+    }
+
+    this._sync = new SyncServer(getTimeFunction);
   }
 
   /** @private */
@@ -44,10 +46,10 @@ class Sync extends Service {
   connect(client) {
     super.connect(client);
 
-    const send = (cmd, ...args) => this.send(client, cmd, ...args);
-    const receive = (cmd, callback) => this.receive(client, cmd, callback);
+    const sendFunction = (...args) => this.send(client, 'pong', ...args);
+    const receiveFunction = callback => this.receive(client, 'ping', callback);
 
-    this._sync.start(send, receive);
+    this._sync.start(sendFunction, receiveFunction);
   }
 
   /**
