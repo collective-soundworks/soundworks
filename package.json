@@ -7,7 +7,7 @@
     "Norbert Schnell"
   ],
   "license": "BSD-3",
-  "version": "2.1.4",
+  "version": "2.1.5",
   "main": "",
   "scripts": {
     "doc": "jsdoc -c jsdoc.json",
