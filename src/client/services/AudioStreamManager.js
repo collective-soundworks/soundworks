@@ -120,8 +120,6 @@ class AudioStreamManager extends Service {
         chunk.url = chunk.name.replace('public/', this.options.assetsDomain);
       });
 
-      console.log(item);
-
       this.bufferInfos.set(bufferId, item);
     });
 
