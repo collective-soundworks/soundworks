@@ -83,6 +83,7 @@ class AudioStreamManager extends Service {
     const defaults = {
       monitorInterval: 1, // in seconds
       requiredAdvanceThreshold: 10, // in seconds
+      assetsDomain: '',
     };
 
     this.configure(defaults);
@@ -109,10 +110,17 @@ class AudioStreamManager extends Service {
    */
   _onAcknowledgeResponse(bufferInfos) {
     bufferInfos.forEach((item) => {
+      // @todo - this has to be reviewed, not robust
       const chunkPath = item[0].name;
       const dirname = path.dirname(chunkPath);
       const parts = dirname.split('/');
       const bufferId = parts.pop();
+
+      item.forEach(chunk => {
+        chunk.url = chunk.name.replace('public/', this.options.assetsDomain);
+      });
+
+      console.log(item);
 
       this.bufferInfos.set(bufferId, item);
     });
@@ -447,9 +455,7 @@ class AudioStream {
 
       const chunkInfos = bufferInfo[this._currentChunkIndex];
       const chunkStartTime = this._queueEndTime - chunkInfos.overlapStart;
-      const name = chunkInfos.name;
-      // @todo - could probably be done more elegantly...
-      const url = name.substr(name.indexOf('public') + 7, name.length - 1);
+      const url = chunkInfos.url;
 
       // flag that first packet has been required and that we must await for its
       // arrival in unsync mode before asking for more, as the network delay
