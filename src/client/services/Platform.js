@@ -1,7 +1,7 @@
 import { audioContext } from 'waves-audio';
 import client from '../core/client';
 import MobileDetect from 'mobile-detect';
-import NoSleep from 'nosleep.js';
+import NoSleep from 'nosleep.js/dist/NoSleep.min';
 import screenfull from 'screenfull';
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
