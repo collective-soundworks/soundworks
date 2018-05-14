@@ -565,8 +565,9 @@ class AudioStream {
     // - in `periodic` scenarios we don't want to compensate for the loading time
     if (!this._sync && !this._periodic) {
       //
-      if (this._firstChunkNetworkLatencyOffset === undefined)
+      if (this._firstChunkNetworkLatencyOffset === undefined) {
         this._firstChunkNetworkLatencyOffset = offset;
+      }
 
       offset -= this._firstChunkNetworkLatencyOffset;
     }
