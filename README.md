@@ -1,4 +1,6 @@
-# Soundworks
+# `Soundworks`
+
+![logo](https://cdn.rawgit.com/collective-soundworks/soundworks/master/resources/logo-soundworks.jpg)
 
 ***Soundworks*** is a framework to create collaborative/collective audiovisual experiences where users interact through their mobile devices.
 The framework is entirely based on web APIs with a *Node.js* server and provides a set of services to easily setup the infrastructure and the most basic functionalities of an application.
@@ -8,6 +10,10 @@ The fundamental motivation behind all design choices of the framework is to allo
 A *Soundworks* application is typically organized in a client part (i.e. running in the web browser of the client devices) and an optional server part (i.e. running in Node.js).
 The server part of an application allows the connected clients to exchange data and to influence each other's audiovisual rendering.
 *Client-only* applications created with the frameworks can be deployed through a simple HTTP server instead of Node.js.
+
+## Documentation
+
+[http://collective-soundworks.github.io/soundworks/](http://collective-soundworks.github.io/soundworks/)
 
 ## Getting Started
 
