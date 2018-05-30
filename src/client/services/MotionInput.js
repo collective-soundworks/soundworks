@@ -1,4 +1,4 @@
-import motionInput from 'motion-input';
+import motionInput from '@ircam/motion-input';
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
 
