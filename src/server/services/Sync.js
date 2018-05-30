@@ -1,8 +1,9 @@
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
-import SyncServer from 'sync/server';
+import SyncServer from '@ircam/sync/server';
 
 const SERVICE_ID = 'service:sync';
+
 /**
  * Interface for the server `'sync'` service.
  *
