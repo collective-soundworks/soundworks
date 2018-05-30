@@ -1,5 +1,8 @@
 docs
 #src
 #bin
+
+resources
+
 CHANGELOG.md
-DEV.md
+jsdoc.json
