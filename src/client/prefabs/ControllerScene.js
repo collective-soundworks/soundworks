@@ -1,4 +1,4 @@
-import * as controllers from 'basic-controllers';
+import * as controllers from '@ircam/basic-controllers';
 import View from '../views/View';
 
 controllers.setTheme('dark');

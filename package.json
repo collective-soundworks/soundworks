@@ -1,5 +1,6 @@
 {
   "name": "soundworks",
+  "version": "2.1.7",
   "description": "Full stack Javascript framework to create collective audio visual experiences based on mobile devices",
   "authors": [
     "Benjamin Matuszewski",
@@ -7,13 +8,17 @@
     "Norbert Schnell"
   ],
   "license": "BSD-3",
-  "version": "2.1.7",
   "main": "",
   "scripts": {
+    "deploy": "np --yolo",
     "doc": "jsdoc -c jsdoc.json",
     "transpile": "node ./bin/runner --transpile",
     "prewatch": "npm run transpile",
+    "version": "npm run transpile && npm run doc && git add docs",
     "watch": "node ./bin/runner --watch"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "repository": {
     "type": "git",
@@ -33,41 +38,42 @@
     }
   },
   "dependencies": {
+    "@ircam/basic-controllers": "^1.0.4",
+    "@ircam/motion-input": "^1.0.7",
+    "@ircam/sync": "^1.0.1",
     "babel-runtime": "^6.23.0",
-    "basic-controllers": "ircam-jstools/basic-controllers#v1.0.1",
     "bunyan": "^1.8.10",
     "compression": "^1.7.1",
     "debug": "^3.1.0",
     "dom-delegate": "^2.0.3",
-    "ejs": "^2.5.6",
+    "ejs": "^2.6.1",
     "express": "^4.16.2",
-    "fs-extra": "^4.0.3",
+    "fs-extra": "^6.0.1",
     "klaw": "^2.1.1",
     "lodash.template": "^4.4.0",
     "mobile-detect": "^1.3.7",
-    "motion-input": "collective-soundworks/motion-input#v1.0.6",
-    "node-audio-slicer": "0.0.6",
+    "node-audio-slicer": "^0.0.7",
     "nosleep.js": "^0.7.0",
-    "osc": "^2.0.1",
-    "pem": "^1.12.3",
+    "osc": "^2.2.2",
+    "pem": "^1.12.5",
     "screenfull": "^3.3.2",
-    "socket.io": "^2.0.4",
-    "socket.io-client": "^2.0.4",
-    "sync": "collective-soundworks/sync#v1.0.0",
+    "socket.io": "^2.1.1",
+    "socket.io-client": "^2.1.1",
     "uuid": "^3.1.0",
-    "uws": "^9.14.0",
+    "uws": "^10.148.0",
     "wav-encoder": "^1.3.0",
     "waves-audio": "^0.4.0",
-    "waves-loaders": "wavesjs/waves-loaders#v0.1.3"
+    "waves-loaders": "^0.1.5"
   },
   "devDependencies": {
-    "babel-core": "^6.24.1",
-    "babel-plugin-transform-es2015-modules-commonjs": "^6.24.1",
+    "@ircam/jsdoc-template": "^1.0.2",
+    "babel-core": "^6.26.3",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
     "babel-plugin-transform-runtime": "^6.23.0",
     "babel-preset-es2015": "^6.24.1",
-    "colors": "^1.1.2",
+    "colors": "^1.3.0",
     "jsdoc": "^3.5.5",
-    "jsdoc-template": "ircam-jstools/jsdoc-template",
+    "np": "^3.0.1",
     "watch": "^1.0.2"
   }
 }

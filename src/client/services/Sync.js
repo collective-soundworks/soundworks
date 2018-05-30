@@ -2,7 +2,7 @@ import { audioContext } from 'waves-audio';
 import SegmentedView from '../views/SegmentedView';
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
-import SyncModule from 'sync/client';
+import SyncModule from '@ircam/sync/client';
 
 const SERVICE_ID = 'service:sync';
 
