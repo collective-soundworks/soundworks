@@ -1,12 +1,14 @@
-const Slicer = require('node-audio-slicer').Slicer;
+import path from 'path';
 import Service from '../core/Service';
-import { getOpt } from '../../utils/helpers';
 import serviceManager from '../core/serviceManager';
+import { Slicer } from 'node-audio-slicer';
 
 const SERVICE_ID = 'service:audio-stream-manager';
 
 /**
  * Interface for the server `'audio-stream-manager'` service.
+ *
+ * @warning - unstable
  *
  * This service allows to stream audio buffers to the client during the experience
  * (not preloaded). Input audio files are segmented by the server upon startup and
@@ -47,6 +49,7 @@ class AudioStreamManager extends Service {
       compress: true,
       duration: 4,
       overlap: 0.1,
+      publicDirectory: 'public',
     };
 
     this.configure(defaults);
@@ -81,7 +84,8 @@ class AudioStreamManager extends Service {
     if (this.options.audioFiles === null) { 
       this.ready();
     } else {
-      this.prepareStreamChunks(this.options.audioFiles, bufferInfos => {
+      const { audioFiles, publicDirectory } = this.options;
+      this.prepareStreamChunks(audioFiles, publicDirectory, bufferInfos => {
         this.bufferInfos = bufferInfos;
         this.ready();
       });
@@ -115,7 +119,7 @@ class AudioStreamManager extends Service {
    * @param {Array<String>} audioFiles - list of paths towards audio files to chunk.
    * @param {Object} callback - Function to call when slicing completed.
    */
-  prepareStreamChunks(audioFiles, callback) {
+  prepareStreamChunks(audioFiles, publicDirectory, callback) {
     const bufferInfos = [];
 
     const slicer = new Slicer({
@@ -129,10 +133,16 @@ class AudioStreamManager extends Service {
     let index = 0;
 
     function sliceNext() {
-      const item = audioFiles[index];
+      const item = path.join(publicDirectory, audioFiles[index]);
+      const prefixRegExp = new RegExp(`^${publicDirectory}`);
 
       slicer.slice(item, chunkList => {
-        bufferInfos.push(chunkList);
+        const chunks = chunkList.map(chunk => {
+          chunk.name = chunk.name.replace(prefixRegExp, '');
+          return chunk;
+        });
+
+        bufferInfos.push(chunks);
 
         index += 1;
 
