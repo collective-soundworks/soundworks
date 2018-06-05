@@ -53,6 +53,8 @@ const serviceManager = {
     if (!instance) {
       instance = new _ctors[id];
       _instances[id] = instance;
+
+      this._requiredSignals.add(instance.signals.ready);
     }
 
     instance.configure(options);
