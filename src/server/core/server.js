@@ -301,15 +301,21 @@ const server = {
 
       this.httpServer = httpServer
 
-      serviceManager.signals.ready.addObserver(() => {
-        httpServer.listen(this.router.get('port'), () => {
-          const protocol = useHttps ? 'https' : 'http';
-          this._address = `${protocol}://127.0.0.1:${this.router.get('port')}`;
-          console.log(`[${protocol.toUpperCase()} SERVER] Server listening on`, this._address);
+      const promise = new Promise((resolve, reject) => {
+        serviceManager.signals.ready.addObserver(() => {
+          httpServer.listen(this.router.get('port'), () => {
+            const protocol = useHttps ? 'https' : 'http';
+            this._address = `${protocol}://127.0.0.1:${this.router.get('port')}`;
+            console.log(`[${protocol.toUpperCase()} SERVER] Server listening on`, this._address);
+
+            resolve();
+          });
         });
       });
 
       serviceManager.start();
+
+      return promise;
     }).catch((err) => console.error(err.stack));
   },
 
