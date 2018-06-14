@@ -31,15 +31,17 @@ const SERVICE_ID = 'service:audio-stream-manager';
  *  mp3 encoding of audio chunks not starting / finishing with zeroed samples.
  *
  * @memberof module:soundworks/server
+ *
  * @example
  * // define list of "streamable" audio files
- * let audioFiles = [
- *   './public/stream/my-audio-file.wav',
- *   './public/stream/another-audio-file.wav',
+ * const audioFiles = [
+ *   'stream/my-audio-file.wav',
+ *   'stream/another-audio-file.wav',
  * ];
  *
  * // require service
  * this.audioStreamManager = this.require('audio-stream-manager', { audioFiles });
+ *
  */
 class AudioStreamManager extends Service {
   /** _<span class="warning">__WARNING__</span> This class should never be instantiated manually_ */
