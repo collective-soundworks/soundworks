@@ -85,7 +85,7 @@ class AudioStreamManager extends Service {
     const defaults = {
       monitorInterval: 1, // in seconds
       requiredAdvanceThreshold: 10, // in seconds
-      assetsDomain: '',
+      assetsDomain: null,
     };
 
     this.configure(defaults);
@@ -111,19 +111,16 @@ class AudioStreamManager extends Service {
    * @param {Object} bufferInfos - info on audio files that can be streamed
    */
   _onAcknowledgeResponse(bufferInfos) {
-    bufferInfos.forEach((item) => {
-      // @todo - this has to be reviewed, not robust
-      const chunkPath = item[0].name;
-      const dirname = path.dirname(chunkPath);
-      const parts = dirname.split('/');
-      const bufferId = parts.pop();
-
-      item.forEach(chunk => {
-        chunk.url = this.options.assetsDomain + '/' + chunk.name;
+    for (let id in bufferInfos) {
+      bufferInfos[id].forEach(chunk => {
+        if (this.options.assetsDomain !== null)
+          chunk.url = this.options.assetsDomain + '/' + chunk.name;
+        else
+          chunk.url = chunk.name;
       });
 
-      this.bufferInfos.set(bufferId, item);
-    });
+      this.bufferInfos.set(id, bufferInfos[id]);
+    }
 
     this.ready();
   }
