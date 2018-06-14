@@ -1,7 +1,9 @@
 import path from 'path';
+import fs from 'fs';
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
 import { Slicer } from 'node-audio-slicer';
+import cache from '../utils/cache';
 
 const SERVICE_ID = 'service:audio-stream-manager';
 
@@ -85,6 +87,7 @@ class AudioStreamManager extends Service {
       this.ready();
     } else {
       const { audioFiles, publicDirectory } = this.options;
+
       this.prepareStreamChunks(audioFiles, publicDirectory, bufferInfos => {
         this.bufferInfos = bufferInfos;
         this.ready();
@@ -120,7 +123,10 @@ class AudioStreamManager extends Service {
    * @param {Object} callback - Function to call when slicing completed.
    */
   prepareStreamChunks(audioFiles, publicDirectory, callback) {
-    const bufferInfos = [];
+    const bufferInfos = {};
+    // try avoid hardcore parallel processing that crashes the server
+    // (ulimit issue) when lots of audioFiles to process
+    let index = 0;
 
     const slicer = new Slicer({
       compress: this.options.compress,
@@ -128,32 +134,45 @@ class AudioStreamManager extends Service {
       overlap: this.options.overlap
     });
 
-    // try avoid hardcore parallel processing that crashes the server
-    // (ulimit issue) when lots of audioFiles to process
-    let index = 0;
+    function next() {
+      index += 1;
 
-    function sliceNext() {
-      const item = path.join(publicDirectory, audioFiles[index]);
-      const prefixRegExp = new RegExp(`^${publicDirectory}`);
+      if (index >= audioFiles.length)
+        callback(bufferInfos);
+      else
+        processFile();
+    }
 
-      slicer.slice(item, chunkList => {
+    function processFile() {
+      // const fileId = ;
+      const filename = path.join(publicDirectory, audioFiles[index]);
+      const fileId = path.basename(filename, '.wav');
+
+      const cachedItem = cache.read(SERVICE_ID, fileId);
+      const stats = fs.statSync(filename);
+      const lastModified = stats.mtimeMs;
+
+      if (cachedItem && lastModified === cachedItem.lastModified) {
+        bufferInfos[fileId] = cachedItem.chunks;
+        return next();
+      }
+
+      slicer.slice(filename, chunkList => {
         const chunks = chunkList.map(chunk => {
-          chunk.name = chunk.name.replace(prefixRegExp, '');
+          chunk.name = path.relative(publicDirectory, chunk.name);
           return chunk;
         });
 
-        bufferInfos.push(chunks);
+        console.log(SERVICE_ID, 'sliced file', filename);
+        bufferInfos[fileId] = chunks;
+        // cache informations
+        cache.write(SERVICE_ID, fileId, { lastModified, chunks })
 
-        index += 1;
-
-        if (index >= audioFiles.length)
-          callback(bufferInfos);
-        else
-          sliceNext();
+        next();
       });
     }
 
-    sliceNext();
+    processFile();
   }
 
 }
