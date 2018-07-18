@@ -37,7 +37,6 @@ class SyncTimeSchedulingQueue extends audio.SchedulingQueue {
     this.nextSyncTime = syncTime;
 
     const audioTime = this.sync.getAudioTime(syncTime);
-    console.log('SyncTimeSchedulingQueue', syncTime, audioTime);
     this.master.resetEngineTime(this, audioTime);
   }
 
