@@ -80,11 +80,15 @@ class ErrorReporter extends Service {
 
   /** @private */
   _onError(file, line, col, msg, userAgent) {
+    this.emit('error', file, line, col, msg, userAgent);
+
+    // log to file
     let entry = `${this._getFormattedDate()}\t\t\t`;
     entry += `- ${file}:${line}:${col}\t"${msg}"\n\t${userAgent}\n\n`;
 
-    fse.appendFile(this.filePath, entry, (err) => {
-      if (err) console.error(err.message);
+    fse.appendFile(this.filePath, entry, err => {
+      if (err)
+        console.error(err.message);
     });
   }
 

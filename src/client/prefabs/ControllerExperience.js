@@ -6,11 +6,14 @@ import ControllerScene from './ControllerScene';
 /**
  * Predefined experience to create a 1 line shared controller
  *
+ * @deprecated
  * @memberof module:soundworks/client
  */
 class ControllerExperience extends Experience {
   constructor(options = {}) {
     super();
+
+    console.error('[deprecated] ControllerExperience is deprecated, has moved in soundworks-template and will be removed in soundworks#v3.0.0. Please consider updating your application from soundworks-template');
 
     this.sharedParams = this.require('shared-params');
     this.controllerScene = new ControllerScene(this, this.sharedParams);

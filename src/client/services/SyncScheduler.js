@@ -37,6 +37,7 @@ class SyncTimeSchedulingQueue extends audio.SchedulingQueue {
     this.nextSyncTime = syncTime;
 
     const audioTime = this.sync.getAudioTime(syncTime);
+    console.log('SyncTimeSchedulingQueue', syncTime, audioTime);
     this.master.resetEngineTime(this, audioTime);
   }
 
@@ -174,14 +175,14 @@ class SyncScheduler extends Service {
     const schedulerService = this;
     let engine;
 
-    if(lookahead) {
+    if (lookahead) {
       scheduler.defer(fun, time);
     } else {
       engine = {
         advanceTime: function(time) {
           const delta = schedulerService.deltaTime;
 
-          if(delta > 0)
+          if (delta > 0)
             setTimeout(fun, 1000 * delta, time); // bridge scheduler lookahead with timeout
           else
             fun(time);
