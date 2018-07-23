@@ -172,14 +172,14 @@ class MetronomeEngine extends audio.TimeEngine {
 
         this.beatCount = nextBeatCount; // next beat
 
-        if(nextBeatCount !== 0) {
+        if (nextBeatCount !== 0) {
           const audioTime = audioScheduler.currentTime;
           const nextBeatDelay = (nextBeatCount - floatBeats) * this.beatPeriod;
           this.beatEngine.resetTime(audioTime + nextBeatDelay);
         }
       }
 
-      if(measurePhase > 0)
+      if (measurePhase > 0)
         measureCount++;
 
       this.measureCount = measureCount - 1;
@@ -187,7 +187,7 @@ class MetronomeEngine extends audio.TimeEngine {
       return startPosition + measureCount * this.measureLength;
     }
 
-    this.measureCount = 0;
+    this.measureCount = -1;
     return startPosition;
   }
 
