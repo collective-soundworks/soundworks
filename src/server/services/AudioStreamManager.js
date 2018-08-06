@@ -48,6 +48,8 @@ class AudioStreamManager extends Service {
   constructor() {
     super(SERVICE_ID);
 
+    console.error('[deprecated] AudioStreamManager unstable API is now deprecated - API will change in soundworks#v3.0.0, please consider updating your application');
+
     const defaults = {
       audioFiles: null,
       compress: true,
