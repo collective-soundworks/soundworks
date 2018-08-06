@@ -76,6 +76,8 @@ class AudioStreamManager extends Service {
   constructor() {
     super(SERVICE_ID, false);
 
+    console.error('[deprecated] AudioStreamManager unstable API is now deprecated - API will change in soundworks#v3.0.0, please consider updating your application');
+
     this.bufferInfos = new Map();
     // define general offset in sync loop (in sec) (not propagated to
     // already created audio streams when modified)
@@ -139,6 +141,13 @@ class AudioStreamManager extends Service {
     );
   }
 
+  getStreamEngine(url) {
+    const engine = new StreamEngine({
+
+    });
+
+    return engine;
+  }
 }
 
 /**

@@ -1,54 +1,6 @@
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
-import * as audio from 'waves-audio';
-const audioScheduler = audio.getScheduler();
-
-class SyncTimeSchedulingQueue extends audio.SchedulingQueue {
-  constructor(sync, scheduler) {
-    super();
-
-    this.sync = sync;
-    this.scheduler = scheduler;
-    this.scheduler.add(this, Infinity);
-    this.nextSyncTime = Infinity;
-
-    // call this.resync in sync callback
-    this.resync = this.resync.bind(this);
-    this.sync.addListener(this.resync);
-  }
-
-  get currentTime () {
-    return this.sync.getSyncTime(this.scheduler.currentTime);
-  }
-
-  advanceTime(audioTime) {
-    const nextSyncTime = super.advanceTime(this.nextSyncTime);
-    const nextAudioTime = this.sync.getAudioTime(nextSyncTime);
-
-    this.nextSyncTime = nextSyncTime;
-
-    return nextAudioTime;
-  }
-
-  resetTime(syncTime) {
-    if (syncTime === undefined)
-      syncTime = this.sync.getSyncTime();
-
-    this.nextSyncTime = syncTime;
-
-    const audioTime = this.sync.getAudioTime(syncTime);
-    this.master.resetEngineTime(this, audioTime);
-  }
-
-  resync() {
-    if (this.nextSyncTime !== Infinity) {
-      const nextAudioTime = this.sync.getAudioTime(this.nextSyncTime);
-      this.master.resetEngineTime(this, nextAudioTime);
-    } else {
-      this.master.resetEngineTime(this, Infinity);
-    }
-  }
-}
+import { Scheduler } from 'waves-masters';
 
 const SERVICE_ID = 'service:sync-scheduler';
 
@@ -86,21 +38,18 @@ class SyncScheduler extends Service {
   constructor () {
     super(SERVICE_ID, false);
 
-    // initialize sync option
-    this._sync = null;
-    this._syncedQueue = null;
-
-    // init audio time based scheduler, sync service, and queue
-    this._platform = this.require('platform', { features: 'web-audio' });
     this._sync = this.require('sync');
-    this._syncedQueue = null;
+    this._scheduler = null;
   }
 
   /** @private */
   start() {
     super.start();
 
-    this._syncedQueue = new SyncTimeSchedulingQueue(this._sync, audioScheduler);
+    // init scheduler based on sync-time
+    const getTimeFunction = () => this._sync.getSyncTime();
+    this._scheduler = new Scheduler(getTimeFunction);
+
     this.ready();
   }
 
@@ -110,7 +59,7 @@ class SyncScheduler extends Service {
    * @type {Number}
    */
   get audioTime() {
-    return audioScheduler.currentTime;
+    return this._sync.getAudioTime(this._scheduler.currentTime);
   }
 
   /**
@@ -119,7 +68,7 @@ class SyncScheduler extends Service {
    * @type {Number}
    */
   get syncTime() {
-    return this._syncedQueue.currentTime;
+    return this._scheduler.currentTime;
   }
 
   /**
@@ -128,17 +77,16 @@ class SyncScheduler extends Service {
    * @type {Number}
    */
   get currentTime() {
-    return this._syncedQueue.currentTime;
+    return this._scheduler.currentTime;
   }
 
   /**
-   * Difference between the scheduler's logical audio time and the `currentTime`
-   * of the audio context.
+   * Difference between the scheduler's logical time and the current `syncTime`
    * @instance
    * @type {Number}
    */
   get deltaTime() {
-    return audioScheduler.currentTime - audio.audioContext.currentTime;
+    return this._scheduler.currentTime - this._sync.getSyncTime();
   }
 
   /**
@@ -170,7 +118,7 @@ class SyncScheduler extends Service {
    *  anticipated (e.g. for audio events) or precisely at the given time (default).
    */
   defer(fun, time, lookahead = false) {
-    const scheduler = this._syncedQueue;
+    const scheduler = this._scheduler;
     const schedulerService = this;
     let engine;
 
@@ -199,7 +147,7 @@ class SyncScheduler extends Service {
    * @param {Number} time - The time at which the function should be executed.
    */
   add(engine, time) {
-    this._syncedQueue.add(engine, time);
+    this._scheduler.add(engine, time);
   }
 
   /**
@@ -208,14 +156,14 @@ class SyncScheduler extends Service {
    * @param {Function} engine - Engine to remove from the scheduler.
    */
   remove(engine) {
-    this._syncedQueue.remove(engine);
+    this._scheduler.remove(engine);
   }
 
   /**
    * Remove all scheduled functions and time engines from the scheduler.
    */
   clear() {
-    this._syncedQueue.clear();
+    this._scheduler.clear();
   }
 }
 
