@@ -7,8 +7,11 @@ import serviceManager from '../core/serviceManager';
 const SERVICE_ID = 'service:audio-stream-manager';
 const log = debug('soundworks:services:audio-stream-manager');
 
-// TODO:
-// - support streaming of files of total duration shorter than packet duration
+/**
+ * number of chunks preloaded by the service for each stream
+ * before getting `ready`
+ */
+const NUM_PRELOADED_CHUNKS = 2;
 
 function loadAudioBuffer(url) {
   const promise = new Promise((resolve, reject) => {
@@ -76,10 +79,7 @@ class AudioStreamManager extends Service {
   constructor() {
     super(SERVICE_ID, false);
 
-    this.bufferInfos = new Map();
-    // define general offset in sync loop (in sec) (not propagated to
-    // already created audio streams when modified)
-    this.syncStartTime = 0;
+    this.bufferInfosList = new Map();
 
     // configure options
     const defaults = {
@@ -89,8 +89,7 @@ class AudioStreamManager extends Service {
     };
 
     this.configure(defaults);
-
-    this.syncService = this.require('sync');
+    this._preloadCache = new Map();
 
     this._onAcknowledgeResponse = this._onAcknowledgeResponse.bind(this);
   }
@@ -108,29 +107,49 @@ class AudioStreamManager extends Service {
    * @private
    * @param {Object} bufferInfos - info on audio files that can be streamed
    */
-  _onAcknowledgeResponse(bufferInfos) {
-    console.log(bufferInfos);
+  _onAcknowledgeResponse(bufferInfosList) {
+    const preloadPromises = [];
 
-    for (let id in bufferInfos) {
-      bufferInfos[id].forEach(chunk => {
+    for (let id in bufferInfosList) {
+      const bufferInfos = bufferInfosList[id];
+
+      bufferInfos.forEach(chunk => {
         if (this.options.assetsDomain !== null)
           chunk.url = this.options.assetsDomain + '/' + chunk.name;
         else
           chunk.url = chunk.name;
       });
 
-      this.bufferInfos.set(id, bufferInfos[id]);
+      // preload the NUM_PRELOADED_CHUNKS first chunk for each streams
+      // before ready
+      const cache = [];
+      this._preloadCache.set(id, cache);
+
+      for (let i = 0; i < Math.min(NUM_PRELOADED_CHUNKS, bufferInfos.length); i++) {
+        const index = i;
+        const url = bufferInfos[i].url;
+
+        const promise = loadAudioBuffer(url).then(buffer => {
+          cache[index] = buffer;
+          Promise.resolve(buffer);
+        });
+
+        preloadPromises.push(promise);
+      }
+
+      this.bufferInfosList.set(id, bufferInfos);
     }
 
-    this.ready();
+    Promise.all(preloadPromises).then(() => this.ready());
   }
 
   getStreamEngine(id) {
-    if (!this.bufferInfos.has(id))
+    if (!this.bufferInfosList.has(id))
       throw new Error(`ndefined stream id: ${id}`)
 
     const engine = new StreamEngine({
-      bufferInfos: this.bufferInfos.get(id),
+      bufferInfos: this.bufferInfosList.get(id),
+      preloadedBuffers: this._preloadCache.get(id),
       monitorInterval: this.options.monitorInterval,
       requiredAdvanceThreshold: this.options.requiredAdvanceThreshold,
     });
@@ -139,6 +158,10 @@ class AudioStreamManager extends Service {
   }
 }
 
+/**
+ * Stream engine to consume in waves-audio masters, or masters provided by soundworks
+ * Implement the transported interface
+ */
 class StreamEngine extends AudioTimeEngine {
   constructor(options) {
     super();
@@ -148,6 +171,10 @@ class StreamEngine extends AudioTimeEngine {
     this.bufferInfos = options.bufferInfos;
     this._monitorInterval = options.monitorInterval * 1000; // in ms
 
+    this._cache = new Map();
+    this._cache.set(0, options.preloadedBuffers[0]);
+    this._cache.set(1, options.preloadedBuffers[1]);
+
     const requiredAdvanceThreshold = options.requiredAdvanceThreshold;
     const buffersDuration = this.bufferInfos[0].duration;
     const minAdvanceChunks = 3;
@@ -155,7 +182,6 @@ class StreamEngine extends AudioTimeEngine {
 
     this._chunkIndex = -1;
     this._currentPosition = 0;
-    this._cache = new Map();
     this._monitorPreloadTimeoutId = null;
 
     this._chunkSrc = null;
@@ -275,8 +301,9 @@ class StreamEngine extends AudioTimeEngine {
     }
   }
 
-  // transported interface
-  // should be enough to start and stop the engine
+  // @note - there is a problem with playControl.pause that does not trigger
+  // this method, define if its a problem in waves-masters or a bad
+  // implementation here
   syncPosition(currentTime, position, speed) {
     this._currentPosition = position;
 
@@ -306,21 +333,19 @@ class StreamEngine extends AudioTimeEngine {
         index += 1;
       }
 
-      console.warn('@todo - `syncPosition` handle position < 0');
-      // @todo - handle position < 0
-      // if (this._chunkIndex === -1) {}
+      // @note - position < 0 seems to be already handled by the play control or the transport
+
+      // clear files that won't be needed anymore from the cache
       this._clearCache(this._chunkIndex);
 
       if (this._cache.has(this._chunkIndex)) {
         this._startMonitorPreload();
-        // go to advancePosition loop
         return position;
       } else {
-        const numPreloadedBuffers = 2;
         const promises = [];
         const chunkIndex = this._chunkIndex;
 
-        for (let i = 0; i < numPreloadedBuffers; i++) {
+        for (let i = 0; i < NUM_PRELOADED_CHUNKS; i++) {
           const index = chunkIndex + i;
 
           if (index < this.bufferInfos.length) {
@@ -342,8 +367,6 @@ class StreamEngine extends AudioTimeEngine {
         });
       }
     }
-
-    return position;
   }
 
   advancePosition(currentTime, position, speed) {

@@ -46,9 +46,10 @@ class SyncScheduler extends Service {
   start() {
     super.start();
 
-    // init scheduler based on sync-time
+    // init scheduler based on synchronized time
     const getTimeFunction = () => this._sync.getSyncTime();
-    this._scheduler = new Scheduler(getTimeFunction);
+    const currentTimeToAudioTimeFunction = currentTime => this._sync.getAudioTime(currentTime);
+    this._scheduler = new Scheduler(getTimeFunction, { currentTimeToAudioTimeFunction });
 
     this.ready();
   }
@@ -59,7 +60,7 @@ class SyncScheduler extends Service {
    * @type {Number}
    */
   get audioTime() {
-    return this._sync.getAudioTime(this._scheduler.currentTime);
+    return this._scheduler.audioTime;
   }
 
   /**
