@@ -57,24 +57,7 @@ class AudioStreamManager extends Service {
     };
 
     this.configure(defaults);
-
-    // this._sync = this.require('sync');
-
-    // this._clients = new Set();
   }
-
-  // /**
-  //  * Set common (sync) start time for AudioStream in sync mode.
-  //  * The value is propagated to every connected clients and newly connected
-  //  * clients.
-  //  */
-  // set syncStartTime(time) {
-  //   this._syncStartTime = time;
-
-  //   this._clients.forEach(client => {
-  //     this.send(client, 'syncStartTime', this._syncStartTime);
-  //   });
-  // }
 
   /** @private */
   configure(options) {
@@ -99,23 +82,12 @@ class AudioStreamManager extends Service {
 
   /** @private */
   connect(client) {
-    // this._clients.add(client);
     this.receive(client, 'request', this._onRequest(client));
   }
 
-  // disconnect(client) {
-  //   // this._clients.delete(client);
-  // }
-
   /** @private */
   _onRequest(client) {
-    return () => {
-      this.send(client, 'acknowlegde', this.bufferInfos);
-
-      // // has already started in sync mode
-      // if (this._syncStartTime !== null)
-      //   this.send(client, 'syncStartTime', this._syncStartTime);
-    }
+    return () => this.send(client, 'acknowlegde', this.bufferInfos);
   }
 
   /**
