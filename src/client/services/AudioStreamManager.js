@@ -1,4 +1,4 @@
-import { audioContext } from 'waves-audio';
+import { AudioTimeEngine, audioContext } from 'waves-audio';
 import path from 'path';
 import debug from 'debug';
 import Service from '../core/Service';
@@ -76,8 +76,6 @@ class AudioStreamManager extends Service {
   constructor() {
     super(SERVICE_ID, false);
 
-    console.error('[deprecated] AudioStreamManager unstable API is now deprecated - API will change in soundworks#v3.0.0, please consider updating your application');
-
     this.bufferInfos = new Map();
     // define general offset in sync loop (in sec) (not propagated to
     // already created audio streams when modified)
@@ -102,10 +100,8 @@ class AudioStreamManager extends Service {
     super.start();
     // send request for infos on "streamable" audio files
     this.receive('acknowlegde', this._onAcknowledgeResponse);
-    this.receive('syncStartTime', value => this.syncStartTime = value);
+    // this.receive('syncStartTime', value => this.syncStartTime = value);
     this.send('request');
-
-    // @todo - should receive a sync start time from server
   }
 
   /**
@@ -113,6 +109,8 @@ class AudioStreamManager extends Service {
    * @param {Object} bufferInfos - info on audio files that can be streamed
    */
   _onAcknowledgeResponse(bufferInfos) {
+    console.log(bufferInfos);
+
     for (let id in bufferInfos) {
       bufferInfos[id].forEach(chunk => {
         if (this.options.assetsDomain !== null)
@@ -127,489 +125,251 @@ class AudioStreamManager extends Service {
     this.ready();
   }
 
-  /**
-   * Return a new audio stream node.
-   */
-  getAudioStream() {
-    // console.log(this.syncStartTime, this.syncService.getSyncTime());
-    return new AudioStream(
-      this.bufferInfos,
-      this.syncService,
-      this.options.monitorInterval,
-      this.options.requiredAdvanceThreshold,
-      this.syncStartTime
-    );
-  }
+  getStreamEngine(id) {
+    if (!this.bufferInfos.has(id))
+      throw new Error(`ndefined stream id: ${id}`)
 
-  getStreamEngine(url) {
     const engine = new StreamEngine({
-
+      bufferInfos: this.bufferInfos.get(id),
+      monitorInterval: this.options.monitorInterval,
+      requiredAdvanceThreshold: this.options.requiredAdvanceThreshold,
     });
 
     return engine;
   }
 }
 
-/**
- * An audio stream node, behaving as would a mediaElementSource node.
- *
- * @param {Object} bufferInfos - Map of streamable buffer chunks infos.
- * @param {Object} syncService - Soundworks sync service, used for sync mode.
- * @param {Number} monitorInterval - See AudioStreamManager's.
- * @param {Number} requiredAdvanceThreshold - See AudioStreamManager's.
- *
- * @memberof module:soundworks/client.AudioStreamManager
- */
-class AudioStream {
-  /** _<span class="warning">__WARNING__</span> This class should never be instantiated manually_ */
-  constructor(bufferInfos, syncService, monitorInterval, requiredAdvanceThreshold, syncStartTime) {
-    // arguments
-    this.bufferInfos = bufferInfos;
-    this.syncService = syncService;
-    this.monitorInterval = monitorInterval * 1000; // in ms
-    this.requiredAdvanceThreshold = requiredAdvanceThreshold;
-    this.syncStartTime = syncStartTime;
+class StreamEngine extends AudioTimeEngine {
+  constructor(options) {
+    super();
 
-    // local attr.
-    this._sync = false;
-    this._loop = false;
-    this._periodic = false;
-    this._metaData = undefined;
-    this._url = null;
+    this.outputNode = audioContext.createGain();
 
-    this.output = audioContext.createGain();
+    this.bufferInfos = options.bufferInfos;
+    this._monitorInterval = options.monitorInterval * 1000; // in ms
 
-    // stream monitoring
-    this._intervalId = undefined;
-    this._queueEndTime = 0;
-    this._srcMap = new Map();
-    this._stopRequired = false;
+    const requiredAdvanceThreshold = options.requiredAdvanceThreshold;
+    const buffersDuration = this.bufferInfos[0].duration;
+    const minAdvanceChunks = 3;
+    this.requiredAdvanceThreshold = Math.max(requiredAdvanceThreshold, buffersDuration * minAdvanceChunks);
 
-    this._reset();
+    this._chunkIndex = -1;
+    this._currentPosition = 0;
+    this._cache = new Map();
+    this._monitorPreloadTimeoutId = null;
 
-    this._requestChunks = this._requestChunks.bind(this);
-    this._onended = this._onended.bind(this);
+    this._chunkSrc = null;
+
+    this._monitorPreload = this._monitorPreload.bind(this);
   }
 
-  /**
-   * Init / reset local attributes (at stream creation and stop() ).
-   * @private
-   */
-  _reset() {
-    this._firstChunkNetworkLatencyOffset = undefined;
-    this._currentChunkIndex = -1;
-    this._firstPacketState = 0;
-  }
-
-  /**
-   * Define url of audio file to stream, send meta data request to server concerning this file.
-   *
-   * @param {String} url - Requested file name, without extension
-   */
-  set url(filename) {
-    if (this.isPlaying) {
-      console.warn('[WARNING] - Cannot set url while playing');
-      return;
-    }
-
-    // check if url corresponds to a streamable file
-    if (this.bufferInfos.get(filename))
-      this._url = filename;
-    else
-      console.error(`[ERROR] - ${filename} url not in ${this.bufferInfos} \n ### url discarded`);
-  }
-
-  get url() {
-    return this._url;
-  }
-
-  /**
-   * Set/Get synchronized mode status. in non sync. mode, the stream audio
-   * will start whenever the first audio buffer is downloaded. in sync. mode,
-   * the stream audio will start (again whan the audio buffer is downloaded)
-   * with an offset in the buffer, as if it started playing exactly when the
-   * start() command was issued.
-   *
-   * @param {Bool} val - Enable / disable sync
-   */
-  set sync(val) {
-    if (this.isPlaying) {
-      console.warn('[WARNING] - Cannot set sync while playing');
-      return;
-    }
-
-    this._sync = val;
-  }
-
-  get sync() {
-    return this._sync;
-  }
-
-  /**
-   * Set/Get loop mode. onended() method not called if loop enabled.
-   * @param {Bool} val - enable / disable sync
-   */
-  set loop(val) {
-    if (this.isPlaying) {
-      console.warn('[WARNING] - Cannot set loop while playing');
-      return;
-    }
-
-    this._loop = val;
-  }
-
-  get loop() {
-    return this._loop;
-  }
-
-  /**
-   * Set/Get periodic mode. we don't want the stream to be synchronized to
-   * a common origin, but have them aligned on a grid. aka, we don't wan't to
-   * compensate for the loading time, when starting with an offset.
-   * @param {Bool} val - enable / disable periodic
-   */
-  set periodic(val) {
-    if (this.isPlaying) {
-      console.warn('[WARNING] - Cannot set loop while playing');
-      return;
-    }
-
-    this._periodic = val;
-  }
-
-  get periodic() {
-    return this._periodic;
-  }
-
-  /**
-   * Return the total duration (in secs) of the audio file currently streamed.
-   */
   get duration() {
-    const bufferInfo = this.bufferInfos.get(this._url);
-    const lastChunk = bufferInfo[bufferInfo.length - 1];
+    const bufferInfos = this.bufferInfos;
+    const lastChunk = bufferInfos[bufferInfos.length - 1];
     const duration = lastChunk.start + lastChunk.duration;
     return duration;
   }
 
-  /**
-   * Connect the stream to an audio node.
-   *
-   * @param {AudioNode} node - Audio node to connect to.
-   */
-  connect(node) {
-    this.output.connect(node);
+  _startMonitorPreload() {
+    if (this._monitorPreloadTimeoutId === null)
+      this._monitorPreload();
   }
 
-  /**
-   * Method called when stream finished playing on its own (won't fire if loop
-   * enabled).
-   */
-  onended() {}
-
-  /**
-   * Method called when stream drops a packet (arrived too late).
-   */
-  ondrop() {
-    console.warn('audiostream: too long loading, discarding buffer');
+  _stopMonitorPreload() {
+    clearTimeout(this._monitorPreloadTimeoutId);
+    this._monitorPreloadTimeoutId = null;
   }
+  // monitor preload in `setInterval`
+  _monitorPreload() {
+    const advanceThreshold = this._currentPosition + this.requiredAdvanceThreshold;
+    let index = this._chunkIndex;
 
-  /**
-   * Method called when stream received a packet late, but not too much to drop
-   * it (gap in audio).
-   * @param {Number} time - delay time.
-   */
-  onlate(time) {}
+    while (index < this.bufferInfos.length &&
+      this.bufferInfos[index].start <= advanceThreshold) {
 
-  /**
-   * Start streaming audio source.
-   * @warning - offset doesn't seem to make sens when not loop and not periodic
-   *
-   * @param {Number} offset - time in buffer from which to start (in sec)
-   */
-  start(offset = 0) {
-    if (this.isPlaying) {
-      console.warn('[WARNING] - start() discarded, must stop first');
-      return;
-    }
+      if (!this._cache.has(index)) {
+        const chunkIndex = index; // copy locally into block to avoid closure
+        const startTime = this.bufferInfos[chunkIndex].start;
+        const url = this.bufferInfos[chunkIndex].url;
 
-    // check if we dispose of valid url to execute start
-    if (this._url === null) {
-      console.warn('[WARNING] - start() discarded, must define valid url first');
-      return;
-    }
-
-    // we consider the stream started now
-    this.isPlaying = true;
-
-    const bufferInfo = this.bufferInfos.get(this._url);
-    const duration = this.duration;
-
-    if (this.sync) {
-      const syncTime = this.syncService.getSyncTime();
-      const startTime = this.syncStartTime;
-      offset = syncTime - startTime + offset;
-    }
-
-    if (this.loop)
-      offset = offset % duration;
-
-    // this looks coherent for all combinations of `loop` and `sync`
-    // console.log('offset', offset);
-    // console.log('duration', duration);
-
-    if (offset >= duration) {
-      console.warn(`[WARNING] - start() discarded, requested offset
-        (${offset} sec) larger than file duration (${duration} sec)`);
-      return;
-    }
-
-    // find index of the chunk corresponding to given offset
-    let index = 0;
-    let offsetInFirstChunk = 0;
-    // console.log(bufferInfo, index, bufferInfo[index]);
-
-    while (this._currentChunkIndex === -1 && index < bufferInfo.length) {
-      const chunkInfos = bufferInfo[index];
-      const start = chunkInfos.start;
-      const end = start + chunkInfos.duration;
-
-      if (offset >= start && offset < end) {
-        this._currentChunkIndex = index;
-        offsetInFirstChunk = offset - start;
+        loadAudioBuffer(url).then(buffer => {
+          this._cache.set(chunkIndex, buffer);
+        });
       }
 
       index += 1;
     }
 
-    // handle negative offset, pick first chunk. This can be usefull to start
-    // synced stream while give them some delay to preload the first chunk
-    if (this._currentChunkIndex === -1 && offset < 0)
-      this._currentChunkIndex = 0;
-
-    // console.log('AudioStream.start()', this._url, this._currentChunkIndex);
-    this._stopRequired = false;
-    this._queueEndTime = this.syncService.getSyncTime() - offsetInFirstChunk;
-
-    // @important - never change the order of these 2 calls
-    this._intervalId = setInterval(this._requestChunks, this.monitorInterval);
-    this._requestChunks();
+    this._monitorPreloadTimeoutId = setTimeout(this._monitorPreload, this._monitorInterval);
   }
 
-  _onended() {
-    this.isPlaying = false;
-    this.onended();
-  }
+  _clearCache(chunkIndex) {
+    const position = this.bufferInfos[chunkIndex].start;
+    const advanceThreshold = position + this.requiredAdvanceThreshold;
+    const indexesToKeep = [];
 
-  /**
-   * Stop the audio stream. Mimics AudioBufferSourceNode stop() method. A stopped
-   * audio stream can be started (no need to create a new one as required when
-   * using an AudioBufferSourceNode).
-   *
-   * @param {Number} offset - offset time (in sec) from now at which
-   *  the audio stream should stop playing.
-   */
-  stop(offset = 0) {
-    if (!this.isPlaying) {
-      console.warn('[WARNING] - stop discarded, not started or already ended');
-      return;
+    let index = chunkIndex;
+
+    while (index < this.bufferInfos.length &&
+      this.bufferInfos[index].start <= advanceThreshold) {
+
+      indexesToKeep.push(index);
+      index += 1;
     }
 
-    if (this._intervalId !== undefined)
-      this._clearRequestChunks();
-
-
-    this._stopRequired = true; // avoid playing buffer that are currently loading
-    this._reset();
-
-    const now = this.syncService.getSyncTime();
-    const audioTime = audioContext.currentTime;
-    const size = this._srcMap.size;
-    let counter = 0;
-
-    this._srcMap.forEach((src, startTime) => {
-      counter += 1;
-      src.onended = null;
-
-      // pick a source arbitrarily to trigger the `onended` event properly
-      if (counter === size)
-        src.onended = this._onended;
-
-      if (startTime < (now + offset) || src.onended !== null)
-        src.stop(audioTime + offset);
-      else
-        src.stop(audioTime);
-    });
-
-    this._srcMap.clear();
-  }
-
-  /**
-   * Check if we have enough "local buffer time" for the audio stream,
-   * request new buffer chunks otherwise.
-   * @private
-   */
-  _requestChunks() {
-    const bufferInfo = this.bufferInfos.get(this._url);
-    const now = this.syncService.getSyncTime();
-
-    // have to deal properly with
-    while (this._queueEndTime - now <= this.requiredAdvanceThreshold) {
-      // in non sync mode, we want the start time to be delayed when the first
-      // buffer is actually received, so we load it before requesting next ones
-      if (this._firstPacketState === 1 && !this._sync)
-        return;
-
-      const chunkInfos = bufferInfo[this._currentChunkIndex];
-      const chunkStartTime = this._queueEndTime - chunkInfos.overlapStart;
-      const url = chunkInfos.url;
-
-      // flag that first packet has been required and that we must await for its
-      // arrival in unsync mode before asking for more, as the network delay
-      // will define the `true` start time
-      if (this._firstPacketState === 0 && !this._sync)
-        this._firstPacketState = 1;
-
-      // console.log('currentChunkIndex', this._currentChunkIndex);
-      // console.log('timeAtQueueEnd', this._queueEndTime);
-      // console.log('chunkStartTime', chunkStartTime);
-
-      const currentChunkIndex = this._currentChunkIndex;
-
-      this._currentChunkIndex += 1;
-      this._queueEndTime += chunkInfos.duration;
-
-      let isLastChunk = false;
-
-      if (this._currentChunkIndex === bufferInfo.length) {
-        if (this._loop) {
-          this._currentChunkIndex = 0;
-        } else {
-          // has this method is called once outside the loop, it might append
-          // that we finish the whole loading without actually having an
-          // intervalId, maybe handle this more properly with reccursive
-          // `setTimeout`s
-          if (this._intervalId)
-            this._clearRequestChunks();
-          // but reset later as the last chunk still needs the current offsets
-          isLastChunk = true;
-        }
-      }
-
-      // load and add buffer to queue
-      loadAudioBuffer(url).then((buffer) => {
-        if (this._stopRequired)
-          return;
-
-        // mark that first packet arrived and that we can ask for more
-        if (this._firstPacketState === 1 && !this._sync)
-          this._firstPacketState = 2;
-
-        const { overlapStart, overlapEnd } = chunkInfos;
-        this._addBufferToQueue(buffer, chunkStartTime, overlapStart, overlapEnd, isLastChunk);
-
-        if (isLastChunk)
-          this._reset();
-      });
-
-      if (isLastChunk)
-        break;
+    for (let [key, value] of this._cache) {
+      if (indexesToKeep.indexOf(key) === -1)
+        this._cache.delete(key);
     }
   }
 
-  /**
-   * Stop looking for new chunks
-   * @private
-   */
-  _clearRequestChunks() {
-    // console.log(`AudioStream._clearRequestChunks() ${this._url} - clearInterval`, this._intervalId);
-    clearInterval(this._intervalId);
-    this._intervalId = undefined;
-  }
+  _trigger(audioTime, position, speed) {
+    const lastChunkIndex = this._chunkIndex - 1;
 
-  /**
-   * Add audio buffer to stream queue.
-   *
-   * @param {AudioBuffer} buffer - Audio buffer to add to playing queue.
-   * @param {Number} startTime - Time at which audio buffer playing is due.
-   * @param {Number} overlapStart - Duration (in sec) of the additional audio
-   *  content added by the node-audio-slicer (on server side) at audio buffer's
-   *  head (used in fade-in mechanism to avoid perceiving potential .mp3
-   *  encoding artifacts introduced when buffer starts with non-zero value)
-   * @param {Number} overlapEnd - Duration (in sec) of the additional audio
-   *  content added at audio buffer's tail.
-   * @private
-   */
-  _addBufferToQueue(buffer, startTime, overlapStart, overlapEnd, isLastChunk) {
-    // hard-code overlap fade-in and out in buffer
-    const numSamplesFadeIn = Math.floor(overlapStart * buffer.sampleRate);
-    const numSamplesFadeOut = Math.floor(overlapEnd * buffer.sampleRate);
-    // loop over audio channels
-    for (let channel = 0; channel < buffer.numberOfChannels; channel++) {
-      const channelData = buffer.getChannelData(channel);
+    // fade out old source
+    if (lastChunkIndex >= 0 && this._chunkSrc) {
+      const chunk = this.bufferInfos[lastChunkIndex];
+      const overlapEnd = chunk.overlapEnd;
+      const endTime = audioTime + overlapEnd;
 
-      // fade in
-      for (let i = 0; i < numSamplesFadeIn; i++) {
-        const gain = i / (numSamplesFadeIn - 1);
-        channelData[i] = channelData[i] * gain;
-      }
+      const { src, env } = this._chunkSrc;
+      env.gain.setValueAtTime(1, audioTime);
+      env.gain.linearRampToValueAtTime(0, endTime);
 
-      // fade out
-      for (let i = channelData.length - numSamplesFadeOut; i < channelData.length; i++) {
-        const gain = (channelData.length - i - 1) / (numSamplesFadeOut - 1);
-        channelData[i] = channelData[i] * gain;
-      }
+      src.stop(endTime);
+
+      this._chunkSrc = null;
     }
 
+    const env = audioContext.createGain();
+    env.connect(this.outputNode);
 
-    const syncTime = this.syncService.getSyncTime();
-    const now = audioContext.currentTime;
-    let offset = startTime - syncTime;
+    const src = audioContext.createBufferSource();
+    src.connect(env);
+    src.buffer = this._cache.get(this._chunkIndex);
+    // @todo - src.playbackRate
 
-    // - in `non sync` scenario, we want to take in account the latency induced
-    // by the loading of the first chunk. This latency must then be applied
-    // to all subsequent chunks.
-    // - in `sync` scenarios, we just let the logical start time and computed
-    // offset do their job...
-    // - in `periodic` scenarios we don't want to compensate for the loading time
-    if (!this._sync && !this._periodic) {
-      //
-      if (this._firstChunkNetworkLatencyOffset === undefined) {
-        this._firstChunkNetworkLatencyOffset = offset;
-      }
+    const { start, overlapStart } = this.bufferInfos[this._chunkIndex];
+    const offset = position - start;
 
-      offset -= this._firstChunkNetworkLatencyOffset;
-    }
-
-    // if computed offset is smaller than duration
-    if (-offset <= buffer.duration) {
-      // create audio source
-      const src = audioContext.createBufferSource();
-      src.connect(this.output);
-      src.buffer = buffer;
-
-      if (offset < 0) {
-        src.start(now, -offset);
-        // the callback should be called after start
-        this.onlate(-offset);
-      } else {
-        src.start(now + offset, 0);
-      }
-
-
-      // keep and clean reference to source
-      this._srcMap.set(startTime, src);
-
-      src.onended = () => {
-        this._srcMap.delete(startTime);
-
-        if (isLastChunk)
-          this._onended();
-      };
+    if (overlapStart === 0 || offset !== 0) {
+      env.gain.value = 1;
+      env.gain.setValueAtTime(1, audioTime);
     } else {
-      this.ondrop();
+      env.gain.value = 0;
+      env.gain.setValueAtTime(0, audioTime);
+      env.gain.linearRampToValueAtTime(1, audioTime + overlapStart);
+    }
+
+    src.start(audioTime, offset);
+
+    this._chunkSrc = { src, env };
+  }
+
+  _halt(audioTime) {
+    if (this._chunkSrc) {
+      const { src, env } = this._chunkSrc;
+      src.stop(audioTime);
+
+      this._chunkSrc = null;
     }
   }
 
+  // transported interface
+  // should be enough to start and stop the engine
+  syncPosition(currentTime, position, speed) {
+    this._currentPosition = position;
+
+    // try to get `.audioTime` from master, if the master does not provide it
+    // we consider that `currentTime` is the `audioTime` (aka waves-audio master)
+    const audioTime = this.master.audioTime ? this.master.audioTime : currentTime;
+    this._halt(audioTime);
+
+    if (speed <= 0 || position > this.duration) {
+      // stop requesting chunks
+      this._stopMonitorPreload();
+      return Infinity;
+    } else {
+      // define current chunkIndex
+      let index = 0;
+      this._chunkIndex = -1;
+
+      while (this._chunkIndex === -1 && index < this.bufferInfos.length) {
+        const chunk = this.bufferInfos[index];
+        const start = chunk.start;
+        const end = start + chunk.duration;
+
+        if (position >= start && position < end) {
+          this._chunkIndex = index;
+        }
+
+        index += 1;
+      }
+
+      console.warn('@todo - `syncPosition` handle position < 0');
+      // @todo - handle position < 0
+      // if (this._chunkIndex === -1) {}
+      this._clearCache(this._chunkIndex);
+
+      if (this._cache.has(this._chunkIndex)) {
+        this._startMonitorPreload();
+        // go to advancePosition loop
+        return position;
+      } else {
+        const numPreloadedBuffers = 2;
+        const promises = [];
+        const chunkIndex = this._chunkIndex;
+
+        for (let i = 0; i < numPreloadedBuffers; i++) {
+          const index = chunkIndex + i;
+
+          if (index < this.bufferInfos.length) {
+            const chunk = this.bufferInfos[index];
+            const promise = loadAudioBuffer(chunk.url);
+
+            promise.then(buffer => {
+              this._cache.set(index, buffer);
+              return Promise.resolve(buffer);
+            });
+
+            promises.push(promise);
+          }
+        }
+
+        Promise.all(promises).then(buffers => {
+          this.resetPosition();
+          this._startMonitorPreload();
+        });
+      }
+    }
+
+    return position;
+  }
+
+  advancePosition(currentTime, position, speed) {
+    this._currentPosition = position;
+    // try to get `.audioTime` from master, if the master does not provide it
+    // we consider that `currentTime` is the `audioTime` (aka waves-audio master)
+    const audioTime = this.master.audioTime ? this.master.audioTime : currentTime;
+
+    this._trigger(audioTime, position, speed);
+    // remove buffer from cache
+    this._cache.delete(this._chunkIndex);
+    // define what should happen next
+    this._chunkIndex += 1;
+
+    if (this._chunkIndex >= this.bufferInfos.length) {
+      this._chunkIndex = -1;
+      this._stopMonitorPreload();
+
+      return Infinity;
+    } else {
+      const nextChunk = this.bufferInfos[this._chunkIndex];
+      const nextPosition = nextChunk.start;
+
+      return nextPosition;
+    }
+  }
 }
 
 serviceManager.register(SERVICE_ID, AudioStreamManager);

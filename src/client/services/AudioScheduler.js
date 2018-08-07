@@ -43,6 +43,15 @@ class AudioScheduler extends Service {
     // get audio time based scheduler
     this._scheduler = audio.getScheduler();
 
+    // add a getter for audio time
+    // allow to abstract synced and non-synced synths (waves-audio engines)
+    // from their master (cf. AudioStreamEngine in AudioStreamManager)
+    Object.defineProperty(this._scheduler, 'audioTime', {
+      enumerable: true,
+      // writable: false,
+      get: () => this._scheduler.currentTime,
+    });
+
     const defaults = {
       lookahead: this._scheduler.lookahead,
       period: this._scheduler.period,
@@ -90,6 +99,7 @@ class AudioScheduler extends Service {
    * @instance
    */
   get audioTime() {
+    console.log('scheduler:audioTime', this._scheduler.currentTime);
     return this._scheduler.currentTime;
   }
 
