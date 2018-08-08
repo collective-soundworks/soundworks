@@ -1,6 +1,6 @@
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
-import SyncServer from '@ircam/sync/server';
+import { SyncServer } from '@ircam/sync';
 
 const SERVICE_ID = 'service:sync';
 
@@ -26,19 +26,28 @@ class Sync extends Service {
   constructor() {
     super(SERVICE_ID);
 
+    // for default `getTimeFunction` only
     const startTime = process.hrtime();
 
-    const getTimeFunction = () => {
-      const now = process.hrtime(startTime);
-      return now[0] + now[1] * 1e-9;
-    }
+    const defaults = {
+      getTimeFunction: () => {
+        const now = process.hrtime(startTime);
+        return now[0] + now[1] * 1e-9;
+      },
+    };
 
-    this._sync = new SyncServer(getTimeFunction);
+    this.configure(defaults);
+
+    this._sync = null;
   }
 
   /** @private */
   start() {
     super.start();
+
+    const getTimeFunction = this.options.getTimeFunction;
+    console.log(getTimeFunction());
+    this._sync = new SyncServer(getTimeFunction);
 
     this.ready();
   }
