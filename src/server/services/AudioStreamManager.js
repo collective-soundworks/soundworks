@@ -2,7 +2,7 @@ import path from 'path';
 import fs from 'fs';
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
-import { Slicer } from 'node-audio-slicer';
+import Slicer from '../utils/Slicer';
 import cache from '../utils/cache';
 
 const SERVICE_ID = 'service:audio-stream-manager';
