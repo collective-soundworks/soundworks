@@ -1,6 +1,6 @@
 import { AudioTimeEngine, audioContext } from 'waves-audio';
-import path from 'path';
 import debug from 'debug';
+import urljoin from 'url-join';
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
 
@@ -58,18 +58,6 @@ function loadAudioBuffer(url) {
  *   monitorInterval: 1,
  *   requiredAdvanceThreshold: 10
  * });
- *
- * // request new audio stream from the stream manager (in experience start method)
- * const audioStream = this.audioStreamManager.getAudioStream();
- * // setup and start audio stream
- * audioStream.url = 'my-audio-file-name'; // without extension
- * // connect as you would any audio node from the web audio api
- * audioStream.connect(audioContext.destination);
- * audioStream.loop = false; // disable loop
- * audioStream.sync = false; // disable synchronization
- * // mimics AudioBufferSourceNode onended method
- * audioStream.onended = function(){ console.log('stream ended'); };
- * audioStream.start(); // start audio stream
  */
 
 class AudioStreamManager extends Service {
@@ -83,7 +71,7 @@ class AudioStreamManager extends Service {
     const defaults = {
       monitorInterval: 1, // in seconds
       requiredAdvanceThreshold: 10, // in seconds
-      assetsDomain: null,
+      assetsDomain: '',
     };
 
     this.configure(defaults);
@@ -92,12 +80,15 @@ class AudioStreamManager extends Service {
     this._onAcknowledgeResponse = this._onAcknowledgeResponse.bind(this);
   }
 
+  get streamIds() {
+    return Array.from(this.bufferInfosList.keys());
+  }
+
   /** @private */
   start() {
     super.start();
-    // send request for infos on "streamable" audio files
+
     this.receive('acknowlegde', this._onAcknowledgeResponse);
-    // this.receive('syncStartTime', value => this.syncStartTime = value);
     this.send('request');
   }
 
@@ -112,10 +103,7 @@ class AudioStreamManager extends Service {
       const bufferInfos = bufferInfosList[id];
 
       bufferInfos.forEach(chunk => {
-        if (this.options.assetsDomain !== null)
-          chunk.url = this.options.assetsDomain + '/' + chunk.name;
-        else
-          chunk.url = chunk.name;
+        chunk.url = urljoin(this.options.assetsDomain, chunk.name);
       });
 
       // preload the NUM_PRELOADED_CHUNKS first chunk for each streams
@@ -185,6 +173,13 @@ class StreamEngine extends AudioTimeEngine {
     this._chunkSrc = null;
 
     this._monitorPreload = this._monitorPreload.bind(this);
+  }
+
+  disconnect(target = null) {
+    super.disconnect(target);
+
+    if (target === null)
+      this._cache.clear();
   }
 
   get duration() {
@@ -299,9 +294,11 @@ class StreamEngine extends AudioTimeEngine {
     }
   }
 
-  // @note - there is a problem with playControl.pause that does not trigger
-  // this method, define if its a problem in waves-masters or a bad
-  // implementation here
+  // @notes / @todos
+  // - `playControl.pause` does not trigger this method, define if its a
+  // problem in waves-masters or a bad implementation/approach here
+  // - not called neither when the engine is removed from the
+  // transport
   syncPosition(currentTime, position, speed) {
     this._currentPosition = position;
 
