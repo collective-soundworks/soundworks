@@ -46,7 +46,6 @@ class Sync extends Service {
     super.start();
 
     const getTimeFunction = this.options.getTimeFunction;
-    console.log(getTimeFunction());
     this._sync = new SyncServer(getTimeFunction);
 
     this.ready();
