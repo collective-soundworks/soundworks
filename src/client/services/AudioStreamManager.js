@@ -33,8 +33,6 @@ function loadAudioBuffer(url) {
 /**
  * Interface for the client `'audio-stream-manager'` service.
  *
- * @warning - unstable
- *
  * This service allows to stream audio buffers to the client during the experience
  * (not preloaded). Input audio files are segmented by the server upon startup
  * and sent to the clients upon request. Service only accepts .wav files at the
@@ -145,7 +143,7 @@ class AudioStreamManager extends Service {
 
   getStreamEngine(id) {
     if (!this.bufferInfosList.has(id))
-      throw new Error(`ndefined stream id: ${id}`)
+      throw new Error(`Undefined stream id: ${id}`)
 
     const engine = new StreamEngine({
       bufferInfos: this.bufferInfosList.get(id),

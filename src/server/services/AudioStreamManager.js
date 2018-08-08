@@ -10,8 +10,6 @@ const SERVICE_ID = 'service:audio-stream-manager';
 /**
  * Interface for the server `'audio-stream-manager'` service.
  *
- * @warning - unstable
- *
  * This service allows to stream audio buffers to the client during the experience
  * (not preloaded). Input audio files are segmented by the server upon startup and
  * sent to the clients upon request. Service only accepts .wav files at the moment.
@@ -97,6 +95,8 @@ class AudioStreamManager extends Service {
    * @param {Object} callback - Function to call when slicing completed.
    */
   prepareStreamChunks(audioFiles, publicDirectory, callback) {
+    const streamIds = Object.keys(audioFiles);
+    const numFiles = streamIds.length;
     const bufferInfos = {};
     // try avoid hardcore parallel processing that crashes the server
     // (ulimit issue) when lots of audioFiles to process
@@ -111,23 +111,23 @@ class AudioStreamManager extends Service {
     function next() {
       index += 1;
 
-      if (index >= audioFiles.length)
+      if (index >= numFiles)
         callback(bufferInfos);
       else
         processFile();
     }
 
     function processFile() {
+      const streamId = streamIds[index];
       // const fileId = ;
-      const filename = path.join(publicDirectory, audioFiles[index]);
-      const fileId = path.basename(filename, '.wav');
+      const filename = path.join(publicDirectory, audioFiles[streamId]);
 
-      const cachedItem = cache.read(SERVICE_ID, fileId);
+      const cachedItem = cache.read(SERVICE_ID, streamId);
       const stats = fs.statSync(filename);
       const lastModified = stats.mtimeMs;
 
       if (cachedItem && lastModified === cachedItem.lastModified) {
-        bufferInfos[fileId] = cachedItem.chunks;
+        bufferInfos[streamId] = cachedItem.chunks;
         return next();
       }
 
@@ -137,10 +137,10 @@ class AudioStreamManager extends Service {
           return chunk;
         });
 
-        console.log(SERVICE_ID, 'sliced file', filename);
-        bufferInfos[fileId] = chunks;
+        console.log(`[${SERVICE_ID}]`, 'processed stream:', `"${streamId}"`, `(${chunks.length} chunks)`);
+        bufferInfos[streamId] = chunks;
         // cache informations
-        cache.write(SERVICE_ID, fileId, { lastModified, chunks })
+        cache.write(SERVICE_ID, streamId, { lastModified, chunks })
 
         next();
       });
