@@ -50,7 +50,7 @@ export default class Slicer {
       if(!fs.existsSync(outputDir)) {
         fs.mkdirSync(outputDir);
       }
-      
+
       // init slicing loop
       const totalDuration = metaBuffer.dataLength / metaBuffer.bytePerSecond;
       let chunkStart = 0.;
@@ -81,17 +81,21 @@ export default class Slicer {
         const chunkPath = path.join(outputDir,
                                     `${chunkIndex}-${input.name}${outputExtension}`);
 
-        if(outputExtension === '.mp3') {
+        if (outputExtension === '.mp3') {
           // need to encode segmented wav buffer to mp3
           const encoder = new Lame({
             output: chunkPath,
-            bitrate: 128});
+            bitrate: 128,
+          });
+
           encoder.setBuffer(chunkBuffer);
-          encoderPromises.push(encoder.encode()
-                               .catch((error) => {
-                                 console.error(`Error with lame ${error.message}`);
-                                 throw error;
-                               }));
+
+          const promise = encoder.encode().catch((error) => {
+            console.error(`Error with lame ${error.message}`);
+            throw error;
+          });
+
+          encoderPromises.push(promise);
         } else {
           // WAV output
           fs.writeFile(chunkPath, chunkBuffer, (error) => {
@@ -198,7 +202,7 @@ class Reader {
   loadBuffer(inputPath, callback) {
     try {
       let buffer = fs.readFileSync(inputPath);
-      callback(buffer); 
+      callback(buffer);
     } catch (error) {
       console.error(error.message);
       throw error;
@@ -267,8 +271,8 @@ class WavFormatReader {
     const fmt = descriptors.get('fmt ');
     const format = {
       type: buffer.readUIntLE(fmt.start, 2),
-      numberOfChannels: buffer.readUIntLE(fmt.start + 2, 2), 
-      sampleRate: buffer.readUIntLE(fmt.start + 4, 4), 
+      numberOfChannels: buffer.readUIntLE(fmt.start + 2, 2),
+      sampleRate: buffer.readUIntLE(fmt.start + 4, 4),
       bytePerSecond: buffer.readUIntLE(fmt.start + 8, 4),
       bitsPerSample: buffer.readUIntLE(fmt.start + 14, 2)
     };
@@ -305,7 +309,7 @@ class WavFormatReader {
       // read chunk descriptor
       let bytes = buffer.slice(index, index + descriptorLength);
       descriptor = this.stringDecoder.write(bytes);
-      
+
       if(descriptor === 'RIFF') {
         // RIFF descriptor's length is always 12 bytes
         chunkLength = 12;
