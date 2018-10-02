@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs';
-import {Lame} from 'node-lame';
-import {StringDecoder} from 'string_decoder';
+import { Lame } from 'node-lame';
+import { StringDecoder } from 'string_decoder';
 
 /**
  * Load and slice WAV file from input path.
