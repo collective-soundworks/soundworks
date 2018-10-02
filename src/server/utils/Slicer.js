@@ -90,6 +90,7 @@ export default class Slicer {
 
           encoder.setBuffer(chunkBuffer);
 
+          // TODO: limit the number of processes
           const promise = encoder.encode().catch((error) => {
             console.error(`Error with lame ${error.message}`);
             throw error;
