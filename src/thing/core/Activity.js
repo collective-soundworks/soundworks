@@ -1,7 +1,7 @@
-import Process from '../../client/Process';
+import Process from '../../client/core/Process';
 import Signal from '../../utils/Signal';
 import SignalAll from '../../utils/SignalAll';
-import socket from '../../client/socket';
+import socket from '../../client/core/socket';
 
 /**
  * Internal base class for services and scenes. Basically a process with view

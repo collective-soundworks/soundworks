@@ -2,7 +2,7 @@ import { audioContext } from 'waves-audio';
 import SegmentedView from '../views/SegmentedView';
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
-import SyncModule from '@ircam/sync/client';
+import SyncClient from '@ircam/sync';
 
 const SERVICE_ID = 'service:sync';
 
@@ -47,7 +47,7 @@ class Sync extends Service {
       () => audioContext.currentTime :
       () => (new Date().getTime() * 0.001);
 
-    this._sync = new SyncModule(getTime);
+    this._sync = new SyncClient(getTime);
     this._ready = false;
 
     this.require('platform', { features: 'web-audio' });

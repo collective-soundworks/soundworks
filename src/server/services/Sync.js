@@ -1,6 +1,6 @@
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
-import SyncServer from '@ircam/sync/server';
+import SyncServer from '@ircam/sync';
 
 const SERVICE_ID = 'service:sync';
 

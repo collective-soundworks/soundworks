@@ -1,4 +1,4 @@
-import Service from '../../client/core/Service';
+import Service from '../core/Service';
 import serviceManager from '../../client/core/serviceManager';
 
 

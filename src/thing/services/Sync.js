@@ -1,9 +1,9 @@
 /**
  * @todo - review to use `libpd.currentTime`
  */
-import Service from '../../client/core/Service';
+import Service from '../core/Service';
 import serviceManager from '../../client/core/serviceManager';
-import SyncModule from 'sync/client';
+import SyncClient from '@ircam/sync';
 
 const SERVICE_ID = 'service:sync';
 
@@ -71,7 +71,7 @@ class Sync extends Service {
     const sendFunction = (...args) => this.send('ping', ...args);
     const receiveFunction = callback => this.receive('pong', callback);
 
-    this._sync = new SyncModule(this.options.getTime);
+    this._sync = new SyncClient(this.options.getTime);
     this._sync.start(sendFunction, receiveFunction, this._syncStatusReport);
   }
 

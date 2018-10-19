@@ -1,5 +1,5 @@
-import serviceManager from '../../client/serviceManager';
-import socket from '../../client/socket';
+import serviceManager from '../../client/core/serviceManager';
+import socket from '../../client/core/socket';
 
 /**
  * Client side entry point for a `soundworks` application.
@@ -210,6 +210,7 @@ const client = {
           }
 
           this.socket.send('handshake', payload);
+
           // wait for handshake response to mark client as `ready`
           this.socket.receive('client:start', (uuid) => {
             this.uuid = uuid;
