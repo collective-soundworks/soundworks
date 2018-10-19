@@ -3,7 +3,7 @@
  */
 import Service from '../core/Service';
 import serviceManager from '../../client/core/serviceManager';
-import SyncClient from '@ircam/sync';
+import { SyncClient } from '@ircam/sync';
 
 const SERVICE_ID = 'service:sync';
 
