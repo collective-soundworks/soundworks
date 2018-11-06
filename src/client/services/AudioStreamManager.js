@@ -30,6 +30,16 @@ function loadAudioBuffer(url) {
   return promise;
 }
 
+
+/**
+ * bufferInfo description
+ *
+ * |                            start
+ *  <------------------->       duration
+ *  <->                         overlapStart
+ *                       <->    overlapEnd
+ */
+
 /**
  * Interface for the client `'audio-stream-manager'` service.
  *
@@ -243,23 +253,6 @@ class StreamEngine extends AudioTimeEngine {
   }
 
   _trigger(audioTime, position, speed) {
-    const lastChunkIndex = this._chunkIndex - 1;
-
-    // fade out old source
-    if (lastChunkIndex >= 0 && this._chunkSrc) {
-      const chunk = this.bufferInfos[lastChunkIndex];
-      const overlapEnd = chunk.overlapEnd;
-      const endTime = audioTime + overlapEnd;
-
-      const { src, env } = this._chunkSrc;
-      env.gain.setValueAtTime(1, audioTime);
-      env.gain.linearRampToValueAtTime(0, endTime);
-
-      src.stop(endTime);
-
-      this._chunkSrc = null;
-    }
-
     const env = audioContext.createGain();
     env.connect(this.outputNode);
 
@@ -268,19 +261,40 @@ class StreamEngine extends AudioTimeEngine {
     src.buffer = this._cache.get(this._chunkIndex);
     // @todo - src.playbackRate
 
-    const { start, overlapStart } = this.bufferInfos[this._chunkIndex];
+    const { start, duration, overlapStart, overlapEnd } = this.bufferInfos[this._chunkIndex];
     const offset = position - start;
+    let fadeOutStartTime = audioTime - offset + duration;
 
-    if (overlapStart === 0 || offset !== 0) {
+    // let fadeInduration = Math.max(0.005, Math.min(overlapStart, fadeOutStartTime - audioTime));
+    const fadeInDuration = offset > 0 ? 0.005 : overlapStart;
+    const fadeInEndTime = Math.min(audioTime + fadeInDuration, fadeOutStartTime);
+
+    const endTime = fadeOutStartTime + overlapEnd;
+
+    // schedule fade in
+    if (overlapStart === 0) {
       env.gain.value = 1;
       env.gain.setValueAtTime(1, audioTime);
     } else {
       env.gain.value = 0;
       env.gain.setValueAtTime(0, audioTime);
-      env.gain.linearRampToValueAtTime(1, audioTime + overlapStart);
+      env.gain.linearRampToValueAtTime(1, fadeInEndTime);
     }
 
+    // schedule fade out
+    env.gain.setValueAtTime(1, fadeOutStartTime);
+    env.gain.linearRampToValueAtTime(0, endTime);
+
+    console.log('duration', duration);
+    console.log('audioTime', audioTime)
+    console.log('offset', offset);
+    console.log('fadeInEndTime', fadeInEndTime);
+    console.log('fadeOutStartTime', fadeOutStartTime);
+    console.log('endTime', endTime);
+    console.log('--------------------------------------------');
+
     src.start(audioTime, offset);
+    src.stop(endTime);
 
     this._chunkSrc = { src, env };
   }
@@ -288,6 +302,7 @@ class StreamEngine extends AudioTimeEngine {
   _halt(audioTime) {
     if (this._chunkSrc) {
       const { src, env } = this._chunkSrc;
+      // @todo - check
       src.stop(audioTime);
 
       this._chunkSrc = null;
@@ -302,9 +317,7 @@ class StreamEngine extends AudioTimeEngine {
   syncPosition(currentTime, position, speed) {
     this._currentPosition = position;
 
-    // try to get `.audioTime` from master, if the master does not provide it
-    // we consider that `currentTime` is the `audioTime` (aka waves-audio master)
-    const audioTime = this.master.audioTime ? this.master.audioTime : currentTime;
+    const audioTime = this.master.audioTime;
     this._halt(audioTime);
 
     if (speed <= 0 || position > this.duration) {
@@ -368,7 +381,7 @@ class StreamEngine extends AudioTimeEngine {
     this._currentPosition = position;
     // try to get `.audioTime` from master, if the master does not provide it
     // we consider that `currentTime` is the `audioTime` (aka waves-audio master)
-    const audioTime = this.master.audioTime ? this.master.audioTime : currentTime;
+    const audioTime = this.master.audioTime;
 
     this._trigger(audioTime, position, speed);
     // remove buffer from cache

@@ -6,15 +6,18 @@ import { StringDecoder } from 'string_decoder';
 /**
  * Load and slice WAV file from input path.
  */
-export default class Slicer {
-  constructor(options = {}) {
+class Slicer {
+  constructor({
+    duration = 4.,
+    compress = true,
+    overlap = 0.
+  } = {}) {
     // chunk duration, in seconds
-    this.chunkDuration = (typeof options.duration !== 'undefined' ? options.duration : 4.);
+    this.chunkDuration = duration;
     // output chunk audio format
-    this.compress = (typeof options.compress !== 'undefined' ? options.compress : true);
+    this.compress = compress;
     // overlap duration, in seconds
-    this.overlapDuration = (typeof options.overlap !== 'undefined' ? options.overlap : 0.);
-
+    this.overlapDuration = overlap;
     // locals
     this.reader = new Reader();
   }
@@ -31,7 +34,7 @@ export default class Slicer {
   slice(inputPath, callback) {
     const input = path.parse(inputPath);
 
-    if(input.ext !== '.wav') {
+    if (input.ext !== '.wav') {
       throw new Error(`File extension ${input.ext} not supported: only '.wav' files input`);
     }
 
@@ -47,7 +50,8 @@ export default class Slicer {
                               );
 
       const outputDir = path.join(input.dir, input.name);
-      if(!fs.existsSync(outputDir)) {
+
+      if (!fs.existsSync(outputDir)) {
         fs.mkdirSync(outputDir);
       }
 
@@ -111,7 +115,7 @@ export default class Slicer {
           name:chunkPath,
           start:chunkStart,
           // logical duration
-          duration: chunkDuration - overlapEnd + overlapStart,
+          duration: chunkDuration - overlapEnd,
           overlapStart,
           overlapEnd,
         });
@@ -119,9 +123,9 @@ export default class Slicer {
         // next
         chunkIndex++;
         chunkStart += this.chunkDuration;
-      } while(overlapEnd > 0.)
+      } while(overlapEnd > 0.);
 
-      Promise.all(encoderPromises).then( () => callback(chunkList));
+      Promise.all(encoderPromises).then(() => callback(chunkList));
     });
   }
 
@@ -339,3 +343,6 @@ class WavFormatReader {
   }
 
 }
+
+export default Slicer;
+
