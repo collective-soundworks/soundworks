@@ -253,45 +253,41 @@ class StreamEngine extends AudioTimeEngine {
   }
 
   _trigger(audioTime, position, speed) {
+    const { start, duration, overlapStart, overlapEnd } = this.bufferInfos[this._chunkIndex];
+    const offset = position - start;
+    let fadeOutStartTime = audioTime - offset + duration;
+    // let fadeInduration = Math.max(0.005, Math.min(overlapStart, fadeOutStartTime - audioTime));
+    const fadeInDuration = offset > 0 ? 0.005 : overlapStart;
+    const fadeInEndTime = Math.min(audioTime + fadeInDuration, fadeOutStartTime);
+    const endTime = fadeOutStartTime + overlapEnd;
+
+    const buffer = this._cache.get(this._chunkIndex);
+
     const env = audioContext.createGain();
     env.connect(this.outputNode);
 
     const src = audioContext.createBufferSource();
     src.connect(env);
-    src.buffer = this._cache.get(this._chunkIndex);
-    // @todo - src.playbackRate
-
-    const { start, duration, overlapStart, overlapEnd } = this.bufferInfos[this._chunkIndex];
-    const offset = position - start;
-    let fadeOutStartTime = audioTime - offset + duration;
-
-    // let fadeInduration = Math.max(0.005, Math.min(overlapStart, fadeOutStartTime - audioTime));
-    const fadeInDuration = offset > 0 ? 0.005 : overlapStart;
-    const fadeInEndTime = Math.min(audioTime + fadeInDuration, fadeOutStartTime);
-
-    const endTime = fadeOutStartTime + overlapEnd;
+    src.buffer = buffer
 
     // schedule fade in
     if (overlapStart === 0) {
-      env.gain.value = 1;
       env.gain.setValueAtTime(1, audioTime);
     } else {
-      env.gain.value = 0;
       env.gain.setValueAtTime(0, audioTime);
       env.gain.linearRampToValueAtTime(1, fadeInEndTime);
     }
 
-    // schedule fade out
     env.gain.setValueAtTime(1, fadeOutStartTime);
     env.gain.linearRampToValueAtTime(0, endTime);
 
-    console.log('duration', duration);
-    console.log('audioTime', audioTime)
-    console.log('offset', offset);
-    console.log('fadeInEndTime', fadeInEndTime);
-    console.log('fadeOutStartTime', fadeOutStartTime);
-    console.log('endTime', endTime);
-    console.log('--------------------------------------------');
+    // console.log('duration', duration);
+    // console.log('audioTime', audioTime)
+    // console.log('offset', offset);
+    // console.log('fadeInEndTime', fadeInEndTime);
+    // console.log('fadeOutStartTime', fadeOutStartTime);
+    // console.log('endTime', endTime);
+    // console.log('--------------------------------------------');
 
     src.start(audioTime, offset);
     src.stop(endTime);
