@@ -16,12 +16,16 @@ const NUM_PRELOADED_CHUNKS = 2;
 function loadAudioBuffer(url) {
   const promise = new Promise((resolve, reject) => {
     const request = new XMLHttpRequest();
-    request.open('GET', url, true);
+    request.open('GET', `${url}?id=${Math.random()}`, true);
     request.responseType = 'arraybuffer';
 
     request.onload = () => {
       const response = request.response;
-      audioContext.decodeAudioData(response, resolve, reject);
+      audioContext.decodeAudioData(response, buffer => {
+        resolve(buffer);
+      }, (err) => {
+        reject();
+      });
     }
 
     request.send();
@@ -223,6 +227,12 @@ class StreamEngine extends AudioTimeEngine {
   }
   // monitor preload in `setInterval`
   _monitorPreload() {
+    // @note - should not happen but be defensive
+    if (this._chunkIndex === -1) {
+      this._monitorPreloadTimeoutId = null;
+      return;
+    }
+
     const advanceThreshold = this._currentPosition + this.requiredAdvanceThreshold;
     let index = this._chunkIndex;
 
@@ -252,16 +262,18 @@ class StreamEngine extends AudioTimeEngine {
 
     let index = chunkIndex;
 
-    while (index < this.bufferInfos.length &&
-      this.bufferInfos[index].start <= advanceThreshold) {
-
+    while (
+      index < this.bufferInfos.length &&
+      this.bufferInfos[index].start <= advanceThreshold
+    ) {
       indexesToKeep.push(index);
       index += 1;
     }
 
     for (let [key, value] of this._cache) {
-      if (indexesToKeep.indexOf(key) === -1)
+      if (indexesToKeep.indexOf(key) === -1) {
         this._cache.delete(key);
+      }
     }
   }
 
@@ -355,16 +367,20 @@ class StreamEngine extends AudioTimeEngine {
       this._clearCache(this._chunkIndex);
 
       if (this._cache.has(this._chunkIndex)) {
-        this._startMonitorPreload();
+        // defer preloading to leave engine a bit alone with its own problems...
+        setTimeout(() => this._startMonitorPreload(), 500);
         return position;
+
       } else {
         const promises = [];
+        const indexes = [];
         const chunkIndex = this._chunkIndex;
 
         for (let i = 0; i < NUM_PRELOADED_CHUNKS; i++) {
           const index = chunkIndex + i;
 
-          if (index < this.bufferInfos.length) {
+          if (index < this.bufferInfos.length && !this._cache.has(index)) {
+            indexes.push(index);
             const chunk = this.bufferInfos[index];
             const promise = loadAudioBuffer(chunk.url);
 
@@ -379,25 +395,28 @@ class StreamEngine extends AudioTimeEngine {
 
         Promise.all(promises).then(buffers => {
           this.resetPosition();
-          this._startMonitorPreload();
         });
+
+        return Infinity;
       }
     }
   }
 
   advancePosition(currentTime, position, speed) {
+    // remove previous buffer from cache
+    this._cache.delete(this._chunkIndex - 1);
+
     this._currentPosition = position;
     const audioTime = this.master.audioTime;
-
+    // trigger new chunk
     this._trigger(audioTime, position, speed);
-    // remove buffer from cache
-    this._cache.delete(this._chunkIndex);
-    // define what should happen next
+
     this._chunkIndex += 1;
 
     if (this._chunkIndex >= this.bufferInfos.length) {
-      this._chunkIndex = -1;
       this._stopMonitorPreload();
+      // monitor preload relies on a valid chunk index
+      this._chunkIndex = -1;
 
       return Infinity;
     } else {
