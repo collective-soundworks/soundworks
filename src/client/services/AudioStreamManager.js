@@ -140,8 +140,9 @@ class AudioStreamManager extends Service {
   }
 
   getStreamEngine(id) {
-    if (!this.bufferInfosList.has(id))
+    if (!this.bufferInfosList.has(id)) {
       throw new Error(`Undefined stream id: ${id}`)
+    }
 
     const engine = new StreamEngine({
       bufferInfos: this.bufferInfosList.get(id),
@@ -149,6 +150,9 @@ class AudioStreamManager extends Service {
       monitorInterval: this.options.monitorInterval,
       requiredAdvanceThreshold: this.options.requiredAdvanceThreshold,
     });
+
+    // only use that when the stream is created for the first time
+    this._preloadCache.delete(id);
 
     return engine;
   }
@@ -168,8 +172,11 @@ class StreamEngine extends AudioTimeEngine {
     this._monitorInterval = options.monitorInterval * 1000; // in ms
 
     this._cache = new Map();
-    this._cache.set(0, options.preloadedBuffers[0]);
-    this._cache.set(1, options.preloadedBuffers[1]);
+    // @todo - if one of these buffer has been corrupted by an envelop
+    if (options.preloadedBuffers) {
+      this._addToCache(0, options.preloadedBuffers[0]);
+      this._addToCache(1, options.preloadedBuffers[1]);
+    }
 
     const requiredAdvanceThreshold = options.requiredAdvanceThreshold;
     const buffersDuration = this.bufferInfos[0].duration;
@@ -188,8 +195,9 @@ class StreamEngine extends AudioTimeEngine {
   disconnect(target = null) {
     super.disconnect(target);
 
-    if (target === null)
+    if (target === null) {
       this._cache.clear();
+    }
   }
 
   get duration() {
@@ -200,13 +208,18 @@ class StreamEngine extends AudioTimeEngine {
   }
 
   _startMonitorPreload() {
-    if (this._monitorPreloadTimeoutId === null)
+    if (this._monitorPreloadTimeoutId === null) {
       this._monitorPreload();
+    }
   }
 
   _stopMonitorPreload() {
     clearTimeout(this._monitorPreloadTimeoutId);
     this._monitorPreloadTimeoutId = null;
+  }
+
+  _addToCache(index, buffer) {
+    this._cache.set(index, { buffer });
   }
   // monitor preload in `setInterval`
   _monitorPreload() {
@@ -222,7 +235,7 @@ class StreamEngine extends AudioTimeEngine {
         const url = this.bufferInfos[chunkIndex].url;
 
         loadAudioBuffer(url).then(buffer => {
-          this._cache.set(chunkIndex, buffer);
+          this._addToCache(chunkIndex, buffer);
         });
       }
 
@@ -255,49 +268,48 @@ class StreamEngine extends AudioTimeEngine {
   _trigger(audioTime, position, speed) {
     const { start, duration, overlapStart, overlapEnd } = this.bufferInfos[this._chunkIndex];
     const offset = position - start;
-    let fadeOutStartTime = audioTime - offset + duration;
-    // let fadeInduration = Math.max(0.005, Math.min(overlapStart, fadeOutStartTime - audioTime));
+    const cached = this._cache.get(this._chunkIndex);
+    const { buffer } = cached;
+
+    // once triggered, the buffer is always removed from cache
+    // so we don't need to worry about corruuting it the buffer
+    const fadeInStartPosition = offset;
     const fadeInDuration = offset > 0 ? 0.005 : overlapStart;
-    const fadeInEndTime = Math.min(audioTime + fadeInDuration, fadeOutStartTime);
-    const endTime = fadeOutStartTime + overlapEnd;
+    const fadeOutStartPosition = Math.max(duration, fadeInStartPosition + fadeInDuration);
+    const fadeOutDuration = Math.min(overlapEnd, duration + overlapEnd - fadeOutStartPosition);
 
-    const buffer = this._cache.get(this._chunkIndex);
+    const fadeInStartSample = Math.floor(fadeInStartPosition * buffer.sampleRate);
+    const fadeInNumSamples = Math.floor(fadeInDuration * buffer.sampleRate);
+    const fadeOutStartSample = Math.floor(fadeOutStartPosition * buffer.sampleRate);
+    const fadeOutNumSamples = Math.floor(fadeOutDuration * buffer.sampleRate);
 
-    const env = audioContext.createGain();
-    env.connect(this.outputNode);
+    for (let channel = 0; channel < buffer.numberOfChannels; channel += 1) {
+      const channelData = buffer.getChannelData(channel);
+      // fade in
+      for (let i = 0; i < fadeInNumSamples; i++) {
+        const index = i + fadeInStartSample;
+        channelData[index] *= i / fadeInNumSamples;
+      }
 
-    const src = audioContext.createBufferSource();
-    src.connect(env);
-    src.buffer = buffer
-
-    // schedule fade in
-    if (overlapStart === 0) {
-      env.gain.setValueAtTime(1, audioTime);
-    } else {
-      env.gain.setValueAtTime(0, audioTime);
-      env.gain.linearRampToValueAtTime(1, fadeInEndTime);
+      // fade out
+      for (let i = 0; i < fadeOutNumSamples; i++) {
+        const index = fadeOutStartSample + fadeOutNumSamples - i; // go backward
+        channelData[index] *= i / fadeOutNumSamples;
+      }
     }
 
-    env.gain.setValueAtTime(1, fadeOutStartTime);
-    env.gain.linearRampToValueAtTime(0, endTime);
-
-    // console.log('duration', duration);
-    // console.log('audioTime', audioTime)
-    // console.log('offset', offset);
-    // console.log('fadeInEndTime', fadeInEndTime);
-    // console.log('fadeOutStartTime', fadeOutStartTime);
-    // console.log('endTime', endTime);
-    // console.log('--------------------------------------------');
-
+    const src = audioContext.createBufferSource();
+    src.buffer = buffer;
+    src.connect(this.outputNode);
     src.start(audioTime, offset);
-    src.stop(endTime);
 
-    this._chunkSrc = { src, env };
+    this._chunkSrc = src;
   }
 
   _halt(audioTime) {
     if (this._chunkSrc) {
-      const { src, env } = this._chunkSrc;
+      // const { src, env } = this._chunkSrc;
+      const src = this._chunkSrc;
       // @todo - check
       src.stop(audioTime);
 
@@ -312,8 +324,8 @@ class StreamEngine extends AudioTimeEngine {
   // transport
   syncPosition(currentTime, position, speed) {
     this._currentPosition = position;
-
     const audioTime = this.master.audioTime;
+
     this._halt(audioTime);
 
     if (speed <= 0 || position > this.duration) {
@@ -337,7 +349,7 @@ class StreamEngine extends AudioTimeEngine {
         index += 1;
       }
 
-      // @note - position < 0 seems to be already handled by the play control or the transport
+      // @note - negative positions are already handled by the transport and playControl
 
       // clear files that won't be needed anymore from the cache
       this._clearCache(this._chunkIndex);
@@ -357,7 +369,7 @@ class StreamEngine extends AudioTimeEngine {
             const promise = loadAudioBuffer(chunk.url);
 
             promise.then(buffer => {
-              this._cache.set(index, buffer);
+              this._addToCache(index, buffer);
               return Promise.resolve(buffer);
             });
 
@@ -375,8 +387,6 @@ class StreamEngine extends AudioTimeEngine {
 
   advancePosition(currentTime, position, speed) {
     this._currentPosition = position;
-    // try to get `.audioTime` from master, if the master does not provide it
-    // we consider that `currentTime` is the `audioTime` (aka waves-audio master)
     const audioTime = this.master.audioTime;
 
     this._trigger(audioTime, position, speed);
