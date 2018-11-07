@@ -281,7 +281,15 @@ class StreamEngine extends AudioTimeEngine {
     const { start, duration, overlapStart, overlapEnd } = this.bufferInfos[this._chunkIndex];
     const offset = position - start;
     const cached = this._cache.get(this._chunkIndex);
-    const { buffer } = cached;
+    let buffer = null;
+
+    try {
+      buffer = cached.buffer;
+    } catch(err) {
+      console.err(err.stack);
+      console.log('Undefined buffer at this._chunkIndex', this._chunkIndex);
+      return;
+    }
 
     // once triggered, the buffer is always removed from cache
     // so we don't need to worry about corruuting it the buffer
