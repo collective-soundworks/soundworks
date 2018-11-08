@@ -286,7 +286,7 @@ class StreamEngine extends AudioTimeEngine {
     try {
       buffer = cached.buffer;
     } catch(err) {
-      console.err(err.stack);
+      console.error(err.stack);
       console.log('Undefined buffer at this._chunkIndex', this._chunkIndex);
       return;
     }
