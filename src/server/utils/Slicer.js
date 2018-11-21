@@ -42,13 +42,8 @@ class Slicer {
     this.reader.loadBuffer(inputPath, (buffer) => {
       // buffer with associated format and description
       const metaBuffer = this.reader.interpretHeaders(buffer);
-
       // compress to mp3 if channels <= 2
-      const outputExtension = (this.compress && metaBuffer.numberOfChannels <= 2
-                               ? '.mp3'
-                               : '.wav'
-                              );
-
+      const outputExtension = this.compress && metaBuffer.numberOfChannels <= 2 ? 'mp3' : 'wav';
       const outputDir = path.join(input.dir, input.name);
 
       if (!fs.existsSync(outputDir)) {
@@ -57,35 +52,31 @@ class Slicer {
 
       // init slicing loop
       const totalDuration = metaBuffer.dataLength / metaBuffer.bytePerSecond;
-      let chunkStart = 0.;
-      let chunkIndex = 0;
       const chunkList = [];
-
       const encoderPromises = [];
+      const baseChunkDuration = this.chunkDuration;
+      const overlapDuration = this.overlapDuration;
 
+      let chunkStart = 0;
+      let chunkIndex = 0;
       // loop exit condition
       let overlapEnd;
-
       // at least one chunk
       do {
-        const chunked = this.getChunk(metaBuffer, chunkStart, this.chunkDuration + this.overlapDuration);
+        // const actualChunkDuration = baseChunkDuration + (Math.random() * 0.5 - 0.25) * baseChunkDuration;
+        const chunked = this.getChunk(metaBuffer, chunkStart, baseChunkDuration + overlapDuration);
         // chunk times rounded to actual samples: updated values
-        const chunkBuffer = chunked.chunkBuffer;
         chunkStart = chunked.chunkStart;
         const chunkDuration = chunked.chunkDuration;
+        const chunkBuffer = chunked.chunkBuffer;
 
-        const overlapStart = (chunkStart > this.overlapDuration
-                              ? this.overlapDuration
-                              : 0.);
+        const overlapStart = chunkStart > overlapDuration ? overlapDuration : 0;
+        overlapEnd = chunkStart + chunkDuration + overlapDuration < totalDuration ? overlapDuration : 0;
 
-        overlapEnd = (chunkStart + chunkDuration + this.overlapDuration < totalDuration
-                      ? this.overlapDuration
-                      : 0.);
+        const filename = `${chunkIndex}-${input.name}.${outputExtension}`;
+        const chunkPath = path.join(outputDir, filename);
 
-        const chunkPath = path.join(outputDir,
-                                    `${chunkIndex}-${input.name}${outputExtension}`);
-
-        if (outputExtension === '.mp3') {
+        if (outputExtension === 'mp3') {
           // need to encode segmented wav buffer to mp3
           const encoder = new Lame({
             output: chunkPath,
@@ -93,8 +84,7 @@ class Slicer {
           });
 
           encoder.setBuffer(chunkBuffer);
-
-          // TODO: limit the number of processes
+          // @todo - limit the number of processes
           const promise = encoder.encode().catch((error) => {
             console.error(`Error with lame ${error.message}`);
             throw error;
@@ -102,9 +92,9 @@ class Slicer {
 
           encoderPromises.push(promise);
         } else {
-          // WAV output
+          // wav output
           fs.writeFile(chunkPath, chunkBuffer, (error) => {
-            if(error) {
+            if (error) {
               console.error(`Error while saving WAV file: ${error}`);
               throw error;
             }
@@ -116,14 +106,14 @@ class Slicer {
           start:chunkStart,
           // logical duration
           duration: chunkDuration - overlapEnd,
-          overlapStart,
-          overlapEnd,
+          overlapStart: overlapStart,
+          overlapEnd: overlapEnd,
         });
 
         // next
-        chunkIndex++;
-        chunkStart += this.chunkDuration;
-      } while(overlapEnd > 0.);
+        chunkIndex += 1;
+        chunkStart += baseChunkDuration;
+      } while (overlapEnd > 0);
 
       Promise.all(encoderPromises).then(() => callback(chunkList));
     });
@@ -146,7 +136,6 @@ class Slicer {
    * @throws {Error} when extracted buffer is empty
    */
   getChunk(metaBuffer, chunkStart, chunkDuration) {
-
     // utils
     const dataStart = metaBuffer.dataStart;
     const dataLength = metaBuffer.dataLength;
@@ -156,32 +145,31 @@ class Slicer {
     const headBuffer = inputBuffer.slice(0, dataStart);
     const tailBuffer = inputBuffer.slice(dataStart + dataLength);
 
-    const chunkStartIndex = Math.round(metaBuffer.bytePerSecond * chunkStart);
+    const bytePerSecond = metaBuffer.bytePerSecond;
+    const chunkStartIndex = Math.round(bytePerSecond * chunkStart);
     // end index is exclusive: one more
-    const chunkEndIndex = 1 + chunkStartIndex + Math.round(metaBuffer.bytePerSecond * chunkDuration);
-
+    const chunkEndIndex = chunkStartIndex + Math.round(bytePerSecond * chunkDuration);
     const dataBuffer = inputBuffer.slice(dataStart + chunkStartIndex, dataStart + chunkEndIndex);
     const chunkLength = dataBuffer.length;
 
-    if(chunkLength === 0.) {
-      throw new Error(`ERROR: fetched empty buffer, for ${metaBuffer.outputDir},`
-                      + `starting at ${chunkStart}, duration ${chunkDuration}`);
+    if (chunkLength === 0.) {
+      const msg = `ERROR: fetched empty buffer, for ${metaBuffer.outputDir}, `
+                      + `starting at ${chunkStart}, duration ${chunkDuration}`;
+      throw new Error(msg);
     }
 
     // update data length descriptor in head buffer (last 4 bytes in header)
     headBuffer.writeUIntLE(dataBuffer.length, headBuffer.length - 4, 4);
-
     // concatenate head / data / tail buffers
-    const chunkBuffer = Buffer.concat([headBuffer, dataBuffer, tailBuffer],
-                                      headBuffer.length + tailBuffer.length + dataBuffer.length);
+    const length = headBuffer.length + tailBuffer.length + dataBuffer.length;
+    const chunkBuffer = Buffer.concat([headBuffer, dataBuffer, tailBuffer], length);
 
     return {
-      chunkBuffer,
-      chunkStart: chunkStartIndex / metaBuffer.bytePerSecond,
-      chunkDuration: chunkLength / metaBuffer.bytePerSecond,
+      chunkBuffer: chunkBuffer,
+      chunkStart: chunkStartIndex / bytePerSecond,
+      chunkDuration: chunkLength / bytePerSecond,
     };
   }
-
 }
 
 /**
