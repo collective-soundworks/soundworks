@@ -54,6 +54,10 @@ class SyncScheduler extends Service {
     this.ready();
   }
 
+  set lookahead(value) {
+    this._scheduler.lookahead = value;
+  }
+
   /**
    * Current audio time of the scheduler.
    * @instance
