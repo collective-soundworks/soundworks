@@ -50,7 +50,7 @@ class Sync extends Service {
     this._sync = new SyncClient(getTime);
     this._ready = false;
 
-    this.require('platform', { features: 'web-audio' });
+    this.require('platform', { features: ['web-audio'] });
 
     this._syncStatusReport = this._syncStatusReport.bind(this);
     this._reportListeners = [];
