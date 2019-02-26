@@ -198,7 +198,7 @@ const client = {
     socket.init(this.type, this.config.websockets);
 
     // see: http://socket.io/docs/client-api/#socket
-    this.socket.addStateListener((eventName) => {
+    this.socket.addStateListener(eventName => {
       switch (eventName) {
         case 'connect':
           const payload = { urlParams: this.urlParams };
