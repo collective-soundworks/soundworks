@@ -5,17 +5,25 @@ import { StringDecoder } from 'string_decoder';
 
 /**
  * Load and slice WAV file from input path.
+ *
+ * @param {Object} options
+ * @param {Number} [options.duration=4.] - Duration of each slices.
+ * @param {Boolean} [options.compress=true] - Defines if slices should be encoded as `wav` or `mp3`.
+ * @param {Number} [options.bitrate=192] - If compress is set to true, defines the bitrate of the resulting `mp3`.
+ * @param {Number} [options.overlap=0.] - Overlap duration between each slices.
  */
 class Slicer {
   constructor({
     duration = 4.,
     compress = true,
+    bitrate = 192,
     overlap = 0.
   } = {}) {
     // chunk duration, in seconds
     this.chunkDuration = duration;
     // output chunk audio format
     this.compress = compress;
+    this.bitrate = bitrate;
     // overlap duration, in seconds
     this.overlapDuration = overlap;
     // locals
@@ -80,7 +88,7 @@ class Slicer {
           // need to encode segmented wav buffer to mp3
           const encoder = new Lame({
             output: chunkPath,
-            bitrate: 128,
+            bitrate: this.bitrate,
           });
 
           encoder.setBuffer(chunkBuffer);
@@ -297,13 +305,13 @@ class WavFormatReader {
     let descriptors = new Map();
 
     // search for buffer descriptors
-    while(index < buffer.length) {
+    while (index < buffer.length) {
 
       // read chunk descriptor
       let bytes = buffer.slice(index, index + descriptorLength);
       descriptor = this.stringDecoder.write(bytes);
 
-      if(descriptor === 'RIFF') {
+      if (descriptor === 'RIFF') {
         // RIFF descriptor's length is always 12 bytes
         chunkLength = 12;
         descriptors.set(descriptor, {

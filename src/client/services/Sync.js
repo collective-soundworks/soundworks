@@ -84,6 +84,9 @@ class Sync extends Service {
     return this._sync.getLocalTime(syncTime);
   }
 
+  /**
+   * alias of `getAudioTime`
+   */
   getLocalTime(syncTime) {
     return this._sync.getLocalTime(syncTime);
   }

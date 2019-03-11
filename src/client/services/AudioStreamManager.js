@@ -256,6 +256,10 @@ class StreamEngine extends AudioTimeEngine {
   }
 
   _clearCache(chunkIndex) {
+    if (!this.bufferInfos[chunkIndex]) {
+      throw new Error(`_clearCache: Undefined chunkIndex: ${chunkIndex}`);
+    }
+
     const position = this.bufferInfos[chunkIndex].start;
     const advanceThreshold = position + this.requiredAdvanceThreshold;
     const indexesToKeep = [];
@@ -279,20 +283,20 @@ class StreamEngine extends AudioTimeEngine {
 
   _trigger(audioTime, position, speed) {
     const { start, duration, overlapStart, overlapEnd } = this.bufferInfos[this._chunkIndex];
-    const offset = position - start;
+    const offset = Math.max(0, position - start); // floating point error seems to occur
     const cached = this._cache.get(this._chunkIndex);
     let buffer = null;
 
     try {
       buffer = cached.buffer;
     } catch(err) {
+      console.log('Undefined buffer at this._chunkIndex', this._chunkIndex, this._cache);
       console.error(err.stack);
-      console.log('Undefined buffer at this._chunkIndex', this._chunkIndex);
       return;
     }
 
     // once triggered, the buffer is always removed from cache
-    // so we don't need to worry about corruuting it the buffer
+    // so that corrupting the buffer's data is not a problem
     const fadeInStartPosition = offset;
     const fadeInDuration = offset > 0 ? 0.005 : overlapStart;
     const fadeOutStartPosition = Math.max(duration, fadeInStartPosition + fadeInDuration);
@@ -328,9 +332,7 @@ class StreamEngine extends AudioTimeEngine {
 
   _halt(audioTime) {
     if (this._chunkSrc) {
-      // const { src, env } = this._chunkSrc;
       const src = this._chunkSrc;
-      // @todo - check
       src.stop(audioTime);
 
       this._chunkSrc = null;
@@ -369,8 +371,12 @@ class StreamEngine extends AudioTimeEngine {
         index += 1;
       }
 
-      // @note - negative positions are already handled by the transport and playControl
+      // if we are outside the stream, go to Infinity
+      if (this._chunkIndex === -1) {
+        return Infinity;
+      }
 
+      // @note - negative positions are already handled by the `transport` and `playControl`
       // clear files that won't be needed anymore from the cache
       this._clearCache(this._chunkIndex);
 
@@ -401,6 +407,9 @@ class StreamEngine extends AudioTimeEngine {
           }
         }
 
+        // once everything is loaded, we call reset position
+        // @note - could probably lead to a concurrency problem, if sync position
+        //         is called again while still buffering
         Promise.all(promises).then(buffers => {
           this.resetPosition();
         });

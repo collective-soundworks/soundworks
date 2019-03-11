@@ -68,6 +68,14 @@ class Sync extends Service {
   getSyncTime() {
     return this._sync.getSyncTime();
   }
+
+  /**
+   * Returns the current time in the sync clock, derived from `process.hrtime()`.
+   * @return {Number} - Current sync time (in _seconds_).
+   */
+  getCurrentTime() {
+    return this._sync.getSyncTime();
+  }
 }
 
 serviceManager.register(SERVICE_ID, Sync);

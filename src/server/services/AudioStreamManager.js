@@ -22,9 +22,10 @@ const SERVICE_ID = 'service:audio-stream-manager';
  *
  * @param {Object} options
  * @param {Array<String>} options.audioFiles - list of paths towards would-be-streamable audio files.
- * @param {Bool} options.compress - Generate .mp3 stream chunks if set to true. Keep input file extension otherwise.
- * @param {Number} options.duration - Audio chunks duration (in sec).
- * @param {Number} options.overlap - Duration of additional audio samples added to head and tail of streamed audio
+ * @param {Bool} [options.compress=true] - Generate .mp3 stream chunks if set to true. Keep input file extension otherwise.
+ * @param {Number} [options.bitrate=192] - If compress is set to true, defines the bitrate of the resulting `mp3`.
+ * @param {Number} [options.duration=4.] - Audio chunks duration (in sec).
+ * @param {Number} [options.overlap=0.1] - Duration of additional audio samples added to head and tail of streamed audio
  *  buffers. Paired with a fade-in fade-out mechanism on client's side, this allows to hide distortions induced by
  *  mp3 encoding of audio chunks not starting / finishing with zeroed samples.
  *
@@ -49,6 +50,7 @@ class AudioStreamManager extends Service {
     const defaults = {
       audioFiles: null,
       compress: true,
+      bitrate: 192,
       duration: 4,
       overlap: 0.1,
       publicDirectory: 'public',
@@ -104,23 +106,34 @@ class AudioStreamManager extends Service {
 
     const slicer = new Slicer({
       compress: this.options.compress,
+      bitrate: this.options.bitrate,
       duration: this.options.duration,
-      overlap: this.options.overlap
+      overlap: this.options.overlap,
     });
 
     function next() {
       index += 1;
 
-      if (index >= numFiles)
+      if (index >= numFiles) {
         callback(bufferInfos);
-      else
+      } else {
         processFile();
+      }
     }
 
     function processFile() {
       const streamId = streamIds[index];
-      // const fileId = ;
-      const filename = path.join(publicDirectory, audioFiles[streamId]);
+      const file = audioFiles[streamId];
+
+      if (!file) {
+        throw new Error(`Undefined stream path for stream "${streamId}"`);
+      }
+
+      const filename = path.join(publicDirectory, file);
+
+      if (!fs.existsSync(filename)) {
+        throw new Error(`Invalid file (${file}) for stream "${streamId}"`);
+      }
 
       const cachedItem = cache.read(SERVICE_ID, streamId);
       const stats = fs.statSync(filename);
