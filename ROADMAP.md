@@ -47,3 +47,13 @@ update Square to assess `AudioStreamManager` API
 
 - clean old branches
 - deploy v3.0.0
+
+
+## v.Next
+
+- make services more dynamic (ex. audioStreamManager: add a new stream while app is running, etc.)
+- improve workflow (ex. more audioStreamManager robust audioStream caching system)
+- improve reconnection of client(s)
+
+- create a cli to create app, new clients etc.
+- formalize States, Stores and Flows.
