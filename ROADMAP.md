@@ -18,6 +18,8 @@ update Square to assess `AudioStreamManager` API
 - replace express w/ something more simple?
 - merge Process and Activity (aka remove Activity)
 - decouple / explicit Experience from serviceManager.ready();
+- remove bunyan logs (too noisy). explore ways to create a nice shell gui that could give important informations (kind of controller...)
+- review how soundworks handle `html` entry point. Move in `src/server` in template
 
 ### 3. View and Services
 
