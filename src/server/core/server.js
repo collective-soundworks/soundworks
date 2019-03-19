@@ -299,7 +299,7 @@ const server = {
     }).then((httpServer) => {
       this._initSockets(httpServer);
 
-      this.httpServer = httpServer
+      this.httpServer = httpServer;
 
       const promise = new Promise((resolve, reject) => {
         serviceManager.signals.ready.addObserver(() => {

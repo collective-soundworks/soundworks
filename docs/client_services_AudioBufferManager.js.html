@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Soundworks - Source: client/services/AudioBufferManager.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+    <link type="text/css" rel="stylesheet" href="styles/overrides.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <!-- if home page assume a title is already present in README -->
+    
+    <h1 class="page-title">Source: client/services/AudioBufferManager.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import { audioContext } from 'waves-audio';
+import { SuperLoader } from 'waves-loaders';
+import debug from 'debug';
+import Service from '../core/Service';
+import serviceManager from '../core/serviceManager';
+
+/**
+ * API of a compliant view for the `audio-buffer-manager` service.
+ *
+ * @memberof module:soundworks/client
+ * @interface AbstractAudioBufferManagerView
+ * @extends module:soundworks/client.AbstractView
+ * @abstract
+ */
+/**
+ * Update the progress bar of the view with the given ratio.
+ *
+ * @name setProgressRatio
+ * @memberof module:soundworks/client.AbstractAudioBufferManagerView
+ * @function
+ * @abstract
+ * @instance
+ *
+ * @param {Number} ratio - Progress ratio of the loaded assets (between 0 and 1).
+ */
+
+const SERVICE_ID = 'service:audio-buffer-manager';
+const log = debug('soundworks:services:audio-buffer-manager');
+
+function flattenLists(a) {
+  const ret = [];
+  const fun = (val) => Array.isArray(val) ? val.forEach(fun) : ret.push(val);
+  fun(a);
+  return ret;
+}
+
+function clonePathObj(value) {
+  if (typeof value === 'object') {
+    const className = value.constructor.name;
+    let clone = null;
+
+    if (className === 'Object')
+      clone = {};
+    else if (className === 'Array')
+      clone = [];
+    else
+      return value;
+
+    for (let key in value)
+      clone[key] = clonePathObj(value[key]);
+
+    return clone;
+  }
+
+  return value;
+}
+
+// const regexp = /\.[a-zA-Z0-9]{3,4}$/;
+
+// supported media formats + json
+// https://developer.mozilla.org/en-US/docs/Web/HTML/Supported_media_formats
+const regexp = /\.(wav|mp3|mp4|aac|aif|aiff|ogg|webm|json)$/i;
+
+function isFilePath(str) {
+  return (typeof str === 'string' &amp;&amp; regexp.test(str));
+}
+
+function isDirSpec(obj) {
+  return (typeof obj === 'object' &amp;&amp; typeof obj.path === 'string');
+}
+
+function decomposePathObj(obj, pathList, refList, dirs = false) {
+  for (let key in obj) {
+    const value = obj[key];
+
+    if ((!dirs &amp;&amp; isFilePath(value)) || (dirs &amp;&amp; isDirSpec(value))) {
+      const ref = { obj, key };
+      let index = -1;
+
+      if (!dirs)
+        index = pathList.indexOf(value);
+
+      if (index === -1) {
+        const length = pathList.push(value);
+
+        index = length - 1;
+        refList[index] = [];
+      }
+
+      refList[index].push(ref);
+
+      obj[key] = null;
+    } else if (typeof value === 'object') {
+      decomposePathObj(value, pathList, refList, dirs);
+    }
+  }
+}
+
+function populateRefList(refList, loadedObjList) {
+  const length = refList.length;
+
+  if (length !== loadedObjList.length) {
+    throw new Error(`[${SERVICE_ID}] Loaded Buffers do not match file definion`);
+  }
+
+  for (let i = 0; i &lt; length; i++) {
+    const refs = refList[i];
+
+    for (let j = 0, l = refs.length; j &lt; l; j++) {
+      const ref = refs[j];
+      const obj = ref.obj;
+      const key = ref.key;
+
+      obj[key] = loadedObjList[i];
+    }
+  }
+}
+
+function createObjFromPathList(pathList, commonPath) {
+  let obj = [];
+
+  for (let path of pathList) {
+    let subPathIndex = path.indexOf(commonPath);
+
+    if (subPathIndex >= 0) {
+      subPathIndex += commonPath.length;
+
+      if (path[subPathIndex] === '/')
+        subPathIndex++;
+
+      const subPath = path.substring(subPathIndex);
+      const nodes = subPath.split('/');
+      const depth = nodes.length;
+      let ref = obj;
+      let i;
+
+      for (i = 0; i &lt; depth - 1; i++) {
+        const key = nodes[i];
+
+        if (ref[key] === undefined)
+          ref[key] = [];
+
+        ref = ref[key];
+      }
+
+      ref.push(path);
+    }
+
+    // transform empty array to object
+    if (obj.length === 0)
+      obj = Object.assign({}, obj);
+  }
+
+  return obj;
+}
+
+function prefixPaths(pathList, prefix) {
+  // test absolute urls (or protocol relative)
+  const isAbsolute = /^https?:\/\/|^\/\//i;
+
+  pathList = pathList.map((path) => {
+    if (isAbsolute.test(path) || prefix === '/')
+      return path;
+    else
+      return prefix + path;
+  });
+
+  return pathList;
+}
+
+/**
+ * Interface for the client `'audio-buffer-manager'` service.
+ *
+ * This service allows to preload files and store them into buffers
+ * before the beginning of the experience. Audio files will be converted and
+ * stored into AudioBuffer objects.
+ *
+ * @param {Object} options
+ * @param {Array&lt;String>} options.assetsDomain - Prefix concatenated to all
+ *  given paths.
+ * @param {Object} options.files - Definition of files to load.
+ * @param {Object} options.directories - Definition of directories to load.
+ * @param {Array&lt;String>} options.directories - List of directories to load.
+ * @param {String|module:soundworks/client.FileSystem~ListConfig} [options.directories=null] -
+ *  Load all the files in particular directories. If setted this option relies
+ *  on the {@link module:soundworks/client.FileSystem} which itself relies on
+ *  its server counterpart, the audio-buffer-manager can then no longer be
+ *  considered as a client-only service.
+ *
+ * @memberof module:soundworks/client
+ * @example
+ * // require and configure the `audio-buffer-manager` inside the experience
+ * // constructor
+ * // Defining a single array of audio files results in a single
+ * // array of audio buffers associated to the identifier `default`.
+ *
+ * // There are two different ways to specify the files to be loaded and the
+ * // data structure in which the loaded data objects are arranged:
+ * //
+ * // (1.) With the 'files' option, the files and structure are defined by an
+ * // object of any depth that contains file paths. All specified files are
+ * // loaded and the loaded data objects are stored into an object of the same
+ * // structure as the definition object.
+ *
+ * this.audioBufferManager = this.require('audio-buffer-manager', { files: [
+ *   'sounds/drums/kick.mp3',
+ *   'sounds/drums/snare.mp3'
+ * ]});
+ *
+ * this.audioBufferManager = this.require('audio-buffer-manager', { files: {
+ *   kick: 'sounds/kick_44kHz.mp3',
+ *   snare: 'sounds/808snare.mp3'
+ * }});
+ *
+ * this.audioBufferManager = this.require('audio-buffer-manager', { files: {
+ *   latin: {
+ *     audio: 'loops/sheila-e-raspberry.mp3',
+ *     markers: 'loops/sheila-e-raspberry-markers.json',
+ *   },
+ *   jazz: {
+ *     audio: 'loops/nussbaum-shuffle.mp3',
+ *     markers: 'loops/nussbaum-shuffle-markers.json',
+ *   },
+ * }});
+ *
+ * this.audioBufferManager = this.require('audio-buffer-manager', { files: {
+ *   instruments: [
+ *     'sounds/instruments/kick_44kHz.mp3',
+ *     'sounds/instruments/808snare.mp3'],
+ *   loops: [
+ *     'sounds/loops/sheila-e-raspberry.mp3',
+ *     'sounds/loops/nussbaum-shuffle.mp3'],
+ * }});
+ *
+ * //(2.) The 'directories' option can be used to load the files of a
+ * // given directory. Each directory is specified by an object that has a
+ * // property 'path' with the directory path and optionally the keys
+ * // 'recursive' (specifying whether the directory's sub-directories are
+ * // considered) and a key 'match' (specifying a regexp to select the files
+ * // in the given directory).
+ *
+ * // With the option 'recursive' set to false, all (matching) files
+ * // in a given directoriy are loaded into an arrays of objects without
+ * // considering sub-directories. The arrays of loaded data objects are
+ * // arranged in the same data structure as the definition object.
+ *
+ * this.audioBufferManager = this.require('audio-buffer-manager', {
+ *   directories: {
+ *     instruments: { path: 'sounds/instruments', recursive: false },
+ *     loops: { path: 'sounds/instruments', recursive: false },
+ *   },
+ * });
+ *
+ * // When 'recursive' is set to true, all (matching) files in the given
+ * // directories and their sub-directories are loaded as arrays of objects.
+ * // With the option 'flatten' set to true, all files in the defined directory
+ * // and its sub-directories are loaded into a single array. When the option
+ * // 'flatten' set to false, the files of each sub-directory are assembled
+ * // into an array and all of these arrays are arranged to a data structure
+ * // that reproduces the sub-directory tree of the defined directories.
+ * // The resulting data structure corresponds to the structure of the
+ * // definition object extended by the defined sub-directory trees.
+ *
+ * // The following option results in a single array of pre-loaded files:
+ * this.audioBufferManager = this.require('audio-buffer-manager', {
+ *   directories: {
+ *     path: 'sounds',
+ *     recursive: true,
+ *     flatten: true,
+ *     match: /\.mp3/,
+ *   },
+ * });
+ *
+ * // This variant results in a data structure that reproduces the
+ * // sub-directory tree of the 'sounds' directory:
+ * this.audioBufferManager = this.require('audio-buffer-manager', {
+ *   directories: {
+ *     path: 'sounds',
+ *     recursive: true,
+ *     match: /\.mp3/,
+ *   },
+ * });
+ *
+ * // The loaded objects can be retrieved according to their definition, as for example :
+ * const kickBuffer = this.audioBufferManager.data.kick;
+ * const audioBuffer = this.audioBufferManager.data.latin.audio;
+ * const markerArray = this.audioBufferManager.data.jazz.markers;
+ * const snareBuffer = this.audioBufferManager.data.instruments[1];
+ * const nussbaumLoop = this.audioBufferManager.data.loops[1];
+ */
+class AudioBufferManager extends Service {
+  /** _&lt;span class="warning">__WARNING__&lt;/span> This class should never be instanciated manually_ */
+  constructor() {
+    super(SERVICE_ID, false);
+
+    const defaults = {
+      assetsDomain: '',
+      files: null,
+      directories: null,
+      audioWrapTail: 0,
+      viewPriority: 4,
+      debug: false, // if set to true, the service never "ready" to debug the view
+    };
+
+    this.view = null;
+
+    /**
+     * Data structure correponding to the structure of requested files.
+     * @private
+     */
+    this.data = [];
+
+    this.configure(defaults);
+  }
+
+  /** @private */
+  configure(options) {
+    super.configure(options);
+
+    const directories = this.options.directories;
+
+    if (directories !== null)
+      this._fileSystem = this.require('file-system');
+  }
+
+  /** @private */
+  start() {
+    super.start();
+
+    this.show();
+
+    if (this.options.files || this.options.directories) {
+      if (this.options.files)
+        this.loadFiles(this.options.files, this.view);
+
+      if (this.options.directories)
+        this.loadDirectories(this.options.directories, this.view);
+    } else {
+      this.ready();
+    }
+  }
+
+  /** @private */
+  stop() {
+    this.hide();
+    super.stop();
+  }
+
+  ready() {
+    if (this.options.debug === false)
+      super.ready();
+  }
+
+  /**
+   * Load files defined as a set of file paths.
+   * @param {Object} defObj - Definition of files to load
+   * @returns {Promise} - Promise resolved with the resulting data structure
+   */
+  loadFiles(defObj, view = null) {
+    const promise = new Promise((resolve, reject) => {
+      let pathList = [];
+      let refList = [];
+
+      if (typeof defObj === 'string')
+        defObj = [defObj];
+
+      // create data object copying the strcuture of the file definion object
+      const dataObj = clonePathObj(defObj);
+      decomposePathObj(dataObj, pathList, refList, false);
+
+      // prefix relative paths with assetsDomain
+      pathList = prefixPaths(pathList, this.options.assetsDomain);
+
+      log(pathList, refList);
+
+      // load files
+      if (pathList.length > 0) {
+        const loader = new SuperLoader();
+        loader.setAudioContext(audioContext);
+
+        if (view &amp;&amp; view.setProgressRatio) {
+          const progressPerFile = pathList.map(() => 0); // track files loading progress
+
+          loader.progressCallback = (e) => {
+            progressPerFile[e.index] = e.value;
+
+            let totalProgress = 0;
+
+            for (let i = 0; i &lt; progressPerFile.length; i++)
+              totalProgress += progressPerFile[i];
+
+            totalProgress /= progressPerFile.length;
+
+            view.setProgressRatio(totalProgress);
+          };
+        }
+
+        loader
+          .load(pathList, {
+            wrapAroundExtention: this.options.audioWrapTail,
+          })
+          .then((loadedObjList) => {
+            // place loaded objects (i.e. audio buffers and json files) into the structure of the file definition object
+            populateRefList(refList, loadedObjList);
+
+            // mix loaded objects into data
+            Object.assign(this.data, dataObj);
+            this.ready();
+            resolve(dataObj);
+          })
+          .catch((error) => {
+            reject(error);
+            console.error(error);
+          });
+      } else {
+        this.ready();
+        resolve([]);
+      }
+    });
+
+    return promise;
+  }
+
+  /**
+   * Load files defined as a set of directory paths.
+   * @param {Object} defObj - Definition of files to load
+   * @returns {Promise} - Promise resolved with the resulting data structure
+   */
+  loadDirectories(defObj, view = null) {
+    const promise = new Promise((resolve, reject) => {
+      let dirDefList = [];
+      let dirRefList = [];
+
+      // for the case that just a directory object is given as definition,
+      // we have to wrap it temporarily into a dummy object
+      defObj = { def: defObj };
+
+      let fileDefObj = clonePathObj(defObj); // clone definition object
+
+      // decompose directory definition into list of directory paths (strings)
+      decomposePathObj(fileDefObj, dirDefList, dirRefList, true);
+
+      this._fileSystem.getList(dirDefList)
+        .then((filePathListList) => {
+          const subDirList = [];
+          const length = filePathListList.length;
+
+          // create sub directory file definitions (list of file paths structured into sub directory trees derived from file paths)
+          if (length === dirDefList.length) {
+            for (let i = 0; i &lt; length; i++) {
+              const dirPath = dirDefList[i].path;
+              const flatten = !!dirDefList[i].flatten;
+              const pathList = filePathListList[i];
+              let subDir = pathList;
+
+              if(!flatten)
+                subDir = createObjFromPathList(pathList, dirPath);
+
+              subDirList.push(subDir);
+            }
+
+            // replace directory paths in initial definition by sub directory file definitions
+            // to create a complete file definition object
+            populateRefList(dirRefList, subDirList);
+          } else {
+            throw new Error(`[${SERVICE_ID}] Cannot retrieve file paths from defined directories`);
+          }
+
+          // unwrap subDir from dummy object
+          fileDefObj = fileDefObj.def;
+
+          // load files
+          this.loadFiles(fileDefObj, view)
+            .then((data) => {
+              this.ready();
+              resolve(data);
+            }).catch((error) => reject(error));
+        }).catch((error) => reject(error));
+    });
+
+    return promise;
+  }
+
+  /**
+   * wrapAround, copy the begining input buffer to the end of an output buffer
+   * @private
+   * @param {arraybuffer} inBuffer {arraybuffer} - The input buffer
+   * @returns {arraybuffer} - The processed buffer (with frame copied from the begining to the end)
+   */
+  _wrapAround(inBuffer) {
+    const inLength = inBuffer.length;
+    const outLength = inLength + this.options.wrapAroundExtension * inBuffer.sampleRate;
+    const outBuffer = audioContext.createBuffer(inBuffer.numberOfChannels, outLength, inBuffer.sampleRate);
+    let arrayChData, arrayOutChData;
+
+    for (let ch = 0; ch &lt; inBuffer.numberOfChannels; ch++) {
+      arrayChData = inBuffer.getChannelData(ch);
+      arrayOutChData = outBuffer.getChannelData(ch);
+
+      for (let i = 0; i &lt; inLength; i++)
+        arrayOutChData[i] = arrayChData[i];
+
+      for (let i = inLength; i &lt; outLength; i++)
+        arrayOutChData[i] = arrayChData[i - inLength];
+    }
+
+    return outBuffer;
+  }
+
+  /** deprecated */
+  load(files, view = null) {
+    return this.loadFiles(files, view);
+  }
+
+  /**
+   * Retrieve a loaded object.
+   * @param {String} id - Object or group identifier.
+   * @param {String} key - Member key in group.
+   * @returns {Promise} - Returns the loaded object.
+   */
+  get(id, key = null) {
+    const obj = this.data[id];
+
+    if (obj &amp;&amp; (key !== null))
+      return obj[key];
+
+    return obj;
+  }
+}
+
+serviceManager.register(SERVICE_ID, AudioBufferManager);
+
+export default AudioBufferManager;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-soundworks_client.html">soundworks/client</a></li><li><a href="module-soundworks_server.html">soundworks/server</a></li></ul><h3>Classes</h3><ul><li><a href="module-soundworks_client.Activity.html">soundworks/client.Activity</a></li><li><a href="module-soundworks_client.AudioBufferManager.html">soundworks/client.AudioBufferManager</a></li><li><a href="module-soundworks_client.AudioScheduler.html">soundworks/client.AudioScheduler</a></li><li><a href="module-soundworks_client.AudioStreamManager.html">soundworks/client.AudioStreamManager</a></li><li><a href="module-soundworks_client.AudioStreamManager.AudioStream.html">soundworks/client.AudioStreamManager.AudioStream</a></li><li><a href="module-soundworks_client.Auth.html">soundworks/client.Auth</a></li><li><a href="module-soundworks_client.Canvas2dRenderer.html">soundworks/client.Canvas2dRenderer</a></li><li><a href="module-soundworks_client.Canvas2dRenderingGroup.html">soundworks/client.Canvas2dRenderingGroup</a></li><li><a href="module-soundworks_client.CanvasView.html">soundworks/client.CanvasView</a></li><li><a href="module-soundworks_client.Checkin.html">soundworks/client.Checkin</a></li><li><a href="module-soundworks_client.ErrorReporter.html">soundworks/client.ErrorReporter</a></li><li><a href="module-soundworks_client.Experience.html">soundworks/client.Experience</a></li><li><a href="module-soundworks_client.FileSystem.html">soundworks/client.FileSystem</a></li><li><a href="module-soundworks_client.Geolocation.html">soundworks/client.Geolocation</a></li><li><a href="module-soundworks_client.Locator.html">soundworks/client.Locator</a></li><li><a href="module-soundworks_client.MotionInput.html">soundworks/client.MotionInput</a></li><li><a href="module-soundworks_client.Network.html">soundworks/client.Network</a></li><li><a href="module-soundworks_client.Placer.html">soundworks/client.Placer</a></li><li><a href="module-soundworks_client.Platform.html">soundworks/client.Platform</a></li><li><a href="module-soundworks_client.RawSocket.html">soundworks/client.RawSocket</a></li><li><a href="module-soundworks_client.SegmentedView.html">soundworks/client.SegmentedView</a></li><li><a href="module-soundworks_client.Service.html">soundworks/client.Service</a></li><li><a href="module-soundworks_client.SharedConfig.html">soundworks/client.SharedConfig</a></li><li><a href="module-soundworks_client.SharedParams.html">soundworks/client.SharedParams</a></li><li><a href="module-soundworks_client.Sync.html">soundworks/client.Sync</a></li><li><a href="module-soundworks_client.SyncScheduler.html">soundworks/client.SyncScheduler</a></li><li><a href="module-soundworks_client.View.html">soundworks/client.View</a></li><li><a href="module-soundworks_server.Activity.html">soundworks/server.Activity</a></li><li><a href="module-soundworks_server.AudioBufferManager.html">soundworks/server.AudioBufferManager</a></li><li><a href="module-soundworks_server.AudioStreamManager.html">soundworks/server.AudioStreamManager</a></li><li><a href="module-soundworks_server.Auth.html">soundworks/server.Auth</a></li><li><a href="module-soundworks_server.Checkin.html">soundworks/server.Checkin</a></li><li><a href="module-soundworks_server.Client.html">soundworks/server.Client</a></li><li><a href="module-soundworks_server.ErrorReporter.html">soundworks/server.ErrorReporter</a></li><li><a href="module-soundworks_server.Experience.html">soundworks/server.Experience</a></li><li><a href="module-soundworks_server.Geolocation.html">soundworks/server.Geolocation</a></li><li><a href="module-soundworks_server.Locator.html">soundworks/server.Locator</a></li><li><a href="module-soundworks_server.MetricScheduler.html">soundworks/server.MetricScheduler</a></li><li><a href="module-soundworks_server.Network.html">soundworks/server.Network</a></li><li><a href="module-soundworks_server.Osc.html">soundworks/server.Osc</a></li><li><a href="module-soundworks_server.Placer.html">soundworks/server.Placer</a></li><li><a href="module-soundworks_server.RawSocket.html">soundworks/server.RawSocket</a></li><li><a href="module-soundworks_server.Service.html">soundworks/server.Service</a></li><li><a href="module-soundworks_server.SharedConfig.html">soundworks/server.SharedConfig</a></li><li><a href="module-soundworks_server.SharedParams.html">soundworks/server.SharedParams</a></li><li><a href="module-soundworks_server.Sync.html">soundworks/server.Sync</a></li><li><a href="module-soundworks_server.SyncScheduler.html">soundworks/server.SyncScheduler</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-soundworks_client.client.html">soundworks/client.client</a></li><li><a href="module-soundworks_client.viewport.html">soundworks/client.viewport</a></li><li><a href="module-soundworks_server.server.html">soundworks/server.server</a></li></ul><h3>Interfaces</h3><ul><li><a href="module-soundworks_client.AbstractAudioBufferManagerView.html">soundworks/client.AbstractAudioBufferManagerView</a></li><li><a href="module-soundworks_client.AbstractAuthView.html">soundworks/client.AbstractAuthView</a></li><li><a href="module-soundworks_client.AbstractCheckinView.html">soundworks/client.AbstractCheckinView</a></li><li><a href="module-soundworks_client.AbstractLocatorView.html">soundworks/client.AbstractLocatorView</a></li><li><a href="module-soundworks_client.AbstractPlacerView.html">soundworks/client.AbstractPlacerView</a></li><li><a href="module-soundworks_client.AbstractPlatformView.html">soundworks/client.AbstractPlatformView</a></li><li><a href="module-soundworks_client.AbstractView.html">soundworks/client.AbstractView</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    
+        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Mon Aug 06 2018 16:36:15 GMT+0200 (CEST)
+    
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

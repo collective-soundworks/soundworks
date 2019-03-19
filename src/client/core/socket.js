@@ -30,6 +30,10 @@ const socket = {
       path: options.path,
     });
 
+    this.socket.on('error', (...args) => {
+      console.error('error', ...args);
+    });
+
     log(`initialized
           - url: ${options.url}/${namespace}
           - transports: ${options.transports}

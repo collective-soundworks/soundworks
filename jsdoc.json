@@ -69,7 +69,7 @@
   ],
   "opts": {
     "projectTitle": "Soundworks",
-    "template": "node_modules/jsdoc-template",
+    "template": "node_modules/@ircam/jsdoc-template",
     "destination": "./docs",
     "encoding": "utf8"
   },
