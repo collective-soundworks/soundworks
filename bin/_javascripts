@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-var babel = require('babel-core');
+var babel = require('@babel/core');
 var fse = require('fs-extra');
 var log = require('./log');
 var path = require('path');

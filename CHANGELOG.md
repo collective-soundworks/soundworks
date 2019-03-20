@@ -4,7 +4,6 @@
 - deprecated AudioStreamManager API
 - deprecated ControllerExperience
 - updated SyncScheduler using waves-masters
-
 - improved event declaration in views
 
 ## **v2.1.0**

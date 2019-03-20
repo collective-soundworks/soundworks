@@ -1,39 +1,40 @@
 #!/usr/bin/env node
-var pkg = require('../package.json');
-var colors = require('colors');
-var path = require('path');
+const pkg = require('../package.json');
+const chalk = require('chalk');
+const path = require('path');
 
-'use strict';
+const prefix = '[' + pkg.name + ']\t';
 
-var prefix = '[' + pkg.name + ']\t';
-var cwd = process.cwd();
-
-function toRel(target) {
-  return path.relative(cwd, target);
+module.exports.transpileSuccess = (src, dist, dt) => {
+  const msg = prefix + chalk.green('%s: successfully transpiled to "%s" (%sms)');
+  console.log(msg, src.rel, dist.rel, dt);
 }
 
-function getDeltaTime(time) {
-  return new Date().getTime() - time;
+module.exports.transpileError = (src, err) => {
+  const msg = prefix + chalk.red('%s');
+  const content = err.message.replace(src.abs, src.rel);
+  console.log(msg, content);
+  console.log(err.codeFrame);
 }
 
-var log = {
-  transpileSuccess: function(src, dest, startTime) {
-    var time = getDeltaTime(startTime);
-    var msg = prefix + '%s: successfully transpiled to "%s" (%sms)'.green;
-    console.log(msg, toRel(src), toRel(dest), time);
-  },
+module.exports.copyFileSuccess = (file, dist, dt) => {
+  const msg = prefix + chalk.green('%s: successfully copied to "%s" (%sms)');
+  console.log(msg, file.rel, dist.rel, dt);
+}
 
-  transpileError: function(err) {
-    var parts = err.message.split(':');
-    var msg = prefix + '%s'.red;
-    console.log(msg, toRel(err.message));
-    console.log(err.codeFrame);
-  },
+module.exports.copyFileError = (file, err) => {
+  const msg = prefix + chalk.red('error copying %s');
+  console.log(msg, file.rel);
+  console.error(err.stack);
+}
 
-  deleteFile: function(filename) {
-    var msg = prefix + '%s: successfully removed'.yellow;
-    console.log(msg, toRel(filename));
-  }
-};
+module.exports.deleteFileSuccess = (file) => {
+  const msg = prefix + chalk.yellow('%s: successfully deleted');
+  console.log(msg, file.rel);
+}
 
-module.exports = log;
+module.exports.deleteFileError = (file, err) => {
+  const msg = prefix + chalk.red('error deleting %s');
+  console.log(msg, file.rel);
+  console.error(err.stack);
+}

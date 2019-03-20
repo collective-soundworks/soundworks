@@ -1,5 +1,7 @@
 {
   "sourceMap": "inline",
-  "presets": ["es2015"],
-  "plugins": ["transform-runtime", "transform-es2015-modules-commonjs"]
+  "presets": ["@babel/preset-env"],
+  "plugins": [
+    "@babel/plugin-transform-runtime"
+  ]
 }

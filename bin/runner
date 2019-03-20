@@ -1,25 +1,22 @@
 #!/usr/bin/env node
-var fse = require('fs-extra');
-var klaw = require('klaw');
-var watch = require('watch');
-var path = require('path');
-var util = require('util');
+const fse = require('fs-extra');
+const watch = require('watch');
+const path = require('path');
+const fileStore = require('./fileStore');
+const log = require('./log');
+const transpiler = require('./transpiler');
+const utils = require('./utils');
 
-var javascripts = require('./javascripts');
-var cwd = process.cwd();
+// var javascripts = require('./javascripts');
+const cwd = process.cwd();
 
-'use strict';
+// --------------------------------------------------------------------------
+// Tools configuration
+// --------------------------------------------------------------------------
 
-/**
- * Options for babel transpiling (cf .babelrc).
- */
-var babelrc = fse.readFileSync(path.join(cwd, '.babelrc'));
-var babelOptions = JSON.parse(babelrc);
+const babelOptions = JSON.parse(fse.readFileSync(path.join(cwd, '.babelrc')));
 
-/**
- * Options for watch.
- */
-var watchOptions = {
+const watchOptions = {
   ignoreDotFiles: true,
   ignoreUnreadableDir: true,
   ignoreNotPermitted: true,
@@ -30,45 +27,16 @@ function getWatchOptions() {
   return Object.assign({}, watchOptions);
 }
 
-/**
- * Watched directories
- */
-var srcDirectory = path.join(cwd, 'src');
-var distDirectory = path.join(cwd, '.');
+const srcDirectory = path.join(cwd, 'src');
+const srcRegExp = new RegExp('^' + escapeRegExp(srcDirectory));
 
-/**
- * Define which file should be ignored by every command.
- */
-var allowedExtentions = /\.ejs$|\.scss$|\.js$/;
-var excludeFiles = /^\./; // exclude hidden files
+const distDirectory = path.join(cwd, '.');
 
-
-/* --------------------------------------------------------------------------
- * Process and execute the given command.
- * -------------------------------------------------------------------------- */
-
-var command = process.argv[2];
-var args = process.argv.slice(3);
-var argv = {};
-for (var i = 0; i < args.length; i += 2) {
-  argv[args[i]] = args[i + 1];
-}
-
-switch (command) {
-  /**
-   * Watch the file system and transpile from es6 to es5.
-   */
-  case '--watch':
-    watchFiles(srcDirectory, distDirectory);
-    break;
-
-  /**
-   * Transpile all files in `src` from es6 to es5.
-   */
-  case '--transpile':
-    transpileFiles(srcDirectory, distDirectory);
-    break;
-}
+// /**
+//  * Define which file should be ignored by every command.
+//  */
+// var allowedExtentions = /\.js$/;
+// var excludeFiles = /^\./; // exclude hidden files
 
 /* --------------------------------------------------------------------------
  * -------------------------------------------------------------------------- */
@@ -78,72 +46,167 @@ switch (command) {
  * @param {String} filename - The filename to be checked.
  * @param {Boolean} [ensureFile=true] - If set to false, don't test if the file exists.
  */
-function isAllowed(filename, ensureFile) {
-  ensureFile = ensureFile === undefined ? true : ensureFile;
+// function isAllowed(filename, ensureFile) {
+//   ensureFile = ensureFile === undefined ? true : ensureFile;
 
-  var basename = path.basename(filename);
-  var isFile = true;
+//   var basename = path.basename(filename);
+//   var isFile = true;
 
-  if (ensureFile) {
+//   if (ensureFile) {
+//     try {
+//       isFile = fse.lstatSync(filename).isFile() && !fse.lstatSync(filename).isSymbolicLink();
+//     } catch(e) {
+//       console.log(e.message);
+//       isFile = false;
+//     }
+//   }
+
+//   var hasAllowedExt = allowedExtentions.test(basename);
+//   var notExcludeFile = !excludeFiles.test(basename);
+
+//   return isFile && hasAllowedExt && notExcludeFile;
+// }
+
+/**
+ * transpile files (babel)
+ */
+async function transpileOrCopy(filename) {
+  const src = await fileStore.get(filename);
+  const distFilename = src.abs.replace(srcRegExp, distDirectory);
+  const dist = await fileStore.get(distFilename);
+  const startTime = getTime();
+
+  if (!isJs(src)) {
     try {
-      isFile = fse.lstatSync(filename).isFile() && !fse.lstatSync(filename).isSymbolicLink();
-    } catch(e) {
-      console.log(e.message);
-      isFile = false;
+      fse.copySync(src.abs, dist.abs);
+      log.copyFileSuccess(src, dist, getTime(startTime));
+
+      return Promise.resolve([src, dist]);
+    } catch(err) {
+      log.copyFileError(src, err);
+      return Promise.reject([src, dist]);
+    }
+  } else {
+    try {
+      await transpiler.transpile(src, dist, babelOptions);
+      log.transpileSuccess(src, dist, getTime(startTime));
+
+      return Promise.resolve([src, dist]);
+    } catch(err) {
+      log.transpileError(src, err);
+      return Promise.reject([src, dist]);
+    }
+  }
+}
+
+async function transpileOrCopyAll() {
+  const files = await fileStore.getAll(srcDirectory);
+  const pairs = [];
+
+  for (let i = 0; i < files.length; i++) {
+    try {
+      const src = files[i];
+      const pair = await transpileOrCopy(src);
+      pairs.push(pair);
+    } catch(err) {
+      return Promise.reject(err);
     }
   }
 
-  var hasAllowedExt = allowedExtentions.test(basename);
-  var notExcludeFile = !excludeFiles.test(basename);
-
-  return isFile && hasAllowedExt && notExcludeFile;
+  return pairs;
 }
 
-/**
- * Returns a list of the file in a given folder recursively.
- */
-function _getFileList(folder, callback) {
-  var files = [];
-
-  klaw(folder)
-    .on('data', function(item) {
-      if (item.stats.isFile() && isAllowed(item.path))
-        files.push(item.path);
-    })
-    .on('end', function() {
-      callback(files);
-    });
+async function deleteFile(file) {
+  try {
+    fileStore.delete(file);
+    log.deleteFileSuccess(file);
+    return Promise.resolve(file);
+  } catch(err) {
+    log.deleteFileError(file, err)
+    return Promise.reject(file);
+  }
 }
 
 /**
  * Watch javascript source files.
  */
-function watchFiles(srcDirectory, distDirectory) {
-  watch.createMonitor(srcDirectory, getWatchOptions(), function(monitor) {
-    var transpiler = javascripts.getTranspiler(srcDirectory, distDirectory, isAllowed, babelOptions);
-
-    monitor.on('created', function(filename, stats) {
-      if (isAllowed(filename))
-        transpiler.transpile(filename, []);
-    });
-
-    monitor.on('changed', function(filename, stats) {
-      if (isAllowed(filename))
-        transpiler.transpile(filename, []);
-    });
-
-    monitor.on('removed', function(filename, stats) {
-      if (isAllowed(filename, false))
-        transpiler.delete(filename);
+function watchSrc() {
+  watch.createMonitor(srcDirectory, Object.assign({}, watchOptions), monitor => {
+    monitor.on('created', transpileOrCopy);
+    monitor.on('changed', transpileOrCopy);
+    // delete dist file
+    monitor.on('removed', async (filename, stats) => {
+      const distFilename = filename.replace(srcRegExp, distDirectory);
+      const dist = await fileStore.get(distFilename).then();
+      await deleteFile(dist);
     });
   });
 }
 
+async function __transpile() {
+  try {
+    const transpiledJS = await transpileOrCopyAll();
+    return Promise.resolve();
+  } catch(err) {
+    return Promise.reject(err);
+  }
+}
 
-function transpileFiles(srcDirectory, distDirectory) {
-  _getFileList(srcDirectory, function(files) {
-    var transpiler = javascripts.getTranspiler(srcDirectory, distDirectory, isAllowed, babelOptions);
-    transpiler.transpile(undefined, files);
+async function __watch() {
+  try {
+    watchSrc();
+
+    return Promise.resolve();
+  } catch(err) {
+    return Promise.reject(err);
+  }
+}
+
+async function __clear() {
+  const directories = [
+    await fileStore.get(path.join('client')),
+    await fileStore.get(path.join('server')),
+    await fileStore.get(path.join('thing')),
+    await fileStore.get(path.join('utils')),
+  ];
+
+  directories.forEach(async function(dir) {
+    try {
+      await deleteFile(dir);
+      return Promise.resolve();
+    } catch(err) {
+      return Promise.reject();
+    }
   });
 }
+
+
+// -------------------------------------------------------------
+// Parse commands
+// -------------------------------------------------------------
+
+const command = process.argv[2];
+
+switch (command) {
+  case '--clear':
+    __clear().catch(err => console.error(err.stack));
+    break;
+  case '--watch':
+    __transpile().then(__watch).catch(err => console.error(err.stack));
+    break;
+  case '--transpile':
+    __transpile().catch(err => console.error(err.stack));
+    break;
+  case '--help':
+    console.log(`
+[${pkg.name}] available commands:
+
+- \`npm run clear\`\tclean the project, delete \`client/\`, \`server\`, \`thing\` and \`utils\`
+- \`npm run transpile\`\ttranspile and bundle all sources (js and css)
+- \`npm run watch\`\trun the server, and transpile, bundle, and restart server on file change
+
+    `);
+    break;
+}
+
 

@@ -1,0 +1,20 @@
+#!/usr/bin/env node
+const path = require('path');
+
+ // http://stackoverflow.com/questions/3446170/escape-string-for-use-in-javascript-regex
+const escapeRegExp = module.exports.escapeRegExp = function(str) {
+  return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
+}
+
+module.exports.getTime = function(startTime = null) {
+  if (startTime === null) {
+    return new Date().getTime();
+  } else {
+    return new Date().getTime() - startTime;
+  }
+}
+
+module.exports.isJs = function(file) {
+  // @todo - move to .mjs when ready on node...
+  return path.extname(file.abs) === '.js';
+}
