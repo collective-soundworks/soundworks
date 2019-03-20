@@ -5,9 +5,8 @@ const path = require('path');
 const fileStore = require('./fileStore');
 const log = require('./log');
 const transpiler = require('./transpiler');
-const utils = require('./utils');
-
-// var javascripts = require('./javascripts');
+const { escapeRegExp, getTime, isJs } = require('./utils');
+const pkg = require('../package.json');
 const cwd = process.cwd();
 
 // --------------------------------------------------------------------------
@@ -20,7 +19,7 @@ const watchOptions = {
   ignoreDotFiles: true,
   ignoreUnreadableDir: true,
   ignoreNotPermitted: true,
-  interval: 2, // watch internally use `fs.watchFile`
+  interval: 0.25, // watch internally use `fs.watchFile`
 };
 
 function getWatchOptions() {
@@ -32,44 +31,10 @@ const srcRegExp = new RegExp('^' + escapeRegExp(srcDirectory));
 
 const distDirectory = path.join(cwd, '.');
 
-// /**
-//  * Define which file should be ignored by every command.
-//  */
-// var allowedExtentions = /\.js$/;
-// var excludeFiles = /^\./; // exclude hidden files
+// -------------------------------------------------------------
+// Reusable logic
+// -------------------------------------------------------------
 
-/* --------------------------------------------------------------------------
- * -------------------------------------------------------------------------- */
-
-/**
- * Test the given filename, to ensure it can be processed by any command / tranpsiler
- * @param {String} filename - The filename to be checked.
- * @param {Boolean} [ensureFile=true] - If set to false, don't test if the file exists.
- */
-// function isAllowed(filename, ensureFile) {
-//   ensureFile = ensureFile === undefined ? true : ensureFile;
-
-//   var basename = path.basename(filename);
-//   var isFile = true;
-
-//   if (ensureFile) {
-//     try {
-//       isFile = fse.lstatSync(filename).isFile() && !fse.lstatSync(filename).isSymbolicLink();
-//     } catch(e) {
-//       console.log(e.message);
-//       isFile = false;
-//     }
-//   }
-
-//   var hasAllowedExt = allowedExtentions.test(basename);
-//   var notExcludeFile = !excludeFiles.test(basename);
-
-//   return isFile && hasAllowedExt && notExcludeFile;
-// }
-
-/**
- * transpile files (babel)
- */
 async function transpileOrCopy(filename) {
   const src = await fileStore.get(filename);
   const distFilename = src.abs.replace(srcRegExp, distDirectory);
@@ -127,9 +92,6 @@ async function deleteFile(file) {
   }
 }
 
-/**
- * Watch javascript source files.
- */
 function watchSrc() {
   watch.createMonitor(srcDirectory, Object.assign({}, watchOptions), monitor => {
     monitor.on('created', transpileOrCopy);
@@ -142,6 +104,11 @@ function watchSrc() {
     });
   });
 }
+
+
+// -------------------------------------------------------------
+// Handle commands
+// -------------------------------------------------------------
 
 async function __transpile() {
   try {
@@ -202,8 +169,8 @@ switch (command) {
 [${pkg.name}] available commands:
 
 - \`npm run clear\`\tclean the project, delete \`client/\`, \`server\`, \`thing\` and \`utils\`
-- \`npm run transpile\`\ttranspile and bundle all sources (js and css)
-- \`npm run watch\`\trun the server, and transpile, bundle, and restart server on file change
+- \`npm run transpile\`\ttranspile all sources
+- \`npm run watch\`\ttranspile a given file on change
 
     `);
     break;

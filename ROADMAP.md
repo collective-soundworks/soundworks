@@ -15,7 +15,10 @@ update `Square` to assess / complete `AudioStreamManager` API
 - move `html/default.ejs` in `src/server` in template (ok)
 - review how soundworks/server handle `html` entry point. 
 - replace socket.io
-- replace express ? see fastify
+- replace express ? 
+  see:
+  + fastify 
+  + polka https://github.com/lukeed/polka (+1)
 - fix uws
 - remove all logic dedicated to client only (has never been used)
 - replace express w/ something more simple?

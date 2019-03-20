@@ -10,12 +10,13 @@
   "license": "BSD-3-Clause",
   "main": "",
   "scripts": {
+    "clear": "node bin/runner --clear",
     "deploy": "np --yolo",
     "doc": "jsdoc -c jsdoc.json",
-    "transpile": "node ./bin/runner --transpile",
-    "prewatch": "npm run transpile",
+    "help": "node bin/runner --help",
+    "transpile": "node bin/runner --transpile",
     "version": "npm run transpile && npm run doc && git add docs",
-    "watch": "node ./bin/runner --watch"
+    "watch": "node bin/runner --watch"
   },
   "publishConfig": {
     "access": "public"

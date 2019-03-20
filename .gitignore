@@ -1,6 +1,7 @@
 # transpiled files
 /client
 /server
+/thing
 /utils
 
 # documentation
