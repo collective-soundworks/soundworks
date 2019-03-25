@@ -24,7 +24,7 @@ function loadAudioBuffer(url) {
       audioContext.decodeAudioData(response, buffer => {
         resolve(buffer);
       }, (err) => {
-        reject();
+        reject(err);
       });
     }
 
@@ -132,7 +132,7 @@ class AudioStreamManager extends Service {
         const promise = loadAudioBuffer(url).then(buffer => {
           cache[index] = buffer;
           Promise.resolve(buffer);
-        });
+        }).catch(err => console.log(err));
 
         preloadPromises.push(promise);
       }
@@ -140,7 +140,9 @@ class AudioStreamManager extends Service {
       this.bufferInfosList.set(id, bufferInfos);
     }
 
-    Promise.all(preloadPromises).then(() => this.ready());
+    Promise.all(preloadPromises)
+      .then(() => this.ready())
+      .catch(err => console.error(err));
   }
 
   getStreamEngine(id) {

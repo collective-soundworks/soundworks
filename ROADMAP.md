@@ -69,6 +69,11 @@ update `Square` to assess / complete `AudioStreamManager` API
 - improve workflow (ex. more audioStreamManager robust audioStream caching system)
 - improve reconnection of client(s)
 - review the way that services are configured
+- checkin - indexes by client types
 
 - create a cli to create app, new clients etc.
 - formalize States, Stores and Flows.
+
+- platform - create an `fullscreen` alias for `full-screen`
+
+- automagically overide config options using url params
