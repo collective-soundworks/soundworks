@@ -226,7 +226,7 @@ class MetronomeEngine extends audio.TimeEngine {
 
 class MetricScheduler extends Service {
   constructor() {
-    super(SERVICE_ID, true);
+    super(SERVICE_ID);
 
     this._syncScheduler = this.require('sync-scheduler');
 

@@ -33,7 +33,7 @@ const SERVICE_ID = 'service:sync';
  */
 class Sync extends Service {
   constructor() {
-    super(SERVICE_ID, true);
+    super(SERVICE_ID);
 
     const defaults = {
       viewPriority: 3,

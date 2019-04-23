@@ -14,6 +14,7 @@ update `Square` to assess / complete `AudioStreamManager` API
 
 > should be compatible with `soundworks-template#master`
 
+- platform - create a `fullscreen` alias for `full-screen` (ok)
 - remove all logic dedicated to client only apps (has never been used)
 - remove bunyan logs (too noisy). 
 - replace socket.io
@@ -23,10 +24,10 @@ update `Square` to assess / complete `AudioStreamManager` API
   see:
   + fastify 
   + polka https://github.com/lukeed/polka (+1)
+- better ErrorReporter (find infos from source)
 - on start log more precise informations
   + ip of server (both local and on network)
   + existing routes
-- platform - create a `fullscreen` alias for `full-screen`
 - platform - add a test to test the `audioContext` clock (iOS)
 
 > release 2.3.0
@@ -83,7 +84,8 @@ update `Square` to assess / complete `AudioStreamManager` API
 - improve workflow (ex. more audioStreamManager robust audioStream caching system)
 - improve reconnection of client(s)
 - review the way that services are configured
-- checkin - indexes by client types
+- checkin - indexes by client types / rooms
+- `option.order` should be server-side
 
 - create a cli to create app, new clients etc.
 - create a cli-tool for updates

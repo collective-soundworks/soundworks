@@ -61,7 +61,7 @@ const defaultViewTemplate = `
  */
 class Language extends Service {
   constructor() {
-    super(SERVICE_ID, false);
+    super(SERVICE_ID);
 
     const defaults = {
       viewPriority: 9,

@@ -194,11 +194,9 @@ const client = {
   /**
    * Start the application.
    */
-  start() {
-    if (socket.required)
-      this._initSocket(() => serviceManager.start());
-    else
-      serviceManager.start();
+  async start() {
+    await this._initSocket();
+    serviceManager.start();
   },
 
   /**
@@ -259,52 +257,56 @@ const client = {
    * @todo - refactor handshake.
    * @private
    */
-  _initSocket(callback) {
+  _initSocket() {
     socket.init(this.type, this.config.websockets);
 
-    // see: http://socket.io/docs/client-api/#socket
-    this.socket.addStateListener((eventName) => {
-      switch (eventName) {
-        case 'connect':
-          const payload = { urlParams: this.urlParams };
+    return new Promise((resolve, reject) => {
+      // see: http://socket.io/docs/client-api/#socket
+      this.socket.addStateListener((eventName) => {
+        switch (eventName) {
+          case 'connect':
+            const payload = { urlParams: this.urlParams };
 
-          if (this.config.env !== 'production') {
-            Object.assign(payload, {
-              requiredServices: serviceManager.getRequiredServices()
-            });
-          }
-
-          this.socket.send('handshake', payload);
-          // wait for handshake response to mark client as `ready`
-          this.socket.receive('client:start', (uuid) => {
-            this.uuid = uuid;
-            callback();
-          });
-
-          this.socket.receive('client:error', (err) => {
-            switch (err.type) {
-              case 'services':
-                // can only append if env !== 'production'
-                const msg = `"${err.data.join(', ')}" required client-side but not server-side`;
-                throw new Error(msg);
-                break;
+            if (this.config.env !== 'production') {
+              Object.assign(payload, {
+                requiredServices: serviceManager.getRequiredServices()
+              });
             }
-          });
-          break;
-          // case 'reconnect':
-          //   // serviceManager.start();
-          //   break;
-          // case 'disconnect':
-          //   // can relaunch serviceManager on reconnection
-          //   // serviceManager.reset();
-          //   break;
-          // case 'connect_error':
-          // case 'reconnect_attempt':
-          // case 'reconnecting':
-          // case 'reconnect_error':
-          // case 'reconnect_failed':
-          //   break;
-      }
+
+            this.socket.send('handshake', payload);
+            // wait for handshake response to mark client as `ready`
+            this.socket.receive('client:start', (uuid) => {
+              this.uuid = uuid;
+              resolve();
+            });
+
+            this.socket.receive('client:error', (err) => {
+              switch (err.type) {
+                case 'services':
+                  // can only append if env !== 'production'
+                  const msg = `"${err.data.join(', ')}" required client-side but not server-side`;
+                  throw new Error(msg);
+                  break;
+              }
+
+              reject();
+            });
+            break;
+            // case 'reconnect':
+            //   // serviceManager.start();
+            //   break;
+            // case 'disconnect':
+            //   // can relaunch serviceManager on reconnection
+            //   // serviceManager.reset();
+            //   break;
+            // case 'connect_error':
+            // case 'reconnect_attempt':
+            // case 'reconnecting':
+            // case 'reconnect_error':
+            // case 'reconnect_failed':
+            //   break;
+        }
+      });
     });
   },
 };

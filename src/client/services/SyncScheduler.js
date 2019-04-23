@@ -36,7 +36,7 @@ const SERVICE_ID = 'service:sync-scheduler';
 class SyncScheduler extends Service {
   /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */
   constructor () {
-    super(SERVICE_ID, false);
+    super(SERVICE_ID);
 
     this._sync = this.require('sync');
     this._scheduler = null;

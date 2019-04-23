@@ -18,7 +18,7 @@ const SERVICE_ID = 'service:raw-socket';
  */
 class RawSocket extends Service {
   constructor() {
-    super(SERVICE_ID, true);
+    super(SERVICE_ID);
 
     const defaults = {
       viewCtor: SegmentedView,

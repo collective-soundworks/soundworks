@@ -32,7 +32,7 @@ const SERVICE_ID = 'service:audio-scheduler';
 class AudioScheduler extends Service {
   /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */
   constructor () {
-    super(SERVICE_ID, false);
+    super(SERVICE_ID);
 
     this._platform = this.require('platform', { features: 'web-audio' });
 

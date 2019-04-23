@@ -28,11 +28,11 @@ const SERVICE_ID = 'service:motion-input';
 class MotionInput extends Service {
   /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */
   constructor() {
-    super(SERVICE_ID, false);
+    super(SERVICE_ID);
 
     const defaults = {
       descriptors: [],
-      // @todo - how to handle if only some descriptors are invalid ?
+      // @todo - what to do if only some descriptors are invalid?
       // showError: false,
     };
 

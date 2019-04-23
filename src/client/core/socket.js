@@ -10,12 +10,6 @@ const socket = {
   socket: null,
 
   /**
-   * Is set to `true` when a `Activity` that requires network is instanciated.
-   * Is checked by the `client` to initialize the connection or not.
-   */
-  required: false,
-
-  /**
    * Initialize a namespaced connection with given options.
    *
    * @param {String} namespace - Correspond to the `client.type` {@link client}.
@@ -57,8 +51,9 @@ const socket = {
   addStateListener(callback) {
     this._stateListeners.add(callback);
 
-    if (this._state !== null)
+    if (this._state !== null) {
       callback(this._state);
+    }
   },
 
   _listenSocketState() {

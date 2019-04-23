@@ -327,7 +327,7 @@ const SERVICE_ID = 'service:platform';
  */
 class Platform extends Service {
   constructor() {
-    super(SERVICE_ID, false);
+    super(SERVICE_ID);
 
     const defaults = {
       showDialog: true,

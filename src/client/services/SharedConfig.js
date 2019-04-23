@@ -36,7 +36,7 @@ const SERVICE_ID = 'service:shared-config';
  */
 class SharedConfig extends Service {
   constructor() {
-    super(SERVICE_ID, true);
+    super(SERVICE_ID);
 
     /**
      * Configuration items required by the client.

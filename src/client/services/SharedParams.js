@@ -144,7 +144,7 @@ const SERVICE_ID = 'service:shared-params';
  */
 class SharedParams extends Service {
   constructor() {
-    super(SERVICE_ID, true);
+    super(SERVICE_ID);
 
     const defaults = {};
     this.configure(defaults);

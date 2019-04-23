@@ -63,7 +63,7 @@ function updateRandomGeoposition(geoposition) {
 class Geolocation extends Service {
   /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */
   constructor() {
-    super(SERVICE_ID, true);
+    super(SERVICE_ID);
 
     const defaults = {
       state: 'start',

@@ -77,7 +77,7 @@ function loadAudioBuffer(url) {
 class AudioStreamManager extends Service {
   /** _<span class="warning">__WARNING__</span> This class should never be instantiated manually_ */
   constructor() {
-    super(SERVICE_ID, false);
+    super(SERVICE_ID);
 
     this.bufferInfosList = new Map();
 

@@ -25,7 +25,7 @@ const SERVICE_ID = 'service:network';
 class Network extends Service {
   /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */
   constructor() {
-    super(SERVICE_ID, true);
+    super(SERVICE_ID);
 
     const defaults = {};
     this.configure(defaults);

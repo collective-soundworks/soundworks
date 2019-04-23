@@ -8,7 +8,7 @@ import viewManager from './viewManager';
 
 /**
  * Internal base class for services and scenes. Basically a process with view
- * and optionnal network abilities.
+ * and network abilities.
  *
  * @memberof module:soundworks/client
  * @extends module:soundworks/client.Process
@@ -19,7 +19,7 @@ class Activity extends Process {
    * @param {Boolean} hasNetwork - Define if the activity needs a socket
    *  connection or not.
    */
-  constructor(id, hasNetwork = true) {
+  constructor(id) {
     super(id);
 
     /**
@@ -30,19 +30,6 @@ class Activity extends Process {
      * @memberof module:soundworks/client.Activity
      */
     this.hasStarted = false;
-
-    /**
-     * Defines if the activity needs a connection to the server.
-     * @type {Boolean}
-     * @name hasNetwork
-     * @instance
-     * @memberof module:soundworks/client.Activity
-     */
-    this.hasNetwork = !!hasNetwork;
-
-    // register as a networked service, setup the socket connection
-    if (this.hasNetwork)
-      socket.required = true;
 
     /**
      * Options of the activity.
@@ -76,7 +63,7 @@ class Activity extends Process {
   }
 
   /**
-   * Interface method to implement in child classes.
+   * Interface method to be implemented by child classes.
    * Define what to do when a service is required by an `Activity`.
    */
   require() {}

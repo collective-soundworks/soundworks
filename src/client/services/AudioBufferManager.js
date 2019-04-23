@@ -291,7 +291,7 @@ function prefixPaths(pathList, prefix) {
 class AudioBufferManager extends Service {
   /** _<span class="warning">__WARNING__</span> This class should never be instanciated manually_ */
   constructor() {
-    super(SERVICE_ID, false);
+    super(SERVICE_ID);
 
     const defaults = {
       assetsDomain: '',
