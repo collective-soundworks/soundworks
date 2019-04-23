@@ -15,7 +15,7 @@ update `Square` to assess / complete `AudioStreamManager` API
 > should be compatible with `soundworks-template#master`
 
 - platform - create a `fullscreen` alias for `full-screen` (ok)
-- remove all logic dedicated to client only apps (has never been used)
+- remove all logic dedicated to client only apps (has never been used) (ok)
 - remove bunyan logs (too noisy). 
 - replace socket.io
 - fix build scripts
@@ -24,7 +24,9 @@ update `Square` to assess / complete `AudioStreamManager` API
   see:
   + fastify 
   + polka https://github.com/lukeed/polka (+1)
-- better ErrorReporter (find infos from source)
+- better ErrorReporter 
+  + find infos from es6 source
+  + log server errors
 - on start log more precise informations
   + ip of server (both local and on network)
   + existing routes

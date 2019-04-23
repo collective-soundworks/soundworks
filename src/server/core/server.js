@@ -1,13 +1,15 @@
-import Client from './Client';
-import compression from 'compression';
-import ejs from 'ejs';
-import express from 'express';
 import fs from 'fs';
 import http from 'http';
 import https from 'https';
-import logger from '../utils/logger';
 import path from 'path';
 import pem from 'pem';
+import os from 'os';
+import colors from 'colors';
+import ejs from 'ejs';
+import express from 'express';
+import columnify from 'columnify';
+import compression from 'compression';
+import Client from './Client';
 import serviceManager from './serviceManager';
 import sockets from './sockets';
 
@@ -78,8 +80,6 @@ import sockets from './sockets';
  *  cf. [https://github.com/expressjs/serve-static](https://github.com/expressjs/serve-static)
  * @property {String} templateDirectory - Directory where the server templating
  *  system looks for the `ejs` templates.
- * @property {Object} logger - Configuration of the logger service, cf. Bunyan
- *  documentation.
  * @property {String} errorReporterDirectory - Directory where error reported
  *  from the clients are written.
  */
@@ -120,18 +120,6 @@ const server = {
   clientCtor: Client,
 
   /**
-   * The url of the node server on the current machine.
-   * @private
-   */
-  _address: '',
-
-  /**
-   * Mapping between a `clientType` and its related activities.
-   * @private
-   */
-  _clientTypeActivitiesMap: {},
-
-  /**
    * express instance, can allow to expose additionnal routes (e.g. REST API).
    * @unstable
    */
@@ -142,6 +130,12 @@ const server = {
    * @unstable
    */
   httpServer: null,
+
+  /**
+   * Mapping between a `clientType` and its related activities.
+   * @private
+   */
+  _clientTypeActivitiesMap: {},
 
   /**
    * Required activities that must be started.
@@ -204,6 +198,8 @@ const server = {
    * @param {String|RegExp} route - Template of the route that should be append.
    *  to the client type
    *
+   * @note: used by Orbe?
+   *
    * @example
    * ```
    * // allow `conductor` clients to connect to `http://site.com/conductor/1`
@@ -236,9 +232,6 @@ const server = {
 
     serviceManager.init();
 
-    if (this.config.logger !== undefined)
-      logger.init(this.config.logger);
-
     // instanciate and configure express
     // this allows to hook middleware and routes (e.g. cors) in the express
     // instance between `server.init` and `server.start`
@@ -257,6 +250,7 @@ const server = {
    * - define routes and activities mapping for all client types.
    */
   start() {
+    console.log(colors.cyan(`[starting soundworks server]`));
     // compression
     if (this.config.enableGZipCompression)
       this.router.use(compression());
@@ -304,9 +298,22 @@ const server = {
       const promise = new Promise((resolve, reject) => {
         serviceManager.signals.ready.addObserver(() => {
           httpServer.listen(this.router.get('port'), () => {
+
+            // console.log(ifaces);
             const protocol = useHttps ? 'https' : 'http';
-            this._address = `${protocol}://127.0.0.1:${this.router.get('port')}`;
-            console.log(`[${protocol.toUpperCase()} SERVER] Server listening on`, this._address);
+            const port = this.router.get('port').toString();
+            // this._address = `${protocol}://127.0.0.1:${this.router.get('port')}`;
+            console.log(colors.yellow(`+ ${protocol} server listening on:`));
+
+            const ifaces = os.networkInterfaces();
+
+            Object.keys(ifaces).forEach(function (dev) {
+              ifaces[dev].forEach(function (details) {
+                if (details.family === 'IPv4') {
+                  console.log(`    ${protocol}://${details.address}:${colors.green(port)}`);
+                }
+              });
+            });
 
             resolve();
           });
@@ -316,6 +323,7 @@ const server = {
       serviceManager.start();
 
       return promise;
+
     }).catch((err) => console.error(err.stack));
   },
 
@@ -334,15 +342,33 @@ const server = {
    * @private
    */
   _initRouting(router) {
-    for (let clientType in this._clientTypeActivitiesMap) {
-      if (clientType !== this.config.defaultClient)
-        this._openClientRoute(clientType, router);
-    }
+    console.log(colors.yellow(`+ available clients:`));
+
+    const routes = [];
 
     for (let clientType in this._clientTypeActivitiesMap) {
-      if (clientType === this.config.defaultClient)
-        this._openClientRoute(clientType, router);
+      if (clientType !== this.config.defaultClient) {
+        const route = this._openClientRoute(clientType, router);
+        routes.push({ clientType: `[${clientType}]`, route: colors.green(route || '/') });
+      }
     }
+
+    // open default route last
+    for (let clientType in this._clientTypeActivitiesMap) {
+      if (clientType === this.config.defaultClient) {
+        const route = this._openClientRoute(clientType, router);
+        routes.unshift({ clientType: `[${clientType}]`, route: colors.green(route || '/') });
+      }
+    }
+
+    const columns = columnify(routes, {
+      showHeaders: false,
+      config: {
+        clientType: {align: 'right'}
+      }
+    });
+
+    console.log(columns);
   },
 
   /**
@@ -406,24 +432,28 @@ const server = {
   _openClientRoute(clientType, router) {
     let route = '';
 
-    if (this._routes[clientType])
+    if (this._routes[clientType]) {
       route += this._routes[clientType];
+    }
 
-    if (clientType !== this.config.defaultClient)
+    if (clientType !== this.config.defaultClient) {
       route = `/${clientType}${route}`;
+    }
 
     // define template filename: `${clientType}.ejs` or `default.ejs`
     const templateDirectory = this.config.templateDirectory;
     const clientTmpl = path.join(templateDirectory, `${clientType}.ejs`);
     const defaultTmpl = path.join(templateDirectory, `default.ejs`);
 
+    // all this can append later
     fs.stat(clientTmpl, (err, stats) => {
       let template;
 
-      if (err || !stats.isFile())
+      if (err || !stats.isFile()) {
         template = defaultTmpl;
-      else
+      } else {
         template = clientTmpl;
+      }
 
       const tmplString = fs.readFileSync(template, { encoding: 'utf8' });
       const tmpl = ejs.compile(tmplString);
@@ -435,6 +465,9 @@ const server = {
         res.send(appIndex);
       });
     });
+
+    // return route infos for logging on server start
+    return route;
   },
 
   /**
@@ -449,9 +482,6 @@ const server = {
     sockets.receive(client, 'disconnect', () => {
       activities.forEach((activity) => activity.disconnect(client));
       client.destroy();
-
-      if (logger.info)
-        logger.info({ socket, clientType }, 'disconnect');
     });
 
     // check coherence between client-side and server-side service requirements
@@ -479,6 +509,7 @@ const server = {
             type: 'services',
             data: missingServices,
           });
+
           return;
         }
       }
@@ -487,9 +518,6 @@ const server = {
       // @todo - handle reconnection (ex: `data` contains an `uuid`)
       activities.forEach((activity) => activity.connect(client));
       sockets.send(client, 'client:start', client.uuid);
-
-      if (logger.info)
-        logger.info({ socket, clientType }, 'handshake');
     });
   },
 };
