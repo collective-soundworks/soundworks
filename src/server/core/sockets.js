@@ -6,15 +6,18 @@ import querystring from 'querystring';
 class Socket {
   constructor(ws) {
     this.ws = ws;
+
+    this._listeners = new Map();
+
     this.ws.on('message', value => {
       const [channel, args] = JSON.parse(value);
-      const listeners = this.listeners.get(channel);
+      const listeners = this._listeners.get(channel);
       console.log('message', channel, args, listeners);
 
       listeners.forEach(callback => callback(...args));
     });
 
-    this.listeners = new Map();
+    // @todo - listen for error messages
   }
 
   send(channel, args) {
@@ -25,17 +28,17 @@ class Socket {
 
   receive(channel, callback) {
     console.log('register callback', channel);
-    if (!this.listeners.has(channel)) {
-      this.listeners.set(channel, new Set());
+    if (!this._listeners.has(channel)) {
+      this._listeners.set(channel, new Set());
     }
 
-    const listeners = this.listeners.get(channel);
+    const listeners = this._listeners.get(channel);
     listeners.add(callback);
   }
 
   removeListener(channel, callback) {
-    if (this.listeners.has(channel)) {
-      const listeners = this.listeners.get(channel);
+    if (this._listeners.has(channel)) {
+      const listeners = this._listeners.get(channel);
       listeners.delete(callback);
     }
   }
@@ -74,6 +77,7 @@ export default {
       const { clientType } = querystring.decode(req.url.split('?')[1]);
       const socket = new Socket(ws);
 
+      // @todo - probably not useful, remove
       if (clientTypes.indexOf(clientType) !== -1) {
         callback(clientType, socket);
       } else {

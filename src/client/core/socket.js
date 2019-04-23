@@ -18,52 +18,12 @@ open
   Also available via the onopen property.
 */
 
-class Socket {
-  constructor(ws) {
-    this.ws = ws;
-
-    this.ws.addEventListener('message', e => {
-      console.log('message', e.data);
-      const [channel, args] = JSON.parse(e.data);
-      const listeners = this.listeners.get(channel);
-
-      listeners.forEach(callback => callback(...args));
-    });
-
-    this.ws.addEventListener('error', (...args) => {
-      console.error('error', ...args);
-    });
-
-    this.listeners = new Map();
-  }
-
-  send(channel, args) {
-    const msg = JSON.stringify([channel, args]);
-    console.log('send', channel, args);
-    this.ws.send(msg);
-  }
-
-  receive(channel, callback) {
-    console.log('register callback', channel);
-    if (!this.listeners.has(channel)) {
-      this.listeners.set(channel, new Set());
-    }
-
-    const listeners = this.listeners.get(channel);
-    listeners.add(callback);
-  }
-
-  removeListener(channel, callback) {
-    if (this.listeners.has(channel)) {
-      const listeners = this.listeners.get(channel);
-      listeners.delete(callback);
-    }
-  }
-
-  removeAllListeners() {
-    console.warn('@todo - implement Socket.removeAllListeners');
-  }
-}
+/**
+@todo
+  - use isomorphic ws ? (does seems like a perfect idea)
+  - review stateListener, not very elegant... (maybe v3)
+  -
+*/
 
 const socket = {
   /**
@@ -71,8 +31,8 @@ const socket = {
    */
   socket: null,
 
+  _listeners: new Map(),
   _stateListeners: new Set(),
-
   _state: null,
 
   /**
@@ -90,10 +50,18 @@ const socket = {
     const { hostname, port } = window.location;
     const url = `${protocol}//${hostname}:${port}/${path}?clientType=${clientType}`;
 
-    const ws = new WebSocket(url);
-    this.socket = new Socket(ws);
-
+    this.ws = new WebSocket(url);
     log(`initialized - url: ${url}`);
+
+    this.ws.addEventListener('message', e => {
+      // console.log('message', e.data);
+      const [channel, args] = JSON.parse(e.data);
+      this.emit(channel, args);
+    });
+
+    this.ws.addEventListener('error', (...args) => {
+      // console.error('error', ...args);
+    });
 
     this._listenSocketState();
   },
@@ -105,11 +73,17 @@ const socket = {
       // 'error',
       'upgrade',
     ].forEach(eventName => {
-      this.socket.ws.addEventListener(eventName, () => {
+      this.ws.addEventListener(eventName, () => {
+        // @todo - just re-emit using the existing event system...
         this._state = eventName;
         this._stateListeners.forEach((listener) => listener(this._state));
       });
     });
+  },
+
+  emit(channel, args) {
+    const listeners = this._listeners.get(channel);
+    listeners.forEach(callback => callback(...args));
   },
 
   /**
@@ -135,7 +109,8 @@ const socket = {
    * @param {...*} args - Arguments of the message (as many as needed, of any type).
    */
   send(channel, ...args) {
-    this.socket.send(channel, args);
+    const msg = JSON.stringify([channel, args]);
+    this.ws.send(msg);
   },
 
   /**
@@ -145,8 +120,12 @@ const socket = {
    * @param {...*} callback - The callback to execute when a message is received.
    */
   receive(channel, callback) {
-    this.socket.removeListener(channel, callback);
-    this.socket.receive(channel, callback);
+    if (!this._listeners.has(channel)) {
+      this._listeners.set(channel, new Set());
+    }
+
+    const listeners = this._listeners.get(channel);
+    listeners.add(callback);
   },
 
   /**
@@ -156,7 +135,10 @@ const socket = {
    * @param {...*} callback - The callback to cancel.
    */
   removeListener(channel, callback) {
-    this.socket.removeListener(channel, callback);
+    if (this._listeners.has(channel)) {
+      const listeners = this._listeners.get(channel);
+      listeners.delete(callback);
+    }
   },
 };
 

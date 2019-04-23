@@ -418,8 +418,9 @@ const server = {
    */
   _mapClientTypesToActivity(clientTypes, activity) {
     clientTypes.forEach((clientType) => {
-      if (!this._clientTypeActivitiesMap[clientType])
+      if (!this._clientTypeActivitiesMap[clientType]) {
         this._clientTypeActivitiesMap[clientType] = new Set();
+      }
 
       this._clientTypeActivitiesMap[clientType].add(activity);
     });
