@@ -250,7 +250,7 @@ const server = {
    * - define routes and activities mapping for all client types.
    */
   start() {
-    console.log(colors.cyan(`[starting soundworks server]`));
+    console.log(colors.cyan(`[soundworks] starting server`));
     // compression
     if (this.config.enableGZipCompression)
       this.router.use(compression());

@@ -231,24 +231,28 @@ const client = {
       .replace(new RegExp('^' + this.type + '/?'), '')  // remove clientType
       .replace(/\/$/, '');                              // trailing slash
 
-    if (pathname.length > 0)
+    if (pathname.length > 0) {
       pathParams = pathname.split('/');
+    }
 
     // handle hash
     let hash = window.location.hash;
     hash = hash.replace(/^#/, '');
 
-    if (hash.length > 0)
+    if (hash.length > 0) {
       hashParams = hash.split('-');
+    }
 
     if (pathParams || hashParams) {
       this.urlParams = [];
 
-      if (pathParams)
+      if (pathParams) {
         pathParams.forEach((param) => this.urlParams.push(param));
+      }
 
-      if (hashParams)
+      if (hashParams) {
         hashParams.forEach((param) => this.urlParams.push(param));
+      }
     }
   },
 
@@ -264,7 +268,7 @@ const client = {
       // see: http://socket.io/docs/client-api/#socket
       this.socket.addStateListener((eventName) => {
         switch (eventName) {
-          case 'connect':
+          case 'open':
             const payload = { urlParams: this.urlParams };
 
             if (this.config.env !== 'production') {
@@ -273,7 +277,6 @@ const client = {
               });
             }
 
-            this.socket.send('handshake', payload);
             // wait for handshake response to mark client as `ready`
             this.socket.receive('client:start', (uuid) => {
               this.uuid = uuid;
@@ -291,6 +294,8 @@ const client = {
 
               reject();
             });
+
+            this.socket.send('handshake', payload);
             break;
             // case 'reconnect':
             //   // serviceManager.start();

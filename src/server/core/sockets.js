@@ -1,4 +1,50 @@
-import sio from 'socket.io';
+// import sio from 'socket.io';
+import WebSocket from 'ws';
+import querystring from 'querystring';
+
+// console.log(WebSocket);
+class Socket {
+  constructor(ws) {
+    this.ws = ws;
+    this.ws.on('message', value => {
+      const [channel, args] = JSON.parse(value);
+      const listeners = this.listeners.get(channel);
+      console.log('message', channel, args, listeners);
+
+      listeners.forEach(callback => callback(...args));
+    });
+
+    this.listeners = new Map();
+  }
+
+  send(channel, args) {
+    const msg = JSON.stringify([channel, args]);
+    console.log('send', channel, args);
+    this.ws.send(msg);
+  }
+
+  receive(channel, callback) {
+    console.log('register callback', channel);
+    if (!this.listeners.has(channel)) {
+      this.listeners.set(channel, new Set());
+    }
+
+    const listeners = this.listeners.get(channel);
+    listeners.add(callback);
+  }
+
+  removeListener(channel, callback) {
+    if (this.listeners.has(channel)) {
+      const listeners = this.listeners.get(channel);
+      listeners.delete(callback);
+    }
+  }
+
+  removeAllListeners() {
+    console.warn('@todo - implement Socket.removeAllListeners');
+  }
+}
+
 
 export default {
   /**
@@ -6,7 +52,14 @@ export default {
    * @private
    */
   init(httpServer, config) {
-    this.io = new sio(httpServer, config);;
+    const path = 'test';
+
+    this.wss = new WebSocket.Server({
+      server: httpServer,
+      path: `/${path}`, // @note - update according to existing config files (aka cosima-apps)
+    });
+
+    // this.io = new sio(httpServer, config);;
   },
 
   /**
@@ -17,11 +70,21 @@ export default {
    * @private
    */
   onConnection(clientTypes, callback) {
-    clientTypes.forEach((clientType) => {
-      this.io.of(clientType).on('connection', (socket) => {
+    this.wss.on('connection', (ws, req) => {
+      const { clientType } = querystring.decode(req.url.split('?')[1]);
+      const socket = new Socket(ws);
+
+      if (clientTypes.indexOf(clientType) !== -1) {
         callback(clientType, socket);
-      });
+      } else {
+        throw new Error(`[sockets] Undefined clientType: "${clientType}"`);
+      }
     });
+    // clientTypes.forEach((clientType) => {
+    //   this.io.of(clientType).on('connection', (socket) => {
+    //     callback(clientType, socket);
+    //   });
+    // });
   },
 
   /**
@@ -31,7 +94,7 @@ export default {
    * @param {...*} callback - The callback to execute when a message is received.
    */
   receive(client, channel, callback) {
-    client.socket.on(channel, callback);
+    client.socket.receive(channel, callback);
   },
 
   /**
@@ -41,7 +104,7 @@ export default {
    * @param {...*} args - Arguments of the message (as many as needed, of any type).
    */
   send(client, channel, ...args) {
-    client.socket.emit(channel, ...args);
+    client.socket.send(channel, args);
   },
 
 
@@ -69,27 +132,27 @@ export default {
    * @param {...*} args - Arguments of the message (as many as needed, of any type).
    */
   broadcast(clientType, excludeClient, channel, ...args) {
-    if (!this.io) // @todo - remove that, fix server initialization order instead
-      return;
+    // if (!this.io) // @todo - remove that, fix server initialization order instead
+    //   return;
 
-    let namespaces;
+    // let namespaces;
 
-    if (typeof clientType === 'string')
-      namespaces = [`/${clientType}`];
-    else if (Array.isArray(clientType))
-      namespaces = clientType.map(type => `/${type}`);
-    else
-      namespaces = Object.keys(this.io.nsps);
+    // if (typeof clientType === 'string')
+    //   namespaces = [`/${clientType}`];
+    // else if (Array.isArray(clientType))
+    //   namespaces = clientType.map(type => `/${type}`);
+    // else
+    //   namespaces = Object.keys(this.io.nsps);
 
-    if (excludeClient) {
-      const index = namespaces.indexOf('/' + excludeClient.type);
+    // if (excludeClient) {
+    //   const index = namespaces.indexOf('/' + excludeClient.type);
 
-      if (index !== -1) {
-        namespaces.splice(index, 1);
-        excludeClient.socket.broadcast.emit(channel, ...args);
-      }
-    }
+    //   if (index !== -1) {
+    //     namespaces.splice(index, 1);
+    //     excludeClient.socket.broadcast.emit(channel, ...args);
+    //   }
+    // }
 
-    namespaces.forEach((nsp) => this.io.of(nsp).emit(channel, ...args));
+    // namespaces.forEach((nsp) => this.io.of(nsp).emit(channel, ...args));
   },
 };

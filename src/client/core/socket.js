@@ -1,13 +1,79 @@
 import debug from 'debug';
-import sio from 'socket.io-client';
+// import sio from 'socket.io-client';
 
 const log = debug('soundworks:socket');
+
+/*
+close
+  Fired when a connection with a websocket is closed.
+  Also available via the onclose property
+error
+  Fired when a connection with a websocket has been closed because of an error, such as whensome data couldn't be sent.
+  Also available via the onerror property.
+message
+  Fired when data is received through a websocket.
+  Also available via the onmessage property.
+open
+  Fired when a connection with a websocket is opened.
+  Also available via the onopen property.
+*/
+
+class Socket {
+  constructor(ws) {
+    this.ws = ws;
+
+    this.ws.addEventListener('message', e => {
+      console.log('message', e.data);
+      const [channel, args] = JSON.parse(e.data);
+      const listeners = this.listeners.get(channel);
+
+      listeners.forEach(callback => callback(...args));
+    });
+
+    this.ws.addEventListener('error', (...args) => {
+      console.error('error', ...args);
+    });
+
+    this.listeners = new Map();
+  }
+
+  send(channel, args) {
+    const msg = JSON.stringify([channel, args]);
+    console.log('send', channel, args);
+    this.ws.send(msg);
+  }
+
+  receive(channel, callback) {
+    console.log('register callback', channel);
+    if (!this.listeners.has(channel)) {
+      this.listeners.set(channel, new Set());
+    }
+
+    const listeners = this.listeners.get(channel);
+    listeners.add(callback);
+  }
+
+  removeListener(channel, callback) {
+    if (this.listeners.has(channel)) {
+      const listeners = this.listeners.get(channel);
+      listeners.delete(callback);
+    }
+  }
+
+  removeAllListeners() {
+    console.warn('@todo - implement Socket.removeAllListeners');
+  }
+}
 
 const socket = {
   /**
    * Store the instance of Socket.io Manager.
    */
   socket: null,
+
+  _stateListeners: new Set(),
+
+  _state: null,
 
   /**
    * Initialize a namespaced connection with given options.
@@ -18,26 +84,32 @@ const socket = {
    * @param {Array<String>} options.transports - The transports to use for the socket (cf. socket.io).
    * @param {Array<String>} options.path - Defines where socket should find the `socket.io` file.
    */
-  init(namespace, options) {
-    this.socket = sio(`${options.url}/${namespace}`, {
-      transports: options.transports,
-      path: options.path,
-    });
+  init(clientType, options) {
+    const path = 'test';
+    const protocol = window.location.protocol.replace(/^http?/, 'ws');
+    const { hostname, port } = window.location;
+    const url = `${protocol}//${hostname}:${port}/${path}?clientType=${clientType}`;
 
-    this.socket.on('error', (...args) => {
-      console.error('error', ...args);
-    });
+    const ws = new WebSocket(url);
+    this.socket = new Socket(ws);
 
-    log(`initialized
-          - url: ${options.url}/${namespace}
-          - transports: ${options.transports}
-          - path: ${options.path}
-    `);
-
-    this._stateListeners = new Set();
-    this._state = null;
+    log(`initialized - url: ${url}`);
 
     this._listenSocketState();
+  },
+
+  _listenSocketState() {
+    [
+      'open',
+      'close',
+      // 'error',
+      'upgrade',
+    ].forEach(eventName => {
+      this.socket.ws.addEventListener(eventName, () => {
+        this._state = eventName;
+        this._stateListeners.forEach((listener) => listener(this._state));
+      });
+    });
   },
 
   /**
@@ -56,25 +128,6 @@ const socket = {
     }
   },
 
-  _listenSocketState() {
-    // see: http://socket.io/docs/client-api/#socket
-    [ 'connect',
-      'reconnect',
-      'disconnect',
-      'connect_error',
-      'reconnect_attempt',
-      'reconnecting',
-      'reconnect_error',
-      'reconnect_failed'
-    ].forEach((eventName) => {
-      this.socket.on(eventName, () => {
-        this._state = eventName;
-        this._stateListeners.forEach((listener) => listener(this._state));
-        log(`state - ${this._state}`);
-      });
-    });
-  },
-
   /**
    * Sends a WebSocket message to the server side socket.
    *
@@ -82,13 +135,7 @@ const socket = {
    * @param {...*} args - Arguments of the message (as many as needed, of any type).
    */
   send(channel, ...args) {
-    this.socket.emit(channel, ...args);
-    log(`send - channel: "${channel}"`, ...args);
-  },
-
-  sendVolatile(channel, ...args) {
-    this.socket.volatile.emit(channel, ...args);
-    log(`sendVolatile - channel: "${channel}"`, ...args);
+    this.socket.send(channel, args);
   },
 
   /**
@@ -99,8 +146,7 @@ const socket = {
    */
   receive(channel, callback) {
     this.socket.removeListener(channel, callback);
-    this.socket.on(channel, callback);
-    log(`receive listener - channel: "${channel}"`);
+    this.socket.receive(channel, callback);
   },
 
   /**
@@ -111,7 +157,6 @@ const socket = {
    */
   removeListener(channel, callback) {
     this.socket.removeListener(channel, callback);
-    log(`remove listener - channel: "${channel}"`);
   },
 };
 

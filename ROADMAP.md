@@ -16,7 +16,8 @@ update `Square` to assess / complete `AudioStreamManager` API
 
 - platform - create a `fullscreen` alias for `full-screen` (ok)
 - remove all logic dedicated to client only apps (has never been used) (ok)
-- remove bunyan logs (too noisy). 
+- remove bunyan logs (too noisy). (ok) 
+
 - replace socket.io
 - fix build scripts
 - fix uws
