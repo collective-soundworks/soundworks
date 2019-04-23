@@ -116,32 +116,34 @@ const defaultDefinitions = [
     check: function() {
       return !!audioContext;
     },
-    interactionHook: function() {
+    interactionHook: async function() {
       if (!('resume' in audioContext)) {
         audioContext.resume = () => {
           return Promise.resolve();
         }
       }
 
-      return audioContext.resume().then(() => {
-        if (!client.platform.isMobile)
-          return Promise.resolve(true);
+      await audioContext.resume();
 
-        const g = audioContext.createGain();
-        g.connect(audioContext.destination);
-        g.gain.value = 0.000000001; // -180dB ?
-
-        const o = audioContext.createOscillator();
-        o.connect(g);
-        o.frequency.value = 20;
-        o.start(0);
-
-        // prevent android to stop audio by keeping the oscillator active
-        if (client.platform.os !== 'android')
-          o.stop(audioContext.currentTime + 0.01);
-
+      if (!client.platform.isMobile) {
         return Promise.resolve(true);
-      });
+      }
+
+      const g = audioContext.createGain();
+      g.connect(audioContext.destination);
+      g.gain.value = 0.000000001; // -180dB
+
+      const o = audioContext.createOscillator();
+      o.connect(g);
+      o.frequency.value = 20;
+      o.start(0);
+
+      // prevent android to stop audio by keeping the oscillator active
+      if (client.platform.os !== 'android') {
+        o.stop(audioContext.currentTime + 0.01);
+      }
+
+      return Promise.resolve(true);
     }
   },
   {
@@ -208,6 +210,20 @@ const defaultDefinitions = [
   },
   {
     id: 'full-screen',
+    check: function() {
+      // functionnality that cannot brake the application
+      return true;
+    },
+    interactionHook() {
+      if (screenfull.enabled)
+        screenfull.request();
+
+      return Promise.resolve(true);
+    }
+  },
+  // alias full screen
+  {
+    id: 'fullscreen',
     check: function() {
       // functionnality that cannot brake the application
       return true;
