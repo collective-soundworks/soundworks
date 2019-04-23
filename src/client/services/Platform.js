@@ -117,6 +117,12 @@ const defaultDefinitions = [
       return !!audioContext;
     },
     interactionHook: function() {
+      if (!('resume' in audioContext)) {
+        audioContext.resume = () => {
+          return Promise.resolve();
+        }
+      }
+
       return audioContext.resume().then(() => {
         if (!client.platform.isMobile)
           return Promise.resolve(true);
