@@ -147,7 +147,7 @@ const defaultDefinitions = [
     }
   },
   {
-    id: 'fix-ios-samplerate',
+    id: 'check-ios-samplerate',
     check: function() {
       return true;
     },
@@ -156,7 +156,7 @@ const defaultDefinitions = [
         // in ipod, when the problem occurs, sampleRate has been observed
         // to be set at 16000Hz, as no exhaustive testing has been done
         // assume < 40000 is a bad value.
-        const localStorageKey = 'soundworks:fix-ios-samplerate';
+        const localStorageKey = 'soundworks:check-ios-samplerate';
 
         if (audioContext.sampleRate < 40000) {
           window.localStorage.setItem(localStorageKey, true);
@@ -268,21 +268,6 @@ const defaultDefinitions = [
       return Promise.resolve(true);
     }
   },
-  {
-    // adapted from https://github.com/richtr/NoSleep.js/blob/master/NoSleep.js
-    // warning: cause 150% cpu use in chrome desktop...
-    id: 'wake-lock',
-    check: function() {
-      // functionnality that cannot brake the application
-      return true;
-    },
-    interactionHook: function() {
-      const noSleep = new NoSleep();
-      noSleep.enable();
-
-      return Promise.resolve(true);
-    }
-  }
 ];
 
 const SERVICE_ID = 'service:platform';
@@ -368,11 +353,13 @@ class Platform extends Service {
     if (options.features) {
       let features = options.features;
 
-      if (typeof features === 'string')
+      if (typeof features === 'string') {
         features = [features];
+      }
 
-      if (features.indexOf('web-audio') !== -1)
-        features.push('fix-ios-samplerate');
+      if (features.indexOf('web-audio') !== -1) {
+        features.push('check-ios-samplerate');
+      }
 
       this.requireFeature(...features);
 
@@ -489,7 +476,13 @@ class Platform extends Service {
    * @private
    */
   requireFeature(...features) {
-    features.forEach((id) => this._requiredFeatures.add(id));
+    features.forEach(id => {
+      if (!this._featureDefinitions[id]) {
+        throw new Error(`${SERVICE_ID} - Cannot require undefined feature: "${id}"`)
+      }
+
+      this._requiredFeatures.add(id);
+    });
   }
 
 
@@ -533,11 +526,12 @@ class Platform extends Service {
   _checkRequiredFeatures() {
     let result = true;
 
-    this._requiredFeatures.forEach(feature => {
-      const checkFunction = this._featureDefinitions[feature].check;
+    this._requiredFeatures.forEach(id => {
+      const checkFunction = this._featureDefinitions[id].check;
 
-      if (!(typeof checkFunction === 'function'))
-        throw new Error(`No check function defined for ${feature} feature`);
+      if (!(typeof checkFunction === 'function')) {
+        throw new Error(`${SERVICE_ID} - No check function defined for feature: "${id}"`);
+      }
 
       result = result && checkFunction();
     });
