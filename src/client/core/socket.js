@@ -1,5 +1,4 @@
 import debug from 'debug';
-// import sio from 'socket.io-client';
 
 const log = debug('soundworks:socket');
 
@@ -25,26 +24,41 @@ open
   -
 */
 
+/**
+ * Simple wrapper with simple pubsub system built on top of `ws` socket.
+ * The socket re-emits all "native" ws events.
+ *
+ * @see https://github.com/websockets/ws
+ *
+ * @memberof module:soundworks/client
+ */
 const socket = {
   /**
-   * Store the instance of Socket.io Manager.
+   * WebSocket instance (string protocol - binaryType = 'string').
    */
-  socket: null,
+  ws: null,
 
   _listeners: new Map(),
-  _stateListeners: new Set(),
-  _state: null,
 
   /**
-   * Initialize a namespaced connection with given options.
-   *
-   * @param {String} namespace - Correspond to the `client.type` {@link client}.
+   * Initialize a websocket connection with the server.
+   * @param {String} clientType - `client.type` {@link client}.
    * @param {Object} options - Options of the socket.
-   * @param {String} options.url - The url where the socket should connect.
-   * @param {Array<String>} options.transports - The transports to use for the socket (cf. socket.io).
    * @param {Array<String>} options.path - Defines where socket should find the `socket.io` file.
    */
   init(clientType, options) {
+    /**
+     * Configuration object
+     * @type {Object}
+     * @name config
+     * @instance
+     * @memberof module:soundworks/client.socket
+     */
+    this.config = Object.assign({
+      pingInterval: 5 * 1000,
+    }, options);
+
+    // open the web socket
     const path = 'test';
     const protocol = window.location.protocol.replace(/^http?/, 'ws');
     const { hostname, port } = window.location;
@@ -53,52 +67,29 @@ const socket = {
     this.ws = new WebSocket(url);
     log(`initialized - url: ${url}`);
 
+    // parse incoming messages for pubsub
     this.ws.addEventListener('message', e => {
-      // console.log('message', e.data);
       const [channel, args] = JSON.parse(e.data);
-      this.emit(channel, args);
+      this.emit(channel, ...args);
     });
 
-    this.ws.addEventListener('error', (...args) => {
-      // console.error('error', ...args);
-    });
-
-    this._listenSocketState();
-  },
-
-  _listenSocketState() {
-    [
-      'open',
+    // broadcast all `WebSockets` "native" events
+    [ 'open',
       'close',
-      // 'error',
+      'error',
       'upgrade',
+      'message',
     ].forEach(eventName => {
-      this.ws.addEventListener(eventName, () => {
-        // @todo - just re-emit using the existing event system...
-        this._state = eventName;
-        this._stateListeners.forEach((listener) => listener(this._state));
+      this.ws.addEventListener(eventName, (e) => {
+        this.emit(eventName, e.data);
       });
     });
   },
 
-  emit(channel, args) {
-    const listeners = this._listeners.get(channel);
-    listeners.forEach(callback => callback(...args));
-  },
-
-  /**
-   * Listen to the different states of the socket.
-   *
-   * @param {Function} callback - The function to be called when the state
-   *  of the socket changes, the given function is called with the name of the
-   *  event as argument.
-   * @see {http://socket.io/docs/client-api/#socket}
-   */
-  addStateListener(callback) {
-    this._stateListeners.add(callback);
-
-    if (this._state !== null) {
-      callback(this._state);
+  emit(channel, ...args) {
+    if (this._listeners.has(channel)) {
+      const listeners = this._listeners.get(channel);
+      listeners.forEach(callback => callback(...args));
     }
   },
 
@@ -141,5 +132,9 @@ const socket = {
     }
   },
 };
+
+// aliases
+socket.on = socket.receive;
+socket.off = socket.removeListener;
 
 export default socket;

@@ -15,11 +15,9 @@ const log = debug('soundworks:services');
 class Service extends Activity {
   /**
    * @param {String} id - The id of the service (should be prefixed with `'service:'`).
-   * @param {Boolean} hasNetwork - Define if the service needs an access to the socket
-   *  connection.
    */
-  constructor(id, hasNetwork) {
-    super(id, hasNetwork);
+  constructor(id) {
+    super(id);
 
     this.requiredSignals.addObserver((value) => {
       if (value) {

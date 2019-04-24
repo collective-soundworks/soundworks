@@ -2,32 +2,120 @@
 import WebSocket from 'ws';
 import querystring from 'querystring';
 
-// console.log(WebSocket);
+const noop = () => {};
+
+/**
+ * Simple wrapper with simple pubsub system built on top of `ws` socket.
+ * The socket re-emits all "native" ws events.
+ *
+ * @see https://github.com/websockets/ws
+ *
+ * @memberof module:soundworks/server
+ */
 class Socket {
-  constructor(ws) {
+  /** @private */
+  constructor(ws, options = {}) {
+    /**
+     * The `ws` socket instance
+     * @type {Object}
+     * @name ws
+     * @instance
+     * @memberof module:soundworks/server.Socket
+     */
     this.ws = ws;
 
+    /**
+     * Configuration object
+     * @type {Object}
+     * @name config
+     * @instance
+     * @memberof module:soundworks/server.Socket
+     */
+    this.config = Object.assign({
+      pingInterval: 5 * 1000,
+    }, options);
+
     this._listeners = new Map();
+    // init to `true` to send first ping
+    this._isAlive = true;
 
-    this.ws.on('message', value => {
-      const [channel, args] = JSON.parse(value);
-      const listeners = this._listeners.get(channel);
-      console.log('message', channel, args, listeners);
+    this._heartbeat = this._heartbeat.bind(this);
 
-      listeners.forEach(callback => callback(...args));
+    this.ws.addEventListener('message', e => {
+      const [channel, args] = JSON.parse(e.data);
+      this.emit(channel, ...args);
     });
 
-    // @todo - listen for error messages
+    this.ws.on('pong', this._heartbeat);
+
+    // broadcast all `ws` "native" events
+    [ 'close',
+      'error',
+      'message',
+      'open',
+      'ping',
+      'pong',
+      'unexpected-response',
+      'upgrade',
+    ].forEach(eventName => {
+      this.ws.addEventListener(eventName, e => {
+        this.emit(eventName, e.data);
+        // // for backward compatibility
+        // if (eventName === 'close') {
+        //   this.emit('disconnect', e.data);
+        // }
+      });
+    });
+
+    // adapted from: https://github.com/websockets/ws#how-to-detect-and-close-broken-connections
+    this._intervalId = setInterval(() => {
+      console.log('ping', this._isAlive);
+      if (this._isAlive === false) {
+        clearInterval(this._intervalId);
+        this.ws.terminate();
+        return;
+      }
+
+      this._isAlive = false;
+      this.ws.ping(noop);
+    }, this.config.pingInterval);
+
+    // aliases
+    this.on = this.receive.bind(this);
+    this.off =  this.removeListener.bind(this);
   }
 
-  send(channel, args) {
+  _heartbeat() {
+    this._isAlive = true;
+  }
+
+  destroy() {
+    clearTimeout(this._intervalId);
+    this._listeners.clear();
+  }
+
+  emit(channel, ...args) {
+    if (this._listeners.has(channel)) {
+      const listeners = this._listeners.get(channel);
+      // console.log(channel, args, listeners);
+      listeners.forEach(callback => callback(...args));
+    }
+  }
+
+  send(channel, ...args) {
     const msg = JSON.stringify([channel, args]);
-    console.log('send', channel, args);
-    this.ws.send(msg);
+
+    this.ws.send(msg, (err) => {
+      if (err) {
+        // @todo - error handling (retry?)
+        console.error('error sending msg:', channel, args);
+      } else {
+        // console.log('msg successfully send:', channel, args);
+      }
+    });
   }
 
   receive(channel, callback) {
-    console.log('register callback', channel);
     if (!this._listeners.has(channel)) {
       this._listeners.set(channel, new Set());
     }
@@ -42,19 +130,24 @@ class Socket {
       listeners.delete(callback);
     }
   }
-
-  removeAllListeners() {
-    console.warn('@todo - implement Socket.removeAllListeners');
-  }
 }
 
+/**
+ * Internal base class for services and scenes.
+ *
+ * @todo - binary socket using:
+ * https://github.com/websockets/ws#multiple-servers-sharing-a-single-https-server
+ *
+ * @memberof module:soundworks/server
+ */
+const sockets = {
+  rooms: new Map(),
 
-export default {
   /**
-   * Initialize the object which socket.io
+   * Initialize sockets
    * @private
    */
-  init(httpServer, config) {
+  init(httpServer, config, onConnectionCallback) {
     const path = 'test';
 
     this.wss = new WebSocket.Server({
@@ -62,33 +155,106 @@ export default {
       path: `/${path}`, // @note - update according to existing config files (aka cosima-apps)
     });
 
-    // this.io = new sio(httpServer, config);;
-  },
-
-  /**
-   * Register the function to apply when a client of the given `clientType`
-   * is connecting to the server
-   * @param {Array} clientTypes - The different type of client, should be namespaced
-   * @param {Function} callback
-   * @private
-   */
-  onConnection(clientTypes, callback) {
     this.wss.on('connection', (ws, req) => {
       const { clientType } = querystring.decode(req.url.split('?')[1]);
       const socket = new Socket(ws);
 
-      // @todo - probably not useful, remove
-      if (clientTypes.indexOf(clientType) !== -1) {
-        callback(clientType, socket);
-      } else {
-        throw new Error(`[sockets] Undefined clientType: "${clientType}"`);
+      this.addToRoom(socket, '*');
+      this.addToRoom(socket, clientType);
+
+      onConnectionCallback(clientType, socket);
+    });
+  },
+
+  /**
+   * Add a socket to a given room
+   * @param {Socket} socket - Socket to register in the room.
+   * @param {String} roomId - Id of the room
+   */
+  addToRoom(socket, roomId) {
+    if (!this.rooms.has(roomId)) {
+      this.rooms.set(roomId, new Set());
+    }
+
+    const room = this.rooms.get(roomId);
+    room.add(socket);
+  },
+
+  /**
+   * Remove a socket to a given room
+   * @param {Socket} socket - Socket to register in the room.
+   * @param {String} [roomId=null] - Id of the room
+   */
+  removeFromRoom(socket, id) {
+    if (this.rooms.has(id)) {
+      const room = this.rooms.get(id);
+      room.delete(socket);
+    }
+  },
+
+  /**
+   * Remove a socket to all rooms
+   * @param {Socket} socket - Socket to register in the room.
+   */
+  removeFromAllRooms(socket) {
+    for (let [key, room] of this.rooms) {
+      room.delete(socket);
+    }
+  },
+
+  /**
+   * Sends a WebSocket message to the client.
+   * @param {Client} client - The client to send the message to.
+   * @param {String} channel - The channel of the message
+   * @param {...*} args - Arguments of the message (as many as needed, of any type).
+   */
+  send(client, channel, ...args) {
+    client.socket.send(channel, ...args);
+  },
+
+  /**
+   * Sends a message to all client of given `clientType` or `clientType`s. If
+   * not specified, the message is sent to all clients.
+   *
+   * @param {String|Array} roomsIds - The ids of the rooms that must receive
+   *  the message. If null is send to all clients.
+   * @param {module:soundworks/server.Client} excludeClient - Optionnal
+   *  client to ignore when broadcasting the message, typically the client
+   *  at the origin of the message.
+   * @param {String} channel - Channel of the message
+   * @param {...*} args - Arguments of the message (as many as needed, of any type).
+   */
+  broadcast(roomIds, excludeClient, channel, ...args) {
+    let targets;
+
+    if (typeof roomsIds === 'string' || Array.isArray(roomIds)) {
+      if (typeof roomsIds === 'string') {
+        roomIds = [roomIds];
+      }
+
+      targets = new Set();
+
+      roomIds.forEach(roomId => {
+        if (this.rooms.has(roomId)) {
+          const room = this.rooms.get(roomId);
+          room.forEach(socket => targets.add(socket));
+        }
+      });
+    } else {
+      targets = this.rooms.get('*');
+    }
+
+    targets.forEach(socket => {
+      if (socket.ws.readyState === WebSocket.OPEN) {
+        if (excludeClient !== null) {
+          if (socket !== excludeClient.socket) {
+            socket.send(channel, ...args);
+          }
+        } else {
+          socket.send(channel, ...args);
+        }
       }
     });
-    // clientTypes.forEach((clientType) => {
-    //   this.io.of(clientType).on('connection', (socket) => {
-    //     callback(clientType, socket);
-    //   });
-    // });
   },
 
   /**
@@ -102,19 +268,7 @@ export default {
   },
 
   /**
-   * Sends a WebSocket message to the client.
-   * @param {Client} client - The client to send the message to.
-   * @param {String} channel - The channel of the message
-   * @param {...*} args - Arguments of the message (as many as needed, of any type).
-   */
-  send(client, channel, ...args) {
-    client.socket.send(channel, args);
-  },
-
-
-  /**
    * Stop listening to a message from the server.
-   *
    * @param {Client} client - The client to send the message to.
    * @param {String} channel - The channel of the message.
    * @param {...*} callback - The callback to cancel.
@@ -122,41 +276,6 @@ export default {
   removeListener(client, channel, callback) {
     client.socket.removeListener(channel, callback);
   },
-
-  /**
-   * Sends a message to all client of given `clientType` or `clientType`s. If
-   * not specified, the message is sent to all clients.
-   *
-   * @param {String|Array} clientType - The `clientType`(s) that must receive
-   *  the message.
-   * @param {module:soundworks/server.Client} excludeClient - Optionnal
-   *  client to ignore when broadcasting the message, typically the client
-   *  at the origin of the message.
-   * @param {String} channel - Channel of the message
-   * @param {...*} args - Arguments of the message (as many as needed, of any type).
-   */
-  broadcast(clientType, excludeClient, channel, ...args) {
-    // if (!this.io) // @todo - remove that, fix server initialization order instead
-    //   return;
-
-    // let namespaces;
-
-    // if (typeof clientType === 'string')
-    //   namespaces = [`/${clientType}`];
-    // else if (Array.isArray(clientType))
-    //   namespaces = clientType.map(type => `/${type}`);
-    // else
-    //   namespaces = Object.keys(this.io.nsps);
-
-    // if (excludeClient) {
-    //   const index = namespaces.indexOf('/' + excludeClient.type);
-
-    //   if (index !== -1) {
-    //     namespaces.splice(index, 1);
-    //     excludeClient.socket.broadcast.emit(channel, ...args);
-    //   }
-    // }
-
-    // namespaces.forEach((nsp) => this.io.of(nsp).emit(channel, ...args));
-  },
 };
+
+export default sockets;

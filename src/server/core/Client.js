@@ -112,7 +112,6 @@ class Client {
    * Destroy the client.
    */
   destroy() {
-    this.socket.removeAllListeners();
     this.uuid = null;
   }
 }

@@ -16,8 +16,6 @@ import viewManager from './viewManager';
 class Activity extends Process {
   /**
    * @param {String} id - Id of the activity.
-   * @param {Boolean} hasNetwork - Define if the activity needs a socket
-   *  connection or not.
    */
   constructor(id) {
     super(id);

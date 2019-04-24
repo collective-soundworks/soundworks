@@ -120,6 +120,13 @@ const server = {
   clientCtor: Client,
 
   /**
+   * wrapper around `ws` server
+   * @type {module:soundworks/server.sockets}
+   * @default module:soundworks/server.sockets
+   */
+  sockets: sockets,
+
+  /**
    * express instance, can allow to expose additionnal routes (e.g. REST API).
    * @unstable
    */
@@ -227,8 +234,16 @@ const server = {
    *  Configuration of the application.
    */
   init(config) {
-    this.config = config;
-    this._populateDefaultConfig();
+    const defaultConfig = {
+      port: 8000,
+      enableGZipCompression: true,
+      publicDirectory: path.join(process.cwd(), 'public'),
+      templateDirectory: path.join(process.cwd(), 'html'),
+      defaultClient: 'player',
+      websockets: {},
+    }
+
+    this.config = Object.assign({}, defaultConfig, config);
 
     serviceManager.init();
 
@@ -252,17 +267,53 @@ const server = {
   start() {
     console.log(colors.cyan(`[soundworks] starting server`));
     // compression
-    if (this.config.enableGZipCompression)
+    if (this.config.enableGZipCompression) {
       this.router.use(compression());
+    }
 
-    // public folder
+    // public static folder
     const { publicDirectory, serveStaticOptions } = this.config;
-    const staticMiddleware = express.static(publicDirectory, serveStaticOptions);
-    this.router.use(staticMiddleware);
+    this.router.use(express.static(publicDirectory, serveStaticOptions));
 
-    this._initActivities();
-    this._initRouting(this.router);
-    // expose router to allow adding some routes (e.g. REST API)
+    // map activities to their respective client type(s) and start them all
+    this._activities.forEach((activity) => {
+      activity.clientTypes.forEach((clientType) => {
+        if (!this._clientTypeActivitiesMap[clientType]) {
+          this._clientTypeActivitiesMap[clientType] = new Set();
+        }
+
+        this._clientTypeActivitiesMap[clientType].add(activity);
+      });
+    });
+
+    // init routing for each client type
+    console.log(colors.yellow(`+ available clients:`));
+
+    const routes = [];
+
+    for (let clientType in this._clientTypeActivitiesMap) {
+      if (clientType !== this.config.defaultClient) {
+        const route = this._openClientRoute(clientType, this.router);
+        routes.push({ clientType: `[${clientType}]`, route: colors.green(route || '/') });
+      }
+    }
+
+    // open default route last
+    for (let clientType in this._clientTypeActivitiesMap) {
+      if (clientType === this.config.defaultClient) {
+        const route = this._openClientRoute(clientType, this.router);
+        routes.unshift({ clientType: `[${clientType}]`, route: colors.green(route || '/') });
+      }
+    }
+
+    console.log(columnify(routes, {
+      showHeaders: false,
+      config: {
+        clientType: {align: 'right'}
+      }
+    }));
+
+    // start http server
     const useHttps = this.config.useHttps || false;
 
     return new Promise((resolve, reject) => {
@@ -290,25 +341,25 @@ const server = {
           });
         }
       }
-    }).then((httpServer) => {
-      this._initSockets(httpServer);
-
+    }).then(httpServer => {
       this.httpServer = httpServer;
 
+      sockets.init(httpServer, this.config.websockets, (clientType, socket) => {
+        this._onSocketConnection(clientType, socket);
+      });
+
+      // bind server to port
       const promise = new Promise((resolve, reject) => {
         serviceManager.signals.ready.addObserver(() => {
           httpServer.listen(this.router.get('port'), () => {
-
-            // console.log(ifaces);
             const protocol = useHttps ? 'https' : 'http';
             const port = this.router.get('port').toString();
-            // this._address = `${protocol}://127.0.0.1:${this.router.get('port')}`;
             console.log(colors.yellow(`+ ${protocol} server listening on:`));
 
             const ifaces = os.networkInterfaces();
 
-            Object.keys(ifaces).forEach(function (dev) {
-              ifaces[dev].forEach(function (details) {
+            Object.keys(ifaces).forEach(dev => {
+              ifaces[dev].forEach(details => {
                 if (details.family === 'IPv4') {
                   console.log(`    ${protocol}://${details.address}:${colors.green(port)}`);
                 }
@@ -325,105 +376,6 @@ const server = {
       return promise;
 
     }).catch((err) => console.error(err.stack));
-  },
-
-  /**
-   * Map activities to their respective client type(s) and start them all.
-   * @private
-   */
-  _initActivities() {
-    this._activities.forEach((activity) => {
-      this._mapClientTypesToActivity(activity.clientTypes, activity);
-    });
-  },
-
-  /**
-   * Init routing for each client. The default client route must be created last.
-   * @private
-   */
-  _initRouting(router) {
-    console.log(colors.yellow(`+ available clients:`));
-
-    const routes = [];
-
-    for (let clientType in this._clientTypeActivitiesMap) {
-      if (clientType !== this.config.defaultClient) {
-        const route = this._openClientRoute(clientType, router);
-        routes.push({ clientType: `[${clientType}]`, route: colors.green(route || '/') });
-      }
-    }
-
-    // open default route last
-    for (let clientType in this._clientTypeActivitiesMap) {
-      if (clientType === this.config.defaultClient) {
-        const route = this._openClientRoute(clientType, router);
-        routes.unshift({ clientType: `[${clientType}]`, route: colors.green(route || '/') });
-      }
-    }
-
-    const columns = columnify(routes, {
-      showHeaders: false,
-      config: {
-        clientType: {align: 'right'}
-      }
-    });
-
-    console.log(columns);
-  },
-
-  /**
-   * Init websocket server.
-   * @private
-   */
-  _initSockets(httpServer) {
-    sockets.init(httpServer, this.config.websockets);
-    // socket connnection
-    sockets.onConnection(this.clientTypes, (clientType, socket) => {
-      this._onSocketConnection(clientType, socket);
-    });
-  },
-
-   /**
-   * Populate mandatory configuration options
-   * @private
-   */
-  _populateDefaultConfig() {
-    if (this.config.port === undefined)
-       this.config.port = 8000;
-
-    if (this.config.enableGZipCompression === undefined)
-      this.config.enableGZipCompression = true;
-
-    if (this.config.publicDirectory === undefined)
-      this.config.publicDirectory = path.join(process.cwd(), 'public');
-
-    if (this.config.serveStaticOptions === undefined)
-      this.config.serveStaticOptions = {};
-
-    if (this.config.templateDirectory === undefined)
-      this.config.templateDirectory = path.join(process.cwd(), 'html');
-
-    if (this.config.defaultClient === undefined)
-      this.config.defaultClient = 'player';
-
-    if (this.config.websockets === undefined)
-      this.config.websockets = {};
-  },
-
-  /**
-   * Map client types with an activity.
-   * @param {Array<String>} clientTypes - List of client type.
-   * @param {Activity} activity - Activity concerned with the given `clientTypes`.
-   * @private
-   */
-  _mapClientTypesToActivity(clientTypes, activity) {
-    clientTypes.forEach((clientType) => {
-      if (!this._clientTypeActivitiesMap[clientType]) {
-        this._clientTypeActivitiesMap[clientType] = new Set();
-      }
-
-      this._clientTypeActivitiesMap[clientType].add(activity);
-    });
   },
 
   /**
@@ -479,9 +431,13 @@ const server = {
     const client = new this.clientCtor(clientType, socket);
     const activities = this._clientTypeActivitiesMap[clientType];
 
-    // global lifecycle of the client
-    sockets.receive(client, 'disconnect', () => {
+    socket.receive('close', () => {
+      // clean sockets
+      socket.destroy();
+      sockets.removeFromAllRooms(socket);
+      // remove client from activities
       activities.forEach((activity) => activity.disconnect(client));
+      // destroy client
       client.destroy();
     });
 
@@ -489,7 +445,7 @@ const server = {
     const serverRequiredServices = serviceManager.getRequiredServices(clientType);
     const serverServicesList = serviceManager.getServiceList();
 
-    sockets.receive(client, 'handshake', (data) => {
+    socket.receive('handshake', (data) => {
       // in development, if service required client-side but not server-side,
       // complain properly client-side.
       if (this.config.env !== 'production') {
@@ -506,11 +462,12 @@ const server = {
         });
 
         if (missingServices.length > 0) {
-          sockets.send(client, 'client:error', {
+          const data = {
             type: 'services',
             data: missingServices,
-          });
+          };
 
+          socket.send('client:error', data);
           return;
         }
       }

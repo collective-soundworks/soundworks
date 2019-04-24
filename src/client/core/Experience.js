@@ -12,12 +12,8 @@ import serviceManager from './serviceManager';
  * @extends module:soundworks/client.Activity
  */
 class Experience extends Activity {
-  /**
-   * @param {Boolean} [hasNetwork=true] - Define if the experience requires a
-   *  socket connection.
-   */
-  constructor(hasNetwork = true) {
-    super('experience', hasNetwork);
+  constructor() {
+    super('experience');
 
     this.start = this.start.bind(this);
 
@@ -25,8 +21,7 @@ class Experience extends Activity {
     this.waitFor(serviceManager.signals.ready);
 
     // if the experience has network, require errorReporter service by default
-    if (hasNetwork)
-      this._errorReporter = this.require('error-reporter');
+    this._errorReporter = this.require('error-reporter');
   }
 
   /**
@@ -46,17 +41,8 @@ class Experience extends Activity {
   start() {
     super.start();
 
-    if (this.hasNetwork)
-      this.send('enter');
+    this.send('enter');
   }
-
-  /** @private */
-  // done() {
-  //   if (this.hasNetwork)
-  //     this.send('exit');
-
-  //   super.done();
-  // }
 }
 
 export default Experience;

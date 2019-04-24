@@ -266,51 +266,34 @@ const client = {
 
     return new Promise((resolve, reject) => {
       // see: http://socket.io/docs/client-api/#socket
-      this.socket.addStateListener((eventName) => {
-        switch (eventName) {
-          case 'open':
-            const payload = { urlParams: this.urlParams };
+      this.socket.on('open', () => {
+        const payload = { urlParams: this.urlParams };
 
-            if (this.config.env !== 'production') {
-              Object.assign(payload, {
-                requiredServices: serviceManager.getRequiredServices()
-              });
-            }
-
-            // wait for handshake response to mark client as `ready`
-            this.socket.receive('client:start', (uuid) => {
-              this.uuid = uuid;
-              resolve();
-            });
-
-            this.socket.receive('client:error', (err) => {
-              switch (err.type) {
-                case 'services':
-                  // can only append if env !== 'production'
-                  const msg = `"${err.data.join(', ')}" required client-side but not server-side`;
-                  throw new Error(msg);
-                  break;
-              }
-
-              reject();
-            });
-
-            this.socket.send('handshake', payload);
-            break;
-            // case 'reconnect':
-            //   // serviceManager.start();
-            //   break;
-            // case 'disconnect':
-            //   // can relaunch serviceManager on reconnection
-            //   // serviceManager.reset();
-            //   break;
-            // case 'connect_error':
-            // case 'reconnect_attempt':
-            // case 'reconnecting':
-            // case 'reconnect_error':
-            // case 'reconnect_failed':
-            //   break;
+        if (this.config.env !== 'production') {
+          Object.assign(payload, {
+            requiredServices: serviceManager.getRequiredServices()
+          });
         }
+
+        // wait for handshake response to mark client as `ready`
+        this.socket.on('client:start', (uuid) => {
+          this.uuid = uuid;
+          resolve();
+        });
+
+        this.socket.on('client:error', (err) => {
+          switch (err.type) {
+            case 'services':
+              // can only append if env !== 'production'
+              const msg = `"${err.data.join(', ')}" required client-side but not server-side`;
+              throw new Error(msg);
+              break;
+          }
+
+          reject();
+        });
+
+        this.socket.send('handshake', payload);
       });
     });
   },
