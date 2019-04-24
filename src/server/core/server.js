@@ -6,7 +6,10 @@ import pem from 'pem';
 import os from 'os';
 import colors from 'colors';
 import ejs from 'ejs';
-import express from 'express';
+
+import polka from 'polka';
+import serveStatic from 'serve-static';
+// import express from 'express';
 import columnify from 'columnify';
 import compression from 'compression';
 import Client from './Client';
@@ -247,13 +250,16 @@ const server = {
 
     serviceManager.init();
 
-    // instanciate and configure express
+    // instanciate and configure polka
     // this allows to hook middleware and routes (e.g. cors) in the express
     // instance between `server.init` and `server.start`
-    this.router = new express();
-    this.router.set('port', process.env.PORT || this.config.port);
-    this.router.set('view engine', 'ejs');
-    // allow promise based syntax for server initialization
+    this.router = polka();
+    // compression (must be set before static)
+    this.router.use(compression());
+    // public static folder
+    const { publicDirectory, serveStaticOptions } = this.config;
+    this.router.use(serveStatic(publicDirectory, serveStaticOptions));
+
     return Promise.resolve();
   },
 
@@ -266,14 +272,6 @@ const server = {
    */
   start() {
     console.log(colors.cyan(`[soundworks] starting server`));
-    // compression
-    if (this.config.enableGZipCompression) {
-      this.router.use(compression());
-    }
-
-    // public static folder
-    const { publicDirectory, serveStaticOptions } = this.config;
-    this.router.use(express.static(publicDirectory, serveStaticOptions));
 
     // map activities to their respective client type(s) and start them all
     this._activities.forEach((activity) => {
@@ -286,96 +284,115 @@ const server = {
       });
     });
 
-    // init routing for each client type
-    console.log(colors.yellow(`+ available clients:`));
-
-    const routes = [];
-
-    for (let clientType in this._clientTypeActivitiesMap) {
-      if (clientType !== this.config.defaultClient) {
-        const route = this._openClientRoute(clientType, this.router);
-        routes.push({ clientType: `[${clientType}]`, route: colors.green(route || '/') });
-      }
-    }
-
-    // open default route last
-    for (let clientType in this._clientTypeActivitiesMap) {
-      if (clientType === this.config.defaultClient) {
-        const route = this._openClientRoute(clientType, this.router);
-        routes.unshift({ clientType: `[${clientType}]`, route: colors.green(route || '/') });
-      }
-    }
-
-    console.log(columnify(routes, {
-      showHeaders: false,
-      config: {
-        clientType: {align: 'right'}
-      }
-    }));
-
     // start http server
     const useHttps = this.config.useHttps || false;
 
-    return new Promise((resolve, reject) => {
-      // launch http(s) server
-      if (!useHttps) {
-        const httpServer = http.createServer(this.router);
-        resolve(httpServer);
-      } else {
-        const httpsInfos = this.config.httpsInfos;
-        // use given certificate
-        if (httpsInfos.key && httpsInfos.cert) {
-          const key = fs.readFileSync(httpsInfos.key);
-          const cert = fs.readFileSync(httpsInfos.cert);
-          const httpsServer = https.createServer({ key, cert }, this.router);
-          resolve(httpsServer);
-        // generate certificate on the fly (for development purposes)
+    return Promise.resolve()
+      .then(() => {
+        // create http server
+        if (!useHttps) {
+          const httpServer = http.createServer();
+          return Promise.resolve(httpServer);
         } else {
-          pem.createCertificate({ days: 1, selfSigned: true }, (err, keys) => {
-            const httpsServer = https.createServer({
-              key: keys.serviceKey,
-              cert: keys.certificate,
-            }, this.router);
+          const httpsInfos = this.config.httpsInfos;
 
-            resolve(httpsServer);
-          });
+          if (httpsInfos.key && httpsInfos.cert) {
+            // use given certificate
+            try {
+              const key = fs.readFileSync(httpsInfos.key);
+              const cert = fs.readFileSync(httpsInfos.cert);
+              const httpsServer = https.createServer({ key, cert });
+            } catch(err) {
+              console.error(
+`Invalid certificate files, please check your:
+- key file: ${httpsInfos.key}
+- cert file: ${httpsInfos.cert}
+              `);
+
+              throw err;
+            }
+
+            return Promise.resolve(httpsServer);
+          } else {
+            // generate certificate on the fly (for development purposes)
+            pem.createCertificate({ days: 1, selfSigned: true }, (err, keys) => {
+              const httpsServer = https.createServer({
+                key: keys.serviceKey,
+                cert: keys.certificate,
+              }, this.router);
+
+              return Promise.resolve(httpsServer);
+            });
+          }
         }
-      }
-    }).then(httpServer => {
-      this.httpServer = httpServer;
+      })
+      .then(httpServer => {
+        this.httpServer = httpServer;
+        this.router.server = httpServer;
 
-      sockets.init(httpServer, this.config.websockets, (clientType, socket) => {
-        this._onSocketConnection(clientType, socket);
-      });
+        // init routing for each client type
+        console.log(colors.yellow(`+ available clients:`));
 
-      // bind server to port
-      const promise = new Promise((resolve, reject) => {
-        serviceManager.signals.ready.addObserver(() => {
-          httpServer.listen(this.router.get('port'), () => {
+        const routes = [];
+        // open all routes except default
+        for (let clientType in this._clientTypeActivitiesMap) {
+          if (clientType !== this.config.defaultClient) {
+            const route = this._openClientRoute(clientType, this.router);
+            routes.push({ clientType: `[${clientType}]`, route: colors.green(route) });
+          }
+        }
+
+        // open default route last
+        for (let clientType in this._clientTypeActivitiesMap) {
+          if (clientType === this.config.defaultClient) {
+            const route = this._openClientRoute(clientType, this.router);
+            routes.unshift({ clientType: `[${clientType}]`, route: colors.green(route) });
+          }
+        }
+
+        console.log(columnify(routes, {
+          showHeaders: false,
+          config: {
+            clientType: {align: 'right'}
+          }
+        }));
+
+        return Promise.resolve();
+      })
+      .then(() => {
+        // init sockets
+        sockets.start(this.httpServer, this.config.websockets, (clientType, socket) => {
+          this._onSocketConnection(clientType, socket);
+        });
+
+        // bind server to port
+        const promise = new Promise((resolve, reject) => {
+          serviceManager.signals.ready.addObserver(() => {
+            const port = this.config.port;
             const protocol = useHttps ? 'https' : 'http';
-            const port = this.router.get('port').toString();
-            console.log(colors.yellow(`+ ${protocol} server listening on:`));
-
             const ifaces = os.networkInterfaces();
 
-            Object.keys(ifaces).forEach(dev => {
-              ifaces[dev].forEach(details => {
-                if (details.family === 'IPv4') {
-                  console.log(`    ${protocol}://${details.address}:${colors.green(port)}`);
-                }
-              });
-            });
+            this.router.listen(port, () => {
+              // log infos
+              console.log(colors.yellow(`+ ${protocol} server listening on:`));
 
-            resolve();
+              Object.keys(ifaces).forEach(dev => {
+                ifaces[dev].forEach(details => {
+                  if (details.family === 'IPv4') {
+                    console.log(`    ${protocol}://${details.address}:${colors.green(port)}`);
+                  }
+                });
+              });
+
+              resolve();
+            });
           });
         });
-      });
 
-      serviceManager.start();
+        serviceManager.start();
 
-      return promise;
-
-    }).catch((err) => console.error(err.stack));
+        return promise;
+      }).catch((err) => console.error(err.stack));
   },
 
   /**
@@ -383,14 +400,14 @@ const server = {
    * @private
    */
   _openClientRoute(clientType, router) {
-    let route = '';
+    let route = '/';
+
+    if (clientType !== this.config.defaultClient) {
+      route += `${clientType}`;
+    }
 
     if (this._routes[clientType]) {
       route += this._routes[clientType];
-    }
-
-    if (clientType !== this.config.defaultClient) {
-      route = `/${clientType}${route}`;
     }
 
     // define template filename: `${clientType}.ejs` or `default.ejs`
@@ -410,12 +427,11 @@ const server = {
 
       const tmplString = fs.readFileSync(template, { encoding: 'utf8' });
       const tmpl = ejs.compile(tmplString);
-
       // http request
       router.get(route, (req, res) => {
         const data = this._clientConfigDefinition(clientType, this.config, req);
         const appIndex = tmpl({ data });
-        res.send(appIndex);
+        res.end(appIndex);
       });
     });
 

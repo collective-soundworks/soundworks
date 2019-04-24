@@ -60,16 +60,11 @@ class Socket {
     ].forEach(eventName => {
       this.ws.addEventListener(eventName, e => {
         this.emit(eventName, e.data);
-        // // for backward compatibility
-        // if (eventName === 'close') {
-        //   this.emit('disconnect', e.data);
-        // }
       });
     });
 
     // adapted from: https://github.com/websockets/ws#how-to-detect-and-close-broken-connections
     this._intervalId = setInterval(() => {
-      console.log('ping', this._isAlive);
       if (this._isAlive === false) {
         clearInterval(this._intervalId);
         this.ws.terminate();
@@ -147,7 +142,7 @@ const sockets = {
    * Initialize sockets
    * @private
    */
-  init(httpServer, config, onConnectionCallback) {
+  start(httpServer, config, onConnectionCallback) {
     const path = 'test';
 
     this.wss = new WebSocket.Server({

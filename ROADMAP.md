@@ -10,21 +10,22 @@ update `Square` to assess / complete `AudioStreamManager` API
 - review how to handle `thing` clients (should be in `src/client`) (ok)
 - sketch a `soundworks-cli` for updates (ok)
 
-### 2. Misc / Updates - non braking
+### 2. Misc / Updates - non breaking
 
 > should be compatible with `soundworks-template#master`
 
 - platform - create a `fullscreen` alias for `full-screen` (ok)
 - remove all logic dedicated to client only apps (has never been used) (ok)
 - remove bunyan logs (too noisy). (ok) 
-
-- replace socket.io
-- fix build scripts
-- fix uws
+- replace socket.io (ok)
 - replace express w/ something more simple / efficient?
   see:
   + fastify 
   + polka https://github.com/lukeed/polka (+1)
+
+- fix uws
+- fix build scripts
+
 - better ErrorReporter 
   + find infos from es6 source
   + log server errors
