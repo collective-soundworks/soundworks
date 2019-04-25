@@ -40,7 +40,7 @@ class RawSocket extends Service {
 
     this._protocol = null;
     this._onReceiveConnectionInfos = this._onReceiveConnectionInfos.bind(this);
-    this._onReceiveAcknoledgement = this._onReceiveAcknoledgement.bind(this);
+    this._onReceiveAcknowledgement = this._onReceiveAcknowledgement.bind(this);
     this._onMessage = this._onMessage.bind(this);
   }
 
@@ -92,7 +92,7 @@ class RawSocket extends Service {
       this.send('service:handshake', data);
     });
 
-    this.socket.addEventListener('message', this._onReceiveAcknoledgement);
+    this.socket.addEventListener('message', this._onReceiveAcknowledgement);
   }
 
   /**
@@ -101,14 +101,14 @@ class RawSocket extends Service {
    *
    * @private
    */
-  _onReceiveAcknoledgement(e) {
+  _onReceiveAcknowledgement(e) {
     const index = new Uint8Array(e.data)[0];
     const { channel, type } = this._protocol[index];
 
     // ignore incomming messages that could occur if
     // acknoledgement was not yet received
     if (channel === 'service:handshake-ack') {
-      this.socket.removeEventListener('message', this._onReceiveAcknoledgement);
+      this.socket.removeEventListener('message', this._onReceiveAcknowledgement);
       this.socket.addEventListener('message', this._onMessage);
       this.ready();
     }
