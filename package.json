@@ -45,6 +45,7 @@
     "osc": "^2.2.2",
     "pem": "^1.12.5",
     "polka": "^0.5.2",
+    "retrace": "^1.0.0",
     "screenfull": "^3.3.2",
     "serve-static": "^1.13.2",
     "url-join": "^4.0.0",

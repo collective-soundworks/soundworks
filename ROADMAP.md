@@ -25,10 +25,9 @@ update `Square` to assess / complete `AudioStreamManager` API
 - replace socket.io (ok)
 - replace express w/ by polka (ok)
 - fix `uws` with `ws` (ok)
-
 - better ErrorReporter 
-  + find infos from es6 source
-  + log server errors
+  + find infos from es6 source (ok)
+  + log server errors (ok)
 
 - fix build scripts
 

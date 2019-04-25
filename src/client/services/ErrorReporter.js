@@ -34,20 +34,21 @@ class ErrorReporter extends Service {
     super.start();
 
     window.addEventListener('error', this._onError);
+    window.addEventListener('unhandledrejection', this._onError);
+
     this.ready();
   }
 
   /** @private */
   _onError(e) {
-    let stack;
-    let file = e.filename;
-    file = file.replace(window.location.origin, '');
-    const line = e.lineno;
-    const col = e.colno;
-    const msg = e.message;
-    const userAgent = navigator.userAgent;
-
-    this.send('error', file, line, col, msg, userAgent);
+    if (e instanceof PromiseRejectionEvent) {
+      if (e.reason && e.reason.stack) {
+        const stack = e.reason.stack;
+        this.send('error', stack, navigator.userAgent);
+      }
+    } else if (e instanceof ErrorEvent) {
+      this.send('error', e.stack, navigator.userAgent);
+    }
   }
 }
 

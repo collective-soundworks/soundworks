@@ -37,8 +37,9 @@ const serviceManager = {
 
     this.signals.start.set(true);
 
-    if (!this._requiredSignals.length)
+    if (!this._requiredSignals.length) {
       this.ready();
+    }
   },
 
   /**

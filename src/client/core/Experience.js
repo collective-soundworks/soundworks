@@ -18,6 +18,7 @@ class Experience extends Activity {
     this.start = this.start.bind(this);
 
     this.requiredSignals.addObserver(this.start);
+
     this.waitFor(serviceManager.signals.ready);
 
     // if the experience has network, require errorReporter service by default
@@ -39,6 +40,7 @@ class Experience extends Activity {
    * the necessary informations and services ready to be consumed.
    */
   start() {
+    console.log('parent start');
     super.start();
 
     this.send('enter');

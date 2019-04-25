@@ -195,8 +195,12 @@ const client = {
    * Start the application.
    */
   async start() {
-    await this._initSocket();
-    serviceManager.start();
+    try {
+      await this._initSocket();
+      serviceManager.start();
+    } catch(err) {
+      console.log('async error');
+    }
   },
 
   /**

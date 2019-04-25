@@ -2,7 +2,7 @@ import fse  from 'fs-extra';
 import path from 'path';
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
-
+import retrace from 'retrace';
 
 function padLeft(str, value, length) {
   str = str + '';
@@ -35,60 +35,79 @@ class ErrorReporter extends Service {
   constructor() {
     super(SERVICE_ID);
 
-    const defaults = {
-      configItem: 'errorReporterDirectory',
-    };
+    const defaults = {};
 
     this.configure(defaults);
-    this._onError = this._onError.bind(this);
+    this._onClientError = this._onClientError.bind(this);
 
-    this._sharedConfig = this.require('shared-config');
+    const clientDirectory = path.join(process.cwd(), 'logs', 'clients');
+    fse.ensureDirSync(clientDirectory); // create directory if not exists
+
+    const serverDirectory = path.join(process.cwd(), 'logs', 'server');
+    fse.ensureDirSync(serverDirectory); // create directory if not exists
+
+    this.clientDir = clientDirectory;
+    this.serverDir = serverDirectory;
+
+    process
+      .on('unhandledRejection', (reason, p) => this._onServerError(reason.stack))
+      .on('uncaughtException', err => this._onServerError(err.stack));
   }
 
   /** @private */
   start() {
     super.start();
-
-    let dir = this._sharedConfig.get(this.options.configItem);
-
-    if (dir === null)
-      dir = path.join(process.cwd(), 'logs', 'clients');
-
-    fse.ensureDirSync(dir); // create directory if not exists
-
-    this.dir = dir;
-
     this.ready();
   }
 
   /** @private */
-  get filePath() {
+  filePath(dir) {
     const now = new Date();
     const year = padLeft(now.getFullYear(), 0, 4);
     const month = padLeft(now.getMonth() + 1, 0, 2);
     const day = padLeft(now.getDate(), 0, 2);
     const filename = `${year}${month}${day}.log`;
 
-    return path.join(this.dir, filename);
+    return path.join(dir, filename);
   }
 
   /** @private */
   connect(client) {
     super.connect(client);
-    this.receive(client, `error`, this._onError);
+    this.receive(client, `error`, this._onClientError);
   }
 
   /** @private */
-  _onError(file, line, col, msg, userAgent) {
-    this.emit('error', file, line, col, msg, userAgent);
+  _onClientError(stack, userAgent) {
+    retrace.map(stack).then(stack => {
+      // keep this for backward compatibility
+      // @todo - remove in v3
+      this.emit('error', stack, '', '', '', userAgent);
+      this.emit('stack', stack, userAgent);
 
-    // log to file
-    let entry = `${this._getFormattedDate()}\t\t\t`;
-    entry += `- ${file}:${line}:${col}\t"${msg}"\n\t${userAgent}\n\n`;
+      const log = `${this._getFormattedDate()}\t${userAgent}\n${stack}\n\n`;
 
-    fse.appendFile(this.filePath, entry, err => {
-      if (err)
+      fse.appendFile(this.filePath(this.clientDir), log, err => {
+        if (err) {
+          console.error(err.message);
+        }
+      });
+    });
+  }
+
+  _onServerError(stack) {
+    console.error('here ?', stack);
+    // keep this for backward compatibility
+    // @todo - remove in v3
+    this.emit('error', stack, '', '', '', 'server');
+    this.emit('stack', stack, 'server');
+
+    const log = `${this._getFormattedDate()}\n${stack}\n\n`;
+
+    fse.appendFile(this.filePath(this.serverDir), log, err => {
+      if (err) {
         console.error(err.message);
+      }
     });
   }
 
