@@ -247,18 +247,17 @@ const client = {
       this.urlParams = [];
 
       if (pathParams) {
-        pathParams.forEach((param) => this.urlParams.push(param));
+        pathParams.forEach(param => this.urlParams.push(param));
       }
 
       if (hashParams) {
-        hashParams.forEach((param) => this.urlParams.push(param));
+        hashParams.forEach(param => this.urlParams.push(param));
       }
     }
   },
 
   /**
    * Initialize socket connection and perform handshake with the server.
-   * @todo - refactor handshake.
    * @private
    */
   _initSocket() {
@@ -276,12 +275,12 @@ const client = {
         }
 
         // wait for handshake response to mark client as `ready`
-        this.socket.on('client:start', (uuid) => {
+        this.socket.on('soundworks:start', ({ uuid }) => {
           this.uuid = uuid;
           resolve();
         });
 
-        this.socket.on('client:error', (err) => {
+        this.socket.on('soundworks:error', (err) => {
           switch (err.type) {
             case 'services':
               // can only append if env !== 'production'
@@ -293,7 +292,7 @@ const client = {
           reject();
         });
 
-        this.socket.send('handshake', payload);
+        this.socket.send('soundworks:handshake', payload);
       });
     });
   },

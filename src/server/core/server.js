@@ -461,7 +461,7 @@ const server = {
     const serverRequiredServices = serviceManager.getRequiredServices(clientType);
     const serverServicesList = serviceManager.getServiceList();
 
-    socket.receive('handshake', (data) => {
+    socket.receive('soundworks:handshake', (data) => {
       // in development, if service required client-side but not server-side,
       // complain properly client-side.
       if (this.config.env !== 'production') {
@@ -483,15 +483,15 @@ const server = {
             data: missingServices,
           };
 
-          socket.send('client:error', data);
+          socket.send('soundworks:error', data);
           return;
         }
       }
 
       client.urlParams = data.urlParams;
-      // @todo - handle reconnection (ex: `data` contains an `uuid`)
+      // @todo - handle reconnection (ex: `data` contains a `uuid`)
       activities.forEach((activity) => activity.connect(client));
-      sockets.send(client, 'client:start', client.uuid);
+      sockets.send(client, 'soundworks:start', { uuid: client.uuid });
     });
   },
 };
