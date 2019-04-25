@@ -29,9 +29,14 @@ update `Square` to assess / complete `AudioStreamManager` API
   + find infos from es6 source (ok)
   + log server errors (ok)
 
+- binary socket in sockets
 - fix build scripts
 
-- platform - add a test to test the `audioContext` clock (iOS)
+- platform 
+  + add a test to test the `audioContext` clock (iOS)
+  + add a test for localStorage
+- check if lame is installed when requesting AudioStreamManager
+  + log and exit gracefully
 
 > release 2.3.0
 
@@ -62,6 +67,10 @@ update `Square` to assess / complete `AudioStreamManager` API
   + - create an internal store for displaying soundworks internal state
   + check : cronvel/terminal-kit
 - explore latency estimation / compensation in Android
+
+misc:
+- remove utils/setup/helper.js
+- 
 
 > soundworks-template
 

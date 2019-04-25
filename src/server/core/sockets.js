@@ -14,7 +14,7 @@ const noop = () => {};
  */
 class Socket {
   /** @private */
-  constructor(ws, options = {}) {
+  constructor(ws, binary = false, options = {}) {
     /**
      * The `ws` socket instance
      * @type {Object}
@@ -136,14 +136,22 @@ class Socket {
  * @memberof module:soundworks/server
  */
 const sockets = {
+  /**
+   * Store string sockets per room. The romm `'*'` store all current connections
+   */
   rooms: new Map(),
+
+  /**
+   * Store binary sockets per room. The romm `'*'` store all current connections
+   */
+  binaryRooms: new Map(),
 
   /**
    * Initialize sockets
    * @private
    */
   start(httpServer, config, onConnectionCallback) {
-    const path = 'test';
+    const path = 'socket'; // should remove origin
 
     this.wss = new WebSocket.Server({
       server: httpServer,
@@ -151,13 +159,17 @@ const sockets = {
     });
 
     this.wss.on('connection', (ws, req) => {
-      const { clientType } = querystring.decode(req.url.split('?')[1]);
-      const socket = new Socket(ws);
+      const { clientType, binary } = querystring.decode(req.url.split('?')[1]);
 
-      this.addToRoom(socket, '*');
-      this.addToRoom(socket, clientType);
+      if (!!(+binary) === false) {
+        console.log('connect', binary);
+        const socket = new Socket(ws);
 
-      onConnectionCallback(clientType, socket);
+        this.addToRoom(socket, '*');
+        this.addToRoom(socket, clientType);
+
+        onConnectionCallback(clientType, socket);
+      }
     });
   },
 
