@@ -1,3 +1,4 @@
+import colors from 'colors';
 import Signal from '../../utils/Signal';
 import SignalAll from '../../utils/SignalAll';
 
@@ -26,10 +27,19 @@ const serviceManager = {
   },
 
   start() {
+    console.log(colors.yellow(`+ required services`));
+    console.log(
+      this.getRequiredServices()
+        .sort()
+        .map(s => `    ${s} ${colors.yellow(' starting...')}`)
+        .join('\n')
+    );
+
     this.signals.start.set(true);
 
-    if (this._requiredSignals.length === 0)
+    if (this._requiredSignals.length === 0) {
       this._ready();
+    }
   },
 
   _ready() {
@@ -45,8 +55,9 @@ const serviceManager = {
   require(id, options = {}) {
     id = 'service:' + id;
 
-    if (!_ctors[id])
+    if (!_ctors[id]) {
       throw new Error(`Service "${id}" is not defined`);
+    }
 
     let instance = _instances[id];
 
@@ -55,6 +66,11 @@ const serviceManager = {
       _instances[id] = instance;
 
       this._requiredSignals.add(instance.signals.ready);
+
+      //
+      instance.signals.ready.addObserver((state) => {
+        console.log(`    ${id} ${colors.green(' ready')}`);
+      });
     }
 
     instance.configure(options);
@@ -70,12 +86,17 @@ const serviceManager = {
     _ctors[id] = ctor;
   },
 
-  getRequiredServices(clientType) {
+  getRequiredServices(clientType = null) {
     const services = [];
 
     for (let id in _instances) {
-      if (_instances[id].clientTypes.has(clientType))
+      if (clientType !== null) {
+        if (_instances[id].clientTypes.has(clientType)) {
+          services.push(id);
+        }
+      } else {
         services.push(id);
+      }
     }
 
     return services;

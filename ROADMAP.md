@@ -13,25 +13,25 @@ update `Square` to assess / complete `AudioStreamManager` API
 ### 2. Misc / Updates - non breaking
 
 > should be compatible with `soundworks-template#master`
+ 
+- on start log more precise informations 
+  + ip of server (both local and on network) - ok
+  + existing routes - ok
+  + used services and initialization status - ok
 
 - platform - create a `fullscreen` alias for `full-screen` (ok)
 - remove all logic dedicated to client only apps (has never been used) (ok)
 - remove bunyan logs (too noisy). (ok) 
 - replace socket.io (ok)
-- replace express w/ something more simple / efficient?
-  see:
-  + fastify 
-  + polka https://github.com/lukeed/polka (+1)
-
-- fix uws
-- fix build scripts
+- replace express w/ by polka (ok)
+- fix `uws` with `ws` (ok)
 
 - better ErrorReporter 
   + find infos from es6 source
   + log server errors
-- on start log more precise informations
-  + ip of server (both local and on network)
-  + existing routes
+
+- fix build scripts
+
 - platform - add a test to test the `audioContext` clock (iOS)
 
 > release 2.3.0
@@ -40,9 +40,6 @@ update `Square` to assess / complete `AudioStreamManager` API
 
 > along w/ `soundworks-template`
 
-- move `html/default.ejs` in `src/server` in template (ok)
-- review how soundworks/server handle `html` entry point. 
-- split `env-config` and `services-config`
 - decouple views and services by relying on events
 - merge Process and Activity (aka remove Activity)
 - decouple / explicit `Experience.start()` from `serviceManager.ready()`
@@ -63,7 +60,15 @@ update `Square` to assess / complete `AudioStreamManager` API
 - explore advanced shell controller
   + logs number of connected clients by type
   + to create advanced cli views: https://github.com/vadimdemedes/ink#building-layouts
+  + - create an internal store for displaying soundworks internal state
+  + check : cronvel/terminal-kit
 - explore latency estimation / compensation in Android
+
+> soundworks-template
+
+- move `html/default.ejs` in `src/server` in template (ok)
+- review how soundworks/server handle `html` entry point. 
+- split `env-config` and `services-config`
 
 > release 3.0.0
 
@@ -81,11 +86,11 @@ update `Square` to assess / complete `AudioStreamManager` API
 - clean old branches
 - deploy v3.0.0
 
-
 ## v.Next - new features
 
 - make services more dynamic (ex. audioStreamManager: add a new stream while app is running, etc.)
 - improve workflow (ex. more audioStreamManager robust audioStream caching system)
+- improve audioBufferManager (dynamic add, remove, rename files)
 - improve reconnection of client(s)
 - review the way that services are configured
 - checkin - indexes by client types / rooms
