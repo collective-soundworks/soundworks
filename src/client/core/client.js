@@ -266,10 +266,8 @@ const client = {
    */
   async _initSocket() {
     await socket.init(this.type, this.config.websockets);
-    console.log('inited?');
 
     return new Promise((resolve, reject) => {
-      // see: http://socket.io/docs/client-api/#socket
       const payload = { urlParams: this.urlParams };
 
       if (this.config.env !== 'production') {

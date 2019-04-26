@@ -163,9 +163,7 @@ class Activity extends EventEmitter {
    * a client disconnect (e.g. removing socket listeners).
    * @param {module:soundworks/server.Client} client
    */
-  disconnect(client) {
-    // delete client.activities[this.id] // maybe needed by other activities
-  }
+  disconnect(client) {}
 
   /**
    * @deprecated - prefer `client.socket.send`
@@ -178,7 +176,7 @@ class Activity extends EventEmitter {
    */
   send(client, channel, ...args) {
     const namespacedChannel = `${this.id}:${channel}`;
-    sockets.send(client, namespacedChannel, ...args);
+    sockets.send(client.socket, namespacedChannel, ...args);
   }
 
   /**
@@ -192,7 +190,7 @@ class Activity extends EventEmitter {
    */
   receive(client, channel, callback) {
     const namespacedChannel = `${this.id}:${channel}`;
-    sockets.addListener(client, namespacedChannel, callback);
+    sockets.addListener(client.socket, namespacedChannel, callback);
   }
 
   /**
@@ -206,7 +204,7 @@ class Activity extends EventEmitter {
    * @param {Function} callback - The callback to remove from the stack.
    */
   stopReceiving(client, channel, callback) {
-    sockets.removeListener(client, `${this.id}:${channel}`, callback);
+    sockets.removeListener(client.socket, `${this.id}:${channel}`, callback);
   }
 
   /**

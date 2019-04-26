@@ -9,7 +9,6 @@ import ejs from 'ejs';
 
 import polka from 'polka';
 import serveStatic from 'serve-static';
-// import express from 'express';
 import columnify from 'columnify';
 import compression from 'compression';
 import Client from './Client';
@@ -490,7 +489,7 @@ const server = {
       client.urlParams = data.urlParams;
       // @todo - handle reconnection (ex: `data` contains a `uuid`)
       activities.forEach((activity) => activity.connect(client));
-      sockets.send(client, 'soundworks:start', { uuid: client.uuid });
+      socket.send('soundworks:start', { uuid: client.uuid });
     });
   },
 };
