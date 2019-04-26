@@ -176,7 +176,7 @@ class Activity extends EventEmitter {
    */
   send(client, channel, ...args) {
     const namespacedChannel = `${this.id}:${channel}`;
-    sockets.send(client.socket, namespacedChannel, ...args);
+    client.socket.send(namespacedChannel, ...args);
   }
 
   /**
@@ -190,7 +190,7 @@ class Activity extends EventEmitter {
    */
   receive(client, channel, callback) {
     const namespacedChannel = `${this.id}:${channel}`;
-    sockets.addListener(client.socket, namespacedChannel, callback);
+    client.socket.addListener(namespacedChannel, callback);
   }
 
   /**
@@ -204,7 +204,8 @@ class Activity extends EventEmitter {
    * @param {Function} callback - The callback to remove from the stack.
    */
   stopReceiving(client, channel, callback) {
-    sockets.removeListener(client.socket, `${this.id}:${channel}`, callback);
+    const namespacedChannel = `${this.id}:${channel}`;
+    client.socket.removeListener(namespacedChannel, callback);
   }
 
   /**
