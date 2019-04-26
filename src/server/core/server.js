@@ -236,16 +236,15 @@ const server = {
    *  Configuration of the application.
    */
   init(config) {
-    const defaultConfig = {
+    this.config = {
       port: 8000,
       enableGZipCompression: true,
       publicDirectory: path.join(process.cwd(), 'public'),
       templateDirectory: path.join(process.cwd(), 'html'),
       defaultClient: 'player',
       websockets: {},
+      ...config,
     }
-
-    this.config = Object.assign({}, defaultConfig, config);
 
     serviceManager.init();
 
