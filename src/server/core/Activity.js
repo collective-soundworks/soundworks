@@ -168,30 +168,8 @@ class Activity extends EventEmitter {
   }
 
   /**
-   * Listen to a web socket message from a given client.
-   * @param {module:soundworks/server.Client} client - Client that must listen to the message.
-   * @param {String} channel - Channel of the message (is automatically namespaced
-   *  with the activity's name: `${this.id}:channel`).
-   * @param {Function} callback - Callback to execute when a message is received.
-   */
-  receive(client, channel, callback) {
-    const namespacedChannel = `${this.id}:${channel}`;
-    sockets.receive(client, namespacedChannel, callback);
-  }
-
-  /**
-   * Stop listening for messages from the server on a given channel.
+   * @deprecated - prefer `client.socket.send`
    *
-   * @param {module:soundworks/server.Client} client - Client that must listen to the message.
-   * @param {String} channel - The channel of the message (is automatically
-   *  namespaced with the activity's id: `${this.id}:channel`).
-   * @param {Function} callback - The callback to remove from the stack.
-   */
-  stopReceiving(client, channel, callback) {
-    sockets.removeListener(client, `${this.id}:${channel}`, callback);
-  }
-
-  /**
    * Send a web socket message to a given client.
    * @param {module:soundworks/server.Client} client - Client to send the message to.
    * @param {String} channel - Channel of the message (is automatically namespaced
@@ -204,6 +182,36 @@ class Activity extends EventEmitter {
   }
 
   /**
+   * @deprecated - prefer `client.socket.addListener`
+   *
+   * Listen to a web socket message from a given client.
+   * @param {module:soundworks/server.Client} client - Client that must listen to the message.
+   * @param {String} channel - Channel of the message (is automatically namespaced
+   *  with the activity's name: `${this.id}:channel`).
+   * @param {Function} callback - Callback to execute when a message is received.
+   */
+  receive(client, channel, callback) {
+    const namespacedChannel = `${this.id}:${channel}`;
+    sockets.addListener(client, namespacedChannel, callback);
+  }
+
+  /**
+   * @deprecated - prefer `client.socket.removeListener`
+   *
+   * Stop listening for messages from the server on a given channel.
+   *
+   * @param {module:soundworks/server.Client} client - Client that must listen to the message.
+   * @param {String} channel - The channel of the message (is automatically
+   *  namespaced with the activity's id: `${this.id}:channel`).
+   * @param {Function} callback - The callback to remove from the stack.
+   */
+  stopReceiving(client, channel, callback) {
+    sockets.removeListener(client, `${this.id}:${channel}`, callback);
+  }
+
+  /**
+   * @deprecated - prefer `client.socket.broadcast`
+   *
    * Send a message to all client of given `clientType`(s).
    * @param {String|Array<String>|null} clientType - The `clientType`(s) that should
    *  receive the message. If `null`, the message is send to all clients.
@@ -216,7 +224,7 @@ class Activity extends EventEmitter {
    */
   broadcast(clientType, excludeClient, channel, ...args) {
     const namespacedChannel = `${this.id}:${channel}`;
-    sockets.broadcast(clientType, excludeClient, namespacedChannel, ...args);
+    sockets.broadcast(clientType, excludeClient && excludeClient.socket, namespacedChannel, ...args);
   }
 }
 

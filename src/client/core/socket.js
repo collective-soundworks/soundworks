@@ -1,4 +1,5 @@
 import debug from 'debug';
+import uuid from 'uuid';
 import {
   packBinaryMessage,
   unpackBinaryMessage,
@@ -21,16 +22,15 @@ const log = debug('soundworks:socket');
 //   Fired when a connection with a websocket is opened.
 //   Also available via the onopen property.
 
-/**
-@todo
-  - use isomorphic ws ? (does seems like a perfect idea)
-  - review stateListener, not very elegant... (maybe v3)
-  -
-*/
+// @todo - use isomorphic ws ? (does seems like a perfect idea)
 
 /**
  * Simple wrapper with simple pubsub system built on top of `ws` socket.
- * The socket re-emits all "native" ws events.
+ * The abstraction actually open two different socket:
+ * - one configured for string (JSON compatible) messages
+ * - one configured with `binaryType=arraybuffer` for streaming data more
+ *   efficiently.
+ * The sockets also re-emits all "native" ws events.
  *
  * @see https://github.com/websockets/ws
  *
@@ -52,6 +52,9 @@ const socket = {
    * @param {Array<String>} options.path - Defines where socket should find the `socket.io` file
    */
   init(clientType, options) {
+    // key that allows to associate the two sockets to the same client
+    const key = uuid.v4();
+
     /**
      * Configuration object
      * @type {Object}
@@ -63,26 +66,31 @@ const socket = {
       pingInterval: 5 * 1000,
     }, options);
 
-    // open the web socket
+    // open web sockets
     const path = 'socket';
     const protocol = window.location.protocol.replace(/^http?/, 'ws');
     const { hostname, port } = window.location;
-    const url = `${protocol}//${hostname}:${port}/${path}?clientType=${clientType}`;
+    const url = `${protocol}//${hostname}:${port}/${path}`;
+    const queryParams = `clientType=${clientType}&key=${key}`;
 
     // ----------------------------------------------------------
     // init string socket
     // ----------------------------------------------------------
-    const stringSocketUrl = `${url}&binary=0`;
+    const stringSocketUrl = `${url}?binary=0&${queryParams}`;
     this.ws = new WebSocket(stringSocketUrl);
     log(`string socket initialized - url: ${stringSocketUrl}`);
 
+    const stringSocketPromise = new Promise((resolve, reject) => {
+      this.ws.addEventListener('open', resolve);
+    });
+
     // parse incoming messages for pubsub
     this.ws.addEventListener('message', e => {
-      const [channel, args] = JSON.parse(e.data);
+      const [channel, args] = unpackStringMessage(e.data);
       this._emit(false, channel, ...args);
     });
 
-    // broadcast all `WebSockets` "native" events
+    // broadcast all `WebSocket` native events
     [ 'open',
       'close',
       'error',
@@ -97,18 +105,22 @@ const socket = {
     // ----------------------------------------------------------
     // init binary socket
     // ----------------------------------------------------------
-    const binarySocketUrl = `${url}&binary=1`;
+    const binarySocketUrl = `${url}?binary=1&${queryParams}`;
     this.binaryWs = new WebSocket(binarySocketUrl);
     this.binaryWs.binaryType = 'arraybuffer';
     log(`binary socket initialized - url: ${binarySocketUrl}`);
 
-    // parse incoming messages for pubsub
-    this.binaryWs.addEventListener('message', e => {
-      const [channel, args] = JSON.parse(e.data);
-      this._emit(true, channel, ...args);
+    const binarySocketPromise = new Promise((resolve, reject) => {
+      this.binaryWs.addEventListener('open', resolve);
     });
 
-    // broadcast all `WebSockets` "native" events
+    // parse incoming messages for pubsub
+    this.binaryWs.addEventListener('message', e => {
+      const [channel, data] = unpackBinaryMessage(e.data);
+      this._emit(true, channel, data);
+    });
+
+    // broadcast all `WebSocket` native events
     [ 'open',
       'close',
       'error',
@@ -119,91 +131,100 @@ const socket = {
         this._emit(true, eventName, e.data);
       });
     });
+
+    // wait for both socket to be opened
+    return Promise.all([stringSocketPromise, binarySocketPromise]);
   },
 
+  /** @private */
   _emit(binary, channel, ...args) {
     const listeners = binary ? this._binaryListeners : this._stringListeners;
 
     if (listeners.has(channel)) {
-      const callbacks = this._stringListeners.get(channel);
+      const callbacks = listeners.get(channel);
       callbacks.forEach(callback => callback(...args));
     }
   },
 
+  /** @private */
+  _addListener(listeners, channel, callback) {
+    if (!listeners.has(channel)) {
+      listeners.set(channel, new Set());
+    }
+
+    const callbacks = listeners.get(channel);
+    callbacks.add(callback);
+  },
+
+  /** @private */
+  _removeListener(listeners, channel, callback) {
+    if (listeners.has(channel)) {
+      const callbacks = listeners.get(channel);
+      callbacks.delete(callback);
+    }
+  },
+
   /**
-   * Sends JSON compatible WebSocket messages on a given channel
+   * Send JSON compatible messages on a given channel
    *
    * @param {String} channel - The channel of the message
    * @param {...*} args - Arguments of the message (as many as needed, of any type)
    */
   send(channel, ...args) {
-    const msg = JSON.stringify([channel, args]);
+    const msg = packStringMessage(channel, ...args);
     this.ws.send(msg);
   },
 
   /**
-   * Listen JSON compatible WebSocket messages on a given channel
+   * Listen JSON compatible messages on a given channel
    *
    * @param {String} channel - Channel of the message
    * @param {...*} callback - Callback to execute when a message is received
    */
-  receive(channel, callback) {
-    if (!this._stringListeners.has(channel)) {
-      this._stringListeners.set(channel, new Set());
-    }
-
-    const listeners = this._stringListeners.get(channel);
-    listeners.add(callback);
+  addListener(channel, callback) {
+    this._addListener(this._stringListeners, channel, callback);
   },
 
   /**
-   * Remove a listener from JSON compatible WebSocket messages on a given channel
+   * Remove a listener from JSON compatible messages on a given channel
    *
    * @param {String} channel - Channel of the message
    * @param {...*} callback - Callback to cancel
    */
   removeListener(channel, callback) {
-    if (this._stringListeners.has(channel)) {
-      const listeners = this._stringListeners.get(channel);
-      listeners.delete(callback);
-    }
+    this._removeListener(this._stringListeners, channel, callback);
   },
 
   /**
-   * Sends binary WebSocket messages on a given channel
+   * Send binary messages on a given channel
    *
    * @param {String} channel - Channel of the message
    * @param {TypedArray} typedArray - Data to send
    */
   sendBinary(channel, typedArray) {
-
+    const msg = packBinaryMessage(channel, typedArray);
+    this.binaryWs.send(msg);
   },
 
   /**
-   * Listen binary WebSocket messages on a given channel
+   * Listen binary messages on a given channel
    *
    * @param {String} channel - Channel of the message
    * @param {...*} callback - Callback to execute when a message is received
    */
-  receiveBinary(channel, typedArray) {
-
+  addBinaryListener(channel, callback) {
+    this._addListener(this._binaryListeners, channel, callback);
   },
 
   /**
-   * Remove a listener from binary compatible WebSocket messages on a given channel
+   * Remove a listener from binary compatible messages on a given channel
    *
    * @param {String} channel - Channel of the message
    * @param {...*} callback - Callback to cancel
    */
   removeBinaryListener(channel, callback) {
-    // if (this._stringListeners.has(channel)) {
-    //   const listeners = this._stringListeners.get(channel);
-    //   listeners.delete(callback);
-    // }
+    this._removeListener(this._binaryListeners, channel, callback);
   },
 };
-
-// aliases
-socket.on = socket.receive;
 
 export default socket;

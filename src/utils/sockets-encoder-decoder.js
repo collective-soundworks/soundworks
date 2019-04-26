@@ -48,19 +48,20 @@ export function unpackBinaryMessage(buffer /* arraybuffer */) {
   const startOffset = infos[2];
 
   // need to slice as the library recreates a UInt8Array from the buffer
-  const channelBuffer = new Uint8Array(buffer).slice(3, 3 + channelSize);
+  const channelBuffer = new Uint8Array(buffer.slice(3, 3 + channelSize));
   const channel = decoder.decode(channelBuffer);
   const type = types[typeIndex];
-  const data = new root[type](buffer, startOffset);
+  // slice (copy) the underlying ArrayBuffer to create a clean TypedArray
+  const data = new root[type](buffer.slice(startOffset));
 
-  return { channel, data };
+  return [channel, data];
 }
 
-
-export function packStringMessage(channel, data) {
-
+export function packStringMessage(channel, ...args) {
+  return JSON.stringify([channel, args]);
 }
 
-export function unpackStringMessage(channel, data) {
-
+// return const [channel, args]
+export function unpackStringMessage(data) {
+  return JSON.parse(data);
 }

@@ -264,40 +264,39 @@ const client = {
    * Initialize socket connection and perform handshake with the server.
    * @private
    */
-  _initSocket() {
-    socket.init(this.type, this.config.websockets);
+  async _initSocket() {
+    await socket.init(this.type, this.config.websockets);
+    console.log('inited?');
 
     return new Promise((resolve, reject) => {
       // see: http://socket.io/docs/client-api/#socket
-      this.socket.on('open', () => {
-        const payload = { urlParams: this.urlParams };
+      const payload = { urlParams: this.urlParams };
 
-        if (this.config.env !== 'production') {
-          Object.assign(payload, {
-            requiredServices: serviceManager.getRequiredServices()
-          });
+      if (this.config.env !== 'production') {
+        Object.assign(payload, {
+          requiredServices: serviceManager.getRequiredServices()
+        });
+      }
+
+      // wait for handshake response to mark client as `ready`
+      this.socket.addListener('soundworks:start', ({ uuid }) => {
+        this.uuid = uuid;
+        resolve();
+      });
+
+      this.socket.addListener('soundworks:error', (err) => {
+        switch (err.type) {
+          case 'services':
+            // can only append if env !== 'production'
+            const msg = `"${err.data.join(', ')}" required client-side but not server-side`;
+            throw new Error(msg);
+            break;
         }
 
-        // wait for handshake response to mark client as `ready`
-        this.socket.on('soundworks:start', ({ uuid }) => {
-          this.uuid = uuid;
-          resolve();
-        });
-
-        this.socket.on('soundworks:error', (err) => {
-          switch (err.type) {
-            case 'services':
-              // can only append if env !== 'production'
-              const msg = `"${err.data.join(', ')}" required client-side but not server-side`;
-              throw new Error(msg);
-              break;
-          }
-
-          reject();
-        });
-
-        this.socket.send('soundworks:handshake', payload);
+        reject();
       });
+
+      this.socket.send('soundworks:handshake', payload);
     });
   },
 };

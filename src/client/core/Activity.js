@@ -55,8 +55,7 @@ class Activity extends Process {
     this.requiredSignals = new SignalAll();
 
     this.send = this.send.bind(this);
-    this.sendVolatile = this.sendVolatile.bind(this);
-    this.receive = this.receive.bind(this);
+    this.addListener = this.addListener.bind(this);
     this.removeListener = this.removeListener.bind(this);
   }
 
@@ -117,6 +116,8 @@ class Activity extends Process {
   }
 
   /**
+   * @deprecated - prefer `client.socket.send`
+   *
    * Send a web socket message to the server on a given channel.
    *
    * @param {String} channel - The channel of the message (is automatically
@@ -128,17 +129,8 @@ class Activity extends Process {
   }
 
   /**
-   * Send a web socket message to the server on a given channel.
+   * @deprecated - prefer `client.socket.addListener`
    *
-   * @param {String} channel - The channel of the message (is automatically
-   *  namespaced with the activity's id: `${this.id}:channel`).
-   * @param {...*} args - Arguments of the message (as many as needed, of any type).
-   */
-  sendVolatile(channel, ...args) {
-    socket.sendVolatile(`${this.id}:${channel}`, ...args);
-  }
-
-  /**
    * Listen to web socket messages from the server on a given channel.
    *
    * @param {String} channel - The channel of the message (is automatically
@@ -146,10 +138,12 @@ class Activity extends Process {
    * @param {Function} callback - The callback to execute when a message is received.
    */
   receive(channel, callback) {
-    socket.receive(`${this.id}:${channel}`, callback);
+    socket.addListener(`${this.id}:${channel}`, callback);
   }
 
   /**
+   * @deprecated - prefer `client.socket.removeListener`
+   *
    * Stop listening for messages from the server on a given channel.
    *
    * @param {String} channel - The channel of the message (is automatically

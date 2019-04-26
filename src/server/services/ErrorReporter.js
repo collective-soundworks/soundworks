@@ -96,7 +96,6 @@ class ErrorReporter extends Service {
   }
 
   _onServerError(stack) {
-    console.error('here ?', stack);
     // keep this for backward compatibility
     // @todo - remove in v3
     this.emit('error', stack, '', '', '', 'server');

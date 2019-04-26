@@ -447,10 +447,9 @@ const server = {
     const client = new this.clientCtor(clientType, socket);
     const activities = this._clientTypeActivitiesMap[clientType];
 
-    socket.receive('close', () => {
+    socket.addListener('close', () => {
       // clean sockets
-      socket.destroy();
-      sockets.removeFromAllRooms(socket);
+      socket.terminate();
       // remove client from activities
       activities.forEach((activity) => activity.disconnect(client));
       // destroy client
@@ -461,7 +460,7 @@ const server = {
     const serverRequiredServices = serviceManager.getRequiredServices(clientType);
     const serverServicesList = serviceManager.getServiceList();
 
-    socket.receive('soundworks:handshake', (data) => {
+    socket.addListener('soundworks:handshake', data => {
       // in development, if service required client-side but not server-side,
       // complain properly client-side.
       if (this.config.env !== 'production') {

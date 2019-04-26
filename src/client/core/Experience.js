@@ -40,7 +40,6 @@ class Experience extends Activity {
    * the necessary informations and services ready to be consumed.
    */
   start() {
-    console.log('parent start');
     super.start();
 
     this.send('enter');
