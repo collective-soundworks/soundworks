@@ -280,6 +280,7 @@ const defaultDefinitions = [
       const lat = Math.random() * 360 - 180;
       const lng = Math.random() * 180 - 90;
       client.coordinates = [lat, lng];
+
       return Promise.resolve(true);
     }
   },

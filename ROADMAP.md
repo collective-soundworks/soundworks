@@ -28,8 +28,8 @@ update `Square` to assess / complete `AudioStreamManager` API
 - better ErrorReporter 
   + find infos from es6 source (ok)
   + log server errors (ok)
-
-- binary socket in sockets (ok)
+- binarySocket by default in sockets (ok)
+- tag rawSocket as deprecated (ok)
 - fix build scripts 
 - platform 
   + add a test for the `audioContext` clock (iOS)
