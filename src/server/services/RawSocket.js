@@ -1,12 +1,12 @@
-import server from '../core/server';
-import Service from '../core/Service';
-import serviceManager from '../core/serviceManager';
-import { Server as WebSocketServer } from 'ws';
 import http from 'http';
 import https from 'https';
 import pem from 'pem';
 import fs from 'fs';
-import colors from 'colors';
+import chalk from 'chalk';
+import { Server as WebSocketServer } from 'ws';
+import server from '../core/server';
+import Service from '../core/Service';
+import serviceManager from '../core/serviceManager';
 
 const SERVICE_ID = 'service:raw-socket';
 
@@ -143,7 +143,7 @@ class RawSocket extends Service {
 
   runServer(server){
     server.listen(this._port, () => {
-      console.log(colors.yellow('+ binary WebSocket server listening on port:', this._port));
+      console.log(chalk.yellow('+ binary WebSocket server listening on port:', this._port));
     });
 
     this._wss = new WebSocketServer({ server: server });
