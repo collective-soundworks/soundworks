@@ -2,6 +2,7 @@
 const _doubleSlashReplaceExpression = '(^|[^:])(/+)';
 const _doubleSlashReplaceRegExp = new RegExp(_doubleSlashReplaceExpression, 'g');
 
+/* @note - not used internally */
 
 /**
  * Remove multiple slashes from URL, except after ':'. Note that it also removes
