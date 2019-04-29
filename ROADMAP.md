@@ -29,12 +29,11 @@ update `Square` to assess / complete `AudioStreamManager` API
   + find infos from es6 source (ok)
   + log server errors (ok)
 
-- binary socket in sockets
-- fix build scripts
-
+- binary socket in sockets (ok)
+- fix build scripts 
 - platform 
-  + add a test to test the `audioContext` clock (iOS)
-  + add a test for localStorage
+  + add a test for the `audioContext` clock (iOS)
+  + add a definition for localStorage
 - check if lame is installed when requesting AudioStreamManager
   + log and exit gracefully
 
