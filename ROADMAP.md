@@ -32,11 +32,8 @@ update `Square` to assess / complete `AudioStreamManager` API
 - tag rawSocket as deprecated (ok)
 - fix build scripts  (ok)
 
-- platform 
-  + add a definition for localStorage 
-- check if lame is installed when requesting AudioStreamManager
-  + log and exit gracefully
-- 
+- platform - add a definition for public-browsing (localStorage) (ok)
+- check if lame is installed when requesting AudioStreamManager (ok)
 
 > release 2.3.0
 
