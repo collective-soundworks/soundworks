@@ -29,6 +29,9 @@ const sockets = {
   start(httpServer, config, onConnectionCallback) {
     const path = 'socket'; // should remove origin
 
+    // init global room
+    this._rooms.set('*', new Set());
+
     this.wss = new WebSocket.Server({
       server: httpServer,
       path: `/${path}`, // @note - update according to existing config files (aka cosima-apps)
@@ -65,14 +68,12 @@ const sockets = {
   /** @private */
   _broadcast(binary, roomIds, excludeSocket, channel, ...args) {
     const method = binary ? 'sendBinary' : 'send';
-    let targets;
+    let targets = new Set();
 
     if (typeof roomsIds === 'string' || Array.isArray(roomIds)) {
       if (typeof roomsIds === 'string') {
         roomIds = [roomIds];
       }
-
-      targets = new Set();
 
       roomIds.forEach(roomId => {
         if (this._rooms.has(roomId)) {
