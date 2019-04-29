@@ -5,7 +5,7 @@ import NoSleep from 'nosleep.js/dist/NoSleep.min';
 import screenfull from 'screenfull';
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
-import isPrivateMode from '../../utils/is-private-mode';
+import isPrivateMode from '../utils/is-private-mode';
 
 /**
  * API of a compliant view for the `platform` service.
@@ -180,6 +180,13 @@ const defaultDefinitions = [
     id: 'public-browsing',
     check: function() {
       return isPrivateMode().then(isPrivate => Promise.resolve(!isPrivate));
+    },
+  },
+  {
+    id: 'wake-lock',
+    check: function() {
+      console.warn('[soundworks:platform] `wake-lock` is now enabled by default, consider removing it from your required features');
+      return Promise.resolve(true);
     },
   },
   {
@@ -418,7 +425,6 @@ class Platform extends Service {
     // check and initialize features required by the application
     this._checkRequiredFeatures().then(([compatible, details]) => {
       client.compatible = compatible;
-      console.log('[soundworks:required-features]', details);
 
       if (this.options.showDialog === false) {
         if (client.compatible) {
