@@ -5,6 +5,7 @@ import NoSleep from 'nosleep.js/dist/NoSleep.min';
 import screenfull from 'screenfull';
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
+import isPrivateMode from '../../utils/is-private-mode';
 
 /**
  * API of a compliant view for the `platform` service.
@@ -114,7 +115,7 @@ const defaultDefinitions = [
   {
     id: 'web-audio',
     check: function() {
-      return !!audioContext;
+      return Promise.resolve(!!audioContext);
     },
     interactionHook: async function() {
       if (!('resume' in audioContext)) {
@@ -149,7 +150,7 @@ const defaultDefinitions = [
   {
     id: 'check-ios-samplerate',
     check: function() {
-      return true;
+      return Promise.resolve(true);
     },
     interactionHook: function() {
       if (client.platform.os === 'ios') {
@@ -176,18 +177,24 @@ const defaultDefinitions = [
     },
   },
   {
-    // @note: `touch` feature workaround
+    id: 'public-browsing',
+    check: function() {
+      return isPrivateMode().then(isPrivate => Promise.resolve(!isPrivate));
+    },
+  },
+  {
+    // @note: `touch` feature workaround (remove?)
     // cf. http://www.stucox.com/blog/you-cant-detect-a-touchscreen/
     id: 'mobile-device',
     check: function() {
-      return client.platform.isMobile;
+      return Promise.resolve(client.platform.isMobile);
     }
   },
   {
     id: 'audio-input',
     check: function() {
       if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        return true;
+        return Promise.resolve(true);
       } else {
         navigator.getUserMedia = (
           navigator.getUserMedia ||
@@ -196,7 +203,7 @@ const defaultDefinitions = [
           navigator.msGetUserMedia
         );
 
-        return !!navigator.getUserMedia;
+        return Promise.resolve(!!navigator.getUserMedia);
       }
     },
     startHook: function() {
@@ -224,10 +231,11 @@ const defaultDefinitions = [
     }
   },
   {
-    id: 'full-screen',
+    id: 'fullscreen',
+    alias: 'full-screen', // for backward compatibility (until v2.2.1)
     check: function() {
       // functionnality that cannot brake the application
-      return true;
+      return Promise.resolve(true);
     },
     interactionHook() {
       if (screenfull.enabled)
@@ -238,10 +246,10 @@ const defaultDefinitions = [
   },
   // alias full screen
   {
-    id: 'fullscreen',
+
     check: function() {
       // functionnality that cannot brake the application
-      return true;
+      return Promise.resolve(true);
     },
     interactionHook() {
       if (screenfull.enabled)
@@ -253,7 +261,7 @@ const defaultDefinitions = [
   {
     id: 'geolocation',
     check: function() {
-      return !!navigator.geolocation.getCurrentPosition;
+      return Promise.resolve(!!navigator.geolocation.getCurrentPosition);
     },
     startHook: function() {
       return new Promise(function(resolve, reject) {
@@ -274,7 +282,7 @@ const defaultDefinitions = [
   {
     id: 'geolocation-mock',
     check: function() {
-      return true;
+      return Promise.resolve(true);
     },
     startHook: function() {
       const lat = Math.random() * 360 - 180;
@@ -407,66 +415,64 @@ class Platform extends Service {
     this._defineAudioFileExtention();
     this._definePlatform();
 
-    // resolve required features from the application
-    client.compatible = this._checkRequiredFeatures();
+    // check and initialize features required by the application
+    this._checkRequiredFeatures().then(([compatible, details]) => {
+      client.compatible = compatible;
+      console.log('[soundworks:required-features]', details);
 
-    // handle `showDialog === false`
-    if (this.options.showDialog === false) {
-      if (client.compatible) {
-        const startPromises = this._getHooks('startHook');
-        const interactionPromises = this._getHooks('interactionHook');
-        const promises = [].concat(startPromises, interactionPromises);
+      if (this.options.showDialog === false) {
+        if (client.compatible) {
+          const startPromises = this._getHooks('startHook');
+          const interactionPromises = this._getHooks('interactionHook');
+          const promises = [].concat(startPromises, interactionPromises);
 
-        Promise.all(promises).then(results => {
-          let resolved = true;
-          results.forEach(bool => resolved = resolved && bool);
+          Promise.all(promises).then(results => {
+            let resolved = true;
+            results.forEach(bool => resolved = resolved && bool);
 
-          if (resolved)
-            this.ready();
-          else
-            throw new Error(`service:platform - didn't obtain the necessary authorizations`);
-        })
+            if (resolved)
+              this.ready();
+            else
+              throw new Error(`service:platform - didn't obtain the necessary authorizations`);
+          })
+        } else {
+          throw new Error('service:platform - client not compatible');
+        }
       } else {
-        throw new Error('service:platform - client not compatible');
+        // default view values
+        this.view.updateCheckingStatus(false);
+        this.view.updateIsCompatibleStatus(null);
+        this.view.updateHasAuthorizationsStatus(null);
+
+        if (!client.compatible) {
+          this.view.updateIsCompatibleStatus(false);
+          this.show();
+        } else {
+          this.view.updateIsCompatibleStatus(true);
+          this.view.updateCheckingStatus(true);
+          this.show();
+
+          // execute start hook
+          const startPromises = this._getHooks('startHook');
+
+          Promise.all(startPromises).then(results => {
+            // if one of the start hook failed
+            let hasAuthorizations = true;
+            results.forEach(success => hasAuthorizations = hasAuthorizations && success);
+
+            this.view.updateHasAuthorizationsStatus(hasAuthorizations);
+            this.view.updateCheckingStatus(false);
+
+            if (hasAuthorizations) {
+              // user gestures (`touchend` and `mouseup`)
+              // cf. https://docs.google.com/document/d/1oF1T3O7_E4t1PYHV6gyCwHxOi3ystm0eSL5xZu7nvOg/edit#heading=h.qq59ev3u8fba
+              this.view.$el.addEventListener('touchend', this._onInteraction('touch'));
+              this.view.$el.addEventListener('mouseup', this._onInteraction('mouse'));
+            }
+          }).catch((err) => console.error(err.stack));
+        }
       }
-    } else {
-      // default view values
-      this.view.updateCheckingStatus(false);
-      this.view.updateIsCompatibleStatus(null);
-      this.view.updateHasAuthorizationsStatus(null);
-
-      if (!client.compatible) {
-        this.view.updateIsCompatibleStatus(false);
-        this.show();
-      } else {
-        this.view.updateIsCompatibleStatus(true);
-        this.view.updateCheckingStatus(true);
-        this.show();
-
-        // execute start hook
-        const startPromises = this._getHooks('startHook');
-
-        Promise.all(startPromises).then(results => {
-          // if one of the start hook failed
-          let hasAuthorizations = true;
-          results.forEach(success => hasAuthorizations = hasAuthorizations && success);
-
-          this.view.updateHasAuthorizationsStatus(hasAuthorizations);
-          this.view.updateCheckingStatus(false);
-
-          if (hasAuthorizations) {
-            // move to 'touchend' and 'mouseup' because 'touchstart' is no
-            // longer recognized as a user gesture in android
-            // @todo - define what to do with the template...
-            // cf. https://docs.google.com/document/d/1oF1T3O7_E4t1PYHV6gyCwHxOi3ystm0eSL5xZu7nvOg/edit#heading=h.qq59ev3u8fba
-            this.view.$el.addEventListener('touchend', this._onInteraction('touch'));
-            this.view.$el.addEventListener('mouseup', this._onInteraction('mouse'));
-            // this.view.setTouchStartCallback(this._onInteraction('touch'));
-            // this.view.setMouseDownCallback(this._onInteraction('mouse'));
-          }
-        }).catch((err) => console.error(err.stack));
-      }
-    }
+    }).catch((err) => console.error(err.stack));
   }
 
   /** @private */
@@ -483,6 +489,10 @@ class Platform extends Service {
    */
   addFeatureDefinition(obj) {
     this._featureDefinitions[obj.id] = obj;
+
+    if (obj.alias) {
+      this._featureDefinitions[obj.alias] = obj;
+    }
   }
 
   /**
@@ -501,6 +511,37 @@ class Platform extends Service {
     });
   }
 
+  /**
+   * Execute all `check` functions defined in the required features.
+   *
+   * @return {Boolean} - `true` if all checks pass, `false` otherwise.
+   * @private
+   */
+  _checkRequiredFeatures() {
+    const promises = [];
+
+    this._requiredFeatures.forEach(id => {
+      const checkFunction = this._featureDefinitions[id].check;
+
+      if (!(typeof checkFunction === 'function')) {
+        throw new Error(`${SERVICE_ID} - No check function defined for feature: "${id}"`);
+      }
+
+      const featurePromise = checkFunction();
+      promises.push(featurePromise);
+    });
+
+    return Promise.all(promises).then(featureResults => {
+      const isCompatible = featureResults.indexOf(false) !== -1 ? false : true;
+      const details = {};
+
+      Array.from(this._requiredFeatures.values()).forEach((id, index) => {
+        details[id] = featureResults[index];
+      });
+
+      return Promise.resolve([isCompatible, details]);
+    }).catch(err => console.error(err.stack));
+  }
 
   /**
    * Execute `interactions` hooks from the `platform` service.
@@ -531,28 +572,6 @@ class Platform extends Service {
         }
       }).catch(err => console.error(err.stack));
     }
-  }
-
-  /**
-   * Execute all `check` functions defined in the required features.
-   *
-   * @return {Boolean} - `true` if all checks pass, `false` otherwise.
-   * @private
-   */
-  _checkRequiredFeatures() {
-    let result = true;
-
-    this._requiredFeatures.forEach(id => {
-      const checkFunction = this._featureDefinitions[id].check;
-
-      if (!(typeof checkFunction === 'function')) {
-        throw new Error(`${SERVICE_ID} - No check function defined for feature: "${id}"`);
-      }
-
-      result = result && checkFunction();
-    });
-
-    return result;
   }
 
   /** @private */

@@ -31,11 +31,12 @@ update `Square` to assess / complete `AudioStreamManager` API
 - binarySocket by default in sockets (ok)
 - tag rawSocket as deprecated (ok)
 - fix build scripts  (ok)
+
 - platform 
-  + add a test for the `audioContext` clock (iOS)
-  + add a definition for localStorage
+  + add a definition for localStorage 
 - check if lame is installed when requesting AudioStreamManager
   + log and exit gracefully
+- 
 
 > release 2.3.0
 
@@ -66,6 +67,11 @@ update `Square` to assess / complete `AudioStreamManager` API
   + - create an internal store for displaying soundworks internal state
   + check : cronvel/terminal-kit
 - explore latency estimation / compensation in Android
+- rename ErrorReporter to Logger
+  + add the ability to log user defined messages (trace behavior)
+- platform 
+  + add a test for the `audioContext` clock (iOS)
+  + define a way to display useful informations in case of error
 
 misc:
 - remove utils/setup/helper.js

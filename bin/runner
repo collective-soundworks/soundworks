@@ -10,7 +10,7 @@ const pkg = require('../package.json');
 const cwd = process.cwd();
 
 // --------------------------------------------------------------------------
-// Tools configuration
+// tools configuration
 // --------------------------------------------------------------------------
 
 const babelOptions = JSON.parse(fse.readFileSync(path.join(cwd, '.babelrc')));
@@ -32,7 +32,7 @@ const srcRegExp = new RegExp('^' + escapeRegExp(srcDirectory));
 const distDirectory = path.join(cwd, '.');
 
 // -------------------------------------------------------------
-// Reusable logic
+// reusable logic
 // -------------------------------------------------------------
 
 async function transpileOrCopy(filename) {
@@ -110,7 +110,7 @@ function watchSrc() {
 }
 
 // -------------------------------------------------------------
-// Handle commands
+// handle commands
 // -------------------------------------------------------------
 
 async function __transpile() {
@@ -151,7 +151,7 @@ async function __clear() {
 }
 
 // -------------------------------------------------------------
-// Parse commands
+// parse commands
 // -------------------------------------------------------------
 
 const command = process.argv[2];

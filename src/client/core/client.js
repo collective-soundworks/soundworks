@@ -199,7 +199,7 @@ const client = {
       await this._initSocket();
       serviceManager.start();
     } catch(err) {
-      console.log('async error');
+      console.error(err);
     }
   },
 
