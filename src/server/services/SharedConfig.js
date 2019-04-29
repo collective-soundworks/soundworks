@@ -85,8 +85,10 @@ class SharedConfig extends Service {
    * @returns {Object} - An optimized object containing all the requested items.
    */
   _getValues(clientType) {
-    if (this._cache[clientType])
+    // @todo - review that to make it more dynamic
+    if (this._cache[clientType]) {
       return this._cache[clientType];
+    }
 
     const items = this._clientItemsMap[clientType];
     const serverConfig = server.config;
