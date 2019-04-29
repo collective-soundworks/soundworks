@@ -14,7 +14,6 @@ module.exports.transpileError = (src, err) => {
   const msg = prefix + chalk.red('%s');
   const content = err.message.replace(src.abs, src.rel);
   console.log(msg, content);
-  console.log(err.codeFrame);
 }
 
 module.exports.copyFileSuccess = (file, dist, dt) => {

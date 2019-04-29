@@ -59,7 +59,7 @@ async function transpileOrCopy(filename) {
       return Promise.resolve([src, dist]);
     } catch(err) {
       log.transpileError(src, err);
-      return Promise.reject([src, dist]);
+      return Promise.reject();
     }
   }
 }
@@ -93,9 +93,13 @@ async function deleteFile(file) {
 }
 
 function watchSrc() {
+  function updateFile(filename) {
+    transpileOrCopy(filename).catch(err => {});
+  }
+
   watch.createMonitor(srcDirectory, Object.assign({}, watchOptions), monitor => {
-    monitor.on('created', transpileOrCopy);
-    monitor.on('changed', transpileOrCopy);
+    monitor.on('created', updateFile);
+    monitor.on('changed', updateFile);
     // delete dist file
     monitor.on('removed', async (filename, stats) => {
       const distFilename = filename.replace(srcRegExp, distDirectory);
@@ -156,13 +160,13 @@ const command = process.argv[2];
 
 switch (command) {
   case '--clear':
-    __clear().catch(err => console.error(err.stack));
+    __clear().catch(err => {});
     break;
   case '--watch':
-    __transpile().then(__watch).catch(err => console.error(err.stack));
+    __transpile().then(__watch).catch(err => {});
     break;
   case '--transpile':
-    __transpile().catch(err => console.error(err.stack));
+    __transpile().catch(err => {});
     break;
   case '--help':
     console.log(`
