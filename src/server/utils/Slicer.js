@@ -1,5 +1,7 @@
 import path from 'path';
 import fs from 'fs';
+import { execSync } from 'child_process';
+import chalk from 'chalk';
 import { Lame } from 'node-lame';
 import { StringDecoder } from 'string_decoder';
 
@@ -28,6 +30,13 @@ class Slicer {
     this.overlapDuration = overlap;
     // locals
     this.reader = new Reader();
+
+    try {
+      execSync(`which lame`);
+    } catch(err) {
+      console.log(`${chalk.cyan('[soundworks]')} ${chalk.yellow(`AudioStreamManager requires "lame" to be installed to work properly.
+Please make sure that "lame" is installed on your system (see https://www.npmjs.com/package/node-lame for installation instructions).`)}`);
+    }
   }
 
   /**
@@ -43,7 +52,7 @@ class Slicer {
     const input = path.parse(inputPath);
 
     if (input.ext !== '.wav') {
-      throw new Error(`File extension ${input.ext} not supported: only '.wav' files input`);
+      throw new Error(`File extension ${input.ext} not supported, please use only '.wav' files as input`);
     }
 
     // load audio file

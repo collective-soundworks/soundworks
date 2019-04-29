@@ -1,4 +1,4 @@
-import colors from 'colors';
+import chalk from 'chalk';
 import Signal from '../../utils/Signal';
 import SignalAll from '../../utils/SignalAll';
 
@@ -27,11 +27,11 @@ const serviceManager = {
   },
 
   start() {
-    console.log(colors.yellow(`+ required services`));
+    console.log(chalk.yellow(`+ required services`));
     console.log(
       this.getRequiredServices()
         .sort()
-        .map(s => `    ${s} ${colors.yellow(' starting...')}`)
+        .map(s => `    ${s} ${chalk.yellow(' starting...')}`)
         .join('\n')
     );
 
@@ -69,7 +69,7 @@ const serviceManager = {
 
       //
       instance.signals.ready.addObserver((state) => {
-        console.log(`    ${id} ${colors.green(' ready')}`);
+        console.log(`    ${id} ${chalk.green(' ready')}`);
       });
     }
 
