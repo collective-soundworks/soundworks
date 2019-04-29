@@ -1,6 +1,6 @@
 import tmpl from 'lodash.template';
 import viewport from './viewport';
-import Delegate from 'dom-delegate';
+import Delegate from 'ftdomdelegate';
 
 /**
  * Interface required to create a soundworks compatible view.

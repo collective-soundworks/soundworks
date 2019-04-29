@@ -1,7 +1,7 @@
 import server from '../core/server';
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
-import { Server as WebSocketServer } from 'uws';
+import { Server as WebSocketServer } from 'ws';
 import http from 'http';
 import https from 'https';
 import pem from 'pem';
