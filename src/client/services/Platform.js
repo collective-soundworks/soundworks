@@ -186,26 +186,41 @@ const defaultDefinitions = [
   {
     id: 'audio-input',
     check: function() {
-      navigator.getUserMedia = (
-        navigator.getUserMedia ||
-        navigator.webkitGetUserMedia ||
-        navigator.mozGetUserMedia ||
-        navigator.msGetUserMedia
-      );
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        return true;
+      } else {
+        navigator.getUserMedia = (
+          navigator.getUserMedia ||
+          navigator.webkitGetUserMedia ||
+          navigator.mozGetUserMedia ||
+          navigator.msGetUserMedia
+        );
 
-      return !!navigator.getUserMedia;
+        return !!navigator.getUserMedia;
+      }
     },
     startHook: function() {
-      // @todo - use new navigator.mediaDevices if available
-      return new Promise(function(resolve, reject) {
-        navigator.getUserMedia({ audio: true }, function(stream) {
-          stream.getAudioTracks()[0].stop();
-          resolve(true);
-        }, function (err) {
-          resolve(false);
-          throw err;
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        return navigator.mediaDevices.getUserMedia({ audio: true })
+          .then(stream => {
+            stream.getAudioTracks()[0].stop();
+            return Promise.resolve(true);
+        })
+        .catch(err => {
+          console.log(err);
+          return Promise.resolve(false);
         });
-      });
+      } else {
+        return new Promise(function(resolve, reject) {
+          navigator.mediaDevices.getUserMedia({ audio: true }, (stream) => {
+            stream.getAudioTracks()[0].stop();
+            resolve(true);
+          }, (err) => {
+            resolve(false);
+            throw err;
+          });
+        });
+      }
     }
   },
   {
