@@ -4,7 +4,7 @@ import https from 'https';
 import path from 'path';
 import pem from 'pem';
 import os from 'os';
-import colors from 'colors';
+import chalk from 'chalk';
 import ejs from 'ejs';
 
 import polka from 'polka';
@@ -74,8 +74,6 @@ import sockets from './sockets';
  * @property {Number} osc.sendPort - Port where the remote application is
  *  listening for messages
  *
- * @property {Boolean} enableGZipCompression - Define if the server should use
- *  gzip compression for static files.
  * @property {String} publicDirectory - Location of the public directory
  *  (accessible through http(s) requests).
  * @property {Object} serveStaticOptions - Options for the serve static middleware
@@ -236,14 +234,31 @@ const server = {
    *  Configuration of the application.
    */
   init(config) {
-    this.config = {
-      port: 8000,
-      enableGZipCompression: true,
-      publicDirectory: path.join(process.cwd(), 'public'),
-      templateDirectory: path.join(process.cwd(), 'html'),
-      defaultClient: 'player',
-      websockets: {},
-      ...config,
+    // must be done this way to keep the instance shared
+    this.config = config;
+
+    if (this.config.port === undefined) {
+       this.config.port = 8000;
+    }
+
+    if (this.config.publicDirectory === undefined) {
+      this.config.publicDirectory = path.join(process.cwd(), 'public');
+    }
+
+    if (this.config.serveStaticOptions === undefined) {
+      this.config.serveStaticOptions = {};
+    }
+
+    if (this.config.templateDirectory === undefined) {
+      this.config.templateDirectory = path.join(process.cwd(), 'html');
+    }
+
+    if (this.config.defaultClient === undefined) {
+      this.config.defaultClient = 'player';
+    }
+
+    if (this.config.websockets === undefined) {
+      this.config.websockets = {};
     }
 
     serviceManager.init();
@@ -269,7 +284,7 @@ const server = {
    * - define routes and activities mapping for all client types.
    */
   start() {
-    console.log(colors.cyan(`[soundworks] starting server`));
+    console.log(chalk.cyan(`[soundworks] starting server`));
 
     // map activities to their respective client type(s) and start them all
     this._activities.forEach((activity) => {
@@ -329,14 +344,14 @@ const server = {
         this.router.server = httpServer;
 
         // init routing for each client type
-        console.log(colors.yellow(`+ available clients:`));
+        console.log(chalk.yellow(`+ available clients:`));
 
         const routes = [];
         // open all routes except default
         for (let clientType in this._clientTypeActivitiesMap) {
           if (clientType !== this.config.defaultClient) {
             const route = this._openClientRoute(clientType, this.router);
-            routes.push({ clientType: `[${clientType}]`, route: colors.green(route) });
+            routes.push({ clientType: `[${clientType}]`, route: chalk.green(route) });
           }
         }
 
@@ -344,7 +359,7 @@ const server = {
         for (let clientType in this._clientTypeActivitiesMap) {
           if (clientType === this.config.defaultClient) {
             const route = this._openClientRoute(clientType, this.router);
-            routes.unshift({ clientType: `[${clientType}]`, route: colors.green(route) });
+            routes.unshift({ clientType: `[${clientType}]`, route: chalk.green(route) });
           }
         }
 
@@ -372,12 +387,12 @@ const server = {
 
             this.router.listen(port, () => {
               // log infos
-              console.log(colors.yellow(`+ ${protocol} server listening on:`));
+              console.log(chalk.yellow(`+ ${protocol} server listening on:`));
 
               Object.keys(ifaces).forEach(dev => {
                 ifaces[dev].forEach(details => {
                   if (details.family === 'IPv4') {
-                    console.log(`    ${protocol}://${details.address}:${colors.green(port)}`);
+                    console.log(`    ${protocol}://${details.address}:${chalk.green(port)}`);
                   }
                 });
               });
