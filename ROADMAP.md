@@ -30,7 +30,7 @@ update `Square` to assess / complete `AudioStreamManager` API
   + log server errors (ok)
 - binarySocket by default in sockets (ok)
 - tag rawSocket as deprecated (ok)
-- fix build scripts 
+- fix build scripts  (ok)
 - platform 
   + add a test for the `audioContext` clock (iOS)
   + add a definition for localStorage
