@@ -28,7 +28,6 @@ const sockets = {
    */
   start(httpServer, config, onConnectionCallback) {
     const path = 'socket'; // should remove origin
-
     // init global room
     this._rooms.set('*', new Set());
 

@@ -16,8 +16,9 @@ const cache = {
     // const storePath
     const filename = getFilename(serviceId);
 
-    if (!fs.existsSync(filename))
+    if (!fs.existsSync(filename)) {
       fs.writeFileSync(filename, JSON.stringify({}));
+    }
 
     const store = JSON.parse(fs.readFileSync(filename));
     store[key] = value;
@@ -32,7 +33,7 @@ const cache = {
       const store = JSON.parse(fs.readFileSync(filename));
       return store[key];
     } else {
-      return undefined;
+      return null;
     }
   },
 };
