@@ -20,7 +20,7 @@ class RawSocket extends Service {
   constructor() {
     super(SERVICE_ID);
 
-    console.warn('[deprecated] RawSocket service is deprecated and will be removed in soundworks#v3.0.0. Please update your application to use `client.socket.[sendBinary|receiveBinary]` instead');
+    console.warn('[deprecated] RawSocket service is deprecated and will be removed in soundworks#v3.0.0. Please update your application to use `client.socket` API instead');
 
     const defaults = {
       viewCtor: SegmentedView,

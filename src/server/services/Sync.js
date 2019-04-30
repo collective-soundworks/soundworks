@@ -55,8 +55,25 @@ class Sync extends Service {
   connect(client) {
     super.connect(client);
 
-    const sendFunction = (...args) => this.send(client, 'pong', ...args);
-    const receiveFunction = callback => this.receive(client, 'ping', callback);
+    const sendCache = new Float32Array(4);
+
+    const sendFunction = (id, clientPingTime, serverPingTime, serverPongTime) => {
+      sendCache[0] = id;
+      sendCache[1] = clientPingTime;
+      sendCache[2] = serverPingTime;
+      sendCache[3] = serverPongTime;
+
+      client.socket.sendBinary('sync:pong', sendCache);
+    };
+
+    const receiveFunction = callback => {
+      client.socket.addBinaryListener('sync:ping', data => {
+        const id = data[0];
+        const clientPingTime = data[1];
+
+        callback(id, clientPingTime);
+      });
+    };
 
     this._sync.start(sendFunction, receiveFunction);
   }

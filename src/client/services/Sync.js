@@ -1,4 +1,5 @@
 import { audioContext } from 'waves-audio';
+import client from '../core/client';
 import SegmentedView from '../views/SegmentedView';
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
@@ -37,6 +38,7 @@ class Sync extends Service {
 
     const defaults = {
       viewPriority: 3,
+      // @todo - v3 - replace with `getTimeFunction` similar to scheduler
       useAudioTime: true,
       // @todo - add options to configure the sync service
     };
@@ -61,8 +63,25 @@ class Sync extends Service {
     super.start();
     this.show();
 
-    const sendFunction = (...args) => this.send('ping', ...args);
-    const receiveFunction = callback => this.receive('pong', callback);
+    const sendCache = new Float32Array(2);
+
+    const sendFunction = (id, clientPingTime) => {
+      sendCache[0] = id;
+      sendCache[1] = clientPingTime;
+
+      client.socket.sendBinary('sync:ping', sendCache);
+    };
+
+    const receiveFunction = callback => {
+      client.socket.addBinaryListener('sync:pong', data => {
+        const id = data[0];
+        const clientPingTime = data[1];
+        const serverPingTime = data[2];
+        const serverPongTime = data[3];
+
+        callback(id, clientPingTime, serverPingTime, serverPongTime);
+      });
+    };
 
     this._sync.start(sendFunction, receiveFunction, this._syncStatusReport);
   }
