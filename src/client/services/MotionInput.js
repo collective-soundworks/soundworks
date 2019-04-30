@@ -30,6 +30,11 @@ class MotionInput extends Service {
   constructor() {
     super(SERVICE_ID);
 
+    // @todo - v3.0.0 - add a requirement in platform (cf. navigator.permissions)
+    if (window.location.protocol !== 'https:') {
+      throw new Error('[soundworks] MotionInput service requires an https server');
+    }
+
     const defaults = {
       descriptors: [],
       // @todo - what to do if only some descriptors are invalid?
@@ -48,8 +53,9 @@ class MotionInput extends Service {
    * @param {Object} options - The options to apply to the service.
    */
   configure(options) {
-    if (this.options.descriptors)
+    if (this.options.descriptors) {
       options.descriptors = this.options.descriptors.concat(options.descriptors);
+    }
 
     super.configure(options);
   }
