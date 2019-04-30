@@ -6,7 +6,6 @@ import pem from 'pem';
 import os from 'os';
 import chalk from 'chalk';
 import ejs from 'ejs';
-
 import polka from 'polka';
 import serveStatic from 'serve-static';
 import columnify from 'columnify';
@@ -14,6 +13,7 @@ import compression from 'compression';
 import Client from './Client';
 import serviceManager from './serviceManager';
 import sockets from './sockets';
+import cache from '../utils/cache';
 
 /**
  * @typedef {Object} module:soundworks/server.server~serverConfig
@@ -127,16 +127,19 @@ const server = {
   sockets: sockets,
 
   /**
-   * express instance, can allow to expose additionnal routes (e.g. REST API).
-   * @unstable
+   * polka instance, can allow to expose additionnal routes (e.g. REST API).
    */
   router: null,
 
   /**
-   * HTTP(S) server instance.
-   * @unstable
+   * http(s) server instance.
    */
   httpServer: null,
+
+  /**
+   * key and certificates (may be generated and self-signed) for https server.
+   */
+  httpsInfos: null,
 
   /**
    * Mapping between a `clientType` and its related activities.
@@ -314,7 +317,9 @@ const server = {
             try {
               const key = fs.readFileSync(httpsInfos.key);
               const cert = fs.readFileSync(httpsInfos.cert);
-              const httpsServer = https.createServer({ key, cert });
+
+              this.httpsInfos = { key, cert };
+              const httpsServer = https.createServer(this.httpsInfos);
             } catch(err) {
               console.error(
 `Invalid certificate files, please check your:
@@ -327,14 +332,34 @@ const server = {
 
             return Promise.resolve(httpsServer);
           } else {
-            // generate certificate on the fly (for development purposes)
-            pem.createCertificate({ days: 1, selfSigned: true }, (err, keys) => {
-              const httpsServer = https.createServer({
-                key: keys.serviceKey,
-                cert: keys.certificate,
-              }, this.router);
+            return new Promise((resolve, reject) => {
+              const key = cache.read('server', 'httpsKey');
+              const cert = cache.read('server', 'httpsCert');
 
-              return Promise.resolve(httpsServer);
+              if (key !== null && cert !== null) {
+                this.httpsInfos = { key, cert };
+                const httpsServer = https.createServer(this.httpsInfos);
+                resolve(httpsServer);
+              } else {
+                // generate certificate on the fly (for development purposes)
+                pem.createCertificate({ days: 1, selfSigned: true }, (err, keys) => {
+                  if (err) {
+                    return console.error(err.stack);
+                  }
+
+                  this.httpsInfos = {
+                    key: keys.serviceKey,
+                    cert: keys.certificate,
+                  };
+
+                  cache.write('server', 'httpsKey', this.httpsInfos.key);
+                  cache.write('server', 'httpsCert', this.httpsInfos.cert);
+
+                  const httpsServer = https.createServer(this.httpsInfos);
+
+                  resolve(httpsServer);
+                });
+              }
             });
           }
         }
