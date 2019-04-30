@@ -53,7 +53,7 @@ class RawSocket extends Service {
   constructor() {
     super(SERVICE_ID);
 
-    console.error('[deprecated] RawSocket service is deprecated and will be removed in soundworks#v3.0.0. Please update your application to use `client.socket.[sendBinary|receiveBinary]` instead');
+    console.warn('[deprecated] RawSocket service is deprecated and will be removed in soundworks#v3.0.0. Please update your application to use `client.socket.[sendBinary|receiveBinary]` instead');
 
     const defaults = {
       configItem: 'rawSocket',
@@ -129,14 +129,12 @@ class RawSocket extends Service {
         const key = fs.readFileSync(httpsInfos.key);
         const cert = fs.readFileSync(httpsInfos.cert);
 
-        let httpsServer = https.createServer({ key: key, cert: cert });
+        const httpsServer = https.createServer({ key: key, cert: cert });
         this.runServer(httpsServer);
-      // generate certificate on the fly (for development purposes)
       } else {
-        pem.createCertificate({ days: 1, selfSigned: true }, (err, keys) => {
-          let httpsServer = https.createServer({ key: keys.serviceKey, cert: keys.certificate });
-          this.runServer(httpsServer);
-        });
+        // reuse generated keys from main server
+        const httpsServer = https.createServer(server.httpsInfos);
+        this.runServer(httpsServer);
       }
     }
   }
