@@ -35,6 +35,8 @@ update `Square` to assess / complete `AudioStreamManager` API
 - platform - add a definition for public-browsing (localStorage) (ok)
 - check if lame is installed when requesting AudioStreamManager (ok)
 
+- update / configure path in sockets
+
 > release 2.3.0
 
 ### 3. View and Services - breaking 
