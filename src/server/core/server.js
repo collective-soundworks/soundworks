@@ -391,8 +391,8 @@ const server = {
         console.log(columnify(routes, {
           showHeaders: false,
           config: {
-            clientType: {align: 'right'}
-          }
+            clientType: { align: 'right' },
+          },
         }));
 
         return Promise.resolve();

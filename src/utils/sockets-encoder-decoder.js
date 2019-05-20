@@ -18,6 +18,9 @@ const types = [
   'BigUint64Array',
 ];
 
+// @todo - probably some room for optimizations
+
+/** private */
 export function packBinaryMessage(channel, data) {
   const channelBuffer = encoder.encode(channel);
   const channelSize = channelBuffer.byteLength;
@@ -41,13 +44,15 @@ export function packBinaryMessage(channel, data) {
   return view.buffer;
 }
 
+/** private */
 export function unpackBinaryMessage(buffer /* arraybuffer */) {
   const infos = new Uint8Array(buffer, 0, 3);
   const channelSize = infos[0];
   const typeIndex = infos[1];
   const startOffset = infos[2];
 
-  // need to slice as the library recreates a UInt8Array from the buffer
+  // need to slice as the library recreates a UInt8Array from the whole buffer
+  // @todo - see if this could be avoided (probably needs a pull request)
   const channelBuffer = new Uint8Array(buffer.slice(3, 3 + channelSize));
   const channel = decoder.decode(channelBuffer);
   const type = types[typeIndex];
@@ -57,11 +62,12 @@ export function unpackBinaryMessage(buffer /* arraybuffer */) {
   return [channel, data];
 }
 
+/** private */
 export function packStringMessage(channel, ...args) {
   return JSON.stringify([channel, args]);
 }
 
-// return const [channel, args]
+/** private */
 export function unpackStringMessage(data) {
   return JSON.parse(data);
 }

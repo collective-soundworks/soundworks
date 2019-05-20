@@ -47,7 +47,8 @@ class ErrorReporter extends Service {
         this.send('error', stack, navigator.userAgent);
       }
     } else if (e instanceof ErrorEvent) {
-      this.send('error', e.stack, navigator.userAgent);
+      const err = e.stack || e.message;
+      this.send('error', err, navigator.userAgent);
     }
   }
 }

@@ -52,7 +52,7 @@ const socket = {
    * @param {Array<String>} options.path - Defines where socket should find the `socket.io` file
    */
   init(clientType, options) {
-    // key that allows to associate the two sockets to the same client
+    // unique key that allows to associate the two sockets to the same client
     const key = uuid.v4();
 
     /**
