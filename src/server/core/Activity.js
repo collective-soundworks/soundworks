@@ -153,9 +153,7 @@ class Activity extends EventEmitter {
    * connected client (e.g. adding socket listeners).
    * @param {module:soundworks/server.Client} client
    */
-  connect(client) {
-    client.activities[this.id] = {};
-  }
+  connect(client) {}
 
   /**
    * Called when the client `client` disconnects from the server. This method

@@ -1,7 +1,7 @@
 import { audioContext } from 'waves-audio';
 import client from '../core/client';
 import MobileDetect from 'mobile-detect';
-import NoSleep from 'nosleep.js/dist/NoSleep.min';
+import NoSleep from 'nosleep.js';
 import screenfull from 'screenfull';
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
@@ -560,8 +560,12 @@ class Platform extends Service {
       e.preventDefault();
       e.stopPropagation();
 
-      const noSleep = new NoSleep();
-      noSleep.enable();
+      // we dont care to have that on desktop
+      // @todo - find a way to match desktop emulating mobile
+      if (type === 'touch') {
+        const noSleep = new NoSleep();
+        noSleep.enable();
+      }
 
       client.platform.interaction = type;
       // execute interaction hooks from the platform

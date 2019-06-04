@@ -38,3 +38,53 @@
 - SharedConfig (should not be needed w/ a proper distributed model, not really used and often too long to initialize to be usefull…)
 - SharedParams (should not be needed w/ proper distributed model, or move in plugins as a simple wrapper around the distributed state - TBC)
 - FileSystem (hide into a smarter AudioBufferManager)
+
+
+## Dependencies
+
+[server]
+**AudioBufferManager -> FileSystem** (check if we really need an `audioContext`)
+AudioStreamManager -> Ø
+**Auth -> SharedConfig**
+**Checkin -> SharedConfig**
+**ErrorReporter -> Ø**
+FileSystem -> SharedConfig
+Geolocation -> Ø
+Locator -> SharedConfig
+MetricScheduler -> SyncScheduler
+Network -> Ø
+Osc -> SharedConfig
+Placer -> SharedConfig
+RawSocket -> SharedConfig
+SharedConfig -> Ø
+SharedParams -> Ø
+SharedRecorder -> RawSocket
+**Sync -> Ø**
+SyncScheduler -> Sync
+
+[client]
+**AudioBufferManager -> FileSystem** (check if we really need an `audioContext`)
+AudioScheduler -> Platform
+AudioStreamManager -> _should require 'platform'_
+**Auth -> Ø**
+**Checkin -> Platform**
+**ErrorReporter -> Ø**
+FileSystem -> Ø
+Geolocation -> Platform
+Language -> Ø
+Locator -> SharedConfig
+MetricScheduler -> SyncScheduler
+MotionInput -> Ø
+Network -> Ø
+Placer -> SharedConfig
+**Platform -> Ø** (@todo - make a server counterpart?)
+RawSocket -> Ø 
+SharedConfig -> Ø
+SharedParams -> Ø
+SharedRecorder -> RawSocket, AudioBufferManager
+**Sync -> Platform**
+SyncScheduler -> Sync
+
+
+
+

@@ -1,8 +1,8 @@
-const { TextEncoder, TextDecoder } = require('text-encoding-shim');
-const root = require('window-or-global');
+import 'text-encoding-shim';
+import root from 'window-or-global';
 
-const encoder = new TextEncoder('utf-8');
-const decoder = new TextDecoder('utf-8');
+const encoder = new root.TextEncoder('utf-8');
+const decoder = new root.TextDecoder('utf-8');
 
 const types = [
   'Int8Array',

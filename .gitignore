@@ -21,3 +21,7 @@ NOTES.md
 # CHANGELOG.md
 package-lock.json
 tests
+
+# temporary
+src/**/services/_*.js
+# src/server/services/_*.js

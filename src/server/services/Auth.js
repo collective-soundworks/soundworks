@@ -27,7 +27,7 @@ class Auth extends Service {
     super(SERVICE_ID);
 
     const defaults = {
-      configItem: 'password'
+      password: ''
     };
 
     this.configure(defaults);
@@ -37,7 +37,7 @@ class Auth extends Service {
      * @type {String|Object}
      */
     this._password = null;
-    this._sharedConfig = this.require('shared-config');
+    // this._sharedConfig = this.require('shared-config');
   }
 
   /** @private */
@@ -49,7 +49,7 @@ class Auth extends Service {
   start() {
     super.start();
 
-    this._password = this._sharedConfig.get(this.options.configItem);
+    this._password = this._sharedConfig.get(this.options.password);
 
     this.ready();
   }

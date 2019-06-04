@@ -199,6 +199,17 @@ class Socket {
     if (listeners.has(channel)) {
       const callbacks = listeners.get(channel);
       callbacks.delete(callback);
+
+      if (callbacks.size === 0) {
+        listeners.delete(channel);
+      }
+    }
+  }
+
+  /** @private */
+  _removeAllListeners(listeners, channel) {
+    if (listeners.has(channel)) {
+      listeners.delete(channel)
     }
   }
 
@@ -263,6 +274,15 @@ class Socket {
   }
 
   /**
+   * Remove all listeners from JSON compatible messages on a given channel
+   *
+   * @param {String} channel - Channel of the message
+   */
+  removeAllListeners(channel) {
+    this._removeAllListeners(this._stringListeners, channel);
+  }
+
+  /**
    * Sends binary messages on a given channel
    *
    * @param {String} channel - Channel of the message
@@ -296,6 +316,15 @@ class Socket {
    */
   removeBinaryListener(channel, callback) {
     this._removeListener(this._binaryListeners, channel, callback);
+  }
+
+  /**
+   * Remove all listeners from binary compatible messages on a given channel
+   *
+   * @param {String} channel - Channel of the message
+   */
+  removeAllBinaryListeners(channel) {
+    this._removeAllListeners(this._binaryListeners, channel);
   }
 }
 

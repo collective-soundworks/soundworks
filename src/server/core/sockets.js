@@ -8,8 +8,10 @@ const initializationCache = new Map();
 /**
  * Internal base class for services and scenes.
  *
- * @todo - binary socket using:
- * https://github.com/websockets/ws#multiple-servers-sharing-a-single-https-server
+ * @todo - remove all `send`, `addListener`, `removeListener` methods,
+ *         use `client.socket` instead.
+ *
+ * will be more simple to document.
  *
  * @memberof module:soundworks/server
  */
@@ -24,6 +26,7 @@ const sockets = {
    * Initialize sockets, all sockets are added by default added to two rooms:
    * - to the room corresponding to the client `clientType`
    * - to the '*' that holds all connected sockets
+   *
    * @private
    */
   start(httpServer, config, onConnectionCallback) {
@@ -100,7 +103,7 @@ const sockets = {
   /**
    * Add a socket to a room
    *
-   * @param {Socket} socket - Socket to register in the room.
+   * @param {Socket} module:soundworks/server.Socket - Socket to register in the room.
    * @param {String} roomId - Id of the room
    */
   addToRoom(socket, roomId) {
@@ -110,23 +113,11 @@ const sockets = {
   /**
    * Remove a socket from a room
    *
-   * @param {Socket} socket - Socket to register in the room.
+   * @param {Socket} module:soundworks/server.Socket - Socket to register in the room.
    * @param {String} [roomId=null] - Id of the room
    */
   removeFromRoom(socket, roomId) {
     socket.removeFromRoom(roomId);
-  },
-
-  /**
-   * Send JSON compatible messages to a socket on a given channel
-   *
-   * @param {module:soundworks/server.Socket} socket - Client to send the message to
-   * @param {String} channel - Channel of the message
-   * @param {...*} args - Arguments of the message (as many as needed, of any type),
-   *  must be compatible with JSON serialization.
-   */
-  send(socket, channel, ...args) {
-    socket.send(channel, ...args);
   },
 
   /**
@@ -146,40 +137,6 @@ const sockets = {
   },
 
   /**
-   * Listen JSON compatible messages from a socket on a given channel
-   *
-   * @param {module:soundworks/server.Socket} socket - Socket that should listen for the message
-   * @param {String} channel - Channel of the message
-   * @param {Function} callback - Callback to execute when a message is received
-   */
-  addListener(socket, channel, callback) {
-    socket.addListener(channel, callback);
-  },
-
-  /**
-   * Remove a listener from JSON compatible messages from a socket on a given channel
-   *
-   * @param {module:soundworks/server.Socket} socket - Socket to send the message to
-   * @param {String} channel - Channel of the message
-   * @param {Function} callback - Callback to cancel
-   */
-  removeListener(socket, channel, callback) {
-    socket.removeListener(channel, callback);
-  },
-
-
-  /**
-   * Send binary messages to a socket on a given channel
-   *
-   * @param {module:soundworks/server.Socket} socket - Socket to send the message to
-   * @param {String} channel - Channel of the message
-   * @param {TypedArray} typedArray - Data to send
-   */
-  sendBinary(socket, channel, typedArray) {
-    socket.sendBinary(channel, typedArray);
-  },
-
-  /**
    * Send a binary message (TypedArray) to all client of given room(s). If no room
    * not specified, the message is sent to all clients
    *
@@ -193,28 +150,6 @@ const sockets = {
    */
   broadcastBinary(roomIds, excludeSocket, channel, typedArray) {
     this._broadcast(true, roomIds, excludeSocket, channel, typedArray);
-  },
-
-  /**
-   * Listen binary messages from a socket on a given channel
-   *
-   * @param {module:soundworks/server.Socket} socket - Client that must listen to the message
-   * @param {String} channel - Channel of the message
-   * @param {...*} callback - Callback to execute when a message is received
-   */
-  addBinaryListener(socket, channel, callback) {
-    client.socket.addBinaryListener(channel, callback);
-  },
-
-  /**
-   * Remove a listener from binary compatible messages form a socket on a given channel
-   *
-   * @param {module:soundworks/server.Socket} socket - Client that must stop to listen for the message
-   * @param {String} channel - Channel of the message
-   * @param {...*} callback - Callback to cancel
-   */
-  removeBinaryListener(socket, channel, callback) {
-    client.socket.removeBinaryListener(channel, callback);
   },
 };
 

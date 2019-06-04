@@ -515,20 +515,22 @@ const server = {
         });
 
         if (missingServices.length > 0) {
-          const data = {
+          const err = {
             type: 'services',
-            data: missingServices,
+            payload: missingServices,
           };
 
-          socket.send('soundworks:error', data);
+          socket.send('soundworks:error', err);
           return;
         }
       }
 
-      client.urlParams = data.urlParams;
-      // @todo - handle reconnection (ex: `data` contains a `uuid`)
-      activities.forEach((activity) => activity.connect(client));
-      socket.send('soundworks:start', { uuid: client.uuid });
+      activities.forEach(activity => activity.connect(client));
+
+      socket.send('soundworks:start', {
+        id: client.id,
+        uuid: client.uuid,
+      });
     });
   },
 };

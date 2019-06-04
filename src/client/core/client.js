@@ -22,13 +22,6 @@ import viewport from '../views/viewport';
  */
 const client = {
   /**
-   * Unique id of the client, generated and retrieved by the server.
-   *
-   * @type {Number}
-   */
-  uuid: null,
-
-  /**
    * The type of the client, this can generally be considered as the role of the
    * client in the application. This value is defined in the
    * [`client.init`]{@link module:soundworks/server.server~serverConfig} object
@@ -37,6 +30,33 @@ const client = {
    * @type {String}
    */
   type: null,
+
+
+  /**
+   * Unique session id of the client (number), generated and retrieved by the server.
+   *
+   * @type {Number}
+   */
+  id: null,
+
+  /**
+   * Unique session id of the client (uuidv4), generated and retrieved by the server.
+   *
+   * @type {String}
+   */
+  uuid: null,
+
+  /**
+   * @note - remove all that, should be directly related to the services
+   * @example
+   * // client side
+   * const index = this.checkin.getIndex();
+   * // server side
+   * const index = this.checkin.getIndex(client);
+   *
+   * // for plaform
+   * const isCcompatible = this.platform.isCompatible
+   */
 
   /**
    * Configuration informations from the server configuration if any.
@@ -277,7 +297,8 @@ const client = {
       }
 
       // wait for handshake response to mark client as `ready`
-      this.socket.addListener('soundworks:start', ({ uuid }) => {
+      this.socket.addListener('soundworks:start', ({ id, uuid }) => {
+        this.id = id;
         this.uuid = uuid;
         resolve();
       });

@@ -1,5 +1,4 @@
 import debug from 'debug';
-import uuid from 'uuid';
 import {
   packBinaryMessage,
   unpackBinaryMessage,
@@ -52,8 +51,10 @@ const socket = {
    * @param {Array<String>} options.path - Defines where socket should find the `socket.io` file
    */
   init(clientType, options) {
-    // unique key that allows to associate the two sockets to the same client
-    const key = uuid.v4();
+    // unique key that allows to associate the two sockets to the same client.
+    // note: the key is only used to pair to two sockets, so its usage is very
+    // limited in time therefore a random number should hopefully be sufficient.
+    const key = (Math.random() + '').replace(/^0./, '');
 
     /**
      * Configuration object
@@ -161,6 +162,17 @@ const socket = {
     if (listeners.has(channel)) {
       const callbacks = listeners.get(channel);
       callbacks.delete(callback);
+
+      if (callbacks.size === 0) {
+        listeners.delete(channel);
+      }
+    }
+  },
+
+  /** @private */
+  _removeAllListeners(listeners, channel) {
+    if (listeners.has(channel)) {
+      listeners.delete(channel);
     }
   },
 
@@ -189,11 +201,21 @@ const socket = {
    * Remove a listener from JSON compatible messages on a given channel
    *
    * @param {String} channel - Channel of the message
-   * @param {...*} callback - Callback to cancel
+   * @param {...*} callback - Callback to remove
    */
   removeListener(channel, callback) {
     this._removeListener(this._stringListeners, channel, callback);
   },
+
+  /**
+   * Remove all listeners from JSON compatible messages on a given channel
+   *
+   * @param {String} channel - Channel of the message
+   */
+  removeAllListeners(channel) {
+    this._removeAllListeners(this._stringListeners, channel);
+  },
+
 
   /**
    * Send binary messages on a given channel
@@ -224,6 +246,15 @@ const socket = {
    */
   removeBinaryListener(channel, callback) {
     this._removeListener(this._binaryListeners, channel, callback);
+  },
+
+  /**
+   * Remove all listeners from binary compatible messages on a given channel
+   *
+   * @param {String} channel - Channel of the message
+   */
+  removeAllBinaryListeners(channel) {
+    this._removeAllListeners(this._binaryListeners, channel);
   },
 };
 
