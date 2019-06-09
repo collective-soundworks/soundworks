@@ -45,7 +45,7 @@
 [server]
 **AudioBufferManager -> FileSystem** (check if we really need an `audioContext`)
 AudioStreamManager -> Ø
-**Auth -> SharedConfig**
+**Auth -> Ø
 **Checkin -> SharedConfig**
 **ErrorReporter -> Ø**
 FileSystem -> SharedConfig

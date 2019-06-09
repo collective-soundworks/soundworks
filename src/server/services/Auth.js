@@ -15,7 +15,7 @@ const SERVICE_ID = 'service:auth';
  * __*The service must be used with its [client-side counterpart]{@link module:soundworks/client.Auth}*__
  *
  * @param {Object} options
- * @param {String} [configItem='password'] - Path to the password in the server configuration.
+ * @param {String} [password=''] - Password.
  *
  * @memberof module:soundworks/server
  * @example
@@ -31,13 +31,6 @@ class Auth extends Service {
     };
 
     this.configure(defaults);
-
-    /**
-     * @private
-     * @type {String|Object}
-     */
-    this._password = null;
-    // this._sharedConfig = this.require('shared-config');
   }
 
   /** @private */
@@ -48,32 +41,18 @@ class Auth extends Service {
   /** @private */
   start() {
     super.start();
-
-    this._password = this._sharedConfig.get(this.options.password);
-
     this.ready();
   }
 
   /** @private */
   connect(client) {
-    this.receive(client, 'password', this._onAccessRequest(client));
-  }
-
-  /** @private */
-  _onAccessRequest(client) {
-    return (password) => {
-      let match;
-
-      if (typeof this._password === 'string')
-        match = this._password;
-      else
-        match = this._password[client.type];
-
-      if (password !== match)
-        this.send(client, 'refused');
-      else
-        this.send(client, 'granted');
-    };
+    client.socket.addListener(`${SERVICE_ID}:password`, password => {
+      if (password !== this.options.password) {
+        client.socket.send(`${SERVICE_ID}:refused`);
+      } else {
+        client.socket.send(`${SERVICE_ID}:granted`);
+      }
+    });
   }
 }
 

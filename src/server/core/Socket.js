@@ -7,6 +7,14 @@ import {
 
 const noop = () => {};
 
+let counter = 0;
+
+const CONNECTING = 0;
+const OPEN = 1;
+const CLOSING = 2;
+const CLOSED = 3;
+const READY_STATES = ['CONNECTING', 'OPEN', 'CLOSING', 'CLOSED']
+
 /**
  * Simple wrapper with simple pubsub system built on top of `ws` socket.
  * The abstraction actually contains two different socket:
@@ -30,9 +38,7 @@ class Socket {
      * @instance
      * @memberof module:soundworks/server.Socket
      * @example
-     * ```js
      * socket.sockets.broadcast('my-room', this, 'update-value', 1);
-     * ```
      */
     this.sockets = sockets;
 
@@ -130,22 +136,36 @@ class Socket {
     // heartbeat system (run only on string socket), adapted from:
     // https://github.com/websockets/ws#how-to-detect-and-close-broken-connections
     this._isAlive = true;
-    this._heartbeat = this._heartbeat.bind(this);
+    this.clientId = null;
+    // heartbeat
+    this.ws.on('pong', () => {
+      // console.log('pong', this.clientId);
+      this._isAlive = true
+    });
 
-    this.ws.on('pong', this._heartbeat);
+    // CONNECTING  0 The connection is not yet open.
+    // OPEN  1 The connection is open and ready to communicate.
+    // CLOSING 2 The connection is in the process of closing.
+    // CLOSED  3 The connection is closed.
 
+    // console.log('starting heartbeat', this.clientId);
     this._intervalId = setInterval(() => {
       if (this._isAlive === false) {
-        clearInterval(this._intervalId);
-        // terminate both sockets
-        this.ws.terminate();
-        this.binaryWs.terminate();
+        // console.log('heartbeat failed', this.clientId, READY_STATES[this.ws.readyState]);
+        // emit a 'close' event to go trough all the disconnection pipeline
+        this._emit(false, 'close');
         return;
+        // return this.ws.terminate();
       }
 
+      // console.log('ping', this.clientId, READY_STATES[this.ws.readyState]);
       this._isAlive = false;
       this.ws.ping(noop);
     }, this.config.pingInterval);
+
+    this.ws.addListener('error', (err) => {
+      console.log(this.clientId, err);
+    });
   }
 
   /**
@@ -153,7 +173,8 @@ class Socket {
    * Called when the string socket closes (aka client reload).
    */
   terminate() {
-    clearTimeout(this._intervalId);
+    console.log('terminate', this.clientId, READY_STATES[this.ws.readyState]);
+    clearInterval(this._intervalId);
     // clean rooms
     for (let [key, room] of this.rooms) {
       room.delete(this);
@@ -162,16 +183,29 @@ class Socket {
     // clear references to sockets and rooms
     this.sockets = null;
     this.rooms = null;
+
     // clear all listeners
     this._stringListeners.clear();
     this._binaryListeners.clear();
+
+    // clear "native" listeners
+    [this.binaryWs, this.ws].forEach((socket) => {
+      [ 'close',
+        'error',
+        'message',
+        'open',
+        'ping',
+        'pong',
+        'unexpected-response',
+        'upgrade'
+      ].forEach(eventName => {
+        socket.removeAllListeners(eventName);
+      })
+    });
+
     // clear binarySocket as this is called from the string one.
     this.binaryWs.terminate();
-  }
-
-  /** @private */
-  _heartbeat() {
-    this._isAlive = true;
+    this.ws.terminate();
   }
 
   /** @private */
@@ -248,7 +282,7 @@ class Socket {
 
     this.ws.send(msg, (err) => {
       if (err) {
-        console.error('error sending msg:', channel, args);
+        console.error('error sending msg:', channel, args, err);
       }
     });
   }

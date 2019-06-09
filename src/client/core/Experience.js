@@ -18,7 +18,6 @@ class Experience extends Activity {
     this.start = this.start.bind(this);
 
     this.requiredSignals.addObserver(this.start);
-
     this.waitFor(serviceManager.signals.ready);
 
     // if the experience has network, require errorReporter service by default

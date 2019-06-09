@@ -1,4 +1,4 @@
-import 'text-encoding-shim';
+import 'fast-text-encoding';
 import root from 'window-or-global';
 
 const encoder = new root.TextEncoder('utf-8');

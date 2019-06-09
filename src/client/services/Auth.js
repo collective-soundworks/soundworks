@@ -1,6 +1,5 @@
 import client from '../core/client';
 import Service from '../core/Service';
-import SegmentedView from '../views/SegmentedView';
 import serviceManager from '../core/serviceManager';
 
 /**
@@ -112,13 +111,14 @@ class Auth extends Service {
     this.view.setSendPasswordCallback(this._sendPassword);
     this.view.setResetCallback(this._resetPassword);
 
-    this.receive('granted', this._onAccesGrantedResponse);
-    this.receive('refused', this._onAccesRefusedResponse);
+    client.socket.addListener(`${SERVICE_ID}:granted`, this._onAccesGrantedResponse);
+    client.socket.addListener(`${SERVICE_ID}:refused`, this._onAccesRefusedResponse);
 
     const storedPassword = localStorage.getItem(LOCAL_STORAGE_KEY);
 
-    if (storedPassword !== null)
+    if (storedPassword !== null) {
       this._sendPassword(storedPassword);
+    }
 
     this.show();
   }
@@ -127,8 +127,8 @@ class Auth extends Service {
   stop() {
     super.stop();
 
-    this.removeListener('granted', this._onAccesGrantedResponse);
-    this.removeListener('refused', this._onAccesRefusedResponse);
+    client.socket.removeAllListeners(`${SERVICE_ID}:granted`);
+    client.socket.removeAllListeners(`${SERVICE_ID}:refused`);
 
     this.hide();
   }
@@ -146,7 +146,7 @@ class Auth extends Service {
   /** @private */
   _sendPassword(password) {
     this._password = password;
-    this.send('password', password);
+    client.socket.send('password', password);
   }
 
   /** @private */

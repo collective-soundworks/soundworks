@@ -45,10 +45,10 @@ class Experience extends Activity {
    */
   connect(client) {
     super.connect(client);
-
-    // listen for `'enter'` and `'exit'` socket messages from the client
+    // listen for the `'enter' socket message from the client, the message is
+    // sent when the client `enters` the Experience client side, i.e. when all
+    // required services are ready
     this.receive(client, 'enter', () => this.enter(client));
-    this.receive(client, 'exit', () => this.exit(client));
   }
 
   /**
@@ -58,34 +58,28 @@ class Experience extends Activity {
   disconnect(client) {
     super.disconnect(client);
 
-    // call `exit()` only if the client previously `enter()`ed
-    // aka, finished its initialization
-    if (this.clients.indexOf(client) !== -1) {
+    // call `exit()` only if the client previously `enter()`ed, i.e. finished
+    // its initialization
+    const index = this.clients.indexOf(client);
+    if (index !== -1) {
+      this.clients.splice(index, 1);
       this.exit(client);
     }
   }
 
   /**
    * Called when the client starts the performance on the client side.
-   * @param {Client} client Client who enters the performance.
+   * There is no exit method as the client typically disconnect from the page
+   * at any moment.
+   * @param {Client} client - Client who enters the performance.
    */
   enter(client) {
     // add the client to the `this.clients` array
     this.clients.push(client);
   }
 
-  /**
-   * Called when the client exits the performance on the client side (*i.e.*
-   * when the `done` method of the client side experience is called, or when
-   * the client disconnects from the server).
-   * @param {Client} client - Client who exits the performance.
-   */
   exit(client) {
-    const index = this.clients.indexOf(client);
 
-    if (index !== -1) {
-      this.clients.splice(index, 1);
-    }
   }
 }
 

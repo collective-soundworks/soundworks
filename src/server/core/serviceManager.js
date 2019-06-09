@@ -10,22 +10,20 @@ const _instances = {};
  * are instanciated only once.
  */
 const serviceManager = {
-  // add an init method
-  /**
-   *
-   *
-   */
-  init() {
-    this._ready = this._ready.bind(this);
+  /** @private */
+  _servicesOptions: {},
 
+  /** @private */
+  init() {
     this.signals = {};
     this.signals.start = new Signal();
     this.signals.ready = new Signal();
 
     this._requiredSignals = new SignalAll();
-    this._requiredSignals.addObserver(this._ready);
+    this._requiredSignals.addObserver(() => this._ready());
   },
 
+  /** @private */
   start() {
     console.log(chalk.yellow(`+ required services`));
     console.log(
@@ -42,6 +40,7 @@ const serviceManager = {
     }
   },
 
+  /** @private */
   _ready() {
     this.signals.ready.set(true);
   },
@@ -50,35 +49,64 @@ const serviceManager = {
    * Retrieve a service according to the given id. If the service as not beeen
    * requested yet, it is instanciated.
    * @param {String} id - The id of the registered service
-   * @param {Object} options - The options to configure the service.
+   * @param {Object} options - The options to configure the service. If an
+   *  option for the required service has been given using `serviceManager.configure()`
+   *  the present object takes precedence.
    */
   require(id, options = {}) {
-    id = 'service:' + id;
+    const ctorId = `service:${id}`;
 
-    if (!_ctors[id]) {
-      throw new Error(`Service "${id}" is not defined`);
+    if (!_ctors[ctorId]) {
+      throw new Error(`Service "${ctorId}" is not defined`);
     }
 
-    let instance = _instances[id];
+    let instance = _instances[ctorId];
 
     if (!instance) {
-      instance = new _ctors[id];
-      _instances[id] = instance;
+      instance = new _ctors[ctorId];
+      _instances[ctorId] = instance;
 
       this._requiredSignals.add(instance.signals.ready);
 
-      //
+      // log service readiness
       instance.signals.ready.addObserver((state) => {
-        console.log(`    ${id} ${chalk.green(' ready')}`);
+        console.log(`    ${ctorId} ${chalk.green(' ready')}`);
       });
     }
 
-    instance.configure(options);
+    // @todo - let's assume configuration could be passed after 1rst
+    //   instanciation, try to review t make it cleaner
+    const config = this._servicesOptions[id] || {};
+    Object.assign(config, options);
+
+    instance.configure(config);
+
     return instance;
   },
 
   /**
-   * Regiter a service
+   * Configure all required service at once.
+   * @param {Object} servicesOptions - Object containing configuration options
+   *  for multiple services. The keys must correspond to the `id` of an required
+   *  service, values are the corresponding config objects.
+   *
+   * @example
+   * serviceManager.configure({
+   *   auth: {
+   *     password: '123456'
+   *   },
+   *   checkin: {
+   *     // ...
+   *   },
+   * });
+   */
+  configure(servicesOptions) {
+    this._servicesOptions = Object.assign(this._servicesOptions, servicesOptions);
+  },
+
+  /**
+   * Regiter a new service
+   *
    * @param {String} id - The id of the service, in order to retrieve it later.
    * @param {Function} ctor - The constructor of the service.
    */
@@ -86,6 +114,7 @@ const serviceManager = {
     _ctors[id] = ctor;
   },
 
+  /** @private */
   getRequiredServices(clientType = null) {
     const services = [];
 
@@ -102,6 +131,7 @@ const serviceManager = {
     return services;
   },
 
+  /** @private */
   getServiceList() {
     return Object.keys(_ctors);
   },

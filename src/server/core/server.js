@@ -482,10 +482,15 @@ const server = {
    * @private
    */
   _onSocketConnection(clientType, socket) {
+    // @note - should wait for 'open' message - doesn't work
+    //  is probably already opened at this point
+
     const client = new this.clientCtor(clientType, socket);
+    socket.clientId = client.id;
     const activities = this._clientTypeActivitiesMap[clientType];
 
-    socket.addListener('close', () => {
+    socket.addListener('close', (code, reason) => {
+      console.log('> close', clientType, socket.clientId);
       // clean sockets
       socket.terminate();
       // remove client from activities
@@ -507,6 +512,7 @@ const server = {
 
         clientRequiredServices.forEach((serviceId) => {
           if (
+            // check that it's not a client-side only servive
             serverServicesList.indexOf(serviceId) !== -1 &&
             serverRequiredServices.indexOf(serviceId) === -1
           ) {
@@ -527,10 +533,8 @@ const server = {
 
       activities.forEach(activity => activity.connect(client));
 
-      socket.send('soundworks:start', {
-        id: client.id,
-        uuid: client.uuid,
-      });
+      const { id, uuid } = client;
+      socket.send('soundworks:start', { id, uuid });
     });
   },
 };

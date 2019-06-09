@@ -53,7 +53,7 @@ class Service extends Activity {
     if (signal)
       this.waitFor(signal);
     else
-      throw new Error(`signal "continue" doesn't exist on service :`, service);
+      throw new Error(`signal "ready" doesn't exist on service :`, service);
 
     return service;
   }

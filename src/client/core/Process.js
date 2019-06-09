@@ -29,21 +29,21 @@ class Process extends EventEmitter {
      * @instanceof Process
      */
     this.signals = {};
-    this.signals.active = new Signal();
+    // this.signals.active = new Signal();
   }
 
   /**
    * Start the process.
    */
   start() {
-    this.signals.active.set(true);
+    // this.signals.active.set(true);
   }
 
   /**
    * Stop the process.
    */
   stop() {
-    this.signals.active.set(false);
+    // this.signals.active.set(false);
   }
 }
 

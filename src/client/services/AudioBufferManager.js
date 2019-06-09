@@ -1,4 +1,3 @@
-import { audioContext } from 'waves-audio';
 import { SuperLoader } from 'waves-loaders';
 import debug from 'debug';
 import Service from '../core/Service';
@@ -376,7 +375,6 @@ class AudioBufferManager extends Service {
       // load files
       if (pathList.length > 0) {
         const loader = new SuperLoader();
-        loader.setAudioContext(audioContext);
 
         if (view && view.setProgressRatio) {
           const progressPerFile = pathList.map(() => 0); // track files loading progress

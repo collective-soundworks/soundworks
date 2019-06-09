@@ -40,20 +40,27 @@
 ### on-going
 
 - [StateManager] 
-  + stabilize API (v1)
+  + stabilize API (v1) - see w/ Ricardo and Diemo
   + wrap in a `StateManageer` service 
   + when stable, import to core and generalize its usage to all services?
+  + define if we want to dipatch if value didn't change (maybe option?)
 
 - [services]
-  + decouples existing service from the ones that will be removed
+  + decouples existing services from the ones that will be removed
+  + problem when requesting client side and not server side
   
 - [sockets] 
   + remove `send`, `addListener`, etc from `server.sockets` (only keep `broadcast` methods there) (ok)
+
+  + add the client-side heartbeat stuff: https://www.npmjs.com/package/ws#other-examples
   + fix not sent errors messages (check `socket.OPENED` / `socket.CLOSED` ?)
   + update / configure path in sockets
   + update [thing.sockets] see if can share code w/ browsers clients
   + maybe move `broadcast` into `server.Socket`?
   + use isomorphic-ws for code sharing w/ thing clients
+  + review binaryBuffer encoding / decoding with new `fast-text-encoding`, i.e. see if we still need to copy buffers or if the `Buffer.offset` is properly taken in account
+
+  + install that and see if problems still occur: https://github.com/plantain-00/ws-heartbeat
 
 - [views] 
   + explore `lit-html` and `lit-elements` as a possible replacements (ok)
@@ -72,6 +79,13 @@
     * cf. https://github.com/lerna/lerna
   + share code betwenn `things` and `browsers` clients
   + start to add tests
+  + remove `service:` from service's ids, just add noise for nothing
+    * or maybe not, allow to not collapse w/ with user field
+    * might be simply fixed by using states...
+
+- [misc]
+
+move utils/math into waves-audio
 
 > @important - sharing most of the code between `node` and `browsers` clients 
 > should allow to write test more easily 
@@ -88,6 +102,7 @@
   + report latency from clients to server for auditing
   + explore latency estimation / compensation in Android (ok, make more measures) 
   + report network latency per client too
+  + check if something weird can happen if we load a lot of sound
 
 - [PlatformService] 
   + add a test for the `audioContext` clock (iOS) - with reporting for in the wild testing
@@ -125,8 +140,8 @@
 ### update apps
 
 - Future Perfect
-- Biotope
-- Square
+- Biotope (get back the soundworks code from prod server)
+- Square (Bologne Fin Juillet - Turin Septembre 2020 - Quai de Branly)
 - Elements
 - All examples
 - Agneau Mystique (not sure)
