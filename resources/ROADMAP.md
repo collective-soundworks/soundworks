@@ -39,11 +39,18 @@
 
 ### on-going
 
+- [core]
+ + move everything to Class so that we can instanciate severa client in one window
+ ```
+ const soundworks = new Soundworks();
+ ```
+
 - [StateManager] 
   + stabilize API (v1) - see w/ Ricardo and Diemo
   + wrap in a `StateManageer` service 
   + when stable, import to core and generalize its usage to all services?
   + define if we want to dipatch if value didn't change (maybe option?)
+  + handle attach twice (ignore or throw, just do something)
 
 - [services]
   + decouples existing services from the ones that will be removed

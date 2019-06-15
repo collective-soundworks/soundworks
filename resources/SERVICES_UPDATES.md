@@ -39,7 +39,6 @@
 - SharedParams (should not be needed w/ proper distributed model, or move in plugins as a simple wrapper around the distributed state - TBC)
 - FileSystem (hide into a smarter AudioBufferManager)
 
-
 ## Dependencies
 
 [server]

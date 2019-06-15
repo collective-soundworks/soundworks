@@ -3,8 +3,9 @@ import path from 'path';
 
 const cacheDir = path.join(process.cwd(), '.soundworks');
 
-if (!fs.existsSync(cacheDir))
+if (!fs.existsSync(cacheDir)) {
   fs.mkdirSync(cacheDir);
+}
 
 function getFilename(serviceId) {
   const filename = serviceId.replace(':', '_');

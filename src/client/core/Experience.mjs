@@ -1,6 +1,7 @@
 import Activity from './Activity';
-import serviceManager from './serviceManager';
 
+// @todo - remove this...
+import client from './client';
 
 /**
  * Base class to be extended in order to create the client-side of a custom
@@ -14,23 +15,6 @@ import serviceManager from './serviceManager';
 class Experience extends Activity {
   constructor() {
     super('experience');
-
-    this.start = this.start.bind(this);
-
-    this.requiredSignals.addObserver(this.start);
-    this.waitFor(serviceManager.signals.ready);
-
-    // if the experience has network, require errorReporter service by default
-    this._errorReporter = this.require('error-reporter');
-  }
-
-  /**
-   * Returns a service configured with the given options.
-   * @param {String} id - The identifier of the service.
-   * @param {Object} options - The options to configure the service.
-   */
-  require(id, options) {
-    return serviceManager.require(id, options);
   }
 
   /**
@@ -41,7 +25,8 @@ class Experience extends Activity {
   start() {
     super.start();
 
-    this.send('enter');
+    client.socket.send('s:exp:enter');
+    // this.client.socket.send('enter');
   }
 }
 

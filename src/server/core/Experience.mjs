@@ -31,11 +31,7 @@ class Experience extends Activity {
      * @type {Client[]}
      */
     this.clients = [];
-
-    this.addClientTypes(clientTypes);
-    this.waitFor(serviceManager.signals.ready);
-
-    this._errorReporter = this.require('error-reporter');
+    this._addClientTypes(clientTypes);
   }
 
 
@@ -48,7 +44,7 @@ class Experience extends Activity {
     // listen for the `'enter' socket message from the client, the message is
     // sent when the client `enters` the Experience client side, i.e. when all
     // required services are ready
-    this.receive(client, 'enter', () => this.enter(client));
+    client.socket.addListener('s:exp:enter', () => this.enter(client));
   }
 
   /**
@@ -58,9 +54,10 @@ class Experience extends Activity {
   disconnect(client) {
     super.disconnect(client);
 
-    // call `exit()` only if the client previously `enter()`ed, i.e. finished
-    // its initialization
+    // call `exit()` only if the client previously `enter()`ed,
+    // i.e. finished its service initialization
     const index = this.clients.indexOf(client);
+
     if (index !== -1) {
       this.clients.splice(index, 1);
       this.exit(client);

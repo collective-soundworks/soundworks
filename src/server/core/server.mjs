@@ -110,14 +110,14 @@ const server = {
    * into this object.
    * @type {module:soundworks/server.server~serverConfig}
    */
-  config: {},
+  // config: {},
 
   /**
    * Constructor used to instanciate `Client` instances.
    * @type {module:soundworks/server.Client}
    * @default module:soundworks/server.Client
    */
-  clientCtor: Client,
+  // clientCtor: Client,
 
   /**
    * wrapper around `ws` server
@@ -160,24 +160,24 @@ const server = {
    */
   _routes: {},
 
-  get clientTypes() {
-    return Object.keys(this._clientTypeActivitiesMap);
-  },
+  // get clientTypes() {
+  //   return Object.keys(this._clientTypeActivitiesMap);
+  // },
 
   /**
    * Return a service configured with the given options.
    * @param {String} id - Identifier of the service.
    * @param {Object} options - Options to configure the service.
    */
-  require(id, options) {
-    return serviceManager.require(id, options);
-  },
+  // require(id, options) {
+  //   return serviceManager.require(id, options);
+  // },
 
   /**
    * Default for the module:soundworks/server.server~clientConfigDefinition
    * @private
    */
-  _clientConfigDefinition: (clientType, serverConfig, httpRequest) => {
+  _clientConfigFunction: (clientType, serverConfig, httpRequest) => {
     return { clientType };
   },
 
@@ -197,9 +197,9 @@ const server = {
    *  to the soundworks client.
    * @see {@link module:soundworks/client.client~init}
    */
-  setClientConfigDefinition(func) {
-    this._clientConfigDefinition = func;
-  },
+  // setClientConfigDefinition(func) {
+    // this._clientConfigFunction = func;
+  // },
 
   /**
    * Register a route for a given `clientType`, allow to define a more complex
@@ -236,35 +236,9 @@ const server = {
    * @param {module:soundworks/server.server~serverConfig} config -
    *  Configuration of the application.
    */
-  init(config) {
-    // must be done this way to keep the instance shared
+  init(config, clientConfigFunction) {
     this.config = config;
-
-    if (this.config.port === undefined) {
-       this.config.port = 8000;
-    }
-
-    if (this.config.publicDirectory === undefined) {
-      this.config.publicDirectory = path.join(process.cwd(), 'public');
-    }
-
-    if (this.config.serveStaticOptions === undefined) {
-      this.config.serveStaticOptions = {};
-    }
-
-    if (this.config.templateDirectory === undefined) {
-      this.config.templateDirectory = path.join(process.cwd(), 'html');
-    }
-
-    if (this.config.defaultClient === undefined) {
-      this.config.defaultClient = 'player';
-    }
-
-    if (this.config.websockets === undefined) {
-      this.config.websockets = {};
-    }
-
-    serviceManager.init();
+    this._clientConfigFunction = clientConfigFunction;
 
     // instanciate and configure polka
     // this allows to hook middleware and routes (e.g. cors) in the express
@@ -272,6 +246,11 @@ const server = {
     this.router = polka();
     // compression (must be set before static)
     this.router.use(compression());
+
+    return Promise.resolve();
+  },
+
+  serveStatic() {
     // public static folder
     const { publicDirectory, serveStaticOptions } = this.config;
     this.router.use(serveStatic(publicDirectory, serveStaticOptions));
@@ -279,17 +258,8 @@ const server = {
     return Promise.resolve();
   },
 
-  /**
-   * Start the application:
-   * - launch the http(s) server.
-   * - launch the socket server.
-   * - start all registered activities.
-   * - define routes and activities mapping for all client types.
-   */
-  start() {
-    console.log(chalk.cyan(`[soundworks] starting server`));
-
-    // map activities to their respective client type(s) and start them all
+  initActivities() {
+        // map activities to their respective client type(s) and start them all
     this._activities.forEach((activity) => {
       activity.clientTypes.forEach((clientType) => {
         if (!this._clientTypeActivitiesMap[clientType]) {
@@ -300,6 +270,10 @@ const server = {
       });
     });
 
+    return Promise.resolve();
+  },
+
+  createHttpServer() {
     // start http server
     const useHttps = this.config.useHttps || false;
 
@@ -363,74 +337,77 @@ const server = {
             });
           }
         }
-      })
-      .then(httpServer => {
+      }).then(httpServer => {
         this.httpServer = httpServer;
         this.router.server = httpServer;
 
-        // init routing for each client type
-        console.log(chalk.yellow(`+ available clients:`));
-
-        const routes = [];
-        // open all routes except default
-        for (let clientType in this._clientTypeActivitiesMap) {
-          if (clientType !== this.config.defaultClient) {
-            const route = this._openClientRoute(clientType, this.router);
-            routes.push({ clientType: `[${clientType}]`, route: chalk.green(route) });
-          }
-        }
-
-        // open default route last
-        for (let clientType in this._clientTypeActivitiesMap) {
-          if (clientType === this.config.defaultClient) {
-            const route = this._openClientRoute(clientType, this.router);
-            routes.unshift({ clientType: `[${clientType}]`, route: chalk.green(route) });
-          }
-        }
-
-        console.log(columnify(routes, {
-          showHeaders: false,
-          config: {
-            clientType: { align: 'right' },
-          },
-        }));
-
         return Promise.resolve();
-      })
-      .then(() => {
-        // init sockets
-        sockets.start(this.httpServer, this.config.websockets, (clientType, socket) => {
-          this._onSocketConnection(clientType, socket);
-        });
+      });
+  },
 
-        // bind server to port
-        const promise = new Promise((resolve, reject) => {
-          serviceManager.signals.ready.addObserver(() => {
-            const port = this.config.port;
-            const protocol = useHttps ? 'https' : 'http';
-            const ifaces = os.networkInterfaces();
+  initRouting() {
+    // init routing for each client type
+    console.log(chalk.yellow(`+ available clients:`));
 
-            this.router.listen(port, () => {
-              // log infos
-              console.log(chalk.yellow(`+ ${protocol} server listening on:`));
+    const routes = [];
+    // open all routes except default
+    for (let clientType in this._clientTypeActivitiesMap) {
+      if (clientType !== this.config.defaultClient) {
+        const route = this._openClientRoute(clientType, this.router);
+        routes.push({ clientType: `[${clientType}]`, route: chalk.green(route) });
+      }
+    }
 
-              Object.keys(ifaces).forEach(dev => {
-                ifaces[dev].forEach(details => {
-                  if (details.family === 'IPv4') {
-                    console.log(`    ${protocol}://${details.address}:${chalk.green(port)}`);
-                  }
-                });
-              });
+    // open default route last
+    for (let clientType in this._clientTypeActivitiesMap) {
+      if (clientType === this.config.defaultClient) {
+        const route = this._openClientRoute(clientType, this.router);
+        routes.unshift({ clientType: `[${clientType}]`, route: chalk.green(route) });
+      }
+    }
 
-              resolve();
-            });
+    console.log(columnify(routes, {
+      showHeaders: false,
+      config: {
+        clientType: { align: 'right' },
+      },
+    }));
+
+    return Promise.resolve();
+  },
+
+  startSocketServer() {
+    sockets.start(this.httpServer, this.config.websockets, (clientType, socket) => {
+      this._onSocketConnection(clientType, socket);
+    });
+
+    return Promise.resolve();
+  },
+
+  listen() {
+    const promise = new Promise((resolve, reject) => {
+      const port = this.config.port;
+      const useHttps = this.config.useHttps || false;
+      const protocol = useHttps ? 'https' : 'http';
+      const ifaces = os.networkInterfaces();
+
+      this.router.listen(port, () => {
+        // log infos
+        console.log(chalk.yellow(`+ ${protocol} server listening on:`));
+
+        Object.keys(ifaces).forEach(dev => {
+          ifaces[dev].forEach(details => {
+            if (details.family === 'IPv4') {
+              console.log(`    ${protocol}://${details.address}:${chalk.green(port)}`);
+            }
           });
         });
 
-        serviceManager.start();
+        resolve();
+      });
+    });
 
-        return promise;
-      }).catch((err) => console.error(err.stack));
+    return promise;
   },
 
   /**
@@ -467,7 +444,7 @@ const server = {
       const tmpl = ejs.compile(tmplString);
       // http request
       router.get(route, (req, res) => {
-        const data = this._clientConfigDefinition(clientType, this.config, req);
+        const data = this._clientConfigFunction(clientType, this.config, req);
         const appIndex = tmpl({ data });
         res.end(appIndex);
       });
@@ -482,15 +459,10 @@ const server = {
    * @private
    */
   _onSocketConnection(clientType, socket) {
-    // @note - should wait for 'open' message - doesn't work
-    //  is probably already opened at this point
-
-    const client = new this.clientCtor(clientType, socket);
-    socket.clientId = client.id;
+    const client = new Client(clientType, socket);
     const activities = this._clientTypeActivitiesMap[clientType];
 
-    socket.addListener('close', (code, reason) => {
-      console.log('> close', clientType, socket.clientId);
+    socket.addListener('close', () => {
       // clean sockets
       socket.terminate();
       // remove client from activities
@@ -503,7 +475,7 @@ const server = {
     const serverRequiredServices = serviceManager.getRequiredServices(clientType);
     const serverServicesList = serviceManager.getServiceList();
 
-    socket.addListener('soundworks:handshake', data => {
+    socket.addListener('s:client:handshake', data => {
       // in development, if service required client-side but not server-side,
       // complain properly client-side.
       if (this.config.env !== 'production') {
@@ -526,7 +498,7 @@ const server = {
             payload: missingServices,
           };
 
-          socket.send('soundworks:error', err);
+          socket.send('s:client:error', err);
           return;
         }
       }
@@ -534,7 +506,7 @@ const server = {
       activities.forEach(activity => activity.connect(client));
 
       const { id, uuid } = client;
-      socket.send('soundworks:start', { id, uuid });
+      socket.send('s:client:start', { id, uuid });
     });
   },
 };

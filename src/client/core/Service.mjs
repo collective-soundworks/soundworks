@@ -20,21 +20,24 @@ class Service extends Activity {
     super(id);
 
     this.requiredSignals.addObserver((value) => {
+      // this can't be false...
       if (value) {
         this.start();
-        this.hasStarted = true; // keep this for Orbe/Nodal compatibility
-      } else {
+        // this.hasStarted = true; // keep this for Orbe/Nodal compatibility
+      } /* else {
         this.stop();
-      }
+      } */
     });
+
+    this.requiredSignals.add(serviceManager.signals.start);
 
     /**
      * Is set to `true` when a signal is ready to be consumed.
      * @type {Signal}
      */
     this.signals.ready = new Signal();
-    // add the serviceManager bootstart signal to the required signals
-    this.waitFor(serviceManager.signals.start);
+    // // add the serviceManager bootstart signal to the required signals
+    // this.waitFor();
 
     this.ready = this.ready.bind(this);
   }
@@ -46,17 +49,17 @@ class Service extends Activity {
    * @param {String} id - id of the service to require.
    * @param {Object} options - configuration object to be passed to the service.
    */
-  require(id, options) {
-    const service = serviceManager.require(id, options);
-    const signal = service.signals.ready;
+  // require(id, options) {
+  //   const service = serviceManager.require(id, options);
+  //   const signal = service.signals.ready;
 
-    if (signal)
-      this.waitFor(signal);
-    else
-      throw new Error(`signal "ready" doesn't exist on service :`, service);
+  //   if (signal)
+  //     this.waitFor(signal);
+  //   else
+  //     throw new Error(`signal "ready" doesn't exist on service :`, service);
 
-    return service;
-  }
+  //   return service;
+  // }
 
   /**
    * Method to call in the service lifecycle when it should be considered as
@@ -65,7 +68,7 @@ class Service extends Activity {
   ready() {
     log(`"${this.id}" ready`);
 
-    this.stop();
+    // this.stop();
     this.signals.ready.set(true);
   }
 
@@ -76,10 +79,10 @@ class Service extends Activity {
   }
 
   /** @inheritdoc */
-  stop() {
-    log(`"${this.id}" stopped`);
-    super.stop();
-  }
+  // stop() {
+  //   log(`"${this.id}" stopped`);
+  //   super.stop();
+  // }
 }
 
 export default Service;

@@ -63,12 +63,10 @@ const socket = {
      * @instance
      * @memberof module:soundworks/client.socket
      */
-    this.config = Object.assign({
-      pingInterval: 5 * 1000,
-    }, options);
+    this.config = options;
 
     // open web sockets
-    const path = 'socket';
+    const { path } = this.config;
     const protocol = window.location.protocol.replace(/^http?/, 'ws');
     const { hostname, port } = window.location;
     const url = `${protocol}//${hostname}:${port}/${path}`;

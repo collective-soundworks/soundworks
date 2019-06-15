@@ -136,35 +136,25 @@ class Socket {
     // heartbeat system (run only on string socket), adapted from:
     // https://github.com/websockets/ws#how-to-detect-and-close-broken-connections
     this._isAlive = true;
-    this.clientId = null;
-    // heartbeat
+    // heartbeat system, only on "regular" socket
     this.ws.on('pong', () => {
-      // console.log('pong', this.clientId);
       this._isAlive = true
     });
 
-    // CONNECTING  0 The connection is not yet open.
-    // OPEN  1 The connection is open and ready to communicate.
-    // CLOSING 2 The connection is in the process of closing.
-    // CLOSED  3 The connection is closed.
-
-    // console.log('starting heartbeat', this.clientId);
     this._intervalId = setInterval(() => {
       if (this._isAlive === false) {
-        // console.log('heartbeat failed', this.clientId, READY_STATES[this.ws.readyState]);
         // emit a 'close' event to go trough all the disconnection pipeline
         this._emit(false, 'close');
         return;
         // return this.ws.terminate();
       }
 
-      // console.log('ping', this.clientId, READY_STATES[this.ws.readyState]);
       this._isAlive = false;
       this.ws.ping(noop);
     }, this.config.pingInterval);
 
     this.ws.addListener('error', (err) => {
-      console.log(this.clientId, err);
+      // console.log(this.clientId, err);
     });
   }
 
@@ -173,7 +163,6 @@ class Socket {
    * Called when the string socket closes (aka client reload).
    */
   terminate() {
-    console.log('terminate', this.clientId, READY_STATES[this.ws.readyState]);
     clearInterval(this._intervalId);
     // clean rooms
     for (let [key, room] of this.rooms) {

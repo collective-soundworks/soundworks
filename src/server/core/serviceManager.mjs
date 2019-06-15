@@ -20,7 +20,13 @@ const serviceManager = {
     this.signals.ready = new Signal();
 
     this._requiredSignals = new SignalAll();
-    this._requiredSignals.addObserver(() => this._ready());
+    this._requiredSignals.addObserver(() => {
+      this.signals.ready.set(true);
+    });
+
+    this.ready = new Promise((resolve, reject) => {
+      this._resolveReadyPromise = resolve;
+    });
   },
 
   /** @private */
@@ -33,16 +39,17 @@ const serviceManager = {
         .join('\n')
     );
 
+    this.signals.ready.addObserver(() => {
+      this._resolveReadyPromise();
+    });
+
     this.signals.start.set(true);
 
     if (this._requiredSignals.length === 0) {
-      this._ready();
+      this.signals.ready.set(true);
     }
-  },
 
-  /** @private */
-  _ready() {
-    this.signals.ready.set(true);
+    return this.ready;
   },
 
   /**

@@ -6,92 +6,7 @@ import screenfull from 'screenfull';
 import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
 import isPrivateMode from '../utils/is-private-mode';
-
-/**
- * API of a compliant view for the `platform` service.
- *
- * @memberof module:soundworks/client
- * @interface AbstractPlatformView
- * @extends module:soundworks/client.AbstractView
- * @abstract
- */
-/**
- * Register the callback to execute when the user touches the screen for the first time.
- *
- * @name setTouchStartCallback
- * @memberof module:soundworks/client.AbstractPlatformView
- * @function
- * @abstract
- * @instance
- *
- * @param {touchStartCallback} callback - Callback to execute when the user
- *  touches the screen for the first time.
- */
-/**
- * Register the callback to execute when the user clicks the screen for the first time.
- *
- * @name setMousedownCallback
- * @memberof module:soundworks/client.AbstractPlatformView
- * @function
- * @abstract
- * @instance
- *
- * @param {mouseDownCallback} callback - Callback to execute when the user
- *  clicks the screen for the first time.
- */
-/**
- * Update the view to notify that the compatibility checks are terminated.
- *
- * @name updateCheckingStatus
- * @memberof module:soundworks/client.AbstractPlatformView
- * @function
- * @abstract
- * @instance
- *
- * @param {Boolean} value
- */
-/**
- * Update the view to notify if the device is compatible or not.
- *
- * @name updateIsCompatibleStatus
- * @memberof module:soundworks/client.AbstractPlatformView
- * @function
- * @abstract
- * @instance
- *
- * @param {Boolean} value
- */
-/**
- * Update the view to notify if the application obtained all the authorizations
- * or not.
- *
- * @name updateHasAuthorizationsStatus
- * @memberof module:soundworks/client.AbstractPlatformView
- * @function
- * @abstract
- * @instance
- *
- * @param {Boolean} value
- */
-
-/**
- * Callback to execute when the user touches the screen for the first time.
- *
- * @callback
- * @name touchStartCallback
- * @memberof module:soundworks/client.AbstractPlatformView
- *
- * @param {String} password - Password given by the user.
- */
-/**
- * Callback to execute when the user clicks the screen for the first time.
- *
- * @callback
- * @name mouseDownCallback
- * @memberof module:soundworks/client.AbstractPlatformView
- */
-
-
+import parameters from '@ircam/parameters';
 
 /**
  * Structure of the definition for the test of a feature.
@@ -114,10 +29,11 @@ import isPrivateMode from '../utils/is-private-mode';
 const defaultDefinitions = [
   {
     id: 'web-audio',
-    check: function() {
+    check: function(audioContext) {
       return Promise.resolve(!!audioContext);
     },
     interactionHook: async function() {
+      // @todo - put also in wawves-audio
       if (!('resume' in audioContext)) {
         audioContext.resume = () => {
           return Promise.resolve();
@@ -301,7 +217,7 @@ const defaultDefinitions = [
   },
 ];
 
-const SERVICE_ID = 'service:platform';
+const SERVICE_ID = 'platform';
 
 /**
  * Interface for the client `'platform'` service.
@@ -361,17 +277,49 @@ class Platform extends Service {
     super(SERVICE_ID);
 
     const defaults = {
+      // @todo - review for better handling of thing and desktop clients
       showDialog: true,
-      view: null,
-      viewPriority: 10,
     };
 
     this.configure(defaults);
 
-    this.view = null;
-
-    // this._defaultViewTemplate = defaultViewTemplate;
-    // this._defaultViewContent = defaultViewContent;
+    this.params = parameters({
+      checkingStatus: {
+        type: 'boolean',
+        default: false,
+      },
+      hasAuthorizations: {
+        type: 'boolean',
+        default: null,
+        nullable: true,
+      },
+      compatible: {
+        type: 'boolean',
+        default: null,
+        nullable: true,
+      },
+      interactionType: {
+        type: 'enum',
+        list: ['touch', 'mouse'],
+        nullable: true,
+        default: null,
+      },
+      audioFileExtension: {
+        type: 'string',
+        default: null,
+        nullable: true,
+      },
+      mobile: {
+        type: 'boolean',
+        default: null,
+        nullable: true,
+      },
+      os: {
+        type: 'string',
+        default: null,
+        nullable: true,
+      },
+    });
 
     this._requiredFeatures = new Set();
     this._featureDefinitions = {};
@@ -392,7 +340,7 @@ class Platform extends Service {
         features.push('check-ios-samplerate');
       }
 
-      this.requireFeature(...features);
+      this._requireFeature(...features);
 
       delete options.features;
     }
@@ -401,7 +349,6 @@ class Platform extends Service {
   }
 
   /**
-   *  Start the client.
    *  Algorithm:
    *  - check required features
    *  - if (false)
@@ -414,6 +361,7 @@ class Platform extends Service {
    *        bind events
    *     - else
    *        show 'sorry' screen
+   *
    * @private
    */
   start() {
@@ -424,40 +372,27 @@ class Platform extends Service {
 
     // check and initialize features required by the application
     this._checkRequiredFeatures().then(([compatible, details]) => {
-      client.compatible = compatible;
+      this.params.set('compatible', compatible);
 
-      if (this.options.showDialog === false) {
-        if (client.compatible) {
-          const startPromises = this._getHooks('startHook');
-          const interactionPromises = this._getHooks('interactionHook');
-          const promises = [].concat(startPromises, interactionPromises);
+      if (compatible) {
+        if (this.options.showDialog === false) {
+          if (compatible) {
+            const startPromises = this._getHooks('startHook');
+            const interactionPromises = this._getHooks('interactionHook');
+            const promises = [].concat(startPromises, interactionPromises);
 
-          Promise.all(promises).then(results => {
-            let resolved = true;
-            results.forEach(bool => resolved = resolved && bool);
+            Promise.all(promises).then(results => {
+              let resolved = true;
+              results.forEach(bool => resolved = resolved && bool);
 
-            if (resolved)
-              this.ready();
-            else
-              throw new Error(`service:platform - didn't obtain the necessary authorizations`);
-          })
-        } else {
-          throw new Error('service:platform - client not compatible');
-        }
-      } else {
-        // default view values
-        this.view.updateCheckingStatus(false);
-        this.view.updateIsCompatibleStatus(null);
-        this.view.updateHasAuthorizationsStatus(null);
-
-        if (!client.compatible) {
-          this.view.updateIsCompatibleStatus(false);
-          this.show();
-        } else {
-          this.view.updateIsCompatibleStatus(true);
-          this.view.updateCheckingStatus(true);
-          this.show();
-
+              if (resolved)
+                this.ready();
+              else
+                throw new Error(`service:platform - didn't obtain the necessary authorizations`);
+            })
+          }
+        } else if (compatible) {
+          this.params.set('checkingStatus', true);
           // execute start hook
           const startPromises = this._getHooks('startHook');
 
@@ -466,25 +401,15 @@ class Platform extends Service {
             let hasAuthorizations = true;
             results.forEach(success => hasAuthorizations = hasAuthorizations && success);
 
-            this.view.updateHasAuthorizationsStatus(hasAuthorizations);
-            this.view.updateCheckingStatus(false);
-
-            if (hasAuthorizations) {
-              // user gestures (`touchend` and `mouseup`)
-              // cf. https://docs.google.com/document/d/1oF1T3O7_E4t1PYHV6gyCwHxOi3ystm0eSL5xZu7nvOg/edit#heading=h.qq59ev3u8fba
-              this.view.$el.addEventListener('touchend', this._onInteraction('touch'));
-              this.view.$el.addEventListener('mouseup', this._onInteraction('mouse'));
-            }
+            this.params.set('checkingStatus', false);
+            this.params.set('hasAuthorizations', hasAuthorizations);
+            // @note - now the view should add the event listeners
           }).catch((err) => console.error(err.stack));
         }
+      } else {
+        throw new Error('service:platform - client not compatible');
       }
     }).catch((err) => console.error(err.stack));
-  }
-
-  /** @private */
-  stop() {
-    this.hide();
-    super.stop();
   }
 
   /**
@@ -502,18 +427,46 @@ class Platform extends Service {
   }
 
   /**
+   * Code to be executed on a user gesture
+   *
+   * @private
+   */
+  onUserGesture(type = null) {
+    // we dont care to have that on desktop
+    // @todo - find a way to match desktop emulating mobile
+    if (type === 'touch') {
+      const noSleep = new NoSleep();
+      noSleep.enable();
+    }
+
+    this.params.set('interactionType', type);
+    // execute interaction hooks from the platform
+    const interactionPromises = this._getHooks('interactionHook');
+
+    Promise.all(interactionPromises).then((results) => {
+      const resolved = results.reduce((acc, value) => acc && value, true);
+
+      if (resolved) {
+        this.ready();
+      } else {
+        this.params.set('hasAuthorizations', false);
+      }
+    }).catch(err => console.error(err.stack));
+  }
+
+  /**
    * Require features for the application.
    *
    * @param {...String} features - Id(s) of the feature(s) to be required.
    * @private
    */
-  requireFeature(...features) {
-    features.forEach(id => {
+  _requireFeature(...features) {
+    features.forEach(([id, ...args]) => {
       if (!this._featureDefinitions[id]) {
         throw new Error(`${SERVICE_ID} - Cannot require undefined feature: "${id}"`)
       }
 
-      this._requiredFeatures.add(id);
+      this._requiredFeatures.add({ id, args });
     });
   }
 
@@ -526,14 +479,14 @@ class Platform extends Service {
   _checkRequiredFeatures() {
     const promises = [];
 
-    this._requiredFeatures.forEach(id => {
+    this._requiredFeatures.forEach(({ id, args }) => {
       const checkFunction = this._featureDefinitions[id].check;
 
       if (!(typeof checkFunction === 'function')) {
         throw new Error(`${SERVICE_ID} - No check function defined for feature: "${id}"`);
       }
 
-      const featurePromise = checkFunction();
+      const featurePromise = checkFunction(...args);
       promises.push(featurePromise);
     });
 
@@ -541,62 +494,29 @@ class Platform extends Service {
       const isCompatible = featureResults.indexOf(false) !== -1 ? false : true;
       const details = {};
 
-      Array.from(this._requiredFeatures.values()).forEach((id, index) => {
-        details[id] = featureResults[index];
+      this._requiredFeatures.forEach((infos, index) => {
+        details[infos.id] = featureResults[index];
       });
 
       return Promise.resolve([isCompatible, details]);
     }).catch(err => console.error(err.stack));
   }
 
-  /**
-   * Execute `interactions` hooks from the `platform` service.
-   * Also activate the media according to the `options`.
-   *
-   * @private
-   */
-  _onInteraction(type) {
-    return (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-
-      // we dont care to have that on desktop
-      // @todo - find a way to match desktop emulating mobile
-      if (type === 'touch') {
-        const noSleep = new NoSleep();
-        noSleep.enable();
-      }
-
-      client.platform.interaction = type;
-      // execute interaction hooks from the platform
-      const interactionPromises = this._getHooks('interactionHook');
-
-      Promise.all(interactionPromises).then((results) => {
-        let resolved = true;
-        results.forEach(bool => resolved = resolved && bool);
-
-        if (resolved) {
-          this.ready();
-        } else {
-          this.view.updateHasAuthorizationsStatus(resolved);
-        }
-      }).catch(err => console.error(err.stack));
-    }
-  }
-
   /** @private */
   _getHooks(type) {
-    const hooks = [];
+    const promises = [];
 
-    this._requiredFeatures.forEach(feature => {
-      const hook = this._featureDefinitions[feature][type];
+    this._requiredFeatures.forEach(({ id, args }) => {
+      const hook = this._featureDefinitions[id][type];
 
-      if (hook)
-        hooks.push(hook);
+      if (hook) {
+        const promise = hook(...args);
+        promises.push(promise);
+      }
     });
 
     // return an array of Promises instead of function
-    return hooks.map(hook => hook());
+    return promises;
   }
 
   /**
@@ -609,11 +529,11 @@ class Platform extends Service {
     const a = document.createElement('audio');
     // http://diveintohtml5.info/everything.html
     if (!!(a.canPlayType && a.canPlayType('audio/mpeg;')))
-      client.platform.audioFileExt = '.mp3';
+      this.params.set('audioFileExtension', '.mp3');
     else if (!!(a.canPlayType && a.canPlayType('audio/ogg; codecs="vorbis"')))
-      client.platform.audioFileExt = '.ogg';
+      this.params.set('audioFileExtension', '.ogg');
     else
-      client.platform.audioFileExt = '.wav';
+      this.params.set('audioFileExtension', '.wav');
   }
 
   /**
@@ -625,17 +545,18 @@ class Platform extends Service {
     const ua = window.navigator.userAgent
     const md = new MobileDetect(ua);
 
-    client.platform.isMobile = (md.mobile() !== null); // true if phone or tablet
-    client.platform.os = (function() {
-      const os = md.os();
+    // @note - `true`` for phone or tablet
+    this.params.set('mobile', (md.mobile() !== null));
 
-      if (os === 'AndroidOS')
-        return 'android';
-      else if (os === 'iOS')
-        return 'ios';
-      else
-        return 'other';
-    })();
+    const os = md.os();
+
+    if (os === 'AndroidOS') {
+      this.params.set('os', 'android');
+    } else if (os === 'iOS') {
+      this.params.set('os', 'ios');
+    } else {
+      this.params.set('os', 'other');
+    }
   }
 }
 

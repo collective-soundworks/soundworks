@@ -2,7 +2,7 @@ import Service from '../core/Service';
 import serviceManager from '../core/serviceManager';
 
 
-const SERVICE_ID = 'service:error-reporter';
+const SERVICE_ID = 'error-reporter';
 
 /**
  * Interface for the client `'error-reporter'` service.
