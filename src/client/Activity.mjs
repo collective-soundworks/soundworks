@@ -1,5 +1,5 @@
-import Signal from '../../utils/Signal';
-import SignalAll from '../../utils/SignalAll';
+import Signal from '../common/Signal';
+import SignalAll from '../common/SignalAll';
 
 /**
  * Internal base class for services and scenes. Basically a process with view
@@ -9,22 +9,7 @@ import SignalAll from '../../utils/SignalAll';
  * @extends module:soundworks/client.Process
  */
 class Activity {
-  /**
-   * @param {String} id - Id of the activity.
-   */
-  constructor(id) {
-    if (id === undefined) {
-      throw new Error(`Undefined id for activty ${this.constructor.name}`);
-    }
-
-    /**
-     * Name of the process.
-     * @name id
-     * @type {String}
-     * @instanceof Process
-     */
-    this.id = id;
-
+  constructor() {
     /**
      * Options of the activity.
      * @type {Object}
@@ -47,7 +32,7 @@ class Activity {
      * List of signals that must be set to `true` before the Activity can start.
      * @private
      */
-    this.requiredSignals = new SignalAll();
+    this.requiredStartSignals = new SignalAll();
   }
 
   /**

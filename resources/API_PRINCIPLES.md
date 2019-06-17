@@ -68,7 +68,9 @@ const soundworks = {
   (client|server), 
   serviceManager, 
   stateManager, 
+
   Experience,
+  Service,
 
   await init() {}
   await start() {} // return `ready` Promise
@@ -106,3 +108,29 @@ class MyExperience extends soundworks.Experience {
   }
 }
 ```
+
+
+## Services API
+
+```
+export default platform(soundworks) {
+  this.id = 'platform';
+
+  class Platform extends soundworks.Service {
+    constructor(id, client) {
+      super(id);
+    }
+
+    start() {
+      
+    }
+  }
+
+  return Platform;
+}
+```
+
+
+
+
+

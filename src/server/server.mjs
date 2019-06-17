@@ -11,79 +11,10 @@ import serveStatic from 'serve-static';
 import columnify from 'columnify';
 import compression from 'compression';
 import Client from './Client';
+import Experience from './Experience';
 import serviceManager from './serviceManager';
 import sockets from './sockets';
-import cache from '../utils/cache';
-
-/**
- * @typedef {Object} module:soundworks/server.server~serverConfig
- * @memberof module:soundworks/server.server
- *
- * @property {String} appName - Name of the application, used in the `.ejs`
- *  template and by default in the `platform` service to populate its view.
- * @property {String} env - Name of the environnement ('production' enable
- *  cache in express application).
- * @property {String} version - Version of application, can be used to force
- *  reload css and js files from server (cf. `html/default.ejs`)
- * @property {String} defaultClient - Name of the default client type,
- *  i.e. the client that can access the application at its root URL
- * @property {String} assetsDomain - Define from where the assets (static files)
- *  should be loaded, this value can refer to a separate server for scalability.
- *  The value should be used client-side to configure the `audio-buffer-manager`
- *  service.
- * @property {Number} port - Port used to open the http server, in production
- *  this value is typically 80
- *
- * @property {Object} setup - Describe the location where the experience takes
- *  places, theses values are used by the `placer`, `checkin` and `locator`
- *  services. If one of these service is required, this entry mandatory.
- * @property {Object} setup.area - Description of the area.
- * @property {Number} setup.area.width - Width of the area.
- * @property {Number} setup.area.height - Height of the area.
- * @property {String} setup.area.background - Path to an image to be used in
- *  the area representation.
- * @property {Array} setup.labels - Optionnal list of predefined labels.
- * @property {Array} setup.coordinates - Optionnal list of predefined coordinates.
- * @property {Array} setup.maxClientsPerPosition - Maximum number of clients
- *  allowed in a position.
- * @property {Number} setup.capacity - Maximum number of positions (may limit
- * or be limited by the number of labels and/or coordinates).
- *
- * @property {Object} websockets - Websockets configuration (socket.io)
- * @property {String} websockets.url - Optionnal url where the socket should
- *  connect.
- * @property {Array} websockets.transports - List of the transport mecanims that
- *  should be used to open or emulate the socket.
- *
- * @property {Boolean} useHttps -  Define if the HTTP server should be launched
- *  using secure connections. For development purposes when set to `true` and no
- *  certificates are given (cf. `httpsInfos`), a self-signed certificate is
- *  created.
- * @property {Object} httpsInfos - Paths to the key and certificate to be used
- *  in order to launch the https server. Both entries are required otherwise a
- *  self-signed certificate is generated.
- * @property {String} httpsInfos.cert - Path to the certificate.
- * @property {String} httpsInfos.key - Path to the key.
- *
- * @property {String} password - Password to be used by the `auth` service.
- *
- * @property {Object} osc - Configuration of the `osc` service.
- * @property {String} osc.receiveAddress - IP of the currently running server.
- * @property {Number} osc.receivePort - Port listening for incomming messages.
- * @property {String} osc.sendAddress - IP of the remote application.
- * @property {Number} osc.sendPort - Port where the remote application is
- *  listening for messages
- *
- * @property {String} publicDirectory - Location of the public directory
- *  (accessible through http(s) requests).
- * @property {Object} serveStaticOptions - Options for the serve static middleware
- *  cf. [https://github.com/expressjs/serve-static](https://github.com/expressjs/serve-static)
- * @property {String} templateDirectory - Directory where the server templating
- *  system looks for the `ejs` templates.
- * @property {String} errorReporterDirectory - Directory where error reported
- *  from the clients are written.
- */
-
+import cache from './utils/cache';
 
 /**
  * Server side entry point for a `soundworks` application.
@@ -110,14 +41,7 @@ const server = {
    * into this object.
    * @type {module:soundworks/server.server~serverConfig}
    */
-  // config: {},
-
-  /**
-   * Constructor used to instanciate `Client` instances.
-   * @type {module:soundworks/server.Client}
-   * @default module:soundworks/server.Client
-   */
-  // clientCtor: Client,
+  config: {},
 
   /**
    * wrapper around `ws` server
@@ -160,19 +84,6 @@ const server = {
    */
   _routes: {},
 
-  // get clientTypes() {
-  //   return Object.keys(this._clientTypeActivitiesMap);
-  // },
-
-  /**
-   * Return a service configured with the given options.
-   * @param {String} id - Identifier of the service.
-   * @param {Object} options - Options to configure the service.
-   */
-  // require(id, options) {
-  //   return serviceManager.require(id, options);
-  // },
-
   /**
    * Default for the module:soundworks/server.server~clientConfigDefinition
    * @private
@@ -180,26 +91,6 @@ const server = {
   _clientConfigFunction: (clientType, serverConfig, httpRequest) => {
     return { clientType };
   },
-
-  /**
-   * @callback module:soundworks/server.server~clientConfigDefinition
-   * @param {String} clientType - Type of the client.
-   * @param {Object} serverConfig - Configuration of the server.
-   * @param {Object} httpRequest - Http request for the `index.html`
-   * @return {Object}
-   */
-  /**
-   * Set the {@link module:soundworks/server.server~clientConfigDefinition} with
-   * a user defined function.
-   * @param {module:soundworks/server.server~clientConfigDefinition} func - A
-   *  function that returns the data that will be used to populate the `index.html`
-   *  template. The function could (and should) be used to pass configuration
-   *  to the soundworks client.
-   * @see {@link module:soundworks/client.client~init}
-   */
-  // setClientConfigDefinition(func) {
-    // this._clientConfigFunction = func;
-  // },
 
   /**
    * Register a route for a given `clientType`, allow to define a more complex
@@ -250,6 +141,7 @@ const server = {
     return Promise.resolve();
   },
 
+  /** @private */
   serveStatic() {
     // public static folder
     const { publicDirectory, serveStaticOptions } = this.config;
@@ -258,6 +150,7 @@ const server = {
     return Promise.resolve();
   },
 
+  /** @private */
   initActivities() {
         // map activities to their respective client type(s) and start them all
     this._activities.forEach((activity) => {
@@ -273,6 +166,7 @@ const server = {
     return Promise.resolve();
   },
 
+  /** @private */
   createHttpServer() {
     // start http server
     const useHttps = this.config.useHttps || false;
@@ -376,6 +270,7 @@ const server = {
     return Promise.resolve();
   },
 
+  /** @private */
   startSocketServer() {
     sockets.start(this.httpServer, this.config.websockets, (clientType, socket) => {
       this._onSocketConnection(clientType, socket);
@@ -384,6 +279,7 @@ const server = {
     return Promise.resolve();
   },
 
+  /** @private */
   listen() {
     const promise = new Promise((resolve, reject) => {
       const port = this.config.port;
@@ -466,28 +362,31 @@ const server = {
       // clean sockets
       socket.terminate();
       // remove client from activities
-      activities.forEach((activity) => activity.disconnect(client));
+      activities.forEach((activity) => {
+        if (activity instanceof Experience) {
+          // maybe the client go through the whole connect lifecycle
+          if (activity.clients.has(client)) {
+            activity.disconnect(client);
+          }
+        } else {
+          activity.disconnect(client);
+        }
+      });
       // destroy client
       client.destroy();
     });
-
-    // check coherence between client-side and server-side service requirements
-    const serverRequiredServices = serviceManager.getRequiredServices(clientType);
-    const serverServicesList = serviceManager.getServiceList();
 
     socket.addListener('s:client:handshake', data => {
       // in development, if service required client-side but not server-side,
       // complain properly client-side.
       if (this.config.env !== 'production') {
+        // check coherence between client-side and server-side service requirements
         const clientRequiredServices = data.requiredServices || [];
+        const serverRequiredServices = serviceManager.getRequiredServices(clientType);
         const missingServices = [];
 
         clientRequiredServices.forEach((serviceId) => {
-          if (
-            // check that it's not a client-side only servive
-            serverServicesList.indexOf(serviceId) !== -1 &&
-            serverRequiredServices.indexOf(serviceId) === -1
-          ) {
+          if (serverRequiredServices.indexOf(serviceId) === -1) {
             missingServices.push(serviceId);
           }
         });
@@ -495,7 +394,7 @@ const server = {
         if (missingServices.length > 0) {
           const err = {
             type: 'services',
-            payload: missingServices,
+            data: missingServices,
           };
 
           socket.send('s:client:error', err);

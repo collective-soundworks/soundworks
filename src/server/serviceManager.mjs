@@ -1,9 +1,6 @@
 import chalk from 'chalk';
-import Signal from '../../utils/Signal';
-import SignalAll from '../../utils/SignalAll';
-
-const _ctors = {};
-const _instances = {};
+import Signal from '../common/Signal';
+import SignalAll from '../common/SignalAll';
 
 /**
  * Manager the services and their relations. Acts as a factory to ensure services
@@ -12,6 +9,10 @@ const _instances = {};
 const serviceManager = {
   /** @private */
   _servicesOptions: {},
+  /** @private */
+  _ctors: {},
+  /** @private */
+  _instances: {},
 
   /** @private */
   init() {
@@ -19,8 +20,8 @@ const serviceManager = {
     this.signals.start = new Signal();
     this.signals.ready = new Signal();
 
-    this._requiredSignals = new SignalAll();
-    this._requiredSignals.addObserver(() => {
+    this._requiredReadySignals = new SignalAll();
+    this._requiredReadySignals.addObserver(() => {
       this.signals.ready.set(true);
     });
 
@@ -45,7 +46,7 @@ const serviceManager = {
 
     this.signals.start.set(true);
 
-    if (this._requiredSignals.length === 0) {
+    if (this._requiredReadySignals.length === 0) {
       this.signals.ready.set(true);
     }
 
@@ -53,40 +54,42 @@ const serviceManager = {
   },
 
   /**
-   * Retrieve a service according to the given id. If the service as not beeen
+   * Retrieve a service according to the given name. If the service as not beeen
    * requested yet, it is instanciated.
-   * @param {String} id - The id of the registered service
+   * @param {String} name - The name of the registered service
    * @param {Object} options - The options to configure the service. If an
    *  option for the required service has been given using `serviceManager.configure()`
    *  the present object takes precedence.
    */
-  require(id, options = {}) {
-    const ctorId = `service:${id}`;
-
-    if (!_ctors[ctorId]) {
-      throw new Error(`Service "${ctorId}" is not defined`);
+  require(name, options = {}, requester = null) {
+    if (!this._ctors[name]) {
+      throw new Error(`Service "${name}" is not defined`);
     }
 
-    let instance = _instances[ctorId];
+    if (!this._instances[name]) {
+      const instance = new this._ctors[name]();
+      instance.name = name;
 
-    if (!instance) {
-      instance = new _ctors[ctorId];
-      _instances[ctorId] = instance;
+      this._instances[name] = instance;
 
-      this._requiredSignals.add(instance.signals.ready);
+      this._requiredReadySignals.add(instance.signals.ready);
 
       // log service readiness
       instance.signals.ready.addObserver((state) => {
-        console.log(`    ${ctorId} ${chalk.green(' ready')}`);
+        console.log(`    ${name} ${chalk.green(' ready')}`);
       });
     }
 
-    // @todo - let's assume configuration could be passed after 1rst
-    //   instanciation, try to review t make it cleaner
-    const config = this._servicesOptions[id] || {};
+    const instance = this._instances[name];
+
+    const config = this._servicesOptions[name] || {};
     Object.assign(config, options);
 
     instance.configure(config);
+
+    if (requester) {
+      instance._addClientTypes(requester.clientTypes);
+    }
 
     return instance;
   },
@@ -94,7 +97,7 @@ const serviceManager = {
   /**
    * Configure all required service at once.
    * @param {Object} servicesOptions - Object containing configuration options
-   *  for multiple services. The keys must correspond to the `id` of an required
+   *  for multiple services. The keys must correspond to the `name` of an required
    *  service, values are the corresponding config objects.
    *
    * @example
@@ -114,33 +117,32 @@ const serviceManager = {
   /**
    * Regiter a new service
    *
-   * @param {String} id - The id of the service, in order to retrieve it later.
+   * @param {String} name - The name of the service, in order to retrieve it later.
    * @param {Function} ctor - The constructor of the service.
    */
-  register(id, ctor) {
-    _ctors[id] = ctor;
+  register(name, ctor) {
+    if (this._ctors[name]) {
+      throw new Error(`Service "${name}" already registered`);
+    }
+
+    this._ctors[name] = ctor;
   },
 
   /** @private */
   getRequiredServices(clientType = null) {
     const services = [];
 
-    for (let id in _instances) {
+    for (let name in this._instances) {
       if (clientType !== null) {
-        if (_instances[id].clientTypes.has(clientType)) {
-          services.push(id);
+        if (this._instances[name].clientTypes.has(clientType)) {
+          services.push(name);
         }
       } else {
-        services.push(id);
+        services.push(name);
       }
     }
 
     return services;
-  },
-
-  /** @private */
-  getServiceList() {
-    return Object.keys(_ctors);
   },
 };
 

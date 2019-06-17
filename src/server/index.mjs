@@ -1,50 +1,26 @@
-/**
- * Server-side entry point of the *soundworks* framework.
- *
- * @module soundworks/server
- * @example
- * import * as soundworks from 'soundworks/server';
- */
-
-// export const version = '%version%';
 import path from 'path';
+import Experience from './Experience';
+import Service from './Service';
+import serviceManager from './serviceManager';
+import Client from './Client';
+import server from './server';
 
-/* core */
-// export { default as Activity } from './core/Activity';
-export { default as Experience } from './core/Experience';
-export { default as Service } from './core/Service';
-import serviceManager from './core/serviceManager';
-import Client from './core/Client';
-import server from './core/server';
 
-/* services */
-// import './services/AudioBufferManager';
-// export { default as AudioStreamManager } from './services/AudioStreamManager';
-// import './services/Auth';
-// export { default as Osc } from './services/Osc';
-// import './services/Checkin';
-// import './services/ErrorReporter';
-// export { default as FileSystem } from './services/FileSystem';
-// export { default as Geolocation } from './services/Geolocation';
-// export { default as Locator } from './services/Locator';
-// export { default as MetricScheduler } from './services/MetricScheduler';
-// export { default as Network } from './services/Network';
-// export { default as Placer } from './services/Placer';
-// export { default as RawSocket } from './services/RawSocket';
-// export { default as SharedConfig } from './services/SharedConfig';
-// export { default as SharedParams } from './services/SharedParams';
-// export { default as SharedRecorder } from './services/SharedRecorder';
-// import './services/Sync';
-// export { default as SyncScheduler } from './services/SyncScheduler';
-
-// import './services/___SharedParams';
-// import './services/___SharedConfig';
-// import './services/___FileSystem';
-
-/* prefabs */
-// export { default as ControllerExperience } from './prefabs/ControllerExperience';
-
+/**
+ * client-side part of *soundworks*
+ *
+ * @module @soundworks/core/client
+ *
+ * @example
+ * import soundworks from '@soundworks/core/client';
+ */
 const soundworks = {
+  // expose base classes for service plugins and application code
+  Experience,
+  Service,
+
+  // soundworks instance
+  // @todo - allow multiple instances (for client-side and thus for consistency)
   config: {},
   server,
   serviceManager,
@@ -119,7 +95,10 @@ const soundworks = {
     return Promise.resolve();
   },
 
-
+  registerService(serviceFactory) {
+    const ctor = serviceFactory(this);
+    this.serviceManager.register(serviceFactory.id, ctor);
+  },
 }
 
 export default soundworks;

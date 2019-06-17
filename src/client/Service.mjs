@@ -1,7 +1,7 @@
 import Activity from './Activity';
-import debug from 'debug';
 import serviceManager from './serviceManager';
-import Signal from '../../utils/Signal';
+import Signal from '../common/Signal';
+import debug from 'debug';
 
 const log = debug('soundworks:services');
 
@@ -16,20 +16,19 @@ class Service extends Activity {
   /**
    * @param {String} id - The id of the service (should be prefixed with `'service:'`).
    */
-  constructor(id) {
-    super(id);
+  constructor() {
+    super();
 
-    this.requiredSignals.addObserver((value) => {
-      // this can't be false...
-      if (value) {
-        this.start();
-        // this.hasStarted = true; // keep this for Orbe/Nodal compatibility
-      } /* else {
-        this.stop();
-      } */
-    });
+    /**
+     * Name of the service.
+     * @name name
+     * @type {String}
+     * @instanceof Process
+     */
+    this.name = null;
 
-    this.requiredSignals.add(serviceManager.signals.start);
+    this.requiredStartSignals.addObserver((value) => this.start());
+    this.requiredStartSignals.add(serviceManager.signals.start);
 
     /**
      * Is set to `true` when a signal is ready to be consumed.

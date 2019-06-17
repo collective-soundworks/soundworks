@@ -30,7 +30,7 @@ class Experience extends Activity {
      * List of the clients who are currently in the performance.
      * @type {Client[]}
      */
-    this.clients = [];
+    this.clients = new Set();
     this._addClientTypes(clientTypes);
   }
 
@@ -44,7 +44,12 @@ class Experience extends Activity {
     // listen for the `'enter' socket message from the client, the message is
     // sent when the client `enters` the Experience client side, i.e. when all
     // required services are ready
-    client.socket.addListener('s:exp:enter', () => this.enter(client));
+    return new Promise((resolve, reject) => {
+      client.socket.addListener('s:exp:enter', () => {
+        this.clients.add(client);
+        resolve();
+      });
+    });
   }
 
   /**
@@ -53,30 +58,10 @@ class Experience extends Activity {
    */
   disconnect(client) {
     super.disconnect(client);
+    // check is made in server before calling disconnect
+    this.clients.delete(client);
 
-    // call `exit()` only if the client previously `enter()`ed,
-    // i.e. finished its service initialization
-    const index = this.clients.indexOf(client);
-
-    if (index !== -1) {
-      this.clients.splice(index, 1);
-      this.exit(client);
-    }
-  }
-
-  /**
-   * Called when the client starts the performance on the client side.
-   * There is no exit method as the client typically disconnect from the page
-   * at any moment.
-   * @param {Client} client - Client who enters the performance.
-   */
-  enter(client) {
-    // add the client to the `this.clients` array
-    this.clients.push(client);
-  }
-
-  exit(client) {
-
+    return Promise.resolve();
   }
 }
 

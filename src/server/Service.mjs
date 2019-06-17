@@ -1,5 +1,5 @@
-import Activity from '../core/Activity';
-import Signal from '../../utils/Signal';
+import Activity from './Activity';
+import Signal from '../common/Signal';
 
 /**
  * Base class to be extended in order to create a new service.
@@ -10,6 +10,15 @@ import Signal from '../../utils/Signal';
 class Service extends Activity {
   constructor(...args) {
     super(...args);
+
+    /**
+     * Name of the service.
+     * @type {String}
+     * @name name
+     * @instance
+     * @memberof module:soundworks/server.Activity
+     */
+    this.name = null;
 
     this.signals = {};
     this.signals.ready = new Signal();

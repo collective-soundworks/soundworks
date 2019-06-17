@@ -1,7 +1,7 @@
 import server from './server';
 import serviceManager from './serviceManager';
-import Signal from '../../utils/Signal';
-import SignalAll from '../../utils/SignalAll';
+import Signal from '../common/Signal';
+import SignalAll from '../common/SignalAll';
 
 // @todo - remove EventEmitter ? (Implement our own listeners)
 
@@ -11,26 +11,7 @@ import SignalAll from '../../utils/SignalAll';
  * @memberof module:soundworks/server
  */
 class Activity {
-  /**
-   * Creates an instance of the class.
-   * @param {String} id - Id of the activity.
-   */
-  constructor(id) {
-    if (id === undefined) {
-      throw new Error(`Undefined id for activty ${this.constructor.name}`);
-    }
-
-    /**
-     * The id of the activity. This value must match a client side
-     * {@link src/client/core/Activity.js~Activity} id in order to create
-     * a namespaced socket channel between the activity and its client side peer.
-     * @type {String}
-     * @name id
-     * @instance
-     * @memberof module:soundworks/server.Activity
-     */
-    this.id = id;
-
+  constructor() {
     /**
      * Options of the activity. These values should be updated with the
      * `this.configure` method.
@@ -55,15 +36,15 @@ class Activity {
      * @type {Set}
      * @private
      */
-    this.requiredActivities = new Set();
+    this._requiredActivities = new Set();
 
     // register as instanciated to the server
     server.setActivity(this);
 
-    this.requiredSignals = new SignalAll();
-    this.requiredSignals.addObserver(() => this.start());
+    this._requiredStartSignals = new SignalAll();
+    this._requiredStartSignals.addObserver(() => this.start());
     // wait for serviceManager.start
-    this.requiredSignals.add(serviceManager.signals.start);
+    this._requiredStartSignals.add(serviceManager.signals.start);
   }
 
   /**
@@ -72,22 +53,22 @@ class Activity {
    * @param {String|Array} val - The client type(s) on which the activity
    *  should be mapped
    */
-  _addClientTypes(type) {
+  _addClientTypes(clientTypes) {
     if (arguments.length === 1) {
-      if (typeof type === 'string')
-        type = [type];
+      if (typeof clientTypes === 'string')
+        clientTypes = [clientTypes];
     } else {
-      type = Array.from(arguments);
+      clientTypes = Array.from(arguments);
     }
 
     // add client types to current activity
-    type.forEach((clientType) => {
+    clientTypes.forEach((clientType) => {
       this.clientTypes.add(clientType);
     });
 
     // propagate value to required activities
-    this.requiredActivities.forEach((activity) => {
-      activity._addClientTypes(type);
+    this._requiredActivities.forEach((activity) => {
+      activity._addClientTypes(clientTypes);
     });
   }
 
@@ -100,7 +81,7 @@ class Activity {
   }
 
   /**
-   * Retrieve a service. The required service is added to the `requiredActivities`.
+   * Retrieve a service. The required service is added to the `_requiredActivities`.
    * @param {String} id - The id of the service.
    * @param {Object} options - Some options to configure the service.
    */
@@ -108,8 +89,8 @@ class Activity {
   require(id, options) {
     const instance = serviceManager.require(id, options);
 
-    this.requiredActivities.add(instance)
-    this.requiredSignals.add(instance.signals.ready);
+    this._requiredActivities.add(instance)
+    this._requiredStartSignals.add(instance.signals.ready);
 
     instance._addClientTypes(this.clientTypes);
 

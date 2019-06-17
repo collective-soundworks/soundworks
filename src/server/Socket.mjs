@@ -3,7 +3,7 @@ import {
   unpackBinaryMessage,
   packStringMessage,
   unpackStringMessage,
-} from '../../utils/sockets-encoder-decoder';
+} from '../common/sockets-encoder-decoder';
 
 const noop = () => {};
 

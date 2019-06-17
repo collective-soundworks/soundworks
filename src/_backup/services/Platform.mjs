@@ -1,4 +1,4 @@
-import { audioContext } from 'waves-audio';
+
 import client from '../core/client';
 import MobileDetect from 'mobile-detect';
 import NoSleep from 'nosleep.js';
@@ -97,22 +97,22 @@ const defaultDefinitions = [
     check: function() {
       return isPrivateMode().then(isPrivate => Promise.resolve(!isPrivate));
     },
-  },
-  {
-    id: 'wake-lock',
-    check: function() {
-      console.warn('[soundworks:platform] `wake-lock` is now enabled by default, consider removing it from your required features');
-      return Promise.resolve(true);
-    },
-  },
-  {
-    // @note: `touch` feature workaround (remove?)
-    // cf. http://www.stucox.com/blog/you-cant-detect-a-touchscreen/
-    id: 'mobile-device',
-    check: function() {
-      return Promise.resolve(client.platform.isMobile);
-    }
-  },
+  // },
+  // {
+  //   id: 'wake-lock',
+  //   check: function() {
+  //     console.warn('[soundworks:platform] `wake-lock` is now enabled by default, consider removing it from your required features');
+  //     return Promise.resolve(true);
+  //   },
+  // },
+  // {
+  //   // @note: `touch` feature workaround (remove?)
+  //   // cf. http://www.stucox.com/blog/you-cant-detect-a-touchscreen/
+  //   id: 'mobile-device',
+  //   check: function() {
+  //     return Promise.resolve(client.platform.isMobile);
+  //   }
+  // },
   {
     id: 'audio-input',
     check: function() {
@@ -181,6 +181,7 @@ const defaultDefinitions = [
       return Promise.resolve(true);
     }
   },
+  // @todo move to geolocation service
   {
     id: 'geolocation',
     check: function() {

@@ -18,16 +18,28 @@ export default [
     external: Object.keys(pkg.dependencies),
     plugins: [
       // sourcemaps(),
-      nodeBuiltins(),
-      resolve(),
       commonjs(),
+      nodeBuiltins(),
+      resolve({
+        mainFields: ['module', 'main'],
+      }),
+
+      // cf. https://github.com/visionmedia/debug/issues/468
+      // commonjs(),
+      // nodeGlobals(), // required for some shims
+      // nodeBuildins(), // the shims
+
       babel({
         exclude: 'node_modules/**'
       }),
-      sourcemaps(),
+      // sourcemaps(),
     ],
     output: [
-      { file: 'client/index.js', format: 'es', sourcemap: 'inline' },
+      {
+        file: 'client/index.js',
+        format: 'es',
+        // sourcemap: 'inline'
+      },
     ]
   },
 
@@ -63,7 +75,11 @@ export default [
       })
     ],
     output: [
-      { file: 'server/index.js', format: 'cjs', sourcemap: 'inline' },
+      {
+        file: 'server/index.js',
+        format: 'cjs',
+        // sourcemap: 'inline'
+      },
     ]
   }
 ];

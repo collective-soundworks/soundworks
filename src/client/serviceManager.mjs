@@ -1,6 +1,6 @@
 import debug from 'debug';
-import Signal from '../../utils/Signal';
-import SignalAll from '../../utils/SignalAll';
+import Signal from '../common/Signal';
+import SignalAll from '../common/SignalAll';
 
 const log = debug('soundworks:serviceManager');
 
@@ -28,8 +28,8 @@ const serviceManager = {
    */
   init() {
     log('init');
-    this._requiredSignals = new SignalAll();
-    this._requiredSignals.addObserver(() => this._ready());
+    this._requiredReadySignals = new SignalAll();
+    this._requiredReadySignals.addObserver(() => this._ready());
 
     this.signals = {};
     this.signals.start = new Signal();
@@ -49,7 +49,7 @@ const serviceManager = {
 
     this.signals.start.set(true);
 
-    if (!this._requiredSignals.length) {
+    if (!this._requiredReadySignals.length) {
       this._resolveReadyPromise();
     }
 
@@ -69,34 +69,35 @@ const serviceManager = {
 
   /**
    * Returns an instance of a service with options to be applied to its constructor.
-   * @param {String} id - The id of the service.
+   * @param {String} name - The name of the service.
    * @param {Object} options - Options to pass to the service constructor.
    */
-  require(id, options = {}) {
-    if (!this._ctors[id]) {
-      throw new Error(`Service "${id}" is not defined`);
+  require(name, options = {}) {
+    if (!this._ctors[name]) {
+      throw new Error(`Service "${name}" is not defined`);
     }
 
-    if (!this._instances[id]) {
+    if (!this._instances[name]) {
       // throw an error if manager already started
       if (this.signals.start.get() === true) {
-        throw new Error(`Service "${id}" required after serviceManager start`);
+        throw new Error(`Service "${name}" required after serviceManager start`);
       }
 
-      const instance = new this._ctors[id]();
+      const instance = new this._ctors[name]();
+      instance.name = name;
       // add the instance ready signal as required for the manager
-      this._requiredSignals.add(instance.signals.ready);
+      this._requiredReadySignals.add(instance.signals.ready);
 
-      // handle service status for views
-      this.servicesStatus[id] = 'idle';
+      // handle service statuses for views
+      this.servicesStatus[name] = 'namele';
 
       const onServiceStart = () => {
-        this.servicesStatus[id] = 'started';
+        this.servicesStatus[name] = 'started';
         this._emitChange();
       }
 
       const onServiceReady = () => {
-        this.servicesStatus[id] = 'ready';
+        this.servicesStatus[name] = 'ready';
         this._emitChange();
 
         instance.signals.start.removeObserver(onServiceStart)
@@ -111,29 +112,29 @@ const serviceManager = {
       });
 
       // store instance
-      this._instances[id] = instance;
+      this._instances[name] = instance;
     }
 
-    const instance = this._instances[id];
+    const instance = this._instances[name];
     instance.configure(options);
 
     return instance;
   },
 
   /**
-   * Register a service with a given id.
-   * @param {String} id - The id of the service.
+   * Register a service with a given name.
+   * @param {String} name - The name of the service.
    * @param {Function} ctor - The constructor of the service.
    */
-  register(id, ctor) {
-    this._ctors[id] = ctor;
+  register(name, ctor) {
+    this._ctors[name] = ctor;
   },
 
-  get(id) {
-    if (this._instances[id]) {
-      return this._instances[id];
+  get(name) {
+    if (this._instances[name]) {
+      return this._instances[name];
     } else {
-      throw new Error(`Cannot get service ${id}, does not exists`);
+      throw new Error(`Cannot get service ${name}, does not exists`);
     }
   },
 
