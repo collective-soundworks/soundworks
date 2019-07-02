@@ -20,8 +20,6 @@ const serviceManager = {
   /** @ */
   servicesStatus: {},
 
-
-
   /**
    * Initialize the manager.
    * @private
@@ -62,7 +60,6 @@ const serviceManager = {
    * @private
    */
   _ready() {
-    console.log('serviceManager:ready');
     this._resolveReadyPromise();
     this.signals.ready.set(true);
   },
@@ -70,9 +67,10 @@ const serviceManager = {
   /**
    * Returns an instance of a service with options to be applied to its constructor.
    * @param {String} name - The name of the service.
-   * @param {Object} options - Options to pass to the service constructor.
+   * @param {Object} [options=null] - Options for the service, may override
+   *  previously given options.
    */
-  require(name, options = {}) {
+  get(name, options = null, dependencies = []) {
     if (!this._ctors[name]) {
       throw new Error(`Service "${name}" is not defined`);
     }
@@ -89,7 +87,7 @@ const serviceManager = {
       this._requiredReadySignals.add(instance.signals.ready);
 
       // handle service statuses for views
-      this.servicesStatus[name] = 'namele';
+      this.servicesStatus[name] = 'idle';
 
       const onServiceStart = () => {
         this.servicesStatus[name] = 'started';
@@ -115,8 +113,24 @@ const serviceManager = {
       this._instances[name] = instance;
     }
 
+    // if instance exists and no other argument given, `get` acts a a pure getter
     const instance = this._instances[name];
-    instance.configure(options);
+
+    if (options !== null) {
+      instance.configure(options);
+    }
+
+    if (dependencies.length) {
+      dependencies.forEach(dependencyName => {
+        if (!this._instances[dependencyName]) {
+          throw new Error(`"${name}" cannot depend on "${dependencyName}",
+            ${dependencyName} has not been required`);
+        }
+
+        const dependency = this._instances[dependencyName];
+        instance.requiredStartSignals.add(dependency.signals.ready);
+      });
+    }
 
     return instance;
   },
@@ -128,14 +142,6 @@ const serviceManager = {
    */
   register(name, ctor) {
     this._ctors[name] = ctor;
-  },
-
-  get(name) {
-    if (this._instances[name]) {
-      return this._instances[name];
-    } else {
-      throw new Error(`Cannot get service ${name}, does not exists`);
-    }
   },
 
   // @note - mimic state Manager API so we can change this later

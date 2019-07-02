@@ -11,7 +11,6 @@ import serveStatic from 'serve-static';
 import columnify from 'columnify';
 import compression from 'compression';
 import Client from './Client';
-import Experience from './Experience';
 import serviceManager from './serviceManager';
 import sockets from './sockets';
 import cache from './utils/cache';
@@ -362,16 +361,7 @@ const server = {
       // clean sockets
       socket.terminate();
       // remove client from activities
-      activities.forEach((activity) => {
-        if (activity instanceof Experience) {
-          // maybe the client go through the whole connect lifecycle
-          if (activity.clients.has(client)) {
-            activity.disconnect(client);
-          }
-        } else {
-          activity.disconnect(client);
-        }
-      });
+      activities.forEach((activity) => activity.disconnect(client));
       // destroy client
       client.destroy();
     });

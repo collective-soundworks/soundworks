@@ -43,6 +43,10 @@ class Activity {
     Object.assign(this.options, options);
   }
 
+  /**
+   * Logic to perform when an `Activity` (`Service` or `Experience`) starts.
+   * i.e. when all the activities it relies on (`require`) are `ready`
+   */
   start() {
     this.signals.start.set(true);
   }

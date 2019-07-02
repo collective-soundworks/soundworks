@@ -54,47 +54,6 @@ const serviceManager = {
   },
 
   /**
-   * Retrieve a service according to the given name. If the service as not beeen
-   * requested yet, it is instanciated.
-   * @param {String} name - The name of the registered service
-   * @param {Object} options - The options to configure the service. If an
-   *  option for the required service has been given using `serviceManager.configure()`
-   *  the present object takes precedence.
-   */
-  require(name, options = {}, requester = null) {
-    if (!this._ctors[name]) {
-      throw new Error(`Service "${name}" is not defined`);
-    }
-
-    if (!this._instances[name]) {
-      const instance = new this._ctors[name]();
-      instance.name = name;
-
-      this._instances[name] = instance;
-
-      this._requiredReadySignals.add(instance.signals.ready);
-
-      // log service readiness
-      instance.signals.ready.addObserver((state) => {
-        console.log(`    ${name} ${chalk.green(' ready')}`);
-      });
-    }
-
-    const instance = this._instances[name];
-
-    const config = this._servicesOptions[name] || {};
-    Object.assign(config, options);
-
-    instance.configure(config);
-
-    if (requester) {
-      instance._addClientTypes(requester.clientTypes);
-    }
-
-    return instance;
-  },
-
-  /**
    * Configure all required service at once.
    * @param {Object} servicesOptions - Object containing configuration options
    *  for multiple services. The keys must correspond to the `name` of an required
@@ -126,6 +85,61 @@ const serviceManager = {
     }
 
     this._ctors[name] = ctor;
+  },
+
+  /**
+   * Retrieve a service according to the given name. If the service as not beeen
+   * requested yet, it is instanciated.
+   * @param {String} name - The name of the registered service
+   * @param {Object} [options=null] - Options for the service, may
+   *  override previously given options. Such as the ones given using
+   *  `serviceManager.configure()`.
+   */
+  get(name, options = null, dependencies = [], experience = null) {
+    if (!this._ctors[name]) {
+      throw new Error(`Service "${name}" is not defined`);
+    }
+
+    if (!this._instances[name]) {
+      const instance = new this._ctors[name]();
+      instance.name = name;
+      // initialize with globals options passed with configure
+      instance.configure(this._servicesOptions[name]);
+
+      this._instances[name] = instance;
+
+      this._requiredReadySignals.add(instance.signals.ready);
+
+      // log service readiness
+      instance.signals.ready.addObserver((state) => {
+        console.log(`    ${name} ${chalk.green(' ready')}`);
+      });
+    }
+
+    // if instance exists and no other argument given, `get` acts a a pure getter
+    const instance = this._instances[name];
+    // if new options given override defaults from `configure`
+    if (options !== null) {
+      instance.configure(options);
+    }
+
+    if (experience) {
+      instance._addClientTypes(experience.clientTypes);
+    }
+
+    if (dependencies.length > 0) {
+      dependencies.forEach(dependencyName => {
+        if (!this._instances[dependencyName]) {
+          throw new Error(`"${name}" cannot depend on "${dependencyName}",
+            ${dependencyName} has not been required`);
+        }
+
+        const dependency = this._instances[dependencyName];
+        instance.requiredStartSignals.add(dependency.signals.ready);
+      });
+    }
+
+    return instance;
   },
 
   /** @private */

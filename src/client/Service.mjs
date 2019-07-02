@@ -42,25 +42,6 @@ class Service extends Activity {
   }
 
   /**
-   * Allow to require another service as a dependencies. When a service is
-   * dependent from another service its `start` method is delayed until all
-   * its dependencies are themselves `ready`.
-   * @param {String} id - id of the service to require.
-   * @param {Object} options - configuration object to be passed to the service.
-   */
-  // require(id, options) {
-  //   const service = serviceManager.require(id, options);
-  //   const signal = service.signals.ready;
-
-  //   if (signal)
-  //     this.waitFor(signal);
-  //   else
-  //     throw new Error(`signal "ready" doesn't exist on service :`, service);
-
-  //   return service;
-  // }
-
-  /**
    * Method to call in the service lifecycle when it should be considered as
    * `ready` and thus allows all its dependent activities to start themselves.
    */
@@ -76,12 +57,6 @@ class Service extends Activity {
     log(`"${this.id}" started`);
     super.start();
   }
-
-  /** @inheritdoc */
-  // stop() {
-  //   log(`"${this.id}" stopped`);
-  //   super.stop();
-  // }
 }
 
 export default Service;

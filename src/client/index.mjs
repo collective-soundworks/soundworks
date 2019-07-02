@@ -42,7 +42,7 @@ const soundworks = {
 
     this.serviceManager.init();
 
-    await this.client.socket.init(this.client.type, this.config.websockets);
+    await this.client.socket.init(this.client.type, this.config);
   },
 
   async start() {

@@ -84,15 +84,19 @@ const soundworks = {
   },
 
   async start() {
-    await server.serveStatic(); // create one for js files
-    await server.initActivities(); // create one for js files
-    await server.createHttpServer();
-    await server.initRouting();
-    await server.startSocketServer();
-    await serviceManager.start();
-    await server.listen();
+    try {
+      await server.serveStatic(); // create one for js files
+      await server.initActivities(); // create one for js files
+      await server.createHttpServer();
+      await server.initRouting();
+      await server.startSocketServer();
+      await serviceManager.start();
+      await server.listen();
 
-    return Promise.resolve();
+      return Promise.resolve();
+    } catch(err) {
+      console.error(err)
+    }
   },
 
   registerService(serviceFactory) {

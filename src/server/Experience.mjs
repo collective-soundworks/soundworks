@@ -34,10 +34,20 @@ class Experience extends Activity {
     this._addClientTypes(clientTypes);
   }
 
+  /**
+   * Shortcut for
+   * ```
+   *
+   * ````
+   */
+  require(name, options = {}, dependencies = []) {
+    return serviceManager.get(name, options, dependencies, this);
+  }
 
   /**
    * Called when the client connects to the server.
    * @param {Client} client Connected client.
+   * @private
    */
   connect(client) {
     super.connect(client);
@@ -47,7 +57,7 @@ class Experience extends Activity {
     return new Promise((resolve, reject) => {
       client.socket.addListener('s:exp:enter', () => {
         this.clients.add(client);
-        resolve();
+        this.enter(client);
       });
     });
   }
@@ -55,13 +65,25 @@ class Experience extends Activity {
   /**
    * Called when the client disconnects from the server.
    * @param {Client} client Disconnected client.
+   * @private
    */
   disconnect(client) {
     super.disconnect(client);
-    // check is made in server before calling disconnect
-    this.clients.delete(client);
 
-    return Promise.resolve();
+    // only call exit if the client has fully entered
+    // (i.e. has finished the its initialization phase)
+    if (this.clients.has(client)) {
+      this.clients.delete(client);
+      this.exit(client);
+    }
+  }
+
+  enter(client) {
+    throw new Error(`Experience "${this.constructor.name}.enter()" not implemented`);
+  }
+
+  exit(client) {
+    throw new Error(`Experience "${this.constructor.name}.exit()" not implemented`);
   }
 }
 

@@ -1,5 +1,6 @@
 import Activity from './Activity';
 import client from './client';
+import serviceManager from './serviceManager';
 
 /**
  * Base class to be extended in order to create the client-side of a custom
@@ -13,6 +14,10 @@ import client from './client';
 class Experience extends Activity {
   constructor() {
     super();
+  }
+
+  require(name, options = {}, dependencies = []) {
+    return serviceManager.get(name, options, dependencies);
   }
 
   /**

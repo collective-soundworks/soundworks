@@ -1,5 +1,9 @@
 # ROADMAP
 
+## Boring !!
+
+- email npm support because of that: https://www.npmjs.com/org/soundworks (ok - wait for answer...)
+
 ## 1. Merge `things` into `develop` (done)
 
 - merge soundworks/things (ok)
@@ -26,6 +30,12 @@
 
 ## 3. View and Services - breaking (on-going)
 
+Good documentation should consist of:
+- A high level overview of the whole module and how it works
+- Javadocs, Heredocs, Rdocs or whatever of its public methods and protocols
+- Sample code showing how to use it
+
+
 ### done
 
 - [sockets] binarySocket by default in sockets (ok)
@@ -40,62 +50,76 @@
 ### on-going
 
 - [core]
- + move everything to Class so that we can instanciate severa client in one window
- ```
- const soundworks = new Soundworks();
- ```
+  + move everything to Class so that we can instanciate several client in one window
+```
+const soundworks = new Soundworks();
+```
+
+  **done**
+  + merge Process and Activity (aka remove Activity, `Process`es and thus services should have nothing to do with views and network, only with states and `client.socket`) (ok)
+  + decouple / explicit `Experience.start()` from `serviceManager.ready()` (ok)
+  + use dependency injection more systematically / decouple everything (cf. serviceManager) (ok)
 
 - [StateManager] 
-  + stabilize API (v1) - see w/ Ricardo and Diemo
-  + wrap in a `StateManageer` service 
-  + when stable, import to core and generalize its usage to all services?
   + define if we want to dipatch if value didn't change (maybe option?)
+  + when stable, import to core and generalize its usage to all services?
+  + abstract from soundworks clients 
+  probably something like:
+```
+new StateMnager(id, { send, addListener, removeListener }
+```
+  + put in its own package
+  
+  **done**
   + handle attach twice (ignore or throw, just do something)
+  + stabilize API (v1) - see w/ Ricardo and Diemo (ok)
+  + wrap in a `StateManageer` service (nop - belongs to core)
+  + start to write tests as we can now test most of the things using a node client
 
 - [services]
-  + decouples existing services from the ones that will be removed
-  + problem when requesting client side and not server side
+  **done**
+  + decouples existing services from the ones that will be removed (ok)
+  + all services MUST a server-side (even no-op) (ok)
+  + remove all services from core (ok)
   
 - [sockets] 
-  + remove `send`, `addListener`, etc from `server.sockets` (only keep `broadcast` methods there) (ok)
-
+  + review binaryBuffer encoding / decoding with new `fast-text-encoding`,i.e. see if we still need to copy buffers or if the `Buffer.offset` is properly taken in account
   + add the client-side heartbeat stuff: https://www.npmjs.com/package/ws#other-examples
-  + fix not sent errors messages (check `socket.OPENED` / `socket.CLOSED` ?)
-  + update / configure path in sockets
-  + update [thing.sockets] see if can share code w/ browsers clients
-  + maybe move `broadcast` into `server.Socket`?
-  + use isomorphic-ws for code sharing w/ thing clients
-  + review binaryBuffer encoding / decoding with new `fast-text-encoding`, i.e. see if we still need to copy buffers or if the `Buffer.offset` is properly taken in account
-
   + install that and see if problems still occur: https://github.com/plantain-00/ws-heartbeat
 
-- [views] 
-  + explore `lit-html` and `lit-elements` as a possible replacements (ok)
-  + remove (prefabs, views, etc.) from core
-  + remove viewManager, 
-  + create a `servicesState` in serviceManager: should allow for proper display of informations without making assumptions on the view system.
+  **done**
+  + remove `send`, `addListener`, etc from `server.sockets` (only keep `broadcast` methods there) (ok)
+  + fix not sent errors messages (check `socket.OPENED` / `socket.CLOSED` ?)
+  + configure path in sockets (ok)
+  + update [thing.sockets] see if can share code w/ browsers clients (ok)
+  + use isomorphic-ws for code sharing w/ thing clients (ok)
 
-- [core] 
-  + merge Process and Activity (aka remove Activity, `Process`es and thus services should have nothing to do with views and network, only with states and `client.socket`)
-  + decouple / explicit `Experience.start()` from `serviceManager.ready()`
-  + use dependency injection more systematically / decouple everything (cf. serviceManager)
+- [views] 
+  + create a `servicesState` in serviceManager: should allow for proper display of informations without making assumptions on the view system.
+  => _sketched, confirm API_
+  
+  **done**
+  + remove (prefabs, views, etc.) from core (ok)
+  + explore `lit-html` and `lit-elements` as a possible replacements (ok)
+  + remove viewManager, (ok)
 
 - [services] 
-  + define which services we keep in `core` (validate w/ Norbert) - (ok)
   + define a proper model for external services / plugins (monorepo)
-    * cf. https://github.com/lerna/lerna
-  + share code betwenn `things` and `browsers` clients
-  + start to add tests
+    * cf. https://github.com/lerna/lerna 
+  => _sketched, confirm API_
+  + adapt remaining existing services to new plugin system
+  + start to write tests as we can now test most of the things using a node client
+
+  **done**
+  + define which services we keep in `core` (validate w/ Norbert) - (ok, finally none) (ok)
   + remove `service:` from service's ids, just add noise for nothing
     * or maybe not, allow to not collapse w/ with user field
     * might be simply fixed by using states...
+  + share code betwenn `things` and `browsers` clients (ok)
 
 - [misc]
 
 move utils/math into waves-audio
-
-> @important - sharing most of the code between `node` and `browsers` clients 
-> should allow to write test more easily 
 
 ### fixes, upgrades, new services
 
@@ -123,13 +147,19 @@ move utils/math into waves-audio
 
 - [LiveCodingService] sketch first version
 ```
-  const liveFilter = this.liveCodingService.createScript('my-filter');
-  const liveSynth = this.liveCodingService.createScript('my-synth');
+# client
+  const liveFilter = this.liveCodingService.attachScript('my-filter');
+  const liveSynth = this.liveCodingService.attachScript('my-synth');
   // ... later
   const data = [...];
   const res = liveFilter({ data });
   // ...
   liveSynth({ audioContext });
+```
+
+```
+# controller
+this.liveCodingService.updateScript('my-filter', string);
 ```
   + persist current state in file (don't loose state between app restart)
   + dispatch and process with eval on change

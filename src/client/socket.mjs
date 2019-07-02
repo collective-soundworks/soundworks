@@ -1,4 +1,5 @@
 import debug from 'debug';
+import WebSocket from 'isomorphic-ws';
 import {
   packBinaryMessage,
   unpackBinaryMessage,
@@ -7,6 +8,8 @@ import {
 } from '../common/sockets-encoder-decoder';
 
 const log = debug('soundworks:socket');
+// https://stackoverflow.com/questions/17575790/environment-detection-node-js-or-browser
+const isBrowser = new Function("try {return this===window;}catch(e){ return false;}");
 
 // close
 //   Fired when a connection with a websocket is closed.
@@ -50,32 +53,33 @@ const socket = {
    * @param {Object} options - Options of the socket
    * @param {Array<String>} options.path - Defines where socket should find the `socket.io` file
    */
-  init(clientType, options) {
+  init(clientType, config) {
     // unique key that allows to associate the two sockets to the same client.
     // note: the key is only used to pair to two sockets, so its usage is very
     // limited in time therefore a random number should hopefully be sufficient.
     const key = (Math.random() + '').replace(/^0./, '');
 
-    /**
-     * Configuration object
-     * @type {Object}
-     * @name config
-     * @instance
-     * @memberof module:soundworks/client.socket
-     */
-    this.config = options;
-
     // open web sockets
-    const { path } = this.config;
-    const protocol = window.location.protocol.replace(/^http?/, 'ws');
-    const { hostname, port } = window.location;
-    const url = `${protocol}//${hostname}:${port}/${path}`;
+    const { path } = config.websockets;
+    let url;
+
+    if (isBrowser()) {
+      const protocol = window.location.protocol.replace(/^http?/, 'ws');
+      const { hostname, port } = window.location;
+      url = `${protocol}//${hostname}:${port}/${path}`;
+    } else {
+      const protocol = config.useHttps ? 'wss:' : 'ws:';
+      const { ip, port } = config;
+      url = `${protocol}//${ip}:${port}/${path}`;
+    }
+
     const queryParams = `clientType=${clientType}&key=${key}`;
 
     // ----------------------------------------------------------
     // init string socket
     // ----------------------------------------------------------
     const stringSocketUrl = `${url}?binary=0&${queryParams}`;
+
     this.ws = new WebSocket(stringSocketUrl);
     log(`string socket initialized - url: ${stringSocketUrl}`);
 
@@ -105,6 +109,7 @@ const socket = {
     // init binary socket
     // ----------------------------------------------------------
     const binarySocketUrl = `${url}?binary=1&${queryParams}`;
+
     this.binaryWs = new WebSocket(binarySocketUrl);
     this.binaryWs.binaryType = 'arraybuffer';
     log(`binary socket initialized - url: ${binarySocketUrl}`);
