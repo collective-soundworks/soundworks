@@ -2,6 +2,7 @@ import path from 'path';
 import Experience from './Experience';
 import Service from './Service';
 import serviceManager from './serviceManager';
+import StateManager from './StateManager';
 import Client from './Client';
 import server from './server';
 
@@ -77,21 +78,25 @@ const soundworks = {
       this.config.websockets = {};
     }
 
-    serviceManager.init();
-    await server.init(config, clientConfigFunction);
+    this.serviceManager.init();
+    await this.server.init(config, clientConfigFunction);
+
+    this.stateManager = new StateManager(this.server);
 
     return Promise.resolve();
   },
 
   async start() {
     try {
-      await server.serveStatic(); // create one for js files
-      await server.initActivities(); // create one for js files
-      await server.createHttpServer();
-      await server.initRouting();
-      await server.startSocketServer();
-      await serviceManager.start();
-      await server.listen();
+      // @todo - create some dist public path builded files
+      // separate what comes from build and what comes from user
+      await this.server.serveStatic();
+      await this.server.initActivities();
+      await this.server.createHttpServer();
+      await this.server.initRouting();
+      await this.server.startSocketServer();
+      await this.serviceManager.start();
+      await this.server.listen();
 
       return Promise.resolve();
     } catch(err) {

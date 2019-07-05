@@ -1,6 +1,4 @@
 import Activity from './Activity';
-import client from './client';
-import serviceManager from './serviceManager';
 
 /**
  * Base class to be extended in order to create the client-side of a custom
@@ -12,12 +10,19 @@ import serviceManager from './serviceManager';
  * @extends module:soundworks/client.Activity
  */
 class Experience extends Activity {
-  constructor() {
+  constructor(soundworks) {
     super();
+
+    // @todo - check that it's a soundworks instance
+    if (!soundworks) {
+      throw new Error('Experience should receive `soundworks` instance as first argument');
+    }
+
+    this.soundworks = soundworks;
   }
 
   require(name, options = {}, dependencies = []) {
-    return serviceManager.get(name, options, dependencies);
+    return this.soundworks.serviceManager.get(name, options, dependencies);
   }
 
   /**
@@ -28,7 +33,7 @@ class Experience extends Activity {
   start() {
     super.start();
 
-    client.socket.send('s:exp:enter');
+    this.soundworks.client.socket.send('s:exp:enter');
   }
 }
 

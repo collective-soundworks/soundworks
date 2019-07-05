@@ -1,5 +1,6 @@
 import client from './client';
 import serviceManager from './serviceManager';
+import StateManager from './StateManager';
 import Experience from './Experience';
 import Service from './Service';
 
@@ -43,6 +44,10 @@ const soundworks = {
     this.serviceManager.init();
 
     await this.client.socket.init(this.client.type, this.config);
+
+    this.stateManager = new StateManager(this.client);
+
+    return Promise.resolve();
   },
 
   async start() {

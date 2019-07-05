@@ -134,3 +134,57 @@ export default platform(soundworks) {
 
 
 
+
+
+
+
+
+
+
+
+## Ideas
+
+```
+// client-side
+import { Client } from 'soundworks/client';
+
+const client = new Client(config);
+// > client = { id, uuid, socket, serviceManager, stateManager };
+// connect sockets
+await client.init();
+
+const experience = new MyExperience(client);
+// init required services 
+await client.start();
+
+experience.start();
+```
+
+```
+// server-side
+import { Server } from 'soundworks/server';
+
+const server = new Server(config);
+// > client = { sockets, serviceManager, stateManager };
+// do things
+await server.init();
+
+const experience = new MyExperience(server, 'player');
+
+await server.start();
+
+experience.start();
+```
+
+
+
+
+
+
+
+
+
+
+
+
+

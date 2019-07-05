@@ -23,8 +23,15 @@ import serviceManager from './serviceManager';
  * @memberof module:soundworks/server
  */
 class Experience extends Activity {
-  constructor(clientTypes) {
-    super('experience');
+  constructor(soundworks, clientTypes) {
+    super();
+
+    // @todo - check that it's a soundworks instance
+    if (!soundworks) {
+      throw new Error('Experience should receive `soundworks` instance as first argument');
+    }
+
+    this.soundworks = soundworks;
 
     /**
      * List of the clients who are currently in the performance.
@@ -41,7 +48,7 @@ class Experience extends Activity {
    * ````
    */
   require(name, options = {}, dependencies = []) {
-    return serviceManager.get(name, options, dependencies, this);
+    return this.soundworks.serviceManager.get(name, options, dependencies, this);
   }
 
   /**
@@ -51,6 +58,8 @@ class Experience extends Activity {
    */
   connect(client) {
     super.connect(client);
+
+    this.soundworks.stateManager.addClient(client);
     // listen for the `'enter' socket message from the client, the message is
     // sent when the client `enters` the Experience client side, i.e. when all
     // required services are ready
@@ -76,14 +85,19 @@ class Experience extends Activity {
       this.clients.delete(client);
       this.exit(client);
     }
+
+    this.soundworks.stateManager.removeClient(client);
   }
 
+  /**
+   * Called when the client started the client
+   */
   enter(client) {
-    throw new Error(`Experience "${this.constructor.name}.enter()" not implemented`);
+    // throw new Error(`Experience "${this.constructor.name}.enter()" not implemented`);
   }
 
   exit(client) {
-    throw new Error(`Experience "${this.constructor.name}.exit()" not implemented`);
+    // throw new Error(`Experience "${this.constructor.name}.exit()" not implemented`);
   }
 }
 
