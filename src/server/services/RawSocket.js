@@ -118,22 +118,8 @@ class RawSocket extends Service {
       let httpServer = http.createServer();
       this.runServer(httpServer);
     } else {
-      const httpsInfos = server.config.httpsInfos;
-
-      // use given certificate
-      if (httpsInfos.key && httpsInfos.cert) {
-        const key = fs.readFileSync(httpsInfos.key);
-        const cert = fs.readFileSync(httpsInfos.cert);
-
-        let httpsServer = https.createServer({ key: key, cert: cert });
-        this.runServer(httpsServer);
-      // generate certificate on the fly (for development purposes)
-      } else {
-        pem.createCertificate({ days: 1, selfSigned: true }, (err, keys) => {
-          let httpsServer = https.createServer({ key: keys.serviceKey, cert: keys.certificate });
-          this.runServer(httpsServer);
-        });
-      }
+      const httpsServer = https.createServer(server.httpsInfos);
+      this.runServer(httpsServer);
     }
   }
 

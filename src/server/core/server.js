@@ -10,6 +10,7 @@ import path from 'path';
 import pem from 'pem';
 import serviceManager from './serviceManager';
 import sockets from './sockets';
+import cache from '../utils/cache';
 
 /**
  * @typedef {Object} module:soundworks/server.server~serverConfig
@@ -283,23 +284,38 @@ const server = {
           const key = fs.readFileSync(httpsInfos.key);
           const cert = fs.readFileSync(httpsInfos.cert);
           const httpsServer = https.createServer({ key, cert }, this.router);
+
+          this.httpsInfos = { key, cert };
+
           resolve(httpsServer);
         // generate certificate on the fly (for development purposes)
         } else {
-          pem.createCertificate({ days: 1, selfSigned: true }, (err, keys) => {
-            const httpsServer = https.createServer({
-              key: keys.serviceKey,
-              cert: keys.certificate,
-            }, this.router);
+          // if some cert already in cache
+          this.httpsInfos = cache.read('server', 'httpsInfos');
+
+          if (this.httpsInfos) {
+            const httpsServer = https.createServer(this.httpsInfos, this.router);
 
             resolve(httpsServer);
-          });
+          } else {
+            pem.createCertificate({ days: 1, selfSigned: true }, (err, keys) => {
+              this.httpsInfos = {
+                key: keys.serviceKey,
+                cert: keys.certificate,
+              };
+
+              const httpsServer = https.createServer(this.httpsInfos, this.router);
+              cache.write('server', 'httpsInfos', this.httpsInfos);
+
+              resolve(httpsServer);
+            });
+          }
         }
       }
     }).then((httpServer) => {
       this._initSockets(httpServer);
 
-      this.httpServer = httpServer
+      this.httpServer = httpServer;
 
       const promise = new Promise((resolve, reject) => {
         serviceManager.signals.ready.addObserver(() => {

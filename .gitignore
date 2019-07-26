@@ -18,3 +18,7 @@ Thumbs.db
 # ...
 NOTES.md
 # CHANGELOG.md
+
+package-lock.json
+_backup
+common
