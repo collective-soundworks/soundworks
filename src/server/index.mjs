@@ -5,6 +5,7 @@ import serviceManager from './serviceManager';
 import StateManager from './StateManager';
 import Client from './Client';
 import server from './server';
+import cache from './utils/cache';
 
 
 /**
@@ -25,6 +26,7 @@ const soundworks = {
   config: {},
   server,
   serviceManager,
+  cache,
 
   /**
    *
