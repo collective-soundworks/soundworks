@@ -148,20 +148,22 @@ const defaultDefinitions = [
         // in ipod, when the problem occurs, sampleRate has been observed
         // to be set at 16000Hz, as no exhaustive testing has been done
         // assume < 40000 is a bad value.
-        const localStorageKey = 'soundworks:fix-ios-samplerate';
+
+        // this can throw an error in safari
+        // const localStorageKey = 'soundworks:fix-ios-samplerate';
 
         if (audioContext.sampleRate < 40000) {
-          window.localStorage.setItem(localStorageKey, true);
+          // window.localStorage.setItem(localStorageKey, true);
           window.location.reload(true);
           return;
         }
 
-        const hasReloaded = !!window.localStorage.getItem(localStorageKey);
+        // const hasReloaded = !!window.localStorage.getItem(localStorageKey);
 
-        if (hasReloaded) {
-          window.localStorage.removeItem(localStorageKey);
-          client.platform.hasReloaded = true;
-        }
+        // if (hasReloaded) {
+        //   window.localStorage.removeItem(localStorageKey);
+        //   client.platform.hasReloaded = true;
+        // }
       }
 
       return Promise.resolve(true);
