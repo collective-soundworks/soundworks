@@ -30,7 +30,7 @@ experience -> start
 await soundworks.init(config); 
   // init client (sockets)
 
-const player = new PlayerExperience(config));
+const player = new PlayerExperience(soundworks, config));
 soundworks.start().then(() => {;
   // run serviceManager
   // when services ready, resolve Promise
@@ -133,31 +133,22 @@ export default platform(soundworks) {
 
 
 
-
-
-
-
-
-
-
-
-
-## Ideas
+## Idea for mulitple instance (would be very usefull for clients)
 
 ```
 // client-side
-import { Client } from 'soundworks/client';
+import { Client } from '@soundworks/core/client';
 
 const client = new Client(config);
-// > client = { id, uuid, socket, serviceManager, stateManager };
+// > client = { id, uuid, socket, serviceManager, stateManager, clientType };
 // connect sockets
 await client.init();
 
-const experience = new MyExperience(client);
+const playerExperience = new PlayerExperience(client);
 // init required services 
 await client.start();
 
-experience.start();
+playerExperience.start();
 ```
 
 ```
@@ -165,15 +156,15 @@ experience.start();
 import { Server } from 'soundworks/server';
 
 const server = new Server(config);
-// > client = { sockets, serviceManager, stateManager };
+// > server = { sockets, serviceManager, stateManager };
 // do things
 await server.init();
 
-const experience = new MyExperience(server, 'player');
+const playerExperience = new PlayerExperience(server, 'player');
 
 await server.start();
 
-experience.start();
+playerExperience.start();
 ```
 
 

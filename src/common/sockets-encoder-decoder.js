@@ -52,7 +52,7 @@ export function unpackBinaryMessage(buffer /* arraybuffer */) {
   const startOffset = infos[2];
 
   // need to slice as the library recreates a UInt8Array from the whole buffer
-  // @todo - see if this could be avoided (probably needs a pull request)
+  // @todo - see if this copy could be avoided (probably needs a pull request)
   const channelBuffer = new Uint8Array(buffer.slice(3, 3 + channelSize));
   const channel = decoder.decode(channelBuffer);
   const type = types[typeIndex];
