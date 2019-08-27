@@ -1,6 +1,8 @@
 # `soundworks`
 
-![logo](https://cdn.rawgit.com/collective-soundworks/soundworks/master/resources/logo-soundworks.jpg)
+<!-- should 200x200 -->
+
+![logo](https://cdn.rawgit.com/collective-soundworks/soundworks/master/docs-resources/soundworks-logo.jpg)
 
 ***soundworks*** is a framework to create collaborative/collective audiovisual experiences where users interact through their mobile devices.
 The framework is entirely based on web APIs with a *Node.js* server and provides a set of services to easily setup the infrastructure and the most basic functionalities of an application.

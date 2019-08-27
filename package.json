@@ -1,6 +1,6 @@
 {
   "name": "@soundworks/core",
-  "version": "3.0.0-alpha.0",
+  "version": "3.0.0-alpha.1",
   "description": "full-stack javascript framework for distributed audio visual experiences on the web",
   "authors": [
     "Benjamin Matuszewski",
@@ -8,6 +8,13 @@
     "Norbert Schnell"
   ],
   "license": "BSD-3-Clause",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/collective-soundworks/soundworks"
+  },
   "main": "",
   "scripts": {
     "clean": "rm -Rf client && rm -Rf server && rm -Rf common",
@@ -22,13 +29,6 @@
     "watch:server": "chokidar src/server/ -c \"npm run transpile:server\"",
     "watch:common": "chokidar src/common/ -c \"npm run transpile:common\"",
     "watch": "npm run transpile && concurrently \"npm run watch:client\" \"npm run watch:server\" \"npm run watch:common\""
-  },
-  "publishConfig": {
-    "access": "public"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/collective-soundworks/soundworks"
   },
   "dependencies": {
     "@ircam/parameters": "^1.2.2",

@@ -1,14 +1,12 @@
 docs
 src
-bin
 resources
 tests
 
 CHANGELOG.md
 jsdoc.json
-NOTES.md
-ROADMAP.md
-rollup.config.js
 
 .babelrc
 .editorconfig
+
+_backup
