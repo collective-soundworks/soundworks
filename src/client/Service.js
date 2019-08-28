@@ -1,10 +1,10 @@
 import Activity from './Activity';
-import serviceManager from './serviceManager';
 import Signal from '../common/Signal';
 import debug from 'debug';
+// @todo - to be removed
+import serviceManager from './serviceManager';
 
-const log = debug('soundworks:services');
-
+const log = debug('soundworks:lifecycle');
 
 /**
  * Base class to be extended in order to create a new service.
@@ -13,32 +13,36 @@ const log = debug('soundworks:services');
  * @extends module:soundworks/client.Activity
  */
 class Service extends Activity {
-  /**
-   * @param {String} id - The id of the service (should be prefixed with `'service:'`).
-   */
   constructor() {
     super();
 
     /**
-     * Name of the service.
+     * Id of the service.
+     * @type {String}
      * @name name
      * @type {String}
      * @instanceof Process
      */
     this.name = null;
 
-    this.requiredStartSignals.addObserver((value) => this.start());
-    this.requiredStartSignals.add(serviceManager.signals.start);
-
     /**
      * Is set to `true` when a signal is ready to be consumed.
      * @type {Signal}
      */
     this.signals.ready = new Signal();
-    // // add the serviceManager bootstart signal to the required signals
-    // this.waitFor();
+
+    // start when all required signals are fired
+    this.requiredStartSignals.addObserver(value => this.start());
+    // require at least the "start" signal of the service manager
+    this.requiredStartSignals.add(serviceManager.signals.start);
 
     this.ready = this.ready.bind(this);
+  }
+
+  /** @inheritdoc */
+  start() {
+    log(`> service "${this.name}" started`);
+    super.start();
   }
 
   /**
@@ -46,16 +50,8 @@ class Service extends Activity {
    * `ready` and thus allows all its dependent activities to start themselves.
    */
   ready() {
-    log(`"${this.id}" ready`);
-
-    // this.stop();
+    log(`> service "${this.name}" ready`);
     this.signals.ready.set(true);
-  }
-
-  /** @inheritdoc */
-  start() {
-    log(`"${this.id}" started`);
-    super.start();
   }
 }
 

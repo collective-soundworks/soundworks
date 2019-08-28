@@ -90,9 +90,6 @@ const soundworks = {
 
   async start() {
     try {
-      // @todo - create some dist public path builded files
-      // separate what comes from build and what comes from user
-      await this.server.serveStatic();
       await this.server.initActivities();
       await this.server.createHttpServer();
       await this.server.initRouting();
@@ -106,9 +103,26 @@ const soundworks = {
     }
   },
 
-  registerService(serviceFactory) {
-    const ctor = serviceFactory(this);
-    this.serviceManager.register(serviceFactory.id, ctor);
+  /**
+   * @example
+   * ```js
+   * soundworks.registerService(serviceFactory);
+   * // or
+   * soundworks.registerService('user-defined-name', serviceFactory);
+   * ```
+   */
+  registerService(nameOrFactory, factory = null) {
+    let name;
+
+    if (factory === null) {
+      name = nameOrFactory.defaultName;
+      factory = nameOrFactory;
+    } else {
+      name = nameOrFactory;
+    }
+
+    const ctor = factory(this);
+    this.serviceManager.register(name, ctor);
   },
 }
 

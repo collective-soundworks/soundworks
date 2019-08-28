@@ -23,6 +23,15 @@ class Activity {
     this.options = {};
 
     /**
+     * Signals defining the process state.
+     * @name signal
+     * @type {Object}
+     * @instanceof Process
+     */
+    this.signals = {};
+    this.signals.start = new Signal();
+
+    /**
      * The client types on which the activity should be mapped.
      * @type {Set}
      * @name clientTypes
@@ -36,40 +45,45 @@ class Activity {
      * @type {Set}
      * @private
      */
-    this._requiredActivities = new Set();
+    // this._requiredActivities = new Set();
 
     // register as instanciated to the server
     server.setActivity(this);
 
-    this._requiredStartSignals = new SignalAll();
-    this._requiredStartSignals.addObserver(() => this.start());
-    // wait for serviceManager.start
-    this._requiredStartSignals.add(serviceManager.signals.start);
+    this.requiredStartSignals = new SignalAll();
+    // this._requiredStartSignals.addObserver(() => this.start());
+    // // wait for serviceManager.start
+    // this._requiredStartSignals.add(serviceManager.signals.start);
   }
 
   /**
-   * Add client type that should be mapped to this activity.
    * @private
+   *
+   * This method is required by the server to know which client should connect
+   * to which activity.
+   * Add client type that should be mapped to this activity.
+   *
    * @param {String|Array} val - The client type(s) on which the activity
    *  should be mapped
    */
   _addClientTypes(clientTypes) {
-    if (arguments.length === 1) {
-      if (typeof clientTypes === 'string')
+    // if (arguments.length === 1) {
+      if (typeof clientTypes === 'string') {
         clientTypes = [clientTypes];
-    } else {
-      clientTypes = Array.from(arguments);
-    }
+      }
+    // } else {
+    //   clientTypes = Array.from(arguments);
+    // }
 
     // add client types to current activity
     clientTypes.forEach((clientType) => {
       this.clientTypes.add(clientType);
     });
 
-    // propagate value to required activities
-    this._requiredActivities.forEach((activity) => {
-      activity._addClientTypes(clientTypes);
-    });
+    // // propagate value to required activities
+    // this._requiredActivities.forEach((activity) => {
+    //   activity._addClientTypes(clientTypes);
+    // });
   }
 
   /**
@@ -86,16 +100,16 @@ class Activity {
    * @param {Object} options - Some options to configure the service.
    */
   // make abstract, should be implemented by child classes (Scene and Service)
-  require(id, options) {
-    const instance = serviceManager.require(id, options);
+  // require(id, options) {
+  //   const instance = serviceManager.require(id, options);
 
-    this._requiredActivities.add(instance)
-    this._requiredStartSignals.add(instance.signals.ready);
+  //   this._requiredActivities.add(instance)
+  //   this._requiredStartSignals.add(instance.signals.ready);
 
-    instance._addClientTypes(this.clientTypes);
+  //   instance._addClientTypes(this.clientTypes);
 
-    return instance;
-  }
+  //   return instance;
+  // }
 
   /**
    * Interface method to be implemented by activities. As part of an activity

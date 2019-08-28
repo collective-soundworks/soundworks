@@ -1,5 +1,8 @@
 import Activity from './Activity';
 import serviceManager from './serviceManager';
+import debug from 'debug';
+
+const log = debug('soundworks:lifecycle');
 
 /**
  * Base class used to build a experience on the server side.
@@ -42,13 +45,22 @@ class Experience extends Activity {
   }
 
   /**
-   * Shortcut for
-   * ```
+   * @todo - update should be done at registration...
    *
-   * ````
+   * Require a service that has been previsouly registered and bind it to the
+   * experience client types.
+   * @param {String} name - Name of the service as given when registered
+   * @param {Object} options={} - Option to configure the service
+   * @param {Array} dependencies=[] - Names of the services that the required
+   *  service should wait to be ready before starting
    */
   require(name, options = {}, dependencies = []) {
     return this.soundworks.serviceManager.get(name, options, dependencies, this);
+  }
+
+  start() {
+    log(`> experience "${this.constructor.name}" start`);
+    super.start();
   }
 
   /**
@@ -58,6 +70,7 @@ class Experience extends Activity {
    */
   connect(client) {
     super.connect(client);
+    // log(`+ private + experience "${this.constructor.name}" connect: client ${client.id}`);
 
     this.soundworks.stateManager.addClient(client);
     // listen for the `'enter' socket message from the client, the message is
@@ -78,6 +91,7 @@ class Experience extends Activity {
    */
   disconnect(client) {
     super.disconnect(client);
+    // log(`+ private + experience "${this.constructor.name}" disconnect: client ${client.id}`);
 
     // only call exit if the client has fully entered
     // (i.e. has finished the its initialization phase)
@@ -93,11 +107,11 @@ class Experience extends Activity {
    * Called when the client started the client
    */
   enter(client) {
-    // throw new Error(`Experience "${this.constructor.name}.enter()" not implemented`);
+    log(`> experience "${this.constructor.name}" enter: client ${client.id}`);
   }
 
   exit(client) {
-    // throw new Error(`Experience "${this.constructor.name}.exit()" not implemented`);
+    log(`> experience "${this.constructor.name}" exit: client ${client.id}`);
   }
 }
 

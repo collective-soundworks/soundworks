@@ -140,14 +140,14 @@ const server = {
     return Promise.resolve();
   },
 
-  /** @private */
-  serveStatic() {
-    // public static folder
-    const { publicDirectory, serveStaticOptions } = this.config;
-    this.router.use(serveStatic(publicDirectory, serveStaticOptions));
+  // /** @private */
+  // serveStatic() {
+  //   // public static folder
+  //   const { publicDirectory, serveStaticOptions } = this.config;
+  //   this.router.use(serveStatic(publicDirectory, serveStaticOptions));
 
-    return Promise.resolve();
-  },
+  //   return Promise.resolve();
+  // },
 
   /** @private */
   initActivities() {
@@ -325,7 +325,7 @@ const server = {
     const clientTmpl = path.join(templateDirectory, `${clientType}.ejs`);
     const defaultTmpl = path.join(templateDirectory, `default.ejs`);
 
-    // all this can append later
+    // all this can happen later
     fs.stat(clientTmpl, (err, stats) => {
       let template;
 

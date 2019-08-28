@@ -87,9 +87,26 @@ const soundworks = {
     return this._ready;
   },
 
-  registerService(serviceFactory) {
-    const ctor = serviceFactory(this);
-    this.serviceManager.register(serviceFactory.id, ctor);
+  /**
+   * @example
+   * ```js
+   * soundworks.registerService(serviceFactory);
+   * // or
+   * soundworks.registerService('user-defined-name', serviceFactory);
+   * ```
+   */
+  registerService(nameOrFactory, factory = null) {
+    let name;
+
+    if (factory === null) {
+      name = nameOrFactory.defaultName;
+      factory = nameOrFactory;
+    } else {
+      name = nameOrFactory;
+    }
+
+    const ctor = factory(this);
+    this.serviceManager.register(name, ctor);
   },
 };
 

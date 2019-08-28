@@ -10,8 +10,6 @@ const log = debug('soundworks:serviceManager');
  */
 const serviceManager = {
   /** @private */
-  _serviceInstanciationHook: null,
-  /** @private */
   _instances: {},
   /** @private */
   _ctors: {},
@@ -104,10 +102,11 @@ const serviceManager = {
 
       instance.signals.start.addObserver(onServiceStart);
       instance.signals.ready.addObserver(onServiceReady);
-      // trigger updates for params update too
-      instance.params.addListener(() => {
-        this._emitChange();
-      });
+      // trigger updates on params update too
+      // @note - this should be kept private for now
+      if (instance.params && instance.params.addListener) {
+        instance.params.addListener(() => this._emitChange());
+      }
 
       // store instance
       this._instances[name] = instance;

@@ -101,6 +101,11 @@ const serviceManager = {
     }
 
     if (!this._instances[name]) {
+      // throw an error if manager already started
+      if (this.signals.start.get() === true) {
+        throw new Error(`Service "${name}" required after serviceManager start`);
+      }
+
       const instance = new this._ctors[name]();
       instance.name = name;
       // initialize with globals options passed with configure
@@ -123,6 +128,7 @@ const serviceManager = {
       instance.configure(options);
     }
 
+    // map client types
     if (experience) {
       instance._addClientTypes(experience.clientTypes);
     }

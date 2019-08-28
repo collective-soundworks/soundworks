@@ -1,4 +1,7 @@
 import Activity from './Activity';
+import debug from 'debug';
+
+const log = debug('soundworks:lifecycle');
 
 /**
  * Base class to be extended in order to create the client-side of a custom
@@ -32,6 +35,8 @@ class Experience extends Activity {
    */
   start() {
     super.start();
+
+    log(`> experience "${this.constructor.name}" start`);
 
     this.soundworks.client.socket.send('s:exp:enter');
   }
