@@ -27,8 +27,6 @@ class SignalAll extends Signal {
       super.set(value);
     });
   }
-
-  set(value) { /* noop */ }
 }
 
 export default SignalAll;

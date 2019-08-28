@@ -3,22 +3,16 @@
 /server
 /common
 
-# documentation
-# /docs
-
 # others
 /node_modules
-/tests
+# /tests
 
 # junk files
 npm-debug.log
 .DS_Store
 Thumbs.db
-
-# ...
-NOTES.md
-# CHANGELOG.md
 package-lock.json
-tests
 
+# MISC
+NOTES.md
 /_backup

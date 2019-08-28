@@ -41,7 +41,7 @@ class Service extends Activity {
 
   /** @inheritdoc */
   start() {
-    log(`> service "${this.name}" started`);
+    log(`> service "${this.name}" start`);
     super.start();
   }
 
@@ -55,12 +55,12 @@ class Service extends Activity {
   }
 
   connect(client) {
-    log(`> service "${this.name}": client ${client.id} connect`);
+    log(`> [client ${client.id}] connect service "${this.name}"`);
     super.connect(client);
   }
 
   disconnect(client) {
-    log(`> service "${this.name}": client ${client.id} disconnect`);
+    log(`> [client ${client.id}] disconnect service "${this.name}"`);
     super.disconnect(client);
   }
 }

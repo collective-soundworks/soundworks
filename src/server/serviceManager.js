@@ -1,6 +1,9 @@
 import chalk from 'chalk';
 import Signal from '../common/Signal';
 import SignalAll from '../common/SignalAll';
+import debug from 'debug';
+
+const log = debug('soundworks:lifecycle');
 
 /**
  * Manager the services and their relations. Acts as a factory to ensure services
@@ -16,14 +19,12 @@ const serviceManager = {
 
   /** @private */
   init() {
-    this.signals = {};
-    this.signals.start = new Signal();
-    this.signals.ready = new Signal();
+    log('> serviceManager init');
 
-    this._requiredReadySignals = new SignalAll();
-    this._requiredReadySignals.addObserver(() => {
-      this.signals.ready.set(true);
-    });
+    this.signals = {
+      start: new Signal(),
+      ready: new SignalAll(),
+    };
 
     this.ready = new Promise((resolve, reject) => {
       this._resolveReadyPromise = resolve;
@@ -32,6 +33,8 @@ const serviceManager = {
 
   /** @private */
   start() {
+    log('> serviceManager start');
+
     console.log(chalk.yellow(`+ required services`));
     console.log(
       this.getRequiredServices()
@@ -41,12 +44,15 @@ const serviceManager = {
     );
 
     this.signals.ready.addObserver(() => {
+      log('> serviceManager ready');
+
       this._resolveReadyPromise();
     });
 
+    // start before ready, even if no deps
     this.signals.start.set(true);
 
-    if (this._requiredReadySignals.length === 0) {
+    if (this.signals.ready.length === 0) {
       this.signals.ready.set(true);
     }
 
@@ -113,7 +119,7 @@ const serviceManager = {
 
       this._instances[name] = instance;
 
-      this._requiredReadySignals.add(instance.signals.ready);
+      this.signals.ready.add(instance.signals.ready);
 
       // log service readiness
       instance.signals.ready.addObserver((state) => {

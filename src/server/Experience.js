@@ -107,11 +107,11 @@ class Experience extends Activity {
    * Called when the client started the client
    */
   enter(client) {
-    log(`> experience "${this.constructor.name}" enter: client ${client.id}`);
+    log(`> [client ${client.id}] enter service experience "${this.constructor.name}"`);
   }
 
   exit(client) {
-    log(`> experience "${this.constructor.name}" exit: client ${client.id}`);
+    log(`> [client ${client.id}] exit service experience "${this.constructor.name}"`);
   }
 }
 

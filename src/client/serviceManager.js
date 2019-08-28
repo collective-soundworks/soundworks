@@ -2,7 +2,7 @@ import debug from 'debug';
 import Signal from '../common/Signal';
 import SignalAll from '../common/SignalAll';
 
-const log = debug('soundworks:serviceManager');
+const log = debug('soundworks:lifecycle');
 
 /**
  * Factory and initialisation manager for the services.
@@ -23,13 +23,12 @@ const serviceManager = {
    * @private
    */
   init() {
-    log('init');
-    this._requiredReadySignals = new SignalAll();
-    this._requiredReadySignals.addObserver(() => this._ready());
+    log('> serviceManager init');
 
-    this.signals = {};
-    this.signals.start = new Signal();
-    this.signals.ready = new Signal();
+    this.signals = {
+      start: new Signal(),
+      ready: new SignalAll(),
+    };
 
     this.ready = new Promise((resolve, reject) => {
       this._resolveReadyPromise = resolve;
@@ -41,26 +40,25 @@ const serviceManager = {
    * @private
    */
   start() {
-    const networkedServices = [];
+    log('> serviceManager start');
 
+    this.signals.ready.addObserver(() => {
+      log('> serviceManager ready');
+
+      this._resolveReadyPromise();
+    });
+
+    // start before ready, even if no deps
     this.signals.start.set(true);
 
-    if (!this._requiredReadySignals.length) {
-      this._resolveReadyPromise();
+    if (!this.signals.ready.length) {
+      this.signals.ready.set(true);
     }
 
     return this.ready;
   },
 
-  /**
-   * Mark the services as ready. This signal is observed by {@link Experience}
-   * instances and trigger their `start`.
-   * @private
-   */
-  _ready() {
-    this._resolveReadyPromise();
-    this.signals.ready.set(true);
-  },
+
 
   /**
    * Returns an instance of a service with options to be applied to its constructor.
@@ -82,7 +80,7 @@ const serviceManager = {
       const instance = new this._ctors[name]();
       instance.name = name;
       // add the instance ready signal as required for the manager
-      this._requiredReadySignals.add(instance.signals.ready);
+      this.signals.ready.add(instance.signals.ready);
 
       // handle service statuses for views
       this.servicesStatus[name] = 'idle';

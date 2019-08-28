@@ -41,7 +41,7 @@ class Service extends Activity {
 
   /** @inheritdoc */
   start() {
-    log(`> service "${this.name}" started`);
+    log(`> service "${this.name}" start`);
     super.start();
   }
 
