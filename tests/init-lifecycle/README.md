@@ -5,11 +5,10 @@
 ## run server
 
 ```
-DEBUG=soundworks:lifecycle npm run watch
+npm run watch
 ```
 
-## in browser console:
+## 2 clients
 
-```
-localStorage.debug = 'soundworks:lifecycle';
-```
+> http://localhost:8000/
+> http://localhost:8000/other

@@ -3,6 +3,8 @@ import soundworks from '@soundworks/core/client';
 import delayServiceFactory from '@soundworks/service-delay/client';
 import OtherExperience from './OtherExperience';
 
+localStorage.debug = 'soundworks:lifecycle';
+
 async function init() {
   try {
     const config = window.soundworksConfig;
