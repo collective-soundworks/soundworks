@@ -8,16 +8,17 @@ class Signal {
     this._observers = new Set();
   }
 
-  set(value) {
+  set value(value) {
     if (value !== this._state) {
       this._state = value;
 
-      for (let observer of this._observers)
+      for (let observer of this._observers) {
         observer(value);
+      }
     }
   }
 
-  get() {
+  get value() {
     return this._state;
   }
 

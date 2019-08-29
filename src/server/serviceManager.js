@@ -11,9 +11,7 @@ const log = debug('soundworks:lifecycle');
  */
 const serviceManager = {
   /** @private */
-  _servicesOptions: {},
-  /** @private */
-  _ctors: {},
+  _registeredServices: {},
   /** @private */
   _instances: {},
 
@@ -35,6 +33,7 @@ const serviceManager = {
   start() {
     log('> serviceManager start');
 
+    // @todo - move these logs to services
     console.log(chalk.yellow(`+ required services`));
     console.log(
       this.getRequiredServices()
@@ -49,106 +48,87 @@ const serviceManager = {
       this._resolveReadyPromise();
     });
 
-    // start before ready, even if no deps
-    this.signals.start.set(true);
+    // start before ready, even if no dependencies
+    this.signals.start.value = true;
 
     if (this.signals.ready.length === 0) {
-      this.signals.ready.set(true);
+      this.signals.ready.value = true;
     }
 
     return this.ready;
   },
 
   /**
-   * Configure all required service at once.
-   * @param {Object} servicesOptions - Object containing configuration options
-   *  for multiple services. The keys must correspond to the `name` of an required
-   *  service, values are the corresponding config objects.
+   * Register a service
+   * @private
    *
-   * @example
-   * serviceManager.configure({
-   *   auth: {
-   *     password: '123456'
-   *   },
-   *   checkin: {
-   *     // ...
-   *   },
-   * });
+   * @param {String} name - Name of the service
+   * @param {Function} ctor - Constructor of the service
+   * @param {Object} options - Options to configure the service
+   * @param {Array} dependencies - List of services' names the service depends on
    */
-  configure(servicesOptions) {
-    this._servicesOptions = Object.assign(this._servicesOptions, servicesOptions);
-  },
-
-  /**
-   * Regiter a new service
-   *
-   * @param {String} name - The name of the service, in order to retrieve it later.
-   * @param {Function} ctor - The constructor of the service.
-   */
-  register(name, ctor) {
-    if (this._ctors[name]) {
+  register(name, ctor, options = {}, dependencies = []) {
+    if (this._registeredServices[name]) {
       throw new Error(`Service "${name}" already registered`);
     }
 
-    this._ctors[name] = ctor;
+    this._registeredServices[name] = { ctor, options, dependencies };
   },
 
   /**
-   * Retrieve a service according to the given name. If the service as not beeen
-   * requested yet, it is instanciated.
-   * @param {String} name - The name of the registered service
-   * @param {Object} [options=null] - Options for the service, may
-   *  override previously given options. Such as the ones given using
-   *  `serviceManager.configure()`.
+   * Retrieve an instance of a registered service according to its given name.
+   * Except if you know what you are doing, prefer `Experience.require('my-service')`
+   * @param {String} name - Name of the registered service
    */
-  get(name, options = null, dependencies = [], experience = null) {
-    if (!this._ctors[name]) {
+  get(name, _experience = null) {
+    if (!this._registeredServices[name]) {
       throw new Error(`Service "${name}" is not defined`);
     }
 
+    // required by experience and manager already started
+    if (_experience && this.signals.start.value === true) {
+      throw new Error(`Service "${name}" required after serviceManager start`);
+    }
+
     if (!this._instances[name]) {
-      // throw an error if manager already started
-      if (this.signals.start.get() === true) {
-        throw new Error(`Service "${name}" required after serviceManager start`);
-      }
-
-      const instance = new this._ctors[name]();
+      const { ctor, options, dependencies } = this._registeredServices[name];
+      // @todo - update that to `new ctor(name, options)`
+      const instance = new ctor();
       instance.name = name;
-      // initialize with globals options passed with configure
-      instance.configure(this._servicesOptions[name]);
-
-      this._instances[name] = instance;
+      instance.configure(options);
 
       this.signals.ready.add(instance.signals.ready);
 
       // log service readiness
+      // #todo - move to Service
       instance.signals.ready.addObserver((state) => {
         console.log(`    ${name} ${chalk.green(' ready')}`);
       });
+
+      if (dependencies.length > 0) {
+        dependencies.forEach(dependencyName => {
+          console.log(dependencyName);
+
+          if (!this._instances[dependencyName]) {
+            this.get(dependencyName, _experience); // pass experience to propagate client types
+            // const msg = `"${name}" cannot depend on "${n}", ${n} has not been required`;
+            // throw new Error(msg);
+          }
+
+          const dependency = this._instances[dependencyName];
+          instance.signals.start.add(dependency.signals.ready);
+        });
+      }
+
+
+      this._instances[name] = instance;
     }
 
-    // if instance exists and no other argument given, `get` acts a a pure getter
     const instance = this._instances[name];
-    // if new options given override defaults from `configure`
-    if (options !== null) {
-      instance.configure(options);
-    }
 
-    // map client types
-    if (experience) {
-      instance._addClientTypes(experience.clientTypes);
-    }
-
-    if (dependencies.length > 0) {
-      dependencies.forEach(dependencyName => {
-        if (!this._instances[dependencyName]) {
-          throw new Error(`"${name}" cannot depend on "${dependencyName}",
-            ${dependencyName} has not been required`);
-        }
-
-        const dependency = this._instances[dependencyName];
-        instance.requiredStartSignals.add(dependency.signals.ready);
-      });
+    // if require by the experience, map client types
+    if (_experience) {
+      instance._addClientTypes(_experience.clientTypes);
     }
 
     return instance;

@@ -45,17 +45,15 @@ class Experience extends Activity {
   }
 
   /**
-   * @todo - update should be done at registration...
+   * Require a registered service, all client types associated to the experience
+   * will also be associated to the required service. Requiring a service should
+   * always be done between `soundworks.init` and `soundworks.start`.
+   * In most case this method is called in the constructor the Experience.
    *
-   * Require a service that has been previsouly registered and bind it to the
-   * experience client types.
    * @param {String} name - Name of the service as given when registered
-   * @param {Object} options={} - Option to configure the service
-   * @param {Array} dependencies=[] - Names of the services that the required
-   *  service should wait to be ready before starting
    */
-  require(name, options = {}, dependencies = []) {
-    return this.soundworks.serviceManager.get(name, options, dependencies, this);
+  require(name) {
+    return this.soundworks.serviceManager.get(name, this);
   }
 
   start() {

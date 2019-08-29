@@ -8,23 +8,24 @@ import Signal from './Signal';
 class SignalAll extends Signal {
   constructor() {
     super();
-    this._dependencies = new Set();
+    this._sources = new Set();
   }
 
   get length() {
-    return this._dependencies.size;
+    return this._sources.size;
   }
 
   add(signal) {
-    this._dependencies.add(signal);
+    this._sources.add(signal);
 
     signal.addObserver(() => {
       let value = true;
 
-      for (let signal of this._dependencies)
-        value = value && signal.get();
+      for (let signal of this._sources) {
+        value = value && signal.value;
+      }
 
-      super.set(value);
+      super.value = value;
     });
   }
 }

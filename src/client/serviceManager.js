@@ -12,7 +12,7 @@ const serviceManager = {
   /** @private */
   _instances: {},
   /** @private */
-  _ctors: {},
+  _registeredService: {},
   /** @private */
   _observers: new Set(),
   /** @ */
@@ -49,16 +49,24 @@ const serviceManager = {
     });
 
     // start before ready, even if no deps
-    this.signals.start.set(true);
+    this.signals.start.value = true;
 
     if (!this.signals.ready.length) {
-      this.signals.ready.set(true);
+      this.signals.ready.value = true;
     }
 
     return this.ready;
   },
 
 
+  /**
+   * Register a service with a given name.
+   * @param {String} name - The name of the service.
+   * @param {Function} ctor - The constructor of the service.
+   */
+  register(name, ctor, options = {}, dependencies = []) {
+    this._registeredService[name] = { ctor, options, dependencies };
+  },
 
   /**
    * Returns an instance of a service with options to be applied to its constructor.
@@ -66,23 +74,40 @@ const serviceManager = {
    * @param {Object} [options=null] - Options for the service, may override
    *  previously given options.
    */
-  get(name, options = null, dependencies = []) {
-    if (!this._ctors[name]) {
+  get(name, _experienceRequired = false) {
+    if (!this._registeredService[name]) {
       throw new Error(`Service "${name}" is not defined`);
     }
 
-    if (!this._instances[name]) {
-      // throw an error if manager already started
-      if (this.signals.start.get() === true) {
-        throw new Error(`Service "${name}" required after serviceManager start`);
-      }
+    // throw an error if manager already started
+    if (_experienceRequired && this.signals.start.value === true) {
+      throw new Error(`Service "${name}" required after serviceManager start`);
+    }
 
-      const instance = new this._ctors[name]();
+    if (!this._instances[name]) {
+      const { ctor, options, dependencies } = this._registeredService[name];
+      // @todo - update that to `new ctor(name, options)`
+      const instance = new ctor();
       instance.name = name;
-      // add the instance ready signal as required for the manager
+      instance.configure(options);
+
+      // handle dependency tree
       this.signals.ready.add(instance.signals.ready);
 
-      // handle service statuses for views
+      if (dependencies.length > 0) {
+        console.log(dependencies);
+
+        dependencies.forEach(dependencyName => {
+          if (!this._instances[dependencyName]) {
+            this.get(dependencyName, _experienceRequired);
+          }
+
+          const dependency = this._instances[dependencyName];
+          instance.signals.start.add(dependency.signals.ready);
+        });
+      }
+
+      // handle service status for reporting
       this.servicesStatus[name] = 'idle';
 
       const onServiceStart = () => {
@@ -102,6 +127,7 @@ const serviceManager = {
       instance.signals.ready.addObserver(onServiceReady);
       // trigger updates on params update too
       // @note - this should be kept private for now
+      // @todo - change this for a shared state, using `stateManager`
       if (instance.params && instance.params.addListener) {
         instance.params.addListener(() => this._emitChange());
       }
@@ -113,32 +139,7 @@ const serviceManager = {
     // if instance exists and no other argument given, `get` acts a a pure getter
     const instance = this._instances[name];
 
-    if (options !== null) {
-      instance.configure(options);
-    }
-
-    if (dependencies.length) {
-      dependencies.forEach(dependencyName => {
-        if (!this._instances[dependencyName]) {
-          throw new Error(`"${name}" cannot depend on "${dependencyName}",
-            ${dependencyName} has not been required`);
-        }
-
-        const dependency = this._instances[dependencyName];
-        instance.requiredStartSignals.add(dependency.signals.ready);
-      });
-    }
-
     return instance;
-  },
-
-  /**
-   * Register a service with a given name.
-   * @param {String} name - The name of the service.
-   * @param {Function} ctor - The constructor of the service.
-   */
-  register(name, ctor) {
-    this._ctors[name] = ctor;
   },
 
   // @note - mimic state Manager API so we can change this later

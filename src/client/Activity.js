@@ -9,48 +9,13 @@ import SignalAll from '../common/SignalAll';
  * @extends module:soundworks/client.Process
  */
 class Activity {
-  constructor() {
-    /**
-     * Options of the activity.
-     * @type {Object}
-     * @name options
-     * @instance
-     * @memberof module:soundworks/client.Activity
-     */
-    this.options = {};
-
-    /**
-     * Signals defining the process state.
-     * @name signal
-     * @type {Object}
-     * @instanceof Process
-     */
-    this.signals = {};
-    this.signals.start = new Signal();
-
-    /**
-     * List of signals that must be set to `true` before the Activity can start.
-     * @private
-     */
-    this.requiredStartSignals = new SignalAll();
-  }
-
-  /**
-   * Configure the activity with the given options.
-   * @param {Object} options
-   */
-  configure(options) {
-    Object.assign(this.options, options);
-  }
+  constructor() {}
 
   /**
    * Logic to perform when an `Activity` (`Service` or `Experience`) starts.
    * i.e. when all the activities it relies on (`require`) are `ready`
    */
-  start() {
-    this.signals.start.set(true);
-  }
-
+  start() {}
 }
 
 export default Activity;

@@ -24,8 +24,13 @@ class Experience extends Activity {
     this.soundworks = soundworks;
   }
 
-  require(name, options = {}, dependencies = []) {
-    return this.soundworks.serviceManager.get(name, options, dependencies);
+  /**
+   * Require a registered service, all client types associated to the experience
+   * will also be associated to the required service.
+   * @param {String} name - Name of the service as given when registered
+   */
+  require(name) {
+    return this.soundworks.serviceManager.get(name, true);
   }
 
   /**

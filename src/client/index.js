@@ -90,12 +90,12 @@ const soundworks = {
   /**
    * @example
    * ```js
-   * soundworks.registerService(serviceFactory);
+   * soundworks.registerService(serviceFactory);  // do not document that, maybe remove
    * // or
    * soundworks.registerService('user-defined-name', serviceFactory);
    * ```
    */
-  registerService(nameOrFactory, factory = null) {
+  registerService(nameOrFactory, factory = null, options, dependecies) {
     let name;
 
     if (factory === null) {
@@ -106,7 +106,7 @@ const soundworks = {
     }
 
     const ctor = factory(this);
-    this.serviceManager.register(name, ctor);
+    this.serviceManager.register(name, ctor, options, dependecies);
   },
 };
 

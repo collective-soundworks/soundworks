@@ -1,5 +1,6 @@
 import Activity from './Activity';
 import Signal from '../common/Signal';
+import SignalAll from '../common/SignalAll';
 import debug from 'debug';
 // @todo - to be removed
 import serviceManager from './serviceManager';
@@ -26,17 +27,39 @@ class Service extends Activity {
     this.name = null;
 
     /**
-     * Is set to `true` when a signal is ready to be consumed.
-     * @type {Signal}
+     * Options of the activity.
+     * @type {Object}
+     * @name options
+     * @instance
+     * @memberof module:soundworks/client.Activity
      */
-    this.signals.ready = new Signal();
+    this.options = {};
+
+    /**
+     * Signals defining the process state.
+     * @name signal
+     * @type {Object}
+     * @instanceof Process
+     */
+    this.signals = {
+      start: new SignalAll(),
+      ready: new Signal(),
+    };
 
     // start when all required signals are fired
-    this.requiredStartSignals.addObserver(value => this.start());
+    this.signals.start.addObserver(value => this.start());
     // require at least the "start" signal of the service manager
-    this.requiredStartSignals.add(serviceManager.signals.start);
+    this.signals.start.add(serviceManager.signals.start);
 
     this.ready = this.ready.bind(this);
+  }
+
+  /**
+   * Configure the activity with the given options.
+   * @param {Object} options
+   */
+  configure(options) {
+    Object.assign(this.options, options);
   }
 
   /** @inheritdoc */
@@ -51,7 +74,7 @@ class Service extends Activity {
    */
   ready() {
     log(`> service "${this.name}" ready`);
-    this.signals.ready.set(true);
+    this.signals.ready.value = true;
   }
 }
 
