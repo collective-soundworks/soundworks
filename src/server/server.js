@@ -4,16 +4,15 @@ import https from 'https';
 import path from 'path';
 import pem from 'pem';
 import os from 'os';
-import chalk from 'chalk';
 import ejs from 'ejs';
 import polka from 'polka';
 import serveStatic from 'serve-static';
-import columnify from 'columnify';
 import compression from 'compression';
 import Client from './Client';
 import serviceManager from './serviceManager';
 import sockets from './sockets';
 import cache from './utils/cache';
+import logger from './utils/logger';
 
 /**
  * Server side entry point for a `soundworks` application.
@@ -240,31 +239,26 @@ const server = {
 
   initRouting() {
     // init routing for each client type
-    console.log(chalk.yellow(`+ available clients:`));
+    logger.title(`routing`);
 
     const routes = [];
     // open all routes except default
     for (let clientType in this._clientTypeActivitiesMap) {
       if (clientType !== this.config.defaultClient) {
-        const route = this._openClientRoute(clientType, this.router);
-        routes.push({ clientType: `[${clientType}]`, route: chalk.green(route) });
+        const path = this._openClientRoute(clientType, this.router);
+        routes.push({ clientType, path });
       }
     }
 
     // open default route last
     for (let clientType in this._clientTypeActivitiesMap) {
       if (clientType === this.config.defaultClient) {
-        const route = this._openClientRoute(clientType, this.router);
-        routes.unshift({ clientType: `[${clientType}]`, route: chalk.green(route) });
+        const path = this._openClientRoute(clientType, this.router);
+        routes.unshift({ clientType, path });
       }
     }
 
-    console.log(columnify(routes, {
-      showHeaders: false,
-      config: {
-        clientType: { align: 'right' },
-      },
-    }));
+    logger.routing(routes);
 
     return Promise.resolve();
   },
@@ -287,13 +281,12 @@ const server = {
       const ifaces = os.networkInterfaces();
 
       this.router.listen(port, () => {
-        // log infos
-        console.log(chalk.yellow(`+ ${protocol} server listening on:`));
+        logger.title(`${protocol} server listening on`);
 
         Object.keys(ifaces).forEach(dev => {
           ifaces[dev].forEach(details => {
             if (details.family === 'IPv4') {
-              console.log(`    ${protocol}://${details.address}:${chalk.green(port)}`);
+              logger.ip(protocol, details.address, port);
             }
           });
         });

@@ -2,6 +2,7 @@ import Activity from './Activity';
 import Signal from '../common/Signal';
 import SignalAll from '../common/SignalAll';
 import debug from 'debug';
+import logger from './utils/logger';
 
 // @todo - to be removed, move to dependency injection
 import serviceManager from './serviceManager';
@@ -66,7 +67,7 @@ class Service extends Activity {
 
   /** @inheritdoc */
   start() {
-    log(`> service "${this.name}" start`);
+    logger.serviceStart(this.name);
     super.start();
   }
 
@@ -75,7 +76,7 @@ class Service extends Activity {
    * `ready` and thus allows all its dependent activities to start themselves.
    */
   ready() {
-    log(`> service "${this.name}" ready`);
+    logger.serviceReady(this.name);
     this.signals.ready.value = true;
   }
 

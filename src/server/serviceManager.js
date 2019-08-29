@@ -1,7 +1,7 @@
-import chalk from 'chalk';
 import Signal from '../common/Signal';
 import SignalAll from '../common/SignalAll';
 import debug from 'debug';
+import logger from './utils/logger';
 
 const log = debug('soundworks:lifecycle');
 
@@ -32,19 +32,10 @@ const serviceManager = {
   /** @private */
   start() {
     log('> serviceManager start');
-
-    // @todo - move these logs to services
-    console.log(chalk.yellow(`+ required services`));
-    console.log(
-      this.getRequiredServices()
-        .sort()
-        .map(s => `    ${s} ${chalk.yellow(' starting...')}`)
-        .join('\n')
-    );
+    logger.title('initializing services');
 
     this.signals.ready.addObserver(() => {
       log('> serviceManager ready');
-
       this._resolveReadyPromise();
     });
 
@@ -91,6 +82,7 @@ const serviceManager = {
     }
 
     if (!this._instances[name]) {
+      log(`> instanciating service "${name}"`);
       const { ctor, options, dependencies } = this._registeredServices[name];
       // @todo - update that to `new ctor(name, options)`
       const instance = new ctor();
@@ -99,20 +91,10 @@ const serviceManager = {
 
       this.signals.ready.add(instance.signals.ready);
 
-      // log service readiness
-      // #todo - move to Service
-      instance.signals.ready.addObserver((state) => {
-        console.log(`    ${name} ${chalk.green(' ready')}`);
-      });
-
       if (dependencies.length > 0) {
         dependencies.forEach(dependencyName => {
-          console.log(dependencyName);
-
           if (!this._instances[dependencyName]) {
-            this.get(dependencyName, _experience); // pass experience to propagate client types
-            // const msg = `"${name}" cannot depend on "${n}", ${n} has not been required`;
-            // throw new Error(msg);
+            this.get(dependencyName, _experience); // propagate client types
           }
 
           const dependency = this._instances[dependencyName];

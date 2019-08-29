@@ -95,8 +95,6 @@ const serviceManager = {
       this.signals.ready.add(instance.signals.ready);
 
       if (dependencies.length > 0) {
-        console.log(dependencies);
-
         dependencies.forEach(dependencyName => {
           if (!this._instances[dependencyName]) {
             this.get(dependencyName, _experienceRequired);
