@@ -8,21 +8,19 @@ const log = debug('soundworks:lifecycle');
  * Factory and initialisation manager for the services.
  * Lazy instanciate an instance of the given type and retrieve it on each call.
  */
-const serviceManager = {
-  /** @private */
-  _instances: {},
-  /** @private */
-  _registeredService: {},
-  /** @private */
-  _observers: new Set(),
-  /** @ */
-  servicesStatus: {},
+class ServiceManager {
+  constructor(client) {
+    /** @private */
+    this._instances = {};
+    /** @private */
+    this._registeredService = {};
+    /** @private */
+    this._observers = new Set();
+    /** @private */
+    this.servicesStatus = {};
+    /** @private */
+    this._client = client;
 
-  /**
-   * Initialize the manager.
-   * @private
-   */
-  init() {
     log('> serviceManager init');
 
     this.signals = {
@@ -33,7 +31,7 @@ const serviceManager = {
     this.ready = new Promise((resolve, reject) => {
       this._resolveReadyPromise = resolve;
     });
-  },
+  }
 
   /**
    * Sends the signal required by all services to start.
@@ -56,7 +54,31 @@ const serviceManager = {
     }
 
     return this.ready;
-  },
+  }
+
+  // ------------------
+  // @unstable
+  // mimic state manager API, so we can change this later...
+  _emitChange() {
+    this._observers.forEach(observer => observer());
+  }
+
+  /** @unstable */
+  observe(observer) {
+    this._observers.add(observer);
+
+    return () => {
+      this._observers.delete(observer);
+    };
+  }
+
+  /** @unstable */
+  getValues() {
+    return Object.assign({}, this.servicesStatus);
+  }
+
+  // end @unstable
+  // ------------------
 
 
   /**
@@ -66,7 +88,7 @@ const serviceManager = {
    */
   register(name, ctor, options = {}, dependencies = []) {
     this._registeredService[name] = { ctor, options, dependencies };
-  },
+  }
 
   /**
    * Returns an instance of a service with options to be applied to its constructor.
@@ -87,10 +109,11 @@ const serviceManager = {
     if (!this._instances[name]) {
       const { ctor, options, dependencies } = this._registeredService[name];
       // @todo - update that to `new ctor(name, options)`
-      const instance = new ctor();
+      const instance = new ctor(this._client, name, options);
       instance.name = name;
       instance.configure(options);
-
+      // wait, at least,  for the service manager start signal
+      instance.signals.start.add(this.signals.start);
       // handle dependency tree
       this.signals.ready.add(instance.signals.ready);
 
@@ -138,25 +161,8 @@ const serviceManager = {
     const instance = this._instances[name];
 
     return instance;
-  },
-
-  // @note - mimic state Manager API so we can change this later
-  _emitChange() {
-    this._observers.forEach(observer => observer());
-  },
-
-  observe(observer) {
-    this._observers.add(observer);
-
-    return () => {
-      this._observers.delete(observer);
-    };
-  },
-
-  getValues() {
-    return Object.assign({}, this.servicesStatus);
   }
 };
 
-export default serviceManager;
+export default ServiceManager;
 

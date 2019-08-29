@@ -207,8 +207,8 @@ class State {
 }
 
 class StateManager {
-  constructor(client) {
-    this.client = client;
+  constructor(id, socket) {
+    this.client = { id, socket };
 
     this._statesById = new Map();
     this._observeListeners = new Set();

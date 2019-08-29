@@ -1,4 +1,3 @@
-import Activity from './Activity';
 import debug from 'debug';
 
 const log = debug('soundworks:lifecycle');
@@ -12,10 +11,8 @@ const log = debug('soundworks:lifecycle');
  * @memberof module:soundworks/client
  * @extends module:soundworks/client.Activity
  */
-class Experience extends Activity {
+class Experience {
   constructor(soundworks) {
-    super();
-
     // @todo - check that it's a soundworks instance
     if (!soundworks) {
       throw new Error('Experience should receive `soundworks` instance as first argument');
@@ -39,11 +36,9 @@ class Experience extends Activity {
    * the necessary informations and services ready to be consumed.
    */
   start() {
-    super.start();
-
     log(`> experience "${this.constructor.name}" start`);
 
-    this.soundworks.client.socket.send('s:exp:enter');
+    this.soundworks.socket.send('s:exp:enter');
   }
 }
 

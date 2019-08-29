@@ -38,14 +38,16 @@ const isBrowser = new Function("try {return this===window;}catch(e){ return fals
  *
  * @memberof module:soundworks/client
  */
-const socket = {
-  /**
-   * WebSocket instance (string protocol - binaryType = 'string').
-   */
-  ws: null,
+class Socket {
+  constructor() {
+    /**
+     * WebSocket instance (string protocol - binaryType = 'string').
+     */
+    this.ws = null;
 
-  _stringListeners: new Map(),
-  _binaryListeners: new Map(),
+    this._stringListeners = new Map();
+    this._binaryListeners = new Map();
+  }
 
   /**
    * Initialize a websocket connection with the server
@@ -138,7 +140,7 @@ const socket = {
 
     // wait for both socket to be opened
     return Promise.all([stringSocketPromise, binarySocketPromise]);
-  },
+  }
 
   /** @private */
   _emit(binary, channel, ...args) {
@@ -148,7 +150,7 @@ const socket = {
       const callbacks = listeners.get(channel);
       callbacks.forEach(callback => callback(...args));
     }
-  },
+  }
 
   /** @private */
   _addListener(listeners, channel, callback) {
@@ -158,7 +160,7 @@ const socket = {
 
     const callbacks = listeners.get(channel);
     callbacks.add(callback);
-  },
+  }
 
   /** @private */
   _removeListener(listeners, channel, callback) {
@@ -170,14 +172,14 @@ const socket = {
         listeners.delete(channel);
       }
     }
-  },
+  }
 
   /** @private */
   _removeAllListeners(listeners, channel) {
     if (listeners.has(channel)) {
       listeners.delete(channel);
     }
-  },
+  }
 
   /**
    * Send JSON compatible messages on a given channel
@@ -188,7 +190,7 @@ const socket = {
   send(channel, ...args) {
     const msg = packStringMessage(channel, ...args);
     this.ws.send(msg);
-  },
+  }
 
   /**
    * Listen JSON compatible messages on a given channel
@@ -198,7 +200,7 @@ const socket = {
    */
   addListener(channel, callback) {
     this._addListener(this._stringListeners, channel, callback);
-  },
+  }
 
   /**
    * Remove a listener from JSON compatible messages on a given channel
@@ -208,7 +210,7 @@ const socket = {
    */
   removeListener(channel, callback) {
     this._removeListener(this._stringListeners, channel, callback);
-  },
+  }
 
   /**
    * Remove all listeners from JSON compatible messages on a given channel
@@ -217,8 +219,7 @@ const socket = {
    */
   removeAllListeners(channel) {
     this._removeAllListeners(this._stringListeners, channel);
-  },
-
+  }
 
   /**
    * Send binary messages on a given channel
@@ -229,7 +230,7 @@ const socket = {
   sendBinary(channel, typedArray) {
     const msg = packBinaryMessage(channel, typedArray);
     this.binaryWs.send(msg);
-  },
+  }
 
   /**
    * Listen binary messages on a given channel
@@ -239,7 +240,7 @@ const socket = {
    */
   addBinaryListener(channel, callback) {
     this._addListener(this._binaryListeners, channel, callback);
-  },
+  }
 
   /**
    * Remove a listener from binary compatible messages on a given channel
@@ -249,7 +250,7 @@ const socket = {
    */
   removeBinaryListener(channel, callback) {
     this._removeListener(this._binaryListeners, channel, callback);
-  },
+  }
 
   /**
    * Remove all listeners from binary compatible messages on a given channel
@@ -258,7 +259,7 @@ const socket = {
    */
   removeAllBinaryListeners(channel) {
     this._removeAllListeners(this._binaryListeners, channel);
-  },
+  }
 };
 
-export default socket;
+export default Socket;

@@ -2,8 +2,6 @@ import Activity from './Activity';
 import Signal from '../common/Signal';
 import SignalAll from '../common/SignalAll';
 import debug from 'debug';
-// @todo - to be removed
-import serviceManager from './serviceManager';
 
 const log = debug('soundworks:lifecycle');
 
@@ -13,10 +11,8 @@ const log = debug('soundworks:lifecycle');
  * @memberof module:soundworks/client
  * @extends module:soundworks/client.Activity
  */
-class Service extends Activity {
+class Service {
   constructor() {
-    super();
-
     /**
      * Id of the service.
      * @type {String}
@@ -48,9 +44,6 @@ class Service extends Activity {
 
     // start when all required signals are fired
     this.signals.start.addObserver(value => this.start());
-    // require at least the "start" signal of the service manager
-    this.signals.start.add(serviceManager.signals.start);
-
     this.ready = this.ready.bind(this);
   }
 
@@ -65,7 +58,6 @@ class Service extends Activity {
   /** @inheritdoc */
   start() {
     log(`> service "${this.name}" start`);
-    super.start();
   }
 
   /**

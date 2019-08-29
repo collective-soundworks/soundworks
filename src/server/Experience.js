@@ -5,25 +5,9 @@ import debug from 'debug';
 const log = debug('soundworks:lifecycle');
 
 /**
- * Base class used to build a experience on the server side.
+ * @todo
  *
- * Along with the classic {@link src/server/core/Activity#connect} and
- * {@link src/server/core/Activity#disconnect} methods, the base class has two
- * additional methods:
- * - {@link Experience#enter}: called when the client enters the `Experience`
- * (*i.e.* when the {@link src/client/scene/Experience.js~Experience} on the
- * client side calls its {@link src/client/scene/Experience.js~Experience#start} method);
- * - {@link Experience#exit}: called when the client leaves the `Experience`
- * (*i.e.* when the {@link src/client/scene/Experience.js~Experience} on the
- * client side calls its {@link src/client/scene/Experience.js~Experience#done}
- * method, or if the client disconnected from the server).
  *
- * The base class also keeps track of the clients who are currently in the
- * performance (*i.e.* who entered but not exited yet) in the array `this.clients`.
- *
- * (See also {@link src/client/scene/Experience.js~Experience} on the client side.)
- *
- * @memberof module:soundworks/server
  */
 class Experience extends Activity {
   constructor(soundworks, clientTypes) {
@@ -40,7 +24,13 @@ class Experience extends Activity {
      * List of the clients who are currently in the performance.
      * @type {Client[]}
      */
-    this.clients = new Set(clientTypes);
+    this.clients = new Set();
+
+    /**
+     * List of client types associated with this server-side experience.
+     */
+    clientTypes = Array.isArray(clientTypes) ? clientTypes : [clientTypes];
+    this.clientTypes = new Set(clientTypes);
   }
 
   /**
