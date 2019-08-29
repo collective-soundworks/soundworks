@@ -40,8 +40,7 @@ class Experience extends Activity {
      * List of the clients who are currently in the performance.
      * @type {Client[]}
      */
-    this.clients = new Set();
-    this._addClientTypes(clientTypes);
+    this.clients = new Set(clientTypes);
   }
 
   /**

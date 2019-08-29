@@ -13,79 +13,75 @@ require() {}
 
 
 // lifetime of a client
-initSocket -> init communication (sockets)
+soundworks -> init
+  - init sockets
+
+soundworks -> start
 serviceManager -> start
-  a -> start (requiredStartPromises)
+  a -> start
   c -> start
   a -> ready
   b -> start
   c -> ready
   b -> ready
-serviceManager -> ready (requiredReadyPromises)
+serviceManager -> ready
 experience -> start
 
 ### client init lifecycle
 
 ```
-await soundworks.init(config); 
-  // init client (sockets)
+soundworks.registerService('my-service', MyServiceFactory, options = {});
 
+// init soundworks client 
+// mainly connect both web-sockets (string and binary))
+await soundworks.init(config); 
+
+// instanciate the experiences
 const player = new PlayerExperience(soundworks, config));
-soundworks.start().then(() => {;
-  // run serviceManager
-  // when services ready, resolve Promise
-  () => player.start()
-});
+
+// initialize all services
+await soundworks.start();
+// everything is ready, experience can start safely
+player.start();
 ```
 
 ### server init lifecycle
 
 ```
+// register services needed for the application
+soundworks.registerService('my-service', MyServiceFactory, options = {});
+
 await soundworks.init(config, () => {
   // config to sent to the clients
 });
 
-// do things
-const player = new PlayerExperience();
-const controller = new ControllerExperience();
+// instanciate the experiences
+const player = new PlayerExperience(soundworks, 'player');
+const controller = new ControllerExperience(soundworks, 'controller');
 
-soundworks.start().then(() => {
-  player.start();
-  controller.start();
-});
-  // instanciate http-server
-  // open routes
-  // instanciate web-socket server
-  // run serviceManager
-  // when services ready, http-server.listen()
-  // trigger soundworks.ready()
+// instanciate http-server
+// open routes
+// instanciate web-socket server
+// run serviceManager
+// when services ready, http-server.listen()
+await soundworks.start();
+// everything is ready, we can start the clients
+player.start();
+controller.start();
 ```
 
 ### Misc
 
-```
-const soundworks = { 
-  (client|server), 
-  serviceManager, 
-  stateManager, 
-
-  Experience,
-  Service,
-
-  await init() {}
-  await start() {} // return `ready` Promise
-} 
-```
 
 ```
 class MyExperience extends soundworks.Experience {
-  constructor() {
+  constructor(soundworks) {
     super();
 
     // client
-    this.client = soudnworks.client;
+    this.client = soudnworks.client; // ?
     // server
-    this.server = soundworks.server;
+    this.server = soundworks.server; // ?
     // both
     this.serviceManager = soudnworks.serviceManager;
     this.stateManager = soudnworks.stateManager;
@@ -97,14 +93,14 @@ class MyExperience extends soundworks.Experience {
   }
 
   // server only
-  async connect(client) {
-    // ... 
-    // async is needed because `connect` has to be slaved to the 
-    // initialization process of the `client`
+  enter(client) {
+    // client enter the experience when it has gone through 
+    // all services' initialization process (client-side and server-side)
   }
 
-  async disconnect(client) {
-    // ...
+  exit(client) {
+    // called when a user disconnect from the page, is called before 
+    // services disconnect method
   }
 }
 ```
@@ -114,15 +110,29 @@ class MyExperience extends soundworks.Experience {
 
 ```
 export default platform(soundworks) {
-  this.id = 'platform';
+  <!-- this.id = 'platform'; -->
 
   class Platform extends soundworks.Service {
-    constructor(id, client) {
-      super(id);
+    constructor(name, soundworks) {
+      super(soundworks);
+
+      this.name = name;
     }
 
-    start() {
-      
+    async start() {
+      await doStuff();
+
+      // notify manager that the service is ready
+      this.ready(); 
+    }
+
+    // server only
+    connect(client) {
+
+    }
+
+    disconnect(client) {
+
     }
   }
 
@@ -153,7 +163,7 @@ playerExperience.start();
 
 ```
 // server-side
-import { Server } from 'soundworks/server';
+import { Server } from 'soundworks/core/server';
 
 const server = new Server(config);
 // > server = { sockets, serviceManager, stateManager };
@@ -168,7 +178,56 @@ playerExperience.start();
 ```
 
 
+## Clean components API after instanciation
 
+```
+import { 
+  SoundworksClient, 
+  Experience, 
+  Service 
+} from '@soundworks/core/client';
+
+client {SoundworksClient} {
+  id {Number},
+  uuid {String},
+  clientType {String},
+  socket {Socket},
+  serviceManager {ServiceManager},
+  stateManager {StateManagerClient},
+
+  async init(config) {Function}
+  async start() {Function}
+  registerService(name, factory, options, dependencies);
+}
+```
+
+```
+import { 
+  SoundworksServer, 
+  Experience, 
+  Service 
+} from '@soundworks/core/server';
+
+server {SoundworksServer} {
+  // external dependencies
+  router {Polka}
+  httpServer {node http(s)Server}
+  db {Cache}  
+    // use keyv - Map API - front-end for multiple storage solutions
+    // https://github.com/lukechilds/keyv ()
+    // default storage: https://github.com/zaaack/keyv-file
+  
+  // sounworks specific
+  config {Object}
+  sockets {Sockets}
+  serviceManager {ServiceManager}
+  stateManager {StateManagerServer}
+  
+  async init(config) {Function}
+  async start() {Function}
+  registerService(name, factory, options, dependencies);
+}
+```
 
 
 

@@ -1,7 +1,6 @@
-import Signal from '../common/Signal';
-import SignalAll from '../common/SignalAll';
-
 /**
+ * @todo - remove that, this is stupid...
+ *
  * Internal base class for services and scenes. Basically a process with view
  * and network abilities.
  *

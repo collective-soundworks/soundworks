@@ -60,6 +60,7 @@ const server = {
 
   /**
    * key and certificates (may be generated and self-signed) for https server.
+   * @todo - put in config...
    */
   httpsInfos: null,
 

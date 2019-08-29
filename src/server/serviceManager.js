@@ -110,7 +110,9 @@ const serviceManager = {
 
     // if require by the experience, map client types
     if (_experience) {
-      instance._addClientTypes(_experience.clientTypes);
+      _experience.clientTypes.forEach((clientType) => {
+        instance.clientTypes.add(clientType);
+      });
     }
 
     return instance;

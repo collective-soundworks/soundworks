@@ -22,27 +22,6 @@ class Activity {
   }
 
   /**
-   * @private
-   *
-   * This method is required by the server to know which client should connect
-   * to which activity.
-   * Add client type that should be mapped to this activity.
-   *
-   * @param {String|Array} val - The client type(s) on which the activity
-   *  should be mapped
-   */
-  _addClientTypes(clientTypes) {
-    if (typeof clientTypes === 'string') {
-      clientTypes = [clientTypes];
-    }
-
-    // add client types to current activity
-    clientTypes.forEach((clientType) => {
-      this.clientTypes.add(clientType);
-    });
-  }
-
-  /**
    * Interface method to be implemented by activities. As part of an activity
    * lifecycle, the method should define the behavior of the activity when started
    * (e.g. binding listeners). When this method is called, all configuration options
