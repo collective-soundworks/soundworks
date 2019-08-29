@@ -4,12 +4,28 @@ import Socket from './Socket';
 import Service from './Service';
 
 /**
- * client-side part of *soundworks*
+ * Create a new client of *soundworks* application.
+ * The `Client` is the main entry point to access *soundworks* components
+ * such as `serviceManager` or `stateManager`. It is also responsible for
+ * handling initialization lifecycle (e.g. communication,
+ * initialization of services)
  *
- * @module @soundworks/core/client
+ * @memberof @soundworks/core/client
  *
  * @example
  * import soundworks from '@soundworks/core/client';
+ *
+ * // create a new `soundworks.Client` instance
+ * const client = new soundworks.Client();
+ * // initialize the client (mainly connect and initialize WebSockets)
+ * await client.init(config);
+ * // create application specific experience
+ * // must extends `soundworks.Experience`
+ * const playerExperience = new PlayerExperience(client);
+ * // start the client
+ * await client.start();
+ * // when everything is ready, start the experience
+ * playerExperience.start();
  */
 class Client {
   constructor() {
@@ -47,14 +63,14 @@ class Client {
     this.socket = new Socket();
 
     /**
-     * @todo
+     * @todo - serviceManager
      *
      * @type {module:soundworks/core/client.ServiceManager}
      */
     this.serviceManager = new ServiceManager(this);
 
     /**
-     * @todo
+     * @todo - stateManager
      *
      * @type {module:soundworks/core/client.StateManager}
      */
@@ -62,7 +78,7 @@ class Client {
   }
 
   /**
-   * @todo
+   * @todo - init
    */
   async init(config) {
     if (!('clientType' in config)) {
@@ -87,7 +103,7 @@ class Client {
   }
 
   /**
-   * @todo
+   * @todo - start
    */
   async start() {
     this._ready = new Promise((resolve, reject) => {

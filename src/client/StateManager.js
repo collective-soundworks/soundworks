@@ -55,6 +55,7 @@ function rejectRequest(reqId, data) {
   reject(data);
 }
 
+/** @private */
 class State {
   constructor(id, schemaName, schema, creator, owner, client, manager, initValues = {}) {
     this.id = id;
@@ -206,6 +207,12 @@ class State {
   }
 }
 
+/**
+ * Component dedicated at managing distributed states among a lot of clients
+ * focusing on application logic rather than network communication.
+ *
+ * @memberof @soundworks/core/client
+ */
 class StateManager {
   constructor(id, socket) {
     this.client = { id, socket };

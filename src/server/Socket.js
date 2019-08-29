@@ -25,7 +25,7 @@ const READY_STATES = ['CONNECTING', 'OPEN', 'CLOSING', 'CLOSED']
  *
  * @see https://github.com/websockets/ws
  *
- * @memberof module:soundworks/server
+ * @memberof @soundworks/core/server
  */
 class Socket {
   /** @private */

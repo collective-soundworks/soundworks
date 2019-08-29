@@ -5,8 +5,20 @@ import SignalAll from '../common/SignalAll';
 const log = debug('soundworks:lifecycle');
 
 /**
- * Factory and initialisation manager for the services.
- * Lazy instanciate an instance of the given type and retrieve it on each call.
+ * Component dedicated at instantiating and initializing services.
+ * Except if you know what you are doing, this components should not be
+ * accessed directly.
+ *
+ * An instance `ServiceManager` is automatically created by the `soundworks.Client`.
+ *
+ * @memberof @soundworks/core/client
+ *
+ * @example
+ * import soundworks from '@soundworks/core/client';
+ *
+ * // create a new `soundworks.Client` instance
+ * const client = new soundworks.Client();
+ * console.log(client.serviceManager);
  */
 class ServiceManager {
   constructor(client) {

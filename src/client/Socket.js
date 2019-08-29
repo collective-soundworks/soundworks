@@ -28,7 +28,7 @@ const isBrowser = new Function("try {return this===window;}catch(e){ return fals
 
 /**
  * Simple wrapper with simple pubsub system built on top of `ws` socket.
- * The abstraction actually open two different socket:
+ * The abstraction actually open two different sockets:
  * - one configured for string (JSON compatible) messages
  * - one configured with `binaryType=arraybuffer` for streaming data more
  *   efficiently.
@@ -36,7 +36,7 @@ const isBrowser = new Function("try {return this===window;}catch(e){ return fals
  *
  * @see https://github.com/websockets/ws
  *
- * @memberof module:soundworks/client
+ * @memberof @soundworks/core/client
  */
 class Socket {
   constructor() {

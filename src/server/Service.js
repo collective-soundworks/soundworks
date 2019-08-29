@@ -12,7 +12,8 @@ const log = debug('soundworks:lifecycle');
 /**
  * Base class to be extended in order to create a new service.
  *
- * @memberof module:soundworks/server
+ * @memberof @soundworks/core/server
+ *
  * @extends module:soundworks/server.Activity
  */
 class Service extends Activity {

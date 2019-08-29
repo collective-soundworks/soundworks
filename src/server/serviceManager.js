@@ -8,6 +8,8 @@ const log = debug('soundworks:lifecycle');
 /**
  * Manager the services and their relations. Acts as a factory to ensure services
  * are instanciated only once.
+ *
+ * @memberof @soundworks/core/server
  */
 const serviceManager = {
   /** @private */

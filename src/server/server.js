@@ -21,8 +21,7 @@ import logger from './utils/logger';
  * initialize and start the application. It is also responsible for creating
  * the static file (http) server as well as the socket server.
  *
- * @memberof module:soundworks/server
- * @namespace
+ * @memberof @soundworks/core/server
  *
  * @example
  * import * as soundworks from 'soundworks/server';

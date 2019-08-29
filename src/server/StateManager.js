@@ -169,9 +169,12 @@ class State {
 
 
 /**
- * Maybe we can assume the owner is always the server here
+ * @todo - review
+ * @note - Maybe we can assume the owner is always the server here
  * If the owner is a client, the server just send infos for
- * proper instanciations
+ * proper instanciations.
+ *
+ * @memberof @soundworks/core/server
  */
 class StateManager {
 

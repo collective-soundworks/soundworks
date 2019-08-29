@@ -13,7 +13,7 @@ const initializationCache = new Map();
  *
  * will be more simple to document.
  *
- * @memberof module:soundworks/server
+ * @memberof @soundworks/core/server
  */
 const sockets = {
   /**

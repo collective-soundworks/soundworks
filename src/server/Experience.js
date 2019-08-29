@@ -5,9 +5,9 @@ import debug from 'debug';
 const log = debug('soundworks:lifecycle');
 
 /**
- * @todo
+ * @todo - Experience
  *
- *
+ * @memberof @soundworks/core/server
  */
 class Experience extends Activity {
   constructor(soundworks, clientTypes) {

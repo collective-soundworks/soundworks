@@ -8,8 +8,7 @@ const log = debug('soundworks:lifecycle');
  *
  * The user defined `Experience` is the main component of a soundworks application.
  *
- * @memberof module:soundworks/client
- * @extends module:soundworks/client.Activity
+ * @memberof @soundworks/core/client
  */
 class Experience {
   constructor(soundworks) {

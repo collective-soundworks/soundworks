@@ -11,7 +11,7 @@ const generateId = idGenerator();
 /**
  * Server side representation of a client.
  *
- * @memberof module:soundworks/server
+ * @memberof @soundworks/core/server
  */
 class Client {
 	/**

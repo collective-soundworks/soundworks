@@ -9,12 +9,12 @@ import cache from './utils/cache';
 
 
 /**
- * client-side part of *soundworks*
+ * server-side part of *soundworks*
  *
- * @module @soundworks/core/client
+ * @module @soundworks/core/server
  *
  * @example
- * import soundworks from '@soundworks/core/client';
+ * import soundworks from '@soundworks/core/server';
  */
 const soundworks = {
   // expose base classes for service plugins and application code

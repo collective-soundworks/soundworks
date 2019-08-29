@@ -4,7 +4,7 @@ import server from './server';
 /**
  * Internal base class for Service and Experience
  *
- * @memberof module:soundworks/server
+ * @memberof @soundworks/core/server
  */
 class Activity {
   constructor() {

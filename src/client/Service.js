@@ -8,17 +8,17 @@ const log = debug('soundworks:lifecycle');
 /**
  * Base class to be extended in order to create a new service.
  *
- * @memberof module:soundworks/client
- * @extends module:soundworks/client.Activity
+ * @memberof @soundworks/core/client
  */
 class Service {
   constructor() {
     /**
-     * Id of the service.
+     * Name of the service, as defined on registration.
      * @type {String}
      * @name name
      * @type {String}
-     * @instanceof Process
+     * @instance
+     * @memberof @soundworks/core/client.Service
      */
     this.name = null;
 
@@ -27,7 +27,7 @@ class Service {
      * @type {Object}
      * @name options
      * @instance
-     * @memberof module:soundworks/client.Activity
+     * @memberof @soundworks/core/client.Service
      */
     this.options = {};
 
@@ -35,7 +35,8 @@ class Service {
      * Signals defining the process state.
      * @name signal
      * @type {Object}
-     * @instanceof Process
+     * @instance
+     * @memberof @soundworks/core/client.Service
      */
     this.signals = {
       start: new SignalAll(),
@@ -55,14 +56,28 @@ class Service {
     Object.assign(this.options, options);
   }
 
-  /** @inheritdoc */
+  /**
+   * Method where the initialization logic of a child Service should be
+   * implemented. When ready, the initialization step should call `this.ready`
+   * in order to inform the serviceManager that the service is ready to be
+   * consumed by the client, and thus allow to continue the initialization
+   * process.
+   *
+   * @example
+   * class MyDelayService extends soundworks.Service {
+   *   // ...
+   *   start() {
+   *     setTimeout(() => this.ready(), 3000);
+   *   }
+   * }
+   */
   start() {
     log(`> service "${this.name}" start`);
   }
 
   /**
    * Method to call in the service lifecycle when it should be considered as
-   * `ready` and thus allows all its dependent activities to start themselves.
+   * `ready` and thus allows the intialization process to continue.
    */
   ready() {
     log(`> service "${this.name}" ready`);
