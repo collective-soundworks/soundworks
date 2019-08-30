@@ -1,4 +1,3 @@
-import Activity from './Activity';
 import Signal from '../common/Signal';
 import SignalAll from '../common/SignalAll';
 import debug from 'debug';

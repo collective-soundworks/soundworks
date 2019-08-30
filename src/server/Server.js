@@ -13,7 +13,7 @@ import Service from './Service';
 import ServiceManager from './ServiceManager';
 import Sockets from './Sockets';
 import StateManager from './StateManager';
-import cache from './utils/cache';
+import Db from './Db';
 import logger from './utils/logger';
 
 /**
@@ -54,7 +54,7 @@ class Server {
     this.httpServer = null;
 
     /**
-     *
+     * Key / value storage with Promise based Map API
      */
     this.db = null;
 
@@ -168,11 +168,12 @@ class Server {
 
     this.stateManager = new StateManager(this);
 
+    this.db = new Db();
+
     return Promise.resolve();
   }
 
   async start() {
-    console.log(this);
     try {
       // ------------------------------------------------------------
       // init acitvities
@@ -222,9 +223,9 @@ class Server {
 
             return Promise.resolve(httpsServer);
           } else {
-            return new Promise((resolve, reject) => {
-              const key = cache.read('server', 'httpsKey');
-              const cert = cache.read('server', 'httpsCert');
+            return new Promise(async (resolve, reject) => {
+              const key = await this.db.get('server:httpsKey');
+              const cert = await this.db.get('server:httpsCert');
 
               if (key !== null && cert !== null) {
                 this._httpsInfos = { key, cert };
@@ -232,7 +233,7 @@ class Server {
                 resolve(httpsServer);
               } else {
                 // generate certificate on the fly (for development purposes)
-                pem.createCertificate({ days: 1, selfSigned: true }, (err, keys) => {
+                pem.createCertificate({ days: 1, selfSigned: true }, async (err, keys) => {
                   if (err) {
                     return console.error(err.stack);
                   }
@@ -242,8 +243,8 @@ class Server {
                     cert: keys.certificate,
                   };
 
-                  cache.write('server', 'httpsKey', this._httpsInfos.key);
-                  cache.write('server', 'httpsCert', this._httpsInfos.cert);
+                  await this.db.set('server:httpsKey', this._httpsInfos.key);
+                  await this.db.set('server:httpsCert', this._httpsInfos.cert);
 
                   const httpsServer = https.createServer(this._httpsInfos);
 

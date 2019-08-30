@@ -24,7 +24,7 @@
     "transpile:client": "babel src/client --out-dir client",
     "transpile:server": "babel src/server --out-dir server",
     "transpile:common": "babel src/common --out-dir common",
-    "transpile": "npm run transpile:server && npm run transpile:client && npm run transpile:common",
+    "transpile": "npm run clean && npm run transpile:server && npm run transpile:client && npm run transpile:common",
     "watch:client": "chokidar src/client/ -c \"npm run transpile:client\"",
     "watch:server": "chokidar src/server/ -c \"npm run transpile:server\"",
     "watch:common": "chokidar src/common/ -c \"npm run transpile:common\"",
