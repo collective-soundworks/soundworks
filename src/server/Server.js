@@ -105,7 +105,7 @@ class Server {
      * Default for the module:soundworks/server.server~clientConfigDefinition
      * @private
      */
-    this._clientConfigFunction = (clientType, serverConfig, httpRequest) => ({ clientType });
+    this._clientConfigFunction = null;
   }
 
     /**
@@ -114,11 +114,9 @@ class Server {
    *
    * @param {String} [options.defaultClient='player'] - Client that can access
    *   the application at its root url.
-   * @param {String} [options.publicDirectory='public'] - The public directory
-   *   to expose, for serving static assets.
+   * @param {String} [options.env='development']
    * @param {String} [options.port=8000] - Port on which the http(s) server will
    *   listen
-   * @param {Object} [options.serveStaticOptions={}] - TBD
    * @param {Boolean} [options.useHttps=false] - Define wheter to use or not an
    *   an https server.
    * @param {Object} [options.httpsInfos=null] - if `useHttps` is `true`, object
@@ -126,48 +124,41 @@ class Server {
    *   an auto generated certificate will be generated, be aware that browsers
    *   will consider the application as not safe in the case.
    * @param {Object} [options.websocket={}] - TBD
-   * @param {String} [options.env='development']
    * @param {String} [options.templateDirectory='src/server/tmpl'] - Folder in
    *   which the server will look for the `index.html` template.
    *
    * @param {Function} clientConfigFunction -
    */
-  async init(config, clientConfigFunction) {
+  async init(
+    config = {
+      env: {
+        type: 'development',
+        port: 8000,
+        "websockets": {
+          "path": "socket",
+          "pingInterval": 5000
+        },
+        "useHttps": false,
+      },
+      app: {
+        name: 'soundworks',
+        htmlTemplateDirectory: '.build/server/tmpl'
+      }
+    },
+    clientConfigFunction = (clientType, serverConfig, httpRequest) => ({ clientType })
+  ) {
     // must be done this way to keep the instance shared (??)
     this.config = config;
-
-    // do something for that...
-    if (this.config.port === undefined) {
-       this.config.port = 8000;
-    }
-
-    if (this.config.templateDirectory === undefined) {
-      this.config.templateDirectory = path.join(process.cwd(), '.build', 'server', 'tmpl');
-    }
-
-    if (this.config.defaultClient === undefined) {
-      this.config.defaultClient = 'player';
-    }
-
-    if (this.config.websockets === undefined) {
-      this.config.websockets = {};
-    }
-
-    if (clientConfigFunction) {
-      this._clientConfigFunction = clientConfigFunction;
-    }
+    this._clientConfigFunction = clientConfigFunction;
 
     this.serviceManager.init();
-
-    // instanciate and configure polka
     // allows to hook middleware and routes (e.g. cors) in the router
     // between `server.init` and `server.start`
     this.router = polka();
-    // compression (must be set before static)
+    // compression (must be set before serve-static)
     this.router.use(compression());
 
     this.stateManager = new StateManager(this);
-
     this.db = new Db();
 
     return Promise.resolve();
@@ -188,146 +179,154 @@ class Server {
         });
       });
 
-         // start http server
-    const useHttps = this.config.useHttps || false;
+      // start http server
+      const useHttps = this.config.env.useHttps || false;
 
-    return Promise.resolve()
-      // ------------------------------------------------------------
-      // create HTTP(S) SERVER
-      // ------------------------------------------------------------
-      .then(() => {
-        // create http server
-        if (!useHttps) {
-          const httpServer = http.createServer();
-          return Promise.resolve(httpServer);
-        } else {
-          const httpsInfos = this.config.httpsInfos;
+      return Promise.resolve()
+        // ------------------------------------------------------------
+        // create HTTP(S) SERVER
+        // ------------------------------------------------------------
+        .then(() => {
+          // create http server
+          if (!useHttps) {
+            const httpServer = http.createServer();
+            return Promise.resolve(httpServer);
+          } else {
+            const httpsInfos = this.config.env.httpsInfos;
 
-          if (httpsInfos.key && httpsInfos.cert) {
-            // use given certificate
-            try {
-              const key = fs.readFileSync(httpsInfos.key);
-              const cert = fs.readFileSync(httpsInfos.cert);
+            if (httpsInfos.key && httpsInfos.cert) {
+              // use given certificate
+              try {
+                const key = fs.readFileSync(httpsInfos.key);
+                const cert = fs.readFileSync(httpsInfos.cert);
 
-              this._httpsInfos = { key, cert };
-              const httpsServer = https.createServer(this._httpsInfos);
-            } catch(err) {
-              console.error(
+                this._httpsInfos = { key, cert };
+                const httpsServer = https.createServer(this._httpsInfos);
+              } catch(err) {
+                console.error(
 `Invalid certificate files, please check your:
 - key file: ${httpsInfos.key}
 - cert file: ${httpsInfos.cert}
-              `);
+                `);
 
-              throw err;
-            }
-
-            return Promise.resolve(httpsServer);
-          } else {
-            return new Promise(async (resolve, reject) => {
-              const key = await this.db.get('server:httpsKey');
-              const cert = await this.db.get('server:httpsCert');
-
-              if (key !== null && cert !== null) {
-                this._httpsInfos = { key, cert };
-                const httpsServer = https.createServer(this._httpsInfos);
-                resolve(httpsServer);
-              } else {
-                // generate certificate on the fly (for development purposes)
-                pem.createCertificate({ days: 1, selfSigned: true }, async (err, keys) => {
-                  if (err) {
-                    return console.error(err.stack);
-                  }
-
-                  this._httpsInfos = {
-                    key: keys.serviceKey,
-                    cert: keys.certificate,
-                  };
-
-                  await this.db.set('server:httpsKey', this._httpsInfos.key);
-                  await this.db.set('server:httpsCert', this._httpsInfos.cert);
-
-                  const httpsServer = https.createServer(this._httpsInfos);
-
-                  resolve(httpsServer);
-                });
+                throw err;
               }
-            });
-          }
-        }
-      }).then(httpServer => {
-        this.httpServer = httpServer;
-        this.router.server = httpServer;
 
-        return Promise.resolve();
-      }).then(() => {
-        // ------------------------------------------------------------
-        // INIT ROUTING
-        // ------------------------------------------------------------
-        logger.title(`routing`);
+              return Promise.resolve(httpsServer);
+            } else {
+              return new Promise(async (resolve, reject) => {
+                const key = await this.db.get('server:httpsKey');
+                const cert = await this.db.get('server:httpsCert');
 
-        const routes = [];
-        // open all routes except default
-        for (let clientType in this._clientTypeActivitiesMap) {
-          if (clientType !== this.config.defaultClient) {
-            const path = this._openClientRoute(clientType, this.router);
-            routes.push({ clientType, path });
-          }
-        }
+                if (key !== null && cert !== null) {
+                  this._httpsInfos = { key, cert };
+                  const httpsServer = https.createServer(this._httpsInfos);
+                  resolve(httpsServer);
+                } else {
+                  // generate certificate on the fly (for development purposes)
+                  pem.createCertificate({ days: 1, selfSigned: true }, async (err, keys) => {
+                    if (err) {
+                      return console.error(err.stack);
+                    }
 
-        // open default route last
-        for (let clientType in this._clientTypeActivitiesMap) {
-          if (clientType === this.config.defaultClient) {
-            const path = this._openClientRoute(clientType, this.router);
-            routes.unshift({ clientType, path });
-          }
-        }
+                    this._httpsInfos = {
+                      key: keys.serviceKey,
+                      cert: keys.certificate,
+                    };
 
-        logger.routing(routes);
+                    await this.db.set('server:httpsKey', this._httpsInfos.key);
+                    await this.db.set('server:httpsCert', this._httpsInfos.cert);
 
-        return Promise.resolve();
-      }).then(() => {
-        // ------------------------------------------------------------
-        // START SOCKET SERVER
-        // ------------------------------------------------------------
-        this.sockets.start(this.httpServer, this.config.websockets, (clientType, socket) => {
-          this._onSocketConnection(clientType, socket);
-        });
+                    const httpsServer = https.createServer(this._httpsInfos);
 
-        return Promise.resolve();
-      }).then(async () => {
-        // ------------------------------------------------------------
-        // START SERVICE MANAGER
-        // ------------------------------------------------------------
-        return this.serviceManager.start();
-
-      }).then(() => {
-        // ------------------------------------------------------------
-        // START HTTP SERVER
-        // ------------------------------------------------------------
-        return new Promise((resolve, reject) => {
-          const port = this.config.port;
-          const useHttps = this.config.useHttps || false;
-          const protocol = useHttps ? 'https' : 'http';
-          const ifaces = os.networkInterfaces();
-
-          this.router.listen(port, () => {
-            logger.title(`${protocol} server listening on`);
-
-            Object.keys(ifaces).forEach(dev => {
-              ifaces[dev].forEach(details => {
-                if (details.family === 'IPv4') {
-                  logger.ip(protocol, details.address, port);
+                    resolve(httpsServer);
+                  });
                 }
               });
-            });
+            }
+          }
+        }).then(httpServer => {
+          this.httpServer = httpServer;
+          this.router.server = httpServer;
 
-            resolve();
+          return Promise.resolve();
+        }).then(() => {
+          // ------------------------------------------------------------
+          // INIT ROUTING
+          // ------------------------------------------------------------
+          logger.title(`configured clients and routing`);
+
+          const routes = [];
+          let defaultClientType = null;
+
+          for (let clientType in this.config.app.clients) {
+            if (this.config.app.clients[clientType].default === true) {
+              defaultClientType = clientType;
+            }
+          }
+          // we must open default route last
+          for (let clientType in this._clientTypeActivitiesMap) {
+            if (clientType !== defaultClientType) {
+              const path = this._openClientRoute(clientType, this.router);
+              routes.push({ clientType, path });
+            }
+          }
+
+          // open default route last
+          for (let clientType in this._clientTypeActivitiesMap) {
+            if (clientType === defaultClientType) {
+              const path = this._openClientRoute(clientType, this.router, true);
+              routes.unshift({ clientType, path });
+            }
+          }
+
+          logger.clientConfigAndRouting(routes, this.config.app.clients, this.config.env.serverIp);
+
+          return Promise.resolve();
+        }).then(() => {
+          // ------------------------------------------------------------
+          // START SOCKET SERVER
+          // ------------------------------------------------------------
+          this.sockets.start(
+            this.httpServer,
+            this.config.env.websockets,
+            (clientType, socket) => this._onSocketConnection(clientType, socket)
+          );
+
+          return Promise.resolve();
+        }).then(async () => {
+          // ------------------------------------------------------------
+          // START SERVICE MANAGER
+          // ------------------------------------------------------------
+          return this.serviceManager.start();
+
+        }).then(() => {
+          // ------------------------------------------------------------
+          // START HTTP SERVER
+          // ------------------------------------------------------------
+          return new Promise((resolve, reject) => {
+            const port = this.config.env.port;
+            const useHttps = this.config.env.useHttps || false;
+            const protocol = useHttps ? 'https' : 'http';
+            const ifaces = os.networkInterfaces();
+
+            this.router.listen(port, () => {
+              logger.title(`${protocol} server listening on`);
+
+              Object.keys(ifaces).forEach(dev => {
+                ifaces[dev].forEach(details => {
+                  if (details.family === 'IPv4') {
+                    logger.ip(protocol, details.address, port);
+                  }
+                });
+              });
+
+              resolve();
+            });
           });
         });
-      });
 
       await this.serviceManager.start();
-      await this.listen();
 
       return Promise.resolve();
     } catch(err) {
@@ -352,10 +351,10 @@ class Server {
    * Open the route for the given client.
    * @private
    */
-  _openClientRoute(clientType, router) {
+  _openClientRoute(clientType, router, isDefault = false) {
     let route = '/';
 
-    if (clientType !== this.config.defaultClient) {
+    if (!isDefault) {
       route += `${clientType}`;
     }
 
@@ -364,7 +363,7 @@ class Server {
     }
 
     // define template filename: `${clientType}.ejs` or `default.ejs`
-    const templateDirectory = this.config.templateDirectory;
+    const templateDirectory = this.config.app.htmlTemplateDirectory;
     const clientTmpl = path.join(templateDirectory, `${clientType}.ejs`);
     const defaultTmpl = path.join(templateDirectory, `default.ejs`);
 
@@ -412,7 +411,7 @@ class Server {
     socket.addListener('s:client:handshake', data => {
       // in development, if service required client-side but not server-side,
       // complain properly client-side.
-      if (this.config.env !== 'production') {
+      if (this.config.env.type !== 'production') {
         // check coherence between client-side and server-side service requirements
         const clientRequiredServices = data.requiredServices || [];
         const serverRequiredServices = this.serviceManager.getRequiredServices(clientType);

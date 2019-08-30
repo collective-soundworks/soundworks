@@ -9,17 +9,49 @@ const logger = {
     console.log(chalk.cyan(`+ ${msg}`));
   },
 
-  routing(routes) {
-    routes = routes.map(({ clientType, path }) => {
-      return { clientType: `[${clientType}]`, path: chalk.green(path) };
-    });
+  clientConfigAndRouting(routes, clientsConfig, serverIp) {
+    const table = [];
 
-    console.log(columnify(routes, {
+    for (let clientType in clientsConfig) {
+      const client = clientsConfig[clientType];
+
+      if (client.target === 'node') {
+        const line = {
+          clientType: `${clientType}`,
+          target: chalk.red(client.target),
+          path: `server ip: ${chalk.green(serverIp)}`,
+          default: undefined
+        }
+
+        table.push(line);
+      } else if (client.target === 'browser') {
+        const line = {
+          clientType: `${clientType}`,
+          target: chalk.red(client.target),
+          path: routes.find(r => r.clientType === clientType) ?
+            chalk.green(routes.find(r => r.clientType === clientType).path) :
+            chalk.red('no route defined'),
+          default: (client.default ? 'default' : undefined)
+        }
+
+        table.push(line);
+      } else {
+        console.log(`@warning: no target defined for client ${clientType}`);
+      }
+    }
+
+    console.log(columnify(table, {
       showHeaders: false,
-      config: {
-        clientType: { align: 'right' },
-      },
+      minWidth: 14,
     }));
+
+    // check if a route is defined but not in config
+    const configClientTypes = Object.keys(clientsConfig);
+    routes.forEach(r => {
+      if (configClientTypes.indexOf(r.clientType) === -1) {
+        console.log(`@warning: no client config found for route ${r.clientType}`);
+      }
+    });
   },
 
   ip(protocol, address, port) {
