@@ -1,5 +1,3 @@
-import Activity from './Activity';
-import serviceManager from './serviceManager';
 import debug from 'debug';
 
 const log = debug('soundworks:lifecycle');
@@ -9,19 +7,22 @@ const log = debug('soundworks:lifecycle');
  *
  * @memberof @soundworks/core/server
  */
-class Experience extends Activity {
-  constructor(soundworks, clientTypes) {
-    super();
-
+class Experience {
+  constructor(server, clientTypes = null) {
     // @todo - check that it's a soundworks instance
-    if (!soundworks) {
-      throw new Error('Experience should receive `soundworks` instance as first argument');
+    if (!server) {
+      throw new Error('Experience should receive the `soundworks.Server` instance as first argument');
     }
 
-    this.soundworks = soundworks;
+    if (clientTypes === null) {
+      throw new Error('Invalid client types');
+    }
+
+    this.server = server;
 
     /**
-     * List of the clients who are currently in the performance.
+     * List of connected clients
+     * @instance
      * @type {Client[]}
      */
     this.clients = new Set();
@@ -31,6 +32,9 @@ class Experience extends Activity {
      */
     clientTypes = Array.isArray(clientTypes) ? clientTypes : [clientTypes];
     this.clientTypes = new Set(clientTypes);
+
+    // register in the server
+    this.server.activities.add(this);
   }
 
   /**
@@ -39,15 +43,14 @@ class Experience extends Activity {
    * always be done between `soundworks.init` and `soundworks.start`.
    * In most case this method is called in the constructor the Experience.
    *
-   * @param {String} name - Name of the service as given when registered
+   * @param {String} name - Name of the registered service
    */
   require(name) {
-    return this.soundworks.serviceManager.get(name, this);
+    return this.server.serviceManager.get(name, this);
   }
 
   start() {
     log(`> experience "${this.constructor.name}" start`);
-    super.start();
   }
 
   /**
@@ -56,10 +59,7 @@ class Experience extends Activity {
    * @private
    */
   connect(client) {
-    super.connect(client);
-    // log(`+ private + experience "${this.constructor.name}" connect: client ${client.id}`);
-
-    this.soundworks.stateManager.addClient(client);
+    this.server.stateManager.addClient(client);
     // listen for the `'enter' socket message from the client, the message is
     // sent when the client `enters` the Experience client side, i.e. when all
     // required services are ready
@@ -77,9 +77,6 @@ class Experience extends Activity {
    * @private
    */
   disconnect(client) {
-    super.disconnect(client);
-    // log(`+ private + experience "${this.constructor.name}" disconnect: client ${client.id}`);
-
     // only call exit if the client has fully entered
     // (i.e. has finished the its initialization phase)
     if (this.clients.has(client)) {
@@ -87,7 +84,7 @@ class Experience extends Activity {
       this.exit(client);
     }
 
-    this.soundworks.stateManager.removeClient(client);
+    this.server.stateManager.removeClient(client);
   }
 
   /**

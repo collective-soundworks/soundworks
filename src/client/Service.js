@@ -11,7 +11,16 @@ const log = debug('soundworks:lifecycle');
  * @memberof @soundworks/core/client
  */
 class Service {
-  constructor() {
+  constructor(client, name) {
+    /**
+     * Instance of soundworks client
+     * @type {String}
+     * @name client
+     * @instance
+     * @memberof module:@soundworks/core/server.Service
+     */
+    this.client = client;
+
     /**
      * Name of the service, as defined on registration.
      * @type {String}
@@ -20,7 +29,7 @@ class Service {
      * @instance
      * @memberof @soundworks/core/client.Service
      */
-    this.name = null;
+    this.name = name;
 
     /**
      * Options of the activity.
@@ -48,12 +57,8 @@ class Service {
     this.ready = this.ready.bind(this);
   }
 
-  /**
-   * Configure the activity with the given options.
-   * @param {Object} options
-   */
-  configure(options) {
-    Object.assign(this.options, options);
+  configure(defaults, options) {
+    return Object.assign(this.options, defaults, options);
   }
 
   /**

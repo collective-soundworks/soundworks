@@ -83,8 +83,8 @@ class MyExperience extends soundworks.Experience {
     // server
     this.server = soundworks.server; // ?
     // both
-    this.serviceManager = soudnworks.serviceManager;
-    this.stateManager = soudnworks.stateManager;
+    this.serviceManager = soundworks.serviceManager;
+    this.stateManager = soundworks.stateManager;
   }
 
   // called when serviceManager.ready()
@@ -147,16 +147,16 @@ export default platform(soundworks) {
 
 ```
 // client-side
-import { Client } from '@soundworks/core/client';
+import soundworks from '@soundworks/core/client';
 
-const client = new Client(config);
-// > client = { id, uuid, socket, serviceManager, stateManager, clientType };
+const soundworks = new soundworks.Client(config);
+// > soundworks = { id, uuid, socket, serviceManager, stateManager, clientType };
 // connect sockets
-await client.init();
+await soundworks.init();
 
-const playerExperience = new PlayerExperience(client);
+const playerExperience = new PlayerExperience(soundworks);
 // init required services 
-await client.start();
+await soundworks.start();
 
 playerExperience.start();
 ```

@@ -11,13 +11,13 @@ const log = debug('soundworks:lifecycle');
  * @memberof @soundworks/core/client
  */
 class Experience {
-  constructor(soundworks) {
+  constructor(client) {
     // @todo - check that it's a soundworks instance
-    if (!soundworks) {
-      throw new Error('Experience should receive `soundworks` instance as first argument');
+    if (!client) {
+      throw new Error('Experience should receive the `soundworks.Client` instance as first argument');
     }
 
-    this.soundworks = soundworks;
+    this.client = client;
   }
 
   /**
@@ -26,7 +26,7 @@ class Experience {
    * @param {String} name - Name of the service as given when registered
    */
   require(name) {
-    return this.soundworks.serviceManager.get(name, true);
+    return this.client.serviceManager.get(name, true);
   }
 
   /**
@@ -37,7 +37,7 @@ class Experience {
   start() {
     log(`> experience "${this.constructor.name}" start`);
 
-    this.soundworks.socket.send('s:exp:enter');
+    this.client.socket.send('s:exp:enter');
   }
 }
 

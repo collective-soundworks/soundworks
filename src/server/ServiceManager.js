@@ -11,11 +11,15 @@ const log = debug('soundworks:lifecycle');
  *
  * @memberof @soundworks/core/server
  */
-const serviceManager = {
-  /** @private */
-  _registeredServices: {},
-  /** @private */
-  _instances: {},
+class ServiceManager {
+  constructor(server) {
+    /** @private */
+    this._registeredServices = {};
+    /** @private */
+    this._instances = {};
+    /** @private */
+    this._server = server;
+  }
 
   /** @private */
   init() {
@@ -29,7 +33,7 @@ const serviceManager = {
     this.ready = new Promise((resolve, reject) => {
       this._resolveReadyPromise = resolve;
     });
-  },
+  }
 
   /** @private */
   start() {
@@ -49,7 +53,7 @@ const serviceManager = {
     }
 
     return this.ready;
-  },
+  }
 
   /**
    * Register a service
@@ -66,7 +70,7 @@ const serviceManager = {
     }
 
     this._registeredServices[name] = { ctor, options, dependencies };
-  },
+  }
 
   /**
    * Retrieve an instance of a registered service according to its given name.
@@ -87,11 +91,10 @@ const serviceManager = {
       log(`> instanciating service "${name}"`);
       const { ctor, options, dependencies } = this._registeredServices[name];
       // @todo - update that to `new ctor(name, options)`
-      const instance = new ctor();
-      instance.name = name;
-      instance.configure(options);
+      const instance = new ctor(this._server, name, options);
 
       this.signals.ready.add(instance.signals.ready);
+      instance.signals.start.add(this.signals.start);
 
       if (dependencies.length > 0) {
         dependencies.forEach(dependencyName => {
@@ -118,7 +121,7 @@ const serviceManager = {
     }
 
     return instance;
-  },
+  }
 
   /** @private */
   getRequiredServices(clientType = null) {
@@ -135,7 +138,7 @@ const serviceManager = {
     }
 
     return services;
-  },
-};
+  }
+}
 
-export default serviceManager;
+export default ServiceManager;

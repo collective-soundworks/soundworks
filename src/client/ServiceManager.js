@@ -120,10 +120,7 @@ class ServiceManager {
 
     if (!this._instances[name]) {
       const { ctor, options, dependencies } = this._registeredService[name];
-      // @todo - update that to `new ctor(name, options)`
       const instance = new ctor(this._client, name, options);
-      instance.name = name;
-      instance.configure(options);
       // wait, at least,  for the service manager start signal
       instance.signals.start.add(this.signals.start);
       // handle dependency tree

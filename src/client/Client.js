@@ -150,7 +150,7 @@ class Client {
    * ```
    */
   registerService(name, factory = null, options = {}, dependencies = []) {
-    const ctor = factory({ Service });
+    const ctor = factory(Service);
     this.serviceManager.register(name, ctor, options = {}, dependencies = []);
   }
 };

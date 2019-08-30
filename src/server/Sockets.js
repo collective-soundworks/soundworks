@@ -2,9 +2,6 @@ import WebSocket from 'ws';
 import querystring from 'querystring';
 import Socket from './Socket';
 
-/** @private */
-const initializationCache = new Map();
-
 /**
  * Internal base class for services and scenes.
  *
@@ -15,12 +12,16 @@ const initializationCache = new Map();
  *
  * @memberof @soundworks/core/server
  */
-const sockets = {
-  /**
-   * Store sockets per room. The romm `'*'` store all current connections.
-   * @private
-   */
-  _rooms: new Map(),
+class Sockets {
+  constructor() {
+    /**
+     * Store sockets per room. The romm `'*'` store all current connections.
+     * @private
+     */
+    this._rooms = new Map();
+
+    this._initializationCache = new Map();
+  }
 
   /**
    * Initialize sockets, all sockets are added by default added to two rooms:
@@ -48,11 +49,11 @@ const sockets = {
         ws.binaryType = 'arraybuffer';
       }
 
-      if (!initializationCache.has(key)) {
-        initializationCache.set(key, { ws, binary });
+      if (!this._initializationCache.has(key)) {
+        this._initializationCache.set(key, { ws, binary });
       } else {
-        const cached = initializationCache.get(key);
-        initializationCache.delete(key);
+        const cached = this._initializationCache.get(key);
+        this._initializationCache.delete(key);
 
         // should be in order, but just to be sure
         const stringWs = cached.binary ? ws : cached.ws;
@@ -65,7 +66,7 @@ const sockets = {
         onConnectionCallback(clientType, socket);
       }
     });
-  },
+  }
 
   /** @private */
   _broadcast(binary, roomIds, excludeSocket, channel, ...args) {
@@ -98,7 +99,7 @@ const sockets = {
         }
       }
     });
-  },
+  }
 
   /**
    * Add a socket to a room
@@ -108,7 +109,7 @@ const sockets = {
    */
   addToRoom(socket, roomId) {
     socket.addToRoom(roomId);
-  },
+  }
 
   /**
    * Remove a socket from a room
@@ -118,7 +119,7 @@ const sockets = {
    */
   removeFromRoom(socket, roomId) {
     socket.removeFromRoom(roomId);
-  },
+  }
 
   /**
    * Send a string message to all client of given room(s). If no room
@@ -134,7 +135,7 @@ const sockets = {
    */
   broadcast(roomIds, excludeSocket, channel, ...args) {
     this._broadcast(false, roomIds, excludeSocket, channel, ...args);
-  },
+  }
 
   /**
    * Send a binary message (TypedArray) to all client of given room(s). If no room
@@ -150,7 +151,7 @@ const sockets = {
    */
   broadcastBinary(roomIds, excludeSocket, channel, typedArray) {
     this._broadcast(true, roomIds, excludeSocket, channel, typedArray);
-  },
+  }
 };
 
-export default sockets;
+export default Sockets;

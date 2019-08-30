@@ -1,11 +1,7 @@
-import Activity from './Activity';
 import Signal from '../common/Signal';
 import SignalAll from '../common/SignalAll';
 import debug from 'debug';
 import logger from './utils/logger';
-
-// @todo - to be removed, move to dependency injection
-import serviceManager from './serviceManager';
 
 const log = debug('soundworks:lifecycle');
 
@@ -13,21 +9,26 @@ const log = debug('soundworks:lifecycle');
  * Base class to be extended in order to create a new service.
  *
  * @memberof @soundworks/core/server
- *
- * @extends module:soundworks/server.Activity
  */
-class Service extends Activity {
-  constructor() { // should receive soundworks instance as argument
-    super();
+class Service {
+  constructor(server, name) { // should receive soundworks instance as argument
+    /**
+     * Instance of soundworks server
+     * @type {String}
+     * @name server
+     * @instance
+     * @memberof module:@soundworks/core/server.Service
+     */
+    this.server = server;
 
     /**
      * Id of the service.
      * @type {String}
      * @name name
      * @instance
-     * @memberof module:soundworks/server.Activity
+     * @memberof module:@soundworks/core/server.Service
      */
-    this.name = null;
+    this.name = name;
 
     /**
      * Options of the activity. These values should be updated with the
@@ -35,7 +36,7 @@ class Service extends Activity {
      * @type {Object}
      * @name options
      * @instance
-     * @memberof module:soundworks/server.Activity
+     * @memberof module:@soundworks/core/server.Service
      */
     this.options = {};
 
@@ -50,26 +51,27 @@ class Service extends Activity {
       ready: new Signal()
     };
 
+    /**
+     *
+     */
+    this.clientTypes = new Set();
+
+    // register in the server
+    this.server.activities.add(this);
+
     // start when all required signals are fired
     this.signals.start.addObserver(value => this.start());
-    // require at least the "start" signal of the service manager
-    this.signals.start.add(serviceManager.signals.start);
 
     this.ready = this.ready.bind(this);
   }
 
-  /**
-   * Configure the activity.
-   * @param {Object} options
-   */
-  configure(options) {
-    Object.assign(this.options, options);
+  configure(defaults, options) {
+    return Object.assign(this.options, defaults, options);
   }
 
   /** @inheritdoc */
   start() {
     logger.serviceStart(this.name);
-    super.start();
   }
 
   /**
@@ -83,12 +85,10 @@ class Service extends Activity {
 
   connect(client) {
     log(`> [client ${client.id}] connect service "${this.name}"`);
-    super.connect(client);
   }
 
   disconnect(client) {
     log(`> [client ${client.id}] disconnect service "${this.name}"`);
-    super.disconnect(client);
   }
 }
 
