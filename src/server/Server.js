@@ -4,7 +4,6 @@ import https from 'https';
 import path from 'path';
 import pem from 'pem';
 import os from 'os';
-import ejs from 'ejs';
 import polka from 'polka';
 import serveStatic from 'serve-static';
 import compression from 'compression';
@@ -36,25 +35,41 @@ import logger from './utils/logger';
 class Server {
   constructor() {
     /**
-     * Configuration informations, all config objects passed to the
-     * [`server.init`]{@link module:soundworks/server.server.init} are merged
-     * into this object.
-     * @type {module:soundworks/server.server~serverConfig}
+     * Configuration informations. Defaults to:
+     * ```
+     * {
+     *   env: {
+     *     type: 'development',
+     *     port: 8000,
+     *     "websockets": {
+     *       "path": "socket",
+     *       "pingInterval": 5000
+     *     },
+     *     "useHttps": false,
+     *   },
+     *   app: {
+     *     name: 'soundworks',
+     *   },
+     * }
+     * ```
      */
     this.config = {};
 
     /**
-     * polka instance, can allow to expose additionnal routes (e.g. REST API).
+     * Router. Internally use polka.
+     * (cf. https://github.com/lukeed/polka)
      */
     this.router = null;
 
     /**
-     * http(s) server instance.
+     * http(s) server instance. The node `http` or `https` module instance
+     * (cf. https://nodejs.org/api/http.html)
      */
     this.httpServer = null;
 
     /**
      * Key / value storage with Promise based Map API
+     * basically a wrapper around kvey (https://github.com/lukechilds/keyv)
      */
     this.db = null;
 
@@ -102,10 +117,12 @@ class Server {
     this._routes = {};
 
     /**
-     * Default for the module:soundworks/server.server~clientConfigDefinition
-     * @private
+     *
      */
-    this._clientConfigFunction = null;
+    this._htmlTemplateConfig = {
+      engine: null,
+      directory: null,
+    }
   }
 
     /**
@@ -142,7 +159,6 @@ class Server {
       },
       app: {
         name: 'soundworks',
-        htmlTemplateDirectory: '.build/server/tmpl'
       }
     },
     clientConfigFunction = (clientType, serverConfig, httpRequest) => ({ clientType })
@@ -251,6 +267,11 @@ class Server {
 
           return Promise.resolve();
         }).then(() => {
+          if (this._htmlTemplateConfig.engine === null ||
+              this._htmlTemplateConfig.directory === null) {
+            throw new Error('Invalid html template configuration, please call `server.configureHtmlTemplates(engine, directory)`');
+          }
+
           // ------------------------------------------------------------
           // INIT ROUTING
           // ------------------------------------------------------------
@@ -348,6 +369,19 @@ class Server {
   }
 
   /**
+   * Configure html template informations
+   * @param {Object} engine - Template engine that should implement a `compile` method.
+   * @param {String} directory - Path to the directory containing the templates,
+   *  any filename corresponding to a registered browser client type will be used
+   *  in priority, in not present fallback to `default` (i.e `${clientType}.tmpl`
+   *  with fallback to `default.tmpl`. Template files must have the `.tmpl` extension.
+   */
+  configureHtmlTemplates(engine, directory) {
+    this._htmlTemplateConfig.engine = engine;
+    this._htmlTemplateConfig.directory = directory;
+  }
+
+  /**
    * Open the route for the given client.
    * @private
    */
@@ -362,29 +396,28 @@ class Server {
       route += this._routes[clientType];
     }
 
-    // define template filename: `${clientType}.ejs` or `default.ejs`
-    const templateDirectory = this.config.app.htmlTemplateDirectory;
-    const clientTmpl = path.join(templateDirectory, `${clientType}.ejs`);
-    const defaultTmpl = path.join(templateDirectory, `default.ejs`);
+    // define template filename: `${clientType}.html` or `default.html`
+    const templateDirectory = this._htmlTemplateConfig.directory;
+    const clientTmpl = path.join(templateDirectory, `${clientType}.tmpl`);
+    const defaultTmpl = path.join(templateDirectory, `default.tmpl`);
 
-    // all this can happen later
-    fs.stat(clientTmpl, (err, stats) => {
-      let template;
+    // make it sync
+    let template;
 
-      if (err || !stats.isFile()) {
-        template = defaultTmpl;
-      } else {
-        template = clientTmpl;
-      }
+    try {
+      const stats = fs.statSync(clientTmpl);
+      template = stats.isFile() ? clientTmpl : defaultTmpl;
+    } catch(err) {
+      template = defaultTmpl;
+    }
 
-      const tmplString = fs.readFileSync(template, { encoding: 'utf8' });
-      const tmpl = ejs.compile(tmplString);
-      // http request
-      router.get(route, (req, res) => {
-        const data = this._clientConfigFunction(clientType, this.config, req);
-        const appIndex = tmpl({ data });
-        res.end(appIndex);
-      });
+    const tmplString = fs.readFileSync(template, 'utf8');
+    const tmpl = this._htmlTemplateConfig.engine.compile(tmplString);
+    // http request
+    router.get(route, (req, res) => {
+      const data = this._clientConfigFunction(clientType, this.config, req);
+      const appIndex = tmpl(data);
+      res.end(appIndex);
     });
 
     // return route infos for logging on server start
