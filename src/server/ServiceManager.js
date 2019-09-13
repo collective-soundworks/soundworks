@@ -79,7 +79,10 @@ class ServiceManager {
    */
   get(name, _experience = null) {
     if (!this._registeredServices[name]) {
-      throw new Error(`Service "${name}" is not defined`);
+      throw new Error(`Cannot get or require service "${name}", service is not registered
+> registered services are:
+${Object.keys(this._registeredServices).map(n => `> - ${n}\n`).join('')}
+`);
     }
 
     // required by experience and manager already started
@@ -90,7 +93,6 @@ class ServiceManager {
     if (!this._instances[name]) {
       log(`> instanciating service "${name}"`);
       const { ctor, options, dependencies } = this._registeredServices[name];
-      // @todo - update that to `new ctor(name, options)`
       const instance = new ctor(this._server, name, options);
 
       this.signals.ready.add(instance.signals.ready);
@@ -106,7 +108,6 @@ class ServiceManager {
           instance.signals.start.add(dependency.signals.ready);
         });
       }
-
 
       this._instances[name] = instance;
     }

@@ -25,11 +25,11 @@ class ServiceManager {
     /** @private */
     this._instances = {};
     /** @private */
-    this._registeredService = {};
+    this._registeredServices = {};
     /** @private */
     this._observers = new Set();
     /** @private */
-    this.servicesStatus = {};
+    this._servicesStatus = {};
     /** @private */
     this._client = client;
 
@@ -72,7 +72,8 @@ class ServiceManager {
   // @unstable
   // mimic state manager API, so we can change this later...
   _emitChange() {
-    this._observers.forEach(observer => observer());
+    const status = this.getValues();
+    this._observers.forEach(observer => observer(status));
   }
 
   /** @unstable */
@@ -86,7 +87,7 @@ class ServiceManager {
 
   /** @unstable */
   getValues() {
-    return Object.assign({}, this.servicesStatus);
+    return Object.assign({}, this._servicesStatus);
   }
 
   // end @unstable
@@ -99,7 +100,7 @@ class ServiceManager {
    * @param {Function} ctor - The constructor of the service.
    */
   register(name, ctor, options = {}, dependencies = []) {
-    this._registeredService[name] = { ctor, options, dependencies };
+    this._registeredServices[name] = { ctor, options, dependencies };
   }
 
   /**
@@ -109,8 +110,11 @@ class ServiceManager {
    *  previously given options.
    */
   get(name, _experienceRequired = false) {
-    if (!this._registeredService[name]) {
-      throw new Error(`Service "${name}" is not defined`);
+    if (!this._registeredServices[name]) {
+      throw new Error(`Cannot get or require service "${name}", service is not registered
+> registered services are:
+${Object.keys(this._registeredServices).map(n => `> - ${n}\n`).join('')}
+`);
     }
 
     // throw an error if manager already started
@@ -119,7 +123,7 @@ class ServiceManager {
     }
 
     if (!this._instances[name]) {
-      const { ctor, options, dependencies } = this._registeredService[name];
+      const { ctor, options, dependencies } = this._registeredServices[name];
       const instance = new ctor(this._client, name, options);
       // wait, at least,  for the service manager start signal
       instance.signals.start.add(this.signals.start);
@@ -138,29 +142,42 @@ class ServiceManager {
       }
 
       // handle service status for reporting
-      this.servicesStatus[name] = 'idle';
+      this._servicesStatus[name] = 'idle';
+      let unsubscribe;
 
-      const onServiceStart = () => {
-        this.servicesStatus[name] = 'started';
+      const onServiceStarted = () => {
+        this._servicesStatus[name] = 'started';
+
+        unsubscribe = instance.state.subscribe(() => {
+          this._emitChange();
+        });
+
         this._emitChange();
+      }
+
+      const onServiceErrored = () => {
+        this._servicesStatus[name] = 'errored';
+        this._emitChange();
+        unsubscribe();
+
+        instance.signals.started.removeObserver(onServiceStarted);
+        instance.signals.ready.removeObserver(onServiceReady);
+        instance.signals.errored.removeObserver(onServiceErrored);
       }
 
       const onServiceReady = () => {
-        this.servicesStatus[name] = 'ready';
+        this._servicesStatus[name] = 'ready';
         this._emitChange();
+        unsubscribe();
 
-        instance.signals.start.removeObserver(onServiceStart)
-        instance.signals.ready.removeObserver(onServiceReady)
+        instance.signals.started.removeObserver(onServiceStarted);
+        instance.signals.ready.removeObserver(onServiceReady);
+        instance.signals.errored.removeObserver(onServiceErrored);
       }
 
-      instance.signals.start.addObserver(onServiceStart);
+      instance.signals.started.addObserver(onServiceStarted);
       instance.signals.ready.addObserver(onServiceReady);
-      // trigger updates on params update too
-      // @note - this should be kept private for now
-      // @todo - change this for a shared state, using `stateManager`
-      if (instance.params && instance.params.addListener) {
-        instance.params.addListener(() => this._emitChange());
-      }
+      instance.signals.errored.addObserver(onServiceErrored);
 
       // store instance
       this._instances[name] = instance;

@@ -59,7 +59,7 @@ const logger = {
   },
 
   serviceStart(name) {
-    console.log(`    ${name} ${chalk.cyan('starting...')}`);
+    console.log(`    ${name} ${chalk.cyan('started...')}`);
   },
 
   serviceReady(name) {

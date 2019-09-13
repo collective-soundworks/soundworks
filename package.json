@@ -1,6 +1,6 @@
 {
   "name": "@soundworks/core",
-  "version": "3.0.0-alpha.1",
+  "version": "3.0.0-alpha.2",
   "description": "full-stack javascript framework for distributed audio visual experiences on the web",
   "authors": [
     "Benjamin Matuszewski",
@@ -31,6 +31,7 @@
     "watch": "npm run transpile && concurrently \"npm run watch:client\" \"npm run watch:server\" \"npm run watch:common\""
   },
   "dependencies": {
+    "@babel/plugin-proposal-export-default-from": "^7.5.2",
     "@ircam/parameters": "^1.2.2",
     "chalk": "^2.4.2",
     "columnify": "^1.5.4",

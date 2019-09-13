@@ -151,7 +151,7 @@ class Client {
    */
   registerService(name, factory = null, options = {}, dependencies = []) {
     const ctor = factory(Service);
-    this.serviceManager.register(name, ctor, options = {}, dependencies = []);
+    this.serviceManager.register(name, ctor, options, dependencies);
   }
 };
 

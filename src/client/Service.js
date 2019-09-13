@@ -11,6 +11,13 @@ const log = debug('soundworks:lifecycle');
  */
 class Service {
   constructor(client, name) {
+    if (!(client)) {
+      throw new Error(`[service] 1rst argument should be an instance of Client`);
+    }
+
+    if (!name) {
+      throw new Error(`[service] 2nd argument should be a valid name`);
+    }
     /**
      * Instance of soundworks client
      * @type {String}
@@ -48,12 +55,17 @@ class Service {
      */
     this.signals = {
       start: new SignalAll(),
+      started: new Signal(),
       ready: new Signal(),
+      errored: new Signal(), // @needs a payload
     };
 
     // start when all required signals are fired
     this.signals.start.addObserver(value => this.start());
+
+    this.started = this.started.bind(this);
     this.ready = this.ready.bind(this);
+    this.error = this.error.bind(this);
   }
 
   configure(defaults, options) {
@@ -80,12 +92,38 @@ class Service {
   }
 
   /**
+   * Method to call when the service is effectively started, as it may do async
+   * job at start (cf. platform-service.client).
+   * Should be called between `start` and `ready`
+   *
+   * @example
+   * class MyDelayService extends soundworks.Service {
+   *   // ...
+   *   start() {
+   *     setTimeout(() => this.ready(), 3000);
+   *   }
+   * }
+   */
+  started() {
+    // @note - this as no strong incidence on the initialization lifecycle,
+    // maybe should be enforced
+    log(`> service "${this.name}" started`);
+    this.signals.started.value = true;
+  }
+
+  /**
    * Method to call in the service lifecycle when it should be considered as
    * `ready` and thus allows the intialization process to continue.
    */
   ready() {
     log(`> service "${this.name}" ready`);
     this.signals.ready.value = true;
+  }
+
+  error(msg) {
+    log(`> service "${this.name}" error: ${msg}`);
+    this.signals.errored.msg = msg;
+    this.signals.errored.value = true;
   }
 }
 

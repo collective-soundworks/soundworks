@@ -3,6 +3,8 @@ import SignalAll from '../common/SignalAll';
 import debug from 'debug';
 import logger from './utils/logger';
 
+// import
+
 const log = debug('soundworks:lifecycle');
 
 /**
@@ -48,7 +50,9 @@ class Service {
      */
     this.signals = {
       start: new SignalAll(),
-      ready: new Signal()
+      started: new Signal(),
+      ready: new Signal(),
+      errored: new Signal(),
     };
 
     /**
@@ -71,7 +75,14 @@ class Service {
 
   /** @inheritdoc */
   start() {
+    // logger.serviceStart(this.name);
+  }
+
+  started() {
+    // @note - this as no strong incidence on the initialization lifecycle,
+    // maybe should be enforced
     logger.serviceStart(this.name);
+    this.signals.started.value = true;
   }
 
   /**
