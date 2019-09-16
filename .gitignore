@@ -18,3 +18,22 @@ Thumbs.db
 # ...
 NOTES.md
 # CHANGELOG.md
+
+# v3
+_backup/
+client/Client.js
+client/Experience.js
+client/Service.js
+client/ServiceManager.js
+client/Socket.js
+client/StateManager.js
+common/
+server/Client.js
+server/Db.js
+server/Experience.js
+server/Server.js
+server/Service.js
+server/ServiceManager.js
+server/Socket.js
+server/Sockets.js
+server/StateManager.js
