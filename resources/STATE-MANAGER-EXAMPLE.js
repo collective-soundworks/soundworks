@@ -2,6 +2,17 @@
 // server
 const stateManager = new StateManager();
 
+const schema = {
+  master: {
+    type: 'interger',
+    min: -80,
+    max: 6,
+    metas: {
+      label: 'dB'
+    }
+  },
+}
+
 /**
  * @param {String} schemaName
  */
