@@ -71,8 +71,8 @@ class Socket {
       url = `${protocol}//${hostname}:${port}/${path}`;
     } else {
       const protocol = config.useHttps ? 'wss:' : 'ws:';
-      const { ip, port } = config;
-      url = `${protocol}//${ip}:${port}/${path}`;
+      const { serverIp, port } = config.env;
+      url = `${protocol}//${serverIp}:${port}/${path}`;
     }
 
     const queryParams = `clientType=${clientType}&key=${key}`;
