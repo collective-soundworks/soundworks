@@ -14,7 +14,7 @@
     "doc": "jsdoc -c jsdoc.json",
     "transpile": "node ./bin/runner --transpile",
     "prewatch": "npm run transpile",
-    "version": "npm run transpile && npm run doc && git add docs",
+    "version": "npm run transpile",
     "watch": "node ./bin/runner --watch"
   },
   "publishConfig": {
