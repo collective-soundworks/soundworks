@@ -343,6 +343,7 @@ class Platform extends Service {
       showDialog: true,
       view: null,
       viewPriority: 10,
+      noSleep: true,
     };
 
     this.configure(defaults);
@@ -499,8 +500,10 @@ class Platform extends Service {
       e.preventDefault();
       e.stopPropagation();
 
-      const noSleep = new NoSleep();
-      noSleep.enable();
+      if (this.options.noSleep) {
+        const noSleep = new NoSleep();
+        noSleep.enable();
+      }
 
       client.platform.interaction = type;
       // execute interaction hooks from the platform
