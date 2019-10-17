@@ -37,7 +37,7 @@ const store = {
       persists(globals.toJSON(), timetag);
     });
 
-    stateManager.onClientCreate((client, state) => {
+    stateManager.observe((schemaName, stateId) => {
       switch (client.type) {
         case 'player':
           state.subscribe(updates => {
@@ -61,14 +61,6 @@ const store = {
       }
     });
 
-  },
-
-  add(client) {
-    stateManager.addClient(client);
-  },
-
-  delete(client) {
-    stateManager.deleteClient(client);
   },
 };
 

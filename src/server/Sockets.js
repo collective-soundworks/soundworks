@@ -73,8 +73,8 @@ class Sockets {
     const method = binary ? 'sendBinary' : 'send';
     let targets = new Set();
 
-    if (typeof roomsIds === 'string' || Array.isArray(roomIds)) {
-      if (typeof roomsIds === 'string') {
+    if (typeof roomIds === 'string' || Array.isArray(roomIds)) {
+      if (typeof roomIds === 'string') {
         roomIds = [roomIds];
       }
 

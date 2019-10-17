@@ -73,23 +73,65 @@ class Service {
     return Object.assign(this.options, defaults, options);
   }
 
-  /** @inheritdoc */
+  /**
+   * Interface method to override when implemnting child classes
+   * The child class MUST call `this.started()` when first init step (creating
+   * state etc. is done) and `this.ready()` when fully initialized.
+   *
+   * @todo - This granularity is especially important client side, so that
+   * we can give feedback on the initialization steps (e.g. we need the state
+   * to be synchronized to display usefull feedback or GUIs). We mostly keep
+   * that server-side for symetry reasons.
+   *
+   * @example
+   * class MyDelayService extends soundworks.Service {
+   *   // start() is executed when the `start` signal pass to `true`
+   *   async start() {
+   *     this.state = await this.client.stateManager.attach(`s:${this.name}`);
+   *     this.started();
+   *     // do [async] stuff
+   *     setTimeout(() => this.ready(), 3000);
+   *   }
+   * }
+   */
   start() {
-    // logger.serviceStart(this.name);
+    throw new Error(`service "${this.name}.start()" not implemented`);
   }
 
   started() {
-    // @note - this as no strong incidence on the initialization lifecycle,
-    // maybe should be enforced
-    logger.serviceStart(this.name);
+    // @note - these check are mostly there for development help. Could be
+    // replaced with decorators.
+    if (this.signals.start.value === false) {
+      throw new Error(`service "${this.name}" cannot "started" before "start"`);
+    }
+
+    if (this.signals.started.value === true) {
+      throw new Error(`service "${this.name}" cannot be "started" twice`);
+    }
+
+    logger.serviceStarted(this.name);
     this.signals.started.value = true;
   }
 
   /**
    * Method to call in the service lifecycle when it should be considered as
-   * `ready` and thus allows all its dependent activities to start themselves.
+   * `ready` and thus allows the intialization process to continue.
    */
   ready() {
+    // @note - these check are mostly there for development help. Could be
+    // replaced with decorators.
+    if (this.signals.start.value === false) {
+      throw new Error(`service "${this.name}" cannot "ready" before "start"`);
+    }
+
+    if (this.signals.started.value === false) {
+      throw new Error(`service "${this.name}" cannot "ready" before "started"`);
+    }
+
+    if (this.signals.ready.value === true) {
+      throw new Error(`service "${this.name}" cannot be "ready" twice`);
+    }
+
     logger.serviceReady(this.name);
     this.signals.ready.value = true;
   }

@@ -77,14 +77,13 @@ class Experience {
    * @private
    */
   disconnect(client) {
+    this.server.stateManager.removeClient(client);
     // only call exit if the client has fully entered
     // (i.e. has finished the its initialization phase)
     if (this.clients.has(client)) {
       this.clients.delete(client);
       this.exit(client);
     }
-
-    this.server.stateManager.removeClient(client);
   }
 
   /**

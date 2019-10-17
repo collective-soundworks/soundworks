@@ -1,5 +1,7 @@
 # `soundworks`
 
+> @warning: this README relates to v2 and is outdated
+
 <!-- should 200x200 -->
 
 ![logo](https://cdn.rawgit.com/collective-soundworks/soundworks/master/docs-resources/soundworks-logo.jpg)

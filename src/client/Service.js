@@ -73,38 +73,57 @@ class Service {
   }
 
   /**
-   * Method where the initialization logic of a child Service should be
-   * implemented. When ready, the initialization step should call `this.ready`
-   * in order to inform the serviceManager that the service is ready to be
-   * consumed by the client, and thus allow to continue the initialization
-   * process.
+   * Interface method to override when implemnting child classes
+   * The child class MUST call `this.started()` when first init step (creating
+   * state etc. is done) and `this.ready()` when fully initialized.
+   *
+   * @todo - This granularity is especially important client side, so that
+   * we can give feedback on the initialization steps (e.g. we need the state
+   * to be synchronized to display usefull feedback or GUIs). This is kept
+   * that server-side for symetry reasons.
    *
    * @example
    * class MyDelayService extends soundworks.Service {
    *   // ...
-   *   start() {
+   *   async start() {
+   *     this.state = await this.client.stateManager.attach(`s:${this.name}`);
+   *     this.started();
+   *     // do [async] stuff
    *     setTimeout(() => this.ready(), 3000);
    *   }
    * }
    */
   start() {
-    log(`> service "${this.name}" start`);
+    throw new Error(`service "${this.name}.start()" not implemented`);
   }
 
   /**
    * Method to call when the service is effectively started, as it may do async
-   * job at start (cf. platform-service.client).
-   * Should be called between `start` and `ready`
+   * job at start (cf. platform-service.client). Must be called between `start`
+   * and `ready`.
    *
    * @example
    * class MyDelayService extends soundworks.Service {
-   *   // ...
-   *   start() {
+   *   // start() is executed when the `start` signal pass to `true`
+   *   async start() {
+   *     this.state = await this.client.stateManager.attach(`s:${this.name}`);
+   *     this.started();
+   *     // do [async] stuff
    *     setTimeout(() => this.ready(), 3000);
    *   }
    * }
    */
   started() {
+    // @note - these check are mostly there for development help. Could be
+    // replaced with decorators.
+    if (this.signals.start.value === false) {
+      throw new Error(`service "${this.name}" cannot "started" before "start"`);
+    }
+
+    if (this.signals.started.value === true) {
+      throw new Error(`service "${this.name}" cannot be "started" twice`);
+    }
+
     // @note - this as no strong incidence on the initialization lifecycle,
     // maybe should be enforced
     log(`> service "${this.name}" started`);
@@ -114,8 +133,33 @@ class Service {
   /**
    * Method to call in the service lifecycle when it should be considered as
    * `ready` and thus allows the intialization process to continue.
+   *
+   * @example
+   * class MyDelayService extends soundworks.Service {
+   *   // ...
+   *   async start() {
+   *     this.state = await this.client.stateManager.attach(`s:${this.name}`);
+   *     this.started();
+   *     // do [async] stuff
+   *     setTimeout(() => this.ready(), 3000);
+   *   }
+   * }
    */
   ready() {
+    // @note - these check are mostly there for development help. Could be
+    // replaced with decorators.
+    if (this.signals.start.value === false) {
+      throw new Error(`service "${this.name}" cannot "ready" before "start"`);
+    }
+
+    if (this.signals.started.value === false) {
+      throw new Error(`service "${this.name}" cannot "ready" before "started"`);
+    }
+
+    if (this.signals.ready.value === true) {
+      throw new Error(`service "${this.name}" cannot be "ready" twice`);
+    }
+
     log(`> service "${this.name}" ready`);
     this.signals.ready.value = true;
   }

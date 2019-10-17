@@ -58,7 +58,11 @@ const logger = {
     console.log(`    ${protocol}://${address}:${chalk.green(port)}`);
   },
 
-  serviceStart(name) {
+  // serviceStart(name) {
+  //   console.log(`    ${name} ${chalk.cyan('start')}`);
+  // },
+
+  serviceStarted(name) {
     console.log(`    ${name} ${chalk.cyan('started...')}`);
   },
 
