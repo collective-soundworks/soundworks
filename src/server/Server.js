@@ -57,42 +57,48 @@ class Server {
 
     /**
      * Router. Internally use polka.
-     * (cf. https://github.com/lukeed/polka)
+     * (cf. {@link https://github.com/lukeed/polka})
      */
     this.router = null;
 
     /**
      * http(s) server instance. The node `http` or `https` module instance
-     * (cf. https://nodejs.org/api/http.html)
+     * (cf. {@link https://nodejs.org/api/http.html})
      */
     this.httpServer = null;
 
     /**
      * Key / value storage with Promise based Map API
-     * basically a wrapper around kvey (https://github.com/lukechilds/keyv)
+     * basically a wrapper around kvey (cf. {@link https://github.com/lukechilds/keyv})
+     * @private
      */
     this.db = null;
 
     /**
-     * wrapper around `ws` server
-     * @type {module:soundworks/server.sockets}
-     * @default module:soundworks/server.sockets
+     * Wrapper around `ws` server.
+     * cf. {@link @soundworks/core/server.Sockets}
+     * @type {soundworks/core/server.Sockets}
      */
     this.sockets = new Sockets();
 
     /**
-     *
+     * The `serviceManager` instance.
+     * cf. {@link @soundworks/core/server.ServiceManager}
+     * @type {soundworks/core/server.ServiceManager}
      */
     this.serviceManager = new ServiceManager(this);
 
     /**
-     *
+     * The `StateManager` instance.
+     * cf. {@link @soundworks/core/server.StateManager}
+     * @type {soundworks/core/server.StateManager}
      */
     this.stateManager = null;
 
     /**
      * key and certificates (may be generated and self-signed) for https server.
      * @todo - put in config...
+     * @private
      */
     this._httpsInfos = null;
 
@@ -111,13 +117,13 @@ class Server {
 
     /**
      * Optionnal routing defined for each client.
-     * @private
      * @type {Object}
+     * @private
      */
     this._routes = {};
 
     /**
-     *
+     * @private
      */
     this._htmlTemplateConfig = {
       engine: null,
@@ -217,7 +223,9 @@ class Server {
                 const cert = fs.readFileSync(httpsInfos.cert);
 
                 this._httpsInfos = { key, cert };
+
                 const httpsServer = https.createServer(this._httpsInfos);
+                return Promise.resolve(httpsServer);
               } catch(err) {
                 console.error(
 `Invalid certificate files, please check your:
@@ -227,8 +235,6 @@ class Server {
 
                 throw err;
               }
-
-              return Promise.resolve(httpsServer);
             } else {
               return new Promise(async (resolve, reject) => {
                 const key = await this.db.get('server:httpsKey');

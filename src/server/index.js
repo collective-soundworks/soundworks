@@ -26,5 +26,5 @@
  *
  */
 export { default as Server } from './Server';
-export { default as Service } from './Service';
+// export { default as Service } from './Service';
 export { default as Experience } from './Experience';

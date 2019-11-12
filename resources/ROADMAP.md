@@ -1,143 +1,51 @@
 # ROADMAP
 
-## Boring !!
+## soundworks#v3
 
-- email npm support because of that: https://www.npmjs.com/org/soundworks (ok - wait for answer...)
+### todos
 
-## 1. Merge `things` into `develop` (done)
+#### core
 
-- merge soundworks/things (ok)
-- review how to handle `thing` clients (should be in `src/client`) (ok)
-- sketch a `soundworks-cli` for updates (ok)
+- [documentation]
+  + write it!
 
-## 2. Misc / Updates - v2.2.1 (done)
+- [service-manager]
+  + stabilize v1 API 
+  + handle attach twice (ignore or throw, just do something) ?
+  + handle streams of binary data 
+  + create standalone version ?
+  + define and fix the multiple states created by one node problem (cf. soundbank) -> create a proper testbed app to test several several ideas
 
-> should be compatible with `soundworks-template#master`
- 
-- on start log more precise informations 
-  + ip of server (both local and on network) - ok
-  + existing routes - ok
-  + used services and initialization status - ok
-
-- platform - create a `fullscreen` alias for `full-screen` (ok)
-- remove all logic dedicated to client only apps (has never been used) (ok)
-- remove bunyan logs (too noisy). (ok) 
-- fix `uws` with `ws` (ok)
-- better ErrorReporter 
-  + find infos from es6 source (ok)
-  + log server errors (ok)
-- [build] fix build scripts  (ok)
-
-## 3. View and Services - breaking (on-going)
-
-Good documentation should consist of:
-- A high level overview of the whole module and how it works
-- Javadocs, Heredocs, Rdocs or whatever of its public methods and protocols
-- Sample code showing how to use it
-
-
-### done
-
-- [sockets] binarySocket by default in sockets (ok)
-- [sockets] tag rawSocket as deprecated (ok)
-- [sockets] replace socket.io (ok)
-- [sockets] socket allow to remove all callback from a channel at once. (ok)
-- [server] replace express w/ by polka (ok)
-- [build] update build scripts w/ modern tool (ok, still wip...)
-- [platform] - add a definition for public-browsing (localStorage) (ok)
-- [AudioStreamManager] check if lame is installed when requesting AudioStreamManager (ok, probably not windows compliant...)
-
-### on-going
-
-- [core]
-  + move everything to Class so that we can instanciate several client in one window
-```
-const soundworks = new Soundworks();
-```
-
-  **done**
-  + merge Process and Activity (aka remove Activity, `Process`es and thus services should have nothing to do with views and network, only with states and `client.socket`) (ok)
-  + decouple / explicit `Experience.start()` from `serviceManager.ready()` (ok)
-  + use dependency injection more systematically / decouple everything (cf. serviceManager) (ok)
-
-- [StateManager] 
-  + define if we want to dipatch if value didn't change (maybe option?)
-  + when stable, import to core and generalize its usage to all services?
-  + abstract from soundworks clients 
-  probably something like:
-```
-new StateMnager(id, { send, addListener, removeListener }
-```
-  + put in its own package
-  
-  **done**
-  + handle attach twice (ignore or throw, just do something)
-  + stabilize API (v1) - see w/ Ricardo and Diemo (ok)
-  + wrap in a `StateManageer` service (nop - belongs to core)
-  + start to write tests as we can now test most of the things using a node client
-
-- [services]
-  **done**
-  + decouples existing services from the ones that will be removed (ok)
-  + all services MUST a server-side (even no-op) (ok)
-  + remove all services from core (ok)
-  
 - [sockets] 
-  + review binaryBuffer encoding / decoding with new `fast-text-encoding`,i.e. see if we still need to copy buffers or if the `Buffer.offset` is properly taken in account
-  + add the client-side heartbeat stuff: https://www.npmjs.com/package/ws#other-examples
+  + i.e. see if we still need to copy buffers or, if  `Buffer.offset` is properly taken in account w/ the new `fast-text-encoding` library used
+  + add client-side heartbeat stuff: https://www.npmjs.com/package/ws#other-examples
   + install that and see if problems still occur: https://github.com/plantain-00/ws-heartbeat
-
-  **done**
-  + remove `send`, `addListener`, etc from `server.sockets` (only keep `broadcast` methods there) (ok)
   + fix not sent errors messages (check `socket.OPENED` / `socket.CLOSED` ?)
-  + configure path in sockets (ok)
-  + update [thing.sockets] see if can share code w/ browsers clients (ok)
-  + use isomorphic-ws for code sharing w/ thing clients (ok)
 
-- [views] 
-  + create a `servicesState` in serviceManager: should allow for proper display of informations without making assumptions on the view system.
-  => _sketched, confirm API_
-  
-  **done**
-  + remove (prefabs, views, etc.) from core (ok)
-  + explore `lit-html` and `lit-elements` as a possible replacements (ok)
-  + remove viewManager, (ok)
-
-- [services] 
-  + define a proper model for external services / plugins (monorepo)
-    * cf. https://github.com/lerna/lerna 
-  => _sketched, confirm API_
-  + adapt remaining existing services to new plugin system
-  + start to write tests as we can now test most of the things using a node client
-
-  **done**
-  + define which services we keep in `core` (validate w/ Norbert) - (ok, finally none) (ok)
-  + remove `service:` from service's ids, just add noise for nothing
-    * or maybe not, allow to not collapse w/ with user field
-    * might be simply fixed by using states...
-  + share code betwenn `things` and `browsers` clients (ok)
+- [soundbank]
+  + create a service ?
 
 - [misc]
+  + move utils/math into waves-audio ?
+  + write tests as we can now test most of the code using node clients
 
-move utils/math into waves-audio
-
-### fixes, upgrades, new services
+#### services
 
 - [ErrorReporter] 
-  + errors are broadcasted to all clients... that's bad (may be a `socket.broadcast` issue)
-  + server errors are displayed twice... that boring
+  + errors are broadcasted to all clients... that's bad (may be a `socket.broadcast` issue) -> should be fixed now
   + rename to Logger
   + add the ability to log user defined messages (trace behavior)
 
 - [SyncService] 
   + report latency from clients to server for auditing
-  + explore latency estimation / compensation in Android (ok, make more measures) 
+  + explore latency estimation / compensation in Android (ok, make more measures)
   + report network latency per client too
   + check if something weird can happen if we load a lot of sound
 
 - [PlatformService] 
   + add a test for the `audioContext` clock (iOS) - with reporting for in the wild testing
   + display useful informations in case of error / incompatibility
+  + add a definition for public-browsing (done ?)
 
 - [Auth]
   + rename to simple
@@ -168,13 +76,9 @@ this.liveCodingService.updateScript('my-filter', string);
 - [AudioStreamManager] 
   + assess new API w/ update of square
 
-### soundworks-template
+### Misc
 
-- move `html/default.ejs` in `src/server` in template (ok)
-- review how soundworks/server handle `html` entry point. 
-- split config files: `env-config` and `services-config` ?
-
-### update apps
+#### update apps
 
 - Future Perfect
 - Biotope (get back the soundworks code from prod server)
@@ -183,22 +87,23 @@ this.liveCodingService.updateScript('my-filter', string);
 - All examples
 - Agneau Mystique (not sure)
 
-### clean repo
+#### clean repo
 
-+ clean old branches
-+ create npm organisation (@soundworks/core etc...)
-+ clean documentation
-+ create tutorials
+- clean old branches
+- clean documentation
+- create tutorials
 
-> RELEASE 3.0.0 - target WAC2019
+-------------------------------------------------------------------------------
 
-## DEPENDENCIES
+### MISC - DEPENDENCIES
 
-- [ssh-key]
-  + command-line tool for managing ssh-keys locally
-
-- [dns / dhcp]
-  + replacement of Server.app
+- [sc-elements] (for Simple-Components ?)
+  + create basic sc-elements (bang, slider, number, text, color-picker, matrix)
+  + use monorepo -> in this, would be nice
+  + port all basic controllers
+  + define how to make them: resizable, movable, configurable 
+    (Max model?, something else?)
+    -> explore mixins or @decorators (probably the more modern option)
   
 - [parameters]
   + fix `
@@ -221,14 +126,7 @@ TypeError: Cannot read property 'setValue' of undefined
 - [xmm-node]
   + fix in node 10 and later, rewrite using Napi
 
-- [sc-elements]
-  + create basic sc-elements (bang, slider, number, text, color-picker, matrix)
-  + use monorepo
-  + port basic controllers
-  + define how to make them: resizable, movable, configurable 
-    (Max model?, something else?)
-
-##  v.Next - new features / ideas to explore
+###  v.Next - new features / ideas to explore
 
 - [stateManager]
   + max patch example / abstraction to dynamically create controls from OSC 
@@ -259,3 +157,89 @@ TypeError: Cannot read property 'setValue' of undefined
 [misc]
   + improve reconnection of client(s)
   + automagically overide config options using url params
+
+## Tooling
+
+- [ssh-key]
+  + command-line tool for managing ssh-keys locally
+
+- [dns / dhcp]
+  + replacement of Server.app
+
+-------------------------------------------------------------------------------
+
+### DONE
+
+#### core
+
+- [core]
+  + move everything to Class so that we can instanciate several client in one window 
+```
+const soundworks = new Soundworks();
+```
+  + merge Process and Activity (aka remove Activity, `Process`es and thus services should have nothing to do with views and network, only with states and `client.socket`) 
+  + decouple / explicit `Experience.start()` from `serviceManager.ready()` 
+  + use dependency injection more systematically / decouple everything (cf. serviceManager)
+  + decouples existing services from the ones that will be removed
+  + all services MUST a server-side (even no-op)
+  + remove all services from core
+  + replace express w/ by polka
+  + share code betwenn `things` and `browsers` clients
+  + update build scripts w/ modern tool
+
+- [logs] 
+  on start log more precise informations 
+  + ip of server (both local and on network)
+  + existing routes
+  + used services and initialization status
+
+- [sockets] 
+  + binarySocket by default in sockets
+  + replace socket.io
+  + socket allow to remove all callback from a channel at once.
+  + configure path in sockets (ok)
+  + update [thing.sockets] see if can share code w/ browsers clients
+  + use isomorphic-ws for code sharing w/ thing clients
+  + remove `send`, `addListener`, etc from `server.sockets` (only keep `broadcast` methods there)
+
+- [views] 
+  + create a `servicesState` in serviceManager: should allow for proper display of informations without making assumptions on the view system.
+  => _sketched, confirm API_
+  + remove (prefabs, views, etc.) from core (ok)
+  + remove viewManager, (ok)
+
+- [services] 
+  + define a proper model for external services / plugins (monorepo)
+    * cf. https://github.com/lerna/lerna 
+  + adapt remaining existing services to new plugin system
+  + start to write tests as we can now test most of the things using a node client
+  + remove `service:` from service's ids, just add noise for nothing
+    * or maybe not, allow to not collapse w/ with user field
+    * might be simply fixed by using states...
+- [service-audio-stream-manager] 
+  + check if lame is installed when requesting AudioStreamManager (probably not windows compliant...)
+
+### soundworks-template
+
+- move `html/default.ejs` in `src/server` in template (ok)
+- review how soundworks/server handle `html` entry point. (ok)
+- split config files: `env-config` and `services-config` ? (ok)
+
+> RELEASE 3.0.0 - target WAC2019
+
+-------------------------------------------------------------------------------
+
+## soundworks#v2.2.1
+
+> should be compatible with `soundworks-template#master`
+
+- platform - create a `fullscreen` alias for `full-screen` (ok)
+- remove all logic dedicated to client only apps (has never been used) (ok)
+- remove bunyan logs (too noisy). (ok) 
+- fix `uws` with `ws` (ok)
+- better ErrorReporter 
+  + find infos from es6 source (ok)
+  + log server errors (ok)
+- [build] fix build scripts  (ok)
+
+-------------------------------------------------------------------------------

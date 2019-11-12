@@ -43,6 +43,7 @@ class Socket {
     /**
      * WebSocket instance (string protocol - binaryType = 'string').
      */
+    /** @private */
     this.ws = null;
 
     this._stringListeners = new Map();
@@ -50,11 +51,13 @@ class Socket {
   }
 
   /**
-   * Initialize a websocket connection with the server
+   * Initialize a websocket connection with the server. This is automatically
+   * called in `client.init()`
    * @param {String} clientType - `client.type` {@link client}
    * @param {Object} options - Options of the socket
    * @param {Array<String>} options.path - Defines where socket should find the `socket.io` file
    */
+  /** @private */
   init(clientType, config) {
     // unique key that allows to associate the two sockets to the same client.
     // note: the key is only used to pair to two sockets, so its usage is very

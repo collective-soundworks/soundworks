@@ -186,6 +186,8 @@ class StateManager {
   }
 
   _getSchemaId(schemaName, creator, owner) {
+    // @fixme - in next version, should not rely on index because it prevents
+    // delete schemas and thus mess up indexes...
     const index = Array.from(this._schemas.keys()).indexOf(schemaName);
     return `${index}.${creator}.${owner}`;
   }

@@ -18,6 +18,7 @@
   "main": "",
   "scripts": {
     "clean": "rm -Rf client && rm -Rf server && rm -Rf common",
+    "graphs": "madge --image resources/graph-client.svg src/client && madge --image resources/graph-server.svg src/server",
     "deploy": "np --yolo",
     "doc": "jsdoc -c jsdoc.json",
     "version": "npm run clean && npm run transpile && npm run doc && git add docs",
@@ -31,7 +32,6 @@
     "watch": "npm run transpile && concurrently \"npm run watch:client\" \"npm run watch:server\" \"npm run watch:common\""
   },
   "dependencies": {
-    "@babel/plugin-proposal-export-default-from": "^7.5.2",
     "@ircam/parameters": "^1.2.2",
     "chalk": "^2.4.2",
     "columnify": "^1.5.4",
@@ -53,6 +53,7 @@
     "@babel/cli": "^7.4.4",
     "@babel/core": "^7.4.5",
     "@babel/preset-env": "^7.4.5",
+    "@babel/plugin-proposal-export-default-from": "^7.5.2",
     "@ircam/jsdoc-template": "^1.0.2",
     "chokidar": "^3.0.1",
     "chokidar-cli": "^1.2.2",

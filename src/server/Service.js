@@ -8,18 +8,19 @@ import logger from './utils/logger';
 const log = debug('soundworks:lifecycle');
 
 /**
- * Base class to be extended in order to create a new service.
+ * Base class to extend for creating new soundworks services.
  *
  * @memberof @soundworks/core/server
  */
 class Service {
   constructor(server, name) { // should receive soundworks instance as argument
     /**
-     * Instance of soundworks server
+     * Instance of soundworks server.
      * @type {String}
      * @name server
      * @instance
      * @memberof module:@soundworks/core/server.Service
+     *
      */
     this.server = server;
 
@@ -44,9 +45,9 @@ class Service {
 
     /**
      * Signals defining the process state.
-     * @name signal
+     * @name signals
      * @type {Object}
-     * @instanceof Process
+     * @memberof module:@soundworks/core/server.Service
      */
     this.signals = {
       start: new SignalAll(),
@@ -55,14 +56,10 @@ class Service {
       errored: new Signal(),
     };
 
-    /**
-     *
-     */
+    /** @private */
     this.clientTypes = new Set();
-
     // register in the server
     this.server.activities.add(this);
-
     // start when all required signals are fired
     this.signals.start.addObserver(value => this.start());
 
@@ -95,7 +92,7 @@ class Service {
    * }
    */
   start() {
-    throw new Error(`service "${this.name}.start()" not implemented`);
+    throw new Error(`service "${this.name}": "start()" not implemented or "super.start()" called`);
   }
 
   started() {

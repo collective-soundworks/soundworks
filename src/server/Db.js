@@ -5,10 +5,14 @@ import fs from 'fs';
 
 /**
  * Simple in file key / value database.
+ * Do not expose for now, may not be the right way to go...
  *
  * @todo - implement options to change storage solution.
  * cf. https://github.com/lukechilds/keyv
+ *
+ * @memberof @soundworks/core/server
  */
+/** @private */
 class Db {
   constructor(options = {}) {
     const dbDirectory = path.join(process.cwd(), '.db');

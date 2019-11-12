@@ -159,9 +159,9 @@ class Socket {
   }
 
   /**
-   * @private
    * Called when the string socket closes (aka client reload).
    */
+  /** @private */
   terminate() {
     clearInterval(this._intervalId);
     // clean rooms

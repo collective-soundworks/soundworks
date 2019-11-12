@@ -18,12 +18,13 @@ class Service {
     if (!name) {
       throw new Error(`[service] 2nd argument should be a valid name`);
     }
+
     /**
      * Instance of soundworks client
      * @type {String}
      * @name client
      * @instance
-     * @memberof module:@soundworks/core/server.Service
+     * @memberof @soundworks/core/client.Service
      */
     this.client = client;
 
@@ -48,7 +49,7 @@ class Service {
 
     /**
      * Signals defining the process state.
-     * @name signal
+     * @name signals
      * @type {Object}
      * @instance
      * @memberof @soundworks/core/client.Service
@@ -94,7 +95,7 @@ class Service {
    * }
    */
   start() {
-    throw new Error(`service "${this.name}.start()" not implemented`);
+    throw new Error(`service "${this.name}": "start()" not implemented or "super.start()" called`);
   }
 
   /**
