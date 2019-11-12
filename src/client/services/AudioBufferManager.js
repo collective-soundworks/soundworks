@@ -59,7 +59,7 @@ function clonePathObj(value) {
 
 // supported media formats + json
 // https://developer.mozilla.org/en-US/docs/Web/HTML/Supported_media_formats
-const regexp = /\.(wav|mp3|mp4|aac|aif|aiff|ogg|webm|json)$/i;
+const regexp = /\.(wav|mp3|mp4|aac|aif|aiff|ogg|webm|flac|json)$/i;
 
 function isFilePath(str) {
   return (typeof str === 'string' && regexp.test(str));
