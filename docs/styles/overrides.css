@@ -1,0 +1,124 @@
+/* layout */
+body {
+  font-size: 90%;
+}
+
+#main {
+  width: 80%;
+  float: right;
+}
+
+nav {
+  width: 20%;
+  float: left;
+  margin-top: 20px;
+  border-right: 1px solid #ccc;
+  border-left: none;
+  padding-right: 16px;
+  overflow: hidden;
+}
+
+/* home page link to github and last release */
+#metas {
+  line-height: 28px;
+  height: 28px;
+}
+
+#metas #github {
+  display: inline-block;
+  line-height: normal;
+  vertical-align: middle;
+}
+
+#metas #release {
+  font-size: 100%;
+  line-height: normal;
+  color: steelblue;
+  padding: 0 20px;
+  display: inline-block;
+  vertical-align: middle;
+  font-weight: bold;
+}
+/* ! home page link to github and last release */
+
+/* clean h1 from `.md` files */
+h1:not(.page-title) {
+  margin-left: 0;
+  margin-top: 0;
+}
+
+/* generic class description */
+/*.container-overview .description,*/
+.class-description {
+  font-size: 100%;
+  margin: 0 0 0.5em 0;
+  padding: 0.5em 1em;
+  background-color: #efefef;
+  border-radius: 3px;
+}
+
+.class-description .prettyprint code {
+  background-color: #efefef;
+}
+
+/* clean tables */
+table {
+  width: 100%;
+}
+
+td.description h6 {
+  margin-top: 0;
+}
+
+td.description p {
+  color: #6a6b73;
+}
+
+td.name code {
+  position: relative;
+  top: 1px;
+}
+
+/* clean code examples */
+pre.prettyprint {
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 3px;
+  padding: 6px 0;
+  overflow-y: auto;
+}
+
+pre.prettyprint code {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+/* inline code */
+p code {
+  color: #748087;
+}
+
+p a code {
+  color: #0095dd;
+}
+
+p img {
+  max-width: 100%;
+}
+
+/* clean nav */
+nav li {
+  margin-top: 1px;
+}
+
+/* @see links */
+.tag-see p {
+  margin: 0;
+}
+
+/* helpers */
+.warning {
+  color: #ff6600;
+  /*font-style: italic;*/
+}
+
