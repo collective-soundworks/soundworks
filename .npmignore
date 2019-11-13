@@ -10,3 +10,5 @@ jsdoc.json
 .editorconfig
 
 _backup
+
+tests
