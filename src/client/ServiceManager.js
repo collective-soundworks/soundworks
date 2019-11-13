@@ -148,9 +148,16 @@ ${Object.keys(this._registeredServices).map(n => `> - ${n}\n`).join('')}
       const onServiceStarted = () => {
         this._servicesStatus[name] = 'started';
 
-        unsubscribe = instance.state.subscribe(() => {
-          this._emitChange();
-        });
+        /**
+         * @fixme - relying on `instance.state` is very weak...
+         * we should find a better solution, to declare that we want the
+         * serviceManager to watch and propagate initialization steps.
+         */
+        if (instance.state) {
+          unsubscribe = instance.state.subscribe(() => {
+            this._emitChange();
+          });
+        }
 
         this._emitChange();
       }
@@ -158,7 +165,10 @@ ${Object.keys(this._registeredServices).map(n => `> - ${n}\n`).join('')}
       const onServiceErrored = () => {
         this._servicesStatus[name] = 'errored';
         this._emitChange();
-        unsubscribe();
+
+        if (unsubscribe) {
+          unsubscribe();
+        }
 
         instance.signals.started.removeObserver(onServiceStarted);
         instance.signals.ready.removeObserver(onServiceReady);
@@ -168,7 +178,10 @@ ${Object.keys(this._registeredServices).map(n => `> - ${n}\n`).join('')}
       const onServiceReady = () => {
         this._servicesStatus[name] = 'ready';
         this._emitChange();
-        unsubscribe();
+
+        if (unsubscribe) {
+          unsubscribe();
+        }
 
         instance.signals.started.removeObserver(onServiceStarted);
         instance.signals.ready.removeObserver(onServiceReady);
