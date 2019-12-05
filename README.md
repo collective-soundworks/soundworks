@@ -1,3 +1,5 @@
+_warning:_ soundworks is in the process of heavy refactoring, for more details see [https://github.com/collective-soundworks/soundworks/tree/v3](https://github.com/collective-soundworks/soundworks/tree/v3)
+
 # `Soundworks`
 
 ![logo](https://cdn.rawgit.com/collective-soundworks/soundworks/master/resources/logo-soundworks.jpg)
