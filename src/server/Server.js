@@ -240,7 +240,7 @@ class Server {
                 const key = await this.db.get('server:httpsKey');
                 const cert = await this.db.get('server:httpsCert');
 
-                if (key !== null && cert !== null) {
+                if (key && cert) {
                   this._httpsInfos = { key, cert };
                   const httpsServer = https.createServer(this._httpsInfos);
                   resolve(httpsServer);

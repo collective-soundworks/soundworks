@@ -21,7 +21,7 @@ class Db {
       fs.mkdirSync(dbDirectory);
     }
 
-    const filename = path.join(dbDirectory, 'keyv.db')
+    const filename = path.join(dbDirectory, 'keyv.db');
 
     this.keyv = new Keyv({
       namespace: 'soundworks',

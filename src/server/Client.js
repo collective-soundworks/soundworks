@@ -47,70 +47,6 @@ class Client {
 		 */
     this.uuid = uuid();
 
-    /**
-     * @note - remove all that, should be directly related to the services
-     * @example
-     * // client side
-     * const index = this.checkin.getIndex();
-     * // server side
-     * const index = this.checkin.getIndex(client);
-     */
-
-		/**
-		 * Coordinates of the client, stored as an `[x:Number, y:Number]` array.
-		 * @name coordinates
-     * @type {Array<Number>}
-     * @memberof module:soundworks/server.Client
-     * @instance
-		 */
-    this.coordinates = null;
-
-    /**
-     * Geoposition of the client as returned by `geolocation.getCurrentPosition`
-     * @name geoposition
-     * @typ {Object}
-     * @memberof module:soundworks/server.Client
-     * @instance
-     */
-    this.geoposition = null;
-
-    /**
-     * Ticket index of the client.
-     * @name index
-     * @type {Number}
-     * @memberof module:soundworks/server.Client
-     * @instance
-     */
-    this.index = null;
-
-    /**
-     * Ticket label of the client.
-     * @name label
-     * @type {Number}
-     * @memberof module:soundworks/server.Client
-     * @instance
-     */
-    this.label = null;
-
-		// /**
-		//  * Used by the activities to associate data to a particular client.
-		//  *
-		//  * All the data associated with a activity whose `name` is `'activityName'`
-  //    * is accessible through the key `activityName`.
-		//  * For instance, the {@link src/server/Checkin.js~Checkin} activity keeps
-  //    * track of client's checkin index and label in `this.activities.checkin.index`
-  //    * and `this.activities.checkin.label`.
-		//  * Similarly, a {@link src/server/Performance.js~Performance} activity whose
-  //    * name is `'myPerformance'` could report the client's status in
-  //    * `this.activities.myPerformance.status`.
-		//  *
-  //    * @name activities
-  //    * @type {Object}
-  //    * @memberof module:soundworks/server.Client
-  //    * @instance
-		//  */
-  //   this.activities = {};
-
 		/**
 		 * Socket used to communicate with the client.
 		 * @type {Socket}
@@ -118,21 +54,6 @@ class Client {
 		 */
     this.socket = socket;
   }
-
-  /**
-   * Returns a lightweight version of the data defining the client.
-   * @returns {Object}
-   */
-  // serialize() {
-  //   return {
-  //     type: this.type,
-  //     uuid: this.uuid,
-  //     coordinates: this.coordinates,
-  //     index: this.index,
-  //     label: this.label,
-  //     activities: this.activities,
-  //   };
-  // }
 
   /**
    * Destroy the client.

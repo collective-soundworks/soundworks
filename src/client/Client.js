@@ -34,7 +34,7 @@ class Client {
      * client in the application.
      * @type {String}
      */
-    this.clientType = null;
+    this.type = null;
 
 
     /**
@@ -86,7 +86,7 @@ class Client {
     }
 
     // handle config
-    this.clientType = config.clientType;
+    this.type = config.clientType;
     // @todo - review that to adapt to ws options
     const websockets = Object.assign({
       url: '',
@@ -97,7 +97,7 @@ class Client {
     this.config = Object.assign({}, config, { websockets });
 
     // init communications
-    await this.socket.init(this.clientType, this.config);
+    await this.socket.init(this.type, this.config);
 
     return Promise.resolve();
   }
