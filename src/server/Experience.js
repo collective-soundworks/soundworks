@@ -59,7 +59,15 @@ class Experience {
    * @private
    */
   connect(client) {
-    this.server.stateManager.addClient(client);
+    const nodeId = client.id;
+    const transport = {
+      emit: client.socket.send.bind(client.socket),
+      addListener: client.socket.addListener.bind(client.socket),
+      // removeListener: client.socket.removeListener.bind(client.socket),
+      removeAllListeners: client.socket.removeAllListeners.bind(client.socket),
+    };
+
+    this.server.stateManager.addClient(nodeId, transport);
     // listen for the `'enter' socket message from the client, the message is
     // sent when the client `enters` the Experience client side, i.e. when all
     // required services are ready
@@ -77,7 +85,8 @@ class Experience {
    * @private
    */
   disconnect(client) {
-    this.server.stateManager.removeClient(client);
+    const nodeId = client.id;
+    this.server.stateManager.removeClient(nodeId);
     // only call exit if the client has fully entered
     // (i.e. has finished the its initialization phase)
     if (this.clients.has(client)) {

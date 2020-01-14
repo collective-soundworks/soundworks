@@ -24,4 +24,5 @@ export const OBSERVE_NOTIFICATION = 's:o:not';
 
 export const UPDATE_REQUEST = 's:u:req';
 export const UPDATE_RESPONSE = 's:u:res';
+export const UPDATE_ABORT = 's:u:ab';
 export const UPDATE_NOTIFICATION = 's:u:not';

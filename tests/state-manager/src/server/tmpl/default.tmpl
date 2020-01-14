@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+    <meta name="theme-color" content="#000000">
+
+    <title>
+      ${d.app.name} | ${d.clientType}
+    </title>
+
+    <link rel="stylesheet" href="${d.env.assetsDomain}css/main.css">
+  </head>
+
+  <body class="loading">
+    <div id="container" class="container"></div>
+
+    <script>
+      window.soundworksConfig = JSON.parse('${JSON.stringify(d)}');
+    </script>
+
+    ${
+      (d.env === 'production')
+        ? `<script src="${d.env.assetsDomain}build/${d.clientType}.min.js"></script>`
+        : `<script src="${d.env.assetsDomain}build/${d.clientType}.js"></script>`
+    }
+  </body>
+</html>

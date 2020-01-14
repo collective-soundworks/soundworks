@@ -1,3 +1,4 @@
+import EventEmitter from 'events';
 import fs from 'fs';
 import http from 'http';
 import https from 'https';
@@ -11,7 +12,7 @@ import Client from './Client';
 import Service from './Service';
 import ServiceManager from './ServiceManager';
 import Sockets from './Sockets';
-import StateManager from './StateManager';
+import ServerStateManager from '../common/ServerStateManager';
 import Db from './Db';
 import logger from './utils/logger';
 
@@ -180,7 +181,21 @@ class Server {
     // compression (must be set before serve-static)
     this.router.use(compression());
 
-    this.stateManager = new StateManager(this);
+    this.stateManager = new ServerStateManager();
+    // const transport = new EventEmitter();
+    // transport.send =  transport.emit.bind(transport);
+    // serverStateManager.addClient({ id: -1, transport });
+
+    // this.stateManager = new ClientStateManager(-1, transport);
+    // // should be a mixin
+    // this.stateManager.registerSchema = (name, schema) => {
+    //   serverStateManager.registerSchema(name, schema);
+    // }
+
+    // this.stateManager.deleteSchema = (name, schema) => {
+    //   serverStateManager.deleteSchema(name, schema);
+    // }
+
     this.db = new Db();
 
     return Promise.resolve();

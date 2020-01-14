@@ -1,5 +1,5 @@
 import ServiceManager from './ServiceManager';
-import StateManager from './StateManager';
+import ClientStateManager from '../common/ClientStateManager';
 import Socket from './Socket';
 import Service from './Service';
 
@@ -120,7 +120,15 @@ class Client {
         this.id = id;
         this.uuid = uuid;
 
-        this.stateManager = new StateManager(this.id, this.socket);
+        // mimic eventEmitter API
+        const transport = {
+          emit: this.socket.send.bind(this.socket),
+          addListener: this.socket.addListener.bind(this.socket),
+          // removeListener: this.socket.removeListener.bind(this.socket),
+          removeAllListeners: this.socket.removeAllListeners.bind(this.socket),
+        };
+
+        this.stateManager = new ClientStateManager(this.id, transport);
         // everything is ready start service manager
         this.serviceManager.start().then(() => resolve());
       });
