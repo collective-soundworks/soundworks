@@ -14,10 +14,11 @@ class ControllerExperience extends Experience {
   async start() {
     super.start();
 
+    console.log('> check OBSERVE_REQUEST');
     this.client.stateManager.observe(async (schemaName, stateId, nodeId) => {
       if (schemaName === 'player') {
         const state = await this.client.stateManager.attach(schemaName, stateId);
-        console.log(state);
+        console.log('attached playerState', nodeId);
 
         state.onDetach(() => {
           console.log('detached playerState', nodeId);
@@ -29,6 +30,12 @@ class ControllerExperience extends Experience {
 
         this.renderApp();
       }
+    });
+
+    // observe twice
+    console.log(`> make sure we don't receive the list twice when subscribing two observe callbacks`);
+    this.client.stateManager.observe((schemaName, stateId, nodeId) => {
+      console.log(schemaName, stateId, nodeId);
     });
 
     this.globalState = await this.client.stateManager.attach('global');

@@ -23,7 +23,27 @@ class PlayerExperience extends Experience {
     this.playerState.subscribe(() => this.renderApp())
 
     this.globalState = await this.client.stateManager.attach('global');
-    this.globalState.subscribe(() => this.renderApp())
+    this.globalState.subscribe((updates) => {
+      console.log('globalState', updates);
+      this.renderApp();
+    });
+
+    console.log('attach twice to the same state');
+    this.globalState2 = await this.client.stateManager.attach('global');
+    this.globalState2.subscribe((updates) => {
+      console.log('globalState2', updates);
+      this.renderApp();
+    });
+
+    this.globalState.set({ float: Math.random() });
+
+    setTimeout(() => {
+      console.log('detach from globalState2');
+      this.globalState2.detach();
+
+      this.globalState.set({ float: Math.random() });
+    }, 3000);
+
 
     this.renderApp();
   }

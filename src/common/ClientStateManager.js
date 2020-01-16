@@ -34,6 +34,7 @@ function* idGenerator() {
 
 const generateRequestId = idGenerator();
 const requestPromises = new Map();
+const observeRequestCallbacks = new Map();
 
 function storeRequestPromise(resolve, reject) {
   const reqId = generateRequestId.next().value;
@@ -67,7 +68,14 @@ class State {
     this._isCreator = isCreator; // may be the server or any client
     this._client = client;
     this._manager = manager;
-    this._parameters = parameters(schema, initValues);
+
+    try {
+      this._parameters = parameters(schema, initValues);
+    } catch(err) {
+      console.error(err.stack);
+      throw new Error(`Error creating or attaching state "${schemaName}" w/ values:\n
+${JSON.stringify(initValues, null, 2)}`);
+    }
     this._subscriptions = new Set();
 
     this._onDetachCallbacks = new Set();
@@ -167,7 +175,7 @@ class State {
     return this._schema;
   }
 
-  set(updates) {
+  async set(updates) {
     return new Promise((resolve, reject) => {
       const reqId = storeRequestPromise(resolve, reject);
       this._client.transport.emit(`${UPDATE_REQUEST}-${this.id}-${this.remoteId}`, reqId, updates);
@@ -190,7 +198,7 @@ class State {
     };
   }
 
-  detach() {
+  async detach() {
     this._subscriptions.clear();
 
     if (this._isCreator) {
@@ -208,10 +216,12 @@ class State {
 
   onDetach(callback) {
     this._onDetachCallbacks.add(callback);
+    return () => this._onDetachCallbacks.delete(callback);
   }
 
   onDelete(callback) {
     this._onDeleteCallbacks.add(callback);
+    return () => this._onDeleteCallbacks.delete(callback);
   }
 }
 
@@ -283,11 +293,14 @@ class ClientStateManager {
     // OBSERVE PEERS (be notified when a state is created, lazy)
     // ---------------------------------------------
     this.client.transport.addListener(OBSERVE_RESPONSE, (reqId, ...list) => {
-      if (list) { // if only client there, list could be empty
-        list.forEach(([schemaName, stateId, nodeId]) => {
-          this._observeListeners.forEach(callback => callback(schemaName, stateId, nodeId));
-        });
-      }
+      // retrieve the callback that have been stored in observe to make sure
+      // we don't call another callback that may have been registered earlier.
+      const callback = observeRequestCallbacks.get(reqId);
+      observeRequestCallbacks.delete(reqId)
+
+      list.forEach(([schemaName, stateId, nodeId]) => {
+        callback(schemaName, stateId, nodeId);
+      });
 
       resolveRequest(reqId, list);
     });
@@ -321,8 +334,12 @@ class ClientStateManager {
     // store function
     new Promise((resolve, reject) => {
       const reqId = storeRequestPromise(resolve, reject);
+      // store the callback to be executed on the response
+      observeRequestCallbacks.set(reqId, callback);
       this.client.transport.emit(OBSERVE_REQUEST, reqId);
     });
+
+    return () => this._observeListeners.delete(callback);
   }
 }
 

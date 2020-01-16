@@ -262,11 +262,24 @@ console.log(`
 
     stateB_OC1.onDetach(() => console.log('stateB_OC1::onDetach called (but SHOULD NOT be called)'));
     stateB_OC1.onDelete(() => console.log('stateB_OC1::onDelete called (but SHOULD NOT be called)'));
+
     // only B_OC
     stateB_OC2.onDetach(() => console.log('stateB_OC2::onDetach called'));
     stateB_OC2.onDelete(() => console.log('stateB_OC2::onDelete called'));
 
     server.stateManager.removeClient(otherClientId);
+
+    console.log('\n> clean a deleted state from server (should not appear in observe)');
+
+    const stateA_D1 = await server.stateManager.create('schemaA');
+    const stateA_D1_Id = stateA_D1.id;
+    stateA_D1.detach();
+
+    server.stateManager.observe((schemaName, stateId, nodeId) => {
+      if (stateId === stateA_D1_Id) {
+        throw new Error(`stateA_D1 with stateId ${stateA_D1_Id} has been delete and should not be observed`);
+      }
+    });
 
     console.log('\n> client-side & socket transport');
 

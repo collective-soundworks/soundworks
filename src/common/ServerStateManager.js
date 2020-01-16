@@ -45,7 +45,7 @@ class ServerState {
     this.id = id;
     this.schemaName = schemaName;
 
-    // this._schema = clonedeep(schema);
+    this._schema = clonedeep(schema);
     this._manager = manager;
     this._parameters = parameters(schema, initValues);
     this._attachedClients = new Map(); // other peers interested in watching / controlling the state
@@ -72,7 +72,10 @@ class ServerState {
         // get new value this way to store events return values
         const newValue = this._parameters.set(name, updates[name]);
 
-        if (newValue !== currentValue) {
+        // @todo - we check the `schema[name].type === 'any'` because if
+        // the state is attached locally, we compare the Object instances instead
+        // of their values. This should be made more robust but how?
+        if (newValue !== currentValue || this._schema[name].type === 'any') {
           updated[name] = newValue;
           dirty = true;
         }
@@ -104,6 +107,7 @@ class ServerState {
     if (isCreator) {
       // delete only if creator
       client.transport.addListener(`${DELETE_REQUEST}-${this.id}-${remoteId}`, (reqId) => {
+        this._manager._serverStatesById.delete(this.id);
         // --------------------------------------------------------------------
         // WARNING - MAKE SURE WE DON'T HAVE PROBLEM W/ THAT
         // --------------------------------------------------------------------
@@ -119,8 +123,6 @@ class ServerState {
             attached.transport.emit(`${DELETE_NOTIFICATION}-${this.id}-${remoteId}`);
           }
         }
-
-        this._manager._statesById.delete(this.id);
       });
     } else {
       // detach only if not creator
