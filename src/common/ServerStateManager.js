@@ -301,6 +301,13 @@ class ServerStateManager extends ClientStateManager {
       throw new Error(`schema "${schemaName}" already registered`);
     }
 
+    // throw is schema is invalid
+    try {
+      parameters(schema, {});
+    } catch(err) {
+      throw new Error(`Invalid schema "${schemaName}": ${err.message}`);
+    }
+
     this._schemas.set(schemaName, clonedeep(schema));
   }
 
