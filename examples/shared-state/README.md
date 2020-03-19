@@ -139,7 +139,7 @@ console.log('globalsState:', globalsState.getValues());
 
 Every player client is now attached to the `globals` state created by the server and will be notified if any update occur (more on that in _Subscribing to updates and updating states_).
 
-## Observing states creation
+## Observing states and network
 
 As states can be dynamically created by any node, we need a way to monitor the newly created state in the application (e.g. when a `player` client connect to the application, the `controller` client wants to be notified so it can attach to the newly created state and monitor or control it).
 
@@ -158,6 +158,8 @@ client.stateManager.observe(observeCallback);
 In our example, the controller wants to track every `player` states created by `player` clients, to be able to monitor and control them remotely, it thus `observe` and attach to the state when notified:
 
 ```js
+// src/clients/controller/ControllerExperience (line 23)
+
 // create a list to store the player states
 this.playerStates = new Set();
 
@@ -172,8 +174,12 @@ this.client.stateManager.observe(async (schemaName, stateId, nodeId) => {
       console.log('playerState:', playerState.getValues());
       // > playerState: {type: "sine", frequency: 513}
 
-      // logic to do when the state is deleted (e.g. when the player disconnects)
-      playerState.onDetach(() => this.playerStates.delete(playerState));
+      // logic to do when the state is deleted 
+      // (e.g. when the player disconnects)
+      playerState.onDetach(() => {
+        // clean things
+        this.playerStates.delete(playerState);
+      });
       // stoare the player state into a list
       this.playerStates.add(playerState);
       break;
@@ -181,11 +187,50 @@ this.client.stateManager.observe(async (schemaName, stateId, nodeId) => {
 });
 ```
 
-## Subscribing to updates and updating states
+## Updating states and subscribing to updates
 
-## Subscribing to updates and updating states
+Once we have a local instance of state (through `create` or `attach`), we need to be notified of any change that may occur and to be able to change its values.
 
-## Deleting states
+The `set` method allows for updating the values of a state
+```js
+state.set(updates);
+```
+- @param {Object} updates - a key / value object of the paramters to update
+
+In our example, the controller, once attached to a player state will update the `frequency` to a new random value every second (ok that probably does not make a lot of sens...):
+
+```js
+// src/clients/controller/ControllerExperience (line 33)
+const intervalId = setInterval(() => {
+  const frequency = Math.round(50 + Math.random() * 950);
+  await playerState.set({ frequency });
+});
+```
+
+The `subscribe` method allows to be notified when an update occur on the state:
+```js
+state.subscribe(callback);
+```
+- @param {Function} callback - Function called when a change occur into the state. It is called with 1 argument:
+  + @param {Object} updates - key / value object containing the updated entries of the state.
+
+In our example, the player can `subscribe` to the updates triggered by the controller and react accordingly. The callback is thus called every second (if we ignore the network latency):
+
+```js
+// src/clients/controller/ControllerExperience (line 30)
+playerState.subscribe(async updates => {
+  console.log('updates:', updates);
+  // updates: { frequency: 288 }
+  // updates: { frequency: 965 }
+  // updates: { frequency: 540 }
+  // updates: { frequency: 120 }
+  // updates: { frequency: 678 }
+  // ...
+});
+```
+
+The same logic could be done with the `globals` state, at the difference that every player client would be notified of the update.
+
 
 
 

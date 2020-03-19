@@ -30,8 +30,17 @@ class ControllerExperience extends Experience {
           const playerState = await this.client.stateManager.attach(schemaName, stateId);
           console.log('playerState:', playerState.getValues());
 
-          // logic to do when the state is deleted (e.g. when the player disconnects)
-          playerState.onDetach(() => this.playerStates.delete(playerState));
+          const intervalId = setInterval(() => {
+            const frequency = Math.round(50 + Math.random() * 950);
+            playerState.set({ frequency });
+          }, 1000);
+          // logic to do when the state is deleted
+          // (e.g. when the player disconnects)
+          playerState.onDetach(() => {
+            // clear interval, as the state does not exists anymore
+            clearInterval(intervalId);
+            this.playerStates.delete(playerState);
+          });
           // stoare the player state into a list
           this.playerStates.add(playerState);
           break;

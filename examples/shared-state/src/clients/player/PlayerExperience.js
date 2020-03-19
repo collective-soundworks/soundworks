@@ -27,6 +27,10 @@ class PlayerExperience extends Experience {
     const globalsState = await this.client.stateManager.attach('globals');
     console.log('globalsState:', globalsState.getValues());
 
+    playerState.subscribe(async updates => {
+      console.log('updates:', updates);
+    });
+
     this.renderApp();
   }
 
