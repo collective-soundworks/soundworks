@@ -1,0 +1,15 @@
+# transpiled files and dependencies
+/node_modules
+
+# ignore all config except default
+/config/env/*
+!/config/env/default.json
+
+# application instance specific
+.db
+.build
+
+# junk files
+package-lock.json
+.DS_Store
+Thumbs.db

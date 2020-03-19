@@ -1,0 +1,232 @@
+/* http://meyerweb.com/eric/tools/css/reset/
+   v2.0 | 20110126
+   License: none (public domain)
+ */
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+}
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section {
+  display: block;
+}
+body {
+  line-height: 1;
+}
+ol, ul {
+  list-style: none;
+}
+blockquote, q {
+  quotes: none;
+}
+blockquote:before, blockquote:after,
+q:before, q:after {
+  content: '';
+  content: none;
+}
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+/* user defined
+ */
+html, body {
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  background-color: #000000;
+  color: #ffffff;
+  font-family: Consolas, monaco, monospace;
+}
+
+html {
+  font-size: 62.5%;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.loading {
+  background-image: url(../images/loader.gif);
+  background-position: 50% 50%;
+  background-repeat: no-repeat;
+}
+
+/* helpers
+ */
+.huge {
+  font-size: 3rem;
+  line-height: 3.4rem;
+}
+
+.big {
+  font-size: 2rem;
+  line-height: 2.4rem;
+}
+
+.normal {
+  font-size: 1.4rem;
+  line-height: 2rem;
+}
+
+.italic {
+  font-style: italic;
+}
+
+.bold {
+  font-weight: bold;
+}
+
+.aligner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.aligner-item {
+  max-width: 50%;
+}
+
+.aligner-item--top {
+  align-self: flex-start;
+}
+
+.aligner-item--bottom {
+  align-self: flex-end;
+}
+
+.title {
+  margin: 20px 0;
+}
+
+.align-center {
+  text-align: center;
+}
+
+.opacity-05 {
+  opacity: 0.5;
+}
+
+/* blinking animation */
+@-webkit-keyframes blink { 0% { opacity: .2; } 20% { opacity: 1; } 100% { opacity: .2; }}
+@-moz-keyframes blink { 0% { opacity: .2; } 20% { opacity: 1; } 100% { opacity: .2; }}
+@-ms-keyframes blink { 0% { opacity: .2; } 20% { opacity: 1; } 100% { opacity: .2; }}
+@-o-keyframes blink { 0% { opacity: .2; } 20% { opacity: 1; } 100% { opacity: .2; }}
+@keyframes blink { 0% { opacity: .2; } 20% { opacity: 1; } 100% { opacity: .2; }}
+
+/* blink softly */
+@-webkit-keyframes regular-soft-blink{0%{opacity:1.0}50%{opacity:0.3}100%{opacity:1.0}}
+@-moz-keyframes regular-soft-blink{0%{opacity:1.0}50%{opacity:0.3}100%{opacity:1.0}}
+@-ms-keyframes regular-soft-blink{0%{opacity:1.0}50%{opacity:0.3}100%{opacity:1.0}}
+@-o-keyframes regular-soft-blink{0%{opacity:1.0}50%{opacity:0.3}100%{opacity:1.0}}
+@keyframes regular-soft-blink{0%{opacity:1.0}50%{opacity:0.3}100%{opacity:1.0}}
+
+.soft-blink{-webkit-animation:regular-soft-blink 3.6s ease-in-out infinite;-moz-animation:regular-soft-blink 3.6s ease-in-out infinite;-ms-animation:regular-soft-blink 3.6s ease-in-out infinite;-o-animation:regular-soft-blink 3.6s ease-in-out infinite;animation:regular-soft-blink 3.6s ease-in-out infinite}
+
+/* default service css
+ */
+#container {
+  width: 100%;
+  height: 100%;
+}
+
+.title {
+  font-size: 3rem;
+  line-height: 3.4rem;
+  margin: 0 0 6px 0;
+}
+
+.author {
+  font-size: 2rem;
+  line-height: 2.4rem;
+  font-style: italic;
+  opacity: 0.5;
+}
+
+.screen {
+  width: 100%;
+  height: 100%;
+}
+
+.screen .half-screen {
+  height: 50%;
+}
+
+.services > div {
+  width: 75%;
+  padding-top: 60px;
+}
+
+.services > div ul {
+  padding: 0;
+}
+
+.services .error {
+  color: #a94442;
+}
+
+.services .initialization-item, .services .error-item  {
+  opacity: 0.6;
+}
+
+/** "..." animation */
+.services .initialization-item span {
+    animation-name: blink;
+    animation-duration: 1.4s;
+    animation-iteration-count: infinite;
+    animation-fill-mode: both;
+}
+
+.services .initialization-item span:nth-child(2) {
+    animation-delay: .2s;
+}
+
+.services .initialization-item span:nth-child(3) {
+    animation-delay: .4s;
+}
+
+/**
+ * emulated clients
+ */
+
+.emulate {
+  float: left;
+  width: 20%;
+  min-width: 300px;
+  height: 500px;
+  outline: 1px solid #aaaaaa;
+}
+
+.init-platform {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  width: 100%;
+  height: 100%;
+  background-color: #121212;
+  opacity: 0.8;
+  color: white;
+  line-height: 400px;
+  text-align: center;
+  font-size: 4rem;
+}

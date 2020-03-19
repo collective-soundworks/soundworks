@@ -2,6 +2,7 @@ docs
 src
 resources
 tests
+examples
 
 CHANGELOG.md
 jsdoc.json
