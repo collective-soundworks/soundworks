@@ -207,6 +207,8 @@ const intervalId = setInterval(() => {
 });
 ```
 
+*note: in a real world situation, we would add this logic server-side to ensure it's only done once, indeed with this example if we open 2 controllers each one will set a new value to the frequency every second*
+
 The `subscribe` method allows to be notified when an update occur on the state:
 ```js
 state.subscribe(callback);
