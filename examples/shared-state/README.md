@@ -33,27 +33,25 @@ export default {
 ```
 
 - the `player` schema is dedicated at describing the state of a single player client, maening that each player will instanciate its own instance of the schema. Other clients (typically a controller) can attach to the player's state to monitor and remotely control the client.
-Here the schema declares two (dummy) parameters: `param1` and `param2`
+Here the schema declares two oscillator parameters: `type` and `frequency`
 
 ```js
 // `src/server/schemas/player.js`
 export default {
-  // dummy params
-  param1: {
-    type: 'integer',
-    min: -60,
-    max: 6,
-    step: 1,
-    default: 0,
+  // dummy oscillator params
+  type: {
+    type: 'enum',
+    list: ['sine', 'square', 'sawtooth', 'triangle'],
+    default: 'sine',
   },
-  param2: {
-    type: 'float',
-    min: -1,
-    max: 1,
-    step: 0.001,
-    default: 0.3,
+  frequency: {
+    type: 'integer',
+    min: 50,
+    max: 1000,
+    default: 440,
   }
 }
+
 ```
 
 ## Registering schemas
@@ -83,8 +81,113 @@ server.stateManager.registerSchema('globals', globalsSchema);
 server.stateManager.registerSchema('player', playerSchema);
 ```
 
-## Registering schemas
- params
+## Creating states
+
+Once schemas are register, they can instanciated by any server or clients `stateManager` (_note: internally the `server.stateManager` is a itself client of the shared state system, except for `registerState` method, its API is thus the same as the client side API_).
+
+Typically, creating a state server-side will allow to share a common state to all the clients of the application. While creating a state client side will create a novel instance of the state for every client, simplifying remote control and monitoring.
+
+```js
+// or client-side
+const state = await server.stateManager.create(schemaName, [defaultValues]);
+// or client-side
+const state = await client.stateManager.create(schemaName, [defaultValues]);
+```
+- @param {String} schemaName - name of the schema as given in `registerState`.
+- @param {Object} [defaultValues] - optionnal default values to be applied to the created schema.
+
+In the example application the `globals` state is created by the server:
+```js
+// src/server/index.js (line 62)
+const globalsState = await server.stateManager.create('globals');
+console.log('globalsState:', globalsState.getValues());
+// > globalsState: { master: 0, mute: false }
+```
+
+While each player creates its own instance of the `player` schema:
+```js
+// src/clients/player/PlayerExperience.js (line 22-24)
+const playerState = await this.client.stateManager.create('player', {
+  frequency: Math.round(50 + Math.random() * 950),
+});
+console.log('playerState:', playerState.getValues());
+// > playerState: {type: "sine", frequency: 513}
+```
+As we want every client connecting to play a different frequency, we initialize the state with a random value.
+
+## Attaching to states
+
+Any node of the network (client or server) can attach to a state created by another node. 
+
+```js
+// or client-side
+const state = await server.stateManager.attach(schemaName, [stateId]);
+// or client-side
+const state = await client.stateManager.attach(schemaName, [stateId]);
+```
+- @param {String} schemaName - name of the schema as given in `registerState`.
+- @param {Object} [stateId] - optionnal id of the state (more on that in the _Observing states_ section).
+
+In our example, we want every player be informed of the current values of the `globalsState` created by the server, the player clients must thus `attach` to this state.
+
+```js
+// src/clients/player/PlayerExperience.js (line 22-24)
+const globalsState = await this.client.stateManager.attach('globals');
+console.log('globalsState:', globalsState.getValues());
+// > globalsState: { master: 0, mute: false }
+```
+
+Every player client is now attached to the `globals` state created by the server and will be notified if any update occur (more on that in _Subscribing to updates and updating states_).
+
+## Observing states creation
+
+As states can be dynamically created by any node, we need a way to monitor the newly created state in the application (e.g. when a `player` client connect to the application, the `controller` client wants to be notified so it can attach to the newly created state and monitor or control it).
+
+This can be achived using the `observe` method :
+```js
+// or client-side
+server.stateManager.observe(observeCallback);
+// or client-side
+client.stateManager.observe(observeCallback);
+```
+- @param {Function} observeCallback - function that will be called for every state already created and everytime a new state is created on the network. It is called with 3 arguments:
+  + @param {String} schemaName - name of the registered schema.
+  + @param {Integer} stateId - unique id the state on the network.
+  + @param {Integer} nodeId - unique id of the node which created the state. (by convention the server's noteId is -1).
+
+In our example, the controller wants to track every `player` states created by `player` clients, to be able to monitor and control them remotely, it thus `observe` and attach to the state when notified:
+
+```js
+// create a list to store the player states
+this.playerStates = new Set();
+
+this.client.stateManager.observe(async (schemaName, stateId, nodeId) => {
+  console.log('arguments:', schemaName, stateId, nodeId);
+  // the callback is called twice, for the global and player states
+  // > arguments: 'globals' 0 -1
+  // > arguments: 'player' 2 1
+  switch(schemaName) {
+    case 'player':
+      const playerState = await this.client.stateManager.attach(schemaName, stateId);
+      console.log('playerState:', playerState.getValues());
+      // > playerState: {type: "sine", frequency: 513}
+
+      // logic to do when the state is deleted (e.g. when the player disconnects)
+      playerState.onDetach(() => this.playerStates.delete(playerState));
+      // stoare the player state into a list
+      this.playerStates.add(playerState);
+      break;
+  }
+});
+```
+
+## Subscribing to updates and updating states
+
+## Subscribing to updates and updating states
+
+## Deleting states
+
+
 
 
 

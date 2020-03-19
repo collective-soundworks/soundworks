@@ -15,8 +15,17 @@ class PlayerExperience extends Experience {
     renderAppInitialization(client, config, $container);
   }
 
-  start() {
+  async start() {
     super.start();
+
+    // create an instance of the `player` schema
+    const playerState = await this.client.stateManager.create('player', {
+      frequency: Math.round(50 + Math.random() * 950),
+    });
+    console.log('playerState:', playerState.getValues());
+
+    const globalsState = await this.client.stateManager.attach('globals');
+    console.log('globalsState:', globalsState.getValues());
 
     this.renderApp();
   }

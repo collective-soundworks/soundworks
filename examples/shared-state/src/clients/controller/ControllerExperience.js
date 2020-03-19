@@ -16,6 +16,28 @@ class ControllerExperience extends Experience {
   async start() {
     super.start();
 
+    // attach to global state
+    const globalsState = await this.client.stateManager.attach('globals');
+    console.log('globalsState:', globalsState.getValues());
+
+    this.playerStates = new Set();
+
+    this.client.stateManager.observe(async (schemaName, stateId, nodeId) => {
+      console.log('arguments:', schemaName, stateId, nodeId);
+
+      switch(schemaName) {
+        case 'player':
+          const playerState = await this.client.stateManager.attach(schemaName, stateId);
+          console.log('playerState:', playerState.getValues());
+
+          // logic to do when the state is deleted (e.g. when the player disconnects)
+          playerState.onDetach(() => this.playerStates.delete(playerState));
+          // stoare the player state into a list
+          this.playerStates.add(playerState);
+          break;
+      }
+    });
+
     window.addEventListener('resize', () => this.renderApp());
     this.renderApp();
   }

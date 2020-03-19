@@ -59,6 +59,9 @@ console.log(`
     server.stateManager.registerSchema('globals', globalsSchema);
     server.stateManager.registerSchema('player', playerSchema);
 
+    const globalsState = await server.stateManager.create('globals');
+    console.log('globalsState:', globalsState.getValues());
+
     // html template and static files (in most case, this should not be modified)
     server.configureHtmlTemplates({ compile }, path.join('.build', 'server', 'tmpl'))
     server.router.use(serveStatic('public'));
