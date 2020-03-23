@@ -12,7 +12,7 @@
   "opts": {
     "projectTitle": "Soundworks",
     "template": "node_modules/@ircam/jsdoc-template",
-    "destination": "./docs",
+    "destination": "./docs/api",
     "encoding": "utf8"
   },
   "templates": {
