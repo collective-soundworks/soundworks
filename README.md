@@ -12,8 +12,7 @@
 
 `soundworks` follows a client / server architecture where the server is written using [Node.js](https://nodejs.org/) and clients can be either regular browser clients but also Node.js clients running for example on a Raspberry Pi. 
 
-| ![high-level-architecture](./resources/high-level-architecture.jpeg) |
-| :--: | 
+![high-level-architecture](./resources/high-level-architecture.jpeg) 
 
 The core of the framework is very minimal and doing the basic initialisation stuff:
   - creating http(s) server
