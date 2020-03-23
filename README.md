@@ -2,7 +2,7 @@
 
 ![soundworks-logo](./resources/soundworks-logo-small.png)
 
-> `soundworks` is a framework dedicated a developping distributed and real-time multimedia application on the Web.
+> `soundworks` is a full-stack javascript framework dedicated a developping distributed and real-time multimedia application on the Web.
 
 ## Documentation
 
@@ -10,17 +10,17 @@
 
 ## Overview
 
-`soundworks` follows a client / server architecture where the server is written using [Node.js](https://nodejs.org/) and clients can be either regular browser clients but also Node.js clients running for example on a Raspberry Pi. 
+`soundworks` follows a client / server architecture where the server is written using [Node.js](https://nodejs.org/) and clients can be either regular browser clients or Node.js clients running for example on a Raspberry Pi. 
 
 ![high-level-architecture](./resources/high-level-architecture.png) 
 
-The core of the framework is very minimal and dedicated at doing the following:
+The core of the framework is very minimal and dedicated at handling:
   - Http(s) server and basic routing
   - WebSockets initialization
   - Processes initialization
   - Distributed state management
   
-`soundworks` can be extended with services to reuse common logic such as audio file loading, clock synchronisation, etc. Each service leaves in a separate repo for better modularity and simplify version management.
+`soundworks` can be extended with services to reuse common logic such as audio file loading, clock synchronisation, etc. Each service leaves in a separate repo for better modularity and to simplify version management.
 
 ## Installation
 
