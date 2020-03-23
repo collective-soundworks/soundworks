@@ -2,7 +2,7 @@
 
 ![soundworks-logo](./resources/soundworks-logo-small.png)
 
-> Full-stack JavaScript framework for distributed and real-time multimedia (mainly [WebAudio](https://www.w3.org/TR/webaudio/)) applications on the Web.  
+> Full-stack JavaScript framework for distributed and real-time WebAudio / multimedia applications on the Web.  
 
 ## Documentation
 
