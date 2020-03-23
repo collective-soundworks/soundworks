@@ -49,6 +49,8 @@ The simplest way to start a new `soundworks` application is using the applicatio
 
 Futher developments has been supported in the framework of the [RAPID-MIX project](http://rapidmix.goldsmithsdigital.com/), funded by the European Union’s Horizon 2020 research and innovation programme.
 
+Development is pursued in the [Interaction Music Mouvement Team](https://www.stms-lab.fr/team/interaction-son-musique-mouvement/) from the STMS-LAB, Ircam.
+
 ## License
 
 The *soundworks* framework is released under the [BSD 3-Clause](https://opensource.org/licenses/BSD-3-Clause) license.
