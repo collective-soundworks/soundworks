@@ -28,6 +28,10 @@ The core of the framework is very minimal and dedicated at handling:
 npm install @soundworks/core
 ```
 
+## Getting Started
+
+[@link to tutorial]()
+
 ## Application Template
 
 The simplest way to start a new `soundworks` application is using the application template:   
