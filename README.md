@@ -1,6 +1,6 @@
 # `soundworks`
 
-![soundworks-logo](./resources/soundworks-logo-small.png)
+![soundworks-logo](./docs/images/soundworks-logo-small.png)
 
 > Full-stack JavaScript framework for distributed and real-time WebAudio / multimedia applications on the Web.  
 
@@ -12,7 +12,7 @@
 
 `soundworks` follows a client / server architecture where the server is written using [Node.js](https://nodejs.org/) and clients can be either regular browser clients or Node.js clients running for example on a Raspberry Pi. 
 
-![high-level-architecture](./resources/high-level-architecture.png) 
+![high-level-architecture](./docs/images/high-level-architecture.png) 
 
 The core of the framework is very minimal and dedicated at handling:
   - Http(s) server and basic routing

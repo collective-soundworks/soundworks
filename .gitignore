@@ -3,23 +3,17 @@
 /server
 /common
 
-# others
+# dependencies
 /node_modules
-# /tests
 
 # junk files
-npm-debug.log
 .DS_Store
 Thumbs.db
-package-lock.json
+
+# vuepress stuff
+/docs/.vuepress/dist
 
 # MISC
 NOTES.md
 TODOS.md
-/_backup
-/docs.bak
-
-# temp
-/docs
-
-NOTES_DOCUMENTATION.md
+___backup
