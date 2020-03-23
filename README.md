@@ -29,7 +29,8 @@ npm install @soundworks/core
 
 ## Application Template
 
-The simplest way to start a new `soundworks` application is using the application template [https://github.com/collective-soundworks/soundworks-template](https://github.com/collective-soundworks/soundworks-template).
+The simplest way to start a new `soundworks` application is using the application template:   
+[https://github.com/collective-soundworks/soundworks-template](https://github.com/collective-soundworks/soundworks-template).
 
 ## List of Services
 
