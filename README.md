@@ -39,11 +39,9 @@ The simplest way to start a new `soundworks` application is using the applicatio
 
 ## Academic Publications
 
-Benjamin Matuszewski. Soundworks - A Framework for Networked Music Systems on the Web - State of Affairs and New Developments. Proceedings of the Web Audio Conference (WAC) 2019, Dec 2019, Trondheim, Norway. ⟨[hal-02387783](https://hal.archives-ouvertes.fr/hal-02387783⟩)
-
-Benjamin Matuszewski, Norbert Schnell, Frédéric Bevilacqua. Interaction Topologies in Mobile-Based Situated Networked Music Systems. Wireless Communications and Mobile Computing, Hindawi Publishing Corporation, 2019, 2019, pp.9142490. ⟨10.1155/2019/9142490⟩. ⟨[hal-02086673](https://hal.archives-ouvertes.fr/hal-02086673⟩)
-
-Norbert Schnell, Sébastien Robaszkiewicz. Soundworks – A playground for artists and developers to create collaborative mobile web performances. `Proceedings of the Web Audio Conference (WAC'15), 2015, Paris, France. ⟨[hal-01580797](https://hal.archives-ouvertes.fr/hal-01580797⟩)
+- Benjamin Matuszewski. Soundworks - A Framework for Networked Music Systems on the Web - State of Affairs and New Developments. Proceedings of the Web Audio Conference (WAC) 2019, Dec 2019, Trondheim, Norway. <[hal-02387783](https://hal.archives-ouvertes.fr/hal-02387783)>
+- Benjamin Matuszewski, Norbert Schnell, Frédéric Bevilacqua. Interaction Topologies in Mobile-Based Situated Networked Music Systems. Wireless Communications and Mobile Computing, Hindawi Publishing Corporation, 2019, 2019, pp.9142490. ⟨10.1155/2019/9142490⟩. <[hal-02086673](https://hal.archives-ouvertes.fr/hal-02086673)>
+- Norbert Schnell, Sébastien Robaszkiewicz. Soundworks – A playground for artists and developers to create collaborative mobile web performances. `Proceedings of the Web Audio Conference (WAC'15), 2015, Paris, France. <[hal-01580797](https://hal.archives-ouvertes.fr/hal-01580797)>
 
 ## Credits
 
