@@ -1,13 +1,26 @@
 # `soundworks`
 
-![logo](./resources/soundworks-logo.png)
+![soundworks-logo](./resources/soundworks-logo-small.png)
 
-> `soundworks` is a framework dedicated a developping distributed and real-time multimedia application on the Web
+> `soundworks` is a framework dedicated a developping distributed and real-time multimedia application on the Web.
+
+## Documentation
+
+[http://collective-soundworks.github.io/soundworks/](http://collective-soundworks.github.io/soundworks/)
+
+## Overview
+
+`soundworks` follows a client / server architecture where the server is written using [Node.js](https://nodejs.org/) and clients can be either regular browser clients but also Node.js clients running for example on a Raspberry PI
+
+![high-level-architecture(./resources/high-level-architecture.jpeg)
 
 ## Installation
 
-## Usage
+```
+npm install @soundworks/core
+```
 
+## Installation
 
 ## Credits
 
