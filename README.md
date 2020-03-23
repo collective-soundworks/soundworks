@@ -2,7 +2,7 @@
 
 ![soundworks-logo](./resources/soundworks-logo-small.png)
 
-> `soundworks` is a full-stack javascript framework dedicated a developping distributed and real-time multimedia application on the Web.
+> `soundworks` is a full-stack javascript framework dedicated a developping distributed and real-time multimedia (mainly [WebAudio](https://www.w3.org/TR/webaudio/)) applications on the Web.  
 
 ## Documentation
 
