@@ -20,17 +20,18 @@
     "clean": "rm -Rf client && rm -Rf server && rm -Rf common",
     "graphs": "madge --image resources/graph-client.svg src/client && madge --image resources/graph-server.svg src/server",
     "deploy": "np --yolo",
-    "doc": "jsdoc -c jsdoc.json",
-    "prepublishOnly": "npm run transpile",
-    "version": "npm run clean && npm run transpile && npm run doc && git add docs",
-    "transpile:client": "babel src/client --out-dir client",
-    "transpile:server": "babel src/server --out-dir server",
-    "transpile:common": "babel src/common --out-dir common",
-    "transpile": "npm run clean && npm run transpile:server && npm run transpile:client && npm run transpile:common",
-    "watch:client": "chokidar src/client/ -c \"npm run transpile:client\"",
-    "watch:server": "chokidar src/server/ -c \"npm run transpile:server\"",
-    "watch:common": "chokidar src/common/ -c \"npm run transpile:common\"",
-    "watch": "npm run transpile && concurrently \"npm run watch:client\" \"npm run watch:server\" \"npm run watch:common\""
+    "docs:build": "vuepress build docs",
+    "docs": "jsdoc -c jsdoc.json",
+    "prepublishOnly": "npm run build",
+    "version": "npm run clean && npm run build && npm run doc && git add docs",
+    "build:client": "babel src/client --out-dir client",
+    "build:server": "babel src/server --out-dir server",
+    "build:common": "babel src/common --out-dir common",
+    "build": "npm run clean && npm run build:server && npm run build:client && npm run build:common",
+    "dev:client": "chokidar src/client/ -c \"npm run build:client\"",
+    "dev:server": "chokidar src/server/ -c \"npm run build:server\"",
+    "dev:common": "chokidar src/common/ -c \"npm run build:common\"",
+    "dev": "npm run build && concurrently \"npm run dev:client\" \"npm run dev:server\" \"npm run dev:common\""
   },
   "dependencies": {
     "@ircam/parameters": "^1.2.2",
@@ -53,13 +54,14 @@
   "devDependencies": {
     "@babel/cli": "^7.4.4",
     "@babel/core": "^7.4.5",
-    "@babel/preset-env": "^7.4.5",
     "@babel/plugin-proposal-export-default-from": "^7.5.2",
+    "@babel/preset-env": "^7.4.5",
     "@ircam/jsdoc-template": "^1.0.2",
     "chokidar": "^3.0.1",
     "chokidar-cli": "^1.2.2",
     "concurrently": "^4.1.0",
     "jsdoc": "^3.6.2",
-    "np": "^5.0.3"
+    "np": "^5.0.3",
+    "vuepress": "^1.4.0"
   }
 }
