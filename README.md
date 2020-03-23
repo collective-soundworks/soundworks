@@ -45,11 +45,11 @@ The simplest way to start a new `soundworks` application is using the applicatio
 
 ## Credits
 
-*soundworks* has been initiated by [NorbertSchnell](https://github.com/NorbertSchnell), [i-Robi](https://github.com/i-Robi), and [b-ma](https://github.com/b-ma) at the [ISMM](http://ismm.ircam.fr/) team at [Ircam - Centre Pompidou](http://www.ircam.fr/) in the framework of the [*CoSiMa*](http://cosima.ircam.fr/) research project supported by the [French National Research Agency (ANR)](http://www.agence-nationale-recherche.fr/en/).
+`soundworks` has been initiated by [NorbertSchnell](https://github.com/NorbertSchnell), [i-Robi](https://github.com/i-Robi), and [b-ma](https://github.com/b-ma) at the [ISMM](http://ismm.ircam.fr/) team at [Ircam - Centre Pompidou](http://www.ircam.fr/) in the framework of the [*CoSiMa*](http://cosima.ircam.fr/) research project supported by the [French National Research Agency (ANR)](http://www.agence-nationale-recherche.fr/en/).
 
 Futher developments has been supported in the framework of the [RAPID-MIX project](http://rapidmix.goldsmithsdigital.com/), funded by the European Union’s Horizon 2020 research and innovation programme.
 
-Development is pursued in the [Interaction Music Mouvement Team](https://www.stms-lab.fr/team/interaction-son-musique-mouvement/) from the STMS-LAB, Ircam.
+Development is pursued in the [Interaction Music Mouvement Team](https://www.stms-lab.fr/team/interaction-son-musique-mouvement/) from the Ircam's STMS-LAB.
 
 ## License
 
