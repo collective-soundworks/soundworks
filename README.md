@@ -53,5 +53,5 @@ Development is pursued in the [Interaction Music Mouvement Team](https://www.stm
 
 ## License
 
-The *soundworks* framework is released under the [BSD 3-Clause](https://opensource.org/licenses/BSD-3-Clause) license.
+[BSD 3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
