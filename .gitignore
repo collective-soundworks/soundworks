@@ -10,11 +10,6 @@
 .DS_Store
 Thumbs.db
 
-# vuepress stuff
-/docs/.vuepress/dist
+# convention for personnal files
+__*
 
-# MISC
-NOTES.md
-TODOS.md
-___resources
-___backup
