@@ -1,15 +1,11 @@
-docs
 src
-resources
 tests
+
 examples
+docs
 
 CHANGELOG.md
 jsdoc.json
 
 .babelrc
 .editorconfig
-
-_backup
-
-tests
