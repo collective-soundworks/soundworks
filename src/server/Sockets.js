@@ -31,7 +31,7 @@ class Sockets {
    * @private
    */
   start(httpServer, config, onConnectionCallback) {
-    const path = 'socket'; // should remove origin
+    const path = config.path;
     // init global room
     this._rooms.set('*', new Set());
 

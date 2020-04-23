@@ -9,3 +9,7 @@ jsdoc.json
 
 .babelrc
 .editorconfig
+
+__backup
+__resources
+assets
