@@ -87,15 +87,15 @@ class Client {
 
     // handle config
     this.type = config.clientType;
+    this.config = config;
     // @todo - review that to adapt to ws options
-    const websockets = Object.assign({
-      url: '',
+    this.config.env.websockets = Object.assign({
+      // url: '',
       path: 'socket',
       // pingInterval: 5 * 1000,
-    }, config.websockets);
+    }, config.env.websockets);
 
-    this.config = Object.assign({}, config, { websockets });
-
+    console.log(this.config);
     // init communications
     await this.socket.init(this.type, this.config);
 

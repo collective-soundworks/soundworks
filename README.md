@@ -37,7 +37,7 @@ npm install @soundworks/core
 The simplest way to start a new `soundworks` application is using the application template:   
 [https://github.com/collective-soundworks/soundworks-template](https://github.com/collective-soundworks/soundworks-template).
 
-## List of Services
+## List of Available Services
 
 @todo
 
@@ -60,5 +60,5 @@ Development is pursued in the [Interaction Music Mouvement Team](https://www.stm
 
 ## License
 
-[BSD 3-Clause](https://opensource.org/licenses/BSD-3-Clause)
+[BSD-3-Clause](https://github.com/collective-soundworks/soundworks/blob/master/LICENSE)
 

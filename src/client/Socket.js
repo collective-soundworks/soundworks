@@ -65,7 +65,7 @@ class Socket {
     const key = (Math.random() + '').replace(/^0./, '');
 
     // open web sockets
-    const { path } = config.websockets;
+    const { path } = config.env.websockets;
     let url;
 
     if (isBrowser()) {

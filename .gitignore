@@ -13,3 +13,6 @@ Thumbs.db
 # convention for personnal files
 __*
 
+# to be removed when documentation is online
+/examples
+
