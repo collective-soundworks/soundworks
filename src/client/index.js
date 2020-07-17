@@ -21,18 +21,21 @@
  * // when everything is ready, start the experience
  * playerExperience.start();
  */
-import { default as _Experience } from './Experience';
+import { default as _Experience } from './Experience.js';
 // import { default as TmpService } from './Service';
-import { default as _Client } from './Client';
+import { default as _Client } from './Client.js';
 
 // (very) weird workaround to be able to:
 //
-// `import * as soundworks from '@soundworks/core/client'``
+// `import soundworks from '@soundworks/core/client'``
 // or
 // `import { Client } from '@soundworks/core/client'`
 //
 export const Experience = _Experience;
-// export const Service = TmpService;
 export const Client = _Client;
-export default undefined;
+
+// export default {
+//   Experience: _Experience,
+//   Client: _Client,
+// };
 

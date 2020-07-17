@@ -25,6 +25,13 @@
  * playerExperience.start();
  *
  */
-export { default as Server } from './Server';
-// export { default as Service } from './Service';
-export { default as Experience } from './Experience';
+import { default as _Server } from './Server';
+import { default as _Experience } from './Experience';
+
+export const Experience = _Experience;
+export const Server = _Server;
+
+export default {
+  Experience: _Experience,
+  Client: _Server,
+};
