@@ -25,17 +25,14 @@ import { default as _Experience } from './Experience.js';
 // import { default as TmpService } from './Service';
 import { default as _Client } from './Client.js';
 
-// (very) weird workaround to be able to:
-//
 // `import soundworks from '@soundworks/core/client'``
 // or
 // `import { Client } from '@soundworks/core/client'`
-//
 export const Experience = _Experience;
 export const Client = _Client;
 
-// export default {
-//   Experience: _Experience,
-//   Client: _Client,
-// };
+export default {
+  Experience: _Experience,
+  Client: _Client,
+};
 
