@@ -19,9 +19,7 @@
   "scripts": {
     "clean": "rm -Rf client && rm -Rf server && rm -Rf common",
     "graphs": "madge --image resources/graph-client.svg src/client && madge --image resources/graph-server.svg src/server",
-    "deploy": "np --yolo",
-    "docs:build": "vuepress build docs",
-    "docs": "jsdoc -c jsdoc.json",
+    "docs": "jsdoc -c .jsdoc.json --verbose",
     "prepublishOnly": "npm run build",
     "version": "npm run clean && npm run build && npm run doc && git add docs",
     "build:client": "babel src/client --out-dir client",
@@ -31,19 +29,23 @@
     "dev:client": "chokidar src/client/ -c \"npm run build:client\"",
     "dev:server": "chokidar src/server/ -c \"npm run build:server\"",
     "dev:common": "chokidar src/common/ -c \"npm run build:common\"",
-    "dev": "npm run build && concurrently \"npm run dev:client\" \"npm run dev:server\" \"npm run dev:common\""
+    "dev": "npm run build && (npm run dev:client & npm run dev:server & npm run dev:common)"
   },
   "dependencies": {
     "@ircam/parameters": "^1.2.2",
+    "braintree-jsdoc-template": "^3.3.0",
     "chalk": "^2.4.2",
     "columnify": "^1.5.4",
     "compression": "^1.7.1",
     "debug": "^4.1.1",
+    "docdash": "^1.2.0",
     "fast-text-encoding": "^1.0.0",
     "isomorphic-ws": "^4.0.1",
+    "jsdoc-template": "^1.2.0",
     "keyv": "^3.1.0",
     "keyv-file": "^0.1.13",
     "lodash.clonedeep": "^4.5.0",
+    "lodash.merge": "^4.6.2",
     "pem": "^1.12.5",
     "polka": "^0.5.2",
     "serve-static": "^1.13.2",
@@ -59,9 +61,6 @@
     "@ircam/jsdoc-template": "^1.0.2",
     "chokidar": "^3.0.1",
     "chokidar-cli": "^1.2.2",
-    "concurrently": "^4.1.0",
-    "jsdoc": "^3.6.2",
-    "np": "^5.0.3",
-    "vuepress": "^1.4.0"
+    "jsdoc": "^3.6.2"
   }
 }

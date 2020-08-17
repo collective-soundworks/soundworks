@@ -1,4 +1,4 @@
-import Signal from './Signal';
+import Signal from './Signal.js';
 
 /**
  * Compound signal that is `true` when all signals it depends on are `true`.

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>server/ServiceManager.js - Documentation</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="client.Client.html">client.Client</a><ul class='methods'><li data-type='method'><a href="client.Client.html#init">init</a></li><li data-type='method'><a href="client.Client.html#registerService">registerService</a></li><li data-type='method'><a href="client.Client.html#start">start</a></li></ul></li><li><a href="client.Experience.html">client.Experience</a><ul class='methods'><li data-type='method'><a href="client.Experience.html#require">require</a></li><li data-type='method'><a href="client.Experience.html#start">start</a></li></ul></li><li><a href="client.Service.html">client.Service</a><ul class='methods'><li data-type='method'><a href="client.Service.html#ready">ready</a></li><li data-type='method'><a href="client.Service.html#start">start</a></li><li data-type='method'><a href="client.Service.html#started">started</a></li></ul></li><li><a href="client.ServiceManager.html">client.ServiceManager</a><ul class='methods'><li data-type='method'><a href="client.ServiceManager.html#get">get</a></li><li data-type='method'><a href="client.ServiceManager.html#getValues">getValues</a></li><li data-type='method'><a href="client.ServiceManager.html#observe">observe</a></li><li data-type='method'><a href="client.ServiceManager.html#register">register</a></li></ul></li><li><a href="client.SharedStateManagerClient.html">client.SharedStateManagerClient</a><ul class='methods'><li data-type='method'><a href="client.SharedStateManagerClient.html#attach">attach</a></li><li data-type='method'><a href="client.SharedStateManagerClient.html#create">create</a></li><li data-type='method'><a href="client.SharedStateManagerClient.html#observe">observe</a></li></ul></li><li><a href="client.Socket.html">client.Socket</a><ul class='methods'><li data-type='method'><a href="client.Socket.html#addBinaryListener">addBinaryListener</a></li><li data-type='method'><a href="client.Socket.html#addListener">addListener</a></li><li data-type='method'><a href="client.Socket.html#removeAllBinaryListeners">removeAllBinaryListeners</a></li><li data-type='method'><a href="client.Socket.html#removeAllListeners">removeAllListeners</a></li><li data-type='method'><a href="client.Socket.html#removeBinaryListener">removeBinaryListener</a></li><li data-type='method'><a href="client.Socket.html#removeListener">removeListener</a></li><li data-type='method'><a href="client.Socket.html#send">send</a></li><li data-type='method'><a href="client.Socket.html#sendBinary">sendBinary</a></li></ul></li><li><a href="server.Experience.html">server.Experience</a><ul class='methods'><li data-type='method'><a href="server.Experience.html#enter">enter</a></li><li data-type='method'><a href="server.Experience.html#require">require</a></li></ul></li><li><a href="server.Server.html">server.Server</a><ul class='methods'><li data-type='method'><a href="server.Server.html#init">init</a></li><li data-type='method'><a href="server.Server.html#registerService">registerService</a></li><li data-type='method'><a href="server.Server.html#start">start</a></li></ul></li><li><a href="server.Service.html">server.Service</a><ul class='methods'><li data-type='method'><a href="server.Service.html#connect">connect</a></li><li data-type='method'><a href="server.Service.html#disconnect">disconnect</a></li><li data-type='method'><a href="server.Service.html#ready">ready</a></li><li data-type='method'><a href="server.Service.html#start">start</a></li><li data-type='method'><a href="server.Service.html#started">started</a></li></ul></li><li><a href="server.ServiceManager.html">server.ServiceManager</a><ul class='methods'><li data-type='method'><a href="server.ServiceManager.html#get">get</a></li></ul></li><li><a href="server.SharedStateManagerServer.html">server.SharedStateManagerServer</a><ul class='methods'><li data-type='method'><a href="server.SharedStateManagerServer.html#attach">attach</a></li><li data-type='method'><a href="server.SharedStateManagerServer.html#create">create</a></li><li data-type='method'><a href="server.SharedStateManagerServer.html#deleteSchema">deleteSchema</a></li><li data-type='method'><a href="server.SharedStateManagerServer.html#observe">observe</a></li><li data-type='method'><a href="server.SharedStateManagerServer.html#registerSchema">registerSchema</a></li></ul></li><li><a href="server.Sockets.html">server.Sockets</a><ul class='methods'><li data-type='method'><a href="server.Sockets.html#addToRoom">addToRoom</a></li><li data-type='method'><a href="server.Sockets.html#broadcast">broadcast</a></li><li data-type='method'><a href="server.Sockets.html#broadcastBinary">broadcastBinary</a></li><li data-type='method'><a href="server.Sockets.html#removeFromRoom">removeFromRoom</a></li></ul></li><li><a href="SharedState.html">SharedState</a></li></ul><h3>Namespaces</h3><ul><li><a href="client.html">client</a></li><li><a href="server.html">server</a></li></ul><h3>Global</h3><ul><li><a href="global.html#signals">signals</a></li></ul>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">server/ServiceManager.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import Signal from '../common/Signal';
+import SignalAll from '../common/SignalAll';
+import debug from 'debug';
+import logger from './utils/logger';
+
+const log = debug('soundworks:lifecycle');
+
+/**
+ * Manager the services and their relations. Acts as a factory to ensure services
+ * are instanciated only once.
+ *
+ * @memberof server
+ */
+class ServiceManager {
+  constructor(server) {
+    /** @private */
+    this._registeredServices = {};
+    /** @private */
+    this._instances = {};
+    /** @private */
+    this._server = server;
+
+    // @todo - move to Promise based logic
+    this.signals = {
+      start: new Signal(),
+      ready: new SignalAll(),
+    };
+
+    this.ready = new Promise((resolve, reject) => {
+      this._resolveReadyPromise = resolve;
+    });
+  }
+
+  /** @private */
+  start() {
+    log('> serviceManager start');
+    logger.title('initializing services');
+
+    this.signals.ready.addObserver(() => {
+      log('> serviceManager ready');
+      this._resolveReadyPromise();
+    });
+
+    // start before ready, even if no dependencies
+    this.signals.start.value = true;
+
+    if (this.signals.ready.length === 0) {
+      this.signals.ready.value = true;
+    }
+
+    return this.ready;
+  }
+
+  /**
+   * Register a service
+   * @private
+   *
+   * @param {String} name - Name of the service
+   * @param {Function} ctor - Constructor of the service
+   * @param {Object} options - Options to configure the service
+   * @param {Array} dependencies - List of services' names the service depends on
+   */
+  register(name, ctor, options = {}, dependencies = []) {
+    if (this._registeredServices[name]) {
+      throw new Error(`Service "${name}" already registered`);
+    }
+
+    this._registeredServices[name] = { ctor, options, dependencies };
+  }
+
+  /**
+   * Retrieve an instance of a registered service according to its given name.
+   * Except if you know what you are doing, prefer `Experience.require('my-service')`
+   * @param {String} name - Name of the registered service
+   */
+  get(name, _experience = null) {
+    if (!this._registeredServices[name]) {
+      throw new Error(`Cannot get or require service "${name}", service is not registered
+> registered services are:
+${Object.keys(this._registeredServices).map(n => `> - ${n}\n`).join('')}
+`);
+    }
+
+    // required by experience and manager already started
+    if (_experience &amp;&amp; this.signals.start.value === true) {
+      throw new Error(`Service "${name}" required after serviceManager start`);
+    }
+
+    if (!this._instances[name]) {
+      log(`> instanciating service "${name}"`);
+      const { ctor, options, dependencies } = this._registeredServices[name];
+      const instance = new ctor(this._server, name, options);
+
+      this.signals.ready.add(instance.signals.ready);
+      instance.signals.start.add(this.signals.start);
+
+      if (dependencies.length > 0) {
+        dependencies.forEach(dependencyName => {
+          if (!this._instances[dependencyName]) {
+            this.get(dependencyName, _experience); // propagate client types
+          }
+
+          const dependency = this._instances[dependencyName];
+          instance.signals.start.add(dependency.signals.ready);
+        });
+      }
+
+      this._instances[name] = instance;
+    }
+
+    const instance = this._instances[name];
+
+    // if require by the experience, map client types
+    if (_experience) {
+      _experience.clientTypes.forEach((clientType) => {
+        instance.clientTypes.add(clientType);
+      });
+    }
+
+    return instance;
+  }
+
+  /** @private */
+  getRequiredServices(clientType = null) {
+    const services = [];
+
+    for (let name in this._instances) {
+      if (clientType !== null) {
+        if (this._instances[name].clientTypes.has(clientType)) {
+          services.push(name);
+        }
+      } else {
+        services.push(name);
+      }
+    }
+
+    return services;
+  }
+}
+
+export default ServiceManager;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Mon Aug 17 2020 17:38:53 GMT+0200 (Central European Summer Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+
+
+</body>
+</html>

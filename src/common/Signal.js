@@ -1,7 +1,4 @@
-/**
- *
- *
- */
+/** @private */
 class Signal {
   constructor() {
     this._state = false;

@@ -5,8 +5,7 @@ examples
 docs
 
 CHANGELOG.md
-jsdoc.json
-
+.jsdoc.json
 .babelrc
 .editorconfig
 

@@ -58,16 +58,20 @@ const logger = {
     console.log(`    ${protocol}://${address}:${chalk.green(port)}`);
   },
 
-  // serviceStart(name) {
-  //   console.log(`    ${name} ${chalk.cyan('start')}`);
-  // },
-
-  serviceStarted(name) {
-    console.log(`    ${name} ${chalk.cyan('started...')}`);
+  pluginStart(name) {
+    console.log(`    ${name} ${chalk.yellow('start...')}`);
   },
 
-  serviceReady(name) {
+  pluginStarted(name) {
+    console.log(`    ${name} ${chalk.cyan('started')}`);
+  },
+
+  pluginReady(name) {
     console.log(`    ${name} ${chalk.green('ready')}`);
+  },
+
+  pluginErrored(name) {
+    console.log(`    ${name} ${chalk.red('errors')}`);
   },
 };
 

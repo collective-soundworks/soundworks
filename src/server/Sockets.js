@@ -1,16 +1,13 @@
 import WebSocket from 'ws';
 import querystring from 'querystring';
-import Socket from './Socket';
+import Socket from './Socket.js';
 
 /**
- * Internal base class for services and scenes.
+ * Websocket server that creates and host all {@link server.Socket} instance.
  *
- * @todo - remove all `send`, `addListener`, `removeListener` methods,
- *         use `client.socket` instead.
+ * (@note - could be usefull for broadcasting messages, creating rooms, etc.
  *
- * will be more simple to document.
- *
- * @memberof @soundworks/core/server
+ * @memberof server
  */
 class Sockets {
   constructor() {
@@ -73,7 +70,7 @@ class Sockets {
     const method = binary ? 'sendBinary' : 'send';
     let targets = new Set();
 
-    if (typeof roomIds === 'string' || Array.isArray(roomIds)) {
+    if (typeof roomIds === 'string' || Array.isArray(roomIds)) {
       if (typeof roomIds === 'string') {
         roomIds = [roomIds];
       }

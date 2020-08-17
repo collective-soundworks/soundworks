@@ -8,13 +8,12 @@ import os from 'os';
 import polka from 'polka';
 import serveStatic from 'serve-static';
 import compression from 'compression';
-import Client from './Client';
-import Service from './Service';
-import ServiceManager from './ServiceManager';
-import Sockets from './Sockets';
-import ServerStateManager from '../common/ServerStateManager';
-import Db from './Db';
-import logger from './utils/logger';
+import Client from './Client.js';
+import PluginManager from './PluginManager.js';
+import Sockets from './Sockets.js';
+import SharedStateManagerServer from '../common/SharedStateManagerServer.js';
+import Db from './utils/Db.js';
+import logger from './utils/logger.js';
 
 /**
  * Server side entry point for a `soundworks` application.
@@ -23,7 +22,7 @@ import logger from './utils/logger';
  * initialize and start the application. It is also responsible for creating
  * the static file (http) server as well as the socket server.
  *
- * @memberof @soundworks/core/server
+ * @memberof server
  *
  * @example
  * import * as soundworks from 'soundworks/server';
@@ -36,7 +35,8 @@ import logger from './utils/logger';
 class Server {
   constructor() {
     /**
-     * Configuration informations. Defaults to:
+     * Configuration informations.
+     * Defaults to:
      * ```
      * {
      *   env: {
@@ -65,7 +65,7 @@ class Server {
     this.router.use(compression());
 
     /**
-     * http(s) server instance. The node `http` or `https` module instance
+     * Http(s) server instance. The node `http` or `https` module instance
      * (cf. {@link https://nodejs.org/api/http.html})
      */
     this.httpServer = null;
@@ -78,25 +78,26 @@ class Server {
     this.db = new Db();
 
     /**
-     * Wrapper around `ws` server.
-     * cf. {@link @soundworks/core/server.Sockets}
-     * @type {soundworks/core/server.Sockets}
+     * The {@link server.Sockets} instance. A small wrapper around
+     * [`ws`](https://github.com/websockets/ws) server.
+     * @see {@link server.Sockets}
+     * @type {server.Sockets}
      */
     this.sockets = new Sockets();
 
     /**
-     * The `serviceManager` instance.
-     * cf. {@link @soundworks/core/server.ServiceManager}
-     * @type {soundworks/core/server.ServiceManager}
+     * The {@link server.PluginManager} instance.
+     * @see {@link server.PluginManager}
+     * @type {server.PluginManager}
      */
-    this.serviceManager = new ServiceManager(this);
+    this.pluginManager = new PluginManager(this);
 
     /**
-     * The `ServerStateManager` instance.
-     * cf. {@link @soundworks/common/ServerStateManager}
-     * @type {soundworks/common/ServerStateManager}
+     * The {@link server.SharedStateManagerServer} instance.
+     * @see {@link server.SharedStateManagerServer}
+     * @type {server.SharedStateManagerServer}
      */
-    this.stateManager = new ServerStateManager();
+    this.stateManager = new SharedStateManagerServer();
 
     /**
      * Template engine that should implement a `compile` method.
@@ -107,8 +108,8 @@ class Server {
     /**
      * Path to the directory containing the templates.
      * Any filename corresponding to a registered browser client type will be used
-     * in priority, in not present fallback to `default` (i.e `${clientType}.tmpl`
-     * with fallback to `default.tmpl`. Template files must have the `.tmpl` extension.
+     * in priority, if not present fallback to `default`, i.e `${clientType}.tmpl`
+     * fallbacks to `default.tmpl`. Template files should have the `.tmpl` extension.
      * @param {String}
      */
     this.templateDirectory = null;
@@ -117,13 +118,13 @@ class Server {
 
     /**
      * Required activities that must be started. Only used in Experience
-     * and Service - do not expose.
+     * and Plugin - do not expose.
      * @private
      */
     this.activities = new Set();
 
     /**
-     * key and certificates (may be generated and self-signed) for https server.
+     * Key and certificates (may be generated and self-signed) for https server.
      * @todo - put in config...
      * @private
      */
@@ -152,30 +153,33 @@ class Server {
   }
 
   /**
-   * server config:
    *
-   * @param {String} [options.defaultClient='player'] - Client that can access
+   * Method to be called before `start` in the initialization lifecycle of the
+   * soundworks server.
+   *
+   * @param {Object} config
+   * @param {String} [config.defaultClient='player'] - Client that can access
    *   the application at its root url.
-   * @param {String} [options.env='development']
-   * @param {String} [options.port=8000] - Port on which the http(s) server will
+   * @param {String} [config.env='development']
+   * @param {String} [config.port=8000] - Port on which the http(s) server will
    *   listen
-   * @param {Boolean} [options.useHttps=false] - Define wheter to use or not an
+   * @param {Boolean} [config.useHttps=false] - Define wheter to use or not an
    *   an https server.
-   * @param {Object} [options.httpsInfos=null] - if `useHttps` is `true`, object
+   * @param {Object} [config.httpsInfos=null] - if `useHttps` is `true`, object
    *   that give the path to `cert` and `key` files (`{ cert, key }`). If `null`
    *   an auto generated certificate will be generated, be aware that browsers
    *   will consider the application as not safe in the case.
-   * @param {Object} [options.websocket={}] - TBD
-   * @param {String} [options.templateDirectory='src/server/tmpl'] - Folder in
+   * @param {Object} [config.websocket={}] - TBD
+   * @param {String} [config.templateDirectory='src/server/tmpl'] - Folder in
    *   which the server will look for the `index.html` template.
    *
    * @param {Function} clientConfigFunction - function that filters / defines
-   *   the configuration object that will be send to a connecting client
+   *   the configuration object that will be sent to a connecting client.
    *
    * @example
    * // defaults to
    * await server.init(
-   *   config = {
+   *   {
    *     env: {
    *       type: 'development',
    *       port: 8000,
@@ -190,7 +194,9 @@ class Server {
    *       author: 'someone'
    *     }
    *   },
-   *   clientConfigFunction = (clientType, serverConfig, httpRequest) => ({ clientType })
+   *   (clientType, serverConfig, httpRequest) => {
+   *     return { clientType, ...serverConfig };
+   *   }
    * );
    */
   async init(
@@ -216,6 +222,11 @@ class Server {
     return Promise.resolve();
   }
 
+  /**
+   * Method to be called when `init` step is done in the initialization
+   *  lifecycle of the soundworks server. Basically initialize plugins,
+   *  define the routing and start the http-server.
+   */
   async start() {
     try {
       // ------------------------------------------------------------
@@ -358,7 +369,7 @@ class Server {
           // ------------------------------------------------------------
           // START SERVICE MANAGER
           // ------------------------------------------------------------
-          return this.serviceManager.start();
+          return this.pluginManager.start();
 
         }).then(() => {
           // ------------------------------------------------------------
@@ -366,7 +377,7 @@ class Server {
           // ------------------------------------------------------------
           return new Promise((resolve, reject) => {
             const port = this.config.env.port;
-            const useHttps = this.config.env.useHttps || false;
+            const useHttps = this.config.env.useHttps || false;
             const protocol = useHttps ? 'https' : 'http';
             const ifaces = os.networkInterfaces();
 
@@ -386,25 +397,12 @@ class Server {
           });
         });
 
-      await this.serviceManager.start();
+      await this.pluginManager.start();
 
       return Promise.resolve();
     } catch(err) {
       console.error(err)
     }
-  }
-
-  /**
-   * @example
-   * ```js
-   * soundworks.registerService(serviceFactory); // do not document that, maybe remove
-   * // or
-   * soundworks.registerService('user-defined-name', serviceFactory);
-   * ```
-   */
-  registerService(name, factory = null, config = {}, deps = []) {
-    const ctor = factory(Service);
-    this.serviceManager.register(name, ctor, config, deps);
   }
 
   /**
@@ -468,24 +466,24 @@ class Server {
     });
 
     socket.addListener('s:client:handshake', data => {
-      // in development, if service required client-side but not server-side,
+      // in development, if plugin required client-side but not server-side,
       // complain properly client-side.
       if (this.config.env.type !== 'production') {
-        // check coherence between client-side and server-side service requirements
-        const clientRequiredServices = data.requiredServices || [];
-        const serverRequiredServices = this.serviceManager.getRequiredServices(clientType);
-        const missingServices = [];
+        // check coherence between client-side and server-side plugin requirements
+        const clientRequiredPlugins = data.requiredPlugins || [];
+        const serverRequiredPlugins = this.pluginManager.getRequiredPlugins(clientType);
+        const missingPlugins = [];
 
-        clientRequiredServices.forEach(serviceId => {
-          if (serverRequiredServices.indexOf(serviceId) === -1) {
-            missingServices.push(serviceId);
+        clientRequiredPlugins.forEach(pluginId => {
+          if (serverRequiredPlugins.indexOf(pluginId) === -1) {
+            missingPlugins.push(pluginId);
           }
         });
 
-        if (missingServices.length > 0) {
+        if (missingPlugins.length > 0) {
           const err = {
-            type: 'services',
-            data: missingServices,
+            type: 'plugins',
+            data: missingPlugins,
           };
 
           socket.send('s:client:error', err);

@@ -1,7 +1,7 @@
 /**
  * Server-side part of the *soundworks* framework.
  *
- * @module @soundworks/core/server
+ * @namespace server
  *
  * @example
  * import soundworks from '@soundworks/core/server';
@@ -25,13 +25,13 @@
  * playerExperience.start();
  *
  */
-import { default as _Server } from './Server';
-import { default as _Experience } from './Experience';
+import { default as _Server } from './Server.js';
+import { default as _AbstractExperience } from './AbstractExperience.js';
 
-export const Experience = _Experience;
+export const AbstractExperience = _AbstractExperience;
 export const Server = _Server;
 
 export default {
-  Experience: _Experience,
+  AbstractExperience: _AbstractExperience,
   Client: _Server,
 };

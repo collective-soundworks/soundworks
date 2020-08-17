@@ -20,7 +20,7 @@ const types = [
 
 // @note - probably some room for optimizations
 
-/** private */
+/** @private */
 export function packBinaryMessage(channel, data) {
   const channelBuffer = encoder.encode(channel);
   const channelSize = channelBuffer.byteLength;
@@ -44,7 +44,7 @@ export function packBinaryMessage(channel, data) {
   return view.buffer;
 }
 
-/** private */
+/** @private */
 export function unpackBinaryMessage(buffer /* arraybuffer */) {
   const infos = new Uint8Array(buffer, 0, 3);
   const channelSize = infos[0];
@@ -62,12 +62,12 @@ export function unpackBinaryMessage(buffer /* arraybuffer */) {
   return [channel, data];
 }
 
-/** private */
+/** @private */
 export function packStringMessage(channel, ...args) {
   return JSON.stringify([channel, args]);
 }
 
-/** private */
+/** @private */
 export function unpackStringMessage(data) {
   return JSON.parse(data);
 }

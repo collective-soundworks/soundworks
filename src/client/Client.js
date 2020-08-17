@@ -1,16 +1,16 @@
-import ServiceManager from './ServiceManager';
-import ClientStateManager from '../common/ClientStateManager';
-import Socket from './Socket';
-import Service from './Service';
+import PluginManager from './PluginManager.js';
+import SharedStateManagerClient from '../common/SharedStateManagerClient.js';
+import Socket from './Socket.js';
 
 /**
- * Create a new client of *soundworks* application.
- * The `Client` is the main entry point to access *soundworks* components
- * such as `serviceManager` or `stateManager`. It is also responsible for
- * handling initialization lifecycle (e.g. communication,
- * initialization of services)
+ * Create a new client of a *soundworks* application.
  *
- * @memberof @soundworks/core/client
+ * The `Client` is the main entry point to access *soundworks* components
+ * such as {@link client.Socket}, {@link client.PluginManager} or
+ * {@link client.SharedStateManagerClient}. It is also responsible for the
+ * initialization lifecycle.
+ *
+ * @memberof client
  *
  * @example
  * import soundworks from '@soundworks/core/client';
@@ -32,6 +32,7 @@ class Client {
     /**
      * Type of the client, this can generally be considered as the role of the
      * client in the application.
+     *
      * @type {String}
      */
     this.type = null;
@@ -40,45 +41,55 @@ class Client {
     /**
      * Unique session id of the client (incremeted positive number),
      * generated and retrieved by the server on start.
+     *
      * @type {Number}
      */
     this.id = null;
 
     /**
-     * Unique session uuid of the client (uuidv4),
-     * generated and retrieved by the server on start.
+     * Unique session uuid of the client (uuidv4), generated and retrieved by
+     * the server on start.
+     *
      * @type {String}
      */
     this.uuid = null;
 
+    /**
+     * Configuration object, typically contains the configuration sent by the server.
+     *
+     * @see {@link server.Server#init} for further information.
+     * @type {Object}
+     */
     this.config = {};
 
     /**
-     * Socket object that handle communications with the server, if any.
-     * This object is automatically created if the experience requires any service
-     * having a server-side counterpart.
+     * Instance of the `Socket` class that handle communications with the server.
      *
-     * @type {module:soundworks/core/client.Socket}
+     * @see {@link client.Socket}
+     * @type {client.Socket}
      */
     this.socket = new Socket();
 
     /**
-     * @todo - serviceManager
+     * instance of the `PluginManager` class.
      *
-     * @type {module:soundworks/core/client.ServiceManager}
+     * @see {@link client.PluginManager}
+     * @type {client.PluginManager}
      */
-    this.serviceManager = new ServiceManager(this);
+    this.pluginManager = new PluginManager(this);
 
     /**
-     * @todo - stateManager
+     * instance of the `SharedStateManagerClient` class.
      *
-     * @type {module:soundworks/core/client.StateManager}
+     * @see {@link client.SharedStateManagerClient}
+     * @type {client.SharedStateManagerClient}
      */
     this.stateManager = null;
   }
 
   /**
-   * @todo - init
+   * Method to be called before `start` in the initialization lifecycle of the
+   * soundworks client. Basically wait for the socket connections the be done.
    */
   async init(config) {
     if (!('clientType' in config)) {
@@ -102,7 +113,10 @@ class Client {
   }
 
   /**
-   * @todo - start
+   * Method to be called when `init` step is done in the initialization
+   *  lifecycle of the soundworks client. Basically initilialize the
+   *  `SharedStateManagerClient` and all plugins. When done, the `Experience.start`
+   *  method can be called safely called.
    */
   async start() {
     this._ready = new Promise((resolve, reject) => {
@@ -110,7 +124,7 @@ class Client {
 
       if (this.config.env !== 'production') {
         Object.assign(payload, {
-          requiredServices: Object.keys(this.serviceManager.getValues()),
+          requiredPlugins: Object.keys(this.pluginManager.getValues()),
         });
       }
 
@@ -127,14 +141,14 @@ class Client {
           removeAllListeners: this.socket.removeAllListeners.bind(this.socket),
         };
 
-        this.stateManager = new ClientStateManager(this.id, transport);
-        // everything is ready start service manager
-        this.serviceManager.start().then(() => resolve());
+        this.stateManager = new SharedStateManagerClient(this.id, transport);
+        // everything is ready start plugin manager
+        this.pluginManager.start().then(() => resolve());
       });
 
       this.socket.addListener('s:client:error', (err) => {
         switch (err.type) {
-          case 'services':
+          case 'plugins':
             // can only append if env !== 'production'
             const msg = `"${err.data.join(', ')}" required client-side but not server-side`;
             throw new Error(msg);
@@ -148,17 +162,6 @@ class Client {
     });
 
     return this._ready;
-  }
-
-  /**
-   * @example
-   * ```js
-   * soundworks.registerService('user-defined-name', serviceFactory);
-   * ```
-   */
-  registerService(name, factory = null, options = {}, dependencies = []) {
-    const ctor = factory(Service);
-    this.serviceManager.register(name, ctor, options, dependencies);
   }
 };
 

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>client/Client.js - Documentation</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="client.AbstractExperience.html">client.AbstractExperience</a><ul class='methods'><li data-type='method'><a href="client.AbstractExperience.html#enter">enter</a></li><li data-type='method'><a href="client.AbstractExperience.html#require">require</a></li><li data-type='method'><a href="client.AbstractExperience.html#require">require</a></li><li data-type='method'><a href="client.AbstractExperience.html#start">start</a></li></ul></li><li></li><li><a href="client.AbstractPlugin.html">client.AbstractPlugin</a><ul class='methods'><li data-type='method'><a href="client.AbstractPlugin.html#configure">configure</a></li><li data-type='method'><a href="client.AbstractPlugin.html#ready">ready</a></li><li data-type='method'><a href="client.AbstractPlugin.html#start">start</a></li><li data-type='method'><a href="client.AbstractPlugin.html#started">started</a></li></ul></li><li><a href="client.Client.html">client.Client</a><ul class='methods'><li data-type='method'><a href="client.Client.html#init">init</a></li><li data-type='method'><a href="client.Client.html#start">start</a></li></ul></li><li><a href="client.PluginManager.html">client.PluginManager</a><ul class='methods'><li data-type='method'><a href="client.PluginManager.html#get">get</a></li><li data-type='method'><a href="client.PluginManager.html#registerPlugin">registerPlugin</a></li></ul></li><li><a href="client.SharedStateManagerClient.html">client.SharedStateManagerClient</a><ul class='methods'><li data-type='method'><a href="client.SharedStateManagerClient.html#attach">attach</a></li><li data-type='method'><a href="client.SharedStateManagerClient.html#create">create</a></li><li data-type='method'><a href="client.SharedStateManagerClient.html#observe">observe</a></li></ul></li><li><a href="client.Socket.html">client.Socket</a><ul class='methods'><li data-type='method'><a href="client.Socket.html#addBinaryListener">addBinaryListener</a></li><li data-type='method'><a href="client.Socket.html#addListener">addListener</a></li><li data-type='method'><a href="client.Socket.html#removeAllBinaryListeners">removeAllBinaryListeners</a></li><li data-type='method'><a href="client.Socket.html#removeAllListeners">removeAllListeners</a></li><li data-type='method'><a href="client.Socket.html#removeBinaryListener">removeBinaryListener</a></li><li data-type='method'><a href="client.Socket.html#removeListener">removeListener</a></li><li data-type='method'><a href="client.Socket.html#send">send</a></li><li data-type='method'><a href="client.Socket.html#sendBinary">sendBinary</a></li></ul></li><li><a href="server.AbstractPlugin.html">server.AbstractPlugin</a><ul class='methods'><li data-type='method'><a href="server.AbstractPlugin.html#configure">configure</a></li><li data-type='method'><a href="server.AbstractPlugin.html#connect">connect</a></li><li data-type='method'><a href="server.AbstractPlugin.html#disconnect">disconnect</a></li><li data-type='method'><a href="server.AbstractPlugin.html#ready">ready</a></li><li data-type='method'><a href="server.AbstractPlugin.html#start">start</a></li><li data-type='method'><a href="server.AbstractPlugin.html#started">started</a></li></ul></li><li><a href="server.PluginManager.html">server.PluginManager</a><ul class='methods'><li data-type='method'><a href="server.PluginManager.html#get">get</a></li><li data-type='method'><a href="server.PluginManager.html#registerPlugin">registerPlugin</a></li></ul></li><li><a href="server.Server.html">server.Server</a><ul class='methods'><li data-type='method'><a href="server.Server.html#init">init</a></li><li data-type='method'><a href="server.Server.html#start">start</a></li></ul></li><li><a href="server.SharedStateManagerServer.html">server.SharedStateManagerServer</a><ul class='methods'><li data-type='method'><a href="server.SharedStateManagerServer.html#attach">attach</a></li><li data-type='method'><a href="server.SharedStateManagerServer.html#create">create</a></li><li data-type='method'><a href="server.SharedStateManagerServer.html#deleteSchema">deleteSchema</a></li><li data-type='method'><a href="server.SharedStateManagerServer.html#observe">observe</a></li><li data-type='method'><a href="server.SharedStateManagerServer.html#registerSchema">registerSchema</a></li></ul></li><li><a href="server.Sockets.html">server.Sockets</a><ul class='methods'><li data-type='method'><a href="server.Sockets.html#addToRoom">addToRoom</a></li><li data-type='method'><a href="server.Sockets.html#broadcast">broadcast</a></li><li data-type='method'><a href="server.Sockets.html#broadcastBinary">broadcastBinary</a></li><li data-type='method'><a href="server.Sockets.html#removeFromRoom">removeFromRoom</a></li></ul></li><li><a href="SharedState.html">SharedState</a></li></ul><h3>Namespaces</h3><ul><li><a href="client.html">client</a></li><li><a href="server.html">server</a></li></ul><h3>Global</h3><ul><li><a href="global.html#signals">signals</a></li></ul>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">client/Client.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import PluginManager from './PluginManager.js';
+import SharedStateManagerClient from '../common/SharedStateManagerClient.js';
+import Socket from './Socket.js';
+
+/**
+ * Create a new client of a *soundworks* application.
+ *
+ * The `Client` is the main entry point to access *soundworks* components
+ * such as {@link client.Socket}, {@link client.PluginManager} or
+ * {@link client.SharedStateManagerClient}. It is also responsible for the
+ * initialization lifecycle.
+ *
+ * @memberof client
+ *
+ * @example
+ * import soundworks from '@soundworks/core/client';
+ *
+ * // create a new `soundworks.Client` instance
+ * const client = new soundworks.Client();
+ * // initialize the client (mainly connect and initialize WebSockets)
+ * await client.init(config);
+ * // create application specific experience
+ * // must extends `soundworks.Experience`
+ * const playerExperience = new PlayerExperience(client);
+ * // start the client
+ * await client.start();
+ * // when everything is ready, start the experience
+ * playerExperience.start();
+ */
+class Client {
+  constructor() {
+    /**
+     * Type of the client, this can generally be considered as the role of the
+     * client in the application.
+     *
+     * @type {String}
+     */
+    this.type = null;
+
+
+    /**
+     * Unique session id of the client (incremeted positive number),
+     * generated and retrieved by the server on start.
+     *
+     * @type {Number}
+     */
+    this.id = null;
+
+    /**
+     * Unique session uuid of the client (uuidv4), generated and retrieved by
+     * the server on start.
+     *
+     * @type {String}
+     */
+    this.uuid = null;
+
+    /**
+     * Configuration object, typically contains the configuration sent by the server.
+     *
+     * @see {@link server.Server#init} for further information.
+     * @type {Object}
+     */
+    this.config = {};
+
+    /**
+     * Instance of the `Socket` class that handle communications with the server.
+     *
+     * @see {@link client.Socket}
+     * @type {client.Socket}
+     */
+    this.socket = new Socket();
+
+    /**
+     * instance of the `PluginManager` class.
+     *
+     * @see {@link client.PluginManager}
+     * @type {client.PluginManager}
+     */
+    this.pluginManager = new PluginManager(this);
+
+    /**
+     * instance of the `SharedStateManagerClient` class.
+     *
+     * @see {@link client.SharedStateManagerClient}
+     * @type {client.SharedStateManagerClient}
+     */
+    this.stateManager = null;
+  }
+
+  /**
+   * Method to be called before `start` in the initialization lifecycle of the
+   * soundworks client. Basically wait for the socket connections the be done.
+   */
+  async init(config) {
+    if (!('clientType' in config)) {
+      throw new Error('soundworks.init config object "must" define a `clientType`');
+    }
+
+    // handle config
+    this.type = config.clientType;
+    this.config = config;
+    // @todo - review that to adapt to ws options
+    this.config.env.websockets = Object.assign({
+      // url: '',
+      path: 'socket',
+      // pingInterval: 5 * 1000,
+    }, config.env.websockets);
+
+    // init communications
+    await this.socket.init(this.type, this.config);
+
+    return Promise.resolve();
+  }
+
+  /**
+   * Method to be called when `init` step is done in the initialization
+   *  lifecycle of the soundworks client. Basically initilialize the
+   *  `SharedStateManagerClient` and all plugins. When done, the `Experience.start`
+   *  method can be called safely called.
+   */
+  async start() {
+    this._ready = new Promise((resolve, reject) => {
+      const payload = {};
+
+      if (this.config.env !== 'production') {
+        Object.assign(payload, {
+          requiredPlugins: Object.keys(this.pluginManager.getValues()),
+        });
+      }
+
+      // wait for handshake response to mark client as `ready`
+      this.socket.addListener('s:client:start', ({ id, uuid }) => {
+        this.id = id;
+        this.uuid = uuid;
+
+        // mimic eventEmitter API
+        const transport = {
+          emit: this.socket.send.bind(this.socket),
+          addListener: this.socket.addListener.bind(this.socket),
+          // removeListener: this.socket.removeListener.bind(this.socket),
+          removeAllListeners: this.socket.removeAllListeners.bind(this.socket),
+        };
+
+        this.stateManager = new SharedStateManagerClient(this.id, transport);
+        // everything is ready start plugin manager
+        this.pluginManager.start().then(() => resolve());
+      });
+
+      this.socket.addListener('s:client:error', (err) => {
+        switch (err.type) {
+          case 'plugins':
+            // can only append if env !== 'production'
+            const msg = `"${err.data.join(', ')}" required client-side but not server-side`;
+            throw new Error(msg);
+            break;
+        }
+
+        reject();
+      });
+
+      this.socket.send('s:client:handshake', payload);
+    });
+
+    return this._ready;
+  }
+};
+
+export default Client;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Mon Aug 17 2020 19:53:30 GMT+0200 (Central European Summer Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+
+
+</body>
+</html>

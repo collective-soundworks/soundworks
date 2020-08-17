@@ -3,7 +3,7 @@ import {
   unpackBinaryMessage,
   packStringMessage,
   unpackStringMessage,
-} from '../common/sockets-encoder-decoder';
+} from '../common/sockets-encoder-decoder.js';
 
 const noop = () => {};
 
@@ -25,7 +25,7 @@ const READY_STATES = ['CONNECTING', 'OPEN', 'CLOSING', 'CLOSED']
  *
  * @see https://github.com/websockets/ws
  *
- * @memberof @soundworks/core/server
+ * @memberof server
  */
 class Socket {
   /** @private */

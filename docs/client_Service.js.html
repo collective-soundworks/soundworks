@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>client/Service.js - Documentation</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="client.Client.html">client.Client</a><ul class='methods'><li data-type='method'><a href="client.Client.html#init">init</a></li><li data-type='method'><a href="client.Client.html#registerService">registerService</a></li><li data-type='method'><a href="client.Client.html#start">start</a></li></ul></li><li><a href="client.Experience.html">client.Experience</a><ul class='methods'><li data-type='method'><a href="client.Experience.html#require">require</a></li><li data-type='method'><a href="client.Experience.html#start">start</a></li></ul></li><li><a href="client.Service.html">client.Service</a><ul class='methods'><li data-type='method'><a href="client.Service.html#ready">ready</a></li><li data-type='method'><a href="client.Service.html#start">start</a></li><li data-type='method'><a href="client.Service.html#started">started</a></li></ul></li><li><a href="client.ServiceManager.html">client.ServiceManager</a><ul class='methods'><li data-type='method'><a href="client.ServiceManager.html#get">get</a></li><li data-type='method'><a href="client.ServiceManager.html#getValues">getValues</a></li><li data-type='method'><a href="client.ServiceManager.html#observe">observe</a></li><li data-type='method'><a href="client.ServiceManager.html#register">register</a></li></ul></li><li><a href="client.SharedStateManagerClient.html">client.SharedStateManagerClient</a><ul class='methods'><li data-type='method'><a href="client.SharedStateManagerClient.html#attach">attach</a></li><li data-type='method'><a href="client.SharedStateManagerClient.html#create">create</a></li><li data-type='method'><a href="client.SharedStateManagerClient.html#observe">observe</a></li></ul></li><li><a href="client.Socket.html">client.Socket</a><ul class='methods'><li data-type='method'><a href="client.Socket.html#addBinaryListener">addBinaryListener</a></li><li data-type='method'><a href="client.Socket.html#addListener">addListener</a></li><li data-type='method'><a href="client.Socket.html#removeAllBinaryListeners">removeAllBinaryListeners</a></li><li data-type='method'><a href="client.Socket.html#removeAllListeners">removeAllListeners</a></li><li data-type='method'><a href="client.Socket.html#removeBinaryListener">removeBinaryListener</a></li><li data-type='method'><a href="client.Socket.html#removeListener">removeListener</a></li><li data-type='method'><a href="client.Socket.html#send">send</a></li><li data-type='method'><a href="client.Socket.html#sendBinary">sendBinary</a></li></ul></li><li><a href="server.Experience.html">server.Experience</a><ul class='methods'><li data-type='method'><a href="server.Experience.html#enter">enter</a></li><li data-type='method'><a href="server.Experience.html#require">require</a></li></ul></li><li><a href="server.Server.html">server.Server</a><ul class='methods'><li data-type='method'><a href="server.Server.html#init">init</a></li><li data-type='method'><a href="server.Server.html#registerService">registerService</a></li><li data-type='method'><a href="server.Server.html#start">start</a></li></ul></li><li><a href="server.Service.html">server.Service</a><ul class='methods'><li data-type='method'><a href="server.Service.html#connect">connect</a></li><li data-type='method'><a href="server.Service.html#disconnect">disconnect</a></li><li data-type='method'><a href="server.Service.html#ready">ready</a></li><li data-type='method'><a href="server.Service.html#start">start</a></li><li data-type='method'><a href="server.Service.html#started">started</a></li></ul></li><li><a href="server.ServiceManager.html">server.ServiceManager</a><ul class='methods'><li data-type='method'><a href="server.ServiceManager.html#get">get</a></li></ul></li><li><a href="server.SharedStateManagerServer.html">server.SharedStateManagerServer</a><ul class='methods'><li data-type='method'><a href="server.SharedStateManagerServer.html#attach">attach</a></li><li data-type='method'><a href="server.SharedStateManagerServer.html#create">create</a></li><li data-type='method'><a href="server.SharedStateManagerServer.html#deleteSchema">deleteSchema</a></li><li data-type='method'><a href="server.SharedStateManagerServer.html#observe">observe</a></li><li data-type='method'><a href="server.SharedStateManagerServer.html#registerSchema">registerSchema</a></li></ul></li><li><a href="server.Sockets.html">server.Sockets</a><ul class='methods'><li data-type='method'><a href="server.Sockets.html#addToRoom">addToRoom</a></li><li data-type='method'><a href="server.Sockets.html#broadcast">broadcast</a></li><li data-type='method'><a href="server.Sockets.html#broadcastBinary">broadcastBinary</a></li><li data-type='method'><a href="server.Sockets.html#removeFromRoom">removeFromRoom</a></li></ul></li><li><a href="SharedState.html">SharedState</a></li></ul><h3>Namespaces</h3><ul><li><a href="client.html">client</a></li><li><a href="server.html">server</a></li></ul><h3>Global</h3><ul><li><a href="global.html#signals">signals</a></li></ul>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">client/Service.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import Signal from '../common/Signal';
+import SignalAll from '../common/SignalAll';
+import debug from 'debug';
+
+const log = debug('soundworks:lifecycle');
+
+/**
+ * Base class to be extended in order to create a new service.
+ *
+ * @memberof client
+ */
+class Service {
+  constructor(client, name) {
+    if (!(client)) {
+      throw new Error(`[service] 1rst argument should be an instance of Client`);
+    }
+
+    if (!name) {
+      throw new Error(`[service] 2nd argument should be a valid name`);
+    }
+
+    /**
+     * Instance of soundworks client
+     * @type {String}
+     */
+    this.client = client;
+
+    /**
+     * Name of the service, as defined on registration.
+     * @type {String}
+     */
+    this.name = name;
+
+    /**
+     * Options of the activity.
+     * @type {Object}
+     */
+    this.options = {};
+
+    /**
+     * Signals defining the process state.
+     * @name signals
+     */
+    this.signals = {
+      start: new SignalAll(),
+      started: new Signal(),
+      ready: new Signal(),
+      errored: new Signal(), // @needs a payload
+    };
+
+    // start when all required signals are fired
+    this.signals.start.addObserver(value => this.start());
+
+    this.started = this.started.bind(this);
+    this.ready = this.ready.bind(this);
+    this.error = this.error.bind(this);
+  }
+
+  /**
+   * Interface method to override when implementing child class.
+   *
+   * _The child class MUST call {@link client.Service#started} and
+   * {@link client.Service#ready}_
+   *
+   * @example
+   * class MyDelayService extends soundworks.Service {
+   *   // ...
+   *   async start() {
+   *     this.state = await this.client.stateManager.attach(`s:${this.name}`);
+   *     this.started();
+   *     // do [async] stuff
+   *     setTimeout(() => this.ready(), 3000);
+   *   }
+   * }
+   */
+  start() {
+    throw new Error(`service "${this.name}": "start()" not implemented or "super.start()" called`);
+  }
+
+  /**
+   * Method to call when the plugin is effectively started, as it may have to
+   * do some asynchonous job at start (e.g. creating a shared state).
+   *
+   * _Must be called between before {@link client.Service#ready}._
+   *
+   * @example
+   * class MyDelayService extends soundworks.Service {
+   *   // start() is executed when the `start` signal pass to `true`
+   *   async start() {
+   *     this.state = await this.client.stateManager.attach(`s:${this.name}`);
+   *     this.started();
+   *     // do [async] stuff
+   *     setTimeout(() => this.ready(), 3000);
+   *   }
+   * }
+   */
+  started() {
+    // @note - these check are mostly there for development help. Could be
+    // replaced with decorators.
+    if (this.signals.start.value === false) {
+      throw new Error(`service "${this.name}" cannot "started" before "start"`);
+    }
+
+    if (this.signals.started.value === true) {
+      throw new Error(`service "${this.name}" cannot be "started" twice`);
+    }
+
+    // @note - this as no strong incidence on the initialization lifecycle,
+    // maybe should be enforced
+    log(`> service "${this.name}" started`);
+    this.signals.started.value = true;
+  }
+
+  /**
+   * Method to call in the service lifecycle when it should be considered as
+   * ready and thus allow the initialization process to continue or the
+   * application to start safely (cf. {@link client.Experience#start})
+   *
+   * @example
+   * class MyDelayService extends soundworks.Service {
+   *   // ...
+   *   async start() {
+   *     this.state = await this.client.stateManager.attach(`s:${this.name}`);
+   *     this.started();
+   *     // do [async] stuff
+   *     setTimeout(() => this.ready(), 3000);
+   *   }
+   * }
+   */
+  ready() {
+    // @note - these check are mostly there for development help. Could be
+    // replaced with decorators.
+    if (this.signals.start.value === false) {
+      throw new Error(`service "${this.name}" cannot "ready" before "start"`);
+    }
+
+    if (this.signals.started.value === false) {
+      throw new Error(`service "${this.name}" cannot "ready" before "started"`);
+    }
+
+    if (this.signals.ready.value === true) {
+      throw new Error(`service "${this.name}" cannot be "ready" twice`);
+    }
+
+    log(`> service "${this.name}" ready`);
+    this.signals.ready.value = true;
+  }
+
+  error(msg) {
+    log(`> service "${this.name}" error: ${msg}`);
+    this.signals.errored.msg = msg;
+    this.signals.errored.value = true;
+  }
+}
+
+export default Service;
+
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Mon Aug 17 2020 17:38:53 GMT+0200 (Central European Summer Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+
+
+</body>
+</html>

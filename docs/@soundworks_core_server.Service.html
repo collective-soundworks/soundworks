@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>Service - Documentation</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="@soundworks_core_server.Experience.html">@soundworks/core/server.Experience</a><ul class='methods'><li data-type='method'><a href="@soundworks_core_server.Experience.html#enter">enter</a></li><li data-type='method'><a href="@soundworks_core_server.Experience.html#require">require</a></li></ul></li><li><a href="@soundworks_core_server.Server.html">@soundworks/core/server.Server</a><ul class='methods'><li data-type='method'><a href="@soundworks_core_server.Server.html#init">init</a></li><li data-type='method'><a href="@soundworks_core_server.Server.html#registerService">registerService</a></li><li data-type='method'><a href="@soundworks_core_server.Server.html#start">start</a></li></ul></li><li><a href="@soundworks_core_server.Service.html">@soundworks/core/server.Service</a><ul class='methods'><li data-type='method'><a href="@soundworks_core_server.Service.html#ready">ready</a></li><li data-type='method'><a href="@soundworks_core_server.Service.html#start">start</a></li></ul></li><li><a href="@soundworks_core_server.ServiceManager.html">@soundworks/core/server.ServiceManager</a><ul class='methods'><li data-type='method'><a href="@soundworks_core_server.ServiceManager.html#get">get</a></li></ul></li><li><a href="@soundworks_core_server.SharedStateManagerServer.html">@soundworks/core/server.SharedStateManagerServer</a><ul class='methods'><li data-type='method'><a href="@soundworks_core_server.SharedStateManagerServer.html#deleteSchema">deleteSchema</a></li><li data-type='method'><a href="@soundworks_core_server.SharedStateManagerServer.html#registerSchema">registerSchema</a></li></ul></li><li><a href="@soundworks_core_server.Sockets.html">@soundworks/core/server.Sockets</a><ul class='methods'><li data-type='method'><a href="@soundworks_core_server.Sockets.html#addToRoom">addToRoom</a></li><li data-type='method'><a href="@soundworks_core_server.Sockets.html#broadcast">broadcast</a></li><li data-type='method'><a href="@soundworks_core_server.Sockets.html#broadcastBinary">broadcastBinary</a></li><li data-type='method'><a href="@soundworks_core_server.Sockets.html#removeFromRoom">removeFromRoom</a></li></ul></li><li><a href="client.Client.html">client.Client</a><ul class='methods'><li data-type='method'><a href="client.Client.html#init">init</a></li><li data-type='method'><a href="client.Client.html#registerService">registerService</a></li><li data-type='method'><a href="client.Client.html#start">start</a></li></ul></li><li><a href="client.Experience.html">client.Experience</a><ul class='methods'><li data-type='method'><a href="client.Experience.html#require">require</a></li><li data-type='method'><a href="client.Experience.html#start">start</a></li></ul></li><li><a href="client.Service.html">client.Service</a><ul class='methods'><li data-type='method'><a href="client.Service.html#ready">ready</a></li><li data-type='method'><a href="client.Service.html#start">start</a></li><li data-type='method'><a href="client.Service.html#started">started</a></li></ul></li><li><a href="client.ServiceManager.html">client.ServiceManager</a><ul class='methods'><li data-type='method'><a href="client.ServiceManager.html#get">get</a></li><li data-type='method'><a href="client.ServiceManager.html#getValues">getValues</a></li><li data-type='method'><a href="client.ServiceManager.html#observe">observe</a></li><li data-type='method'><a href="client.ServiceManager.html#register">register</a></li></ul></li><li><a href="client.SharedStateManagerClient.html">client.SharedStateManagerClient</a><ul class='methods'><li data-type='method'><a href="client.SharedStateManagerClient.html#attach">attach</a></li><li data-type='method'><a href="client.SharedStateManagerClient.html#create">create</a></li><li data-type='method'><a href="client.SharedStateManagerClient.html#observe">observe</a></li></ul></li><li><a href="client.Socket.html">client.Socket</a><ul class='methods'><li data-type='method'><a href="client.Socket.html#addBinaryListener">addBinaryListener</a></li><li data-type='method'><a href="client.Socket.html#addListener">addListener</a></li><li data-type='method'><a href="client.Socket.html#removeAllBinaryListeners">removeAllBinaryListeners</a></li><li data-type='method'><a href="client.Socket.html#removeAllListeners">removeAllListeners</a></li><li data-type='method'><a href="client.Socket.html#removeBinaryListener">removeBinaryListener</a></li><li data-type='method'><a href="client.Socket.html#removeListener">removeListener</a></li><li data-type='method'><a href="client.Socket.html#send">send</a></li><li data-type='method'><a href="client.Socket.html#sendBinary">sendBinary</a></li></ul></li><li><a href="SharedState.html">SharedState</a></li></ul><h3>Modules</h3><ul><li><a href="module-@soundworks_core_server.html">@soundworks/core/server</a></li></ul><h3>Namespaces</h3><ul><li><a href="client.html">client</a></li></ul>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">Service</h1>
+    
+
+    
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>
+        Service
+        </h2>
+        
+            <div class="class-description usertext"><p>Base class to extend for creating new soundworks services.</p></div>
+        
+    
+</header>
+
+<article>
+    
+        <div class="container-overview">
+        
+            
+
+    
+    <h2>Constructor</h2>
+    
+
+    <h4 class="name" id="Service"><span class="type-signature"></span>new Service<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="server_Service.js.html">server/Service.js</a>, <a href="server_Service.js.html#line16">line 16</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+        </div>
+    
+
+    
+
+    
+
+    
+    
+    
+
+     
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    <h4 class="name" id="ready"><span class="type-signature"></span>ready<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="server_Service.js.html">server/Service.js</a>, <a href="server_Service.js.html#line117">line 117</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description usertext">
+    <p>Method to call in the service lifecycle when it should be considered as
+<code>ready</code> and thus allows the intialization process to continue.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="start"><span class="type-signature"></span>start<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="server_Service.js.html">server/Service.js</a>, <a href="server_Service.js.html#line94">line 94</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-todo">To Do:</dt>
+    <dd class="tag-todo">
+        <ul>
+            <li>- This granularity is especially important client side, so that
+we can give feedback on the initialization steps (e.g. we need the state
+to be synchronized to display usefull feedback or GUIs). We mostly keep
+that server-side for symetry reasons.</li>
+        </ul>
+    </dd>
+    
+</dl>
+
+
+
+
+
+<div class="description usertext">
+    <p>Interface method to override when implemnting child classes
+The child class MUST call <code>this.started()</code> when first init step (creating
+state etc. is done) and <code>this.ready()</code> when fully initialized.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>class MyDelayService extends soundworks.Service {
+  // start() is executed when the `start` signal pass to `true`
+  async start() {
+    this.state = await this.client.stateManager.attach(`s:${this.name}`);
+    this.started();
+    // do [async] stuff
+    setTimeout(() => this.ready(), 3000);
+  }
+}</code></pre>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.3</a> on Mon Aug 17 2020 17:07:15 GMT+0200 (Central European Summer Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+
+
+</body>
+</html>

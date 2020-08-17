@@ -5,7 +5,7 @@ import {
   unpackBinaryMessage,
   packStringMessage,
   unpackStringMessage,
-} from '../common/sockets-encoder-decoder';
+} from '../common/sockets-encoder-decoder.js';
 
 const log = debug('soundworks:socket');
 // https://stackoverflow.com/questions/17575790/environment-detection-node-js-or-browser
@@ -34,9 +34,12 @@ const isBrowser = new Function("try {return this===window;}catch(e){ return fals
  *   efficiently.
  * The sockets also re-emits all "native" ws events.
  *
+ * An instance of `Socket` is automatically created by the `soundworks.Client`.
+ * @see {@link client.Client#socket}
+ *
  * @see https://github.com/websockets/ws
  *
- * @memberof @soundworks/core/client
+ * @memberof client
  */
 class Socket {
   constructor() {
