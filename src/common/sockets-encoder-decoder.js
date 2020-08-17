@@ -18,7 +18,7 @@ const types = [
   'BigUint64Array',
 ];
 
-// @todo - probably some room for optimizations
+// @note - probably some room for optimizations
 
 /** private */
 export function packBinaryMessage(channel, data) {

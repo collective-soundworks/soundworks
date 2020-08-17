@@ -19,12 +19,8 @@ class ServiceManager {
     this._instances = {};
     /** @private */
     this._server = server;
-  }
 
-  /** @private */
-  init() {
-    log('> serviceManager init');
-
+    // @todo - move to Promise based logic
     this.signals = {
       start: new Signal(),
       ready: new SignalAll(),

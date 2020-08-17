@@ -60,7 +60,9 @@ class Server {
      * Router. Internally use polka.
      * (cf. {@link https://github.com/lukeed/polka})
      */
-    this.router = null;
+    this.router = polka();
+    // compression (must be set before serve-static)
+    this.router.use(compression());
 
     /**
      * http(s) server instance. The node `http` or `https` module instance
@@ -73,7 +75,7 @@ class Server {
      * basically a wrapper around kvey (cf. {@link https://github.com/lukechilds/keyv})
      * @private
      */
-    this.db = null;
+    this.db = new Db();
 
     /**
      * Wrapper around `ws` server.
@@ -90,11 +92,35 @@ class Server {
     this.serviceManager = new ServiceManager(this);
 
     /**
-     * The `StateManager` instance.
-     * cf. {@link @soundworks/core/server.StateManager}
-     * @type {soundworks/core/server.StateManager}
+     * The `ServerStateManager` instance.
+     * cf. {@link @soundworks/common/ServerStateManager}
+     * @type {soundworks/common/ServerStateManager}
      */
-    this.stateManager = null;
+    this.stateManager = new ServerStateManager();
+
+    /**
+     * Template engine that should implement a `compile` method.
+     * @type {Object}
+     */
+    this.templateEngine = null;
+
+    /**
+     * Path to the directory containing the templates.
+     * Any filename corresponding to a registered browser client type will be used
+     * in priority, in not present fallback to `default` (i.e `${clientType}.tmpl`
+     * with fallback to `default.tmpl`. Template files must have the `.tmpl` extension.
+     * @param {String}
+     */
+    this.templateDirectory = null;
+
+    // private stuff
+
+    /**
+     * Required activities that must be started. Only used in Experience
+     * and Service - do not expose.
+     * @private
+     */
+    this.activities = new Set();
 
     /**
      * key and certificates (may be generated and self-signed) for https server.
@@ -108,13 +134,6 @@ class Server {
      * @private
      */
     this._clientTypeActivitiesMap = {};
-
-    /**
-     * Required activities that must be started. Only used in Experience
-     * and Service - do not expose.
-     * @private
-     */
-    this.activities = new Set();
 
     /**
      * Optionnal routing defined for each client.
@@ -132,8 +151,7 @@ class Server {
     }
   }
 
-    /**
-   *
+  /**
    * server config:
    *
    * @param {String} [options.defaultClient='player'] - Client that can access
@@ -151,7 +169,29 @@ class Server {
    * @param {String} [options.templateDirectory='src/server/tmpl'] - Folder in
    *   which the server will look for the `index.html` template.
    *
-   * @param {Function} clientConfigFunction -
+   * @param {Function} clientConfigFunction - function that filters / defines
+   *   the configuration object that will be send to a connecting client
+   *
+   * @example
+   * // defaults to
+   * await server.init(
+   *   config = {
+   *     env: {
+   *       type: 'development',
+   *       port: 8000,
+   *       "websockets": {
+   *         "path": "socket",
+   *         "pingInterval": 5000
+   *       },
+   *       "useHttps": false,
+   *     },
+   *     app: {
+   *       name: 'soundworks',
+   *       author: 'someone'
+   *     }
+   *   },
+   *   clientConfigFunction = (clientType, serverConfig, httpRequest) => ({ clientType })
+   * );
    */
   async init(
     config = {
@@ -170,33 +210,8 @@ class Server {
     },
     clientConfigFunction = (clientType, serverConfig, httpRequest) => ({ clientType })
   ) {
-    // must be done this way to keep the instance shared (??)
     this.config = config;
     this._clientConfigFunction = clientConfigFunction;
-
-    this.serviceManager.init();
-    // allows to hook middleware and routes (e.g. cors) in the router
-    // between `server.init` and `server.start`
-    this.router = polka();
-    // compression (must be set before serve-static)
-    this.router.use(compression());
-
-    this.stateManager = new ServerStateManager();
-    // const transport = new EventEmitter();
-    // transport.send =  transport.emit.bind(transport);
-    // serverStateManager.addClient({ id: -1, transport });
-
-    // this.stateManager = new ClientStateManager(-1, transport);
-    // // should be a mixin
-    // this.stateManager.registerSchema = (name, schema) => {
-    //   serverStateManager.registerSchema(name, schema);
-    // }
-
-    // this.stateManager.deleteSchema = (name, schema) => {
-    //   serverStateManager.deleteSchema(name, schema);
-    // }
-
-    this.db = new Db();
 
     return Promise.resolve();
   }
@@ -217,7 +232,7 @@ class Server {
       });
 
       // start http server
-      const useHttps = this.config.env.useHttps || false;
+      const useHttps = this.config.env.useHttps || false;
 
       return Promise.resolve()
         // ------------------------------------------------------------
@@ -288,9 +303,12 @@ class Server {
 
           return Promise.resolve();
         }).then(() => {
-          if (this._htmlTemplateConfig.engine === null ||
-              this._htmlTemplateConfig.directory === null) {
-            throw new Error('Invalid html template configuration, please call `server.configureHtmlTemplates(engine, directory)`');
+          if (this.templateEngine === null) {
+            throw new Error('Undefined "server.templateEngine": please provide a valid template engine');
+          }
+
+          if (this.templateDirectory === null) {
+            throw new Error('Undefined "server.templateDirectory": please provide a valid template directory');
           }
 
           // ------------------------------------------------------------
@@ -390,19 +408,6 @@ class Server {
   }
 
   /**
-   * Configure html template informations
-   * @param {Object} engine - Template engine that should implement a `compile` method.
-   * @param {String} directory - Path to the directory containing the templates,
-   *  any filename corresponding to a registered browser client type will be used
-   *  in priority, in not present fallback to `default` (i.e `${clientType}.tmpl`
-   *  with fallback to `default.tmpl`. Template files must have the `.tmpl` extension.
-   */
-  configureHtmlTemplates(engine, directory) {
-    this._htmlTemplateConfig.engine = engine;
-    this._htmlTemplateConfig.directory = directory;
-  }
-
-  /**
    * Open the route for the given client.
    * @private
    */
@@ -418,7 +423,7 @@ class Server {
     }
 
     // define template filename: `${clientType}.html` or `default.html`
-    const templateDirectory = this._htmlTemplateConfig.directory;
+    const templateDirectory = this.templateDirectory;
     const clientTmpl = path.join(templateDirectory, `${clientType}.tmpl`);
     const defaultTmpl = path.join(templateDirectory, `default.tmpl`);
 
@@ -433,7 +438,7 @@ class Server {
     }
 
     const tmplString = fs.readFileSync(template, 'utf8');
-    const tmpl = this._htmlTemplateConfig.engine.compile(tmplString);
+    const tmpl = this.templateEngine.compile(tmplString);
     // http request
     router.get(route, (req, res) => {
       const data = this._clientConfigFunction(clientType, this.config, req);
