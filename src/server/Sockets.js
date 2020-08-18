@@ -101,7 +101,7 @@ class Sockets {
   /**
    * Add a socket to a room
    *
-   * @param {Socket} module:soundworks/server.Socket - Socket to register in the room.
+   * @param {server.Socket} socket - Socket to add to the room.
    * @param {String} roomId - Id of the room
    */
   addToRoom(socket, roomId) {
@@ -111,7 +111,7 @@ class Sockets {
   /**
    * Remove a socket from a room
    *
-   * @param {Socket} module:soundworks/server.Socket - Socket to register in the room.
+   * @param {server.Socket} socket - Socket to remove from the room.
    * @param {String} [roomId=null] - Id of the room
    */
   removeFromRoom(socket, roomId) {
@@ -124,7 +124,7 @@ class Sockets {
    *
    * @param {String|Array} roomsIds - Ids of the rooms that must receive
    *  the message. If null the message is sent to all clients
-   * @param {module:soundworks/server.Socket} excludeSocket - Optionnal
+   * @param {server.Socket} excludeSocket - Optionnal
    *  socket to ignore when broadcasting the message, typically the client
    *  at the origin of the message
    * @param {String} channel - Channel of the message
@@ -140,7 +140,7 @@ class Sockets {
    *
    * @param {String|Array} roomsIds - Ids of the rooms that must receive
    *  the message. If null the message is sent to all clients
-   * @param {module:soundworks/server.Socket} excludeSocket - Optionnal
+   * @param {server.Socket} excludeSocket - Optionnal
    *  socket to ignore when broadcasting the message, typically the client
    *  at the origin of the message
    * @param {String} channel - Channel of the message

@@ -32,7 +32,6 @@ class Client {
     /**
      * Type of the client, this can generally be considered as the role of the
      * client in the application.
-     *
      * @type {String}
      */
     this.type = null;
@@ -41,7 +40,6 @@ class Client {
     /**
      * Unique session id of the client (incremeted positive number),
      * generated and retrieved by the server on start.
-     *
      * @type {Number}
      */
     this.id = null;
@@ -49,38 +47,34 @@ class Client {
     /**
      * Unique session uuid of the client (uuidv4), generated and retrieved by
      * the server on start.
-     *
      * @type {String}
      */
     this.uuid = null;
 
     /**
-     * Configuration object, typically contains the configuration sent by the server.
-     *
-     * @see {@link server.Server#init} for further information.
+     * Configuration object, typically contains the configuration sent by the
+     * server (cf. {@link server.Server#init}).
+     * @see {@link server.Server#init}.
      * @type {Object}
      */
     this.config = {};
 
     /**
      * Instance of the `Socket` class that handle communications with the server.
-     *
      * @see {@link client.Socket}
      * @type {client.Socket}
      */
     this.socket = new Socket();
 
     /**
-     * instance of the `PluginManager` class.
-     *
+     * Instance of the `PluginManager` class.
      * @see {@link client.PluginManager}
      * @type {client.PluginManager}
      */
     this.pluginManager = new PluginManager(this);
 
     /**
-     * instance of the `SharedStateManagerClient` class.
-     *
+     * Instance of the `SharedStateManagerClient` class.
      * @see {@link client.SharedStateManagerClient}
      * @type {client.SharedStateManagerClient}
      */
@@ -88,8 +82,13 @@ class Client {
   }
 
   /**
-   * Method to be called before `start` in the initialization lifecycle of the
-   * soundworks client. Basically wait for the socket connections the be done.
+   * Method to be called before {@link client.Client#start} in the
+   * initialization lifecycle of the soundworks client.
+   *
+   * Basically waits for the socket to be connected.
+   * @see {@link server.Server#init}
+   *
+   * @param {Object} config - Configuration object (cf. {@link server.Server#init})
    */
   async init(config) {
     if (!('clientType' in config)) {
@@ -113,10 +112,14 @@ class Client {
   }
 
   /**
-   * Method to be called when `init` step is done in the initialization
-   *  lifecycle of the soundworks client. Basically initilialize the
-   *  `SharedStateManagerClient` and all plugins. When done, the `Experience.start`
-   *  method can be called safely called.
+   * Method to be called when {@link client.Client#init} has finished in the
+   * initialization lifecycle of the soundworks client.
+   *
+   *  Initilialize the {@link clientSharedStateManagerClient} and all required
+   *  plugins. When done, the {@link client.AbstractExperience#start} method
+   *  can be called safely called.
+   *
+   * @see {@link server.Server#start}
    */
   async start() {
     this._ready = new Promise((resolve, reject) => {

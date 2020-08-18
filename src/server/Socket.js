@@ -6,37 +6,31 @@ import {
 } from '../common/sockets-encoder-decoder.js';
 
 const noop = () => {};
-
 let counter = 0;
-
 const CONNECTING = 0;
 const OPEN = 1;
 const CLOSING = 2;
 const CLOSED = 3;
-const READY_STATES = ['CONNECTING', 'OPEN', 'CLOSING', 'CLOSED']
+const READY_STATES = ['CONNECTING', 'OPEN', 'CLOSING', 'CLOSED'];
 
 /**
- * Simple wrapper with simple pubsub system built on top of `ws` socket.
- * The abstraction actually contains two different socket:
+ * Simple wrapper with simple pubsub system built on top of `ws` sockets.
+ * The abstraction contains two different socket:
  * - one configured for string (JSON compatible) messages
  * - one configured with `binaryType=arraybuffer` for streaming data more
  *   efficiently.
- * The socket re-emits all "native" ws events.
  *
  * @see https://github.com/websockets/ws
  *
  * @memberof server
  */
 class Socket {
-  /** @private */
   constructor(ws, binaryWs, rooms, sockets, options = {}) {
+
     /**
      * Reference to the sockets object, is mainly dedicated to allow
      * broadcasting from a given socket instance.
-     * @type {module:soundworks/server.sockets}
-     * @name sockets
-     * @instance
-     * @memberof module:soundworks/server.Socket
+     * @type {server.Sockets}
      * @example
      * socket.sockets.broadcast('my-room', this, 'update-value', 1);
      */
@@ -46,9 +40,6 @@ class Socket {
      * `ws` socket instance configured with `binaryType=blob` (string)
      * @private
      * @type {Object}
-     * @name _ws
-     * @instance
-     * @memberof module:soundworks/server.Socket
      */
     this.ws = ws;
 
@@ -56,9 +47,6 @@ class Socket {
      * `ws` socket instance configured with `binaryType=arraybuffer` (TypedArray)
      * @private
      * @type {Object}
-     * @name _binaryWs
-     * @instance
-     * @memberof module:soundworks/server.Socket
      */
     this.binaryWs = binaryWs;
 
@@ -66,18 +54,12 @@ class Socket {
      * `ws` socket instance configured with `binaryType=arraybuffer` (TypedArray)
      * @private
      * @type {Map}
-     * @name _rooms
-     * @instance
-     * @memberof module:soundworks/server.Socket
      */
     this.rooms = rooms
 
     /**
      * Configuration object
      * @type {Object}
-     * @name _config
-     * @instance
-     * @memberof module:soundworks/server.Socket
      */
     this.config = {
       pingInterval: 5 * 1000,
@@ -263,7 +245,7 @@ class Socket {
   /**
    * Sends JSON compatible messages on a given channel
    *
-   * @param {String} channel - The channel of the message
+   * @param {String} channel - Channel of the message
    * @param {...*} args - Arguments of the message (as many as needed, of any type)
    */
   send(channel, ...args) {

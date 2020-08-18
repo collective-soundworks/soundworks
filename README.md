@@ -20,7 +20,7 @@ The core of the framework is very minimal and dedicated at handling:
   - Processes initialization
   - Distributed state management
 
-`soundworks` can be extended with services to reuse common logic such as audio file loading, clock synchronisation, etc. Each service leaves in a separate repo for better modularity and to simplify version management.
+`soundworks` can be extended with plugins to reuse common logic such as audio file loading, clock synchronisation, etc. Each plugin leaves in a separate repo for better modularity and to simplify version management.
 
 ## Installation
 
@@ -37,7 +37,7 @@ npm install @soundworks/core
 The simplest way to start a new `soundworks` application is using the application template: 
 [https://github.com/collective-soundworks/soundworks-template](https://github.com/collective-soundworks/soundworks-template).
 
-## List of Available Services
+## List of Available Plugins
 
 @todo
 

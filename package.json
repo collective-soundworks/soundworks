@@ -19,7 +19,7 @@
   "scripts": {
     "clean": "rm -Rf client && rm -Rf server && rm -Rf common",
     "graphs": "madge --image resources/graph-client.svg src/client && madge --image resources/graph-server.svg src/server",
-    "docs": "jsdoc -c .jsdoc.json --verbose",
+    "docs": "jsdoc -c .jsdoc.json --verbose && cp -R assets docs/",
     "prepublishOnly": "npm run build",
     "version": "npm run clean && npm run build && npm run doc && git add docs",
     "build:client": "babel src/client --out-dir client",

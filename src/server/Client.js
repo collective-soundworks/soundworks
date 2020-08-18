@@ -17,40 +17,30 @@ class Client {
 	/**
 	 * @param {String} clientType - Client type of the connected client.
 	 * @param {Socket} socket - Socket object used to comminuate with the client.
-	 * @private
 	 */
 	constructor(clientType, socket) {
 		/**
 		 * Client type (specified when initializing the {@link client} object on the client side with {@link client.init}).
-		 * @name type
      * @type {String}
-     * @memberof module:soundworks/server.Client
-     * @instance
 		 */
     this.type = clientType;
 
     /**
      * Unique session id (ever increasing number)
-     * @name id
      * @type {Number}
-     * @memberof module:soundworks/server.Client
-     * @instance
      */
     this.id = generateId.next().value;
 
 		/**
 		 * Unique session id (uuidv4).
-		 * @name uuid
      * @type {String}
-     * @memberof module:soundworks/server.Client
-     * @instance
 		 */
     this.uuid = uuid();
 
 		/**
 		 * Socket used to communicate with the client.
-		 * @type {Socket}
-		 * @private
+		 * @type {server.Socket}
+     * @see {@link server.Socket}
 		 */
     this.socket = socket;
   }

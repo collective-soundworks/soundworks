@@ -8,7 +8,7 @@ const log = debug('soundworks:lifecycle');
  *
  * The user defined `Experience`s are the main components of a soundworks application.
  *
- * @memberof client
+ * @memberof server
  */
 class AbstractExperience {
   constructor(server, clientTypes = null) {

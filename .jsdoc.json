@@ -1,6 +1,7 @@
 {
   "source": {
     "include": [
+      "README.md",
       "src/client",
       "src/server",
       "src/common"
@@ -20,5 +21,36 @@
       "useLongnameInNav": true
     },
     "footer": ""
+  },
+  "docdash": {
+    "sectionOrder": [
+      "Namespaces",
+      "Classes",
+      "Modules",
+      "Externals",
+      "Events",
+      "Mixins",
+      "Tutorials",
+      "Interfaces"
+    ],
+    "meta": {
+        "title": "soundworks",
+        "description": "Documentation of soundworks, a full-stack JavaScript framework for distributed WebAudio and multimedia applications"
+    },
+    "search": true,
+    "menu": {
+      "Resources": {
+        "href":"http://collective-soundworks.github.io/",
+        "target":"_blank",
+        "class":"menu-item",
+        "id":"website_link"
+      },
+      "Github": {
+        "href": "https://github.com/collective-soundworks/soundworks",
+        "target":"_blank",
+        "class":"menu-item",
+        "id":"website_link"
+      }
+    }
   }
 }

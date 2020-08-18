@@ -52,12 +52,11 @@ class PluginManager {
     return this.ready;
   }
 
-
   /**
    * Register a plugin (server-side) into soundworks.
    *
    * _A plugin must be registered both client-side and server-side_
-   * @see {@link client.PluginManager#registerPlugin}
+   * @see {@link client.PluginManager#register}
    *
    * @param {String} name - Name of the plugin
    * @param {Function} factory - Factory function that return the plugin class
@@ -66,10 +65,10 @@ class PluginManager {
    *
    * @example
    * ```js
-   * server.pluginManager.registerPlugin('user-defined-name', pluginFactory);
+   * server.pluginManager.register('user-defined-name', pluginFactory);
    * ```
    */
-  registerPlugin(name, factory = null, options = {}, deps = []) {
+  register(name, factory = null, options = {}, deps = []) {
     if (this._registeredPlugins[name]) {
       throw new Error(`Plugin "${name}" already registered`);
     }

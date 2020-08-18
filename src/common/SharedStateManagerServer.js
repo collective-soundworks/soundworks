@@ -240,6 +240,15 @@ class SharedStateManagerServer extends SharedStateManagerClient {
   }
 
   /**
+   * Alias for registerSchema
+   * @unstable
+   * @private
+   */
+  register(schemaName, schema) {
+    this.registerSchema(schemaName, schema);
+  }
+
+  /**
    * Delete a schema and all associated states.
    * When a schema is deleted, all attached clients are detached
    * and the `onDetach` and `onDelete` callbacks are called.
