@@ -61,10 +61,11 @@ class SharedStatePrivate {
         // get new value this way to store events return values
         const newValue = this._parameters.set(name, updates[name]);
 
-        // @todo - we check the `schema[name].type === 'any'` because if
-        // the state is attached locally, we compare the Object instances instead
-        // of their values. This should be made more robust but how?
-        if (newValue !== currentValue || this._schema[name].type === 'any') {
+        // we check the `schema[name].type === 'any'`, to always consider
+        // objects as dirty, because if the state is attached locally, we
+        // compare the Object instances instead of their values.
+        // @todo - this should be made more robust but how?
+        if (newValue !== currentValue || this._schema[name].type === 'any') {
           updated[name] = newValue;
           dirty = true;
         }
@@ -74,21 +75,26 @@ class SharedStatePrivate {
         // send response to requester
         client.transport.emit(`${UPDATE_RESPONSE}-${this.id}-${remoteId}`, reqId, updated)
 
-        // --------------------------------------------------------------------
-        // WARNING - MAKE SURE WE DON'T HAVE PROBLEM W/ THAT
-        // --------------------------------------------------------------------
-        // @todo - propagate server-side last, because if a subscription function sends a
-        // message to a client, network messages order are kept coherent
-        // this._subscriptions.forEach(func => func(updated));
+        // @note: we propagate server-side last, because as the server transport
+        // is synchronous it can break ordering if a subscription function makes
+        // itself an update in reaction to an update, therefore network messages
+        // order would be broken,
         for (let [peerRemoteId, peer] of this._attachedClients.entries()) {
-          // propagate notification to all other attached clients
-          if (remoteId !== peerRemoteId) {
+          // propagate notification to all other attached clients except server
+          if (remoteId !== peerRemoteId && peer.id !== -1) {
+            peer.transport.emit(`${UPDATE_NOTIFICATION}-${this.id}-${peerRemoteId}`, updated);
+          }
+        }
+
+        for (let [peerRemoteId, peer] of this._attachedClients.entries()) {
+          // propagate notification to server
+          if (remoteId !== peerRemoteId && peer.id === -1) {
             peer.transport.emit(`${UPDATE_NOTIFICATION}-${this.id}-${peerRemoteId}`, updated);
           }
         }
       } else {
-        // propagate back to requester that the update has been aborted w/
-        // updates, ignore all other attached clients.
+        // propagate back to the requester that the update has been aborted
+        // ignore all other attached clients.
         client.transport.emit(`${UPDATE_ABORT}-${this.id}-${remoteId}`, reqId, updates);
       }
     });
