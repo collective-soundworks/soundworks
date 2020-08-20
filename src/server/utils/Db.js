@@ -15,13 +15,13 @@ import fs from 'fs';
  */
 class Db {
   constructor(options = {}) {
-    const dbDirectory = path.join(process.cwd(), '.db');
+    const dbDirectory = path.join(process.cwd(), '.data');
 
     if (!fs.existsSync(dbDirectory)) {
       fs.mkdirSync(dbDirectory);
     }
 
-    const filename = path.join(dbDirectory, 'keyv.db');
+    const filename = path.join(dbDirectory, 'soundworks.db');
 
     this.keyv = new Keyv({
       namespace: 'soundworks',

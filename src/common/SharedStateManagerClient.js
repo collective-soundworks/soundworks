@@ -170,14 +170,17 @@ class SharedStateManagerClient {
   }
 
   /**
+   * @callback client.SharedStateManagerClient~observeCallback
+   * @async
+   * @param {String} schemaName - name of the schema
+   * @param {Number} stateId - id of the state
+   * @param {Number} nodeId - id of the node that created the state
+   */
+  /**
    * Observe all the {@link SharedState} instances that are created on the network.
    *
-   * @param {Function} callback - Function to be called when a new state is
-   *  created on the network.
-   *  The function is called with the following arguments:
-   *  - `schemaName`
-   *  - `stateId`
-   *  - `nodeId` (id of the node that created the state)
+   * @param {client.SharedStateManagerClient~observeCallback} callback - Function
+   *  to be called when a new state is created on the network.
    *
    * @example
    * this.client.stateManager.observe(async (schemaName, stateId, nodeId) => {

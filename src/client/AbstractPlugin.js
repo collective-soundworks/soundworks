@@ -40,7 +40,7 @@ class AbstractPlugin {
 
     /**
      * Signals defining the process state.
-     * @name signals
+     * @type {Object}
      */
     this.signals = {
       start: new SignalAll(),

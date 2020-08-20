@@ -91,8 +91,12 @@ class Client {
    * @param {Object} config - Configuration object (cf. {@link server.Server#init})
    */
   async init(config) {
+    if (!(Object.prototype.toString.call(config) === '[object Object]')) {
+      throw new Error('[soundworks.init] must receive a config object as argument`');
+    }
+
     if (!('clientType' in config)) {
-      throw new Error('soundworks.init config object "must" define a `clientType`');
+      throw new Error('[soundworks.init] config object "must" define a `clientType`');
     }
 
     // handle config
