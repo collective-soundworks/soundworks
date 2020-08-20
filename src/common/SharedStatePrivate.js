@@ -73,7 +73,7 @@ class SharedStatePrivate {
 
       if (dirty) {
         // send response to requester
-        client.transport.emit(`${UPDATE_RESPONSE}-${this.id}-${remoteId}`, reqId, updated)
+        // client.transport.emit(`${UPDATE_RESPONSE}-${this.id}-${remoteId}`, reqId, updated);
 
         // @note: we propagate server-side last, because as the server transport
         // is synchronous it can break ordering if a subscription function makes
@@ -82,6 +82,7 @@ class SharedStatePrivate {
         for (let [peerRemoteId, peer] of this._attachedClients.entries()) {
           // propagate notification to all other attached clients except server
           if (remoteId !== peerRemoteId && peer.id !== -1) {
+            // console.log('send to', peer.id, Object.keys(updates));
             peer.transport.emit(`${UPDATE_NOTIFICATION}-${this.id}-${peerRemoteId}`, updated);
           }
         }
@@ -89,9 +90,14 @@ class SharedStatePrivate {
         for (let [peerRemoteId, peer] of this._attachedClients.entries()) {
           // propagate notification to server
           if (remoteId !== peerRemoteId && peer.id === -1) {
+            // console.log('send to', peer.id, Object.keys(updates));
             peer.transport.emit(`${UPDATE_NOTIFICATION}-${this.id}-${peerRemoteId}`, updated);
           }
         }
+
+        // for the very same reason we send the response back to the requester
+        // last. @note: could this have weird side effects
+        client.transport.emit(`${UPDATE_RESPONSE}-${this.id}-${remoteId}`, reqId, updated);
       } else {
         // propagate back to the requester that the update has been aborted
         // ignore all other attached clients.
