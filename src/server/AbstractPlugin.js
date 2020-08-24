@@ -156,6 +156,12 @@ class AbstractPlugin {
     this.signals.ready.value = true;
   }
 
+  error(msg) {
+    console.log(`> plugin "${this.name}" error: ${msg}`);
+    this.signals.errored.msg = msg;
+    this.signals.errored.value = true;
+  }
+
   /**
    * Interface method to implement if specific logic should be done when a
    * {@link server.Client} connects to the plugin.
