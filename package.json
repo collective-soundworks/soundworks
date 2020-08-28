@@ -18,9 +18,9 @@
   "main": "",
   "scripts": {
     "clean": "rm -Rf client && rm -Rf server && rm -Rf common",
-    "graphs": "madge --image resources/graph-client.svg src/client && madge --image resources/graph-server.svg src/server",
     "docs": "rm -Rf docs && jsdoc -c .jsdoc.json --verbose && cp -R assets docs/",
     "prepublishOnly": "npm run build",
+    "toc": "markdown-toc -i README.md",
     "version": "npm run clean && npm run build && npm run doc && git add docs",
     "build:client": "babel src/client --out-dir client",
     "build:server": "babel src/server --out-dir server",
@@ -38,7 +38,6 @@
     "columnify": "^1.5.4",
     "compression": "^1.7.1",
     "debug": "^4.1.1",
-    "docdash": "^1.2.0",
     "fast-text-encoding": "^1.0.0",
     "isomorphic-ws": "^4.0.1",
     "jsdoc-template": "^1.2.0",
@@ -58,9 +57,10 @@
     "@babel/core": "^7.4.5",
     "@babel/plugin-proposal-export-default-from": "^7.5.2",
     "@babel/preset-env": "^7.4.5",
-    "@ircam/jsdoc-template": "^1.0.2",
     "chokidar": "^3.0.1",
     "chokidar-cli": "^1.2.2",
-    "jsdoc": "^3.6.2"
+    "docdash": "^1.2.0",
+    "jsdoc": "^3.6.2",
+    "markdown-toc": "^1.2.0"
   }
 }

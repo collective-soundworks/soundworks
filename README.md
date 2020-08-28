@@ -4,6 +4,21 @@
 
 > Full-stack JavaScript framework for distributed WebAudio and multimedia applications.
 
+## Table of Contents
+
+<!-- toc -->
+
+- [Documentation](#documentation)
+- [API](#api)
+- [Overview](#overview)
+- [Installation](#installation)
+- [Application Template](#application-template)
+- [Academic Papers](#academic-papers)
+- [Credits](#credits)
+- [License](#license)
+
+<!-- tocstop -->
+
 ## Documentation
 
 [https://collective-soundworks.github.io](https://collective-soundworks.github.io)
@@ -27,6 +42,8 @@ The core of the framework is very minimal and dedicated at handling:
 `soundworks` can be extended with plugins to reuse common logic such as audio file loading, clock synchronisation, etc. Each plugin leaves in a separate repo for better modularity and to simplify version management.
 
 ## Installation
+
+_Note: most of the time you won't need to install `soundworks` manually, consider using the [application template](#application-template) instead._
 
 ```
 npm install @soundworks/core
