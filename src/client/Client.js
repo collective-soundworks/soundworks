@@ -19,12 +19,11 @@ import Socket from './Socket.js';
  * const client = new soundworks.Client();
  * // initialize the client (mainly connect and initialize WebSockets)
  * await client.init(config);
- * // create application specific experience
- * // must extends `soundworks.Experience`
+ * // create application specific experience (extends `client.AbstractExperience`
  * const playerExperience = new PlayerExperience(client);
  * // start the client
  * await client.start();
- * // when everything is ready, start the experience
+ * // when everything is ready, the experience can be safely started
  * playerExperience.start();
  */
 class Client {
@@ -119,9 +118,9 @@ class Client {
    * Method to be called when {@link client.Client#init} has finished in the
    * initialization lifecycle of the soundworks client.
    *
-   *  Initilialize the {@link clientSharedStateManagerClient} and all required
-   *  plugins. When done, the {@link client.AbstractExperience#start} method
-   *  can be called safely called.
+   * Initilialize the {@link client.SharedStateManagerClient} and all required
+   * plugins. When done, the {@link client.AbstractExperience#start} method
+   * should be consider as being safely called.
    *
    * @see {@link server.Server#start}
    */

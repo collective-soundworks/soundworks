@@ -38,14 +38,16 @@ const generateRemoteId = idGenerator();
  * additionnal functionnalities to register schemas and handle clients.
  *
  * An instance of `SharedStateManagerClient` is automatically created by the
- * `soundworks.Server`.
- * @see {@link server.Server#stateManager}
+ * `soundworks.Server` (cf. {@link server.Server#stateManager}).
  *
  * Tutorial: [https://collective-soundworks.github.io/tutorials/state-manager.html](https://collective-soundworks.github.io/tutorials/state-manager.html)
  *
  * @memberof server
  * @extends client.SharedStateManagerClient
+ *
  * @see {@link client.SharedStateManagerClient}
+ * @see {@link server.SharedState}
+ * @see {@link server.Server#stateManager}
  */
 class SharedStateManagerServer extends SharedStateManagerClient {
   constructor() {
@@ -219,7 +221,8 @@ class SharedStateManagerServer extends SharedStateManagerClient {
   }
 
   /**
-   * Register a schema.
+   * Register a schema. The schema definition follows the convention described
+   * here [https://github.com/ircam-jstools/parameters#booleandefinition--object](https://github.com/ircam-jstools/parameters#booleandefinition--object) (@todo - document somewhere else).
    *
    * @param {String} schemaName - Name of the schema.
    * @param {Object} schema - Description of the state data structure.

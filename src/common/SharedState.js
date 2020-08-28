@@ -29,9 +29,18 @@ import {
   rejectRequest,
 } from './shared-state-utils.js';
 
+// -----------------------------------------------------------
+// define a common namespace...
+// -----------------------------------------------------------
+
 /**
- * Local representation of a shared state.
+ * Representation of a shared state. The class and its instances are the same
+ * client-side and server-side.
  *
+ * @memberof common
+ *
+ * @see {client.SharedStateManagerClient}
+ * @see {server.SharedStateManagerServer}
  */
 class SharedState {
   constructor(id, remoteId, schemaName, schema, client, isCreator, manager, initValues = {}) {
@@ -146,10 +155,23 @@ ${JSON.stringify(initValues, null, 2)}`);
     return updated;
   }
 
+
+  /**
+   * Get the schema that describes the state.
+   *
+   * @return {Object}
+   */
   getSchema() {
     return this._schema;
   }
 
+  /**
+   * Updates values of the state.
+   *
+   * @async
+   * @param {Object} updates - key / value pairs of updates to apply to the state
+   * @return {Object}
+   */
   async set(updates) {
     return new Promise((resolve, reject) => {
       const reqId = storeRequestPromise(resolve, reject);
@@ -157,14 +179,42 @@ ${JSON.stringify(initValues, null, 2)}`);
     });
   }
 
+  /**
+   * Get a value of the state by its name
+   *
+   * @param {String} name - Name of the param
+   * @return {Mixed}
+   */
   get(name) {
     return this._parameters.get(name);
   }
 
+  /**
+   * Get a all the key / value pairs of the state.
+   *
+   * @return {Object}
+   */
   getValues() {
     return this._parameters.getValues();
   }
 
+  /**
+   * @callback common.SharedState~subscribeCallback
+   * @param {Object} updates - key / value pairs of the updates that have been
+   *   applied to the state
+   */
+  /**
+   * Subscribe to state updates
+   *
+   * @param {common.SharedState~subscribeCallback} callback - callback to execute
+   *   when an update is commited on the state.
+   * @example
+   * state.subscribe(async (updates) =>  {
+   *   for (let [key, value] of Object.entries(updates)) {
+   *      // dispatch
+   *   }
+   * }
+   */
   subscribe(listener) {
     this._subscriptions.add(listener);
 
@@ -173,6 +223,18 @@ ${JSON.stringify(initValues, null, 2)}`);
     };
   }
 
+  /**
+   * Detach from the state. If the client is the creator of the state, the state
+   * is deleted and all attached nodes get notified
+   *
+   * @async
+   * @see {common.SharedState#onDetach}
+   * @see {common.SharedState#onDelete}
+   * @see {client.SharedStateManagerClient#create}
+   * @see {server.SharedStateManagerClient#create}
+   * @see {client.SharedStateManagerClient#attach}
+   * @see {server.SharedStateManagerClient#attach}
+   */
   async detach() {
     this._subscriptions.clear();
 
@@ -189,11 +251,24 @@ ${JSON.stringify(initValues, null, 2)}`);
     }
   }
 
+  /**
+   * Register a function to execute when detaching from the state
+   *
+   * @param {Function} callback - callback to execute when detaching from the state.
+   *   wether the client as called `detach`, or the state has been deleted by its
+   *   creator.
+   */
   onDetach(callback) {
     this._onDetachCallbacks.add(callback);
     return () => this._onDetachCallbacks.delete(callback);
   }
 
+  /**
+   * Register a function to execute when the state is deleted. Only called if the
+   * node was the creator of the state. Is called after `onDetach`
+   *
+   * @param {Function} callback - callback to execute when the state is deleted.
+   */
   onDelete(callback) {
     this._onDeleteCallbacks.add(callback);
     return () => this._onDeleteCallbacks.delete(callback);

@@ -6,9 +6,7 @@ import SignalAll from '../common/SignalAll.js';
 const log = debug('soundworks:lifecycle');
 
 /**
- * Component dedicated at instantiating and initializing plugins.
- * Except if you know what you are doing, this components should not be
- * accessed directly.
+ * Component dedicated at registering, instantiating and initializing plugins.
  *
  * An instance of the `PluginManager` is automatically created by the
  * `soundworks.Client`.
@@ -21,7 +19,7 @@ const log = debug('soundworks:lifecycle');
  *
  * // create a new `soundworks.Client` instance
  * const client = new soundworks.Client();
- * console.log(client.pluginManager);
+ * client.pluginManager.register('my-plugin', myPluginFactory, {}, []);
  */
 class PluginManager {
   constructor(client) {
@@ -101,22 +99,32 @@ class PluginManager {
 /** @private */
 
   /**
-   * Register a plugin (client-side) into soundworks.
+   * Register the client-side part of a plugin into soundworks instance.
    *
-   * _A plugin must be registered both client-side and server-side_
+   * Notes:
+   *    - A plugin must always be registered (and required) both client-side
+   *    and server-side
+   *    - A plugin factory can be used several times with different names to
+   *    create several instances of the plugin
+   *
+   *
    * @see {@link server.PluginManager#register}
+   * @see {@link client.AbstractExperience#require}
+   * @see {@link client.AbstractPlugin#start}
+   * @see {@link client.AbstractPlugin#ready}
    *
    * @param {String} name - Name of the plugin
    * @param {Function} factory - Factory function that return the plugin class
-   * @param {Object} options - Options to configure the plugin
-   * @param {Array} deps - List of plugins' names the plugin depends on
+   * @param {Object} [options={}] - Options to configure the plugin
+   * @param {Array} [deps=[]] - List of plugins' names the plugin depends on, aka
+   *   the plugins that the plugin should wait for being `ready` before `start`
    *
    * @example
    * ```js
    * client.pluginManager.register('user-defined-name', pluginFactory);
    * ```
    */
-  register(name, factory = null, options = {}, deps = []) {
+  register(name, factory, options = {}, deps = []) {
     if (this._registeredPlugins[name]) {
       throw new Error(`Plugin "${name}" already registered`);
     }
@@ -127,7 +135,11 @@ class PluginManager {
 
   /**
    * Returns an instance of a plugin with options to be applied to its constructor.
+   * Warning: using this method do not attach any client to the plugin (as does
+   * {@link client.AbstractExperience#require}, use this method only if you know
+   * what you are doing.
    *
+   * @see {client.AbstractExperience#require}
    * @param {String} name - Name of the plugin.
    */
   get(name, _experienceRequired = false) {

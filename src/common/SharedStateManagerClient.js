@@ -30,16 +30,17 @@ import {
 } from './shared-state-utils.js';
 
 /**
- * Component dedicated at managing distributed states, accessible through {@link SharedState} instances, among the application.
+ * Component dedicated at managing distributed states, accessible through {@link common.SharedState} instances, among the application.
  *
  * An instance of `SharedStateManagerClient` is automatically created by the
- * `soundworks.Client`.
- * @see {@link client.Client#stateManager}
+ * `soundworks.Client` (cf. {@link client.Client#stateManager}).
  *
  * Tutorial: [https://collective-soundworks.github.io/tutorials/state-manager.html](https://collective-soundworks.github.io/tutorials/state-manager.html)
  *
  * @memberof client
+ * @see {@link common.SharedState}
  * @see {@link server.SharedStateManagerServer}
+ * @see {@link client.Client#stateManager}
  */
 class SharedStateManagerClient {
   /**
@@ -137,7 +138,7 @@ class SharedStateManagerClient {
    *  (cf. ServerStateManager)
    * @param {Object} [initValues={}] - Default values for the state.
    *
-   * @return {@link SharedState}
+   * @return {@link common.SharedState}
    */
   async create(schemaName, initValues = {}) {
     return new Promise((resolve, reject) => {
@@ -158,7 +159,7 @@ class SharedStateManagerClient {
    *  attach to the first state found with the given schema name (usefull for
    *  globally shared states owned by the server).
    *
-   * @return {@link SharedState}
+   * @return {@link common.SharedState}
    */
   async attach(schemaName, stateId = null) {
     return new Promise((resolve, reject) => {
@@ -170,7 +171,7 @@ class SharedStateManagerClient {
   }
 
   /**
-   * @callback client.SharedStateManagerClient~observeCallback
+   * @callback common.SharedStateManagerClient~observeCallback
    * @async
    * @param {String} schemaName - name of the schema
    * @param {Number} stateId - id of the state
@@ -179,7 +180,7 @@ class SharedStateManagerClient {
   /**
    * Observe all the {@link SharedState} instances that are created on the network.
    *
-   * @param {client.SharedStateManagerClient~observeCallback} callback - Function
+   * @param {common.SharedStateManagerClient~observeCallback} callback - Function
    *  to be called when a new state is created on the network.
    *
    * @example

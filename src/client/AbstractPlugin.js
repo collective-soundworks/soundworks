@@ -6,7 +6,34 @@ import SignalAll from '../common/SignalAll.js';
 const log = debug('soundworks:lifecycle');
 
 /**
- * Base class to be extended in order to create a new plugin.
+ * Base class to extend for implementing a new plugin.
+ *
+ * A plugin should always be provided wrapped in a factory function to allow for
+ * dynamically extend this class and avoid circular dependencies.
+ *
+ * @example
+ * function myPluginFactory(AbstractPlugin) {
+ *   class MyPlugin extends AbstractPlugin {
+ *     constructor(client, name, options) {
+ *       super(client, name);
+ *       // ...
+ *     }
+ *
+ *     async start() {
+ *       await ...
+ *       this.started();
+ *       await ...
+ *       this.ready();
+ *     }
+ *   }
+ *
+ *   return MyPlugin;
+ * }
+ * // then register the factory
+ * client.pluginManager.register('my-plugin', myPluginFactory, { options }, []);
+ *
+ * @param {client.Client} client - instance of the soundworks Client
+ * @param {String} name - user defined name of the plugin
  *
  * @memberof client
  */
@@ -21,7 +48,8 @@ class AbstractPlugin {
     }
 
     /**
-     * Instance of soundworks client
+     * Instance of the soundworks client
+     * @see {client.Client}
      * @type {String}
      */
     this.client = client;
@@ -42,6 +70,7 @@ class AbstractPlugin {
      * Signals defining the process state.
      * @type {Object}
      */
+    /** @private */
     this.signals = {
       start: new SignalAll(),
       started: new Signal(),
@@ -70,8 +99,12 @@ class AbstractPlugin {
   /**
    * Interface method to override when implementing child class.
    *
-   * _The child class MUST call {@link client.AbstractPlugin#started} and
-   * {@link client.AbstractPlugin#ready}_
+   * _Important: the derived class MUST call {@link client.AbstractPlugin#started}
+   * and {@link client.AbstractPlugin#ready} to notify soundworks about the
+   * state of the plugin_
+   *
+   * @see {client.AbstractPlugin#started}
+   * @see {client.AbstractPlugin#ready}
    *
    * @example
    * class MyDelayPlugin extends AbstractPlugin {
@@ -89,10 +122,15 @@ class AbstractPlugin {
   }
 
   /**
-   * Method to call when the plugin is effectively started, as it may have to
-   * do some asynchonous job at start (e.g. creating a shared state).
+   * Lifecyle method to call in the {@link client.AbstractPlugin#start} method
+   * when the plugin is effectively started, as it may have to
+   * do some asynchonous job at start (e.g. creating a shared state, waiting for
+   * user input, etc.).
    *
    * _Must be called between before {@link client.AbstractPlugin#ready}._
+   *
+   * @see {client.AbstractPlugin#start}
+   * @see {client.AbstractPlugin#ready}
    *
    * @example
    * class MyDelayPlugin extends AbstractPlugin {
@@ -123,9 +161,15 @@ class AbstractPlugin {
   }
 
   /**
-   * Method to call in the plugin lifecycle when it should be considered as
-   * ready and thus allow the initialization process to continue or the
-   * application to start safely (cf. {@link client.AbstractExperience#start})
+   * Lifecyle method to call in the {@link client.AbstractPlugin#start} method
+   * when the plugin has completely finished its initialization should be
+   * considered as ready. Calling this method notify soundworks that the
+   * initialization process can continue or that the application can start
+   * safely (cf. {@link client.AbstractExperience#start})
+   *
+   * @see {client.AbstractPlugin#start}
+   * @see {client.AbstractPlugin#started}
+   * @see {client.AbstractExperience#start}
    *
    * @example
    * class MyDelayPlugin extends AbstractPlugin {
