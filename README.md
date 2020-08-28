@@ -6,6 +6,10 @@
 
 ## Documentation
 
+[https://collective-soundworks.github.io](https://collective-soundworks.github.io)
+
+## API
+
 [http://collective-soundworks.github.io/soundworks/](http://collective-soundworks.github.io/soundworks/)
 
 ## Overview
@@ -28,18 +32,10 @@ The core of the framework is very minimal and dedicated at handling:
 npm install @soundworks/core
 ```
 
-## Getting Started
-
-[@link to tutorial]()
-
 ## Application Template
 
 The simplest way to start a new `soundworks` application is using the application template: 
 [https://github.com/collective-soundworks/soundworks-template](https://github.com/collective-soundworks/soundworks-template).
-
-## List of Available Plugins
-
-@todo
 
 ## Academic Papers
 
