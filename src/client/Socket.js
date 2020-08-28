@@ -202,7 +202,7 @@ class Socket {
    * Listen JSON compatible messages on a given channel
    *
    * @param {String} channel - Channel of the message
-   * @param {...*} callback - Callback to execute when a message is received
+   * @param {Function} callback - Callback to execute when a message is received
    */
   addListener(channel, callback) {
     this._addListener(this._stringListeners, channel, callback);
@@ -212,7 +212,7 @@ class Socket {
    * Remove a listener from JSON compatible messages on a given channel
    *
    * @param {String} channel - Channel of the message
-   * @param {...*} callback - Callback to remove
+   * @param {Function} callback - Callback to remove
    */
   removeListener(channel, callback) {
     this._removeListener(this._stringListeners, channel, callback);
@@ -242,7 +242,7 @@ class Socket {
    * Listen binary messages on a given channel
    *
    * @param {String} channel - Channel of the message
-   * @param {...*} callback - Callback to execute when a message is received
+   * @param {Function} callback - Callback to execute when a message is received
    */
   addBinaryListener(channel, callback) {
     this._addListener(this._binaryListeners, channel, callback);
@@ -252,7 +252,7 @@ class Socket {
    * Remove a listener from binary compatible messages on a given channel
    *
    * @param {String} channel - Channel of the message
-   * @param {...*} callback - Callback to cancel
+   * @param {Function} callback - Callback to cancel
    */
   removeBinaryListener(channel, callback) {
     this._removeListener(this._binaryListeners, channel, callback);
