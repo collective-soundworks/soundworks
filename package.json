@@ -1,6 +1,6 @@
 {
   "name": "@soundworks/core",
-  "version": "3.0.0-alpha.9",
+  "version": "2.2.6",
   "description": "full-stack javascript framework for distributed audio visual experiences on the web",
   "authors": [
     "Benjamin Matuszewski",
@@ -21,7 +21,6 @@
     "docs": "rm -Rf docs && jsdoc -c .jsdoc.json --verbose && cp -R assets docs/",
     "prepublishOnly": "npm run build",
     "toc": "markdown-toc -i README.md",
-    "version": "npm run clean && npm run build && npm run doc && git add docs",
     "build:client": "babel src/client --out-dir client",
     "build:server": "babel src/server --out-dir server",
     "build:common": "babel src/common --out-dir common",
