@@ -1,4 +1,4 @@
-_warning:_ soundworks is in the process of heavy refactoring, for more details see [https://github.com/collective-soundworks/soundworks/tree/v3](https://github.com/collective-soundworks/soundworks/tree/v3)
+_DEPRECATED_ soundworks#v2 is now deprecated, please consider using the new version, cf. [@soundworks/core](https://www.npmjs.com/package/@soundworks/core).
 
 # `Soundworks`
 
