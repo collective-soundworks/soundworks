@@ -1,4 +1,4 @@
-_DEPRECATED_ soundworks#v2 is now deprecated, please consider using the new version, cf. [@soundworks/core](https://www.npmjs.com/package/@soundworks/core).
+**[DEPRECATED] soundworks#v2 is now deprecated, please consider using the new version available at [https://www.npmjs.com/package/@soundworks/core](https://www.npmjs.com/package/@soundworks/core).**
 
 # `Soundworks`
 
