@@ -15,18 +15,21 @@ const generateId = idGenerator();
  */
 class Client {
 	/**
-	 * @param {String} clientType - Client type of the connected client.
-	 * @param {Socket} socket - Socket object used to comminuate with the client.
+	 * @param {String} clientType - Type of the client
+	 * @param {server.Socket} socket - Socket connection with the client
 	 */
 	constructor(clientType, socket) {
 		/**
-		 * Client type (specified when initializing the {@link client} object on the client side with {@link client.init}).
+		 * Client type, as specified when initializing the client side {@link client.Client}.
+     *
+     * @see {@link client.Client#init}
      * @type {String}
 		 */
     this.type = clientType;
 
     /**
-     * Unique session id (ever increasing number)
+     * Session id (incremeted positive number).
+     * The counter is reset when the server restarts.
      * @type {Number}
      */
     this.id = generateId.next().value;
@@ -38,15 +41,15 @@ class Client {
     this.uuid = uuid();
 
 		/**
-		 * Socket used to communicate with the client.
+		 * Socket connection with the remote {@link client.Client}.
 		 * @type {server.Socket}
-     * @see {@link server.Socket}
 		 */
     this.socket = socket;
   }
 
   /**
    * Destroy the client.
+   * @private
    */
   destroy() {
     this.uuid = null;

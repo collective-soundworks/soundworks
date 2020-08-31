@@ -27,6 +27,7 @@ import {
 
 /**
  * The "real" state, this instance is kept private by the SharedStateServerManager.
+ * It cannot be accessed without a SharedState proxy
  * @private
  */
 class SharedStatePrivate {

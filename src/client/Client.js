@@ -35,10 +35,10 @@ class Client {
      */
     this.type = null;
 
-
     /**
-     * Unique session id of the client (incremeted positive number),
+     * Session id of the client (incremeted positive number),
      * generated and retrieved by the server on start.
+     * The counter is reset when the server restarts.
      * @type {Number}
      */
     this.id = null;

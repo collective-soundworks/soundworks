@@ -82,14 +82,11 @@ class SharedStateManagerClient {
     // ---------------------------------------------
     // ATTACH (when creator, is attached by default)
     // ---------------------------------------------
-    // @note - we have room to improve network footprint by letting know the
-    // server that the client already know the schema, and that the server
-    // doesn't need to send it again (sends null instead).
-    // in this case, if we manage to make that dynamic at some point (dynamic
-    // schema) the server should be able to invalidate the schema and send
-    // it again despite that.
     this.client.transport.addListener(ATTACH_RESPONSE, (reqId, stateId, remoteId, schemaName, schema, currentValues) => {
-      // cache schema when first dealing it to save some bandwidth
+      // cache schema when first dealing with it to save some bandwidth
+      // note: when we make the schemas dynamic at some point
+      // the server should be able to invalidate the schema and send
+      // it again despite the caching.
       if (!this._cachedSchemas.has(schemaName)) {
         this._cachedSchemas.set(schemaName, schema);
       }
@@ -130,9 +127,9 @@ class SharedStateManagerClient {
   }
 
   /**
-   * Create a {@link SharedState} instance from a previsouly registered schema.
+   * Create a {@link common.SharedState} instance from a previsouly registered schema.
    *
-   * @see {@link SharedState}
+   * @see {@link common.SharedState}
    *
    * @param {String} schemaName - Name of the schema as given on registration
    *  (cf. ServerStateManager)
@@ -149,9 +146,9 @@ class SharedStateManagerClient {
   }
 
   /**
-   * Attach to an existing {@link SharedState} instance.
+   * Attach to an existing {@link common.SharedState} instance.
    *
-   * @see {@link SharedState}
+   * @see {@link common.SharedState}
    *
    * @param {String} schemaName - Name of the schema as given on registration
    *  (cf. ServerStateManager)
@@ -171,16 +168,16 @@ class SharedStateManagerClient {
   }
 
   /**
-   * @callback common.SharedStateManagerClient~observeCallback
+   * @callback client.SharedStateManagerClient~observeCallback
    * @async
    * @param {String} schemaName - name of the schema
    * @param {Number} stateId - id of the state
    * @param {Number} nodeId - id of the node that created the state
    */
   /**
-   * Observe all the {@link SharedState} instances that are created on the network.
+   * Observe all the {@link common.SharedState} instances that are created on the network.
    *
-   * @param {common.SharedStateManagerClient~observeCallback} callback - Function
+   * @param {client.SharedStateManagerClient~observeCallback} callback - Function
    *  to be called when a new state is created on the network.
    *
    * @example
