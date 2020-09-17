@@ -435,7 +435,14 @@ class Server {
       template = defaultTmpl;
     }
 
-    const tmplString = fs.readFileSync(template, 'utf8');
+    let tmplString;
+
+    try {
+      tmplString = fs.readFileSync(template, 'utf8');
+    } catch(err) {
+      throw new Error(`[@soundworks/core] html template file "${template}" not found`);
+    }
+
     const tmpl = this.templateEngine.compile(tmplString);
     // http request
     router.get(route, (req, res) => {
