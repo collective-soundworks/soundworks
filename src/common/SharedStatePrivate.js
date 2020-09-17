@@ -92,7 +92,7 @@ class SharedStatePrivate {
         // server attached state (client.id: -1) spot a problem and overrides the value
         // we want the remote client (id: 2) to receive in the right order:
         // * 1. the value it requested,
-        // * 2. the value overriden by attached state -1
+        // * 2. the value overriden by the server-side attached state (id: -1)
         if (client.id !== -1) {
           client.transport.emit(`${UPDATE_RESPONSE}-${this.id}-${remoteId}`, reqId, updated);
         }
