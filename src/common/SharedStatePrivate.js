@@ -83,22 +83,30 @@ class SharedStatePrivate {
         for (let [peerRemoteId, peer] of this._attachedClients.entries()) {
           // propagate notification to all other attached clients except server
           if (remoteId !== peerRemoteId && peer.id !== -1) {
-            // console.log('send to', peer.id, Object.keys(updates));
             peer.transport.emit(`${UPDATE_NOTIFICATION}-${this.id}-${peerRemoteId}`, updated);
           }
+        }
+
+        // handle case where:
+        // client state (client.id: 2) sends a request
+        // server attached state (client.id: -1) spot a problem and overrides the value
+        // we want the remote client (id: 2) to receive in the right order:
+        // * 1. the value it requested,
+        // * 2. the value overriden by attached state -1
+        if (client.id !== -1) {
+          client.transport.emit(`${UPDATE_RESPONSE}-${this.id}-${remoteId}`, reqId, updated);
         }
 
         for (let [peerRemoteId, peer] of this._attachedClients.entries()) {
           // propagate notification to server
           if (remoteId !== peerRemoteId && peer.id === -1) {
-            // console.log('send to', peer.id, Object.keys(updates));
             peer.transport.emit(`${UPDATE_NOTIFICATION}-${this.id}-${peerRemoteId}`, updated);
           }
         }
 
-        // for the very same reason we send the response back to the requester
-        // last. @note: could this have weird side effects
-        client.transport.emit(`${UPDATE_RESPONSE}-${this.id}-${remoteId}`, reqId, updated);
+        if (client.id === -1) {
+          client.transport.emit(`${UPDATE_RESPONSE}-${this.id}-${remoteId}`, reqId, updated);
+        }
       } else {
         // propagate back to the requester that the update has been aborted
         // ignore all other attached clients.

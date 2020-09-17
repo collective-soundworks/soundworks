@@ -164,14 +164,14 @@ class SharedStateManagerServer extends SharedStateManagerClient {
     // OBSERVE PEERS (be notified when a state is created, lazy)
     // ---------------------------------------------
     client.transport.addListener(OBSERVE_REQUEST, (reqId) => {
-      const clientSchemaPairs = [];
+      const statesInfos = [];
 
       this._serverStatesById.forEach(state => {
         const { schemaName, id, _creatorId } = state;
-        clientSchemaPairs.push([schemaName, id, _creatorId]);
+        statesInfos.push([schemaName, id, _creatorId]);
       });
 
-      client.transport.emit(OBSERVE_RESPONSE, reqId, ...clientSchemaPairs);
+      client.transport.emit(OBSERVE_RESPONSE, reqId, ...statesInfos);
 
       this._observers.add(client);
     });

@@ -57,10 +57,12 @@
     "@babel/core": "^7.4.5",
     "@babel/plugin-proposal-export-default-from": "^7.5.2",
     "@babel/preset-env": "^7.4.5",
+    "chai": "^4.2.0",
     "chokidar": "^3.0.1",
     "chokidar-cli": "^1.2.2",
     "docdash": "^1.2.0",
     "jsdoc": "^3.6.2",
-    "markdown-toc": "^1.2.0"
+    "markdown-toc": "^1.2.0",
+    "mocha": "^8.1.3"
   }
 }
