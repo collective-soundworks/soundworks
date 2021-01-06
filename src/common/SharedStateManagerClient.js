@@ -60,8 +60,8 @@ class SharedStateManagerClient {
     // CREATE
     // ---------------------------------------------
 
-    // @todo - ask for schema in request if not cached.
     this.client.transport.addListener(CREATE_RESPONSE, (reqId, stateId, remoteId, schemaName, schema, initValues) => {
+
       // cache schema when first dealing it to save some bandwidth
       if (!this._cachedSchemas.has(schemaName)) {
         this._cachedSchemas.set(schemaName, schema);

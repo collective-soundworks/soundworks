@@ -80,6 +80,21 @@ class SharedStatePrivate {
         // is synchronous it can break ordering if a subscription function makes
         // itself an update in reaction to an update, therefore network messages
         // order would be broken,
+
+        // we need to handle cases where:
+        // client state (client.id: 2) sends a request
+        // server attached state (client.id: -1) spot a problem and overrides the value
+        // we want the remote client (id: 2) to receive in the right order:
+        // * 1. the value it requested,
+        // * 2. the value overriden by the server-side attached state (id: -1)
+
+        // this problem could be solved properly with a reducer system:
+        // if (dirty) {
+        //   -> call (async) reducer
+        //   -> get values from reducer
+        //.  -> dispatch to everybody
+        // }
+
         for (let [peerRemoteId, peer] of this._attachedClients.entries()) {
           // propagate notification to all other attached clients except server
           if (remoteId !== peerRemoteId && peer.id !== -1) {
@@ -87,12 +102,6 @@ class SharedStatePrivate {
           }
         }
 
-        // handle case where:
-        // client state (client.id: 2) sends a request
-        // server attached state (client.id: -1) spot a problem and overrides the value
-        // we want the remote client (id: 2) to receive in the right order:
-        // * 1. the value it requested,
-        // * 2. the value overriden by the server-side attached state (id: -1)
         if (client.id !== -1) {
           client.transport.emit(`${UPDATE_RESPONSE}-${this.id}-${remoteId}`, reqId, updated);
         }

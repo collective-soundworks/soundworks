@@ -15,20 +15,12 @@ class ServerTestExperience extends ServerAbstractExperience {
   constructor(server, clientTypes) {
     super(server, clientTypes);
   }
-
-  // start() { console.log('[server] experience started'); }
-  // connect(client) { console.log(`[server] client ${client.id} connected`); }
 }
 
 class ClientTestExperience extends ClientAbstractExperience {
   constructor(client) {
     super(client);
   }
-
-  // start() {
-  //   // console.log('[client] experience started');
-  //   // console.log(`[client] client ${this.client.id}`);
-  // }
 }
 
 let server;
