@@ -78,6 +78,7 @@ ${JSON.stringify(initValues, null, 2)}`);
     });
 
     client.transport.addListener(`${UPDATE_NOTIFICATION}-${id}-${this.remoteId}`, (updates) => {
+      // cf. https://github.com/collective-soundworks/soundworks/issues/18
       this._commit(updates);
     });
 
