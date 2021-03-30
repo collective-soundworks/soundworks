@@ -140,6 +140,7 @@ class SharedStateManagerServer extends SharedStateManagerClient {
         if (state !== null) {
           // @note - we use a unique remote id to allow a client to attach
           // several times to the same state.
+          // i.e. same state -> several remote attach on the same node
           const remoteId = generateRemoteId.next().value;
           const schema = this._schemas.get(schemaName);
           const currentValues = state._parameters.getValues();
