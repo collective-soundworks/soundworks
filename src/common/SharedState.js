@@ -91,6 +91,8 @@ ${JSON.stringify(initValues, null, 2)}`);
 
       this._onDetachCallbacks.forEach(callback => callback());
       this._onDeleteCallbacks.forEach(callback => callback());
+
+      this._clearDetach();
     });
 
 
@@ -104,6 +106,8 @@ ${JSON.stringify(initValues, null, 2)}`);
 
         this._onDetachCallbacks.forEach(callback => callback());
         this._onDeleteCallbacks.forEach(callback => callback());
+
+        this._clearDetach();
         resolveRequest(reqId, this);
       });
 
@@ -120,6 +124,8 @@ ${JSON.stringify(initValues, null, 2)}`);
         this._clearTransport();
 
         this._onDetachCallbacks.forEach(func => func());
+
+        this._clearDetach();
         resolveRequest(reqId, this);
       });
 
@@ -129,6 +135,17 @@ ${JSON.stringify(initValues, null, 2)}`);
       });
 
     }
+  }
+
+  _clearDetach() {
+    this._onDetachCallbacks.clear();
+    this._onDeleteCallbacks.clear();
+
+    // Monkey patch detach so it throws we called twice. Doing nothing blocks
+    // the process on a second `detach` call as the Promise was never resolved
+    this.detach = () => {
+      throw new Error(`State "${this.schemaName} (${this.id})" already detached, cannot detach twice`);
+    };
   }
 
   _clearTransport() {

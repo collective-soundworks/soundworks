@@ -367,6 +367,25 @@ describe('@soundworks/core.StateManager', () => {
         await a0.detach();
       });
     });
+
+    it('should throw on a second `detach` call', async () => {
+      const a = await server.stateManager.create('a');
+      const b = await server.stateManager.create('b');
+
+      let index = 0;
+      // should be called only once
+      await b.onDetach(() => {
+        if (index === 1) {
+          assert.fail('should not call onDetach twice');
+        }
+
+        index += 1;
+      });
+
+      await b.detach();
+      assert.throws(() => b.detach());
+    });
+
   });
 
   describe('stateManager.deleteSchema(name)', () => {
