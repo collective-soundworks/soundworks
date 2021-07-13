@@ -25,13 +25,13 @@
  * playerExperience.start();
  *
  */
-import { default as _Server } from './Server.js';
-import { default as _AbstractExperience } from './AbstractExperience.js';
+import _Server from './Server.js';
+import _AbstractExperience from './AbstractExperience.js';
 
 export const AbstractExperience = _AbstractExperience;
 export const Server = _Server;
 
 export default {
   AbstractExperience: _AbstractExperience,
-  Client: _Server,
+  Server: _Server,
 };

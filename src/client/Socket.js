@@ -68,7 +68,15 @@ class Socket {
     const key = (Math.random() + '').replace(/^0./, '');
 
     // open web sockets
-    const { path } = config.env.websockets;
+    let { path } = config.env.websockets;
+
+    // @note: keep this check
+    // backward compatibility w/ assetsDomain and websocket old config way
+    // cf. https://github.com/collective-soundworks/soundworks/issues/35
+    if (config.env.subpath) {
+      path = `${config.env.subpath}/${path}`;
+    }
+
     let url;
 
     if (isBrowser()) {

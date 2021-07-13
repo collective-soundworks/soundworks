@@ -2,6 +2,7 @@ import EventEmitter from 'events';
 import fs from 'fs';
 import http from 'http';
 import https from 'https';
+import merge from 'lodash.merge';
 import path from 'path';
 import pem from 'pem';
 import os from 'os';
@@ -42,11 +43,8 @@ class Server {
      *   env: {
      *     type: 'development',
      *     port: 8000,
-     *     "websockets": {
-     *       "path": "socket",
-     *       "pingInterval": 5000
-     *     },
-     *     "useHttps": false,
+     *     subfolder: '',
+     *     useHttps: false,
      *   },
      *   app: {
      *     name: 'soundworks',
@@ -163,15 +161,15 @@ class Server {
    * @param {String} [config.env='development']
    * @param {String} [config.port=8000] - Port on which the http(s) server will
    *   listen
+   * @param {String} [config.subpath] - If the application runs behind a
+   *   proxy server (e.g. https://my-domain.com/my-app/`), path to the
+   *   application root (i.e. 'my-app')
    * @param {Boolean} [config.useHttps=false] - Define wheter to use or not an
    *   an https server.
    * @param {Object} [config.httpsInfos=null] - if `useHttps` is `true`, object
    *   that give the path to `cert` and `key` files (`{ cert, key }`). If `null`
    *   an auto generated certificate will be generated, be aware that browsers
    *   will consider the application as not safe in the case.
-   * @param {Object} [config.websocket={}] - TBD
-   * @param {String} [config.templateDirectory='src/server/tmpl'] - Folder in
-   *   which the server will look for the `index.html` template.
    *
    * @param {Function} clientConfigFunction - function that filters / defines
    *   the configuration object that will be sent to a connecting client.
@@ -183,11 +181,8 @@ class Server {
    *     env: {
    *       type: 'development',
    *       port: 8000,
-   *       "websockets": {
-   *         "path": "socket",
-   *         "pingInterval": 5000
-   *       },
-   *       "useHttps": false,
+   *       subpath: '',
+   *       useHttps: false,
    *     },
    *     app: {
    *       name: 'soundworks',
@@ -200,23 +195,42 @@ class Server {
    * );
    */
   async init(
-    config = {
+    config,
+    clientConfigFunction = (clientType, serverConfig, httpRequest) => ({ clientType })
+  ) {
+    const defaultConfig = {
       env: {
         type: 'development',
         port: 8000,
-        "websockets": {
-          "path": "socket",
-          "pingInterval": 5000
+        subpath: '',
+        websockets: {
+          path: 'socket',
+          pingInterval: 5000
         },
-        "useHttps": false,
+        useHttps: false,
       },
       app: {
         name: 'soundworks',
       }
-    },
-    clientConfigFunction = (clientType, serverConfig, httpRequest) => ({ clientType })
-  ) {
-    this.config = config;
+    };
+
+    this.config = merge({}, defaultConfig, config);
+
+    // @note: do not remove
+    // backward compatibility w/ assetsDomain and `soundworks-template`
+    // cf. https://github.com/collective-soundworks/soundworks/issues/35
+    // see also '@soundworks/plugin-audio-buffer-loader' (could be updated more
+    // easily as the `assetsDomain` entry was not documented)
+    // - we need to handle 3 cases:
+    //   + old config style / old template
+    //   + new config style / old template
+    //   + new template
+    // @note: keep `websocket.path` as defined should be enough
+    if (!this.config.env.assetsDomain && this.config.env.subpath) {
+      const subpath = this.config.env.subpath.replace(/^\//, '').replace(/\/$/, '');
+      this.config.env.assetsDomain = `/${subpath}/`;
+    }
+
     this._clientConfigFunction = clientConfigFunction;
 
     return Promise.resolve();
@@ -447,6 +461,14 @@ class Server {
     // http request
     router.get(route, (req, res) => {
       const data = this._clientConfigFunction(clientType, this.config, req);
+
+      // @note: do not remove
+      // backward compatibility w/ assetsDomain and `soundworks-template`
+      // cf. https://github.com/collective-soundworks/soundworks/issues/35
+      if (this.config.env.subpath && !data.env.subpath) {
+        data.env.subpath = this.config.env.subpath;
+      }
+
       const appIndex = tmpl(data);
       res.end(appIndex);
     });
