@@ -21,9 +21,8 @@
  * // when everything is ready, start the experience
  * playerExperience.start();
  */
-import { default as _AbstractExperience } from './AbstractExperience.js';
-// import { default as TmpService } from './Service';
-import { default as _Client } from './Client.js';
+import _AbstractExperience from './AbstractExperience.js';
+import _Client from './Client.js';
 
 // `import soundworks from '@soundworks/core/client'``
 // or
