@@ -1,6 +1,6 @@
 {
   "name": "@soundworks/core",
-  "version": "3.0.2",
+  "version": "3.0.3",
   "description": "full-stack javascript framework for distributed audio visual experiences on the web",
   "authors": [
     "Benjamin Matuszewski",
