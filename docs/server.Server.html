@@ -50,7 +50,7 @@
 <header>
     
         <h2>
-            <span class="ancestors"><a href="server.html">server</a>~</span>
+            <span class="ancestors"><a href="server.html">server</a>.</span>
         
         Server
         </h2>
@@ -193,7 +193,7 @@ soundworks.server.start();</code></pre>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="server_Server.js.html">server/Server.js</a>, <a href="server_Server.js.html#line57">line 57</a>
+        <a href="server_Server.js.html">server/Server.js</a>, <a href="server_Server.js.html#line55">line 55</a>
     </li></ul></dd>
     
 
@@ -239,11 +239,8 @@ Defaults to:</p>
   env: {
     type: 'development',
     port: 8000,
-    &quot;websockets&quot;: {
-      &quot;path&quot;: &quot;socket&quot;,
-      &quot;pingInterval&quot;: 5000
-    },
-    &quot;useHttps&quot;: false,
+    subfolder: '',
+    useHttps: false,
   },
   app: {
     name: 'soundworks',
@@ -272,7 +269,7 @@ Defaults to:</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="server_Server.js.html">server/Server.js</a>, <a href="server_Server.js.html#line71">line 71</a>
+        <a href="server_Server.js.html">server/Server.js</a>, <a href="server_Server.js.html#line69">line 69</a>
     </li></ul></dd>
     
 
@@ -336,7 +333,7 @@ Defaults to:</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="server_Server.js.html">server/Server.js</a>, <a href="server_Server.js.html#line93">line 93</a>
+        <a href="server_Server.js.html">server/Server.js</a>, <a href="server_Server.js.html#line91">line 91</a>
     </li></ul></dd>
     
 
@@ -416,7 +413,7 @@ Defaults to:</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="server_Server.js.html">server/Server.js</a>, <a href="server_Server.js.html#line63">line 63</a>
+        <a href="server_Server.js.html">server/Server.js</a>, <a href="server_Server.js.html#line61">line 61</a>
     </li></ul></dd>
     
 
@@ -480,7 +477,7 @@ Defaults to:</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="server_Server.js.html">server/Server.js</a>, <a href="server_Server.js.html#line86">line 86</a>
+        <a href="server_Server.js.html">server/Server.js</a>, <a href="server_Server.js.html#line84">line 84</a>
     </li></ul></dd>
     
 
@@ -561,7 +558,7 @@ Defaults to:</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="server_Server.js.html">server/Server.js</a>, <a href="server_Server.js.html#line100">line 100</a>
+        <a href="server_Server.js.html">server/Server.js</a>, <a href="server_Server.js.html#line98">line 98</a>
     </li></ul></dd>
     
 
@@ -641,7 +638,7 @@ Defaults to:</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="server_Server.js.html">server/Server.js</a>, <a href="server_Server.js.html#line115">line 115</a>
+        <a href="server_Server.js.html">server/Server.js</a>, <a href="server_Server.js.html#line113">line 113</a>
     </li></ul></dd>
     
 
@@ -707,7 +704,7 @@ fallbacks to <code>default.tmpl</code>. Template files should have the <code>.tm
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="server_Server.js.html">server/Server.js</a>, <a href="server_Server.js.html#line106">line 106</a>
+        <a href="server_Server.js.html">server/Server.js</a>, <a href="server_Server.js.html#line104">line 104</a>
     </li></ul></dd>
     
 
@@ -790,7 +787,7 @@ fallbacks to <code>default.tmpl</code>. Template files should have the <code>.tm
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="server_Server.js.html">server/Server.js</a>, <a href="server_Server.js.html#line202">line 202</a>
+        <a href="server_Server.js.html">server/Server.js</a>, <a href="server_Server.js.html#line197">line 197</a>
     </li></ul></dd>
     
 
@@ -850,11 +847,8 @@ await server.init(
     env: {
       type: 'development',
       port: 8000,
-      "websockets": {
-        "path": "socket",
-        "pingInterval": 5000
-      },
-      "useHttps": false,
+      subpath: '',
+      useHttps: false,
     },
     app: {
       name: 'soundworks',
@@ -1059,6 +1053,45 @@ listen</p></td>
 
         <tr>
             
+                <td class="name"><code>subpath</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>If the application runs behind a
+proxy server (e.g. https://my-domain.com/my-app/`), path to the
+application root (i.e. 'my-app')</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
                 <td class="name"><code>useHttps</code></td>
             
 
@@ -1138,85 +1171,6 @@ will consider the application as not safe in the case.</p></td>
         </tr>
 
     
-
-        <tr>
-            
-                <td class="name"><code>websocket</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    <code>{}</code>
-                
-                </td>
-            
-
-            <td class="description last"><p>TBD</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>templateDirectory</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    <code>'src/server/tmpl'</code>
-                
-                </td>
-            
-
-            <td class="description last"><p>Folder in
-which the server will look for the <code>index.html</code> template.</p></td>
-        </tr>
-
-    
     </tbody>
 </table>
 
@@ -1286,7 +1240,7 @@ the configuration object that will be sent to a connecting client.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="server_Server.js.html">server/Server.js</a>, <a href="server_Server.js.html#line230">line 230</a>
+        <a href="server_Server.js.html">server/Server.js</a>, <a href="server_Server.js.html#line249">line 249</a>
     </li></ul></dd>
     
 
@@ -1378,7 +1332,7 @@ define the routing and start the http-server.</p>
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.5</a> on Thu Sep 17 2020 15:37:18 GMT+0200 (Central European Summer Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.6</a> on Thu Jul 15 2021 17:56:53 GMT+0200 (Central European Summer Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>
