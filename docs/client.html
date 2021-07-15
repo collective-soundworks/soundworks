@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>client - soundworks</title>
+    
+    <meta name="description" content="Documentation of soundworks, a full-stack JavaScript framework for distributed WebAudio and multimedia applications" />
+    
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    <input type="text" id="nav-search" placeholder="Search" />
+    
+    <h2><a href="index.html">Home</a></h2><h2><a href="http://collective-soundworks.github.io/" target="_blank" class="menu-item" id="website_link" >Resources</a></h2><h2><a href="https://github.com/collective-soundworks/soundworks" target="_blank" class="menu-item" id="website_link" >Github</a></h2><h3>Namespaces</h3><ul><li><a href="client.html">client</a></li><li><a href="server.html">server</a></li></ul><h3>Classes</h3><ul><li><a href="client.AbstractExperience.html">client.AbstractExperience</a><ul class='methods'><li data-type='method'><a href="client.AbstractExperience.html#require">require</a></li><li data-type='method'><a href="client.AbstractExperience.html#start">start</a></li></ul></li><li><a href="client.AbstractPlugin.html">client.AbstractPlugin</a><ul class='methods'><li data-type='method'><a href="client.AbstractPlugin.html#configure">configure</a></li><li data-type='method'><a href="client.AbstractPlugin.html#ready">ready</a></li><li data-type='method'><a href="client.AbstractPlugin.html#start">start</a></li><li data-type='method'><a href="client.AbstractPlugin.html#started">started</a></li></ul></li><li><a href="client.Client.html">client.Client</a><ul class='methods'><li data-type='method'><a href="client.Client.html#init">init</a></li><li data-type='method'><a href="client.Client.html#start">start</a></li></ul></li><li><a href="client.PluginManager.html">client.PluginManager</a><ul class='methods'><li data-type='method'><a href="client.PluginManager.html#get">get</a></li><li data-type='method'><a href="client.PluginManager.html#register">register</a></li></ul></li><li><a href="client.SharedStateManagerClient.html">client.SharedStateManagerClient</a><ul class='methods'><li data-type='method'><a href="client.SharedStateManagerClient.html#attach">attach</a></li><li data-type='method'><a href="client.SharedStateManagerClient.html#create">create</a></li><li data-type='method'><a href="client.SharedStateManagerClient.html#observe">observe</a></li></ul></li><li><a href="client.Socket.html">client.Socket</a><ul class='methods'><li data-type='method'><a href="client.Socket.html#addBinaryListener">addBinaryListener</a></li><li data-type='method'><a href="client.Socket.html#addListener">addListener</a></li><li data-type='method'><a href="client.Socket.html#removeAllBinaryListeners">removeAllBinaryListeners</a></li><li data-type='method'><a href="client.Socket.html#removeAllListeners">removeAllListeners</a></li><li data-type='method'><a href="client.Socket.html#removeBinaryListener">removeBinaryListener</a></li><li data-type='method'><a href="client.Socket.html#removeListener">removeListener</a></li><li data-type='method'><a href="client.Socket.html#send">send</a></li><li data-type='method'><a href="client.Socket.html#sendBinary">sendBinary</a></li></ul></li><li><a href="common.SharedState.html">common.SharedState</a><ul class='methods'><li data-type='method'><a href="common.SharedState.html#detach">detach</a></li><li data-type='method'><a href="common.SharedState.html#get">get</a></li><li data-type='method'><a href="common.SharedState.html#getSchema">getSchema</a></li><li data-type='method'><a href="common.SharedState.html#getValues">getValues</a></li><li data-type='method'><a href="common.SharedState.html#onDelete">onDelete</a></li><li data-type='method'><a href="common.SharedState.html#onDetach">onDetach</a></li><li data-type='method'><a href="common.SharedState.html#set">set</a></li><li data-type='method'><a href="common.SharedState.html#subscribe">subscribe</a></li></ul></li><li><a href="server.AbstractExperience.html">server.AbstractExperience</a><ul class='methods'><li data-type='method'><a href="server.AbstractExperience.html#enter">enter</a></li><li data-type='method'><a href="server.AbstractExperience.html#require">require</a></li></ul></li><li><a href="server.AbstractPlugin.html">server.AbstractPlugin</a><ul class='methods'><li data-type='method'><a href="server.AbstractPlugin.html#configure">configure</a></li><li data-type='method'><a href="server.AbstractPlugin.html#connect">connect</a></li><li data-type='method'><a href="server.AbstractPlugin.html#disconnect">disconnect</a></li><li data-type='method'><a href="server.AbstractPlugin.html#ready">ready</a></li><li data-type='method'><a href="server.AbstractPlugin.html#start">start</a></li><li data-type='method'><a href="server.AbstractPlugin.html#started">started</a></li></ul></li><li><a href="server.Client.html">server.Client</a></li><li><a href="server.PluginManager.html">server.PluginManager</a><ul class='methods'><li data-type='method'><a href="server.PluginManager.html#get">get</a></li><li data-type='method'><a href="server.PluginManager.html#register">register</a></li></ul></li><li><a href="server.Server.html">server.Server</a><ul class='methods'><li data-type='method'><a href="server.Server.html#init">init</a></li><li data-type='method'><a href="server.Server.html#start">start</a></li></ul></li><li><a href="server.SharedStateManagerServer.html">server.SharedStateManagerServer</a><ul class='methods'><li data-type='method'><a href="server.SharedStateManagerServer.html#attach">attach</a></li><li data-type='method'><a href="server.SharedStateManagerServer.html#create">create</a></li><li data-type='method'><a href="server.SharedStateManagerServer.html#deleteSchema">deleteSchema</a></li><li data-type='method'><a href="server.SharedStateManagerServer.html#observe">observe</a></li><li data-type='method'><a href="server.SharedStateManagerServer.html#registerSchema">registerSchema</a></li></ul></li><li><a href="server.Socket.html">server.Socket</a><ul class='methods'><li data-type='method'><a href="server.Socket.html#addBinaryListener">addBinaryListener</a></li><li data-type='method'><a href="server.Socket.html#addListener">addListener</a></li><li data-type='method'><a href="server.Socket.html#addToRoom">addToRoom</a></li><li data-type='method'><a href="server.Socket.html#removeAllBinaryListeners">removeAllBinaryListeners</a></li><li data-type='method'><a href="server.Socket.html#removeAllListeners">removeAllListeners</a></li><li data-type='method'><a href="server.Socket.html#removeBinaryListener">removeBinaryListener</a></li><li data-type='method'><a href="server.Socket.html#removeFromRoom">removeFromRoom</a></li><li data-type='method'><a href="server.Socket.html#removeListener">removeListener</a></li><li data-type='method'><a href="server.Socket.html#send">send</a></li><li data-type='method'><a href="server.Socket.html#sendBinary">sendBinary</a></li></ul></li><li><a href="server.Sockets.html">server.Sockets</a><ul class='methods'><li data-type='method'><a href="server.Sockets.html#addToRoom">addToRoom</a></li><li data-type='method'><a href="server.Sockets.html#broadcast">broadcast</a></li><li data-type='method'><a href="server.Sockets.html#broadcastBinary">broadcastBinary</a></li><li data-type='method'><a href="server.Sockets.html#removeFromRoom">removeFromRoom</a></li></ul></li></ul>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">client</h1>
+    
+
+    
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>
+        client
+        </h2>
+        
+    
+</header>
+
+<article>
+    
+        <div class="container-overview">
+        
+            
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="client_index.js.html">client/index.js</a>, <a href="client_index.js.html#line1">line 1</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+            
+                <div class="description usertext"><p>Client-side part of the <em>soundworks</em> framework.
+Can run seamlessly in a browser or in node.js.</p></div>
+            
+
+            
+                <h3>Example</h3>
+                
+    <pre class="prettyprint"><code>import soundworks from '@soundworks/core/client';
+
+// create a new `soundworks.Client` instance
+const client = new soundworks.Client();
+// register a pre-defined or user-defined plugin
+client.registerService('my-plugin', myServiceFactory);
+// initialize the client (mainly connect and initialize WebSockets)
+await client.init(config);
+// create application specific experience
+// must extends `soundworks.Experience`
+const playerExperience = new PlayerExperience(client);
+// init required plugins, if any
+await client.start();
+// when everything is ready, start the experience
+playerExperience.start();</code></pre>
+
+            
+        
+        </div>
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Classes</h3>
+
+        <dl>
+            <dt><a href="client.AbstractExperience.html">AbstractExperience</a></dt>
+            <dd></dd>
+        
+            <dt><a href="client.AbstractPlugin.html">AbstractPlugin</a></dt>
+            <dd></dd>
+        
+            <dt><a href="client.Client.html">Client</a></dt>
+            <dd></dd>
+        
+            <dt><a href="client.PluginManager.html">PluginManager</a></dt>
+            <dd></dd>
+        
+            <dt><a href="client.SharedStateManagerClient.html">SharedStateManagerClient</a></dt>
+            <dd></dd>
+        
+            <dt><a href="client.Socket.html">Socket</a></dt>
+            <dd></dd>
+        </dl>
+    
+    
+    
+
+     
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.6</a> on Thu Jul 15 2021 18:00:44 GMT+0200 (Central European Summer Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+<script src="scripts/search.js" defer></script>
+
+
+
+</body>
+</html>

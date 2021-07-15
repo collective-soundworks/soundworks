@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>client/Socket.js - soundworks</title>
+    
+    <meta name="description" content="Documentation of soundworks, a full-stack JavaScript framework for distributed WebAudio and multimedia applications" />
+    
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    <input type="text" id="nav-search" placeholder="Search" />
+    
+    <h2><a href="index.html">Home</a></h2><h2><a href="http://collective-soundworks.github.io/" target="_blank" class="menu-item" id="website_link" >Resources</a></h2><h2><a href="https://github.com/collective-soundworks/soundworks" target="_blank" class="menu-item" id="website_link" >Github</a></h2><h3>Namespaces</h3><ul><li><a href="client.html">client</a></li><li><a href="server.html">server</a></li></ul><h3>Classes</h3><ul><li><a href="client.AbstractExperience.html">client.AbstractExperience</a><ul class='methods'><li data-type='method'><a href="client.AbstractExperience.html#require">require</a></li><li data-type='method'><a href="client.AbstractExperience.html#start">start</a></li></ul></li><li><a href="client.AbstractPlugin.html">client.AbstractPlugin</a><ul class='methods'><li data-type='method'><a href="client.AbstractPlugin.html#configure">configure</a></li><li data-type='method'><a href="client.AbstractPlugin.html#ready">ready</a></li><li data-type='method'><a href="client.AbstractPlugin.html#start">start</a></li><li data-type='method'><a href="client.AbstractPlugin.html#started">started</a></li></ul></li><li><a href="client.Client.html">client.Client</a><ul class='methods'><li data-type='method'><a href="client.Client.html#init">init</a></li><li data-type='method'><a href="client.Client.html#start">start</a></li></ul></li><li><a href="client.PluginManager.html">client.PluginManager</a><ul class='methods'><li data-type='method'><a href="client.PluginManager.html#get">get</a></li><li data-type='method'><a href="client.PluginManager.html#register">register</a></li></ul></li><li><a href="client.SharedStateManagerClient.html">client.SharedStateManagerClient</a><ul class='methods'><li data-type='method'><a href="client.SharedStateManagerClient.html#attach">attach</a></li><li data-type='method'><a href="client.SharedStateManagerClient.html#create">create</a></li><li data-type='method'><a href="client.SharedStateManagerClient.html#observe">observe</a></li></ul></li><li><a href="client.Socket.html">client.Socket</a><ul class='methods'><li data-type='method'><a href="client.Socket.html#addBinaryListener">addBinaryListener</a></li><li data-type='method'><a href="client.Socket.html#addListener">addListener</a></li><li data-type='method'><a href="client.Socket.html#removeAllBinaryListeners">removeAllBinaryListeners</a></li><li data-type='method'><a href="client.Socket.html#removeAllListeners">removeAllListeners</a></li><li data-type='method'><a href="client.Socket.html#removeBinaryListener">removeBinaryListener</a></li><li data-type='method'><a href="client.Socket.html#removeListener">removeListener</a></li><li data-type='method'><a href="client.Socket.html#send">send</a></li><li data-type='method'><a href="client.Socket.html#sendBinary">sendBinary</a></li></ul></li><li><a href="common.SharedState.html">common.SharedState</a><ul class='methods'><li data-type='method'><a href="common.SharedState.html#detach">detach</a></li><li data-type='method'><a href="common.SharedState.html#get">get</a></li><li data-type='method'><a href="common.SharedState.html#getSchema">getSchema</a></li><li data-type='method'><a href="common.SharedState.html#getValues">getValues</a></li><li data-type='method'><a href="common.SharedState.html#onDelete">onDelete</a></li><li data-type='method'><a href="common.SharedState.html#onDetach">onDetach</a></li><li data-type='method'><a href="common.SharedState.html#set">set</a></li><li data-type='method'><a href="common.SharedState.html#subscribe">subscribe</a></li></ul></li><li><a href="server.AbstractExperience.html">server.AbstractExperience</a><ul class='methods'><li data-type='method'><a href="server.AbstractExperience.html#enter">enter</a></li><li data-type='method'><a href="server.AbstractExperience.html#require">require</a></li></ul></li><li><a href="server.AbstractPlugin.html">server.AbstractPlugin</a><ul class='methods'><li data-type='method'><a href="server.AbstractPlugin.html#configure">configure</a></li><li data-type='method'><a href="server.AbstractPlugin.html#connect">connect</a></li><li data-type='method'><a href="server.AbstractPlugin.html#disconnect">disconnect</a></li><li data-type='method'><a href="server.AbstractPlugin.html#ready">ready</a></li><li data-type='method'><a href="server.AbstractPlugin.html#start">start</a></li><li data-type='method'><a href="server.AbstractPlugin.html#started">started</a></li></ul></li><li><a href="server.Client.html">server.Client</a></li><li><a href="server.PluginManager.html">server.PluginManager</a><ul class='methods'><li data-type='method'><a href="server.PluginManager.html#get">get</a></li><li data-type='method'><a href="server.PluginManager.html#register">register</a></li></ul></li><li><a href="server.Server.html">server.Server</a><ul class='methods'><li data-type='method'><a href="server.Server.html#init">init</a></li><li data-type='method'><a href="server.Server.html#start">start</a></li></ul></li><li><a href="server.SharedStateManagerServer.html">server.SharedStateManagerServer</a><ul class='methods'><li data-type='method'><a href="server.SharedStateManagerServer.html#attach">attach</a></li><li data-type='method'><a href="server.SharedStateManagerServer.html#create">create</a></li><li data-type='method'><a href="server.SharedStateManagerServer.html#deleteSchema">deleteSchema</a></li><li data-type='method'><a href="server.SharedStateManagerServer.html#observe">observe</a></li><li data-type='method'><a href="server.SharedStateManagerServer.html#registerSchema">registerSchema</a></li></ul></li><li><a href="server.Socket.html">server.Socket</a><ul class='methods'><li data-type='method'><a href="server.Socket.html#addBinaryListener">addBinaryListener</a></li><li data-type='method'><a href="server.Socket.html#addListener">addListener</a></li><li data-type='method'><a href="server.Socket.html#addToRoom">addToRoom</a></li><li data-type='method'><a href="server.Socket.html#removeAllBinaryListeners">removeAllBinaryListeners</a></li><li data-type='method'><a href="server.Socket.html#removeAllListeners">removeAllListeners</a></li><li data-type='method'><a href="server.Socket.html#removeBinaryListener">removeBinaryListener</a></li><li data-type='method'><a href="server.Socket.html#removeFromRoom">removeFromRoom</a></li><li data-type='method'><a href="server.Socket.html#removeListener">removeListener</a></li><li data-type='method'><a href="server.Socket.html#send">send</a></li><li data-type='method'><a href="server.Socket.html#sendBinary">sendBinary</a></li></ul></li><li><a href="server.Sockets.html">server.Sockets</a><ul class='methods'><li data-type='method'><a href="server.Sockets.html#addToRoom">addToRoom</a></li><li data-type='method'><a href="server.Sockets.html#broadcast">broadcast</a></li><li data-type='method'><a href="server.Sockets.html#broadcastBinary">broadcastBinary</a></li><li data-type='method'><a href="server.Sockets.html#removeFromRoom">removeFromRoom</a></li></ul></li></ul>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">client/Socket.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import debug from 'debug';
+import WebSocket from 'isomorphic-ws';
+import {
+  packBinaryMessage,
+  unpackBinaryMessage,
+  packStringMessage,
+  unpackStringMessage,
+} from '../common/sockets-encoder-decoder.js';
+
+const log = debug('soundworks:socket');
+// https://stackoverflow.com/questions/17575790/environment-detection-node-js-or-browser
+const isBrowser = new Function("try {return this===window;}catch(e){ return false;}");
+
+// close
+//   Fired when a connection with a websocket is closed.
+//   Also available via the onclose property
+// error
+//   Fired when a connection with a websocket has been closed because of an error, such as whensome data couldn't be sent.
+//   Also available via the onerror property.
+// message
+//   Fired when data is received through a websocket.
+//   Also available via the onmessage property.
+// open
+//   Fired when a connection with a websocket is opened.
+//   Also available via the onopen property.
+
+// @todo - use isomorphic ws ? (does seems like a perfect idea)
+
+/**
+ * Simple wrapper with simple pubsub system built on top of `ws` socket.
+ * The abstraction actually open two different sockets:
+ * - one configured for string (JSON compatible) messages
+ * - one configured with `binaryType=arraybuffer` for streaming data more
+ *   efficiently.
+ * The sockets also re-emits all "native" ws events.
+ *
+ * An instance of `Socket` is automatically created by the `soundworks.Client`.
+ * @see {@link client.Client#socket}
+ *
+ * @see https://github.com/websockets/ws
+ *
+ * @memberof client
+ */
+class Socket {
+  constructor() {
+    /**
+     * WebSocket instance (string protocol - binaryType = 'string').
+     */
+    /** @private */
+    this.ws = null;
+
+    this._stringListeners = new Map();
+    this._binaryListeners = new Map();
+  }
+
+  /**
+   * Initialize a websocket connection with the server. This is automatically
+   * called in `client.init()`
+   * @param {String} clientType - `client.type` {@link client}
+   * @param {Object} options - Options of the socket
+   * @param {Array&lt;String>} options.path - Defines where socket should find the `socket.io` file
+   */
+  /** @private */
+  init(clientType, config) {
+    // unique key that allows to associate the two sockets to the same client.
+    // note: the key is only used to pair to two sockets, so its usage is very
+    // limited in time therefore a random number should hopefully be sufficient.
+    const key = (Math.random() + '').replace(/^0./, '');
+
+    // open web sockets
+    let { path } = config.env.websockets;
+
+    // @note: keep this check
+    // backward compatibility w/ assetsDomain and websocket old config way
+    // cf. https://github.com/collective-soundworks/soundworks/issues/35
+    if (config.env.subpath) {
+      path = `${config.env.subpath}/${path}`;
+    }
+
+    let url;
+
+    if (isBrowser()) {
+      const protocol = window.location.protocol.replace(/^http?/, 'ws');
+      const { hostname, port } = window.location;
+      url = `${protocol}//${hostname}:${port}/${path}`;
+    } else {
+      const protocol = config.useHttps ? 'wss:' : 'ws:';
+      const { serverIp, port } = config.env;
+      url = `${protocol}//${serverIp}:${port}/${path}`;
+    }
+
+    const queryParams = `clientType=${clientType}&amp;key=${key}`;
+
+    // ----------------------------------------------------------
+    // init string socket
+    // ----------------------------------------------------------
+    const stringSocketUrl = `${url}?binary=0&amp;${queryParams}`;
+
+    this.ws = new WebSocket(stringSocketUrl);
+    log(`string socket initialized - url: ${stringSocketUrl}`);
+
+    const stringSocketPromise = new Promise((resolve, reject) => {
+      this.ws.addEventListener('open', resolve);
+    });
+
+    // parse incoming messages for pubsub
+    this.ws.addEventListener('message', e => {
+      const [channel, args] = unpackStringMessage(e.data);
+      this._emit(false, channel, ...args);
+    });
+
+    // broadcast all `WebSocket` native events
+    [ 'open',
+      'close',
+      'error',
+      'upgrade',
+      'message',
+    ].forEach(eventName => {
+      this.ws.addEventListener(eventName, (e) => {
+        this._emit(false, eventName, e.data);
+      });
+    });
+
+    // ----------------------------------------------------------
+    // init binary socket
+    // ----------------------------------------------------------
+    const binarySocketUrl = `${url}?binary=1&amp;${queryParams}`;
+
+    this.binaryWs = new WebSocket(binarySocketUrl);
+    this.binaryWs.binaryType = 'arraybuffer';
+    log(`binary socket initialized - url: ${binarySocketUrl}`);
+
+    const binarySocketPromise = new Promise((resolve, reject) => {
+      this.binaryWs.addEventListener('open', resolve);
+    });
+
+    // parse incoming messages for pubsub
+    this.binaryWs.addEventListener('message', e => {
+      const [channel, data] = unpackBinaryMessage(e.data);
+      this._emit(true, channel, data);
+    });
+
+    // broadcast all `WebSocket` native events
+    [ 'open',
+      'close',
+      'error',
+      'upgrade',
+      'message',
+    ].forEach(eventName => {
+      this.binaryWs.addEventListener(eventName, (e) => {
+        this._emit(true, eventName, e.data);
+      });
+    });
+
+    // wait for both socket to be opened
+    return Promise.all([stringSocketPromise, binarySocketPromise]);
+  }
+
+  /** @private */
+  _emit(binary, channel, ...args) {
+    const listeners = binary ? this._binaryListeners : this._stringListeners;
+
+    if (listeners.has(channel)) {
+      const callbacks = listeners.get(channel);
+      callbacks.forEach(callback => callback(...args));
+    }
+  }
+
+  /** @private */
+  _addListener(listeners, channel, callback) {
+    if (!listeners.has(channel)) {
+      listeners.set(channel, new Set());
+    }
+
+    const callbacks = listeners.get(channel);
+    callbacks.add(callback);
+  }
+
+  /** @private */
+  _removeListener(listeners, channel, callback) {
+    if (listeners.has(channel)) {
+      const callbacks = listeners.get(channel);
+      callbacks.delete(callback);
+
+      if (callbacks.size === 0) {
+        listeners.delete(channel);
+      }
+    }
+  }
+
+  /** @private */
+  _removeAllListeners(listeners, channel) {
+    if (listeners.has(channel)) {
+      listeners.delete(channel);
+    }
+  }
+
+  /**
+   * Send JSON compatible messages on a given channel
+   *
+   * @param {String} channel - The channel of the message
+   * @param {...*} args - Arguments of the message (as many as needed, of any type)
+   */
+  send(channel, ...args) {
+    const msg = packStringMessage(channel, ...args);
+    this.ws.send(msg);
+  }
+
+  /**
+   * Listen JSON compatible messages on a given channel
+   *
+   * @param {String} channel - Channel of the message
+   * @param {Function} callback - Callback to execute when a message is received
+   */
+  addListener(channel, callback) {
+    this._addListener(this._stringListeners, channel, callback);
+  }
+
+  /**
+   * Remove a listener from JSON compatible messages on a given channel
+   *
+   * @param {String} channel - Channel of the message
+   * @param {Function} callback - Callback to remove
+   */
+  removeListener(channel, callback) {
+    this._removeListener(this._stringListeners, channel, callback);
+  }
+
+  /**
+   * Remove all listeners from JSON compatible messages on a given channel
+   *
+   * @param {String} channel - Channel of the message
+   */
+  removeAllListeners(channel) {
+    this._removeAllListeners(this._stringListeners, channel);
+  }
+
+  /**
+   * Send binary messages on a given channel
+   *
+   * @param {String} channel - Channel of the message
+   * @param {TypedArray} typedArray - Data to send
+   */
+  sendBinary(channel, typedArray) {
+    const msg = packBinaryMessage(channel, typedArray);
+    this.binaryWs.send(msg);
+  }
+
+  /**
+   * Listen binary messages on a given channel
+   *
+   * @param {String} channel - Channel of the message
+   * @param {Function} callback - Callback to execute when a message is received
+   */
+  addBinaryListener(channel, callback) {
+    this._addListener(this._binaryListeners, channel, callback);
+  }
+
+  /**
+   * Remove a listener from binary compatible messages on a given channel
+   *
+   * @param {String} channel - Channel of the message
+   * @param {Function} callback - Callback to cancel
+   */
+  removeBinaryListener(channel, callback) {
+    this._removeListener(this._binaryListeners, channel, callback);
+  }
+
+  /**
+   * Remove all listeners from binary compatible messages on a given channel
+   *
+   * @param {String} channel - Channel of the message
+   */
+  removeAllBinaryListeners(channel) {
+    this._removeAllListeners(this._binaryListeners, channel);
+  }
+};
+
+export default Socket;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.6</a> on Thu Jul 15 2021 18:00:44 GMT+0200 (Central European Summer Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+<script src="scripts/search.js" defer></script>
+
+
+
+</body>
+</html>

@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>common/SharedState.js - soundworks</title>
+    
+    <meta name="description" content="Documentation of soundworks, a full-stack JavaScript framework for distributed WebAudio and multimedia applications" />
+    
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    <input type="text" id="nav-search" placeholder="Search" />
+    
+    <h2><a href="index.html">Home</a></h2><h2><a href="http://collective-soundworks.github.io/" target="_blank" class="menu-item" id="website_link" >Resources</a></h2><h2><a href="https://github.com/collective-soundworks/soundworks" target="_blank" class="menu-item" id="website_link" >Github</a></h2><h3>Namespaces</h3><ul><li><a href="client.html">client</a></li><li><a href="server.html">server</a></li></ul><h3>Classes</h3><ul><li><a href="client.AbstractExperience.html">client.AbstractExperience</a><ul class='methods'><li data-type='method'><a href="client.AbstractExperience.html#require">require</a></li><li data-type='method'><a href="client.AbstractExperience.html#start">start</a></li></ul></li><li><a href="client.AbstractPlugin.html">client.AbstractPlugin</a><ul class='methods'><li data-type='method'><a href="client.AbstractPlugin.html#configure">configure</a></li><li data-type='method'><a href="client.AbstractPlugin.html#ready">ready</a></li><li data-type='method'><a href="client.AbstractPlugin.html#start">start</a></li><li data-type='method'><a href="client.AbstractPlugin.html#started">started</a></li></ul></li><li><a href="client.Client.html">client.Client</a><ul class='methods'><li data-type='method'><a href="client.Client.html#init">init</a></li><li data-type='method'><a href="client.Client.html#start">start</a></li></ul></li><li><a href="client.PluginManager.html">client.PluginManager</a><ul class='methods'><li data-type='method'><a href="client.PluginManager.html#get">get</a></li><li data-type='method'><a href="client.PluginManager.html#register">register</a></li></ul></li><li><a href="client.SharedStateManagerClient.html">client.SharedStateManagerClient</a><ul class='methods'><li data-type='method'><a href="client.SharedStateManagerClient.html#attach">attach</a></li><li data-type='method'><a href="client.SharedStateManagerClient.html#create">create</a></li><li data-type='method'><a href="client.SharedStateManagerClient.html#observe">observe</a></li></ul></li><li><a href="client.Socket.html">client.Socket</a><ul class='methods'><li data-type='method'><a href="client.Socket.html#addBinaryListener">addBinaryListener</a></li><li data-type='method'><a href="client.Socket.html#addListener">addListener</a></li><li data-type='method'><a href="client.Socket.html#removeAllBinaryListeners">removeAllBinaryListeners</a></li><li data-type='method'><a href="client.Socket.html#removeAllListeners">removeAllListeners</a></li><li data-type='method'><a href="client.Socket.html#removeBinaryListener">removeBinaryListener</a></li><li data-type='method'><a href="client.Socket.html#removeListener">removeListener</a></li><li data-type='method'><a href="client.Socket.html#send">send</a></li><li data-type='method'><a href="client.Socket.html#sendBinary">sendBinary</a></li></ul></li><li><a href="common.SharedState.html">common.SharedState</a><ul class='methods'><li data-type='method'><a href="common.SharedState.html#detach">detach</a></li><li data-type='method'><a href="common.SharedState.html#get">get</a></li><li data-type='method'><a href="common.SharedState.html#getSchema">getSchema</a></li><li data-type='method'><a href="common.SharedState.html#getValues">getValues</a></li><li data-type='method'><a href="common.SharedState.html#onDelete">onDelete</a></li><li data-type='method'><a href="common.SharedState.html#onDetach">onDetach</a></li><li data-type='method'><a href="common.SharedState.html#set">set</a></li><li data-type='method'><a href="common.SharedState.html#subscribe">subscribe</a></li></ul></li><li><a href="server.AbstractExperience.html">server.AbstractExperience</a><ul class='methods'><li data-type='method'><a href="server.AbstractExperience.html#enter">enter</a></li><li data-type='method'><a href="server.AbstractExperience.html#require">require</a></li></ul></li><li><a href="server.AbstractPlugin.html">server.AbstractPlugin</a><ul class='methods'><li data-type='method'><a href="server.AbstractPlugin.html#configure">configure</a></li><li data-type='method'><a href="server.AbstractPlugin.html#connect">connect</a></li><li data-type='method'><a href="server.AbstractPlugin.html#disconnect">disconnect</a></li><li data-type='method'><a href="server.AbstractPlugin.html#ready">ready</a></li><li data-type='method'><a href="server.AbstractPlugin.html#start">start</a></li><li data-type='method'><a href="server.AbstractPlugin.html#started">started</a></li></ul></li><li><a href="server.Client.html">server.Client</a></li><li><a href="server.PluginManager.html">server.PluginManager</a><ul class='methods'><li data-type='method'><a href="server.PluginManager.html#get">get</a></li><li data-type='method'><a href="server.PluginManager.html#register">register</a></li></ul></li><li><a href="server.Server.html">server.Server</a><ul class='methods'><li data-type='method'><a href="server.Server.html#init">init</a></li><li data-type='method'><a href="server.Server.html#start">start</a></li></ul></li><li><a href="server.SharedStateManagerServer.html">server.SharedStateManagerServer</a><ul class='methods'><li data-type='method'><a href="server.SharedStateManagerServer.html#attach">attach</a></li><li data-type='method'><a href="server.SharedStateManagerServer.html#create">create</a></li><li data-type='method'><a href="server.SharedStateManagerServer.html#deleteSchema">deleteSchema</a></li><li data-type='method'><a href="server.SharedStateManagerServer.html#observe">observe</a></li><li data-type='method'><a href="server.SharedStateManagerServer.html#registerSchema">registerSchema</a></li></ul></li><li><a href="server.Socket.html">server.Socket</a><ul class='methods'><li data-type='method'><a href="server.Socket.html#addBinaryListener">addBinaryListener</a></li><li data-type='method'><a href="server.Socket.html#addListener">addListener</a></li><li data-type='method'><a href="server.Socket.html#addToRoom">addToRoom</a></li><li data-type='method'><a href="server.Socket.html#removeAllBinaryListeners">removeAllBinaryListeners</a></li><li data-type='method'><a href="server.Socket.html#removeAllListeners">removeAllListeners</a></li><li data-type='method'><a href="server.Socket.html#removeBinaryListener">removeBinaryListener</a></li><li data-type='method'><a href="server.Socket.html#removeFromRoom">removeFromRoom</a></li><li data-type='method'><a href="server.Socket.html#removeListener">removeListener</a></li><li data-type='method'><a href="server.Socket.html#send">send</a></li><li data-type='method'><a href="server.Socket.html#sendBinary">sendBinary</a></li></ul></li><li><a href="server.Sockets.html">server.Sockets</a><ul class='methods'><li data-type='method'><a href="server.Sockets.html#addToRoom">addToRoom</a></li><li data-type='method'><a href="server.Sockets.html#broadcast">broadcast</a></li><li data-type='method'><a href="server.Sockets.html#broadcastBinary">broadcastBinary</a></li><li data-type='method'><a href="server.Sockets.html#removeFromRoom">removeFromRoom</a></li></ul></li></ul>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">common/SharedState.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import parameters from '@ircam/parameters';
+import clonedeep from 'lodash.clonedeep';
+import {
+  // constants
+  SERVER_ID,
+  CREATE_REQUEST,
+  CREATE_RESPONSE,
+  CREATE_ERROR,
+  DELETE_REQUEST,
+  DELETE_RESPONSE,
+  DELETE_ERROR,
+  DELETE_NOTIFICATION,
+  ATTACH_REQUEST,
+  ATTACH_RESPONSE,
+  ATTACH_ERROR,
+  DETACH_REQUEST,
+  DETACH_RESPONSE,
+  DETACH_ERROR,
+  OBSERVE_REQUEST,
+  OBSERVE_RESPONSE,
+  OBSERVE_NOTIFICATION,
+  UPDATE_REQUEST,
+  UPDATE_RESPONSE,
+  UPDATE_ABORT,
+  UPDATE_NOTIFICATION,
+  // promises handling
+  storeRequestPromise,
+  resolveRequest,
+  rejectRequest,
+} from './shared-state-utils.js';
+
+// -----------------------------------------------------------
+// define a common namespace...
+// -----------------------------------------------------------
+
+/**
+ * Representation of a shared state. The class and its instances are the same
+ * client-side and server-side.
+ *
+ * @memberof common
+ *
+ * @see {client.SharedStateManagerClient}
+ * @see {server.SharedStateManagerServer}
+ */
+class SharedState {
+  constructor(id, remoteId, schemaName, schema, client, isCreator, manager, initValues = {}) {
+    this.id = id;
+    this.remoteId = remoteId;
+    this.schemaName = schemaName;
+
+    this._schema = clonedeep(schema);
+    this._isCreator = isCreator; // may be the server or any client
+    this._client = client;
+    this._manager = manager;
+
+    try {
+      this._parameters = parameters(schema, initValues);
+    } catch(err) {
+      console.error(err.stack);
+      throw new Error(`Error creating or attaching state "${schemaName}" w/ values:\n
+${JSON.stringify(initValues, null, 2)}`);
+    }
+    this._subscriptions = new Set();
+
+    this._onDetachCallbacks = new Set();
+    this._onDeleteCallbacks = new Set();
+
+    // add listener for state updates
+    client.transport.addListener(`${UPDATE_RESPONSE}-${id}-${this.remoteId}`, (reqId, updates) => {
+      const updated = this._commit(updates);
+      resolveRequest(reqId, updated);
+    });
+
+    // retrieve values but do not propagate to subscriptions
+    client.transport.addListener(`${UPDATE_ABORT}-${id}-${this.remoteId}`, (reqId, updates) => {
+      const updated = this._commit(updates, false);
+      resolveRequest(reqId, updated);
+    });
+
+    client.transport.addListener(`${UPDATE_NOTIFICATION}-${id}-${this.remoteId}`, (updates) => {
+      // cf. https://github.com/collective-soundworks/soundworks/issues/18
+      this._commit(updates);
+    });
+
+    // ---------------------------------------------
+    // DELETE initiated by creator, or schema deleted
+    // ---------------------------------------------
+    client.transport.addListener(`${DELETE_NOTIFICATION}-${id}-${this.remoteId}`, () => {
+      this._manager._statesById.delete(this.id);
+      this._clearTransport();
+
+      this._onDetachCallbacks.forEach(callback => callback());
+      this._onDeleteCallbacks.forEach(callback => callback());
+
+      this._clearDetach();
+    });
+
+
+    if (this._isCreator) {
+      // ---------------------------------------------
+      // DELETE (can only delete if creator)
+      // ---------------------------------------------
+      client.transport.addListener(`${DELETE_RESPONSE}-${id}-${this.remoteId}`, (reqId) => {
+        this._manager._statesById.delete(this.id);
+        this._clearTransport();
+
+        this._onDetachCallbacks.forEach(callback => callback());
+        this._onDeleteCallbacks.forEach(callback => callback());
+
+        this._clearDetach();
+        resolveRequest(reqId, this);
+      });
+
+      client.transport.addListener(`${DELETE_ERROR}-${id}`, (reqId, msg) => {
+        rejectRequest(reqId, msg);
+      });
+
+    } else {
+      // ---------------------------------------------
+      // DETACH
+      // ---------------------------------------------
+      client.transport.addListener(`${DETACH_RESPONSE}-${id}-${this.remoteId}`, (reqId) => {
+        this._manager._statesById.delete(this.id);
+        this._clearTransport();
+
+        this._onDetachCallbacks.forEach(func => func());
+
+        this._clearDetach();
+        resolveRequest(reqId, this);
+      });
+
+      // the state does not exists anymore in the server (should not happen)
+      client.transport.addListener(`${DETACH_ERROR}-${id}`, (reqId, msg) => {
+        rejectRequest(reqId, msg);
+      });
+
+    }
+  }
+
+  _clearDetach() {
+    this._onDetachCallbacks.clear();
+    this._onDeleteCallbacks.clear();
+
+    // Monkey patch detach so it throws we called twice. Doing nothing blocks
+    // the process on a second `detach` call as the Promise was never resolved
+    this.detach = () => {
+      throw new Error(`State "${this.schemaName} (${this.id})" already detached, cannot detach twice`);
+    };
+  }
+
+  _clearTransport() {
+    // remove listeners
+    this._client.transport.removeAllListeners(`${UPDATE_RESPONSE}-${this.id}-${this.remoteId}`);
+    this._client.transport.removeAllListeners(`${UPDATE_NOTIFICATION}-${this.id}-${this.remoteId}`);
+    this._client.transport.removeAllListeners(`${DELETE_RESPONSE}-${this.id}-${this.remoteId}`);
+    this._client.transport.removeAllListeners(`${DELETE_NOTIFICATION}-${this.id}-${this.remoteId}`);
+    this._client.transport.removeAllListeners(`${DETACH_RESPONSE}-${this.id}-${this.remoteId}`);
+  }
+
+  /** @private */
+  _commit(obj, propagate = true) {
+    const updated = {};
+
+    for (let name in obj) {
+      updated[name] = this._parameters.set(name, obj[name]);
+    }
+
+    // if the `UPDATE_REQUEST` as been aborted by the server, do not propagate
+    if (propagate) {
+      this._subscriptions.forEach(listener => listener(updated));
+    }
+
+    return updated;
+  }
+
+
+  /**
+   * Get the schema that describes the state.
+   *
+   * @return {Object}
+   */
+  getSchema() {
+    return this._schema;
+  }
+
+  /**
+   * Updates values of the state.
+   *
+   * @async
+   * @param {Object} updates - key / value pairs of updates to apply to the state
+   * @return {Object}
+   */
+  async set(updates) {
+    return new Promise((resolve, reject) => {
+      const reqId = storeRequestPromise(resolve, reject);
+      this._client.transport.emit(`${UPDATE_REQUEST}-${this.id}-${this.remoteId}`, reqId, updates);
+    });
+  }
+
+  /**
+   * Get a value of the state by its name
+   *
+   * @param {String} name - Name of the param
+   * @return {Mixed}
+   */
+  get(name) {
+    return this._parameters.get(name);
+  }
+
+  /**
+   * Get a all the key / value pairs of the state.
+   *
+   * @return {Object}
+   */
+  getValues() {
+    return this._parameters.getValues();
+  }
+
+  /**
+   * @callback common.SharedState~subscribeCallback
+   * @param {Object} updates - key / value pairs of the updates that have been
+   *   applied to the state
+   */
+  /**
+   * Subscribe to state updates
+   *
+   * @param {common.SharedState~subscribeCallback} callback - callback to execute
+   *   when an update is commited on the state.
+   * @example
+   * state.subscribe(async (updates) =>  {
+   *   for (let [key, value] of Object.entries(updates)) {
+   *      // dispatch
+   *   }
+   * }
+   */
+  subscribe(listener) {
+    this._subscriptions.add(listener);
+
+    return () => {
+      this._subscriptions.delete(listener);
+    };
+  }
+
+  /**
+   * Detach from the state. If the client is the creator of the state, the state
+   * is deleted and all attached nodes get notified
+   *
+   * @async
+   * @see {common.SharedState#onDetach}
+   * @see {common.SharedState#onDelete}
+   * @see {client.SharedStateManagerClient#create}
+   * @see {server.SharedStateManagerClient#create}
+   * @see {client.SharedStateManagerClient#attach}
+   * @see {server.SharedStateManagerClient#attach}
+   */
+  async detach() {
+    this._subscriptions.clear();
+
+    if (this._isCreator) {
+      return new Promise((resolve, reject) => {
+        const reqId = storeRequestPromise(resolve, reject);
+        this._client.transport.emit(`${DELETE_REQUEST}-${this.id}-${this.remoteId}`, reqId);
+      });
+    } else {
+      return new Promise((resolve, reject) => {
+        const reqId = storeRequestPromise(resolve, reject);
+        this._client.transport.emit(`${DETACH_REQUEST}-${this.id}-${this.remoteId}`, reqId);
+      });
+    }
+  }
+
+  /**
+   * Register a function to execute when detaching from the state
+   *
+   * @param {Function} callback - callback to execute when detaching from the state.
+   *   wether the client as called `detach`, or the state has been deleted by its
+   *   creator.
+   */
+  onDetach(callback) {
+    this._onDetachCallbacks.add(callback);
+    return () => this._onDetachCallbacks.delete(callback);
+  }
+
+  /**
+   * Register a function to execute when the state is deleted. Only called if the
+   * node was the creator of the state. Is called after `onDetach`
+   *
+   * @param {Function} callback - callback to execute when the state is deleted.
+   */
+  onDelete(callback) {
+    this._onDeleteCallbacks.add(callback);
+    return () => this._onDeleteCallbacks.delete(callback);
+  }
+}
+
+export default SharedState;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.6</a> on Thu Jul 15 2021 18:00:44 GMT+0200 (Central European Summer Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+<script src="scripts/search.js" defer></script>
+
+
+
+</body>
+</html>
