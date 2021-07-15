@@ -226,9 +226,14 @@ class Server {
     //   + new config style / old template
     //   + new template
     // @note: keep `websocket.path` as defined should be enough
-    if (!this.config.env.assetsDomain && this.config.env.subpath) {
+    if (!this.config.env.assetsDomain && this.config.env.subpath !== undefined) {
       const subpath = this.config.env.subpath.replace(/^\//, '').replace(/\/$/, '');
-      this.config.env.assetsDomain = `/${subpath}/`;
+
+      if (subpath) {
+        this.config.env.assetsDomain = `/${subpath}/`;
+      } else {
+        this.config.env.assetsDomain = `/`;
+      }
     }
 
     this._clientConfigFunction = clientConfigFunction;
