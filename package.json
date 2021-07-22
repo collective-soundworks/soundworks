@@ -32,8 +32,6 @@
     "dev": "npm run build && (npm run dev:client & npm run dev:server & npm run dev:common)"
   },
   "dependencies": {
-    "@ircam/parameters": "^1.2.2",
-    "braintree-jsdoc-template": "^3.3.0",
     "chalk": "^2.4.2",
     "columnify": "^1.5.4",
     "compression": "^1.7.1",
@@ -55,8 +53,8 @@
   "devDependencies": {
     "@babel/cli": "^7.4.4",
     "@babel/core": "^7.4.5",
-    "@babel/plugin-proposal-export-default-from": "^7.5.2",
     "@babel/preset-env": "^7.4.5",
+    "braintree-jsdoc-template": "^3.3.0",
     "chai": "^4.2.0",
     "chokidar": "^3.0.1",
     "chokidar-cli": "^1.2.2",

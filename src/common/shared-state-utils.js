@@ -16,7 +16,7 @@ export const ATTACH_ERROR = 's:a:err';
 
 export const DETACH_REQUEST = 's:dt:req';
 export const DETACH_RESPONSE = 's:dt:res';
-export const DETACH_ERROR = 's:dt:err'; // usefull
+export const DETACH_ERROR = 's:dt:err';
 
 export const OBSERVE_REQUEST = 's:o:req';
 export const OBSERVE_RESPONSE = 's:o:res';
