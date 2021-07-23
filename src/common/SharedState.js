@@ -1,5 +1,4 @@
-import parameters from '@ircam/parameters';
-import clonedeep from 'lodash.clonedeep';
+import ParameterBag from './params/ParameterBag.js';
 import {
   // constants
   SERVER_ID,
@@ -43,18 +42,17 @@ import {
  * @see {server.SharedStateManagerServer}
  */
 class SharedState {
-  constructor(id, remoteId, schemaName, schema, client, isCreator, manager, initValues = {}) {
+  constructor(id, remoteId, schemaName, schema, client, isOwner, manager, initValues = {}) {
     this.id = id;
     this.remoteId = remoteId;
     this.schemaName = schemaName;
 
-    this._schema = clonedeep(schema);
-    this._isCreator = isCreator; // may be the server or any client
+    this._isOwner = isOwner; // may be the server or any client
     this._client = client;
     this._manager = manager;
 
     try {
-      this._parameters = parameters(schema, initValues);
+      this._parameters = new ParameterBag(schema, initValues);
     } catch(err) {
       console.error(err.stack);
       throw new Error(`Error creating or attaching state "${schemaName}" w/ values:\n
@@ -96,7 +94,7 @@ ${JSON.stringify(initValues, null, 2)}`);
     });
 
 
-    if (this._isCreator) {
+    if (this._isOwner) {
       // ---------------------------------------------
       // DELETE (can only delete if creator)
       // ---------------------------------------------
@@ -141,10 +139,10 @@ ${JSON.stringify(initValues, null, 2)}`);
     this._onDetachCallbacks.clear();
     this._onDeleteCallbacks.clear();
 
-    // Monkey patch detach so it throws we called twice. Doing nothing blocks
-    // the process on a second `detach` call as the Promise was never resolved
+    // Monkey patch detach so it throws if called twice. Doing nothing blocks
+    // the process on a second `detach` call as the Promise never resolves
     this.detach = () => {
-      throw new Error(`State "${this.schemaName} (${this.id})" already detached, cannot detach twice`);
+      throw new Error(`[stateManager] State "${this.schemaName} (${this.id})" already detached, cannot detach twice`);
     };
   }
 
@@ -162,7 +160,13 @@ ${JSON.stringify(initValues, null, 2)}`);
     const updated = {};
 
     for (let name in obj) {
-      updated[name] = this._parameters.set(name, obj[name]);
+      const [ value ] = this._parameters.set(name, obj[name]);
+      // @note - maybe we could check `updated` here
+      // probably usefull for `immediate` option:
+      //    - 1. call subscription now
+      //    - 2. go thourhg server
+      //    - 3. check `updated` and re-call subscriptions if needed
+      updated[name] = value;
     }
 
     // if the `UPDATE_REQUEST` as been aborted by the server, do not propagate
@@ -171,16 +175,6 @@ ${JSON.stringify(initValues, null, 2)}`);
     }
 
     return updated;
-  }
-
-
-  /**
-   * Get the schema that describes the state.
-   *
-   * @return {Object}
-   */
-  getSchema() {
-    return this._schema;
   }
 
   /**
@@ -214,6 +208,33 @@ ${JSON.stringify(initValues, null, 2)}`);
    */
   getValues() {
     return this._parameters.getValues();
+  }
+
+  /**
+   * Get the schema that describes the state.
+   *
+   * @return {Object}
+   */
+  getSchema(name = null) {
+    return this._parameters.getSchema(name);
+  }
+
+  /**
+   * Get the values with which the state has been initialized.
+   *
+   * @return {Object}
+   */
+  getInitValues() {
+    return this._parameters.getInitValues();
+  }
+
+  /**
+   * Get the default values that has been declared in the schema.
+   *
+   * @return {Object}
+   */
+  getDefaults() {
+    return this._parameters.getDefaults();
   }
 
   /**
@@ -256,7 +277,7 @@ ${JSON.stringify(initValues, null, 2)}`);
   async detach() {
     this._subscriptions.clear();
 
-    if (this._isCreator) {
+    if (this._isOwner) {
       return new Promise((resolve, reject) => {
         const reqId = storeRequestPromise(resolve, reject);
         this._client.transport.emit(`${DELETE_REQUEST}-${this.id}-${this.remoteId}`, reqId);
@@ -266,6 +287,27 @@ ${JSON.stringify(initValues, null, 2)}`);
         const reqId = storeRequestPromise(resolve, reject);
         this._client.transport.emit(`${DETACH_REQUEST}-${this.id}-${this.remoteId}`, reqId);
       });
+    }
+  }
+
+  /**
+   * Delete the state. Only the creator/owner of the state (i.e. a state created using
+   * `create`) can use this method. If a non-owner call this method (i.e. a
+   * state created using `attach`), an error will be thrown.
+   *
+   * @async
+   * @see {common.SharedState#onDetach}
+   * @see {common.SharedState#onDelete}
+   * @see {client.SharedStateManagerClient#create}
+   * @see {server.SharedStateManagerClient#create}
+   * @see {client.SharedStateManagerClient#attach}
+   * @see {server.SharedStateManagerClient#attach}
+   */
+  async delete() {
+    if (this._isOwner) {
+      return this.detach();
+    } else {
+      throw new Error(`[stateManager] can delete state "${this.schemaName}", only owner of the state (i.e. the node that "create[d]" it) can delete it`);
     }
   }
 

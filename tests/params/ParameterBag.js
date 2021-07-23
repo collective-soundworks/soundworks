@@ -8,18 +8,25 @@ console.log('* ------------------------------------- *');
 
 describe('static validateSchema(schema)', () => {
   it('should check if schema is invalid', () => {
-    assert.throws(() => ParameterBag.validateSchema({
+    assert.throw(() => ParameterBag.validateSchema({
       noType: {}
     }), TypeError, `[stateManager] Invalid schema definition - param "noType": "type" key is required`);
 
-    assert.throws(() => ParameterBag.validateSchema({
+    assert.throw(() => ParameterBag.validateSchema({
       invalidType: { type: 'invalid' }
     }), TypeError, `[stateManager] Invalid schema definition - param "invalidType": "{ type: 'invalid' }" does not exists`);
 
-    assert.throws(() => ParameterBag.validateSchema({
+    assert.throw(() => ParameterBag.validateSchema({
       myBoolean: { type: 'boolean' }
     }), TypeError, `[stateManager] Invalid schema definition - param "myBoolean" (type "boolean"): "default" key is required`);
   });
+
+  it(`should allow "default" to not be declared when "event" is true`, () => {
+    // event: true does not require `default` value
+    assert.doesNotThrow(() => ParameterBag.validateSchema({
+      myBoolean: { type: 'boolean', event: true }
+    }));
+  })
 });
 
 describe('constructor(schema, initValues)', () => {

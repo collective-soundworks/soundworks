@@ -1,5 +1,6 @@
 import types from './types';
 import cloneDeep from 'lodash.cloneDeep';
+import equal from 'fast-deep-equal';
 
 /**
  * Generic class for typed parameters.
@@ -74,7 +75,9 @@ class ParameterBag {
       const required = types[def.type].required;
 
       required.forEach(function(key) {
-        if (!def.hasOwnProperty(key)) {
+        if (def.event === true && key === 'default') {
+          // do nothing, default is always null for `event` params
+        } else if (!def.hasOwnProperty(key)) {
           throw new TypeError(`[stateManager] Invalid schema definition - param "${name}" (type "${def.type}"): "${key}" key is required`);
         }
       });
@@ -214,7 +217,7 @@ class ParameterBag {
     }
 
     const currentValue = this._values[name];
-    const updated = (currentValue !== value);
+    const updated = !equal(currentValue, value);
     this._values[name] = value;
 
     if (def.event === true) {
@@ -255,7 +258,7 @@ class ParameterBag {
   }
 
   // return the default value, if initValue has been given, return init values
-  getInitValues(name = null) {
+  getInitValues() {
     const initValues = {};
     for (let [name, def] of Object.entries(this._schema)) {
       initValues[name] = def.initValue;
@@ -264,7 +267,7 @@ class ParameterBag {
   }
 
     // return the default value, if initValue has been given, return init values
-  getDefaults(name = null) {
+  getDefaults() {
     const defaults = {};
     for (let [name, def] of Object.entries(this._schema)) {
       defaults[name] = def.defaults;

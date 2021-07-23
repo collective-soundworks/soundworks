@@ -1,5 +1,5 @@
 import EventEmitter from 'events';
-import parameters from '@ircam/parameters';
+import ParameterBag from './params/ParameterBag.js';
 import clonedeep from 'lodash.clonedeep';
 import SharedStatePrivate from './SharedStatePrivate.js';
 import SharedStateManagerClient from './SharedStateManagerClient.js';
@@ -230,15 +230,10 @@ class SharedStateManagerServer extends SharedStateManagerClient {
    */
   registerSchema(schemaName, schema) {
     if (this._schemas.has(schemaName)) {
-      throw new Error(`schema "${schemaName}" already registered`);
+      throw new Error(`[stateManager] schema "${schemaName}" already registered`);
     }
 
-    // throw is schema is invalid
-    try {
-      parameters(schema, {});
-    } catch(err) {
-      throw new Error(`Invalid schema "${schemaName}": ${err.message}`);
-    }
+    ParameterBag.validateSchema(schema);
 
     this._schemas.set(schemaName, clonedeep(schema));
   }

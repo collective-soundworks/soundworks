@@ -1,5 +1,4 @@
-import parameters from '@ircam/parameters';
-import clonedeep from 'lodash.clonedeep';
+import ParameterBag from './params/ParameterBag.js';
 import {
   // constants
   SERVER_ID,
@@ -35,19 +34,18 @@ class SharedStatePrivate {
     this.id = id;
     this.schemaName = schemaName;
 
-    this._schema = clonedeep(schema);
     this._manager = manager;
-    this._parameters = parameters(schema, initValues);
+    this._parameters = new ParameterBag(schema, initValues);
     this._attachedClients = new Map(); // other peers interested in watching / controlling the state
 
     this._creatorRemoteId = null;
     this._creatorId = null;
   }
 
-  _attachClient(remoteId, client, isCreator = false) {
+  _attachClient(remoteId, client, isOwner = false) {
     this._attachedClients.set(remoteId, client);
 
-    if (isCreator) {
+    if (isOwner) {
       this._creatorRemoteId = remoteId;
       this._creatorId = client.id;
     }
@@ -58,18 +56,26 @@ class SharedStatePrivate {
       let dirty = false;
 
       for (let name in updates) {
-        const currentValue = this._parameters.get(name);
+        const paramSchema = this._parameters.getSchema(name);
         // get new value this way to store events return values
-        const newValue = this._parameters.set(name, updates[name]);
+        const [newValue, changed] = this._parameters.set(name, updates[name]);
 
-        // we check the `schema[name].type === 'any'`, to always consider
-        // objects as dirty, because if the state is attached locally, we
-        // compare the Object instances instead of their values.
-        // @todo - this should be made more robust but how?
-        if (newValue !== currentValue || this._schema[name].type === 'any') {
+        // @note - we could handle filterChange option here or inside ParameterBag
+        // see what would be the more logical to do have a consistent behavior
+        // when used in conjonction with immediate (cf. immediate)
+
+        // from v3.1.0 - the updated check is made using 'fast-deep-equal'
+        //    cf. https://github.com/epoberezkin/fast-deep-equal
+        //    therefore unchanged objects are not propagated anymore
+        // until v3.0.4 - we check the `schema[name].type === 'any'`, to always consider
+        //    objects as dirty, because if the state is attached locally, we
+        //    compare the Object instances instead of their values.
+        //    @note - this should be made more robust but how?
+        if (changed) {
           updated[name] = newValue;
-          dirty = true;
         }
+
+        dirty = (dirty || changed);
       }
 
       if (dirty) {
@@ -123,7 +129,7 @@ class SharedStatePrivate {
       }
     });
 
-    if (isCreator) {
+    if (isOwner) {
       // delete only if creator
       client.transport.addListener(`${DELETE_REQUEST}-${this.id}-${remoteId}`, (reqId) => {
         this._manager._serverStatesById.delete(this.id);
