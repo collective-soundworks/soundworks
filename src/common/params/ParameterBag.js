@@ -1,4 +1,5 @@
 import types from './types';
+import cloneDeep from 'lodash.cloneDeep';
 
 /**
  * Generic class for typed parameters.
@@ -6,67 +7,55 @@ import types from './types';
  * @param {String} name - Name of the parameter.
  * @param {Array} definitionTemplate - List of mandatory keys in the param
  *  definition.
- * @param {Function} typeCheckFunction - Function to be used in order to check
- *  the value against the param definition.
- * @param {Object} definition - Definition of the parameter.
+ * @param {Function} coerceFunction - Function that coerce the type of the
+ *  parameter.
+ * @param {Object} def - Definition of the parameter.
  * @param {Mixed} value - Value of the parameter.
  * @private
  */
-class Param {
-  constructor(name, definitionTemplate, typeCheckFunction, definition, value) {
-    definitionTemplate.forEach(function(key) {
-      if (definition.hasOwnProperty(key) === false)
-        throw new Error(`Invalid definition for param "${name}", ${key} is not defined`);
-    });
+// export class Param {
+//   // new Param(name, coerceFunction, def, initValue)
+//   constructor(name, coerceFunction, def, initValue) {
+//     this.name = name;
+//     this.def = def;
+//     this.coerce = coerceFunction;
 
-    this.name = name;
-    this.type = definition.type;
-    this.definition = definition;
+//     this.set(initValue);
+//   }
 
-    if (this.definition.nullable === true && value === null) {
-      this.value = null;
-    } else {
-      this.value = typeCheckFunction(value, definition, name);
-    }
+//   /**
+//    * Get current value.
+//    *
+//    * @return {Mixed}
+//    */
+//   get() {
+//     return this.value;
+//   }
 
-    this._typeCheckFunction = typeCheckFunction;
-  }
+//   *
+//    * Update current value.
+//    *
+//    * @param {Mixed} value - New value of the parameter.
+//    * @return {Boolean} - `true` if the param has been updated, `false` otherwise.
 
-  /**
-   * Returns the current value.
-   * @return {Mixed}
-   */
-  getValue() {
-    return this.value;
-  }
+//   set(value) {
+//     if (value === null && this.def.nullable === false) {
+//       throw new TypeError(`[stateManager] Invalid value for ${this.def.type} param "${this.name}": value is null and param is not nullable`);
+//     } else if (value === null && this.def.nullable === true) {
+//       value = value;
+//     } else {
+//       value = this.coerce(this.name, this.def, value);
+//     }
 
-  /**
-   * Update the current value.
-   * @param {Mixed} value - New value of the parameter.
-   * @return {Boolean} - `true` if the param has been updated, false otherwise
-   *  (e.g. if the parameter already had this value).
-   */
-  setValue(value) {
-    if (this.definition.constant === true) {
-      throw new Error(`Invalid assignement to constant param "${this.name}"`);
-    }
+//     const changed = (this.value !== value);
+//     this.value = value;
 
-    if (!(this.definition.nullable === true && value === null)) {
-      value = this._typeCheckFunction(value, this.definition, this.name);
-    }
-
-    if (this.value !== value) {
-      this.value = value;
-      return true;
-    }
-
-    return false;
-  }
-}
-
+//     return changed;
+//   }
+// }
 
 /**
- * Bag of parameters. Main interface of the library
+ * Bag of parameters.
  * @private
  */
 class ParameterBag {
@@ -75,24 +64,30 @@ class ParameterBag {
       const def = schema[name];
 
       if (!def.hasOwnProperty('type')) {
-        throw new TypeError(`[schema] Invalid definition for param "${name}": "type" key is required`);
+        throw new TypeError(`[stateManager] Invalid schema definition - param "${name}": "type" key is required`);
       }
 
       if (!types.hasOwnProperty(def.type)) {
-        throw new TypeError(`[schema] Invalid definition for param "${name}": "{ type: ${def.type} }" does not exists`);
+        throw new TypeError(`[stateManager] Invalid schema definition - param "${name}": "{ type: '${def.type}' }" does not exists`);
       }
 
       const required = types[def.type].required;
 
       required.forEach(function(key) {
         if (!def.hasOwnProperty(key)) {
-          throw new Error(`[schema] Invalid definition for param "${name}" of type: "${def.type}": "${key}" key is required`);
+          throw new TypeError(`[stateManager] Invalid schema definition - param "${name}" (type "${def.type}"): "${key}" key is required`);
         }
       });
     }
   }
 
-  constructor(schema, initValues) {
+  constructor(schema, initValues = {}) {
+    if (!schema) {
+      throw new Error(`[stateManager] schema is mandatory`);
+    }
+
+    schema = cloneDeep(schema);
+    initValues = cloneDeep(initValues);
 
     /**
      * List of parameters.
@@ -103,7 +98,7 @@ class ParameterBag {
      * @instance
      * @private
      */
-    this._params = {};
+    this._values = {};
 
     /**
      * List of schema with init values.
@@ -114,63 +109,58 @@ class ParameterBag {
      * @instance
      * @private
      */
-    this._schema = schema;
+    this._schema = {};
 
+    ParameterBag.validateSchema(schema);
+
+    // make shure initValues make sens according to the given schema
     for (let name in initValues) {
-      if (schema.hasOwnProperty(name) === false) {
-        throw new Error(`Unknown param "${name}"`);
+      if (!schema.hasOwnProperty(name)) {
+        throw new ReferenceError(`[stateManager] init value defined for undefined param "${name}"`);
       }
     }
 
-    for (let name in schema) {
-      if (this._params.hasOwnProperty(name) === true) {
-        throw new Error(`Parameter "${name}" already defined`);
-      }
-
-      const definition = schema[name];
-
-      if (!paramTemplates[definition.type]) {
-        throw new Error(`Unknown param type "${definition.type}"`);
-      }
-
+    for (let [name, def] of Object.entries(schema)) {
       const {
-        definitionTemplate,
-        typeCheckFunction
-      } = paramTemplates[definition.type];
+        defaultOptions,
+        coerceFunction
+      } = types[def.type];
 
+      def = Object.assign({}, defaultOptions, def);
       // if event property is set to true, the param must
       // be nullable and its default value is `undefined`
-      if (definition.event === true) {
-        definition.nullable = true;
-        definition.default = null;
+      if (def.event === true) {
+        def.nullable = true;
+        def.default = null;
       }
 
       let initValue;
 
-      if (initValues.hasOwnProperty(name) === true) {
+      if (initValues.hasOwnProperty(name)) {
         initValue = initValues[name];
       } else {
-        initValue = definition.default;
+        initValue = def.default;
       }
 
-      // store init value in definition
-      definition.initValue = initValue;
 
-      this._params[name] = new Param(name, definitionTemplate, typeCheckFunction, definition, value);
+      this._schema[name] = def;
+      // coerce init value and store in definition
+      initValue = this.set(name, initValue)[0];
+
+      this._schema[name].initValue = initValue;
+      this._values[name] = initValue;
+
     }
   }
 
   /**
-   * Return the given schema along with the initialization values.
+   * Define if the parameter exists.
    *
-   * @return {Object}
+   * @param {String} name - Name of the parameter.
+   * @return {Boolean}
    */
-  getschema(name = null) {
-    if (name !== null) {
-      return this._schema[name];
-    } else {
-      return this._schema;
-    }
+  has(name) {
+    return this._schema.hasOwnProperty(name);
   }
 
   /**
@@ -179,13 +169,7 @@ class ParameterBag {
    * @return {Object}
    */
   getValues() {
-    const values = {};
-
-    for (let name in this._params) {
-      values[name] = this._params[name].value;
-    }
-
-    return values;
+    return Object.assign({}, this._values);
   }
 
   /**
@@ -195,10 +179,11 @@ class ParameterBag {
    * @return {Mixed} - Value of the parameter.
    */
   get(name) {
-    if (!this._params[name])
-      throw new Error(`Cannot read property value of undefined parameter "${name}"`);
+    if (!this.has(name)) {
+      throw new ReferenceError(`[stateManager] Cannot get value of undefined parameter "${name}"`);
+    }
 
-    return this._params[name].value;
+    return this._values[name];
   }
 
   /**
@@ -210,41 +195,34 @@ class ParameterBag {
    * @param {Mixed} value - Value of the parameter.
    * @param {Boolean} [forcePropagation=false] - if true, propagate value even
    *    if the value has not changed.
-   * @return {Mixed} - New value of the parameter.
+   * @return {Array} - [new value, updated flag].
    */
-  set(name, value, forcePropagation = false) {
-    const param = this._params[name];
-    const updated = param.setValue(value);
-    value = param.getValue();
-
-    if (param.definition.event === true) {
-      param.setValue(null);
+  set(name, value) {
+    if (!this.has(name)) {
+      throw new ReferenceError(`[stateManager] Cannot set value of undefined parameter "${name}"`);
     }
 
-    if (updated || forcePropagation) {
-      const metas = param.definition.metas;
-      // trigger global listeners
-      for (let listener of this._globalListeners) {
-        listener(name, value, metas);
-      }
+    const def = this._schema[name];
+    const { coerceFunction } = types[def.type];
 
-      // trigger param listeners
-      for (let listener of this._paramsListeners[name]) {
-        listener(value, metas);
-      }
+    if (value === null && def.nullable === false) {
+      throw new TypeError(`[stateManager] Invalid value for ${def.type} param "${name}": value is null and param is not nullable`);
+    } else if (value === null && def.nullable === true) {
+      value = value;
+    } else {
+      value = coerceFunction(name, def, value);
     }
 
-    return value;
-  }
+    const currentValue = this._values[name];
+    const updated = (currentValue !== value);
+    this._values[name] = value;
 
-  /**
-   * Define if the `name` parameter exists or not.
-   *
-   * @param {String} name - Name of the parameter.
-   * @return {Boolean}
-   */
-  has(name) {
-    return this._params.hasOwnProperty(name);
+    if (def.event === true) {
+      this._values[name] = null;
+    }
+
+    // return tuple so that the state manager can handle the `filterChange` option
+    return [value, updated];
   }
 
   /**
@@ -252,24 +230,46 @@ class ParameterBag {
    *
    * @param {String} [name=null] - Name of the parameter to reset.
    */
-  reset(name = null) {
-    if (name !== null) {
-      this._params[name].reset();
+  // reset(name = null) {
+  //   if (name !== null) {
+  //     this._params[name] = this._initValues[name];
+  //   } else {
+  //     for (let name in this.params) {
+  //       this._params[name].reset();
+  //     }
+  //   }
+  // }
+
+
+  /**
+   * Return the given schema along with the initialization values.
+   *
+   * @return {Object}
+   */
+  getSchema(name = null) {
+    if (name === null) {
+      return this._schema;
     } else {
-      for (let name in this.params) {
-        this._params[name].reset();
-      }
+      return this._schema[name];
     }
   }
 
-
-  getSchema(name = null) {
-
+  // return the default value, if initValue has been given, return init values
+  getInitValues(name = null) {
+    const initValues = {};
+    for (let [name, def] of Object.entries(this._schema)) {
+      initValues[name] = def.initValue;
+    }
+    return initValues;
   }
 
-  // return the default value, if initValue has been given, return init values
+    // return the default value, if initValue has been given, return init values
   getDefaults(name = null) {
-
+    const defaults = {};
+    for (let [name, def] of Object.entries(this._schema)) {
+      defaults[name] = def.defaults;
+    }
+    return defaults;
   }
 }
 

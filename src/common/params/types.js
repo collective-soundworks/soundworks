@@ -1,25 +1,35 @@
+import cloneDeep from 'lodash.cloneDeep';
+
 /**
  * Dictionnary of the available types. Each key correspond to the type of the
  * implemented param while the corresponding object value should the
- * {@link `paramDefinition`} of the defined type.
+ * {@link `paramdef`} of the defined type.
  *
  * typedef {Object} paramTemplates
  * @type {Object<String, paramTemplate>}
  */
 
+export const sharedOptions = {
+  nullable: false,
+  event: false, // if event=true, nullable=true
+  // filterChange: true,
+  // immediate: false,
+  metas: {},
+}
+
 /**
- * Definition of a parameter. The definition should at least contain the entries
+ * def of a parameter. The def should at least contain the entries
  * `type` and `default`. Every parameter can also accept optionnal configuration.
- * Available definitions are:
- * - {@link booleanDefinition}
- * - {@link integerDefinition}
- * - {@link floatDefinition}
- * - {@link stringDefinition}
- * - {@link enumDefinition}
+ * Available defs are:
+ * - {@link booleandef}
+ * - {@link integerdef}
+ * - {@link floatdef}
+ * - {@link stringdef}
+ * - {@link enumdef}
  */
 export default {
   /**
-   * @typedef {Object} booleanTypeDefinition
+   * @typedef {Object} booleanTypedef
    *
    * @property {String} [type='boolean'] - Define a boolean parameter.
    * @property {Boolean} default - Default value of the parameter.
@@ -28,17 +38,12 @@ export default {
    */
   boolean: {
     required: ['default'],
-    ensureDefinition(definition) {
-      const defaults = {
-        nullable: false,
-        metas: {},
-      };
-
-      return Object.assign(defaults, definition);
+    get defaultOptions() {
+      return Object.assign(cloneDeep(sharedOptions), {});
     },
-    ensureValue(value, definition, name) {
+    coerceFunction: (name, def, value) => {
       if (typeof value !== 'boolean') {
-        throw new Error(`Invalid value for boolean param "${name}": ${value}`);
+        throw new TypeError(`[stateManager] Invalid value for boolean param "${name}": ${value}`);
       }
 
       return value;
@@ -46,7 +51,7 @@ export default {
   },
 
   /**
-   * @typedef {Object} stringTypeDefinition
+   * @typedef {Object} stringTypedef
    *
    * @property {String} [type='string'] - Define a boolean parameter.
    * @property {Mixed} default - Default value of the parameter.
@@ -55,17 +60,12 @@ export default {
    */
   string: {
     required: ['default'],
-    ensureDefinition(definition) {
-      const defaults = {
-        nullable: false,
-        metas: {},
-      };
-
-      return Object.assign(defaults, definition);
+    get defaultOptions() {
+      return Object.assign(cloneDeep(sharedOptions), {});
     },
-    ensureValue(value, definition, name) {
+    coerceFunction: (name, def, value) => {
       if (typeof value !== 'string') {
-        throw new Error(`Invalid value for string param "${name}": ${value}`);
+        throw new TypeError(`[stateManager] Invalid value for string param "${name}": ${value}`);
       }
 
       return value;
@@ -73,7 +73,7 @@ export default {
   },
 
   /**
-   * @typedef {Object} integerTypeDefinition
+   * @typedef {Object} integerTypedef
    *
    * @property {String} [type='integer'] - Define a boolean parameter.
    * @property {Mixed} default - Default value of the parameter.
@@ -85,27 +85,23 @@ export default {
    */
   integer: {
     required: ['default'],
-    ensureDefinition(definition) {
-      const defaults = {
-        nullable: false,
+    get defaultOptions() {
+      return Object.assign(cloneDeep(sharedOptions), {
         min: -Infinity,
         max: +Infinity,
-        metas: {},
-      };
-
-      return Object.assign(defaults, definition);
+      });
     },
-    ensureValue(value, definition, name) {
+    coerceFunction: (name, def, value) => {
       if (!(typeof value === 'number' && Math.floor(value) === value)) {
-        throw new Error(`Invalid value for integer param "${name}": ${value}`);
+        throw new TypeError(`[stateManager] Invalid value for integer param "${name}": ${value}`);
       }
 
-      return Math.max(definition.min, Math.min(definition.max, value));
+      return Math.max(def.min, Math.min(def.max, value));
     }
   },
 
   /**
-   * @typedef {Object} floatTypeDefinition
+   * @typedef {Object} floatTypedef
    *
    * @property {String} [type='float'] - Float parameter.
    * @property {Mixed} default - Default value.
@@ -116,27 +112,23 @@ export default {
    */
   float: {
     required: ['default'],
-    ensureDefinition(definition) {
-      const defaults = {
-        nullable: false,
+    get defaultOptions() {
+      return Object.assign(cloneDeep(sharedOptions), {
         min: -Infinity,
         max: +Infinity,
-        metas: {},
-      };
-
-      return Object.assign(defaults, definition);
+      });
     },
-    ensureValue(value, definition, name) {
+    coerceFunction: (name, def, value) => {
       if (typeof value !== 'number' || value !== value) { // reject NaN
-        throw new Error(`Invalid value for float param "${name}": ${value}`);
+        throw new TypeError(`[stateManager] Invalid value for float param "${name}": ${value}`);
       }
 
-      return Math.max(definition.min, Math.min(definition.max, value));
+      return Math.max(def.min, Math.min(def.max, value));
     }
   },
 
   /**
-   * @typedef {Object} enumTypeDefinition
+   * @typedef {Object} enumTypedef
    *
    * @property {String} [type='enum'] - Enum parameter.
    * @property {Mixed} default - Default value of the parameter.
@@ -146,28 +138,23 @@ export default {
    */
   enum: {
     required: ['default', 'list'],
-    ensureDefinition(definition) {
-      const defaults = {
-        nullable: false,
-        metas: {},
-      };
-
-      return Object.assign(defaults, definition);
+    get defaultOptions() {
+      return Object.assign(cloneDeep(sharedOptions), {});
     },
-    ensureValue(value, definition, name) {
-      if (definition.list.indexOf(value) === -1) {
-        throw new Error(`Invalid value for enum param "${name}": ${value}`);
+    coerceFunction: (name, def, value) => {
+      if (def.list.indexOf(value) === -1) {
+        throw new TypeError(`[stateManager] Invalid value for enum param "${name}": ${value}`);
       }
+
 
       return value;
     }
   },
 
   /**
-   * @typedef {Object} anyTypeDefinition
+   * @typedef {Object} anyTypedef
    * @property {String} [type='any'] - Parameter of any type.
    * @property {Mixed} default - Default value of the parameter.
-   * @property {Boolean} [constant=false] - Define if the parameter is constant.
    * @property {Boolean} [nullable=false] - Define if the parameter is nullable.
    * @property {Boolean} [event=false] - Define if the parameter is a volatile, e.g.
    *    set its value back to `null` after propagation of its value. When `true`,
@@ -175,8 +162,11 @@ export default {
    * @property {Object} [metas={}] - Optionnal metadata of the parameter.
    */
   any: {
-    definitionTemplate: ['default'],
-    ensureValue(value, definition, name) {
+    required: ['default'],
+    get defaultOptions() {
+      return Object.assign(cloneDeep(sharedOptions), {});
+    },
+    coerceFunction: (name, def, value) => {
       // no check as it can have any type...
       return value;
     }
