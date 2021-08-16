@@ -173,9 +173,15 @@ describe(`set(name, value)`, () => {
 });
 
 describe(`getSchema([name])`, () => {
-  it(`should return schema`, () => {
-    console.log(params.getSchema());
-    console.log(params.getSchema('bool'));
+  it(`should return the schema with proper default applied`, () => {
+    console.log(schema, '==>', params.getSchema());
+    console.log(schema.bool, '==>', params.getSchema('bool'));
+  });
+
+  it(`should throw if name does not exists`, () => {
+    assert.throw(() => params.getSchema('42'), ReferenceError, `[stateManager] Cannot get schema description of undefined parameter "42"`)
+    // assert.nestedInclude(params.getSchema(), schema);
+    // assert.deepOwnInclude(params.getSchema('bool'), schema.bool);
   });
 });
 

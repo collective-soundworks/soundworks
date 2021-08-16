@@ -194,7 +194,7 @@ ${JSON.stringify(initValues, null, 2)}`);
   /**
    * Get a value of the state by its name
    *
-   * @param {String} name - Name of the param
+   * @param {String} name - Name of the param. Throws an error if the name is invalid.
    * @return {Mixed}
    */
   get(name) {
@@ -213,6 +213,8 @@ ${JSON.stringify(initValues, null, 2)}`);
   /**
    * Get the schema that describes the state.
    *
+   * @param {String} [name=null] - if given, returns only the definition
+   *   of the given param name. Throws an error if the name is invalid.
    * @return {Object}
    */
   getSchema(name = null) {

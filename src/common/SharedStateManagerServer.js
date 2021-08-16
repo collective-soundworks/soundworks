@@ -286,11 +286,9 @@ class SharedStateManagerServer extends SharedStateManagerClient {
    */
   // setUpdateHook(schemaName, updateHook) {
 
+      // return unsetUpdateHook
   // }
 
-  // deleteUpdateHook(schemaName, updateHook) {
-
-  // }
 }
 
 export default SharedStateManagerServer;

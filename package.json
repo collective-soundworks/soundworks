@@ -32,7 +32,6 @@
     "dev": "npm run build && (npm run dev:client & npm run dev:server & npm run dev:common)"
   },
   "dependencies": {
-    "@ircam/parameters": "^1.2.2",
     "chalk": "^2.4.2",
     "columnify": "^1.5.4",
     "compression": "^1.7.1",

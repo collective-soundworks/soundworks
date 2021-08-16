@@ -374,7 +374,7 @@ class ParameterBag {
   }
 
   /**
-   * Reset a parameter to its init value. Reset all parameters if no argument.
+   * Reset a parameter to its initialization values. Reset all parameters if no argument.
    *
    * @param {String} [name=null] - Name of the parameter to reset.
    */
@@ -398,6 +398,10 @@ class ParameterBag {
     if (name === null) {
       return this._schema;
     } else {
+      if (!this.has(name)) {
+        throw new ReferenceError(`[stateManager] Cannot get schema description of undefined parameter "${name}"`);
+      }
+
       return this._schema[name];
     }
   }
