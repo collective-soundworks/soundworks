@@ -33,7 +33,7 @@ import {
  * Component dedicated at managing distributed states, accessible through {@link common.SharedState} instances, among the application.
  *
  * An instance of `SharedStateManagerClient` is automatically created by the
- * `soundworks.Client` (cf. {@link client.Client#stateManager}).
+ * `soundworks.Client` at initialization (cf. {@link client.Client#stateManager}).
  *
  * Tutorial: [https://collective-soundworks.github.io/tutorials/state-manager.html](https://collective-soundworks.github.io/tutorials/state-manager.html)
  *

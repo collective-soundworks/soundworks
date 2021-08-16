@@ -1,7 +1,7 @@
 const path = require('path');
 const assert = require('chai').assert;
 
-const types = require('../../common/params/types.js').default;
+const { types } = require('../../common/ParameterBag.js');
 
 console.log('* ------------------------------------- *');
 console.log('* types for ParameterBag');

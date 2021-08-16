@@ -1,6 +1,6 @@
 const assert = require('chai').assert;
-const ParameterBag = require('../../common/params/ParameterBag.js').default;
-const { sharedOptions } = require('../../common/params/types.js');
+const ParameterBag = require('../../common/ParameterBag.js').default;
+const { sharedOptions } = require('../../common/ParameterBag.js');
 
 console.log('* ------------------------------------- *');
 console.log('* class ParameterBag');

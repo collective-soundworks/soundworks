@@ -11,6 +11,16 @@ const config = require('./config');
 const a = require('./schemas/a');
 const b = require('./schemas/b');
 
+/**
+ * NOTE
+ * to automatically close the processes (server and clients) when all tests
+ * are done, launch with:
+ *
+ * ```
+ * mocha tests/state-manager --exit
+ * ```
+ */
+
 class ServerTestExperience extends ServerAbstractExperience {
   constructor(server, clientTypes) {
     super(server, clientTypes);
@@ -48,7 +58,10 @@ before(async () => {
   // ---------------------------------------------------
   for (let i = 0; i < numClients; i++) {
     const client = new Client();
-    await client.init(config);
+    await client.init({
+      ...config,
+      clientType: 'test',
+    });
     // console.log('client inited');
     const clientExperience = new ClientTestExperience(client);
 
@@ -62,12 +75,6 @@ before(async () => {
 > created ${numClients} clients
   `);
 });
-
-// prefer mocha --exit
-// after(() => {
-//   process.exit();
-// });
-
 
 console.log('* ------------------------------------- *');
 console.log('* @soundworks/core.StateManager');

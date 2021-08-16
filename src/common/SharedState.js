@@ -1,4 +1,4 @@
-import ParameterBag from './params/ParameterBag.js';
+import ParameterBag from './ParameterBag.js';
 import {
   // constants
   SERVER_ID,
@@ -248,9 +248,11 @@ ${JSON.stringify(initValues, null, 2)}`);
    * @param {common.SharedState~subscribeCallback} callback - callback to execute
    *   when an update is commited on the state.
    * @example
-   * state.subscribe(async (updates) =>  {
+   * state.subscribe(async updates =>  {
    *   for (let [key, value] of Object.entries(updates)) {
-   *      // dispatch
+   *      switch (key) {
+   *        // do something
+   *      }
    *   }
    * }
    */

@@ -12,7 +12,4 @@ module.exports = {
     serverIp: '127.0.0.1',
     useHttps: false,
   },
-
-  // client only config
-  clientType: 'test',
 };

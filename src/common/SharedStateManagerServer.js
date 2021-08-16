@@ -1,5 +1,5 @@
 import EventEmitter from 'events';
-import ParameterBag from './params/ParameterBag.js';
+import ParameterBag from './ParameterBag.js';
 import clonedeep from 'lodash.clonedeep';
 import SharedStatePrivate from './SharedStatePrivate.js';
 import SharedStateManagerClient from './SharedStateManagerClient.js';
@@ -37,8 +37,8 @@ const generateRemoteId = idGenerator();
  * The `SharedStateManagerServer` extends the `SharedStateManagerClient` with
  * additionnal functionnalities to register schemas and handle clients.
  *
- * An instance of `SharedStateManagerClient` is automatically created by the
- * `soundworks.Server` (cf. {@link server.Server#stateManager}).
+ * An instance of `SharedStateManagerServer` is automatically created by the
+ * `soundworks.Server` at initialization (cf. {@link server.Server#stateManager}).
  *
  * Tutorial: [https://collective-soundworks.github.io/tutorials/state-manager.html](https://collective-soundworks.github.io/tutorials/state-manager.html)
  *
@@ -120,7 +120,6 @@ class SharedStateManagerServer extends SharedStateManagerClient {
     client.transport.addListener(ATTACH_REQUEST, (reqId, schemaName, stateId = null, requireSchema = true) => {
       if (this._schemas.has(schemaName)) {
         let state = null;
-
 
         if (stateId !== null && this._serverStatesById.has(stateId)) {
           state = this._serverStatesById.get(stateId);
@@ -222,11 +221,29 @@ class SharedStateManagerServer extends SharedStateManagerClient {
   }
 
   /**
-   * Register a schema. The schema definition follows the convention described
-   * here [https://github.com/ircam-jstools/parameters#booleandefinition--object](https://github.com/ircam-jstools/parameters#booleandefinition--object) (@todo - document somewhere else).
+   * Register a schema from which shared states (cf. {@link common.SharedState})
+   * can be instanciated.
    *
    * @param {String} schemaName - Name of the schema.
-   * @param {Object} schema - Description of the state data structure.
+   * @param {server.SharedStateManagerServer~schema} schema - Data structure
+   *  describing the states that will be created from this schema.
+   *
+   * @see {@link server.SharedStateManagerServer#create}
+   * @see {@link client.SharedStateManagerClient#create}
+   *
+   * @example
+   * server.stateManager.registerSchema('my-schema', {
+   *   myBoolean: {
+   *     type: 'boolean'
+   *     default: false,
+   *   },
+   *   myFloat: {
+   *     type: 'float'
+   *     default: 0.1,
+   *     min: -1,
+   *     max: 1
+   *   }
+   * })
    */
   registerSchema(schemaName, schema) {
     if (this._schemas.has(schemaName)) {
@@ -240,8 +257,9 @@ class SharedStateManagerServer extends SharedStateManagerClient {
 
   /**
    * Delete a schema and all associated states.
-   * When a schema is deleted, all attached clients are detached
-   * and the `onDetach` and `onDelete` callbacks are called.
+   * When a schema is deleted, all states created from this schema are deleted
+   * as well, therefore all attached clients are detached and the `onDetach`
+   * and `onDelete` callbacks are called on the related states.
    *
    * @param {String} schemaName - Name of the schema.
    */
@@ -259,6 +277,20 @@ class SharedStateManagerServer extends SharedStateManagerClient {
 
     this._schemas.delete(schemaName);
   }
+
+  /**
+   * Register a function for a given schema (e.g. will be applied on all states
+   * created from this schema) that will be executed before the update values
+   * are propagated.
+   *
+   */
+  // setUpdateHook(schemaName, updateHook) {
+
+  // }
+
+  // deleteUpdateHook(schemaName, updateHook) {
+
+  // }
 }
 
 export default SharedStateManagerServer;
