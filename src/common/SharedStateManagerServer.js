@@ -285,6 +285,12 @@ class SharedStateManagerServer extends SharedStateManagerClient {
 
   /**
    * @callback server.SharedStateManagerServer~updateHook
+   *
+   * @param {Object} updates - Update object as given on a set callback, or
+   *  result of the previous hook
+   * @param {Object} currentValues - Current values of the state.
+   * @return {Object} The "real" updates to be applied on the state.
+   */
   /**
    * Register a function for a given schema (e.g. will be applied on all states
    * created from this schema) that will be executed before the update values
@@ -292,6 +298,29 @@ class SharedStateManagerServer extends SharedStateManagerClient {
    * where all the values of the state are updated from e.g. some data stored in
    * filesystem while the consumer of the state only want to update the preset name.
    *
+   * The hook is associated to every state of its kind (i.e. schemaName) and
+   * executed on every update (call of `set`). Note that the hooks are executed
+   * server-side regarless the node on which `set` has been called and before
+   * the "actual" update of the state (e.g. before the call of `subscribe`).
+   *
+   * @example
+   * server.stateManager.registerSchema('hooked', schema);
+   * server.stateManager.registerUpdateHook('hooked', (updates, currentValues) => {
+   *   return {
+   *     ...updates
+   *     numUpdates: currentValues.numUpdates + 1,
+   *   };
+   * });
+   *
+   * const state = await server.stateManager.create('hooked');
+   *
+   * await state.set({ name: 'test' });
+   * state.getValues();
+   * // > { name: 'test', numUpdates: 1 };
+   *
+   * @param {String} schemaName - Kind of states on which applying the hook.
+   * @param {server.SharedStateManagerServer~updateHook} updateHook - Function
+   *   called between the `set` call and the actual update.
    */
   registerUpdateHook(schemaName, updateHook) {
     // throw error if schemaName has not been registered
