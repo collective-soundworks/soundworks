@@ -1,4 +1,4 @@
-import ParameterBag from './params/ParameterBag.js';
+import ParameterBag from './ParameterBag.js';
 import {
   // constants
   SERVER_ID,
@@ -51,26 +51,33 @@ class SharedStatePrivate {
     }
 
     // attach client listeners
-    client.transport.addListener(`${UPDATE_REQUEST}-${this.id}-${remoteId}`, (reqId, updates) => {
+    client.transport.addListener(`${UPDATE_REQUEST}-${this.id}-${remoteId}`, async (reqId, updates) => {
+      // apply registered hooks
+      const hooks = this._manager._hooksBySchemaName.get(this.schemaName);
+
+      // @note: we may need a proper update queue to avoid race conditions
+      for (let hook of hooks.values()) {
+        updates = await hook(updates, this._parameters.getValues());
+      }
+
       const updated = {};
       let dirty = false;
 
       for (let name in updates) {
-        const paramSchema = this._parameters.getSchema(name);
-        // get new value this way to store events return values
+        // from v3.1.0 - the `updated` check is made using 'fast-deep-equal'
+        //    cf. https://github.com/epoberezkin/fast-deep-equal
+        //    therefore unchanged objects are not considered changed
+        //    nor propagated anymore.
+        // until v3.0.4 - we checked the `schema[name].type === 'any'`, to always consider
+        //    objects as dirty, because if the state is attached locally, we
+        //    compare the Object instances instead of their values.
+        //    @note - this should be made more robust but how?
         const [newValue, changed] = this._parameters.set(name, updates[name]);
 
         // @note - we could handle filterChange option here or inside ParameterBag
         // see what would be the more logical to do have a consistent behavior
         // when used in conjonction with immediate (cf. immediate)
 
-        // from v3.1.0 - the updated check is made using 'fast-deep-equal'
-        //    cf. https://github.com/epoberezkin/fast-deep-equal
-        //    therefore unchanged objects are not propagated anymore
-        // until v3.0.4 - we check the `schema[name].type === 'any'`, to always consider
-        //    objects as dirty, because if the state is attached locally, we
-        //    compare the Object instances instead of their values.
-        //    @note - this should be made more robust but how?
         if (changed) {
           updated[name] = newValue;
         }

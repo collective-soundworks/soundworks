@@ -61,6 +61,7 @@ class SharedStateManagerServer extends SharedStateManagerClient {
     this._serverStatesById = new Map();
     this._schemas = new Map();
     this._observers = new Set();
+    this._hooksBySchemaName = new Map(); // protected
 
     this.addClient(localClientId, localTransport);
   }
@@ -247,12 +248,14 @@ class SharedStateManagerServer extends SharedStateManagerClient {
    */
   registerSchema(schemaName, schema) {
     if (this._schemas.has(schemaName)) {
-      throw new Error(`[stateManager] schema "${schemaName}" already registered`);
+      throw new Error(`[stateManager.registerSchema] cannot register schema name "${schemaName}", schema name already exists`);
     }
 
     ParameterBag.validateSchema(schema);
 
     this._schemas.set(schemaName, clonedeep(schema));
+    // create hooks list
+    this._hooksBySchemaName.set(schemaName, new Set());
   }
 
   /**
@@ -276,18 +279,31 @@ class SharedStateManagerServer extends SharedStateManagerClient {
     }
 
     this._schemas.delete(schemaName);
+    // delete registered hooks
+    this._hooksBySchemaName.delete(schemaName);
   }
 
   /**
+   * @callback server.SharedStateManagerServer~updateHook
+  /**
    * Register a function for a given schema (e.g. will be applied on all states
    * created from this schema) that will be executed before the update values
-   * are propagated.
+   * are propagated. For example, this could be used to implement a preset system
+   * where all the values of the state are updated from e.g. some data stored in
+   * filesystem while the consumer of the state only want to update the preset name.
    *
    */
-  // setUpdateHook(schemaName, updateHook) {
+  registerUpdateHook(schemaName, updateHook) {
+    // throw error if schemaName has not been registered
+    if (!this._schemas.has(schemaName)) {
+      throw new Error(`[stateManager.registerUpdateHook] cannot register update hook for schema name "${schemaName}", schema name does not exists`);
+    }
 
-      // return unsetUpdateHook
-  // }
+    const hooks = this._hooksBySchemaName.get(schemaName);
+    hooks.add(updateHook);
+
+    return () => hooks.delete(updateHook);
+  }
 
 }
 

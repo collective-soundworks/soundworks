@@ -10,6 +10,7 @@ const ClientAbstractExperience = require('../../client').AbstractExperience;
 const config = require('./config');
 const a = require('./schemas/a');
 const b = require('./schemas/b');
+const hookSchema = require('./schemas/hookSchema');
 
 /**
  * NOTE
@@ -87,7 +88,7 @@ describe('stateManager.registerSchema(schemaName, definition)', () => {
     server.stateManager.registerSchema('b', b);
   });
 
-  it ('should register schema with same definition', () => {
+  it ('should register another schema reusing same definition', () => {
     server.stateManager.registerSchema('aa', a);
   });
 });
@@ -429,6 +430,143 @@ describe('stateManager.deleteSchema(name)', () => {
         resolve();
       }, 200);
     });
+  });
+});
+
+describe('stateManager.setUpdateHook(schemaName, updateHook)', () => {
+  it('should execute hook properly', async () => {
+    server.stateManager.registerSchema('hooked', hookSchema);
+    server.stateManager.registerUpdateHook('hooked', (updates, currentValues) => {
+      updates.value = `${updates.name}-value`;
+      return updates;
+    });
+
+    const hServer = await server.stateManager.create('hooked');
+    const hClient = await clients[0].stateManager.attach('hooked');
+
+    const serverPromise = new Promise(resolve => {
+      hServer.subscribe(updates => {
+        assert.equal(updates.value, `${updates.name}-value`);
+        resolve();
+      });
+    });
+
+    const clientPromise = new Promise(resolve => {
+      hClient.subscribe(updates => {
+        assert.equal(updates.value, `${updates.name}-value`);
+        resolve();
+      });
+    });
+
+    await hServer.set({ name: 'test' });
+
+    assert.deepEqual(hServer.getValues(), { name: 'test', value: 'test-value' });
+
+    await Promise.all([serverPromise, clientPromise]);
+    server.stateManager.deleteSchema('hooked');
+
+    return Promise.resolve();
+  });
+
+  it('hook API should be `hook(updates, currentValues)`', async () => {
+    return new Promise(async resolve => {
+      server.stateManager.registerSchema('hooked', hookSchema);
+      server.stateManager.registerUpdateHook('hooked', (updates, currentValues) => {
+        assert.deepEqual(updates, { name: 'test' });
+        assert.deepEqual(currentValues, { name: null, value: null });
+        resolve();
+        return updates;
+      });
+
+      const h = await server.stateManager.create('hooked');
+
+      await h.set({ name: 'test' });
+
+      server.stateManager.deleteSchema('hooked');
+    });
+  });
+
+
+  it('should not mess around when several states of same kind are created', async () => {
+    server.stateManager.registerSchema('hooked', hookSchema);
+    server.stateManager.registerUpdateHook('hooked', (updates, currentValues) => {
+      // just apply name to value
+      updates.value = `${updates.name}-value`;
+      return updates;
+    });
+
+    const h1 = await server.stateManager.create('hooked');
+    const h2 = await server.stateManager.create('hooked');
+
+    await h1.set({ name: 'test' });
+
+    assert.deepEqual(h1.getValues(), { name: 'test', value: 'test-value' });
+    assert.deepEqual(h2.getValues(), { name: null, value: null });
+
+    server.stateManager.deleteSchema('hooked');
+    return Promise.resolve();
+  });
+
+  it('should support asynchronous operation', async () => {
+    server.stateManager.registerSchema('hooked', hookSchema);
+    server.stateManager.registerUpdateHook('hooked', async (updates, currentValues) => {
+      return new Promise(resolve => {
+        setTimeout(() => {
+          resolve({
+            ...updates,
+            value: 'async-ok',
+          });
+        }, 50);
+      });
+    });
+
+    const h = await server.stateManager.create('hooked');
+
+    await h.set({ name: 'test' });
+    assert.deepEqual(h.getValues(), { name: 'test', value: 'async-ok' });
+
+    server.stateManager.deleteSchema('hooked');
+  });
+
+  it('should apply several hooks in registation order', async () => {
+    server.stateManager.registerSchema('hooked', hookSchema);
+    server.stateManager.registerUpdateHook('hooked', (updates, currentValues) => {
+      return { ...updates, value: 'ok-1' };
+    });
+
+    server.stateManager.registerUpdateHook('hooked', (updates, currentValues) => {
+      return { ...updates, value: 'ok-2' };
+    });
+
+    const h = await server.stateManager.create('hooked');
+
+    await h.set({ name: 'test' });
+    assert.deepEqual(h.getValues(), { name: 'test', value: 'ok-2' });
+
+    server.stateManager.deleteSchema('hooked');
+  });
+
+  it('should unregister hooks properly', async () => {
+    server.stateManager.registerSchema('hooked', hookSchema);
+    server.stateManager.registerUpdateHook('hooked', (updates, currentValues) => {
+      return { ...updates, value: 'ok-1' };
+    });
+
+    const unregister = server.stateManager.registerUpdateHook('hooked', (updates, currentValues) => {
+      return { ...updates, value: 'ok-2' };
+    });
+
+    const h = await server.stateManager.create('hooked');
+
+    await h.set({ name: 'test-1' });
+    assert.deepEqual(h.getValues(), { name: 'test-1', value: 'ok-2' });
+
+    unregister(); // remove second hook
+
+    await h.set({ name: 'test-2' });
+    assert.deepEqual(h.getValues(), { name: 'test-2', value: 'ok-1' });
+
+    server.stateManager.deleteSchema('hooked');
   });
 });
 
