@@ -13,5 +13,10 @@ module.exports = {
   event: {
     type: 'boolean',
     event: true,
-  }
+  },
+  doNotFilterChange: {
+    type: 'boolean',
+    default: true,
+    filterChange: false,
+  },
 };

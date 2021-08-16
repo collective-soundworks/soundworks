@@ -248,7 +248,7 @@ class SharedStateManagerServer extends SharedStateManagerClient {
    */
   registerSchema(schemaName, schema) {
     if (this._schemas.has(schemaName)) {
-      throw new Error(`[stateManager.registerSchema] cannot register schema name "${schemaName}", schema name already exists`);
+      throw new Error(`[stateManager.registerSchema] cannot register schema with name: "${schemaName}", schema name already exists`);
     }
 
     ParameterBag.validateSchema(schema);

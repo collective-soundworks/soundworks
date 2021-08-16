@@ -49,6 +49,8 @@ before(async () => {
   server.templateDirectory = __dirname;
 
   await server.init(config);
+  server.stateManager.registerSchema('a', a);
+  server.stateManager.registerSchema('b', b);
   const serverExperience = new ServerTestExperience(server, 'test');
 
   await server.start();
@@ -81,11 +83,12 @@ console.log('* ------------------------------------- *');
 console.log('* @soundworks/core.StateManager');
 console.log('* ------------------------------------- *');
 
-
 describe('stateManager.registerSchema(schemaName, definition)', () => {
-  it ('should register schema', () => {
-    server.stateManager.registerSchema('a', a);
-    server.stateManager.registerSchema('b', b);
+  it('should register schema', () => {
+    assert.throws(() => {
+      server.stateManager.registerSchema('a', a);
+    }, Error, '[stateManager.registerSchema] cannot register schema with name: "a", schema name already exists');
+
   });
 
   it ('should register another schema reusing same definition', () => {
@@ -203,7 +206,7 @@ describe('async state.set(updates) => updates', () => {
   });
 });
 
-describe('state.subscribe(updates => {}) => unsubscribe', () => {
+describe.only('state.subscribe(updates => {}) => unsubscribe', () => {
   it('should be notified with updates when an update is made', async () => {
     const a = await server.stateManager.create('a');
 
@@ -217,7 +220,7 @@ describe('state.subscribe(updates => {}) => unsubscribe', () => {
     });
   });
 
-  it('should not propagate updates if the value does not change when [event=false]', async () => {
+  it('default options [event=false, filterChange=true] should behave correctly', async () => {
     const a = await server.stateManager.create('a');
     let counter = 0;
 
@@ -238,7 +241,7 @@ describe('state.subscribe(updates => {}) => unsubscribe', () => {
     });
   });
 
-  it('should propagate updates even if the value does not change when [event=true]', async () => {
+  it('[event=true] should behave correctl', async () => {
     const a = await server.stateManager.create('a');
     const numEvents = 5;
     let counter = 0;
@@ -251,8 +254,10 @@ describe('state.subscribe(updates => {}) => unsubscribe', () => {
     let updates;
     for (let i = 0; i < numEvents; i++) {
       updates = await a.set({ event: true });
-      assert.deepEqual(updates, { event: true })
-      assert.equal(a.get('event', null));
+      // returned updates object has the proper value
+      assert.deepEqual(updates, { event: true });
+      // but value is null if read from state
+      assert.equal(a.get('event'), null);
       updates = null;
     }
 
@@ -264,7 +269,31 @@ describe('state.subscribe(updates => {}) => unsubscribe', () => {
     });
   });
 
-  it(`should unsubsribe to stop receiving updates events`, async () => {
+  it('[filterChange=false] should behave correctly', async () => {
+    const a = await server.stateManager.create('a');
+    const numEvents = 5;
+    let counter = 0;
+
+    a.subscribe(updates => {
+      assert.deepEqual(updates, { doNotFilterChange: true });
+      counter += 1;
+    });
+
+    for (let i = 0; i < numEvents; i++) {
+      await a.set({ doNotFilterChange: true });
+      // contrary to `event` the value is still stored into the state
+      assert.equal(a.get('doNotFilterChange'), true);
+    }
+
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        assert.equal(counter, numEvents);
+        resolve();
+      }, 100);
+    });
+  });
+
+  it(`should return working unsubscribe() function`, async () => {
     const a = await server.stateManager.create('a');
 
     const unsubsribe = a.subscribe(updates => {

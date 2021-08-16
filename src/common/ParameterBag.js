@@ -38,10 +38,17 @@ import equal from 'fast-deep-equal';
  *
  * @property {String} type='boolean' - Define a boolean parameter.
  * @property {Boolean} default - Default value of the parameter.
- * @property {Boolean} [nullable=false] - Define if the parameter is nullable.
+ * @property {Boolean} [nullable=false] - Define if the parameter is nullable. If
+ *   set to `true` the parameter `default` is set to `null`.
  * @property {Boolean} [event=false] - Define if the parameter is a volatile, e.g.
  *   set its value back to `null` after propagation. When `true`, `nullable` is
  *   automatically set to `true` and `default` to `null`.
+ * @property {Boolean} [filterChange=true] - Setting this option to `false` forces
+ *   the propagation of a parameter even when its value do not change. It
+ *   offers a kind of middle ground between the default bahavior (e.g. where
+ *   only changed values are propagated) and the behavior of the `event` option
+ *   (which has no state per se). As such, setting this options to `false` if
+ *   `event=true` does not make sens.
  * @property {Object} [metas={}] - Optionnal metadata of the parameter.
  */
 /**
@@ -49,10 +56,17 @@ import equal from 'fast-deep-equal';
  *
  * @property {String} type='string' - Define a boolean parameter.
  * @property {Mixed} default - Default value of the parameter.
- * @property {Boolean} [nullable=false] - Define if the parameter is nullable.
+ * @property {Boolean} [nullable=false] - Define if the parameter is nullable. If
+ *   set to `true` the parameter `default` is set to `null`.
  * @property {Boolean} [event=false] - Define if the parameter is a volatile, e.g.
  *   set its value back to `null` after propagation. When `true`, `nullable` is
  *   automatically set to `true` and `default` to `null`.
+ * @property {Boolean} [filterChange=true] - Setting this option to `false` forces
+ *   the propagation of a parameter even when its value do not change. It
+ *   offers a kind of middle ground between the default bahavior (e.g. where
+ *   only changed values are propagated) and the behavior of the `event` option
+ *   (which has no state per se). As such, setting this options to `false` if
+ *   `event=true` does not make sens.
  * @property {Object} [metas={}] - Optionnal metadata of the parameter.
  */
 /**
@@ -60,13 +74,19 @@ import equal from 'fast-deep-equal';
  *
  * @property {String} type='integer' - Define a boolean parameter.
  * @property {Mixed} default - Default value of the parameter.
- * @property {Mixed} default - Default value of the parameter.
  * @property {Number} [min=-Infinity] - Minimum value of the parameter.
  * @property {Number} [max=+Infinity] - Maximum value of the parameter.
- * @property {Boolean} [nullable=false] - Define if the parameter is nullable.
+ * @property {Boolean} [nullable=false] - Define if the parameter is nullable. If
+ *   set to `true` the parameter `default` is set to `null`.
  * @property {Boolean} [event=false] - Define if the parameter is a volatile, e.g.
  *   set its value back to `null` after propagation. When `true`, `nullable` is
  *   automatically set to `true` and `default` to `null`.
+ * @property {Boolean} [filterChange=true] - Setting this option to `false` forces
+ *   the propagation of a parameter even when its value do not change. It
+ *   offers a kind of middle ground between the default bahavior (e.g. where
+ *   only changed values are propagated) and the behavior of the `event` option
+ *   (which has no state per se). As such, setting this options to `false` if
+ *   `event=true` does not make sens.
  * @property {Object} [metas={}] - Optionnal metadata of the parameter.
  */
 /**
@@ -76,10 +96,17 @@ import equal from 'fast-deep-equal';
  * @property {Mixed} default - Default value.
  * @property {Number} [min=-Infinity] - Minimum value.
  * @property {Number} [max=+Infinity] - Maximum value.
- * @property {Boolean} [nullable=false] - Define if the parameter is nullable.
+ * @property {Boolean} [nullable=false] - Define if the parameter is nullable. If
+ *   set to `true` the parameter `default` is set to `null`.
  * @property {Boolean} [event=false] - Define if the parameter is a volatile, e.g.
  *   set its value back to `null` after propagation. When `true`, `nullable` is
  *   automatically set to `true` and `default` to `null`.
+ * @property {Boolean} [filterChange=true] - Setting this option to `false` forces
+ *   the propagation of a parameter even when its value do not change. It
+ *   offers a kind of middle ground between the default bahavior (e.g. where
+ *   only changed values are propagated) and the behavior of the `event` option
+ *   (which has no state per se). As such, setting this options to `false` if
+ *   `event=true` does not make sens.
  * @property {Object} [metas={}] - Optionnal metadata of the parameter.
  */
 /**
@@ -88,10 +115,17 @@ import equal from 'fast-deep-equal';
  * @property {String} [type='enum'] - Enum parameter.
  * @property {Mixed} default - Default value of the parameter.
  * @property {Array} list - Possible values of the parameter.
- * @property {Boolean} [nullable=false] - Define if the parameter is nullable.
+ * @property {Boolean} [nullable=false] - Define if the parameter is nullable. If
+ *   set to `true` the parameter `default` is set to `null`.
  * @property {Boolean} [event=false] - Define if the parameter is a volatile, e.g.
  *   set its value back to `null` after propagation. When `true`, `nullable` is
  *   automatically set to `true` and `default` to `null`.
+ * @property {Boolean} [filterChange=true] - Setting this option to `false` forces
+ *   the propagation of a parameter even when its value do not change. It
+ *   offers a kind of middle ground between the default bahavior (e.g. where
+ *   only changed values are propagated) and the behavior of the `event` option
+ *   (which has no state per se). As such, setting this options to `false` if
+ *   `event=true` does not make sens.
  * @property {Object} [metas={}] - Optionnal metadata of the parameter.
  */
 /**
@@ -99,10 +133,17 @@ import equal from 'fast-deep-equal';
  *
  * @property {String} [type='any'] - Parameter of any type.
  * @property {Mixed} default - Default value of the parameter.
- * @property {Boolean} [nullable=false] - Define if the parameter is nullable.
+ * @property {Boolean} [nullable=false] - Define if the parameter is nullable. If
+ *   set to `true` the parameter `default` is set to `null`.
  * @property {Boolean} [event=false] - Define if the parameter is a volatile, e.g.
  *   set its value back to `null` after propagation. When `true`, `nullable` is
  *   automatically set to `true` and `default` to `null`.
+ * @property {Boolean} [filterChange=true] - Setting this option to `false` forces
+ *   the propagation of a parameter even when its value do not change. It
+ *   offers a kind of middle ground between the default bahavior (e.g. where
+ *   only changed values are propagated) and the behavior of the `event` option
+ *   (which has no state per se). As such, setting this options to `false` if
+ *   `event=true` does not make sens.
  * @property {Object} [metas={}] - Optionnal metadata of the parameter.
  */
 
@@ -110,7 +151,7 @@ export const sharedOptions = {
   nullable: false,
   event: false, // if event=true, nullable=true
   metas: {},
-  // filterChange: true,
+  filterChange: true,
   // immediate: false,
 }
 

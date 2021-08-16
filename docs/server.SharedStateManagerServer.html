@@ -1408,7 +1408,7 @@ name of the parameter, and the value is an object describing the parameter.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_ParameterBag.js.html">common/ParameterBag.js</a>, <a href="common_ParameterBag.js.html#line97">line 97</a>
+        <a href="common_ParameterBag.js.html">common/ParameterBag.js</a>, <a href="common_ParameterBag.js.html#line131">line 131</a>
     </li></ul></dd>
     
 
@@ -1575,7 +1575,8 @@ name of the parameter, and the value is an object describing the parameter.</p>
                 </td>
             
 
-            <td class="description last"><p>Define if the parameter is nullable.</p></td>
+            <td class="description last"><p>Define if the parameter is nullable. If
+set to <code>true</code> the parameter <code>default</code> is set to <code>null</code>.</p></td>
         </tr>
 
     
@@ -1615,6 +1616,48 @@ name of the parameter, and the value is an object describing the parameter.</p>
             <td class="description last"><p>Define if the parameter is a volatile, e.g.
 set its value back to <code>null</code> after propagation. When <code>true</code>, <code>nullable</code> is
 automatically set to <code>true</code> and <code>default</code> to <code>null</code>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>filterChange</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>true</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Setting this option to <code>false</code> forces
+the propagation of a parameter even when its value do not change. It
+offers a kind of middle ground between the default bahavior (e.g. where
+only changed values are propagated) and the behavior of the <code>event</code> option
+(which has no state per se). As such, setting this options to <code>false</code> if
+<code>event=true</code> does not make sens.</p></td>
         </tr>
 
     
@@ -1858,7 +1901,8 @@ automatically set to <code>true</code> and <code>default</code> to <code>null</c
                 </td>
             
 
-            <td class="description last"><p>Define if the parameter is nullable.</p></td>
+            <td class="description last"><p>Define if the parameter is nullable. If
+set to <code>true</code> the parameter <code>default</code> is set to <code>null</code>.</p></td>
         </tr>
 
     
@@ -1898,6 +1942,48 @@ automatically set to <code>true</code> and <code>default</code> to <code>null</c
             <td class="description last"><p>Define if the parameter is a volatile, e.g.
 set its value back to <code>null</code> after propagation. When <code>true</code>, <code>nullable</code> is
 automatically set to <code>true</code> and <code>default</code> to <code>null</code>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>filterChange</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>true</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Setting this option to <code>false</code> forces
+the propagation of a parameter even when its value do not change. It
+offers a kind of middle ground between the default bahavior (e.g. where
+only changed values are propagated) and the behavior of the <code>event</code> option
+(which has no state per se). As such, setting this options to <code>false</code> if
+<code>event=true</code> does not make sens.</p></td>
         </tr>
 
     
@@ -1976,7 +2062,7 @@ automatically set to <code>true</code> and <code>default</code> to <code>null</c
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_ParameterBag.js.html">common/ParameterBag.js</a>, <a href="common_ParameterBag.js.html#line85">line 85</a>
+        <a href="common_ParameterBag.js.html">common/ParameterBag.js</a>, <a href="common_ParameterBag.js.html#line112">line 112</a>
     </li></ul></dd>
     
 
@@ -2176,7 +2262,8 @@ automatically set to <code>true</code> and <code>default</code> to <code>null</c
                 </td>
             
 
-            <td class="description last"><p>Define if the parameter is nullable.</p></td>
+            <td class="description last"><p>Define if the parameter is nullable. If
+set to <code>true</code> the parameter <code>default</code> is set to <code>null</code>.</p></td>
         </tr>
 
     
@@ -2216,6 +2303,48 @@ automatically set to <code>true</code> and <code>default</code> to <code>null</c
             <td class="description last"><p>Define if the parameter is a volatile, e.g.
 set its value back to <code>null</code> after propagation. When <code>true</code>, <code>nullable</code> is
 automatically set to <code>true</code> and <code>default</code> to <code>null</code>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>filterChange</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>true</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Setting this option to <code>false</code> forces
+the propagation of a parameter even when its value do not change. It
+offers a kind of middle ground between the default bahavior (e.g. where
+only changed values are propagated) and the behavior of the <code>event</code> option
+(which has no state per se). As such, setting this options to <code>false</code> if
+<code>event=true</code> does not make sens.</p></td>
         </tr>
 
     
@@ -2294,7 +2423,7 @@ automatically set to <code>true</code> and <code>default</code> to <code>null</c
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_ParameterBag.js.html">common/ParameterBag.js</a>, <a href="common_ParameterBag.js.html#line72">line 72</a>
+        <a href="common_ParameterBag.js.html">common/ParameterBag.js</a>, <a href="common_ParameterBag.js.html#line92">line 92</a>
     </li></ul></dd>
     
 
@@ -2535,7 +2664,8 @@ automatically set to <code>true</code> and <code>default</code> to <code>null</c
                 </td>
             
 
-            <td class="description last"><p>Define if the parameter is nullable.</p></td>
+            <td class="description last"><p>Define if the parameter is nullable. If
+set to <code>true</code> the parameter <code>default</code> is set to <code>null</code>.</p></td>
         </tr>
 
     
@@ -2575,6 +2705,48 @@ automatically set to <code>true</code> and <code>default</code> to <code>null</c
             <td class="description last"><p>Define if the parameter is a volatile, e.g.
 set its value back to <code>null</code> after propagation. When <code>true</code>, <code>nullable</code> is
 automatically set to <code>true</code> and <code>default</code> to <code>null</code>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>filterChange</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>true</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Setting this option to <code>false</code> forces
+the propagation of a parameter even when its value do not change. It
+offers a kind of middle ground between the default bahavior (e.g. where
+only changed values are propagated) and the behavior of the <code>event</code> option
+(which has no state per se). As such, setting this options to <code>false</code> if
+<code>event=true</code> does not make sens.</p></td>
         </tr>
 
     
@@ -2653,7 +2825,7 @@ automatically set to <code>true</code> and <code>default</code> to <code>null</c
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_ParameterBag.js.html">common/ParameterBag.js</a>, <a href="common_ParameterBag.js.html#line58">line 58</a>
+        <a href="common_ParameterBag.js.html">common/ParameterBag.js</a>, <a href="common_ParameterBag.js.html#line72">line 72</a>
     </li></ul></dd>
     
 
@@ -2749,39 +2921,6 @@ automatically set to <code>true</code> and <code>default</code> to <code>null</c
             
 
             <td class="description last"><p>Define a boolean parameter.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>default</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Mixed</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last"><p>Default value of the parameter.</p></td>
         </tr>
 
     
@@ -2925,7 +3064,8 @@ automatically set to <code>true</code> and <code>default</code> to <code>null</c
                 </td>
             
 
-            <td class="description last"><p>Define if the parameter is nullable.</p></td>
+            <td class="description last"><p>Define if the parameter is nullable. If
+set to <code>true</code> the parameter <code>default</code> is set to <code>null</code>.</p></td>
         </tr>
 
     
@@ -2965,6 +3105,48 @@ automatically set to <code>true</code> and <code>default</code> to <code>null</c
             <td class="description last"><p>Define if the parameter is a volatile, e.g.
 set its value back to <code>null</code> after propagation. When <code>true</code>, <code>nullable</code> is
 automatically set to <code>true</code> and <code>default</code> to <code>null</code>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>filterChange</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>true</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Setting this option to <code>false</code> forces
+the propagation of a parameter even when its value do not change. It
+offers a kind of middle ground between the default bahavior (e.g. where
+only changed values are propagated) and the behavior of the <code>event</code> option
+(which has no state per se). As such, setting this options to <code>false</code> if
+<code>event=true</code> does not make sens.</p></td>
         </tr>
 
     
@@ -3043,7 +3225,7 @@ automatically set to <code>true</code> and <code>default</code> to <code>null</c
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_ParameterBag.js.html">common/ParameterBag.js</a>, <a href="common_ParameterBag.js.html#line47">line 47</a>
+        <a href="common_ParameterBag.js.html">common/ParameterBag.js</a>, <a href="common_ParameterBag.js.html#line54">line 54</a>
     </li></ul></dd>
     
 
@@ -3208,7 +3390,8 @@ automatically set to <code>true</code> and <code>default</code> to <code>null</c
                 </td>
             
 
-            <td class="description last"><p>Define if the parameter is nullable.</p></td>
+            <td class="description last"><p>Define if the parameter is nullable. If
+set to <code>true</code> the parameter <code>default</code> is set to <code>null</code>.</p></td>
         </tr>
 
     
@@ -3248,6 +3431,48 @@ automatically set to <code>true</code> and <code>default</code> to <code>null</c
             <td class="description last"><p>Define if the parameter is a volatile, e.g.
 set its value back to <code>null</code> after propagation. When <code>true</code>, <code>nullable</code> is
 automatically set to <code>true</code> and <code>default</code> to <code>null</code>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>filterChange</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>true</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Setting this option to <code>false</code> forces
+the propagation of a parameter even when its value do not change. It
+offers a kind of middle ground between the default bahavior (e.g. where
+only changed values are propagated) and the behavior of the <code>event</code> option
+(which has no state per se). As such, setting this options to <code>false</code> if
+<code>event=true</code> does not make sens.</p></td>
         </tr>
 
     
@@ -3509,7 +3734,7 @@ result of the previous hook</p></td>
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a> on Mon Aug 16 2021 16:38:03 GMT+0200 (Central European Summer Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a> on Mon Aug 16 2021 18:23:12 GMT+0200 (Central European Summer Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>

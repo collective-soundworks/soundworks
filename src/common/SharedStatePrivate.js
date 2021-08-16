@@ -60,11 +60,11 @@ class SharedStatePrivate {
         updates = await hook(updates, this._parameters.getValues());
       }
 
-      const updated = {};
-      let dirty = false;
+      const filteredUpdates = {};
+      let hasUpdates = false;
 
       for (let name in updates) {
-        // from v3.1.0 - the `updated` check is made using 'fast-deep-equal'
+        // from v3.1.0 - the `filteredUpdates` check is made using 'fast-deep-equal'
         //    cf. https://github.com/epoberezkin/fast-deep-equal
         //    therefore unchanged objects are not considered changed
         //    nor propagated anymore.
@@ -74,20 +74,19 @@ class SharedStatePrivate {
         //    @note - this should be made more robust but how?
         const [newValue, changed] = this._parameters.set(name, updates[name]);
 
-        // @note - we could handle filterChange option here or inside ParameterBag
-        // see what would be the more logical to do have a consistent behavior
-        // when used in conjonction with immediate (cf. immediate)
+        // if `filterChange` is set to `false` we don't check if the value
+        // has been changed or not, it is always propagated to client states
+        const { filterChange } = this._parameters.getSchema(name);
 
-        if (changed) {
-          updated[name] = newValue;
+        if ((filterChange && changed) || !filterChange) {
+          filteredUpdates[name] = newValue;
+          hasUpdates = true;
         }
-
-        dirty = (dirty || changed);
       }
 
-      if (dirty) {
+      if (hasUpdates) {
         // send response to requester
-        // client.transport.emit(`${UPDATE_RESPONSE}-${this.id}-${remoteId}`, reqId, updated);
+        // client.transport.emit(`${UPDATE_RESPONSE}-${this.id}-${remoteId}`, reqId, filteredUpdates);
 
         // @note: we propagate server-side last, because as the server transport
         // is synchronous it can break ordering if a subscription function makes
@@ -111,23 +110,23 @@ class SharedStatePrivate {
         for (let [peerRemoteId, peer] of this._attachedClients.entries()) {
           // propagate notification to all other attached clients except server
           if (remoteId !== peerRemoteId && peer.id !== -1) {
-            peer.transport.emit(`${UPDATE_NOTIFICATION}-${this.id}-${peerRemoteId}`, updated);
+            peer.transport.emit(`${UPDATE_NOTIFICATION}-${this.id}-${peerRemoteId}`, filteredUpdates);
           }
         }
 
         if (client.id !== -1) {
-          client.transport.emit(`${UPDATE_RESPONSE}-${this.id}-${remoteId}`, reqId, updated);
+          client.transport.emit(`${UPDATE_RESPONSE}-${this.id}-${remoteId}`, reqId, filteredUpdates);
         }
 
         for (let [peerRemoteId, peer] of this._attachedClients.entries()) {
           // propagate notification to server
           if (remoteId !== peerRemoteId && peer.id === -1) {
-            peer.transport.emit(`${UPDATE_NOTIFICATION}-${this.id}-${peerRemoteId}`, updated);
+            peer.transport.emit(`${UPDATE_NOTIFICATION}-${this.id}-${peerRemoteId}`, filteredUpdates);
           }
         }
 
         if (client.id === -1) {
-          client.transport.emit(`${UPDATE_RESPONSE}-${this.id}-${remoteId}`, reqId, updated);
+          client.transport.emit(`${UPDATE_RESPONSE}-${this.id}-${remoteId}`, reqId, filteredUpdates);
         }
       } else {
         // propagate back to the requester that the update has been aborted
