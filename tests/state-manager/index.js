@@ -165,11 +165,15 @@ describe('async state.set(updates) => updates', () => {
     assert.equal(a.get('bool'), true);
   });
 
-  it('should return the update but not keep the value when [event=true]', async() => {
+  it('should throw early on undefined param name', async () => {
     const a = await server.stateManager.create('a');
-    const updates = await a.set({ event: true });
-    assert.deepEqual(updates, { event: true });
-    assert.equal(a.get('event'), null);
+
+    // weird stuff with async chai, did find better solution
+    try {
+      await a.set({ unkown: true })
+    } catch(err) {
+      assert.equal(err.message, `[stateManager] Cannot set value of undefined parameter "unkown"`)
+    }
   });
 
   it('should keep states of same kind isolated', async () => {
@@ -206,7 +210,7 @@ describe('async state.set(updates) => updates', () => {
   });
 });
 
-describe.only('state.subscribe(updates => {}) => unsubscribe', () => {
+describe('state.subscribe(updates => {}) => unsubscribe', () => {
   it('should be notified with updates when an update is made', async () => {
     const a = await server.stateManager.create('a');
 
@@ -217,79 +221,6 @@ describe.only('state.subscribe(updates => {}) => unsubscribe', () => {
       });
 
       await a.set({ bool: true });
-    });
-  });
-
-  it('default options [event=false, filterChange=true] should behave correctly', async () => {
-    const a = await server.stateManager.create('a');
-    let counter = 0;
-
-    a.subscribe(updates => {
-      assert.deepEqual(updates, { bool: true });
-      counter += 1;
-    });
-
-    await a.set({ bool: true });
-    await a.set({ bool: true });
-    await a.set({ bool: true });
-
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        assert.equal(counter, 1);
-        resolve();
-      }, 100);
-    });
-  });
-
-  it('[event=true] should behave correctl', async () => {
-    const a = await server.stateManager.create('a');
-    const numEvents = 5;
-    let counter = 0;
-
-    a.subscribe(updates => {
-      assert.deepEqual(updates, { event: true });
-      counter += 1;
-    });
-
-    let updates;
-    for (let i = 0; i < numEvents; i++) {
-      updates = await a.set({ event: true });
-      // returned updates object has the proper value
-      assert.deepEqual(updates, { event: true });
-      // but value is null if read from state
-      assert.equal(a.get('event'), null);
-      updates = null;
-    }
-
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        assert.equal(counter, numEvents);
-        resolve();
-      }, 100);
-    });
-  });
-
-  it('[filterChange=false] should behave correctly', async () => {
-    const a = await server.stateManager.create('a');
-    const numEvents = 5;
-    let counter = 0;
-
-    a.subscribe(updates => {
-      assert.deepEqual(updates, { doNotFilterChange: true });
-      counter += 1;
-    });
-
-    for (let i = 0; i < numEvents; i++) {
-      await a.set({ doNotFilterChange: true });
-      // contrary to `event` the value is still stored into the state
-      assert.equal(a.get('doNotFilterChange'), true);
-    }
-
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        assert.equal(counter, numEvents);
-        resolve();
-      }, 100);
     });
   });
 
@@ -306,6 +237,412 @@ describe.only('state.subscribe(updates => {}) => unsubscribe', () => {
 
     return new Promise((resolve, reject) => {
       setTimeout(resolve, 100);
+    });
+  });
+});
+
+describe('schema options', () => {
+  it('default options [event=false, filterChange=true, immediate=false] should behave correctly', async () => {
+    return new Promise(async (resolve, reject) => {
+      const a = await server.stateManager.create('a');
+      let counter = 0;
+
+      a.subscribe(updates => {
+        try {
+          assert.deepEqual(updates, { bool: true });
+          counter += 1;
+        } catch(err) {
+          reject(err);
+        }
+      });
+
+      await a.set({ bool: true });
+      await a.set({ bool: true });
+      await a.set({ bool: true });
+
+      setTimeout(() => {
+        assert.equal(counter, 1);
+        resolve();
+      }, 100);
+    });
+  });
+
+  it('[event=true] should behave correctl', async () => {
+    return new Promise(async (resolve, reject) => {
+      server.stateManager.registerSchema('event-test', {
+        value: {
+          type: 'boolean',
+          event: true,
+        }
+      });
+      const state = await server.stateManager.create('event-test');
+      const numEvents = 5;
+      let counter = 0;
+
+      state.subscribe(updates => {
+        try {
+          assert.deepEqual(updates, { value: true });
+          counter += 1;
+        } catch(err) {
+          reject(err);
+        }
+      });
+
+      let updates;
+      for (let i = 0; i < numEvents; i++) {
+        updates = await state.set({ value: true });
+        // returned updates object has the proper value
+        assert.deepEqual(updates, { value: true });
+        // but value is null if read from state
+        assert.equal(state.get('value'), null);
+        updates = null;
+      }
+
+      setTimeout(() => {
+        assert.equal(counter, numEvents);
+        resolve();
+      }, 100);
+    });
+  });
+
+  it('[filterChange=false] should behave correctly', async () => {
+    return new Promise(async (resolve, reject) => {
+      server.stateManager.registerSchema('filter-change-test', {
+        value: {
+          type: 'boolean',
+          default: true,
+          filterChange: false,
+        }
+      });
+      const state = await server.stateManager.create('filter-change-test');
+      const numCalls = 5;
+      let counter = 0;
+
+      state.subscribe(updates => {
+        try {
+          assert.deepEqual(updates, { value: true });
+          counter += 1;
+        } catch(err) {
+          reject(err);
+        }
+      });
+
+      for (let i = 0; i < numCalls; i++) {
+        await state.set({ value: true });
+        // contrary to `event` the value is still stored into the state
+        assert.equal(state.get('value'), true);
+      }
+
+
+      setTimeout(() => {
+        // try {
+          assert.equal(counter, numCalls);
+          resolve();
+        // } catch(err) {
+        //   reject(err);
+        // }
+      }, 100);
+    });
+  });
+
+  it('[immediate=true] (w/ [event=false, filterChange=true]) should behave correctly', async () => {
+    return new Promise(async (resolve, reject) => {
+      server.stateManager.registerSchema('immediate-test', {
+        immediateValue: {
+          type: 'integer',
+          default: 0,
+          immediate: true,
+        },
+        normalValue: {
+          type: 'integer',
+          default: 0,
+        }
+      });
+
+      let subscribeCalledBeforeHook = false;
+
+      server.stateManager.registerUpdateHook('immediate-test', (updates, currentValues) => {
+        try {
+          // assert.fail();
+          assert.isTrue(subscribeCalledBeforeHook, 'subscribe should be called before hook');
+        } catch(err) {
+          reject(err);
+        }
+
+        if (updates.immediateValue === 2) {
+          return {
+            ...updates,
+            immediateValue: 3,
+          }
+        }
+
+        return updates;
+      });
+
+      const state = await clients[0].stateManager.create('immediate-test');
+      const attached = await clients[1].stateManager.attach('immediate-test');
+
+      const statePromise = new Promise((resolve) => {
+        let call = 0;
+
+        state.subscribe(updates => {
+          if (call === 0) {
+            subscribeCalledBeforeHook = true;
+
+            try {
+              assert.deepEqual(updates, { immediateValue: 1 });
+            } catch(err) {
+              reject(err);
+            }
+          } else if (call === 1) {
+            try {
+              assert.deepEqual(updates, { normalValue: 10 });
+              resolve();
+            } catch(err) {
+              reject(err);
+            }
+          } else if (call === 2) {
+            // call from immedaite
+            try {
+              assert.deepEqual(updates, { immediateValue: 2 });
+              resolve();
+            } catch(err) {
+              reject(err);
+            }
+          } else if (call === 3) {
+            // call from server override
+            try {
+              assert.deepEqual(updates, { immediateValue: 3 });
+              resolve();
+            } catch(err) {
+              reject(err);
+            }
+          } else {
+            reject('creator: something went wrong');
+          }
+
+          call += 1;
+        });
+      });
+
+      // should be notified normally if not initiator of the update
+      const attachedPromise = new Promise((resolve) => {
+        let call = 0;
+
+        attached.subscribe(updates => {
+          if (call === 0) {
+            try {
+              assert.deepEqual(updates, { immediateValue: 1, normalValue: 10 });
+              resolve();
+            } catch(err) {
+              reject(err);
+            }
+          } else if (call === 1) {
+            try {
+              assert.deepEqual(updates, { immediateValue: 3 });
+              resolve();
+            } catch(err) {
+              reject(err);
+            }
+          } else {
+            reject('attached: something went wrong');
+          }
+
+          call += 1;
+        });
+      });
+
+      // invalid value
+      try {
+        await state.set({ immediateValue: 1, normalValue: 10 });
+        // this should not trigger anything
+        await state.set({ immediateValue: 1, normalValue: 10 });
+        // if the value is overriden server-side, initiator should be called twice
+        // while attached should be called once with final value
+        await state.set({ immediateValue: 2 });
+      } catch(err) {
+        reject(err);
+      }
+
+      Promise.all([statePromise, attachedPromise]).then(() => resolve());
+    });
+  });
+
+  it('[immediate=true, event=true] should behave correctly', async () => {
+    return new Promise(async (resolve, reject) => {
+      server.stateManager.registerSchema('immediate-test-2', {
+        immediateValue: {
+          type: 'integer',
+          default: 0,
+          immediate: true,
+          event: true,
+        },
+        normalValue: {
+          type: 'integer',
+          default: 0,
+        }
+      });
+
+      const state = await clients[0].stateManager.create('immediate-test-2');
+      const attached = await clients[1].stateManager.attach('immediate-test-2');
+
+      const statePromise = new Promise((resolve) => {
+        let call = 0;
+
+        state.subscribe(updates => {
+          if (call === 0) {
+            try {
+              assert.deepEqual(updates, { immediateValue: 1 });
+            } catch(err) {
+              reject(err);
+            }
+          } else if (call === 1) {
+            try {
+              assert.deepEqual(updates, { normalValue: 10 });
+            } catch(err) {
+              reject(err);
+            }
+          } else if (call === 2) {
+            // as it's an event it should be retriggered
+            try {
+              assert.deepEqual(updates, { immediateValue: 1 });
+              resolve();
+            } catch(err) {
+              reject(err);
+            }
+          } else {
+            reject('creator: something wrong happened');
+          }
+
+          call += 1;
+        });
+      });
+
+      // should be notified normally if not initiator of the update
+      const attachedPromise = new Promise((resolve) => {
+        let call = 0;
+        attached.subscribe(updates => {
+          if (call === 0) {
+            try {
+              assert.deepEqual(updates, { immediateValue: 1, normalValue: 10 });
+              resolve();
+            } catch(err) {
+              reject(err);
+            }
+          } else if (call === 1) {
+            try {
+              assert.deepEqual(updates, { immediateValue: 1 });
+              resolve();
+            } catch(err) {
+              reject(err);
+            }
+          } else {
+            reject('attached: something wrong happened');
+          }
+
+          call += 1;
+        });
+      });
+
+      // invalid value
+      try {
+        await state.set({ immediateValue: 1, normalValue: 10 });
+        // this should not trigger anything
+        await state.set({ immediateValue: 1, normalValue: 10 });
+      } catch(err) {
+        reject(err);
+      }
+
+      Promise.all([statePromise, attachedPromise]).then(() => resolve());
+    });
+  });
+
+  it('[immediate=true, filterChange=false] should behave correctly', async () => {
+    return new Promise(async (resolve, reject) => {
+      server.stateManager.registerSchema('immediate-test-3', {
+        immediateValue: {
+          type: 'integer',
+          default: 0,
+          immediate: true,
+          filterChange: false,
+        },
+        normalValue: {
+          type: 'integer',
+          default: 0,
+        }
+      });
+
+      const state = await clients[0].stateManager.create('immediate-test-3');
+      const attached = await clients[1].stateManager.attach('immediate-test-3');
+
+      const statePromise = new Promise((resolve) => {
+        let call = 0;
+
+        state.subscribe(updates => {
+          if (call === 0) {
+            try {
+              assert.deepEqual(updates, { immediateValue: 1 });
+            } catch(err) {
+              reject(err);
+            }
+          } else if (call === 1) {
+            try {
+              assert.deepEqual(updates, { normalValue: 10 });
+            } catch(err) {
+              reject(err);
+            }
+          } else if (call === 2) {
+            // as it's an event it should be retriggered
+            try {
+              assert.deepEqual(updates, { immediateValue: 1 });
+              resolve();
+            } catch(err) {
+              reject(err);
+            }
+          } else {
+            reject('creator: something wrong happened');
+          }
+
+          call += 1;
+        });
+      });
+
+      // should be notified normally if not initiator of the update
+      const attachedPromise = new Promise((resolve) => {
+        let call = 0;
+        attached.subscribe(updates => {
+          if (call === 0) {
+            try {
+              assert.deepEqual(updates, { immediateValue: 1, normalValue: 10 });
+              resolve();
+            } catch(err) {
+              reject(err);
+            }
+          } else if (call === 1) {
+            try {
+              assert.deepEqual(updates, { immediateValue: 1 });
+              resolve();
+            } catch(err) {
+              reject(err);
+            }
+          } else {
+            reject('attached: something wrong happened');
+          }
+
+          call += 1;
+        });
+      });
+
+      // invalid value
+      try {
+        await state.set({ immediateValue: 1, normalValue: 10 });
+        // this should not trigger anything
+        await state.set({ immediateValue: 1, normalValue: 10 });
+      } catch(err) {
+        reject(err);
+      }
+
+      Promise.all([statePromise, attachedPromise]).then(() => resolve());
     });
   });
 });
@@ -473,17 +810,25 @@ describe('stateManager.setUpdateHook(schemaName, updateHook)', () => {
     const hServer = await server.stateManager.create('hooked');
     const hClient = await clients[0].stateManager.attach('hooked');
 
-    const serverPromise = new Promise(resolve => {
+    const serverPromise = new Promise((resolve, reject) => {
       hServer.subscribe(updates => {
-        assert.equal(updates.value, `${updates.name}-value`);
-        resolve();
+        try {
+          assert.equal(updates.value, `${updates.name}-value`);
+          resolve();
+        } catch(err) {
+          reject(err);
+        }
       });
     });
 
-    const clientPromise = new Promise(resolve => {
+    const clientPromise = new Promise((resolve, reject) => {
       hClient.subscribe(updates => {
-        assert.equal(updates.value, `${updates.name}-value`);
-        resolve();
+        try {
+          assert.equal(updates.value, `${updates.name}-value`);
+          resolve();
+        } catch(err) {
+          reject(err);
+        }
       });
     });
 
@@ -491,19 +836,27 @@ describe('stateManager.setUpdateHook(schemaName, updateHook)', () => {
 
     assert.deepEqual(hServer.getValues(), { name: 'test', value: 'test-value' });
 
-    await Promise.all([serverPromise, clientPromise]);
-    server.stateManager.deleteSchema('hooked');
-
-    return Promise.resolve();
+    try {
+      await Promise.all([serverPromise, clientPromise]);
+      server.stateManager.deleteSchema('hooked');
+      return Promise.resolve();
+    } catch(err) {
+      server.stateManager.deleteSchema('hooked');
+      return Promise.reject(err);
+    }
   });
 
   it('hook API should be `hook(updates, currentValues)`', async () => {
-    return new Promise(async resolve => {
+    return new Promise(async (resolve, reject) => {
       server.stateManager.registerSchema('hooked', hookSchema);
       server.stateManager.registerUpdateHook('hooked', (updates, currentValues) => {
-        assert.deepEqual(updates, { name: 'test' });
-        assert.deepEqual(currentValues, { name: null, value: null });
-        resolve();
+        try {
+          assert.deepEqual(updates, { name: 'test' });
+          assert.deepEqual(currentValues, { name: null, value: null });
+          resolve();
+        } catch(err) {
+          reject(err);
+        }
         return updates;
       });
 
@@ -529,11 +882,16 @@ describe('stateManager.setUpdateHook(schemaName, updateHook)', () => {
 
     await h1.set({ name: 'test' });
 
-    assert.deepEqual(h1.getValues(), { name: 'test', value: 'test-value' });
-    assert.deepEqual(h2.getValues(), { name: null, value: null });
+    try {
+      assert.deepEqual(h1.getValues(), { name: 'test', value: 'test-value' });
+      assert.deepEqual(h2.getValues(), { name: null, value: null });
 
-    server.stateManager.deleteSchema('hooked');
-    return Promise.resolve();
+      server.stateManager.deleteSchema('hooked');
+      return Promise.resolve();
+    } catch(err) {
+      server.stateManager.deleteSchema('hooked');
+      return Promise.reject(err);
+    }
   });
 
   it('should support asynchronous operation', async () => {
@@ -552,9 +910,15 @@ describe('stateManager.setUpdateHook(schemaName, updateHook)', () => {
     const h = await server.stateManager.create('hooked');
 
     await h.set({ name: 'test' });
-    assert.deepEqual(h.getValues(), { name: 'test', value: 'async-ok' });
 
-    server.stateManager.deleteSchema('hooked');
+    try {
+      assert.deepEqual(h.getValues(), { name: 'test', value: 'async-ok' });
+      server.stateManager.deleteSchema('hooked');
+      return Promise.resolve();
+    } catch(err) {
+      server.stateManager.deleteSchema('hooked');
+      return Promise.reject(err);
+    }
   });
 
   it('should apply several hooks in registation order', async () => {
@@ -570,9 +934,15 @@ describe('stateManager.setUpdateHook(schemaName, updateHook)', () => {
     const h = await server.stateManager.create('hooked');
 
     await h.set({ name: 'test' });
-    assert.deepEqual(h.getValues(), { name: 'test', value: 'ok-2' });
 
-    server.stateManager.deleteSchema('hooked');
+    try {
+      assert.deepEqual(h.getValues(), { name: 'test', value: 'ok-2' });
+      server.stateManager.deleteSchema('hooked');
+      return Promise.resolve();
+    } catch(err) {
+      server.stateManager.deleteSchema('hooked');
+      return Promise.reject(err);
+    }
   });
 
   it('should unregister hooks properly', async () => {
@@ -587,15 +957,20 @@ describe('stateManager.setUpdateHook(schemaName, updateHook)', () => {
 
     const h = await server.stateManager.create('hooked');
 
-    await h.set({ name: 'test-1' });
-    assert.deepEqual(h.getValues(), { name: 'test-1', value: 'ok-2' });
+    try {
+      await h.set({ name: 'test-1' });
+      assert.deepEqual(h.getValues(), { name: 'test-1', value: 'ok-2' });
 
-    unregister(); // remove second hook
+      unregister(); // remove second hook
 
-    await h.set({ name: 'test-2' });
-    assert.deepEqual(h.getValues(), { name: 'test-2', value: 'ok-1' });
+      await h.set({ name: 'test-2' });
+      assert.deepEqual(h.getValues(), { name: 'test-2', value: 'ok-1' });
 
-    server.stateManager.deleteSchema('hooked');
+      server.stateManager.deleteSchema('hooked');
+    } catch(err) {
+      server.stateManager.deleteSchema('hooked');
+      return Promise.reject(err);
+    }
   });
 });
 

@@ -10,13 +10,4 @@ module.exports = {
     default: 0,
     step: 1,
   },
-  event: {
-    type: 'boolean',
-    event: true,
-  },
-  doNotFilterChange: {
-    type: 'boolean',
-    default: true,
-    filterChange: false,
-  },
 };

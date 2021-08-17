@@ -49,6 +49,13 @@ import equal from 'fast-deep-equal';
  *   only changed values are propagated) and the behavior of the `event` option
  *   (which has no state per se). As such, setting this options to `false` if
  *   `event=true` does not make sens.
+ * @property {Boolean} [immediate=false] - Setting this option to `true` will
+ *   trigger any change (e.g. call the subscribe listeners) immediately on the
+ *   state that generate the update (i.e. calling `set`), before propagating the
+ *   change on the network. This option can be usefull in cases the network
+ *   would introduce a noticeable latency on the client. If for some reason
+ *   the value is overriden server-side (e.g. in an updateHook) the listeners
+ *   will be called again on when the "real" / final value will be received.
  * @property {Object} [metas={}] - Optionnal metadata of the parameter.
  */
 /**
@@ -67,6 +74,13 @@ import equal from 'fast-deep-equal';
  *   only changed values are propagated) and the behavior of the `event` option
  *   (which has no state per se). As such, setting this options to `false` if
  *   `event=true` does not make sens.
+ * @property {Boolean} [immediate=false] - Setting this option to `true` will
+ *   trigger any change (e.g. call the subscribe listeners) immediately on the
+ *   state that generate the update (i.e. calling `set`), before propagating the
+ *   change on the network. This option can be usefull in cases the network
+ *   would introduce a noticeable latency on the client. If for some reason
+ *   the value is overriden server-side (e.g. in an updateHook) the listeners
+ *   will be called again on when the "real" / final value will be received.
  * @property {Object} [metas={}] - Optionnal metadata of the parameter.
  */
 /**
@@ -87,6 +101,13 @@ import equal from 'fast-deep-equal';
  *   only changed values are propagated) and the behavior of the `event` option
  *   (which has no state per se). As such, setting this options to `false` if
  *   `event=true` does not make sens.
+ * @property {Boolean} [immediate=false] - Setting this option to `true` will
+ *   trigger any change (e.g. call the subscribe listeners) immediately on the
+ *   state that generate the update (i.e. calling `set`), before propagating the
+ *   change on the network. This option can be usefull in cases the network
+ *   would introduce a noticeable latency on the client. If for some reason
+ *   the value is overriden server-side (e.g. in an updateHook) the listeners
+ *   will be called again on when the "real" / final value will be received.
  * @property {Object} [metas={}] - Optionnal metadata of the parameter.
  */
 /**
@@ -107,6 +128,13 @@ import equal from 'fast-deep-equal';
  *   only changed values are propagated) and the behavior of the `event` option
  *   (which has no state per se). As such, setting this options to `false` if
  *   `event=true` does not make sens.
+ * @property {Boolean} [immediate=false] - Setting this option to `true` will
+ *   trigger any change (e.g. call the subscribe listeners) immediately on the
+ *   state that generate the update (i.e. calling `set`), before propagating the
+ *   change on the network. This option can be usefull in cases the network
+ *   would introduce a noticeable latency on the client. If for some reason
+ *   the value is overriden server-side (e.g. in an updateHook) the listeners
+ *   will be called again on when the "real" / final value will be received.
  * @property {Object} [metas={}] - Optionnal metadata of the parameter.
  */
 /**
@@ -126,6 +154,13 @@ import equal from 'fast-deep-equal';
  *   only changed values are propagated) and the behavior of the `event` option
  *   (which has no state per se). As such, setting this options to `false` if
  *   `event=true` does not make sens.
+ * @property {Boolean} [immediate=false] - Setting this option to `true` will
+ *   trigger any change (e.g. call the subscribe listeners) immediately on the
+ *   state that generate the update (i.e. calling `set`), before propagating the
+ *   change on the network. This option can be usefull in cases the network
+ *   would introduce a noticeable latency on the client. If for some reason
+ *   the value is overriden server-side (e.g. in an updateHook) the listeners
+ *   will be called again on when the "real" / final value will be received.
  * @property {Object} [metas={}] - Optionnal metadata of the parameter.
  */
 /**
@@ -144,6 +179,13 @@ import equal from 'fast-deep-equal';
  *   only changed values are propagated) and the behavior of the `event` option
  *   (which has no state per se). As such, setting this options to `false` if
  *   `event=true` does not make sens.
+ * @property {Boolean} [immediate=false] - Setting this option to `true` will
+ *   trigger any change (e.g. call the subscribe listeners) immediately on the
+ *   state that generate the update (i.e. calling `set`), before propagating the
+ *   change on the network. This option can be usefull in cases the network
+ *   would introduce a noticeable latency on the client. If for some reason
+ *   the value is overriden server-side (e.g. in an updateHook) the listeners
+ *   will be called again on when the "real" / final value will be received.
  * @property {Object} [metas={}] - Optionnal metadata of the parameter.
  */
 
