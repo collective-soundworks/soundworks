@@ -210,17 +210,58 @@ describe('async state.set(updates) => updates', () => {
   });
 });
 
-describe('state.subscribe(updates => {}) => unsubscribe', () => {
-  it('should be notified with updates when an update is made', async () => {
-    const a = await server.stateManager.create('a');
-
+describe('state.subscribe((newValues, oldValues[, context = null]) => {}) => unsubscribe', () => {
+  it('should properly execute listeners', async () => {
     return new Promise(async (resolve, reject) => {
-      a.subscribe(updates => {
-        assert.deepEqual(updates, { bool: true });
-        resolve();
+      const state = await server.stateManager.create('a');
+      const attached = await clients[0].stateManager.attach('a', state.id);
+
+      const statePromise = new Promise((resolve) => {
+        let step = 0;
+
+        state.subscribe((newValues, oldValues, context) => {
+          if (step === 0) {
+            assert.deepEqual(newValues, { bool: true, int: 42 });
+            assert.deepEqual(oldValues, { bool: false, int: 0 });
+            assert.deepEqual(context, null);
+          } else if (step === 1) {
+            assert.deepEqual(newValues, { bool: false, int: 76 });
+            assert.deepEqual(oldValues, { bool: true, int: 42 });
+            assert.deepEqual(context, { someContext: true });
+            resolve();
+          } else {
+            reject('something wrong happened');
+          }
+
+          step += 1;
+        });
       });
 
-      await a.set({ bool: true });
+      const attachedPromise = new Promise((resolve) => {
+        let step = 0;
+
+        attached.subscribe((newValues, oldValues, context) => {
+          if (step === 0) {
+            assert.deepEqual(newValues, { bool: true, int: 42 });
+            assert.deepEqual(oldValues, { bool: false, int: 0 });
+            assert.deepEqual(context, null);
+          } else if (step === 1) {
+            assert.deepEqual(newValues, { bool: false, int: 76 });
+            assert.deepEqual(oldValues, { bool: true, int: 42 });
+            assert.deepEqual(context, { someContext: true });
+            resolve();
+          } else {
+            reject('something wrong happened');
+          }
+
+          step += 1;
+        });
+      });
+
+      await state.set({ bool: true, int: 42 });
+      await state.set({ bool: false, int: 76 }, { someContext: true });
+      await Promise.all([statePromise, attachedPromise]);
+      resolve();
     });
   });
 
@@ -846,13 +887,14 @@ describe('stateManager.setUpdateHook(schemaName, updateHook)', () => {
     }
   });
 
-  it('hook API should be `hook(updates, currentValues)`', async () => {
+  it('hook API should be `hook(updates, currentValues, context)`', async () => {
     return new Promise(async (resolve, reject) => {
       server.stateManager.registerSchema('hooked', hookSchema);
-      server.stateManager.registerUpdateHook('hooked', (updates, currentValues) => {
+      server.stateManager.registerUpdateHook('hooked', (updates, currentValues, context) => {
         try {
           assert.deepEqual(updates, { name: 'test' });
           assert.deepEqual(currentValues, { name: null, value: null });
+          assert.deepEqual(context, { myContext: true });
           resolve();
         } catch(err) {
           reject(err);
@@ -862,7 +904,7 @@ describe('stateManager.setUpdateHook(schemaName, updateHook)', () => {
 
       const h = await server.stateManager.create('hooked');
 
-      await h.set({ name: 'test' });
+      await h.set({ name: 'test' }, { myContext: true });
 
       server.stateManager.deleteSchema('hooked');
     });

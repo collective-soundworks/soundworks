@@ -289,6 +289,8 @@ class SharedStateManagerServer extends SharedStateManagerClient {
    * @param {Object} updates - Update object as given on a set callback, or
    *  result of the previous hook
    * @param {Object} currentValues - Current values of the state.
+   * @param {Object} [context=null] - Optionnal context passed by the creator
+   *  of the update.
    * @return {Object} The "real" updates to be applied on the state.
    */
   /**

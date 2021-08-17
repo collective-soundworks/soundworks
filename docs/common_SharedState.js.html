@@ -113,20 +113,20 @@ ${JSON.stringify(initValues, null, 2)}`);
     this._onDeleteCallbacks = new Set();
 
     // add listener for state updates
-    client.transport.addListener(`${UPDATE_RESPONSE}-${id}-${this.remoteId}`, (reqId, updates) => {
-      const updated = this._commit(updates, true, true);
+    client.transport.addListener(`${UPDATE_RESPONSE}-${id}-${this.remoteId}`, (reqId, updates, context) => {
+      const updated = this._commit(updates, context, true, true);
       resolveRequest(reqId, updated);
     });
 
     // retrieve values but do not propagate to subscriptions
-    client.transport.addListener(`${UPDATE_ABORT}-${id}-${this.remoteId}`, (reqId, updates) => {
-      const updated = this._commit(updates, false, true);
+    client.transport.addListener(`${UPDATE_ABORT}-${id}-${this.remoteId}`, (reqId, updates, context) => {
+      const updated = this._commit(updates, context, false, true);
       resolveRequest(reqId, updated);
     });
 
-    client.transport.addListener(`${UPDATE_NOTIFICATION}-${id}-${this.remoteId}`, (updates) => {
+    client.transport.addListener(`${UPDATE_NOTIFICATION}-${id}-${this.remoteId}`, (updates, context) => {
       // cf. https://github.com/collective-soundworks/soundworks/issues/18
-      this._commit(updates, true, false);
+      this._commit(updates, context, true, false);
     });
 
     // ---------------------------------------------
@@ -205,12 +205,14 @@ ${JSON.stringify(initValues, null, 2)}`);
   }
 
   /** @private */
-  _commit(updates, propagate = true, initiator = false) {
-    const updated = {};
+  _commit(updates, context, propagate = true, initiator = false) {
+    const newValues = {};
+    const oldValues = {};
 
     for (let name in updates) {
       const { immediate, filterChange, event } = this._parameters.getSchema(name);
-      const [value, changed] = this._parameters.set(name, updates[name]);
+      const oldValue = this._parameters.get(name);
+      const [newValue, changed] = this._parameters.set(name, updates[name]);
 
       // handle immediate stuff
       if (initiator &amp;&amp; immediate) {
@@ -224,28 +226,34 @@ ${JSON.stringify(initValues, null, 2)}`);
         }
       }
 
-      updated[name] = value;
+      newValues[name] = newValue;
+      oldValues[name] = oldValue;
     }
 
     // if the `UPDATE_REQUEST` as been aborted by the server, do not propagate
-    if (propagate &amp;&amp; Object.keys(updated).length > 0) {
-      this._subscriptions.forEach(listener => listener(updated));
+    if (propagate &amp;&amp; Object.keys(newValues).length > 0) {
+      this._subscriptions.forEach(listener => listener(newValues, oldValues, context));
     }
 
-    return updated;
+    return newValues;
   }
 
   /**
    * Updates values of the state.
    *
    * @async
-   * @param {Object} updates - key / value pairs of updates to apply to the state
-   * @return {Object}
+   * @param {Object} updates - key / value pairs of updates to apply to the state.
+   * @param {Mixed} [context=null] - optionnal context that will be propagated
+   *   alongside the updates of the state. The context is valid only for the
+   *   current call and will be passed as third argument to any subscribe listeners.
+   * @return {Promise&lt;Object>} A promise to the (coerced) updates.
+   *
+   * @see {common.SharedState~subscribeCallback}
    */
-  async set(updates) {
-    // console.log(updates);
+  async set(updates, context = null) {
     // handle immediate option
-    const immediates = {};
+    const immediateNewValues = {};
+    const immediateOldValues = {};
     let propagateNow = false;
 
     for (let name in updates) {
@@ -255,37 +263,38 @@ ${JSON.stringify(initValues, null, 2)}`);
       }
 
       // @note: general idea...
-      // if immediate=true &amp;&amp; filterChange=true
+      // if immediate=true
       //  - call listeners if value changed
-      //  - else go through normal server path
+      //  - go through normal server path
       //  - retrigger only if response from server is different from current value
-      // if immediate=true &amp;&amp; filterChange=false (...same for event=true)
+      // if immediate=true &amp;&amp; (filterChange=false || event=true)
       //  - call listeners with value regarless it changed
       //  - go through normal server path
-      //  - if the node is initiator of the update (UPDATE_RESPONSE)
-      //    - we need to (re-)check to prevent trigger listeners a second time
+      //  - if the node is initiator of the update (UPDATE_RESPONSE), (re-)check
+      //    to prevent execute the listeners twice
 
       const { immediate, filterChange, event } = this._parameters.getSchema(name);
 
       if (immediate) {
+        const oldValue = this._parameters.get(name);
         const [newValue, changed] = this._parameters.set(name, updates[name]);
 
         if (changed || filterChange === false) {
-          immediates[name] = updates[name];
+          immediateOldValues[name] = oldValue;
+          immediateNewValues[name] = newValue;
           propagateNow = true;
         }
       }
     }
 
-    // console.log(immediates, propagateNow);
     if (propagateNow) {
-      this._subscriptions.forEach(listener => listener(immediates));
+      this._subscriptions.forEach(listener => listener(immediateNewValues, immediateOldValues, context));
     }
 
     // go through server-side normal behavior
     return new Promise((resolve, reject) => {
       const reqId = storeRequestPromise(resolve, reject);
-      this._client.transport.emit(`${UPDATE_REQUEST}-${this.id}-${this.remoteId}`, reqId, updates);
+      this._client.transport.emit(`${UPDATE_REQUEST}-${this.id}-${this.remoteId}`, reqId, updates, context);
     });
   }
 
@@ -339,17 +348,34 @@ ${JSON.stringify(initValues, null, 2)}`);
 
   /**
    * @callback common.SharedState~subscribeCallback
-   * @param {Object} updates - key / value pairs of the updates that have been
-   *   applied to the state
+   * @param {Object} newValues - key / value pairs of the updates that have been
+   *   applied to the state.
+   * @param {Object} oldValues - key / value pairs of the related params before
+   *   the updates has been applied to the state.
+   * @param {Mixed} [context=null] - Optionnal context data that has been passed
+   *   with the updates in the `set` call.
+   *
+   * @example
+   * state.subscribe(async (newValues, oldValues[, context=null]) =>  {
+   *   for (let [key, value] of Object.entries(newValues)) {
+   *      switch (key) {
+   *        // do something
+   *      }
+   *   }
+   * }
+   *
+   * @see {common.SharedState#set}
+   * @see {common.SharedState#subscribe}
    */
   /**
    * Subscribe to state updates
    *
    * @param {common.SharedState~subscribeCallback} callback - callback to execute
-   *   when an update is commited on the state.
+   *   when an update is applied on the state.
+   *
    * @example
-   * state.subscribe(async updates =>  {
-   *   for (let [key, value] of Object.entries(updates)) {
+   * state.subscribe(async (newValues, oldValues) =>  {
+   *   for (let [key, value] of Object.entries(newValues)) {
    *      switch (key) {
    *        // do something
    *      }
@@ -452,7 +478,7 @@ export default SharedState;
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a> on Tue Aug 17 2021 14:50:35 GMT+0200 (Central European Summer Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a> on Tue Aug 17 2021 15:49:14 GMT+0200 (Central European Summer Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>

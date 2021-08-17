@@ -51,13 +51,14 @@ class SharedStatePrivate {
     }
 
     // attach client listeners
-    client.transport.addListener(`${UPDATE_REQUEST}-${this.id}-${remoteId}`, async (reqId, updates) => {
+    client.transport.addListener(`${UPDATE_REQUEST}-${this.id}-${remoteId}`, async (reqId, updates, context) => {
       // apply registered hooks
       const hooks = this._manager._hooksBySchemaName.get(this.schemaName);
+      const values = this._parameters.getValues();
 
       // @note: we may need a proper update queue to avoid race conditions
       for (let hook of hooks.values()) {
-        updates = await hook(updates, this._parameters.getValues());
+        updates = await hook(updates, values, context);
       }
 
       const filteredUpdates = {};
@@ -110,28 +111,28 @@ class SharedStatePrivate {
         for (let [peerRemoteId, peer] of this._attachedClients.entries()) {
           // propagate notification to all other attached clients except server
           if (remoteId !== peerRemoteId && peer.id !== -1) {
-            peer.transport.emit(`${UPDATE_NOTIFICATION}-${this.id}-${peerRemoteId}`, filteredUpdates);
+            peer.transport.emit(`${UPDATE_NOTIFICATION}-${this.id}-${peerRemoteId}`, filteredUpdates, context);
           }
         }
 
         if (client.id !== -1) {
-          client.transport.emit(`${UPDATE_RESPONSE}-${this.id}-${remoteId}`, reqId, filteredUpdates);
+          client.transport.emit(`${UPDATE_RESPONSE}-${this.id}-${remoteId}`, reqId, filteredUpdates, context);
         }
 
         for (let [peerRemoteId, peer] of this._attachedClients.entries()) {
           // propagate notification to server
           if (remoteId !== peerRemoteId && peer.id === -1) {
-            peer.transport.emit(`${UPDATE_NOTIFICATION}-${this.id}-${peerRemoteId}`, filteredUpdates);
+            peer.transport.emit(`${UPDATE_NOTIFICATION}-${this.id}-${peerRemoteId}`, filteredUpdates, context);
           }
         }
 
         if (client.id === -1) {
-          client.transport.emit(`${UPDATE_RESPONSE}-${this.id}-${remoteId}`, reqId, filteredUpdates);
+          client.transport.emit(`${UPDATE_RESPONSE}-${this.id}-${remoteId}`, reqId, filteredUpdates, context);
         }
       } else {
         // propagate back to the requester that the update has been aborted
         // ignore all other attached clients.
-        client.transport.emit(`${UPDATE_ABORT}-${this.id}-${remoteId}`, reqId, updates);
+        client.transport.emit(`${UPDATE_ABORT}-${this.id}-${remoteId}`, reqId, updates, context);
       }
     });
 
