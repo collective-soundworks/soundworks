@@ -71,7 +71,7 @@ class PluginManager {
   register(name, factory = null, options = {}, deps = []) {
     if (this._registeredPlugins[name]) {
       const ctor = factory(AbstractPlugin);
-      throw new Error(`[soundworks:core] plugin "${name}" of type "${ctor.name}" already registered`);
+      throw new Error(`[soundworks:core] Plugin "${name}" of type "${ctor.name}" already registered`);
     }
 
     const ctor = factory(AbstractPlugin);
@@ -85,7 +85,7 @@ class PluginManager {
    */
   get(name, _experience = null) {
     if (!this._registeredPlugins[name]) {
-      throw new Error(`Cannot get or require plugin "${name}", plugin is not registered
+      throw new Error(`[soundworks:core] Cannot get or require plugin "${name}", plugin is not registered
 > registered plugins are:
 ${Object.keys(this._registeredPlugins).map(n => `> - ${n}\n`).join('')}
 `);
@@ -93,7 +93,7 @@ ${Object.keys(this._registeredPlugins).map(n => `> - ${n}\n`).join('')}
 
     // required by experience and manager already started
     if (_experience && this.signals.start.value === true) {
-      throw new Error(`Plugin "${name}" required after pluginManager start`);
+      throw new Error(`[soundworks:core] Plugin "${name}" required after pluginManager start`);
     }
 
     if (!this._instances[name]) {
