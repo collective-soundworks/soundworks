@@ -13,8 +13,12 @@ import Client from './Client.js';
 import PluginManager from './PluginManager.js';
 import Sockets from './Sockets.js';
 import SharedStateManagerServer from '../common/SharedStateManagerServer.js';
-import Db from './utils/Db.js';
 import logger from './utils/logger.js';
+import Keyv from 'keyv';
+import KeyvFile from 'keyv-file';
+
+let _dbNamespaces = new Set();
+let _dbStore = null;
 
 /**
  * Server side entry point for a `soundworks` application.
@@ -73,7 +77,7 @@ class Server {
      * basically a wrapper around kvey (cf. {@link https://github.com/lukechilds/keyv})
      * @private
      */
-    this.db = new Db();
+    this.db = this.createNamespacedDb('core');
 
     /**
      * The {@link server.Sockets} instance. A small wrapper around
@@ -297,8 +301,8 @@ class Server {
               }
             } else {
               return new Promise(async (resolve, reject) => {
-                const key = await this.db.get('server:httpsKey');
-                const cert = await this.db.get('server:httpsCert');
+                const key = await this.db.get('httpsKey');
+                const cert = await this.db.get('httpsCert');
 
                 if (key && cert) {
                   this._httpsInfos = { key, cert };
@@ -316,8 +320,8 @@ class Server {
                       cert: keys.certificate,
                     };
 
-                    await this.db.set('server:httpsKey', this._httpsInfos.key);
-                    await this.db.set('server:httpsCert', this._httpsInfos.cert);
+                    await this.db.set('httpsKey', this._httpsInfos.key);
+                    await this.db.set('httpsCert', this._httpsInfos.cert);
 
                     const httpsServer = https.createServer(this._httpsInfos);
 
@@ -530,6 +534,38 @@ class Server {
       const { id, uuid } = client;
       socket.send('s:client:start', { id, uuid });
     });
+  }
+
+  /**
+   * Create namespaced databases for core and plugins
+   * (kind of experiemental API do not expose in doc for now)
+   *
+   * @note - introduced in v3.1.0-beta.1
+   * @note - used by core and plugin-audio-streams
+   * @private
+   */
+  createNamespacedDb(namespace = null) {
+    if (namespace === null || !(typeof namespace === 'string')) {
+      throw new Error(`[soundworks:core] Invalid namespace for ".createNamespacedDb(namespace)", namespace is mandatory and should be a string`);
+    }
+
+    if (_dbNamespaces.has(namespace)) {
+      throw new Error(`[soundworks:core] Invalid namespace for ".createNamespacedDb(namespace)", namespace "${namespace}" already exists`);
+    }
+
+    const dbDirectory = path.join(process.cwd(), '.data');
+
+    if (!fs.existsSync(dbDirectory)) {
+      fs.mkdirSync(dbDirectory);
+    }
+
+    const filename = path.join(dbDirectory, `soundworks-${namespace}.db`);
+    // at note keyv-file doesn't seems to works
+    const store = new KeyvFile({ filename });
+    const db = new Keyv({ namespace, store });
+    db.on('error', err => console.log(chalk.red('[soundworks:core] db ${namespace} error:'), err));
+
+    return db;
   }
 }
 

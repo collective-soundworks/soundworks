@@ -70,7 +70,8 @@ class PluginManager {
    */
   register(name, factory = null, options = {}, deps = []) {
     if (this._registeredPlugins[name]) {
-      throw new Error(`Plugin "${name}" already registered`);
+      const ctor = factory(AbstractPlugin);
+      throw new Error(`[soundworks:core] plugin "${name}" of type "${ctor.name}" already registered`);
     }
 
     const ctor = factory(AbstractPlugin);
