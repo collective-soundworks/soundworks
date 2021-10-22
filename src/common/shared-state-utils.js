@@ -27,6 +27,8 @@ export const UPDATE_RESPONSE = 's:u:res';
 export const UPDATE_ABORT = 's:u:ab';
 export const UPDATE_NOTIFICATION = 's:u:not';
 
+export const DELETE_SCHEMA = 's:d:s';
+
 export function* idGenerator() {
   for (let i = 0; true; i++) {
     yield i;

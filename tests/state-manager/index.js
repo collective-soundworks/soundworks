@@ -865,7 +865,7 @@ describe('stateManager.deleteSchema(name)', () => {
   });
 });
 
-describe('stateManager.setUpdateHook(schemaName, updateHook)', () => {
+describe('stateManager.registerUpdateHook(schemaName, updateHook)', () => {
   it('should execute hook properly', async () => {
     server.stateManager.registerSchema('hooked', hookSchema);
     server.stateManager.registerUpdateHook('hooked', (updates, currentValues) => {
@@ -1032,6 +1032,90 @@ describe('stateManager.setUpdateHook(schemaName, updateHook)', () => {
 
       await h.set({ name: 'test-2' });
       assert.deepEqual(h.getValues(), { name: 'test-2', value: 'ok-1' });
+
+      server.stateManager.deleteSchema('hooked');
+    } catch(err) {
+      server.stateManager.deleteSchema('hooked');
+      return Promise.reject(err);
+    }
+  });
+
+  it('should abort when explicitly returning `null`', async () => {
+    server.stateManager.registerSchema('hooked', hookSchema);
+    server.stateManager.registerUpdateHook('hooked', (updates, currentValues) => {
+      assert.ok('hook called');
+      return null;
+    });
+
+    server.stateManager.registerUpdateHook('hooked', (updates, currentValues) => {
+      assert.fail('should not be called', updates);
+      return { ...updates, value: 'ok-2' };
+    });
+
+    const h = await server.stateManager.create('hooked');
+
+    try {
+      await h.set({ name: 'test' });
+      // should have changed
+      assert.deepEqual(h.getValues(), { name: null, value: null });
+
+      server.stateManager.deleteSchema('hooked');
+    } catch(err) {
+      server.stateManager.deleteSchema('hooked');
+      return Promise.reject(err);
+    }
+  });
+
+  it('should abort when explicitly returning `null` (w/ immediate option)', async () => {
+    server.stateManager.registerSchema('hooked', {
+      value: {
+        type: 'string',
+        default: null,
+        nullable: true,
+        immediate: true,
+      },
+    });
+
+    server.stateManager.registerUpdateHook('hooked', (updates, currentValues) => {
+      assert.ok('hook called');
+      return null;
+    });
+
+    const h = await server.stateManager.create('hooked');
+
+    try {
+      await h.set({ value: 'test' });
+      // should have changed
+      assert.deepEqual(h.getValues(), { value: null });
+
+      server.stateManager.deleteSchema('hooked');
+    } catch(err) {
+      server.stateManager.deleteSchema('hooked');
+      return Promise.reject(err);
+    }
+  });
+
+  it('should continue when implicitly returning `undefined`', async () => {
+    server.stateManager.registerSchema('hooked', hookSchema);
+
+    server.stateManager.registerUpdateHook('hooked', (updates, currentValues) => {
+      if (updates.name === 'test-1') {
+        return {
+          ...updates,
+          value: 'ok',
+        };
+      }
+      // implicitely return undefined on test-2
+    });
+
+    const h = await server.stateManager.create('hooked');
+
+    try {
+      await h.set({ name: 'test-1' });
+      assert.deepEqual(h.getValues(), { name: 'test-1', value: 'ok' });
+
+      await h.set({ name: 'test-2' });
+      assert.deepEqual(h.getValues(), { name: 'test-2', value: 'ok' });
 
       server.stateManager.deleteSchema('hooked');
     } catch(err) {

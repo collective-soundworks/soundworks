@@ -1,4 +1,5 @@
 import ParameterBag from './ParameterBag.js';
+import cloneDeep from 'lodash.clonedeep';
 import {
   // constants
   SERVER_ID,
@@ -55,84 +56,105 @@ class SharedStatePrivate {
       // apply registered hooks
       const hooks = this._manager._hooksBySchemaName.get(this.schemaName);
       const values = this._parameters.getValues();
+      let hookAborted = false;
 
-      // @note: we may need a proper update queue to avoid race conditions
+      // cf. https://github.com/collective-soundworks/soundworks/issues/45
       for (let hook of hooks.values()) {
-        updates = await hook(updates, values, context);
-      }
+        const result = await hook(updates, values, context);
 
-      const filteredUpdates = {};
-      let hasUpdates = false;
-
-      for (let name in updates) {
-        // from v3.1.0 - the `filteredUpdates` check is made using 'fast-deep-equal'
-        //    cf. https://github.com/epoberezkin/fast-deep-equal
-        //    therefore unchanged objects are not considered changed
-        //    nor propagated anymore.
-        // until v3.0.4 - we checked the `schema[name].type === 'any'`, to always consider
-        //    objects as dirty, because if the state is attached locally, we
-        //    compare the Object instances instead of their values.
-        //    @note - this should be made more robust but how?
-        const [newValue, changed] = this._parameters.set(name, updates[name]);
-
-        // if `filterChange` is set to `false` we don't check if the value
-        // has been changed or not, it is always propagated to client states
-        const { filterChange } = this._parameters.getSchema(name);
-
-        if ((filterChange && changed) || !filterChange) {
-          filteredUpdates[name] = newValue;
-          hasUpdates = true;
+        if (result === null) { // explicit abort if hook returns null
+          hookAborted = true;
+          break;
+        } else if (result === undefined) { // implicit continue if hook returns undefined
+          continue;
+        } else { // the hook returned an updates object
+          updates = result;
         }
       }
 
-      if (hasUpdates) {
-        // send response to requester
-        // client.transport.emit(`${UPDATE_RESPONSE}-${this.id}-${remoteId}`, reqId, filteredUpdates);
+      if (hookAborted === false) {
+        const filteredUpdates = {};
+        let hasUpdates = false;
 
-        // @note: we propagate server-side last, because as the server transport
-        // is synchronous it can break ordering if a subscription function makes
-        // itself an update in reaction to an update, therefore network messages
-        // order would be broken,
+        for (let name in updates) {
+          // from v3.1.0 - the `filteredUpdates` check is made using 'fast-deep-equal'
+          //    cf. https://github.com/epoberezkin/fast-deep-equal
+          //    therefore unchanged objects are not considered changed
+          //    nor propagated anymore.
+          // until v3.0.4 - we checked the `schema[name].type === 'any'`, to always consider
+          //    objects as dirty, because if the state is attached locally, we
+          //    compare the Object instances instead of their values.
+          //    @note - this should be made more robust but how?
+          const [newValue, changed] = this._parameters.set(name, updates[name]);
 
-        // we need to handle cases where:
-        // client state (client.id: 2) sends a request
-        // server attached state (client.id: -1) spot a problem and overrides the value
-        // we want the remote client (id: 2) to receive in the right order:
-        // * 1. the value it requested,
-        // * 2. the value overriden by the server-side attached state (id: -1)
+          // if `filterChange` is set to `false` we don't check if the value
+          // has been changed or not, it is always propagated to client states
+          const { filterChange } = this._parameters.getSchema(name);
 
-        // this problem could be solved properly with a reducer system:
-        // if (dirty) {
-        //   -> call (async) reducer
-        //   -> get values from reducer
-        //.  -> dispatch to everybody
-        // }
-
-        for (let [peerRemoteId, peer] of this._attachedClients.entries()) {
-          // propagate notification to all other attached clients except server
-          if (remoteId !== peerRemoteId && peer.id !== -1) {
-            peer.transport.emit(`${UPDATE_NOTIFICATION}-${this.id}-${peerRemoteId}`, filteredUpdates, context);
+          if ((filterChange && changed) || !filterChange) {
+            filteredUpdates[name] = newValue;
+            hasUpdates = true;
           }
         }
 
-        if (client.id !== -1) {
-          client.transport.emit(`${UPDATE_RESPONSE}-${this.id}-${remoteId}`, reqId, filteredUpdates, context);
-        }
+        if (hasUpdates) {
+          // send response to requester
+          // client.transport.emit(`${UPDATE_RESPONSE}-${this.id}-${remoteId}`, reqId, filteredUpdates);
 
-        for (let [peerRemoteId, peer] of this._attachedClients.entries()) {
-          // propagate notification to server
-          if (remoteId !== peerRemoteId && peer.id === -1) {
-            peer.transport.emit(`${UPDATE_NOTIFICATION}-${this.id}-${peerRemoteId}`, filteredUpdates, context);
+          // @note: we propagate server-side last, because as the server transport
+          // is synchronous it can break ordering if a subscription function makes
+          // itself an update in reaction to an update, therefore network messages
+          // order would be broken,
+
+          // we need to handle cases where:
+          // client state (client.id: 2) sends a request
+          // server attached state (client.id: -1) spot a problem and overrides the value
+          // we want the remote client (id: 2) to receive in the right order:
+          // * 1. the value it requested,
+          // * 2. the value overriden by the server-side attached state (id: -1)
+
+          // this problem could be solved properly with a reducer system:
+          // if (dirty) {
+          //   -> call (async) reducer
+          //   -> get values from reducer
+          //.  -> dispatch to everybody
+          // }
+
+          for (let [peerRemoteId, peer] of this._attachedClients.entries()) {
+            // propagate notification to all other attached clients except server
+            if (remoteId !== peerRemoteId && peer.id !== -1) {
+              peer.transport.emit(`${UPDATE_NOTIFICATION}-${this.id}-${peerRemoteId}`, filteredUpdates, context);
+            }
           }
-        }
 
-        if (client.id === -1) {
-          client.transport.emit(`${UPDATE_RESPONSE}-${this.id}-${remoteId}`, reqId, filteredUpdates, context);
+          if (client.id !== -1) {
+            client.transport.emit(`${UPDATE_RESPONSE}-${this.id}-${remoteId}`, reqId, filteredUpdates, context);
+          }
+
+          for (let [peerRemoteId, peer] of this._attachedClients.entries()) {
+            // propagate notification to server
+            if (remoteId !== peerRemoteId && peer.id === -1) {
+              peer.transport.emit(`${UPDATE_NOTIFICATION}-${this.id}-${peerRemoteId}`, filteredUpdates, context);
+            }
+          }
+
+          if (client.id === -1) {
+            client.transport.emit(`${UPDATE_RESPONSE}-${this.id}-${remoteId}`, reqId, filteredUpdates, context);
+          }
+        } else {
+          // propagate back to the requester that the update has been aborted
+          // ignore all other attached clients.
+          client.transport.emit(`${UPDATE_ABORT}-${this.id}-${remoteId}`, reqId, updates, context);
         }
       } else {
-        // propagate back to the requester that the update has been aborted
-        // ignore all other attached clients.
-        client.transport.emit(`${UPDATE_ABORT}-${this.id}-${remoteId}`, reqId, updates, context);
+        // retrieve values from inner state (also handle immediate approriately)
+        const oldValues = {};
+
+        for (let name in updates) {
+          oldValues[name] = this._parameters.get(name);
+        }
+        // aborted by hook (updates have been overriden to {})
+        client.transport.emit(`${UPDATE_ABORT}-${this.id}-${remoteId}`, reqId, oldValues, context);
       }
     });
 

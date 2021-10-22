@@ -22,6 +22,7 @@ import {
   UPDATE_RESPONSE,
   UPDATE_ABORT,
   UPDATE_NOTIFICATION,
+  DELETE_SCHEMA,
   // promises handling
   storeRequestPromise,
   resolveRequest,
@@ -123,6 +124,13 @@ class SharedStateManagerClient {
       list.forEach(([schemaName, stateId, nodeId]) => {
         this._observeListeners.forEach(callback => callback(schemaName, stateId, nodeId));
       });
+    });
+
+    // ---------------------------------------------
+    // Clear cache when schema is deleted
+    // ---------------------------------------------
+    this.client.transport.addListener(DELETE_SCHEMA, schemaName => {
+      this._cachedSchemas.delete(schemaName);
     });
   }
 

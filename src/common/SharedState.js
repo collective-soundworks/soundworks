@@ -170,7 +170,7 @@ ${JSON.stringify(initValues, null, 2)}`);
         // @note - we don't need to check filterChange here because the value
         // has been updated in parameters on the `set` side so can rely on `changed`
         // to avoid retrigger listeners.
-        // If the value has overriden by the server, `changed` will true
+        // If the value has been overriden by the server, `changed` will true
         // anyway so it should behave correctly.
         if (!changed || event) {
           continue;

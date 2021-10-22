@@ -26,6 +26,7 @@ import {
   UPDATE_RESPONSE,
   UPDATE_ABORT,
   UPDATE_NOTIFICATION,
+  DELETE_SCHEMA,
   idGenerator,
 } from './shared-state-utils.js';
 
@@ -267,6 +268,7 @@ class SharedStateManagerServer extends SharedStateManagerClient {
    * @param {String} schemaName - Name of the schema.
    */
   deleteSchema(schemaName) {
+    // @note: deleting schema
     for (let [id, state] of this._serverStatesById.entries()) {
       if (state.schemaName === schemaName) {
         for (let [remoteId, attached] of state._attachedClients.entries()) {
@@ -276,6 +278,11 @@ class SharedStateManagerServer extends SharedStateManagerClient {
 
         this._serverStatesById.delete(this.id);
       }
+    }
+
+    // clear schema cache of all connected clients
+    for (let client of this._clientByNodeId.values()) {
+      client.transport.emit(`${DELETE_SCHEMA}`, schemaName);
     }
 
     this._schemas.delete(schemaName);
