@@ -210,7 +210,7 @@ describe('async state.set(updates) => updates', () => {
   });
 });
 
-describe('state.subscribe((newValues, oldValues[, context = null]) => {}) => unsubscribe', () => {
+describe('state.subscribe((newValues, oldValues[, context = null]) => {}[, executeListener=false]) => unsubscribe', () => {
   it('should properly execute listeners', async () => {
     return new Promise(async (resolve, reject) => {
       const state = await server.stateManager.create('a');
@@ -278,6 +278,31 @@ describe('state.subscribe((newValues, oldValues[, context = null]) => {}) => uns
 
     return new Promise((resolve, reject) => {
       setTimeout(resolve, 100);
+    });
+  });
+
+  it('should not execute immediately if `executeListener=false` (default)', async () => {
+    const a = await server.stateManager.create('a');
+
+    const unsubsribe = a.subscribe(updates => {
+      assert.fail('should not be called')
+    });
+
+    return new Promise((resolve, reject) => {
+      setTimeout(resolve, 100);
+    });
+  });
+
+  it('should execute immediately if `executeListener=true`', async () => {
+    return new Promise(async (resolve) => {
+      const a = await server.stateManager.create('a');
+
+      const unsubsribe = a.subscribe((newValues, oldValues, context) => {
+        assert.deepEqual(newValues, { bool: false, int: 0 });
+        assert.deepEqual(oldValues, {});
+        assert.deepEqual(context, null);
+        resolve();
+      }, true);
     });
   });
 });

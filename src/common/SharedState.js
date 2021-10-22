@@ -313,7 +313,7 @@ ${JSON.stringify(initValues, null, 2)}`);
    *        // do something
    *      }
    *   }
-   * }
+   * });
    *
    * @see {common.SharedState#set}
    * @see {common.SharedState#subscribe}
@@ -323,6 +323,8 @@ ${JSON.stringify(initValues, null, 2)}`);
    *
    * @param {common.SharedState~subscribeCallback} callback - callback to execute
    *   when an update is applied on the state.
+   * @param {Boolean} [executeListener=false] - execute the given listener with
+   *   current state values. (`oldValues` will be set to `{}`, and `context` to `null`)
    *
    * @example
    * state.subscribe(async (newValues, oldValues) =>  {
@@ -331,10 +333,17 @@ ${JSON.stringify(initValues, null, 2)}`);
    *        // do something
    *      }
    *   }
-   * }
+   * });
    */
-  subscribe(listener) {
+  subscribe(listener, executeListener = false) {
     this._subscriptions.add(listener);
+
+    if (executeListener === true) {
+      const currentValues = this.getValues();
+      const oldValues = {};
+      const context = null;
+      listener(currentValues, oldValues, context);
+    }
 
     return () => {
       this._subscriptions.delete(listener);
