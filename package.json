@@ -55,7 +55,6 @@
     "@babel/cli": "^7.4.4",
     "@babel/core": "^7.4.5",
     "@babel/preset-env": "^7.4.5",
-    "braintree-jsdoc-template": "^3.3.0",
     "chai": "^4.2.0",
     "chokidar": "^3.0.1",
     "chokidar-cli": "^1.2.2",
@@ -63,5 +62,9 @@
     "jsdoc": "^3.6.2",
     "markdown-toc": "^1.2.0",
     "mocha": "^8.1.3"
+  },
+  "optionalDependencies": {
+    "bufferutil": "^4.0.5",
+    "utf-8-validate": "^5.0.7"
   }
 }

@@ -1,5 +1,5 @@
 // import types from './types';
-import cloneDeep from 'lodash.cloneDeep';
+import cloneDeep from 'lodash.clonedeep';
 import equal from 'fast-deep-equal';
 
 

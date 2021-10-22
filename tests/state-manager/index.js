@@ -1126,7 +1126,8 @@ describe('stateManager.registerUpdateHook(schemaName, updateHook)', () => {
 });
 
 describe('WebSocket transport', () => {
-  it('should work properly with async transport - brute force testing', async () => {
+  it.only('should work properly with async transport - brute force testing', async () => {
+    console.time('  + brute force time');
     const global = await server.stateManager.create('a');
     const attached = [];
 
@@ -1205,6 +1206,7 @@ describe('WebSocket transport', () => {
 
 
     global.detach();
+    console.timeEnd('  + brute force time');
 
     return new Promise((resolve) => {
       setTimeout(() => {
