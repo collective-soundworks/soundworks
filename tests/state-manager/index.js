@@ -1126,7 +1126,7 @@ describe('stateManager.registerUpdateHook(schemaName, updateHook)', () => {
 });
 
 describe('WebSocket transport', () => {
-  it.only('should work properly with async transport - brute force testing', async () => {
+  it('should work properly with async transport - brute force testing', async () => {
     console.time('  + brute force time');
     const global = await server.stateManager.create('a');
     const attached = [];
