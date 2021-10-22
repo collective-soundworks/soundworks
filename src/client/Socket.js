@@ -48,6 +48,11 @@ class Socket {
      */
     /** @private */
     this.ws = null;
+    /**
+     * WebSocket instance (binary protocol - binaryType = 'arraybuffer').
+     */
+    /** @private */
+    this.binaryWs = null;
 
     this._stringListeners = new Map();
     this._binaryListeners = new Map();
@@ -61,11 +66,11 @@ class Socket {
    * @param {Array<String>} options.path - Defines where socket should find the `socket.io` file
    */
   /** @private */
-  init(clientType, config) {
+  async init(clientType, config) {
     // unique key that allows to associate the two sockets to the same client.
     // note: the key is only used to pair to two sockets, so its usage is very
     // limited in time therefore a random number should hopefully be sufficient.
-    const key = (Math.random() + '').replace(/^0./, '');
+    const key = (Math.random() + '').replace(/^0\./, '');
 
     // open web sockets
     let { path } = config.env.websockets;
@@ -96,64 +101,85 @@ class Socket {
     // ----------------------------------------------------------
     const stringSocketUrl = `${url}?binary=0&${queryParams}`;
 
-    this.ws = new WebSocket(stringSocketUrl);
-    log(`string socket initialized - url: ${stringSocketUrl}`);
+    await new Promise((resolve, reject) => {
+      const trySocket = async () => {
+        log(`[string socket] trying connection - url: ${stringSocketUrl}`);
+        const ws = new WebSocket(stringSocketUrl);
 
-    const stringSocketPromise = new Promise((resolve, reject) => {
-      this.ws.addEventListener('open', resolve);
+        ws.addEventListener('open', connectEvent => {
+          // parse incoming messages for pubsub
+          this.ws = ws;
+          this.ws.addEventListener('message', e => {
+            const [channel, args] = unpackStringMessage(e.data);
+            this._emit(false, channel, ...args);
+          });
+
+          // broadcast all `WebSocket` native events
+          [ 'close',
+            'error',
+            'upgrade',
+            'message',
+          ].forEach(eventName => {
+            this.ws.addEventListener(eventName, (e) => {
+              this._emit(false, eventName, e);
+            });
+          });
+
+          // forward open event
+          this._emit(false, 'open', connectEvent);
+          // continue with raw socket
+          resolve();
+        });
+
+        // cf. https://github.com/collective-soundworks/soundworks/issues/17
+        ws.addEventListener('error', e => {
+          if (e.type === 'error' && e.error.code === 'ECONNREFUSED') {
+            console.log('[socket] connection refused - (retry in 1s)')
+            setTimeout(trySocket, 1000);
+          }
+        });
+      };
+
+      trySocket();
     });
 
-    // parse incoming messages for pubsub
-    this.ws.addEventListener('message', e => {
-      const [channel, args] = unpackStringMessage(e.data);
-      this._emit(false, channel, ...args);
-    });
-
-    // broadcast all `WebSocket` native events
-    [ 'open',
-      'close',
-      'error',
-      'upgrade',
-      'message',
-    ].forEach(eventName => {
-      this.ws.addEventListener(eventName, (e) => {
-        this._emit(false, eventName, e.data);
-      });
-    });
-
-    // ----------------------------------------------------------
-    // init binary socket
-    // ----------------------------------------------------------
+    // // ----------------------------------------------------------
+    // // init binary socket
+    // // ----------------------------------------------------------
     const binarySocketUrl = `${url}?binary=1&${queryParams}`;
 
-    this.binaryWs = new WebSocket(binarySocketUrl);
-    this.binaryWs.binaryType = 'arraybuffer';
-    log(`binary socket initialized - url: ${binarySocketUrl}`);
+    await new Promise((resolve, reject) => {
+      log(`[binary socket] trying connection - url: ${binarySocketUrl}`);
+      const ws = new WebSocket(binarySocketUrl);
+      ws.binaryType = 'arraybuffer';
 
-    const binarySocketPromise = new Promise((resolve, reject) => {
-      this.binaryWs.addEventListener('open', resolve);
-    });
+      ws.addEventListener('open', connectEvent => {
+        // parse incoming messages for pubsub
+        this.binaryWs = ws;
+        this.binaryWs.addEventListener('message', e => {
+          const [channel, data] = unpackBinaryMessage(e.data);
+          this._emit(true, channel, data);
+        });
 
-    // parse incoming messages for pubsub
-    this.binaryWs.addEventListener('message', e => {
-      const [channel, data] = unpackBinaryMessage(e.data);
-      this._emit(true, channel, data);
-    });
+        // broadcast all `WebSocket` native events
+        [ 'close',
+          'error',
+          'upgrade',
+          'message',
+        ].forEach(eventName => {
+          this.binaryWs.addEventListener(eventName, (e) => {
+            this._emit(true, eventName, e);
+          });
+        });
 
-    // broadcast all `WebSocket` native events
-    [ 'open',
-      'close',
-      'error',
-      'upgrade',
-      'message',
-    ].forEach(eventName => {
-      this.binaryWs.addEventListener(eventName, (e) => {
-        this._emit(true, eventName, e.data);
+        // forward open event
+        this._emit(true, 'open', connectEvent);
+        resolve();
       });
     });
 
-    // wait for both socket to be opened
-    return Promise.all([stringSocketPromise, binarySocketPromise]);
+    // everyone is connected
+    return Promise.resolve();
   }
 
   /** @private */

@@ -108,7 +108,7 @@ class Client {
       // pingInterval: 5 * 1000,
     }, config.env.websockets);
 
-    // init communications
+    // init socket communications (string and binary)
     await this.socket.init(this.type, this.config);
 
     return Promise.resolve();
