@@ -1,5 +1,6 @@
 // import types from './types';
 import cloneDeep from 'lodash.clonedeep';
+// import shallowClone from 'shallow-clone';
 import equal from 'fast-deep-equal';
 
 
@@ -166,6 +167,9 @@ import equal from 'fast-deep-equal';
 /**
  * @typedef {Object} server.SharedStateManagerServer~schemaAnyDef
  *
+ * Note that the `any` type always return a shallow copy of the state internal
+ * value. Mutating the returned value will not modify the internal state.
+ *
  * @property {String} [type='any'] - Parameter of any type.
  * @property {Mixed} default - Default value of the parameter.
  * @property {Boolean} [nullable=false] - Define if the parameter is nullable. If
@@ -194,7 +198,7 @@ export const sharedOptions = {
   event: false, // if event=true, nullable=true
   metas: {},
   filterChange: true,
-  // immediate: false,
+  immediate: false,
 }
 
 export const types = {
@@ -400,11 +404,18 @@ class ParameterBag {
    * @return {Object}
    */
   getValues() {
-    return Object.assign({}, this._values);
+    let values = {};
+
+    for (let name in this._values) {
+      values[name] = this.get(name);
+    }
+
+    return values;
   }
 
   /**
-   * Return the value of the given parameter.
+   * Return the value of the given parameter. If the parameter is of `any` type,
+   * a deep copy is returned.
    *
    * @param {String} name - Name of the parameter.
    * @return {Mixed} - Value of the parameter.
@@ -414,7 +425,11 @@ class ParameterBag {
       throw new ReferenceError(`[stateManager] Cannot get value of undefined parameter "${name}"`);
     }
 
-    return this._values[name];
+    if (this._schema[name].type === 'any') {
+      return cloneDeep(this._values[name]);
+    } else {
+      return this._values[name];
+    }
   }
 
   /**
@@ -446,6 +461,7 @@ class ParameterBag {
 
     const currentValue = this._values[name];
     const updated = !equal(currentValue, value);
+
     this._values[name] = value;
 
     if (def.event === true) {

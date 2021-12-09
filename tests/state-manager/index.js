@@ -165,6 +165,23 @@ describe('async state.set(updates) => updates', () => {
     assert.equal(a.get('bool'), true);
   });
 
+  it('should resolve after `subscribe` even if subscribe callback is async', async () => {
+    const a = await server.stateManager.create('a');
+    let asyncCallbackCalled = false;
+
+    a.subscribe(updates => {
+      return new Promise(resolve => {
+        setTimeout(() => {
+          asyncCallbackCalled = true;
+          resolve();
+        }, 100);
+      });
+    });
+
+    await a.set({ bool: true });
+    assert.equal(asyncCallbackCalled, true);
+  });
+
   it('should throw early on undefined param name', async () => {
     const a = await server.stateManager.create('a');
 
@@ -207,6 +224,44 @@ describe('async state.set(updates) => updates', () => {
         }
       }
     }
+  });
+});
+
+describe('state.get(name) - state.getValues()', () => {
+  it.only('get(name) `any` type should not allow to mutate internal value', async() => {
+    server.stateManager.registerSchema('any', {
+      ref: {
+        type: 'any',
+        default: {
+          inner: { test: false },
+        },
+      },
+    });
+
+    const a = await server.stateManager.create('any');
+
+    const ref1 = a.get('ref');
+    ref1.test = true;
+    ref1.inner.test = true;
+
+    const ref2 = a.get('ref');
+    assert.equal(ref2.test, undefined);
+    assert.equal(ref2.inner.test, false);
+  });
+
+  it.only('getValues() `any` type should not allow to mutate internal value', async() => {
+    server.stateManager.registerSchema('any-all', {
+      ref: {
+        type: 'any',
+        default: {},
+      },
+    });
+
+    const a = await server.stateManager.create('any-all');
+    const ref1 = a.getValues();
+    ref1.ref.test = true;
+    const ref2 = a.get('ref');
+    assert.equal(ref2.test, undefined);
   });
 });
 

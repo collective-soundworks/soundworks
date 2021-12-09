@@ -55,29 +55,32 @@ class SharedState {
       this._parameters = new ParameterBag(schema, initValues);
     } catch(err) {
       console.error(err.stack);
+
       throw new Error(`Error creating or attaching state "${schemaName}" w/ values:\n
 ${JSON.stringify(initValues, null, 2)}`);
+
     }
+
     this._subscriptions = new Set();
 
     this._onDetachCallbacks = new Set();
     this._onDeleteCallbacks = new Set();
 
     // add listener for state updates
-    client.transport.addListener(`${UPDATE_RESPONSE}-${id}-${this.remoteId}`, (reqId, updates, context) => {
-      const updated = this._commit(updates, context, true, true);
+    client.transport.addListener(`${UPDATE_RESPONSE}-${id}-${this.remoteId}`, async (reqId, updates, context) => {
+      const updated = await this._commit(updates, context, true, true);
       resolveRequest(reqId, updated);
     });
 
     // retrieve values but do not propagate to subscriptions
-    client.transport.addListener(`${UPDATE_ABORT}-${id}-${this.remoteId}`, (reqId, updates, context) => {
-      const updated = this._commit(updates, context, false, true);
+    client.transport.addListener(`${UPDATE_ABORT}-${id}-${this.remoteId}`, async (reqId, updates, context) => {
+      const updated = await this._commit(updates, context, false, true);
       resolveRequest(reqId, updated);
     });
 
-    client.transport.addListener(`${UPDATE_NOTIFICATION}-${id}-${this.remoteId}`, (updates, context) => {
+    client.transport.addListener(`${UPDATE_NOTIFICATION}-${id}-${this.remoteId}`, async (updates, context) => {
       // cf. https://github.com/collective-soundworks/soundworks/issues/18
-      this._commit(updates, context, true, false);
+      await this._commit(updates, context, true, false);
     });
 
     // ---------------------------------------------
@@ -156,12 +159,16 @@ ${JSON.stringify(initValues, null, 2)}`);
   }
 
   /** @private */
-  _commit(updates, context, propagate = true, initiator = false) {
+  async _commit(updates, context, propagate = true, initiator = false) {
     const newValues = {};
     const oldValues = {};
 
     for (let name in updates) {
       const { immediate, filterChange, event } = this._parameters.getSchema(name);
+      // @note 20211209 - we have an issue here server-side, because if the value
+      // is an object or an array, the reference is shared by everybody, therefore
+      // `changed` is always false and the new value is never propagated...
+      // FIXED - `state.get` now returns a deep copy when `type` is `any`
       const oldValue = this._parameters.get(name);
       const [newValue, changed] = this._parameters.set(name, updates[name]);
 
@@ -182,15 +189,39 @@ ${JSON.stringify(initValues, null, 2)}`);
     }
 
     // if the `UPDATE_REQUEST` as been aborted by the server, do not propagate
+    let promises = [];
+
     if (propagate && Object.keys(newValues).length > 0) {
-      this._subscriptions.forEach(listener => listener(newValues, oldValues, context));
+      this._subscriptions.forEach(listener => {
+        promises.push(listener(newValues, oldValues, context));
+      });
     }
+
+    await Promise.all(promises);
 
     return newValues;
   }
 
   /**
-   * Updates values of the state.
+   * Updates values of the state. Wait for all subscriptions to be resolved
+   * before resolving itself, i.e.:
+   *
+   * ```js
+   * const a = await server.stateManager.create('a');
+   * let asyncCallbackCalled = false;
+   *
+   * a.subscribe(updates => {
+   *   return new Promise(resolve => {
+   *     setTimeout(() => {
+   *       asyncCallbackCalled = true;
+   *       resolve();
+   *     }, 100);
+   *   });
+   * });
+   *
+   * await a.set({ bool: true });
+   * assert.equal(asyncCallbackCalled, true);
+   * ```
    *
    * @async
    * @param {Object} updates - key / value pairs of updates to apply to the state.
