@@ -104,29 +104,32 @@ class SharedState {
       this._parameters = new ParameterBag(schema, initValues);
     } catch(err) {
       console.error(err.stack);
+
       throw new Error(`Error creating or attaching state "${schemaName}" w/ values:\n
 ${JSON.stringify(initValues, null, 2)}`);
+
     }
+
     this._subscriptions = new Set();
 
     this._onDetachCallbacks = new Set();
     this._onDeleteCallbacks = new Set();
 
     // add listener for state updates
-    client.transport.addListener(`${UPDATE_RESPONSE}-${id}-${this.remoteId}`, (reqId, updates, context) => {
-      const updated = this._commit(updates, context, true, true);
+    client.transport.addListener(`${UPDATE_RESPONSE}-${id}-${this.remoteId}`, async (reqId, updates, context) => {
+      const updated = await this._commit(updates, context, true, true);
       resolveRequest(reqId, updated);
     });
 
     // retrieve values but do not propagate to subscriptions
-    client.transport.addListener(`${UPDATE_ABORT}-${id}-${this.remoteId}`, (reqId, updates, context) => {
-      const updated = this._commit(updates, context, false, true);
+    client.transport.addListener(`${UPDATE_ABORT}-${id}-${this.remoteId}`, async (reqId, updates, context) => {
+      const updated = await this._commit(updates, context, false, true);
       resolveRequest(reqId, updated);
     });
 
-    client.transport.addListener(`${UPDATE_NOTIFICATION}-${id}-${this.remoteId}`, (updates, context) => {
+    client.transport.addListener(`${UPDATE_NOTIFICATION}-${id}-${this.remoteId}`, async (updates, context) => {
       // cf. https://github.com/collective-soundworks/soundworks/issues/18
-      this._commit(updates, context, true, false);
+      await this._commit(updates, context, true, false);
     });
 
     // ---------------------------------------------
@@ -205,12 +208,16 @@ ${JSON.stringify(initValues, null, 2)}`);
   }
 
   /** @private */
-  _commit(updates, context, propagate = true, initiator = false) {
+  async _commit(updates, context, propagate = true, initiator = false) {
     const newValues = {};
     const oldValues = {};
 
     for (let name in updates) {
       const { immediate, filterChange, event } = this._parameters.getSchema(name);
+      // @note 20211209 - we have an issue here server-side, because if the value
+      // is an object or an array, the reference is shared by everybody, therefore
+      // `changed` is always false and the new value is never propagated...
+      // FIXED - `state.get` now returns a deep copy when `type` is `any`
       const oldValue = this._parameters.get(name);
       const [newValue, changed] = this._parameters.set(name, updates[name]);
 
@@ -219,7 +226,7 @@ ${JSON.stringify(initValues, null, 2)}`);
         // @note - we don't need to check filterChange here because the value
         // has been updated in parameters on the `set` side so can rely on `changed`
         // to avoid retrigger listeners.
-        // If the value has overriden by the server, `changed` will true
+        // If the value has been overriden by the server, `changed` will true
         // anyway so it should behave correctly.
         if (!changed || event) {
           continue;
@@ -231,15 +238,39 @@ ${JSON.stringify(initValues, null, 2)}`);
     }
 
     // if the `UPDATE_REQUEST` as been aborted by the server, do not propagate
+    let promises = [];
+
     if (propagate &amp;&amp; Object.keys(newValues).length > 0) {
-      this._subscriptions.forEach(listener => listener(newValues, oldValues, context));
+      this._subscriptions.forEach(listener => {
+        promises.push(listener(newValues, oldValues, context));
+      });
     }
+
+    await Promise.all(promises);
 
     return newValues;
   }
 
   /**
-   * Updates values of the state.
+   * Updates values of the state. Wait for all subscriptions to be resolved
+   * before resolving itself, i.e.:
+   *
+   * ```js
+   * const a = await server.stateManager.create('a');
+   * let asyncCallbackCalled = false;
+   *
+   * a.subscribe(updates => {
+   *   return new Promise(resolve => {
+   *     setTimeout(() => {
+   *       asyncCallbackCalled = true;
+   *       resolve();
+   *     }, 100);
+   *   });
+   * });
+   *
+   * await a.set({ bool: true });
+   * assert.equal(asyncCallbackCalled, true);
+   * ```
    *
    * @async
    * @param {Object} updates - key / value pairs of updates to apply to the state.
@@ -362,7 +393,7 @@ ${JSON.stringify(initValues, null, 2)}`);
    *        // do something
    *      }
    *   }
-   * }
+   * });
    *
    * @see {common.SharedState#set}
    * @see {common.SharedState#subscribe}
@@ -372,6 +403,8 @@ ${JSON.stringify(initValues, null, 2)}`);
    *
    * @param {common.SharedState~subscribeCallback} callback - callback to execute
    *   when an update is applied on the state.
+   * @param {Boolean} [executeListener=false] - execute the given listener with
+   *   current state values. (`oldValues` will be set to `{}`, and `context` to `null`)
    *
    * @example
    * state.subscribe(async (newValues, oldValues) =>  {
@@ -380,10 +413,17 @@ ${JSON.stringify(initValues, null, 2)}`);
    *        // do something
    *      }
    *   }
-   * }
+   * });
    */
-  subscribe(listener) {
+  subscribe(listener, executeListener = false) {
     this._subscriptions.add(listener);
+
+    if (executeListener === true) {
+      const currentValues = this.getValues();
+      const oldValues = {};
+      const context = null;
+      listener(currentValues, oldValues, context);
+    }
 
     return () => {
       this._subscriptions.delete(listener);
@@ -478,7 +518,7 @@ export default SharedState;
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a> on Fri Sep 03 2021 16:02:33 GMT+0200 (Central European Summer Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a> on Fri Dec 10 2021 16:35:43 GMT+0100 (Central European Standard Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>
