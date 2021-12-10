@@ -474,6 +474,8 @@ class ParameterBag {
 
   /**
    * Reset a parameter to its initialization values. Reset all parameters if no argument.
+   * @note - prefer `state.set(state.getInitValues())`
+   *         or     `state.set(state.getDefaultValues())`
    *
    * @param {String} [name=null] - Name of the parameter to reset.
    */
