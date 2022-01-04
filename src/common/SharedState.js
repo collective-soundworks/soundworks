@@ -199,6 +199,15 @@ ${JSON.stringify(initValues, null, 2)}`);
 
     await Promise.all(promises);
 
+    // reset events to null after propagation of all listeners
+    for (let name in newValues) {
+      const { event } = this._parameters.getSchema(name);
+
+      if (event) {
+        this._parameters.set(name, null);
+      }
+    }
+
     return newValues;
   }
 
@@ -261,7 +270,7 @@ ${JSON.stringify(initValues, null, 2)}`);
         const oldValue = this._parameters.get(name);
         const [newValue, changed] = this._parameters.set(name, updates[name]);
 
-        if (changed || filterChange === false) {
+        if (changed || filterChange === false || event) {
           immediateOldValues[name] = oldValue;
           immediateNewValues[name] = newValue;
           propagateNow = true;

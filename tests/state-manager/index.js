@@ -228,7 +228,7 @@ describe('async state.set(updates) => updates', () => {
 });
 
 describe('state.get(name) - state.getValues()', () => {
-  it.only('get(name) `any` type should not allow to mutate internal value', async() => {
+  it('get(name) `any` type should not allow to mutate internal value', async() => {
     server.stateManager.registerSchema('any', {
       ref: {
         type: 'any',
@@ -249,7 +249,7 @@ describe('state.get(name) - state.getValues()', () => {
     assert.equal(ref2.inner.test, false);
   });
 
-  it.only('getValues() `any` type should not allow to mutate internal value', async() => {
+  it('getValues() `any` type should not allow to mutate internal value', async() => {
     server.stateManager.registerSchema('any-all', {
       ref: {
         type: 'any',
@@ -388,7 +388,7 @@ describe('schema options', () => {
     });
   });
 
-  it('[event=true] should behave correctl', async () => {
+  it('[event=true] should behave correctly', async () => {
     return new Promise(async (resolve, reject) => {
       server.stateManager.registerSchema('event-test', {
         value: {
@@ -400,9 +400,15 @@ describe('schema options', () => {
       const numEvents = 5;
       let counter = 0;
 
+      // should be able to read if called from a subscription
+      function readInSubscribe() {
+        assert.equal(state.get('value'), true);
+      }
+
       state.subscribe(updates => {
         try {
           assert.deepEqual(updates, { value: true });
+          readInSubscribe();
           counter += 1;
         } catch(err) {
           reject(err);
@@ -642,6 +648,7 @@ describe('schema options', () => {
       // should be notified normally if not initiator of the update
       const attachedPromise = new Promise((resolve) => {
         let call = 0;
+
         attached.subscribe(updates => {
           if (call === 0) {
             try {

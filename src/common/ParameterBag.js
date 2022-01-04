@@ -464,10 +464,6 @@ class ParameterBag {
 
     this._values[name] = value;
 
-    if (def.event === true) {
-      this._values[name] = null;
-    }
-
     // return tuple so that the state manager can handle the `filterChange` option
     return [value, updated];
   }

@@ -89,7 +89,12 @@ class SharedStatePrivate {
 
           // if `filterChange` is set to `false` we don't check if the value
           // has been changed or not, it is always propagated to client states
-          const { filterChange } = this._parameters.getSchema(name);
+          const { event, filterChange } = this._parameters.getSchema(name);
+
+          // if event type reset internal value to null
+          if (event) {
+            this._parameters.set(name, null);
+          }
 
           if ((filterChange && changed) || !filterChange) {
             filteredUpdates[name] = newValue;
