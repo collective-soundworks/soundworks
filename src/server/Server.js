@@ -478,6 +478,12 @@ class Server {
         data.env.subpath = this.config.env.subpath;
       }
 
+      res.writeHead(200, {
+        'Cross-Origin-Resource-Policy': 'same-origin',
+        'Cross-Origin-Embedder-Policy': 'require-corp',
+        'Cross-Origin-Opener-Policy': 'same-origin',
+      });
+
       const appIndex = tmpl(data);
       res.end(appIndex);
     });
