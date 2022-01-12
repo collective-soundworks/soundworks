@@ -242,6 +242,40 @@ class Server {
 
     this._clientConfigFunction = clientConfigFunction;
 
+    // basic http authentication
+    if (this.config.env.auth) {
+      this.router.use((req, res, next) => {
+
+        const isProtected  = this.config.env.auth.clients
+          .map(type => req.path.endsWith(`/${type}`))
+          .reduce((acc, value) => acc || value, false);
+
+        if (isProtected) {
+          // authentication middleware
+          const auth = this.config.env.auth;
+          // parse login and password from headers
+          const b64auth = (req.headers.authorization || '').split(' ')[1] || '';
+          const [login, password] = Buffer.from(b64auth, 'base64').toString().split(':');
+
+          // verify login and password are set and correct
+          if (login && password && login === auth.login && password === auth.password) {
+            // -> access granted...
+            return next()
+          }
+
+          // -> access denied...
+          res.writeHead(401, {
+            'WWW-Authenticate':'Basic',
+            'Content-Type':'text/plain'
+          });
+          res.end('Authentication required.')
+        } else {
+          // route not protected
+          return next();
+        }
+      });
+    }
+
     return Promise.resolve();
   }
 
@@ -374,7 +408,7 @@ class Server {
             }
           }
 
-          logger.clientConfigAndRouting(routes, this.config.app.clients, this.config.env.serverIp);
+          logger.clientConfigAndRouting(routes, this.config);
 
           return Promise.resolve();
         }).then(() => {
@@ -478,6 +512,9 @@ class Server {
         data.env.subpath = this.config.env.subpath;
       }
 
+      // cors / coop / coep headers for `crossOriginIsolated pages, enables
+      // sharedArrayBuffers and high precision timers
+      // cf. https://web.dev/why-coop-coep/
       res.writeHead(200, {
         'Cross-Origin-Resource-Policy': 'same-origin',
         'Cross-Origin-Embedder-Policy': 'require-corp',

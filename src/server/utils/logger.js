@@ -9,7 +9,10 @@ const logger = {
     console.log(chalk.cyan(`+ ${msg}`));
   },
 
-  clientConfigAndRouting(routes, clientsConfig, serverIp) {
+  clientConfigAndRouting(routes, config) {
+    const clientsConfig = config.app.clients;
+    const servIp = config.env.serverIp;
+    const auth = config.env.auth;
     const table = [];
 
     for (let clientType in clientsConfig) {
@@ -17,21 +20,23 @@ const logger = {
 
       if (client.target === 'node') {
         const line = {
-          clientType: `${clientType}`,
+          client_type: `> ${clientType}`,
           target: chalk.red(client.target),
           path: `server ip: ${chalk.green(serverIp)}`,
-          default: undefined
+          default: undefined,
+          auth: undefined,
         }
 
         table.push(line);
       } else if (client.target === 'browser') {
         const line = {
-          clientType: `${clientType}`,
+          client_type: `> ${clientType}`,
           target: chalk.red(client.target),
           path: routes.find(r => r.clientType === clientType) ?
             chalk.green(routes.find(r => r.clientType === clientType).path) :
             chalk.red('no route defined'),
-          default: (client.default ? 'default' : undefined)
+          default: (client.default ? 'x' : undefined),
+          auth: auth && auth.clients.indexOf(clientType) !== -1 ? 'x' : undefined,
         }
 
         table.push(line);
@@ -40,10 +45,17 @@ const logger = {
       }
     }
 
+    console.log(``);
     console.log(columnify(table, {
-      showHeaders: false,
-      minWidth: 14,
+      showHeaders: true,
+      minWidth: 6,
+      columnSplitter: ' | ',
+      config: {
+        default: { align: 'center' },
+        auth: { align: 'center' },
+      }
     }));
+    console.log(``);
 
     // check if a route is defined but not in config
     const configClientTypes = Object.keys(clientsConfig);
