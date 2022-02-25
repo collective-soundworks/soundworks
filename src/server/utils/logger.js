@@ -11,7 +11,7 @@ const logger = {
 
   clientConfigAndRouting(routes, config) {
     const clientsConfig = config.app.clients;
-    const servIp = config.env.serverIp;
+    const serverIp = config.env.serverIp;
     const auth = config.env.auth;
     const table = [];
 
