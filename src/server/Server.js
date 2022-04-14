@@ -212,6 +212,7 @@ class Server {
           pingInterval: 5000
         },
         useHttps: false,
+        crossOriginIsolated: true,
       },
       app: {
         name: 'soundworks',
@@ -514,12 +515,15 @@ class Server {
 
       // cors / coop / coep headers for `crossOriginIsolated pages, enables
       // sharedArrayBuffers and high precision timers
+      // this is the default behavior
       // cf. https://web.dev/why-coop-coep/
-      res.writeHead(200, {
-        'Cross-Origin-Resource-Policy': 'same-origin',
-        'Cross-Origin-Embedder-Policy': 'require-corp',
-        'Cross-Origin-Opener-Policy': 'same-origin',
-      });
+      if (this.config.env.crossOriginIsolated) {
+        res.writeHead(200, {
+          'Cross-Origin-Resource-Policy': 'same-origin',
+          'Cross-Origin-Embedder-Policy': 'require-corp',
+          'Cross-Origin-Opener-Policy': 'same-origin',
+        });
+      }
 
       const appIndex = tmpl(data);
       res.end(appIndex);
