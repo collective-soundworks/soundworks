@@ -83,15 +83,20 @@ class Socket {
     }
 
     let url;
+    let webSocketOptions;
 
     if (isBrowser()) {
       const protocol = window.location.protocol.replace(/^http?/, 'ws');
       const { hostname, port } = window.location;
       url = `${protocol}//${hostname}:${port}/${path}`;
+      webSocketOptions = {};
     } else {
-      const protocol = config.useHttps ? 'wss:' : 'ws:';
+      const protocol = config.env.useHttps ? 'wss:' : 'ws:';
       const { serverIp, port } = config.env;
       url = `${protocol}//${serverIp}:${port}/${path}`;
+      webSocketOptions = {
+        rejectUnauthorized: false,
+      };
     }
 
     const queryParams = `clientType=${clientType}&key=${key}`;
@@ -104,7 +109,7 @@ class Socket {
     await new Promise((resolve, reject) => {
       const trySocket = async () => {
         log(`[string socket] trying connection - url: ${stringSocketUrl}`);
-        const ws = new WebSocket(stringSocketUrl);
+        const ws = new WebSocket(stringSocketUrl, webSocketOptions);
 
         ws.addEventListener('open', connectEvent => {
           // parse incoming messages for pubsub
@@ -150,7 +155,7 @@ class Socket {
 
     await new Promise((resolve, reject) => {
       log(`[binary socket] trying connection - url: ${binarySocketUrl}`);
-      const ws = new WebSocket(binarySocketUrl);
+      const ws = new WebSocket(binarySocketUrl, webSocketOptions);
       ws.binaryType = 'arraybuffer';
 
       ws.addEventListener('open', connectEvent => {

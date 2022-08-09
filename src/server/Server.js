@@ -290,8 +290,12 @@ class Server {
       // ------------------------------------------------------------
       // init acitvities
       // ------------------------------------------------------------
+
+      // we should at least have one activity registered for each client here
+      // i.e. the Experience so it's ok
       this.activities.forEach((activity) => {
         activity.clientTypes.forEach((clientType) => {
+
           if (!this._clientTypeActivitiesMap[clientType]) {
             this._clientTypeActivitiesMap[clientType] = new Set();
           }
@@ -540,6 +544,10 @@ class Server {
   _onSocketConnection(clientType, socket) {
     const client = new Client(clientType, socket);
     const activities = this._clientTypeActivitiesMap[clientType];
+
+    if (activities == undefined) {
+      throw new Error(`No activity registered for "${clientType}" clients, make sure an Experience has been initialized for this client (see src/server/index.js)`);
+    }
 
     socket.addListener('close', () => {
       // clean sockets
