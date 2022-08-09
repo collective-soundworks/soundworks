@@ -89,7 +89,7 @@ class Socket {
       const protocol = window.location.protocol.replace(/^http?/, 'ws');
       const { hostname, port } = window.location;
       url = `${protocol}//${hostname}:${port}/${path}`;
-      webSocketOptions = {};
+      webSocketOptions = [];
     } else {
       const protocol = config.env.useHttps ? 'wss:' : 'ws:';
       const { serverIp, port } = config.env;
