@@ -377,12 +377,24 @@ class Server {
 
           return Promise.resolve();
         }).then(() => {
-          if (this.templateEngine === null) {
-            throw new Error('Undefined "server.templateEngine": please provide a valid template engine');
+          let nodeOnly = true;
+
+          // do not throw if no browser clients are defined, very usefull for
+          // cleaning tests in particular
+          for (let clientType in this.config.app.clients) {
+            if (this.config.app.clients[clientType].target === 'browser') {
+              nodeOnly = false;
+            }
           }
 
-          if (this.templateDirectory === null) {
-            throw new Error('Undefined "server.templateDirectory": please provide a valid template directory');
+          if (!nodeOnly) {
+            if (this.templateEngine === null) {
+              throw new Error('Undefined "server.templateEngine": please provide a valid template engine');
+            }
+
+            if (this.templateDirectory === null) {
+              throw new Error('Undefined "server.templateDirectory": please provide a valid template directory');
+            }
           }
 
           // ------------------------------------------------------------
@@ -400,6 +412,11 @@ class Server {
           }
           // we must open default route last
           for (let clientType in this._clientTypeActivitiesMap) {
+            // do nothing if client type is not registered in config
+            if (!(clientType in this.config.app.clients)) {
+              continue;
+            }
+
             if (clientType !== defaultClientType) {
               const clientTarget = this.config.app.clients[clientType].target;
               const path = this._openClientRoute(clientType, target, this.router);
@@ -409,6 +426,11 @@ class Server {
 
           // open default route last
           for (let clientType in this._clientTypeActivitiesMap) {
+            // do nothing if client type is not registered in config
+            if (!(clientType in this.config.app.clients)) {
+              continue;
+            }
+
             if (clientType === defaultClientType) {
               const clientTarget = this.config.app.clients[clientType].target;
               const path = this._openClientRoute(clientType, target, this.router, true);

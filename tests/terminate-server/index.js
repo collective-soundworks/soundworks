@@ -27,13 +27,7 @@ class ServerTestExperience extends ServerAbstractExperience {
 let server;
 
 before(async () => {
-  // ---------------------------------------------------
-  // server
-  // ---------------------------------------------------
   server = new Server();
-  // @note - these two should not be mandatory
-  server.templateEngine = { compile: () => {} };
-  server.templateDirectory = __dirname;
 
   await server.init(config);
   // @note - client type should not be mandatory
