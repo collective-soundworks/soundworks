@@ -11,7 +11,7 @@ const log = debug('soundworks:lifecycle');
  * @memberof server
  */
 class AbstractExperience {
-  constructor(server, clientTypes = null) {
+  constructor(server, clientTypes = []) {
     // @todo - check that it's a soundworks instance
     if (!server) {
       throw new Error(`${this.constructor.name} should receive the "Server" instance as first argument`);

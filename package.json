@@ -29,7 +29,8 @@
     "dev:client": "chokidar src/client/ -c \"npm run build:client\"",
     "dev:server": "chokidar src/server/ -c \"npm run build:server\"",
     "dev:common": "chokidar src/common/ -c \"npm run build:common\"",
-    "dev": "npm run build && (npm run dev:client & npm run dev:server & npm run dev:common)"
+    "dev": "npm run build && (npm run dev:client & npm run dev:server & npm run dev:common)",
+    "test": "mocha"
   },
   "dependencies": {
     "chalk": "^4.1.2",
@@ -38,6 +39,7 @@
     "debug": "^4.3.4",
     "fast-deep-equal": "^3.1.3",
     "fast-text-encoding": "^1.0.0",
+    "http-terminator": "^3.2.0",
     "isomorphic-ws": "^4.0.1",
     "keyv": "^4.2.2",
     "keyv-file": "^0.2.0",

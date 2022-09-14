@@ -16,6 +16,7 @@ import SharedStateManagerServer from '../common/SharedStateManagerServer.js';
 import logger from './utils/logger.js';
 import Keyv from 'keyv';
 import KeyvFile from 'keyv-file';
+import { createHttpTerminator } from 'http-terminator';
 
 let _dbNamespaces = new Set();
 let _dbStore = null;
@@ -400,7 +401,8 @@ class Server {
           // we must open default route last
           for (let clientType in this._clientTypeActivitiesMap) {
             if (clientType !== defaultClientType) {
-              const path = this._openClientRoute(clientType, this.router);
+              const clientTarget = this.config.app.clients[clientType].target;
+              const path = this._openClientRoute(clientType, target, this.router);
               routes.push({ clientType, path });
             }
           }
@@ -408,7 +410,8 @@ class Server {
           // open default route last
           for (let clientType in this._clientTypeActivitiesMap) {
             if (clientType === defaultClientType) {
-              const path = this._openClientRoute(clientType, this.router, true);
+              const clientTarget = this.config.app.clients[clientType].target;
+              const path = this._openClientRoute(clientType, target, this.router, true);
               routes.unshift({ clientType, path });
             }
           }
@@ -467,17 +470,31 @@ class Server {
     }
   }
 
+  async stop() {
+    const httpTerminator = createHttpTerminator({
+      server: this.httpServer,
+    });
+
+    await httpTerminator.terminate();
+  }
+
   /**
    * Open the route for the given client.
    * @private
    */
-  _openClientRoute(clientType, router, isDefault = false) {
+  _openClientRoute(clientType, target, router, isDefault = false) {
+    // only browser targets need a route
+    if (target === 'node') {
+      return;
+    }
+
     let route = '/';
 
     if (!isDefault) {
       route += `${clientType}`;
     }
 
+    // @todo - define what is this... looks completely not used and not usable...
     if (this._routes[clientType]) {
       route += this._routes[clientType];
     }
