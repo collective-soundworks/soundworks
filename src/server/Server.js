@@ -419,7 +419,7 @@ class Server {
 
             if (clientType !== defaultClientType) {
               const clientTarget = this.config.app.clients[clientType].target;
-              const path = this._openClientRoute(clientType, target, this.router);
+              const path = this._openClientRoute(clientType, clientTarget, this.router);
               routes.push({ clientType, path });
             }
           }
@@ -433,7 +433,7 @@ class Server {
 
             if (clientType === defaultClientType) {
               const clientTarget = this.config.app.clients[clientType].target;
-              const path = this._openClientRoute(clientType, target, this.router, true);
+              const path = this._openClientRoute(clientType, clientTarget, this.router, true);
               routes.unshift({ clientType, path });
             }
           }
