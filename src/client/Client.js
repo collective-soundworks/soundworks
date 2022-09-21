@@ -169,6 +169,10 @@ class Client {
 
     return this._ready;
   }
+
+  async stop() {
+    this.socket.terminate();
+  }
 };
 
 export default Client;

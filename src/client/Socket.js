@@ -305,6 +305,14 @@ class Socket {
   removeAllBinaryListeners(channel) {
     this._removeAllListeners(this._binaryListeners, channel);
   }
+
+  /**
+   * Immediately close the 2 sockets
+   */
+  terminate() {
+    this.ws.close();
+    this.binaryWs.close();
+  }
 };
 
 export default Socket;
