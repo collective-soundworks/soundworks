@@ -65,6 +65,11 @@ class Sockets {
     });
   }
 
+  terminate() {
+    const sockets = this._rooms.get('*');
+    sockets.forEach(socket => socket.terminate());
+  }
+
   /** @private */
   _broadcast(binary, roomIds, excludeSocket, channel, ...args) {
     const method = binary ? 'sendBinary' : 'send';

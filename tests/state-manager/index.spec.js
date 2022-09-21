@@ -1,4 +1,3 @@
-const path = require('path');
 const assert = require('chai').assert;
 
 const Server = require('../../server').Server;
@@ -7,7 +6,6 @@ const ServerAbstractExperience = require('../../server').AbstractExperience;
 const Client = require('../../client').Client;
 const ClientAbstractExperience = require('../../client').AbstractExperience;
 
-const config = require('./config');
 const a = require('./schemas/a');
 const b = require('./schemas/b');
 const hookSchema = require('./schemas/hookSchema');
@@ -21,6 +19,20 @@ const hookSchema = require('./schemas/hookSchema');
  * mocha tests/state-manager --exit
  * ```
  */
+const config = {
+  app: {
+    name: 'test-state-manager',
+    clients: {
+      test: { target: 'node' },
+    },
+  },
+  env: {
+    type: 'development',
+    port: 8081,
+    serverIp: '127.0.0.1',
+    useHttps: false,
+  },
+};
 
 class ServerTestExperience extends ServerAbstractExperience {
   constructor(server, clientTypes) {
@@ -43,10 +55,6 @@ before(async () => {
   // server
   // ---------------------------------------------------
   server = new Server();
-
-  // this is boring... should not be mandatory
-  server.templateEngine = { compile: () => {} };
-  server.templateDirectory = __dirname;
 
   await server.init(config);
   server.stateManager.registerSchema('a', a);
@@ -77,6 +85,10 @@ before(async () => {
   console.log(`
 > created ${numClients} clients
   `);
+});
+
+after(async function() {
+  server.stop();
 });
 
 console.log('* ------------------------------------- *');

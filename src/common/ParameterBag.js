@@ -236,6 +236,23 @@ export const types = {
         max: +Infinity,
       });
     },
+    sanitizeSchema: (def) => {
+      // sanitize `null` values in received schema, this prevent a bug when
+      // `min` and `max` are explicitely set to `±Infinity`, the schema is stringified
+      // when sent over the network and therefore Infinity is transformed to `null`
+      //
+      // JSON.parse({ a: Infinity });
+      // > { "a": null }
+      if (def.min === null) {
+        def.min = -Infinity;
+      }
+
+      if (def.max === null) {
+        def.max = Infinity;
+      }
+
+      return def;
+    },
     coerceFunction: (name, def, value) => {
       if (!(typeof value === 'number' && Math.floor(value) === value)) {
         throw new TypeError(`[stateManager] Invalid value for integer param "${name}": ${value}`);
@@ -251,6 +268,23 @@ export const types = {
         min: -Infinity,
         max: +Infinity,
       });
+    },
+    sanitizeSchema: (def) => {
+      // sanitize `null` values in received schema, this prevent a bug when
+      // `min` and `max` are explicitely set to `±Infinity`, the schema is stringified
+      // when sent over the network and therefore Infinity is transformed to `null`
+      //
+      // JSON.parse({ a: Infinity });
+      // > { "a": null }
+      if (def.min === null) {
+        def.min = -Infinity;
+      }
+
+      if (def.max === null) {
+        def.max = Infinity;
+      }
+
+      return def;
     },
     coerceFunction: (name, def, value) => {
       if (typeof value !== 'number' || value !== value) { // reject NaN
@@ -358,8 +392,12 @@ class ParameterBag {
     for (let [name, def] of Object.entries(schema)) {
       const {
         defaultOptions,
-        coerceFunction
+        coerceFunction,
       } = types[def.type];
+
+      if (types[def.type].sanitizeSchema) {
+        def = types[def.type].sanitizeSchema(def);
+      }
 
       def = Object.assign({}, defaultOptions, def);
       // if event property is set to true, the param must

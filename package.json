@@ -39,7 +39,6 @@
     "debug": "^4.3.4",
     "fast-deep-equal": "^3.1.3",
     "fast-text-encoding": "^1.0.0",
-    "http-terminator": "^3.2.0",
     "isomorphic-ws": "^4.0.1",
     "keyv": "^4.2.2",
     "keyv-file": "^0.2.0",
@@ -62,7 +61,8 @@
     "docdash": "^1.2.0",
     "jsdoc": "^3.6.10",
     "markdown-toc": "^1.2.0",
-    "mocha": "^9.2.2"
+    "mocha": "^9.2.2",
+    "serial-mocha": "^0.0.4"
   },
   "optionalDependencies": {
     "bufferutil": "^4.0.5",

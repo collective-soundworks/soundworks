@@ -16,7 +16,6 @@ import SharedStateManagerServer from '../common/SharedStateManagerServer.js';
 import logger from './utils/logger.js';
 import Keyv from 'keyv';
 import KeyvFile from 'keyv-file';
-import { createHttpTerminator } from 'http-terminator';
 
 let _dbNamespaces = new Set();
 let _dbStore = null;
@@ -492,12 +491,11 @@ class Server {
     }
   }
 
+  // @todo - handle gracefull close of the server
   async stop() {
-    const httpTerminator = createHttpTerminator({
-      server: this.httpServer,
-    });
-
-    await httpTerminator.terminate();
+    this.sockets.terminate();
+    this.httpServer.close();
+    return Promise.resolve();
   }
 
   /**
