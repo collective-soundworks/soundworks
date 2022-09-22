@@ -213,6 +213,7 @@ class Server {
         },
         useHttps: false,
         crossOriginIsolated: true,
+        verbose: true,
       },
       app: {
         name: 'soundworks',
@@ -220,6 +221,8 @@ class Server {
     };
 
     this.config = merge({}, defaultConfig, config);
+
+    logger.configure(this.config.env.verbose);
 
     // @note: do not remove
     // backward compatibility w/ assetsDomain and `soundworks-template`
