@@ -106,7 +106,10 @@ class Socket {
     // ----------------------------------------------------------
     const stringSocketUrl = `${url}?binary=0&${queryParams}`;
 
+
     await new Promise((resolve, reject) => {
+      let connectionRefusedLogged = false;
+
       const trySocket = async () => {
         log(`[string socket] trying connection - url: ${stringSocketUrl}`);
         const ws = new WebSocket(stringSocketUrl, webSocketOptions);
@@ -139,7 +142,11 @@ class Socket {
         // cf. https://github.com/collective-soundworks/soundworks/issues/17
         ws.addEventListener('error', e => {
           if (e.type === 'error' && e.error.code === 'ECONNREFUSED') {
-            console.log('[socket] connection refused - (retry in 1s)')
+            if (!connectionRefusedLogged) {
+              console.log('[socket] connection refused, waiting for the server to start');
+              connectionRefusedLogged = true;
+            }
+
             setTimeout(trySocket, 1000);
           }
         });
