@@ -1,4 +1,3 @@
-import EventEmitter from 'events';
 import fs from 'fs';
 import http from 'http';
 import https from 'https';
@@ -145,13 +144,14 @@ class Server {
      */
     this._routes = {};
 
-    /**
-     * @private
-     */
+    /** @private */
     this._htmlTemplateConfig = {
       engine: null,
       directory: null,
     }
+
+    /** @private */
+    this._listeners = new Map();
   }
 
   /**
@@ -279,6 +279,8 @@ class Server {
         }
       });
     }
+
+    await this._emit('inited');
 
     return Promise.resolve();
   }
@@ -470,7 +472,7 @@ class Server {
             const protocol = useHttps ? 'https' : 'http';
             const ifaces = os.networkInterfaces();
 
-            this.router.listen(port, () => {
+            this.router.listen(port, async () => {
               logger.title(`${protocol} server listening on`);
 
               Object.keys(ifaces).forEach(dev => {
@@ -481,12 +483,12 @@ class Server {
                 });
               });
 
+              await this._emit('started');
+
               resolve();
             });
           });
         });
-
-      await this.pluginManager.start();
 
       return Promise.resolve();
     } catch(err) {
@@ -498,6 +500,9 @@ class Server {
   async stop() {
     this.sockets.terminate();
     this.httpServer.close();
+
+    await this._emit('stopped');
+
     return Promise.resolve();
   }
 
@@ -661,6 +666,38 @@ class Server {
     db.on('error', err => console.log(chalk.red('[soundworks:core] db ${namespace} error:'), err));
 
     return db;
+  }
+
+  addListener(channel, callback) {
+    if (!this._listeners.has(channel)) {
+      const listeners = new Set();
+      this._listeners.set(channel, listeners);
+    }
+
+    const listeners = this._listeners.get(channel);
+    listeners.add(callback);
+  }
+
+  removeListener(channel, callback) {
+    if (this._listeners.has(channel)) {
+      const listeners = this._listeners.get(channel);
+      listeners.delete(callback);
+
+      if (listeners.size === 0) {
+        this._listeners.delete(channel);
+      }
+    }
+  }
+
+  /** @private */
+  async _emit(channel) {
+    if (this._listeners.has(channel)) {
+      const listeners = this._listeners.get(channel);
+
+      for (let callback of listeners) {
+        await callback();
+      }
+    }
   }
 }
 
