@@ -47,15 +47,6 @@ const hookSchema = {
   },
 };
 
-/**
- * NOTE
- * to automatically close the processes (server and clients) when all tests
- * are done, launch with:
- *
- * ```
- * mocha tests/state-manager --exit
- * ```
- */
 const config = {
   app: {
     name: 'test-state-manager',
@@ -77,11 +68,8 @@ class ClientTestExperience extends ClientAbstractExperience {}
 
 let server;
 let clients = [];
-let client;
+let client; // clients[0]
 const numClients = 100;
-
-// console.log('* ------------------------------------- *');
-// console.log('* @soundworks/core.StateManager');
 
 describe(`common::StateManager`, () => {
   before(async () => {
@@ -99,7 +87,7 @@ describe(`common::StateManager`, () => {
     serverExperience.start();
 
     // ---------------------------------------------------
-    // client
+    // clients
     // ---------------------------------------------------
     for (let i = 0; i < numClients; i++) {
       const client = new Client();
@@ -141,7 +129,6 @@ describe(`common::StateManager`, () => {
 
   describe('stateManager.observe((schemaName, stateId, nodeId) => {}) => unobserve', async () => {
     it(`should be notified of states created on the network`, async () => {
-      const client = clients[0];
 
       await client.stateManager.create('a');
 
@@ -1308,7 +1295,6 @@ describe(`common::StateManager`, () => {
         await global.set({ int: i });
       }
 
-
       global.detach();
       console.timeEnd('  + brute force time');
 
@@ -1328,7 +1314,6 @@ describe(`common::StateManager`, () => {
           { int: 12 },
         ];
 
-        const client = clients[0];
         const state = await client.stateManager.create('a');
         const attached = await server.stateManager.attach('a', state.id);
 
@@ -1359,7 +1344,6 @@ describe(`common::StateManager`, () => {
           { int: 12 },
         ];
 
-        const client = clients[0];
         const state = await server.stateManager.create('a');
         const attached = await client.stateManager.attach('a', state.id);
 
@@ -1390,7 +1374,6 @@ describe(`common::StateManager`, () => {
           { int: 12 },
         ];
 
-        const client = clients[0];
         const state = await server.stateManager.create('a');
         const attached = await client.stateManager.attach('a', state.id);
 
@@ -1424,7 +1407,7 @@ describe(`common::StateManager`, () => {
   // > { "a": null }
   describe(`integer and floats min and max`, () => {
 
-    it(`[integer type] should propagate value when min and max are manually set to Infinity`, async function() {
+    it(`[integer type] should properly set boundaries and propagate values when min and max are manually set to Infinity`, async function() {
       this.timeout(5 * 1000);
 
       const schema = {
@@ -1450,18 +1433,22 @@ describe(`common::StateManager`, () => {
 
       for (let i = 0; i < 10; i++) {
         await serverInteger.set({ myInt: Math.floor(Math.random() * 1000) });
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 10));
       }
 
       for (let i = 0; i < 10; i++) {
         await clientInteger.set({ myInt: Math.floor(Math.random() * 1000) });
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 10));
       }
 
       assert.deepEqual(clientResult, serverResult);
+
+      let { min, max } = clientInteger.getSchema('myInt');
+      assert.equal(min, -Infinity);
+      assert.equal(max, Infinity);
     });
 
-    it(`[float type] should propagate value when min and max are manually set to Infinity`, async function() {
+    it(`[float type] should properly set boundaries and propagate values when min and max are manually set to Infinity`, async function() {
       this.timeout(5 * 1000);
 
       const schema = {
@@ -1480,22 +1467,26 @@ describe(`common::StateManager`, () => {
 
       serverInteger.subscribe(updates => serverResult.push(updates.myFloat));
 
-      const clientInteger = await client.stateManager.attach('test-float');
+      const clientFloat = await client.stateManager.attach('test-float');
       const clientResult = [];
 
-      clientInteger.subscribe(updates => clientResult.push(updates.myFloat));
+      clientFloat.subscribe(updates => clientResult.push(updates.myFloat));
 
       for (let i = 0; i < 10; i++) {
         await serverInteger.set({ myFloat: Math.random() });
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 10));
       }
 
       for (let i = 0; i < 10; i++) {
-        await clientInteger.set({ myFloat: Math.random() });
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await clientFloat.set({ myFloat: Math.random() });
+        await new Promise(resolve => setTimeout(resolve, 10));
       }
 
       assert.deepEqual(clientResult, serverResult);
+
+      let { min, max } = clientFloat.getSchema('myFloat');
+      assert.equal(min, -Infinity);
+      assert.equal(max, Infinity);
     });
   });
 });
