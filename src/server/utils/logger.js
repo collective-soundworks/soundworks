@@ -68,12 +68,16 @@ const logger = {
     console.log(``);
 
     // check if a route is defined but not in config
-    const configClientTypes = Object.keys(clientsConfig);
-    routes.forEach(r => {
-      if (configClientTypes.indexOf(r.clientType) === -1) {
-        console.log(`@warning: no client config found for route ${r.clientType}`);
-      }
-    });
+    if (clientsConfig) {
+      const configClientTypes = Object.keys(clientsConfig);
+      routes.forEach(r => {
+        if (configClientTypes.indexOf(r.clientType) === -1) {
+          console.log(`@warning: no client config found for route ${r.clientType}`);
+        }
+      });
+    } else {
+      console.log(`@warning: no config found for clients`);
+    }
   },
 
   ip(protocol, address, port) {
