@@ -63,7 +63,6 @@ describe(`client.Socket`, () => {
           }
         }
 
-
         server = new Server();
         await server.init(config);
         const serverExperience = new ServerTestExperience(server, 'test');

@@ -62,8 +62,7 @@
     "docdash": "^1.2.0",
     "jsdoc": "^3.6.10",
     "markdown-toc": "^1.2.0",
-    "mocha": "^9.2.2",
-    "serial-mocha": "^0.0.4"
+    "mocha": "^9.2.2"
   },
   "optionalDependencies": {
     "bufferutil": "^4.0.5",

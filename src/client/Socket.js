@@ -88,11 +88,13 @@ class Socket {
     if (isBrowser()) {
       const protocol = window.location.protocol.replace(/^http?/, 'ws');
       const { hostname, port } = window.location;
+
       url = `${protocol}//${hostname}:${port}/${path}`;
       webSocketOptions = [];
     } else {
       const protocol = config.env.useHttps ? 'wss:' : 'ws:';
       const { serverIp, port } = config.env;
+
       url = `${protocol}//${serverIp}:${port}/${path}`;
       webSocketOptions = {
         rejectUnauthorized: false,
@@ -101,11 +103,39 @@ class Socket {
 
     const queryParams = `clientType=${clientType}&key=${key}`;
 
+    // see https://github.com/collective-soundworks/soundworks/issues/56
+    // problem is that we can't build the bundle for browser clients then
+    // ----------------------------------------------------------
+    // node clients can wait for the server to be started
+    // ----------------------------------------------------------
+    // if (!isBrowser()) {
+    //   let tcpp = await import('tcp-ping');
+    //   const { serverIp, port } = config.env;
+
+    //   await new Promise(async (resolve, reject) => {
+    //     (function ping() {
+    //       console.log('ping');
+    //       tcpp.probe(serverIp, port, function(err, available) {
+    //         console.log('ping', available);
+    //         if (err) {
+    //           console.log(err);
+    //           reject();
+    //         } else {
+    //           if (available) {
+    //             resolve();
+    //           } else {
+    //             setTimeout(ping, 1000);
+    //           }
+    //         }
+    //       });
+    //     }());
+    //   });
+    // }
+
     // ----------------------------------------------------------
     // init string socket
     // ----------------------------------------------------------
     const stringSocketUrl = `${url}?binary=0&${queryParams}`;
-
 
     await new Promise((resolve, reject) => {
       let connectionRefusedLogged = false;
@@ -147,6 +177,12 @@ class Socket {
               connectionRefusedLogged = true;
             }
 
+            if (ws.terminate) {
+              ws.terminate();
+            } else {
+              ws.close();
+            }
+
             setTimeout(trySocket, 1000);
           }
         });
@@ -155,9 +191,9 @@ class Socket {
       trySocket();
     });
 
-    // // ----------------------------------------------------------
-    // // init binary socket
-    // // ----------------------------------------------------------
+    // ----------------------------------------------------------
+    // init binary socket
+    // ----------------------------------------------------------
     const binarySocketUrl = `${url}?binary=1&${queryParams}`;
 
     await new Promise((resolve, reject) => {
@@ -190,7 +226,7 @@ class Socket {
       });
     });
 
-    // everyone is connected
+    // wait for both sockets connected
     return Promise.resolve();
   }
 
