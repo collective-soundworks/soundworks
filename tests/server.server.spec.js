@@ -42,7 +42,7 @@ describe('server::Server', () => {
     });
 
 
-    it('should stop the server properly', async () => {
+    it('should stop the server', async () => {
       await server.stop();
       assert.isOk('server and process should stop');
     });

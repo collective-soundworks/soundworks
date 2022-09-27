@@ -33,19 +33,6 @@ const b = {
     step: 1,
   },
 };
-const hookSchema = {
-  name: {
-    type: 'string',
-    default: null,
-    nullable: true,
-  },
-  // value will be updated according to name from hook
-  value: {
-    type: 'string',
-    default: null,
-    nullable: true,
-  },
-};
 
 const config = {
   app: {
@@ -957,7 +944,22 @@ describe(`common::StateManager`, () => {
   });
 
   describe('stateManager.registerUpdateHook(schemaName, updateHook)', () => {
-    it('should execute hook properly', async () => {
+
+    const hookSchema = {
+      name: {
+        type: 'string',
+        default: null,
+        nullable: true,
+      },
+      // value will be updated according to name from hook
+      value: {
+        type: 'string',
+        default: null,
+        nullable: true,
+      },
+    };
+
+    it('should properly execute hook', async () => {
       server.stateManager.registerSchema('hooked', hookSchema);
       server.stateManager.registerUpdateHook('hooked', (updates, currentValues) => {
         updates.value = `${updates.name}-value`;
