@@ -30,6 +30,7 @@
     "dev:server": "chokidar src/server/ -c \"npm run build:server\"",
     "dev:common": "chokidar src/common/ -c \"npm run build:common\"",
     "dev": "npm run build && (npm run dev:client & npm run dev:server & npm run dev:common)",
+    "lint": "npx eslint src",
     "test": "mocha"
   },
   "dependencies": {
@@ -62,6 +63,7 @@
     "commitizen": "^4.2.5",
     "cz-conventional-changelog": "^3.3.0",
     "docdash": "^1.2.0",
+    "eslint": "^8.24.0",
     "jsdoc": "^3.6.10",
     "markdown-toc": "^1.2.0",
     "mocha": "^9.2.2",
