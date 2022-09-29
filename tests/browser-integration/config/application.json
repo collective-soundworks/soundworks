@@ -1,0 +1,11 @@
+{
+  name: 'soundworks',
+  author: '',
+
+  clients: {
+    player: {
+      target: 'browser',
+      default: true
+    },
+  },
+}

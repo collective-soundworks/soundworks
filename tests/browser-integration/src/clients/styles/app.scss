@@ -1,0 +1,61 @@
+$backgroundColor: #000000;
+$color: #ffffff;
+
+html, body {
+  width: 100%;
+  min-height: 100vh;
+  background-color: $backgroundColor;
+  color: $color;
+}
+
+html {
+  font-size: 62.5%;
+}
+
+* {
+  box-sizing: border-box;
+  font-family: Consolas, monaco, monospace;
+}
+
+body.loading {
+  background-image: url(../../images/loader.gif);
+  background-position: 50% 50%;
+  background-repeat: no-repeat;
+}
+
+#__soundworks-container {
+  width: 100%;
+  min-height: 100vh;
+
+  // ---------------------------------------------------
+  // emulated clients
+  // ---------------------------------------------------
+  .emulate {
+    float: left;
+    width: 20%;
+    min-width: 300px;
+    height: 500px;
+    outline: 1px solid #aaaaaa;
+    position: relative;
+    overflow: auto;
+  }
+
+  .init-platform {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 10;
+    width: 100%;
+    height: 100%;
+    background-color: #121212;
+    opacity: 0.8;
+    color: white;
+    line-height: 400px;
+    text-align: center;
+    font-size: 4rem;
+  }
+  // ---------------------------------------------------
+  // end emulated clients
+  // ---------------------------------------------------
+}
+
