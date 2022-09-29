@@ -59,13 +59,21 @@
     "chai-shallow-deep-equal": "^1.4.6",
     "chokidar": "^3.5.3",
     "chokidar-cli": "^3.0.0",
+    "commitizen": "^4.2.5",
+    "cz-conventional-changelog": "^3.3.0",
     "docdash": "^1.2.0",
     "jsdoc": "^3.6.10",
     "markdown-toc": "^1.2.0",
-    "mocha": "^9.2.2"
+    "mocha": "^9.2.2",
+    "puppeteer": "^18.0.5"
   },
   "optionalDependencies": {
     "bufferutil": "^4.0.5",
     "utf-8-validate": "^5.0.7"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
   }
 }
