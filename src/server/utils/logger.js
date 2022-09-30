@@ -12,13 +12,13 @@ const logger = {
   },
 
   title(msg) {
-    if (!this.verbose) { return }
+    if (!this.verbose) { return; }
 
     console.log(chalk.cyan(`+ ${msg}`));
   },
 
   clientConfigAndRouting(routes, config) {
-    if (!this.verbose) { return }
+    if (!this.verbose) { return; }
 
     const clientsConfig = config.app.clients;
     const serverIp = config.env.serverIp;
@@ -35,7 +35,7 @@ const logger = {
           path: `server ip: ${chalk.green(serverIp)}`,
           default: undefined,
           auth: undefined,
-        }
+        };
 
         table.push(line);
       } else if (client.target === 'browser') {
@@ -47,7 +47,7 @@ const logger = {
             chalk.red('no route defined'),
           default: (client.default ? 'x' : undefined),
           auth: auth && auth.clients.indexOf(clientType) !== -1 ? 'x' : undefined,
-        }
+        };
 
         table.push(line);
       } else {
@@ -63,7 +63,7 @@ const logger = {
       config: {
         default: { align: 'center' },
         auth: { align: 'center' },
-      }
+      },
     }));
     console.log(``);
 
@@ -81,31 +81,31 @@ const logger = {
   },
 
   ip(protocol, address, port) {
-    if (!this.verbose) { return }
+    if (!this.verbose) { return; }
 
     console.log(`    ${protocol}://${address}:${chalk.green(port)}`);
   },
 
   pluginStart(name) {
-    if (!this.verbose) { return }
+    if (!this.verbose) { return; }
 
     console.log(`    ${name} ${chalk.yellow('start...')}`);
   },
 
   pluginStarted(name) {
-    if (!this.verbose) { return }
+    if (!this.verbose) { return; }
 
     console.log(`    ${name} ${chalk.cyan('started')}`);
   },
 
   pluginReady(name) {
-    if (!this.verbose) { return }
+    if (!this.verbose) { return; }
 
     console.log(`    ${name} ${chalk.green('ready')}`);
   },
 
   pluginErrored(name) {
-    if (!this.verbose) { return }
+    if (!this.verbose) { return; }
 
     console.log(`    ${name} ${chalk.red('errors')}`);
   },

@@ -48,12 +48,12 @@ class AbstractPlugin {
     // register in the server
     this.server.activities.add(this);
     // start when all required signals are fired
-    this.signals.start.addObserver(value => {
-      logger.pluginStart(this.name)
+    this.signals.start.addObserver(() => {
+      logger.pluginStart(this.name);
       this.start();
     });
     // log errors if any
-    this.signals.errored.addObserver(value => logger.pluginErrored(this.name));
+    this.signals.errored.addObserver(() => logger.pluginErrored(this.name));
 
     this.ready = this.ready.bind(this);
   }

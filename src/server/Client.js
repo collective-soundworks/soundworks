@@ -14,17 +14,17 @@ const generateId = idGenerator();
  * @memberof server
  */
 class Client {
-	/**
-	 * @param {String} clientType - Type of the client
-	 * @param {server.Socket} socket - Socket connection with the client
-	 */
-	constructor(clientType, socket) {
-		/**
-		 * Client type, as specified when initializing the client side {@link client.Client}.
+  /**
+   * @param {String} clientType - Type of the client
+   * @param {server.Socket} socket - Socket connection with the client
+   */
+  constructor(clientType, socket) {
+    /**
+     * Client type, as specified when initializing the client side {@link client.Client}.
      *
      * @see {@link client.Client#init}
      * @type {String}
-		 */
+     */
     this.type = clientType;
 
     /**
@@ -34,16 +34,16 @@ class Client {
      */
     this.id = generateId.next().value;
 
-		/**
-		 * Unique session id (uuidv4).
+    /**
+     * Unique session id (uuidv4).
      * @type {String}
-		 */
+     */
     this.uuid = uuid();
 
-		/**
-		 * Socket connection with the remote {@link client.Client}.
-		 * @type {server.Socket}
-		 */
+    /**
+     * Socket connection with the remote {@link client.Client}.
+     * @type {server.Socket}
+     */
     this.socket = socket;
   }
 

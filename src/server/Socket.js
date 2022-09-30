@@ -6,12 +6,11 @@ import {
 } from '../common/sockets-encoder-decoder.js';
 
 const noop = () => {};
-let counter = 0;
-const CONNECTING = 0;
-const OPEN = 1;
-const CLOSING = 2;
-const CLOSED = 3;
-const READY_STATES = ['CONNECTING', 'OPEN', 'CLOSING', 'CLOSED'];
+// const CONNECTING = 0;
+// const OPEN = 1;
+// const CLOSING = 2;
+// const CLOSED = 3;
+// const READY_STATES = ['CONNECTING', 'OPEN', 'CLOSING', 'CLOSED'];
 
 /**
  * Simple wrapper with simple pubsub system built on top of `ws` sockets.
@@ -55,7 +54,7 @@ class Socket {
      * @private
      * @type {Map}
      */
-    this.rooms = rooms
+    this.rooms = rooms;
 
     /**
      * Configuration object
@@ -120,7 +119,7 @@ class Socket {
     this._isAlive = true;
     // heartbeat system, only on "regular" socket
     this.ws.on('pong', () => {
-      this._isAlive = true
+      this._isAlive = true;
     });
 
     this._intervalId = setInterval(() => {
@@ -135,7 +134,7 @@ class Socket {
       this.ws.ping(noop);
     }, this.config.pingInterval);
 
-    this.ws.addListener('error', (err) => {
+    this.ws.addListener('error', _err => {
       // console.log(this.clientId, err);
     });
   }
@@ -147,7 +146,7 @@ class Socket {
   terminate() {
     clearInterval(this._intervalId);
     // clean rooms
-    for (let [key, room] of this.rooms) {
+    for (let [_key, room] of this.rooms) {
       room.delete(this);
     }
 
@@ -168,10 +167,10 @@ class Socket {
         'ping',
         'pong',
         'unexpected-response',
-        'upgrade'
+        'upgrade',
       ].forEach(eventName => {
         socket.removeAllListeners(eventName);
-      })
+      });
     });
 
     // clear binarySocket as this is called from the string one.
@@ -214,7 +213,7 @@ class Socket {
   /** @private */
   _removeAllListeners(listeners, channel) {
     if (listeners.has(channel)) {
-      listeners.delete(channel)
+      listeners.delete(channel);
     }
   }
 

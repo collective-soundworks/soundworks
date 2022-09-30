@@ -1219,7 +1219,9 @@ describe(`common::StateManager`, () => {
   });
 
   describe('WebSocket transport', () => {
-    it('should work properly with async transport - brute force testing', async () => {
+    it('should work properly with async transport - brute force testing', async function() {
+      this.timeout(5 * 1000);
+
       console.time('  + brute force time');
       const global = await server.stateManager.create('a');
       const attached = [];

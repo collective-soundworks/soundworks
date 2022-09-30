@@ -1,33 +1,20 @@
 import SharedState from './SharedState.js';
 import {
   // constants
-  SERVER_ID,
   CREATE_REQUEST,
   CREATE_RESPONSE,
   CREATE_ERROR,
-  DELETE_REQUEST,
-  DELETE_RESPONSE,
-  DELETE_ERROR,
-  DELETE_NOTIFICATION,
   ATTACH_REQUEST,
   ATTACH_RESPONSE,
   ATTACH_ERROR,
-  DETACH_REQUEST,
-  DETACH_RESPONSE,
-  DETACH_ERROR,
   OBSERVE_REQUEST,
   OBSERVE_RESPONSE,
   OBSERVE_NOTIFICATION,
-  UPDATE_REQUEST,
-  UPDATE_RESPONSE,
-  UPDATE_ABORT,
-  UPDATE_NOTIFICATION,
   DELETE_SCHEMA,
   // promises handling
   storeRequestPromise,
   resolveRequest,
   rejectRequest,
-  idGenerator,
 } from './shared-state-utils.js';
 
 /**
@@ -111,7 +98,7 @@ class SharedStateManagerClient {
       // retrieve the callback that have been stored in observe to make sure
       // we don't call another callback that may have been registered earlier.
       const callback = this._observeRequestCallbacks.get(reqId);
-      this._observeRequestCallbacks.delete(reqId)
+      this._observeRequestCallbacks.delete(reqId);
 
       list.forEach(([schemaName, stateId, nodeId]) => {
         callback(schemaName, stateId, nodeId);
@@ -168,7 +155,7 @@ class SharedStateManagerClient {
    */
   async attach(schemaName, stateId = null) {
     return new Promise((resolve, reject) => {
-       // @todo - add a timeout
+      // @todo - add a timeout
       const reqId = storeRequestPromise(resolve, reject);
       const requireSchema = this._cachedSchemas.has(schemaName) ? false : true;
       this.client.transport.emit(ATTACH_REQUEST, reqId, schemaName, stateId, requireSchema);

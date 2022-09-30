@@ -1,12 +1,12 @@
 import fs from 'fs';
 import http from 'http';
 import https from 'https';
+import chalk from 'chalk';
 import merge from 'lodash.merge';
 import path from 'path';
 import pem from 'pem';
 import os from 'os';
 import polka from 'polka';
-import serveStatic from 'serve-static';
 import compression from 'compression';
 import Client from './Client.js';
 import PluginManager from './PluginManager.js';
@@ -17,7 +17,6 @@ import Keyv from 'keyv';
 import KeyvFile from 'keyv-file';
 
 let _dbNamespaces = new Set();
-let _dbStore = null;
 
 /**
  * Server side entry point for a `soundworks` application.
@@ -148,7 +147,7 @@ class Server {
     this._htmlTemplateConfig = {
       engine: null,
       directory: null,
-    }
+    };
 
     /** @private */
     this._listeners = new Map();
@@ -200,7 +199,7 @@ class Server {
    */
   async init(
     config,
-    clientConfigFunction = (clientType, serverConfig, httpRequest) => ({ clientType })
+    clientConfigFunction = (clientType, _serverConfig, _httpRequest) => ({ clientType }),
   ) {
     const defaultConfig = {
       env: {
@@ -209,7 +208,7 @@ class Server {
         subpath: '',
         websockets: {
           path: 'socket',
-          pingInterval: 5000
+          pingInterval: 5000,
         },
         useHttps: false,
         crossOriginIsolated: true,
@@ -217,7 +216,7 @@ class Server {
       },
       app: {
         name: 'soundworks',
-      }
+      },
     };
 
     this.config = merge({}, defaultConfig, config);
@@ -264,15 +263,15 @@ class Server {
           // verify login and password are set and correct
           if (login && password && login === auth.login && password === auth.password) {
             // -> access granted...
-            return next()
+            return next();
           }
 
           // -> access denied...
           res.writeHead(401, {
             'WWW-Authenticate':'Basic',
-            'Content-Type':'text/plain'
+            'Content-Type':'text/plain',
           });
-          res.end('Authentication required.')
+          res.end('Authentication required.');
         } else {
           // route not protected
           return next();
@@ -316,7 +315,7 @@ class Server {
         // ------------------------------------------------------------
         // create HTTP(S) SERVER
         // ------------------------------------------------------------
-        .then(() => {
+        .then(async () => {
           // create http server
           if (!useHttps) {
             const httpServer = http.createServer();
@@ -335,8 +334,8 @@ class Server {
                 const httpsServer = https.createServer(this._httpsInfos);
                 return Promise.resolve(httpsServer);
               } catch(err) {
-                console.error(
-`Invalid certificate files, please check your:
+                console.error(`
+Invalid certificate files, please check your:
 - key file: ${httpsInfos.key}
 - cert file: ${httpsInfos.cert}
                 `);
@@ -344,15 +343,15 @@ class Server {
                 throw err;
               }
             } else {
-              return new Promise(async (resolve, reject) => {
-                const key = await this.db.get('httpsKey');
-                const cert = await this.db.get('httpsCert');
+              const key = await this.db.get('httpsKey');
+              const cert = await this.db.get('httpsCert');
 
-                if (key && cert) {
-                  this._httpsInfos = { key, cert };
-                  const httpsServer = https.createServer(this._httpsInfos);
-                  resolve(httpsServer);
-                } else {
+              if (key && cert) {
+                this._httpsInfos = { key, cert };
+                const httpsServer = https.createServer(this._httpsInfos);
+                return Promise.resolve(httpsServer);
+              } else {
+                return new Promise(resolve => {
                   // generate certificate on the fly (for development purposes)
                   pem.createCertificate({ days: 1, selfSigned: true }, async (err, keys) => {
                     if (err) {
@@ -371,8 +370,8 @@ class Server {
 
                     resolve(httpsServer);
                   });
-                }
-              });
+                });
+              }
             }
           }
         }).then(httpServer => {
@@ -452,7 +451,7 @@ class Server {
           this.sockets.start(
             this.httpServer,
             this.config.env.websockets,
-            (clientType, socket) => this._onSocketConnection(clientType, socket)
+            (clientType, socket) => this._onSocketConnection(clientType, socket),
           );
 
           return Promise.resolve();
@@ -466,7 +465,7 @@ class Server {
           // ------------------------------------------------------------
           // START HTTP SERVER
           // ------------------------------------------------------------
-          return new Promise((resolve, reject) => {
+          return new Promise(resolve => {
             const port = this.config.env.port;
             const useHttps = this.config.env.useHttps || false;
             const protocol = useHttps ? 'https' : 'http';
@@ -489,10 +488,8 @@ class Server {
             });
           });
         });
-
-      return Promise.resolve();
     } catch(err) {
-      console.error(err)
+      console.error(err);
     }
   }
 

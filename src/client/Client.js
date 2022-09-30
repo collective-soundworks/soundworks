@@ -153,12 +153,10 @@ class Client {
       });
 
       this.socket.addListener('s:client:error', (err) => {
-        switch (err.type) {
-          case 'plugins':
-            // can only append if env !== 'production'
-            const msg = `"${err.data.join(', ')}" required client-side but not server-side`;
-            throw new Error(msg);
-            break;
+        if (err.type === 'plugins') {
+          // can only append if env !== 'production'
+          const msg = `"${err.data.join(', ')}" required client-side but not server-side`;
+          throw new Error(msg);
         }
 
         reject();
@@ -173,6 +171,6 @@ class Client {
   async stop() {
     this.socket.terminate();
   }
-};
+}
 
 export default Client;

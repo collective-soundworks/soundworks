@@ -154,6 +154,6 @@ class Sockets {
   broadcastBinary(roomIds, excludeSocket, channel, typedArray) {
     this._broadcast(true, roomIds, excludeSocket, channel, typedArray);
   }
-};
+}
 
 export default Sockets;

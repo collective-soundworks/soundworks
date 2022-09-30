@@ -41,7 +41,7 @@ class PluginManager {
       ready: new SignalAll(),
     };
 
-    this.ready = new Promise((resolve, reject) => {
+    this.ready = new Promise(resolve => {
       this._resolveReadyPromise = resolve;
     });
   }
@@ -95,8 +95,6 @@ class PluginManager {
 
   // end @unstable
   // ------------------
-
-/** @private */
 
   /**
    * Register the client-side part of a plugin into soundworks instance.
@@ -194,7 +192,7 @@ ${Object.keys(this._registeredPlugins).map(n => `> - ${n}\n`).join('')}
         }
 
         this._emitChange();
-      }
+      };
 
       const onPluginErrored = () => {
         this._pluginsStatus[name] = 'errored';
@@ -207,7 +205,7 @@ ${Object.keys(this._registeredPlugins).map(n => `> - ${n}\n`).join('')}
         instance.signals.started.removeObserver(onPluginStarted);
         instance.signals.ready.removeObserver(onPluginReady);
         instance.signals.errored.removeObserver(onPluginErrored);
-      }
+      };
 
       const onPluginReady = () => {
         this._pluginsStatus[name] = 'ready';
@@ -220,7 +218,7 @@ ${Object.keys(this._registeredPlugins).map(n => `> - ${n}\n`).join('')}
         instance.signals.started.removeObserver(onPluginStarted);
         instance.signals.ready.removeObserver(onPluginReady);
         instance.signals.errored.removeObserver(onPluginErrored);
-      }
+      };
 
       instance.signals.started.addObserver(onPluginStarted);
       instance.signals.ready.addObserver(onPluginReady);
@@ -235,7 +233,7 @@ ${Object.keys(this._registeredPlugins).map(n => `> - ${n}\n`).join('')}
 
     return instance;
   }
-};
+}
 
 export default PluginManager;
 

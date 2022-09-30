@@ -1,23 +1,13 @@
 import ParameterBag from './ParameterBag.js';
 import {
   // constants
-  SERVER_ID,
-  CREATE_REQUEST,
-  CREATE_RESPONSE,
-  CREATE_ERROR,
   DELETE_REQUEST,
   DELETE_RESPONSE,
   DELETE_ERROR,
   DELETE_NOTIFICATION,
-  ATTACH_REQUEST,
-  ATTACH_RESPONSE,
-  ATTACH_ERROR,
   DETACH_REQUEST,
   DETACH_RESPONSE,
   DETACH_ERROR,
-  OBSERVE_REQUEST,
-  OBSERVE_RESPONSE,
-  OBSERVE_NOTIFICATION,
   UPDATE_REQUEST,
   UPDATE_RESPONSE,
   UPDATE_ABORT,
@@ -164,7 +154,7 @@ ${JSON.stringify(initValues, null, 2)}`);
     const oldValues = {};
 
     for (let name in updates) {
-      const { immediate, filterChange, event } = this._parameters.getSchema(name);
+      const { immediate, event } = this._parameters.getSchema(name);
       // @note 20211209 - we had an issue here server-side, because if the value
       // is an object or an array, the reference is shared by everybody, therefore
       // `changed` is always false and the new value is never propagated...

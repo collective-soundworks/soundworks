@@ -5,27 +5,16 @@ import SharedStatePrivate from './SharedStatePrivate.js';
 import SharedStateManagerClient from './SharedStateManagerClient.js';
 import {
   // constants
-  SERVER_ID,
   CREATE_REQUEST,
   CREATE_RESPONSE,
   CREATE_ERROR,
-  DELETE_REQUEST,
-  DELETE_RESPONSE,
-  DELETE_ERROR,
   DELETE_NOTIFICATION,
   ATTACH_REQUEST,
   ATTACH_RESPONSE,
   ATTACH_ERROR,
-  DETACH_REQUEST,
-  DETACH_RESPONSE,
-  DETACH_ERROR,
   OBSERVE_REQUEST,
   OBSERVE_RESPONSE,
   OBSERVE_NOTIFICATION,
-  UPDATE_REQUEST,
-  UPDATE_RESPONSE,
-  UPDATE_ABORT,
-  UPDATE_NOTIFICATION,
   DELETE_SCHEMA,
   idGenerator,
 } from './shared-state-utils.js';
@@ -189,7 +178,7 @@ class SharedStateManagerServer extends SharedStateManagerClient {
    * @private
    */
   removeClient(nodeId) {
-    for (let [id, state] of this._serverStatesById.entries()) {
+    for (let [_id, state] of this._serverStatesById.entries()) {
       let deleteState = false;
 
       // define if the client is the creator of the state, in which case
@@ -269,7 +258,7 @@ class SharedStateManagerServer extends SharedStateManagerClient {
    */
   deleteSchema(schemaName) {
     // @note: deleting schema
-    for (let [id, state] of this._serverStatesById.entries()) {
+    for (let [_id, state] of this._serverStatesById.entries()) {
       if (state.schemaName === schemaName) {
         for (let [remoteId, attached] of state._attachedClients.entries()) {
           state._detachClient(remoteId, attached);

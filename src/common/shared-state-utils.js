@@ -53,7 +53,7 @@ export function resolveRequest(reqId, data) {
 }
 
 export function rejectRequest(reqId, data) {
-  const { resolve, reject } = requestPromises.get(reqId);
+  const { reject } = requestPromises.get(reqId);
   requestPromises.delete(reqId);
 
   reject(data);

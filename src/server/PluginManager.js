@@ -27,7 +27,7 @@ class PluginManager {
       ready: new SignalAll(),
     };
 
-    this.ready = new Promise((resolve, reject) => {
+    this.ready = new Promise(resolve => {
       this._resolveReadyPromise = resolve;
     });
   }

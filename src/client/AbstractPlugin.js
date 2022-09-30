@@ -79,7 +79,7 @@ class AbstractPlugin {
     };
 
     // start when all required signals are fired
-    this.signals.start.addObserver(value => this.start());
+    this.signals.start.addObserver(() => this.start());
 
     this.started = this.started.bind(this);
     this.ready = this.ready.bind(this);

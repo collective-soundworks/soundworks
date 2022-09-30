@@ -199,7 +199,7 @@ export const sharedOptions = {
   metas: {},
   filterChange: true,
   immediate: false,
-}
+};
 
 export const types = {
   boolean: {
@@ -213,7 +213,7 @@ export const types = {
       }
 
       return value;
-    }
+    },
   },
   string: {
     required: ['default'],
@@ -226,7 +226,7 @@ export const types = {
       }
 
       return value;
-    }
+    },
   },
   integer: {
     required: ['default'],
@@ -259,7 +259,7 @@ export const types = {
       }
 
       return Math.max(def.min, Math.min(def.max, value));
-    }
+    },
   },
   float: {
     required: ['default'],
@@ -292,7 +292,7 @@ export const types = {
       }
 
       return Math.max(def.min, Math.min(def.max, value));
-    }
+    },
   },
   enum: {
     required: ['default', 'list'],
@@ -306,7 +306,7 @@ export const types = {
 
 
       return value;
-    }
+    },
   },
   any: {
     required: ['default'],
@@ -316,9 +316,9 @@ export const types = {
     coerceFunction: (name, def, value) => {
       // no check as it can have any type...
       return value;
-    }
-  }
-}
+    },
+  },
+};
 
 
 /**
@@ -330,20 +330,20 @@ class ParameterBag {
     for (let name in schema) {
       const def = schema[name];
 
-      if (!def.hasOwnProperty('type')) {
+      if (!Object.prototype.hasOwnProperty.call(def, 'type')) {
         throw new TypeError(`[stateManager] Invalid schema definition - param "${name}": "type" key is required`);
       }
 
-      if (!types.hasOwnProperty(def.type)) {
+      if (!Object.prototype.hasOwnProperty.call(types, def.type)) {
         throw new TypeError(`[stateManager] Invalid schema definition - param "${name}": "{ type: '${def.type}' }" does not exists`);
       }
 
       const required = types[def.type].required;
 
-      required.forEach(function(key) {
+      required.forEach(key => {
         if (def.event === true && key === 'default') {
           // do nothing, default is always null for `event` params
-        } else if (!def.hasOwnProperty(key)) {
+        } else if (!Object.prototype.hasOwnProperty.call(def, key)) {
           throw new TypeError(`[stateManager] Invalid schema definition - param "${name}" (type "${def.type}"): "${key}" key is required`);
         }
       });
@@ -384,21 +384,17 @@ class ParameterBag {
 
     // make shure initValues make sens according to the given schema
     for (let name in initValues) {
-      if (!schema.hasOwnProperty(name)) {
+      if (!Object.prototype.hasOwnProperty.call(schema, name)) {
         throw new ReferenceError(`[stateManager] init value defined for undefined param "${name}"`);
       }
     }
 
     for (let [name, def] of Object.entries(schema)) {
-      const {
-        defaultOptions,
-        coerceFunction,
-      } = types[def.type];
-
       if (types[def.type].sanitizeSchema) {
         def = types[def.type].sanitizeSchema(def);
       }
 
+      const { defaultOptions } = types[def.type];
       def = Object.assign({}, defaultOptions, def);
       // if event property is set to true, the param must
       // be nullable and its default value is `undefined`
@@ -409,7 +405,7 @@ class ParameterBag {
 
       let initValue;
 
-      if (initValues.hasOwnProperty(name)) {
+      if (Object.prototype.hasOwnProperty.call(initValues, name)) {
         initValue = initValues[name];
       } else {
         initValue = def.default;
@@ -433,7 +429,7 @@ class ParameterBag {
    * @return {Boolean}
    */
   has(name) {
-    return this._schema.hasOwnProperty(name);
+    return Object.prototype.hasOwnProperty.call(this._schema, name);
   }
 
   /**
@@ -492,7 +488,7 @@ class ParameterBag {
     if (value === null && def.nullable === false) {
       throw new TypeError(`[stateManager] Invalid value for ${def.type} param "${name}": value is null and param is not nullable`);
     } else if (value === null && def.nullable === true) {
-      value = value;
+      value = null;
     } else {
       value = coerceFunction(name, def, value);
     }
@@ -550,7 +546,7 @@ class ParameterBag {
     return initValues;
   }
 
-    // return the default value, if initValue has been given, return init values
+  // return the default value, if initValue has been given, return init values
   getDefaults() {
     const defaults = {};
     for (let [name, def] of Object.entries(this._schema)) {

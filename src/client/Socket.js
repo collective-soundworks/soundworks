@@ -9,7 +9,7 @@ import {
 
 const log = debug('soundworks:socket');
 // https://stackoverflow.com/questions/17575790/environment-detection-node-js-or-browser
-const isBrowser = new Function("try {return this===window;}catch(e){ return false;}");
+const isBrowser = new Function('try {return this===window;}catch(e){ return false;}');
 
 // close
 //   Fired when a connection with a websocket is closed.
@@ -137,7 +137,7 @@ class Socket {
     // ----------------------------------------------------------
     const stringSocketUrl = `${url}?binary=0&${queryParams}`;
 
-    await new Promise((resolve, reject) => {
+    await new Promise(resolve => {
       let connectionRefusedLogged = false;
 
       const trySocket = async () => {
@@ -196,7 +196,7 @@ class Socket {
     // ----------------------------------------------------------
     const binarySocketUrl = `${url}?binary=1&${queryParams}`;
 
-    await new Promise((resolve, reject) => {
+    await new Promise(resolve => {
       log(`[binary socket] trying connection - url: ${binarySocketUrl}`);
       const ws = new WebSocket(binarySocketUrl, webSocketOptions);
       ws.binaryType = 'arraybuffer';
@@ -356,6 +356,6 @@ class Socket {
     this.ws.close();
     this.binaryWs.close();
   }
-};
+}
 
 export default Socket;

@@ -74,7 +74,7 @@ class AbstractExperience {
     // listen for the `'enter' socket message from the client, the message is
     // sent when the client `enters` the Experience client side, i.e. when all
     // required plugins are ready
-    return new Promise((resolve, reject) => {
+    return new Promise(() => {
       client.socket.addListener('s:exp:enter', () => {
         this.clients.add(client);
         this.enter(client);
