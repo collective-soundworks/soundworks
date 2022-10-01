@@ -18,18 +18,19 @@ import {
   rejectRequest,
 } from './shared-state-utils.js';
 
-// -----------------------------------------------------------
-// define a common namespace...
-// -----------------------------------------------------------
-
 /**
- * Representation of a shared state. The class and its instances are the same
- * client-side and server-side.
+ * Representation of a shared state.
  *
- * @memberof common
+ * @memberof server
+ *
+ * @see {server.SharedStateManagerServer}
+ */
+/**
+ * Representation of a shared state.
+ *
+ * @memberof client
  *
  * @see {client.SharedStateManagerClient}
- * @see {server.SharedStateManagerServer}
  */
 class SharedState {
   constructor(id, remoteId, schemaName, schema, client, isOwner, manager, initValues = {}) {
