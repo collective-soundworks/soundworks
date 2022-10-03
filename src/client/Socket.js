@@ -153,11 +153,7 @@ class Socket {
           });
 
           // broadcast all `WebSocket` native events
-          [ 'close',
-            'error',
-            'upgrade',
-            'message',
-          ].forEach(eventName => {
+          ['close', 'error', 'upgrade', 'message'].forEach(eventName => {
             this.ws.addEventListener(eventName, (e) => {
               this._emit(false, eventName, e);
             });
@@ -210,11 +206,7 @@ class Socket {
         });
 
         // broadcast all `WebSocket` native events
-        [ 'close',
-          'error',
-          'upgrade',
-          'message',
-        ].forEach(eventName => {
+        ['close', 'error', 'upgrade', 'message'].forEach(eventName => {
           this.binaryWs.addEventListener(eventName, (e) => {
             this._emit(true, eventName, e);
           });

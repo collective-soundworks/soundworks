@@ -77,7 +77,8 @@ class Socket {
     });
 
     // broadcast all `ws` "native" events
-    [ 'close',
+    [
+      'close',
       'error',
       'message',
       'open',
@@ -100,7 +101,8 @@ class Socket {
     });
 
     // broadcast all `ws` "native" events
-    [ 'close',
+    [
+      'close',
       'error',
       'message',
       'open',
@@ -160,7 +162,8 @@ class Socket {
 
     // clear "native" listeners
     [this.binaryWs, this.ws].forEach((socket) => {
-      [ 'close',
+      [
+        'close',
         'error',
         'message',
         'open',
