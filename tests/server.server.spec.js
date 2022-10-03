@@ -28,15 +28,29 @@ class ServerTestExperience extends ServerAbstractExperience {}
 class ClientTestExperience extends ClientAbstractExperience {}
 
 describe('server::Server', () => {
+  describe(`await server.start()`, () => {
+    it(`should throw if config not found for declared clientType`, async () => {
+      server = new Server();
+
+      await server.init(config);
+      const serverTestExperience = new ServerTestExperience(server, 'unknown');
+
+      try {
+        await server.start();
+        assert.fail('server.start() should not terminate');
+      } catch(err) {
+        assert.ok('server.start() should throw');
+      }
+    });
+  });
+
   describe('await server.stop()', () => {
 
     beforeEach(async () => {
       server = new Server();
 
       await server.init(config);
-      // @note - client type should not be mandatory
       const serverTestExperience = new ServerTestExperience(server, 'test');
-
       await server.start();
       serverTestExperience.start();
     });

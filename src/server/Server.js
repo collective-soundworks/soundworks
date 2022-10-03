@@ -290,207 +290,207 @@ class Server {
    *  define the routing and start the http-server.
    */
   async start() {
-    try {
-      // ------------------------------------------------------------
-      // init acitvities
-      // ------------------------------------------------------------
+    // ------------------------------------------------------------
+    // init acitvities
+    // ------------------------------------------------------------
 
-      // we should at least have one activity registered for each client here
-      // i.e. the Experience so it's ok
-      this.activities.forEach((activity) => {
-        activity.clientTypes.forEach((clientType) => {
+    // we should at least have one activity registered for each client here
+    // i.e. the Experience so it's ok
+    this.activities.forEach((activity) => {
+      activity.clientTypes.forEach((clientType) => {
 
-          if (!this._clientTypeActivitiesMap[clientType]) {
-            this._clientTypeActivitiesMap[clientType] = new Set();
-          }
+        if (!(clientType in this.config.app.clients)) {
+          throw new Error(`[soundworks:core] no config found for client type ${clientType}`);
+        }
 
-          this._clientTypeActivitiesMap[clientType].add(activity);
-        });
+        if (!this._clientTypeActivitiesMap[clientType]) {
+          this._clientTypeActivitiesMap[clientType] = new Set();
+        }
+
+        this._clientTypeActivitiesMap[clientType].add(activity);
       });
+    });
 
-      // start http server
-      const useHttps = this.config.env.useHttps || false;
+    // start http server
+    const useHttps = this.config.env.useHttps || false;
 
-      return Promise.resolve()
-        // ------------------------------------------------------------
-        // create HTTP(S) SERVER
-        // ------------------------------------------------------------
-        .then(async () => {
-          // create http server
-          if (!useHttps) {
-            const httpServer = http.createServer();
-            return Promise.resolve(httpServer);
-          } else {
-            const httpsInfos = this.config.env.httpsInfos;
+    return Promise.resolve()
+      // ------------------------------------------------------------
+      // create HTTP(S) SERVER
+      // ------------------------------------------------------------
+      .then(async () => {
+        // create http server
+        if (!useHttps) {
+          const httpServer = http.createServer();
+          return Promise.resolve(httpServer);
+        } else {
+          const httpsInfos = this.config.env.httpsInfos;
 
-            if (httpsInfos.key && httpsInfos.cert) {
-              // use given certificate
-              try {
-                const key = fs.readFileSync(httpsInfos.key);
-                const cert = fs.readFileSync(httpsInfos.cert);
+          if (httpsInfos.key && httpsInfos.cert) {
+            // use given certificate
+            try {
+              const key = fs.readFileSync(httpsInfos.key);
+              const cert = fs.readFileSync(httpsInfos.cert);
 
-                this._httpsInfos = { key, cert };
+              this._httpsInfos = { key, cert };
 
-                const httpsServer = https.createServer(this._httpsInfos);
-                return Promise.resolve(httpsServer);
-              } catch(err) {
-                console.error(`
+              const httpsServer = https.createServer(this._httpsInfos);
+              return Promise.resolve(httpsServer);
+            } catch(err) {
+              console.error(`
 Invalid certificate files, please check your:
 - key file: ${httpsInfos.key}
 - cert file: ${httpsInfos.cert}
-                `);
+              `);
 
-                throw err;
-              }
+              throw err;
+            }
+          } else {
+            const key = await this.db.get('httpsKey');
+            const cert = await this.db.get('httpsCert');
+
+            if (key && cert) {
+              this._httpsInfos = { key, cert };
+              const httpsServer = https.createServer(this._httpsInfos);
+              return Promise.resolve(httpsServer);
             } else {
-              const key = await this.db.get('httpsKey');
-              const cert = await this.db.get('httpsCert');
-
-              if (key && cert) {
-                this._httpsInfos = { key, cert };
-                const httpsServer = https.createServer(this._httpsInfos);
-                return Promise.resolve(httpsServer);
-              } else {
-                return new Promise(resolve => {
-                  // generate certificate on the fly (for development purposes)
-                  pem.createCertificate({ days: 1, selfSigned: true }, async (err, keys) => {
-                    if (err) {
-                      return console.error(err.stack);
-                    }
-
-                    this._httpsInfos = {
-                      key: keys.serviceKey,
-                      cert: keys.certificate,
-                    };
-
-                    await this.db.set('httpsKey', this._httpsInfos.key);
-                    await this.db.set('httpsCert', this._httpsInfos.cert);
-
-                    const httpsServer = https.createServer(this._httpsInfos);
-
-                    resolve(httpsServer);
-                  });
-                });
-              }
-            }
-          }
-        }).then(httpServer => {
-          this.httpServer = httpServer;
-          this.router.server = httpServer;
-
-          return Promise.resolve();
-        }).then(() => {
-          let nodeOnly = true;
-
-          // do not throw if no browser clients are defined, very usefull for
-          // cleaning tests in particular
-          for (let clientType in this.config.app.clients) {
-            if (this.config.app.clients[clientType].target === 'browser') {
-              nodeOnly = false;
-            }
-          }
-
-          if (!nodeOnly) {
-            if (this.templateEngine === null) {
-              throw new Error('Undefined "server.templateEngine": please provide a valid template engine');
-            }
-
-            if (this.templateDirectory === null) {
-              throw new Error('Undefined "server.templateDirectory": please provide a valid template directory');
-            }
-          }
-
-          // ------------------------------------------------------------
-          // INIT ROUTING
-          // ------------------------------------------------------------
-          logger.title(`configured clients and routing`);
-
-          const routes = [];
-          let defaultClientType = null;
-
-          for (let clientType in this.config.app.clients) {
-            if (this.config.app.clients[clientType].default === true) {
-              defaultClientType = clientType;
-            }
-          }
-          // we must open default route last
-          for (let clientType in this._clientTypeActivitiesMap) {
-            // do nothing if client type is not registered in config
-            if (!(clientType in this.config.app.clients)) {
-              continue;
-            }
-
-            if (clientType !== defaultClientType) {
-              const clientTarget = this.config.app.clients[clientType].target;
-              const path = this._openClientRoute(clientType, clientTarget, this.router);
-              routes.push({ clientType, path });
-            }
-          }
-
-          // open default route last
-          for (let clientType in this._clientTypeActivitiesMap) {
-            // do nothing if client type is not registered in config
-            if (!(clientType in this.config.app.clients)) {
-              continue;
-            }
-
-            if (clientType === defaultClientType) {
-              const clientTarget = this.config.app.clients[clientType].target;
-              const path = this._openClientRoute(clientType, clientTarget, this.router, true);
-              routes.unshift({ clientType, path });
-            }
-          }
-
-          logger.clientConfigAndRouting(routes, this.config);
-
-          return Promise.resolve();
-        }).then(() => {
-          // ------------------------------------------------------------
-          // START SOCKET SERVER
-          // ------------------------------------------------------------
-          this.sockets.start(
-            this.httpServer,
-            this.config.env.websockets,
-            (clientType, socket) => this._onSocketConnection(clientType, socket),
-          );
-
-          return Promise.resolve();
-        }).then(async () => {
-          // ------------------------------------------------------------
-          // START SERVICE MANAGER
-          // ------------------------------------------------------------
-          return this.pluginManager.start();
-
-        }).then(() => {
-          // ------------------------------------------------------------
-          // START HTTP SERVER
-          // ------------------------------------------------------------
-          return new Promise(resolve => {
-            const port = this.config.env.port;
-            const useHttps = this.config.env.useHttps || false;
-            const protocol = useHttps ? 'https' : 'http';
-            const ifaces = os.networkInterfaces();
-
-            this.router.listen(port, async () => {
-              logger.title(`${protocol} server listening on`);
-
-              Object.keys(ifaces).forEach(dev => {
-                ifaces[dev].forEach(details => {
-                  if (details.family === 'IPv4') {
-                    logger.ip(protocol, details.address, port);
+              return new Promise(resolve => {
+                // generate certificate on the fly (for development purposes)
+                pem.createCertificate({ days: 1, selfSigned: true }, async (err, keys) => {
+                  if (err) {
+                    return console.error(err.stack);
                   }
+
+                  this._httpsInfos = {
+                    key: keys.serviceKey,
+                    cert: keys.certificate,
+                  };
+
+                  await this.db.set('httpsKey', this._httpsInfos.key);
+                  await this.db.set('httpsCert', this._httpsInfos.cert);
+
+                  const httpsServer = https.createServer(this._httpsInfos);
+
+                  resolve(httpsServer);
                 });
               });
+            }
+          }
+        }
+      }).then(httpServer => {
+        this.httpServer = httpServer;
+        this.router.server = httpServer;
 
-              await this._emit('started');
+        return Promise.resolve();
+      }).then(() => {
+        let nodeOnly = true;
 
-              resolve();
+        // do not throw if no browser clients are defined, very usefull for
+        // cleaning tests in particular
+        for (let clientType in this.config.app.clients) {
+          if (this.config.app.clients[clientType].target === 'browser') {
+            nodeOnly = false;
+          }
+        }
+
+        if (!nodeOnly) {
+          if (this.templateEngine === null) {
+            throw new Error('Undefined "server.templateEngine": please provide a valid template engine');
+          }
+
+          if (this.templateDirectory === null) {
+            throw new Error('Undefined "server.templateDirectory": please provide a valid template directory');
+          }
+        }
+
+        // ------------------------------------------------------------
+        // INIT ROUTING
+        // ------------------------------------------------------------
+        logger.title(`configured clients and routing`);
+
+        const routes = [];
+        let defaultClientType = null;
+
+        for (let clientType in this.config.app.clients) {
+          if (this.config.app.clients[clientType].default === true) {
+            defaultClientType = clientType;
+          }
+        }
+        // we must open default route last
+        for (let clientType in this._clientTypeActivitiesMap) {
+          // do nothing if client type is not registered in config
+          if (!(clientType in this.config.app.clients)) {
+            continue;
+          }
+
+          if (clientType !== defaultClientType) {
+            const clientTarget = this.config.app.clients[clientType].target;
+            const path = this._openClientRoute(clientType, clientTarget, this.router);
+            routes.push({ clientType, path });
+          }
+        }
+
+        // open default route last
+        for (let clientType in this._clientTypeActivitiesMap) {
+          // do nothing if client type is not registered in config
+          if (!(clientType in this.config.app.clients)) {
+            continue;
+          }
+
+          if (clientType === defaultClientType) {
+            const clientTarget = this.config.app.clients[clientType].target;
+            const path = this._openClientRoute(clientType, clientTarget, this.router, true);
+            routes.unshift({ clientType, path });
+          }
+        }
+
+        logger.clientConfigAndRouting(routes, this.config);
+
+        return Promise.resolve();
+      }).then(() => {
+        // ------------------------------------------------------------
+        // START SOCKET SERVER
+        // ------------------------------------------------------------
+        this.sockets.start(
+          this.httpServer,
+          this.config.env.websockets,
+          (clientType, socket) => this._onSocketConnection(clientType, socket),
+        );
+
+        return Promise.resolve();
+      }).then(async () => {
+        // ------------------------------------------------------------
+        // START SERVICE MANAGER
+        // ------------------------------------------------------------
+        return this.pluginManager.start();
+
+      }).then(() => {
+        // ------------------------------------------------------------
+        // START HTTP SERVER
+        // ------------------------------------------------------------
+        return new Promise(resolve => {
+          const port = this.config.env.port;
+          const useHttps = this.config.env.useHttps || false;
+          const protocol = useHttps ? 'https' : 'http';
+          const ifaces = os.networkInterfaces();
+
+          this.router.listen(port, async () => {
+            logger.title(`${protocol} server listening on`);
+
+            Object.keys(ifaces).forEach(dev => {
+              ifaces[dev].forEach(details => {
+                if (details.family === 'IPv4') {
+                  logger.ip(protocol, details.address, port);
+                }
+              });
             });
+
+            await this._emit('started');
+
+            resolve();
           });
         });
-    } catch(err) {
-      console.error(err);
-    }
+      });
   }
 
   // @todo - handle gracefull close of the server
@@ -588,42 +588,51 @@ Invalid certificate files, please check your:
     const activities = this._clientTypeActivitiesMap[clientType];
 
     if (activities == undefined) {
-      throw new Error(`No activity registered for "${clientType}" clients, make sure an Experience has been initialized for this client (see src/server/index.js)`);
+      logger.error(`[soundworks:core] No activity registered for "${clientType}", make sure an Experience has been created for this client`);
     }
 
     socket.addListener('close', () => {
+      console.log('server: socket.close()');
       // clean sockets
       socket.terminate();
       // remove client from activities
-      activities.forEach(activity => activity.disconnect(client));
+      if (activities) {
+        activities.forEach(activity => activity.disconnect(client));
+      }
       // destroy client
       client.destroy();
     });
 
     socket.addListener('s:client:handshake', data => {
-      // in development, if plugin required client-side but not server-side,
-      // complain properly client-side.
-      if (this.config.env.type !== 'production') {
-        // check coherence between client-side and server-side plugin requirements
-        const clientRequiredPlugins = data.requiredPlugins || [];
-        const serverRequiredPlugins = this.pluginManager.getRequiredPlugins(clientType);
-        const missingPlugins = [];
+      // client should throw error if no activity registered server-side (cf. #16)
+      if (activities === undefined) {
+        const err = {
+          type: 'no-activity',
+        };
 
-        clientRequiredPlugins.forEach(pluginId => {
-          if (serverRequiredPlugins.indexOf(pluginId) === -1) {
-            missingPlugins.push(pluginId);
-          }
-        });
+        socket.send('s:client:error', err);
+        return;
+      }
 
-        if (missingPlugins.length > 0) {
-          const err = {
-            type: 'plugins',
-            data: missingPlugins,
-          };
+      // check coherence between client-side and server-side plugin requirements
+      const clientRequiredPlugins = data.requiredPlugins || [];
+      const serverRequiredPlugins = this.pluginManager.getRequiredPlugins(clientType);
+      const missingPlugins = [];
 
-          socket.send('s:client:error', err);
-          return;
+      clientRequiredPlugins.forEach(pluginId => {
+        if (serverRequiredPlugins.indexOf(pluginId) === -1) {
+          missingPlugins.push(pluginId);
         }
+      });
+
+      if (missingPlugins.length > 0) {
+        const err = {
+          type: 'plugins',
+          data: missingPlugins,
+        };
+
+        socket.send('s:client:error', err);
+        return;
       }
 
       activities.forEach(activity => activity.connect(client));

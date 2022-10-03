@@ -126,13 +126,9 @@ class Client {
    */
   async start() {
     this._ready = new Promise((resolve, reject) => {
-      const payload = {};
-
-      if (this.config.env !== 'production') {
-        Object.assign(payload, {
-          requiredPlugins: this.pluginManager.getRequiredPlugins(),
-        });
-      }
+      const payload = {
+        requiredPlugins: this.pluginManager.getRequiredPlugins(),
+      };
 
       // wait for handshake response to mark client as `ready`
       this.socket.addListener('s:client:start', ({ id, uuid }) => {
@@ -153,13 +149,22 @@ class Client {
       });
 
       this.socket.addListener('s:client:error', (err) => {
-        if (err.type === 'plugins') {
-          // can only append if env !== 'production'
-          const msg = `"${err.data.join(', ')}" required client-side but not server-side`;
-          reject(msg);
+        let msg = ``;
+
+        switch(err.type) {
+          case 'plugins':
+            msg = `"${err.data.join(', ')}" required client-side but not server-side`;
+            break;
+          case 'no-activity':
+            msg = `[soundworks:core] No activity registered server-side for "${this.type}", make sure an Experience has been created for this client`;
+            break;
+          default:
+            msg = `Unknown error`;
+            break;
         }
 
-        reject(`Unknown error`);
+        this.socket.terminate();
+        reject(msg);
       });
 
       this.socket.send('s:client:handshake', payload);
