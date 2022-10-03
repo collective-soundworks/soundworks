@@ -130,7 +130,7 @@ class Client {
 
       if (this.config.env !== 'production') {
         Object.assign(payload, {
-          requiredPlugins: Object.keys(this.pluginManager.getValues()),
+          requiredPlugins: this.pluginManager.getRequiredPlugins(),
         });
       }
 
@@ -156,10 +156,10 @@ class Client {
         if (err.type === 'plugins') {
           // can only append if env !== 'production'
           const msg = `"${err.data.join(', ')}" required client-side but not server-side`;
-          throw new Error(msg);
+          reject(msg);
         }
 
-        reject();
+        reject(`Unknown error`);
       });
 
       this.socket.send('s:client:handshake', payload);

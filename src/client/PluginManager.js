@@ -30,7 +30,7 @@ class PluginManager {
     /** @private */
     this._observers = new Set();
     /** @private */
-    this._pluginsStatus = {};
+    this._pluginsStatuses = {};
     /** @private */
     this._client = client;
 
@@ -59,6 +59,7 @@ class PluginManager {
       this._resolveReadyPromise();
     });
 
+    this._propagateStatusChange();
     // start before ready, even if no deps
     this.signals.start.value = true;
 
@@ -69,14 +70,17 @@ class PluginManager {
     return this.ready;
   }
 
-  // ------------------
-  // @unstable
-  // mimic state manager API, so we can change this later...
-
   /** @private */
-  _emitChange() {
-    const status = this.getValues();
-    this._observers.forEach(observer => observer(status));
+  _propagateStatusChange(name = null, status = null) {
+    if (name != null && status != null) {
+      this._pluginsStatuses[name] = status;
+
+      const statuses = this.getStatuses();
+      this._observers.forEach(observer => observer(statuses, { [name]: status }));
+    } else {
+      const statuses = this.getStatuses();
+      this._observers.forEach(observer => observer(statuses, {}));
+    }
   }
 
   /** @private */
@@ -89,12 +93,10 @@ class PluginManager {
   }
 
   /** @private */
-  getValues() {
-    return Object.assign({}, this._pluginsStatus);
+  // @todo rename to `getStatuses`
+  getStatuses() {
+    return Object.assign({}, this._pluginsStatuses);
   }
-
-  // end @unstable
-  // ------------------
 
   /**
    * Register the client-side part of a plugin into soundworks instance.
@@ -174,29 +176,32 @@ ${Object.keys(this._registeredPlugins).map(n => `> - ${n}\n`).join('')}
       }
 
       // handle plugin status for reporting
-      this._pluginsStatus[name] = 'idle';
+      this._pluginsStatuses[name] = 'idle';
       let unsubscribe;
 
       const onPluginStarted = () => {
-        this._pluginsStatus[name] = 'started';
+        this._pluginsStatuses[name] = 'started';
 
         /**
-         * @fixme - relying on `instance.state` is very weak...
+         * @FIXME
+         * relying on `instance.state` is very weak...
          * we should find a better solution, to declare that we want the
          * pluginManager to watch and propagate initialization steps.
+         *
+         * This is probably a dirty hack to make the init views working...
          */
         if (instance.state) {
           unsubscribe = instance.state.subscribe(() => {
-            this._emitChange();
+            this._propagateStatusChange();
           });
         }
 
-        this._emitChange();
+        this._propagateStatusChange();
       };
 
       const onPluginErrored = () => {
-        this._pluginsStatus[name] = 'errored';
-        this._emitChange();
+        this._pluginsStatuses[name] = 'errored';
+        this._propagateStatusChange();
 
         if (unsubscribe) {
           unsubscribe();
@@ -208,8 +213,8 @@ ${Object.keys(this._registeredPlugins).map(n => `> - ${n}\n`).join('')}
       };
 
       const onPluginReady = () => {
-        this._pluginsStatus[name] = 'ready';
-        this._emitChange();
+        this._pluginsStatuses[name] = 'ready';
+        this._propagateStatusChange();
 
         if (unsubscribe) {
           unsubscribe();
@@ -232,6 +237,10 @@ ${Object.keys(this._registeredPlugins).map(n => `> - ${n}\n`).join('')}
     const instance = this._instances[name];
 
     return instance;
+  }
+
+  getRequiredPlugins() {
+    return Object.keys(this._pluginsStatuses);
   }
 }
 

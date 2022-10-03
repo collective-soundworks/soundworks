@@ -12,7 +12,7 @@ import Client from './Client.js';
 import PluginManager from './PluginManager.js';
 import Sockets from './Sockets.js';
 import SharedStateManagerServer from '../common/SharedStateManagerServer.js';
-import logger from './utils/logger.js';
+import logger from '../common/logger.js';
 import Keyv from 'keyv';
 import KeyvFile from 'keyv-file';
 

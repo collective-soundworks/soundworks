@@ -2,7 +2,7 @@ import debug from 'debug';
 import merge from 'lodash.merge';
 import Signal from '../common/Signal.js';
 import SignalAll from '../common/SignalAll.js';
-import logger from './utils/logger.js';
+import logger from '../common/logger.js';
 
 const log = debug('soundworks:lifecycle');
 

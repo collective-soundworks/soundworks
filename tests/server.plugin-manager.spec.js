@@ -46,6 +46,16 @@ describe(`server::PluginManager`, () => {
       });
     });
 
+    // this is often the case with filesystem for example
+    it(`should be able to get plugin without experience binding`, async function() {
+      const server = new Server();
+      server.pluginManager.register('delay', pluginDelayFactory, {});
+      await server.init(config);
+
+      const plugin = server.pluginManager.get('delay');
+      assert.ok('did not crash');
+    });
+
     // @note - this API should be "private", should be reviewed
     it(`should throw if plugin required after server.start()`, async function() {
       const server = new Server();
@@ -65,33 +75,6 @@ describe(`server::PluginManager`, () => {
       assert.throws(() => {
         server.pluginManager.get('delay', experience);
       });
-
-      await server.stop();
-    });
-  });
-
-  describe(`pluginManager.getRequiredPlugins(clientType = null)`, async function() {
-    // @note - this API should be "private", should be reviewed
-    it(`should returned the list of plugin given client type`, async function() {
-      const server = new Server();
-      server.pluginManager.register('delay', pluginDelayFactory, {
-        startedDelayTime: 0.1,
-        readyDelayTime: 0.1,
-      });
-      await server.init(config);
-
-      class ServerTestExperience extends ServerAbstractExperience {
-        constructor(server, clientTypes) {
-          super(server, clientTypes);
-          this.require('delay');
-        }
-      }
-      const experience = new ServerTestExperience(server, 'test');
-      await server.start();
-
-      const expected = ['delay'];
-      const result = server.pluginManager.getRequiredPlugins('test');
-      assert.deepEqual(expected, result);
 
       await server.stop();
     });
@@ -171,7 +154,7 @@ describe(`server::PluginManager`, () => {
   });
 
   describe(`plugin initialization lifecycle`, () => {
-    it(`should start if no plugins registered`, async function() {
+    it(`server should start if no plugins registered`, async function() {
       const server = new Server();
       await server.init(config);
       // start plugin manager
@@ -352,7 +335,33 @@ describe(`server::PluginManager`, () => {
       await server.start();
       await server.stop();
     });
+  });
 
+  describe(`[@protected] pluginManager.getRequiredPlugins(clientType = null)`, async function() {
+    // @note - this API should be "private", should be reviewed
+    it(`should returned the list of plugin given client type`, async function() {
+      const server = new Server();
+      server.pluginManager.register('delay', pluginDelayFactory, {
+        startedDelayTime: 0.1,
+        readyDelayTime: 0.1,
+      });
+      await server.init(config);
+
+      class ServerTestExperience extends ServerAbstractExperience {
+        constructor(server, clientTypes) {
+          super(server, clientTypes);
+          this.require('delay');
+        }
+      }
+      const experience = new ServerTestExperience(server, 'test');
+      await server.start();
+
+      const expected = ['delay'];
+      const result = server.pluginManager.getRequiredPlugins('test');
+      assert.deepEqual(expected, result);
+
+      await server.stop();
+    });
   });
 
 });

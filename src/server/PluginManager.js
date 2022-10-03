@@ -1,9 +1,8 @@
 import debug from 'debug';
 import AbstractPlugin from './AbstractPlugin.js';
-import AbstractExperience from './AbstractExperience.js';
 import Signal from '../common/Signal.js';
 import SignalAll from '../common/SignalAll.js';
-import logger from './utils/logger.js';
+import logger from '../common/logger.js';
 
 const log = debug('soundworks:lifecycle');
 
@@ -119,11 +118,8 @@ class PluginManager {
    *
    * @param {String} name - Name of the registered plugin
    */
+  // @todo - review this API, this is ugly and error prone
   get(name, _experience = null) {
-    if (!(_experience instanceof AbstractExperience)) {
-      throw new Error(`[soundworks:core] pluginManager.get(name, _experience): Invalid argument _experience should be an instance of AbstractExperience`);
-    }
-
     if (!this._registeredPlugins.has(name)) {
       let msg = `[soundworks:core] Cannot get or require plugin "${name}", plugin is not registered`
 
@@ -140,7 +136,7 @@ ${Array.from(this._registeredPlugins.keys()).map(name => `> - ${name}\n`).join('
     }
 
     // required by experience and manager already started
-    if (_experience instanceof AbstractExperience && this.signals.start.value === true) {
+    if (_experience && this.signals.start.value === true) {
       throw new Error(`[soundworks:core] Cannot require plugin ("${name}") after server.start()`);
     }
 
@@ -151,7 +147,7 @@ ${Array.from(this._registeredPlugins.keys()).map(name => `> - ${name}\n`).join('
     const instance = this._instances.get(name);
 
     // if require by the experience, map client types
-    if (_experience instanceof AbstractExperience) {
+    if (_experience) {
       _experience.clientTypes.forEach((clientType) => {
         instance.clientTypes.add(clientType);
       });
