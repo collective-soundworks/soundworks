@@ -792,10 +792,44 @@ describe(`common::StateManager`, () => {
   });
 
   describe('await stateManager.attach(schema[, stateId]) => state', () => {
-    it('should propagate updates to all attached states', async () => {
+    it('should propagate updates to all attached states (server)', async () => {
       const a0 = await server.stateManager.create('a');
       const a1 = await server.stateManager.attach('a', a0.id);
       const a2 = await server.stateManager.attach('a', a0.id);
+
+      return new Promise(async (resolve, reject) => {
+        const called = [0, 0, 0];
+
+        [a0, a1, a2].forEach((state, index) => {
+          state.subscribe(updates => {
+            assert.equal(updates.int, called[index] % 100 + 1);
+            called[index] += 1;
+          });
+        });
+
+        for (let state of [a0, a1, a2]) {
+          for (let i = 1; i <= 100; i++) {
+            await state.set({ int: i });
+
+            assert.equal(a0.get('int'), i);
+            assert.equal(a1.get('int'), i);
+            assert.equal(a2.get('int'), i);
+          }
+        }
+
+        setTimeout(() => {
+          assert.equal(called[0], 300);
+          assert.equal(called[1], 300);
+          assert.equal(called[2], 300);
+          resolve();
+        }, 200);
+      });
+    });
+
+    it('should propagate updates to all attached states (client)', async () => {
+      const a0 = await client.stateManager.create('a');
+      const a1 = await client.stateManager.attach('a', a0.id);
+      const a2 = await client.stateManager.attach('a', a0.id);
 
       return new Promise(async (resolve, reject) => {
         const called = [0, 0, 0];
@@ -1493,5 +1527,37 @@ describe(`common::StateManager`, () => {
       assert.equal(max, Infinity);
     });
   });
+
+  // describe(`concurrency/order issue between attach and update notification, cf. #18`, () => {
+  //   it(`should do things in the right order...`, async function() {
+  //     this.timeout(5 * 1000);
+
+  //     const schema = { a: { type: 'boolean', default: false } };
+  //     server.stateManager.registerSchema('test-concurrency', schema);
+
+  //     const unobserve = server.stateManager.observe(async (schemaName, stateId, nodeId) => {
+  //       const state = await server.stateManager.attach(schemaName, stateId, nodeId);
+  //       await state.set({ a: true });
+  //     });
+
+  //     let count = 0;
+
+  //     for (let client of clients) {
+  //       const state = await client.stateManager.create('test-concurrency');
+  //       // const rand = parseInt(Math.random() * 100000);
+  //       // console.time(rand);
+  //       assert.deepEqual(state.getValues(), { a: false });
+
+  //       state.subscribe(updates => {
+  //         // console.timeEnd(rand);
+  //         assert.deepEqual(state.getValues(), { a: true });
+  //         count += 1;
+  //       });
+  //     }
+
+  //     await new Promise(resolve => setTimeout(resolve, 100));
+  //     assert.equal(count, clients.length);
+  //   });
+  // });
 });
 

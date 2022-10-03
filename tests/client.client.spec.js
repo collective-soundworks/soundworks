@@ -27,7 +27,7 @@ class ServerTestExperience extends ServerAbstractExperience {}
 class ClientTestExperience extends ClientAbstractExperience {}
 
 describe('client::Client', () => {
-  describe.only(`await client.start()`, async function() {
+  describe(`await client.start()`, async function() {
     it(`should throw if client type/role has no correspondance server-side`, async () => {
       const server = new Server();
       await server.init(config);
