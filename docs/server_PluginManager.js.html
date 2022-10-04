@@ -51,7 +51,7 @@
 import AbstractPlugin from './AbstractPlugin.js';
 import Signal from '../common/Signal.js';
 import SignalAll from '../common/SignalAll.js';
-import logger from './utils/logger.js';
+import logger from '../common/logger.js';
 
 const log = debug('soundworks:lifecycle');
 
@@ -66,9 +66,9 @@ class PluginManager {
     /** @private */
     this._server = server;
     /** @private */
-    this._registeredPlugins = {};
+    this._registeredPlugins = new Map();
     /** @private */
-    this._instances = {};
+    this._instances = new Map();
     /** @private */
     this._observers = new Set();
     /** @private */
@@ -95,6 +95,8 @@ class PluginManager {
       this._resolveReadyPromise();
     });
 
+    // propagate all 'idle' statuses before start
+    this._propagateStatusChange();
     // start before ready, even if no deps
     this.signals.start.value = true;
 
@@ -105,16 +107,17 @@ class PluginManager {
     return this.ready;
   }
 
-  // ------------------
-  // @unstable
-  // mimic state manager API, so we can change this later...
-
   /** @private */
-  _propagateStatusChange(name, status) {
-    this._pluginsStatuses[name] = status;
+  _propagateStatusChange(name = null, status = null) {
+    if (name != null &amp;&amp; status != null) {
+      this._pluginsStatuses[name] = status;
 
-    const statuses = this.getStatuses();
-    this._observers.forEach(observer => observer(statuses, { [name]: status }));
+      const statuses = this.getStatuses();
+      this._observers.forEach(observer => observer(statuses, { [name]: status }));
+    } else {
+      const statuses = this.getStatuses();
+      this._observers.forEach(observer => observer(statuses, {}));
+    }
   }
 
   /** @private */
@@ -131,9 +134,6 @@ class PluginManager {
   getStatuses() {
     return Object.assign({}, this._pluginsStatuses);
   }
-
-  // end @unstable
-  // ------------------
 
   /**
    * Register a plugin (server-side) into soundworks.
@@ -152,13 +152,13 @@ class PluginManager {
    * ```
    */
   register(name, factory = null, options = {}, deps = []) {
-    if (this._registeredPlugins[name]) {
+    if (this._registeredPlugins.has(name)) {
       const ctor = factory(AbstractPlugin);
       throw new Error(`[soundworks:core] Plugin "${name}" of type "${ctor.name}" already registered`);
     }
 
     const ctor = factory(AbstractPlugin);
-    this._registeredPlugins[name] = { ctor, options, deps };
+    this._registeredPlugins.set(name, { ctor, options, deps });
   }
 
   /**
@@ -167,71 +167,33 @@ class PluginManager {
    *
    * @param {String} name - Name of the registered plugin
    */
+  // @todo - review this API, this is ugly and error prone
   get(name, _experience = null) {
-    if (!this._registeredPlugins[name]) {
-      throw new Error(`[soundworks:core] Cannot get or require plugin "${name}", plugin is not registered
+    if (!this._registeredPlugins.has(name)) {
+      let msg = `[soundworks:core] Cannot get or require plugin "${name}", plugin is not registered`
+
+      if (this._registeredPlugins.size > 0) {
+        msg += `
 > registered plugins are:
-${Object.keys(this._registeredPlugins).map(n => `> - ${n}\n`).join('')}
-`);
+${Array.from(this._registeredPlugins.keys()).map(name => `> - ${name}\n`).join('')}`
+      } else {
+        msg += `
+> no plugin registered`
+      }
+
+      throw new Error(msg);
     }
 
     // required by experience and manager already started
     if (_experience &amp;&amp; this.signals.start.value === true) {
-      throw new Error(`[soundworks:core] Plugin "${name}" required after pluginManager start`);
+      throw new Error(`[soundworks:core] Cannot require plugin ("${name}") after server.start()`);
     }
 
-    if (!this._instances[name]) {
-      log(`> instanciating plugin "${name}"`);
-      const { ctor, options, deps } = this._registeredPlugins[name];
-      const instance = new ctor(this._server, name, options);
-
-      this.signals.ready.add(instance.signals.ready);
-      instance.signals.start.add(this.signals.start);
-
-      if (deps.length > 0) {
-        deps.forEach(dependencyName => {
-          if (!this._instances[dependencyName]) {
-            this.get(dependencyName, _experience); // propagate client types
-          }
-
-          const dependency = this._instances[dependencyName];
-          instance.signals.start.add(dependency.signals.ready);
-        });
-      }
-
-      // handle plugin status for reporting
-      this._pluginsStatuses[name] = 'idle';
-      let unsubscribe;
-
-      const onPluginStarted = () => {
-        this._propagateStatusChange(name, 'started');
-      };
-
-      const onPluginErrored = () => {
-        this._propagateStatusChange(name, 'errored');
-
-        instance.signals.started.removeObserver(onPluginStarted);
-        instance.signals.ready.removeObserver(onPluginReady);
-        instance.signals.errored.removeObserver(onPluginErrored);
-      };
-
-      const onPluginReady = () => {
-        this._propagateStatusChange(name, 'ready');
-
-        instance.signals.started.removeObserver(onPluginStarted);
-        instance.signals.ready.removeObserver(onPluginReady);
-        instance.signals.errored.removeObserver(onPluginErrored);
-      };
-
-      // listen the signals
-      instance.signals.started.addObserver(onPluginStarted);
-      instance.signals.ready.addObserver(onPluginReady);
-      instance.signals.errored.addObserver(onPluginErrored);
-
-      this._instances[name] = instance;
+    if (!this._instances.has(name)) {
+      this._createInstance(name);
     }
 
-    const instance = this._instances[name];
+    const instance = this._instances.get(name);
 
     // if require by the experience, map client types
     if (_experience) {
@@ -244,12 +206,68 @@ ${Object.keys(this._registeredPlugins).map(n => `> - ${n}\n`).join('')}
   }
 
   /** @private */
+  _createInstance(name) {
+    log(`> instantiating plugin "${name}"`);
+
+    const { ctor, options, deps } = this._registeredPlugins.get(name);
+    const instance = new ctor(this._server, name, options);
+
+    this.signals.ready.add(instance.signals.ready);
+    instance.signals.start.add(this.signals.start);
+
+    if (deps.length > 0) {
+      deps.forEach(dependencyName => {
+        if (!this._instances.has(dependencyName)) {
+          this.get(dependencyName, _experience); // propagate client types
+        }
+
+        const dependency = this._instances.get(dependencyName);
+        instance.signals.start.add(dependency.signals.ready);
+      });
+    }
+
+    // handle plugin status reporting
+    this._pluginsStatuses[name] = 'idle';
+
+    const onPluginStarted = () => {
+      this._propagateStatusChange(name, 'started');
+    };
+
+    const onPluginErrored = () => {
+      this._propagateStatusChange(name, 'errored');
+
+      instance.signals.started.removeObserver(onPluginStarted);
+      instance.signals.ready.removeObserver(onPluginReady);
+      instance.signals.errored.removeObserver(onPluginErrored);
+    };
+
+    const onPluginReady = () => {
+      this._propagateStatusChange(name, 'ready');
+
+      instance.signals.started.removeObserver(onPluginStarted);
+      instance.signals.ready.removeObserver(onPluginReady);
+      instance.signals.errored.removeObserver(onPluginErrored);
+    };
+
+    // listen the signals
+    instance.signals.started.addObserver(onPluginStarted);
+    instance.signals.ready.addObserver(onPluginReady);
+    instance.signals.errored.addObserver(onPluginErrored);
+
+    this._instances.set(name, instance);
+  }
+
+  /**
+   * @private
+   * This method is protected (semi-private), only used by server to check
+   * consistency between client and server experiences requirements.
+   */
   getRequiredPlugins(clientType = null) {
     const plugins = [];
 
-    for (let name in this._instances) {
+    for (let name of this._instances.keys()) {
       if (clientType !== null) {
-        if (this._instances[name].clientTypes.has(clientType)) {
+        if (this._instances.get(name).clientTypes.has(clientType)) {
           plugins.push(name);
         }
       } else {
@@ -276,7 +294,7 @@ export default PluginManager;
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.11</a> on Sat Oct 01 2022 10:00:00 GMT+0200 (Central European Summer Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.11</a> on Tue Oct 04 2022 10:57:22 GMT+0200 (Central European Summer Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>

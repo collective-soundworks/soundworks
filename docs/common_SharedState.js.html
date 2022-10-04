@@ -67,10 +67,6 @@ import {
   rejectRequest,
 } from './shared-state-utils.js';
 
-// -----------------------------------------------------------
-// define a common namespace...
-// -----------------------------------------------------------
-
 /**
  * Representation of a shared state.
  *
@@ -111,26 +107,47 @@ ${JSON.stringify(initValues, null, 2)}`);
     this._onDeleteCallbacks = new Set();
 
     // add listener for state updates
-    client.transport.addListener(`${UPDATE_RESPONSE}-${id}-${this.remoteId}`, async (reqId, updates, context) => {
+    this._client.transport.addListener(`${UPDATE_RESPONSE}-${this.id}-${this.remoteId}`, async (reqId, updates, context) => {
       const updated = await this._commit(updates, context, true, true);
       resolveRequest(reqId, updated);
     });
 
     // retrieve values but do not propagate to subscriptions
-    client.transport.addListener(`${UPDATE_ABORT}-${id}-${this.remoteId}`, async (reqId, updates, context) => {
+    this._client.transport.addListener(`${UPDATE_ABORT}-${this.id}-${this.remoteId}`, async (reqId, updates, context) => {
       const updated = await this._commit(updates, context, false, true);
       resolveRequest(reqId, updated);
     });
 
-    client.transport.addListener(`${UPDATE_NOTIFICATION}-${id}-${this.remoteId}`, async (updates, context) => {
-      // cf. https://github.com/collective-soundworks/soundworks/issues/18
-      await this._commit(updates, context, true, false);
+    this._client.transport.addListener(`${UPDATE_NOTIFICATION}-${this.id}-${this.remoteId}`, async (updates, context) => {
+      // https://github.com/collective-soundworks/soundworks/issues/18
+      //
+      // # note: 2002-10-03
+      //
+      // `setTimeout(async () => this._commit(updates, context, true, false));`
+      // appears to be the only way to push the update commit in the next event
+      // cycle so that `attach` can resolve before the update notification is
+      // actually dispatched. The alternative:
+      // `Promise.resolve().then(() => this._commit(updates, context, true, false))``
+      // does not behave as expected...
+      //
+      // However this breaks the reliability of:
+      // ```
+      // /* given a0, a1 and a2 being 3 similar attached states */
+      // await state.set({ int: i });
+      //
+      // assert.equal(a0.get('int'), i);
+      // assert.equal(a1.get('int'), i);
+      // assert.equal(a2.get('int'), i);
+      // ```
+      // which is far more important than the edge case reported in the issue
+      // therefore this wont be fixed for now
+      this._commit(updates, context, true, false);
     });
 
     // ---------------------------------------------
     // DELETE initiated by creator, or schema deleted
     // ---------------------------------------------
-    client.transport.addListener(`${DELETE_NOTIFICATION}-${id}-${this.remoteId}`, () => {
+    this._client.transport.addListener(`${DELETE_NOTIFICATION}-${this.id}-${this.remoteId}`, () => {
       this._manager._statesById.delete(this.id);
       this._clearTransport();
 
@@ -145,7 +162,7 @@ ${JSON.stringify(initValues, null, 2)}`);
       // ---------------------------------------------
       // DELETE (can only delete if creator)
       // ---------------------------------------------
-      client.transport.addListener(`${DELETE_RESPONSE}-${id}-${this.remoteId}`, (reqId) => {
+      this._client.transport.addListener(`${DELETE_RESPONSE}-${this.id}-${this.remoteId}`, (reqId) => {
         this._manager._statesById.delete(this.id);
         this._clearTransport();
 
@@ -156,7 +173,7 @@ ${JSON.stringify(initValues, null, 2)}`);
         resolveRequest(reqId, this);
       });
 
-      client.transport.addListener(`${DELETE_ERROR}-${id}`, (reqId, msg) => {
+      this._client.transport.addListener(`${DELETE_ERROR}-${this.id}`, (reqId, msg) => {
         rejectRequest(reqId, msg);
       });
 
@@ -164,7 +181,7 @@ ${JSON.stringify(initValues, null, 2)}`);
       // ---------------------------------------------
       // DETACH
       // ---------------------------------------------
-      client.transport.addListener(`${DETACH_RESPONSE}-${id}-${this.remoteId}`, (reqId) => {
+      this._client.transport.addListener(`${DETACH_RESPONSE}-${this.id}-${this.remoteId}`, (reqId) => {
         this._manager._statesById.delete(this.id);
         this._clearTransport();
 
@@ -175,7 +192,7 @@ ${JSON.stringify(initValues, null, 2)}`);
       });
 
       // the state does not exists anymore in the server (should not happen)
-      client.transport.addListener(`${DETACH_ERROR}-${id}`, (reqId, msg) => {
+      this._client.transport.addListener(`${DETACH_ERROR}-${this.id}`, (reqId, msg) => {
         rejectRequest(reqId, msg);
       });
 
@@ -241,6 +258,8 @@ ${JSON.stringify(initValues, null, 2)}`);
       });
     }
 
+    // on a given client, `await state.set(update)` resolves when all
+    // subscription have resolved themselves
     await Promise.all(promises);
 
     // reset events to null after propagation of all listeners
@@ -522,7 +541,7 @@ export default SharedState;
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.11</a> on Sat Oct 01 2022 10:00:00 GMT+0200 (Central European Summer Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.11</a> on Tue Oct 04 2022 10:57:22 GMT+0200 (Central European Summer Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>
