@@ -1,8 +1,0 @@
-{
-  "controller": {
-    "target": "browser"
-  },
-  "thing": {
-    "target": "node"
-  }
-}
