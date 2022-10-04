@@ -1,22 +1,37 @@
 import fs from 'fs';
 import http from 'http';
 import https from 'https';
-import chalk from 'chalk';
-import merge from 'lodash.merge';
 import path from 'path';
-import pem from 'pem';
 import os from 'os';
-import polka from 'polka';
+import { X509Certificate } from 'crypto';
+
+import chalk from 'chalk';
 import compression from 'compression';
+import Keyv from 'keyv';
+import KeyvFile from 'keyv-file';
+import merge from 'lodash.merge';
+import pem from 'pem';
+import polka from 'polka';
+
 import Client from './Client.js';
 import PluginManager from './PluginManager.js';
 import Sockets from './Sockets.js';
 import SharedStateManagerServer from '../common/SharedStateManagerServer.js';
 import logger from '../common/logger.js';
-import Keyv from 'keyv';
-import KeyvFile from 'keyv-file';
 
 let _dbNamespaces = new Set();
+
+function getCertInfos(cert) {
+  // this fail with self-signed certificates for whatever reason...
+  const x509 = new X509Certificate(cert);
+
+  return {
+    CN: x509.subject.split('=')[1],
+    altNames: x509.subjectAltName.split(',').map(e => e.trim().split(':')[1]),
+    validFrom: x509.validFrom,
+    validTo: x509.validTo,
+  }
+}
 
 /**
  * Server side entry point for a `soundworks` application.
@@ -114,7 +129,11 @@ class Server {
      */
     this.templateDirectory = null;
 
-    // private stuff
+    /**
+     * If https is required, will contain informations about the certificates
+     * (self-signed, validity dates, etc.)
+     */
+    this.httpsInfos = null;
 
     /**
      * Required activities that must be started. Only used in Experience
@@ -122,13 +141,6 @@ class Server {
      * @private
      */
     this.activities = new Set();
-
-    /**
-     * Key and certificates (may be generated and self-signed) for https server.
-     * @todo - put in config...
-     * @private
-     */
-    this._httpsInfos = null;
 
     /**
      * Mapping between a `clientType` and its related activities.
@@ -332,9 +344,9 @@ class Server {
               const key = fs.readFileSync(httpsInfos.key);
               const cert = fs.readFileSync(httpsInfos.cert);
 
-              this._httpsInfos = { key, cert };
+              this.httpsInfos = { selfSigned: false, ...getCertInfos(cert) };
 
-              const httpsServer = https.createServer(this._httpsInfos);
+              const httpsServer = https.createServer({ key, cert });
               return Promise.resolve(httpsServer);
             } catch(err) {
               console.error(`
@@ -350,8 +362,9 @@ Invalid certificate files, please check your:
             const cert = await this.db.get('httpsCert');
 
             if (key && cert) {
-              this._httpsInfos = { key, cert };
-              const httpsServer = https.createServer(this._httpsInfos);
+              this.httpsInfos = { selfSigned: true };
+              const httpsServer = https.createServer({ key, cert });
+
               return Promise.resolve(httpsServer);
             } else {
               return new Promise(resolve => {
@@ -361,15 +374,16 @@ Invalid certificate files, please check your:
                     return console.error(err.stack);
                   }
 
-                  this._httpsInfos = {
-                    key: keys.serviceKey,
-                    cert: keys.certificate,
-                  };
+                  const key = keys.serviceKey;
+                  const cert = keys.certificate;
 
-                  await this.db.set('httpsKey', this._httpsInfos.key);
-                  await this.db.set('httpsCert', this._httpsInfos.cert);
+                  this.httpsInfos = { selfSigned: true };
+                  // we store the cert so that we don't have to re-accept the
+                  // cert each time the server restarts
+                  await this.db.set('httpsKey', key);
+                  await this.db.set('httpsCert', cert);
 
-                  const httpsServer = https.createServer(this._httpsInfos);
+                  const httpsServer = https.createServer({ key, cert });
 
                   resolve(httpsServer);
                 });
@@ -484,6 +498,17 @@ Invalid certificate files, please check your:
                 }
               });
             });
+
+            if (this.httpsInfos !== null) {
+              logger.title(`https certificates infos`);
+
+              if (this.httpsInfos.selfSigned) {
+                logger.log(`    self-signed: ${this.httpsInfos.selfSigned ? 'true' : 'false'}`);
+              } else {
+                logger.log(`    valid from: ${this.httpsInfos.validFrom}`);
+                logger.log(`    valid to:   ${this.httpsInfos.validTo}`);
+              }
+            }
 
             await this._emit('started');
 

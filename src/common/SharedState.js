@@ -72,7 +72,7 @@ ${JSON.stringify(initValues, null, 2)}`);
     this._client.transport.addListener(`${UPDATE_NOTIFICATION}-${this.id}-${this.remoteId}`, async (updates, context) => {
       // https://github.com/collective-soundworks/soundworks/issues/18
       //
-      // note: 2002-10-03
+      // # note: 2002-10-03
       //
       // `setTimeout(async () => this._commit(updates, context, true, false));`
       // appears to be the only way to push the update commit in the next event

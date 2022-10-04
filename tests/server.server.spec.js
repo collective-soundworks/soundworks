@@ -1,5 +1,8 @@
+const fs = require('fs');
 const path = require('path');
 const assert = require('chai').assert;
+
+const dotenv = require('dotenv');
 
 const Server = require('../server').Server;
 const ServerAbstractExperience = require('../server').AbstractExperience;
@@ -155,6 +158,60 @@ describe('server::Server', () => {
       await server.stop();
       // assert await resolves after all callbacks
       assert.equal(counter, 2);
+    });
+  });
+
+  describe('Check https infos', () => {
+    // this test will exit early if the `.env` file is not found in the tests
+    // directory, making it work should be straightforward reading the code...
+    it(`should get infos about valid certificates`, async () => {
+      const envPathname = path.join(__dirname, '.env');
+
+      if (!fs.existsSync(envPathname)) {
+        assert.ok('no .env file, skip this test');
+        return;
+      }
+
+      const envBuffer = fs.readFileSync(envPathname);
+      const env = dotenv.parse(envBuffer);
+
+      server = new Server();
+
+      config.env.useHttps = true;
+      config.env.httpsInfos = {
+        key: env.HTTPS_KEY,
+        cert: env.HTTPS_CERT,
+      };
+
+      await server.init(config);
+      await server.start();
+
+      assert.notEqual(server.httpsInfos, null);
+      assert.equal(server.httpsInfos.selfSigned, false);
+      assert.isDefined(server.httpsInfos.validFrom);
+      assert.isDefined(server.httpsInfos.validTo);
+
+      await server.stop();
+    });
+
+    it(`should get infos about self-signed certificates`, async () => {
+      server = new Server();
+
+      config.env.useHttps = true;
+      config.env.httpsInfos = {
+        key: null,
+        cert: null,
+      };
+
+      await server.init(config);
+      await server.start();
+
+      assert.notEqual(server.httpsInfos, null);
+      assert.equal(server.httpsInfos.selfSigned, true);
+      assert.isUndefined(server.httpsInfos.validFrom);
+      assert.isUndefined(server.httpsInfos.validTo);
+
+      await server.stop();
     });
   });
 });

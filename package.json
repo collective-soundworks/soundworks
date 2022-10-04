@@ -63,6 +63,7 @@
     "commitizen": "^4.2.5",
     "cz-conventional-changelog": "^3.3.0",
     "docdash": "^1.2.0",
+    "dotenv": "^16.0.3",
     "eslint": "^8.24.0",
     "jsdoc": "^3.6.10",
     "markdown-toc": "^1.2.0",

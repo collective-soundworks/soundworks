@@ -519,7 +519,6 @@ class ParameterBag {
   //   }
   // }
 
-
   /**
    * Return the given schema along with the initialization values.
    *

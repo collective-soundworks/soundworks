@@ -16,4 +16,6 @@ __*
 # to be removed when documentation is online
 /examples
 
+/tests/.env
+
 NOTES.md
