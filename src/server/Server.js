@@ -21,18 +21,6 @@ import logger from '../common/logger.js';
 
 let _dbNamespaces = new Set();
 
-function getCertInfos(cert) {
-  // this fail with self-signed certificates for whatever reason...
-  const x509 = new X509Certificate(cert);
-
-  return {
-    CN: x509.subject.split('=')[1],
-    altNames: x509.subjectAltName.split(',').map(e => e.trim().split(':')[1]),
-    validFrom: x509.validFrom,
-    validTo: x509.validTo,
-  }
-}
-
 /**
  * Server side entry point for a `soundworks` application.
  *
@@ -343,13 +331,21 @@ class Server {
             try {
               const key = fs.readFileSync(httpsInfos.key);
               const cert = fs.readFileSync(httpsInfos.cert);
+              // this fails with self-signed certificates for whatever reason...
+              const x509 = new X509Certificate(cert);
 
-              this.httpsInfos = { selfSigned: false, ...getCertInfos(cert) };
+              this.httpsInfos = {
+                selfSigned: false,
+                CN: x509.subject.split('=')[1],
+                altNames: x509.subjectAltName.split(',').map(e => e.trim().split(':')[1]),
+                validFrom: x509.validFrom,
+                validTo: x509.validTo,
+              };
 
               const httpsServer = https.createServer({ key, cert });
               return Promise.resolve(httpsServer);
             } catch(err) {
-              console.error(`
+              logger.error(`
 Invalid certificate files, please check your:
 - key file: ${httpsInfos.key}
 - cert file: ${httpsInfos.cert}
@@ -371,15 +367,16 @@ Invalid certificate files, please check your:
                 // generate certificate on the fly (for development purposes)
                 pem.createCertificate({ days: 1, selfSigned: true }, async (err, keys) => {
                   if (err) {
-                    return console.error(err.stack);
+                    logger.error(err.stack);
+                    return;
                   }
 
                   const key = keys.serviceKey;
                   const cert = keys.certificate;
 
                   this.httpsInfos = { selfSigned: true };
-                  // we store the cert so that we don't have to re-accept the
-                  // cert each time the server restarts
+                  // we store the generated cert so that we don't have to re-accept
+                  // the cert each time the server restarts
                   await this.db.set('httpsKey', key);
                   await this.db.set('httpsCert', cert);
 
@@ -617,7 +614,6 @@ Invalid certificate files, please check your:
     }
 
     socket.addListener('close', () => {
-      console.log('server: socket.close()');
       // clean sockets
       socket.terminate();
       // remove client from activities
@@ -694,7 +690,7 @@ Invalid certificate files, please check your:
     // at note keyv-file doesn't seems to works
     const store = new KeyvFile({ filename });
     const db = new Keyv({ namespace, store });
-    db.on('error', err => console.log(chalk.red('[soundworks:core] db ${namespace} error:'), err));
+    db.on('error', err => logger.error('[soundworks:core] db ${namespace} error: ${err}'));
 
     return db;
   }

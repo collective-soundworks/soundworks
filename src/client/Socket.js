@@ -6,6 +6,7 @@ import {
   packStringMessage,
   unpackStringMessage,
 } from '../common/sockets-encoder-decoder.js';
+import logger from '../common/logger.js';
 
 const log = debug('soundworks:socket');
 // https://stackoverflow.com/questions/17575790/environment-detection-node-js-or-browser
@@ -103,35 +104,6 @@ class Socket {
 
     const queryParams = `clientType=${clientType}&key=${key}`;
 
-    // see https://github.com/collective-soundworks/soundworks/issues/56
-    // problem is that we can't build the bundle for browser clients then
-    // ----------------------------------------------------------
-    // node clients can wait for the server to be started
-    // ----------------------------------------------------------
-    // if (!isBrowser()) {
-    //   let tcpp = await import('tcp-ping');
-    //   const { serverIp, port } = config.env;
-
-    //   await new Promise(async (resolve, reject) => {
-    //     (function ping() {
-    //       console.log('ping');
-    //       tcpp.probe(serverIp, port, function(err, available) {
-    //         console.log('ping', available);
-    //         if (err) {
-    //           console.log(err);
-    //           reject();
-    //         } else {
-    //           if (available) {
-    //             resolve();
-    //           } else {
-    //             setTimeout(ping, 1000);
-    //           }
-    //         }
-    //       });
-    //     }());
-    //   });
-    // }
-
     // ----------------------------------------------------------
     // init string socket
     // ----------------------------------------------------------
@@ -169,7 +141,7 @@ class Socket {
         ws.addEventListener('error', e => {
           if (e.type === 'error' && e.error.code === 'ECONNREFUSED') {
             if (!connectionRefusedLogged) {
-              console.log('[socket] connection refused, waiting for the server to start');
+              logger.log('[socket] connection refused, waiting for the server to start');
               connectionRefusedLogged = true;
             }
 

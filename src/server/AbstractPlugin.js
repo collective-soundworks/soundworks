@@ -157,7 +157,9 @@ class AbstractPlugin {
   }
 
   error(msg) {
-    console.log(`> plugin "${this.name}" error: ${msg}`);
+    logger.pluginError(this.name);
+    logger.error(`> Error: ${msg}`);
+
     this.signals.errored.msg = msg;
     this.signals.errored.value = true;
   }
