@@ -9,6 +9,7 @@
 # junk files
 .DS_Store
 Thumbs.db
+.data
 
 # convention for personnal files
 __*
