@@ -26,12 +26,12 @@
  *
  */
 import _Server from './Server.js';
-import _AbstractExperience from './AbstractExperience.js';
+import _Context from './Context.js';
 
-export const AbstractExperience = _AbstractExperience;
+export const Context = _Context;
 export const Server = _Server;
 
 export default {
-  AbstractExperience: _AbstractExperience,
+  Context: _Context,
   Server: _Server,
 };

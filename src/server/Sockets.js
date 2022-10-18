@@ -1,5 +1,6 @@
 import WebSocket from 'ws';
 import querystring from 'querystring';
+
 import Socket from './Socket.js';
 
 /**
@@ -16,6 +17,8 @@ class Sockets {
      * @private
      */
     this._rooms = new Map();
+    // init global room
+    this._rooms.set('*', new Set());
 
     this._initializationCache = new Map();
   }
@@ -29,8 +32,6 @@ class Sockets {
    */
   start(httpServer, config, onConnectionCallback) {
     const path = config.path;
-    // init global room
-    this._rooms.set('*', new Set());
 
     this.wss = new WebSocket.Server({
       server: httpServer,

@@ -1,10 +1,6 @@
 import { v4 as uuid } from 'uuid';
 
-function* idGenerator() {
-  for (let i = 0; true; i++) {
-    yield i;
-  }
-}
+import { idGenerator } from '../common/utils.js';
 
 const generateId = idGenerator();
 

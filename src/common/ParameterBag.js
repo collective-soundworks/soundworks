@@ -1,8 +1,5 @@
-// import types from './types';
 import cloneDeep from 'lodash.clonedeep';
-// import shallowClone from 'shallow-clone';
 import equal from 'fast-deep-equal';
-
 
 /**
  * @typedef {Object} server.SharedStateManagerServer~schema

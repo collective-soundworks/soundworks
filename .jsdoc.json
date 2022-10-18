@@ -33,23 +33,24 @@
       "Tutorials",
       "Interfaces"
     ],
+    "scripts": [
+      "assets/custom.css"
+    ],
     "meta": {
         "title": "soundworks",
         "description": "Documentation of soundworks, a full-stack JavaScript framework for distributed WebAudio and multimedia applications"
     },
-    "search": true,
+    "search": false,
     "menu": {
-      "Resources": {
-        "href":"http://collective-soundworks.github.io/",
-        "target":"_blank",
-        "class":"menu-item",
-        "id":"website_link"
-      },
       "Github": {
         "href": "https://github.com/collective-soundworks/soundworks",
         "target":"_blank",
-        "class":"menu-item",
-        "id":"website_link"
+        "class":"menu-item"
+      },
+      "Resources": {
+        "href":"http://collective-soundworks.github.io/",
+        "target":"_blank",
+        "class":"menu-item"
       }
     }
   }

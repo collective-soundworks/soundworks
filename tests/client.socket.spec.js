@@ -2,14 +2,10 @@ const path = require('node:path');
 const assert = require('chai').assert;
 
 const Server = require('../server').Server;
-const ServerAbstractExperience = require('../server').AbstractExperience;
-
 const Client = require('../client').Client;
-const ClientAbstractExperience = require('../client').AbstractExperience;
 
 const config = {
   app: {
-    name: 'web-socket-connect-retry',
     clients: {
       test: { target: 'node' },
     },
@@ -23,15 +19,14 @@ const config = {
   },
 };
 
-class ClientTestExperience extends ClientAbstractExperience {}
-
 let client;
 let server;
 
 describe(`client.Socket`, () => {
   describe(`[node client] wait for the server to start`, () => {
     before(async function() {
-      client = new Client();
+      // config.env.verbose = true;
+      client = new Client({ clientType: 'test', ...config });
     });
 
     after(async function() {
@@ -43,35 +38,18 @@ describe(`client.Socket`, () => {
 
       const initPromise = new Promise(async (resolve) => {
         // client.init resolves only when connected
-        // @note: the test is not reliable on this point...
-        await client.init({ clientType: 'test', ...config });
+        await client.init();
         resolve();
-
-        const clientExperience = new ClientTestExperience(client);
-
-        await client.start();
-        clientExperience.start();
       });
-      // wait for 2 seconds
+
+      // wait for 3 seconds and start the server
       await new Promise(resolve => setTimeout(resolve, 3000));
 
-      const connectPromise = new Promise(async resolve => {
-        class ServerTestExperience extends ServerAbstractExperience {
-          enter(_client) {
-            assert.equal(_client.id, client.id);
-            resolve();
-          }
-        }
+      server = new Server(config);
+      await server.init();
+      await server.start();
 
-        server = new Server();
-        await server.init(config);
-        const serverExperience = new ServerTestExperience(server, 'test');
-
-        await server.start();
-        serverExperience.start();
-      });
-
-      return Promise.all([initPromise, connectPromise]);
+      return initPromise;
     });
   });
 });

@@ -1,5 +1,3 @@
-
-
 ## should throw clean Error
 
 ```
@@ -15,8 +13,3 @@ server.stop();
 > or
 > `server.stop` cannot be called before `server.start`
 ```
-
-## check that browser clients can be built
-
-_but how to do that ?_
-

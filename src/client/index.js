@@ -21,17 +21,17 @@
  * // when everything is ready, start the experience
  * playerExperience.start();
  */
-import _AbstractExperience from './AbstractExperience.js';
+import _Context from './Context.js';
 import _Client from './Client.js';
 
 // `import soundworks from '@soundworks/core/client'``
 // or
 // `import { Client } from '@soundworks/core/client'`
-export const AbstractExperience = _AbstractExperience;
+export const Context = _Context;
 export const Client = _Client;
 
 export default {
-  AbstractExperience: _AbstractExperience,
+  Context: _Context,
   Client: _Client,
 };
 

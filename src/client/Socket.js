@@ -1,5 +1,5 @@
-import debug from 'debug';
 import WebSocket from 'isomorphic-ws';
+
 import {
   packBinaryMessage,
   unpackBinaryMessage,
@@ -7,10 +7,7 @@ import {
   unpackStringMessage,
 } from '../common/sockets-encoder-decoder.js';
 import logger from '../common/logger.js';
-
-const log = debug('soundworks:socket');
-// https://stackoverflow.com/questions/17575790/environment-detection-node-js-or-browser
-const isBrowser = new Function('try {return this===window;}catch(e){ return false;}');
+import { isBrowser } from '../common/utils.js';
 
 // close
 //   Fired when a connection with a websocket is closed.
@@ -113,7 +110,6 @@ class Socket {
       let connectionRefusedLogged = false;
 
       const trySocket = async () => {
-        log(`[string socket] trying connection - url: ${stringSocketUrl}`);
         const ws = new WebSocket(stringSocketUrl, webSocketOptions);
 
         ws.addEventListener('open', connectEvent => {
@@ -141,7 +137,7 @@ class Socket {
         ws.addEventListener('error', e => {
           if (e.type === 'error' && e.error.code === 'ECONNREFUSED') {
             if (!connectionRefusedLogged) {
-              logger.log('[socket] connection refused, waiting for the server to start');
+              logger.log('[soundworks.Socket] Connection refused, waiting for the server to start');
               connectionRefusedLogged = true;
             }
 
@@ -165,7 +161,6 @@ class Socket {
     const binarySocketUrl = `${url}?binary=1&${queryParams}`;
 
     await new Promise(resolve => {
-      log(`[binary socket] trying connection - url: ${binarySocketUrl}`);
       const ws = new WebSocket(binarySocketUrl, webSocketOptions);
       ws.binaryType = 'arraybuffer';
 
@@ -316,9 +311,25 @@ class Socket {
   /**
    * Immediately close the 2 sockets
    */
-  terminate() {
+  async terminate() {
+    const wsPromise = new Promise((resolve, _reject) => {
+      this.addListener('close', () => {
+        this.removeAllListeners();
+        resolve();
+      });
+    });
+
+    const binaryWsPromise = new Promise((resolve, _reject) => {
+      this.addBinaryListener('close', () => {
+        this.removeAllBinaryListeners();
+        resolve();
+      });
+    });
+
     this.ws.close();
     this.binaryWs.close();
+
+    return Promise.all([wsPromise, binaryWsPromise]);
   }
 }
 

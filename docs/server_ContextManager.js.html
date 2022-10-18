@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>server/ContextManager.js - soundworks</title>
+    
+    <meta name="description" content="Documentation of soundworks, a full-stack JavaScript framework for distributed WebAudio and multimedia applications" />
+    
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    <h2><a href="index.html">Home</a></h2><h2><a href="https://github.com/collective-soundworks/soundworks" target="_blank" class="menu-item" >Github</a></h2><h2><a href="http://collective-soundworks.github.io/" target="_blank" class="menu-item" >Resources</a></h2><h3>Namespaces</h3><ul><li><a href="client.html">client</a></li><li><a href="server.html">server</a></li></ul><h3>Classes</h3><ul><li><a href="client.Client.html">client.Client</a><ul class='methods'><li data-type='method'><a href="client.Client.html#init">init</a></li><li data-type='method'><a href="client.Client.html#start">start</a></li></ul></li><li><a href="client.Context.html">client.Context</a><ul class='methods'><li data-type='method'><a href="client.Context.html#enter">enter</a></li><li data-type='method'><a href="client.Context.html#exit">exit</a></li><li data-type='method'><a href="client.Context.html#start">start</a></li><li data-type='method'><a href="client.Context.html#stop">stop</a></li></ul></li><li><a href="client.PluginManager.html">client.PluginManager</a><ul class='methods'><li data-type='method'><a href="client.PluginManager.html#get">get</a></li><li data-type='method'><a href="client.PluginManager.html#register">register</a></li></ul></li><li><a href="client.SharedState.html">client.SharedState</a><ul class='methods'><li data-type='method'><a href="client.SharedState.html#delete">delete</a></li><li data-type='method'><a href="client.SharedState.html#detach">detach</a></li><li data-type='method'><a href="client.SharedState.html#get">get</a></li><li data-type='method'><a href="client.SharedState.html#getDefaults">getDefaults</a></li><li data-type='method'><a href="client.SharedState.html#getInitValues">getInitValues</a></li><li data-type='method'><a href="client.SharedState.html#getSchema">getSchema</a></li><li data-type='method'><a href="client.SharedState.html#getValues">getValues</a></li><li data-type='method'><a href="client.SharedState.html#onDelete">onDelete</a></li><li data-type='method'><a href="client.SharedState.html#onDetach">onDetach</a></li><li data-type='method'><a href="client.SharedState.html#set">set</a></li><li data-type='method'><a href="client.SharedState.html#subscribe">subscribe</a></li></ul></li><li><a href="client.Socket.html">client.Socket</a><ul class='methods'><li data-type='method'><a href="client.Socket.html#addBinaryListener">addBinaryListener</a></li><li data-type='method'><a href="client.Socket.html#addListener">addListener</a></li><li data-type='method'><a href="client.Socket.html#removeAllBinaryListeners">removeAllBinaryListeners</a></li><li data-type='method'><a href="client.Socket.html#removeAllListeners">removeAllListeners</a></li><li data-type='method'><a href="client.Socket.html#removeBinaryListener">removeBinaryListener</a></li><li data-type='method'><a href="client.Socket.html#removeListener">removeListener</a></li><li data-type='method'><a href="client.Socket.html#send">send</a></li><li data-type='method'><a href="client.Socket.html#sendBinary">sendBinary</a></li><li data-type='method'><a href="client.Socket.html#terminate">terminate</a></li></ul></li><li><a href="client.StateManager.html">client.StateManager</a><ul class='methods'><li data-type='method'><a href="client.StateManager.html#attach">attach</a></li><li data-type='method'><a href="client.StateManager.html#create">create</a></li><li data-type='method'><a href="client.StateManager.html#observe">observe</a></li></ul></li><li><a href="ContextManager.html">ContextManager</a></li><li></li><li><a href="server.Client.html">server.Client</a></li><li><a href="server.Context.html">server.Context</a><ul class='methods'><li data-type='method'><a href="server.Context.html#enter">enter</a></li><li data-type='method'><a href="server.Context.html#exit">exit</a></li><li data-type='method'><a href="server.Context.html#start">start</a></li><li data-type='method'><a href="server.Context.html#stop">stop</a></li></ul></li><li><a href="server.Plugin.html">server.Plugin</a><ul class='methods'><li data-type='method'><a href="server.Plugin.html#addClient">addClient</a></li><li data-type='method'><a href="server.Plugin.html#removeClient">removeClient</a></li><li data-type='method'><a href="server.Plugin.html#start">start</a></li><li data-type='method'><a href="server.Plugin.html#start">start</a></li></ul></li><li></li><li><a href="server.PluginManager.html">server.PluginManager</a><ul class='methods'><li data-type='method'><a href="server.PluginManager.html#checkRegisteredPlugins">checkRegisteredPlugins</a></li><li data-type='method'><a href="server.PluginManager.html#get">get</a></li><li data-type='method'><a href="server.PluginManager.html#register">register</a></li></ul></li><li><a href="server.Server.html">server.Server</a><ul class='methods'><li data-type='method'><a href="server.Server.html#init">init</a></li><li data-type='method'><a href="server.Server.html#setCustomTemplateConfig">setCustomTemplateConfig</a></li><li data-type='method'><a href="server.Server.html#setDefaultTemplateConfig">setDefaultTemplateConfig</a></li><li data-type='method'><a href="server.Server.html#start">start</a></li><li data-type='method'><a href="server.Server.html#stop">stop</a></li></ul></li><li><a href="server.Socket.html">server.Socket</a><ul class='methods'><li data-type='method'><a href="server.Socket.html#addBinaryListener">addBinaryListener</a></li><li data-type='method'><a href="server.Socket.html#addListener">addListener</a></li><li data-type='method'><a href="server.Socket.html#addToRoom">addToRoom</a></li><li data-type='method'><a href="server.Socket.html#removeAllBinaryListeners">removeAllBinaryListeners</a></li><li data-type='method'><a href="server.Socket.html#removeAllListeners">removeAllListeners</a></li><li data-type='method'><a href="server.Socket.html#removeBinaryListener">removeBinaryListener</a></li><li data-type='method'><a href="server.Socket.html#removeFromRoom">removeFromRoom</a></li><li data-type='method'><a href="server.Socket.html#removeListener">removeListener</a></li><li data-type='method'><a href="server.Socket.html#send">send</a></li><li data-type='method'><a href="server.Socket.html#sendBinary">sendBinary</a></li></ul></li><li><a href="server.Sockets.html">server.Sockets</a><ul class='methods'><li data-type='method'><a href="server.Sockets.html#addToRoom">addToRoom</a></li><li data-type='method'><a href="server.Sockets.html#broadcast">broadcast</a></li><li data-type='method'><a href="server.Sockets.html#broadcastBinary">broadcastBinary</a></li><li data-type='method'><a href="server.Sockets.html#removeFromRoom">removeFromRoom</a></li></ul></li><li><a href="server.StateManager.html">server.StateManager</a><ul class='methods'><li data-type='method'><a href="server.StateManager.html#attach">attach</a></li><li data-type='method'><a href="server.StateManager.html#create">create</a></li><li data-type='method'><a href="server.StateManager.html#deleteSchema">deleteSchema</a></li><li data-type='method'><a href="server.StateManager.html#observe">observe</a></li><li data-type='method'><a href="server.StateManager.html#registerSchema">registerSchema</a></li><li data-type='method'><a href="server.StateManager.html#registerUpdateHook">registerUpdateHook</a></li></ul></li></ul>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">server/ContextManager.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import Context from './Context.js';
+import {
+  CONTEXT_ENTER_REQUEST,
+  CONTEXT_ENTER_RESPONSE,
+  CONTEXT_ENTER_ERROR,
+  CONTEXT_EXIT_REQUEST,
+  CONTEXT_EXIT_RESPONSE,
+  CONTEXT_EXIT_ERROR,
+} from '../common/constants.js';
+
+
+/**
+ * @private
+ * create a dummy server side context if a proper server-side context has not
+ * been declared and registered, one DefaultContext is created per unknown
+ * contextName and associated to all known client types.
+ */
+function createNamedContextClass(contextName) {
+  return class DefaultContext extends Context {
+    get name() { return contextName }
+  }
+}
+
+/** @private */
+class ContextCollection {
+  constructor() {
+    this.inner = [];
+  }
+
+  add(context) {
+    this.inner.push(context);
+  }
+
+  has(name) {
+    return this.inner.find(c => c.name === name) !== undefined;
+  }
+
+  get(name) {
+    return this.inner.find(c => c.name === name);
+  }
+
+  map(func) {
+    return this.inner.map(func);
+  }
+
+  filter(func) {
+    return this.inner.filter(func);
+  }
+}
+
+/**
+ * Manager the different contexts and their lifecycle.
+ * Most of the time, you should not ahve to manipulate the context manager directly
+ */
+class ContextManager {
+  constructor(server) {
+    this.server = server;
+
+    /** @private */
+    this._contexts = new ContextCollection();
+    /** @private */
+    this._contextStartPromises = new Map();
+  }
+
+  register(context) {
+    // we must await the contructor initialization end to check the name and throw
+    if (this._contexts.has(context.name)) {
+      throw new Error(`[soundworks:ContextManager] Context "${context.name}" already registered`);
+    }
+
+    this._contexts.add(context);
+  }
+
+  async get(contextName) {
+    if (!this._contexts.has(contextName)) {
+      throw new Error(`[soundworks:ContextManager] Can't get context "${contextName}", not registered`);
+    }
+
+    const context = this._contexts.get(contextName);
+
+    if (this._contextStartPromises.has(contextName)) {
+      const startPromise = this._contextStartPromises.get(contextName);
+      await startPromise;
+    } else {
+      context.status = 'inited';
+
+      try {
+        const startPromise = context.start();
+        this._contextStartPromises.set(contextName, startPromise);
+        await startPromise;
+        context.status = 'started';
+      } catch(err) {
+        context.status = 'errored';
+        throw new Error(err);
+      }
+    }
+
+    return context;
+  }
+
+  // called on socket open
+  addClient(client) {
+    client.socket.addListener(CONTEXT_ENTER_REQUEST, async (reqId, contextName) => {
+      // if no context found, create a DefaultContext on the fly
+      if (!this._contexts.has(contextName)) {
+        // create default context for all client types
+        const ctor = createNamedContextClass(contextName);
+        const clientTypes = Object.keys(this.server.config.app.clients);
+        // this will automatically register the context in the context manager
+        new ctor(this.server, clientTypes);
+      }
+
+      // we ensure context is started, even lazilly after server.start()
+      let context;
+      try {
+        context = await this.get(contextName);
+      } catch(err) {
+        client.socket.send(
+          CONTEXT_ENTER_ERROR,
+          reqId,
+          contextName,
+          err.message,
+        );
+        return;
+      }
+
+      // don't do this check with default context to allow several parallel
+      // contexts client side with no server-side part.
+      if (context &amp;&amp; context.clients.has(client)) {
+        client.socket.send(
+          CONTEXT_ENTER_ERROR,
+          reqId,
+          contextName,
+          `[soundworks:ContextManager] Client already in context (if only one context is created .enter() has been called automatically)`,
+        );
+        return;
+      }
+
+      // use default context if no server-side context part defined
+      if (context === undefined) {
+        context = this.defaultContext;
+      }
+
+      if (!context.clientTypes.has(client.type)) {
+        client.socket.send(
+          CONTEXT_ENTER_ERROR,
+          reqId,
+          contextName,
+          `[soundworks:ContextManager] Clients of type "${client.type}" are not declared as possible consumers of context "${contextName}"`,
+        );
+        return;
+      }
+
+      try {
+        await context.enter(client);
+
+        client.socket.send(CONTEXT_ENTER_RESPONSE, reqId, contextName);
+      } catch(err) {
+        client.socket.send(CONTEXT_ENTER_ERROR, reqId, contextName, err.message);
+      }
+    });
+
+    client.socket.addListener(CONTEXT_EXIT_REQUEST, async (reqId, contextName) => {
+      if (!this._contexts.has(contextName)) {
+        client.socket.send(
+          CONTEXT_EXIT_ERROR,
+          reqId,
+          contextName,
+          `[soundworks:ContextManager] Cannot exit(), context ${contextName} does not exists`,
+        );
+        return;
+      }
+
+      let context = await this.get(contextName);
+
+      if (context.clients.has(client)) {
+        try {
+          await context.exit(client);
+          client.socket.send(CONTEXT_EXIT_RESPONSE, reqId, contextName);
+        } catch(err) {
+          client.socket.send(CONTEXT_EXIT_ERROR, reqId, contextName, err.message);
+        }
+      } else {
+        client.socket.send(
+          CONTEXT_EXIT_ERROR,
+          reqId,
+          contextName,
+          `[soundworks:ContextManager] Client of type "${client.type}" is not in context "${contextName}"`,
+        );
+      }
+    });
+  }
+
+  // called on socket 'close'
+  async removeClient(client) {
+    client.socket.removeAllListeners(CONTEXT_ENTER_REQUEST);
+    client.socket.removeAllListeners(CONTEXT_EXIT_REQUEST);
+
+    // exit from all contexts
+    const promises = this._contexts
+      .filter(context => context.clients.has(client))
+      .map(context => context.exit(client));
+
+    await Promise.all(promises);
+  }
+
+  async start() {
+    const promises = this._contexts.map(context => this.get(context.name));
+    await Promise.all(promises);
+  }
+
+  async stop() {
+    const promises = this._contexts.map(context => context.stop());
+    await Promise.all(promises);
+  }
+}
+
+export default ContextManager;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.11</a> on Tue Oct 18 2022 18:08:27 GMT+0200 (Central European Summer Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+
+
+    <link type="text/css" rel="stylesheet" href="assets/custom.css">
+    
+</body>
+</html>

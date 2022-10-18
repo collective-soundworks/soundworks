@@ -1,0 +1,116 @@
+a, a:active {
+  color: #242424;
+}
+
+a:hover, a:active {
+  color: #767676;
+}
+
+nav {
+  padding-bottom: 50px;
+}
+
+footer {
+  color: #767676;
+  text-align: right;
+  font-size: 75%;
+}
+
+nav > ul > li > a {
+  color: #242424;
+  margin-top: 10px;
+}
+nav > ul > li > a:hover,
+nav > ul > li > a:active {
+  color: #767676;
+}
+
+nav ul ul a:hover,
+nav ul ul a:active {
+  color: #565656;
+}
+
+nav > h2 > a {
+  margin: 10px 0 -10px;
+  color: #343434 !important;
+}
+
+nav > h2 > a::before {
+  content: ">";
+  margin-right: 5px;
+}
+
+/* home button */
+nav h2 a:not(.menu-item) {
+  display: block;
+  margin: 25px;
+  width: 200px;
+  height: 200px;
+  background-image: url(./logo-200x200.png);
+  background-size: cover;
+  font-size: 0;
+}
+
+
+.package { display: none; }
+
+.usertext h1, h1 {
+  font-size: 48px;
+  margin: 0;
+  margin-top: 0.5em;
+}
+
+h1 > code {
+  padding: 0.5em;
+  font-size: 48px;
+  display: block;
+}
+
+h4.name {
+  color: #121212;
+  background: #f0db4f;
+  border-top: 1px solid #efefef;
+  box-shadow: 0 0.05em 0.1em #e1e1e1;
+}
+
+.class-description {
+  font-size: 100%;
+}
+
+.signature {
+  color: #565656;
+}
+
+.signature-attributes {
+  font-size: 60%;
+  color: #787878;
+  font-style: italic;
+  font-weight: lighter;
+}
+
+.type-signature {
+  color: #343434;
+}
+
+.type-signature:last-child {
+  color: #787878;
+}
+
+h4.name a {
+  color: #565656;
+}
+
+h4.name a:hover {
+  border-bottom-color: #565656;
+}
+
+span.param-type, .params td .param-type, .param-type dd {
+  color: #787878;
+  font-family: Consolas, Monaco, 'Andale Mono', monospace;
+}
+
+.prettyprint code {
+  font-size: 12px;
+  background-color: #282922;
+}
+

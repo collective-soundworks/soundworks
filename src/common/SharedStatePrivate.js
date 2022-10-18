@@ -1,6 +1,5 @@
 import ParameterBag from './ParameterBag.js';
 import {
-  // constants
   DELETE_REQUEST,
   DELETE_RESPONSE,
   DELETE_NOTIFICATION,
@@ -10,7 +9,7 @@ import {
   UPDATE_RESPONSE,
   UPDATE_ABORT,
   UPDATE_NOTIFICATION,
-} from './shared-state-utils';
+} from './constants.js';
 
 /**
  * The "real" state, this instance is kept private by the SharedStateServerManager.

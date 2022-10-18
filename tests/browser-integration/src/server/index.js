@@ -1,23 +1,15 @@
 import 'source-map-support/register';
+import path from 'node:path';
+
 import { Server } from '../../../../server/index.js';
-import path from 'path';
-import serveStatic from 'serve-static';
-import compile from 'template-literal';
-
-import PlayerExperience from './PlayerExperience.js';
-
-import globalsSchema from './schemas/globals.js';
-
 import getConfig from '../utils/getConfig.js';
+
 const ENV = process.env.ENV || 'default';
 const config = getConfig(ENV);
-const server = new Server();
+// config.env.verbose = true;
 
-// html template and static files (in most case, this should not be modified)
-server.templateEngine = { compile };
-server.templateDirectory = path.join('.build', 'server', 'tmpl');
-server.router.use(serveStatic('public'));
-server.router.use('build', serveStatic(path.join('.build', 'public')));
+const server = new Server(config);
+server.setDefaultTemplateConfig();
 
 if (config.env.verbose) {
   console.log(`
@@ -28,47 +20,42 @@ if (config.env.verbose) {
   `);
 }
 
-// -------------------------------------------------------------------
-// register schemas
-// -------------------------------------------------------------------
+const globalsSchema = {
+  done: {
+    type: 'boolean',
+    nullable: true,
+    default: null,
+    event: true,
+  },
+};
+
 server.stateManager.registerSchema('globals', globalsSchema);
 
 (async function launch() {
   try {
-    await server.init(config, (clientType, config, httpRequest) => {
-      return {
-        clientType: clientType,
-        app: {
-          name: config.app.name,
-          author: config.app.author,
-        },
-        env: {
-          type: config.env.type,
-          websockets: config.env.websockets,
-          subpath: config.env.subpath,
-        }
-      };
-    });
+    await server.init();
 
     const globals = await server.stateManager.create('globals');
     globals.subscribe(updates => {
       // forward updates to main process
-      process.send(JSON.stringify(updates));
+      if (process.send !== undefined) {
+        process.send(JSON.stringify(updates));
+      }
     });
-
-    const playerExperience = new PlayerExperience(server, 'player');
 
     // start all the things
     await server.start();
-    playerExperience.start();
 
-    process.send('soundworks:started');
-    process.on('message', async msg => {
-      if (msg === 'stop') {
-        console.log('stop received');
-        await server.stop();
-      }
-    });
+    // this is run from test suite
+    if (process.send !== undefined) {
+      process.send('soundworks:started'); // is sent by soundworks `soundworks:server:started`
+      // sent by parent process to quit server
+      process.on('message', async msg => {
+        if (msg === 'stop') {
+          await server.stop();
+        }
+      });
+    }
 
   } catch (err) {
     console.error(err.stack);

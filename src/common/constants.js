@@ -1,6 +1,7 @@
 // id of the server when owner of a state
 export const SERVER_ID = -1;
 
+// shared states channels
 export const CREATE_REQUEST = 's:c:req';
 export const CREATE_RESPONSE = 's:c:res';
 export const CREATE_ERROR = 's:c:err';
@@ -29,32 +30,16 @@ export const UPDATE_NOTIFICATION = 's:u:not';
 
 export const DELETE_SCHEMA = 's:d:s';
 
-export function* idGenerator() {
-  for (let i = 0; true; i++) {
-    yield i;
-  }
-}
+// context channels
+export const CONTEXT_ENTER_REQUEST = 'c:en:req';
+export const CONTEXT_ENTER_RESPONSE = 'c:en:res';
+export const CONTEXT_ENTER_ERROR = 'c:en:err';
 
-const generateRequestId = idGenerator();
-const requestPromises = new Map();
+export const CONTEXT_EXIT_REQUEST = 'c:ex:req';
+export const CONTEXT_EXIT_RESPONSE = 'c:ex:res';
+export const CONTEXT_EXIT_ERROR = 'c:ex:err';
 
-export function storeRequestPromise(resolve, reject) {
-  const reqId = generateRequestId.next().value;
-  requestPromises.set(reqId, { resolve, reject });
-
-  return reqId;
-}
-
-export function resolveRequest(reqId, data) {
-  const { resolve } = requestPromises.get(reqId);
-  requestPromises.delete(reqId);
-
-  resolve(data);
-}
-
-export function rejectRequest(reqId, data) {
-  const { reject } = requestPromises.get(reqId);
-  requestPromises.delete(reqId);
-
-  reject(data);
-}
+// client handshake
+export const CLIENT_HANDSHAKE_REQUEST = 'cl:h:req';
+export const CLIENT_HANDSHAKE_RESPONSE = 'cl:h:res';
+export const CLIENT_HANDSHAKE_ERROR = 'cl:h:err';

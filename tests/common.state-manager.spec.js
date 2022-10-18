@@ -1,10 +1,7 @@
 const assert = require('chai').assert;
 
 const Server = require('../server').Server;
-const ServerAbstractExperience = require('../server').AbstractExperience;
-
 const Client = require('../client').Client;
-const ClientAbstractExperience = require('../client').AbstractExperience;
 
 const a = {
   bool: {
@@ -36,7 +33,6 @@ const b = {
 
 const config = {
   app: {
-    name: 'test-state-manager',
     clients: {
       test: { target: 'node' },
     },
@@ -50,9 +46,6 @@ const config = {
   },
 };
 
-class ServerTestExperience extends ServerAbstractExperience {}
-class ClientTestExperience extends ClientAbstractExperience {}
-
 let server;
 let clients = [];
 let client; // clients[0]
@@ -63,27 +56,20 @@ describe(`common::StateManager`, () => {
     // ---------------------------------------------------
     // server
     // ---------------------------------------------------
-    server = new Server();
-
-    await server.init(config);
+    server = new Server(config);
     server.stateManager.registerSchema('a', a);
     server.stateManager.registerSchema('b', b);
-    const serverExperience = new ServerTestExperience(server, 'test');
 
+    await server.init();
     await server.start();
-    serverExperience.start();
 
     // ---------------------------------------------------
     // clients
     // ---------------------------------------------------
     for (let i = 0; i < numClients; i++) {
-      const client = new Client();
-      await client.init({ clientType: 'test', ...config });
-      // console.log('client inited');
-      const clientExperience = new ClientTestExperience(client);
-
+      const client = new Client({ clientType: 'test', ...config });
+      await client.init();
       await client.start();
-      clientExperience.start();
 
       clients[i] = client;
     }
@@ -116,26 +102,26 @@ describe(`common::StateManager`, () => {
 
   describe('stateManager.observe((schemaName, stateId, nodeId) => {}) => unobserve', async () => {
     it(`should be notified of states created on the network`, async () => {
-
+      console.log('observe create a state');
       await client.stateManager.create('a');
 
       return new Promise(async (resolve, reject) => {
         let numCalled = 0;
+
         const unobserve = server.stateManager.observe((schemaName, stateId, nodeId) => {
-          assert.isString(schemaName);
           assert.equal(schemaName, 'a');
           assert.isNumber(stateId);
-          assert.equal(stateId, numCalled);
-          assert.isNumber(nodeId);
           assert.equal(nodeId, client.id);
+
           numCalled += 1;
 
           if (numCalled === 2) {
-            unobserve();
+            unobserve(); // this does not work as expected
             resolve();
           }
         });
 
+        // observe is sync server-side, no need to wait
         await client.stateManager.create('a');
       });
     });
@@ -1029,6 +1015,7 @@ describe(`common::StateManager`, () => {
 
       assert.deepEqual(hServer.getValues(), { name: 'test', value: 'test-value' });
 
+      // @todo - review, this is weird
       try {
         await Promise.all([serverPromise, clientPromise]);
         server.stateManager.deleteSchema('hooked');

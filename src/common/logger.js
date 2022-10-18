@@ -32,7 +32,7 @@ const logger = {
         const line = {
           client_type: `> ${clientType}`,
           target: chalk.red(client.target),
-          path: `server ip: ${chalk.green(serverIp)}`,
+          path: `serverIp: ${chalk.green(serverIp)}`,
           default: undefined,
           auth: undefined,
         };
@@ -119,7 +119,6 @@ const logger = {
     if (!this.verbose) { return; }
     console.error(chalk.red(msg));
   },
-
 };
 
 export default logger;

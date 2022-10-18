@@ -1,25 +1,53 @@
-import fs from 'fs';
-import http from 'http';
-import https from 'https';
-import path from 'path';
-import os from 'os';
-import { X509Certificate } from 'crypto';
+import fs from 'node:fs';
+import http from 'node:http';
+import https from 'node:https';
+import path from 'node:path';
+import os from 'node:os';
+import { X509Certificate, createPrivateKey } from 'node:crypto';
 
 import chalk from 'chalk';
 import compression from 'compression';
+import express from 'express';
+import isPlainObject from 'is-plain-obj';
 import Keyv from 'keyv';
 import KeyvFile from 'keyv-file';
 import merge from 'lodash.merge';
 import pem from 'pem';
-import polka from 'polka';
+import compile from 'template-literal';
 
 import Client from './Client.js';
+import ContextManager from './ContextManager.js';
 import PluginManager from './PluginManager.js';
+import StateManager from './StateManager.js';
 import Sockets from './Sockets.js';
-import SharedStateManagerServer from '../common/SharedStateManagerServer.js';
 import logger from '../common/logger.js';
+import {
+  CLIENT_HANDSHAKE_REQUEST,
+  CLIENT_HANDSHAKE_RESPONSE,
+  CLIENT_HANDSHAKE_ERROR,
+} from '../common/constants';
 
 let _dbNamespaces = new Set();
+
+const DEFAULT_CONFIG = {
+  env: {
+    type: 'development',
+    port: 8000,
+    subpath: '',
+    websockets: {
+      path: 'socket',
+      pingInterval: 5000,
+    },
+    useHttps: false,
+    httpsInfos: null,
+    crossOriginIsolated: true,
+    verbose: true,
+  },
+  app: {
+    name: 'soundworks',
+    clients: {},
+  },
+};
 
 /**
  * Server side entry point for a `soundworks` application.
@@ -30,16 +58,43 @@ let _dbNamespaces = new Set();
  *
  * @memberof server
  *
- * @example
- * import * as soundworks from 'soundworks/server';
- * import MyExperience from './MyExperience';
+ * @param {Object} config
+ * @param {String} [config.defaultClient='player'] - Client that can access
+ *   the application at its root url.
+ * @param {String} [config.env='development']
+ * @param {String} [config.port=8000] - Port on which the http(s) server will
+ *   listen
+ * @param {String} [config.subpath] - If the application runs behind a
+ *   proxy server (e.g. https://my-domain.com/my-app/`), path to the
+ *   application root (i.e. 'my-app')
+ * @param {Boolean} [config.useHttps=false] - Define wheter to use or not an
+ *   an https server. In production, it's generally better to set this value
+ *   to false, and delegate the https handling to a proxy server (e.g. nginx)
+ * @param {Object} [config.httpsInfos=null] - if `useHttps` is `true`, object
+ *   that declare the path to `cert` and `key` files (`{ cert, key }`). If `null`
+ *   an auto generated certificate will be generated, be aware that browsers
+ *   will consider the application as not safe in the case (which is generally
+ *   fine for development purpose).
  *
- * soundworks.server.init(config);
- * const myExperience = new MyExperience();
- * soundworks.server.start();
+ * @example
+ * import { Server } from '@soundworks/core/server';
+ * const server = new Server({
+ *   app: {
+ *     name: 'my-example-app',
+ *     clients: { myClient: { target: 'node' } },
+ *   },
+ *   env: {
+ *     port: 8888,
+ *   },
+ * });
+ * await server.init();
+ * await server.start();
  */
 class Server {
-  constructor() {
+  constructor(config) {
+    if (!isPlainObject(config)) {
+      throw new Error(`[soundworks:Server] Invalid argument for Server constructor, config should be an object`);
+    }
     /**
      * Configuration informations.
      * Defaults to:
@@ -50,20 +105,47 @@ class Server {
      *     port: 8000,
      *     subfolder: '',
      *     useHttps: false,
+     *     httpsInfos: null,
      *   },
      *   app: {
      *     name: 'soundworks',
+     *     clients: {},
      *   },
      * }
      * ```
      */
-    this.config = {};
+    this.config = merge({}, DEFAULT_CONFIG, config);
+
+    // parse config
+    if (Object.keys(this.config.app.clients).length === 0) {
+      throw new Error(`[soundworks:Server] Invalid "app.clients" config, at least one client should be declared`);
+    }
+
+    if (this.config.env.useHttps && this.config.env.httpsInfos !== null) {
+      const httpsInfos = this.config.env.httpsInfos;
+
+      if (!isPlainObject(this.config.env.httpsInfos)) {
+        throw new Error(`[soundworks:Server] Invalid "env.httpsInfos" config, should be null or object { cert, key }`);
+      }
+
+      if (!('cert' in httpsInfos) || !('key' in httpsInfos)) {
+        throw new Error(`[soundworks:Server] Invalid "env.httpsInfos" config, should contain both "cert" and "key" entries`);
+      }
+      // @todo - move that to constructor
+      if (!fs.existsSync(httpsInfos.cert)) {
+        throw new Error(`[soundworks:Server] Invalid "env.httpsInfos" config, "cert" file not found`);
+      }
+
+      if (!fs.existsSync(httpsInfos.key)) {
+        throw new Error(`[soundworks:Server] Invalid "env.httpsInfos" config, "key" file not found`);
+      }
+    }
 
     /**
      * Router. Internally use polka.
      * (cf. {@link https://github.com/lukeed/polka})
      */
-    this.router = polka();
+    this.router = express();
     // compression (must be set before serve-static)
     this.router.use(compression());
 
@@ -96,26 +178,17 @@ class Server {
     this.pluginManager = new PluginManager(this);
 
     /**
-     * The {@link server.SharedStateManagerServer} instance.
-     * @see {@link server.SharedStateManagerServer}
-     * @type {server.SharedStateManagerServer}
+     * The {@link server.StateManager} instance.
+     * @see {@link server.StateManager}
+     * @type {server.StateManager}
      */
-    this.stateManager = new SharedStateManagerServer();
+    this.stateManager = new StateManager();
 
     /**
-     * Template engine that should implement a `compile` method.
-     * @type {Object}
+     * The {@link server.ContextManager} instance.
+     *
      */
-    this.templateEngine = null;
-
-    /**
-     * Path to the directory containing the templates.
-     * Any filename corresponding to a registered browser client type will be used
-     * in priority, if not present fallback to `default`, i.e `${clientType}.tmpl`
-     * fallbacks to `default.tmpl`. Template files should have the `.tmpl` extension.
-     * @param {String}
-     */
-    this.templateDirectory = null;
+    this.contextManager = new ContextManager(this);
 
     /**
      * If https is required, will contain informations about the certificates
@@ -124,127 +197,42 @@ class Server {
     this.httpsInfos = null;
 
     /**
-     * Required activities that must be started. Only used in Experience
-     * and Plugin - do not expose.
-     * @private
+     * Current status of the server ['idle', 'inited', 'started']
      */
-    this.activities = new Set();
-
-    /**
-     * Mapping between a `clientType` and its related activities.
-     * @private
-     */
-    this._clientTypeActivitiesMap = {};
-
-    /**
-     * Optionnal routing defined for each client.
-     * @type {Object}
-     * @private
-     */
-    this._routes = {};
+    this.status = 'idle';
 
     /** @private */
-    this._htmlTemplateConfig = {
-      engine: null,
-      directory: null,
+    this._applicationTemplateConfig = {
+      templateEngine: null,
+      templatePath: null,
+      clientConfigFunction: null,
     };
 
     /** @private */
     this._listeners = new Map();
+
+    logger.configure(this.config.env.verbose);
   }
 
   /**
-   *
    * Method to be called before `start` in the initialization lifecycle of the
    * soundworks server.
    *
-   * @param {Object} config
-   * @param {String} [config.defaultClient='player'] - Client that can access
-   *   the application at its root url.
-   * @param {String} [config.env='development']
-   * @param {String} [config.port=8000] - Port on which the http(s) server will
-   *   listen
-   * @param {String} [config.subpath] - If the application runs behind a
-   *   proxy server (e.g. https://my-domain.com/my-app/`), path to the
-   *   application root (i.e. 'my-app')
-   * @param {Boolean} [config.useHttps=false] - Define wheter to use or not an
-   *   an https server.
-   * @param {Object} [config.httpsInfos=null] - if `useHttps` is `true`, object
-   *   that give the path to `cert` and `key` files (`{ cert, key }`). If `null`
-   *   an auto generated certificate will be generated, be aware that browsers
-   *   will consider the application as not safe in the case.
+   * What it does:
+   * - prepapre http(s) server and routing according to the informations
+   * declared in `config.app.clients`
+   * - starts all registered plugins
    *
-   * @param {Function} clientConfigFunction - function that filters / defines
-   *   the configuration object that will be sent to a connecting client.
+   * After `await server.init()`, you can safely use the StateManager, as well
+   * as any registered Plugins.
    *
    * @example
    * // defaults to
-   * await server.init(
-   *   {
-   *     env: {
-   *       type: 'development',
-   *       port: 8000,
-   *       subpath: '',
-   *       useHttps: false,
-   *     },
-   *     app: {
-   *       name: 'soundworks',
-   *       author: 'someone'
-   *     }
-   *   },
-   *   (clientType, serverConfig, httpRequest) => {
-   *     return { clientType, ...serverConfig };
-   *   }
-   * );
+   * const server = new Server(config);
+   * await server.init();
+   * await server.start();
    */
-  async init(
-    config,
-    clientConfigFunction = (clientType, _serverConfig, _httpRequest) => ({ clientType }),
-  ) {
-    const defaultConfig = {
-      env: {
-        type: 'development',
-        port: 8000,
-        subpath: '',
-        websockets: {
-          path: 'socket',
-          pingInterval: 5000,
-        },
-        useHttps: false,
-        crossOriginIsolated: true,
-        verbose: true,
-      },
-      app: {
-        name: 'soundworks',
-      },
-    };
-
-    this.config = merge({}, defaultConfig, config);
-
-    logger.configure(this.config.env.verbose);
-
-    // @note: do not remove
-    // backward compatibility w/ assetsDomain and `soundworks-template`
-    // cf. https://github.com/collective-soundworks/soundworks/issues/35
-    // see also '@soundworks/plugin-audio-buffer-loader' (could be updated more
-    // easily as the `assetsDomain` entry was not documented)
-    // - we need to handle 3 cases:
-    //   + old config style / old template
-    //   + new config style / old template
-    //   + new template
-    // @note: keep `websocket.path` as defined should be enough
-    if (!this.config.env.assetsDomain && this.config.env.subpath !== undefined) {
-      const subpath = this.config.env.subpath.replace(/^\//, '').replace(/\/$/, '');
-
-      if (subpath) {
-        this.config.env.assetsDomain = `/${subpath}/`;
-      } else {
-        this.config.env.assetsDomain = `/`;
-      }
-    }
-
-    this._clientConfigFunction = clientConfigFunction;
-
+  async init() {
     // basic http authentication
     if (this.config.env.auth) {
       this.router.use((req, res, next) => {
@@ -279,257 +267,284 @@ class Server {
       });
     }
 
-    await this._emit('inited');
+    // start http server
+    const useHttps = this.config.env.useHttps || false;
+
+    // ------------------------------------------------------------
+    // create HTTP(S) SERVER
+    // ------------------------------------------------------------
+    if (!useHttps) {
+      this.httpServer = http.createServer(this.router);
+    } else {
+      const httpsInfos = this.config.env.httpsInfos;
+
+      // if certs have been given in config
+      if (httpsInfos !== null) {
+        try {
+          let cert = fs.readFileSync(httpsInfos.cert);
+          let key = fs.readFileSync(httpsInfos.key);
+
+          let x509 = null;
+          // this fails with self-signed certificates for whatever reason...
+          try {
+            x509 = new X509Certificate(cert);
+          } catch(err) {
+            this._dispatchStatus('errored');
+            throw new Error(`[soundworks:Server] Invalid https cert file`);
+          }
+
+          try {
+            const keyObj = createPrivateKey(key);
+
+            if (!x509.checkPrivateKey(keyObj)) {
+              this._dispatchStatus('errored');
+              throw new Error(`[soundworks:Server] Invalid https key file`);
+            }
+          } catch(err) {
+            this._dispatchStatus('errored');
+            throw new Error(`[soundworks:Server] Invalid https key file`);
+          }
+
+          // check is certificate is still valid
+          const now = Date.now();
+          const certExpire = Date.parse(x509.validTo);
+          const isValid = now < certExpire;
+
+          const diff = certExpire - now;
+          const daysRemaining = Math.round(diff / 1000 / 60 / 60 / 24);
+
+          this.httpsInfos = {
+            selfSigned: false,
+            CN: x509.subject.split('=')[1],
+            altNames: x509.subjectAltName.split(',').map(e => e.trim().split(':')[1]),
+            validFrom: x509.validFrom,
+            validTo: x509.validTo,
+            isValid: isValid,
+            daysRemaining: daysRemaining,
+          };
+
+          this.httpServer = https.createServer({ key, cert }, this.router);
+        } catch(err) {
+          logger.error(`
+Invalid certificate files, please check your:
+- key file: ${httpsInfos.key}
+- cert file: ${httpsInfos.cert}
+          `);
+
+          this._dispatchStatus('errored');
+          throw err;
+        }
+      } else {
+        // generate certs
+        // --------------------------------------------------------
+        const cert = await this.db.get('httpsCert');
+        const key = await this.db.get('httpsKey');
+
+        if (key && cert) {
+          this.httpsInfos = { selfSigned: true };
+          this.httpServer = https.createServer({ cert, key }, this.router);
+        } else {
+          this.httpServer = await new Promise((resolve, reject) => {
+            // generate certificate on the fly (for development purposes)
+            pem.createCertificate({ days: 1, selfSigned: true }, async (err, keys) => {
+              if (err) {
+                logger.error(err.stack);
+                this._dispatchStatus('errored');
+
+                reject(err);
+                return;
+              }
+
+              const cert = keys.certificate;
+              const key = keys.serviceKey;
+
+              this.httpsInfos = { selfSigned: true };
+              // we store the generated cert so that we don't have to re-accept
+              // the cert each time the server restarts in development
+              await this.db.set('httpsCert', cert);
+              await this.db.set('httpsKey', key);
+
+              const httpsServer = https.createServer({ cert, key }, this.router);
+
+              resolve(httpsServer);
+            });
+          });
+        }
+      }
+    }
+
+    let nodeOnly = true;
+    // do not throw if no browser clients are defined, very usefull for
+    // cleaning tests in particular
+    for (let clientType in this.config.app.clients) {
+      if (this.config.app.clients[clientType].target === 'browser') {
+        nodeOnly = false;
+      }
+    }
+
+    if (!nodeOnly) {
+      if (this._applicationTemplateConfig.templateEngine === null
+        || this._applicationTemplateConfig.templatePath === null
+        || this._applicationTemplateConfig.clientConfigFunction === null
+      ) {
+        throw new Error('[soundworks:Server] A browser client has been found in "config.app.clients" but configuration for html templating is missing. You should probably call `server.setDefaultTemplateConfig()` if you use the soundworks-template and/or refer (at your own risks) to the documentation of `setCustomTemplateConfig()`');
+      }
+    }
+
+    // ------------------------------------------------------------
+    // INIT ROUTING
+    // ------------------------------------------------------------
+    logger.title(`configured clients and routing`);
+
+    const routes = [];
+    const clientsConfig = [];
+
+    for (let clientType in this.config.app.clients) {
+      const config = Object.assign({}, this.config.app.clients[clientType]);
+      config.clientType = clientType;
+      clientsConfig.push(config);
+    }
+
+    // sort default client last to open the route at the end
+    clientsConfig
+      .sort(a => a.default === true ? 1 : -1)
+      .forEach(config => {
+        const path = this._openClientRoute(this.router, config);
+        routes.push({ clientType: config.clientType, path });
+      });
+
+    logger.clientConfigAndRouting(routes, this.config);
+
+    // ------------------------------------------------------------
+    // START PLUGIN MANAGER
+    // ------------------------------------------------------------
+    await this.pluginManager.start();
+
+    await this._dispatchStatus('inited');
 
     return Promise.resolve();
   }
 
   /**
    * Method to be called when `init` step is done in the initialization
-   *  lifecycle of the soundworks server. Basically initialize plugins,
-   *  define the routing and start the http-server.
+   * lifecycle of the soundworks server.
+   *
+   * What it does:
+   * - starts all registered contexts (context are automatically registered
+   * when instantiated)
+   * - start the web socket server
+   * - launch the HTTP server on given port
+   *
+   * After `await server.start()` the server is ready to accept incoming connexions
    */
   async start() {
+    if (this.status !== 'inited') {
+      throw new Error(`[soundworks:Server] Cannot start() before init()`);
+    }
     // ------------------------------------------------------------
-    // init acitvities
+    // START CONTEXT MANAGER
     // ------------------------------------------------------------
+    await this.contextManager.start();
 
-    // we should at least have one activity registered for each client here
-    // i.e. the Experience so it's ok
-    this.activities.forEach((activity) => {
-      activity.clientTypes.forEach((clientType) => {
+    // ------------------------------------------------------------
+    // START SOCKET SERVER
+    // ------------------------------------------------------------
+    this.sockets.start(
+      this.httpServer,
+      this.config.env.websockets,
+      (clientType, socket) => this._onSocketConnection(clientType, socket),
+    );
 
-        if (!(clientType in this.config.app.clients)) {
-          throw new Error(`[soundworks:core] no config found for client type ${clientType}`);
-        }
+    // ------------------------------------------------------------
+    // START HTTP SERVER
+    // ------------------------------------------------------------
+    return new Promise(resolve => {
+      const port = this.config.env.port;
+      const useHttps = this.config.env.useHttps || false;
+      const protocol = useHttps ? 'https' : 'http';
+      const ifaces = os.networkInterfaces();
 
-        if (!this._clientTypeActivitiesMap[clientType]) {
-          this._clientTypeActivitiesMap[clientType] = new Set();
-        }
+      this.httpServer.listen(port, async () => {
+        logger.title(`${protocol} server listening on`);
 
-        this._clientTypeActivitiesMap[clientType].add(activity);
-      });
-    });
-
-    // start http server
-    const useHttps = this.config.env.useHttps || false;
-
-    return Promise.resolve()
-      // ------------------------------------------------------------
-      // create HTTP(S) SERVER
-      // ------------------------------------------------------------
-      .then(async () => {
-        // create http server
-        if (!useHttps) {
-          const httpServer = http.createServer();
-          return Promise.resolve(httpServer);
-        } else {
-          const httpsInfos = this.config.env.httpsInfos;
-
-          if (httpsInfos.key && httpsInfos.cert) {
-            // use given certificate
-            try {
-              const key = fs.readFileSync(httpsInfos.key);
-              const cert = fs.readFileSync(httpsInfos.cert);
-              // this fails with self-signed certificates for whatever reason...
-              const x509 = new X509Certificate(cert);
-
-              this.httpsInfos = {
-                selfSigned: false,
-                CN: x509.subject.split('=')[1],
-                altNames: x509.subjectAltName.split(',').map(e => e.trim().split(':')[1]),
-                validFrom: x509.validFrom,
-                validTo: x509.validTo,
-              };
-
-              const httpsServer = https.createServer({ key, cert });
-              return Promise.resolve(httpsServer);
-            } catch(err) {
-              logger.error(`
-Invalid certificate files, please check your:
-- key file: ${httpsInfos.key}
-- cert file: ${httpsInfos.cert}
-              `);
-
-              throw err;
+        Object.keys(ifaces).forEach(dev => {
+          ifaces[dev].forEach(details => {
+            if (details.family === 'IPv4') {
+              logger.ip(protocol, details.address, port);
             }
+          });
+        });
+
+        if (this.httpsInfos !== null) {
+          logger.title(`https certificates infos`);
+
+          // this.httpsInfos.selfSigned = true;
+          if (this.httpsInfos.selfSigned) {
+            logger.log(`    self-signed: ${this.httpsInfos.selfSigned ? 'true' : 'false'}`);
+            logger.log(chalk.yellow`    > INVALID CERTIFICATE (self-signed)`);
+
           } else {
-            const key = await this.db.get('httpsKey');
-            const cert = await this.db.get('httpsCert');
+            logger.log(`    valid from: ${this.httpsInfos.validFrom}`);
+            logger.log(`    valid to:   ${this.httpsInfos.validTo}`);
 
-            if (key && cert) {
-              this.httpsInfos = { selfSigned: true };
-              const httpsServer = https.createServer({ key, cert });
-
-              return Promise.resolve(httpsServer);
+            // this.httpsInfos.isValid = false; // for testing
+            if (!this.httpsInfos.isValid) {
+              logger.error(chalk.red`    -------------------------------------------`);
+              logger.error(chalk.red`    > INVALID CERTIFICATE`);
+              logger.error(chalk.red`    i.e. you pretend to be safe but you are not`);
+              logger.error(chalk.red`    -------------------------------------------`);
             } else {
-              return new Promise(resolve => {
-                // generate certificate on the fly (for development purposes)
-                pem.createCertificate({ days: 1, selfSigned: true }, async (err, keys) => {
-                  if (err) {
-                    logger.error(err.stack);
-                    return;
-                  }
-
-                  const key = keys.serviceKey;
-                  const cert = keys.certificate;
-
-                  this.httpsInfos = { selfSigned: true };
-                  // we store the generated cert so that we don't have to re-accept
-                  // the cert each time the server restarts
-                  await this.db.set('httpsKey', key);
-                  await this.db.set('httpsCert', cert);
-
-                  const httpsServer = https.createServer({ key, cert });
-
-                  resolve(httpsServer);
-                });
-              });
-            }
-          }
-        }
-      }).then(httpServer => {
-        this.httpServer = httpServer;
-        this.router.server = httpServer;
-
-        return Promise.resolve();
-      }).then(() => {
-        let nodeOnly = true;
-
-        // do not throw if no browser clients are defined, very usefull for
-        // cleaning tests in particular
-        for (let clientType in this.config.app.clients) {
-          if (this.config.app.clients[clientType].target === 'browser') {
-            nodeOnly = false;
-          }
-        }
-
-        if (!nodeOnly) {
-          if (this.templateEngine === null) {
-            throw new Error('Undefined "server.templateEngine": please provide a valid template engine');
-          }
-
-          if (this.templateDirectory === null) {
-            throw new Error('Undefined "server.templateDirectory": please provide a valid template directory');
-          }
-        }
-
-        // ------------------------------------------------------------
-        // INIT ROUTING
-        // ------------------------------------------------------------
-        logger.title(`configured clients and routing`);
-
-        const routes = [];
-        let defaultClientType = null;
-
-        for (let clientType in this.config.app.clients) {
-          if (this.config.app.clients[clientType].default === true) {
-            defaultClientType = clientType;
-          }
-        }
-        // we must open default route last
-        for (let clientType in this._clientTypeActivitiesMap) {
-          // do nothing if client type is not registered in config
-          if (!(clientType in this.config.app.clients)) {
-            continue;
-          }
-
-          if (clientType !== defaultClientType) {
-            const clientTarget = this.config.app.clients[clientType].target;
-            const path = this._openClientRoute(clientType, clientTarget, this.router);
-            routes.push({ clientType, path });
-          }
-        }
-
-        // open default route last
-        for (let clientType in this._clientTypeActivitiesMap) {
-          // do nothing if client type is not registered in config
-          if (!(clientType in this.config.app.clients)) {
-            continue;
-          }
-
-          if (clientType === defaultClientType) {
-            const clientTarget = this.config.app.clients[clientType].target;
-            const path = this._openClientRoute(clientType, clientTarget, this.router, true);
-            routes.unshift({ clientType, path });
-          }
-        }
-
-        logger.clientConfigAndRouting(routes, this.config);
-
-        return Promise.resolve();
-      }).then(() => {
-        // ------------------------------------------------------------
-        // START SOCKET SERVER
-        // ------------------------------------------------------------
-        this.sockets.start(
-          this.httpServer,
-          this.config.env.websockets,
-          (clientType, socket) => this._onSocketConnection(clientType, socket),
-        );
-
-        return Promise.resolve();
-      }).then(async () => {
-        // ------------------------------------------------------------
-        // START SERVICE MANAGER
-        // ------------------------------------------------------------
-        return this.pluginManager.start();
-
-      }).then(() => {
-        // ------------------------------------------------------------
-        // START HTTP SERVER
-        // ------------------------------------------------------------
-        return new Promise(resolve => {
-          const port = this.config.env.port;
-          const useHttps = this.config.env.useHttps || false;
-          const protocol = useHttps ? 'https' : 'http';
-          const ifaces = os.networkInterfaces();
-
-          this.router.listen(port, async () => {
-            logger.title(`${protocol} server listening on`);
-
-            Object.keys(ifaces).forEach(dev => {
-              ifaces[dev].forEach(details => {
-                if (details.family === 'IPv4') {
-                  logger.ip(protocol, details.address, port);
-                }
-              });
-            });
-
-            if (this.httpsInfos !== null) {
-              logger.title(`https certificates infos`);
-
-              if (this.httpsInfos.selfSigned) {
-                logger.log(`    self-signed: ${this.httpsInfos.selfSigned ? 'true' : 'false'}`);
+              // this.httpsInfos.daysRemaining = 2; // for testing
+              if (this.httpsInfos.daysRemaining < 5) {
+                logger.log(chalk.red`    > CERTIFICATE IS VALID... BUT ONLY ${this.httpsInfos.daysRemaining} DAYS LEFT, PLEASE CONSIDER UPDATING YOUR CERTS!`);
+              } else if (this.httpsInfos.daysRemaining < 15) {
+                logger.log(chalk.yellow`    > CERTIFICATE IS VALID - only ${this.httpsInfos.daysRemaining} days left, be careful...`);
               } else {
-                logger.log(`    valid from: ${this.httpsInfos.validFrom}`);
-                logger.log(`    valid to:   ${this.httpsInfos.validTo}`);
+                logger.log(chalk.green`    > CERTIFICATE IS VALID (${this.httpsInfos.daysRemaining} days left)`);
               }
             }
 
-            await this._emit('started');
+          }
+        }
 
-            resolve();
-          });
-        });
+        await this._dispatchStatus('started');
+
+        resolve();
       });
+    });
   }
 
-  // @todo - handle gracefull close of the server
+  // @todo - handle gracefull close of the server (but define what it means first...)
+  /**
+   * Stop the server, close all existing WebSocket connections.
+   * Mainly usefull for test.
+   */
   async stop() {
-    this.sockets.terminate();
-    this.httpServer.close();
+    if (this.status !== 'started') {
+      throw new Error(`[soundworks:Server] Cannot stop() before start()`);
+    }
 
-    await this._emit('stopped');
+    await this.contextManager.stop();
+
+    this.sockets.terminate();
+    this.httpServer.close(err => {
+      if (err) {
+        throw new Error(err.message);
+      }
+    });
+
+    await this._dispatchStatus('stopped');
 
     return Promise.resolve();
   }
 
   /**
-   * Open the route for the given client.
+   * Open the route for a given client.
    * @private
    */
-  _openClientRoute(clientType, target, router, isDefault = false) {
+  _openClientRoute(router, config) {
+    const { clientType, target } = config;
+    const isDefault = (config.default === true);
     // only browser targets need a route
     if (target === 'node') {
       return;
@@ -541,15 +556,15 @@ Invalid certificate files, please check your:
       route += `${clientType}`;
     }
 
-    // @todo - define what is this... looks completely not used and not usable...
-    if (this._routes[clientType]) {
-      route += this._routes[clientType];
-    }
-
     // define template filename: `${clientType}.html` or `default.html`
-    const templateDirectory = this.templateDirectory;
-    const clientTmpl = path.join(templateDirectory, `${clientType}.tmpl`);
-    const defaultTmpl = path.join(templateDirectory, `default.tmpl`);
+    const {
+      templatePath,
+      templateEngine,
+      clientConfigFunction,
+    } = this._applicationTemplateConfig;
+
+    const clientTmpl = path.join(templatePath, `${clientType}.tmpl`);
+    const defaultTmpl = path.join(templatePath, `default.tmpl`);
 
     // make it sync
     let template;
@@ -566,24 +581,16 @@ Invalid certificate files, please check your:
     try {
       tmplString = fs.readFileSync(template, 'utf8');
     } catch(err) {
-      throw new Error(`[@soundworks/core] html template file "${template}" not found`);
+      throw new Error(`[soundworks:Server] html template file "${template}" not found`);
     }
 
-    const tmpl = this.templateEngine.compile(tmplString);
+    const tmpl = templateEngine.compile(tmplString);
     // http request
     router.get(route, (req, res) => {
-      const data = this._clientConfigFunction(clientType, this.config, req);
+      const data = clientConfigFunction(clientType, this.config, req);
 
-      // @note: do not remove
-      // backward compatibility w/ assetsDomain and `soundworks-template`
-      // cf. https://github.com/collective-soundworks/soundworks/issues/35
-      if (this.config.env.subpath && !data.env.subpath) {
-        data.env.subpath = this.config.env.subpath;
-      }
-
-      // cors / coop / coep headers for `crossOriginIsolated pages, enables
-      // sharedArrayBuffers and high precision timers
-      // this is the default behavior
+      // CORS / COOP / COEP headers for `crossOriginIsolated pages,
+      // enables `sharedArrayBuffers` and high precision timers
       // cf. https://web.dev/why-coop-coep/
       if (this.config.env.crossOriginIsolated) {
         res.writeHead(200, {
@@ -607,65 +614,66 @@ Invalid certificate files, please check your:
    */
   _onSocketConnection(clientType, socket) {
     const client = new Client(clientType, socket);
-    const activities = this._clientTypeActivitiesMap[clientType];
 
-    if (activities == undefined) {
-      logger.error(`[soundworks:core] No activity registered for "${clientType}", make sure an Experience has been created for this client`);
-    }
-
-    socket.addListener('close', () => {
+    socket.addListener('close', async () => {
+      // clean context manager, await before cleaning state manager
+      try {
+      await this.contextManager.removeClient(client);
+      // remove client from pluginManager
+      await this.pluginManager.removeClient(client);
+      } catch(err) {
+        console.log(err);
+      }
+      // clean state manager
+      await this.stateManager.removeClient(client.id);
       // clean sockets
       socket.terminate();
-      // remove client from activities
-      if (activities) {
-        activities.forEach(activity => activity.disconnect(client));
-      }
       // destroy client
       client.destroy();
     });
 
-    socket.addListener('s:client:handshake', data => {
-      // client should throw error if no activity registered server-side (cf. #16)
-      if (activities === undefined) {
-        const err = {
-          type: 'no-activity',
-        };
+    socket.addListener(CLIENT_HANDSHAKE_REQUEST, async payload => {
+      const { clientType, registeredPlugins } = payload;
+      const clientTypes = Object.keys(this.config.app.clients);
 
-        socket.send('s:client:error', err);
+      if (clientTypes.indexOf(clientType) === -1) {
+        socket.send(CLIENT_HANDSHAKE_ERROR, {
+          type: 'invalid-client-type',
+          message: `Invalid client type, please check server configuration (valid client types are: ${clientTypes.join(', ')})`,
+        });
         return;
       }
 
-      // check coherence between client-side and server-side plugin requirements
-      const clientRequiredPlugins = data.requiredPlugins || [];
-      const serverRequiredPlugins = this.pluginManager.getRequiredPlugins(clientType);
-      const missingPlugins = [];
+      try {
+        this.pluginManager.checkRegisteredPlugins(registeredPlugins);
+      } catch(err) {
+        socket.send(CLIENT_HANDSHAKE_ERROR, {
+          type: 'invalid-plugin-list',
+          message: err.message,
+        });
+        return;
+      }
 
-      clientRequiredPlugins.forEach(pluginId => {
-        if (serverRequiredPlugins.indexOf(pluginId) === -1) {
-          missingPlugins.push(pluginId);
-        }
+      // add client to state manager
+      await this.stateManager.addClient(client.id, {
+        emit: client.socket.send.bind(client.socket),
+        addListener: client.socket.addListener.bind(client.socket),
+        removeAllListeners: client.socket.removeAllListeners.bind(client.socket),
       });
-
-      if (missingPlugins.length > 0) {
-        const err = {
-          type: 'plugins',
-          data: missingPlugins,
-        };
-
-        socket.send('s:client:error', err);
-        return;
-      }
-
-      activities.forEach(activity => activity.connect(client));
+      // add client to plugin manager
+      // server-side, all plugins are active for the lifetime of the client
+      await this.pluginManager.addClient(client, registeredPlugins);
+      // add client to context manager
+      await this.contextManager.addClient(client);
 
       const { id, uuid } = client;
-      socket.send('s:client:start', { id, uuid });
+      socket.send(CLIENT_HANDSHAKE_RESPONSE, { id, uuid });
     });
   }
 
   /**
    * Create namespaced databases for core and plugins
-   * (kind of experiemental API do not expose in doc for now)
+   * (kind of experimental API do not expose in doc for now)
    *
    * @note - introduced in v3.1.0-beta.1
    * @note - used by core and plugin-audio-streams
@@ -673,11 +681,11 @@ Invalid certificate files, please check your:
    */
   createNamespacedDb(namespace = null) {
     if (namespace === null || !(typeof namespace === 'string')) {
-      throw new Error(`[soundworks:core] Invalid namespace for ".createNamespacedDb(namespace)", namespace is mandatory and should be a string`);
+      throw new Error(`[soundworks:Server] Invalid namespace for ".createNamespacedDb(namespace)", namespace is mandatory and should be a string`);
     }
 
     if (_dbNamespaces.has(namespace)) {
-      throw new Error(`[soundworks:core] Invalid namespace for ".createNamespacedDb(namespace)", namespace "${namespace}" already exists`);
+      throw new Error(`[soundworks:Server] Invalid namespace for ".createNamespacedDb(namespace)", namespace "${namespace}" already exists`);
     }
 
     const dbDirectory = path.join(process.cwd(), '.data');
@@ -690,7 +698,7 @@ Invalid certificate files, please check your:
     // at note keyv-file doesn't seems to works
     const store = new KeyvFile({ filename });
     const db = new Keyv({ namespace, store });
-    db.on('error', err => logger.error('[soundworks:core] db ${namespace} error: ${err}'));
+    db.on('error', err => logger.error(`[soundworks:Server] db ${namespace} error: ${err}`));
 
     return db;
   }
@@ -716,10 +724,67 @@ Invalid certificate files, please check your:
     }
   }
 
+  /**
+   * Configure the server to work out-of-the box with the soundworks-template
+   * directory tree structure.
+   *
+   * - uses [template-literal](https://www.npmjs.com/package/template-literal) package
+   * as html templateEngine
+   * - define `.build/server/tmpl` as the directory in which html template can be
+   * found
+   * - define the `clientConfigFunction` function that return client compliant
+   * config object to be injected in the html template.
+   *
+   * Also expose two public directory:
+   * - the `public` directory which is exposed behind the root path
+   * - the `./.build/public` directory which is exposed behind the `build` path
+   */
+  setDefaultTemplateConfig() {
+    this._applicationTemplateConfig = {
+      templateEngine: { compile },
+      templatePath: path.join('.build', 'server', 'tmpl'),
+      clientConfigFunction: (clientType, config, _httpRequest) => {
+        return {
+          clientType: clientType,
+          app: {
+            name: config.app.name,
+            author: config.app.author,
+          },
+          env: {
+            type: config.env.type,
+            websockets: config.env.websockets,
+            subpath: config.env.subpath,
+          },
+        };
+      },
+    };
+
+    this.router.use(express.static('public'));
+    this.router.use('/build', express.static(path.join('.build', 'public')));
+  }
+
+  /**
+   * Define your own template path, template engine, and clientConfig function.
+   * This method is for very advanced use-cases and only be used if you know what
+   * you are doing. As such its behavior could probably be improved a lot...
+   *
+   * If you end up using this, please contact me to explain your use-case :)
+   */
+  setCustomTemplateConfig(options) {
+    Object.assign(this._applicationTemplateConfig, options);
+  }
+
   /** @private */
-  async _emit(channel) {
-    if (this._listeners.has(channel)) {
-      const listeners = this._listeners.get(channel);
+  async _dispatchStatus(status) {
+    this.status = status;
+
+    // if launched in a child process, forward status to parent process
+    if (process.send !== undefined) {
+      process.send(`soundworks:server:${status}`);
+    }
+
+    if (this._listeners.has(status)) {
+      const listeners = this._listeners.get(status);
 
       for (let callback of listeners) {
         await callback();

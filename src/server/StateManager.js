@@ -1,59 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    
-    <meta charset="utf-8">
-    <title>common/SharedStateManagerServer.js - soundworks</title>
-    
-    <meta name="description" content="Documentation of soundworks, a full-stack JavaScript framework for distributed WebAudio and multimedia applications" />
-    
-    
-    
-    <script src="scripts/prettify/prettify.js"></script>
-    <script src="scripts/prettify/lang-css.js"></script>
-    <!--[if lt IE 9]>
-      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
-    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
-    <script src="scripts/nav.js" defer></script>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
-<body>
+import EventEmitter from 'node:events';
 
-<input type="checkbox" id="nav-trigger" class="nav-trigger" />
-<label for="nav-trigger" class="navicon-button x">
-  <div class="navicon"></div>
-</label>
-
-<label for="nav-trigger" class="overlay"></label>
-
-<nav >
-    
-    <input type="text" id="nav-search" placeholder="Search" />
-    
-    <h2><a href="index.html">Home</a></h2><h2><a href="http://collective-soundworks.github.io/" target="_blank" class="menu-item" id="website_link" >Resources</a></h2><h2><a href="https://github.com/collective-soundworks/soundworks" target="_blank" class="menu-item" id="website_link" >Github</a></h2><h3>Namespaces</h3><ul><li><a href="client.html">client</a></li><li><a href="server.html">server</a></li></ul><h3>Classes</h3><ul><li><a href="client.AbstractExperience.html">client.AbstractExperience</a><ul class='methods'><li data-type='method'><a href="client.AbstractExperience.html#require">require</a></li><li data-type='method'><a href="client.AbstractExperience.html#start">start</a></li></ul></li><li><a href="client.AbstractPlugin.html">client.AbstractPlugin</a><ul class='methods'><li data-type='method'><a href="client.AbstractPlugin.html#configure">configure</a></li><li data-type='method'><a href="client.AbstractPlugin.html#ready">ready</a></li><li data-type='method'><a href="client.AbstractPlugin.html#start">start</a></li><li data-type='method'><a href="client.AbstractPlugin.html#started">started</a></li></ul></li><li><a href="client.Client.html">client.Client</a><ul class='methods'><li data-type='method'><a href="client.Client.html#init">init</a></li><li data-type='method'><a href="client.Client.html#start">start</a></li></ul></li><li><a href="client.PluginManager.html">client.PluginManager</a><ul class='methods'><li data-type='method'><a href="client.PluginManager.html#get">get</a></li><li data-type='method'><a href="client.PluginManager.html#register">register</a></li></ul></li><li><a href="client.SharedState.html">client.SharedState</a><ul class='methods'><li data-type='method'><a href="client.SharedState.html#delete">delete</a></li><li data-type='method'><a href="client.SharedState.html#detach">detach</a></li><li data-type='method'><a href="client.SharedState.html#get">get</a></li><li data-type='method'><a href="client.SharedState.html#getDefaults">getDefaults</a></li><li data-type='method'><a href="client.SharedState.html#getInitValues">getInitValues</a></li><li data-type='method'><a href="client.SharedState.html#getSchema">getSchema</a></li><li data-type='method'><a href="client.SharedState.html#getValues">getValues</a></li><li data-type='method'><a href="client.SharedState.html#onDelete">onDelete</a></li><li data-type='method'><a href="client.SharedState.html#onDetach">onDetach</a></li><li data-type='method'><a href="client.SharedState.html#set">set</a></li><li data-type='method'><a href="client.SharedState.html#subscribe">subscribe</a></li></ul></li><li><a href="client.SharedStateManagerClient.html">client.SharedStateManagerClient</a><ul class='methods'><li data-type='method'><a href="client.SharedStateManagerClient.html#attach">attach</a></li><li data-type='method'><a href="client.SharedStateManagerClient.html#create">create</a></li><li data-type='method'><a href="client.SharedStateManagerClient.html#observe">observe</a></li></ul></li><li><a href="client.Socket.html">client.Socket</a><ul class='methods'><li data-type='method'><a href="client.Socket.html#addBinaryListener">addBinaryListener</a></li><li data-type='method'><a href="client.Socket.html#addListener">addListener</a></li><li data-type='method'><a href="client.Socket.html#removeAllBinaryListeners">removeAllBinaryListeners</a></li><li data-type='method'><a href="client.Socket.html#removeAllListeners">removeAllListeners</a></li><li data-type='method'><a href="client.Socket.html#removeBinaryListener">removeBinaryListener</a></li><li data-type='method'><a href="client.Socket.html#removeListener">removeListener</a></li><li data-type='method'><a href="client.Socket.html#send">send</a></li><li data-type='method'><a href="client.Socket.html#sendBinary">sendBinary</a></li><li data-type='method'><a href="client.Socket.html#terminate">terminate</a></li></ul></li><li><a href="server.AbstractExperience.html">server.AbstractExperience</a><ul class='methods'><li data-type='method'><a href="server.AbstractExperience.html#enter">enter</a></li><li data-type='method'><a href="server.AbstractExperience.html#require">require</a></li></ul></li><li><a href="server.AbstractPlugin.html">server.AbstractPlugin</a><ul class='methods'><li data-type='method'><a href="server.AbstractPlugin.html#configure">configure</a></li><li data-type='method'><a href="server.AbstractPlugin.html#connect">connect</a></li><li data-type='method'><a href="server.AbstractPlugin.html#disconnect">disconnect</a></li><li data-type='method'><a href="server.AbstractPlugin.html#ready">ready</a></li><li data-type='method'><a href="server.AbstractPlugin.html#start">start</a></li><li data-type='method'><a href="server.AbstractPlugin.html#started">started</a></li></ul></li><li><a href="server.Client.html">server.Client</a></li><li><a href="server.PluginManager.html">server.PluginManager</a><ul class='methods'><li data-type='method'><a href="server.PluginManager.html#get">get</a></li><li data-type='method'><a href="server.PluginManager.html#register">register</a></li></ul></li><li><a href="server.Server.html">server.Server</a><ul class='methods'><li data-type='method'><a href="server.Server.html#init">init</a></li><li data-type='method'><a href="server.Server.html#start">start</a></li></ul></li><li><a href="server.SharedStateManagerServer.html">server.SharedStateManagerServer</a><ul class='methods'><li data-type='method'><a href="server.SharedStateManagerServer.html#attach">attach</a></li><li data-type='method'><a href="server.SharedStateManagerServer.html#create">create</a></li><li data-type='method'><a href="server.SharedStateManagerServer.html#deleteSchema">deleteSchema</a></li><li data-type='method'><a href="server.SharedStateManagerServer.html#observe">observe</a></li><li data-type='method'><a href="server.SharedStateManagerServer.html#registerSchema">registerSchema</a></li><li data-type='method'><a href="server.SharedStateManagerServer.html#registerUpdateHook">registerUpdateHook</a></li></ul></li><li><a href="server.Socket.html">server.Socket</a><ul class='methods'><li data-type='method'><a href="server.Socket.html#addBinaryListener">addBinaryListener</a></li><li data-type='method'><a href="server.Socket.html#addListener">addListener</a></li><li data-type='method'><a href="server.Socket.html#addToRoom">addToRoom</a></li><li data-type='method'><a href="server.Socket.html#removeAllBinaryListeners">removeAllBinaryListeners</a></li><li data-type='method'><a href="server.Socket.html#removeAllListeners">removeAllListeners</a></li><li data-type='method'><a href="server.Socket.html#removeBinaryListener">removeBinaryListener</a></li><li data-type='method'><a href="server.Socket.html#removeFromRoom">removeFromRoom</a></li><li data-type='method'><a href="server.Socket.html#removeListener">removeListener</a></li><li data-type='method'><a href="server.Socket.html#send">send</a></li><li data-type='method'><a href="server.Socket.html#sendBinary">sendBinary</a></li></ul></li><li><a href="server.Sockets.html">server.Sockets</a><ul class='methods'><li data-type='method'><a href="server.Sockets.html#addToRoom">addToRoom</a></li><li data-type='method'><a href="server.Sockets.html#broadcast">broadcast</a></li><li data-type='method'><a href="server.Sockets.html#broadcastBinary">broadcastBinary</a></li><li data-type='method'><a href="server.Sockets.html#removeFromRoom">removeFromRoom</a></li></ul></li></ul>
-</nav>
-
-<div id="main">
-    
-    <h1 class="page-title">common/SharedStateManagerServer.js</h1>
-    
-
-    
-
-
-
-    
-    <section>
-        <article>
-            <pre class="prettyprint source linenums"><code>import EventEmitter from 'events';
-import ParameterBag from './ParameterBag.js';
 import clonedeep from 'lodash.clonedeep';
-import SharedStatePrivate from './SharedStatePrivate.js';
-import SharedStateManagerClient from './SharedStateManagerClient.js';
+
+import ParameterBag from '../common/ParameterBag.js';
+import SharedStatePrivate from '../common/SharedStatePrivate.js';
+import StateManagerClient from '../client/StateManager.js';
 import {
-  // constants
+  SERVER_ID,
   CREATE_REQUEST,
   CREATE_RESPONSE,
   CREATE_ERROR,
@@ -65,33 +18,33 @@ import {
   OBSERVE_RESPONSE,
   OBSERVE_NOTIFICATION,
   DELETE_SCHEMA,
-  idGenerator,
-} from './shared-state-utils.js';
+} from '../common/constants.js';
+import { idGenerator } from '../common/utils.js';
 
 const generateStateId = idGenerator();
 const generateRemoteId = idGenerator();
 
 /**
  * Component dedicated at managing distributed states among the application.
- * The `SharedStateManagerServer` extends the `SharedStateManagerClient` with
+ * The `StateManager` extends the `StateManager` with
  * additionnal functionnalities to register schemas and handle clients.
  *
- * An instance of `SharedStateManagerServer` is automatically created by the
+ * An instance of `StateManager` is automatically created by the
  * `soundworks.Server` at initialization (cf. {@link server.Server#stateManager}).
  *
  * Tutorial: [https://collective-soundworks.github.io/tutorials/state-manager.html](https://collective-soundworks.github.io/tutorials/state-manager.html)
  *
  * @memberof server
- * @extends client.SharedStateManagerClient
+ * @extends client.StateManager
  *
- * @see {@link client.SharedStateManagerClient}
+ * @see {@link client.StateManager}
  * @see {@link server.SharedState}
  * @see {@link server.Server#stateManager}
  */
-class SharedStateManagerServer extends SharedStateManagerClient {
+class StateManager extends StateManagerClient {
   constructor() {
     // acts as a client of itself locally
-    const localClientId = -1;
+    const localClientId = SERVER_ID;
     const localTransport = new EventEmitter();
 
     super(localClientId, localTransport);
@@ -110,7 +63,7 @@ class SharedStateManagerServer extends SharedStateManagerClient {
    * connects.
    *
    * @param {Number} nodeId - Id of the client node, as given in
-   *  {@link client.SharedStateManagerClient}
+   *  {@link client.StateManager}
    * @param {Object} transport - Tranpsort mecanism to communicate with the
    *  client. Should implement a basic EventEmitter API.
    *
@@ -161,7 +114,7 @@ class SharedStateManagerServer extends SharedStateManagerClient {
       if (this._schemas.has(schemaName)) {
         let state = null;
 
-        if (stateId !== null &amp;&amp; this._serverStatesById.has(stateId)) {
+        if (stateId !== null && this._serverStatesById.has(stateId)) {
           state = this._serverStatesById.get(stateId);
         } else if (stateId === null) {
           // if no `stateId` given, we try to find the first state with the given
@@ -203,7 +156,7 @@ class SharedStateManagerServer extends SharedStateManagerClient {
     // ---------------------------------------------
     // OBSERVE PEERS (be notified when a state is created, lazy)
     // ---------------------------------------------
-    client.transport.addListener(OBSERVE_REQUEST, (reqId) => {
+    client.transport.addListener(OBSERVE_REQUEST, reqId => {
       const statesInfos = [];
 
       this._serverStatesById.forEach(state => {
@@ -211,9 +164,11 @@ class SharedStateManagerServer extends SharedStateManagerClient {
         statesInfos.push([schemaName, id, _creatorId]);
       });
 
-      client.transport.emit(OBSERVE_RESPONSE, reqId, ...statesInfos);
-
+      // add client to observers first because if some server side (sync)
+      // callback throws, the client would never be added to the list
       this._observers.add(client);
+
+      client.transport.emit(OBSERVE_RESPONSE, reqId, ...statesInfos);
     });
   }
 
@@ -222,7 +177,7 @@ class SharedStateManagerServer extends SharedStateManagerClient {
    * connects.
    *
    * @param {Number} nodeId - Id of the client node, as given in
-   *  {@link client.SharedStateManagerClient}
+   *  {@link client.StateManager}
    *
    * @private
    */
@@ -233,7 +188,7 @@ class SharedStateManagerServer extends SharedStateManagerClient {
       // define if the client is the creator of the state, in which case
       // everybody must delete it
       for (let [remoteId, attachedClient] of state._attachedClients.entries()) {
-        if (nodeId === attachedClient.id &amp;&amp; remoteId === state._creatorRemoteId) {
+        if (nodeId === attachedClient.id && remoteId === state._creatorRemoteId) {
           deleteState = true;
         }
       }
@@ -265,11 +220,11 @@ class SharedStateManagerServer extends SharedStateManagerClient {
    * can be instanciated.
    *
    * @param {String} schemaName - Name of the schema.
-   * @param {server.SharedStateManagerServer~schema} schema - Data structure
+   * @param {server.StateManager~schema} schema - Data structure
    *  describing the states that will be created from this schema.
    *
-   * @see {@link server.SharedStateManagerServer#create}
-   * @see {@link client.SharedStateManagerClient#create}
+   * @see {@link server.StateManager#create}
+   * @see {@link client.StateManager#create}
    *
    * @example
    * server.stateManager.registerSchema('my-schema', {
@@ -329,7 +284,7 @@ class SharedStateManagerServer extends SharedStateManagerClient {
   }
 
   /**
-   * @callback server.SharedStateManagerServer~updateHook
+   * @callback server.StateManager~updateHook
    *
    * @param {Object} updates - Update object as given on a set callback, or
    *  result of the previous hook
@@ -366,7 +321,7 @@ class SharedStateManagerServer extends SharedStateManagerClient {
    * // > { name: 'test', numUpdates: 1 };
    *
    * @param {String} schemaName - Kind of states on which applying the hook.
-   * @param {server.SharedStateManagerServer~updateHook} updateHook - Function
+   * @param {server.StateManager~updateHook} updateHook - Function
    *   called between the `set` call and the actual update.
    */
   registerUpdateHook(schemaName, updateHook) {
@@ -383,31 +338,4 @@ class SharedStateManagerServer extends SharedStateManagerClient {
 
 }
 
-export default SharedStateManagerServer;
-</code></pre>
-        </article>
-    </section>
-
-
-
-
-    
-    
-</div>
-
-<br class="clear">
-
-<footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.11</a> on Tue Oct 04 2022 10:57:22 GMT+0200 (Central European Summer Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
-</footer>
-
-<script>prettyPrint();</script>
-<script src="scripts/polyfill.js"></script>
-<script src="scripts/linenumber.js"></script>
-
-<script src="scripts/search.js" defer></script>
-
-
-
-</body>
-</html>
+export default StateManager;

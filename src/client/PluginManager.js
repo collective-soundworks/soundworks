@@ -1,88 +1,189 @@
-import debug from 'debug';
-import AbstractPlugin from './AbstractPlugin.js';
-import Signal from '../common/Signal.js';
-import SignalAll from '../common/SignalAll.js';
+import isPlainObject from 'is-plain-obj';
 
-const log = debug('soundworks:lifecycle');
+import Plugin from './Plugin.js';
+import Client from './Client.js';
+import logger from '../common/logger.js';
+import { isString } from '../common/utils.js';
 
 /**
- * Component dedicated at registering, instantiating and initializing plugins.
- *
- * An instance of the `PluginManager` is automatically created by the
- * `soundworks.Client`.
- * @see {@link client.Client#pluginManager}
+ * Manage the plugins and their relations. Acts as a factory to ensure plugins
+ * are instanciated only once.
  *
  * @memberof client
- *
- * @example
- * import soundworks from '@soundworks/core/client';
- *
- * // create a new `soundworks.Client` instance
- * const client = new soundworks.Client();
- * client.pluginManager.register('my-plugin', myPluginFactory, {}, []);
  */
 class PluginManager {
   constructor(client) {
+    if (!(client instanceof Client)) {
+      throw new Error(`[soundworks.PluginManager] Invalid argument, "new PluginManager(client)" should receive an instance of "soundworks.Client as argument"`);
+    }
+
     /** @private */
-    this._instances = {};
+    this._client = client;
     /** @private */
-    this._registeredPlugins = {};
+    this._registeredPlugins = new Map();
+    /** @private */
+    this._instances = new Map();
+    /** @private */
+    this._instanceStartPromises = new Map();
     /** @private */
     this._observers = new Set();
     /** @private */
     this._pluginsStatuses = {};
-    /** @private */
-    this._client = client;
 
-    log('> pluginManager init');
-
-    this.signals = {
-      start: new Signal(),
-      ready: new SignalAll(),
-    };
-
-    this.ready = new Promise(resolve => {
-      this._resolveReadyPromise = resolve;
-    });
+    this.status = 'idle';
   }
 
   /**
-   * Sends the signal required by all plugins to start.
-   * @private
+   * Register a plugin (client-side) into soundworks.
+   *
+   * _A plugin must be registered both client-side and server-side_
+   * @see {@link client.PluginManager#register}
+   *
+   * @param {String} id - Unique id of the plugin, allow to register the same
+   *  plugin factory under different ids.
+   * @param {Function} factory - Factory function that return the plugin class
+   * @param {Object} options - Options to configure the plugin
+   * @param {Array} deps - List of plugins' names the plugin depends on
+   *
+   * @example
+   * ```js
+   * client.pluginManager.register('user-defined-name', pluginFactory);
+   * ```
    */
-  start() {
-    log('> pluginManager start');
-
-    this.signals.ready.addObserver(() => {
-      log('> pluginManager ready');
-
-      this._resolveReadyPromise();
-    });
-
-    this._propagateStatusChange();
-    // start before ready, even if no deps
-    this.signals.start.value = true;
-
-    if (!this.signals.ready.length) {
-      this.signals.ready.value = true;
+  register(id, factory, options = {}, deps = []) {
+    // for now we don't allow to register a plugin after `client.init` has been called?
+    // This is subject to change in the future as we may want to dynamically register
+    // new plugins during application lifetime.
+    if (this._client.status === 'inited') {
+      throw new Error(`[soundworks.PluginManager] Cannot register plugin (${id}) after "client.init()"`);
     }
 
-    return this.ready;
+    if (!isString(id)) {
+      throw new Error(`[soundworks.PluginManager] Invalid argument, "pluginManager.register" first argument should be a string`);
+    }
+
+    const ctor = factory(Plugin);
+
+    if (!(ctor.prototype instanceof Plugin)) {
+      throw new Error(`[soundworks.PluginManager] Invalid argument, "pluginManager.register" second argument should be a factory function returning a class extending Plugin`);
+    }
+
+    if (!isPlainObject(options)) {
+      throw new Error(`[soundworks.PluginManager] Invalid argument, "pluginManager.register" third optionnal argument should be an object`);
+    }
+
+    if (!Array.isArray(deps)) {
+      throw new Error(`[soundworks.PluginManager] Invalid argument, "pluginManager.register" fourth optionnal argument should be an array`);
+    }
+
+    if (this._registeredPlugins.has(id)) {
+      const ctor = factory(Plugin);
+      throw new Error(`[soundworks:PluginManager] Plugin "${id}" of type "${ctor.name}" already registered`);
+    }
+
+    this._registeredPlugins.set(id, { ctor, options, deps });
+    this._pluginsStatuses[id] = 'idle';
   }
 
+  /**
+   * Retrieve an instance of a registered plugin according to its given id.
+   * If the plugin wasn't fully started yet, the Promise will resolve once done.
+   * Be aware that if the plugin depends of another one, the full chain of dependency
+   * will be resolved.
+   *
+   * @param {String} id - Id of the plugin as given when registered
+   */
+  async get(id) {
+    if (!isString(id)) {
+      throw new Error(`[soundworks.PluginManager] Invalid argument, "pluginManager.get(name)" argument should be a string`);
+    }
+
+    if (!this._registeredPlugins.has(id)) {
+      throw new Error(`[soundworks:PluginManager] Cannot get plugin "${id}", plugin is not registered`);
+    }
+
+    if (!this._instances.has(id)) {
+      const { ctor, options } = this._registeredPlugins.get(id);
+      const instance = new ctor(this._client, id, options);
+      this._instances.set(id, instance);
+    }
+
+    const instance = this._instances.get(id);
+
+    // recursively get the dependency chain
+    const { deps } = this._registeredPlugins.get(id);
+    const promises = deps.map(id => this.get(id));
+
+    await Promise.all(promises);
+
+    // 'plugin.start' has already been called, just await the start promise
+    if (this._instanceStartPromises.has(id)) {
+      await this._instanceStartPromises.get(id);
+    } else {
+      this._propagateStatusChange(instance, 'inited');
+      let errored = false;
+
+      try {
+        const startPromise = instance.start();
+        this._instanceStartPromises.set(id, startPromise);
+
+        await startPromise;
+      } catch(err) {
+        errored = true;
+        this._propagateStatusChange(instance, 'errored');
+        throw new Error(err);
+      }
+
+      // this looks silly but it prevents the try / catch to catch errors that could
+      // be triggered by the propagate status callback, putting the plugin in errored state
+      if (!errored) {
+        this._propagateStatusChange(instance, 'started');
+      }
+    }
+
+    return instance;
+  }
+
+  /**
+   * Initialize all the registered plugin. Called during `Client.init()`
+   * @private
+   */
+  async start() {
+    logger.title('starting registered plugins');
+
+    if (this.status !== 'idle') {
+      throw new Error(`[soundworks:PluginManager] Cannot call "pluginManager.init()" twice`);
+    }
+
+    this.status = 'inited';
+    // propagate all 'idle' statuses before start
+    this._propagateStatusChange();
+
+    const promises = Array.from(this._registeredPlugins.keys()).map(id => this.get(id));
+
+    await Promise.all(promises);
+
+    this.status = 'started';
+  }
+
+  // @todo - review while updating the platform init view
   /** @private */
-  _propagateStatusChange(name = null, status = null) {
-    if (name != null && status != null) {
-      this._pluginsStatuses[name] = status;
+  _propagateStatusChange(instance = null, status = null) {
+    if (instance != null && status != null) {
+      instance.status = status;
+
+      const id = instance.id;
+      this._pluginsStatuses[id] = status;
 
       const statuses = this.getStatuses();
-      this._observers.forEach(observer => observer(statuses, { [name]: status }));
+      this._observers.forEach(observer => observer(statuses, { [id]: status }));
     } else {
       const statuses = this.getStatuses();
       this._observers.forEach(observer => observer(statuses, {}));
     }
   }
 
+  // Observable API
   /** @private */
   observe(observer) {
     this._observers.add(observer);
@@ -93,156 +194,14 @@ class PluginManager {
   }
 
   /** @private */
-  // @todo rename to `getStatuses`
   getStatuses() {
     return Object.assign({}, this._pluginsStatuses);
   }
 
-  /**
-   * Register the client-side part of a plugin into soundworks instance.
-   *
-   * Notes:
-   *    - A plugin must always be registered (and required) both client-side
-   *    and server-side
-   *    - A plugin factory can be used several times with different names to
-   *    create several instances of the plugin
-   *
-   *
-   * @see {@link server.PluginManager#register}
-   * @see {@link client.AbstractExperience#require}
-   * @see {@link client.AbstractPlugin#start}
-   * @see {@link client.AbstractPlugin#ready}
-   *
-   * @param {String} name - Name of the plugin
-   * @param {Function} factory - Factory function that return the plugin class
-   * @param {Object} [options={}] - Options to configure the plugin
-   * @param {Array} [deps=[]] - List of plugins' names the plugin depends on, aka
-   *   the plugins that the plugin should wait for being `ready` before `start`
-   *
-   * @example
-   * ```js
-   * client.pluginManager.register('user-defined-name', pluginFactory);
-   * ```
-   */
-  register(name, factory, options = {}, deps = []) {
-    if (this._registeredPlugins[name]) {
-      const ctor = factory(AbstractPlugin);
-      throw new Error(`[soundworks:core] Plugin "${name}" of type "${ctor.name}" already registered`);
-    }
-
-    const ctor = factory(AbstractPlugin);
-    this._registeredPlugins[name] = { ctor, options, deps };
-  }
-
-  /**
-   * Returns an instance of a plugin with options to be applied to its constructor.
-   * Warning: using this method do not attach any client to the plugin (as does
-   * {@link client.AbstractExperience#require}, use this method only if you know
-   * what you are doing.
-   *
-   * @see {client.AbstractExperience#require}
-   * @param {String} name - Name of the plugin.
-   */
-  get(name, _experienceRequired = false) {
-    if (!this._registeredPlugins[name]) {
-      throw new Error(`[soundworks:core] Cannot get or require plugin "${name}", plugin is not registered
-> registered plugins are:
-${Object.keys(this._registeredPlugins).map(n => `> - ${n}\n`).join('')}
-`);
-    }
-
-    // throw an error if manager already started
-    if (_experienceRequired && this.signals.start.value === true) {
-      throw new Error(`[soundworks:core] Plugin "${name}" required after pluginManager start`);
-    }
-
-    if (!this._instances[name]) {
-      const { ctor, options, deps } = this._registeredPlugins[name];
-      const instance = new ctor(this._client, name, options);
-      // wait, at least,  for the plugin manager start signal
-      instance.signals.start.add(this.signals.start);
-      // handle dependency tree
-      this.signals.ready.add(instance.signals.ready);
-
-      if (deps.length > 0) {
-        deps.forEach(dependencyName => {
-          if (!this._instances[dependencyName]) {
-            this.get(dependencyName, _experienceRequired);
-          }
-
-          const dependency = this._instances[dependencyName];
-          instance.signals.start.add(dependency.signals.ready);
-        });
-      }
-
-      // handle plugin status for reporting
-      this._pluginsStatuses[name] = 'idle';
-      let unsubscribe;
-
-      const onPluginStarted = () => {
-        this._pluginsStatuses[name] = 'started';
-
-        /**
-         * @FIXME
-         * relying on `instance.state` is very weak...
-         * we should find a better solution, to declare that we want the
-         * pluginManager to watch and propagate initialization steps.
-         *
-         * This is probably a dirty hack to make the init views working...
-         */
-        if (instance.state) {
-          unsubscribe = instance.state.subscribe(() => {
-            this._propagateStatusChange();
-          });
-        }
-
-        this._propagateStatusChange();
-      };
-
-      const onPluginErrored = () => {
-        this._pluginsStatuses[name] = 'errored';
-        this._propagateStatusChange();
-
-        if (unsubscribe) {
-          unsubscribe();
-        }
-
-        instance.signals.started.removeObserver(onPluginStarted);
-        instance.signals.ready.removeObserver(onPluginReady);
-        instance.signals.errored.removeObserver(onPluginErrored);
-      };
-
-      const onPluginReady = () => {
-        this._pluginsStatuses[name] = 'ready';
-        this._propagateStatusChange();
-
-        if (unsubscribe) {
-          unsubscribe();
-        }
-
-        instance.signals.started.removeObserver(onPluginStarted);
-        instance.signals.ready.removeObserver(onPluginReady);
-        instance.signals.errored.removeObserver(onPluginErrored);
-      };
-
-      instance.signals.started.addObserver(onPluginStarted);
-      instance.signals.ready.addObserver(onPluginReady);
-      instance.signals.errored.addObserver(onPluginErrored);
-
-      // store instance
-      this._instances[name] = instance;
-    }
-
-    // if instance exists and no other argument given, `get` acts a a pure getter
-    const instance = this._instances[name];
-
-    return instance;
-  }
-
-  getRequiredPlugins() {
-    return Object.keys(this._pluginsStatuses);
+  /** @private */
+  getRegisteredPlugins() {
+    return Array.from(this._registeredPlugins.keys());
   }
 }
 
 export default PluginManager;
-

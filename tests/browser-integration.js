@@ -1,4 +1,3 @@
-
 const { fork, exec } = require('node:child_process');
 const path = require('node:path');
 const assert = require('chai').assert;

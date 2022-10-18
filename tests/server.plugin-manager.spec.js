@@ -2,7 +2,10 @@ const path = require('path');
 const assert = require('chai').assert;
 
 const Server = require('../server').Server;
+const Client = require('../client').Client;
 const ServerAbstractExperience = require('../server').AbstractExperience;
+const Plugin = require('../server/Plugin.js').default;
+const PluginManager = require('../server/PluginManager.js').default;
 const pluginDelayFactory = require('@soundworks/plugin-delay/server').default;
 
 config = {
@@ -21,90 +24,228 @@ config = {
   },
 };
 
-// accepted error in delay plugin timeouts
-const TIMEOUT_ERROR = 0.025;
+// accepted error in delay-plugin timeouts (in ms)
+const TIMEOUT_ERROR = 15.;
 
 describe(`server::PluginManager`, () => {
-
-  describe(`pluginManager.register(name, pluginFactory)`, () => {
-    it(`should throw if name already registered`, () => {
-      const server = new Server();
-      server.pluginManager.register('delay', pluginDelayFactory, {});
-
-      assert.throws(() => {
-        server.pluginManager.register('delay', pluginDelayFactory, {});
-      });
+  describe(`(protected) new PluginManager(server)`, () => {
+    it(`should throw if argument is not instance of Server`, () => {
+      let errored = false;
+      try {
+        new PluginManager({});
+      } catch(err) {
+        console.log(err.message);
+        errored = true;
+      }
+      if (!errored) { assert.fail('should fail'); }
     });
   });
 
-  describe(`pluginManager.get(name[, _experience])`, () => {
-    it(`should throw if plugin name has not been registered`, () => {
-      const server = new Server();
+  describe(`register(id, pluginFactory)`, () => {
+    let server;
 
-      assert.throws(() => {
-        server.pluginManager.get('delay');
-      });
+    beforeEach(() => {
+      server = new Server(config);
     });
 
-    // this is often the case with filesystem for example
-    it(`should be able to get plugin without experience binding`, async function() {
-      const server = new Server();
-      server.pluginManager.register('delay', pluginDelayFactory, {});
-      await server.init(config);
-
-      const plugin = server.pluginManager.get('delay');
-      assert.ok('did not crash');
-    });
-
-    // @note - this API should be "private", should be reviewed
-    it(`should throw if plugin required after server.start()`, async function() {
-      const server = new Server();
-      server.pluginManager.register('delay', pluginDelayFactory, {});
-      await server.init(config);
-
-      class ServerTestExperience extends ServerAbstractExperience {
-        constructor(server, clientTypes) {
-          super(server, clientTypes);
-          // do not require plugin heres
-        }
+    it(`should throw if first argument is not a string`, () => {
+      let errored = false;
+      try {
+        server.pluginManager.register(true, pluginDelayFactory);
+      } catch(err) {
+        console.log(err.message);
+        errored = true;
       }
-      const experience = new ServerTestExperience(server, 'test');
-
-      await server.start();
-
-      assert.throws(() => {
-        server.pluginManager.get('delay', experience);
-      });
-
-      await server.stop();
+      if (!errored) { assert.fail('should fail'); }
     });
+
+    it(`should throw if second argument is not an Plugin factory`, () => {
+      function factory(Plugin) { return {}; }
+
+      let errored = false;
+      try {
+        server.pluginManager.register('plugin-name', factory);
+      } catch(err) {
+        console.log(err.message);
+        errored = true;
+      }
+      if (!errored) { assert.fail('should fail'); }
+    });
+
+    it(`should throw if third argument is not an object`, () => {
+      let errored = false;
+      try {
+        server.pluginManager.register('plugin-name', pluginDelayFactory, true);
+      } catch(err) {
+        console.log(err.message);
+        errored = true;
+      }
+      if (!errored) { assert.fail('should fail'); }
+    });
+
+    it(`third argument should be optionnal`, () => {
+      server.pluginManager.register('plugin-name', pluginDelayFactory);
+      assert.ok('should pass');
+    });
+
+    it(`should throw if fourth argument is not an array`, () => {
+      let errored = false;
+      try {
+        server.pluginManager.register('plugin-name', pluginDelayFactory, {}, true);
+      } catch(err) {
+        console.log(err.message);
+        errored = true;
+      }
+      if (!errored) { assert.fail('should fail'); }
+    });
+
+    it(`fourth argument should be optionnal`, () => {
+      server.pluginManager.register('plugin-name', pluginDelayFactory, {});
+      assert.ok('should pass');
+    });
+
+    it(`should throw if id already registered`, () => {
+      const server = new Server(config);
+      server.pluginManager.register('delay', pluginDelayFactory, {});
+
+      let errored = false;
+      try {
+        server.pluginManager.register('delay', pluginDelayFactory, {});
+      } catch(err) {
+        console.log(err.message);
+        errored = true;
+      }
+      if (!errored) { assert.fail('should fail'); }
+    });
+
+    it(`should throw if called after "server.init" (may change in the future)`, async () => {
+      await server.init();
+
+      let errored = false;
+      try {
+        server.pluginManager.register('delay-1', pluginDelayFactory, {});
+      } catch(err) {
+        console.log(err.message);
+        errored = true;
+      }
+      if (!errored) { assert.fail('should fail'); }
+    });
+
+    it(`should allow to registered same plugin factory with different ids`, () => {
+      const server = new Server(config);
+      server.pluginManager.register('delay-1', pluginDelayFactory, {});
+      server.pluginManager.register('delay-2', pluginDelayFactory, {});
+
+      assert.ok('should not throw');
+    });
+  });
+
+  describe(`[protected] await pluginManager.init()`, () => {
+    it(`should throw if started twice`, async () => {
+      const server = new Server(config);
+      await server.init(); // run pluginManager.init()
+
+      let errored = false;
+      try {
+        await server.pluginManager.init();
+      } catch(err) {
+        errored = true;
+        console.log(err.message);
+      }
+      if (!errored) { assert.fail('should throw'); }
+    });
+  });
+
+  describe(`await pluginManager.get(id)`, () => {
+    it(`should throw if plugin id his not a string`, async () => {
+      const server = new Server(config);
+
+      let errored = false;
+      try {
+        await server.pluginManager.get(true);
+      } catch(err) {
+        errored = true;
+        console.log(err.message);
+      }
+      if (!errored) { assert.fail('should throw'); }
+    });
+
+    it(`should throw if plugin id has not been registered`, async () => {
+      const server = new Server(config);
+
+      let errored = false;
+      try {
+        await server.pluginManager.get('delay');
+      } catch(err) {
+        errored = true;
+        console.log(err.message);
+      }
+      if (!errored) { assert.fail('should throw'); }
+    });
+
+    it(`should be able to immediately get a plugin after server.init()`, async function() {
+      const server = new Server(config);
+      server.pluginManager.register('delay', pluginDelayFactory, { delayTime: 100 });
+
+      await server.init();
+
+      const startTime = Date.now();
+
+      const plugin = await server.pluginManager.get('delay');
+
+      const now = Date.now();
+      const delta = now - startTime;
+      assert.isBelow(delta, TIMEOUT_ERROR);
+
+      assert.ok(plugin instanceof Plugin);
+    });
+
+    // @note - for now we just forbid this,
+    // this could change in the future to dynamically import plugins at runtime
+    // it(`should be able to register and await a plugin after server.init()`, async function() {
+    //   const server = new Server(config);
+    //   await server.init();
+
+    //   server.pluginManager.register('delay', pluginDelayFactory, {
+    //     delayTime: 100,
+    //   });
+
+    //   const startTime = Date.now();
+
+    //   server.pluginManager.observe((statuses, updates) => {
+    //     const now = Date.now();
+    //     const delta = now - startTime;
+    //     // assume we can 20ms jitter in the setTimeout
+    //     if (updates['delay-1'] === 'inited') {
+    //       assert.isBelow(Math.abs(delta - 0.), TIMEOUT_ERROR);
+    //     } else if (updates['delay-1'] === 'started') {
+    //       assert.isBelow(Math.abs(delta - 100), TIMEOUT_ERROR);
+    //     }
+    //   });
+
+    //   const plugin = await server.pluginManager.get('delay');
+
+    //   const now = Date.now();
+    //   const delta = now - startTime;
+    //   assert.isBelow(Math.abs(delta - 100), TIMEOUT_ERROR);
+
+    //   assert.ok(plugin instanceof Plugin);
+    // });
   });
 
   describe(`pluginManager.observe((statuses, updates) => {})`, () => {
     it(`should properly propagate statuses`, async function() {
       this.timeout(3 * 1000);
 
-      const server = new Server();
+      const server = new Server(config);
       server.pluginManager.register('delay', pluginDelayFactory, {
-        startedDelayTime: 0.1,
-        readyDelayTime: 0.1,
+        delayTime: 100,
       });
-      await server.init(config);
-
-      class ServerTestExperience extends ServerAbstractExperience {
-        constructor(server, clientTypes) {
-          super(server, clientTypes);
-          this.require('delay');
-        }
-      }
-      const experience = new ServerTestExperience(server, 'test');
-
-      const startTime = Date.now() / 1000.;
 
       const expected = [
         { delay: 'idle' },
+        { delay: 'inited' },
         { delay: 'started' },
-        { delay: 'ready' },
       ];
       let index = 0;
 
@@ -113,96 +254,277 @@ describe(`server::PluginManager`, () => {
         index += 1;
       });
 
-      await server.start();
-      await server.stop();
+      await server.init();
     });
 
     it(`should be able to monitor plugin lifecycle`, async function() {
       this.timeout(3 * 1000);
 
-      const server = new Server();
+      const server = new Server(config);
       server.pluginManager.register('delay', pluginDelayFactory, {
-        startedDelayTime: 0.1,
-        readyDelayTime: 0.1,
+        delayTime: 100,
       });
-      await server.init(config);
 
-      class ServerTestExperience extends ServerAbstractExperience {
-        constructor(server, clientTypes) {
-          super(server, clientTypes);
-          this.require('delay');
-        }
-      }
-      const experience = new ServerTestExperience(server, 'test');
+      const startTime = Date.now();
 
-      const startTime = Date.now() / 1000.;
-
-      server.pluginManager.observe(status => {
-        const now = Date.now() / 1000.;
+      server.pluginManager.observe(statuses => {
+        const now = Date.now();
         const delta = now - startTime;
         // assume we can 20ms jitter in the setTimeout
-        if (status['delay'] === 'started') {
-          assert.isBelow(Math.abs(delta - 0.1), TIMEOUT_ERROR);
-        } else if (status['delay'] === 'ready') {
-          assert.isBelow(Math.abs(delta - 0.2), TIMEOUT_ERROR);
+        if (statuses['delay'] === 'inited') {
+          assert.isBelow(Math.abs(delta - 0), TIMEOUT_ERROR);
+        } else if (statuses['delay'] === 'started') {
+          assert.isBelow(Math.abs(delta - 100), TIMEOUT_ERROR);
         }
       });
 
+      await server.init();
+    });
+  });
+
+  describe(`[protected] pluginManager.addClient(client)`, () => {
+    it(`stateManager should be ready to use`, async () => {
+      let addClientCalled = false;
+
+      function testPluginFactory(Plugin) {
+        return class TestPlugin extends Plugin {
+          addClient(client) {
+            addClientCalled = true;
+            assert.equal(this.server.stateManager._clientByNodeId.has(client.id), true);
+          }
+        }
+      }
+
+      const server = new Server(config);
+      server.pluginManager.register('test-plugin', testPluginFactory);
+      await server.init();
       await server.start();
+
+      const client = new Client({ clientType: 'test', ...config });
+      client.pluginManager.register('test-plugin', (Plugin) => class TestPlugin extends Plugin {});
+      await client.init();
+      await client.start();
+
       await server.stop();
+
+      assert.equal(addClientCalled, true);
+    });
+
+    it(`should add clients only into registered plugins`, async () => {
+      let addClientCalled = false;
+
+      function testPluginFactory(Plugin) {
+        return class TestPlugin extends Plugin {
+          async addClient(client) {
+            await super.addClient(client);
+            assert.equal(this.clients.has(client), true);
+            addClientCalled = true;
+          }
+        }
+      }
+
+      addClientCalled2 = false;
+
+      function testPluginFactory2(Plugin) {
+        return class TestPlugin extends Plugin {
+          async addClient(client) {
+            await super.addClient(client);
+            addClientCalled2 = true;
+          }
+        }
+      }
+
+      const server = new Server(config);
+      server.pluginManager.register('test-plugin', testPluginFactory);
+      server.pluginManager.register('test-plugin-2', testPluginFactory2);
+      await server.init();
+      await server.start();
+
+      const client = new Client({ clientType: 'test', ...config });
+      client.pluginManager.register('test-plugin', (Plugin) => class TestPlugin extends Plugin {});
+      await client.init();
+      await client.start();
+
+      await server.stop();
+
+      assert.equal(addClientCalled, true);
+      assert.equal(addClientCalled2, false);
+    });
+  });
+
+  describe(`[protected] pluginManager.removeClient(client)`, () => {
+    it(`should be called on client.stop()`, async () => {
+      let removeClientCalled = false;
+
+      function testPluginFactory(Plugin) {
+        return class TestPlugin extends Plugin {
+          async removeClient(client) {
+            await super.removeClient(client);
+            removeClientCalled = true;
+          }
+        }
+      }
+
+      const server = new Server(config);
+      server.pluginManager.register('test-plugin', testPluginFactory);
+      await server.init();
+      await server.start();
+
+      const client = new Client({ clientType: 'test', ...config });
+      client.pluginManager.register('test-plugin', (Plugin) => class TestPlugin extends Plugin {});
+      await client.init();
+      await client.start();
+
+      await client.stop();
+      // wait a bit for socket close event to propagate
+      await new Promise(resolve => setTimeout(resolve, 50));
+      await server.stop();
+
+      assert.equal(removeClientCalled, true, `didn't call removeClient`);
+    });
+
+    it(`stateManager should still be usable`, async () => {
+      let removeClientCalled = false;
+
+      function testPluginFactory(Plugin) {
+        return class TestPlugin extends Plugin {
+          async removeClient(client) {
+            await super.removeClient(client);
+
+            removeClientCalled = true;
+            assert.equal(this.server.stateManager._clientByNodeId.has(client.id), true);
+            assert.equal(this.clients.has(client), false);
+          }
+        }
+      }
+
+      const server = new Server(config);
+      server.pluginManager.register('test-plugin', testPluginFactory);
+      await server.init();
+      await server.start();
+
+      const client = new Client({ clientType: 'test', ...config });
+      client.pluginManager.register('test-plugin', (Plugin) => class TestPlugin extends Plugin {});
+      await client.init();
+      await client.start();
+
+      await client.stop();
+      // wait a bit for socket close event to propagate
+      await new Promise(resolve => setTimeout(resolve, 50));
+      await server.stop();
+
+      assert.equal(removeClientCalled, true, `didn't call removeClient`);
+    });
+
+    it(`should add clients only into registered plugins`, async () => {
+      let removeClientCalled = false;
+
+      function testPluginFactory(Plugin) {
+        return class TestPlugin extends Plugin {
+          async removeClient(client) {
+            await super.removeClient(client);
+            removeClientCalled = true;
+          }
+        }
+      }
+
+      removeClientCalled2 = false;
+
+      function testPluginFactory2(Plugin) {
+        return class TestPlugin extends Plugin {
+          async removeClient(client) {
+            await super.removeClient(client);
+            removeClientCalled2 = true;
+          }
+        }
+      }
+
+      const server = new Server(config);
+      server.pluginManager.register('test-plugin', testPluginFactory);
+      server.pluginManager.register('test-plugin-2', testPluginFactory2);
+      await server.init();
+      await server.start();
+
+      const client = new Client({ clientType: 'test', ...config });
+      client.pluginManager.register('test-plugin', (Plugin) => class TestPlugin extends Plugin {});
+      await client.init();
+      await client.start();
+      await client.stop();
+      // wait a bit for socket close event to propagate
+      await new Promise(resolve => setTimeout(resolve, 50));
+      await server.stop();
+
+      assert.equal(removeClientCalled, true, `didn't call removeClient`);
+      assert.equal(removeClientCalled2, false, `wrongly called removeClient`);
     });
   });
 
   describe(`plugin initialization lifecycle`, () => {
     it(`server should start if no plugins registered`, async function() {
-      const server = new Server();
-      await server.init(config);
-      // start plugin manager
+      const server = new Server(config);
+      await server.init();
       await server.start();
+
       assert.ok('server started');
       await server.stop();
+    });
+
+    it(`server should start if plugin registered`, async function() {
+      const server = new Server(config);
+      server.pluginManager.register('delay', pluginDelayFactory, { delayTime: 0.1 });
+      await server.init();
+      await server.start();
+
+      assert.ok('server started');
+      await server.stop();
+    });
+
+    it(`should propagate plugin start() errors`, async () => {
+      const server = new Server(config);
+      server.pluginManager.register('delay', pluginDelayFactory, {
+        delayTime: 0.1,
+        throwError: true,
+      });
+
+      let errored = false;
+      try {
+        await server.init();
+      } catch(err) {
+        console.log(err.message);
+        errored = true;
+      }
+      if (!errored) { assert.fail('should throw'); }
     });
 
     it(`should be able to require several plugins in parallel`, async function() {
       this.timeout(3 * 1000);
 
-      const server = new Server();
+      const server = new Server(config);
       server.pluginManager.register('delay-1', pluginDelayFactory, {
-        startedDelayTime: 0.1,
-        readyDelayTime: 0.1,
+        delayTime: 100,
       });
       server.pluginManager.register('delay-2', pluginDelayFactory, {
-        startedDelayTime: 0.1,
-        readyDelayTime: 0.1,
+        delayTime: 100,
       });
 
-      await server.init(config);
+      await server.init();
 
-      class ServerTestExperience extends ServerAbstractExperience {
-        constructor(server, clientTypes) {
-          super(server, clientTypes);
-          this.require('delay-1');
-          this.require('delay-2');
-        }
-      }
-      const experience = new ServerTestExperience(server, 'test');
-
-      const startTime = Date.now() / 1000.;
+      const startTime = Date.now();
 
       server.pluginManager.observe((statuses, updates) => {
-        const now = Date.now() / 1000.;
+        const now = Date.now();
         const delta = now - startTime;
         // assume we can 20ms jitter in the setTimeout
-        if (updates['delay-1'] === 'started') {
-          assert.isBelow(Math.abs(delta - 0.1), TIMEOUT_ERROR);
-        } else if (updates['delay-1'] === 'ready') {
-          assert.isBelow(Math.abs(delta - 0.2), TIMEOUT_ERROR);
+        if (updates['delay-1'] === 'inited') {
+          assert.isBelow(Math.abs(delta - 0.), TIMEOUT_ERROR);
+        } else if (updates['delay-1'] === 'started') {
+          assert.isBelow(Math.abs(delta - 100), TIMEOUT_ERROR);
         }
 
-        if (updates['delay-2'] === 'started') {
-          assert.isBelow(Math.abs(delta - 0.1), TIMEOUT_ERROR);
-        } else if (updates['delay-2'] === 'ready') {
-          assert.isBelow(Math.abs(delta - 0.2), TIMEOUT_ERROR);
+        if (updates['delay-2'] === 'inited') {
+          assert.isBelow(Math.abs(delta - 0.), TIMEOUT_ERROR);
+        } else if (updates['delay-2'] === 'started') {
+          assert.isBelow(Math.abs(delta - 100), TIMEOUT_ERROR);
         }
       });
 
@@ -213,45 +535,35 @@ describe(`server::PluginManager`, () => {
     it(`should be able to chain plugin initialization`, async function() {
       this.timeout(3 * 1000);
 
-      class ServerTestExperience extends ServerAbstractExperience {
-        constructor(server, clientTypes) {
-          super(server, clientTypes);
-          this.require('delay-1');
-          this.require('delay-2');
-        }
-      }
-
-      const server = new Server();
+      const server = new Server(config);
 
       server.pluginManager.register('delay-1', pluginDelayFactory, {
-        startedDelayTime: 0.1,
-        readyDelayTime: 0.1,
+        delayTime: 100,
       });
       // delay-2 depends on delay-1
       server.pluginManager.register('delay-2', pluginDelayFactory, {
-        startedDelayTime: 0.1,
-        readyDelayTime: 0.1,
+        delayTime: 100,
       }, ['delay-1']);
 
-      await server.init(config);
-      const experience = new ServerTestExperience(server, 'test');
+      await server.init();
 
-      const startTime = Date.now() / 1000.;
+      const startTime = Date.now();
 
       server.pluginManager.observe((statuses, updates) => {
-        const now = Date.now() / 1000.;
+        console.log(statuses);
+        const now = Date.now();
         const delta = now - startTime;
         // assume we can 20ms jitter in the setTimeout
-        if (updates['delay-1'] === 'started') {
-          assert.isBelow(Math.abs(delta - 0.1), TIMEOUT_ERROR);
-        } else if (updates['delay-1'] === 'ready') {
-          assert.isBelow(Math.abs(delta - 0.2), TIMEOUT_ERROR);
+        if (updates['delay-1'] === 'inited') {
+          assert.isBelow(Math.abs(delta - 0.), TIMEOUT_ERROR);
+        } else if (updates['delay-1'] === 'started') {
+          assert.isBelow(Math.abs(delta - 100), TIMEOUT_ERROR);
         }
 
-        if (updates['delay-2'] === 'started') {
-          assert.isBelow(Math.abs(delta - 0.3), TIMEOUT_ERROR);
-        } else if (updates['delay-2'] === 'ready') {
-          assert.isBelow(Math.abs(delta - 0.4), TIMEOUT_ERROR);
+        if (updates['delay-2'] === 'inited') {
+          assert.isBelow(Math.abs(delta - 100), TIMEOUT_ERROR);
+        } else if (updates['delay-2'] === 'started') {
+          assert.isBelow(Math.abs(delta - 200), TIMEOUT_ERROR);
         }
       });
 
@@ -265,70 +577,55 @@ describe(`server::PluginManager`, () => {
       // delay-1 --> delay-2 --|
       // delay-3 --------------+-> delay-4
 
-      class ServerTestExperience extends ServerAbstractExperience {
-        constructor(server, clientTypes) {
-          super(server, clientTypes);
-          this.require('delay-1');
-          this.require('delay-2');
-          this.require('delay-3');
-          this.require('delay-4');
-        }
-      }
-
-      const server = new Server();
+      const server = new Server(config);
 
       server.pluginManager.register('delay-1', pluginDelayFactory, {
-        startedDelayTime: 0.1,
-        readyDelayTime: 0.1,
+        delayTime: 200,
       });
       // delay-2 depends on delay-1
       server.pluginManager.register('delay-2', pluginDelayFactory, {
-        startedDelayTime: 0.1,
-        readyDelayTime: 0.1,
+        delayTime: 200,
       }, ['delay-1']);
 
       // delay 3 ready (at 0.6) after delay delay-2 (at 0.4)
       server.pluginManager.register('delay-3', pluginDelayFactory, {
-        startedDelayTime: 0.3,
-        readyDelayTime: 0.3,
+        delayTime: 600,
       });
 
       server.pluginManager.register('delay-4', pluginDelayFactory, {
-        startedDelayTime: 0.1,
-        readyDelayTime: 0.1,
+        delayTime: 200,
       }, ['delay-2', 'delay-3']);
 
-      await server.init(config);
-      const experience = new ServerTestExperience(server, 'test');
+      await server.init();
 
-      const startTime = Date.now() / 1000.;
+      const startTime = Date.now();
 
       server.pluginManager.observe((statuses, updates) => {
-        const now = Date.now() / 1000.;
+        const now = Date.now();
         const delta = now - startTime;
         // assume we can 20ms jitter in the setTimeout
-        if (updates['delay-1'] === 'started') {
-          assert.isBelow(Math.abs(delta - 0.1), TIMEOUT_ERROR);
-        } else if (updates['delay-1'] === 'ready') {
-          assert.isBelow(Math.abs(delta - 0.2), TIMEOUT_ERROR);
+        if (updates['delay-1'] === 'inited') {
+          assert.isBelow(Math.abs(delta - 0.), TIMEOUT_ERROR);
+        } else if (updates['delay-1'] === 'started') {
+          assert.isBelow(Math.abs(delta - 200), TIMEOUT_ERROR);
         }
 
-        if (updates['delay-2'] === 'started') {
-          assert.isBelow(Math.abs(delta - 0.3), TIMEOUT_ERROR);
-        } else if (updates['delay-2'] === 'ready') {
-          assert.isBelow(Math.abs(delta - 0.4), TIMEOUT_ERROR);
+        if (updates['delay-2'] === 'inited') {
+          assert.isBelow(Math.abs(delta - 200), TIMEOUT_ERROR);
+        } else if (updates['delay-2'] === 'started') {
+          assert.isBelow(Math.abs(delta - 400), TIMEOUT_ERROR);
         }
 
-        if (updates['delay-3'] === 'started') {
-          assert.isBelow(Math.abs(delta - 0.3), TIMEOUT_ERROR);
-        } else if (updates['delay-3'] === 'ready') {
-          assert.isBelow(Math.abs(delta - 0.6), TIMEOUT_ERROR);
+        if (updates['delay-3'] === 'inited') {
+          assert.isBelow(Math.abs(delta - 0.), TIMEOUT_ERROR);
+        } else if (updates['delay-3'] === 'started') {
+          assert.isBelow(Math.abs(delta - 600), TIMEOUT_ERROR);
         }
 
-        if (updates['delay-4'] === 'started') {
-          assert.isBelow(Math.abs(delta - 0.7), TIMEOUT_ERROR);
-        } else if (updates['delay-4'] === 'ready') {
-          assert.isBelow(Math.abs(delta - 0.8), TIMEOUT_ERROR);
+        if (updates['delay-4'] === 'inited') {
+          assert.isBelow(Math.abs(delta - 600), TIMEOUT_ERROR);
+        } else if (updates['delay-4'] === 'started') {
+          assert.isBelow(Math.abs(delta - 800), TIMEOUT_ERROR);
         }
       });
 
@@ -336,32 +633,4 @@ describe(`server::PluginManager`, () => {
       await server.stop();
     });
   });
-
-  describe(`[@protected] pluginManager.getRequiredPlugins(clientType = null)`, async function() {
-    // @note - this API should be "private", should be reviewed
-    it(`should returned the list of plugin given client type`, async function() {
-      const server = new Server();
-      server.pluginManager.register('delay', pluginDelayFactory, {
-        startedDelayTime: 0.1,
-        readyDelayTime: 0.1,
-      });
-      await server.init(config);
-
-      class ServerTestExperience extends ServerAbstractExperience {
-        constructor(server, clientTypes) {
-          super(server, clientTypes);
-          this.require('delay');
-        }
-      }
-      const experience = new ServerTestExperience(server, 'test');
-      await server.start();
-
-      const expected = ['delay'];
-      const result = server.pluginManager.getRequiredPlugins('test');
-      assert.deepEqual(expected, result);
-
-      await server.stop();
-    });
-  });
-
 });

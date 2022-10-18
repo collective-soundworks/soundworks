@@ -1,6 +1,5 @@
 import ParameterBag from './ParameterBag.js';
 import {
-  // constants
   DELETE_REQUEST,
   DELETE_RESPONSE,
   DELETE_ERROR,
@@ -12,25 +11,26 @@ import {
   UPDATE_RESPONSE,
   UPDATE_ABORT,
   UPDATE_NOTIFICATION,
-  // promises handling
+} from './constants.js';
+import {
   storeRequestPromise,
   resolveRequest,
   rejectRequest,
-} from './shared-state-utils.js';
+} from './promise-store.js';
 
 /**
  * Representation of a shared state.
  *
  * @memberof server
  *
- * @see {server.SharedStateManagerServer}
+ * @see {server.StateManager}
  */
 /**
  * Representation of a shared state.
  *
  * @memberof client
  *
- * @see {client.SharedStateManagerClient}
+ * @see {client.StateManager}
  */
 class SharedState {
   constructor(id, remoteId, schemaName, schema, client, isOwner, manager, initValues = {}) {

@@ -1,6 +1,5 @@
-import SharedState from './SharedState.js';
+import SharedState from '../common/SharedState.js';
 import {
-  // constants
   CREATE_REQUEST,
   CREATE_RESPONSE,
   CREATE_ERROR,
@@ -11,26 +10,27 @@ import {
   OBSERVE_RESPONSE,
   OBSERVE_NOTIFICATION,
   DELETE_SCHEMA,
-  // promises handling
+} from '../common/constants.js';
+import {
   storeRequestPromise,
   resolveRequest,
   rejectRequest,
-} from './shared-state-utils.js';
+} from '../common/promise-store.js';
 
 /**
  * Component dedicated at managing distributed states, accessible through {@link common.SharedState} instances, among the application.
  *
- * An instance of `SharedStateManagerClient` is automatically created by the
+ * An instance of `StateManager` is automatically created by the
  * `soundworks.Client` at initialization (cf. {@link client.Client#stateManager}).
  *
  * Tutorial: [https://collective-soundworks.github.io/tutorials/state-manager.html](https://collective-soundworks.github.io/tutorials/state-manager.html)
  *
  * @memberof client
  * @see {@link common.SharedState}
- * @see {@link server.SharedStateManagerServer}
+ * @see {@link server.StateManager}
  * @see {@link client.Client#stateManager}
  */
-class SharedStateManagerClient {
+class StateManager {
   /**
    * @param {Number} id - Id of the node.
    * @param {Object} transport - Transport to use for synchronizing the state.
@@ -162,8 +162,13 @@ class SharedStateManagerClient {
     });
   }
 
+  // @todo - review, should:
+  // - bind communications on first observer added
+  // - unbind communication if all observer removed
+  // - now the callback are not executed but the communications are still there
+  // that's not good!
   /**
-   * @callback client.SharedStateManagerClient~observeCallback
+   * @callback client.StateManager~observeCallback
    * @async
    * @param {String} schemaName - name of the schema
    * @param {Number} stateId - id of the state
@@ -172,7 +177,7 @@ class SharedStateManagerClient {
   /**
    * Observe all the {@link common.SharedState} instances that are created on the network.
    *
-   * @param {client.SharedStateManagerClient~observeCallback} callback - Function
+   * @param {client.StateManager~observeCallback} callback - Function
    *  to be called when a new state is created on the network.
    *
    * @example
@@ -193,8 +198,9 @@ class SharedStateManagerClient {
       this.client.transport.emit(OBSERVE_REQUEST, reqId);
     });
 
+    // @todo - this does not clean the infos
     return () => this._observeListeners.delete(callback);
   }
 }
 
-export default SharedStateManagerClient;
+export default StateManager;

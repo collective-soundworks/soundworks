@@ -1,13 +1,23 @@
+import isPlainObject from 'is-plain-obj';
+
+import ContextManager from './ContextManager.js';
 import PluginManager from './PluginManager.js';
-import SharedStateManagerClient from '../common/SharedStateManagerClient.js';
 import Socket from './Socket.js';
+import StateManager from './StateManager.js';
+import {
+  CLIENT_HANDSHAKE_REQUEST,
+  CLIENT_HANDSHAKE_RESPONSE,
+  CLIENT_HANDSHAKE_ERROR,
+} from '../common/constants';
+import { isBrowser } from '../common/utils.js';
+import logger from '../common/logger.js';
 
 /**
  * Create a new client of a *soundworks* application.
  *
  * The `Client` is the main entry point to access *soundworks* components
  * such as {@link client.Socket}, {@link client.PluginManager} or
- * {@link client.SharedStateManagerClient}. It is also responsible for the
+ * {@link client.StateManager}. It is also responsible for the
  * initialization lifecycle.
  *
  * @memberof client
@@ -27,13 +37,54 @@ import Socket from './Socket.js';
  * playerExperience.start();
  */
 class Client {
-  constructor() {
+  constructor(config) {
+    if (!isPlainObject(config)) {
+      throw new Error(`[soundworks:Client] Invalid argument for Client constructor, config should be an object`);
+    }
+
+    if (!('clientType' in config)) {
+      throw new Error('[soundworks:Client] Invalid config object, "config.clientType" should be defined');
+    }
+
+    // for node clients env.https is requires to open the websocket
+    if (!isBrowser()) {
+      if (!('env' in config)) {
+        throw new Error('[soundworks:Client] Invalid config object, "config.env" { useHttps, serverIp, port } should be defined');
+      }
+
+      let missing = [];
+      if (!('useHttps' in config.env)) { missing.push('useHttps'); }
+      if (!('serverIp' in config.env)) { missing.push('serverIp'); }
+      if (!('port' in config.env)) { missing.push('port'); }
+
+      if (missing.length) {
+        throw new Error(`[soundworks:Client] Invalid config object, "config.env" is missing: ${missing.join(', ')}`);
+      }
+    }
+
     /**
      * Type of the client, this can generally be considered as the role of the
      * client in the application.
      * @type {String}
      */
-    this.type = null;
+    this.type = config.clientType;
+
+    /**
+     * Configuration object, typically contains the configuration sent by the
+     * server (cf. {@link server.Server#init}).
+     * @see {@link server.Server#init}.
+     * @type {Object}
+     */
+    this.config = config;
+
+    if (!this.config.env) {
+      this.config.env = {};
+    }
+
+    // minimal configuration for websockets
+    this.config.env.websockets = Object.assign({
+      path: 'socket',
+    }, config.env.websockets);
 
     /**
      * Session id of the client (incremeted positive number),
@@ -51,19 +102,17 @@ class Client {
     this.uuid = null;
 
     /**
-     * Configuration object, typically contains the configuration sent by the
-     * server (cf. {@link server.Server#init}).
-     * @see {@link server.Server#init}.
-     * @type {Object}
-     */
-    this.config = {};
-
-    /**
      * Instance of the `Socket` class that handle communications with the server.
      * @see {@link client.Socket}
      * @type {client.Socket}
      */
     this.socket = new Socket();
+
+    /**
+     *
+     *
+     */
+    this.contextManager = new ContextManager();
 
     /**
      * Instance of the `PluginManager` class.
@@ -73,43 +122,97 @@ class Client {
     this.pluginManager = new PluginManager(this);
 
     /**
-     * Instance of the `SharedStateManagerClient` class.
-     * @see {@link client.SharedStateManagerClient}
-     * @type {client.SharedStateManagerClient}
+     * Instance of the `StateManager` class. The state manager
+     * requires the socket to be connected therefore it can be accessed and uses
+     * only after `client.init()` has been called.
+     *
+     * @see {@link client.StateManager}
+     * @type {client.StateManager}
      */
     this.stateManager = null;
+
+    /** @private */
+    this._status = 'idle';
+
+    logger.configure(!!config.env.verbose);
   }
 
   /**
    * Method to be called before {@link client.Client#start} in the
    * initialization lifecycle of the soundworks client.
    *
-   * Basically waits for the socket to be connected.
-   * @see {@link server.Server#init}
+   * - connect the sockets to be server
+   * - do the handshake with soundwoks server (retrieve id, etc.)
+   * - launch the state manager
+   * - init registered plugin
    *
-   * @param {Object} config - Configuration object (cf. {@link server.Server#init})
+   * After `await client(config)` you can safely use the stateManaher and the
+   * pluginManager
+   *
+   * @see {@link server.Server}
+   *
+   * @param {Object} config - Configuration object (cf. {@link server.Server})
    */
-  async init(config) {
-    if (!(Object.prototype.toString.call(config) === '[object Object]')) {
-      throw new Error('[soundworks.init] must receive a config object as argument`');
-    }
-
-    if (!('clientType' in config)) {
-      throw new Error('[soundworks.init] config object "must" define a `clientType`');
-    }
-
-    // handle config
-    this.type = config.clientType;
-    this.config = config;
-    // @todo - review that to adapt to ws options
-    this.config.env.websockets = Object.assign({
-      // url: '',
-      path: 'socket',
-      // pingInterval: 5 * 1000,
-    }, config.env.websockets);
-
+  async init() {
     // init socket communications (string and binary)
     await this.socket.init(this.type, this.config);
+
+    try {
+      await new Promise((resolve, reject) => {
+        // wait for handshake response before starting stateManager and pluginManager
+        this.socket.addListener(CLIENT_HANDSHAKE_RESPONSE, async ({ id, uuid }) => {
+          this.id = id;
+          this.uuid = uuid;
+
+          resolve();
+        });
+
+        this.socket.addListener(CLIENT_HANDSHAKE_ERROR, (err) => {
+          let msg = ``;
+
+          switch(err.type) {
+            case 'invalid-client-type':
+              msg = `[soundworks:Client] ${err.message}`;
+              break;
+            case 'invalid-plugin-list':
+              msg = `[soundworks:Client] ${err.message}`;
+              break;
+            default:
+              msg = `Undefined error`;
+              break;
+          }
+
+          this.socket.terminate();
+          reject(msg);
+        });
+
+        // send handshake request
+        const payload = {
+          clientType: this.type,
+          registeredPlugins: this.pluginManager.getRegisteredPlugins(),
+        };
+
+        this.socket.send(CLIENT_HANDSHAKE_REQUEST, payload);
+      });
+    } catch(err) {
+      throw new Error(err);
+    }
+
+    // ------------------------------------------------------------
+    // CREATE STATE MANAGER
+    // ------------------------------------------------------------
+    this.stateManager = new StateManager(this.id, {
+      emit: this.socket.send.bind(this.socket), // need to alias this
+      addListener: this.socket.addListener.bind(this.socket),
+      removeAllListeners: this.socket.removeAllListeners.bind(this.socket),
+    });
+
+    // ------------------------------------------------------------
+    // INIT PLUGIN MANAGER
+    // ------------------------------------------------------------
+    await this.pluginManager.start();
+
+    this.status = 'inited';
 
     return Promise.resolve();
   }
@@ -118,63 +221,30 @@ class Client {
    * Method to be called when {@link client.Client#init} has finished in the
    * initialization lifecycle of the soundworks client.
    *
-   * Initilialize the {@link client.SharedStateManagerClient} and all required
-   * plugins. When done, the {@link client.AbstractExperience#start} method
-   * should be consider as being safely called.
+   * - start the registered contexts, if only one context registered, it is
+   * entered as well
    *
    * @see {@link server.Server#start}
    */
   async start() {
-    this._ready = new Promise((resolve, reject) => {
-      const payload = {
-        requiredPlugins: this.pluginManager.getRequiredPlugins(),
-      };
+    if (this.status !== 'inited') {
+      throw new Error(`[soundworks:Client] Cannot start() before init()`);
+    }
 
-      // wait for handshake response to mark client as `ready`
-      this.socket.addListener('s:client:start', ({ id, uuid }) => {
-        this.id = id;
-        this.uuid = uuid;
+    // ------------------------------------------------------------
+    // START CONTEXT MANAGER
+    // ------------------------------------------------------------
+    await this.contextManager.start();
 
-        // mimic eventEmitter API
-        const transport = {
-          emit: this.socket.send.bind(this.socket),
-          addListener: this.socket.addListener.bind(this.socket),
-          // removeListener: this.socket.removeListener.bind(this.socket),
-          removeAllListeners: this.socket.removeAllListeners.bind(this.socket),
-        };
-
-        this.stateManager = new SharedStateManagerClient(this.id, transport);
-        // everything is ready start plugin manager
-        this.pluginManager.start().then(() => resolve());
-      });
-
-      this.socket.addListener('s:client:error', (err) => {
-        let msg = ``;
-
-        switch(err.type) {
-          case 'plugins':
-            msg = `"${err.data.join(', ')}" required client-side but not server-side`;
-            break;
-          case 'no-activity':
-            msg = `[soundworks:core] No activity registered server-side for "${this.type}", make sure an Experience has been created for this client`;
-            break;
-          default:
-            msg = `Unknown error`;
-            break;
-        }
-
-        this.socket.terminate();
-        reject(msg);
-      });
-
-      this.socket.send('s:client:handshake', payload);
-    });
-
-    return this._ready;
+    this.status = 'started';
   }
 
   async stop() {
-    this.socket.terminate();
+    if (this.status !== 'started') {
+      throw new Error(`[soundworks:Client] Cannot stop() before start()`);
+    }
+
+    await this.socket.terminate();
   }
 }
 
