@@ -3,6 +3,11 @@ const assert = require('chai').assert;
 const Server = require('../server').Server;
 const Client = require('../client').Client;
 
+const {
+  OBSERVE_RESPONSE,
+  OBSERVE_NOTIFICATION,
+} = require('../common/constants.js');
+
 const a = {
   bool: {
     type: 'boolean',
@@ -102,28 +107,168 @@ describe(`common::StateManager`, () => {
 
   describe('stateManager.observe((schemaName, stateId, nodeId) => {}) => unobserve', async () => {
     it(`should be notified of states created on the network`, async () => {
-      console.log('observe create a state');
-      await client.stateManager.create('a');
+      let numCalled = 0;
 
-      return new Promise(async (resolve, reject) => {
-        let numCalled = 0;
+      const state1 = await client.stateManager.create('a');
 
-        const unobserve = server.stateManager.observe((schemaName, stateId, nodeId) => {
-          assert.equal(schemaName, 'a');
-          assert.isNumber(stateId);
-          assert.equal(nodeId, client.id);
+      const unobserve = await server.stateManager.observe((schemaName, stateId, nodeId) => {
+        assert.equal(schemaName, 'a');
+        assert.isNumber(stateId);
+        assert.equal(nodeId, client.id);
 
-          numCalled += 1;
-
-          if (numCalled === 2) {
-            unobserve(); // this does not work as expected
-            resolve();
-          }
-        });
-
-        // observe is sync server-side, no need to wait
-        await client.stateManager.create('a');
+        numCalled += 1;
       });
+
+      assert.equal(numCalled, 1);
+      // observe is sync server-side, no need to wait
+      const state2 = await client.stateManager.create('a');
+      assert.equal(numCalled, 2);
+
+      unobserve();
+
+      const state3 = await client.stateManager.create('a');
+      assert.equal(numCalled, 2);
+
+      await state1.delete();
+      await state2.delete();
+      await state3.delete();
+    });
+
+    it(`returned not be notified of deleted states`, async () => {
+      let numCalled = 0;
+      const state1 = await client.stateManager.create('a');
+
+      const unobserve1 = await server.stateManager.observe(async (schemaName, stateId, nodeId) => {
+        numCalled += 1;
+      });
+
+      assert.equal(numCalled, 1);
+
+      await state1.delete();
+      unobserve1();
+
+      const unobserve2 = await server.stateManager.observe(async (schemaName, stateId, nodeId) => {
+        numCalled += 1;
+      });
+
+      assert.equal(numCalled, 1);
+      unobserve2();
+    });
+
+    it(`returned Promise should resolve after async observe callback`, async () => {
+      let numCalled = 0;
+      const state1 = await client.stateManager.create('a');
+
+      const unobserve = await server.stateManager.observe(async (schemaName, stateId, nodeId) => {
+        // we just make it wait for the first call, to simplify the test
+        if (numCalled === 0) {
+          await new Promise(resolve => setTimeout(resolve, 200));
+        }
+        numCalled += 1;
+      });
+
+      assert.equal(numCalled, 1);
+      // observe is sync server-side, no need to wait
+      const state2 = await client.stateManager.create('a');
+      assert.equal(numCalled, 2);
+
+      unobserve();
+
+      const state3 = await client.stateManager.create('a');
+      assert.equal(numCalled, 2);
+
+      await state1.delete();
+      await state2.delete();
+      await state3.delete();
+    });
+
+    it(`should not receive messages from transport after unobserve`, async () => {
+      let numCalled = 0;
+      const state1 = await client.stateManager.create('a');
+
+      const unobserve = await server.stateManager.observe(async (schemaName, stateId, nodeId) => {
+        numCalled += 1;
+      });
+
+      assert.equal(numCalled, 1);
+
+      let notificationReceived = false;
+      // check low level transport messages
+      server.stateManager.client.transport.addListener(OBSERVE_NOTIFICATION, () => {
+        notificationReceived = true;
+      });
+
+      unobserve();
+      const state2 = await client.stateManager.create('a');
+
+      if (notificationReceived) {
+        assert.fail('should not receive notification from transport');
+      }
+
+      await state1.delete();
+      await state2.delete();
+    });
+
+    it(`should properly behave with several observers`, async () => {
+      let responsesReceived = 0;
+
+      server.stateManager.client.transport.addListener(OBSERVE_RESPONSE, () => {
+        responsesReceived += 1;
+      });
+
+      let notificationsReceived = 0;
+
+      server.stateManager.client.transport.addListener(OBSERVE_NOTIFICATION, () => {
+        notificationsReceived += 1;
+      });
+
+
+      let numCalled = 0;
+      const state1 = await client.stateManager.create('a');
+
+      const unobserve1 = await server.stateManager.observe(async (schemaName, stateId, nodeId) => {
+        numCalled += 1;
+      });
+
+      const unobserve2 = await server.stateManager.observe(async (schemaName, stateId, nodeId) => {
+        numCalled += 1;
+      });
+
+      // each observer receives its own response and is called
+      assert.equal(responsesReceived, 2);
+      assert.equal(notificationsReceived, 0);
+      assert.equal(numCalled, 2);
+
+      const state2 = await client.stateManager.create('a');
+
+      // 1 notifications received, but both observers called
+      assert.equal(responsesReceived, 2);
+      assert.equal(notificationsReceived, 1);
+      assert.equal(numCalled, 4);
+
+      // delete first observer
+      unobserve1();
+
+      const state3 = await client.stateManager.create('a');
+
+      // 1 notifications received, but only second observer called
+      assert.equal(responsesReceived, 2);
+      assert.equal(notificationsReceived, 2);
+      assert.equal(numCalled, 5);
+
+      // delete second observer
+      unobserve2();
+
+      const state4 = await client.stateManager.create('a');
+      // nothing should happen
+      assert.equal(responsesReceived, 2);
+      assert.equal(notificationsReceived, 2);
+      assert.equal(numCalled, 5);
+
+      await state1.delete();
+      await state2.delete();
+      await state3.delete();
+      await state4.delete();
     });
   });
 

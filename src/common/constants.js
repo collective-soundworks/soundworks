@@ -23,6 +23,8 @@ export const OBSERVE_REQUEST = 's:o:req';
 export const OBSERVE_RESPONSE = 's:o:res';
 export const OBSERVE_NOTIFICATION = 's:o:not';
 
+export const UNOBSERVE_NOTIFICATION = 's:uo:not'
+
 export const UPDATE_REQUEST = 's:u:req';
 export const UPDATE_RESPONSE = 's:u:res';
 export const UPDATE_ABORT = 's:u:ab';

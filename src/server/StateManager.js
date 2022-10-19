@@ -17,6 +17,7 @@ import {
   OBSERVE_REQUEST,
   OBSERVE_RESPONSE,
   OBSERVE_NOTIFICATION,
+  UNOBSERVE_NOTIFICATION,
   DELETE_SCHEMA,
 } from '../common/constants.js';
 import { idGenerator } from '../common/utils.js';
@@ -164,11 +165,15 @@ class StateManager extends StateManagerClient {
         statesInfos.push([schemaName, id, _creatorId]);
       });
 
-      // add client to observers first because if some server side (sync)
+      // add client to observers first because if some (sync) server side
       // callback throws, the client would never be added to the list
       this._observers.add(client);
 
       client.transport.emit(OBSERVE_RESPONSE, reqId, ...statesInfos);
+    });
+
+    client.transport.addListener(UNOBSERVE_NOTIFICATION, () => {
+      this._observers.delete(client);
     });
   }
 

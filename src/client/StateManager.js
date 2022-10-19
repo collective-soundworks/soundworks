@@ -9,6 +9,7 @@ import {
   OBSERVE_REQUEST,
   OBSERVE_RESPONSE,
   OBSERVE_NOTIFICATION,
+  UNOBSERVE_NOTIFICATION,
   DELETE_SCHEMA,
 } from '../common/constants.js';
 import {
@@ -94,17 +95,26 @@ class StateManager {
     // ---------------------------------------------
     // OBSERVE PEERS (be notified when a state is created, lazy)
     // ---------------------------------------------
-    this.client.transport.addListener(OBSERVE_RESPONSE, (reqId, ...list) => {
+    this.client.transport.addListener(OBSERVE_RESPONSE, async (reqId, ...list) => {
       // retrieve the callback that have been stored in observe to make sure
       // we don't call another callback that may have been registered earlier.
       const callback = this._observeRequestCallbacks.get(reqId);
       this._observeRequestCallbacks.delete(reqId);
 
-      list.forEach(([schemaName, stateId, nodeId]) => {
-        callback(schemaName, stateId, nodeId);
+      const promises = list.map(([schemaName, stateId, nodeId]) => {
+        return callback(schemaName, stateId, nodeId);
       });
 
-      resolveRequest(reqId, list);
+      await Promise.all(promises);
+
+      const unsubscribe = () => {
+        this._observeListeners.delete(callback);
+
+        if (this._observeListeners.size === 0) {
+          this.client.transport.emit(UNOBSERVE_NOTIFICATION);
+        }
+      };
+      resolveRequest(reqId, unsubscribe);
     });
 
     this.client.transport.addListener(OBSERVE_NOTIFICATION, (...list) => {
@@ -180,6 +190,10 @@ class StateManager {
    * @param {client.StateManager~observeCallback} callback - Function
    *  to be called when a new state is created on the network.
    *
+   * @return Promise<Function> - Return a Promise that resolves when the callback
+   *  as been executed for the first time. The promise value is a function which
+   *  allows to stop observing the network.
+   *
    * @example
    * this.client.stateManager.observe(async (schemaName, stateId, nodeId) => {
    *   if (schemaName === 'something') {
@@ -188,18 +202,16 @@ class StateManager {
    *   }
    * });
    */
-  observe(callback) {
+  async observe(callback) {
     this._observeListeners.add(callback);
     // store function
-    new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       const reqId = storeRequestPromise(resolve, reject);
       // store the callback to be executed on the response
       this._observeRequestCallbacks.set(reqId, callback);
+      // @todo - optionnal schema name
       this.client.transport.emit(OBSERVE_REQUEST, reqId);
     });
-
-    // @todo - this does not clean the infos
-    return () => this._observeListeners.delete(callback);
   }
 }
 
