@@ -1,7 +1,7 @@
 {
   "source": {
     "include": [
-      "README.md",
+      "assets/DOC.md",
       "src/client",
       "src/server",
       "src/common"

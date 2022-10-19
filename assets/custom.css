@@ -1,5 +1,5 @@
 a, a:active {
-  color: #242424;
+  color: #282922;
 }
 
 a:hover, a:active {
@@ -12,12 +12,12 @@ nav {
 
 footer {
   color: #767676;
-  text-align: right;
+  text-align: left;
   font-size: 75%;
 }
 
 nav > ul > li > a {
-  color: #242424;
+  color: #282922;
   margin-top: 10px;
 }
 nav > ul > li > a:hover,
@@ -27,12 +27,12 @@ nav > ul > li > a:active {
 
 nav ul ul a:hover,
 nav ul ul a:active {
-  color: #565656;
+  color: #3e4035;
 }
 
 nav > h2 > a {
   margin: 10px 0 -10px;
-  color: #343434 !important;
+  color: #282922 !important;
 }
 
 nav > h2 > a::before {
@@ -58,6 +58,17 @@ nav h2 a:not(.menu-item) {
   font-size: 48px;
   margin: 0;
   margin-top: 0.5em;
+  color: #3e4035;
+}
+
+.usertext h1 {
+  padding: 40px 0 20px;
+  border-bottom: 1px solid #767676;
+}
+
+.usertext h2 {
+  font-size: 24px;
+
 }
 
 h1 > code {
@@ -67,7 +78,7 @@ h1 > code {
 }
 
 h4.name {
-  color: #121212;
+  color: #282922;
   background: #f0db4f;
   border-top: 1px solid #efefef;
   box-shadow: 0 0.05em 0.1em #e1e1e1;
@@ -78,39 +89,52 @@ h4.name {
 }
 
 .signature {
-  color: #565656;
+  color: #3e4035;
 }
 
 .signature-attributes {
   font-size: 60%;
-  color: #787878;
+  color: #616354;
   font-style: italic;
   font-weight: lighter;
 }
 
 .type-signature {
-  color: #343434;
+  color: #3e4035;
 }
 
 .type-signature:last-child {
-  color: #787878;
+  color: #616354;
 }
 
 h4.name a {
-  color: #565656;
+  color: #3e4035;
 }
 
 h4.name a:hover {
-  border-bottom-color: #565656;
+  border-bottom-color: #3e4035;
+}
+
+article a {
+  border-bottom: 1px solid #616354;
 }
 
 span.param-type, .params td .param-type, .param-type dd {
-  color: #787878;
+  color: #616354;
   font-family: Consolas, Monaco, 'Andale Mono', monospace;
 }
 
+/* block code */
+.prettyprint {
+  border-radius: 2px;
+}
 .prettyprint code {
   font-size: 12px;
   background-color: #282922;
+}
+
+/* inline code */
+code {
+  font-size: 14px;
 }
 
