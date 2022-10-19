@@ -1,9 +1,9 @@
 const assert = require('chai').assert;
 
 const Server = require('../server').Server;
-const serverPluginDelayFactory = require('@soundworks/plugin-delay/server').default;
+const serverPluginDelayFactory = require('./utils/plugin-delay.server.js');
 const Client = require('../client').Client;
-const clientPluginDelayFactory = require('@soundworks/plugin-delay/client').default;
+const clientPluginDelayFactory = require('./utils/plugin-delay.client.js');
 
 const config = {
   app: {

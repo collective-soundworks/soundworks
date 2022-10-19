@@ -5,7 +5,7 @@ const merge = require('lodash.merge');
 const Server = require('../server').Server;
 const Client = require('../client').Client;
 const Context = require('../client').Context;
-const pluginDelayFactory = require('@soundworks/plugin-delay/client').default;
+const pluginDelayFactory = require('./utils/plugin-delay.client.js');
 
 config = {
   app: {

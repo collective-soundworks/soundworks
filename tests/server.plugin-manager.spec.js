@@ -6,7 +6,7 @@ const Client = require('../client').Client;
 const ServerAbstractExperience = require('../server').AbstractExperience;
 const Plugin = require('../server/Plugin.js').default;
 const PluginManager = require('../server/PluginManager.js').default;
-const pluginDelayFactory = require('@soundworks/plugin-delay/server').default;
+const pluginDelayFactory = require('./utils/plugin-delay.server.js');
 
 config = {
   app: {
