@@ -303,7 +303,7 @@ class StateManager extends StateManagerClient {
    * The hook is associated to every state of its kind (i.e. schemaName) and
    * executed on every update (call of `set`). Note that the hooks are executed
    * server-side regarless the node on which `set` has been called and before
-   * the "actual" update of the state (e.g. before the call of `subscribe`).
+   * the "actual" update of the state (e.g. before the call of `onUpdate`).
    *
    * @example
    * server.stateManager.registerSchema('hooked', schema);

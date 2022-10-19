@@ -185,7 +185,6 @@ class PluginManager {
     }
   }
 
-  // @todo - Observable API --> rename to subscribe()
   /** @private */
   observe(observer) {
     this._observers.add(observer);

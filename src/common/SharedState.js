@@ -49,11 +49,9 @@ class SharedState {
 
       throw new Error(`Error creating or attaching state "${schemaName}" w/ values:\n
 ${JSON.stringify(initValues, null, 2)}`);
-
     }
 
-    this._subscriptions = new Set();
-
+    this._onUpdateCallbacks = new Set();
     this._onDetachCallbacks = new Set();
     this._onDeleteCallbacks = new Set();
 
@@ -204,13 +202,13 @@ ${JSON.stringify(initValues, null, 2)}`);
     let promises = [];
 
     if (propagate && Object.keys(newValues).length > 0) {
-      this._subscriptions.forEach(listener => {
+      this._onUpdateCallbacks.forEach(listener => {
         promises.push(listener(newValues, oldValues, context));
       });
     }
 
-    // on a given client, `await state.set(update)` resolves when all
-    // subscription have resolved themselves
+    // on a given client, `await state.set(update)` resolves after all
+    // update callbacks have themselves resolved
     await Promise.all(promises);
 
     // reset events to null after propagation of all listeners
@@ -226,14 +224,14 @@ ${JSON.stringify(initValues, null, 2)}`);
   }
 
   /**
-   * Updates values of the state. Wait for all subscriptions to be resolved
-   * before resolving itself, i.e.:
+   * Updates values of the state. The returned `Promise` resolves when all the
+   * have resolved themselves, i.e.:
    *
    * ```js
    * const a = await server.stateManager.create('a');
    * let asyncCallbackCalled = false;
    *
-   * a.subscribe(updates => {
+   * a.onUpdate(updates => {
    *   return new Promise(resolve => {
    *     setTimeout(() => {
    *       asyncCallbackCalled = true;
@@ -248,12 +246,12 @@ ${JSON.stringify(initValues, null, 2)}`);
    *
    * @async
    * @param {Object} updates - key / value pairs of updates to apply to the state.
-   * @param {Mixed} [context=null] - optionnal context that will be propagated
+   * @param {Mixed} [context=null] - optionnal contextual object that will be propagated
    *   alongside the updates of the state. The context is valid only for the
-   *   current call and will be passed as third argument to any subscribe listeners.
+   *   current call and will be passed as third argument to all update listeners.
    * @return {Promise<Object>} A promise to the (coerced) updates.
    *
-   * @see {common.SharedState~subscribeCallback}
+   * @see {common.SharedState~updateCallback}
    */
   async set(updates, context = null) {
     // handle immediate option
@@ -293,7 +291,7 @@ ${JSON.stringify(initValues, null, 2)}`);
     }
 
     if (propagateNow) {
-      this._subscriptions.forEach(listener => listener(immediateNewValues, immediateOldValues, context));
+      this._onUpdateCallbacks.forEach(listener => listener(immediateNewValues, immediateOldValues, context));
     }
 
     // go through server-side normal behavior
@@ -325,8 +323,8 @@ ${JSON.stringify(initValues, null, 2)}`);
   /**
    * Get the schema that describes the state.
    *
-   * @param {String} [name=null] - if given, returns only the definition
-   *   of the given param name. Throws an error if the name is invalid.
+   * @param {String} [name=null] - If given, returns only the definition
+   *  of the given param name. Throws an error if the name is invalid.
    * @return {Object}
    */
   getSchema(name = null) {
@@ -352,59 +350,6 @@ ${JSON.stringify(initValues, null, 2)}`);
   }
 
   /**
-   * @callback common.SharedState~subscribeCallback
-   * @param {Object} newValues - key / value pairs of the updates that have been
-   *   applied to the state.
-   * @param {Object} oldValues - key / value pairs of the related params before
-   *   the updates has been applied to the state.
-   * @param {Mixed} [context=null] - Optionnal context data that has been passed
-   *   with the updates in the `set` call.
-   *
-   * @example
-   * state.subscribe(async (newValues, oldValues[, context=null]) =>  {
-   *   for (let [key, value] of Object.entries(newValues)) {
-   *      switch (key) {
-   *        // do something
-   *      }
-   *   }
-   * });
-   *
-   * @see {common.SharedState#set}
-   * @see {common.SharedState#subscribe}
-   */
-  /**
-   * Subscribe to state updates
-   *
-   * @param {common.SharedState~subscribeCallback} callback - callback to execute
-   *   when an update is applied on the state.
-   * @param {Boolean} [executeListener=false] - execute the given listener with
-   *   current state values. (`oldValues` will be set to `{}`, and `context` to `null`)
-   *
-   * @example
-   * state.subscribe(async (newValues, oldValues) =>  {
-   *   for (let [key, value] of Object.entries(newValues)) {
-   *      switch (key) {
-   *        // do something
-   *      }
-   *   }
-   * });
-   */
-  subscribe(listener, executeListener = false) {
-    this._subscriptions.add(listener);
-
-    if (executeListener === true) {
-      const currentValues = this.getValues();
-      const oldValues = {};
-      const context = null;
-      listener(currentValues, oldValues, context);
-    }
-
-    return () => {
-      this._subscriptions.delete(listener);
-    };
-  }
-
-  /**
    * Detach from the state. If the client is the creator of the state, the state
    * is deleted and all attached nodes get notified
    *
@@ -417,7 +362,7 @@ ${JSON.stringify(initValues, null, 2)}`);
    * @see {server.SharedStateManagerClient#attach}
    */
   async detach() {
-    this._subscriptions.clear();
+    this._onUpdateCallbacks.clear();
 
     if (this._isOwner) {
       return new Promise((resolve, reject) => {
@@ -451,6 +396,59 @@ ${JSON.stringify(initValues, null, 2)}`);
     } else {
       throw new Error(`[stateManager] can delete state "${this.schemaName}", only owner of the state (i.e. the node that "create[d]" it) can delete it`);
     }
+  }
+
+  /**
+   * @callback common.SharedState~updateCallback
+   * @param {Object} newValues - key / value pairs of the updates that have been
+   *  applied to the state.
+   * @param {Object} oldValues - key / value pairs of the updated params before
+   *  the updates has been applied to the state.
+   * @param {Mixed} [context=null] - Optionnal context object that has been passed
+   *  with the values updates in the `set` call.
+   *
+   * @example
+   * state.onUpdate(async (newValues, oldValues[, context=null]) =>  {
+   *   for (let [key, value] of Object.entries(newValues)) {
+   *      switch (key) {
+   *        // do something
+   *      }
+   *   }
+   * });
+   *
+   * @see {common.SharedState#set}
+   * @see {common.SharedState#onUpdate}
+   */
+  /**
+   * Subscribe to state updates
+   *
+   * @param {common.SharedState~updateCallback} callback - callback to execute
+   *  when an update is applied on the state.
+   * @param {Boolean} [executeListener=false] - execute the given callback immediately
+   *  with current state values. (`oldValues` will be set to `{}`, and `context` to `null`)
+   *
+   * @example
+   * state.onUpdate(async (newValues, oldValues) =>  {
+   *   for (let [key, value] of Object.entries(newValues)) {
+   *      switch (key) {
+   *        // do something
+   *      }
+   *   }
+   * });
+   */
+  onUpdate(listener, executeListener = false) {
+    this._onUpdateCallbacks.add(listener);
+
+    if (executeListener === true) {
+      const currentValues = this.getValues();
+      const oldValues = {};
+      const context = null;
+      listener(currentValues, oldValues, context);
+    }
+
+    return () => {
+      this._onUpdateCallbacks.delete(listener);
+    };
   }
 
   /**

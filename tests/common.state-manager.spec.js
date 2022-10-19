@@ -171,7 +171,7 @@ describe(`common::StateManager`, () => {
       const a = await server.stateManager.create('a');
       let asyncCallbackCalled = false;
 
-      a.subscribe(updates => {
+      a.onUpdate(updates => {
         return new Promise(resolve => {
           setTimeout(() => {
             asyncCallbackCalled = true;
@@ -267,7 +267,7 @@ describe(`common::StateManager`, () => {
     });
   });
 
-  describe('state.subscribe((newValues, oldValues[, context = null]) => {}[, executeListener=false]) => unsubscribe', () => {
+  describe('state.onUpdate((newValues, oldValues[, context = null]) => {}[, executeListener=false]) => unsubscribe', () => {
     it('should properly execute listeners', async () => {
       return new Promise(async (resolve, reject) => {
         const state = await server.stateManager.create('a');
@@ -276,7 +276,7 @@ describe(`common::StateManager`, () => {
         const statePromise = new Promise((resolve) => {
           let step = 0;
 
-          state.subscribe((newValues, oldValues, context) => {
+          state.onUpdate((newValues, oldValues, context) => {
             if (step === 0) {
               assert.deepEqual(newValues, { bool: true, int: 42 });
               assert.deepEqual(oldValues, { bool: false, int: 0 });
@@ -297,7 +297,7 @@ describe(`common::StateManager`, () => {
         const attachedPromise = new Promise((resolve) => {
           let step = 0;
 
-          attached.subscribe((newValues, oldValues, context) => {
+          attached.onUpdate((newValues, oldValues, context) => {
             if (step === 0) {
               assert.deepEqual(newValues, { bool: true, int: 42 });
               assert.deepEqual(oldValues, { bool: false, int: 0 });
@@ -325,7 +325,7 @@ describe(`common::StateManager`, () => {
     it(`should return working unsubscribe() function`, async () => {
       const a = await server.stateManager.create('a');
 
-      const unsubsribe = a.subscribe(updates => {
+      const unsubsribe = a.onUpdate(updates => {
         assert.fail('should not be called')
       });
 
@@ -341,7 +341,7 @@ describe(`common::StateManager`, () => {
     it('should not execute immediately if `executeListener=false` (default)', async () => {
       const a = await server.stateManager.create('a');
 
-      const unsubsribe = a.subscribe(updates => {
+      const unsubsribe = a.onUpdate(updates => {
         assert.fail('should not be called')
       });
 
@@ -354,7 +354,7 @@ describe(`common::StateManager`, () => {
       return new Promise(async (resolve) => {
         const a = await server.stateManager.create('a');
 
-        const unsubsribe = a.subscribe((newValues, oldValues, context) => {
+        const unsubsribe = a.onUpdate((newValues, oldValues, context) => {
           assert.deepEqual(newValues, { bool: false, int: 0 });
           assert.deepEqual(oldValues, {});
           assert.deepEqual(context, null);
@@ -370,7 +370,7 @@ describe(`common::StateManager`, () => {
         const a = await server.stateManager.create('a');
         let counter = 0;
 
-        a.subscribe(updates => {
+        a.onUpdate(updates => {
           try {
             assert.deepEqual(updates, { bool: true });
             counter += 1;
@@ -407,7 +407,7 @@ describe(`common::StateManager`, () => {
           assert.equal(state.get('value'), true);
         }
 
-        state.subscribe(updates => {
+        state.onUpdate(updates => {
           try {
             assert.deepEqual(updates, { value: true });
             readInSubscribe();
@@ -447,7 +447,7 @@ describe(`common::StateManager`, () => {
         const numCalls = 5;
         let counter = 0;
 
-        state.subscribe(updates => {
+        state.onUpdate(updates => {
           try {
             assert.deepEqual(updates, { value: true });
             counter += 1;
@@ -514,7 +514,7 @@ describe(`common::StateManager`, () => {
         const statePromise = new Promise((resolve) => {
           let call = 0;
 
-          state.subscribe(updates => {
+          state.onUpdate(updates => {
             if (call === 0) {
               subscribeCalledBeforeHook = true;
 
@@ -558,7 +558,7 @@ describe(`common::StateManager`, () => {
         const attachedPromise = new Promise((resolve) => {
           let call = 0;
 
-          attached.subscribe(updates => {
+          attached.onUpdate(updates => {
             if (call === 0) {
               try {
                 assert.deepEqual(updates, { immediateValue: 1, normalValue: 10 });
@@ -618,7 +618,7 @@ describe(`common::StateManager`, () => {
         const statePromise = new Promise((resolve) => {
           let call = 0;
 
-          state.subscribe(updates => {
+          state.onUpdate(updates => {
             if (call === 0) {
               try {
                 assert.deepEqual(updates, { immediateValue: 1 });
@@ -651,7 +651,7 @@ describe(`common::StateManager`, () => {
         const attachedPromise = new Promise((resolve) => {
           let call = 0;
 
-          attached.subscribe(updates => {
+          attached.onUpdate(updates => {
             if (call === 0) {
               try {
                 assert.deepEqual(updates, { immediateValue: 1, normalValue: 10 });
@@ -708,7 +708,7 @@ describe(`common::StateManager`, () => {
         const statePromise = new Promise((resolve) => {
           let call = 0;
 
-          state.subscribe(updates => {
+          state.onUpdate(updates => {
             if (call === 0) {
               try {
                 assert.deepEqual(updates, { immediateValue: 1 });
@@ -740,7 +740,7 @@ describe(`common::StateManager`, () => {
         // should be notified normally if not initiator of the update
         const attachedPromise = new Promise((resolve) => {
           let call = 0;
-          attached.subscribe(updates => {
+          attached.onUpdate(updates => {
             if (call === 0) {
               try {
                 assert.deepEqual(updates, { immediateValue: 1, normalValue: 10 });
@@ -787,7 +787,7 @@ describe(`common::StateManager`, () => {
         const called = [0, 0, 0];
 
         [a0, a1, a2].forEach((state, index) => {
-          state.subscribe(updates => {
+          state.onUpdate(updates => {
             assert.equal(updates.int, called[index] % 100 + 1);
             called[index] += 1;
           });
@@ -821,7 +821,7 @@ describe(`common::StateManager`, () => {
         const called = [0, 0, 0];
 
         [a0, a1, a2].forEach((state, index) => {
-          state.subscribe(updates => {
+          state.onUpdate(updates => {
             assert.equal(updates.int, called[index] % 100 + 1);
             called[index] += 1;
           });
@@ -854,7 +854,7 @@ describe(`common::StateManager`, () => {
       const a2 = await server.stateManager.attach('a', a0.id);
 
       return new Promise(async (resolve, reject) => {
-        a1.subscribe(() => assert.fail('subscribe should not be called'));
+        a1.onUpdate(() => assert.fail('subscribe should not be called'));
 
         await a1.detach();
         await a0.set({ bool: true });
@@ -990,7 +990,7 @@ describe(`common::StateManager`, () => {
       const hClient = await clients[0].stateManager.attach('hooked');
 
       const serverPromise = new Promise((resolve, reject) => {
-        hServer.subscribe(updates => {
+        hServer.onUpdate(updates => {
           try {
             assert.equal(updates.value, `${updates.name}-value`);
             resolve();
@@ -1001,7 +1001,7 @@ describe(`common::StateManager`, () => {
       });
 
       const clientPromise = new Promise((resolve, reject) => {
-        hClient.subscribe(updates => {
+        hClient.onUpdate(updates => {
           try {
             assert.equal(updates.value, `${updates.name}-value`);
             resolve();
@@ -1255,7 +1255,7 @@ describe(`common::StateManager`, () => {
       // propagate value from server
       attached.forEach(state => {
         const expected = { int: 1 };
-        const unsubscribe = state.subscribe(values => {
+        const unsubscribe = state.onUpdate(values => {
           assert.deepEqual(values, expected);
           expected.int += 1;
           if (values.int === 100) {
@@ -1271,7 +1271,7 @@ describe(`common::StateManager`, () => {
       // proagate value from clients
       attached.forEach(state => {
         const expected = { int: 1 };
-        const unsubscribe = state.subscribe(values => {
+        const unsubscribe = state.onUpdate(values => {
           assert.deepEqual(values, expected);
           expected.int += 1;
           if (values.int === 100) {
@@ -1302,7 +1302,7 @@ describe(`common::StateManager`, () => {
         }
 
         const expected = { int: 1 };
-        const unsubscribe = state.subscribe(values => {
+        const unsubscribe = state.onUpdate(values => {
           if (index < 50) {
             assert.deepEqual(values, expected);
             expected.int += 1;
@@ -1343,7 +1343,7 @@ describe(`common::StateManager`, () => {
         const attached = await server.stateManager.attach('a', state.id);
 
         let messageIndex = 0;
-        state.subscribe(values => {
+        state.onUpdate(values => {
           assert.deepEqual(values, messages[messageIndex]);
           messageIndex += 1;
 
@@ -1352,7 +1352,7 @@ describe(`common::StateManager`, () => {
           }
         });
 
-        attached.subscribe(values => {
+        attached.onUpdate(values => {
           if (values.int === messages[0].int) {
             attached.set(messages[1]);
           }
@@ -1373,7 +1373,7 @@ describe(`common::StateManager`, () => {
         const attached = await client.stateManager.attach('a', state.id);
 
         let messageIndex = 0;
-        attached.subscribe(values => {
+        attached.onUpdate(values => {
           assert.deepEqual(values, messages[messageIndex]);
           messageIndex += 1;
 
@@ -1382,7 +1382,7 @@ describe(`common::StateManager`, () => {
           }
         });
 
-        state.subscribe(values => {
+        state.onUpdate(values => {
           if (values.int === messages[0].int) {
             state.set(messages[1]);
           }
@@ -1404,7 +1404,7 @@ describe(`common::StateManager`, () => {
 
         let messageIndex = 0;
 
-        attached.subscribe(values => {
+        attached.onUpdate(values => {
           assert.deepEqual(values, messages[messageIndex]);
           messageIndex += 1;
 
@@ -1413,7 +1413,7 @@ describe(`common::StateManager`, () => {
           }
         });
 
-        state.subscribe(values => {
+        state.onUpdate(values => {
           if (values.int === messages[0].int) {
             state.set(messages[1]);
           }
@@ -1449,12 +1449,12 @@ describe(`common::StateManager`, () => {
       const serverInteger = await server.stateManager.create('test-integer');
       const serverResult = [];
 
-      serverInteger.subscribe(updates => serverResult.push(updates.myInt));
+      serverInteger.onUpdate(updates => serverResult.push(updates.myInt));
 
       const clientInteger = await client.stateManager.attach('test-integer');
       const clientResult = [];
 
-      clientInteger.subscribe(updates => clientResult.push(updates.myInt));
+      clientInteger.onUpdate(updates => clientResult.push(updates.myInt));
 
       for (let i = 0; i < 10; i++) {
         await serverInteger.set({ myInt: Math.floor(Math.random() * 1000) });
@@ -1490,12 +1490,12 @@ describe(`common::StateManager`, () => {
       const serverInteger = await server.stateManager.create('test-float');
       const serverResult = [];
 
-      serverInteger.subscribe(updates => serverResult.push(updates.myFloat));
+      serverInteger.onUpdate(updates => serverResult.push(updates.myFloat));
 
       const clientFloat = await client.stateManager.attach('test-float');
       const clientResult = [];
 
-      clientFloat.subscribe(updates => clientResult.push(updates.myFloat));
+      clientFloat.onUpdate(updates => clientResult.push(updates.myFloat));
 
       for (let i = 0; i < 10; i++) {
         await serverInteger.set({ myFloat: Math.random() });
@@ -1535,7 +1535,7 @@ describe(`common::StateManager`, () => {
   //       // console.time(rand);
   //       assert.deepEqual(state.getValues(), { a: false });
 
-  //       state.subscribe(updates => {
+  //       state.onUpdate(updates => {
   //         // console.timeEnd(rand);
   //         assert.deepEqual(state.getValues(), { a: true });
   //         count += 1;
