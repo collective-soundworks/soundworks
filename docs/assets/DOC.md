@@ -18,6 +18,6 @@ To start a new application, you will probably want to use the application templa
 - [Github](https://github.com/collective-soundworks)
 - [Application Template](https://github.com/collective-soundworks/soundworks-template)
 - [Examples](https://github.com/collective-soundworks/soundworks-examples)
-- [Max/MSP communications](https://github.com/collective-soundworks/soundworks-max)
-- [General documentation / Tutorials](http://collective-soundworks.github.io/)
+- [General Documentation / Tutorials](http://collective-soundworks.github.io/)
+- [Working with Max/MSP](https://github.com/collective-soundworks/soundworks-max)
 - [Issue Tracker](https://github.com/collective-soundworks/soundworks/issues)
