@@ -2,7 +2,7 @@
 
 ![soundworks-logo](./assets/logo-200x200.png)
 
-> Full-stack JavaScript framework for distributed WebAudio and multimedia applications.
+Full-stack JavaScript framework for distributed WebAudio and multimedia applications.
 
 ## Table of Contents
 
