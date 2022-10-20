@@ -253,7 +253,7 @@ describe(`client::PluginManager`, () => {
     // });
   });
 
-  describe(`pluginManager.observe((statuses, updates) => {})`, () => {
+  describe(`pluginManager.onStateChange((states, updatedPlugin) => {})`, () => {
     it(`should properly propagate statuses`, async function() {
       this.timeout(3 * 1000);
 
@@ -263,14 +263,14 @@ describe(`client::PluginManager`, () => {
       });
 
       const expected = [
-        { 'delay-1': 'idle' },
-        { 'delay-1': 'inited' },
-        { 'delay-1': 'started' },
+        'idle',
+        'inited',
+        'started',
       ];
       let index = 0;
 
-      client.pluginManager.observe(statuses => {
-        assert.deepEqual(expected[index], statuses);
+      client.pluginManager.onStateChange(plugins => {
+        assert.deepStrictEqual(expected[index], plugins['delay-1']. status);
         index += 1;
       });
 
@@ -287,13 +287,13 @@ describe(`client::PluginManager`, () => {
 
       const startTime = Date.now();
 
-      client.pluginManager.observe(statuses => {
+      client.pluginManager.onStateChange(plugins => {
         const now = Date.now();
         const delta = now - startTime;
         // assume we can 20ms jitter in the setTimeout
-        if (statuses['delay-1'] === 'inited') {
+        if (plugins['delay-1'].status === 'inited') {
           assert.isBelow(Math.abs(delta - 0), TIMEOUT_ERROR);
-        } else if (statuses['delay-1'] === 'started') {
+        } else if (plugins['delay-1'].status === 'started') {
           assert.isBelow(Math.abs(delta - 100), TIMEOUT_ERROR);
         }
       });
@@ -354,19 +354,19 @@ describe(`client::PluginManager`, () => {
 
       const startTime = Date.now();
 
-      client.pluginManager.observe((statuses, updates) => {
+      client.pluginManager.onStateChange((plugins, updatedPlugin) => {
         const now = Date.now();
         const delta = now - startTime;
         // assume we can 20ms jitter in the setTimeout
-        if (updates['delay-1'] === 'inited') {
+        if (updatedPlugin['delay-1'].status === 'inited') {
           assert.isBelow(Math.abs(delta - 0.), TIMEOUT_ERROR);
-        } else if (updates['delay-1'] === 'started') {
+        } else if (updatedPlugin['delay-1'].status === 'started') {
           assert.isBelow(Math.abs(delta - 100), TIMEOUT_ERROR);
         }
 
-        if (updates['delay-2'] === 'inited') {
+        if (updatedPlugin['delay-2'].status === 'inited') {
           assert.isBelow(Math.abs(delta - 0.), TIMEOUT_ERROR);
-        } else if (updates['delay-2'] === 'started') {
+        } else if (updatedPlugin['delay-2'].status === 'started') {
           assert.isBelow(Math.abs(delta - 100), TIMEOUT_ERROR);
         }
       });
@@ -392,20 +392,19 @@ describe(`client::PluginManager`, () => {
 
       const startTime = Date.now();
 
-      client.pluginManager.observe((statuses, updates) => {
-        console.log(statuses);
+      client.pluginManager.onStateChange((plugins, updatedPlugin) => {
         const now = Date.now();
         const delta = now - startTime;
         // assume we can 20ms jitter in the setTimeout
-        if (updates['delay-1'] === 'inited') {
+        if (updatedPlugin['delay-1'].status === 'inited') {
           assert.isBelow(Math.abs(delta - 0.), TIMEOUT_ERROR);
-        } else if (updates['delay-1'] === 'started') {
+        } else if (updatedPlugin['delay-1'] === 'started') {
           assert.isBelow(Math.abs(delta - 100), TIMEOUT_ERROR);
         }
 
-        if (updates['delay-2'] === 'inited') {
+        if (updatedPlugin['delay-2'].status === 'inited') {
           assert.isBelow(Math.abs(delta - 100), TIMEOUT_ERROR);
-        } else if (updates['delay-2'] === 'started') {
+        } else if (updatedPlugin['delay-2'] === 'started') {
           assert.isBelow(Math.abs(delta - 200), TIMEOUT_ERROR);
         }
       });
@@ -443,31 +442,31 @@ describe(`client::PluginManager`, () => {
 
       const startTime = Date.now();
 
-      client.pluginManager.observe((statuses, updates) => {
+      client.pluginManager.onStateChange((plugins, updatedPlugin) => {
         const now = Date.now();
         const delta = now - startTime;
         // assume we can 20ms jitter in the setTimeout
-        if (updates['delay-1'] === 'inited') {
+        if (updatedPlugin['delay-1'].status === 'inited') {
           assert.isBelow(Math.abs(delta - 0.), TIMEOUT_ERROR);
-        } else if (updates['delay-1'] === 'started') {
+        } else if (updatedPlugin['delay-1'].status === 'started') {
           assert.isBelow(Math.abs(delta - 200), TIMEOUT_ERROR);
         }
 
-        if (updates['delay-2'] === 'inited') {
+        if (updatedPlugin['delay-2'].status === 'inited') {
           assert.isBelow(Math.abs(delta - 200), TIMEOUT_ERROR);
-        } else if (updates['delay-2'] === 'started') {
+        } else if (updatedPlugin['delay-2'].status === 'started') {
           assert.isBelow(Math.abs(delta - 400), TIMEOUT_ERROR);
         }
 
-        if (updates['delay-3'] === 'inited') {
+        if (updatedPlugin['delay-3'].status === 'inited') {
           assert.isBelow(Math.abs(delta - 0.), TIMEOUT_ERROR);
-        } else if (updates['delay-3'] === 'started') {
+        } else if (updatedPlugin['delay-3'].status === 'started') {
           assert.isBelow(Math.abs(delta - 600), TIMEOUT_ERROR);
         }
 
-        if (updates['delay-4'] === 'inited') {
+        if (updatedPlugin['delay-4'].status === 'inited') {
           assert.isBelow(Math.abs(delta - 600), TIMEOUT_ERROR);
-        } else if (updates['delay-4'] === 'started') {
+        } else if (updatedPlugin['delay-4'].status === 'started') {
           assert.isBelow(Math.abs(delta - 800), TIMEOUT_ERROR);
         }
       });

@@ -1,8 +1,8 @@
 const pluginFactory = function(AbstractPlugin) {
 
   return class PluginDelay extends AbstractPlugin {
-    constructor(server, name, options) {
-      super(server, name);
+    constructor(server, id, options) {
+      super(server, id);
 
       const defaults = {
         delayTime: 1000, // in ms
