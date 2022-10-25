@@ -16,6 +16,9 @@
     "url": "https://github.com/collective-soundworks/soundworks"
   },
   "main": "",
+  "engines" : {
+    "node" : ">=16.0.0"
+  },
   "scripts": {
     "clean": "rm -Rf client && rm -Rf server && rm -Rf common",
     "doc": "rm -Rf docs && jsdoc -c .jsdoc.json --verbose && cp -R assets docs/",
