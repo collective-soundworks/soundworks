@@ -45,7 +45,6 @@ describe('Plugin', () => {
 
       const pluginClient = await client.pluginManager.get('delay');
 
-      console.log(pluginClient.type);
       assert.equal(pluginServer.type, 'PluginDelay');
       assert.equal(pluginClient.type, 'PluginDelay');
 
@@ -53,7 +52,7 @@ describe('Plugin', () => {
     });
   });
 
-  describe(`[client] Plugin.state // @todo - should be the same server-side`, () => {
+  describe(`[client] Plugin.state propagation`, () => {
     it(`should propagate its inner state`, async () => {
       const server = new Server(config);
       server.pluginManager.register('stateful', (ServerPlugin) => class StatefulPlugin extends ServerPlugin {});
@@ -123,9 +122,16 @@ describe('Plugin', () => {
       const rand2 = Math.random();
       plugin.propagateStateChange({ rand: rand2 });
 
-      assert.equal(numCalled, 3);
+      // should equal 5
+      // - 3 status ('idle', 'inited', 'started') because we call client.init()
+      // - 2 due to the `plugin.propagateStateChange`
+      assert.equal(numCalled, 5);
 
       await server.stop();
     });
   });
+
+  describe(`[server] Plugin.state propagation`, () => {
+    it.skip('should implement the tests', () => {});
+  })
 });

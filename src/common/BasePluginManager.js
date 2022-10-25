@@ -88,13 +88,13 @@ class BasePluginManager {
     for (let [id, { ctor, options }] of this._registeredPlugins.entries()) {
       const instance = new ctor(this._node, id, options);
       this._instances.set(id, instance);
+      instance.onStateChange((values) => this._propagateStateChange(instance));
     }
 
     // propagate all 'idle' statuses before start
     this._propagateStateChange();
 
     const promises = Array.from(this._registeredPlugins.keys()).map(id => this.get(id));
-
     await Promise.all(promises);
 
     this.status = 'started';
@@ -181,8 +181,11 @@ class BasePluginManager {
 
   /** @private */
   _propagateStateChange(instance = null, status = null) {
-    if (instance != null && status != null) {
-      instance.status = status;
+    if (instance !== null) {
+      // status is null if wew forward some inner state change from the instance
+      if (status !== null) {
+        instance.status = status;
+      }
 
       const fullState = Object.fromEntries(this._instances);
       this._stateChangeObservers.forEach(observer => observer(fullState, instance));

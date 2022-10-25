@@ -617,13 +617,9 @@ Invalid certificate files, please check your:
 
     socket.addListener('close', async () => {
       // clean context manager, await before cleaning state manager
-      try {
       await this.contextManager.removeClient(client);
       // remove client from pluginManager
       await this.pluginManager.removeClient(client);
-      } catch(err) {
-        console.log(err);
-      }
       // clean state manager
       await this.stateManager.removeClient(client.id);
       // clean sockets

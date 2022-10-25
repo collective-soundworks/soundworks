@@ -17,8 +17,8 @@ import {
  */
 function createNamedContextClass(contextName) {
   return class DefaultContext extends Context {
-    get name() { return contextName }
-  }
+    get name() { return contextName; }
+  };
 }
 
 /** @private */

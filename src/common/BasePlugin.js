@@ -41,6 +41,9 @@ class BasePlugin {
      * @type {String}
      */
     this.status = 'idle';
+
+    /** @private */
+    this._onStateChangeCallbacks = new Set();
   }
 
   /**

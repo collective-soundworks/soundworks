@@ -1,6 +1,5 @@
 import Client from './Client.js';
 import Server from './Server.js';
-import logger from '../common/logger.js';
 
 /**
  * Base class to extend in order to create the server-side counterpert of
@@ -56,17 +55,13 @@ class Context {
    * the context was created after `server.start()`
    * WARNING: this method should never be called manually.
    */
-  async start() {
-    logger.log(`> context "${this.name}" start`);
-  }
+  async start() {}
 
   /**
    * Method automatically called when the server stops.
    * WARNING: this method should never be called manually.
    */
-  async stop() {
-    logger.log(`> context "${this.name}" stop`);
-  }
+  async stop() {}
 
   /**
    * Method automatically called when the client enters the context.
@@ -77,7 +72,6 @@ class Context {
       throw new Error(`[soundworks.Context] Invalid argument, ${this.name} context ".enter()" method should receive a server-side "soundworks.Client" instance argument`);
     }
 
-    logger.log(`> context "${this.name}" enter (${client.id})`);
     this.clients.add(client);
   }
 
@@ -90,7 +84,6 @@ class Context {
       throw new Error(`[soundworks.Context] Invalid argument, ${this.name}.exit() should receive a server-side "soundworks.Client" instance argument`);
     }
 
-    logger.log(`> context "${this.name}" exit (${client.id})`);
     this.clients.delete(client);
   }
 }

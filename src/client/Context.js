@@ -1,5 +1,4 @@
 import Client from './Client.js';
-import logger from '../common/logger.js';
 import {
   CONTEXT_ENTER_REQUEST,
   CONTEXT_ENTER_RESPONSE,
@@ -85,16 +84,12 @@ class Context {
    * Should be use to create application wise stuff existing regardeless the client
    * enters or exists the context
    */
-  async start() {
-    logger.log(`> context "${this.name}" start`);
-  }
+  async start() {}
 
   /**
    * Clean the context
    */
-  async stop() {
-    logger.log(`> context "${this.name}" stop`);
-  }
+  async stop() {}
 
   /**
    * Enter the context, if a server-side part of the context is defined (i.e. a
@@ -104,8 +99,6 @@ class Context {
    * @return Promise
    */
   async enter() {
-    logger.log(`> context "${this.name}" enter`);
-
     // lazily start the context if registered after `client.start()`
     if (this.status !== 'started' && this.status !== 'errored') {
       await this.client.contextManager.get(this.name);
@@ -129,8 +122,6 @@ class Context {
    * @return Promise
    */
   async exit() {
-    logger.log(`> context "${this.name}" exit`);
-
     try {
       await new Promise((resolve, reject) => {
         const reqId = storeRequestPromise(resolve, reject);

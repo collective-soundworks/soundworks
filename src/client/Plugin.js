@@ -16,9 +16,6 @@ class Plugin extends BasePlugin {
      * @see {@link client.Client}
      */
     this.client = client;
-
-    /** @private */
-    this._onStateChangeCallbacks = new Set();
   }
 
   // @todo
