@@ -157,6 +157,7 @@ class Client {
     // init socket communications (string and binary)
     await this.socket.init(this.type, this.config);
 
+    // we need the try/catch block to change the promise rejection into proper error
     try {
       await new Promise((resolve, reject) => {
         // wait for handshake response before starting stateManager and pluginManager
@@ -243,6 +244,9 @@ class Client {
     if (this.status !== 'started') {
       throw new Error(`[soundworks:Client] Cannot stop() before start()`);
     }
+
+    await this.contextManager.stop();
+    await this.pluginManager.stop();
 
     await this.socket.terminate();
   }

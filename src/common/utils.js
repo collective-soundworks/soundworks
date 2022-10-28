@@ -14,3 +14,9 @@ export function* idGenerator() {
 export function isString(val) {
   return (typeof val === 'string' || val instanceof String);
 }
+
+export function isFunction(func) {
+  return Object.prototype.toString.call(func) == '[object Function]' ||
+    Object.prototype.toString.call(func) == '[object AsyncFunction]';
+}
+

@@ -85,7 +85,9 @@ describe('Plugin', () => {
 
     it(`should be forwarded by the stateManager`, async () => {
       const server = new Server(config);
-      server.pluginManager.register('stateful', (ServerPlugin) => class StatefulPlugin extends ServerPlugin {});
+      server.pluginManager.register('stateful', (Plugin) => {
+        return class StatefulPlugin extends Plugin {}
+      });
 
       await server.init();
       await server.start();
@@ -93,8 +95,8 @@ describe('Plugin', () => {
       let numCalled = 0;
       const client = new Client({ clientType: 'test', ...config });
 
-      client.pluginManager.register('stateful', (ClientPlugin) => {
-        return class StatefulPlugin extends ClientPlugin {
+      client.pluginManager.register('stateful', (Plugin) => {
+        return class StatefulPlugin extends Plugin {
           constructor(client, id) {
             super(client, id);
             this.state = { rand: 0 };
@@ -115,13 +117,8 @@ describe('Plugin', () => {
       await client.init();
 
       const plugin = await client.pluginManager.get('stateful');
-
-      const rand1 = Math.random();
-      plugin.propagateStateChange({ rand: rand1 });
-
-      const rand2 = Math.random();
-      plugin.propagateStateChange({ rand: rand2 });
-
+      plugin.propagateStateChange({ rand: Math.random() });
+      plugin.propagateStateChange({ rand: Math.random() });
       // should equal 5
       // - 3 status ('idle', 'inited', 'started') because we call client.init()
       // - 2 due to the `plugin.propagateStateChange`
@@ -132,6 +129,41 @@ describe('Plugin', () => {
   });
 
   describe(`[server] Plugin.state propagation`, () => {
-    it.skip('should implement the tests', () => {});
+    it('should implement the tests', async () => {
+      const server = new Server(config);
+      server.pluginManager.register('stateful', (ClientPlugin) => {
+        return class StatefulPlugin extends ClientPlugin {
+          constructor(client, id) {
+            super(client, id);
+            this.state = { rand: 0 };
+          }
+        }
+      });
+
+      let numCalled = 0;
+
+      server.pluginManager.onStateChange((plugins, updatedPlugin) => {
+        assert.isNumber(plugins['stateful'].state.rand);
+
+        if (updatedPlugin !== null) {
+          assert.isNumber(updatedPlugin.state.rand);
+        }
+
+        numCalled += 1;
+      });
+
+      await server.init();
+      await server.start();
+
+      const plugin = await server.pluginManager.get('stateful');
+      plugin.propagateStateChange({ rand: Math.random() });
+      plugin.propagateStateChange({ rand: Math.random() });
+      // should equal 5
+      // - 3 status ('idle', 'inited', 'started') because we call client.init()
+      // - 2 due to the `plugin.propagateStateChange`
+      assert.equal(numCalled, 5);
+
+      await server.stop();
+    });
   })
 });

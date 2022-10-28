@@ -281,6 +281,7 @@ class Server {
       // if certs have been given in config
       if (httpsInfos !== null) {
         try {
+          // @todo - add fs.existsSync check too
           let cert = fs.readFileSync(httpsInfos.cert);
           let key = fs.readFileSync(httpsInfos.key);
 
@@ -525,6 +526,7 @@ Invalid certificate files, please check your:
     }
 
     await this.contextManager.stop();
+    await this.pluginManager.stop();
 
     this.sockets.terminate();
     this.httpServer.close(err => {

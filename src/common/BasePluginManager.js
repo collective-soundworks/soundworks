@@ -100,6 +100,12 @@ class BasePluginManager {
     this.status = 'started';
   }
 
+  async stop() {
+    for (let instance of this._instances.values()) {
+      await instance.stop();
+    }
+  }
+
   /**
    * Retrieve an fully started instance of a registered plugin.
    *
@@ -158,7 +164,7 @@ class BasePluginManager {
       } catch(err) {
         errored = true;
         this._propagateStateChange(instance, 'errored');
-        throw new Error(err);
+        throw err;
       }
 
       // this looks silly but it prevents the try / catch to catch errors that could

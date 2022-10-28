@@ -5,6 +5,8 @@ const merge = require('lodash.merge');
 const Server = require('../server').Server;
 const Client = require('../client').Client;
 const Context = require('../client').Context;
+const ServerContext = require('../server').Context;
+const ClientContext = require('../client').Context;
 const pluginDelayFactory = require('./utils/plugin-delay.client.js');
 
 config = {
@@ -247,5 +249,72 @@ describe('client::Client', () => {
       await server.stop();
     });
 
+    it(`should stop the contexts first and then the plugins`, async () => {
+      server = new Server(config);
+      server.pluginManager.register('test-plugin', Plugin => {
+        return class TestPlugin extends Plugin {}
+      });
+
+      await server.init();
+
+      class ServerTestContext extends ServerContext {
+        get name() { return 'test-context'; }
+      }
+
+      const serverTestContext = new ServerTestContext(server, 'test');
+      // we call start after creating the context, so it is started
+      await server.start();
+
+      let counter = 0;
+      let pluginStop = false;
+      let contextStop = false;
+
+      const client = new Client({ clientType: 'test', ...config });
+
+      client.pluginManager.register('test-plugin', Plugin => {
+        return class TestPlugin extends Plugin {
+          async start() {
+            await super.start();
+            // just check that we are ok with that, and that we are not stuck
+            // with some on-going processcf. sync
+            this._intervalId = setInterval(() => {}, 500);
+          }
+          async stop() {
+            await super.stop();
+
+            clearInterval(this._intervalId);
+            pluginStop = true;
+            // should be called context.stop()
+            counter += 1;
+            assert.equal(counter, 2);
+          }
+        }
+      });
+
+      await client.init();
+
+      class ClientTestContext extends ClientContext {
+        get name() { return 'test-context'; }
+        async stop() {
+          await super.stop();
+          contextStop = true;
+          // should be called first
+          counter += 1;
+          assert.equal(counter, 1);
+        }
+      }
+
+      const context = new ClientTestContext(client);
+      await client.start();
+
+      assert.equal(contextStop, false);
+      assert.equal(pluginStop, false);
+      // stop everything
+      await client.stop();
+      await server.stop();
+
+      assert.equal(contextStop, true);
+      assert.equal(pluginStop, true);
+    });
   });
 });

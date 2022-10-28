@@ -8,6 +8,7 @@ const tcpp = require('tcp-ping');
 
 const Server = require('../server').Server;
 const Client = require('../client').Client;
+const ServerContext = require('../server').Context;
 
 const config = {
   app: {
@@ -349,31 +350,91 @@ describe('server::Server', () => {
   });
 
   describe('await server.stop()', () => {
+    it('should throw if stop() is called before start()', async () => {
+      server = new Server(config);
 
-    beforeEach(async () => {
+      await server.init();
+
+      let errored = false;
+      try {
+        await server.stop();
+      } catch(err) {
+        console.log(err.message);
+        errored = true;
+      }
+      if (!errored) { assert.fail('should have failed'); }
+    });
+
+    it('should stop the server', async () => {
       server = new Server(config);
 
       await server.init();
       await server.start();
-    });
-
-    it('should throw stop() is called before start()', async () => {
-      await server.stop();
-      assert.isOk('server and process should stop');
-    });
-
-    it('should stop the server', async () => {
       await server.stop();
       assert.isOk('server and process should stop');
     });
 
     it('should stop the server even if a client is connected', async() => {
+      server = new Server(config);
+
+      await server.init();
+      await server.start();
+
       const client = new Client({ clientType: 'test', ...config });
       await client.init();
       await client.start();
 
       await server.stop();
       assert.isOk('server and process should stop');
+    });
+
+    it(`should stop the contexts first and then the plugins`, async () => {
+      let counter = 0;
+      let pluginStop = false;
+      let contextStop = false;
+
+      server = new Server(config);
+      server.pluginManager.register('test-plugin', Plugin => {
+        return class TestPlugin extends Plugin {
+          async start() {
+            await super.start();
+            // just check that we are ok with that, and that we are not stuck
+            // with some on-going processcf. sync
+            this._intervalId = setInterval(() => {}, 500);
+          }
+          // should be called after context.stop()
+          async stop() {
+            await super.stop();
+
+            clearInterval(this._intervalId);
+
+            counter += 1;
+            pluginStop = true;
+            assert.equal(counter, 2);
+          }
+        }
+      });
+      await server.init();
+
+      class ServerTestContext extends ServerContext {
+        get name() { return 'test-context'; }
+        // should be called first
+        async stop() {
+          await super.stop();
+
+          counter += 1;
+          contextStop = true;
+          assert.equal(counter, 1);
+        }
+      }
+      const serverTestContext = new ServerTestContext(server, 'test');
+
+      // we call start after creating the context, so it is started
+      await server.start();
+      await server.stop();
+
+      assert.equal(contextStop, true);
+      assert.equal(pluginStop, true);
     });
   });
 

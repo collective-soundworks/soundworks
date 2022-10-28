@@ -104,6 +104,7 @@ class Context {
       await this.client.contextManager.get(this.name);
     }
 
+    // we need the try/catch block to change the promise rejection into proper error
     try {
       await new Promise((resolve, reject) => {
         const reqId = storeRequestPromise(resolve, reject);
@@ -122,6 +123,7 @@ class Context {
    * @return Promise
    */
   async exit() {
+    // we need the try/catch block to change the promise rejection into proper error
     try {
       await new Promise((resolve, reject) => {
         const reqId = storeRequestPromise(resolve, reject);
