@@ -1,7 +1,8 @@
-const { fork, exec } = require('node:child_process');
-const path = require('node:path');
-const assert = require('chai').assert;
-const puppeteer = require('puppeteer');
+import { fork, exec } from 'node:child_process';
+import path from 'node:path';
+
+import { assert } from 'chai';
+import puppeteer from 'puppeteer';
 
 // path of the soundworks app
 const appPath = path.join(process.cwd(), 'tests', 'browser-integration');

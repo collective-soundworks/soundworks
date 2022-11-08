@@ -1,11 +1,7 @@
-const path = require('node:path');
-const assert = require('chai').assert;
+import { assert } from 'chai';
 
-const Server = require('../server').Server;
-const ServerContext = require('../server').Context;
-
-const Client = require('../client').Client;
-const ClientContext = require('../client').Context;
+import { Server, Context as ServerContext } from '../src/server/index.js';
+import { Client, Context as ClientContext } from '../src/client/index.js';
 
 const config = {
   app: {

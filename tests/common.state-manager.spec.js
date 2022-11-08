@@ -1,12 +1,11 @@
-const assert = require('chai').assert;
+import { assert } from 'chai';
 
-const Server = require('../server').Server;
-const Client = require('../client').Client;
-
-const {
+import { Server } from '../src/server/index.js';
+import { Client } from '../src/client/index.js';
+import {
   OBSERVE_RESPONSE,
   OBSERVE_NOTIFICATION,
-} = require('../common/constants.js');
+} from '../src/common/constants.js';
 
 const a = {
   bool: {
@@ -1097,8 +1096,8 @@ describe(`common::StateManager`, () => {
         server.stateManager.deleteSchema('aa');
 
         setTimeout(() => {
-          allDetach = detachCalled.reduce((acc, value) => acc && value, true);
-          allDelete = deleteCalled.reduce((acc, value) => acc && value, true);
+          const allDetach = detachCalled.reduce((acc, value) => acc && value, true);
+          const allDelete = deleteCalled.reduce((acc, value) => acc && value, true);
 
           assert.equal(allDetach, true);
           assert.equal(allDelete, true);

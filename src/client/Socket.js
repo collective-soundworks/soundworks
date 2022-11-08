@@ -5,7 +5,7 @@ import {
   unpackBinaryMessage,
   packStringMessage,
   unpackStringMessage,
-} from '../common/sockets-encoder-decoder.js';
+} from '../common/sockets-utils.js';
 import logger from '../common/logger.js';
 import { isBrowser } from '../common/utils.js';
 

@@ -2,7 +2,10 @@
 
 ![soundworks-logo](./assets/logo-200x200.png)
 
-Full-stack JavaScript framework for distributed WebAudio and multimedia applications.
+Open-source creative coding framework for distributed applications based on Web technologies
+
+
+@todo - review
 
 ## Table of Contents
 

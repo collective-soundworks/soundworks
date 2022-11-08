@@ -1,3 +1,4 @@
+import { WebSocketServer } from 'ws';
 import WebSocket from 'ws';
 import querystring from 'querystring';
 
@@ -33,7 +34,7 @@ class Sockets {
   start(httpServer, config, onConnectionCallback) {
     const path = config.path;
 
-    this.wss = new WebSocket.Server({
+    this.wss = new WebSocketServer({
       server: httpServer,
       path: `/${path}`, // @note - update according to existing config files (aka cosima-apps)
     });

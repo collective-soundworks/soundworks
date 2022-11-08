@@ -1,6 +1,5 @@
-const pluginFactory = function(AbstractPlugin) {
-
-  return class PluginDelay extends AbstractPlugin {
+export function pluginDelayFactory(Plugin) {
+  return class PluginDelay extends Plugin {
     constructor(server, id, options) {
       super(server, id);
 
@@ -36,5 +35,3 @@ const pluginFactory = function(AbstractPlugin) {
     }
   }
 }
-
-module.exports = pluginFactory;

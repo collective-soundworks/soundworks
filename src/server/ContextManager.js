@@ -9,12 +9,12 @@ import {
 } from '../common/constants.js';
 
 
-/**
- * @private
- * create a dummy server side context if a proper server-side context has not
- * been declared and registered, one DefaultContext is created per unknown
- * contextName and associated to all known client types.
- */
+// @note
+// Create a dummy server side context if a proper server-side context has not
+// been declared and registered, one DefaultContext is created per unknown
+// contextName and associated to all known client types.
+
+/** @private */
 function createNamedContextClass(contextName) {
   return class DefaultContext extends Context {
     get name() { return contextName; }

@@ -3,7 +3,7 @@
 <head>
     
     <meta charset="utf-8">
-    <title>ContextManager - soundworks</title>
+    <title>BasePluginManager - soundworks</title>
     
     <meta name="description" content="Documentation of soundworks, a full-stack JavaScript framework for distributed WebAudio and multimedia applications" />
     
@@ -35,7 +35,7 @@
 
 <div id="main">
     
-    <h1 class="page-title">ContextManager</h1>
+    <h1 class="page-title">BasePluginManager</h1>
     
 
     
@@ -48,11 +48,10 @@
 <header>
     
         <h2>
-        ContextManager
+        BasePluginManager
         </h2>
         
-            <div class="class-description usertext"><p>Manager the different contexts and their lifecycle.
-Most of the time, you should not ahve to manipulate the context manager directly</p></div>
+            <div class="class-description usertext"><p>Shared functionnality between server-side and client-size plugin manager</p></div>
         
     
 </header>
@@ -67,7 +66,7 @@ Most of the time, you should not ahve to manipulate the context manager directly
     <h2>Constructor</h2>
     
 
-    <h4 class="name" id="ContextManager"><span class="type-signature"></span>new ContextManager<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="BasePluginManager"><span class="type-signature"></span>new BasePluginManager<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
@@ -79,7 +78,7 @@ Most of the time, you should not ahve to manipulate the context manager directly
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="client_ContextManager.js.html">client/ContextManager.js</a>, <a href="client_ContextManager.js.html#line27">line 27</a>
+        <a href="common_BasePluginManager.js.html">common/BasePluginManager.js</a>, <a href="common_BasePluginManager.js.html#line9">line 9</a>
     </li></ul></dd>
     
 
@@ -164,45 +163,14 @@ Most of the time, you should not ahve to manipulate the context manager directly
     
 
     
+        <h3 class="subsection-title">Methods</h3>
 
-    
-
-    
-</article>
-
-</section>
-
-
-
-
-
-
-
-<section>
-
-<header>
-    
-        <h2>
-        ContextManager
-        </h2>
-        
-            <div class="class-description usertext"><p>Manager the different contexts and their lifecycle.
-Most of the time, you should not ahve to manipulate the context manager directly</p></div>
-        
-    
-</header>
-
-<article>
-    
-        <div class="container-overview">
         
             
 
     
-    <h2>Constructor</h2>
-    
 
-    <h4 class="name" id="ContextManager"><span class="type-signature"></span>new ContextManager<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="get"><span class="type-signature">(async) </span>get<span class="signature">(id)</span><span class="type-signature"></span></h4>
 
     
 
@@ -214,7 +182,7 @@ Most of the time, you should not ahve to manipulate the context manager directly
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="server_ContextManager.js.html">server/ContextManager.js</a>, <a href="server_ContextManager.js.html#line55">line 55</a>
+        <a href="common_BasePluginManager.js.html">common/BasePluginManager.js</a>, <a href="common_BasePluginManager.js.html#line120">line 120</a>
     </li></ul></dd>
     
 
@@ -253,6 +221,154 @@ Most of the time, you should not ahve to manipulate the context manager directly
 
 
 
+<div class="description usertext">
+    <p>Retrieve an fully started instance of a registered plugin.</p>
+<p>Be aware that the <code>get</code> method resolves when the plugin is fully 'started',
+which is what we cant 99.9% of the time, as such this method should not be
+used before <code>client|server.init()</code> is fullfilled. To access plugin instances
+before this point, e.g. to display initialization screen, etc., you should
+therefore rely on the <code>onStateChange</code> method.</p>
+<p>Note that this API is deisgned to enable dynamic creation of plugins in the
+future, instanciating and starting (resolving its full chain of dependency
+chain) if needed.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>id</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Id of the plugin as defined on registration</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="onStateChange"><span class="type-signature"></span>onStateChange<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="common_BasePluginManager.js.html">common/BasePluginManager.js</a>, <a href="common_BasePluginManager.js.html#line179">line 179</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description usertext">
+    <p>Propagate a notification each time a plugin is updated (status or inner state)</p>
+</div>
+
 
 
 
@@ -281,7 +397,24 @@ Most of the time, you should not ahve to manipulate the context manager directly
 
 
         
-        </div>
+            
+
+    
+
+    <h4 class="name" id="register"><span class="type-signature"></span>register<span class="signature">(id, factory, options, deps)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="common_BasePluginManager.js.html">common/BasePluginManager.js</a>, <a href="common_BasePluginManager.js.html#line46">line 46</a>
+    </li></ul></dd>
     
 
     
@@ -289,15 +422,205 @@ Most of the time, you should not ahve to manipulate the context manager directly
     
 
     
-    
-    
-
-     
 
     
 
     
 
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li>client.PluginManager#register</li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description usertext">
+    <p>Register a plugin into soundworks.</p>
+<p><em>A plugin must be registered both client-side and server-side</em></p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>```js
+// client-side
+client.pluginManager.register('user-defined-name', pluginFactory);
+// server-side
+server.pluginManager.register('user-defined-name', pluginFactory);
+```</code></pre>
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>id</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Unique id of the plugin, allow to register the same
+plugin factory under different ids.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>factory</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Factory function that return the plugin class</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Options to configure the plugin</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>deps</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>List of plugins' names the plugin depends on</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
     
 
     

@@ -8,7 +8,7 @@ import {
   CLIENT_HANDSHAKE_REQUEST,
   CLIENT_HANDSHAKE_RESPONSE,
   CLIENT_HANDSHAKE_ERROR,
-} from '../common/constants';
+} from '../common/constants.js';
 import { isBrowser } from '../common/utils.js';
 import logger from '../common/logger.js';
 

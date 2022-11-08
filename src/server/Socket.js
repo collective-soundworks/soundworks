@@ -3,7 +3,7 @@ import {
   unpackBinaryMessage,
   packStringMessage,
   unpackStringMessage,
-} from '../common/sockets-encoder-decoder.js';
+} from '../common/sockets-utils.js';
 
 const noop = () => {};
 // const CONNECTING = 0;

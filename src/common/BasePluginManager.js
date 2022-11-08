@@ -8,10 +8,8 @@ import { isString } from './utils.js';
  */
 class BasePluginManager {
   constructor(node) {
-    /**
-     * @private
-     * node may be either a soundworks server or a soundworks client
-     */
+    // node may be either a soundworks server or a soundworks client
+    /** @private */
     this._node = node;
     /** @private */
     this._registeredPlugins = new Map();
@@ -72,10 +70,8 @@ class BasePluginManager {
     this._registeredPlugins.set(id, { ctor, options, deps });
   }
 
-  /**
-   * Initialize all the registered plugin. Called during `Client.init()` or `Server.init()`
-   * @private
-   */
+  // Initialize all the registered plugin. Called during `Client.init()` or `Server.init()`
+  /** @private */
   async start() {
     logger.title('starting registered plugins');
 

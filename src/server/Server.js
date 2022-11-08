@@ -10,7 +10,7 @@ import compression from 'compression';
 import express from 'express';
 import isPlainObject from 'is-plain-obj';
 import Keyv from 'keyv';
-import KeyvFile from 'keyv-file';
+import { KeyvFile } from 'keyv-file';
 import merge from 'lodash.merge';
 import pem from 'pem';
 import compile from 'template-literal';
@@ -25,7 +25,7 @@ import {
   CLIENT_HANDSHAKE_REQUEST,
   CLIENT_HANDSHAKE_RESPONSE,
   CLIENT_HANDSHAKE_ERROR,
-} from '../common/constants';
+} from '../common/constants.js';
 
 let _dbNamespaces = new Set();
 
@@ -281,7 +281,7 @@ class Server {
       // if certs have been given in config
       if (httpsInfos !== null) {
         try {
-          // @todo - add fs.existsSync check too
+          // existance of file is checked in contructor
           let cert = fs.readFileSync(httpsInfos.cert);
           let key = fs.readFileSync(httpsInfos.key);
 
@@ -686,14 +686,11 @@ Invalid certificate files, please check your:
       throw new Error(`[soundworks:Server] Invalid namespace for ".createNamespacedDb(namespace)", namespace "${namespace}" already exists`);
     }
 
-    const dbDirectory = path.join(process.cwd(), '.data');
-
-    if (!fs.existsSync(dbDirectory)) {
-      fs.mkdirSync(dbDirectory);
-    }
-
-    const filename = path.join(dbDirectory, `soundworks-${namespace}.db`);
-    // at note keyv-file doesn't seems to works
+    // KeyvFile uses fs-extra.outputFile internally so we don't need to create
+    // the directory, it will be lazily created if something is written in the db
+    // @see https://github.com/zaaack/keyv-file/blob/52502077c78226b3d69a615c80b88e53be096979/index.ts#L157
+    const filename = path.join(process.cwd(), '.data', `soundworks-${namespace}.db`);
+    // @note - keyv-file doesn't seems to works
     const store = new KeyvFile({ filename });
     const db = new Keyv({ namespace, store });
     db.on('error', err => logger.error(`[soundworks:Server] db ${namespace} error: ${err}`));

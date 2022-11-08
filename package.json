@@ -1,7 +1,7 @@
 {
   "name": "@soundworks/core",
   "version": "3.7.0",
-  "description": "full-stack javascript framework for distributed audio visual experiences on the web",
+  "description": "Open-source creative coding framework for distributed applications based on Web technologies",
   "authors": [
     "Benjamin Matuszewski",
     "Sébastien Robaszkiewicz",
@@ -11,28 +11,34 @@
   "publishConfig": {
     "access": "public"
   },
+  "type": "module",
+  "exports": {
+    "./client.js": "./src/client/index.js",
+    "./server.js": "./src/server/index.js"
+  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/collective-soundworks/soundworks"
+    "url": "git+https://github.com/collective-soundworks/soundworks.git"
   },
-  "main": "",
-  "engines" : {
-    "node" : ">=16.0.0"
+  "bugs": {
+    "url": "https://github.com/collective-soundworks/soundworks/issues"
+  },
+  "homepage": "https://soundworks.dev",
+  "keywords": [
+    "soundworks",
+    "creative-coding",
+    "music",
+    "full-stack",
+    "real-time",
+    "distributed-system"
+  ],
+  "engines": {
+    "node": ">=16.0.0"
   },
   "scripts": {
-    "clean": "rm -Rf client && rm -Rf server && rm -Rf common",
     "doc": "rm -Rf docs && jsdoc -c .jsdoc.json --verbose && cp -R assets docs/",
-    "prepublishOnly": "npm run build",
     "toc": "markdown-toc -i README.md",
     "version": "npm run toc && npm run doc && git add docs",
-    "build:client": "babel src/client --out-dir client",
-    "build:server": "babel src/server --out-dir server",
-    "build:common": "babel src/common --out-dir common",
-    "build": "npm run clean && npm run build:server && npm run build:client && npm run build:common",
-    "dev:client": "chokidar src/client/ -c \"npm run build:client\"",
-    "dev:server": "chokidar src/server/ -c \"npm run build:server\"",
-    "dev:common": "chokidar src/common/ -c \"npm run build:common\"",
-    "dev": "npm run build && (npm run dev:client & npm run dev:server & npm run dev:common)",
     "lint": "npx eslint src",
     "test": "mocha"
   },
@@ -57,13 +63,9 @@
     "ws": "^8.5.0"
   },
   "devDependencies": {
-    "@babel/cli": "^7.17.6",
-    "@babel/core": "^7.17.9",
-    "@babel/preset-env": "^7.16.11",
+    "@ircam/eslint-config": "^1.0.0",
     "chai": "^4.3.6",
     "chai-shallow-deep-equal": "^1.4.6",
-    "chokidar": "^3.5.3",
-    "chokidar-cli": "^3.0.0",
     "commitizen": "^4.2.5",
     "cz-conventional-changelog": "^3.3.0",
     "docdash": "^1.2.0",

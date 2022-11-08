@@ -1,18 +1,14 @@
-src
 tests
-
-examples
 docs
+
 .data
 
 CHANGELOG.md
 .jsdoc.json
-.babelrc
 .editorconfig
 .eslintrc.json
 
-__backup
-__resources
+__*
 assets
 
 NOTES.md

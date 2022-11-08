@@ -1,8 +1,7 @@
-const path = require('node:path');
-const assert = require('chai').assert;
+import { assert } from 'chai';
 
-const Server = require('../server').Server;
-const Client = require('../client').Client;
+import { Server } from '../src/server/index.js';
+import { Client } from '../src/client/index.js';
 
 const config = {
   app: {
@@ -19,21 +18,17 @@ const config = {
   },
 };
 
-let client;
-let server;
 
 describe(`client.Socket`, () => {
   describe(`[node client] wait for the server to start`, () => {
-    before(async function() {
-      // config.env.verbose = true;
-      client = new Client({ clientType: 'test', ...config });
-    });
+    let server;
 
     after(async function() {
       await server.stop();
     });
 
     it(`should connect when server is launched later`, async function() {
+      const client = new Client({ clientType: 'test', ...config });
       this.timeout(6 * 1000);
 
       const initPromise = new Promise(async (resolve) => {

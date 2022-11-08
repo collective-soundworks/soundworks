@@ -1,12 +1,11 @@
-const assert = require('chai').assert;
+import { assert } from 'chai';
 
-const Server = require('../server').Server;
-const ServerPlugin = require('../server/Plugin.js');
-const serverPluginDelayFactory = require('./utils/plugin-delay.server.js');
-
-const Client = require('../client').Client;
-const ClientPlugin = require('../client/Plugin.js');
-const clientPluginDelayFactory = require('./utils/plugin-delay.client.js');
+import { Server } from '../src/server/index.js';
+import { Client } from '../src/client/index.js';
+import ServerPlugin from '../src/server/Plugin.js';
+import ClientPlugin from '../src/client/Plugin.js';
+import { pluginDelayFactory as serverPluginDelayFactory } from './utils/plugin-delay.server.js';
+import { pluginDelayFactory as clientPluginDelayFactory } from './utils/plugin-delay.client.js';
 
 const config = {
   app: {

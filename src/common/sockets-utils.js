@@ -1,8 +1,5 @@
 import 'fast-text-encoding';
 import root from 'window-or-global';
-// import { isBrowser } from './utils.js';
-
-// const root = isBrowser() ? window : global;
 
 const encoder = new root.TextEncoder('utf-8');
 const decoder = new root.TextDecoder('utf-8');

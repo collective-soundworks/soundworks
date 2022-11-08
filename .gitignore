@@ -1,8 +1,3 @@
-# transpiled files
-/client
-/server
-/common
-
 # dependencies
 /node_modules
 
@@ -11,16 +6,12 @@
 Thumbs.db
 .data
 
-# convention for personnal files
+# personnal files
 __*
-
-# to be removed when documentation is online
-/examples
-
-/tests/.env
-
 NOTES.md
 
+# testing
+/tests/.env
 
-# generate-changelog -t 6a735ab08a18138d6f15c44f32c78af1964770be
+# changelog
 CHANGELOG.md

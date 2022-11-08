@@ -1,15 +1,10 @@
-const path = require('path');
-const assert = require('chai').assert;
-const merge = require('lodash.merge');
+import { assert }  from 'chai';
 
-const Server = require('../server').Server;
-const Client = require('../client').Client;
-const Context = require('../client').Context;
-const ServerContext = require('../server').Context;
-const ClientContext = require('../client').Context;
-const pluginDelayFactory = require('./utils/plugin-delay.client.js');
+import { Server, Context as ServerContext } from '../src/server/index.js';
+import { Client, Context as ClientContext } from '../src/client/index.js';
+import { pluginDelayFactory } from './utils/plugin-delay.client.js';
 
-config = {
+const config = {
   app: {
     clients: {
       test: { target: 'node' },
@@ -189,7 +184,7 @@ describe('client::Client', () => {
       await client.init();
 
       let contextStarted = false;
-      class MyContext extends Context {
+      class MyContext extends ClientContext {
         async start() {
           super.start();
           contextStarted = true;
@@ -250,7 +245,7 @@ describe('client::Client', () => {
     });
 
     it(`should stop the contexts first and then the plugins`, async () => {
-      server = new Server(config);
+      const server = new Server(config);
       server.pluginManager.register('test-plugin', Plugin => {
         return class TestPlugin extends Plugin {}
       });

@@ -1,7 +1,5 @@
 import merge from 'lodash.merge';
 
-import logger from '../common/logger.js';
-
 class BasePlugin {
   constructor(id) {
     /**
@@ -58,12 +56,11 @@ class BasePlugin {
    *   }
    * }
    */
-  async start() {
-    logger.log(`> plugin "${this.id}" start`);
-  }
+  async start() {}
 
   /**
    * @private
+   *
    * This method is called during the `pluginManager.stop()` which is itself
    * called during `client.stop()`. Most of the time, you wont need to implement
    * this method.
@@ -76,12 +73,10 @@ class BasePlugin {
    *   }
    * }
    */
-  async stop() {
-    logger.log(`> plugin "${this.id}" stop`);
-  }
+  async stop() {}
 
   /**
-   * @todo
+   * @todo - documentation
    */
   onStateChange(callback) {
     this._onStateChangeCallbacks.add(callback);
@@ -89,7 +84,7 @@ class BasePlugin {
   }
 
   /**
-   * @todo
+   * @todo - documentation
    */
   propagateStateChange(updates) {
     merge(this.state, updates);

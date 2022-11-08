@@ -1,14 +1,12 @@
-const path = require('path');
-const assert = require('chai').assert;
+import { assert } from 'chai';
 
-const Server = require('../server').Server;
-const Client = require('../client').Client;
-const ServerAbstractExperience = require('../server').AbstractExperience;
-const Plugin = require('../server/Plugin.js').default;
-const PluginManager = require('../server/PluginManager.js').default;
-const pluginDelayFactory = require('./utils/plugin-delay.server.js');
+import { Server } from '../src/server/index.js';
+import { Client } from '../src/client/index.js';
+import Plugin from '../src/server/Plugin.js';
+import PluginManager from '../src/server/PluginManager.js';
+import { pluginDelayFactory } from './utils/plugin-delay.server.js';
 
-config = {
+const config = {
   app: {
     name: 'plugin-manager-test',
     clients: {
@@ -326,7 +324,7 @@ describe(`server::PluginManager`, () => {
         }
       }
 
-      addClientCalled2 = false;
+      let addClientCalled2 = false;
 
       function testPluginFactory2(Plugin) {
         return class TestPlugin extends Plugin {
@@ -431,7 +429,7 @@ describe(`server::PluginManager`, () => {
         }
       }
 
-      removeClientCalled2 = false;
+      let removeClientCalled2 = false;
 
       function testPluginFactory2(Plugin) {
         return class TestPlugin extends Plugin {

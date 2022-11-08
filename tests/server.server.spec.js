@@ -1,14 +1,17 @@
-const fs = require('fs');
-const path = require('path');
-const assert = require('chai').assert;
+import fs from 'node:fs';
+import path from 'node:path';
+import * as url from 'node:url';
 
-const dotenv = require('dotenv');
-const merge = require('lodash.merge');
-const tcpp = require('tcp-ping');
+import { assert } from 'chai';
+import dotenv from 'dotenv';
+import merge from 'lodash.merge';
+import tcpp from 'tcp-ping';
 
-const Server = require('../server').Server;
-const Client = require('../client').Client;
-const ServerContext = require('../server').Context;
+import { Server, Context as ServerContext } from '../src/server/index.js';
+import { Client } from '../src/client/index.js';
+
+const __filename = url.fileURLToPath(import.meta.url);
+const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
 
 const config = {
   app: {
@@ -114,13 +117,14 @@ describe('server::Server', () => {
 
       const server = new Server(browserConfig);
 
+      let errored = false;
       try {
         await server.init();
-        assert.fail('should throw');
       } catch(err) {
+        errored = true;
         console.log(err.message);
-        assert.ok('should require some template config');
       }
+      if (!errored) { assert.fail('should have thrown'); }
     });
 
     it(`should throw if invalid https cert file given`, async () => {
@@ -137,19 +141,20 @@ describe('server::Server', () => {
       const wrongConfig = merge({}, config);
       wrongConfig.env.useHttps = true;
       wrongConfig.env.httpsInfos = {
-        cert: __filename, // this is invalid
+        cert: __filename, // this is an invalid cert file
         key: env.HTTPS_KEY,
       };
 
       const server = new Server(wrongConfig);
 
+      let errored = false;
       try {
         await server.init();
-        assert.fail('should have thrown');
-      } catch (err) {
+      } catch(err) {
+        errored = true;
         console.log(err.message);
-        assert.ok('should throw');
       }
+      if (!errored) { assert.fail('should have thrown'); }
     });
 
     it(`should throw if invalid https key file given`, async () => {
@@ -172,13 +177,14 @@ describe('server::Server', () => {
 
       const server = new Server(wrongConfig);
 
+      let errored = false;
       try {
         await server.init();
-        assert.fail('should have thrown');
-      } catch (err) {
+      } catch(err) {
+        errored = true;
         console.log(err.message);
-        assert.ok('should throw');
       }
+      if (!errored) { assert.fail('should have thrown'); }
     });
 
     it(`should store self-signed certificated in db`, async () => {
@@ -216,7 +222,7 @@ describe('server::Server', () => {
           cert: env.HTTPS_CERT,
         };
 
-        server = new Server(httpsConfig);
+        const server = new Server(httpsConfig);
         await server.init();
 
         assert.notEqual(server.httpsInfos, null);
@@ -231,7 +237,7 @@ describe('server::Server', () => {
         httpsConfig.env.useHttps = true;
         httpsConfig.env.httpsInfos = null;
 
-        server = new Server(httpsConfig);
+        const server = new Server(httpsConfig);
         await server.init();
 
         assert.notEqual(server.httpsInfos, null);
@@ -240,12 +246,13 @@ describe('server::Server', () => {
         assert.isUndefined(server.httpsInfos.validTo);
         assert.isUndefined(server.httpsInfos.isValid);
       });
+
     });
   });
 
   describe(`await server.start()`, () => {
     it(`should throw start() is called before init()`, async () => {
-      server = new Server(config);
+      const server = new Server(config);
 
       try {
         await server.start();
@@ -257,7 +264,7 @@ describe('server::Server', () => {
     });
 
     it(`should launch the server (http)`, async () => {
-      server = new Server(config);
+      const server = new Server(config);
       await server.init();
       await server.start();
 
@@ -284,7 +291,7 @@ describe('server::Server', () => {
       const selfSignedConfig = merge({}, config);
       selfSignedConfig.env.useHttps = true;
 
-      server = new Server(selfSignedConfig);
+      const server = new Server(selfSignedConfig);
       await server.init();
       await server.start();
 
@@ -325,7 +332,7 @@ describe('server::Server', () => {
         key: env.HTTPS_KEY,
       };
 
-      server = new Server(httpsConfigs);
+      const server = new Server(httpsConfigs);
       await server.init();
       await server.start();
 
@@ -351,7 +358,7 @@ describe('server::Server', () => {
 
   describe('await server.stop()', () => {
     it('should throw if stop() is called before start()', async () => {
-      server = new Server(config);
+      const server = new Server(config);
 
       await server.init();
 
@@ -366,7 +373,7 @@ describe('server::Server', () => {
     });
 
     it('should stop the server', async () => {
-      server = new Server(config);
+      const server = new Server(config);
 
       await server.init();
       await server.start();
@@ -375,7 +382,7 @@ describe('server::Server', () => {
     });
 
     it('should stop the server even if a client is connected', async() => {
-      server = new Server(config);
+      const server = new Server(config);
 
       await server.init();
       await server.start();
@@ -393,7 +400,7 @@ describe('server::Server', () => {
       let pluginStop = false;
       let contextStop = false;
 
-      server = new Server(config);
+      const server = new Server(config);
       server.pluginManager.register('test-plugin', Plugin => {
         return class TestPlugin extends Plugin {
           async start() {
@@ -439,6 +446,8 @@ describe('server::Server', () => {
   });
 
   describe('server.add|removeListener(function) - Events (inited, started, stopped)', () => {
+    let server;
+
     before(async () => {
       server = new Server(config);
     });

@@ -1,6 +1,6 @@
-const assert = require('chai').assert;
+import { assert } from 'chai';
 
-const { packBinaryMessage, unpackBinaryMessage } = require('../common/sockets-encoder-decoder.js');
+import { packBinaryMessage, unpackBinaryMessage } from '../src/common/sockets-utils.js';
 
 describe(`common::<packBinaryMessage, unpackBinaryMessage>`, () => {
   it('should pack/unpack Float32Array', () => {

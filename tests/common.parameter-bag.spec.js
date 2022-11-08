@@ -1,10 +1,11 @@
-const chai = require('chai');
-chai.use(require('chai-shallow-deep-equal'));
+import equal from 'fast-deep-equal';
+import { default as chai, assert } from 'chai';
+import shallowDeepEqual from 'chai-shallow-deep-equal';
 
-const assert = chai.assert;
-const ParameterBag = require('../common/ParameterBag.js').default;
-const { sharedOptions, types } = require('../common/ParameterBag.js');
-const equal = require('fast-deep-equal');
+import ParameterBag from '../src/common/ParameterBag.js';
+import { sharedOptions, types } from '../src/common/ParameterBag.js';
+
+chai.use(shallowDeepEqual);
 
 describe('common::ParameterBag (private)', () => {
   // ---------------------------------------------------------------
