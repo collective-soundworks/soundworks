@@ -43,9 +43,9 @@ nav > h2 > a::before {
 /* home button */
 nav h2 a:not(.menu-item) {
   display: block;
-  margin: 25px;
-  width: 200px;
-  height: 200px;
+  margin: 25px 0;
+  width: 210px;
+  height: 210px;
   background-image: url(./logo-200x200.png);
   background-size: cover;
   font-size: 0;
@@ -56,12 +56,11 @@ nav h2 a:not(.menu-item) {
 .usertext h1, h1 {
   font-size: 48px;
   margin: 0;
-  margin-top: 0.5em;
   color: #3e4035;
 }
 
 .usertext h1 {
-  padding: 40px 0 20px;
+  padding: 10px 0 20px;
   border-bottom: 1px solid #767676;
 }
 

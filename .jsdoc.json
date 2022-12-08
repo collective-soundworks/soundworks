@@ -40,15 +40,15 @@
         "title": "soundworks",
         "description": "Documentation of soundworks, a full-stack JavaScript framework for distributed WebAudio and multimedia applications"
     },
-    "search": false,
+    "search": true,
     "menu": {
-      "Github": {
-        "href": "https://github.com/collective-soundworks/soundworks",
+      "General Documentation": {
+        "href":"http://soundworks.dev/",
         "target":"_blank",
         "class":"menu-item"
       },
-      "Resources": {
-        "href":"http://collective-soundworks.github.io/",
+      "Github": {
+        "href": "https://github.com/collective-soundworks/soundworks",
         "target":"_blank",
         "class":"menu-item"
       }

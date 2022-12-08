@@ -24,11 +24,11 @@ Open-source creative coding framework for distributed applications based on Web 
 
 ## Documentation
 
-[https://collective-soundworks.github.io](https://collective-soundworks.github.io)
+[https://soundworks.dev](https://soundworks.dev)
 
 ## API
 
-[http://collective-soundworks.github.io/soundworks/](http://collective-soundworks.github.io/soundworks/)
+[https://soundworks.dev/api](https://soundworks.dev/api)
 
 ## Overview
 
@@ -43,6 +43,10 @@ The core of the framework is very minimal and dedicated at handling:
   - Distributed state management
 
 `soundworks` can be extended with plugins to reuse common logic such as audio file loading, clock synchronisation, etc. Each plugin leaves in a separate repo for better modularity and to simplify version management.
+
+## Shared w/ us
+
+https://github.com/collective-soundworks/soundworks/discussions/61
 
 ## Installation
 
