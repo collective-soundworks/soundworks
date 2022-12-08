@@ -60,7 +60,7 @@
     "template-literal": "^1.0.4",
     "uuid": "^8.3.2",
     "window-or-global": "^1.0.1",
-    "ws": "^8.5.0"
+    "ws": "^8.11.0"
   },
   "devDependencies": {
     "@ircam/eslint-config": "^1.0.0",
@@ -76,7 +76,8 @@
     "markdown-toc": "^1.2.0",
     "mocha": "^9.2.2",
     "puppeteer": "^18.0.5",
-    "tcp-ping": "^0.1.1"
+    "tcp-ping": "^0.1.1",
+    "typescript": "^4.9.3"
   },
   "optionalDependencies": {
     "bufferutil": "^4.0.5",
