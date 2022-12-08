@@ -251,18 +251,6 @@ describe('server::Server', () => {
   });
 
   describe(`await server.start()`, () => {
-    it(`should throw start() is called before init()`, async () => {
-      const server = new Server(config);
-
-      try {
-        await server.start();
-        assert.fail('server.start() should not terminate');
-      } catch(err) {
-        console.log(err.message);
-        assert.ok('server.start() should throw');
-      }
-    });
-
     it(`should launch the server (http)`, async () => {
       const server = new Server(config);
       await server.init();

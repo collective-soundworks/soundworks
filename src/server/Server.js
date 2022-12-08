@@ -428,7 +428,8 @@ Invalid certificate files, please check your:
 
   /**
    * Method to be called when `init` step is done in the initialization
-   * lifecycle of the soundworks server.
+   * lifecycle of the soundworks server. If `server.init()` has not been called
+   * explicitely, `server.start()` will call it automatically.
    *
    * What it does:
    * - starts all registered contexts (context are automatically registered
@@ -439,9 +440,18 @@ Invalid certificate files, please check your:
    * After `await server.start()` the server is ready to accept incoming connexions
    */
   async start() {
-    if (this.status !== 'inited') {
-      throw new Error(`[soundworks:Server] Cannot start() before init()`);
+    if (this.status === 'idle') {
+      await this.init();
     }
+
+    if (this.status === 'started') {
+      throw new Error(`[soundworks:Server] Cannot call "server.start()" twice`);
+    }
+
+    if (this.status !== 'inited') {
+      throw new Error(`[soundworks:Server] Cannot "server.start()" before "server.init()"`);
+    }
+
     // ------------------------------------------------------------
     // START CONTEXT MANAGER
     // ------------------------------------------------------------

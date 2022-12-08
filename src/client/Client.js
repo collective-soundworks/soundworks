@@ -110,6 +110,10 @@ class Client {
 
     /**
      *
+     */
+    this.target = isBrowser() ? 'browser' : 'node';
+    /**
+     *
      *
      */
     this.contextManager = new ContextManager();
@@ -132,7 +136,7 @@ class Client {
     this.stateManager = null;
 
     /** @private */
-    this._status = 'idle';
+    this.status = 'idle';
 
     logger.configure(!!config.env.verbose);
   }
@@ -228,8 +232,16 @@ class Client {
    * @see {@link server.Server#start}
    */
   async start() {
+    if (this.status === 'idle') {
+      await this.init();
+    }
+
+    if (this.status === 'started') {
+      throw new Error(`[soundworks:Server] Cannot call "client.start()" twice`);
+    }
+
     if (this.status !== 'inited') {
-      throw new Error(`[soundworks:Client] Cannot start() before init()`);
+      throw new Error(`[soundworks:Server] Cannot "client.start()" before "client.init()"`);
     }
 
     // ------------------------------------------------------------
