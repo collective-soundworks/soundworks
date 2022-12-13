@@ -185,6 +185,24 @@ class Socket {
       });
     });
 
+    // clean all listeners on close, this must be done here instead of in
+    // `terminate` because the client should properly exit even if the server
+    // is stopped first
+    // `client.socket.addListener('close', () => await client.stop());`
+    // this._wsClosePromise = new Promise((resolve, _reject) => {
+    //   this.addListener('close', () => {
+    //     this.removeAllListeners();
+    //     resolve();
+    //   });
+    // });
+
+    // this._binaryWsClosePromise = new Promise((resolve, _reject) => {
+    //   this.addBinaryListener('close', () => {
+    //     this.removeAllBinaryListeners();
+    //     resolve();
+    //   });
+    // });
+
     // wait for both sockets connected
     return Promise.resolve();
   }
@@ -222,8 +240,10 @@ class Socket {
   }
 
   /** @private */
-  _removeAllListeners(listeners, channel) {
-    if (listeners.has(channel)) {
+  _removeAllListeners(listeners, channel = null) {
+    if (channel === null) {
+      listeners.clear();
+    } else if (listeners.has(channel)) {
       listeners.delete(channel);
     }
   }
@@ -264,7 +284,7 @@ class Socket {
    *
    * @param {String} channel - Channel of the message
    */
-  removeAllListeners(channel) {
+  removeAllListeners(channel = null) {
     this._removeAllListeners(this._stringListeners, channel);
   }
 
@@ -304,7 +324,7 @@ class Socket {
    *
    * @param {String} channel - Channel of the message
    */
-  removeAllBinaryListeners(channel) {
+  removeAllBinaryListeners(channel = null) {
     this._removeAllListeners(this._binaryListeners, channel);
   }
 
@@ -312,24 +332,14 @@ class Socket {
    * Immediately close the 2 sockets
    */
   async terminate() {
-    const wsPromise = new Promise((resolve, _reject) => {
-      this.addListener('close', () => {
-        this.removeAllListeners();
-        resolve();
-      });
-    });
-
-    const binaryWsPromise = new Promise((resolve, _reject) => {
-      this.addBinaryListener('close', () => {
-        this.removeAllBinaryListeners();
-        resolve();
-      });
-    });
+    this.removeAllListeners();
+    this.removeAllBinaryListeners();
 
     this.ws.close();
     this.binaryWs.close();
 
-    return Promise.all([wsPromise, binaryWsPromise]);
+    // return Promise.all([this._wsClosePromise, this._binaryWsClosePromise]);
+    return Promise.resolve();
   }
 }
 

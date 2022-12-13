@@ -244,6 +244,20 @@ describe('client::Client', () => {
       await server.stop();
     });
 
+    it('should properly stop if server is closed first', async () => {
+      const server = new Server(config);
+      await server.start();
+
+      const client = new Client({ clientType: 'test', ...config });
+      await client.start();
+
+      await new Promise(resolve => setTimeout(resolve, 100));
+      await server.stop();
+
+      await new Promise(resolve => setTimeout(resolve, 100));
+      await client.stop();
+    });
+
     it(`should stop the contexts first and then the plugins`, async () => {
       const server = new Server(config);
       server.pluginManager.register('test-plugin', Plugin => {

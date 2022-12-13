@@ -259,7 +259,6 @@ class Client {
 
     await this.contextManager.stop();
     await this.pluginManager.stop();
-
     await this.socket.terminate();
   }
 }
