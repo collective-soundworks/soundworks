@@ -326,4 +326,43 @@ describe('client::Client', () => {
       assert.equal(pluginStop, true);
     });
   });
+
+  describe(`client.getAuditState()`, () => {
+    it(`should throw if called before init`, async () => {
+      const server = new Server(config);
+      await server.start();
+
+      const client = new Client({ clientType: 'test', ...config });
+
+      let errored = false;
+
+      try {
+        await client.getAuditState();
+      } catch(err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      if (!errored) {
+        assert.fail('should throw');
+      }
+
+      await server.stop();
+    });
+
+    it(`should track number of connected clients`, async () => {
+      const server = new Server(config);
+      await server.start();
+
+      const client = new Client({ clientType: 'test', ...config });
+      await client.start();
+
+      const auditState = await client.getAuditState();
+
+      const numClients = auditState.get('numClients');
+      assert.equal(numClients.test, 1);
+
+      await server.stop();
+    });
+  });
 });

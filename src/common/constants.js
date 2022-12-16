@@ -45,3 +45,7 @@ export const CONTEXT_EXIT_ERROR = 'c:ex:err';
 export const CLIENT_HANDSHAKE_REQUEST = 'cl:h:req';
 export const CLIENT_HANDSHAKE_RESPONSE = 'cl:h:res';
 export const CLIENT_HANDSHAKE_ERROR = 'cl:h:err';
+
+// audit state schema name
+export const AUDIT_STATE_NAME = 's:c:audit';
+export const PRIVATE_STATES = [AUDIT_STATE_NAME];

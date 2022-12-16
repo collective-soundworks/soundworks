@@ -15,6 +15,7 @@ import merge from 'lodash.merge';
 import pem from 'pem';
 import compile from 'template-literal';
 
+import auditSchema from './audit-schema.js';
 import Client from './Client.js';
 import ContextManager from './ContextManager.js';
 import PluginManager from './PluginManager.js';
@@ -25,6 +26,7 @@ import {
   CLIENT_HANDSHAKE_REQUEST,
   CLIENT_HANDSHAKE_RESPONSE,
   CLIENT_HANDSHAKE_ERROR,
+  AUDIT_STATE_NAME,
 } from '../common/constants.js';
 
 let _dbNamespaces = new Set();
@@ -48,6 +50,28 @@ const DEFAULT_CONFIG = {
     clients: {},
   },
 };
+
+// set terminal title
+/** @private */
+function setTerminalTitle(server) {
+  let title = '';
+
+  if (server._auditState !== null) {
+    const numClients = server._auditState.get('numClients');
+    let numClientStrings = [];
+    for (let name in numClients) {
+      numClientStrings.push(`${name}: ${numClients[name]}`);
+    }
+
+    title = `${server.config.app.name} | ${numClientStrings.join(' - ')}`;
+  } else {
+    title = `${server.config.app.name}`;
+  }
+
+  process.stdout.write(
+      String.fromCharCode(27) + ']0;' + title + String.fromCharCode(7)
+  );
+}
 
 /**
  * Server side entry point for a `soundworks` application.
@@ -210,15 +234,23 @@ class Server {
 
     /** @private */
     this._listeners = new Map();
+    /** @private */
+    this._auditState = null;
+
+    // create audit state
+    this.stateManager.registerSchema(AUDIT_STATE_NAME, auditSchema);
 
     logger.configure(this.config.env.verbose);
+    setTerminalTitle(this);
   }
 
   /**
    * Method to be called before `start` in the initialization lifecycle of the
-   * soundworks server.
+   * soundworks server. Note that if `init()`` is not explicitely called, `start()`
+   *  will call it implicitely.
    *
    * What it does:
+   * - create the audit state
    * - prepapre http(s) server and routing according to the informations
    * declared in `config.app.clients`
    * - starts all registered plugins
@@ -227,12 +259,22 @@ class Server {
    * as any registered Plugins.
    *
    * @example
-   * // defaults to
    * const server = new Server(config);
    * await server.init();
    * await server.start();
+   * // or implicitly called by start
+   * const server = new Server(config);
+   * await server.start(); // init is called implicitely
    */
   async init() {
+    const numClients = {};
+    for (let name in this.config.app.clients) {
+      numClients[name] = 0;
+    }
+    /** @private */
+    this._auditState = await this.stateManager.create(AUDIT_STATE_NAME, { numClients });
+    this._auditState.onUpdate(() => setTerminalTitle(this));
+
     // basic http authentication
     if (this.config.env.auth) {
       this.router.use((req, res, next) => {
@@ -460,8 +502,8 @@ Invalid certificate files, please check your:
     // ------------------------------------------------------------
     // START SOCKET SERVER
     // ------------------------------------------------------------
-    this.sockets.start(
-      this.httpServer,
+    await this.sockets.start(
+      this,
       this.config.env.websockets,
       (clientType, socket) => this._onSocketConnection(clientType, socket),
     );
@@ -626,14 +668,23 @@ Invalid certificate files, please check your:
    */
   _onSocketConnection(clientType, socket) {
     const client = new Client(clientType, socket);
+    const clientTypes = Object.keys(this.config.app.clients);
 
     socket.addListener('close', async () => {
-      // clean context manager, await before cleaning state manager
-      await this.contextManager.removeClient(client);
-      // remove client from pluginManager
-      await this.pluginManager.removeClient(client);
-      // clean state manager
-      await this.stateManager.removeClient(client.id);
+      // do nothin if client type was invalid
+      if (clientTypes.includes(clientType)) {
+        // decrement audit state counter
+        const numClients = this._auditState.get('numClients');
+        numClients[clientType] -= 1;
+        this._auditState.set({ numClients });
+
+        // clean context manager, await before cleaning state manager
+        await this.contextManager.removeClient(client);
+        // remove client from pluginManager
+        await this.pluginManager.removeClient(client);
+        // clean state manager
+        await this.stateManager.removeClient(client.id);
+      }
       // clean sockets
       socket.terminate();
       // destroy client
@@ -642,9 +693,10 @@ Invalid certificate files, please check your:
 
     socket.addListener(CLIENT_HANDSHAKE_REQUEST, async payload => {
       const { clientType, registeredPlugins } = payload;
-      const clientTypes = Object.keys(this.config.app.clients);
 
-      if (clientTypes.indexOf(clientType) === -1) {
+      if (!clientTypes.includes(clientType)) {
+        console.error(`[soundworks.Server] A client with invalid type ("${clientType}") attempted to connect`);
+
         socket.send(CLIENT_HANDSHAKE_ERROR, {
           type: 'invalid-client-type',
           message: `Invalid client type, please check server configuration (valid client types are: ${clientTypes.join(', ')})`,
@@ -661,6 +713,11 @@ Invalid certificate files, please check your:
         });
         return;
       }
+
+      // increment audit state
+      const numClients = this._auditState.get('numClients');
+      numClients[clientType] += 1;
+      this._auditState.set({ numClients });
 
       // add client to state manager
       await this.stateManager.addClient(client.id, {
@@ -729,6 +786,24 @@ Invalid certificate files, please check your:
     }
   }
 
+  /** @private */
+  async _dispatchStatus(status) {
+    this.status = status;
+
+    // if launched in a child process, forward status to parent process
+    if (process.send !== undefined) {
+      process.send(`soundworks:server:${status}`);
+    }
+
+    if (this._listeners.has(status)) {
+      const listeners = this._listeners.get(status);
+
+      for (let callback of listeners) {
+        await callback();
+      }
+    }
+  }
+
   /**
    * Configure the server to work out-of-the box with the soundworks-template
    * directory tree structure.
@@ -779,22 +854,17 @@ Invalid certificate files, please check your:
     Object.assign(this._applicationTemplateConfig, options);
   }
 
-  /** @private */
-  async _dispatchStatus(status) {
-    this.status = status;
-
-    // if launched in a child process, forward status to parent process
-    if (process.send !== undefined) {
-      process.send(`soundworks:server:${status}`);
+  /**
+   * Get the global audit state of the application.
+   *
+   * @throws Will throw if called before `server.init()`
+   */
+  async getAuditState() {
+    if (this.status === 'idle') {
+      throw new Error(`[soundworks.Server] Cannot access audit state before init`);
     }
 
-    if (this._listeners.has(status)) {
-      const listeners = this._listeners.get(status);
-
-      for (let callback of listeners) {
-        await callback();
-      }
-    }
+    return this._auditState;
   }
 }
 

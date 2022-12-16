@@ -19,6 +19,7 @@ import {
   OBSERVE_NOTIFICATION,
   UNOBSERVE_NOTIFICATION,
   DELETE_SCHEMA,
+  PRIVATE_STATES,
 } from '../common/constants.js';
 import { idGenerator } from '../common/utils.js';
 
@@ -162,7 +163,11 @@ class StateManager extends StateManagerClient {
 
       this._serverStatesById.forEach(state => {
         const { schemaName, id, _creatorId } = state;
-        statesInfos.push([schemaName, id, _creatorId]);
+        // only track application states
+        // (e.g. do not propagate infos about audit state)
+        if (!PRIVATE_STATES.includes(schemaName)) {
+          statesInfos.push([schemaName, id, _creatorId]);
+        }
       });
 
       // add client to observers first because if some (sync) server side

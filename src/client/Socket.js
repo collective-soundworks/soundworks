@@ -185,24 +185,6 @@ class Socket {
       });
     });
 
-    // clean all listeners on close, this must be done here instead of in
-    // `terminate` because the client should properly exit even if the server
-    // is stopped first
-    // `client.socket.addListener('close', () => await client.stop());`
-    // this._wsClosePromise = new Promise((resolve, _reject) => {
-    //   this.addListener('close', () => {
-    //     this.removeAllListeners();
-    //     resolve();
-    //   });
-    // });
-
-    // this._binaryWsClosePromise = new Promise((resolve, _reject) => {
-    //   this.addBinaryListener('close', () => {
-    //     this.removeAllBinaryListeners();
-    //     resolve();
-    //   });
-    // });
-
     // wait for both sockets connected
     return Promise.resolve();
   }

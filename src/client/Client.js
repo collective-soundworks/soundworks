@@ -8,6 +8,7 @@ import {
   CLIENT_HANDSHAKE_REQUEST,
   CLIENT_HANDSHAKE_RESPONSE,
   CLIENT_HANDSHAKE_ERROR,
+  AUDIT_STATE_NAME,
 } from '../common/constants.js';
 import { isBrowser } from '../common/utils.js';
 import logger from '../common/logger.js';
@@ -137,6 +138,8 @@ class Client {
 
     /** @private */
     this.status = 'idle';
+    /** @private */
+    this._auditState = null;
 
     logger.configure(!!config.env.verbose);
   }
@@ -260,6 +263,24 @@ class Client {
     await this.contextManager.stop();
     await this.pluginManager.stop();
     await this.socket.terminate();
+  }
+
+  /**
+   * Get the global audit state of the application. The audit state is attached
+   * to the client only if this method is called
+   *
+   * @throws Will throw if called before `client.init()`
+   */
+  async getAuditState() {
+    if (this.status === 'idle') {
+      throw new Error(`[soundworks.Client] Cannot access audit state before init`);
+    }
+
+    if (this._auditState === null) {
+      this._auditState = await this.stateManager.attach(AUDIT_STATE_NAME);
+    }
+
+    return this._auditState;
   }
 }
 

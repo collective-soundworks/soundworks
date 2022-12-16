@@ -1,3 +1,4 @@
+import { getTime } from '@ircam/sc-gettime';
 import {
   packBinaryMessage,
   unpackBinaryMessage,
@@ -5,7 +6,6 @@ import {
   unpackStringMessage,
 } from '../common/sockets-utils.js';
 
-const noop = () => {};
 // const CONNECTING = 0;
 // const OPEN = 1;
 // const CLOSING = 2;
@@ -119,9 +119,20 @@ class Socket {
     // heartbeat system (run only on string socket), adapted from:
     // https://github.com/websockets/ws#how-to-detect-and-close-broken-connections
     this._isAlive = true;
+    let msg = {
+      type: 'add-measurement',
+      value: {
+        ping: 0,
+        pong: 0,
+      }
+    };
+
     // heartbeat system, only on "regular" socket
     this.ws.on('pong', () => {
       this._isAlive = true;
+
+      msg.value.pong = getTime();
+      this.sockets._latencyStatsWorker.postMessage(msg);
     });
 
     this._intervalId = setInterval(() => {
@@ -129,11 +140,12 @@ class Socket {
         // emit a 'close' event to go trough all the disconnection pipeline
         this._emit(false, 'close');
         return;
-        // return this.ws.terminate();
       }
 
       this._isAlive = false;
-      this.ws.ping(noop);
+      msg.value.ping = getTime();
+
+      this.ws.ping();
     }, this.config.pingInterval);
 
     this.ws.addListener('error', _err => {

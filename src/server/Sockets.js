@@ -1,8 +1,15 @@
+import { Worker } from 'node:worker_threads';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
 import { WebSocketServer } from 'ws';
 import WebSocket from 'ws';
 import querystring from 'querystring';
 
 import Socket from './Socket.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = fileURLToPath(new URL('.', import.meta.url));
 
 /**
  * Websocket server that creates and host all {@link server.Socket} instance.
@@ -22,6 +29,10 @@ class Sockets {
     this._rooms.set('*', new Set());
 
     this._initializationCache = new Map();
+
+    // for stats
+    this._latencyStatsWorker = null; // protected - used in Socket instances
+    this._auditState = null;
   }
 
   /**
@@ -31,12 +42,34 @@ class Sockets {
    *
    * @private
    */
-  start(httpServer, config, onConnectionCallback) {
-    const path = config.path;
+  async start(server, config, onConnectionCallback) {
+    // init audit stuff for network latency estimation
+    const workerPathname = path.join(__dirname, 'audit-network-latency.worker.js');
+    this._latencyStatsWorker = new Worker(workerPathname);
+    this._auditState = await server.getAuditState();
 
+    this._auditState.onUpdate(updates => {
+      if ('averageNetworkLatencyWindow' in updates || 'averageNetworkLatencyPeriod' in updates) {
+        this._latencyStatsWorker.postMessage({
+          type: 'config',
+          value: {
+            averageLatencyWindow: updates.averageNetworkLatencyWindow,
+            averageLatencyPeriod: updates.averageNetworkLatencyPeriod,
+          },
+        });
+      }
+    }, true);
+
+    this._latencyStatsWorker.on('message', msg => {
+      if (msg.type === 'computed-average-latency') {
+        this._auditState.set({ averageNetworkLatency: msg.value });
+      }
+    });
+
+    // init ws server
     this.wss = new WebSocketServer({
-      server: httpServer,
-      path: `/${path}`, // @note - update according to existing config files (aka cosima-apps)
+      server: server.httpServer,
+      path: `/${config.path}`, // @note - update according to existing config files (aka cosima-apps)
     });
 
     this.wss.on('connection', (ws, req) => {
