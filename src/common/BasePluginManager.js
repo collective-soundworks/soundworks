@@ -84,7 +84,7 @@ class BasePluginManager {
     for (let [id, { ctor, options }] of this._registeredPlugins.entries()) {
       const instance = new ctor(this._node, id, options);
       this._instances.set(id, instance);
-      instance.onStateChange((values) => this._propagateStateChange(instance));
+      instance.onStateChange(_values => this._propagateStateChange(instance));
     }
 
     // propagate all 'idle' statuses before start

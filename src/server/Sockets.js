@@ -8,7 +8,6 @@ import querystring from 'querystring';
 
 import Socket from './Socket.js';
 
-const __filename = fileURLToPath(import.meta.url);
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
 
 /**

@@ -124,7 +124,7 @@ class Socket {
       value: {
         ping: 0,
         pong: 0,
-      }
+      },
     };
 
     // heartbeat system, only on "regular" socket
