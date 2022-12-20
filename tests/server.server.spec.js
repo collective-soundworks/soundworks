@@ -31,12 +31,16 @@ const config = {
 describe('server::Server', () => {
   describe(`new Server(config)`, () => {
     it(`should throw if invalid config object`, () => {
+
+      let errored = false;
       try {
         const server = new Server();
-        assert.fail('should have thrown if no clients declared');
       } catch (err) {
         console.log(err.message);
-        assert.ok('should throw');
+        errored = true;
+      }
+      if (!errored) {
+        assert.fail('should have thrown');
       }
     });
 
@@ -44,12 +48,15 @@ describe('server::Server', () => {
       const wrongConfig = merge({}, config);
       wrongConfig.app.clients = {};
 
+      let errored = false;
       try {
         const server = new Server(wrongConfig);
-        assert.fail('should have thrown if no clients declared');
       } catch (err) {
         console.log(err.message);
-        assert.ok('should throw');
+        errored = true;
+      }
+      if (!errored) {
+        assert.fail('should have thrown');
       }
     });
 
@@ -58,12 +65,15 @@ describe('server::Server', () => {
       wrongConfig.env.useHttps = true;
       wrongConfig.env.httpsInfos = 42;
 
+      let errored = false;
       try {
         const server = new Server(wrongConfig);
-        assert.fail('should have thrown if no clients declared');
       } catch (err) {
         console.log(err.message);
-        assert.ok('should throw');
+        errored = true;
+      }
+      if (!errored) {
+        assert.fail('should have thrown');
       }
     });
 
@@ -72,12 +82,15 @@ describe('server::Server', () => {
       wrongConfig.env.useHttps = true;
       wrongConfig.env.httpsInfos = { cert: 'dummy' };
 
+      let errored = false;
       try {
         const server = new Server(wrongConfig);
-        assert.fail('should have thrown if no clients declared');
       } catch (err) {
         console.log(err.message);
-        assert.ok('should throw');
+        errored = true;
+      }
+      if (!errored) {
+        assert.fail('should have thrown');
       }
     });
 
@@ -86,12 +99,15 @@ describe('server::Server', () => {
       wrongConfig.env.useHttps = true;
       wrongConfig.env.httpsInfos = { cert: 'dummy.pem', key: 'dummy.pem' };
 
+      let errored = false;
       try {
         const server = new Server(wrongConfig);
-        assert.fail('should have thrown if no clients declared');
       } catch (err) {
         console.log(err.message);
-        assert.ok('should throw');
+        errored = true;
+      }
+      if (!errored) {
+        assert.fail('should have thrown');
       }
     });
 
@@ -100,12 +116,31 @@ describe('server::Server', () => {
       wrongConfig.env.useHttps = true;
       wrongConfig.env.httpsInfos = { cert: __filename, key: 'dummy.pem' };
 
+      let errored = false;
       try {
         const server = new Server(wrongConfig);
-        assert.fail('should have thrown if no clients declared');
       } catch (err) {
         console.log(err.message);
-        assert.ok('should throw');
+        errored = true;
+      }
+      if (!errored) {
+        assert.fail('should have thrown');
+      }
+    });
+
+    it(`should throw if serverAddress is not defined when a node client is declared`, () => {
+      const wrongConfig = merge({}, config);
+      wrongConfig.env.serverAddress = undefined;
+
+      let errored = false;
+      try {
+        const server = new Server(wrongConfig);
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+      if (!errored) {
+        assert.fail('should have thrown');
       }
     });
   });

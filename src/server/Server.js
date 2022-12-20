@@ -35,6 +35,7 @@ const DEFAULT_CONFIG = {
   env: {
     type: 'development',
     port: 8000,
+    serverAddress: null,
     subpath: '',
     websockets: {
       path: 'socket',
@@ -142,6 +143,18 @@ class Server {
     // parse config
     if (Object.keys(this.config.app.clients).length === 0) {
       throw new Error(`[soundworks:Server] Invalid "app.clients" config, at least one client should be declared`);
+    }
+
+    // if a node client is defined, serverAddress should be defined
+    let hasNodeClient = false;
+    for (let name in this.config.app.clients) {
+      if (this.config.app.clients[name].target === 'node') {
+        hasNodeClient = true;
+      }
+    }
+
+    if (hasNodeClient && this.config.env.serverAddress === null) {
+      throw new Error(`[soundworks:Server] Invalid "env.serverAddress" config, is mandatory when a node client target is defined`);
     }
 
     if (this.config.env.useHttps && this.config.env.httpsInfos !== null) {
