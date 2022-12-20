@@ -44,7 +44,7 @@ const config = {
   env: {
     type: 'development',
     port: 8081,
-    serverIp: '127.0.0.1',
+    serverAddress: '127.0.0.1',
     useHttps: false,
     verbose: process.env.VERBOSE === '1' ? true : false,
   },

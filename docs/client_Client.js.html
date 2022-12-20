@@ -98,12 +98,12 @@ class Client {
     // for node clients env.https is requires to open the websocket
     if (!isBrowser()) {
       if (!('env' in config)) {
-        throw new Error('[soundworks:Client] Invalid config object, "config.env" { useHttps, serverIp, port } should be defined');
+        throw new Error('[soundworks:Client] Invalid config object, "config.env" { useHttps, serverAddress, port } should be defined');
       }
 
       let missing = [];
       if (!('useHttps' in config.env)) { missing.push('useHttps'); }
-      if (!('serverIp' in config.env)) { missing.push('serverIp'); }
+      if (!('serverAddress' in config.env)) { missing.push('serverAddress'); }
       if (!('port' in config.env)) { missing.push('port'); }
 
       if (missing.length) {

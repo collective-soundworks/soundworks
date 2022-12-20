@@ -91,9 +91,9 @@ class Socket {
       webSocketOptions = [];
     } else {
       const protocol = config.env.useHttps ? 'wss:' : 'ws:';
-      const { serverIp, port } = config.env;
+      const { serverAddress, port } = config.env;
 
-      url = `${protocol}//${serverIp}:${port}/${path}`;
+      url = `${protocol}//${serverAddress}:${port}/${path}`;
       webSocketOptions = {
         rejectUnauthorized: false,
       };

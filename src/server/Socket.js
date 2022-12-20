@@ -147,10 +147,6 @@ class Socket {
 
       this.ws.ping();
     }, this.config.pingInterval);
-
-    this.ws.addListener('error', _err => {
-      // console.log(this.clientId, err);
-    });
   }
 
   /**
@@ -158,6 +154,7 @@ class Socket {
    */
   /** @private */
   terminate() {
+    // clear ping/pong check
     clearInterval(this._intervalId);
     // clean rooms
     for (let [_key, room] of this.rooms) {

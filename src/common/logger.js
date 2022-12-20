@@ -21,7 +21,7 @@ const logger = {
     if (!this.verbose) { return; }
 
     const clientsConfig = config.app.clients;
-    const serverIp = config.env.serverIp;
+    const serverAddress = config.env.serverAddress;
     const auth = config.env.auth;
     const table = [];
 
@@ -32,7 +32,7 @@ const logger = {
         const line = {
           client_type: `> ${clientType}`,
           target: chalk.red(client.target),
-          path: `serverIp: ${chalk.green(serverIp)}`,
+          path: `serverAddress: ${chalk.green(serverAddress)}`,
           default: undefined,
           auth: undefined,
         };
