@@ -100,6 +100,9 @@ class Sockets {
   }
 
   terminate() {
+    // terminate stat worker thread
+    this._latencyStatsWorker.terminate();
+    // clean sockets
     const sockets = this._rooms.get('*');
     sockets.forEach(socket => socket.terminate());
   }
