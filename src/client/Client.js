@@ -78,6 +78,7 @@ class Client {
     // minimal configuration for websockets
     this.config.env.websockets = Object.assign({
       path: 'socket',
+      pingInterval: 5000,
     }, config.env.websockets);
 
     /**
