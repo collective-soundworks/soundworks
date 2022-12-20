@@ -155,6 +155,25 @@ class Socket {
       trySocket();
     });
 
+    let pingTimeoutId = null;
+    const pingInterval = config.env.websockets.pingInterval;
+    // detect broken connection
+    // cf. https://github.com/websockets/ws#how-to-detect-and-close-broken-connections
+    const heartbeat = () => {
+      clearTimeout(pingTimeoutId);
+
+      pingTimeoutId = setTimeout(() => {
+        this.terminate();
+      }, pingInterval + 2000);
+    }
+
+    this.ws.addEventListener('ping', heartbeat);
+    this.ws.addEventListener('close', () => {
+      clearTimeout(pingTimeoutId);
+    });
+
+    heartbeat();
+
     // ----------------------------------------------------------
     // init binary socket
     // ----------------------------------------------------------
