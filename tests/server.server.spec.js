@@ -410,7 +410,7 @@ describe('server::Server', () => {
       await server.init();
       await server.start();
 
-      const client = new Client({ clientType: 'test', ...config });
+      const client = new Client({ role: 'test', ...config });
       await client.init();
       await client.start();
 
@@ -570,9 +570,9 @@ describe('server::Server', () => {
       const server = new Server(config);
       server.setDefaultTemplateConfig();
       // returns the config to be sent to the client
-      const clientConfigFunction = (clientType, config, httpRequest) => {
+      const clientConfigFunction = (role, config, httpRequest) => {
         return {
-          clientType: clientType,
+          role: role,
           app: {
             name: config.app.name,
             author: config.app.author,
@@ -622,7 +622,7 @@ describe('server::Server', () => {
       //   assert.equal(numClients.test, 0);
       // }
 
-      // // const client = new Client({ clientType: 'test', ...config });
+      // // const client = new Client({ role: 'test', ...config });
       // // await client.start();
 
       // // {

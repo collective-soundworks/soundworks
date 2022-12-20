@@ -14,7 +14,7 @@ import { isBrowser } from '../common/utils.js';
 import logger from '../common/logger.js';
 
 /**
- * Create a new client of a *soundworks* application.
+ * Create a new soundworks client.
  *
  * The `Client` is the main entry point to access *soundworks* components
  * such as {@link client.Socket}, {@link client.PluginManager} or
@@ -24,18 +24,12 @@ import logger from '../common/logger.js';
  * @memberof client
  *
  * @example
- * import soundworks from '@soundworks/core/client';
+ * import { Client } from '@soundworks/core/client.js';
  *
- * // create a new `soundworks.Client` instance
- * const client = new soundworks.Client();
- * // initialize the client (mainly connect and initialize WebSockets)
- * await client.init(config);
- * // create application specific experience (extends `client.AbstractExperience`
- * const playerExperience = new PlayerExperience(client);
- * // start the client
+ * // create a new soundworks `Client` instance
+ * const client = new Client(config);
+ * // init and start the client
  * await client.start();
- * // when everything is ready, the experience can be safely started
- * playerExperience.start();
  */
 class Client {
   constructor(config) {
@@ -43,8 +37,8 @@ class Client {
       throw new Error(`[soundworks:Client] Invalid argument for Client constructor, config should be an object`);
     }
 
-    if (!('clientType' in config)) {
-      throw new Error('[soundworks:Client] Invalid config object, "config.clientType" should be defined');
+    if (!('role' in config)) {
+      throw new Error('[soundworks:Client] Invalid config object, "config.role" should be defined');
     }
 
     // for node clients env.https is requires to open the websocket
@@ -64,11 +58,10 @@ class Client {
     }
 
     /**
-     * Type of the client, this can generally be considered as the role of the
-     * client in the application.
+     * Role of the client in the application.
      * @type {String}
      */
-    this.type = config.clientType;
+    this.role = config.role;
 
     /**
      * Configuration object, typically contains the configuration sent by the
@@ -162,7 +155,7 @@ class Client {
    */
   async init() {
     // init socket communications (string and binary)
-    await this.socket.init(this.type, this.config);
+    await this.socket.init(this.role, this.config);
 
     // we need the try/catch block to change the promise rejection into proper error
     try {
@@ -196,7 +189,7 @@ class Client {
 
         // send handshake request
         const payload = {
-          clientType: this.type,
+          role: this.role,
           registeredPlugins: this.pluginManager.getRegisteredPlugins(),
         };
 

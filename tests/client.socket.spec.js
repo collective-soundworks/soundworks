@@ -28,7 +28,7 @@ describe(`client.Socket`, () => {
     });
 
     it(`should connect when server is launched later`, async function() {
-      const client = new Client({ clientType: 'test', ...config });
+      const client = new Client({ role: 'test', ...config });
       this.timeout(6 * 1000);
 
       const initPromise = new Promise(async (resolve) => {

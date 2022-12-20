@@ -63,7 +63,7 @@ describe(`client::PluginManager`, () => {
     let client;
 
     beforeEach(() => {
-      client = new Client({ clientType: 'test', ...config });
+      client = new Client({ role: 'test', ...config });
     });
 
     it(`should throw if first argument is not a string`, () => {
@@ -159,7 +159,7 @@ describe(`client::PluginManager`, () => {
 
   describe(`(protected) await pluginManager.init()`, () => {
     it(`should throw if started twice`, async () => {
-      const client = new Client({ clientType: 'test', ...config });
+      const client = new Client({ role: 'test', ...config });
       await client.init(); // run pluginManager.init()
 
       let errored = false;
@@ -175,7 +175,7 @@ describe(`client::PluginManager`, () => {
 
   describe(`await pluginManager.get(id)`, () => {
     it(`should throw if plugin id his not a string`, async () => {
-      const client = new Client({ clientType: 'test', ...config });
+      const client = new Client({ role: 'test', ...config });
 
       let errored = false;
       try {
@@ -188,7 +188,7 @@ describe(`client::PluginManager`, () => {
     });
 
     it(`should throw if plugin id has not been registered`, async () => {
-      const client = new Client({ clientType: 'test', ...config });
+      const client = new Client({ role: 'test', ...config });
 
       let errored = false;
       try {
@@ -201,7 +201,7 @@ describe(`client::PluginManager`, () => {
     });
 
     it(`should be able to immediately get a plugin after client.init()`, async function() {
-      const client = new Client({ clientType: 'test', ...config });
+      const client = new Client({ role: 'test', ...config });
       client.pluginManager.register('delay-1', clientPluginDelayFactory, { delayTime: 100 });
 
       await client.init();
@@ -220,7 +220,7 @@ describe(`client::PluginManager`, () => {
     // @note - for now we just forbid this,
     // this could change in the future to dynamically import plugins at runtime
     // it(`should be able to register and await a plugin after client.init()`, async function() {
-    //   client = new Client({ clientType: 'test', ...config });
+    //   client = new Client({ role: 'test', ...config });
     //   await client.init();
 
     //   client.pluginManager.register('delay-1', clientPluginDelayFactory, {
@@ -254,7 +254,7 @@ describe(`client::PluginManager`, () => {
     it(`should properly propagate statuses`, async function() {
       this.timeout(3 * 1000);
 
-      const client = new Client({ clientType: 'test', ...config });
+      const client = new Client({ role: 'test', ...config });
       client.pluginManager.register('delay-1', clientPluginDelayFactory, {
         delayTime: 100,
       });
@@ -277,7 +277,7 @@ describe(`client::PluginManager`, () => {
     it(`should be able to monitor plugin lifecycle`, async function() {
       this.timeout(3 * 1000);
 
-      const client = new Client({ clientType: 'test', ...config });
+      const client = new Client({ role: 'test', ...config });
       client.pluginManager.register('delay-1', clientPluginDelayFactory, {
         delayTime: 100,
       });
@@ -301,7 +301,7 @@ describe(`client::PluginManager`, () => {
 
   describe(`plugin initialization lifecycle`, () => {
     it(`client should start if no plugins registered`, async function() {
-      const client = new Client({ clientType: 'test', ...config });
+      const client = new Client({ role: 'test', ...config });
       await client.init();
       await client.start();
 
@@ -310,7 +310,7 @@ describe(`client::PluginManager`, () => {
     });
 
     it(`client should start if plugin registered`, async function() {
-      const client = new Client({ clientType: 'test', ...config });
+      const client = new Client({ role: 'test', ...config });
       client.pluginManager.register('delay-1', clientPluginDelayFactory, { delayTime: 0.1 });
       await client.init();
       await client.start();
@@ -320,7 +320,7 @@ describe(`client::PluginManager`, () => {
     });
 
     it(`should propagate plugin start() errors`, async () => {
-      const client = new Client({ clientType: 'test', ...config });
+      const client = new Client({ role: 'test', ...config });
       client.pluginManager.register('delay-1', clientPluginDelayFactory, {
         delayTime: 0.1,
         throwError: true,
@@ -339,7 +339,7 @@ describe(`client::PluginManager`, () => {
     it(`should be able to require several plugins in parallel`, async function() {
       this.timeout(3 * 1000);
 
-      const client = new Client({ clientType: 'test', ...config });
+      const client = new Client({ role: 'test', ...config });
       client.pluginManager.register('delay-1', clientPluginDelayFactory, {
         delayTime: 100,
       });
@@ -375,7 +375,7 @@ describe(`client::PluginManager`, () => {
     it(`should be able to chain plugin initialization`, async function() {
       this.timeout(3 * 1000);
 
-      const client = new Client({ clientType: 'test', ...config });
+      const client = new Client({ role: 'test', ...config });
 
       client.pluginManager.register('delay-1', clientPluginDelayFactory, {
         delayTime: 100,
@@ -416,7 +416,7 @@ describe(`client::PluginManager`, () => {
       // delay-1 --> delay-2 --|
       // delay-3 --------------+-> delay-4
 
-      const client = new Client({ clientType: 'test', ...config });
+      const client = new Client({ role: 'test', ...config });
 
       client.pluginManager.register('delay-1', clientPluginDelayFactory, {
         delayTime: 200,
@@ -475,7 +475,7 @@ describe(`client::PluginManager`, () => {
 
   describe(`pluginManager.getRegisteredPlugins()`, () => {
     it(`should return the list of registered plugins`, () => {
-      const client = new Client({ clientType: 'test', ...config });
+      const client = new Client({ role: 'test', ...config });
       client.pluginManager.register('delay-1', clientPluginDelayFactory, { delayTime: 0 });
       client.pluginManager.register('delay-2', clientPluginDelayFactory, { delayTime: 0 });
 

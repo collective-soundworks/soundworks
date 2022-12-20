@@ -31,7 +31,7 @@ describe('client::Client', () => {
       }
     });
 
-    it(`should throw if no clientType in config`, () => {
+    it(`should throw if no role in config`, () => {
       try {
         const client = new Client({});
         assert.fail('should have thrown');
@@ -44,7 +44,7 @@ describe('client::Client', () => {
     describe(`node clients only`, () => {
       it(`should throw if no config.env is missing`, () => {
         try {
-          const client = new Client({ clientType: 'test' });
+          const client = new Client({ role: 'test' });
           assert.fail('should have thrown');
         } catch(err) {
           console.log(err.message);
@@ -54,7 +54,7 @@ describe('client::Client', () => {
 
       it(`should throw if no config.env is missing 1 or several entries`, () => {
         try {
-          const client = new Client({ clientType: 'test', env: { useHttps: false } });
+          const client = new Client({ role: 'test', env: { useHttps: false } });
           assert.fail('should have thrown');
         } catch(err) {
           console.log(err.message);
@@ -70,7 +70,7 @@ describe('client::Client', () => {
       await server.init();
       await server.start();
 
-      const client = new Client({ clientType: 'test', ...config });
+      const client = new Client({ role: 'test', ...config });
       await client.init();
 
       let socketMessageReceived = false;
@@ -91,7 +91,7 @@ describe('client::Client', () => {
       await server.init();
       await server.start();
 
-      const client = new Client({ clientType: 'unknown', ...config });
+      const client = new Client({ role: 'unknown', ...config });
 
       let errored = false;
       try {
@@ -110,7 +110,7 @@ describe('client::Client', () => {
       await server.init();
       await server.start();
 
-      const client = new Client({ clientType: 'test', ...config });
+      const client = new Client({ role: 'test', ...config });
       client.pluginManager.register('unknown-server-side', pluginDelayFactory, { delayTime: 0 });
 
       let errored = false;
@@ -130,7 +130,7 @@ describe('client::Client', () => {
       await server.init();
       await server.start();
 
-      const client = new Client({ clientType: 'test', ...config });
+      const client = new Client({ role: 'test', ...config });
       await client.init();
 
       assert.notEqual(client.id, null);
@@ -146,7 +146,7 @@ describe('client::Client', () => {
       await server.init();
       await server.start();
 
-      const client = new Client({ clientType: 'test', ...config });
+      const client = new Client({ role: 'test', ...config });
       await client.init();
 
       const state = await client.stateManager.create('test');
@@ -162,7 +162,7 @@ describe('client::Client', () => {
       await server.init();
       await server.start();
 
-      const client = new Client({ clientType: 'test', ...config });
+      const client = new Client({ role: 'test', ...config });
 
       try {
         await client.start();
@@ -180,7 +180,7 @@ describe('client::Client', () => {
       await server.init();
       await server.start();
 
-      const client = new Client({ clientType: 'test', ...config });
+      const client = new Client({ role: 'test', ...config });
       await client.init();
 
       let contextStarted = false;
@@ -205,7 +205,7 @@ describe('client::Client', () => {
       await server.init();
       await server.start();
 
-      const client = new Client({ clientType: 'test', ...config });
+      const client = new Client({ role: 'test', ...config });
       await client.init();
 
       try {
@@ -224,7 +224,7 @@ describe('client::Client', () => {
       await server.init();
       await server.start();
 
-      const client = new Client({ clientType: 'test', ...config });
+      const client = new Client({ role: 'test', ...config });
       await client.init();
       await client.start();
 
@@ -248,7 +248,7 @@ describe('client::Client', () => {
       const server = new Server(config);
       await server.start();
 
-      const client = new Client({ clientType: 'test', ...config });
+      const client = new Client({ role: 'test', ...config });
       await client.start();
 
       await new Promise(resolve => setTimeout(resolve, 100));
@@ -278,7 +278,7 @@ describe('client::Client', () => {
       let pluginStop = false;
       let contextStop = false;
 
-      const client = new Client({ clientType: 'test', ...config });
+      const client = new Client({ role: 'test', ...config });
 
       client.pluginManager.register('test-plugin', Plugin => {
         return class TestPlugin extends Plugin {
@@ -332,7 +332,7 @@ describe('client::Client', () => {
       const server = new Server(config);
       await server.start();
 
-      const client = new Client({ clientType: 'test', ...config });
+      const client = new Client({ role: 'test', ...config });
 
       let errored = false;
 
@@ -354,7 +354,7 @@ describe('client::Client', () => {
       const server = new Server(config);
       await server.start();
 
-      const client = new Client({ clientType: 'test', ...config });
+      const client = new Client({ role: 'test', ...config });
       await client.start();
 
       const auditState = await client.getAuditState();

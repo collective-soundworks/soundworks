@@ -11,17 +11,17 @@ const generateId = idGenerator();
  */
 class Client {
   /**
-   * @param {String} clientType - Type of the client
+   * @param {String} role - Role of the client
    * @param {server.Socket} socket - Socket connection with the client
    */
-  constructor(clientType, socket) {
+  constructor(role, socket) {
     /**
-     * Client type, as specified when initializing the client side {@link client.Client}.
+     * Client type, as specified in client side config {@link client.Client}.
      *
-     * @see {@link client.Client#init}
+     * @see {@link client.Client}
      * @type {String}
      */
-    this.type = clientType;
+    this.role = role;
 
     /**
      * Session id (incremeted positive number).

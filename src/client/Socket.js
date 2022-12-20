@@ -59,12 +59,12 @@ class Socket {
   /**
    * Initialize a websocket connection with the server. This is automatically
    * called in `client.init()`
-   * @param {String} clientType - `client.type` {@link client}
+   * @param {String} role - Role of the `client.role` {@link client}
    * @param {Object} options - Options of the socket
    * @param {Array<String>} options.path - Defines where socket should find the `socket.io` file
    */
   /** @private */
-  async init(clientType, config) {
+  async init(role, config) {
     // unique key that allows to associate the two sockets to the same client.
     // note: the key is only used to pair to two sockets, so its usage is very
     // limited in time therefore a random number should hopefully be sufficient.
@@ -99,7 +99,7 @@ class Socket {
       };
     }
 
-    const queryParams = `clientType=${clientType}&key=${key}`;
+    const queryParams = `role=${role}&key=${key}`;
 
     // ----------------------------------------------------------
     // init string socket

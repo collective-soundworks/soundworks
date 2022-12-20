@@ -301,7 +301,7 @@ describe(`server::PluginManager`, () => {
 
       const plugin = await server.pluginManager.get('test-plugin');
 
-      const client = new Client({ clientType: 'test', ...config });
+      const client = new Client({ role: 'test', ...config });
       client.pluginManager.register('test-plugin', (Plugin) => class TestPlugin extends Plugin {});
       await client.init();
 
@@ -341,7 +341,7 @@ describe(`server::PluginManager`, () => {
       await server.init();
       await server.start();
 
-      const client = new Client({ clientType: 'test', ...config });
+      const client = new Client({ role: 'test', ...config });
       client.pluginManager.register('test-plugin', (Plugin) => class TestPlugin extends Plugin {});
       await client.init();
       await client.start();
@@ -371,7 +371,7 @@ describe(`server::PluginManager`, () => {
       await server.init();
       await server.start();
 
-      const client = new Client({ clientType: 'test', ...config });
+      const client = new Client({ role: 'test', ...config });
       client.pluginManager.register('test-plugin', (Plugin) => class TestPlugin extends Plugin {});
       await client.init();
       await client.start();
@@ -404,7 +404,7 @@ describe(`server::PluginManager`, () => {
       await server.init();
       await server.start();
 
-      const client = new Client({ clientType: 'test', ...config });
+      const client = new Client({ role: 'test', ...config });
       client.pluginManager.register('test-plugin', (Plugin) => class TestPlugin extends Plugin {});
       await client.init();
       await client.start();
@@ -446,7 +446,7 @@ describe(`server::PluginManager`, () => {
       await server.init();
       await server.start();
 
-      const client = new Client({ clientType: 'test', ...config });
+      const client = new Client({ role: 'test', ...config });
       client.pluginManager.register('test-plugin', (Plugin) => class TestPlugin extends Plugin {});
       await client.init();
       await client.start();

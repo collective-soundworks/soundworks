@@ -105,9 +105,9 @@ class ContextManager {
       if (!this._contexts.has(contextName)) {
         // create default context for all client types
         const ctor = createNamedContextClass(contextName);
-        const clientTypes = Object.keys(this.server.config.app.clients);
+        const roles = Object.keys(this.server.config.app.clients);
         // this will automatically register the context in the context manager
-        new ctor(this.server, clientTypes);
+        new ctor(this.server, roles);
       }
 
       // we ensure context is started, even lazilly after server.start()
@@ -141,12 +141,12 @@ class ContextManager {
         context = this.defaultContext;
       }
 
-      if (!context.clientTypes.has(client.type)) {
+      if (!context.roles.has(client.role)) {
         client.socket.send(
           CONTEXT_ENTER_ERROR,
           reqId,
           contextName,
-          `[soundworks:ContextManager] Clients of type "${client.type}" are not declared as possible consumers of context "${contextName}"`,
+          `[soundworks:ContextManager] Clients with role "${client.role}" are not declared as possible consumers of context "${contextName}"`,
         );
         return;
       }
@@ -185,7 +185,7 @@ class ContextManager {
           CONTEXT_EXIT_ERROR,
           reqId,
           contextName,
-          `[soundworks:ContextManager] Client of type "${client.type}" is not in context "${contextName}"`,
+          `[soundworks:ContextManager] Client with role "${client.role}" is not in context "${contextName}"`,
         );
       }
     });

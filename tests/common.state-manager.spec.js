@@ -71,7 +71,7 @@ describe(`common::StateManager`, () => {
     // clients
     // ---------------------------------------------------
     for (let i = 0; i < numClients; i++) {
-      const client = new Client({ clientType: 'test', ...config });
+      const client = new Client({ role: 'test', ...config });
       await client.init();
       await client.start();
 

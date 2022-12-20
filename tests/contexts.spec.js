@@ -58,7 +58,7 @@ describe('Contexts', () => {
       await server.start();
 
       // client
-      const client = new Client({ clientType: 'test', ...config });
+      const client = new Client({ role: 'test', ...config });
       await client.init();
       class TestContext extends ClientContext {}
 
@@ -94,7 +94,7 @@ describe('Contexts', () => {
 
       await server.start();
 
-      const client = new Client({ clientType: 'test', ...config });
+      const client = new Client({ role: 'test', ...config });
       await client.init();
       // server and client context have different ClassName but same `name`
       class ClientTestContext extends ClientContext {
@@ -169,7 +169,7 @@ describe('Contexts', () => {
       await server.start();
 
       // client
-      const client = new Client({ clientType: 'test', ...config });
+      const client = new Client({ role: 'test', ...config });
       await client.init();
 
       let clientStartCalled = false;
@@ -214,7 +214,7 @@ describe('Contexts', () => {
       await server.start();
 
       // client
-      const client = new Client({ clientType: 'test', ...config });
+      const client = new Client({ role: 'test', ...config });
       await client.init();
 
       class TestContext extends ClientContext {}
@@ -252,7 +252,7 @@ describe('Contexts', () => {
       await server.start();
 
       // client
-      const client = new Client({ clientType: 'test', ...config });
+      const client = new Client({ role: 'test', ...config });
       await client.init();
 
       // define 2 contexts so we don't fall into the automatic .enter() path
@@ -285,7 +285,7 @@ describe('Contexts', () => {
       await server.start();
 
       // client
-      const client = new Client({ clientType: 'test', ...config });
+      const client = new Client({ role: 'test', ...config });
       await client.init();
 
       let entered = false;
@@ -316,7 +316,7 @@ describe('Contexts', () => {
       await server.start();
 
       // client
-      const client = new Client({ clientType: 'test', ...config });
+      const client = new Client({ role: 'test', ...config });
       await client.init();
 
       class TestContext extends ClientContext {};
@@ -349,7 +349,7 @@ describe('Contexts', () => {
         const serverTestContext = new TestContext(server, 'other');
       }
       // client
-      const client = new Client({ clientType: 'test', ...config });
+      const client = new Client({ role: 'test', ...config });
       await client.init();
 
       class TestContext extends ClientContext {};
@@ -398,7 +398,7 @@ describe('Contexts', () => {
       await server.start();
 
       // client
-      const client = new Client({ clientType: 'test', ...config });
+      const client = new Client({ role: 'test', ...config });
       await client.init();
       // only 1 context registered, .enter() will be called automatically
       class TestContext extends ClientContext {}
@@ -420,7 +420,7 @@ describe('Contexts', () => {
       await server.start();
 
       // client
-      const client = new Client({ clientType: 'test', ...config });
+      const client = new Client({ role: 'test', ...config });
       await client.init();
       // only 1 context registered, .enter() will be called automatically
       class TestContext extends ClientContext {}
@@ -467,7 +467,7 @@ describe('Contexts', () => {
       await server.start();
 
       // client
-      const client = new Client({ clientType: 'test', ...config });
+      const client = new Client({ role: 'test', ...config });
       await client.init();
 
       // define 2 contexts so we don't fall into the automatic .enter() path
@@ -501,7 +501,7 @@ describe('Contexts', () => {
       await server.init();
       await server.start();
 
-      const client = new Client({ clientType: 'test', ...config });
+      const client = new Client({ role: 'test', ...config });
       await client.init();
       await client.start();
 
@@ -560,7 +560,7 @@ describe('Contexts', () => {
       await server.init();
       await server.start();
 
-      const client = new Client({ clientType: 'test', ...config });
+      const client = new Client({ role: 'test', ...config });
       await client.init();
 
       // let now =
@@ -660,7 +660,7 @@ describe('Contexts', () => {
         await server.init();
         await server.start();
 
-        const client = new Client({ clientType: 'test', ...config });
+        const client = new Client({ role: 'test', ...config });
         await client.init();
 
         class MyClientContext extends ClientContext {}

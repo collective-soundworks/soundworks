@@ -36,7 +36,7 @@ describe('Plugin', () => {
 
       await server.start();
 
-      const client = new Client({ clientType: 'test', ...config });
+      const client = new Client({ role: 'test', ...config });
       client.pluginManager.register('delay', clientPluginDelayFactory, {
         delayTime: 0,
       });
@@ -59,7 +59,7 @@ describe('Plugin', () => {
       await server.init();
       await server.start();
 
-      const client = new Client({ clientType: 'test', ...config });
+      const client = new Client({ role: 'test', ...config });
       client.pluginManager.register('stateful', (ClientPlugin) => class StatefulPlugin extends ClientPlugin {});
       await client.init();
 
@@ -92,7 +92,7 @@ describe('Plugin', () => {
       await server.start();
 
       let numCalled = 0;
-      const client = new Client({ clientType: 'test', ...config });
+      const client = new Client({ role: 'test', ...config });
 
       client.pluginManager.register('stateful', (Plugin) => {
         return class StatefulPlugin extends Plugin {

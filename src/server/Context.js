@@ -10,12 +10,12 @@ import Server from './Server.js';
  * @memberof server
  */
 class Context {
-  constructor(server, clientTypes = []) {
+  constructor(server, roles = []) {
     if (!(server instanceof Server)) {
       throw new Error(`[soundworks:Context] Invalid argument, context "${this.constructor.name}" should receive a "soundworks.Server" instance as first argument`);
     }
 
-    if (clientTypes === null) {
+    if (roles === null) {
       throw new Error('Invalid client types');
     }
 
@@ -36,8 +36,8 @@ class Context {
     /**
      * List of client types associated with this server-side experience.
      */
-    clientTypes = Array.isArray(clientTypes) ? clientTypes : [clientTypes];
-    this.clientTypes = new Set(clientTypes);
+    roles = Array.isArray(roles) ? roles : [roles];
+    this.roles = new Set(roles);
 
     // register in context manager
     this.server.contextManager.register(this);

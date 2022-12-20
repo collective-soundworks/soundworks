@@ -431,8 +431,8 @@ Invalid certificate files, please check your:
     let nodeOnly = true;
     // do not throw if no browser clients are defined, very usefull for
     // cleaning tests in particular
-    for (let clientType in this.config.app.clients) {
-      if (this.config.app.clients[clientType].target === 'browser') {
+    for (let role in this.config.app.clients) {
+      if (this.config.app.clients[role].target === 'browser') {
         nodeOnly = false;
       }
     }
@@ -454,9 +454,9 @@ Invalid certificate files, please check your:
     const routes = [];
     const clientsConfig = [];
 
-    for (let clientType in this.config.app.clients) {
-      const config = Object.assign({}, this.config.app.clients[clientType]);
-      config.clientType = clientType;
+    for (let role in this.config.app.clients) {
+      const config = Object.assign({}, this.config.app.clients[role]);
+      config.role = role;
       clientsConfig.push(config);
     }
 
@@ -465,7 +465,7 @@ Invalid certificate files, please check your:
       .sort(a => a.default === true ? 1 : -1)
       .forEach(config => {
         const path = this._openClientRoute(this.router, config);
-        routes.push({ clientType: config.clientType, path });
+        routes.push({ role: config.role, path });
       });
 
     logger.clientConfigAndRouting(routes, this.config);
@@ -517,7 +517,7 @@ Invalid certificate files, please check your:
     await this.sockets.start(
       this,
       this.config.env.websockets,
-      (clientType, socket) => this._onSocketConnection(clientType, socket),
+      (role, socket) => this._onSocketConnection(role, socket),
     );
 
     // ------------------------------------------------------------
@@ -609,7 +609,7 @@ Invalid certificate files, please check your:
    * @private
    */
   _openClientRoute(router, config) {
-    const { clientType, target } = config;
+    const { role, target } = config;
     const isDefault = (config.default === true);
     // only browser targets need a route
     if (target === 'node') {
@@ -619,17 +619,17 @@ Invalid certificate files, please check your:
     let route = '/';
 
     if (!isDefault) {
-      route += `${clientType}`;
+      route += `${role}`;
     }
 
-    // define template filename: `${clientType}.html` or `default.html`
+    // define template filename: `${role}.html` or `default.html`
     const {
       templatePath,
       templateEngine,
       clientConfigFunction,
     } = this._applicationTemplateConfig;
 
-    const clientTmpl = path.join(templatePath, `${clientType}.tmpl`);
+    const clientTmpl = path.join(templatePath, `${role}.tmpl`);
     const defaultTmpl = path.join(templatePath, `default.tmpl`);
 
     // make it sync
@@ -653,7 +653,7 @@ Invalid certificate files, please check your:
     const tmpl = templateEngine.compile(tmplString);
     // http request
     router.get(route, (req, res) => {
-      const data = clientConfigFunction(clientType, this.config, req);
+      const data = clientConfigFunction(role, this.config, req);
 
       // CORS / COOP / COEP headers for `crossOriginIsolated pages,
       // enables `sharedArrayBuffers` and high precision timers
@@ -678,16 +678,16 @@ Invalid certificate files, please check your:
    * Socket connection callback.
    * @private
    */
-  _onSocketConnection(clientType, socket) {
-    const client = new Client(clientType, socket);
-    const clientTypes = Object.keys(this.config.app.clients);
+  _onSocketConnection(role, socket) {
+    const client = new Client(role, socket);
+    const roles = Object.keys(this.config.app.clients);
 
     socket.addListener('close', async () => {
       // do nothin if client type was invalid
-      if (clientTypes.includes(clientType)) {
+      if (roles.includes(role)) {
         // decrement audit state counter
         const numClients = this._auditState.get('numClients');
-        numClients[clientType] -= 1;
+        numClients[role] -= 1;
         this._auditState.set({ numClients });
 
         // clean context manager, await before cleaning state manager
@@ -704,14 +704,14 @@ Invalid certificate files, please check your:
     });
 
     socket.addListener(CLIENT_HANDSHAKE_REQUEST, async payload => {
-      const { clientType, registeredPlugins } = payload;
+      const { role, registeredPlugins } = payload;
 
-      if (!clientTypes.includes(clientType)) {
-        console.error(`[soundworks.Server] A client with invalid type ("${clientType}") attempted to connect`);
+      if (!roles.includes(role)) {
+        console.error(`[soundworks.Server] A client with invalid type ("${role}") attempted to connect`);
 
         socket.send(CLIENT_HANDSHAKE_ERROR, {
           type: 'invalid-client-type',
-          message: `Invalid client type, please check server configuration (valid client types are: ${clientTypes.join(', ')})`,
+          message: `Invalid client type, please check server configuration (valid client types are: ${roles.join(', ')})`,
         });
         return;
       }
@@ -728,7 +728,7 @@ Invalid certificate files, please check your:
 
       // increment audit state
       const numClients = this._auditState.get('numClients');
-      numClients[clientType] += 1;
+      numClients[role] += 1;
       this._auditState.set({ numClients });
 
       // add client to state manager
@@ -835,9 +835,9 @@ Invalid certificate files, please check your:
     this._applicationTemplateConfig = {
       templateEngine: { compile },
       templatePath: path.join('.build', 'server', 'tmpl'),
-      clientConfigFunction: (clientType, config, _httpRequest) => {
+      clientConfigFunction: (role, config, _httpRequest) => {
         return {
-          clientType: clientType,
+          role: role,
           app: {
             name: config.app.name,
             author: config.app.author,

@@ -25,12 +25,12 @@ const logger = {
     const auth = config.env.auth;
     const table = [];
 
-    for (let clientType in clientsConfig) {
-      const client = clientsConfig[clientType];
+    for (let role in clientsConfig) {
+      const client = clientsConfig[role];
 
       if (client.target === 'node') {
         const line = {
-          client_type: `> ${clientType}`,
+          role: `> ${role}`,
           target: chalk.red(client.target),
           path: `serverAddress: ${chalk.green(serverAddress)}`,
           default: undefined,
@@ -40,18 +40,18 @@ const logger = {
         table.push(line);
       } else if (client.target === 'browser') {
         const line = {
-          client_type: `> ${clientType}`,
+          role: `> ${role}`,
           target: chalk.red(client.target),
-          path: routes.find(r => r.clientType === clientType) ?
-            chalk.green(routes.find(r => r.clientType === clientType).path) :
+          path: routes.find(r => r.role === role) ?
+            chalk.green(routes.find(r => r.role === role).path) :
             chalk.red('no route defined'),
           default: (client.default ? 'x' : undefined),
-          auth: auth && auth.clients.indexOf(clientType) !== -1 ? 'x' : undefined,
+          auth: auth && auth.clients.indexOf(role) !== -1 ? 'x' : undefined,
         };
 
         table.push(line);
       } else {
-        console.log(`@warning: no target defined for client ${clientType}`);
+        console.log(`@warning: no target defined for client ${role}`);
       }
     }
 
@@ -71,8 +71,8 @@ const logger = {
     if (clientsConfig) {
       const configClientTypes = Object.keys(clientsConfig);
       routes.forEach(r => {
-        if (configClientTypes.indexOf(r.clientType) === -1) {
-          console.log(`@warning: no client config found for route ${r.clientType}`);
+        if (configClientTypes.indexOf(r.role) === -1) {
+          console.log(`@warning: no client config found for route ${r.role}`);
         }
       });
     } else {

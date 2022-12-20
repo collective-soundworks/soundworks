@@ -36,7 +36,7 @@ class Sockets {
 
   /**
    * Initialize sockets, all sockets are added by default added to two rooms:
-   * - to the room corresponding to the client `clientType`
+   * - to the room corresponding to the client `role`
    * - to the '*' that holds all connected sockets
    *
    * @private
@@ -73,7 +73,7 @@ class Sockets {
 
     this.wss.on('connection', (ws, req) => {
       const queryString = querystring.decode(req.url.split('?')[1]);
-      const { clientType, key } = queryString;
+      const { role, key } = queryString;
       const binary = !!(parseInt(queryString.binary));
 
       if (binary) {
@@ -92,9 +92,9 @@ class Sockets {
         const socket = new Socket(stringWs, binaryWs, this._rooms, this, config);
 
         socket.addToRoom('*');
-        socket.addToRoom(clientType);
+        socket.addToRoom(role);
 
-        onConnectionCallback(clientType, socket);
+        onConnectionCallback(role, socket);
       }
     });
   }
