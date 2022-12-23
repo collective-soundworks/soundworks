@@ -13,8 +13,14 @@
   },
   "type": "module",
   "exports": {
-    "./client.js": "./src/client/index.js",
-    "./server.js": "./src/server/index.js"
+    "./client.js": {
+      "module": "./src/client/index.js",
+      "types": "./types/client/index.d.ts"
+    },
+    "./server.js": {
+      "module": "./src/server/index.js",
+      "types": "./types/server/index.d.ts"
+    }
   },
   "repository": {
     "type": "git",
@@ -36,11 +42,13 @@
     "node": ">=16.0.0"
   },
   "scripts": {
-    "doc": "rm -Rf docs && jsdoc -c .jsdoc.json --verbose && cp -R assets docs/",
-    "toc": "markdown-toc -i README.md",
-    "version": "npm run toc && npm run doc && git add docs",
+    "doc": "npm run jsdoc && npm run types",
+    "jsdoc": "rm -Rf docs && jsdoc -c .jsdoc.json --verbose && cp -R assets docs/",
     "lint": "npx eslint src",
-    "test": "mocha"
+    "test": "mocha",
+    "toc": "markdown-toc -i README.md",
+    "types": "rm -Rf types && tsc",
+    "version": "npm run toc && npm run doc && git add docs"
   },
   "dependencies": {
     "@ircam/sc-gettime": "^1.0.0",
@@ -72,6 +80,7 @@
     "docdash": "^1.2.0",
     "dotenv": "^16.0.3",
     "eslint": "^8.24.0",
+    "eslint-plugin-jsdoc": "^39.6.4",
     "generate-changelog": "^1.8.0",
     "jsdoc": "^3.6.10",
     "markdown-toc": "^1.2.0",

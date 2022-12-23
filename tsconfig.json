@@ -1,5 +1,5 @@
 {
-  "include": ["src/server/index.js"],
+  "include": ["src/**/*.js"],
 
   "compilerOptions": {
     // Tells TypeScript to read JS files, as
