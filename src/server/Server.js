@@ -697,10 +697,9 @@ Invalid certificate files, please check your:
         // clean state manager
         await this.stateManager.removeClient(client.id);
       }
+
       // clean sockets
       socket.terminate();
-      // destroy client
-      client.destroy();
     });
 
     socket.addListener(CLIENT_HANDSHAKE_REQUEST, async payload => {

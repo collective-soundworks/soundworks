@@ -224,10 +224,15 @@ ${JSON.stringify(initValues, null, 2)}`);
   }
 
   /**
-   * Updates values of the state. The returned `Promise` resolves when all the
-   * have resolved themselves, i.e.:
+   * Update values of the state.
+   *
+   * The returned `Promise` resolves on the applied updates, when all the `onUpdate`
+   * callbacks have resolved themselves, i.e.:
    *
    * ```js
+   * server.stateManager.registerSchema('test', {
+   *   myBool: { type: 'boolean', default: false },
+   * });
    * const a = await server.stateManager.create('a');
    * let asyncCallbackCalled = false;
    *
@@ -240,8 +245,9 @@ ${JSON.stringify(initValues, null, 2)}`);
    *   });
    * });
    *
-   * await a.set({ bool: true });
+   * const updates = await a.set({ myBool: true });
    * assert.equal(asyncCallbackCalled, true);
+   * assert.deepEqual(updates, { myBool: true });
    * ```
    *
    * @async

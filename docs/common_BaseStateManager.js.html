@@ -3,7 +3,7 @@
 <head>
     
     <meta charset="utf-8">
-    <title>client/Context.js - soundworks</title>
+    <title>common/BaseStateManager.js - soundworks</title>
     
     <meta name="description" content="Documentation of soundworks, a full-stack JavaScript framework for distributed WebAudio and multimedia applications" />
     
@@ -37,7 +37,7 @@
 
 <div id="main">
     
-    <h1 class="page-title">client/Context.js</h1>
+    <h1 class="page-title">common/BaseStateManager.js</h1>
     
 
     
@@ -47,159 +47,235 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>import Client from './Client.js';
+            <pre class="prettyprint source linenums"><code>import SharedState from './SharedState.js';
 import {
-  CONTEXT_ENTER_REQUEST,
-  CONTEXT_ENTER_RESPONSE,
-  CONTEXT_ENTER_ERROR,
-  CONTEXT_EXIT_REQUEST,
-  CONTEXT_EXIT_RESPONSE,
-  CONTEXT_EXIT_ERROR,
-} from '../common/constants.js';
+  CREATE_REQUEST,
+  CREATE_RESPONSE,
+  CREATE_ERROR,
+  ATTACH_REQUEST,
+  ATTACH_RESPONSE,
+  ATTACH_ERROR,
+  OBSERVE_REQUEST,
+  OBSERVE_RESPONSE,
+  OBSERVE_NOTIFICATION,
+  UNOBSERVE_NOTIFICATION,
+  DELETE_SCHEMA,
+} from './constants.js';
 import {
   storeRequestPromise,
   resolveRequest,
   rejectRequest,
-} from '../common/promise-store.js';
+} from './promise-store.js';
+
 
 /**
- * Base class to extend for implementing a client of a soundworks application.
+ * @callback common.StateManagerObserveCallback
+ * @async
  *
- * @memberof client
+ * @param {String} schemaName - name of the schema
+ * @param {Number} stateId - id of the state
+ * @param {Number} nodeId - id of the node that created the state
  */
-class Context {
+
+/**
+ * Component dedicated at managing distributed states, accessible through {@link common.SharedState} instances, among the application.
+ *
+ * An instance of `StateManager` is automatically created by the
+ * `soundworks.Client` at initialization (cf. {@link client.Client#stateManager}).
+ *
+ * Tutorial: [https://collective-soundworks.github.io/tutorials/state-manager.html](https://collective-soundworks.github.io/tutorials/state-manager.html)
+ *
+ * @see {@link common.SharedState}
+ * @see {@link client.StateManager}
+ * @see {@link client.Client#stateManager}
+ * @see {@link server.StateManager}
+ * @see {@link server.Server#stateManager}
+ *
+ * @private
+ */
+class BaseStateManager {
   /**
-   * @param {client.Client} client - The soundworks client instance.
-   * @throws Will throw if the first argument is not a soundworks client instance.
+   * @param {Number} id - Id of the node.
+   * @param {Object} transport - Transport to use for synchronizing the state.
+   *  Must implement a basic EventEmitter API.
    */
-  constructor(client) {
-    if (!(client instanceof Client)) {
-      throw new Error(`[soundworks:Context] Invalid argument, context "${this.name}" should receive a "soundworks.Client" instance as first argument`);
-    }
+  constructor(id, transport) {
+    this.client = { id, transport };
 
-    /**
-     * The soundworks client instance
-     */
-    this.client = client;
+    this._statesById = new Map();
+    this._observeListeners = new Set();
+    this._cachedSchemas = new Map();
+    this._observeRequestCallbacks = new Map();
 
-    /**
-     * Status os the context ['idle', 'inited', 'started', 'errored']
-     */
-    this.status = 'idle';
+    // ---------------------------------------------
+    // CREATE
+    // ---------------------------------------------
 
-    this.client.socket.addListener(CONTEXT_ENTER_RESPONSE, (reqId, contextName) => {
-      if (contextName !== this.name) {
-        return;
+    this.client.transport.addListener(CREATE_RESPONSE, (reqId, stateId, remoteId, schemaName, schema, initValues) => {
+
+      // cache schema when first dealing it to save some bandwidth
+      if (!this._cachedSchemas.has(schemaName)) {
+        this._cachedSchemas.set(schemaName, schema);
       }
 
-      resolveRequest(reqId);
+      schema = this._cachedSchemas.get(schemaName);
+
+      const state = new SharedState(stateId, remoteId, schemaName, schema, this.client, true, this, initValues);
+      this._statesById.set(state.id, state);
+
+      resolveRequest(reqId, state);
     });
 
-    this.client.socket.addListener(CONTEXT_ENTER_ERROR, (reqId, contextName, msg) => {
-      if (contextName !== this.name) {
-        return;
-      }
-
+    this.client.transport.addListener(CREATE_ERROR, (reqId, msg) => {
       rejectRequest(reqId, msg);
     });
 
-    this.client.socket.addListener(CONTEXT_EXIT_RESPONSE, (reqId, contextName) => {
-      if (contextName !== this.name) {
-        return;
+    // ---------------------------------------------
+    // ATTACH (when creator, is attached by default)
+    // ---------------------------------------------
+    this.client.transport.addListener(ATTACH_RESPONSE, (reqId, stateId, remoteId, schemaName, schema, currentValues) => {
+      // cache schema when first dealing with it to save some bandwidth
+      // note: when we make the schemas dynamic at some point
+      // the server should be able to invalidate the schema and send
+      // it again despite the caching.
+      if (!this._cachedSchemas.has(schemaName)) {
+        this._cachedSchemas.set(schemaName, schema);
       }
 
-      resolveRequest(reqId);
+      schema = this._cachedSchemas.get(schemaName);
+
+      const state = new SharedState(stateId, remoteId, schemaName, schema, this.client, false, this, currentValues);
+      this._statesById.set(state.id, state);
+
+      resolveRequest(reqId, state);
     });
 
-    this.client.socket.addListener(CONTEXT_EXIT_ERROR, (reqId, contextName, msg) => {
-      if (contextName !== this.name) {
-        return;
-      }
-
+    this.client.transport.addListener(ATTACH_ERROR, (reqId, msg) => {
       rejectRequest(reqId, msg);
     });
 
-    this.client.contextManager.register(this);
-  }
+    // ---------------------------------------------
+    // OBSERVE PEERS (be notified when a state is created, lazy)
+    // ---------------------------------------------
+    this.client.transport.addListener(OBSERVE_RESPONSE, async (reqId, ...list) => {
+      // retrieve the callback that have been stored in observe to make sure
+      // we don't call another callback that may have been registered earlier.
+      const callback = this._observeRequestCallbacks.get(reqId);
+      this._observeRequestCallbacks.delete(reqId);
 
-  /**
-   * Getter that returns the name of the context, override to use a user-defined name
-   *
-   * @returns {string} - Name of the context.
-   */
-  get name() {
-    return this.constructor.name;
-  }
-
-
-  /**
-   * Start the context, this method is automatically called when `await client.start()`
-   * is called.
-   *
-   * Should be overriden to handle application wise behavior regardeless the client
-   * enters or exists the context.
-   */
-  async start() {}
-
-  /**
-   * Stop the context, this method is automatically called when `await client.stop()`
-   * is called.
-   *
-   * Should be overriden to handle application wise behavior regardeless the client
-   * enters or exists the context.
-   */
-  async stop() {}
-
-  /**
-   * Enter the context. If a server-side part of the context is defined (i.e. a
-   * context with the same class name or user-defined name), the corresponding
-   * server-side `enter()` method will be executed before the returned Promise
-   * resolves.
-   *
-   * If the context has not been started yet, the `start` method is lazily called.
-   *
-   * @returns {Promise} - Promise that resolves when the context is entered.
-   */
-  async enter() {
-    // lazily start the context if registered after `client.start()`
-    if (this.status !== 'started' &amp;&amp; this.status !== 'errored') {
-      await this.client.contextManager.get(this.name);
-    }
-
-    // we need the try/catch block to change the promise rejection into proper error
-    try {
-      await new Promise((resolve, reject) => {
-        const reqId = storeRequestPromise(resolve, reject);
-        this.client.socket.send(CONTEXT_ENTER_REQUEST, reqId, this.name);
+      const promises = list.map(([schemaName, stateId, nodeId]) => {
+        return callback(schemaName, stateId, nodeId);
       });
-    } catch(err) {
-      throw new Error(err);
-    }
+
+      await Promise.all(promises);
+
+      const unsubscribe = () => {
+        this._observeListeners.delete(callback);
+
+        if (this._observeListeners.size === 0) {
+          this.client.transport.emit(UNOBSERVE_NOTIFICATION);
+        }
+      };
+      resolveRequest(reqId, unsubscribe);
+    });
+
+    this.client.transport.addListener(OBSERVE_NOTIFICATION, (...list) => {
+      list.forEach(([schemaName, stateId, nodeId]) => {
+        this._observeListeners.forEach(callback => callback(schemaName, stateId, nodeId));
+      });
+    });
+
+    // ---------------------------------------------
+    // Clear cache when schema is deleted
+    // ---------------------------------------------
+    this.client.transport.addListener(DELETE_SCHEMA, schemaName => {
+      this._cachedSchemas.delete(schemaName);
+    });
   }
 
   /**
-   * Exit the context. If a server-side part of the context is defined (i.e. a
-   * context with the same class name or user-defined name), the corresponding
-   * server-side `exit()` method will be executed before the returned Promise
-   * resolves.
+   * Create a {@link common.SharedState} instance from a previsouly registered schema.
    *
+   * @see {@link common.SharedState}
    *
-   * @returns {Promise} - Promise that resolves when the context is exited.
+   * @param {String} schemaName - Name of the schema as given on registration
+   *  (cf. ServerStateManager)
+   * @param {Object} [initValues={}] - Default values for the state.
+   *
+   * @return {@link common.SharedState}
    */
-  async exit() {
-    // we need the try/catch block to change the promise rejection into proper error
-    try {
-      await new Promise((resolve, reject) => {
-        const reqId = storeRequestPromise(resolve, reject);
-        this.client.socket.send(CONTEXT_EXIT_REQUEST, reqId, this.name);
-      });
-    } catch(err) {
-      throw new Error(err);
-    }
+  async create(schemaName, initValues = {}) {
+    return new Promise((resolve, reject) => {
+      const reqId = storeRequestPromise(resolve, reject);
+      const requireSchema = this._cachedSchemas.has(schemaName) ? false : true;
+      this.client.transport.emit(CREATE_REQUEST, reqId, schemaName, requireSchema, initValues);
+    });
+  }
+
+  /**
+   * Attach to an existing {@link common.SharedState} instance.
+   *
+   * @see {@link common.SharedState}
+   *
+   * @param {String} schemaName - Name of the schema as given on registration
+   *  (cf. ServerStateManager)
+   * @param {Object} [stateId=null] - Id of the state to attach to. If `null`,
+   *  attach to the first state found with the given schema name (usefull for
+   *  globally shared states owned by the server).
+   *
+   * @return {@link common.SharedState}
+   */
+  async attach(schemaName, stateId = null) {
+    return new Promise((resolve, reject) => {
+      // @todo - add a timeout
+      const reqId = storeRequestPromise(resolve, reject);
+      const requireSchema = this._cachedSchemas.has(schemaName) ? false : true;
+      this.client.transport.emit(ATTACH_REQUEST, reqId, schemaName, stateId, requireSchema);
+    });
+  }
+
+  // // @todo - review, should:
+  // // - bind communications on first observer added
+  // // - unbind communication if all observer removed
+  // // - now the callback are not executed but the communications are still there
+  // // that's not good!
+  // // --> later note, not sure what I meant there... (unusefull comments are a bit boring)
+  // // --> is it done ?
+
+  // // @todo - optionnal schema name
+
+  /**
+   * Observe all the {@link common.SharedState} instances that are created on the network.
+   *
+   * @param {common.StateManagerObserveCallback} callback - Function
+   *  to be called when a new state is created on the network.
+   *
+   * @return Promise&lt;Function> - Return a Promise that resolves when the callback
+   *  as been executed for the first time. The promise value is a function which
+   *  allows to stop observing the network.
+   *
+   * @example
+   * this.client.stateManager.observe(async (schemaName, stateId, nodeId) => {
+   *   if (schemaName === 'something') {
+   *     const state = await this.client.stateManager.attach(schemaName, stateId);
+   *     console.log(state.getValues());
+   *   }
+   * });
+   */
+  async observe(callback) {
+    this._observeListeners.add(callback);
+    // store function
+    return new Promise((resolve, reject) => {
+      const reqId = storeRequestPromise(resolve, reject);
+      // store the callback to be executed on the response
+      this._observeRequestCallbacks.set(reqId, callback);
+      this.client.transport.emit(OBSERVE_REQUEST, reqId);
+    });
   }
 }
 
-export default Context;
+export default BaseStateManager;
+
 </code></pre>
         </article>
     </section>

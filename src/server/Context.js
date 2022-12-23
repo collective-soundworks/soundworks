@@ -2,10 +2,9 @@ import Client from './Client.js';
 import Server from './Server.js';
 
 /**
- * Base class to extend in order to create the server-side counterpert of
- * a soundworks client.
- *
- * The user defined `Experience`s are the main components of a soundworks application.
+ * Base class to extend in order to create the server-side counterpart of
+ * a {@link client.Context}. If not defined, a default context will be created
+ * and used by the server.
  *
  * @memberof server
  */
@@ -19,22 +18,26 @@ class Context {
       throw new Error('Invalid client types');
     }
 
+    /**
+     * soundworks server
+     * @type {server.Server}
+     */
     this.server = server;
 
     /**
      * List of clients that are currently in this context
-     * @instance
      * @type {Client[]}
      */
     this.clients = new Set();
 
     /**
-     * status of the context ['idle', 'inited', 'started', 'errored']
+     * Status of the context ('idle', 'inited', 'started' or 'errored')
+     * @type {String}
      */
     this.status = 'idle';
 
     /**
-     * List of client types associated with this server-side experience.
+     * List of client role associated with this context.
      */
     roles = Array.isArray(roles) ? roles : [roles];
     this.roles = new Set(roles);
@@ -44,28 +47,32 @@ class Context {
   }
 
   /**
-   * Getter that returns the name of the context, override to use a user-defined name
+   * Name of the context, default to the class name.
+   * Override the `get name()` getter to use a user-defined context name.
    */
   get name() {
     return this.constructor.name;
   }
 
   /**
-   * Method automatically called when the server starts. Or lazilly called if
-   * the context was created after `server.start()`
-   * WARNING: this method should never be called manually.
+   * Method automatically called when the server starts, or lazilly called if
+   * the context is created after `server.start()`
+   *
+   * _WARNING: this method should never be called manually._
    */
   async start() {}
 
   /**
    * Method automatically called when the server stops.
-   * WARNING: this method should never be called manually.
+   *
+   * _WARNING: this method should never be called manually._
    */
   async stop() {}
 
   /**
    * Method automatically called when the client enters the context.
-   * WARNING: this method should never be called manually.
+   *
+   * _WARNING: this method should never be called manually._
    */
   async enter(client) {
     if (!(client instanceof Client)) {
@@ -77,7 +84,8 @@ class Context {
 
   /**
    * Method automatically called when the client exits the context.
-   * WARNING: this method should never be called manually.
+   *
+   * _WARNING: this method should never be called manually._
    */
   async exit(client) {
     if (!(client instanceof Client)) {

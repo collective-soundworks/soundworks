@@ -1,19 +1,40 @@
+/**
+ * Internal schema used to audit the application.
+ */
 export default {
+  /**
+   * Number of connected clients by role.
+   *
+   * @example
+   * {
+   *   player: 12,
+   *   controller: 1,
+   * }
+   */
   numClients: {
     type: 'any',
     default: {},
   },
-  // average latency computed from ping/pong (s)
+
+  /**
+   * Average latency in seconds computed from ping/pong.
+   */
   averageNetworkLatency: {
     type: 'float',
     default: 0,
   },
-  // time window on which the average latency is computed (s)
+
+  /**
+   * Time window in second used to compute the average latency. Defaults to 5
+   */
   averageNetworkLatencyWindow: {
     type: 'float',
     default: 5,
   },
-  // period on which the average latency is computed (s)
+
+  /**
+   * Period in second at which the average latency is computed. Defaults to 2
+   */
   averageNetworkLatencyPeriod: {
     type: 'float',
     default: 2,

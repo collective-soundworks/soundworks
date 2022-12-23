@@ -1,3 +1,22 @@
+body {
+  font-size: 14px;
+}
+
+.params td, .params .name, .props .name, .name code {
+  font-size: 12px;
+}
+
+/* inline code */
+code {
+  font-size: 12px;
+}
+
+#main {
+  max-width: 1000px;
+  float: left;
+  margin-left: 280px;
+}
+
 a, a:active {
   color: #282922;
 }
@@ -130,9 +149,3 @@ span.param-type, .params td .param-type, .param-type dd {
   font-size: 12px;
   background-color: #282922;
 }
-
-/* inline code */
-code {
-  font-size: 14px;
-}
-

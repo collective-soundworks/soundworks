@@ -12,26 +12,27 @@ const __dirname = fileURLToPath(new URL('.', import.meta.url));
 
 /**
  * Websocket server that creates and host all {@link server.Socket} instance.
- *
- * (@note - could be usefull for broadcasting messages, creating rooms, etc.
+ * Most of the time, you shouldn't have to use this class instance directely, but
+ * it could be usefull in some situations, for broadcasting messages, creating rooms, etc.
  *
  * @memberof server
  */
 class Sockets {
   constructor() {
-    /**
-     * Store sockets per room. The romm `'*'` store all current connections.
-     * @private
-     */
+    /** @private */
+    this._wss = null;
+    /** @private */
     this._rooms = new Map();
-    // init global room
+    // The special `'*'` romm stores all current connections.
     this._rooms.set('*', new Set());
-
+    /** @private */
     this._initializationCache = new Map();
 
-    // for stats
+    /** @private */
     this._latencyStatsWorker = null; // protected - used in Socket instances
+    /** @private */
     this._auditState = null;
+
   }
 
   /**
@@ -66,12 +67,12 @@ class Sockets {
     });
 
     // init ws server
-    this.wss = new WebSocketServer({
+    this._wss = new WebSocketServer({
       server: server.httpServer,
       path: `/${config.path}`, // @note - update according to existing config files (aka cosima-apps)
     });
 
-    this.wss.on('connection', (ws, req) => {
+    this._wss.on('connection', (ws, req) => {
       const queryString = querystring.decode(req.url.split('?')[1]);
       const { role, key } = queryString;
       const binary = !!(parseInt(queryString.binary));
@@ -99,6 +100,7 @@ class Sockets {
     });
   }
 
+  /** @protected */
   terminate() {
     // terminate stat worker thread
     this._latencyStatsWorker.terminate();

@@ -5,6 +5,8 @@ import { isString } from './utils.js';
 
 /**
  * Shared functionnality between server-side and client-size plugin manager
+ *
+ * @private
  */
 class BasePluginManager {
   constructor(node) {
@@ -26,22 +28,22 @@ class BasePluginManager {
   /**
    * Register a plugin into soundworks.
    *
-   * _A plugin must be registered both client-side and server-side_
+   * _A plugin must always be registered both on client-side and on server-side_
    * @see {@link client.PluginManager#register}
    *
    * @param {String} id - Unique id of the plugin, allow to register the same
    *  plugin factory under different ids.
    * @param {Function} factory - Factory function that return the plugin class
-   * @param {Object} options - Options to configure the plugin
-   * @param {Array} deps - List of plugins' names the plugin depends on
+   * @param {Object} [options={}] - Options to configure the plugin
+   * @param {Array} [deps=[]] - List of plugins' names the plugin depends on, i.e.
+   *  the plugin initialization will start only after the plugins it depends on are
+   *  fully started themselves.
    *
    * @example
-   * ```js
    * // client-side
    * client.pluginManager.register('user-defined-name', pluginFactory);
    * // server-side
    * server.pluginManager.register('user-defined-name', pluginFactory);
-   * ```
    */
   register(id, ctor, options = {}, deps = []) {
     // For now we don't allow to register a plugin after `client|server.init()`.
@@ -174,7 +176,9 @@ class BasePluginManager {
   }
 
   /**
-   * Propagate a notification each time a plugin is updated (status or inner state)
+   * Propagate a notification each time a plugin is updated (status or inner state).
+   * The callback will receive the list of all plugins as first parameter, and the
+   * plugin instance that initiated the state change event as second parameter.
    */
   onStateChange(observer) {
     this._stateChangeObservers.add(observer);

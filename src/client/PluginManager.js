@@ -6,8 +6,13 @@ import Client from './Client.js';
  * Manage the plugins lifecycle and their possible inter-dependencies.
  *
  * @memberof client
+ * @extends BasePluginManager
+ * @inheritdoc
  */
 class PluginManager extends BasePluginManager {
+  /**
+   * @param {client.Client} client - The soundworks client instance.
+   */
   constructor(client) {
     if (!(client instanceof Client)) {
       throw new Error(`[soundworks.PluginManager] Invalid argument, "new PluginManager(client)" should receive an instance of "soundworks.Client as argument"`);
@@ -27,8 +32,12 @@ class PluginManager extends BasePluginManager {
   }
 
   // client only methods
+  // ------------------------------------------------------------
 
-  /** @private */
+  /**
+   * @protected
+   * @ignore
+   */
   getRegisteredPlugins() {
     return Array.from(this._registeredPlugins.keys());
   }

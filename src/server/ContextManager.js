@@ -8,16 +8,18 @@ import {
   CONTEXT_EXIT_ERROR,
 } from '../common/constants.js';
 
-
-// @note
-// Create a dummy server side context if a proper server-side context has not
-// been declared and registered, one DefaultContext is created per unknown
-// contextName and associated to all known client types.
-
-/** @private */
+/**
+ * Create a dummy server side context if a proper server-side context has not
+ * been declared and registered, one DefaultContext is created per unknown
+ * contextName and associated to all known client types.
+ *
+ * @private
+ */
 function createNamedContextClass(contextName) {
   return class DefaultContext extends Context {
-    get name() { return contextName; }
+    get name() {
+      return contextName;
+    }
   };
 }
 
@@ -49,19 +51,34 @@ class ContextCollection {
 }
 
 /**
- * Manager the different contexts and their lifecycle.
- * Most of the time, you should not ahve to manipulate the context manager directly
+ * Manage the different server-side contexts and their lifecycle. The `ContextManager`
+ * is automatically instantiated by the {@link server.Server}.
+ *
+ * _WARNING: Most of the time, you should not have to manipulate the context manager directly._
+ *
+ * @memberof server
  */
 class ContextManager {
+  /**
+   * @param {server.Server} server - Instance of the soundworks server.
+   */
   constructor(server) {
+    /** @private */
     this.server = server;
-
     /** @private */
     this._contexts = new ContextCollection();
     /** @private */
     this._contextStartPromises = new Map();
   }
 
+  /**
+   * Register a context in the manager.
+   * This method is called in the {@link server.Context} constructor
+   *
+   * @param {server.Context} context - Context instance to register.
+   *
+   * @private
+   */
   register(context) {
     // we must await the contructor initialization end to check the name and throw
     if (this._contexts.has(context.name)) {
@@ -71,6 +88,14 @@ class ContextManager {
     this._contexts.add(context);
   }
 
+  /**
+   * Retrieve a started context from its name.
+   *
+   * @see {server.Context#name}
+   * @param {String} contextName - Name of the context.
+   *
+   * @private
+   */
   async get(contextName) {
     if (!this._contexts.has(contextName)) {
       throw new Error(`[soundworks:ContextManager] Can't get context "${contextName}", not registered`);
@@ -98,7 +123,13 @@ class ContextManager {
     return context;
   }
 
-  // called on socket open
+  /**
+   * Called when a client connects to the server (websocket handshake)
+   *
+   * @param {server.Client} client
+   *
+   * @private
+   */
   addClient(client) {
     client.socket.addListener(CONTEXT_ENTER_REQUEST, async (reqId, contextName) => {
       // if no context found, create a DefaultContext on the fly
@@ -191,7 +222,13 @@ class ContextManager {
     });
   }
 
-  // called on socket 'close'
+  /**
+   * Called when a client connects to the server (websocket 'close' event)
+   *
+   * @param {server.Client} client
+   *
+   * @private
+   */
   async removeClient(client) {
     client.socket.removeAllListeners(CONTEXT_ENTER_REQUEST);
     client.socket.removeAllListeners(CONTEXT_EXIT_REQUEST);
@@ -204,11 +241,22 @@ class ContextManager {
     await Promise.all(promises);
   }
 
+  /**
+   * Start all contexts registered before `await server.start()`.
+   * Called on {@link server.Server#start}
+   *
+   * @private
+   */
   async start() {
     const promises = this._contexts.map(context => this.get(context.name));
     await Promise.all(promises);
   }
 
+  /**
+   * Stop all contexts. Called on {@link server.Server#stop}
+   *
+   * @private
+   */
   async stop() {
     const promises = this._contexts.map(context => context.stop());
     await Promise.all(promises);

@@ -1,10 +1,9 @@
 /**
- * Client-side part of the *soundworks* framework.
- *
- * Can run seamlessly in a browser or in a Node.js context.
+ * Client-side part of the *soundworks* framework. In the soundworks paradigm,
+ * A client is a node of the application that can run seamlessly in a browser
+ * or in a Node.js context.
  *
  * @namespace client
- *
  * @example
  * import { Client } from '@soundworks/core/client.js';
  *

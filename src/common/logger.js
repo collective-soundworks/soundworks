@@ -12,13 +12,19 @@ const logger = {
   },
 
   title(msg) {
-    if (!this.verbose) { return; }
+    if (!this.verbose) {
+      return;
+    }
+
 
     console.log(chalk.cyan(`+ ${msg}`));
   },
 
   clientConfigAndRouting(routes, config) {
-    if (!this.verbose) { return; }
+    if (!this.verbose) {
+      return;
+    }
+
 
     const clientsConfig = config.app.clients;
     const serverAddress = config.env.serverAddress;
@@ -81,42 +87,66 @@ const logger = {
   },
 
   ip(protocol, address, port) {
-    if (!this.verbose) { return; }
+    if (!this.verbose) {
+      return;
+    }
+
     console.log(`    ${protocol}://${address}:${chalk.green(port)}`);
   },
 
   pluginStart(name) {
-    if (!this.verbose) { return; }
+    if (!this.verbose) {
+      return;
+    }
+
     console.log(`    ${name} ${chalk.yellow('start...')}`);
   },
 
   pluginStarted(name) {
-    if (!this.verbose) { return; }
+    if (!this.verbose) {
+      return;
+    }
+
     console.log(`    ${name} ${chalk.cyan('started')}`);
   },
 
   pluginReady(name) {
-    if (!this.verbose) { return; }
+    if (!this.verbose) {
+      return;
+    }
+
     console.log(`    ${name} ${chalk.green('ready')}`);
   },
 
   pluginErrored(name) {
-    if (!this.verbose) { return; }
+    if (!this.verbose) {
+      return;
+    }
+
     console.log(`    ${name} ${chalk.red('errors')}`);
   },
 
   log(msg) {
-    if (!this.verbose) { return; }
+    if (!this.verbose) {
+      return;
+    }
+
     console.log(msg);
   },
 
   warn(msg) {
-    if (!this.verbose) { return; }
+    if (!this.verbose) {
+      return;
+    }
+
     console.warn(chalk.yellow(msg));
   },
 
   error(msg) {
-    if (!this.verbose) { return; }
+    if (!this.verbose) {
+      return;
+    }
+
     console.error(chalk.red(msg));
   },
 };

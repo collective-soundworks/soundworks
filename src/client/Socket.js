@@ -9,61 +9,68 @@ import {
 import logger from '../common/logger.js';
 import { isBrowser } from '../common/utils.js';
 
-// close
+// WebSocket events:
+//
+// `close`:
 //   Fired when a connection with a websocket is closed.
 //   Also available via the onclose property
-// error
-//   Fired when a connection with a websocket has been closed because of an error, such as whensome data couldn't be sent.
+// `error`:
+//   Fired when a connection with a websocket has been closed because of an error,
+//   such as whensome data couldn't be sent.
 //   Also available via the onerror property.
-// message
+// `message`:
 //   Fired when data is received through a websocket.
 //   Also available via the onmessage property.
-// open
+// `open`:
 //   Fired when a connection with a websocket is opened.
 //   Also available via the onopen property.
 
-// @todo - use isomorphic ws ? (does seems like a perfect idea)
-
 /**
- * Simple wrapper with simple pubsub system built on top of `ws` socket.
- * The abstraction actually open two different sockets:
- * - one configured for string (JSON compatible) messages
- * - one configured with `binaryType=arraybuffer` for streaming data more
- *   efficiently.
- * The sockets also re-emits all "native" ws events.
+ * The Socket class is a simple wrapper built on top of `isomorphic-ws` socket,
+ * that implements a pubsub interface. An instance of `Socket` is automatically
+ * created by the `soundworks.Client`.
  *
- * An instance of `Socket` is automatically created by the `soundworks.Client`.
- * @see {@link client.Client#socket}
- *
- * @see https://github.com/websockets/ws
+ * The Socket class concurrently opens two different WebSockets:
+ * - a socket configured with `binaryType = 'string'` for JSON compatible string
+ *  messages.
+ * - a socket configured with `binaryType=arraybuffer` for efficient streaming
+ *  of binary data.
+ * The sockets re-emits all "native" ws events ('open', 'upgrade', 'close', 'error'
+ *  and 'message'.
  *
  * @memberof client
+ * @see {@link client.Client#socket}
+ * @see https://github.com/heineiuo/isomorphic-ws
  */
 class Socket {
   constructor() {
     /**
-     * WebSocket instance (string protocol - binaryType = 'string').
+     * WebSocket instance w/ string protocol, i.e. `binaryType = 'string'`.
+     *
+     * @private
      */
-    /** @private */
     this.ws = null;
     /**
-     * WebSocket instance (binary protocol - binaryType = 'arraybuffer').
+     * WebSocket instance w/ binary protocol, i.e. `binaryType = 'arraybuffer'`.
+     *
+     * @private
      */
-    /** @private */
     this.binaryWs = null;
-
+    /** @private */
     this._stringListeners = new Map();
+    /** @private */
     this._binaryListeners = new Map();
   }
 
   /**
-   * Initialize a websocket connection with the server. This is automatically
-   * called in `client.init()`
-   * @param {String} role - Role of the `client.role` {@link client}
-   * @param {Object} options - Options of the socket
-   * @param {Array<String>} options.path - Defines where socket should find the `socket.io` file
+   * Initialize a websocket connection with the server. Automatically called
+   * during `client.init()`
+   *
+   * @param {string} role - Role of the client (see {@link client.Client#role})
+   * @param {object} config - Configuration of the sockets
+   * @protected
+   * @ignore
    */
-  /** @private */
   async init(role, config) {
     // unique key that allows to associate the two sockets to the same client.
     // note: the key is only used to pair to two sockets, so its usage is very
@@ -160,14 +167,20 @@ class Socket {
     // detect broken connection
     // cf. https://github.com/websockets/ws#how-to-detect-and-close-broken-connections
     const heartbeat = () => {
-      clearTimeout(pingTimeoutId);
+      try {
+        console.log('ping received');
+        clearTimeout(pingTimeoutId);
 
-      pingTimeoutId = setTimeout(() => {
-        this.terminate();
-      }, pingInterval + 2000);
-    }
+      // pingTimeoutId = setTimeout(() => {
+      //   console.log('terminate');
+      //   this.terminate();
+      // }, pingInterval + 2000);
+      } catch (err) {
+        console.error(err);
+      }
+    };
 
-    this.ws.addEventListener('ping', heartbeat);
+    this.ws.on('ping', heartbeat);
     this.ws.addEventListener('close', () => {
       clearTimeout(pingTimeoutId);
     });
@@ -208,7 +221,12 @@ class Socket {
     return Promise.resolve();
   }
 
-  /** @private */
+  /**
+   * @param {boolean} binary - Emit to either the string or binary socket.
+   * @param {string} channel - Channel name.
+   * @param {...*} args - Content of the message.
+   * @private
+   */
   _emit(binary, channel, ...args) {
     const listeners = binary ? this._binaryListeners : this._stringListeners;
 
@@ -218,7 +236,12 @@ class Socket {
     }
   }
 
-  /** @private */
+  /**
+   * @param {Function[]} listeners - List of listeners, either for the string or binary socket.
+   * @param {string} channel - Channel name.
+   * @param {Function} callback - The function to be added to the listeners.
+   * @private
+   */
   _addListener(listeners, channel, callback) {
     if (!listeners.has(channel)) {
       listeners.set(channel, new Set());
@@ -228,7 +251,12 @@ class Socket {
     callbacks.add(callback);
   }
 
-  /** @private */
+  /**
+   * @param {Function[]} listeners - List of listeners, either for the string or binary socket.
+   * @param {string} channel - Channel name.
+   * @param {Function} callback - The function to be removed from the listeners.
+   * @private
+   */
   _removeListener(listeners, channel, callback) {
     if (listeners.has(channel)) {
       const callbacks = listeners.get(channel);
@@ -240,7 +268,12 @@ class Socket {
     }
   }
 
-  /** @private */
+  /**
+   * @param {Function[]} listeners - List of listeners, either for the string or binary socket.
+   * @param {string} [channel=null] - Channel name of the listeners to remove. If null
+   *  all the listeners are cleared.
+   * @private
+   */
   _removeAllListeners(listeners, channel = null) {
     if (channel === null) {
       listeners.clear();
@@ -250,10 +283,10 @@ class Socket {
   }
 
   /**
-   * Send JSON compatible messages on a given channel
+   * Send JSON compatible messages on a given channel.
    *
-   * @param {String} channel - The channel of the message
-   * @param {...*} args - Arguments of the message (as many as needed, of any type)
+   * @param {string} channel - Channel name of the message.
+   * @param {...*} args - Message list, as many as needed, of any serializable type).
    */
   send(channel, ...args) {
     const msg = packStringMessage(channel, ...args);
@@ -261,39 +294,39 @@ class Socket {
   }
 
   /**
-   * Listen JSON compatible messages on a given channel
+   * Listen to JSON compatible messages on a given channel.
    *
-   * @param {String} channel - Channel of the message
-   * @param {Function} callback - Callback to execute when a message is received
+   * @param {string} channel - Channel name of the message.
+   * @param {Function} callback - Callback to execute when a message is received.
    */
   addListener(channel, callback) {
     this._addListener(this._stringListeners, channel, callback);
   }
 
   /**
-   * Remove a listener from JSON compatible messages on a given channel
+   * Remove a listener from JSON compatible messages on a given channel.
    *
-   * @param {String} channel - Channel of the message
-   * @param {Function} callback - Callback to remove
+   * @param {string} channel - Channel name of the message.
+   * @param {Function} callback - Callback to remove.
    */
   removeListener(channel, callback) {
     this._removeListener(this._stringListeners, channel, callback);
   }
 
   /**
-   * Remove all listeners from JSON compatible messages on a given channel
+   * Remove all listeners from JSON compatible messages on a given channel.
    *
-   * @param {String} channel - Channel of the message
+   * @param {string} channel - Channel name of the message.
    */
   removeAllListeners(channel = null) {
     this._removeAllListeners(this._stringListeners, channel);
   }
 
   /**
-   * Send binary messages on a given channel
+   * Send binary messages on a given channel.
    *
-   * @param {String} channel - Channel of the message
-   * @param {TypedArray} typedArray - Data to send
+   * @param {string} channel - Channel name of the message.
+   * @param {TypedArray} typedArray - Binary data to be sent.
    */
   sendBinary(channel, typedArray) {
     const msg = packBinaryMessage(channel, typedArray);
@@ -301,10 +334,10 @@ class Socket {
   }
 
   /**
-   * Listen binary messages on a given channel
+   * Listen binary messages on a given channel.
    *
-   * @param {String} channel - Channel of the message
-   * @param {Function} callback - Callback to execute when a message is received
+   * @param {string} channel - Channel name of the message.
+   * @param {Function} callback - Callback to execute when a message is received.
    */
   addBinaryListener(channel, callback) {
     this._addListener(this._binaryListeners, channel, callback);
@@ -313,8 +346,8 @@ class Socket {
   /**
    * Remove a listener from binary compatible messages on a given channel
    *
-   * @param {String} channel - Channel of the message
-   * @param {Function} callback - Callback to cancel
+   * @param {string} channel - Channel of the message.
+   * @param {Function} callback - Callback to cancel.
    */
   removeBinaryListener(channel, callback) {
     this._removeListener(this._binaryListeners, channel, callback);
@@ -323,14 +356,14 @@ class Socket {
   /**
    * Remove all listeners from binary compatible messages on a given channel
    *
-   * @param {String} channel - Channel of the message
+   * @param {string} channel - Channel of the message.
    */
   removeAllBinaryListeners(channel = null) {
     this._removeAllListeners(this._binaryListeners, channel);
   }
 
   /**
-   * Immediately close the 2 sockets
+   * Removes all listeners and immediately close the two sockets.
    */
   async terminate() {
     this.removeAllListeners();
@@ -339,7 +372,6 @@ class Socket {
     this.ws.close();
     this.binaryWs.close();
 
-    // return Promise.all([this._wsClosePromise, this._binaryWsClosePromise]);
     return Promise.resolve();
   }
 }

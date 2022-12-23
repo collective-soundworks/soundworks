@@ -1,10 +1,14 @@
 import BasePlugin from '../common/BasePlugin.js';
 
 /**
- * Base class to extend for creating new soundworks plugins.
+ * Base class to extend in order to create the server-side counterpart of a
+ * soundworks plugin.
  *
  * @memberof server
+ *
  * @augments BasePlugin
+ * @param {server.Server} server - Instance of the soundworks server.
+ * @param {String} id - User defined id of the plugin, as given in {@link server.PluginManager#register}.
  */
 class Plugin extends BasePlugin {
   constructor(server, id) {
@@ -22,8 +26,9 @@ class Plugin extends BasePlugin {
   }
 
   /**
-   * Method called when a client, which registered the client-side plugin,
-   * connects to the application.
+   * Method called when a client (which registered the client-side plugin),
+   * connects to the application. Override this method if you need to perform
+   * some particular logic (e.g. creating a shared state) for each clients.
    *
    * @param {server.Client} client
    */
@@ -32,8 +37,9 @@ class Plugin extends BasePlugin {
   }
 
   /**
-   * Method called when a client, which registered the client-side plugin,
-   * disconnects from the application.
+   * Method called when a client (which registered the client-side plugin),
+   * disconnects from the application. Override this method if you need to perform
+   * some particular logic (e.g. creating a shared state) for each clients.
    *
    * @param {server.Client} client
    */

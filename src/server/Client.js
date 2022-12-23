@@ -5,9 +5,10 @@ import { idGenerator } from '../common/utils.js';
 const generateId = idGenerator();
 
 /**
- * Server side representation of a client.
+ * Server side representation of a soundworks client.
  *
  * @memberof server
+ * @see {@link client.Client}
  */
 class Client {
   /**
@@ -16,7 +17,7 @@ class Client {
    */
   constructor(role, socket) {
     /**
-     * Client type, as specified in client side config {@link client.Client}.
+     * Client role, as specified in client side config {@link client.Client}.
      *
      * @see {@link client.Client}
      * @type {String}
@@ -24,32 +25,22 @@ class Client {
     this.role = role;
 
     /**
-     * Session id (incremeted positive number).
-     * The counter is reset when the server restarts.
+     * Session Id (incremented positive number).
      * @type {Number}
      */
     this.id = generateId.next().value;
 
     /**
-     * Unique session id (uuidv4).
+     * Unique session Id (uuidv4).
      * @type {String}
      */
     this.uuid = uuid();
 
     /**
-     * Socket connection with the remote {@link client.Client}.
+     * Socket connection with the remote client {@link client.Client}.
      * @type {server.Socket}
      */
     this.socket = socket;
-  }
-
-  /**
-   * Destroy the client.
-   * @private
-   */
-  destroy() {
-    this.uuid = null;
-    this.id = null;
   }
 }
 

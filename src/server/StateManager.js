@@ -2,9 +2,9 @@ import EventEmitter from 'node:events';
 
 import clonedeep from 'lodash.clonedeep';
 
+import BaseStateManager from '../common/BaseStateManager.js';
 import ParameterBag from '../common/ParameterBag.js';
 import SharedStatePrivate from '../common/SharedStatePrivate.js';
-import StateManagerClient from '../client/StateManager.js';
 import {
   SERVER_ID,
   CREATE_REQUEST,
@@ -37,13 +37,14 @@ const generateRemoteId = idGenerator();
  * Tutorial: [https://collective-soundworks.github.io/tutorials/state-manager.html](https://collective-soundworks.github.io/tutorials/state-manager.html)
  *
  * @memberof server
- * @extends client.StateManager
+ * @extends BaseStateManager
+ * @inheritdoc
  *
  * @see {@link client.StateManager}
  * @see {@link server.SharedState}
  * @see {@link server.Server#stateManager}
  */
-class StateManager extends StateManagerClient {
+class StateManager extends BaseStateManager {
   constructor() {
     // acts as a client of itself locally
     const localClientId = SERVER_ID;
@@ -61,8 +62,9 @@ class StateManager extends StateManagerClient {
   }
 
   /**
-   * Add a client. This is automatically handle by `soundworks` when a client
-   * connects.
+   * Add a client to the manager.
+   *
+   * This is automatically handled by the {@link server.Server} when a client connects.
    *
    * @param {Number} nodeId - Id of the client node, as given in
    *  {@link client.StateManager}
@@ -183,8 +185,9 @@ class StateManager extends StateManagerClient {
   }
 
   /**
-   * Remove a client. This is automatically handle by `soundworks` when a client
-   * connects.
+   * Remove a client from the manager. Clean all created or attached states.
+   *
+   * This is automatically handled by the {@link server.Server} when a client disconnects.
    *
    * @param {Number} nodeId - Id of the client node, as given in
    *  {@link client.StateManager}
@@ -295,14 +298,17 @@ class StateManager extends StateManagerClient {
 
   /**
    * @callback server.StateManager~updateHook
+   * @async
    *
    * @param {Object} updates - Update object as given on a set callback, or
    *  result of the previous hook
    * @param {Object} currentValues - Current values of the state.
    * @param {Object} [context=null] - Optionnal context passed by the creator
    *  of the update.
+   *
    * @return {Object} The "real" updates to be applied on the state.
    */
+
   /**
    * Register a function for a given schema (e.g. will be applied on all states
    * created from this schema) that will be executed before the update values
@@ -315,9 +321,18 @@ class StateManager extends StateManagerClient {
    * server-side regarless the node on which `set` has been called and before
    * the "actual" update of the state (e.g. before the call of `onUpdate`).
    *
+   * @param {String} schemaName - Kind of states on which applying the hook.
+   * @param {server.StateManager~updateHook} updateHook - Function
+   *   called between the `set` call and the actual update.
+   *
+   * @returns {Fuction} deleteHook - Handler that deletes the hook when executed.
+   *
    * @example
-   * server.stateManager.registerSchema('hooked', schema);
-   * server.stateManager.registerUpdateHook('hooked', (updates, currentValues) => {
+   * server.stateManager.registerSchema('hooked', {
+   *   name: { type: 'string', default: null, nullable: true },
+   *   name: { numUpdates: 'integer', default: 0 },
+   * });
+   * server.stateManager.registerUpdateHook('hooked', updates => {
    *   return {
    *     ...updates
    *     numUpdates: currentValues.numUpdates + 1,
@@ -327,12 +342,8 @@ class StateManager extends StateManagerClient {
    * const state = await server.stateManager.create('hooked');
    *
    * await state.set({ name: 'test' });
-   * state.getValues();
-   * // > { name: 'test', numUpdates: 1 };
-   *
-   * @param {String} schemaName - Kind of states on which applying the hook.
-   * @param {server.StateManager~updateHook} updateHook - Function
-   *   called between the `set` call and the actual update.
+   * const values = state.getValues();
+   * assert.deepEqual(result, { name: 'test', numUpdates: 1 });
    */
   registerUpdateHook(schemaName, updateHook) {
     // throw error if schemaName has not been registered

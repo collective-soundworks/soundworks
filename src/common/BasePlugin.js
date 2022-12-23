@@ -1,42 +1,48 @@
 import merge from 'lodash.merge';
 
 class BasePlugin {
+  /**
+   * @param {string} id - User-defined id of the plugin.
+   */
   constructor(id) {
     /**
-     * Id of the plugin.
-     * @type {String}
+     * User defined Id of the plugin.
+     *
+     * @type {string}
      */
     this.id = id;
 
     /**
      * Type of the plugin, i.e. the ClassName.
      *
-     * Usefull to do something based on certain types of plugin while not
+     * Usefull to do something based on certain types of plugins while not
      * knowing under which id they have been registered. (e.g. view for platform)
      *
-     * @type {String}
+     * @type {string}
      * @readonly
      */
     this.type = this.constructor.name;
 
     /**
      * Options of the plugin.
-     * @type {Object}
+     *
+     * @type {object}
      */
     this.options = {};
 
     /**
-     * Object containing internal local state of the plugin, use `propageStateChange`
-     * to propagate the state and `onStateChange` to listen to state changes.
-     * The state change will also be propagated to `StateManaget.onStateChange`
-     * listeners
-     * @type {Object}
+     * Internal local state of the plugin.
+     *
+     * @type {object}
+     * @see {@link BasePlugin.onStateChange}
+     * @see {@link BasePlugin.propagateStateChange}
      */
     this.state = {};
 
     /**
-     * Current status of the plugin ('idle', 'inited', 'started', 'errored')
-     * @type {String}
+     * Current status of the plugin, i.e. 'idle', 'inited', 'started', 'errored'
+     *
+     * @type {string}
      */
     this.status = 'idle';
 
@@ -45,38 +51,54 @@ class BasePlugin {
   }
 
   /**
-   * This method is called during the `pluginManager.start()` which is itself
-   * called during `server.init()`. At this point the state manager is ready to use.
+   * Start the plugin. This method is automatically called during the
+   * `pluginManager.start()` which is itself called during the `init` lifecyle step.
+   * After this point the plugin should be ready to use.
    *
    * @example
    * class MyDummyPlugin extends Plugin {
    *   async start() {
-   *     this.state = await this.server.stateManager.create(`s:${this.id}`);
+   *     this.sharedState = await this.server.stateManager.create(`s:${this.id}`);
    *     await new Promise(resolve => setTimeout(resolve, 1000));
+   *   }
+   *
+   *   async stop() {
+   *     await this.sharedState.delete();
    *   }
    * }
    */
   async start() {}
 
   /**
-   * @private
-   *
-   * This method is called during the `pluginManager.stop()` which is itself
-   * called during `client.stop()`. Most of the time, you wont need to implement
-   * this method.
+   * Start the plugin. This method is automatically called during the
+   * `pluginManager.start()` which is itself called during the `init` lifecyle step.
    *
    * @example
    * class MyDummyPlugin extends Plugin {
    *   async start() {
-   *     this.state = await this.server.stateManager.create(`s:${this.id}`);
+   *     this.sharedState = await this.server.stateManager.create(`s:${this.id}`);
    *     await new Promise(resolve => setTimeout(resolve, 1000));
+   *   }
+   *
+   *   async stop() {
+   *     await this.sharedState.delete();
    *   }
    * }
    */
   async stop() {}
 
   /**
-   * @todo - documentation
+   * Listen to the state changes propagated by {@link BasePlugin.propagateStateChange}
+   *
+   * @param {Function} callback - Function to be executed when a state change is
+   *  propagated. The callback receives the plugin state as first argument.
+   * @returns {Function} - Remove the listener from the callback list when executed.
+   * @see {@link BasePlugin.propagateStateChange}
+   * @see {@link server.StateManaget#onStateChange}
+   * @example
+   * const unsubscribe = plugin.onStateChange(pluginState => console.log(pluginState));
+   * // stop listening state changes
+   * unsubscribe();
    */
   onStateChange(callback) {
     this._onStateChangeCallbacks.add(callback);
@@ -84,7 +106,13 @@ class BasePlugin {
   }
 
   /**
-   * @todo - documentation
+   * Apply updates to the plugin {@link server.Plugin#state} and propagate the
+   * updated state to the listeners. The state changes will also be propagated
+   * to the {@link server.StateManaget#onStateChange} listeners.
+   *
+   * @param {object} updates - Updates to be merged in the plugin state.
+   * @see {@link BasePlugin.onStateChange}
+   * @see {@link server.StateManaget#onStateChange}
    */
   propagateStateChange(updates) {
     merge(this.state, updates);

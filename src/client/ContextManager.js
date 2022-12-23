@@ -1,3 +1,4 @@
+/** @private */
 class ContextCollection {
   constructor() {
     this.inner = [];
@@ -21,8 +22,9 @@ class ContextCollection {
 }
 
 /**
- * Manager the different contexts and their lifecycle.
- * Most of the time, you should not ahve to manipulate the context manager directly
+ * Manage the different contexts and their lifecycle.
+ *
+ * @memberof client
  */
 class ContextManager {
   constructor() {
@@ -32,7 +34,12 @@ class ContextManager {
     this._contextStartPromises = new Map();
   }
 
-  /** @private */
+  /**
+   * Register the context into the manager. Is called in context constructor.
+   *
+   * @param {client.Context} context - The context to be registered.
+   * @private
+   */
   register(context) {
     if (this._contexts.has(context.name)) {
       throw new Error(`[soundworks:context-manager] Context "${context.name}" already registered`);
@@ -41,6 +48,12 @@ class ContextManager {
     this._contexts.add(context);
   }
 
+  /**
+   * Retrieve a started context from its name. Most of the time you won't need to
+   * call this method manually.
+   *
+   * @param {string} contextName - Name of the context, a given in its constructor
+   */
   async get(contextName) {
     if (!this._contexts.has(contextName)) {
       throw new Error(`[soundworks:ContextManager] Can't get context "${contextName}", not registered`);
@@ -68,11 +81,21 @@ class ContextManager {
     return context;
   }
 
+  /**
+   * Start all registered contexts. Called during `client.start()`
+   *
+   * @private
+   */
   async start() {
     const promises = this._contexts.map(context => this.get(context.name));
     await Promise.all(promises);
   }
 
+  /**
+   * Stop all registered contexts. Called during `client.stop()`
+   *
+   * @private
+   */
   async stop() {
     const promises = this._contexts.map(context => context.stop());
     await Promise.all(promises);
