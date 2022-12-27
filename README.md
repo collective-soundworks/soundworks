@@ -1,5 +1,7 @@
 # `soundworks`
 
+[![npm version](https://badge.fury.io/js/@soundworks%2Fcore.svg)](https://badge.fury.io/js/@soundworks%2Fcore)
+
 ![soundworks-logo](./assets/logo-200x200.png)
 
 Open-source creative coding framework for distributed applications based on Web technologies
@@ -29,6 +31,13 @@ Open-source creative coding framework for distributed applications based on Web 
 ## API
 
 [https://soundworks.dev/api](https://soundworks.dev/api)
+
+To access the API documentation locally, just clone this repository and launch some http server in the docs directory. For example, using the [serve](https://www.npmjs.com/package/serve) package:
+
+```sh
+git clone https://github.com/collective-soundworks/soundworks.git
+serve soundworks/docs
+```
 
 ## Overview
 
