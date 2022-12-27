@@ -98,10 +98,15 @@ class BasePluginManager {
     // propagate all 'idle' statuses before start
     this._propagateStateChange();
 
-    const promises = Array.from(this._registeredPlugins.keys()).map(id => this.get(id));
-    await Promise.all(promises);
+    const promises = Array.from(this._registeredPlugins.keys()).map(id => this.getUnsafe(id));
 
-    this.status = 'started';
+    try {
+      await Promise.all(promises);
+      this.status = 'started';
+    } catch(err) {
+      this.status = 'errored';
+      throw new Error(err);
+    }
   }
 
   async stop() {
@@ -111,26 +116,13 @@ class BasePluginManager {
   }
 
   /**
-   * Retrieve an fully started instance of a registered plugin.
+   * Retrieve an fully started instance of a registered plugin, without checking
+   * that the pluginManager is started. This is important for starting the plugin
+   * manager itself.
    *
-   * Be aware that the `get` method resolves only when the plugin is fully 'started',
-   * which is what we want 99.99% of the time. As such this method should NEVER be
-   * used before `client|server.init()` (or `client|server.start()`), in which case
-   * your application would be stuck in some kind of Promise dead lock.
-   *
-   * To handle the remaining 0.01% cases and access plugin instances during their
-   * initialization (e.g. to display initialization screen, etc.), you should rely
-   * on the `onStateChange` method.
-   *
-   * _Note: the API is designed to enable the dynamic creation of plugins (hopefully
-   * without brealing changes) in a future release._
-   *
-   * @param {client.Plugin#id|client.Plugin#id} id - Id of the plugin as defined when registered.
-   * @returns {client.Plugin|server.Plugin}
-   * @see {@link client.PluginManager#onStateChange}
-   * @see {@link server.PluginManager#onStateChange}
+   * @private
    */
-  async get(id) {
+  async getUnsafe(id) {
     if (!isString(id)) {
       throw new Error(`[soundworks.PluginManager] Invalid argument, "pluginManager.get(name)" argument should be a string`);
     }
@@ -153,7 +145,7 @@ class BasePluginManager {
 
     // recursively get the dependency chain
     const { deps } = this._registeredPlugins.get(id);
-    const promises = deps.map(id => this.get(id));
+    const promises = deps.map(id => this.getUnsafe(id));
 
     await Promise.all(promises);
 

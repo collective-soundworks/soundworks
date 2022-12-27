@@ -155,8 +155,23 @@ describe(`server::PluginManager`, () => {
   });
 
   describe(`await pluginManager.get(id)`, () => {
+    it(`should throw if called before server.init()`, async () => {
+      const server = new Server(config);
+      server.pluginManager.register('delay', pluginDelayFactory, { delayTime: 100 });
+
+      let errored = false;
+      try {
+        await server.pluginManager.get('delay');
+      } catch(err) {
+        errored = true;
+        console.log(err.message);
+      }
+      if (!errored) { assert.fail('should throw'); }
+    });
+
     it(`should throw if plugin id his not a string`, async () => {
       const server = new Server(config);
+      await server.init();
 
       let errored = false;
       try {
@@ -170,6 +185,7 @@ describe(`server::PluginManager`, () => {
 
     it(`should throw if plugin id has not been registered`, async () => {
       const server = new Server(config);
+      await server.init();
 
       let errored = false;
       try {

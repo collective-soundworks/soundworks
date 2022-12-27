@@ -74,6 +74,35 @@ class PluginManager extends BasePluginManager {
     super.register(id, ctor, options, deps);
   }
 
+  /**
+   * Retrieve an fully started instance of a registered plugin.
+   *
+   * Be aware that the `get` method resolves only when the plugin is fully 'started',
+   * which is what we want 99.99% of the time. As such, and to prevent the application
+   * to be stuck in some kind of Promise dead lock, this method will throw if
+   * used before `server.init()` (or `server.start()`).
+   *
+   * To handle the remaining 0.01% cases and access plugin instances during their
+   * initialization (e.g. to display initialization screen, etc.), you should rely
+   * on the `onStateChange` method.
+   *
+   * _Note: the async API is designed to enable the dynamic creation of plugins (hopefully
+   * without brealing changes) in a future release._
+   *
+   * @param {server.Plugin#id} id - Id of the plugin as defined when registered.
+   * @returns {server.Plugin}
+   * @see {@link server.PluginManager#onStateChange}
+   *
+   * @private
+   */
+  async get(id) {
+    if (this.status !== 'started') {
+      throw new Error(`[soundworks.PluginManager] Cannot get plugin before "server.init()"`);
+    }
+
+    return super.getUnsafe(id);
+  }
+
   // server only methods
 
   /** private */
