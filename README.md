@@ -44,9 +44,14 @@ The core of the framework is very minimal and dedicated at handling:
 
 `soundworks` can be extended with plugins to reuse common logic such as audio file loading, clock synchronisation, etc. Each plugin leaves in a separate repo for better modularity and to simplify version management.
 
-## Shared w/ us
+## Share w/ us
 
 https://github.com/collective-soundworks/soundworks/discussions/61
+
+## TypeScript
+
+@todo
+https://github.com/tc39/proposal-type-annotations
 
 ## Installation
 

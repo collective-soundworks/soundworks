@@ -5,7 +5,7 @@ import { idGenerator } from '../common/utils.js';
 const generateId = idGenerator();
 
 /**
- * Server side representation of a _soundworks_ client.
+ * Server-side representation of a `soundworks` client.
  *
  * @memberof server
  * @hideconstructor

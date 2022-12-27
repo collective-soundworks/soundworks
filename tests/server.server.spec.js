@@ -468,7 +468,7 @@ describe('server::Server', () => {
     });
   });
 
-  describe('server.add|removeListener(function) - Events (inited, started, stopped)', () => {
+  describe('server.onStatusChange(function) - Events (inited, started, stopped)', () => {
     let server;
 
     before(async () => {
@@ -476,81 +476,100 @@ describe('server::Server', () => {
     });
 
     it('should cleanly add and remove listeners', () => {
-      const callback = async () => {};
+      const unsubscribe = server.onStatusChange(async () => {});
+      unsubscribe();
 
-      server.addListener('inited', callback);
-      server.removeListener('inited', callback);
-
-      assert.equal(server._listeners.size, 0)
+      assert.equal(server._onStatusChangeCallbacks.size, 0)
     });
 
-    it('should execute "inited" listeners', async () => {
+    it('should receive "inited" events', async () => {
       let counter = 0;
 
-      const callback1 = async () => {
-        await new Promise(resolve => setTimeout(resolve, 200));
-        assert.equal(counter, 0);
+      const callback1 = async (status) => {
+        await new Promise(resolve => setTimeout(resolve, 50));
+        if (status === 'inited') {
+          assert.equal(counter, 0);
+        }
         counter++;
       }
 
-      const callback2 = async () => {
-        await new Promise(resolve => setTimeout(resolve, 200));
-        assert.equal(counter, 1);
+      const callback2 = async (status) => {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        if (status === 'inited') {
+          assert.equal(counter, 1);
+        }
         counter++;
       }
 
-      server.addListener('inited', callback1);
-      server.addListener('inited', callback2);
+      const unsubscribe1 = server.onStatusChange(callback1);
+      const unsubscribe2 = server.onStatusChange(callback2);
 
       await server.init();
       // assert await resolves after all callbacks
       assert.equal(counter, 2);
+
+      unsubscribe1();
+      unsubscribe2();
     });
 
-    it('should execute "started" listeners', async () => {
+    it('should receive "started" events', async () => {
       let counter = 0;
 
-      const callback1 = async () => {
-        await new Promise(resolve => setTimeout(resolve, 200));
-        assert.equal(counter, 0);
+      const callback1 = async (status) => {
+        await new Promise(resolve => setTimeout(resolve, 50));
+        if (status === 'started') {
+          assert.equal(counter, 0);
+        }
         counter++;
       }
 
-      const callback2 = async () => {
-        await new Promise(resolve => setTimeout(resolve, 200));
-        assert.equal(counter, 1);
+      const callback2 = async (status) => {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        if (status === 'started') {
+          assert.equal(counter, 1);
+        }
         counter++;
       }
 
-      server.addListener('started', callback1);
-      server.addListener('started', callback2);
+      const unsubscribe1 = server.onStatusChange(callback1);
+      const unsubscribe2 = server.onStatusChange(callback2);
 
       await server.start();
       // assert await resolves after all callbacks
       assert.equal(counter, 2);
+
+      unsubscribe1();
+      unsubscribe2();
     });
 
-    it('should execute "stopped" listeners', async () => {
+    it('should receive "stopped" events', async () => {
       let counter = 0;
 
-      const callback1 = async () => {
-        await new Promise(resolve => setTimeout(resolve, 200));
-        assert.equal(counter, 0);
+      const callback1 = async (status) => {
+        await new Promise(resolve => setTimeout(resolve, 50));
+        if (status === 'stopped') {
+          assert.equal(counter, 0);
+        }
         counter++;
       }
 
-      const callback2 = async () => {
-        await new Promise(resolve => setTimeout(resolve, 200));
-        assert.equal(counter, 1);
+      const callback2 = async (status) => {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        if (status === 'stopped') {
+          assert.equal(counter, 1);
+        }
         counter++;
       }
 
-      server.addListener('stopped', callback1);
-      server.addListener('stopped', callback2);
+      const unsubscribe1 = server.onStatusChange(callback1);
+      const unsubscribe2 = server.onStatusChange(callback2);
 
       await server.stop();
       // assert await resolves after all callbacks
       assert.equal(counter, 2);
+
+      unsubscribe1();
+      unsubscribe2();
     });
   });
 

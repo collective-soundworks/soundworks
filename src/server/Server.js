@@ -228,7 +228,7 @@ class Server {
     };
 
     /** @private */
-    this._listeners = new Map();
+    this._onStatusChangeCallbacks = new Set();
     /** @private */
     this._auditState = null;
 
@@ -759,25 +759,10 @@ Invalid certificate files, please check your:
     return db;
   }
 
-  addListener(channel, callback) {
-    if (!this._listeners.has(channel)) {
-      const listeners = new Set();
-      this._listeners.set(channel, listeners);
-    }
+  onStatusChange(callback) {
+    this._onStatusChangeCallbacks.add(callback);
 
-    const listeners = this._listeners.get(channel);
-    listeners.add(callback);
-  }
-
-  removeListener(channel, callback) {
-    if (this._listeners.has(channel)) {
-      const listeners = this._listeners.get(channel);
-      listeners.delete(callback);
-
-      if (listeners.size === 0) {
-        this._listeners.delete(channel);
-      }
-    }
+    return () => this._onStatusChangeCallbacks.delete(callback);
   }
 
   /** @private */
@@ -789,13 +774,14 @@ Invalid certificate files, please check your:
       process.send(`soundworks:server:${status}`);
     }
 
-    if (this._listeners.has(status)) {
-      const listeners = this._listeners.get(status);
+    // execute all callbacks in parallel
+    const promises = [];
 
-      for (let callback of listeners) {
-        await callback();
-      }
+    for (let callback of this._onStatusChangeCallbacks) {
+      promises.push(callback(status));
     }
+
+    await Promise.all(promises);
   }
 
   /**
