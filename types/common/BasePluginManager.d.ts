@@ -45,18 +45,20 @@ declare class BasePluginManager {
      * Retrieve an fully started instance of a registered plugin.
      *
      * Be aware that the `get` method resolves when the plugin is fully 'started',
-     * which is what we cant 99.9% of the time, as such this method should not be
-     * used before `client|server.init()` is fullfilled. To access plugin instances
-     * before this point, e.g. to display initialization screen, etc., you should
-     * therefore rely on the `onStateChange` method.
+     * which is what we want 99.99% of the time, as such this method should not be
+     * used before `client|server.start()` is fullfilled.
      *
-     * Note that this API is deisgned to enable dynamic creation of plugins in the
-     * future, instanciating and starting (resolving its full chain of dependency
-     * chain) if needed.
+     * To handle the remaining 0.01% and to access plugin instances before this point,
+     * (e.g. to display initialization screen, etc.), you should rely on the
+     * `onStateChange` method.
+     *
+     * Note: this API is designed to enable dynamic creation of plugins in the
+     * future.
      *
      * @param {String} id - Id of the plugin as defined on registration
+     * @returns {client.Plugin|server.Plugin}
      */
-    get(id: string): Promise<any>;
+    get(id: string): client.Plugin | server.Plugin;
     /**
      * Propagate a notification each time a plugin is updated (status or inner state).
      * The callback will receive the list of all plugins as first parameter, and the

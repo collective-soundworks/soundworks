@@ -1,4 +1,4 @@
-import ParameterBag from './ParameterBag.js';
+import ParameterBag from '../common/ParameterBag.js';
 import {
   DELETE_REQUEST,
   DELETE_RESPONSE,
@@ -9,10 +9,10 @@ import {
   UPDATE_RESPONSE,
   UPDATE_ABORT,
   UPDATE_NOTIFICATION,
-} from './constants.js';
+} from '../common/constants.js';
 
 /**
- * The "real" state, this instance is kept private by the SharedStateServerManager.
+ * The "real" state, this instance is kept private by the server.StateManager.
  * It cannot be accessed without a SharedState proxy
  * @private
  */
@@ -188,3 +188,5 @@ class SharedStatePrivate {
 }
 
 export default SharedStatePrivate;
+
+

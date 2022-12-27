@@ -1,1 +1,1 @@
-{"version":3,"file":"PluginManager.d.ts","sourceRoot":"","sources":["../../src/client/PluginManager.js"],"names":[],"mappings":";AAIA;;;;;;GAMG;AACH;IACE;;OAEG;IACH,mCAMC;IAED,kEAQC;IAKD;;;OAGG;IACH,wCAEC;CACF"}
+{"version":3,"file":"PluginManager.d.ts","sourceRoot":"","sources":["../../src/client/PluginManager.js"],"names":[],"mappings":";AAIA;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;GAkCG;AACH;IACE;;OAEG;IACH,mCAMC;IAED,kEAQC;IAKD;;;OAGG;IACH,wCAEC;CACF"}

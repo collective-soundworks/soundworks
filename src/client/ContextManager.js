@@ -24,7 +24,12 @@ class ContextCollection {
 /**
  * Manage the different contexts and their lifecycle.
  *
+ * See {@link client.Client#contextManager}
+ *
+ * _WARNING: In most cases, you should not have to manipulate the context manager directly._
+ *
  * @memberof client
+ * @hideconstructor
  */
 class ContextManager {
   constructor() {
@@ -49,10 +54,11 @@ class ContextManager {
   }
 
   /**
-   * Retrieve a started context from its name. Most of the time you won't need to
-   * call this method manually.
+   * Retrieve a started context from its name.
    *
-   * @param {string} contextName - Name of the context, a given in its constructor
+   * _WARNING: Most of the time, you should not have to call this method manually._
+   *
+   * @param {client.Context#name} contextName - Name of the context.
    */
   async get(contextName) {
     if (!this._contexts.has(contextName)) {

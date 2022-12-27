@@ -4,12 +4,16 @@ export default Socket;
  * that implements a pubsub interface. An instance of `Socket` is automatically
  * created by the `soundworks.Client`.
  *
+ * _Important: In most cases, you should consider using a {@link client.SharedState} rather than
+ * sending messages directly through the sockets._
+ *
  * The Socket class concurrently opens two different WebSockets:
  * - a socket configured with `binaryType = 'string'` for JSON compatible string
  *  messages.
  * - a socket configured with `binaryType=arraybuffer` for efficient streaming
  *  of binary data.
- * The sockets re-emits all "native" ws events ('open', 'upgrade', 'close', 'error'
+ *
+ * Both sockets re-emits all "native" ws events ('open', 'upgrade', 'close', 'error'
  *  and 'message'.
  *
  * @memberof client

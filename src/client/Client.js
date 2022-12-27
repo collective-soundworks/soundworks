@@ -14,26 +14,29 @@ import { isBrowser } from '../common/utils.js';
 import logger from '../common/logger.js';
 
 /**
- * Create a new soundworks client.
+ * The `Client` class is the main entry point for  the client-side of soundworks
+ * application.
  *
- * The `Client` is the main entry point to access *soundworks* components
- * such as {@link client.Socket}, {@link client.PluginManager},
- * {@link client.StateManager} or {@link client.ContextManager}.
- * The client is responsible for the initialization lifecycle of the application.
+ * A `Client` instance allows to access soundworks components such as {@link client.StateManager},
+ * {@link client.PluginManager},{@link client.Socket} or {@link client.ContextManager}.
+ * Its is also responsible for handling the initialization lifecycles of the different
+ * soundworks components.
  *
- * @memberof client
- * @throws Will throw if the given config object is invalid.
- * @example
+ * ```
  * import { Client } from '@soundworks/core/client.js';
- *
  * // create a new soundworks `Client` instance
  * const client = new Client({ role: 'player' });
  * // init and start the client
  * await client.start();
+ * ```
+ *
+ * @memberof client
  */
 class Client {
   /**
-   * @param {object} config - Configuration of the soundworks client.
+   * @param {client.BrowserClientConfig|client.NodeClientConfig} config -
+   *  Configuration of the soundworks client.
+   * @throws Will throw if the given config object is invalid.
    */
   constructor(config) {
     if (!isPlainObject(config)) {
@@ -77,12 +80,9 @@ class Client {
     this.role = config.role;
 
     /**
-     * Configuration object, typically contains the configuration sent by the
-     * server.
+     * Configuration object.
      *
-     * @todo typedef
-     * @type {object}
-     * @see {@link server.Server}.
+     * @type {client.BrowserClientConfig|client.NodeClientConfig}
      */
     this.config = config;
 
@@ -123,7 +123,7 @@ class Client {
     this.socket = new Socket();
 
     /**
-     * Target platform of the client, i.e. 'browser' or 'node'.
+     * Runtime platform on which the client is executed, i.e. 'browser' or 'node'.
      *
      * @type {string}
      */
@@ -132,8 +132,7 @@ class Client {
     /**
      * Instance of the {@link client.ContextManager} class.
      *
-     * The context manager requires the socket to be connected therefore it can be
-     * accessed and used only after `client.init()` has been fulfilled.
+     * The context manager can be safely used after `client.init()` has been fulfilled.
      *
      * @see {@link client.ContextManager}
      * @type {client.ContextManager}
@@ -143,8 +142,7 @@ class Client {
     /**
      * Instance of the {@link client.PluginManager} class.
      *
-     * The plugin manager requires the socket to be connected therefore it can be
-     * accessed and used only after `client.init()` has been fulfilled.
+     * The context manager can be safely used after `client.init()` has been fulfilled.
      *
      * @see {@link client.PluginManager}
      * @type {client.PluginManager}
@@ -154,8 +152,7 @@ class Client {
     /**
      * Instance of the {@link client.StateManager} class.
      *
-     * The state manager requires the socket to be connected therefore it can be
-     * accessed and used only after `client.init()` has been fulfilled.
+     * The context manager can be safely used after `client.init()` has been fulfilled.
      *
      * @see {@link client.StateManager}
      * @type {client.StateManager}
@@ -176,18 +173,30 @@ class Client {
   }
 
   /**
-   * Method to be called before {@link client.Client#start} in the
-   * initialization lifecycle of the soundworks client.
+   * The `init` method is part of the initialization lifecycle of the `soundworks`
+   * client. Most of the time, the `init` method will be implicitly called by the
+   * {@link client.Client#start} method.
    *
+   * In some situations you might want to call this method manually, in such cases
+   * the method should be called before the {@link client.Client#start} method.
+   *
+   * What it does:
    * - connect the sockets to be server
-   * - do the handshake with soundwoks server (retrieve id, etc.)
+   * - perform the handshake with soundworks server (retrieve id, etc.)
    * - launch the state manager
-   * - init registered plugin
+   * - initialize all registered plugin
    *
-   * After calling `await client.init()`, the stateManaher and the pluginManager
+   * After `await client.init()` is fulfilled, the {@link client.Client#stateManager},
+   * the {@link client.Client#pluginManager} and the {@link client.Client#socket}
    * can be safely used.
    *
-   * @see {@link server.Server}
+   * @example
+   * import { Client } from '@soundworks/core/client.js'
+   *
+   * const client = new Client(config);
+   * // optionnal explicit call of `init` before `start`
+   * await client.init();
+   * await client.start();
    */
   async init() {
     // init socket communications (string and binary)
@@ -255,12 +264,19 @@ class Client {
   }
 
   /**
-   * Method to be called when {@link client.Client#init} has finished in the
-   * initialization lifecycle of the soundworks client.
+   * The `start` method is part of the initialization lifecycle of the `soundworks`
+   * client. The `start` method will implicitly call the {@link client.Client#init}
+   * method if it has not been called manually.
    *
-   * - starts all the registered contexts
+   * What it does:
+   * - optionnaly call {@link client.Client#init}
+   * - starts all the already created contexts (see {@link client.Context})
    *
-   * @see {@link server.Server#start}
+   * @example
+   * import { Client } from '@soundworks/core/client.js'
+   *
+   * const client = new Client(config);
+   * await client.start();
    */
   async start() {
     if (this.status === 'idle') {
@@ -284,12 +300,24 @@ class Client {
   }
 
   /**
-   * Stop the client. Stops all started contexts, plugins and terminates the socket
-   * connections.
+   * Stops all started contexts, plugins and terminates the socket connections.
+   *
+   * In most situations, you might not need to call this method. However, it can
+   * be usefull for unit testing or similar situations where you want to create
+   * and delete several clients in the same process.
+   *
+   * @example
+   * import { Client } from '@soundworks/core/client.js'
+   *
+   * const client = new Client(config);
+   * await client.start();
+   *
+   * await new Promise(resolve => setTimeout(resolve, 1000));
+   * await client.stop();
    */
   async stop() {
     if (this.status !== 'started') {
-      throw new Error(`[soundworks:Client] Cannot stop() before start()`);
+      throw new Error(`[soundworks:Client] Cannot "client.stop()" before "client.start()"`);
     }
 
     await this.contextManager.stop();
@@ -298,14 +326,24 @@ class Client {
   }
 
   /**
-   * Get the global audit state of the application. The audit state is lazily
-   * attached to the client only if this method is called.
+   * Attach and retrieve the global audit state of the application.
+   *
+   * The audit state is a {@link client.SharedState} instance that keeps track of
+   * global informations about the application such as, the number of connected
+   * clients, network latency estimation, etc. It is usefull for controller client
+   * roles to give the user an overview about the state of the application.
+   *
+   * The audit state is lazily attached to the client only if this method is called.
    *
    * @throws Will throw if called before `client.init()`
+   * @see {@link client.SharedState}
+   * @example
+   * const auditState = await client.getAuditState();
+   * auditState.onUpdate(() => console.log(auditState.getValues()), true);
    */
   async getAuditState() {
     if (this.status === 'idle') {
-      throw new Error(`[soundworks.Client] Cannot access audit state before init`);
+      throw new Error(`[soundworks.Client] Cannot access audit state before "client.init()"`);
     }
 
     if (this._auditState === null) {

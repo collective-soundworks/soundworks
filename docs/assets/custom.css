@@ -149,3 +149,7 @@ span.param-type, .params td .param-type, .param-type dd {
   font-size: 12px;
   background-color: #282922;
 }
+
+.details {
+  margin-bottom: 24px;
+}

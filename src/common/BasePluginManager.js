@@ -20,7 +20,7 @@ class BasePluginManager {
     /** @private */
     this._instanceStartPromises = new Map();
     /** @private */
-    this._stateChangeObservers = new Set();
+    this._onStateChangeCallbacks = new Set();
 
     this.status = 'idle';
   }
@@ -29,21 +29,24 @@ class BasePluginManager {
    * Register a plugin into soundworks.
    *
    * _A plugin must always be registered both on client-side and on server-side_
-   * @see {@link client.PluginManager#register}
    *
-   * @param {String} id - Unique id of the plugin, allow to register the same
-   *  plugin factory under different ids.
-   * @param {Function} factory - Factory function that return the plugin class
-   * @param {Object} [options={}] - Options to configure the plugin
-   * @param {Array} [deps=[]] - List of plugins' names the plugin depends on, i.e.
+   * Refer to the plugin documentation to check its options and proper way of
+   * registering it.
+   *
+   * @param {string} id - Unique id of the plugin. Enables the registration of the
+   *  same plugin factory under different ids.
+   * @param {Function} factory - Factory function that returns the Plugin class.
+   * @param {object} [options={}] - Options to configure the plugin.
+   * @param {array} [deps=[]] - List of plugins' names the plugin depends on, i.e.
    *  the plugin initialization will start only after the plugins it depends on are
    *  fully started themselves.
-   *
+   * @see {@link client.PluginManager#register}
+   * @see {@link server.PluginManager#register}
    * @example
    * // client-side
-   * client.pluginManager.register('user-defined-name', pluginFactory);
+   * client.pluginManager.register('user-defined-id', pluginFactory);
    * // server-side
-   * server.pluginManager.register('user-defined-name', pluginFactory);
+   * server.pluginManager.register('user-defined-id', pluginFactory);
    */
   register(id, ctor, options = {}, deps = []) {
     // For now we don't allow to register a plugin after `client|server.init()`.
@@ -72,8 +75,11 @@ class BasePluginManager {
     this._registeredPlugins.set(id, { ctor, options, deps });
   }
 
-  // Initialize all the registered plugin. Called during `Client.init()` or `Server.init()`
-  /** @private */
+  /**
+   * Initialize all the registered plugin. Executed during the `Client.init()` or
+   * `Server.init()` initialization step.
+   * @private
+   */
   async start() {
     logger.title('starting registered plugins');
 
@@ -107,17 +113,22 @@ class BasePluginManager {
   /**
    * Retrieve an fully started instance of a registered plugin.
    *
-   * Be aware that the `get` method resolves when the plugin is fully 'started',
-   * which is what we cant 99.9% of the time, as such this method should not be
-   * used before `client|server.init()` is fullfilled. To access plugin instances
-   * before this point, e.g. to display initialization screen, etc., you should
-   * therefore rely on the `onStateChange` method.
+   * Be aware that the `get` method resolves only when the plugin is fully 'started',
+   * which is what we want 99.99% of the time. As such this method should NEVER be
+   * used before `client|server.init()` (or `client|server.start()`), in which case
+   * your application would be stuck in some kind of Promise dead lock.
    *
-   * Note that this API is deisgned to enable dynamic creation of plugins in the
-   * future, instanciating and starting (resolving its full chain of dependency
-   * chain) if needed.
+   * To handle the remaining 0.01% cases and access plugin instances during their
+   * initialization (e.g. to display initialization screen, etc.), you should rely
+   * on the `onStateChange` method.
    *
-   * @param {String} id - Id of the plugin as defined on registration
+   * _Note: the API is designed to enable the dynamic creation of plugins (hopefully
+   * without brealing changes) in a future release._
+   *
+   * @param {client.Plugin#id|client.Plugin#id} id - Id of the plugin as defined when registered.
+   * @returns {client.Plugin|server.Plugin}
+   * @see {@link client.PluginManager#onStateChange}
+   * @see {@link server.PluginManager#onStateChange}
    */
   async get(id) {
     if (!isString(id)) {
@@ -129,9 +140,8 @@ class BasePluginManager {
     }
 
     // @note - For now, all instances are created at the beginning of `start()`
-    // to be able to properly propagate the states. the code bellow should allow
-    // to dynamically register and launch plugins at runtime, but this is
-    // forbidden for now.
+    // to be able to properly propagate the states. The code bellow should allow
+    // to dynamically register and launch plugins at runtime.
     //
     // if (!this._instances.has(id)) {
     //   const { ctor, options } = this._registeredPlugins.get(id);
@@ -179,10 +189,30 @@ class BasePluginManager {
    * Propagate a notification each time a plugin is updated (status or inner state).
    * The callback will receive the list of all plugins as first parameter, and the
    * plugin instance that initiated the state change event as second parameter.
+   *
+   * _In most cases, you should not have to rely on this method._
+   *
+   * @param {client.PluginManager~onStateChangeCallback|server.PluginManager~onStateChangeCallback} callback
+   *  Callback to be executed on state change
+   * @param {client.PluginManager~deleteOnStateChangeCallback|client.PluginManager~deleteOnStateChangeCallback}
+   *  Function to execute to listening for changes.
+   * @example
+   * const unsubscribe = client.pluginManager.onStateChange(pluginList, initiator => {
+   *   // log the current status of all plugins
+   *   for (let name in pluginList) {
+   *     console.log(name, pluginList[name].status);
+   *   }
+   *   // if the change was initiated by a plugin, log its status and state
+   *   if (initiator !== null) {
+   *.    console.log(initiator.name, initiator.status, initiator.state);
+   *   }
+   * });
+   * // stop listening for updates later
+   * unsubscribe();
    */
-  onStateChange(observer) {
-    this._stateChangeObservers.add(observer);
-    return () => this._stateChangeObservers.delete(observer);
+  onStateChange(callback) {
+    this._onStateChangeCallbacks.add(callback);
+    return () => this._onStateChangeCallbacks.delete(callback);
   }
 
   /** @private */
@@ -194,10 +224,10 @@ class BasePluginManager {
       }
 
       const fullState = Object.fromEntries(this._instances);
-      this._stateChangeObservers.forEach(observer => observer(fullState, instance));
+      this._onStateChangeCallbacks.forEach(callback => callback(fullState, instance));
     } else {
       const fullState = Object.fromEntries(this._instances);
-      this._stateChangeObservers.forEach(observer => observer(fullState, null));
+      this._onStateChangeCallbacks.forEach(callback => callback(fullState, null));
     }
   }
 }

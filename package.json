@@ -15,10 +15,11 @@
   "exports": {
     "./client.js": {
       "module": "./src/client/index.js",
+      "node": "./src/client/index.js",
       "types": "./types/client/index.d.ts"
     },
     "./server.js": {
-      "module": "./src/server/index.js",
+      "node": "./src/server/index.js",
       "types": "./types/server/index.d.ts"
     }
   },

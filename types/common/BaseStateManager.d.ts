@@ -1,29 +1,5 @@
 export default BaseStateManager;
-export namespace common {
-    type StateManagerObserveCallback = () => any;
-}
 /**
- * @callback common.StateManagerObserveCallback
- * @async
- *
- * @param {String} schemaName - name of the schema
- * @param {Number} stateId - id of the state
- * @param {Number} nodeId - id of the node that created the state
- */
-/**
- * Component dedicated at managing distributed states, accessible through {@link common.SharedState} instances, among the application.
- *
- * An instance of `StateManager` is automatically created by the
- * `soundworks.Client` at initialization (cf. {@link client.Client#stateManager}).
- *
- * Tutorial: [https://collective-soundworks.github.io/tutorials/state-manager.html](https://collective-soundworks.github.io/tutorials/state-manager.html)
- *
- * @see {@link common.SharedState}
- * @see {@link client.StateManager}
- * @see {@link client.Client#stateManager}
- * @see {@link server.StateManager}
- * @see {@link server.Server#stateManager}
- *
  * @private
  */
 declare class BaseStateManager {
@@ -50,9 +26,9 @@ declare class BaseStateManager {
      *  (cf. ServerStateManager)
      * @param {Object} [initValues={}] - Default values for the state.
      *
-     * @return {@link common.SharedState}
+     * @returns {client.SharedState|server.SharedState}
      */
-    create(schemaName: string, initValues?: any): any;
+    create(schemaName: string, initValues?: any): client.SharedState | server.SharedState;
     /**
      * Attach to an existing {@link common.SharedState} instance.
      *
@@ -64,19 +40,18 @@ declare class BaseStateManager {
      *  attach to the first state found with the given schema name (usefull for
      *  globally shared states owned by the server).
      *
-     * @return {@link common.SharedState}
+     * @returns {client.SharedState|server.SharedState}
      */
-    attach(schemaName: string, stateId?: any): any;
+    attach(schemaName: string, stateId?: any): client.SharedState | server.SharedState;
     /**
      * Observe all the {@link common.SharedState} instances that are created on the network.
      *
-     * @param {common.StateManagerObserveCallback} callback - Function
-     *  to be called when a new state is created on the network.
-     *
-     * @return Promise<Function> - Return a Promise that resolves when the callback
+     * @todo Optionnal schema name
+     * @param {server.StateManager~ObserveCallback|client.StateManager~ObserveCallback}
+     *  callback - Function to be called when a new state is created on the network.
+     * @returns {Promise<Function>} - Return a Promise that resolves when the callback
      *  as been executed for the first time. The promise value is a function which
      *  allows to stop observing the network.
-     *
      * @example
      * this.client.stateManager.observe(async (schemaName, stateId, nodeId) => {
      *   if (schemaName === 'something') {
@@ -85,6 +60,6 @@ declare class BaseStateManager {
      *   }
      * });
      */
-    observe(callback: common.StateManagerObserveCallback): Promise<any>;
+    observe(callback: any): Promise<Function>;
 }
 //# sourceMappingURL=BaseStateManager.d.ts.map

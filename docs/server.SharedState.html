@@ -3,7 +3,7 @@
 <head>
     
     <meta charset="utf-8">
-    <title>StateManager - soundworks</title>
+    <title>SharedState - soundworks</title>
     
     <meta name="description" content="Documentation of soundworks, a full-stack JavaScript framework for distributed WebAudio and multimedia applications" />
     
@@ -37,7 +37,7 @@
 
 <div id="main">
     
-    <h1 class="page-title">StateManager</h1>
+    <h1 class="page-title">SharedState</h1>
     
 
     
@@ -52,18 +52,21 @@
         <h2>
             <span class="ancestors"><a href="server.html">server</a>.</span>
         
-        StateManager
+        SharedState
         </h2>
         
-            <div class="class-description usertext"><p>The <code>StateManager</code> allows to create new <a href="server.SharedState.html">server.SharedState</a>s, or attach
-to <a href="server.SharedState.html">server.SharedState</a>s created by other nodes (clients or server). It
-can also track all the <a href="server.SharedState.html">server.SharedState</a>s created by other nodes.</p>
-<p>An instance of <code>StateManager</code> is automatically created by the <code>soundworks.Server</code>
-at initialization (cf. <a href="server.Server.html#stateManager">server.Server#stateManager</a>).</p>
-<p>Compared to the <a href="client.StateManager.html">client.StateManager</a>, the <code>server.StateManager</code> can also
-create and delete schemas, as well as register update hook that are executed when
-a state is updated.</p>
-<p>See <a href="server.Server.html#stateManager">server.Server#stateManager</a></p>
+            <div class="class-description usertext"><p>The <code>SharedState</code> is one of the most important and versatile abstraction provided
+by <code>soundworks</code>. It represents a set of parameters that are synchronized accross
+every nodes of the application (clients and server) that declared some interest
+to the shared state.</p>
+<p>A <code>SharedState</code> is created according to a &quot;schema&quot; (in the sense of a database
+schema) that must be declared and registered server-side. Any number of <code>SharedState</code>s
+can be created from a single schema.</p>
+<p>A shared state can be created both by the clients or by the server (in which case
+it is generally considered as a global state of the application). Similarly any
+node of the application (clients or server) can declare interest and &quot;attach&quot; to
+a state created by another node. All node attached to a state can modify its values
+and/or react to the modifications applied by other nodes.</p>
 <p>Tutorial: <a href="https://soundworks.dev/guide/state-manager.html">https://soundworks.dev/guide/state-manager.html</a></p>
 <pre class="prettyprint source"><code>// server-side
 import { Server } from '@soundworks/server/index.js';
@@ -97,7 +100,7 @@ const globalState = await client.stateManager.attach('some-global-state');
 setInterval(() => {
   globalState.set({ myRandom: Math.random() });
 }, 1000);
-</code></pre></div>
+``</code></pre></div>
         
     
 </header>
@@ -112,7 +115,7 @@ setInterval(() => {
 
 
     <ul>
-        <li><a href="BaseStateManager.html">BaseStateManager</a></li>
+        <li><a href="BaseSharedState.html">BaseSharedState</a></li>
     </ul>
 
 
@@ -138,7 +141,7 @@ setInterval(() => {
 
     
 
-    <h4 class="name" id="attach"><span class="type-signature">(async) </span>attach<span class="signature">(schemaName, stateId<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="client.SharedState.html">client.SharedState</a>|<a href="server.SharedState.html">server.SharedState</a>}</span></h4>
+    <h4 class="name" id="delete"><span class="type-signature">(async) </span>delete<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
@@ -150,7 +153,18 @@ setInterval(() => {
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_BaseStateManager.js.html">common/BaseStateManager.js</a>, <a href="common_BaseStateManager.js.html#line158">line 158</a>
+        <a href="common_BaseSharedState.js.html">common/BaseSharedState.js</a>, <a href="common_BaseSharedState.js.html#line406">line 406</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="BaseSharedState.html#delete">BaseSharedState#delete</a>
     </li></ul></dd>
     
 
@@ -161,11 +175,6 @@ setInterval(() => {
     
 
     
-    <dt class="tag-overrides">Overrides:</dt>
-    <dd class="tag-overrides"><ul class="dummy"><li>
-        <a href="BaseStateManager.html#attach">BaseStateManager#attach</a>
-    </li></ul></dd>
-    
 
     
 
@@ -179,21 +188,6 @@ setInterval(() => {
 
     
 
-    
-
-    
-
-    
-
-    
-    <dt class="tag-see">See:</dt>
-    <dd class="tag-see">
-        <ul>
-            <li><a href="client.SharedState.html">client.SharedState</a></li>
-        
-            <li><a href="server.SharedState.html">server.SharedState</a></li>
-        </ul>
-    </dd>
     
 
     
@@ -204,7 +198,10 @@ setInterval(() => {
 
 
 <div class="description usertext">
-    <p>Attach to an existing <code>SharedState</code> instance.</p>
+    <p>Delete the state. Only the creator/owner of the state can use this method.
+All nodes attached to the state will be deteched, triggering the <code>onDetach</code>
+callback. The creator of the state will also have its <code>onDelete</code> callback
+triggered.</p>
 </div>
 
 
@@ -217,7 +214,627 @@ setInterval(() => {
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>const state = await client.stateManager.attach('my-schema');</code></pre>
+    <pre class="prettyprint"><code>const state = await client.state.create('my-schema-name');
+// later
+await state.delete();</code></pre>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Throws:</h5>
+
+        
+
+    <div class="param-desc usertext">
+    
+        <p>Throws if the method is called by a node which is not the owner of
+the state.</p>
+    
+    </div>
+
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="detach"><span class="type-signature">(async) </span>detach<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="common_BaseSharedState.js.html">common/BaseSharedState.js</a>, <a href="common_BaseSharedState.js.html#line377">line 377</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="BaseSharedState.html#detach">BaseSharedState#detach</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description usertext">
+    <p>Detach from the state. If the client is the creator of the state, the state
+is deleted and all attached nodes get notified</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>const state = await client.state.attach('globals');
+// later
+await state.detach();</code></pre>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="get"><span class="type-signature"></span>get<span class="signature">(name)</span><span class="type-signature"> &rarr; {mixed}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="common_BaseSharedState.js.html">common/BaseSharedState.js</a>, <a href="common_BaseSharedState.js.html#line315">line 315</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="BaseSharedState.html#get">BaseSharedState#get</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description usertext">
+    <p>Get the value of a paramter of the state.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>const value = state.get('name');</code></pre>
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Name of the param.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Throws:</h5>
+
+        
+
+    <div class="param-desc usertext">
+    
+        <p>Throws if <code>name</code> does not correspond to an existing field
+of the state.</p>
+    
+    </div>
+
+
+    
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">mixed</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="getDefaults"><span class="type-signature"></span>getDefaults<span class="signature">()</span><span class="type-signature"> &rarr; {object}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="common_BaseSharedState.js.html">common/BaseSharedState.js</a>, <a href="common_BaseSharedState.js.html#line364">line 364</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="BaseSharedState.html#getDefaults">BaseSharedState#getDefaults</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description usertext">
+    <p>Get the default values as declared in the schema.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>const defaults = state.getDefaults();</code></pre>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">object</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="getInitValues"><span class="type-signature"></span>getInitValues<span class="signature">()</span><span class="type-signature"> &rarr; {object}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="common_BaseSharedState.js.html">common/BaseSharedState.js</a>, <a href="common_BaseSharedState.js.html#line353">line 353</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="BaseSharedState.html#getInitValues">BaseSharedState#getInitValues</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description usertext">
+    <p>Get the values with which the state has been created. May defer from the
+default values declared in the schema.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>const initValues = state.getInitValues();</code></pre>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">object</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="getSchema"><span class="type-signature"></span>getSchema<span class="signature">(name<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {object}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="common_BaseSharedState.js.html">common/BaseSharedState.js</a>, <a href="common_BaseSharedState.js.html#line341">line 341</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="BaseSharedState.html#getSchema">BaseSharedState#getSchema</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description usertext">
+    <p>Get the schema from which the state has been created.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>const schema = state.getSchema();</code></pre>
 
 
 
@@ -251,49 +868,13 @@ setInterval(() => {
 
         <tr>
             
-                <td class="name"><code>schemaName</code></td>
+                <td class="name"><code>name</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">String</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last"><p>Name of the schema as given on registration
-(cf. ServerStateManager)</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>stateId</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
+<span class="param-type">string</span>
 
 
             
@@ -319,14 +900,141 @@ setInterval(() => {
                 </td>
             
 
-            <td class="description last"><p>Id of the state to attach to. If <code>null</code>,
-attach to the first state found with the given schema name (usefull for
-globally shared states owned by the server).</p></td>
+            <td class="description last"><p>If given, returns only the definition corresponding
+to the given param name.</p></td>
         </tr>
 
     
     </tbody>
 </table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Throws:</h5>
+
+        
+
+    <div class="param-desc usertext">
+    
+        <p>Throws if <code>name</code> does not correspond to an existing field
+of the state.</p>
+    
+    </div>
+
+
+    
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">object</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="getValues"><span class="type-signature"></span>getValues<span class="signature">()</span><span class="type-signature"> &rarr; {object}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="common_BaseSharedState.js.html">common/BaseSharedState.js</a>, <a href="common_BaseSharedState.js.html#line326">line 326</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="BaseSharedState.html#getValues">BaseSharedState#getValues</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description usertext">
+    <p>Get all the key / value pairs of the state.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>const values = state.getValues();</code></pre>
+
+
 
 
 
@@ -354,10 +1062,7 @@ globally shared states owned by the server).</p></td>
     </dt>
     <dd>
         
-<span class="param-type"><a href="client.SharedState.html">client.SharedState</a></span>
-|
-
-<span class="param-type"><a href="server.SharedState.html">server.SharedState</a></span>
+<span class="param-type">object</span>
 
 
     </dd>
@@ -372,7 +1077,7 @@ globally shared states owned by the server).</p></td>
 
     
 
-    <h4 class="name" id="create"><span class="type-signature">(async) </span>create<span class="signature">(schemaName, initValues<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="client.SharedState.html">client.SharedState</a>|<a href="server.SharedState.html">server.SharedState</a>}</span></h4>
+    <h4 class="name" id="onDelete"><span class="type-signature"></span>onDelete<span class="signature">(callback)</span><span class="type-signature"></span></h4>
 
     
 
@@ -384,7 +1089,7 @@ globally shared states owned by the server).</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_BaseStateManager.js.html">common/BaseStateManager.js</a>, <a href="common_BaseStateManager.js.html#line136">line 136</a>
+        <a href="common_BaseSharedState.js.html">common/BaseSharedState.js</a>, <a href="common_BaseSharedState.js.html#line467">line 467</a>
     </li></ul></dd>
     
 
@@ -393,237 +1098,10 @@ globally shared states owned by the server).</p></td>
     
 
     
-
-    
-    <dt class="tag-overrides">Overrides:</dt>
-    <dd class="tag-overrides"><ul class="dummy"><li>
-        <a href="BaseStateManager.html#create">BaseStateManager#create</a>
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="BaseSharedState.html#onDelete">BaseSharedState#onDelete</a>
     </li></ul></dd>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-see">See:</dt>
-    <dd class="tag-see">
-        <ul>
-            <li><a href="client.SharedState.html">client.SharedState</a></li>
-        
-            <li><a href="server.SharedState.html">server.SharedState</a></li>
-        </ul>
-    </dd>
-    
-
-    
-</dl>
-
-
-
-
-
-<div class="description usertext">
-    <p>Create a <code>SharedState</code> instance from a registered schema.</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Example</h5>
-    
-    <pre class="prettyprint"><code>const state = await client.stateManager.create('my-schema');</code></pre>
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-        <th>Attributes</th>
-        
-
-        
-        <th>Default</th>
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>schemaName</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last"><p>Name of the schema as given on registration
-(cf. ServerStateManager)</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>initValues</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    <code>{}</code>
-                
-                </td>
-            
-
-            <td class="description last"><p>Default values for the state.</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-
-
-<dl class="param-type">
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type"><a href="client.SharedState.html">client.SharedState</a></span>
-|
-
-<span class="param-type"><a href="server.SharedState.html">server.SharedState</a></span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="deleteSchema"><span class="type-signature"></span>deleteSchema<span class="signature">(schemaName)</span><span class="type-signature"></span></h4>
-
-    
-
-
-
-
-<dl class="details">
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="server_StateManager.js.html">server/StateManager.js</a>, <a href="server_StateManager.js.html#line324">line 324</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
     
 
     
@@ -656,10 +1134,8 @@ globally shared states owned by the server).</p></td>
 
 
 <div class="description usertext">
-    <p>Delete a schema and all associated states.
-When a schema is deleted, all states created from this schema are deleted
-as well, therefore all attached clients are detached and the <code>onDetach</code>
-and <code>onDelete</code> callbacks are called on the related states.</p>
+    <p>Register a function to execute when the state is deleted. Only called if the
+node was the creator of the state. Is called after <code>onDetach</code></p>
 </div>
 
 
@@ -668,167 +1144,6 @@ and <code>onDelete</code> callbacks are called on the related states.</p>
 
 
 
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>schemaName</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Name of the schema.</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="observe"><span class="type-signature">(async) </span>observe<span class="signature">(callback)</span><span class="type-signature"> &rarr; {Promise.&lt;function()>}</span></h4>
-
-    
-
-
-
-
-<dl class="details">
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_BaseStateManager.js.html">common/BaseStateManager.js</a>, <a href="common_BaseStateManager.js.html#line187">line 187</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-overrides">Overrides:</dt>
-    <dd class="tag-overrides"><ul class="dummy"><li>
-        <a href="BaseStateManager.html#observe">BaseStateManager#observe</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-todo">To Do:</dt>
-    <dd class="tag-todo">
-        <ul>
-            <li>Optionnal schema name</li>
-        </ul>
-    </dd>
-    
-</dl>
-
-
-
-
-
-<div class="description usertext">
-    <p>Observe all the <code>SharedState</code> instances that are created on the network.
-This can be usefull for clients with some controller role that might want to track
-the state of all other clients of the application, to monitor them and/or take
-control over them from a single point.</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Example</h5>
-    
-    <pre class="prettyprint"><code>client.stateManager.observe(async (schemaName, stateId, nodeId) => {
-  if (schemaName === 'something') {
-    const state = await this.client.stateManager.attach(schemaName, stateId);
-    console.log(state.getValues());
-  }
-});</code></pre>
 
 
 
@@ -864,20 +1179,374 @@ control over them from a single point.</p>
             <td class="type">
             
                 
-<span class="param-type"><a href="server.StateManager.html#~ObserveCallback">server.StateManager~ObserveCallback</a></span>
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>callback to execute when the state is deleted.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="onDetach"><span class="type-signature"></span>onDetach<span class="signature">(callback)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="common_BaseSharedState.js.html">common/BaseSharedState.js</a>, <a href="common_BaseSharedState.js.html#line456">line 456</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="BaseSharedState.html#onDetach">BaseSharedState#onDetach</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description usertext">
+    <p>Register a function to execute when detaching from the state</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>callback to execute when detaching from the state.
+wether the client as called <code>detach</code>, or the state has been deleted by its
+creator.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="onUpdate"><span class="type-signature"></span>onUpdate<span class="signature">(callback, executeListener<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="client.SharedState.html#~deleteOnUpdateCallback">client.SharedState~deleteOnUpdateCallback</a>|<a href="server.SharedState.html#~deleteOnUpdateCallback">server.SharedState~deleteOnUpdateCallback</a>}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="common_BaseSharedState.js.html">common/BaseSharedState.js</a>, <a href="common_BaseSharedState.js.html#line434">line 434</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="BaseSharedState.html#onUpdate">BaseSharedState#onUpdate</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description usertext">
+    <p>Subscribe to state updates.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>const unsubscribe = state.onUpdate(async (newValues, oldValues, context) =>  {
+  for (let [key, value] of Object.entries(newValues)) {
+     switch (key) {
+       // do something
+     }
+  }
+});
+
+// later
+unsubscribe();</code></pre>
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="client.SharedState.html#~onUpdateCallback">client.SharedState~onUpdateCallback</a></span>
 |
 
-<span class="param-type"><a href="client.StateManager.html#~ObserveCallback">client.StateManager~ObserveCallback</a></span>
+<span class="param-type"><a href="client.SharedState.html#~onUpdateCallback">client.SharedState~onUpdateCallback</a></span>
 
 
             
             </td>
 
             
+                <td class="attributes">
+                
 
+                
+
+                
+                </td>
             
 
-            <td class="description last"><p>Function to be called when a new state is created on the network.</p></td>
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>Callback to execute when an update is applied on the state.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>executeListener</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>false</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Execute the callback immediately
+with current state values. (<code>oldValues</code> will be set to <code>{}</code>, and <code>context</code> to <code>null</code>)</p></td>
         </tr>
 
     
@@ -902,14 +1571,6 @@ control over them from a single point.</p>
 <h5>Returns:</h5>
 
         
-<div class="param-desc">
-    <ul>
-<li>Return a Promise that resolves when the callback
-as been executed for the first time. The promise value is a function which
-allows to stop observing the network.</li>
-</ul>
-</div>
-
 
 
 <dl class="param-type">
@@ -918,7 +1579,10 @@ allows to stop observing the network.</li>
     </dt>
     <dd>
         
-<span class="param-type">Promise.&lt;function()></span>
+<span class="param-type"><a href="client.SharedState.html#~deleteOnUpdateCallback">client.SharedState~deleteOnUpdateCallback</a></span>
+|
+
+<span class="param-type"><a href="server.SharedState.html#~deleteOnUpdateCallback">server.SharedState~deleteOnUpdateCallback</a></span>
 
 
     </dd>
@@ -933,7 +1597,7 @@ allows to stop observing the network.</li>
 
     
 
-    <h4 class="name" id="registerSchema"><span class="type-signature"></span>registerSchema<span class="signature">(schemaName, schema)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="set"><span class="type-signature">(async) </span>set<span class="signature">(updates, context<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Promise.&lt;Object>}</span></h4>
 
     
 
@@ -945,7 +1609,7 @@ allows to stop observing the network.</li>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="server_StateManager.js.html">server/StateManager.js</a>, <a href="server_StateManager.js.html#line304">line 304</a>
+        <a href="common_BaseSharedState.js.html">common/BaseSharedState.js</a>, <a href="common_BaseSharedState.js.html#line257">line 257</a>
     </li></ul></dd>
     
 
@@ -954,191 +1618,10 @@ allows to stop observing the network.</li>
     
 
     
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-see">See:</dt>
-    <dd class="tag-see">
-        <ul>
-            <li><a href="server.StateManager.html#create">server.StateManager#create</a></li>
-        
-            <li><a href="client.StateManager.html#create">client.StateManager#create</a></li>
-        </ul>
-    </dd>
-    
-
-    
-</dl>
-
-
-
-
-
-<div class="description usertext">
-    <p>Register a schema from which shared states (cf. common.SharedState)
-can be instanciated.</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Example</h5>
-    
-    <pre class="prettyprint"><code>server.stateManager.registerSchema('my-schema', {
-  myBoolean: {
-    type: 'boolean'
-    default: false,
-  },
-  myFloat: {
-    type: 'float'
-    default: 0.1,
-    min: -1,
-    max: 1
-  }
-})</code></pre>
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>schemaName</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Name of the schema.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>schema</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">server.StateManager~schema</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Data structure
-describing the states that will be created from this schema.</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="registerUpdateHook"><span class="type-signature"></span>registerUpdateHook<span class="signature">(schemaName, updateHook)</span><span class="type-signature"> &rarr; {Fuction}</span></h4>
-
-    
-
-
-
-
-<dl class="details">
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="server_StateManager.js.html">server/StateManager.js</a>, <a href="server_StateManager.js.html#line396">line 396</a>
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="BaseSharedState.html#set">BaseSharedState#set</a>
     </li></ul></dd>
-    
-
-    
-
-    
-
     
 
     
@@ -1171,15 +1654,28 @@ describing the states that will be created from this schema.</p></td>
 
 
 <div class="description usertext">
-    <p>Register a function for a given schema (e.g. will be applied on all states
-created from this schema) that will be executed before the update values
-are propagated. For example, this could be used to implement a preset system
-where all the values of the state are updated from e.g. some data stored in
-filesystem while the consumer of the state only want to update the preset name.</p>
-<p>The hook is associated to every state of its kind (i.e. schemaName) and
-executed on every update (call of <code>set</code>). Note that the hooks are executed
-server-side regarless the node on which <code>set</code> has been called and before
-the &quot;actual&quot; update of the state (e.g. before the call of <code>onUpdate</code>).</p>
+    <p>Update values of the state.</p>
+<p>The returned <code>Promise</code> resolves on the applied updates, when all the <code>onUpdate</code>
+callbacks have resolved themselves, i.e.:</p>
+<pre class="prettyprint source lang-js"><code>server.stateManager.registerSchema('test', {
+  myBool: { type: 'boolean', default: false },
+});
+const a = await server.stateManager.create('a');
+let asyncCallbackCalled = false;
+
+a.onUpdate(updates => {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      asyncCallbackCalled = true;
+      resolve();
+    }, 100);
+  });
+});
+
+const updates = await a.set({ myBool: true });
+assert.equal(asyncCallbackCalled, true);
+assert.deepEqual(updates, { myBool: true });
+</code></pre>
 </div>
 
 
@@ -1192,384 +1688,8 @@ the &quot;actual&quot; update of the state (e.g. before the call of <code>onUpda
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>server.stateManager.registerSchema('hooked', {
-  name: { type: 'string', default: null, nullable: true },
-  name: { numUpdates: 'integer', default: 0 },
-});
-server.stateManager.registerUpdateHook('hooked', updates => {
-  return {
-    ...updates
-    numUpdates: currentValues.numUpdates + 1,
-  };
-});
-
-const state = await server.stateManager.create('hooked');
-
-await state.set({ name: 'test' });
-const values = state.getValues();
-assert.deepEqual(result, { name: 'test', numUpdates: 1 });</code></pre>
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>schemaName</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Kind of states on which applying the hook.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>updateHook</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="server.StateManager.html#~updateHook">server.StateManager~updateHook</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Function
-called between the <code>set</code> call and the actual update.</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    <p>deleteHook - Handler that deletes the hook when executed.</p>
-</div>
-
-
-
-<dl class="param-type">
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Fuction</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-        
-    
-
-    
-        <h3 class="subsection-title">Type Definitions</h3>
-
-        
-                
-
-    
-
-    <h4 class="name" id="~ObserveCallback"><span class="type-signature">(async) </span>ObserveCallback<span class="signature">(schemaName, stateId, nodeId)</span><span class="type-signature"></span></h4>
-
-    
-
-
-
-
-<dl class="details">
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="server_StateManager.js.html">server/StateManager.js</a>, <a href="server_StateManager.js.html#line29">line 29</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>schemaName</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">String</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>name of the schema</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>stateId</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Number</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>id of the state</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>nodeId</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Number</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>id of the node that created the state</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            
-                
-
-    
-
-    <h4 class="name" id="~updateHook"><span class="type-signature">(async) </span>updateHook<span class="signature">(updates, currentValues, context<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Object}</span></h4>
-
-    
-
-
-
-
-<dl class="details">
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="server_StateManager.js.html">server/StateManager.js</a>, <a href="server_StateManager.js.html#line347">line 347</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
+    <pre class="prettyprint"><code>const state = await client.state.attach('globals');
+const updates = await state.set({ myParam: Math.random() });</code></pre>
 
 
 
@@ -1609,7 +1729,7 @@ called between the <code>set</code> call and the actual update.</p></td>
             <td class="type">
             
                 
-<span class="param-type">Object</span>
+<span class="param-type">object</span>
 
 
             
@@ -1631,43 +1751,7 @@ called between the <code>set</code> call and the actual update.</p></td>
                 </td>
             
 
-            <td class="description last"><p>Update object as given on a set callback, or
-result of the previous hook</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>currentValues</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last"><p>Current values of the state.</p></td>
+            <td class="description last"><p>key / value pairs of updates to apply to the state.</p></td>
         </tr>
 
     
@@ -1680,7 +1764,7 @@ result of the previous hook</p></td>
             <td class="type">
             
                 
-<span class="param-type">Object</span>
+<span class="param-type">mixed</span>
 
 
             
@@ -1706,8 +1790,9 @@ result of the previous hook</p></td>
                 </td>
             
 
-            <td class="description last"><p>Optionnal context passed by the creator
-of the update.</p></td>
+            <td class="description last"><p>optionnal contextual object that will be propagated
+alongside the updates of the state. The context is valid only for the
+current call and will be passed as third argument to all update listeners.</p></td>
         </tr>
 
     
@@ -1733,7 +1818,7 @@ of the update.</p></td>
 
         
 <div class="param-desc">
-    <p>The &quot;real&quot; updates to be applied on the state.</p>
+    <p>A promise to the (coerced) updates.</p>
 </div>
 
 
@@ -1744,13 +1829,331 @@ of the update.</p></td>
     </dt>
     <dd>
         
-<span class="param-type">Object</span>
+<span class="param-type">Promise.&lt;Object></span>
 
 
     </dd>
 </dl>
 
     
+
+
+
+        
+    
+
+    
+        <h3 class="subsection-title">Type Definitions</h3>
+
+        
+                
+
+    
+
+    <h4 class="name" id="~deleteOnUpdateCallback"><span class="type-signature"></span>deleteOnUpdateCallback<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="server_SharedState.js.html">server/SharedState.js</a>, <a href="server_SharedState.js.html#line15">line 15</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description usertext">
+    <p>Delete the registered <a href="server.SharedState.html#~onUpdateCallback">server.SharedState~onUpdateCallback</a>.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            
+                
+
+    
+
+    <h4 class="name" id="~onUpdateCallback"><span class="type-signature"></span>onUpdateCallback<span class="signature">(newValues, oldValues, context<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="server_SharedState.js.html">server/SharedState.js</a>, <a href="server_SharedState.js.html#line5">line 5</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>newValues</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>Key / value pairs of the updates that have been
+applied to the state.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>oldValues</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>Key / value pairs of the updated params before
+the updates has been applied to the state.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>context</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Mixed</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>null</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Optionnal context object that has been passed
+with the values updates in the <code>set</code> call.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

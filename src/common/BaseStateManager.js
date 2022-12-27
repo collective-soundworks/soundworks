@@ -1,4 +1,4 @@
-import SharedState from './SharedState.js';
+import SharedState from './BaseSharedState.js';
 import {
   CREATE_REQUEST,
   CREATE_RESPONSE,
@@ -18,30 +18,7 @@ import {
   rejectRequest,
 } from './promise-store.js';
 
-
 /**
- * @callback common.StateManagerObserveCallback
- * @async
- *
- * @param {String} schemaName - name of the schema
- * @param {Number} stateId - id of the state
- * @param {Number} nodeId - id of the node that created the state
- */
-
-/**
- * Component dedicated at managing distributed states, accessible through {@link common.SharedState} instances, among the application.
- *
- * An instance of `StateManager` is automatically created by the
- * `soundworks.Client` at initialization (cf. {@link client.Client#stateManager}).
- *
- * Tutorial: [https://collective-soundworks.github.io/tutorials/state-manager.html](https://collective-soundworks.github.io/tutorials/state-manager.html)
- *
- * @see {@link common.SharedState}
- * @see {@link client.StateManager}
- * @see {@link client.Client#stateManager}
- * @see {@link server.StateManager}
- * @see {@link server.Server#stateManager}
- *
  * @private
  */
 class BaseStateManager {
@@ -145,15 +122,16 @@ class BaseStateManager {
   }
 
   /**
-   * Create a {@link common.SharedState} instance from a previsouly registered schema.
-   *
-   * @see {@link common.SharedState}
+   * Create a `SharedState` instance from a registered schema.
    *
    * @param {String} schemaName - Name of the schema as given on registration
    *  (cf. ServerStateManager)
    * @param {Object} [initValues={}] - Default values for the state.
-   *
-   * @return {@link common.SharedState}
+   * @returns {client.SharedState|server.SharedState}
+   * @see {@link client.SharedState}
+   * @see {@link server.SharedState}
+   * @example
+   * const state = await client.stateManager.create('my-schema');
    */
   async create(schemaName, initValues = {}) {
     return new Promise((resolve, reject) => {
@@ -164,17 +142,18 @@ class BaseStateManager {
   }
 
   /**
-   * Attach to an existing {@link common.SharedState} instance.
-   *
-   * @see {@link common.SharedState}
+   * Attach to an existing `SharedState` instance.
    *
    * @param {String} schemaName - Name of the schema as given on registration
    *  (cf. ServerStateManager)
    * @param {Object} [stateId=null] - Id of the state to attach to. If `null`,
    *  attach to the first state found with the given schema name (usefull for
    *  globally shared states owned by the server).
-   *
-   * @return {@link common.SharedState}
+   * @returns {client.SharedState|server.SharedState}
+   * @see {@link client.SharedState}
+   * @see {@link server.SharedState}
+   * @example
+   * const state = await client.stateManager.attach('my-schema');
    */
   async attach(schemaName, stateId = null) {
     return new Promise((resolve, reject) => {
@@ -185,28 +164,20 @@ class BaseStateManager {
     });
   }
 
-  // // @todo - review, should:
-  // // - bind communications on first observer added
-  // // - unbind communication if all observer removed
-  // // - now the callback are not executed but the communications are still there
-  // // that's not good!
-  // // --> later note, not sure what I meant there... (unusefull comments are a bit boring)
-  // // --> is it done ?
-
-  // // @todo - optionnal schema name
-
   /**
-   * Observe all the {@link common.SharedState} instances that are created on the network.
+   * Observe all the `SharedState` instances that are created on the network.
+   * This can be usefull for clients with some controller role that might want to track
+   * the state of all other clients of the application, to monitor them and/or take
+   * control over them from a single point.
    *
-   * @param {common.StateManagerObserveCallback} callback - Function
-   *  to be called when a new state is created on the network.
-   *
-   * @return Promise<Function> - Return a Promise that resolves when the callback
+   * @todo Optionnal schema name
+   * @param {server.StateManager~ObserveCallback|client.StateManager~ObserveCallback}
+   *  callback - Function to be called when a new state is created on the network.
+   * @returns {Promise<Function>} - Return a Promise that resolves when the callback
    *  as been executed for the first time. The promise value is a function which
    *  allows to stop observing the network.
-   *
    * @example
-   * this.client.stateManager.observe(async (schemaName, stateId, nodeId) => {
+   * client.stateManager.observe(async (schemaName, stateId, nodeId) => {
    *   if (schemaName === 'something') {
    *     const state = await this.client.stateManager.attach(schemaName, stateId);
    *     console.log(state.getValues());

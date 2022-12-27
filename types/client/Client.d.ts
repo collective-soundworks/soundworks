@@ -1,27 +1,30 @@
 export default Client;
 /**
- * Create a new soundworks client.
+ * The `Client` class is the main entry point for  the client-side of soundworks
+ * application.
  *
- * The `Client` is the main entry point to access *soundworks* components
- * such as {@link client.Socket}, {@link client.PluginManager},
- * {@link client.StateManager} or {@link client.ContextManager}.
- * The client is responsible for the initialization lifecycle of the application.
+ * A `Client` instance allows to access soundworks components such as {@link client.StateManager},
+ * {@link client.PluginManager},{@link client.Socket} or {@link client.ContextManager}.
+ * Its is also responsible for handling the initialization lifecycles of the different
+ * soundworks components.
  *
- * @memberof client
- * @throws Will throw if the given config object is invalid.
- * @example
+ * ```
  * import { Client } from '@soundworks/core/client.js';
  *
  * // create a new soundworks `Client` instance
  * const client = new Client({ role: 'player' });
  * // init and start the client
  * await client.start();
+ * ```
+ *
+ * @memberof client
  */
 declare class Client {
     /**
-     * @param {object} config - Configuration of the soundworks client.
+     * @param {client.BrowserClientConfig} config - Configuration of the soundworks client.
+     * @throws Will throw if the given config object is invalid.
      */
-    constructor(config: object);
+    constructor(config: client.BrowserClientConfig);
     /**
      * Role of the client in the application.
      *
@@ -29,14 +32,12 @@ declare class Client {
      */
     role: string;
     /**
-     * Configuration object, typically contains the configuration sent by the
-     * server.
+     * Configuration object.
      *
      * @todo typedef
-     * @type {object}
-     * @see {@link server.Server}.
+     * @type {client.BrowserClientConfig|client.NodeClientConfig}
      */
-    config: object;
+    config: client.BrowserClientConfig | client.NodeClientConfig;
     /**
      * Session id of the client (incremeted positive number), generated and
      * retrieved by the server during `client.init`. The counter is reset when
@@ -61,7 +62,7 @@ declare class Client {
      */
     socket: client.Socket;
     /**
-     * Target platform of the client, i.e. 'browser' or 'node'.
+     * Runtime platform in which the client is executed, i.e. 'browser' or 'node'.
      *
      * @type {string}
      */
@@ -70,7 +71,7 @@ declare class Client {
      * Instance of the {@link client.ContextManager} class.
      *
      * The context manager requires the socket to be connected therefore it can be
-     * accessed and used only after `client.init()` has been fulfilled.
+     * safely used only after `client.init()` has been fulfilled.
      *
      * @see {@link client.ContextManager}
      * @type {client.ContextManager}
@@ -80,7 +81,7 @@ declare class Client {
      * Instance of the {@link client.PluginManager} class.
      *
      * The plugin manager requires the socket to be connected therefore it can be
-     * accessed and used only after `client.init()` has been fulfilled.
+     * safely used only after `client.init()` has been fulfilled.
      *
      * @see {@link client.PluginManager}
      * @type {client.PluginManager}
@@ -90,7 +91,7 @@ declare class Client {
      * Instance of the {@link client.StateManager} class.
      *
      * The state manager requires the socket to be connected therefore it can be
-     * accessed and used only after `client.init()` has been fulfilled.
+     * safely used only after `client.init()` has been fulfilled.
      *
      * @see {@link client.StateManager}
      * @type {client.StateManager}
@@ -105,27 +106,31 @@ declare class Client {
     /** @private */
     private _auditState;
     /**
-     * Method to be called before {@link client.Client#start} in the
-     * initialization lifecycle of the soundworks client.
+     * Method to be called before {@link client.Client#start} in the initialization
+     * lifecycle of the soundworks client.
      *
+     * This method is implicitely called by {@link client.Client#start} if not done
+     * explictely by the user code.
+     *
+     * What it does:
      * - connect the sockets to be server
-     * - do the handshake with soundwoks server (retrieve id, etc.)
+     * - perform the handshake with soundworks server (retrieve id, etc.)
      * - launch the state manager
-     * - init registered plugin
+     * - initialize all registered plugin
      *
-     * After calling `await client.init()`, the stateManaher and the pluginManager
-     * can be safely used.
-     *
-     * @see {@link server.Server}
+     * After `await client.init()`, the {@link client.StateManager}
+     * and the {@link client.PluginManager}  can be safely used.
      */
     init(): Promise<void>;
     /**
      * Method to be called when {@link client.Client#init} has finished in the
      * initialization lifecycle of the soundworks client.
      *
-     * - starts all the registered contexts
+     * Calling `client.start()` will lazily execute `client.init` if `init has not been
+     * call manually
      *
-     * @see {@link server.Server#start}
+     * What it does:
+     * - starts all the registered contexts
      */
     start(): Promise<void>;
     /**
@@ -134,8 +139,12 @@ declare class Client {
      */
     stop(): Promise<void>;
     /**
-     * Get the global audit state of the application. The audit state is lazily
-     * attached to the client only if this method is called.
+     * Get the global audit state of the application. The audit tracks global informations
+     * such as the number of connected clients, network latency estimation, etc. It is
+     * usefull for controller clients that should give the user some overview about
+     * the state of the application.
+     *
+     * The audit state is lazily attached to the client only if this method is called.
      *
      * @throws Will throw if called before `client.init()`
      */

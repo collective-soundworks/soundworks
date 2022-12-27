@@ -26,21 +26,26 @@ import { isBrowser } from '../common/utils.js';
 //   Also available via the onopen property.
 
 /**
- * The Socket class is a simple wrapper built on top of `isomorphic-ws` socket,
- * that implements a pubsub interface. An instance of `Socket` is automatically
- * created by the `soundworks.Client`.
+ * The Socket class is a simple publish / subscribe wrapper built on top of the
+ * [isomorphic-ws](https://github.com/heineiuo/isomorphic-ws) library.
+ * An instance of `Socket` is automatically created by the `soundworks.Client`.
+ *
+ * _Important: In most cases, you should consider using a {@link client.SharedState} rather than
+ * sending messages directly through the sockets._
  *
  * The Socket class concurrently opens two different WebSockets:
  * - a socket configured with `binaryType = 'string'` for JSON compatible string
  *  messages.
  * - a socket configured with `binaryType=arraybuffer` for efficient streaming
  *  of binary data.
- * The sockets re-emits all "native" ws events ('open', 'upgrade', 'close', 'error'
+ *
+ * Both sockets re-emits all "native" ws events ('open', 'upgrade', 'close', 'error'
  *  and 'message'.
  *
+ * See {@link client.Client#socket}
+ *
  * @memberof client
- * @see {@link client.Client#socket}
- * @see https://github.com/heineiuo/isomorphic-ws
+ * @hideconstructor
  */
 class Socket {
   constructor() {
@@ -162,30 +167,35 @@ class Socket {
       trySocket();
     });
 
-    let pingTimeoutId = null;
-    const pingInterval = config.env.websockets.pingInterval;
-    // detect broken connection
-    // cf. https://github.com/websockets/ws#how-to-detect-and-close-broken-connections
-    const heartbeat = () => {
-      try {
-        console.log('ping received');
-        clearTimeout(pingTimeoutId);
+    // @todo - review/fix
+    // - the `ws.on` method only exists on node implementation, and the 'ping'
+    //   message is not received on addEventListener
+    // - there seems to be no way to access the ping event in browsers...
+    //
+    // let pingTimeoutId = null;
+    // const pingInterval = config.env.websockets.pingInterval;
+    // // detect broken connection
+    // // cf. https://github.com/websockets/ws#how-to-detect-and-close-broken-connections
+    // const heartbeat = () => {
+    //   try {
+    //     console.log('ping received');
+    //     clearTimeout(pingTimeoutId);
 
-      // pingTimeoutId = setTimeout(() => {
-      //   console.log('terminate');
-      //   this.terminate();
-      // }, pingInterval + 2000);
-      } catch (err) {
-        console.error(err);
-      }
-    };
+    //   // pingTimeoutId = setTimeout(() => {
+    //   //   console.log('terminate');
+    //   //   this.terminate();
+    //   // }, pingInterval + 2000);
+    //   } catch (err) {
+    //     console.error(err);
+    //   }
+    // };
+    //
+    // this.ws.on('ping', heartbeat);
+    // this.ws.addEventListener('close', () => {
+    //   clearTimeout(pingTimeoutId);
+    // });
 
-    this.ws.on('ping', heartbeat);
-    this.ws.addEventListener('close', () => {
-      clearTimeout(pingTimeoutId);
-    });
-
-    heartbeat();
+    // heartbeat();
 
     // ----------------------------------------------------------
     // init binary socket

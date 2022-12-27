@@ -3,7 +3,7 @@
 <head>
     
     <meta charset="utf-8">
-    <title>server/Plugin.js - soundworks</title>
+    <title>server/SharedState.js - soundworks</title>
     
     <meta name="description" content="Documentation of soundworks, a full-stack JavaScript framework for distributed WebAudio and multimedia applications" />
     
@@ -37,7 +37,7 @@
 
 <div id="main">
     
-    <h1 class="page-title">server/Plugin.js</h1>
+    <h1 class="page-title">server/SharedState.js</h1>
     
 
     
@@ -47,83 +47,92 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>import BasePlugin from '../common/BasePlugin.js';
+            <pre class="prettyprint source linenums"><code>import BaseSharedState from '../common/BaseSharedState.js';
+
+// this file exists only for documentation purposes
 
 /**
- * Callback executed when the plugin state is updated.
- *
- * @callback server.Plugin~onStateChangeCallback
- * @param {server.Plugin#state} state - Current state of the plugin.
+ * @callback server.SharedState~onUpdateCallback
+ * @param {Object} newValues - Key / value pairs of the updates that have been
+ *  applied to the state.
+ * @param {Object} oldValues - Key / value pairs of the updated params before
+ *  the updates has been applied to the state.
+ * @param {Mixed} [context=null] - Optionnal context object that has been passed
+ *  with the values updates in the `set` call.
  */
 
 /**
- * Delete the registered {@link server.Plugin~onStateChangeCallback}.
+ * Delete the registered {@link server.SharedState~onUpdateCallback}.
  *
- * @callback server.Plugin~deleteOnStateChangeCallback
+ * @callback server.SharedState~deleteOnUpdateCallback
  */
 
+
 /**
- * Base class to extend in order to create new `soundworks` plugins.
+ * The `SharedState` is one of the most important and versatile abstraction provided
+ * by `soundworks`. It represents a set of parameters that are synchronized accross
+ * every nodes of the application (clients and server) that declared some interest
+ * to the shared state.
  *
- * In the `soundworks` paradigm, a plugin is a component that allows to extend
- * the framework capabilities by encapsulating common and reusable logic in
- * an application wise perspective. For example, plugins are available to handle
- * clock synchronization, to deal with the file system, etc. Plugin should always
- * have both a client-side and a server-side part.
+ * A `SharedState` is created according to a "schema" (in the sense of a database
+ * schema) that must be declared and registered server-side. Any number of `SharedState`s
+ * can be created from a single schema.
  *
- * See [https://soundworks.dev/guide/ecosystem](https://soundworks.dev/guide/ecosystem)
- * for more informations on the available plugins.
+ * A shared state can be created both by the clients or by the server (in which case
+ * it is generally considered as a global state of the application). Similarly any
+ * node of the application (clients or server) can declare interest and "attach" to
+ * a state created by another node. All node attached to a state can modify its values
+ * and/or react to the modifications applied by other nodes.
  *
- * _Creating new plugins should be considered an advanced usage._
+ * Tutorial: {@link https://soundworks.dev/guide/state-manager.html}
+ *
+ * ```
+ * // server-side
+ * import { Server } from '@soundworks/server/index.js';
+ *
+ * const server = new Server(config);
+ * // declare and register the schema of a shared state.
+ * server.stateManager.registerSchema('some-global-state', {
+ *   myRandom: {
+ *     type: 'float',
+ *     default: 0,
+ *   }
+ * });
+ *
+ * await server.start();
+ *
+ * // create a global state server-side
+ * const globalState = await server.stateManager.create('some-global-state');
+ * // listen and react to the changes made by the clients
+ * globalState.onUpdate(updates => console.log(updates));
+ * ```
+ *
+ * ```
+ * // client-side
+ * import { Client } from '@soundworks/client.index.js';
+ *
+ * const client = new Client(config);
+ * await client.start();
+ *
+ * // attach to the global state created by the server
+ * const globalState = await client.stateManager.attach('some-global-state');
+ *
+ * // update the value of a `myRandom` parameter every seconds
+ * setInterval(() => {
+ *   globalState.set({ myRandom: Math.random() });
+ * }, 1000);
+ * ``
  *
  * @memberof server
- * @extends BasePlugin
+ * @extends BaseSharedState
  * @inheritdoc
+ * @hideconstructor
+ * @see {server.StateManager}
  */
-class Plugin extends BasePlugin {
-  /**
-   * @param {server.Server} server - The soundworks server instance.
-   * @param {string} id - User defined id of the plugin as defined in
-   *  {@link server.PluginManager#register}.
-   */
-  constructor(server, id) {
-    super(id);
+class SharedState extends BaseSharedState {}
 
-    /**
-     * Instance of soundworks server.
-     * @type {server.Server}
-     * @see {@link server.Server}
-     */
-    this.server = server;
+export default SharedState;
 
-    /** @private */
-    this.clients = new Set();
-  }
-
-  /**
-   * Method called when a client (which registered the client-side plugin),
-   * connects to the application. Override this method if you need to perform
-   * some particular logic (e.g. creating a shared state) for each clients.
-   *
-   * @param {server.Client} client
-   */
-  async addClient(client) {
-    this.clients.add(client);
-  }
-
-  /**
-   * Method called when a client (which registered the client-side plugin),
-   * disconnects from the application. Override this method if you need to perform
-   * some particular logic (e.g. creating a shared state) for each clients.
-   *
-   * @param {server.Client} client
-   */
-  async removeClient(client) {
-    this.clients.delete(client);
-  }
-}
-
-export default Plugin;
 </code></pre>
         </article>
     </section>

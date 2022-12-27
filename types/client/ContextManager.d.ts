@@ -2,7 +2,10 @@ export default ContextManager;
 /**
  * Manage the different contexts and their lifecycle.
  *
+ * _WARNING: Most of the time, you should not have to manipulate the context manager directly._
+ *
  * @memberof client
+ * @hideconstructor
  */
 declare class ContextManager {
     /** @private */
@@ -17,8 +20,9 @@ declare class ContextManager {
      */
     private register;
     /**
-     * Retrieve a started context from its name. Most of the time you won't need to
-     * call this method manually.
+     * Retrieve a started context from its name.
+     *
+     * _WARNING: Most of the time, you should not have to call this method manually._
      *
      * @param {string} contextName - Name of the context, a given in its constructor
      */

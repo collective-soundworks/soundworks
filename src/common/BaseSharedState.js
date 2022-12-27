@@ -18,31 +18,21 @@ import {
   rejectRequest,
 } from './promise-store.js';
 
-/**
- * Representation of a shared state.
- *
- * @memberof server
- *
- * @see {server.StateManager}
- */
-/**
- * Representation of a shared state.
- *
- * @memberof client
- *
- * @see {client.StateManager}
- */
-class SharedState {
+class BaseSharedState {
   constructor(id, remoteId, schemaName, schema, client, isOwner, manager, initValues = {}) {
     this.id = id;
     this.remoteId = remoteId;
     this.schemaName = schemaName;
 
+    /** @private */
     this._isOwner = isOwner; // may be the server or any client
+    /** @private */
     this._client = client;
+    /** @private */
     this._manager = manager;
 
     try {
+      /** @private */
       this._parameters = new ParameterBag(schema, initValues);
     } catch(err) {
       console.error(err.stack);
@@ -51,8 +41,11 @@ class SharedState {
 ${JSON.stringify(initValues, null, 2)}`);
     }
 
+    /** @private */
     this._onUpdateCallbacks = new Set();
+    /** @private */
     this._onDetachCallbacks = new Set();
+    /** @private */
     this._onDeleteCallbacks = new Set();
 
     // add listener for state updates
@@ -148,6 +141,7 @@ ${JSON.stringify(initValues, null, 2)}`);
     }
   }
 
+  /** @private */
   _clearDetach() {
     this._onDetachCallbacks.clear();
     this._onDeleteCallbacks.clear();
@@ -159,6 +153,7 @@ ${JSON.stringify(initValues, null, 2)}`);
     };
   }
 
+  /** @private */
   _clearTransport() {
     // remove listeners
     this._client.transport.removeAllListeners(`${UPDATE_RESPONSE}-${this.id}-${this.remoteId}`);
@@ -250,14 +245,14 @@ ${JSON.stringify(initValues, null, 2)}`);
    * assert.deepEqual(updates, { myBool: true });
    * ```
    *
-   * @async
-   * @param {Object} updates - key / value pairs of updates to apply to the state.
-   * @param {Mixed} [context=null] - optionnal contextual object that will be propagated
+   * @param {object} updates - key / value pairs of updates to apply to the state.
+   * @param {mixed} [context=null] - optionnal contextual object that will be propagated
    *   alongside the updates of the state. The context is valid only for the
    *   current call and will be passed as third argument to all update listeners.
-   * @return {Promise<Object>} A promise to the (coerced) updates.
-   *
-   * @see {common.SharedState~updateCallback}
+   * @returns {Promise<Object>} A promise to the (coerced) updates.
+   * @example
+   * const state = await client.state.attach('globals');
+   * const updates = await state.set({ myParam: Math.random() });
    */
   async set(updates, context = null) {
     // handle immediate option
@@ -308,48 +303,63 @@ ${JSON.stringify(initValues, null, 2)}`);
   }
 
   /**
-   * Get a value of the state by its name
+   * Get the value of a paramter of the state.
    *
-   * @param {String} name - Name of the param. Throws an error if the name is invalid.
-   * @return {Mixed}
+   * @param {string} name - Name of the param.
+   * @throws Throws if `name` does not correspond to an existing field
+   *  of the state.
+   * @return {mixed}
+   * @example
+   * const value = state.get('name');
    */
   get(name) {
     return this._parameters.get(name);
   }
 
   /**
-   * Get a all the key / value pairs of the state.
+   * Get all the key / value pairs of the state.
    *
-   * @return {Object}
+   * @return {object}
+   * @example
+   * const values = state.getValues();
    */
   getValues() {
     return this._parameters.getValues();
   }
 
   /**
-   * Get the schema that describes the state.
+   * Get the schema from which the state has been created.
    *
-   * @param {String} [name=null] - If given, returns only the definition
-   *  of the given param name. Throws an error if the name is invalid.
-   * @return {Object}
+   * @param {string} [name=null] - If given, returns only the definition corresponding
+   *  to the given param name.
+   * @throws Throws if `name` does not correspond to an existing field
+   *  of the state.
+   * @return {object}
+   * @example
+   * const schema = state.getSchema();
    */
   getSchema(name = null) {
     return this._parameters.getSchema(name);
   }
 
   /**
-   * Get the values with which the state has been initialized.
+   * Get the values with which the state has been created. May defer from the
+   * default values declared in the schema.
    *
-   * @return {Object}
+   * @return {object}
+   * @example
+   * const initValues = state.getInitValues();
    */
   getInitValues() {
     return this._parameters.getInitValues();
   }
 
   /**
-   * Get the default values that has been declared in the schema.
+   * Get the default values as declared in the schema.
    *
-   * @return {Object}
+   * @return {object}
+   * @example
+   * const defaults = state.getDefaults();
    */
   getDefaults() {
     return this._parameters.getDefaults();
@@ -359,13 +369,10 @@ ${JSON.stringify(initValues, null, 2)}`);
    * Detach from the state. If the client is the creator of the state, the state
    * is deleted and all attached nodes get notified
    *
-   * @async
-   * @see {common.SharedState#onDetach}
-   * @see {common.SharedState#onDelete}
-   * @see {client.SharedStateManagerClient#create}
-   * @see {server.SharedStateManagerClient#create}
-   * @see {client.SharedStateManagerClient#attach}
-   * @see {server.SharedStateManagerClient#attach}
+   * @example
+   * const state = await client.state.attach('globals');
+   * // later
+   * await state.detach();
    */
   async detach() {
     this._onUpdateCallbacks.clear();
@@ -384,17 +391,17 @@ ${JSON.stringify(initValues, null, 2)}`);
   }
 
   /**
-   * Delete the state. Only the creator/owner of the state (i.e. a state created using
-   * `create`) can use this method. If a non-owner call this method (i.e. a
-   * state created using `attach`), an error will be thrown.
+   * Delete the state. Only the creator/owner of the state can use this method.
+   * All nodes attached to the state will be deteched, triggering the `onDetach`
+   * callback. The creator of the state will also have its `onDelete` callback
+   * triggered.
    *
-   * @async
-   * @see {common.SharedState#onDetach}
-   * @see {common.SharedState#onDelete}
-   * @see {client.SharedStateManagerClient#create}
-   * @see {server.SharedStateManagerClient#create}
-   * @see {client.SharedStateManagerClient#attach}
-   * @see {server.SharedStateManagerClient#attach}
+   * @throws Throws if the method is called by a node which is not the owner of
+   * the state.
+   * @example
+   * const state = await client.state.create('my-schema-name');
+   * // later
+   * await state.delete();
    */
   async delete() {
     if (this._isOwner) {
@@ -405,42 +412,24 @@ ${JSON.stringify(initValues, null, 2)}`);
   }
 
   /**
-   * @callback common.SharedState~updateCallback
-   * @param {Object} newValues - key / value pairs of the updates that have been
-   *  applied to the state.
-   * @param {Object} oldValues - key / value pairs of the updated params before
-   *  the updates has been applied to the state.
-   * @param {Mixed} [context=null] - Optionnal context object that has been passed
-   *  with the values updates in the `set` call.
+   * Subscribe to state updates.
    *
-   * @example
-   * state.onUpdate(async (newValues, oldValues[, context=null]) =>  {
-   *   for (let [key, value] of Object.entries(newValues)) {
-   *      switch (key) {
-   *        // do something
-   *      }
-   *   }
-   * });
-   *
-   * @see {common.SharedState#set}
-   * @see {common.SharedState#onUpdate}
-   */
-  /**
-   * Subscribe to state updates
-   *
-   * @param {common.SharedState~updateCallback} callback - callback to execute
-   *  when an update is applied on the state.
-   * @param {Boolean} [executeListener=false] - execute the given callback immediately
+   * @param {client.SharedState~onUpdateCallback|client.SharedState~onUpdateCallback} callback
+   *  Callback to execute when an update is applied on the state.
+   * @param {Boolean} [executeListener=false] - Execute the callback immediately
    *  with current state values. (`oldValues` will be set to `{}`, and `context` to `null`)
-   *
+   * @returns {client.SharedState~deleteOnUpdateCallback|server.SharedState~deleteOnUpdateCallback}
    * @example
-   * state.onUpdate(async (newValues, oldValues) =>  {
+   * const unsubscribe = state.onUpdate(async (newValues, oldValues, context) =>  {
    *   for (let [key, value] of Object.entries(newValues)) {
    *      switch (key) {
    *        // do something
    *      }
    *   }
    * });
+   *
+   * // later
+   * unsubscribe();
    */
   onUpdate(listener, executeListener = false) {
     this._onUpdateCallbacks.add(listener);
@@ -481,4 +470,4 @@ ${JSON.stringify(initValues, null, 2)}`);
   }
 }
 
-export default SharedState;
+export default BaseSharedState;

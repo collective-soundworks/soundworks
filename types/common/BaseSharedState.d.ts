@@ -1,45 +1,32 @@
-export default SharedState;
-/**
- * Representation of a shared state.
- *
- * @memberof server
- *
- * @see {server.StateManager}
- */
-/**
- * Representation of a shared state.
- *
- * @memberof client
- *
- * @see {client.StateManager}
- */
-declare class SharedState {
+export default BaseSharedState;
+declare class BaseSharedState {
     constructor(id: any, remoteId: any, schemaName: any, schema: any, client: any, isOwner: any, manager: any, initValues?: {});
     id: any;
     remoteId: any;
     schemaName: any;
-    _isOwner: any;
-    _client: any;
-    _manager: any;
-    _parameters: ParameterBag;
-    _onUpdateCallbacks: Set<any>;
-    _onDetachCallbacks: Set<any>;
-    _onDeleteCallbacks: Set<any>;
-    _clearDetach(): void;
+    /** @private */
+    private _isOwner;
+    /** @private */
+    private _client;
+    /** @private */
+    private _manager;
+    /** @private */
+    private _parameters;
+    /** @private */
+    private _onUpdateCallbacks;
+    /** @private */
+    private _onDetachCallbacks;
+    /** @private */
+    private _onDeleteCallbacks;
+    /** @private */
+    private _clearDetach;
     /**
      * Detach from the state. If the client is the creator of the state, the state
      * is deleted and all attached nodes get notified
-     *
-     * @async
-     * @see {common.SharedState#onDetach}
-     * @see {common.SharedState#onDelete}
-     * @see {client.SharedStateManagerClient#create}
-     * @see {server.SharedStateManagerClient#create}
-     * @see {client.SharedStateManagerClient#attach}
-     * @see {server.SharedStateManagerClient#attach}
      */
     detach(): Promise<any>;
-    _clearTransport(): void;
+    /** @private */
+    private _clearTransport;
     /** @private */
     private _commit;
     /**
@@ -69,68 +56,63 @@ declare class SharedState {
      * assert.deepEqual(updates, { myBool: true });
      * ```
      *
-     * @async
-     * @param {Object} updates - key / value pairs of updates to apply to the state.
-     * @param {Mixed} [context=null] - optionnal contextual object that will be propagated
+     * @param {object} updates - key / value pairs of updates to apply to the state.
+     * @param {mixed} [context=null] - optionnal contextual object that will be propagated
      *   alongside the updates of the state. The context is valid only for the
      *   current call and will be passed as third argument to all update listeners.
-     * @return {Promise<Object>} A promise to the (coerced) updates.
-     *
-     * @see {common.SharedState~updateCallback}
+     * @returns {Promise<Object>} A promise to the (coerced) updates.
      */
-    set(updates: any, context?: Mixed): Promise<any>;
+    set(updates: object, context?: mixed): Promise<any>;
     /**
-     * Get a value of the state by its name
+     * Get the value of a paramter of the state.
      *
-     * @param {String} name - Name of the param. Throws an error if the name is invalid.
-     * @return {Mixed}
+     * @param {string} name - Name of the param.
+     * @throws Throws if `name` does not correspond to an existing field
+     *  of the state.
+     * @return {mixed}
      */
-    get(name: string): Mixed;
+    get(name: string): mixed;
     /**
-     * Get a all the key / value pairs of the state.
+     * Get all the key / value pairs of the state.
      *
-     * @return {Object}
+     * @return {object}
      */
-    getValues(): any;
+    getValues(): object;
     /**
-     * Get the schema that describes the state.
+     * Get the schema from which the state has been created.
      *
-     * @param {String} [name=null] - If given, returns only the definition
-     *  of the given param name. Throws an error if the name is invalid.
-     * @return {Object}
+     * @param {string} [name=null] - If given, returns only the definition corresponding
+     *  to the given param name.
+     * @throws Throws if `name` does not correspond to an existing field
+     *  of the state.
+     * @return {object}
      */
-    getSchema(name?: string): any;
+    getSchema(name?: string): object;
     /**
-     * Get the values with which the state has been initialized.
+     * Get the values with which the state has been created. May defer from the
+     * default values declared in the schema.
      *
      * @return {Object}
      */
     getInitValues(): any;
     /**
-     * Get the default values that has been declared in the schema.
+     * Get the default values as declared in the schema.
      *
      * @return {Object}
      */
     getDefaults(): any;
     /**
-     * Delete the state. Only the creator/owner of the state (i.e. a state created using
-     * `create`) can use this method. If a non-owner call this method (i.e. a
-     * state created using `attach`), an error will be thrown.
+     * Delete the state. Only the creator/owner of the state can use this method.
      *
-     * @async
-     * @see {common.SharedState#onDetach}
-     * @see {common.SharedState#onDelete}
-     * @see {client.SharedStateManagerClient#create}
-     * @see {server.SharedStateManagerClient#create}
-     * @see {client.SharedStateManagerClient#attach}
-     * @see {server.SharedStateManagerClient#attach}
+     * @throws Throws if the method is called by a node which is not the owner of
+     * the state.
      */
     delete(): Promise<any>;
     /**
      * @callback common.SharedState~updateCallback
-     * @param {Object} newValues - key / value pairs of the updates that have been
+     * @param {Object} newValues - Key / value pairs of the updates that have been
      *  applied to the state.
-     * @param {Object} oldValues - key / value pairs of the updated params before
+     * @param {Object} oldValues - Key / value pairs of the updated params before
      *  the updates has been applied to the state.
      * @param {Mixed} [context=null] - Optionnal context object that has been passed
      *  with the values updates in the `set` call.
@@ -143,16 +125,13 @@ declare class SharedState {
      *      }
      *   }
      * });
-     *
-     * @see {common.SharedState#set}
-     * @see {common.SharedState#onUpdate}
      */
     /**
-     * Subscribe to state updates
+     * Subscribe to state updates.
      *
-     * @param {common.SharedState~updateCallback} callback - callback to execute
+     * @param {common.SharedState~updateCallback} callback - Callback to execute
      *  when an update is applied on the state.
-     * @param {Boolean} [executeListener=false] - execute the given callback immediately
+     * @param {Boolean} [executeListener=false] - Execute the given callback immediately
      *  with current state values. (`oldValues` will be set to `{}`, and `context` to `null`)
      *
      * @example
@@ -181,5 +160,4 @@ declare class SharedState {
      */
     onDelete(callback: Function): () => boolean;
 }
-import ParameterBag from "./ParameterBag.js";
-//# sourceMappingURL=SharedState.d.ts.map
+//# sourceMappingURL=BaseSharedState.d.ts.map

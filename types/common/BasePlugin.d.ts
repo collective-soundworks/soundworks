@@ -1,4 +1,7 @@
 export default BasePlugin;
+/**
+ * @private
+ */
 declare class BasePlugin {
     /**
      * @param {string} id - User-defined id of the plugin.

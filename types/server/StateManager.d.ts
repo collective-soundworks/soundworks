@@ -1,4 +1,17 @@
 export default StateManager;
+export namespace server {
+    /**
+     * ~ObserveCallback
+     */
+    type StateManager = () => any;
+}
+/**
+ * @callback server.StateManager~ObserveCallback
+ * @async
+ * @param {String} schemaName - name of the schema
+ * @param {Number} stateId - id of the state
+ * @param {Number} nodeId - id of the node that created the state
+ */
 /**
  * Component dedicated at managing distributed states among the application.
  * The `StateManager` extends the `StateManager` with

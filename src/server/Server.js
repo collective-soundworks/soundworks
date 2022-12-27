@@ -82,24 +82,7 @@ function setTerminalTitle(server) {
  *
  * @memberof server
  *
- * @param {Object} config
- * @param {String} [config.defaultClient='player'] - Client that can access
- *   the application at its root url.
- * @param {String} [config.env='development']
- * @param {String} [config.port=8000] - Port on which the http(s) server will
- *   listen
- * @param {String} [config.subpath] - If the application runs behind a
- *   proxy server (e.g. https://my-domain.com/my-app/`), path to the
- *   application root (i.e. 'my-app')
- * @param {Boolean} [config.useHttps=false] - Define wheter to use or not an
- *   an https server. In production, it's generally better to set this value
- *   to false, and delegate the https handling to a proxy server (e.g. nginx)
- * @param {Object} [config.httpsInfos=null] - if `useHttps` is `true`, object
- *   that declare the path to `cert` and `key` files (`{ cert, key }`). If `null`
- *   an auto generated certificate will be generated, be aware that browsers
- *   will consider the application as not safe in the case (which is generally
- *   fine for development purpose).
- *
+ * @param {server.ServerConfig} config
  * @example
  * import { Server } from '@soundworks/core/server';
  * const server = new Server({

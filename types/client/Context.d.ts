@@ -1,6 +1,44 @@
 export default Context;
 /**
- * Base class to extend for implementing a client of a soundworks application.
+ * Base class to extend for implementing a new Context.
+ *
+ * In the *soundworks* paradigm, a client has a "role" (see {@link client.Client#role})
+ * and can be in different "contexts" (e.g. some part of the experience, different
+ * sections of a music piece, etc.). This class gives a simple way to model these
+ * reccuring aspects of an application.
+ *
+ * You can also think of a `Context` as a state in a state machine from which a
+ * client can `enter()` or `exit()` (be aware that soundworks does however not
+ * provide any implementation for the state machine out of the box).
+ *
+ * The `Context` can optionnaly allow to perform server-side logic when a client
+ * enters or exits the context. In such case, soundworks guarantees that the server-side
+ * logic is done before the `enter()` and `exit()` promises are fulfilled.
+ *
+ * ```
+ * import { Client, Context } from '@soundworks/core/index.js'
+ *
+ * const client = new Client(config);
+ *
+ * class MyContext {
+ *   async enter() {
+ *     await super.enter();
+ *     console.log(`client ${this.client.id} entered my context`);
+ *   }
+ *
+ *   async exit() {
+ *     await super.exit();
+ *     console.log(`client ${this.client.id} exited my context`);
+ *   }
+ * }
+ * const myContext = new MyContext(client);
+ *
+ * await client.start();
+ * await myContext.enter();
+ *
+ * await new Promise(resolve => setTimeout(resolve, 2000));
+ * await myContext.exit();
+ * ```
  *
  * @memberof client
  */

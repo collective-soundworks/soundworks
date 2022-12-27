@@ -3,7 +3,7 @@
 <head>
     
     <meta charset="utf-8">
-    <title>common/SharedState.js - soundworks</title>
+    <title>common/BaseSharedState.js - soundworks</title>
     
     <meta name="description" content="Documentation of soundworks, a full-stack JavaScript framework for distributed WebAudio and multimedia applications" />
     
@@ -32,12 +32,12 @@
     
     <input type="text" id="nav-search" placeholder="Search" />
     
-    <h2><a href="index.html">Home</a></h2><h2><a href="http://soundworks.dev/" target="_blank" class="menu-item" >General Documentation</a></h2><h2><a href="https://github.com/collective-soundworks/soundworks" target="_blank" class="menu-item" >Github</a></h2><h3>Namespaces</h3><ul><li><a href="client.html">client</a></li><li><a href="server.html">server</a></li></ul><h3>Classes</h3><ul><li><a href="BasePlugin.html">BasePlugin</a><ul class='methods'><li data-type='method'><a href="BasePlugin.html#onStateChange">onStateChange</a></li><li data-type='method'><a href="BasePlugin.html#propagateStateChange">propagateStateChange</a></li><li data-type='method'><a href="BasePlugin.html#start">start</a></li><li data-type='method'><a href="BasePlugin.html#stop">stop</a></li></ul></li><li><a href="client.Client.html">client.Client</a><ul class='methods'><li data-type='method'><a href="client.Client.html#getAuditState">getAuditState</a></li><li data-type='method'><a href="client.Client.html#init">init</a></li><li data-type='method'><a href="client.Client.html#start">start</a></li><li data-type='method'><a href="client.Client.html#stop">stop</a></li></ul></li><li><a href="client.Context.html">client.Context</a><ul class='methods'><li data-type='method'><a href="client.Context.html#enter">enter</a></li><li data-type='method'><a href="client.Context.html#exit">exit</a></li><li data-type='method'><a href="client.Context.html#start">start</a></li><li data-type='method'><a href="client.Context.html#stop">stop</a></li></ul></li><li><a href="client.ContextManager.html">client.ContextManager</a><ul class='methods'><li data-type='method'><a href="client.ContextManager.html#get">get</a></li></ul></li><li><a href="client.Plugin.html">client.Plugin</a><ul class='methods'><li data-type='method'><a href="client.Plugin.html#onStateChange">onStateChange</a></li><li data-type='method'><a href="client.Plugin.html#propagateStateChange">propagateStateChange</a></li><li data-type='method'><a href="client.Plugin.html#start">start</a></li><li data-type='method'><a href="client.Plugin.html#stop">stop</a></li></ul></li><li><a href="client.PluginManager.html">client.PluginManager</a><ul class='methods'><li data-type='method'><a href="client.PluginManager.html#get">get</a></li><li data-type='method'><a href="client.PluginManager.html#onStateChange">onStateChange</a></li><li data-type='method'><a href="client.PluginManager.html#register">register</a></li></ul></li><li><a href="client.SharedState.html">client.SharedState</a><ul class='methods'><li data-type='method'><a href="client.SharedState.html#delete">delete</a></li><li data-type='method'><a href="client.SharedState.html#detach">detach</a></li><li data-type='method'><a href="client.SharedState.html#get">get</a></li><li data-type='method'><a href="client.SharedState.html#getDefaults">getDefaults</a></li><li data-type='method'><a href="client.SharedState.html#getInitValues">getInitValues</a></li><li data-type='method'><a href="client.SharedState.html#getSchema">getSchema</a></li><li data-type='method'><a href="client.SharedState.html#getValues">getValues</a></li><li data-type='method'><a href="client.SharedState.html#onDelete">onDelete</a></li><li data-type='method'><a href="client.SharedState.html#onDetach">onDetach</a></li><li data-type='method'><a href="client.SharedState.html#onUpdate">onUpdate</a></li><li data-type='method'><a href="client.SharedState.html#set">set</a></li></ul></li><li><a href="client.Socket.html">client.Socket</a><ul class='methods'><li data-type='method'><a href="client.Socket.html#addBinaryListener">addBinaryListener</a></li><li data-type='method'><a href="client.Socket.html#addListener">addListener</a></li><li data-type='method'><a href="client.Socket.html#removeAllBinaryListeners">removeAllBinaryListeners</a></li><li data-type='method'><a href="client.Socket.html#removeAllListeners">removeAllListeners</a></li><li data-type='method'><a href="client.Socket.html#removeBinaryListener">removeBinaryListener</a></li><li data-type='method'><a href="client.Socket.html#removeListener">removeListener</a></li><li data-type='method'><a href="client.Socket.html#send">send</a></li><li data-type='method'><a href="client.Socket.html#sendBinary">sendBinary</a></li><li data-type='method'><a href="client.Socket.html#terminate">terminate</a></li></ul></li><li><a href="client.StateManager.html">client.StateManager</a><ul class='methods'><li data-type='method'><a href="client.StateManager.html#attach">attach</a></li><li data-type='method'><a href="client.StateManager.html#create">create</a></li><li data-type='method'><a href="client.StateManager.html#observe">observe</a></li></ul></li><li><a href="server.Client.html">server.Client</a></li><li><a href="server.Context.html">server.Context</a><ul class='methods'><li data-type='method'><a href="server.Context.html#enter">enter</a></li><li data-type='method'><a href="server.Context.html#exit">exit</a></li><li data-type='method'><a href="server.Context.html#start">start</a></li><li data-type='method'><a href="server.Context.html#stop">stop</a></li></ul></li><li><a href="server.ContextManager.html">server.ContextManager</a></li><li><a href="server.Plugin.html">server.Plugin</a><ul class='methods'><li data-type='method'><a href="server.Plugin.html#addClient">addClient</a></li><li data-type='method'><a href="server.Plugin.html#onStateChange">onStateChange</a></li><li data-type='method'><a href="server.Plugin.html#propagateStateChange">propagateStateChange</a></li><li data-type='method'><a href="server.Plugin.html#removeClient">removeClient</a></li><li data-type='method'><a href="server.Plugin.html#start">start</a></li><li data-type='method'><a href="server.Plugin.html#stop">stop</a></li></ul></li><li><a href="server.PluginManager.html">server.PluginManager</a><ul class='methods'><li data-type='method'><a href="server.PluginManager.html#checkRegisteredPlugins">checkRegisteredPlugins</a></li></ul></li><li><a href="server.Server.html">server.Server</a><ul class='methods'><li data-type='method'><a href="server.Server.html#getAuditState">getAuditState</a></li><li data-type='method'><a href="server.Server.html#init">init</a></li><li data-type='method'><a href="server.Server.html#setCustomTemplateConfig">setCustomTemplateConfig</a></li><li data-type='method'><a href="server.Server.html#setDefaultTemplateConfig">setDefaultTemplateConfig</a></li><li data-type='method'><a href="server.Server.html#start">start</a></li><li data-type='method'><a href="server.Server.html#stop">stop</a></li></ul></li><li><a href="server.Socket.html">server.Socket</a><ul class='methods'><li data-type='method'><a href="server.Socket.html#addBinaryListener">addBinaryListener</a></li><li data-type='method'><a href="server.Socket.html#addListener">addListener</a></li><li data-type='method'><a href="server.Socket.html#addToRoom">addToRoom</a></li><li data-type='method'><a href="server.Socket.html#removeAllBinaryListeners">removeAllBinaryListeners</a></li><li data-type='method'><a href="server.Socket.html#removeAllListeners">removeAllListeners</a></li><li data-type='method'><a href="server.Socket.html#removeBinaryListener">removeBinaryListener</a></li><li data-type='method'><a href="server.Socket.html#removeFromRoom">removeFromRoom</a></li><li data-type='method'><a href="server.Socket.html#removeListener">removeListener</a></li><li data-type='method'><a href="server.Socket.html#send">send</a></li><li data-type='method'><a href="server.Socket.html#sendBinary">sendBinary</a></li></ul></li><li><a href="server.Sockets.html">server.Sockets</a><ul class='methods'><li data-type='method'><a href="server.Sockets.html#addToRoom">addToRoom</a></li><li data-type='method'><a href="server.Sockets.html#broadcast">broadcast</a></li><li data-type='method'><a href="server.Sockets.html#broadcastBinary">broadcastBinary</a></li><li data-type='method'><a href="server.Sockets.html#removeFromRoom">removeFromRoom</a></li><li data-type='method'><a href="server.Sockets.html#terminate">terminate</a></li></ul></li><li><a href="server.StateManager.html">server.StateManager</a><ul class='methods'><li data-type='method'><a href="server.StateManager.html#attach">attach</a></li><li data-type='method'><a href="server.StateManager.html#create">create</a></li><li data-type='method'><a href="server.StateManager.html#deleteSchema">deleteSchema</a></li><li data-type='method'><a href="server.StateManager.html#observe">observe</a></li><li data-type='method'><a href="server.StateManager.html#registerSchema">registerSchema</a></li><li data-type='method'><a href="server.StateManager.html#registerUpdateHook">registerUpdateHook</a></li></ul></li></ul>
+    <h2><a href="index.html">Home</a></h2><h2><a href="http://soundworks.dev/" target="_blank" class="menu-item" >General Documentation</a></h2><h2><a href="https://github.com/collective-soundworks/soundworks" target="_blank" class="menu-item" >Github</a></h2><h3>Namespaces</h3><ul><li><a href="client.html">client</a></li><li><a href="server.html">server</a></li></ul><h3>Classes</h3><ul><li><a href="client.Client.html">client.Client</a><ul class='methods'><li data-type='method'><a href="client.Client.html#getAuditState">getAuditState</a></li><li data-type='method'><a href="client.Client.html#init">init</a></li><li data-type='method'><a href="client.Client.html#start">start</a></li><li data-type='method'><a href="client.Client.html#stop">stop</a></li></ul></li><li><a href="client.Context.html">client.Context</a><ul class='methods'><li data-type='method'><a href="client.Context.html#enter">enter</a></li><li data-type='method'><a href="client.Context.html#exit">exit</a></li><li data-type='method'><a href="client.Context.html#start">start</a></li><li data-type='method'><a href="client.Context.html#stop">stop</a></li></ul></li><li><a href="client.ContextManager.html">client.ContextManager</a><ul class='methods'><li data-type='method'><a href="client.ContextManager.html#get">get</a></li></ul></li><li><a href="client.Plugin.html">client.Plugin</a><ul class='methods'><li data-type='method'><a href="client.Plugin.html#onStateChange">onStateChange</a></li><li data-type='method'><a href="client.Plugin.html#propagateStateChange">propagateStateChange</a></li><li data-type='method'><a href="client.Plugin.html#start">start</a></li><li data-type='method'><a href="client.Plugin.html#stop">stop</a></li></ul></li><li><a href="client.PluginManager.html">client.PluginManager</a><ul class='methods'><li data-type='method'><a href="client.PluginManager.html#get">get</a></li><li data-type='method'><a href="client.PluginManager.html#onStateChange">onStateChange</a></li><li data-type='method'><a href="client.PluginManager.html#register">register</a></li></ul></li><li><a href="client.SharedState.html">client.SharedState</a><ul class='methods'><li data-type='method'><a href="client.SharedState.html#delete">delete</a></li><li data-type='method'><a href="client.SharedState.html#detach">detach</a></li><li data-type='method'><a href="client.SharedState.html#get">get</a></li><li data-type='method'><a href="client.SharedState.html#getDefaults">getDefaults</a></li><li data-type='method'><a href="client.SharedState.html#getInitValues">getInitValues</a></li><li data-type='method'><a href="client.SharedState.html#getSchema">getSchema</a></li><li data-type='method'><a href="client.SharedState.html#getValues">getValues</a></li><li data-type='method'><a href="client.SharedState.html#onDelete">onDelete</a></li><li data-type='method'><a href="client.SharedState.html#onDetach">onDetach</a></li><li data-type='method'><a href="client.SharedState.html#onUpdate">onUpdate</a></li><li data-type='method'><a href="client.SharedState.html#set">set</a></li></ul></li><li><a href="client.Socket.html">client.Socket</a><ul class='methods'><li data-type='method'><a href="client.Socket.html#addBinaryListener">addBinaryListener</a></li><li data-type='method'><a href="client.Socket.html#addListener">addListener</a></li><li data-type='method'><a href="client.Socket.html#removeAllBinaryListeners">removeAllBinaryListeners</a></li><li data-type='method'><a href="client.Socket.html#removeAllListeners">removeAllListeners</a></li><li data-type='method'><a href="client.Socket.html#removeBinaryListener">removeBinaryListener</a></li><li data-type='method'><a href="client.Socket.html#removeListener">removeListener</a></li><li data-type='method'><a href="client.Socket.html#send">send</a></li><li data-type='method'><a href="client.Socket.html#sendBinary">sendBinary</a></li><li data-type='method'><a href="client.Socket.html#terminate">terminate</a></li></ul></li><li><a href="client.StateManager.html">client.StateManager</a><ul class='methods'><li data-type='method'><a href="client.StateManager.html#attach">attach</a></li><li data-type='method'><a href="client.StateManager.html#create">create</a></li><li data-type='method'><a href="client.StateManager.html#observe">observe</a></li></ul></li><li><a href="server.Client.html">server.Client</a></li><li><a href="server.Context.html">server.Context</a><ul class='methods'><li data-type='method'><a href="server.Context.html#enter">enter</a></li><li data-type='method'><a href="server.Context.html#exit">exit</a></li><li data-type='method'><a href="server.Context.html#start">start</a></li><li data-type='method'><a href="server.Context.html#stop">stop</a></li></ul></li><li><a href="server.ContextManager.html">server.ContextManager</a></li><li><a href="server.Plugin.html">server.Plugin</a><ul class='methods'><li data-type='method'><a href="server.Plugin.html#addClient">addClient</a></li><li data-type='method'><a href="server.Plugin.html#onStateChange">onStateChange</a></li><li data-type='method'><a href="server.Plugin.html#propagateStateChange">propagateStateChange</a></li><li data-type='method'><a href="server.Plugin.html#removeClient">removeClient</a></li><li data-type='method'><a href="server.Plugin.html#start">start</a></li><li data-type='method'><a href="server.Plugin.html#stop">stop</a></li></ul></li><li><a href="server.PluginManager.html">server.PluginManager</a><ul class='methods'><li data-type='method'><a href="server.PluginManager.html#checkRegisteredPlugins">checkRegisteredPlugins</a></li><li data-type='method'><a href="server.PluginManager.html#get">get</a></li><li data-type='method'><a href="server.PluginManager.html#onStateChange">onStateChange</a></li><li data-type='method'><a href="server.PluginManager.html#register">register</a></li></ul></li><li><a href="server.Server.html">server.Server</a><ul class='methods'><li data-type='method'><a href="server.Server.html#getAuditState">getAuditState</a></li><li data-type='method'><a href="server.Server.html#init">init</a></li><li data-type='method'><a href="server.Server.html#setCustomTemplateConfig">setCustomTemplateConfig</a></li><li data-type='method'><a href="server.Server.html#setDefaultTemplateConfig">setDefaultTemplateConfig</a></li><li data-type='method'><a href="server.Server.html#start">start</a></li><li data-type='method'><a href="server.Server.html#stop">stop</a></li></ul></li><li><a href="server.SharedState.html">server.SharedState</a><ul class='methods'><li data-type='method'><a href="server.SharedState.html#delete">delete</a></li><li data-type='method'><a href="server.SharedState.html#detach">detach</a></li><li data-type='method'><a href="server.SharedState.html#get">get</a></li><li data-type='method'><a href="server.SharedState.html#getDefaults">getDefaults</a></li><li data-type='method'><a href="server.SharedState.html#getInitValues">getInitValues</a></li><li data-type='method'><a href="server.SharedState.html#getSchema">getSchema</a></li><li data-type='method'><a href="server.SharedState.html#getValues">getValues</a></li><li data-type='method'><a href="server.SharedState.html#onDelete">onDelete</a></li><li data-type='method'><a href="server.SharedState.html#onDetach">onDetach</a></li><li data-type='method'><a href="server.SharedState.html#onUpdate">onUpdate</a></li><li data-type='method'><a href="server.SharedState.html#set">set</a></li></ul></li><li><a href="server.Socket.html">server.Socket</a><ul class='methods'><li data-type='method'><a href="server.Socket.html#addBinaryListener">addBinaryListener</a></li><li data-type='method'><a href="server.Socket.html#addListener">addListener</a></li><li data-type='method'><a href="server.Socket.html#addToRoom">addToRoom</a></li><li data-type='method'><a href="server.Socket.html#removeAllBinaryListeners">removeAllBinaryListeners</a></li><li data-type='method'><a href="server.Socket.html#removeAllListeners">removeAllListeners</a></li><li data-type='method'><a href="server.Socket.html#removeBinaryListener">removeBinaryListener</a></li><li data-type='method'><a href="server.Socket.html#removeFromRoom">removeFromRoom</a></li><li data-type='method'><a href="server.Socket.html#removeListener">removeListener</a></li><li data-type='method'><a href="server.Socket.html#send">send</a></li><li data-type='method'><a href="server.Socket.html#sendBinary">sendBinary</a></li></ul></li><li><a href="server.Sockets.html">server.Sockets</a><ul class='methods'><li data-type='method'><a href="server.Sockets.html#addToRoom">addToRoom</a></li><li data-type='method'><a href="server.Sockets.html#broadcast">broadcast</a></li><li data-type='method'><a href="server.Sockets.html#broadcastBinary">broadcastBinary</a></li><li data-type='method'><a href="server.Sockets.html#removeFromRoom">removeFromRoom</a></li><li data-type='method'><a href="server.Sockets.html#terminate">terminate</a></li></ul></li><li><a href="server.StateManager.html">server.StateManager</a><ul class='methods'><li data-type='method'><a href="server.StateManager.html#attach">attach</a></li><li data-type='method'><a href="server.StateManager.html#create">create</a></li><li data-type='method'><a href="server.StateManager.html#deleteSchema">deleteSchema</a></li><li data-type='method'><a href="server.StateManager.html#observe">observe</a></li><li data-type='method'><a href="server.StateManager.html#registerSchema">registerSchema</a></li><li data-type='method'><a href="server.StateManager.html#registerUpdateHook">registerUpdateHook</a></li></ul></li></ul>
 </nav>
 
 <div id="main">
     
-    <h1 class="page-title">common/SharedState.js</h1>
+    <h1 class="page-title">common/BaseSharedState.js</h1>
     
 
     
@@ -67,31 +67,21 @@ import {
   rejectRequest,
 } from './promise-store.js';
 
-/**
- * Representation of a shared state.
- *
- * @memberof server
- *
- * @see {server.StateManager}
- */
-/**
- * Representation of a shared state.
- *
- * @memberof client
- *
- * @see {client.StateManager}
- */
-class SharedState {
+class BaseSharedState {
   constructor(id, remoteId, schemaName, schema, client, isOwner, manager, initValues = {}) {
     this.id = id;
     this.remoteId = remoteId;
     this.schemaName = schemaName;
 
+    /** @private */
     this._isOwner = isOwner; // may be the server or any client
+    /** @private */
     this._client = client;
+    /** @private */
     this._manager = manager;
 
     try {
+      /** @private */
       this._parameters = new ParameterBag(schema, initValues);
     } catch(err) {
       console.error(err.stack);
@@ -100,8 +90,11 @@ class SharedState {
 ${JSON.stringify(initValues, null, 2)}`);
     }
 
+    /** @private */
     this._onUpdateCallbacks = new Set();
+    /** @private */
     this._onDetachCallbacks = new Set();
+    /** @private */
     this._onDeleteCallbacks = new Set();
 
     // add listener for state updates
@@ -197,6 +190,7 @@ ${JSON.stringify(initValues, null, 2)}`);
     }
   }
 
+  /** @private */
   _clearDetach() {
     this._onDetachCallbacks.clear();
     this._onDeleteCallbacks.clear();
@@ -208,6 +202,7 @@ ${JSON.stringify(initValues, null, 2)}`);
     };
   }
 
+  /** @private */
   _clearTransport() {
     // remove listeners
     this._client.transport.removeAllListeners(`${UPDATE_RESPONSE}-${this.id}-${this.remoteId}`);
@@ -299,14 +294,14 @@ ${JSON.stringify(initValues, null, 2)}`);
    * assert.deepEqual(updates, { myBool: true });
    * ```
    *
-   * @async
-   * @param {Object} updates - key / value pairs of updates to apply to the state.
-   * @param {Mixed} [context=null] - optionnal contextual object that will be propagated
+   * @param {object} updates - key / value pairs of updates to apply to the state.
+   * @param {mixed} [context=null] - optionnal contextual object that will be propagated
    *   alongside the updates of the state. The context is valid only for the
    *   current call and will be passed as third argument to all update listeners.
-   * @return {Promise&lt;Object>} A promise to the (coerced) updates.
-   *
-   * @see {common.SharedState~updateCallback}
+   * @returns {Promise&lt;Object>} A promise to the (coerced) updates.
+   * @example
+   * const state = await client.state.attach('globals');
+   * const updates = await state.set({ myParam: Math.random() });
    */
   async set(updates, context = null) {
     // handle immediate option
@@ -357,48 +352,63 @@ ${JSON.stringify(initValues, null, 2)}`);
   }
 
   /**
-   * Get a value of the state by its name
+   * Get the value of a paramter of the state.
    *
-   * @param {String} name - Name of the param. Throws an error if the name is invalid.
-   * @return {Mixed}
+   * @param {string} name - Name of the param.
+   * @throws Throws if `name` does not correspond to an existing field
+   *  of the state.
+   * @return {mixed}
+   * @example
+   * const value = state.get('name');
    */
   get(name) {
     return this._parameters.get(name);
   }
 
   /**
-   * Get a all the key / value pairs of the state.
+   * Get all the key / value pairs of the state.
    *
-   * @return {Object}
+   * @return {object}
+   * @example
+   * const values = state.getValues();
    */
   getValues() {
     return this._parameters.getValues();
   }
 
   /**
-   * Get the schema that describes the state.
+   * Get the schema from which the state has been created.
    *
-   * @param {String} [name=null] - If given, returns only the definition
-   *  of the given param name. Throws an error if the name is invalid.
-   * @return {Object}
+   * @param {string} [name=null] - If given, returns only the definition corresponding
+   *  to the given param name.
+   * @throws Throws if `name` does not correspond to an existing field
+   *  of the state.
+   * @return {object}
+   * @example
+   * const schema = state.getSchema();
    */
   getSchema(name = null) {
     return this._parameters.getSchema(name);
   }
 
   /**
-   * Get the values with which the state has been initialized.
+   * Get the values with which the state has been created. May defer from the
+   * default values declared in the schema.
    *
-   * @return {Object}
+   * @return {object}
+   * @example
+   * const initValues = state.getInitValues();
    */
   getInitValues() {
     return this._parameters.getInitValues();
   }
 
   /**
-   * Get the default values that has been declared in the schema.
+   * Get the default values as declared in the schema.
    *
-   * @return {Object}
+   * @return {object}
+   * @example
+   * const defaults = state.getDefaults();
    */
   getDefaults() {
     return this._parameters.getDefaults();
@@ -408,13 +418,10 @@ ${JSON.stringify(initValues, null, 2)}`);
    * Detach from the state. If the client is the creator of the state, the state
    * is deleted and all attached nodes get notified
    *
-   * @async
-   * @see {common.SharedState#onDetach}
-   * @see {common.SharedState#onDelete}
-   * @see {client.SharedStateManagerClient#create}
-   * @see {server.SharedStateManagerClient#create}
-   * @see {client.SharedStateManagerClient#attach}
-   * @see {server.SharedStateManagerClient#attach}
+   * @example
+   * const state = await client.state.attach('globals');
+   * // later
+   * await state.detach();
    */
   async detach() {
     this._onUpdateCallbacks.clear();
@@ -433,17 +440,17 @@ ${JSON.stringify(initValues, null, 2)}`);
   }
 
   /**
-   * Delete the state. Only the creator/owner of the state (i.e. a state created using
-   * `create`) can use this method. If a non-owner call this method (i.e. a
-   * state created using `attach`), an error will be thrown.
+   * Delete the state. Only the creator/owner of the state can use this method.
+   * All nodes attached to the state will be deteched, triggering the `onDetach`
+   * callback. The creator of the state will also have its `onDelete` callback
+   * triggered.
    *
-   * @async
-   * @see {common.SharedState#onDetach}
-   * @see {common.SharedState#onDelete}
-   * @see {client.SharedStateManagerClient#create}
-   * @see {server.SharedStateManagerClient#create}
-   * @see {client.SharedStateManagerClient#attach}
-   * @see {server.SharedStateManagerClient#attach}
+   * @throws Throws if the method is called by a node which is not the owner of
+   * the state.
+   * @example
+   * const state = await client.state.create('my-schema-name');
+   * // later
+   * await state.delete();
    */
   async delete() {
     if (this._isOwner) {
@@ -454,42 +461,24 @@ ${JSON.stringify(initValues, null, 2)}`);
   }
 
   /**
-   * @callback common.SharedState~updateCallback
-   * @param {Object} newValues - key / value pairs of the updates that have been
-   *  applied to the state.
-   * @param {Object} oldValues - key / value pairs of the updated params before
-   *  the updates has been applied to the state.
-   * @param {Mixed} [context=null] - Optionnal context object that has been passed
-   *  with the values updates in the `set` call.
+   * Subscribe to state updates.
    *
-   * @example
-   * state.onUpdate(async (newValues, oldValues[, context=null]) =>  {
-   *   for (let [key, value] of Object.entries(newValues)) {
-   *      switch (key) {
-   *        // do something
-   *      }
-   *   }
-   * });
-   *
-   * @see {common.SharedState#set}
-   * @see {common.SharedState#onUpdate}
-   */
-  /**
-   * Subscribe to state updates
-   *
-   * @param {common.SharedState~updateCallback} callback - callback to execute
-   *  when an update is applied on the state.
-   * @param {Boolean} [executeListener=false] - execute the given callback immediately
+   * @param {client.SharedState~onUpdateCallback|client.SharedState~onUpdateCallback} callback
+   *  Callback to execute when an update is applied on the state.
+   * @param {Boolean} [executeListener=false] - Execute the callback immediately
    *  with current state values. (`oldValues` will be set to `{}`, and `context` to `null`)
-   *
+   * @returns {client.SharedState~deleteOnUpdateCallback|server.SharedState~deleteOnUpdateCallback}
    * @example
-   * state.onUpdate(async (newValues, oldValues) =>  {
+   * const unsubscribe = state.onUpdate(async (newValues, oldValues, context) =>  {
    *   for (let [key, value] of Object.entries(newValues)) {
    *      switch (key) {
    *        // do something
    *      }
    *   }
    * });
+   *
+   * // later
+   * unsubscribe();
    */
   onUpdate(listener, executeListener = false) {
     this._onUpdateCallbacks.add(listener);
@@ -530,7 +519,7 @@ ${JSON.stringify(initValues, null, 2)}`);
   }
 }
 
-export default SharedState;
+export default BaseSharedState;
 </code></pre>
         </article>
     </section>
@@ -545,7 +534,7 @@ export default SharedState;
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.11</a> on Fri Dec 23 2022 18:52:12 GMT+0100 (Central European Standard Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.11</a> on Tue Dec 27 2022 12:37:44 GMT+0100 (Central European Standard Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>

@@ -27,22 +27,70 @@ const generateStateId = idGenerator();
 const generateRemoteId = idGenerator();
 
 /**
- * Component dedicated at managing distributed states among the application.
- * The `StateManager` extends the `StateManager` with
- * additionnal functionnalities to register schemas and handle clients.
+ * @callback server.StateManager~ObserveCallback
+ * @async
+ * @param {String} schemaName - name of the schema
+ * @param {Number} stateId - id of the state
+ * @param {Number} nodeId - id of the node that created the state
+ */
+
+/**
+ * The `StateManager` allows to create new {@link server.SharedState}s, or attach
+ * to {@link server.SharedState}s created by other nodes (clients or server). It
+ * can also track all the {@link server.SharedState}s created by other nodes.
  *
- * An instance of `StateManager` is automatically created by the
- * `soundworks.Server` at initialization (cf. {@link server.Server#stateManager}).
+ * An instance of `StateManager` is automatically created by the `soundworks.Server`
+ * at initialization (cf. {@link server.Server#stateManager}).
  *
- * Tutorial: [https://collective-soundworks.github.io/tutorials/state-manager.html](https://collective-soundworks.github.io/tutorials/state-manager.html)
+ * Compared to the {@link client.StateManager}, the `server.StateManager` can also
+ * create and delete schemas, as well as register update hook that are executed when
+ * a state is updated.
+ *
+ * See {@link server.Server#stateManager}
+ *
+ * Tutorial: {@link https://soundworks.dev/guide/state-manager.html}
+ *
+ * ```
+ * // server-side
+ * import { Server } from '@soundworks/server/index.js';
+ *
+ * const server = new Server(config);
+ * // declare and register the schema of a shared state.
+ * server.stateManager.registerSchema('some-global-state', {
+ *   myRandom: {
+ *     type: 'float',
+ *     default: 0,
+ *   }
+ * });
+ *
+ * await server.start();
+ *
+ * // create a global state server-side
+ * const globalState = await server.stateManager.create('some-global-state');
+ * // listen and react to the changes made by the clients
+ * globalState.onUpdate(updates => console.log(updates));
+ * ```
+ *
+ * ```
+ * // client-side
+ * import { Client } from '@soundworks/client.index.js';
+ *
+ * const client = new Client(config);
+ * await client.start();
+ *
+ * // attach to the global state created by the server
+ * const globalState = await client.stateManager.attach('some-global-state');
+ *
+ * // update the value of a `myRandom` parameter every seconds
+ * setInterval(() => {
+ *   globalState.set({ myRandom: Math.random() });
+ * }, 1000);
+ * ```
  *
  * @memberof server
  * @extends BaseStateManager
  * @inheritdoc
- *
- * @see {@link client.StateManager}
- * @see {@link server.SharedState}
- * @see {@link server.Server#stateManager}
+ * @hideconstructor
  */
 class StateManager extends BaseStateManager {
   constructor() {
