@@ -583,8 +583,6 @@ Invalid certificate files, please check your:
     });
 
     await this._dispatchStatus('stopped');
-
-    return Promise.resolve();
   }
 
   /**

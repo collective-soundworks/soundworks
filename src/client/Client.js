@@ -167,6 +167,8 @@ class Client {
     this.status = 'idle';
 
     /** @private */
+    this._onStatusChangeCallbacks = new Set();
+    /** @private */
     this._auditState = null;
 
     logger.configure(!!config.env.verbose);
@@ -258,9 +260,7 @@ class Client {
     // ------------------------------------------------------------
     await this.pluginManager.start();
 
-    this.status = 'inited';
-
-    return Promise.resolve();
+    await this._dispatchStatus('inited');
   }
 
   /**
@@ -296,7 +296,7 @@ class Client {
     // ------------------------------------------------------------
     await this.contextManager.start();
 
-    this.status = 'started';
+    await this._dispatchStatus('started');
   }
 
   /**
@@ -323,6 +323,8 @@ class Client {
     await this.contextManager.stop();
     await this.pluginManager.stop();
     await this.socket.terminate();
+
+    await this._dispatchStatus('stopped');
   }
 
   /**
@@ -351,6 +353,37 @@ class Client {
     }
 
     return this._auditState;
+  }
+
+  /**
+   * Listen for the status change ('inited', 'started', 'stopped') of the client.
+   *
+   * @param {Function} callback - Listener to the status change.
+   * @return {Function} Delete the listener.
+   */
+  onStatusChange(callback) {
+    this._onStatusChangeCallbacks.add(callback);
+
+    return () => this._onStatusChangeCallbacks.delete(callback);
+  }
+
+  /** @private */
+  async _dispatchStatus(status) {
+    this.status = status;
+
+    // if node target and launched in a child process, forward status to parent process
+    if (this.target === 'node' && process.send !== undefined) {
+      process.send(`soundworks:client:${status}`);
+    }
+
+    // execute all callbacks in parallel
+    const promises = [];
+
+    for (let callback of this._onStatusChangeCallbacks) {
+      promises.push(callback(status));
+    }
+
+    await Promise.all(promises);
   }
 }
 

@@ -468,7 +468,7 @@ describe('server::Server', () => {
     });
   });
 
-  describe('server.onStatusChange(function) - Events (inited, started, stopped)', () => {
+  describe('server.onStatusChange(state => {}) - state: (inited, started, stopped)', () => {
     let server;
 
     before(async () => {
