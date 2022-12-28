@@ -6,9 +6,9 @@
 
 Open-source creative coding framework for distributed applications based on Web technologies.
 
-Primarily focused on music, soundworks aims at supporting rapid development of real-time distributed applications using JavaScript. It provides abstractions to hide the complexity of the network and to foster very rapid-prototyping and trial-and-error workflows that are typical in artistic practices.
+Primarily focused on music, `soundworks` aims at supporting rapid development of real-time distributed applications using _JavaScript_. It provides abstractions to hide the complexity of the network and to foster very rapid-prototyping and trial-and-error workflows that are typical in artistic practices.
 
-*__WARNING: The version 4 of the `@soundworks/core` framework is under heavy development.__*
+*__WARNING: The version 4 of `@soundworks/core` is under heavy development.__*
 
 ## Getting Started
 
@@ -21,32 +21,32 @@ npx init @soundworks
 See [https://soundworks.dev/guides/getting-started.html](https://soundworks.dev/guides/getting-started.html) for more informations on the wizard and how to start with `soundworks`.
 
 <!--
-## General Documentation and Tutorial
+## Documentation
 
-[https://soundworks.dev](https://soundworks.dev)
-
-## API
-
-[https://soundworks.dev/api](https://soundworks.dev/api)
+- Guides and Tutorials: [https://soundworks.dev](https://soundworks.dev)
+- API: [https://soundworks.dev/api](https://soundworks.dev/api)
 -->
+
 ## API
 
-The API is not publicly published for now. To access the API documentation locally, just clone this repository and launch some http server in the docs directory. For example, using the [serve](https://www.npmjs.com/package/serve) package:
+The API is not publicly published for now. To access the API documentation locally, just clone this repository, go to the v4 branch and launch some http server in the docs directory. For example, using the [serve](https://www.npmjs.com/package/serve) package:
 
 ```sh
 git clone https://github.com/collective-soundworks/soundworks.git
-serve soundworks/docs
+cd soundworks
+git checkout v4
+serve docs
 ```
 
 ## TypeScript Support
 
 Basic TypeScript support will be proposed in a (hopefully) near future. 
 
-However, as we aim at following the TC39 and W3C specifications as close as possible, we will wait for the https://github.com/tc39/proposal-type-annotations proposal to reach stage 3 to update the source code in a more integrated manner.
+However, as we aim to follow the TC39 and W3C specifications as close as possible, we will wait for the https://github.com/tc39/proposal-type-annotations proposal to reach stage 3 to update the source code in a more integrated manner.
 
 ## Install
 
-Note that the `@soundworks/build` package is automatically installed when creating an application using the `@soundworks/create` wizard, so most of the time you should not have to install this package manually. See [https://soundworks.dev/guides/getting-started.html](https://soundworks.dev/guides/getting-started.html) for more informations on the `soundworks` wizard.
+Note that the `@soundworks/core` package is automatically installed when creating an application using the `@soundworks/create` wizard, so most of the time you should not have to install this package manually. See [https://soundworks.dev/guides/getting-started.html](https://soundworks.dev/guides/getting-started.html) for more informations on the `soundworks` wizard.
 
 ```
 npm install @soundworks/core
