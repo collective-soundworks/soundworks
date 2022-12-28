@@ -15,7 +15,7 @@ Primarily focused on music, `soundworks` aims at supporting rapid development of
 The best and most simple way to start using `soundworks` is to use the `@soundworks/create` wizard. 
 
 ```sh
-npx init @soundworks
+npx @soundworks/create@latest
 ```
 
 See [https://soundworks.dev/guides/getting-started.html](https://soundworks.dev/guides/getting-started.html) for more informations on the wizard and how to start with `soundworks`.
