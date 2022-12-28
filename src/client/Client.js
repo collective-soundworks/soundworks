@@ -337,7 +337,7 @@ class Client {
    *
    * The audit state is lazily attached to the client only if this method is called.
    *
-   * @returns {Promise<client.SharedState}
+   * @returns {Promise<client.SharedState>}
    * @throws Will throw if called before `client.init()`
    * @see {@link client.SharedState}
    * @example
