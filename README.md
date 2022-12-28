@@ -4,76 +4,57 @@
 
 ![soundworks-logo](./assets/logo-200x200.png)
 
-Open-source creative coding framework for distributed applications based on Web technologies
+Open-source creative coding framework for distributed applications based on Web technologies.
 
+Primarily focused on music, soundworks aims at supporting rapid development of real-time distributed applications using JavaScript. It provides abstractions to hide the complexity of the network and to foster very rapid-prototyping and trial-and-error workflows that are typical in artistic practices.
 
-@todo - review
+*__WARNING: The version 4 of the `@soundworks/core` framework is under heavy development.__*
 
-## Table of Contents
+## Getting Started
 
-<!-- toc -->
+The best and most simple way to start using `soundworks` is to use the `@soundworks/create` wizard. 
 
-- [Documentation](#documentation)
-- [API](#api)
-- [Overview](#overview)
-- [Installation](#installation)
-- [Application Template](#application-template)
-- [Academic Papers](#academic-papers)
-- [Credits](#credits)
-- [License](#license)
+```sh
+npx init @soundworks
+```
 
-<!-- tocstop -->
+See [https://soundworks.dev/guides/getting-started.html](https://soundworks.dev/guides/getting-started.html) for more informations on the wizard and how to start with `soundworks`.
 
-## Documentation
+<!--
+## General Documentation and Tutorial
 
 [https://soundworks.dev](https://soundworks.dev)
 
 ## API
 
 [https://soundworks.dev/api](https://soundworks.dev/api)
+-->
+## API
 
-To access the API documentation locally, just clone this repository and launch some http server in the docs directory. For example, using the [serve](https://www.npmjs.com/package/serve) package:
+The API is not publicly published for now. To access the API documentation locally, just clone this repository and launch some http server in the docs directory. For example, using the [serve](https://www.npmjs.com/package/serve) package:
 
 ```sh
 git clone https://github.com/collective-soundworks/soundworks.git
 serve soundworks/docs
 ```
 
-## Overview
+## TypeScript Support
 
-`soundworks` follows a client / server architecture where the server is written using [Node.js](https://nodejs.org/) and clients can be either regular browser clients or Node.js clients running for example on a Raspberry Pi.
+Basic TypeScript support will be proposed in a (hopefully) near future. 
 
-![high-level-architecture](./assets/high-level-architecture.png)
+However, as we aim at following the TC39 and W3C specifications as close as possible, we will wait for the https://github.com/tc39/proposal-type-annotations proposal to reach stage 3 to update the source code in a more integrated manner.
 
-The core of the framework is very minimal and dedicated at handling:
-  - Http(s) server and basic routing
-  - WebSockets initialization
-  - Processes initialization
-  - Distributed state management
+## Install
 
-`soundworks` can be extended with plugins to reuse common logic such as audio file loading, clock synchronisation, etc. Each plugin leaves in a separate repo for better modularity and to simplify version management.
-
-## Share w/ us
-
-https://github.com/collective-soundworks/soundworks/discussions/61
-
-## TypeScript
-
-@todo
-https://github.com/tc39/proposal-type-annotations
-
-## Installation
-
-_Note: most of the time you won't need to install `soundworks` manually, consider using the [application template](#application-template) instead._
+Note that the `@soundworks/build` package is automatically installed when creating an application using the `@soundworks/create` wizard, so most of the time you should not have to install this package manually. See [https://soundworks.dev/guides/getting-started.html](https://soundworks.dev/guides/getting-started.html) for more informations on the `soundworks` wizard.
 
 ```
 npm install @soundworks/core
 ```
 
-## Application Template
+## Share with Us
 
-The simplest way to start a new `soundworks` application is using the application template: 
-[https://github.com/collective-soundworks/soundworks-template](https://github.com/collective-soundworks/soundworks-template).
+If you made an application using `soundworks` please let us know here: https://github.com/collective-soundworks/soundworks/discussions/61
 
 ## Academic Papers
 
@@ -88,7 +69,7 @@ The simplest way to start a new `soundworks` application is using the applicatio
 
 Futher developments has been supported in the framework of:
 - The [RAPID-MIX project](http://rapidmix.goldsmithsdigital.com/), funded by the European Union’s Horizon 2020 research and innovation program
-- The Ircam project _BeCoMe_
+- The Ircam projects _BeCoMe_ and _SO(a)P_
 - The _Constella(c)tions_ residency of the STARTS program of the European Commission.
 
 Development is pursued, led by Benjamin Matuszewski, in the [Interaction Music Movement Team](https://www.stms-lab.fr/team/interaction-son-musique-mouvement/) from the Ircam's STMS-LAB.
