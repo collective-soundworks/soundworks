@@ -43,7 +43,7 @@
     "node": ">=16.0.0"
   },
   "scripts": {
-    "doc": "npm run jsdoc && npm run types",
+    "doc": "npm run jsdoc",
     "jsdoc": "rm -Rf docs && jsdoc -c .jsdoc.json --verbose && cp -R assets docs/",
     "lint": "npx eslint src",
     "test": "mocha",
