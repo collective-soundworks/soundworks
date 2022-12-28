@@ -1,8 +1,28 @@
 export default SharedState;
+export namespace server {
+    /**
+     * ~onUpdateCallback
+     */
+    type SharedState = (newValues: any, oldValues: any, context?: Mixed) => any;
+}
+/**
+ * @callback server.SharedState~onUpdateCallback
+ * @param {Object} newValues - Key / value pairs of the updates that have been
+ *  applied to the state.
+ * @param {Object} oldValues - Key / value pairs of the updated params before
+ *  the updates has been applied to the state.
+ * @param {Mixed} [context=null] - Optionnal context object that has been passed
+ *  with the values updates in the `set` call.
+ */
+/**
+ * Delete the registered {@link server.SharedState~onUpdateCallback}.
+ *
+ * @callback server.SharedState~deleteOnUpdateCallback
+ */
 /**
  * The `SharedState` is one of the most important and versatile abstraction provided
- * by *soundworks*. It represents a set of parameters that are synchronized accross
- * all the nodes of the application (clients and server) that declared some interest
+ * by `soundworks`. It represents a set of parameters that are synchronized accross
+ * every nodes of the application (clients and server) that declared some interest
  * to the shared state.
  *
  * A `SharedState` is created according to a "schema" (in the sense of a database
@@ -10,10 +30,12 @@ export default SharedState;
  * can be created from a single schema.
  *
  * A shared state can be created both by the clients or by the server (in which case
- * it is generally considered as a global state of the application) of the application.
- * Similarly any node of the application (clients or server) can declare interest and
- * "attach" to a state created by another node. All node attached to a state can modify
- * its values and/or react to the modifications applied by other nodes.
+ * it is generally considered as a global state of the application). Similarly any
+ * node of the application (clients or server) can declare interest and "attach" to
+ * a state created by another node. All node attached to a state can modify its values
+ * and/or react to the modifications applied by other nodes.
+ *
+ * Tutorial: {@link https://soundworks.dev/guide/state-manager.html}
  *
  * ```
  * // server-side

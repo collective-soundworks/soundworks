@@ -121,7 +121,7 @@ declare class Server {
     /** @private */
     private _applicationTemplateConfig;
     /** @private */
-    private _listeners;
+    private _onStatusChangeCallbacks;
     /** @private */
     private _auditState;
     /**
@@ -185,8 +185,7 @@ declare class Server {
      * @private
      */
     private createNamespacedDb;
-    addListener(channel: any, callback: any): void;
-    removeListener(channel: any, callback: any): void;
+    onStatusChange(callback: any): () => boolean;
     /** @private */
     private _dispatchStatus;
     /**

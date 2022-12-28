@@ -1,8 +1,8 @@
 export default Socket;
 /**
- * The Socket class is a simple wrapper built on top of `isomorphic-ws` socket,
- * that implements a pubsub interface. An instance of `Socket` is automatically
- * created by the `soundworks.Client`.
+ * The Socket class is a simple publish / subscribe wrapper built on top of the
+ * [isomorphic-ws](https://github.com/heineiuo/isomorphic-ws) library.
+ * An instance of `Socket` is automatically created by the `soundworks.Client`.
  *
  * _Important: In most cases, you should consider using a {@link client.SharedState} rather than
  * sending messages directly through the sockets._
@@ -16,9 +16,10 @@ export default Socket;
  * Both sockets re-emits all "native" ws events ('open', 'upgrade', 'close', 'error'
  *  and 'message'.
  *
+ * See {@link client.Client#socket}
+ *
  * @memberof client
- * @see {@link client.Client#socket}
- * @see https://github.com/heineiuo/isomorphic-ws
+ * @hideconstructor
  */
 declare class Socket {
     /**

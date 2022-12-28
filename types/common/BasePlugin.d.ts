@@ -3,21 +3,21 @@ export default BasePlugin;
  * @private
  */
 declare class BasePlugin {
+    constructor(id: any);
     /**
-     * @param {string} id - User-defined id of the plugin.
-     */
-    constructor(id: string);
-    /**
-     * User defined Id of the plugin.
+     * User defined ID of the plugin.
      *
      * @type {string}
+     * @see {@link client.PluginManager#register}
+     * @see {@link server.PluginManager#register}
      */
     id: string;
     /**
      * Type of the plugin, i.e. the ClassName.
      *
-     * Usefull to do something based on certain types of plugins while not
-     * knowing under which id they have been registered. (e.g. view for platform)
+     * Usefull to do perform some logic based on certain types of plugins without
+     * knowing under which `id` they have been registered. (e.g. creating some generic
+     * views, etc.)
      *
      * @type {string}
      * @readonly
@@ -30,13 +30,18 @@ declare class BasePlugin {
      */
     options: object;
     /**
-     * Internal local state of the plugin.
+     * Placeholder that stores internal (local) state of the plugin. The state
+     * should be modified through the `propagateStateChange` method to ensure
+     * the change to be properly propagated to `onStateChange` callbacks.
      *
      * @type {object}
-     * @see {@link BasePlugin.onStateChange}
-     * @see {@link BasePlugin.propagateStateChange}
+     * @protected
+     * @see {@link client.Plugin#onStateChange}
+     * @see {@link server.Plugin#onStateChange}
+     * @see {@link client.Plugin#propagateStateChange}
+     * @see {@link server.Plugin#propagateStateChange}
      */
-    state: object;
+    protected state: object;
     /**
      * Current status of the plugin, i.e. 'idle', 'inited', 'started', 'errored'
      *
@@ -46,15 +51,29 @@ declare class BasePlugin {
     /** @private */
     private _onStateChangeCallbacks;
     /**
-     * Start the plugin. This method is automatically called during the
-     * `pluginManager.start()` which is itself called during the `init` lifecyle step.
-     * After this point the plugin should be ready to use.
+     * Start the plugin. This method is automatically called during the client or
+     * server `init()` lifecyle step. After `start()` is fulfilled the plugin should
+     * be ready to use.
      *
      * @example
-     * class MyDummyPlugin extends Plugin {
+     * // server-side couterpart of a plugin that creates a dedicated global shared
+     * // state on which the server-side part can attach.
+     * class MyPlugin extends Plugin {
+     *   constructor(server, id) {
+     *     super(server, id);
+     *
+     *     this.server.stateManager.registerSchema(`my-plugin:${this.id}`, {
+     *       someParam: {
+     *         type: 'boolean',
+     *         default: false,
+     *       },
+     *       // ...
+     *     });
+     *   }
+     *
      *   async start() {
-     *     this.sharedState = await this.server.stateManager.create(`s:${this.id}`);
-     *     await new Promise(resolve => setTimeout(resolve, 1000));
+     *     await super.start()
+     *     this.sharedState = await this.server.stateManager.create(`my-plugin:${this.id}`);
      *   }
      *
      *   async stop() {
@@ -64,14 +83,29 @@ declare class BasePlugin {
      */
     start(): Promise<void>;
     /**
-     * Start the plugin. This method is automatically called during the
-     * `pluginManager.start()` which is itself called during the `init` lifecyle step.
+     * Stop the plugin. This method is automatically called during the client or server
+     * `stop()` lifecyle step.
      *
      * @example
-     * class MyDummyPlugin extends Plugin {
+     * // server-side couterpart of a plugin that creates a dedicated global shared
+     * // state on which the server-side part can attach.
+     * class MyPlugin extends Plugin {
+     *   constructor(server, id) {
+     *     super(server, id);
+     *
+     *     this.server.stateManager.registerSchema(`my-plugin:${this.id}`, {
+     *       someParam: {
+     *         type: 'boolean',
+     *         default: false,
+     *       },
+     *       // ...
+     *     });
+     *   }
+     *
      *   async start() {
-     *     this.sharedState = await this.server.stateManager.create(`s:${this.id}`);
-     *     await new Promise(resolve => setTimeout(resolve, 1000));
+     *     await super.start()
+     *     this.sharedState = await this.server.stateManager.create(`my-plugin:${this.id}`);
+     *     this.sharedState.onUpdate(updates => this.doSomething(updates));
      *   }
      *
      *   async stop() {
@@ -83,25 +117,28 @@ declare class BasePlugin {
     /**
      * Listen to the state changes propagated by {@link BasePlugin.propagateStateChange}
      *
-     * @param {Function} callback - Function to be executed when a state change is
-     *  propagated. The callback receives the plugin state as first argument.
-     * @returns {Function} - Remove the listener from the callback list when executed.
-     * @see {@link BasePlugin.propagateStateChange}
-     * @see {@link server.StateManaget#onStateChange}
+     * @param {client.Plugin~onStateChangeCallback|server.Plugin~onStateChangeCallback} callback -
+     *  Callback to execute when a state change is propagated.
+     * @returns {client.Plugin~deleteOnStateChangeCallback|server.Plugin~deleteOnStateChangeCallback}
+     *  Execute the function to delete the listener from the callback list.
+     * @see {@link client.Plugin#propagateStateChange}
+     * @see {@link server.Plugin#propagateStateChange}
      * @example
      * const unsubscribe = plugin.onStateChange(pluginState => console.log(pluginState));
      * // stop listening state changes
      * unsubscribe();
      */
-    onStateChange(callback: Function): Function;
+    onStateChange(callback: any): client.Plugin;
     /**
-     * Apply updates to the plugin {@link server.Plugin#state} and propagate the
-     * updated state to the listeners. The state changes will also be propagated
-     * to the {@link server.StateManaget#onStateChange} listeners.
+     * Apply updates to the plugin state and propagate the updated state to the
+     * `onStateChange` listeners. The state changes will also be propagated
+     * through the `PluginManager#onStateChange` listeners.
      *
      * @param {object} updates - Updates to be merged in the plugin state.
-     * @see {@link BasePlugin.onStateChange}
-     * @see {@link server.StateManaget#onStateChange}
+     * @see {@link client.Plugin#onStateChange}
+     * @see {@link server.Plugin#onStateChange}
+     * @see {@link client.PluginManager#onStateChange}
+     * @see {@link server.PluginManager#onStateChange}
      */
     propagateStateChange(updates: object): void;
 }

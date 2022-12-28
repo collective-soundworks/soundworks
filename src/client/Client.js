@@ -337,6 +337,7 @@ class Client {
    *
    * The audit state is lazily attached to the client only if this method is called.
    *
+   * @returns {Promise<client.SharedState}
    * @throws Will throw if called before `client.init()`
    * @see {@link client.SharedState}
    * @example
@@ -359,7 +360,7 @@ class Client {
    * Listen for the status change ('inited', 'started', 'stopped') of the client.
    *
    * @param {Function} callback - Listener to the status change.
-   * @return {Function} Delete the listener.
+   * @returns {Function} Delete the listener.
    */
   onStatusChange(callback) {
     this._onStatusChangeCallbacks.add(callback);
