@@ -31,6 +31,27 @@ import {
 
 let _dbNamespaces = new Set();
 
+/**
+ * Configuration object for the server.
+ *
+ * @typedef ServerConfig
+ * @memberof server
+ * @type {object}
+ * @property {object} [app] - Application configration object.
+ * @property {object} app.clients - Definition of the application clients.
+ * @property {string} [app.name=''] - Name of the application.
+ * @property {string} [app.author=''] - Name of the author.
+ * @property {object} [env] - Environment configration object.
+ * @property {boolean} env.port - Port on which the server is listening.
+ * @property {boolean} env.useHttps - Define is the server run in http or in https.
+ * @property {boolean} [env.httpsInfos={}] - Path to cert files for https.
+ * @property {boolean} env.serverAddress - Domain name or IP of the server.
+ *  Mandatory if node clients are defined
+ * @property {string} [env.websockets={}] - Configuration options for websockets.
+ * @property {string} [env.subpath=''] - If running behind a proxy, path to the application.
+ */
+
+/** @private */
 const DEFAULT_CONFIG = {
   env: {
     type: 'development',
@@ -74,50 +95,88 @@ function setTerminalTitle(server) {
 }
 
 /**
- * Server side entry point for a `soundworks` application.
+ * The `Server` class is the main entry point for the server-side of a soundworks
+ * application.
  *
- * This object hosts configuration informations, as well as methods to
- * initialize and start the application. It is also responsible for creating
- * the static file (http) server as well as the socket server.
+ * The `Server` instance allows to access soundworks components such as {@link server.StateManager},
+ * {@link server.PluginManager},{@link server.Socket} or {@link server.ContextManager}.
+ * Its is also responsible for handling the initialization lifecycles of the different
+ * soundworks components.
  *
- * @memberof server
- *
- * @param {server.ServerConfig} config
- * @example
+ * ```
  * import { Server } from '@soundworks/core/server';
+ *
  * const server = new Server({
  *   app: {
  *     name: 'my-example-app',
- *     clients: { myClient: { target: 'node' } },
+ *     clients: {
+ *       player: { target: 'browser', default: true },
+ *       controller: { target: 'browser' },
+ *       thing: { target: 'node' }
+ *     },
  *   },
  *   env: {
- *     port: 8888,
+ *     port: 8000,
  *   },
  * });
- * await server.init();
+ *
  * await server.start();
+ * ```
+ *
+ * According to the clients definitions provided in `config.app.clients`, the
+ * server will automatically create a dedicated route for each browser client role.
+ * For example, given the config object of the example above that defines two
+ * different client roles for browser targets (i.e. `player` and `controller`):
+ *
+ * ```
+ * config.app.clients = {
+ *   player: { target: 'browser', default: true },
+ *   controller: { target: 'browser' },
+ * }
+ * ```
+ *
+ * The server will listen to the following URLs:
+ * - `http://127.0.0.1:8000/` for the `player` role, which is defined as the default client.
+ * - `http://127.0.0.1:8000/controller` for the `controller` role.
+ *
+ * @memberof server
  */
 class Server {
+  /**
+   * @param {server.ServerConfig} config - Configuration object for the server.
+   * @throws
+   * - If `config.app.clients` is empty.
+   * - If a `node` client is defined but `config.env.serverAddress` is not defined.
+   * - if `config.env.useHttps` is `true` and `config.env.httpsInfos` is not `null`
+   *   (which generates self signed certificated), `config.env.httpsInfos.cert` and
+   *   `config.env.httpsInfos.key` should point to valid cert files.
+   */
   constructor(config) {
     if (!isPlainObject(config)) {
       throw new Error(`[soundworks:Server] Invalid argument for Server constructor, config should be an object`);
     }
     /**
-     * Configuration informations.
-     * Defaults to:
+     * Given config object merged with the following defaults:
      * ```
      * {
      *   env: {
      *     type: 'development',
      *     port: 8000,
-     *     subfolder: '',
+     *     serverAddress: null,
+     *     subpath: '',
+     *     websockets: {
+     *       path: 'socket',
+     *       pingInterval: 5000,
+     *     },
      *     useHttps: false,
      *     httpsInfos: null,
+     *     crossOriginIsolated: true,
+     *     verbose: true,
      *   },
      *   app: {
      *     name: 'soundworks',
      *     clients: {},
-     *   },
+     *   }
      * }
      * ```
      */
@@ -161,67 +220,90 @@ class Server {
     }
 
     /**
-     * Router. Internally use polka.
-     * (cf. {@link https://github.com/lukeed/polka})
+     * Instance of the express router.
+     *
+     * The router can be used to open new route, for example to expose a directory
+     * of static assets (in default soundworks applications only the `public` is exposed).
+     *
+     * @see {@link https://github.com/expressjs/express}
+     * @example
+     * import { Server } from '@soundworks/core/server.js';
+     * import express from 'express';
+     *
+     * // create the soundworks server instance
+     * const server = new Server(config);
+     *
+     * // expose assets located in the `soundfiles` directory on the network
+     * server.router.use('/soundfiles', express.static('soundfiles')));
      */
     this.router = express();
     // compression (must be set before serve-static)
     this.router.use(compression());
 
     /**
-     * Http(s) server instance. The node `http` or `https` module instance
-     * (cf. {@link https://nodejs.org/api/http.html})
+     * Raw Node.js `http` or `https` instance
+     *
+     * @see {@link https://nodejs.org/api/http.html}
+     * @see {@link https://nodejs.org/api/https.html}
      */
     this.httpServer = null;
 
     /**
-     * Key / value storage with Promise based Map API
-     * basically a wrapper around kvey (cf. {@link https://github.com/lukechilds/keyv})
-     * @private
-     */
-    this.db = this.createNamespacedDb('core');
-
-    /**
-     * The {@link server.Sockets} instance. A small wrapper around
-     * [`ws`](https://github.com/websockets/ws) server.
+     * Instance of the {@link server.Sockets} class.
+     *
      * @see {@link server.Sockets}
      * @type {server.Sockets}
      */
     this.sockets = new Sockets();
 
     /**
-     * The {@link server.PluginManager} instance.
+     * Instance of the {@link server.PluginManager} class.
+     *
      * @see {@link server.PluginManager}
      * @type {server.PluginManager}
      */
     this.pluginManager = new PluginManager(this);
 
     /**
-     * The {@link server.StateManager} instance.
+     * Instance of the {@link server.StateManager} class.
+     *
      * @see {@link server.StateManager}
      * @type {server.StateManager}
      */
     this.stateManager = new StateManager();
 
     /**
-     * The {@link server.ContextManager} instance.
+     * Instance of the {@link server.ContextManager} class.
      *
+     * @see {@link server.ContextManager}
+     * @type {server.ContextManager}
      */
     this.contextManager = new ContextManager(this);
 
     /**
-     * If https is required, will contain informations about the certificates
-     * (self-signed, validity dates, etc.)
+     * If `https` is required, hold informations about the certificates, e.g. if
+     * self-signed, the dates of validity of the certificates, etc.
      */
     this.httpsInfos = null;
 
     /**
-     * Current status of the server ['idle', 'inited', 'started']
+     * Status of the server, 'idle', 'inited', 'started' or 'errored'.
+     *
+     * @type {string}
      */
     this.status = 'idle';
 
+    /**
+     * Simple key / value database with Promise based Map API store on filesystem,
+     * basically a tiny wrapper around the `kvey` package.
+     *
+     * @private
+     * @see {@link https://github.com/lukechilds/keyv}
+     */
+    this.db = this.createNamespacedDb('core');
+
     /** @private */
-    this._applicationTemplateConfig = {
+    this._applicationTemplateOptions = {
       templateEngine: null,
       templatePath: null,
       clientConfigFunction: null,
@@ -232,7 +314,7 @@ class Server {
     /** @private */
     this._auditState = null;
 
-    // create audit state
+    // register audit state schema
     this.stateManager.registerSchema(AUDIT_STATE_NAME, auditSchema);
 
     logger.configure(this.config.env.verbose);
@@ -240,18 +322,21 @@ class Server {
   }
 
   /**
-   * Method to be called before `start` in the initialization lifecycle of the
-   * soundworks server. Note that if `init()`` is not explicitely called, `start()`
-   *  will call it implicitely.
+   * The `init` method is part of the initialization lifecycle of the `soundworks`
+   * server. Most of the time, the `init` method will be implicitly called by the
+   * {@link server.Server#start} method.
+   *
+   * In some situations you might want to call this method manually, in such cases
+   * the method should be called before the {@link server.Server#start} method.
    *
    * What it does:
    * - create the audit state
    * - prepapre http(s) server and routing according to the informations
    * declared in `config.app.clients`
-   * - starts all registered plugins
+   * - initialize all registered plugins
    *
-   * After `await server.init()`, you can safely use the StateManager, as well
-   * as any registered Plugins.
+   * After `await server.init()` is fulfilled, the {@link server.Server#stateManager}
+   * and all registered plugins can be safely used.
    *
    * @example
    * const server = new Server(config);
@@ -421,9 +506,9 @@ Invalid certificate files, please check your:
     }
 
     if (!nodeOnly) {
-      if (this._applicationTemplateConfig.templateEngine === null
-        || this._applicationTemplateConfig.templatePath === null
-        || this._applicationTemplateConfig.clientConfigFunction === null
+      if (this._applicationTemplateOptions.templateEngine === null
+        || this._applicationTemplateOptions.templatePath === null
+        || this._applicationTemplateOptions.clientConfigFunction === null
       ) {
         throw new Error('[soundworks:Server] A browser client has been found in "config.app.clients" but configuration for html templating is missing. You should probably call `server.setDefaultTemplateConfig()` if you use the soundworks-template and/or refer (at your own risks) to the documentation of `setCustomTemplateConfig()`');
       }
@@ -464,17 +549,23 @@ Invalid certificate files, please check your:
   }
 
   /**
-   * Method to be called when `init` step is done in the initialization
-   * lifecycle of the soundworks server. If `server.init()` has not been called
-   * explicitely, `server.start()` will call it automatically.
+   * The `start` method is part of the initialization lifecycle of the `soundworks`
+   * server. The `start` method will implicitly call the {@link server.Server#init}
+   * method if it has not been called manually.
    *
    * What it does:
-   * - starts all registered contexts (context are automatically registered
-   * when instantiated)
-   * - start the web socket server
-   * - launch the HTTP server on given port
+   * - implicitely call {@link server.Server#init} if not done manually
+   * - launch the HTTP and WebSocket servers
+   * - start all created contexts. To this end, you will have to call `server.init`
+   * manually and instantiate the contexts between `server.init()` and `server.start()`
    *
-   * After `await server.start()` the server is ready to accept incoming connexions
+   * After `await server.start()` the server is ready to accept incoming connections
+   *
+   * @example
+   * import { Server } from '@soundworks/core/server.js'
+   *
+   * const server = new Server(config);
+   * await server.start();
    */
   async start() {
     if (this.status === 'idle') {
@@ -562,10 +653,22 @@ Invalid certificate files, please check your:
     });
   }
 
-  // @todo - handle gracefull close of the server (but define what it means first...)
   /**
-   * Stop the server, close all existing WebSocket connections.
-   * Mainly usefull for test.
+   * Stops all started contexts, plugins, close all the socket connections and
+   * the http(s) server.
+   *
+   * In most situations, you might not need to call this method. However, it can
+   * be usefull for unit testing or similar situations where you want to create
+   * and delete several servers in the same process.
+   *
+   * @example
+   * import { Server } from '@soundworks/core/server.js'
+   *
+   * const server = new Server(config);
+   * await server.start();
+   *
+   * await new Promise(resolve => setTimeout(resolve, 1000));
+   * await server.stop();
    */
   async stop() {
     if (this.status !== 'started') {
@@ -608,7 +711,7 @@ Invalid certificate files, please check your:
       templatePath,
       templateEngine,
       clientConfigFunction,
-    } = this._applicationTemplateConfig;
+    } = this._applicationTemplateOptions;
 
     const clientTmpl = path.join(templatePath, `${role}.tmpl`);
     const defaultTmpl = path.join(templatePath, `default.tmpl`);
@@ -783,8 +886,8 @@ Invalid certificate files, please check your:
   }
 
   /**
-   * Configure the server to work out-of-the box with the soundworks-template
-   * directory tree structure.
+   * Configure the server to work _out-of-the-box_ within the soundworks application
+   * template provided by `@soundworks/create.
    *
    * - uses [template-literal](https://www.npmjs.com/package/template-literal) package
    * as html templateEngine
@@ -796,9 +899,12 @@ Invalid certificate files, please check your:
    * Also expose two public directory:
    * - the `public` directory which is exposed behind the root path
    * - the `./.build/public` directory which is exposed behind the `build` path
+   *
+   * _Note: except in very rare cases (so rare that they are quite difficult to imagine),
+   * you should rely on these defaults._
    */
-  setDefaultTemplateConfig() {
-    this._applicationTemplateConfig = {
+  useDefaultApplicationTemplate() {
+    this._applicationTemplateOptions = {
       templateEngine: { compile },
       templatePath: path.join('.build', 'server', 'tmpl'),
       clientConfigFunction: (role, config, _httpRequest) => {
@@ -822,20 +928,30 @@ Invalid certificate files, please check your:
   }
 
   /**
-   * Define your own template path, template engine, and clientConfig function.
-   * This method is for very advanced use-cases and only be used if you know what
-   * you are doing. As such its behavior could probably be improved a lot...
-   *
-   * If you end up using this, please contact me to explain your use-case :)
+   * Define custom template path, template engine, and clientConfig function.
+   * This method is proposed for very advanced use-cases and should very probably
+   * be improved. If you consider using this for some reason, please get in touch
+   * first to explain your use-case :)
    */
-  setCustomTemplateConfig(options) {
-    Object.assign(this._applicationTemplateConfig, options);
+  setCustomApplicationTemplateOptions(options) {
+    Object.assign(this._applicationTemplateOptions, options);
   }
 
   /**
-   * Get the global audit state of the application.
+   * Attach and retrieve the global audit state of the application.
    *
+   * The audit state is a {@link server.SharedState} instance that keeps track of
+   * global informations about the application such as, the number of connected
+   * clients, network latency estimation, etc.
+   *
+   * The audit state is created by the server on start up.
+   *
+   * @returns {Promise<server.SharedState>}
    * @throws Will throw if called before `server.init()`
+   * @see {@link server.SharedState}
+   * @example
+   * const auditState = await server.getAuditState();
+   * auditState.onUpdate(() => console.log(auditState.getValues()), true);
    */
   async getAuditState() {
     if (this.status === 'idle') {

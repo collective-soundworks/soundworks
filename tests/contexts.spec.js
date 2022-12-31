@@ -338,7 +338,31 @@ describe('Contexts', () => {
       await server.stop();
     });
 
-    it(`should throw if client type is not registered as a possible type for context`, async () => {
+    it(`roles filtering should be optionnal`, async () => {
+      // server
+      const server = new Server(config);
+      await server.start();
+
+      {
+        class TestContext extends ServerContext {};
+        const serverTestContext = new TestContext(server);
+      }
+      // client
+      const client = new Client({ role: 'test', ...config });
+      await client.start();
+
+      class TestContext extends ClientContext {};
+      const clientTestContext = new TestContext(client);
+
+      await clientTestContext.enter();
+
+      assert.ok('should not have thrown');
+
+      await client.stop();
+      await server.stop();
+    });
+
+    it(`if roles are defined, should throw if client role is not in list`, async () => {
       // server
       const server = new Server(config);
       await server.init();
@@ -354,8 +378,6 @@ describe('Contexts', () => {
 
       class TestContext extends ClientContext {};
       const clientTestContext = new TestContext(client);
-      class TestContext2 extends ClientContext {};
-      const clientTestContext2 = new TestContext2(client);
 
       await client.start();
 
@@ -368,6 +390,7 @@ describe('Contexts', () => {
       }
       if (!errored) { assert.fail('should have thrown'); }
 
+      await client.stop();
       await server.stop();
     });
   });

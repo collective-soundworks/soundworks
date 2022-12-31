@@ -57,6 +57,7 @@ class ContextCollection {
  * _WARNING: Most of the time, you should not have to manipulate the context manager directly._
  *
  * @memberof server
+ * @hideconstructor
  */
 class ContextManager {
   /**
@@ -91,10 +92,9 @@ class ContextManager {
   /**
    * Retrieve a started context from its name.
    *
-   * @see {server.Context#name}
-   * @param {String} contextName - Name of the context.
+   * _WARNING: Most of the time, you should not have to call this method manually._
    *
-   * @private
+   * @param {server.Context#name} contextName - Name of the context.
    */
   async get(contextName) {
     if (!this._contexts.has(contextName)) {
@@ -136,9 +136,8 @@ class ContextManager {
       if (!this._contexts.has(contextName)) {
         // create default context for all client types
         const ctor = createNamedContextClass(contextName);
-        const roles = Object.keys(this.server.config.app.clients);
         // this will automatically register the context in the context manager
-        new ctor(this.server, roles);
+        new ctor(this.server);
       }
 
       // we ensure context is started, even lazilly after server.start()

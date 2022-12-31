@@ -23,7 +23,7 @@ import Client from './Client.js';
  *
  * Plugins should always be registered both client-side and server-side,
  * and before {@link client.Client#start} or {@link server.Server#start}
- * are called for proper initialization.
+ * to be properly initialized.
  *
  * In some sitautions, you might want to register the same plugin factory several times
  * using different ids (e.g. for watching several parts of the file system, etc.).
@@ -35,16 +35,36 @@ import Client from './Client.js';
  * See {@link client.Client#pluginManager}
  *
  * ```
+ * // client-side
  * import { Client } from '@soundworks/core/client.js';
- * import platformPlugin from '@soundworks/plugin-sync/client.js';
+ * import syncPlugin from '@soundworks/plugin-sync/client.js';
  *
  * const client = new Client(config);
  * // register the plugin before `client.start()`
- * client.pluginManager.register('sync', pluginSync);
+ * client.pluginManager.register('sync', syncPlugin);
  *
  * await client.start();
  *
  * const sync = await client.pluginManager.get('sync');
+ *
+ * setInterval(() => {
+ *   // log the estimated global synced clock alongside the local clock.
+ *   console.log(sync.getSyncTime(), sync.getLocalTime());
+ * }, 1000);
+ * ```
+ *
+ * ```
+ * // server-side
+ * import { Server } from '@soundworks/core/server.js';
+ * import syncPlugin from '@soundworks/plugin-sync/server.js';
+ *
+ * const server = new Server(config);
+ * // register the plugin before `server.start()`
+ * server.pluginManager.register('sync', syncPlugin);
+ *
+ * await server.start();
+ *
+ * const sync = await server.pluginManager.get('sync');
  *
  * setInterval(() => {
  *   // log the estimated global synced clock alongside the local clock.
@@ -91,8 +111,8 @@ class PluginManager extends BasePluginManager {
    * initialization (e.g. to display initialization screen, etc.), you should rely
    * on the `onStateChange` method.
    *
-   * _Note: the async API is designed to enable the dynamic creation of plugins (hopefully
-   * without brealing changes) in a future release._
+   * _Note: the async API is designed to enable the dynamic creation of plugins
+   * (hopefully without brealing changes) in a future release._
    *
    * @param {client.Plugin#id} id - Id of the plugin as defined when registered.
    * @returns {client.Plugin}
@@ -105,18 +125,7 @@ class PluginManager extends BasePluginManager {
       throw new Error(`[soundworks.PluginManager] Cannot get plugin before "client.init()"`);
     }
 
-    return super.getUnsafe(id);
-  }
-
-  // client only methods
-  // ------------------------------------------------------------
-
-  /**
-   * @protected
-   * @ignore
-   */
-  getRegisteredPlugins() {
-    return Array.from(this._registeredPlugins.keys());
+    return super.unsafeGet(id);
   }
 }
 

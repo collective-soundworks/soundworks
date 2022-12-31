@@ -14,7 +14,8 @@ import BasePlugin from '../common/BasePlugin.js';
  */
 
 /**
- * Base class to extend in order to create new `soundworks` plugins.
+ * Base class to extend in order to create the server-side counterpart of a
+ * `soundworks` plugin.
  *
  * In the `soundworks` paradigm, a plugin is a component that allows to extend
  * the framework capabilities by encapsulating common and reusable logic in

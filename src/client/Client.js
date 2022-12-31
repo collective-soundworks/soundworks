@@ -14,7 +14,40 @@ import { isBrowser } from '../common/utils.js';
 import logger from '../common/logger.js';
 
 /**
- * The `Client` class is the main entry point for  the client-side of soundworks
+ * Configuration object for a client running in a browser runtime.
+ *
+ * @typedef BrowserClientConfig
+ * @memberof client
+ * @type {object}
+ * @property {string} role - Role of the client in the application (e.g. 'player', 'controller').
+ * @property {object} [app] - Application configration object.
+ * @property {string} [app.name=''] - Name of the application.
+ * @property {string} [app.author=''] - Name of the author.
+ * @property {object} [env] - Environment configration object.
+ * @property {string} [env.websockets={}] - Configuration options for websockets.
+ * @property {string} [env.subpath=''] - If running behind a proxy, path to the application.
+ */
+
+/**
+ * Configuration object for a client running in a node runtime.
+ *
+ * @typedef NodeClientConfig
+ * @memberof client
+ * @type {object}
+ * @property {string} role - Role of the client in the application (e.g. 'player', 'controller').
+ * @property {object} [app] - Application configration object.
+ * @property {string} [app.name=''] - Name of the application.
+ * @property {string} [app.author=''] - Name of the author.
+ * @property {object} env - Environment configration object.
+ * @property {boolean} env.serverAddress - Domain name or IP of the server.
+ * @property {boolean} env.useHttps - Define is the server run in http or in https.
+ * @property {boolean} env.port - Port on which the server is listening.
+ * @property {string} [env.websockets={}] - Configuration options for websockets.
+ * @property {string} [env.subpath=''] - If running behind a proxy, path to the application.
+ */
+
+/**
+ * The `Client` class is the main entry point for the client-side of a soundworks
  * application.
  *
  * A `Client` instance allows to access soundworks components such as {@link client.StateManager},
@@ -269,8 +302,9 @@ class Client {
    * method if it has not been called manually.
    *
    * What it does:
-   * - optionnaly call {@link client.Client#init}
-   * - starts all the already created contexts (see {@link client.Context})
+   * - implicitly call {@link client.Client#init} if not done manually
+   * - start all created contexts. For that to happen, you will have to call `client.init`
+   * manually and instantiate the contexts between `client.init()` and `client.start()`
    *
    * @example
    * import { Client } from '@soundworks/core/client.js'

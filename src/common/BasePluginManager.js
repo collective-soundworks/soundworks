@@ -76,6 +76,14 @@ class BasePluginManager {
   }
 
   /**
+   * Returns the list of the registered plugins ids
+   * @returns {string[]}
+   */
+  getRegisteredPlugins() {
+    return Array.from(this._registeredPlugins.keys());
+  }
+
+  /**
    * Initialize all the registered plugin. Executed during the `Client.init()` or
    * `Server.init()` initialization step.
    * @private
@@ -98,7 +106,7 @@ class BasePluginManager {
     // propagate all 'idle' statuses before start
     this._propagateStateChange();
 
-    const promises = Array.from(this._registeredPlugins.keys()).map(id => this.getUnsafe(id));
+    const promises = Array.from(this._registeredPlugins.keys()).map(id => this.unsafeGet(id));
 
     try {
       await Promise.all(promises);
@@ -109,6 +117,7 @@ class BasePluginManager {
     }
   }
 
+  /** @private */
   async stop() {
     for (let instance of this._instances.values()) {
       await instance.stop();
@@ -122,7 +131,7 @@ class BasePluginManager {
    *
    * @private
    */
-  async getUnsafe(id) {
+  async unsafeGet(id) {
     if (!isString(id)) {
       throw new Error(`[soundworks.PluginManager] Invalid argument, "pluginManager.get(name)" argument should be a string`);
     }
@@ -145,7 +154,7 @@ class BasePluginManager {
 
     // recursively get the dependency chain
     const { deps } = this._registeredPlugins.get(id);
-    const promises = deps.map(id => this.getUnsafe(id));
+    const promises = deps.map(id => this.unsafeGet(id));
 
     await Promise.all(promises);
 

@@ -2,18 +2,20 @@
 
 Welcome to the `@soundworks/core` API documentation
 
-## Install
+## Create new application
+
+To create a new application, you will probably prefer using the `@soundworks/create` wizard:
+
+```sh
+npx @soundworks/create@latest
+```
+
+## Manual Install
+
+But if you are advanturous, you can also install `soundworks` manually:
 
 ```sh
 npm install --save @soundworks/core
-```
-
-## Create new application
-
-To create a new application, you will probably prefer using the application wizard:
-
-```sh
-npm init @soundworks
 ```
 
 ## Other Links

@@ -44,7 +44,7 @@ serve docs
 
 Basic TypeScript support will be proposed in a (hopefully) near future. 
 
-However, as we aim to follow the TC39 and W3C specifications as close as possible, we will wait for the https://github.com/tc39/proposal-type-annotations proposal to reach stage 3 to update the source code in a more integrated manner.
+However, for maintenance reasons, we aim at following the TC39 and W3C specifications as close as possible. Therefore, we will wait for the https://github.com/tc39/proposal-type-annotations proposal to reach stage 3 to update the source code in a more integrated manner.
 
 ## Install
 

@@ -573,21 +573,21 @@ describe('server::Server', () => {
     });
   });
 
-  describe(`server.setDefaultTemplateConfig()`, () => {
-    it(`should populate server._applicationTemplateConfig`, () => {
+  describe(`server.useDefaultApplicationTemplate()`, () => {
+    it(`should populate server._applicationTemplateOptions`, () => {
       const server = new Server(config);
-      server.setDefaultTemplateConfig();
+      server.useDefaultApplicationTemplate();
 
-      assert.notEqual(server._applicationTemplateConfig.templateEngine, null);
-      assert.notEqual(server._applicationTemplateConfig.templatePath, null);
-      assert.notEqual(server._applicationTemplateConfig.clientConfigFunction, null);
+      assert.notEqual(server._applicationTemplateOptions.templateEngine, null);
+      assert.notEqual(server._applicationTemplateOptions.templatePath, null);
+      assert.notEqual(server._applicationTemplateOptions.clientConfigFunction, null);
     });
   });
 
-  describe(`server.setCustomTemplateConfig(options)`, () => {
-    it(`should override server._applicationTemplateConfig`, () => {
+  describe(`server.setCustomApplicationTemplateOptions(options)`, () => {
+    it(`should override server._applicationTemplateOptions`, () => {
       const server = new Server(config);
-      server.setDefaultTemplateConfig();
+      server.useDefaultApplicationTemplate();
       // returns the config to be sent to the client
       const clientConfigFunction = (role, config, httpRequest) => {
         return {
@@ -605,11 +605,11 @@ describe('server::Server', () => {
         }
       }
 
-      server.setCustomTemplateConfig({ clientConfigFunction });
+      server.setCustomApplicationTemplateOptions({ clientConfigFunction });
 
-      assert.notEqual(server._applicationTemplateConfig.templateEngine, null);
-      assert.notEqual(server._applicationTemplateConfig.templatePath, null);
-      assert.equal(server._applicationTemplateConfig.clientConfigFunction, clientConfigFunction);
+      assert.notEqual(server._applicationTemplateOptions.templateEngine, null);
+      assert.notEqual(server._applicationTemplateOptions.templatePath, null);
+      assert.equal(server._applicationTemplateOptions.clientConfigFunction, clientConfigFunction);
     });
   });
 
