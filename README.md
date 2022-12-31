@@ -73,7 +73,7 @@ Initial and futher developments has been supported by the following research pro
 
 - The [DOTS](http://dots.ircam.fr/) project, funded by the French National Research Agency (ANR)
 - The Ircam projects _BeCoMe_ and _SO(a)P_
-- The _Constella(c)tions_ residency, funded by STARTS program of the European Commission
+- The _Constella(c)tions_ residency, funded by the STARTS program of the European Commission
 - The [RAPID-MIX project](http://rapidmix.goldsmithsdigital.com/), funded by the European Union’s Horizon 2020 research and innovation program
 - The [CoSiMa](http://cosima.ircam.fr/) project, funded by the French National Research Agency (ANR)
 
