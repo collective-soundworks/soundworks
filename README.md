@@ -43,6 +43,10 @@ serve docs
 
 Feel welcome to open an [issue](https://github.com/collective-soundworks/soundworks/issues) or a PR if you find any inconsistency, error or missing information in the documentation.
 
+## Share with Us
+
+If you made an application using `soundworks` please let us know here: https://github.com/collective-soundworks/soundworks/discussions/61
+
 ## TypeScript Support
 
 Basic TypeScript support will be proposed in a (hopefully) near future. 
@@ -57,27 +61,28 @@ Note that the `@soundworks/core` package is automatically installed when creatin
 npm install @soundworks/core
 ```
 
-## Share with Us
+## Credits
 
-If you made an application using `soundworks` please let us know here: https://github.com/collective-soundworks/soundworks/discussions/61
+`soundworks` has been initiated by [Norbert Schnell](https://github.com/NorbertSchnell), [Sébastien Robaszkiewicz](https://github.com/i-Robi), and [Benjamin Matuszewski](https://github.com/b-ma) at the [ISMM](http://ismm.ircam.fr/) team at [Ircam - Centre Pompidou](http://www.ircam.fr/) in the context of the [CoSiMa](http://cosima.ircam.fr/) research project founded by the French National Research Agency (ANR).
 
-## Academic Papers
+Development is now led by Benjamin Matuszewski, in the [Sound Music Movement Interaction Team](https://www.stms-lab.fr/team/interaction-son-musique-mouvement/) from the Ircam's STMS-LAB.
+
+### Supporting Research Projects
+
+Initial and futher developments has been supported by the following research projects:
+
+- The [DOTS](http://cosima.ircam.fr/) research project supported by the French National Research Agency (ANR)
+- The Ircam projects _BeCoMe_ and _SO(a)P_
+- The _Constella(c)tions_ residency of the STARTS program of the European Commission.
+- The [RAPID-MIX project](http://rapidmix.goldsmithsdigital.com/), funded by the European Union’s Horizon 2020 research and innovation program (H2020)
+- The [CoSiMa](http://cosima.ircam.fr/) research project supported by the French National Research Agency (ANR)
+
+### Academic Papers
 
 - Benjamin Matuszewski. A Web-Based Framework for Distributed Music System Research and Creation. AES - Journal of the Audio Engineering Society Audio-Accoustics-Application, Audio Engineering Society Inc, 2020. <[hal-03033143](https://hal.archives-ouvertes.fr/hal-03033143)>
 - Benjamin Matuszewski. Soundworks - A Framework for Networked Music Systems on the Web - State of Affairs and New Developments. Proceedings of the Web Audio Conference (WAC) 2019, Dec 2019, Trondheim, Norway. <[hal-02387783](https://hal.archives-ouvertes.fr/hal-02387783)>
 - Benjamin Matuszewski, Norbert Schnell, Frédéric Bevilacqua. Interaction Topologies in Mobile-Based Situated Networked Music Systems. Wireless Communications and Mobile Computing, Hindawi Publishing Corporation, 2019, 2019, pp.9142490. ⟨10.1155/2019/9142490⟩. <[hal-02086673](https://hal.archives-ouvertes.fr/hal-02086673)>
 - Norbert Schnell, Sébastien Robaszkiewicz. Soundworks – A playground for artists and developers to create collaborative mobile web performances. `Proceedings of the Web Audio Conference (WAC'15), 2015, Paris, France. <[hal-01580797](https://hal.archives-ouvertes.fr/hal-01580797)>
-
-## Credits
-
-`soundworks` has been initiated by [Norbert Schnell](https://github.com/NorbertSchnell), [Sébastien Robaszkiewicz](https://github.com/i-Robi), and [Benjamin Matuszewski](https://github.com/b-ma) at the [ISMM](http://ismm.ircam.fr/) team at [Ircam - Centre Pompidou](http://www.ircam.fr/) in the framework of the [*CoSiMa*](http://cosima.ircam.fr/) research project supported by the [French National Research Agency (ANR)](http://www.agence-nationale-recherche.fr/en/).
-
-Futher developments has been supported in the framework of:
-- The [RAPID-MIX project](http://rapidmix.goldsmithsdigital.com/), funded by the European Union’s Horizon 2020 research and innovation program
-- The Ircam projects _BeCoMe_ and _SO(a)P_
-- The _Constella(c)tions_ residency of the STARTS program of the European Commission.
-
-Development is pursued, led by Benjamin Matuszewski, in the [Sound Music Movement Interaction Team](https://www.stms-lab.fr/team/interaction-son-musique-mouvement/) from the Ircam's STMS-LAB.
 
 ## License
 
