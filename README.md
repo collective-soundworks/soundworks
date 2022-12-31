@@ -41,6 +41,8 @@ git checkout v4
 serve docs
 ```
 
+Feel welcome to open an [issue](https://github.com/collective-soundworks/soundworks/issues) or a PR if you find any inconsistency, error or missing information in the documentation.
+
 ## TypeScript Support
 
 Basic TypeScript support will be proposed in a (hopefully) near future. 
