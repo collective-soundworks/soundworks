@@ -71,7 +71,7 @@ Development is now led by Benjamin Matuszewski, in the [Sound Music Movement Int
 
 Initial and futher developments has been supported by the following research projects:
 
-- The [DOTS](http://cosima.ircam.fr/) research project supported by the French National Research Agency (ANR)
+- The [DOTS](http://dots.ircam.fr/) research project supported by the French National Research Agency (ANR)
 - The Ircam projects _BeCoMe_ and _SO(a)P_
 - The _Constella(c)tions_ residency of the STARTS program of the European Commission.
 - The [RAPID-MIX project](http://rapidmix.goldsmithsdigital.com/), funded by the European Union’s Horizon 2020 research and innovation program (H2020)
