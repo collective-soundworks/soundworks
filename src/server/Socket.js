@@ -351,7 +351,7 @@ class Socket {
    * Send binary messages on a given channel.
    *
    * @param {string} channel - Channel name.
-   * @param {TypedArray} args - Binary data to be sent.
+   * @param {TypedArray} typedArray - Binary data to be sent.
    */
   sendBinary(channel, typedArray) {
     const msg = packBinaryMessage(channel, typedArray);
