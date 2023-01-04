@@ -616,7 +616,7 @@ globally shared states owned by the server).</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="server_StateManager.js.html">server/StateManager.js</a>, <a href="server_StateManager.js.html#line324">line 324</a>
+        <a href="server_StateManager.js.html">server/StateManager.js</a>, <a href="server_StateManager.js.html#line523">line 523</a>
     </li></ul></dd>
     
 
@@ -656,8 +656,8 @@ globally shared states owned by the server).</p></td>
 
 
 <div class="description usertext">
-    <p>Delete a schema and all associated states.
-When a schema is deleted, all states created from this schema are deleted
+    <p>Delete a schema and all associated states.</p>
+<p>When a schema is deleted, all states created from this schema are deleted
 as well, therefore all attached clients are detached and the <code>onDetach</code>
 and <code>onDelete</code> callbacks are called on the related states.</p>
 </div>
@@ -703,7 +703,7 @@ and <code>onDelete</code> callbacks are called on the related states.</p>
             <td class="type">
             
                 
-<span class="param-type">String</span>
+<span class="param-type">string</span>
 
 
             
@@ -945,7 +945,7 @@ allows to stop observing the network.</li>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="server_StateManager.js.html">server/StateManager.js</a>, <a href="server_StateManager.js.html#line304">line 304</a>
+        <a href="server_StateManager.js.html">server/StateManager.js</a>, <a href="server_StateManager.js.html#line502">line 502</a>
     </li></ul></dd>
     
 
@@ -1055,7 +1055,7 @@ can be instanciated.</p>
             <td class="type">
             
                 
-<span class="param-type">String</span>
+<span class="param-type">string</span>
 
 
             
@@ -1078,7 +1078,7 @@ can be instanciated.</p>
             <td class="type">
             
                 
-<span class="param-type">server.StateManager~schema</span>
+<span class="param-type"><a href="server.StateManager.html#~schema">server.StateManager~schema</a></span>
 
 
             
@@ -1131,7 +1131,7 @@ describing the states that will be created from this schema.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="server_StateManager.js.html">server/StateManager.js</a>, <a href="server_StateManager.js.html#line396">line 396</a>
+        <a href="server_StateManager.js.html">server/StateManager.js</a>, <a href="server_StateManager.js.html#line595">line 595</a>
     </li></ul></dd>
     
 
@@ -1243,7 +1243,7 @@ assert.deepEqual(result, { name: 'test', numUpdates: 1 });</code></pre>
             <td class="type">
             
                 
-<span class="param-type">String</span>
+<span class="param-type">string</span>
 
 
             
@@ -1347,7 +1347,7 @@ called between the <code>set</code> call and the actual update.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="server_StateManager.js.html">server/StateManager.js</a>, <a href="server_StateManager.js.html#line29">line 29</a>
+        <a href="server_StateManager.js.html">server/StateManager.js</a>, <a href="server_StateManager.js.html#line227">line 227</a>
     </li></ul></dd>
     
 
@@ -1427,7 +1427,7 @@ called between the <code>set</code> call and the actual update.</p></td>
             <td class="type">
             
                 
-<span class="param-type">String</span>
+<span class="param-type">string</span>
 
 
             
@@ -1450,7 +1450,7 @@ called between the <code>set</code> call and the actual update.</p></td>
             <td class="type">
             
                 
-<span class="param-type">Number</span>
+<span class="param-type">number</span>
 
 
             
@@ -1473,7 +1473,7 @@ called between the <code>set</code> call and the actual update.</p></td>
             <td class="type">
             
                 
-<span class="param-type">Number</span>
+<span class="param-type">number</span>
 
 
             
@@ -1510,6 +1510,2536 @@ called between the <code>set</code> call and the actual update.</p></td>
 
             
                 
+<h4 class="name" id="~schema">schema</h4>
+
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="server_StateManager.js.html">server/StateManager.js</a>, <a href="server_StateManager.js.html#line29">line 29</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description usertext">
+    <p>Description of a schema to be registered by the <a href="server.StateManager.html#registerSchema">server.StateManager#registerSchema</a></p>
+<p>A schema is the blueprint, or definition from which shared states can be created.</p>
+<p>It consists of a set of key / value pairs where the key is the name of
+the parameter, and the value is an object describing the parameter.</p>
+<p>The value can be of any of the foolowing types:</p>
+<ul>
+<li><a href="server.StateManager.html#~schemaBooleanDefinition">server.StateManager~schemaBooleanDefinition</a></li>
+<li><a href="server.StateManager.html#~schemaStringDefinition">server.StateManager~schemaStringDefinition</a></li>
+<li><a href="server.StateManager.html#~schemaIntegerDefinition">server.StateManager~schemaIntegerDefinition</a></li>
+<li><a href="server.StateManager.html#~schemaFloatDefinition">server.StateManager~schemaFloatDefinition</a></li>
+<li><a href="server.StateManager.html#~schemaEnumDefinition">server.StateManager~schemaEnumDefinition</a></li>
+<li><a href="server.StateManager.html#~schemaAnyDefinition">server.StateManager~schemaAnyDefinition</a></li>
+</ul>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">object</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>const mySchema = {
+  triggerSound: {
+    type: 'boolean',
+    event: true,
+  },
+  volume: {
+    type: 'float'
+    default: 0,
+    min: -80,
+    max: 6,
+  }
+};
+
+server.stateManager.registerSchema('my-schema-name', mySchema);</code></pre>
+
+
+
+            
+                
+<h4 class="name" id="~schemaAnyDefinition">schemaAnyDefinition</h4>
+
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="server_StateManager.js.html">server/StateManager.js</a>, <a href="server_StateManager.js.html#line198">line 198</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>type</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>'any'</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Parameter of any type.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>default</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">*</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>Default value of the parameter.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>nullable</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>false</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Define if the parameter is nullable. If
+set to <code>true</code> the parameter <code>default</code> is set to <code>null</code>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>event</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>false</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Define if the parameter is a volatile, e.g.
+set its value back to <code>null</code> after propagation. When <code>true</code>, <code>nullable</code> is
+automatically set to <code>true</code> and <code>default</code> to <code>null</code>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>filterChange</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>true</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Setting this option to <code>false</code> forces
+the propagation of a parameter even when its value do not change. It
+offers a kind of middle ground between the default bahavior (e.g. where
+only changed values are propagated) and the behavior of the <code>event</code> option
+(which has no state per se). As such, setting this options to <code>false</code> if
+<code>event=true</code> does not make sens.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>immediate</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>false</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Setting this option to <code>true</code> will
+trigger any change (e.g. call the <code>onUpdate</code> listeners) immediately on the
+state that generate the update (i.e. calling <code>set</code>), before propagating the
+change on the network. This option can be usefull in cases the network
+would introduce a noticeable latency on the client. If for some reason
+the value is overriden server-side (e.g. in an <code>updateHook</code>) the listeners
+will be called again on when the &quot;real&quot; / final value will be received.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>metas</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>{}</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Optionnal metadata of the parameter.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<div class="description usertext">
+    <p>Describe a <a href="server.StateManager.html#~schema">server.StateManager~schema</a> entry of &quot;any&quot; type.</p>
+<p>Note that the <code>any</code> type always return a shallow copy of the state internal
+value. Mutating the returned value will therefore not modify the internal state.</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">object</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+
+            
+                
+<h4 class="name" id="~schemaBooleanDefinition">schemaBooleanDefinition</h4>
+
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="server_StateManager.js.html">server/StateManager.js</a>, <a href="server_StateManager.js.html#line63">line 63</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>type</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>'boolean'</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Define a boolean parameter.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>default</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>Default value of the parameter.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>nullable</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>false</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Define if the parameter is nullable. If
+set to <code>true</code> the parameter <code>default</code> is set to <code>null</code>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>event</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>false</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Define if the parameter is a volatile, e.g.
+set its value back to <code>null</code> after propagation. When <code>true</code>, <code>nullable</code> is
+automatically set to <code>true</code> and <code>default</code> to <code>null</code>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>filterChange</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>true</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Setting this option to <code>false</code> forces
+the propagation of a parameter even when its value do not change. It
+offers a kind of middle ground between the default bahavior (e.g. where
+only changed values are propagated) and the behavior of the <code>event</code> option
+(which has no state per se). As such, setting this options to <code>false</code> if
+<code>event=true</code> does not make sens.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>immediate</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>false</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Setting this option to <code>true</code> will
+trigger any change (e.g. call the <code>onUpdate</code> listeners) immediately on the
+state that generate the update (i.e. calling <code>set</code>), before propagating the
+change on the network. This option can be usefull in cases the network
+would introduce a noticeable latency on the client. If for some reason
+the value is overriden server-side (e.g. in an <code>updateHook</code>) the listeners
+will be called again on when the &quot;real&quot; / final value will be received.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>metas</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>{}</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Optionnal metadata of the parameter.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<div class="description usertext">
+    <p>Describe a <a href="server.StateManager.html#~schema">server.StateManager~schema</a> entry of &quot;boolean&quot; type.</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">object</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+
+            
+                
+<h4 class="name" id="~schemaEnumDefinition">schemaEnumDefinition</h4>
+
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="server_StateManager.js.html">server/StateManager.js</a>, <a href="server_StateManager.js.html#line171">line 171</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>type</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>'enum'</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Enum parameter.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>default</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>Default value of the parameter.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>list</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>Possible values of the parameter.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>nullable</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>false</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Define if the parameter is nullable. If
+set to <code>true</code> the parameter <code>default</code> is set to <code>null</code>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>event</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>false</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Define if the parameter is a volatile, e.g.
+set its value back to <code>null</code> after propagation. When <code>true</code>, <code>nullable</code> is
+automatically set to <code>true</code> and <code>default</code> to <code>null</code>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>filterChange</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>true</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Setting this option to <code>false</code> forces
+the propagation of a parameter even when its value do not change. It
+offers a kind of middle ground between the default bahavior (e.g. where
+only changed values are propagated) and the behavior of the <code>event</code> option
+(which has no state per se). As such, setting this options to <code>false</code> if
+<code>event=true</code> does not make sens.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>immediate</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>false</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Setting this option to <code>true</code> will
+trigger any change (e.g. call the <code>onUpdate</code> listeners) immediately on the
+state that generate the update (i.e. calling <code>set</code>), before propagating the
+change on the network. This option can be usefull in cases the network
+would introduce a noticeable latency on the client. If for some reason
+the value is overriden server-side (e.g. in an <code>updateHook</code>) the listeners
+will be called again on when the &quot;real&quot; / final value will be received.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>metas</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>{}</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Optionnal metadata of the parameter.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<div class="description usertext">
+    <p>Describe a <a href="server.StateManager.html#~schema">server.StateManager~schema</a> entry of &quot;enum&quot; type.</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">object</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+
+            
+                
+<h4 class="name" id="~schemaFloatDefinition">schemaFloatDefinition</h4>
+
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="server_StateManager.js.html">server/StateManager.js</a>, <a href="server_StateManager.js.html#line143">line 143</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>type</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>'float'</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Float parameter.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>default</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>Default value.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>min</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>-Infinity</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Minimum value.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>max</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>+Infinity</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Maximum value.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>nullable</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>false</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Define if the parameter is nullable. If
+set to <code>true</code> the parameter <code>default</code> is set to <code>null</code>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>event</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>false</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Define if the parameter is a volatile, e.g.
+set its value back to <code>null</code> after propagation. When <code>true</code>, <code>nullable</code> is
+automatically set to <code>true</code> and <code>default</code> to <code>null</code>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>filterChange</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>true</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Setting this option to <code>false</code> forces
+the propagation of a parameter even when its value do not change. It
+offers a kind of middle ground between the default bahavior (e.g. where
+only changed values are propagated) and the behavior of the <code>event</code> option
+(which has no state per se). As such, setting this options to <code>false</code> if
+<code>event=true</code> does not make sens.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>immediate</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>false</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Setting this option to <code>true</code> will
+trigger any change (e.g. call the <code>onUpdate</code> listeners) immediately on the
+state that generate the update (i.e. calling <code>set</code>), before propagating the
+change on the network. This option can be usefull in cases the network
+would introduce a noticeable latency on the client. If for some reason
+the value is overriden server-side (e.g. in an <code>updateHook</code>) the listeners
+will be called again on when the &quot;real&quot; / final value will be received.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>metas</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>{}</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Optionnal metadata of the parameter.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<div class="description usertext">
+    <p>Describe a <a href="server.StateManager.html#~schema">server.StateManager~schema</a> entry of &quot;float&quot; type.</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">object</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+
+            
+                
+<h4 class="name" id="~schemaIntegerDefinition">schemaIntegerDefinition</h4>
+
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="server_StateManager.js.html">server/StateManager.js</a>, <a href="server_StateManager.js.html#line115">line 115</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>type</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>'integer'</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Define a boolean parameter.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>default</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>Default value of the parameter.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>min</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>-Infinity</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Minimum value of the parameter.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>max</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>+Infinity</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Maximum value of the parameter.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>nullable</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>false</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Define if the parameter is nullable. If
+set to <code>true</code> the parameter <code>default</code> is set to <code>null</code>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>event</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>false</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Define if the parameter is a volatile, e.g.
+set its value back to <code>null</code> after propagation. When <code>true</code>, <code>nullable</code> is
+automatically set to <code>true</code> and <code>default</code> to <code>null</code>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>filterChange</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>true</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Setting this option to <code>false</code> forces
+the propagation of a parameter even when its value do not change. It
+offers a kind of middle ground between the default bahavior (e.g. where
+only changed values are propagated) and the behavior of the <code>event</code> option
+(which has no state per se). As such, setting this options to <code>false</code> if
+<code>event=true</code> does not make sens.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>immediate</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>false</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Setting this option to <code>true</code> will
+trigger any change (e.g. call the <code>onUpdate</code> listeners) immediately on the
+state that generate the update (i.e. calling <code>set</code>), before propagating the
+change on the network. This option can be usefull in cases the network
+would introduce a noticeable latency on the client. If for some reason
+the value is overriden server-side (e.g. in an <code>updateHook</code>) the listeners
+will be called again on when the &quot;real&quot; / final value will be received.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>metas</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>{}</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Optionnal metadata of the parameter.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<div class="description usertext">
+    <p>Describe a <a href="server.StateManager.html#~schema">server.StateManager~schema</a> entry of &quot;integer&quot; type.</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">object</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+
+            
+                
+<h4 class="name" id="~schemaStringDefinition">schemaStringDefinition</h4>
+
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="server_StateManager.js.html">server/StateManager.js</a>, <a href="server_StateManager.js.html#line89">line 89</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>type</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>'string'</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Define a boolean parameter.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>default</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>Default value of the parameter.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>nullable</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>false</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Define if the parameter is nullable. If
+set to <code>true</code> the parameter <code>default</code> is set to <code>null</code>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>event</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>false</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Define if the parameter is a volatile, e.g.
+set its value back to <code>null</code> after propagation. When <code>true</code>, <code>nullable</code> is
+automatically set to <code>true</code> and <code>default</code> to <code>null</code>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>filterChange</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>true</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Setting this option to <code>false</code> forces
+the propagation of a parameter even when its value do not change. It
+offers a kind of middle ground between the default bahavior (e.g. where
+only changed values are propagated) and the behavior of the <code>event</code> option
+(which has no state per se). As such, setting this options to <code>false</code> if
+<code>event=true</code> does not make sens.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>immediate</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>false</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Setting this option to <code>true</code> will
+trigger any change (e.g. call the <code>onUpdate</code> listeners) immediately on the
+state that generate the update (i.e. calling <code>set</code>), before propagating the
+change on the network. This option can be usefull in cases the network
+would introduce a noticeable latency on the client. If for some reason
+the value is overriden server-side (e.g. in an <code>updateHook</code>) the listeners
+will be called again on when the &quot;real&quot; / final value will be received.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>metas</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>{}</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Optionnal metadata of the parameter.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<div class="description usertext">
+    <p>Describe a <a href="server.StateManager.html#~schema">server.StateManager~schema</a> entry of &quot;string&quot; type.</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">object</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+
+            
+                
 
     
 
@@ -1525,7 +4055,7 @@ called between the <code>set</code> call and the actual update.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="server_StateManager.js.html">server/StateManager.js</a>, <a href="server_StateManager.js.html#line347">line 347</a>
+        <a href="server_StateManager.js.html">server/StateManager.js</a>, <a href="server_StateManager.js.html#line546">line 546</a>
     </li></ul></dd>
     
 
@@ -1772,7 +4302,7 @@ of the update.</p></td>
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.11</a> on Wed Jan 04 2023 10:33:47 GMT+0100 (Central European Standard Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.11</a> on Wed Jan 04 2023 10:52:54 GMT+0100 (Central European Standard Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>

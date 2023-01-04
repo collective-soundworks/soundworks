@@ -1,195 +1,6 @@
 import cloneDeep from 'lodash.clonedeep';
 import equal from 'fast-deep-equal';
 
-/**
- * @typedef {Object} server.SharedStateManagerServer~schema
- *
- * Description of a schema to be register by the {@link server.ServerStateManagerServer}
- * A schema consists of a combinaison of key value pairs where the key is the
- * name of the parameter, and the value is an object describing the parameter.
- *
- * Available types are:
- * - {@link server.SharedStateManagerServer~schemaBooleanDef}
- * - {@link server.SharedStateManagerServer~schemaStringDef}
- * - {@link server.SharedStateManagerServer~schemaIntegerDef}
- * - {@link server.SharedStateManagerServer~schemaFloatDef}
- * - {@link server.SharedStateManagerServer~schemaEnumDef}
- * - {@link server.SharedStateManagerServer~schemaAnyDef}
- *
- * @example
- * {
- *   myBoolean: {
- *     type: 'boolean'
- *     default: false,
- *   },
- *   myFloat: {
- *     type: 'float'
- *     default: 0.1,
- *     min: -1,
- *     max: 1,
- *     event: true,
- *   }
- * }
- */
-/**
- * @typedef {Object} server.SharedStateManagerServer~schemaBooleanDef
- *
- * @property {String} type='boolean' - Define a boolean parameter.
- * @property {Boolean} default - Default value of the parameter.
- * @property {Boolean} [nullable=false] - Define if the parameter is nullable. If
- *   set to `true` the parameter `default` is set to `null`.
- * @property {Boolean} [event=false] - Define if the parameter is a volatile, e.g.
- *   set its value back to `null` after propagation. When `true`, `nullable` is
- *   automatically set to `true` and `default` to `null`.
- * @property {Boolean} [filterChange=true] - Setting this option to `false` forces
- *   the propagation of a parameter even when its value do not change. It
- *   offers a kind of middle ground between the default bahavior (e.g. where
- *   only changed values are propagated) and the behavior of the `event` option
- *   (which has no state per se). As such, setting this options to `false` if
- *   `event=true` does not make sens.
- * @property {Boolean} [immediate=false] - Setting this option to `true` will
- *   trigger any change (e.g. call the `onUpdate` listeners) immediately on the
- *   state that generate the update (i.e. calling `set`), before propagating the
- *   change on the network. This option can be usefull in cases the network
- *   would introduce a noticeable latency on the client. If for some reason
- *   the value is overriden server-side (e.g. in an `updateHook`) the listeners
- *   will be called again on when the "real" / final value will be received.
- * @property {Object} [metas={}] - Optionnal metadata of the parameter.
- */
-/**
- * @typedef {Object} server.SharedStateManagerServer~schemaStringDef
- *
- * @property {String} type='string' - Define a boolean parameter.
- * @property {Mixed} default - Default value of the parameter.
- * @property {Boolean} [nullable=false] - Define if the parameter is nullable. If
- *   set to `true` the parameter `default` is set to `null`.
- * @property {Boolean} [event=false] - Define if the parameter is a volatile, e.g.
- *   set its value back to `null` after propagation. When `true`, `nullable` is
- *   automatically set to `true` and `default` to `null`.
- * @property {Boolean} [filterChange=true] - Setting this option to `false` forces
- *   the propagation of a parameter even when its value do not change. It
- *   offers a kind of middle ground between the default bahavior (e.g. where
- *   only changed values are propagated) and the behavior of the `event` option
- *   (which has no state per se). As such, setting this options to `false` if
- *   `event=true` does not make sens.
- * @property {Boolean} [immediate=false] - Setting this option to `true` will
- *   trigger any change (e.g. call the `onUpdate` listeners) immediately on the
- *   state that generate the update (i.e. calling `set`), before propagating the
- *   change on the network. This option can be usefull in cases the network
- *   would introduce a noticeable latency on the client. If for some reason
- *   the value is overriden server-side (e.g. in an `updateHook`) the listeners
- *   will be called again on when the "real" / final value will be received.
- * @property {Object} [metas={}] - Optionnal metadata of the parameter.
- */
-/**
- @typedef {Object} server.SharedStateManagerServer~schemaIntegerDef
- *
- * @property {String} type='integer' - Define a boolean parameter.
- * @property {Mixed} default - Default value of the parameter.
- * @property {Number} [min=-Infinity] - Minimum value of the parameter.
- * @property {Number} [max=+Infinity] - Maximum value of the parameter.
- * @property {Boolean} [nullable=false] - Define if the parameter is nullable. If
- *   set to `true` the parameter `default` is set to `null`.
- * @property {Boolean} [event=false] - Define if the parameter is a volatile, e.g.
- *   set its value back to `null` after propagation. When `true`, `nullable` is
- *   automatically set to `true` and `default` to `null`.
- * @property {Boolean} [filterChange=true] - Setting this option to `false` forces
- *   the propagation of a parameter even when its value do not change. It
- *   offers a kind of middle ground between the default bahavior (e.g. where
- *   only changed values are propagated) and the behavior of the `event` option
- *   (which has no state per se). As such, setting this options to `false` if
- *   `event=true` does not make sens.
- * @property {Boolean} [immediate=false] - Setting this option to `true` will
- *   trigger any change (e.g. call the `onUpdate` listeners) immediately on the
- *   state that generate the update (i.e. calling `set`), before propagating the
- *   change on the network. This option can be usefull in cases the network
- *   would introduce a noticeable latency on the client. If for some reason
- *   the value is overriden server-side (e.g. in an `updateHook`) the listeners
- *   will be called again on when the "real" / final value will be received.
- * @property {Object} [metas={}] - Optionnal metadata of the parameter.
- */
-/**
- * @typedef {Object} server.SharedStateManagerServer~schemaFloatDef
- *
- * @property {String} [type='float'] - Float parameter.
- * @property {Mixed} default - Default value.
- * @property {Number} [min=-Infinity] - Minimum value.
- * @property {Number} [max=+Infinity] - Maximum value.
- * @property {Boolean} [nullable=false] - Define if the parameter is nullable. If
- *   set to `true` the parameter `default` is set to `null`.
- * @property {Boolean} [event=false] - Define if the parameter is a volatile, e.g.
- *   set its value back to `null` after propagation. When `true`, `nullable` is
- *   automatically set to `true` and `default` to `null`.
- * @property {Boolean} [filterChange=true] - Setting this option to `false` forces
- *   the propagation of a parameter even when its value do not change. It
- *   offers a kind of middle ground between the default bahavior (e.g. where
- *   only changed values are propagated) and the behavior of the `event` option
- *   (which has no state per se). As such, setting this options to `false` if
- *   `event=true` does not make sens.
- * @property {Boolean} [immediate=false] - Setting this option to `true` will
- *   trigger any change (e.g. call the `onUpdate` listeners) immediately on the
- *   state that generate the update (i.e. calling `set`), before propagating the
- *   change on the network. This option can be usefull in cases the network
- *   would introduce a noticeable latency on the client. If for some reason
- *   the value is overriden server-side (e.g. in an `updateHook`) the listeners
- *   will be called again on when the "real" / final value will be received.
- * @property {Object} [metas={}] - Optionnal metadata of the parameter.
- */
-/**
- * @typedef {Object} server.SharedStateManagerServer~schemaEnumDef
- *
- * @property {String} [type='enum'] - Enum parameter.
- * @property {Mixed} default - Default value of the parameter.
- * @property {Array} list - Possible values of the parameter.
- * @property {Boolean} [nullable=false] - Define if the parameter is nullable. If
- *   set to `true` the parameter `default` is set to `null`.
- * @property {Boolean} [event=false] - Define if the parameter is a volatile, e.g.
- *   set its value back to `null` after propagation. When `true`, `nullable` is
- *   automatically set to `true` and `default` to `null`.
- * @property {Boolean} [filterChange=true] - Setting this option to `false` forces
- *   the propagation of a parameter even when its value do not change. It
- *   offers a kind of middle ground between the default bahavior (e.g. where
- *   only changed values are propagated) and the behavior of the `event` option
- *   (which has no state per se). As such, setting this options to `false` if
- *   `event=true` does not make sens.
- * @property {Boolean} [immediate=false] - Setting this option to `true` will
- *   trigger any change (e.g. call the `onUpdate` listeners) immediately on the
- *   state that generate the update (i.e. calling `set`), before propagating the
- *   change on the network. This option can be usefull in cases the network
- *   would introduce a noticeable latency on the client. If for some reason
- *   the value is overriden server-side (e.g. in an `updateHook`) the listeners
- *   will be called again on when the "real" / final value will be received.
- * @property {Object} [metas={}] - Optionnal metadata of the parameter.
- */
-/**
- * @typedef {Object} server.SharedStateManagerServer~schemaAnyDef
- *
- * Note that the `any` type always return a shallow copy of the state internal
- * value. Mutating the returned value will not modify the internal state.
- *
- * @property {String} [type='any'] - Parameter of any type.
- * @property {Mixed} default - Default value of the parameter.
- * @property {Boolean} [nullable=false] - Define if the parameter is nullable. If
- *   set to `true` the parameter `default` is set to `null`.
- * @property {Boolean} [event=false] - Define if the parameter is a volatile, e.g.
- *   set its value back to `null` after propagation. When `true`, `nullable` is
- *   automatically set to `true` and `default` to `null`.
- * @property {Boolean} [filterChange=true] - Setting this option to `false` forces
- *   the propagation of a parameter even when its value do not change. It
- *   offers a kind of middle ground between the default bahavior (e.g. where
- *   only changed values are propagated) and the behavior of the `event` option
- *   (which has no state per se). As such, setting this options to `false` if
- *   `event=true` does not make sens.
- * @property {Boolean} [immediate=false] - Setting this option to `true` will
- *   trigger any change (e.g. call the `onUpdate` listeners) immediately on the
- *   state that generate the update (i.e. calling `set`), before propagating the
- *   change on the network. This option can be usefull in cases the network
- *   would introduce a noticeable latency on the client. If for some reason
- *   the value is overriden server-side (e.g. in an `updateHook`) the listeners
- *   will be called again on when the "real" / final value will be received.
- * @property {Object} [metas={}] - Optionnal metadata of the parameter.
- */
-
 export const sharedOptions = {
   nullable: false,
   event: false, // if event=true, nullable=true
@@ -422,7 +233,7 @@ class ParameterBag {
   /**
    * Define if the parameter exists.
    *
-   * @param {String} name - Name of the parameter.
+   * @param {string} name - Name of the parameter.
    * @return {Boolean}
    */
   has(name) {
@@ -432,7 +243,7 @@ class ParameterBag {
   /**
    * Return values of all parameters as a flat object.
    *
-   * @return {Object}
+   * @return {object}
    */
   getValues() {
     let values = {};
@@ -448,7 +259,7 @@ class ParameterBag {
    * Return the value of the given parameter. If the parameter is of `any` type,
    * a deep copy is returned.
    *
-   * @param {String} name - Name of the parameter.
+   * @param {string} name - Name of the parameter.
    * @return {Mixed} - Value of the parameter.
    */
   get(name) {
@@ -468,9 +279,9 @@ class ParameterBag {
    * (aka if previous value is different from new value) all registered
    * callbacks are registered.
    *
-   * @param {String} name - Name of the parameter.
+   * @param {string} name - Name of the parameter.
    * @param {Mixed} value - Value of the parameter.
-   * @param {Boolean} [forcePropagation=false] - if true, propagate value even
+   * @param {boolean} [forcePropagation=false] - if true, propagate value even
    *    if the value has not changed.
    * @return {Array} - [new value, updated flag].
    */
@@ -504,7 +315,7 @@ class ParameterBag {
    * @note - prefer `state.set(state.getInitValues())`
    *         or     `state.set(state.getDefaultValues())`
    *
-   * @param {String} [name=null] - Name of the parameter to reset.
+   * @param {string} [name=null] - Name of the parameter to reset.
    */
   // reset(name = null) {
   //   if (name !== null) {
@@ -519,7 +330,7 @@ class ParameterBag {
   /**
    * Return the given schema along with the initialization values.
    *
-   * @return {Object}
+   * @return {object}
    */
   getSchema(name = null) {
     if (name === null) {
