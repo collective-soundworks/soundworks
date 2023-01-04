@@ -328,8 +328,8 @@ class StateManager extends BaseStateManager {
    *
    * @param {number} nodeId - Id of the client node, as given in
    *  {@link client.StateManager}
-   * @param {object} transport - Tranpsort mecanism to communicate with the
-   *  client. Should implement a basic EventEmitter API.
+   * @param {object} transport - Transport mecanism to communicate with the
+   *  client. Must implement a basic EventEmitter API.
    *
    * @private
    */
@@ -604,7 +604,6 @@ class StateManager extends BaseStateManager {
 
     return () => hooks.delete(updateHook);
   }
-
 }
 
 export default StateManager;
