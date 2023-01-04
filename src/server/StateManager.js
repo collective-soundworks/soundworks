@@ -224,12 +224,26 @@ const generateRemoteId = idGenerator();
  *   will be called again on when the "real" / final value will be received.
  * @property {object} [metas={}] - Optionnal metadata of the parameter.
  */
+
 /**
  * @callback server.StateManager~ObserveCallback
  * @async
  * @param {string} schemaName - name of the schema
  * @param {number} stateId - id of the state
  * @param {number} nodeId - id of the node that created the state
+ */
+
+/**
+ * @callback server.StateManager~updateHook
+ * @async
+ *
+ * @param {object} updates - Update object as given on a set callback, or
+ *  result of the previous hook
+ * @param {object} currentValues - Current values of the state.
+ * @param {object} [context=null] - Optionnal context passed by the creator
+ *  of the update.
+ *
+ * @return {object} The "real" updates to be applied on the state.
  */
 
 /**
@@ -314,7 +328,7 @@ class StateManager extends BaseStateManager {
    *
    * @param {number} nodeId - Id of the client node, as given in
    *  {@link client.StateManager}
-   * @param {Object} transport - Tranpsort mecanism to communicate with the
+   * @param {object} transport - Tranpsort mecanism to communicate with the
    *  client. Should implement a basic EventEmitter API.
    *
    * @private
@@ -542,19 +556,6 @@ class StateManager extends BaseStateManager {
     // delete registered hooks
     this._hooksBySchemaName.delete(schemaName);
   }
-
-  /**
-   * @callback server.StateManager~updateHook
-   * @async
-   *
-   * @param {Object} updates - Update object as given on a set callback, or
-   *  result of the previous hook
-   * @param {Object} currentValues - Current values of the state.
-   * @param {Object} [context=null] - Optionnal context passed by the creator
-   *  of the update.
-   *
-   * @return {Object} The "real" updates to be applied on the state.
-   */
 
   /**
    * Register a function for a given schema (e.g. will be applied on all states
