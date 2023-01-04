@@ -28,21 +28,20 @@ import { isBrowser } from '../common/utils.js';
 /**
  * The Socket class is a simple publish / subscribe wrapper built on top of the
  * [isomorphic-ws](https://github.com/heineiuo/isomorphic-ws) library.
- * An instance of `Socket` is automatically created by the `soundworks.Client`.
+ * An instance of `Socket` is automatically created by the `soundworks.Client`
+ * (see {@link client.Client#socket}).
  *
- * _Important: In most cases, you should consider using a {@link client.SharedState} rather than
- * sending messages directly through the sockets._
+ * _Important: In most cases, you should consider using a {@link client.SharedState}
+ * rather than directly using the sockets._
  *
  * The Socket class concurrently opens two different WebSockets:
- * - a socket configured with `binaryType = 'string'` for JSON compatible string
- *  messages.
- * - a socket configured with `binaryType=arraybuffer` for efficient streaming
+ * - a socket configured with `binaryType = 'blob'` for JSON compatible data
+ *  types (i.e. string, number, boolean, object, array and null).
+ * - a socket configured with `binaryType= 'arraybuffer'` for efficient streaming
  *  of binary data.
  *
  * Both sockets re-emits all "native" ws events ('open', 'upgrade', 'close', 'error'
  *  and 'message'.
- *
- * See {@link client.Client#socket}
  *
  * @memberof client
  * @hideconstructor
@@ -50,13 +49,13 @@ import { isBrowser } from '../common/utils.js';
 class Socket {
   constructor() {
     /**
-     * WebSocket instance w/ string protocol, i.e. `binaryType = 'string'`.
+     * WebSocket instance configured with `binaryType = 'blob'`.
      *
      * @private
      */
     this.ws = null;
     /**
-     * WebSocket instance w/ binary protocol, i.e. `binaryType = 'arraybuffer'`.
+     * WebSocket instance configured with `binaryType = 'arraybuffer'`.
      *
      * @private
      */
@@ -232,6 +231,22 @@ class Socket {
   }
 
   /**
+   * Removes all listeners and immediately close the two sockets. Is automatically
+   * called on `client.stop()`
+   *
+   * @private
+   */
+  async terminate() {
+    this.removeAllListeners();
+    this.removeAllBinaryListeners();
+
+    this.ws.close();
+    this.binaryWs.close();
+
+    return Promise.resolve();
+  }
+
+  /**
    * @param {boolean} binary - Emit to either the string or binary socket.
    * @param {string} channel - Channel name.
    * @param {...*} args - Content of the message.
@@ -293,10 +308,11 @@ class Socket {
   }
 
   /**
-   * Send JSON compatible messages on a given channel.
+   * Send messages with JSON compatible data types on a given channel.
    *
-   * @param {string} channel - Channel name of the message.
-   * @param {...*} args - Message list, as many as needed, of any serializable type).
+   * @param {string} channel - Channel name.
+   * @param {...*} args - Payload of the message. As many arguments as needed, of
+   *  JSON compatible data types (i.e. string, number, boolean, object, array and null).
    */
   send(channel, ...args) {
     const msg = packStringMessage(channel, ...args);
@@ -304,10 +320,12 @@ class Socket {
   }
 
   /**
-   * Listen to JSON compatible messages on a given channel.
+   * Listen messages with JSON compatible data types on a given channel.
    *
-   * @param {string} channel - Channel name of the message.
-   * @param {Function} callback - Callback to execute when a message is received.
+   * @param {string} channel - Channel name.
+   * @param {Function} callback - Callback to execute when a message is received,
+   *  arguments of the callback function will match the arguments sent using the
+   *  {@link server.Socket#send} method.
    */
   addListener(channel, callback) {
     this._addListener(this._stringListeners, channel, callback);
@@ -316,7 +334,7 @@ class Socket {
   /**
    * Remove a listener from JSON compatible messages on a given channel.
    *
-   * @param {string} channel - Channel name of the message.
+   * @param {string} channel - Channel name.
    * @param {Function} callback - Callback to remove.
    */
   removeListener(channel, callback) {
@@ -324,9 +342,9 @@ class Socket {
   }
 
   /**
-   * Remove all listeners from JSON compatible messages on a given channel.
+   * Remove all listeners of messages with JSON compatible data types.
    *
-   * @param {string} channel - Channel name of the message.
+   * @param {string} channel - Channel name.
    */
   removeAllListeners(channel = null) {
     this._removeAllListeners(this._stringListeners, channel);
@@ -335,8 +353,8 @@ class Socket {
   /**
    * Send binary messages on a given channel.
    *
-   * @param {string} channel - Channel name of the message.
-   * @param {TypedArray} typedArray - Binary data to be sent.
+   * @param {string} channel - Channel name.
+   * @param {TypedArray} args - Binary data to be sent.
    */
   sendBinary(channel, typedArray) {
     const msg = packBinaryMessage(channel, typedArray);
@@ -344,9 +362,9 @@ class Socket {
   }
 
   /**
-   * Listen binary messages on a given channel.
+   * Listen binary messages on a given channel
    *
-   * @param {string} channel - Channel name of the message.
+   * @param {string} channel - Channel name.
    * @param {Function} callback - Callback to execute when a message is received.
    */
   addBinaryListener(channel, callback) {
@@ -354,35 +372,22 @@ class Socket {
   }
 
   /**
-   * Remove a listener from binary compatible messages on a given channel
+   * Remove a listener of binary compatible messages from a given channel
    *
-   * @param {string} channel - Channel of the message.
-   * @param {Function} callback - Callback to cancel.
+   * @param {string} channel - Channel name.
+   * @param {Function} callback - Callback to remove.
    */
   removeBinaryListener(channel, callback) {
     this._removeListener(this._binaryListeners, channel, callback);
   }
 
   /**
-   * Remove all listeners from binary compatible messages on a given channel
+   * Remove all listeners of binary compatible messages on a given channel
    *
    * @param {string} channel - Channel of the message.
    */
   removeAllBinaryListeners(channel = null) {
     this._removeAllListeners(this._binaryListeners, channel);
-  }
-
-  /**
-   * Removes all listeners and immediately close the two sockets.
-   */
-  async terminate() {
-    this.removeAllListeners();
-    this.removeAllBinaryListeners();
-
-    this.ws.close();
-    this.binaryWs.close();
-
-    return Promise.resolve();
   }
 }
 

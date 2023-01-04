@@ -6,29 +6,63 @@ import {
   unpackStringMessage,
 } from '../common/sockets-utils.js';
 
-// const CONNECTING = 0;
-// const OPEN = 1;
-// const CLOSING = 2;
-// const CLOSED = 3;
-// const READY_STATES = ['CONNECTING', 'OPEN', 'CLOSING', 'CLOSED'];
+// Status codes:
+//
+// CONNECTING = 0;
+// OPEN = 1;
+// CLOSING = 2;
+// CLOSED = 3;
+// READY_STATES = ['CONNECTING', 'OPEN', 'CLOSING', 'CLOSED'];
 
 /**
- * Simple wrapper with simple pubsub system built on top of `ws` sockets.
- * The abstraction contains two different socket:
- * - one configured for string (JSON compatible) messages
- * - one configured with `binaryType=arraybuffer` for streaming data more
- *   efficiently.
+ * The Socket class is a simple publish / subscribe wrapper built on top of the
+ * [ws](https://github.com/websockets/ws) library. An instance of {@link server.Socket}
+ * is automatically created per client when it connects (see {@link server.Client#socket}).
  *
- * @see https://github.com/websockets/ws
+ * _Important: In most cases, you should consider using a {@link client.SharedState}
+ * rather than directly using the sockets._
+ *
+ * The Socket class contains two different WebSockets:
+ * - a socket configured with `binaryType = 'blob'` for JSON compatible data
+ *  types (i.e. string, number, boolean, object, array and null).
+ * - a socket configured with `binaryType= 'arraybuffer'` for efficient streaming
+ *  of binary data.
  *
  * @memberof server
+ * @hideconstructor
  */
 class Socket {
   constructor(ws, binaryWs, rooms, sockets, options = {}) {
+    /**
+     * Configuration object
+     *
+     * @type {object}
+     */
+    this.config = {
+      pingInterval: 5 * 1000,
+      ...options,
+    };
+
+    /**
+     * `ws` socket instance configured with `binaryType=blob` (string)
+     *
+     * @type {object}
+     * @private
+     */
+    this.ws = ws;
+
+    /**
+     * `ws` socket instance configured with `binaryType=arraybuffer` (TypedArray)
+     *
+     * @type {object}
+     * @private
+     */
+    this.binaryWs = binaryWs;
 
     /**
      * Reference to the sockets object, is mainly dedicated to allow
      * broadcasting from a given socket instance.
+     *
      * @type {server.Sockets}
      * @example
      * socket.sockets.broadcast('my-room', this, 'update-value', 1);
@@ -36,36 +70,16 @@ class Socket {
     this.sockets = sockets;
 
     /**
-     * `ws` socket instance configured with `binaryType=blob` (string)
-     * @private
-     * @type {Object}
-     */
-    this.ws = ws;
-
-    /**
-     * `ws` socket instance configured with `binaryType=arraybuffer` (TypedArray)
-     * @private
-     * @type {Object}
-     */
-    this.binaryWs = binaryWs;
-
-    /**
-     * `ws` socket instance configured with `binaryType=arraybuffer` (TypedArray)
-     * @private
+     * Reference to the rooms object
+     *
      * @type {Map}
+     * @private
      */
     this.rooms = rooms;
 
-    /**
-     * Configuration object
-     * @type {Object}
-     */
-    this.config = {
-      pingInterval: 5 * 1000,
-      ...options,
-    };
-
+    /** @private */
     this._stringListeners = new Map();
+    /** @private */
     this._binaryListeners = new Map();
 
     // ----------------------------------------------------------
@@ -150,9 +164,11 @@ class Socket {
   }
 
   /**
-   * Called when the string socket closes (aka client reload).
+   * Removes all listeners and immediately close the two sockets. Is automatically
+   * called on `server.stop()`
+   *
+   * @private
    */
-  /** @private */
   terminate() {
     // clear ping/pong check
     clearInterval(this._intervalId);
@@ -190,7 +206,12 @@ class Socket {
     this.ws.terminate();
   }
 
-  /** @private */
+  /**
+   * @param {boolean} binary - Emit to either the string or binary socket.
+   * @param {string} channel - Channel name.
+   * @param {...*} args - Content of the message.
+   * @private
+   */
   _emit(binary, channel, ...args) {
     const listeners = binary ? this._binaryListeners : this._stringListeners;
 
@@ -200,7 +221,12 @@ class Socket {
     }
   }
 
-  /** @private */
+  /**
+   * @param {Function[]} listeners - List of listeners, either for the string or binary socket.
+   * @param {string} channel - Channel name.
+   * @param {Function} callback - The function to be added to the listeners.
+   * @private
+   */
   _addListener(listeners, channel, callback) {
     if (!listeners.has(channel)) {
       listeners.set(channel, new Set());
@@ -210,7 +236,12 @@ class Socket {
     callbacks.add(callback);
   }
 
-  /** @private */
+  /**
+   * @param {Function[]} listeners - List of listeners, either for the string or binary socket.
+   * @param {string} channel - Channel name.
+   * @param {Function} callback - The function to be removed from the listeners.
+   * @private
+   */
   _removeListener(listeners, channel, callback) {
     if (listeners.has(channel)) {
       const callbacks = listeners.get(channel);
@@ -222,16 +253,24 @@ class Socket {
     }
   }
 
-  /** @private */
+  /**
+   * @param {Function[]} listeners - List of listeners, either for the string or binary socket.
+   * @param {string} [channel=null] - Channel name of the listeners to remove. If null
+   *  all the listeners are cleared.
+   * @private
+   */
   _removeAllListeners(listeners, channel) {
-    if (listeners.has(channel)) {
+    if (channel === null) {
+      listeners.clear();
+    } else if (listeners.has(channel)) {
       listeners.delete(channel);
     }
   }
 
   /**
    * Add the socket to a room
-   * @param {String} roomId - Id of the room
+   *
+   * @param {string} roomId - Id of the room.
    */
   addToRoom(roomId) {
     if (!this.rooms.has(roomId)) {
@@ -244,7 +283,8 @@ class Socket {
 
   /**
    * Remove the socket from a room
-   * @param {String} roomId - Id of the room
+   *
+   * @param {string} roomId - Id of the room.
    */
   removeFromRoom(roomId) {
     if (this.rooms.has(roomId)) {
@@ -254,10 +294,11 @@ class Socket {
   }
 
   /**
-   * Sends JSON compatible messages on a given channel
+   * Send messages with JSON compatible data types on a given channel.
    *
-   * @param {String} channel - Channel of the message
-   * @param {...*} args - Arguments of the message (as many as needed, of any type)
+   * @param {string} channel - Channel name.
+   * @param {...*} args - Payload of the message. As many arguments as needed, of
+   *  JSON compatible data types (i.e. string, number, boolean, object, array and null).
    */
   send(channel, ...args) {
     const msg = packStringMessage(channel, ...args);
@@ -276,39 +317,41 @@ class Socket {
   }
 
   /**
-   * Listen JSON compatible messages on a given channel
+   * Listen messages with JSON compatible data types on a given channel.
    *
-   * @param {String} channel - Channel of the message
-   * @param {Function} callback - Callback to execute when a message is received
+   * @param {string} channel - Channel name.
+   * @param {Function} callback - Callback to execute when a message is received,
+   *  arguments of the callback function will match the arguments sent using the
+   *  {@link server.Socket#send} method.
    */
   addListener(channel, callback) {
     this._addListener(this._stringListeners, channel, callback);
   }
 
   /**
-   * Remove a listener from JSON compatible messages on a given channel
+   * Remove a listener of messages with JSON compatible data types from a given channel.
    *
-   * @param {String} channel - Channel of the message
-   * @param {Function} callback - Callback to cancel
+   * @param {string} channel - Channel name.
+   * @param {Function} callback - Callback to remove.
    */
   removeListener(channel, callback) {
     this._removeListener(this._stringListeners, channel, callback);
   }
 
   /**
-   * Remove all listeners from JSON compatible messages on a given channel
+   * Remove all listeners of messages with JSON compatible data types.
    *
-   * @param {String} channel - Channel of the message
+   * @param {string} channel - Channel name.
    */
-  removeAllListeners(channel) {
+  removeAllListeners(channel = null) {
     this._removeAllListeners(this._stringListeners, channel);
   }
 
   /**
-   * Sends binary messages on a given channel
+   * Send binary messages on a given channel.
    *
-   * @param {String} channel - Channel of the message
-   * @param {TypedArray} typedArray - Data to send
+   * @param {string} channel - Channel name.
+   * @param {TypedArray} args - Binary data to be sent.
    */
   sendBinary(channel, typedArray) {
     const msg = packBinaryMessage(channel, typedArray);
@@ -323,29 +366,29 @@ class Socket {
   /**
    * Listen binary messages on a given channel
    *
-   * @param {String} channel - Channel of the message
-   * @param {Function} callback - Callback to execute when a message is received
+   * @param {string} channel - Channel name.
+   * @param {Function} callback - Callback to execute when a message is received.
    */
   addBinaryListener(channel, callback) {
     this._addListener(this._binaryListeners, channel, callback);
   }
 
   /**
-   * Remove a listener from binary compatible messages on a given channel
+   * Remove a listener of binary compatible messages from a given channel
    *
-   * @param {String} channel - Channel of the message
-   * @param {Function} callback - Callback to cancel
+   * @param {string} channel - Channel name.
+   * @param {Function} callback - Callback to remove.
    */
   removeBinaryListener(channel, callback) {
     this._removeListener(this._binaryListeners, channel, callback);
   }
 
   /**
-   * Remove all listeners from binary compatible messages on a given channel
+   * Remove all listeners of binary compatible messages on a given channel
    *
-   * @param {String} channel - Channel of the message
+   * @param {string} channel - Channel of the message.
    */
-  removeAllBinaryListeners(channel) {
+  removeAllBinaryListeners(channel = null) {
     this._removeAllListeners(this._binaryListeners, channel);
   }
 }
