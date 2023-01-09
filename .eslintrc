@@ -1,7 +1,6 @@
 {
   "extends": [
     "@ircam",
-    "plugin:jsdoc/recommended"
   ],
   "settings": {
     "jsdoc": {

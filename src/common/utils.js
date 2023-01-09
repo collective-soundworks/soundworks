@@ -1,3 +1,5 @@
+import isPlainObj from 'is-plain-obj';
+
 // https://stackoverflow.com/questions/17575790/environment-detection-node-js-or-browser
 export const isBrowser = new Function('try {return this===window;}catch(e){ return false;}');
 
@@ -18,5 +20,9 @@ export function isString(val) {
 export function isFunction(func) {
   return Object.prototype.toString.call(func) == '[object Function]' ||
     Object.prototype.toString.call(func) == '[object AsyncFunction]';
+}
+
+export function isPlainObject(obj) {
+  return isPlainObj(obj);
 }
 

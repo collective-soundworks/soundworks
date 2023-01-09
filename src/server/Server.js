@@ -648,6 +648,10 @@ Invalid certificate files, please check your:
 
         await this._dispatchStatus('started');
 
+        if (this.config.env.type === 'development') {
+          logger.log(`\n> press "${chalk.bold('Ctrl + C')}" to exit`);
+        }
+
         resolve();
       });
     });

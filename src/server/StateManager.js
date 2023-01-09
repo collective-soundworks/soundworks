@@ -5,6 +5,7 @@ import clonedeep from 'lodash.clonedeep';
 import BaseStateManager from '../common/BaseStateManager.js';
 import ParameterBag from '../common/ParameterBag.js';
 import SharedStatePrivate from '../common/SharedStatePrivate.js';
+import { isString, isPlainObject } from '../common/utils.js';
 import {
   SERVER_ID,
   CREATE_REQUEST,
@@ -514,8 +515,16 @@ class StateManager extends BaseStateManager {
    * })
    */
   registerSchema(schemaName, schema) {
+    if (!isString(schemaName)) {
+      throw new Error(`[stateManager.registerSchema] Invalid schema name "${schemaName}", should be a string`);
+    }
+
     if (this._schemas.has(schemaName)) {
       throw new Error(`[stateManager.registerSchema] cannot register schema with name: "${schemaName}", schema name already exists`);
+    }
+
+    if (!isPlainObject(schema)) {
+      throw new Error(`[stateManager.registerSchema] Invalid schema, should be an object`);
     }
 
     ParameterBag.validateSchema(schema);
