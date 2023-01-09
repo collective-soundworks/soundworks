@@ -17,7 +17,7 @@ export const types = {
     },
     coerceFunction: (name, def, value) => {
       if (typeof value !== 'boolean') {
-        throw new TypeError(`[stateManager] Invalid value for boolean param "${name}": ${value}`);
+        throw new TypeError(`[SharedState] Invalid value for boolean param "${name}": ${value}`);
       }
 
       return value;
@@ -30,7 +30,7 @@ export const types = {
     },
     coerceFunction: (name, def, value) => {
       if (typeof value !== 'string') {
-        throw new TypeError(`[stateManager] Invalid value for string param "${name}": ${value}`);
+        throw new TypeError(`[SharedState] Invalid value for string param "${name}": ${value}`);
       }
 
       return value;
@@ -63,7 +63,7 @@ export const types = {
     },
     coerceFunction: (name, def, value) => {
       if (!(typeof value === 'number' && Math.floor(value) === value)) {
-        throw new TypeError(`[stateManager] Invalid value for integer param "${name}": ${value}`);
+        throw new TypeError(`[SharedState] Invalid value for integer param "${name}": ${value}`);
       }
 
       return Math.max(def.min, Math.min(def.max, value));
@@ -96,7 +96,7 @@ export const types = {
     },
     coerceFunction: (name, def, value) => {
       if (typeof value !== 'number' || value !== value) { // reject NaN
-        throw new TypeError(`[stateManager] Invalid value for float param "${name}": ${value}`);
+        throw new TypeError(`[SharedState] Invalid value for float param "${name}": ${value}`);
       }
 
       return Math.max(def.min, Math.min(def.max, value));
@@ -109,7 +109,7 @@ export const types = {
     },
     coerceFunction: (name, def, value) => {
       if (def.list.indexOf(value) === -1) {
-        throw new TypeError(`[stateManager] Invalid value for enum param "${name}": ${value}`);
+        throw new TypeError(`[SharedState] Invalid value for enum param "${name}": ${value}`);
       }
 
 
@@ -139,11 +139,11 @@ class ParameterBag {
       const def = schema[name];
 
       if (!Object.prototype.hasOwnProperty.call(def, 'type')) {
-        throw new TypeError(`[stateManager] Invalid schema definition - param "${name}": "type" key is required`);
+        throw new TypeError(`[StateManager.registerSchema] Invalid schema definition - param "${name}": "type" key is required`);
       }
 
       if (!Object.prototype.hasOwnProperty.call(types, def.type)) {
-        throw new TypeError(`[stateManager] Invalid schema definition - param "${name}": "{ type: '${def.type}' }" does not exists`);
+        throw new TypeError(`[StateManager.registerSchema] Invalid schema definition - param "${name}": "{ type: '${def.type}' }" does not exists`);
       }
 
       const required = types[def.type].required;
@@ -152,7 +152,7 @@ class ParameterBag {
         if (def.event === true && key === 'default') {
           // do nothing, default is always null for `event` params
         } else if (!Object.prototype.hasOwnProperty.call(def, key)) {
-          throw new TypeError(`[stateManager] Invalid schema definition - param "${name}" (type "${def.type}"): "${key}" key is required`);
+          throw new TypeError(`[StateManager.registerSchema] Invalid schema definition - param "${name}" (type "${def.type}"): "${key}" key is required`);
         }
       });
     }
@@ -160,7 +160,7 @@ class ParameterBag {
 
   constructor(schema, initValues = {}) {
     if (!schema) {
-      throw new Error(`[stateManager] schema is mandatory`);
+      throw new Error(`[ParameterBag] schema is mandatory`);
     }
 
     schema = cloneDeep(schema);
@@ -193,7 +193,7 @@ class ParameterBag {
     // make shure initValues make sens according to the given schema
     for (let name in initValues) {
       if (!Object.prototype.hasOwnProperty.call(schema, name)) {
-        throw new ReferenceError(`[stateManager] init value defined for undefined param "${name}"`);
+        throw new ReferenceError(`[StateManager.create] init value defined for undefined param "${name}"`);
       }
     }
 
