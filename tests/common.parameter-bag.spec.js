@@ -7,7 +7,7 @@ import { sharedOptions, types } from '../src/common/ParameterBag.js';
 
 chai.use(shallowDeepEqual);
 
-describe.only('common::ParameterBag (private)', () => {
+describe('common::ParameterBag (private)', () => {
   // ---------------------------------------------------------------
   // MAIN API
   // ---------------------------------------------------------------
