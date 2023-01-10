@@ -66,7 +66,7 @@ export const types = {
     },
     coerceFunction: (name, def, value) => {
       if (typeof value !== 'boolean') {
-        throw new TypeError(`[stateManager] Invalid value for boolean param "${name}": ${value}`);
+        throw new TypeError(`[SharedState] Invalid value for boolean param "${name}": ${value}`);
       }
 
       return value;
@@ -79,7 +79,7 @@ export const types = {
     },
     coerceFunction: (name, def, value) => {
       if (typeof value !== 'string') {
-        throw new TypeError(`[stateManager] Invalid value for string param "${name}": ${value}`);
+        throw new TypeError(`[SharedState] Invalid value for string param "${name}": ${value}`);
       }
 
       return value;
@@ -112,7 +112,7 @@ export const types = {
     },
     coerceFunction: (name, def, value) => {
       if (!(typeof value === 'number' &amp;&amp; Math.floor(value) === value)) {
-        throw new TypeError(`[stateManager] Invalid value for integer param "${name}": ${value}`);
+        throw new TypeError(`[SharedState] Invalid value for integer param "${name}": ${value}`);
       }
 
       return Math.max(def.min, Math.min(def.max, value));
@@ -145,7 +145,7 @@ export const types = {
     },
     coerceFunction: (name, def, value) => {
       if (typeof value !== 'number' || value !== value) { // reject NaN
-        throw new TypeError(`[stateManager] Invalid value for float param "${name}": ${value}`);
+        throw new TypeError(`[SharedState] Invalid value for float param "${name}": ${value}`);
       }
 
       return Math.max(def.min, Math.min(def.max, value));
@@ -158,7 +158,7 @@ export const types = {
     },
     coerceFunction: (name, def, value) => {
       if (def.list.indexOf(value) === -1) {
-        throw new TypeError(`[stateManager] Invalid value for enum param "${name}": ${value}`);
+        throw new TypeError(`[SharedState] Invalid value for enum param "${name}": ${value}`);
       }
 
 
@@ -188,11 +188,11 @@ class ParameterBag {
       const def = schema[name];
 
       if (!Object.prototype.hasOwnProperty.call(def, 'type')) {
-        throw new TypeError(`[stateManager] Invalid schema definition - param "${name}": "type" key is required`);
+        throw new TypeError(`[StateManager.registerSchema] Invalid schema definition - param "${name}": "type" key is required`);
       }
 
       if (!Object.prototype.hasOwnProperty.call(types, def.type)) {
-        throw new TypeError(`[stateManager] Invalid schema definition - param "${name}": "{ type: '${def.type}' }" does not exists`);
+        throw new TypeError(`[StateManager.registerSchema] Invalid schema definition - param "${name}": "{ type: '${def.type}' }" does not exists`);
       }
 
       const required = types[def.type].required;
@@ -201,7 +201,7 @@ class ParameterBag {
         if (def.event === true &amp;&amp; key === 'default') {
           // do nothing, default is always null for `event` params
         } else if (!Object.prototype.hasOwnProperty.call(def, key)) {
-          throw new TypeError(`[stateManager] Invalid schema definition - param "${name}" (type "${def.type}"): "${key}" key is required`);
+          throw new TypeError(`[StateManager.registerSchema] Invalid schema definition - param "${name}" (type "${def.type}"): "${key}" key is required`);
         }
       });
     }
@@ -209,7 +209,7 @@ class ParameterBag {
 
   constructor(schema, initValues = {}) {
     if (!schema) {
-      throw new Error(`[stateManager] schema is mandatory`);
+      throw new Error(`[ParameterBag] schema is mandatory`);
     }
 
     schema = cloneDeep(schema);
@@ -242,7 +242,7 @@ class ParameterBag {
     // make shure initValues make sens according to the given schema
     for (let name in initValues) {
       if (!Object.prototype.hasOwnProperty.call(schema, name)) {
-        throw new ReferenceError(`[stateManager] init value defined for undefined param "${name}"`);
+        throw new ReferenceError(`[StateManager.create] init value defined for undefined param "${name}"`);
       }
     }
 
@@ -313,10 +313,12 @@ class ParameterBag {
    */
   get(name) {
     if (!this.has(name)) {
-      throw new ReferenceError(`[stateManager] Cannot get value of undefined parameter "${name}"`);
+      throw new ReferenceError(`[SharedState] Cannot get value of undefined parameter "${name}"`);
     }
 
     if (this._schema[name].type === 'any') {
+      // we return a deep copy of the object as we don't want the client code to
+      // be able to modify our underlying data.
       return cloneDeep(this._values[name]);
     } else {
       return this._values[name];
@@ -336,14 +338,14 @@ class ParameterBag {
    */
   set(name, value) {
     if (!this.has(name)) {
-      throw new ReferenceError(`[stateManager] Cannot set value of undefined parameter "${name}"`);
+      throw new ReferenceError(`[SharedState] Cannot set value of undefined parameter "${name}"`);
     }
 
     const def = this._schema[name];
     const { coerceFunction } = types[def.type];
 
     if (value === null &amp;&amp; def.nullable === false) {
-      throw new TypeError(`[stateManager] Invalid value for ${def.type} param "${name}": value is null and param is not nullable`);
+      throw new TypeError(`[SharedState] Invalid value for ${def.type} param "${name}": value is null and param is not nullable`);
     } else if (value === null &amp;&amp; def.nullable === true) {
       value = null;
     } else {
@@ -352,6 +354,16 @@ class ParameterBag {
 
     const currentValue = this._values[name];
     const updated = !equal(currentValue, value);
+
+    // we store a deep copy of the object as we don't want the client to be able
+    // to modify our underlying data, which leads unexpected behavior where the
+    // deep equal check to returns true, and therefore the update is not triggered.
+    //
+    // @see tests/common.state-manager.spec.js
+    // 'should copy stored value for "any" type to have a predictable behavior'
+    if (this._schema[name].type === 'any') {
+      value = cloneDeep(value);
+    }
 
     this._values[name] = value;
 
@@ -386,7 +398,7 @@ class ParameterBag {
       return this._schema;
     } else {
       if (!this.has(name)) {
-        throw new ReferenceError(`[stateManager] Cannot get schema description of undefined parameter "${name}"`);
+        throw new ReferenceError(`[SharedState] Cannot get schema description of undefined parameter "${name}"`);
       }
 
       return this._schema[name];
@@ -427,7 +439,7 @@ export default ParameterBag;
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.11</a> on Wed Jan 04 2023 11:37:07 GMT+0100 (Central European Standard Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.11</a> on Tue Jan 10 2023 15:40:24 GMT+0100 (Central European Standard Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>
