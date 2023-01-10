@@ -311,7 +311,7 @@ describe(`common::StateManager`, () => {
       assert.equal(a.get('bool'), true);
     });
 
-    it('should resolve after `subscribe` even if subscribe callback is async', async () => {
+    it('should resolve after `onUpdate` even if onUpdate callback is async', async () => {
       const a = await server.stateManager.create('a');
       let asyncCallbackCalled = false;
 
@@ -505,6 +505,37 @@ describe(`common::StateManager`, () => {
           resolve();
         }, true);
       });
+    });
+
+    it('should copy stored value for "any" type to have a predictable behavior', async () => {
+      server.stateManager.registerSchema('test-any', {
+        any: {
+          type: 'any',
+          nullable: true,
+          default: null,
+        }
+      });
+
+      const state = await server.stateManager.create('test-any');
+      let numCalled = 0;
+
+      state.onUpdate(updates => {
+        assert.equal(updates.any.num, numCalled);
+        numCalled += 1;
+      });
+
+      // client code `data` and state underlying data should never be the same pointer
+      const data = { num: 0 };
+
+      await state.set({ any: data });
+      assert.equal(state.get('any').num, 0);
+
+      data.num = 1;
+
+      await state.set({ any: data });
+      assert.equal(state.get('any').num, 1);
+
+      assert.equal(numCalled, 2);
     });
   });
 

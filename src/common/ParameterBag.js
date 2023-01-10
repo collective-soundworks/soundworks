@@ -264,10 +264,12 @@ class ParameterBag {
    */
   get(name) {
     if (!this.has(name)) {
-      throw new ReferenceError(`[stateManager] Cannot get value of undefined parameter "${name}"`);
+      throw new ReferenceError(`[SharedState] Cannot get value of undefined parameter "${name}"`);
     }
 
     if (this._schema[name].type === 'any') {
+      // we return a deep copy of the object as we don't want the client code to
+      // be able to modify our underlying data.
       return cloneDeep(this._values[name]);
     } else {
       return this._values[name];
@@ -287,14 +289,14 @@ class ParameterBag {
    */
   set(name, value) {
     if (!this.has(name)) {
-      throw new ReferenceError(`[stateManager] Cannot set value of undefined parameter "${name}"`);
+      throw new ReferenceError(`[SharedState] Cannot set value of undefined parameter "${name}"`);
     }
 
     const def = this._schema[name];
     const { coerceFunction } = types[def.type];
 
     if (value === null && def.nullable === false) {
-      throw new TypeError(`[stateManager] Invalid value for ${def.type} param "${name}": value is null and param is not nullable`);
+      throw new TypeError(`[SharedState] Invalid value for ${def.type} param "${name}": value is null and param is not nullable`);
     } else if (value === null && def.nullable === true) {
       value = null;
     } else {
@@ -303,6 +305,16 @@ class ParameterBag {
 
     const currentValue = this._values[name];
     const updated = !equal(currentValue, value);
+
+    // we store a deep copy of the object as we don't want the client to be able
+    // to modify our underlying data, which leads unexpected behavior where the
+    // deep equal check to returns true, and therefore the update is not triggered.
+    //
+    // @see tests/common.state-manager.spec.js
+    // 'should copy stored value for "any" type to have a predictable behavior'
+    if (this._schema[name].type === 'any') {
+      value = cloneDeep(value);
+    }
 
     this._values[name] = value;
 
@@ -337,7 +349,7 @@ class ParameterBag {
       return this._schema;
     } else {
       if (!this.has(name)) {
-        throw new ReferenceError(`[stateManager] Cannot get schema description of undefined parameter "${name}"`);
+        throw new ReferenceError(`[SharedState] Cannot get schema description of undefined parameter "${name}"`);
       }
 
       return this._schema[name];
