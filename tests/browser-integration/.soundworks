@@ -1,0 +1,5 @@
+{
+  "name": "browser-integration",
+  "eslint": true,
+  "language": "js"
+}

@@ -10,7 +10,7 @@
     </title>
 
     <script>
-      window.soundworksConfig = JSON.parse('${JSON.stringify(d)}');
+      window.SOUNDWORKS_CONFIG = JSON.parse('${JSON.stringify(d)}');
     </script>
 
     ${
@@ -23,7 +23,5 @@
     <link rel="stylesheet" href="${d.env.subpath ? `/${d.env.subpath}` : ''}/build/css/app.css">
   </head>
 
-  <body class="loading ${d.role}">
-    <div id="__soundworks-container"></div>
-  </body>
+  <body class="loading ${d.role}"></body>
 </html>

@@ -87,7 +87,7 @@ describe('Browser client integration (install, build, start)', () => {
       let page;
 
       forked.on('message', async msg => {
-        if (msg === 'soundworks:started') {
+        if (msg === 'soundworks:server:started') {
           browser = await puppeteer.launch();
           page = await browser.newPage();
           await page.goto('http://127.0.0.1:8000');

@@ -1,68 +1,64 @@
-import 'source-map-support/register';
-import path from 'node:path';
+import '@soundworks/helpers/polyfills.js';
+import { Server } from '@soundworks/core/server.js';
 
-import { Server } from '../../../../server/index.js';
-import getConfig from '../utils/getConfig.js';
+import { loadConfig } from '../utils/load-config.js';
+import '../utils/catch-unhandled-errors.js';
 
-const ENV = process.env.ENV || 'default';
-const config = getConfig(ENV);
-// config.env.verbose = true;
+// - General documentation: https://soundworks.dev/
+// - API documentation:     https://soundworks.dev/api
+// - Issue Tracker:         https://github.com/collective-soundworks/soundworks/issues
+// - Wizard & Tools:        `npx soundworks`
 
-const server = new Server(config);
-server.setDefaultTemplateConfig();
+const config = loadConfig(process.env.ENV, import.meta.url);
 
-if (config.env.verbose) {
-  console.log(`
+console.log(`
 --------------------------------------------------------
-- launching "${config.app.name}" in "${ENV}" environment
+- launching "${config.app.name}" in "${process.env.ENV || 'default'}" environment
 - [pid: ${process.pid}]
 --------------------------------------------------------
-  `);
-}
+`);
 
-const globalsSchema = {
+/**
+ * Create the soundworks server
+ */
+const server = new Server(config);
+// configure the server for usage within this application template
+server.useDefaultApplicationTemplate();
+
+/**
+ * Register plugins and schemas
+ */
+server.stateManager.registerSchema('globals', {
   done: {
     type: 'boolean',
     nullable: true,
     default: null,
     event: true,
   },
-};
-
-server.stateManager.registerSchema('globals', globalsSchema);
-
-(async function launch() {
-  try {
-    await server.init();
-
-    const globals = await server.stateManager.create('globals');
-    globals.subscribe(updates => {
-      // forward updates to main process
-      if (process.send !== undefined) {
-        process.send(JSON.stringify(updates));
-      }
-    });
-
-    // start all the things
-    await server.start();
-
-    // this is run from test suite
-    if (process.send !== undefined) {
-      process.send('soundworks:started'); // is sent by soundworks `soundworks:server:started`
-      // sent by parent process to quit server
-      process.on('message', async msg => {
-        if (msg === 'stop') {
-          await server.stop();
-        }
-      });
-    }
-
-  } catch (err) {
-    console.error(err.stack);
-  }
-})();
-
-process.on('unhandledRejection', (reason, p) => {
-  console.log('> Unhandled Promise Rejection');
-  console.log(reason);
 });
+
+/**
+ * Launch application (init plugins, http server, etc.)
+ */
+await server.start();
+
+const globals = await server.stateManager.create('globals');
+
+globals.onUpdate(updates => {
+  // console.log(JSON.stringify(updates));
+
+  // forward updates to main process
+  if (process.send !== undefined) {
+    process.send(JSON.stringify(updates));
+  }
+});
+
+if (process.send !== undefined) {
+  // sent by parent process to quit server
+  process.on('message', async msg => {
+    if (msg === 'stop') {
+      await server.stop();
+    }
+  });
+}
+

@@ -1,11 +1,10 @@
 {
-  name: 'soundworks',
+  name: 'browser-integration',
   author: '',
-
   clients: {
     player: {
       target: 'browser',
-      default: true
+      default: true,
     },
   },
 }

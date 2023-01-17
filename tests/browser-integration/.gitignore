@@ -1,14 +1,11 @@
 # transpiled files and dependencies
 /node_modules
-/public/vendors
-# ignore all config except default
-/config/env/*
-!/config/env/default.json
-
-# application instance specific
+# application build files
 .build
 .data
-.vendors
+
+# ignore all environement config files
+/config/env/*
 
 # junk files
 package-lock.json

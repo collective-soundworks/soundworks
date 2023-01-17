@@ -1,41 +1,35 @@
 {
-  "name": "soundworks-template",
-  "authors": [
-    "Benjamin Matuszewski"
-  ],
-  "description": "soundworks application template",
+  "name": "browser-integration",
+  "description": "soundworks application",
+  "authors": [],
   "license": "BSD-3-Clause",
-  "version": "3.1.0",
+  "version": "0.0.0",
+  "type": "module",
   "private": true,
   "scripts": {
-    "build": "npm run clean && sass src/clients/styles:.build/public/css && soundworks-template-build -b",
-    "build:production": "npm run clean && soundworks-template-build -b -m",
-    "clean": "soundworks-template-build -c",
-    "watch-process": "soundworks-template-build -p",
-    "watch-process:inspect": "soundworks-template-build -i -p",
-    "watch-sass": "sass --watch src/clients/styles:.build/public/css",
-    "dev": "npm run build && (concurrently -p \"none\" \"npm run watch-process:inspect server\" \"soundworks-template-build -b -w\" \"npm run watch-sass\")",
-    "start": "node .build/server/index.js"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/collective-soundworks/soundworks-template"
+    "build": "npm run clean && sass src/clients/components/css:.build/public/css && soundworks-build -b",
+    "build:production": "npm run clean && soundworks-build -b -m",
+    "clean": "soundworks-build -D",
+    "dev": "npm run build && (concurrently -i -p \"none\" \"npm run watch:inspect server\" \"soundworks-build -b -w\" \"npm run watch:sass\")",
+    "postinstall": "soundworks-build -C",
+    "start": "node .build/server/index.js",
+    "watch": "soundworks-build -p",
+    "watch:inspect": "soundworks-build -d -p",
+    "watch:sass": "sass --watch src/clients/components/css:.build/public/css",
+    "lint": "eslint ."
   },
   "dependencies": {
-    "@ircam/simple-components": "^2.0.1",
-    "@soundworks/template-helpers": "^2.0.0",
-    "@webcomponents/webcomponentsjs": "^2.4.3",
-    "core-js": "^3.22.3",
-    "json5": "^2.2.1",
-    "lit": "^2.2.2",
-    "regenerator-runtime": "^0.13.7",
-    "sass": "^1.51.0",
-    "serve-static": "^1.15.0",
-    "source-map-support": "^0.5.21",
-    "template-literal": "^1.0.3"
+    "@soundworks/core": "^4.0.0-alpha.0",
+    "@soundworks/helpers": "^1.0.0-alpha.2",
+    "json5": "^2.2.2",
+    "lit": "^2.2.2"
   },
   "devDependencies": {
-    "@soundworks/template-build": "^3.1.3",
-    "concurrently": "^7.1.0"
+    "@ircam/eslint-config": "^1.3.0",
+    "@soundworks/build": "^1.0.0-alpha.0",
+    "@soundworks/create": "^1.0.0-alpha.12",
+    "concurrently": "^7.1.0",
+    "eslint": "^8.32.0",
+    "sass": "^1.57.1"
   }
 }
