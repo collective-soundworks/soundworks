@@ -21,7 +21,7 @@ npx @soundworks/create@latest
 
 ![./assets/soundworks-create-min.gif](./assets/soundworks-create-min.gif)
 
-See [https://soundworks.dev/guides/getting-started.html](https://soundworks.dev/guides/getting-started.html) for more informations on the wizard and how to start with `soundworks`.
+See [https://soundworks.dev/tutorials/getting-started.html](https://soundworks.dev/tutorials/getting-started.html) for more informations on the wizard and how to start with `soundworks`.
 
 <!--
 ## Documentation
