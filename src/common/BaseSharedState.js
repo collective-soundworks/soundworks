@@ -17,6 +17,7 @@ import {
   resolveRequest,
   rejectRequest,
 } from './promise-store.js';
+import { isPlainObject } from './utils.js';
 
 class BaseSharedState {
   constructor(id, remoteId, schemaName, schema, client, isOwner, manager, initValues = {}) {
@@ -255,6 +256,14 @@ ${JSON.stringify(initValues, null, 2)}`);
    * const updates = await state.set({ myParam: Math.random() });
    */
   async set(updates, context = null) {
+    if (!isPlainObject(updates)) {
+      throw new ReferenceError(`[SharedState] State "${this.schemaName}": state.set(updates[, context]) should receive an object as first parameter`);
+    }
+
+    if (context !== null && !isPlainObject(context)) {
+      throw new ReferenceError(`[SharedState] State "${this.schemaName}": state.set(updates[, context]) should receive an object as second parameter`);
+    }
+
     // handle immediate option
     const immediateNewValues = {};
     const immediateOldValues = {};
@@ -263,7 +272,7 @@ ${JSON.stringify(initValues, null, 2)}`);
     for (let name in updates) {
       // throw early (client-side and not only server-side) if parameter is undefined
       if (!this._parameters.has(name)) {
-        throw new ReferenceError(`[stateManager] Cannot set value of undefined parameter "${name}"`);
+        throw new ReferenceError(`[SharedState] State "${this.schemaName}": cannot set value of undefined parameter "${name}"`);
       }
 
       // @note: general idea...
@@ -407,7 +416,7 @@ ${JSON.stringify(initValues, null, 2)}`);
     if (this._isOwner) {
       return this.detach();
     } else {
-      throw new Error(`[stateManager] can delete state "${this.schemaName}", only owner of the state (i.e. the node that "create[d]" it) can delete it`);
+      throw new Error(`[SharedState] Cannot delete state "${this.schemaName}", only the owner of the state (i.e. the node that created it) can delete the state. Use "detach" instead.`);
     }
   }
 

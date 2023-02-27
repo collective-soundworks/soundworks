@@ -301,7 +301,58 @@ describe(`common::StateManager`, () => {
     });
   });
 
-  describe('async state.set(updates) => updates', () => {
+  describe('async state.set(updates[, context]) => updates', () => {
+    it('should throw if first argument is not an object', async () => {
+      const a = await server.stateManager.create('a');
+
+      // weird stuff with async chai, did find better solution
+      let errored = false;
+      try {
+        await a.set('fail', true);
+      } catch(err) {
+        console.log(err);
+        errored = true;
+      }
+
+      if (errored === false) {
+        assert.fail('should throw error');
+      }
+    });
+
+    it('should throw if second argument is not an object', async () => {
+      const a = await server.stateManager.create('a');
+
+      // weird stuff with async chai, did find better solution
+      let errored = false;
+      try {
+        await a.set({}, 'fail');
+      } catch(err) {
+        console.log(err);
+        errored = true;
+      }
+
+      if (errored === false) {
+        assert.fail('should throw error');
+      }
+    });
+
+    it('should throw on undefined param name', async () => {
+      const a = await server.stateManager.create('a');
+
+      // weird stuff with async chai, did find better solution
+      let errored = false;
+      try {
+        await a.set({ unkown: true })
+      } catch(err) {
+        console.log(err);
+        errored = true;
+      }
+
+      if (errored === false) {
+        assert.fail('should throw error');
+      }
+    });
+
     it('should return the updated values', async () => {
       const a = await server.stateManager.create('a');
       const updates = { bool: true };
@@ -326,17 +377,6 @@ describe(`common::StateManager`, () => {
 
       await a.set({ bool: true });
       assert.equal(asyncCallbackCalled, true);
-    });
-
-    it('should throw early on undefined param name', async () => {
-      const a = await server.stateManager.create('a');
-
-      // weird stuff with async chai, did find better solution
-      try {
-        await a.set({ unkown: true })
-      } catch(err) {
-        assert.equal(err.message, `[stateManager] Cannot set value of undefined parameter "unkown"`)
-      }
     });
 
     it('should keep states of same kind isolated', async () => {

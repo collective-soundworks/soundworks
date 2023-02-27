@@ -18,7 +18,6 @@ import BaseSharedState from '../common/BaseSharedState.js';
  * @callback server.SharedState~deleteOnUpdateCallback
  */
 
-
 /**
  * The `SharedState` is one of the most important and versatile abstraction provided
  * by `soundworks`. It represents a set of parameters that are synchronized accross
