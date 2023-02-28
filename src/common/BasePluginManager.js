@@ -113,7 +113,7 @@ class BasePluginManager {
       this.status = 'started';
     } catch(err) {
       this.status = 'errored';
-      throw new Error(err);
+      throw err; // throw initial error
     }
   }
 
