@@ -236,7 +236,7 @@ class Server {
      * // expose assets located in the `soundfiles` directory on the network
      * server.router.use('/soundfiles', express.static('soundfiles')));
      */
-    this.router = express();
+    this.router = express.Router();
     // compression (must be set before serve-static)
     this.router.use(compression());
 
