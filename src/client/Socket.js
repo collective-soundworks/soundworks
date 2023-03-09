@@ -1,3 +1,4 @@
+import { isBrowser } from '@ircam/sc-utils';
 import WebSocket from 'isomorphic-ws';
 
 import {
@@ -7,7 +8,6 @@ import {
   unpackStringMessage,
 } from '../common/sockets-utils.js';
 import logger from '../common/logger.js';
-import { isBrowser } from '../common/utils.js';
 
 // WebSocket events:
 //

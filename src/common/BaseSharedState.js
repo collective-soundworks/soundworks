@@ -1,3 +1,4 @@
+import { isPlainObject } from '@ircam/sc-utils';
 import ParameterBag from './ParameterBag.js';
 import {
   DELETE_REQUEST,
@@ -17,7 +18,6 @@ import {
   resolveRequest,
   rejectRequest,
 } from './promise-store.js';
-import { isPlainObject } from './utils.js';
 
 class BaseSharedState {
   constructor(id, remoteId, schemaName, schema, client, isOwner, manager, initValues = {}) {

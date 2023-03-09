@@ -1,4 +1,4 @@
-import isPlainObject from 'is-plain-obj';
+import { isBrowser, isPlainObject } from '@ircam/sc-utils';
 
 import ContextManager from './ContextManager.js';
 import PluginManager from './PluginManager.js';
@@ -10,7 +10,6 @@ import {
   CLIENT_HANDSHAKE_ERROR,
   AUDIT_STATE_NAME,
 } from '../common/constants.js';
-import { isBrowser } from '../common/utils.js';
 import logger from '../common/logger.js';
 
 /**

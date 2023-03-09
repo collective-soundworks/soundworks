@@ -1,7 +1,6 @@
-import isPlainObject from 'is-plain-obj';
+import { isPlainObject, isString } from '@ircam/sc-utils';
 
 import logger from './logger.js';
-import { isString } from './utils.js';
 
 /**
  * Shared functionnality between server-side and client-size plugin manager

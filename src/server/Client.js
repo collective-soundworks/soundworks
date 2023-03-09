@@ -1,6 +1,5 @@
+import { idGenerator } from '@ircam/sc-utils';
 import { v4 as uuid } from 'uuid';
-
-import { idGenerator } from '../common/utils.js';
 
 const generateId = idGenerator();
 

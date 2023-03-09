@@ -1,4 +1,4 @@
-import { idGenerator } from './utils.js';
+import { idGenerator } from '@ircam/sc-utils';
 
 const generateRequestId = idGenerator();
 const requestPromises = new Map();

@@ -5,10 +5,10 @@ import path from 'node:path';
 import os from 'node:os';
 import { X509Certificate, createPrivateKey } from 'node:crypto';
 
+import { isPlainObject } from '@ircam/sc-utils';
 import chalk from 'chalk';
 import compression from 'compression';
 import express from 'express';
-import isPlainObject from 'is-plain-obj';
 import Keyv from 'keyv';
 import { KeyvFile } from 'keyv-file';
 import merge from 'lodash.merge';
@@ -357,7 +357,7 @@ class Server {
 
     // basic http authentication
     if (this.config.env.auth) {
-      this.router.use((req, res, next) => {
+      const soundworksAuth = (req, res, next) => {
 
         const isProtected  = this.config.env.auth.clients
           .map(type => req.path.endsWith(`/${type}`))
@@ -386,7 +386,9 @@ class Server {
           // route not protected
           return next();
         }
-      });
+      };
+
+      this.router.use(soundworksAuth);
     }
 
     // start http server
@@ -739,8 +741,8 @@ Invalid certificate files, please check your:
     }
 
     const tmpl = templateEngine.compile(tmplString);
-    // http request
-    router.get(route, (req, res) => {
+
+    const soundworksClientHandler = (req, res) => {
       const data = clientConfigFunction(role, this.config, req);
 
       // CORS / COOP / COEP headers for `crossOriginIsolated pages,
@@ -756,7 +758,9 @@ Invalid certificate files, please check your:
 
       const appIndex = tmpl(data);
       res.end(appIndex);
-    });
+    };
+    // http request
+    router.get(route, soundworksClientHandler);
 
     // return route infos for logging on server start
     return route;

@@ -1,11 +1,11 @@
 import EventEmitter from 'node:events';
 
+import { idGenerator, isString, isPlainObject } from '@ircam/sc-utils';
 import clonedeep from 'lodash.clonedeep';
 
 import BaseStateManager from '../common/BaseStateManager.js';
 import ParameterBag from '../common/ParameterBag.js';
 import SharedStatePrivate from '../common/SharedStatePrivate.js';
-import { isString, isPlainObject } from '../common/utils.js';
 import {
   SERVER_ID,
   CREATE_REQUEST,
@@ -22,7 +22,7 @@ import {
   DELETE_SCHEMA,
   PRIVATE_STATES,
 } from '../common/constants.js';
-import { idGenerator } from '../common/utils.js';
+
 
 const generateStateId = idGenerator();
 const generateRemoteId = idGenerator();
