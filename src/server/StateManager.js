@@ -359,7 +359,7 @@ class StateManager extends BaseStateManager {
           client.transport.emit(CREATE_RESPONSE, reqId, stateId, remoteId, schemaName, sendedSchema, currentValues);
 
           this._observers.forEach(observer => {
-            observer.transport.emit(OBSERVE_NOTIFICATION, [schemaName, stateId, nodeId]);
+            observer.transport.emit(OBSERVE_NOTIFICATION, schemaName, stateId, nodeId);
           });
         } catch (err) {
           client.transport.emit(CREATE_ERROR, reqId, err.message);

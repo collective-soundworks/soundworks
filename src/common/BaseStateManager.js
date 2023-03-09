@@ -1,3 +1,4 @@
+import { isString, isFunction } from '@ircam/sc-utils';
 import SharedState from './BaseSharedState.js';
 import {
   CREATE_REQUEST,
@@ -31,7 +32,7 @@ class BaseStateManager {
     this.client = { id, transport };
 
     this._statesById = new Map();
-    this._observeListeners = new Set();
+    this._observeListeners = new Map(); // Map <callback, filterSchemaName>
     this._cachedSchemas = new Map();
     this._observeRequestCallbacks = new Map();
 
@@ -88,28 +89,35 @@ class BaseStateManager {
     this.client.transport.addListener(OBSERVE_RESPONSE, async (reqId, ...list) => {
       // retrieve the callback that have been stored in observe to make sure
       // we don't call another callback that may have been registered earlier.
-      const callback = this._observeRequestCallbacks.get(reqId);
+      const [callback, filterSchemaName] = this._observeRequestCallbacks.get(reqId);
       this._observeRequestCallbacks.delete(reqId);
 
       const promises = list.map(([schemaName, stateId, nodeId]) => {
-        return callback(schemaName, stateId, nodeId);
+        if (filterSchemaName === '*' || filterSchemaName === schemaName) {
+          return callback(schemaName, stateId, nodeId);
+        } else {
+          return Promise.resolve();
+        }
       });
 
       await Promise.all(promises);
 
       const unsubscribe = () => {
         this._observeListeners.delete(callback);
-
+        // no more listeners, we can stop receiving notification from the server
         if (this._observeListeners.size === 0) {
           this.client.transport.emit(UNOBSERVE_NOTIFICATION);
         }
       };
+
       resolveRequest(reqId, unsubscribe);
     });
 
-    this.client.transport.addListener(OBSERVE_NOTIFICATION, (...list) => {
-      list.forEach(([schemaName, stateId, nodeId]) => {
-        this._observeListeners.forEach(callback => callback(schemaName, stateId, nodeId));
+    this.client.transport.addListener(OBSERVE_NOTIFICATION, (schemaName, stateId, nodeId) => {
+      this._observeListeners.forEach((filterSchemaName, callback) => {
+        if (filterSchemaName === '*' || filterSchemaName === schemaName) {
+          callback(schemaName, stateId, nodeId);
+        }
       });
     });
 
@@ -184,13 +192,40 @@ class BaseStateManager {
    *   }
    * });
    */
-  async observe(callback) {
-    this._observeListeners.add(callback);
-    // store function
+  // note: all filtering is done only on client-side as it is really more simple to
+  // handle this way and the network overhead is very low for observe notifications:
+  // i.e. schemaName, stateId, nodeId
+  async observe(...args) {
+    let filterSchemaName;
+    let callback;
+
+    if (args.length === 1) {
+      filterSchemaName = '*';
+      callback = args[0];
+
+      if (!isFunction(callback)) {
+        throw new Error(`[stateManager] Invalid arguments, valid signatures are "stateManager.observe(callback)" or "stateManager.observe(schemaName, callback)"`);
+      }
+    } else if (args.length === 2) {
+      filterSchemaName = args[0];
+      callback = args[1];
+
+      if (!isString(filterSchemaName) || !isFunction(callback)) {
+        throw new Error(`[stateManager] Invalid arguments, valid signatures are "stateManager.observe(callback)" or "stateManager.observe(schemaName, callback)"`);
+      }
+    } else {
+      throw new Error(`[stateManager] Invalid arguments, valid signatures are "stateManager.observe(callback)" or "stateManager.observe(schemaName, callback)"`);
+    }
+
+    // resend request to get updated list of states
     return new Promise((resolve, reject) => {
       const reqId = storeRequestPromise(resolve, reject);
-      // store the callback to be executed on the response
-      this._observeRequestCallbacks.set(reqId, callback);
+      // store the callback for execution on the response. the returned Promise
+      // is fullfiled once callback has been executed with each existing states
+      this._observeRequestCallbacks.set(reqId, [callback, filterSchemaName]);
+      // store the callback for execution on subsequent notifications
+      this._observeListeners.set(callback, filterSchemaName);
+
       this.client.transport.emit(OBSERVE_REQUEST, reqId);
     });
   }

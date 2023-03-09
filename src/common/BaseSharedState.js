@@ -150,7 +150,7 @@ ${JSON.stringify(initValues, null, 2)}`);
     // Monkey patch detach so it throws if called twice. Doing nothing blocks
     // the process on a second `detach` call as the Promise never resolves
     this.detach = () => {
-      throw new Error(`[stateManager] State "${this.schemaName} (${this.id})" already detached, cannot detach twice`);
+      throw new Error(`[SharedState] State "${this.schemaName} (${this.id})" already detached, cannot detach twice`);
     };
   }
 

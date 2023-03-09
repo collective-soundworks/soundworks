@@ -269,6 +269,56 @@ describe(`common::StateManager`, () => {
       await state3.delete();
       await state4.delete();
     });
+
+    it(`should properly behave with filtered signature: observe(schemaName callback)`, async () => {
+      const a1 = await client.stateManager.create('a');
+      const b1 = await client.stateManager.create('b');
+
+      let starCalled = 0;
+      let filteredCalled = 0;
+
+      const unobserveStar = await client.stateManager.observe(async (schemaName, stateId) => {
+        starCalled += 1;
+      });
+
+      const unobserveFiltered = await client.stateManager.observe('a', async (schemaName, stateId) => {
+        filteredCalled += 1;
+      });
+
+      assert.equal(starCalled, 2);
+      assert.equal(filteredCalled, 1);
+
+      const a2 = await client.stateManager.create('a');
+      await new Promise(resolve => setTimeout(resolve, 100));
+      assert.equal(starCalled, 3);
+      assert.equal(filteredCalled, 2);
+
+      const b2 = await client.stateManager.create('b');
+      await new Promise(resolve => setTimeout(resolve, 100));
+      assert.equal(starCalled, 4);
+      assert.equal(filteredCalled, 2);
+
+      unobserveStar();
+
+      const a3 = await client.stateManager.create('a');
+      await new Promise(resolve => setTimeout(resolve, 100));
+      assert.equal(starCalled, 4);
+      assert.equal(filteredCalled, 3);
+
+      unobserveFiltered();
+
+      const a4 = await client.stateManager.create('a');
+      await new Promise(resolve => setTimeout(resolve, 100));
+      assert.equal(starCalled, 4);
+      assert.equal(filteredCalled, 3);
+
+      await a1.delete();
+      await a2.delete();
+      await a3.delete();
+      await a4.delete();
+      await b1.delete();
+      await b2.delete();
+    });
   });
 
 
