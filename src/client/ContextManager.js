@@ -78,7 +78,7 @@ class ContextManager {
         this._contextStartPromises.set(contextName, startPromise);
         await startPromise;
         context.status = 'started';
-      } catch(err) {
+      } catch (err) {
         context.status = 'errored';
         throw new Error(err);
       }

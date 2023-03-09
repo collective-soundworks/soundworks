@@ -114,7 +114,7 @@ class ContextManager {
         this._contextStartPromises.set(contextName, startPromise);
         await startPromise;
         context.status = 'started';
-      } catch(err) {
+      } catch (err) {
         context.status = 'errored';
         throw new Error(err);
       }
@@ -144,7 +144,7 @@ class ContextManager {
       let context;
       try {
         context = await this.get(contextName);
-      } catch(err) {
+      } catch (err) {
         client.socket.send(
           CONTEXT_ENTER_ERROR,
           reqId,
@@ -185,7 +185,7 @@ class ContextManager {
         await context.enter(client);
 
         client.socket.send(CONTEXT_ENTER_RESPONSE, reqId, contextName);
-      } catch(err) {
+      } catch (err) {
         client.socket.send(CONTEXT_ENTER_ERROR, reqId, contextName, err.message);
       }
     });
@@ -207,7 +207,7 @@ class ContextManager {
         try {
           await context.exit(client);
           client.socket.send(CONTEXT_EXIT_RESPONSE, reqId, contextName);
-        } catch(err) {
+        } catch (err) {
           client.socket.send(CONTEXT_EXIT_ERROR, reqId, contextName, err.message);
         }
       } else {

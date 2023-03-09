@@ -413,7 +413,7 @@ class Server {
           // this fails with self-signed certificates for whatever reason...
           try {
             x509 = new X509Certificate(cert);
-          } catch(err) {
+          } catch (err) {
             this._dispatchStatus('errored');
             throw new Error(`[soundworks:Server] Invalid https cert file`);
           }
@@ -425,7 +425,7 @@ class Server {
               this._dispatchStatus('errored');
               throw new Error(`[soundworks:Server] Invalid https key file`);
             }
-          } catch(err) {
+          } catch (err) {
             this._dispatchStatus('errored');
             throw new Error(`[soundworks:Server] Invalid https key file`);
           }
@@ -449,7 +449,7 @@ class Server {
           };
 
           this.httpServer = https.createServer({ key, cert }, this.router);
-        } catch(err) {
+        } catch (err) {
           logger.error(`
 Invalid certificate files, please check your:
 - key file: ${httpsInfos.key}
@@ -728,7 +728,7 @@ Invalid certificate files, please check your:
     try {
       const stats = fs.statSync(clientTmpl);
       template = stats.isFile() ? clientTmpl : defaultTmpl;
-    } catch(err) {
+    } catch (err) {
       template = defaultTmpl;
     }
 
@@ -736,7 +736,7 @@ Invalid certificate files, please check your:
 
     try {
       tmplString = fs.readFileSync(template, 'utf8');
-    } catch(err) {
+    } catch (err) {
       throw new Error(`[soundworks:Server] html template file "${template}" not found`);
     }
 
@@ -809,7 +809,7 @@ Invalid certificate files, please check your:
 
       try {
         this.pluginManager.checkRegisteredPlugins(registeredPlugins);
-      } catch(err) {
+      } catch (err) {
         socket.send(CLIENT_HANDSHAKE_ERROR, {
           type: 'invalid-plugin-list',
           message: err.message,

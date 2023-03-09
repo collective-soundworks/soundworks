@@ -35,7 +35,7 @@ class BaseSharedState {
     try {
       /** @private */
       this._parameters = new ParameterBag(schema, initValues);
-    } catch(err) {
+    } catch (err) {
       console.error(err.stack);
 
       throw new Error(`Error creating or attaching state "${schemaName}" w/ values:\n

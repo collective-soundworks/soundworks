@@ -250,7 +250,7 @@ class Client {
         this.socket.addListener(CLIENT_HANDSHAKE_ERROR, (err) => {
           let msg = ``;
 
-          switch(err.type) {
+          switch (err.type) {
             case 'invalid-client-type':
               msg = `[soundworks:Client] ${err.message}`;
               break;
@@ -274,7 +274,7 @@ class Client {
 
         this.socket.send(CLIENT_HANDSHAKE_REQUEST, payload);
       });
-    } catch(err) {
+    } catch (err) {
       throw new Error(err);
     }
 

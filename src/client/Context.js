@@ -209,7 +209,7 @@ class Context {
         const reqId = storeRequestPromise(resolve, reject);
         this.client.socket.send(CONTEXT_ENTER_REQUEST, reqId, this.name);
       });
-    } catch(err) {
+    } catch (err) {
       throw new Error(err);
     }
   }
@@ -243,7 +243,7 @@ class Context {
         const reqId = storeRequestPromise(resolve, reject);
         this.client.socket.send(CONTEXT_EXIT_REQUEST, reqId, this.name);
       });
-    } catch(err) {
+    } catch (err) {
       throw new Error(err);
     }
   }

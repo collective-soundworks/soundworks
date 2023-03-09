@@ -110,7 +110,7 @@ class BasePluginManager {
     try {
       await Promise.all(promises);
       this.status = 'started';
-    } catch(err) {
+    } catch (err) {
       this.status = 'errored';
       throw err; // throw initial error
     }
@@ -169,7 +169,7 @@ class BasePluginManager {
         this._instanceStartPromises.set(id, startPromise);
 
         await startPromise;
-      } catch(err) {
+      } catch (err) {
         errored = true;
         this._propagateStateChange(instance, 'errored');
         throw err;
