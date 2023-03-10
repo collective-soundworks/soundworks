@@ -359,7 +359,9 @@ class StateManager extends BaseStateManager {
           client.transport.emit(CREATE_RESPONSE, reqId, stateId, remoteId, schemaName, sendedSchema, currentValues);
 
           this._observers.forEach(observer => {
-            observer.transport.emit(OBSERVE_NOTIFICATION, schemaName, stateId, nodeId);
+            if (observer.id !== nodeId) {
+              observer.transport.emit(OBSERVE_NOTIFICATION, schemaName, stateId, nodeId);
+            }
           });
         } catch (err) {
           client.transport.emit(CREATE_ERROR, reqId, err.message);
@@ -428,7 +430,7 @@ class StateManager extends BaseStateManager {
         const { schemaName, id, _creatorId } = state;
         // only track application states
         // (e.g. do not propagate infos about audit state)
-        if (!PRIVATE_STATES.includes(schemaName)) {
+        if (!PRIVATE_STATES.includes(schemaName) && _creatorId !== client.id) {
           statesInfos.push([schemaName, id, _creatorId]);
         }
       });

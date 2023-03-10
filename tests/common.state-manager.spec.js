@@ -89,7 +89,6 @@ describe(`common::StateManager`, () => {
     server.stop();
   });
 
-
   describe('stateManager.registerSchema(schemaName, definition)', () => {
     it('should register schema', () => {
       assert.throws(() => {
@@ -133,7 +132,7 @@ describe(`common::StateManager`, () => {
       await state3.delete();
     });
 
-    it(`returned not be notified of deleted states`, async () => {
+    it(`should not be notified of deleted states`, async () => {
       let numCalled = 0;
       const state1 = await client.stateManager.create('a');
 
@@ -181,7 +180,7 @@ describe(`common::StateManager`, () => {
       await state3.delete();
     });
 
-    it(`should not receive messages from transport after unobserve`, async () => {
+    it(`should not receive messages on transport after unobserve`, async () => {
       let numCalled = 0;
       const state1 = await client.stateManager.create('a');
 
@@ -202,6 +201,27 @@ describe(`common::StateManager`, () => {
 
       if (notificationReceived) {
         assert.fail('should not receive notification from transport');
+      }
+
+      await state1.delete();
+      await state2.delete();
+    });
+
+    it(`should not be notified of states created by same node`, async () => {
+      const state1 = await client.stateManager.create('a');
+
+      let observeCalled = false;
+
+      const unobserve = await client.stateManager.observe('a', (schemaName, stateId, nodeId) => {
+        observeCalled = true;
+      });
+
+      const state2 = await client.stateManager.create('a');
+
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      if (observeCalled === true) {
+        assert.fail('observe should not have been called')
       }
 
       await state1.delete();
@@ -320,7 +340,6 @@ describe(`common::StateManager`, () => {
       await b2.delete();
     });
   });
-
 
   describe('async stateManager.create(schemaName) => state', () => {
     it('should create state', async () => {
@@ -1228,8 +1247,96 @@ describe(`common::StateManager`, () => {
     });
   });
 
-  describe('stateManager.registerUpdateHook(schemaName, updateHook)', () => {
+  describe.only(`await getCollection()`, () => {
+    it(`should return a working state collection`, async () => {
+      const client0 = clients[0];
+      const client1 = clients[1];
+      const client2 = clients[2];
 
+      const stateb = await client0.stateManager.create('b');
+      const stateA0 = await client0.stateManager.create('a');
+      await stateA0.set({ int: 42 });
+      const stateA1 = await client1.stateManager.create('a');
+      await stateA1.set({ int: 21 });
+
+      const collection = await client2.stateManager.getCollection('a');
+
+      collection.sort((a, b) => a.get('int') < b.get('int') ? -1 : 1);
+      const values = collection.getValues();
+      assert.deepEqual(values, [ { bool: false, int: 21 }, { bool: false, int: 42 } ]);
+      const ints = collection.get('int');
+      assert.deepEqual(ints, [21, 42]);
+
+      await stateA0.detach();
+
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      const ints2 = collection.get('int');
+      assert.deepEqual(ints2, [21]);
+
+      await collection.detach();
+
+      assert.equal(collection.length, 0);
+
+      stateb.delete();
+      stateA0.delete();
+      stateA1.delete();
+    });
+
+    it(`collection should not contain own node state`, async () => {
+      const state = await client.stateManager.create('a');
+      const collection = await client.stateManager.getCollection('a');
+
+      assert.equal(collection.length, 0);
+
+      state.delete();
+    });
+
+    it(`collection.onUpdate(callback)`, async () => {
+      const state = await client.stateManager.create('a');
+
+      const collection = await clients[1].stateManager.getCollection('a');
+
+      let onUpdateCalled = false;
+
+      collection.onUpdate((s, updates) => {
+        onUpdateCalled = true;
+
+        assert.equal(s.get('int'), 42);
+        assert.equal(updates.int, 42);
+      });
+
+      await state.set({ int: 42 });
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      if (onUpdateCalled === false) {
+        assert.fail('onUpdate should have been called');
+      }
+
+      state.delete();
+    });
+
+    it(`collection.onDetach(callback)`, async () => {
+      const state = await client.stateManager.create('a');
+      const collection = await clients[1].stateManager.getCollection('a');
+
+      let onDetachCalled = false;
+
+      collection.onDetach((s) => {
+        onDetachCalled = true;
+      });
+
+      state.delete();
+
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      if (onDetachCalled === false) {
+        assert.fail('onUpdate should have been called');
+      }
+    });
+  });
+
+  describe('stateManager.registerUpdateHook(schemaName, updateHook)', () => {
     const hookSchema = {
       name: {
         type: 'string',
