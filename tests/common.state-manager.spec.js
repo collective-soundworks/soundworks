@@ -151,6 +151,8 @@ describe(`common::StateManager`, () => {
 
       assert.equal(numCalled, 1);
       unobserve2();
+
+      state1.delete();
     });
 
     it(`returned Promise should resolve after async observe callback`, async () => {
@@ -297,11 +299,13 @@ describe(`common::StateManager`, () => {
       let starCalled = 0;
       let filteredCalled = 0;
 
-      const unobserveStar = await client.stateManager.observe(async (schemaName, stateId) => {
+      const other = clients[1];
+
+      const unobserveStar = await other.stateManager.observe(async (schemaName, stateId) => {
         starCalled += 1;
       });
 
-      const unobserveFiltered = await client.stateManager.observe('a', async (schemaName, stateId) => {
+      const unobserveFiltered = await other.stateManager.observe('a', async (schemaName, stateId) => {
         filteredCalled += 1;
       });
 
@@ -350,6 +354,9 @@ describe(`common::StateManager`, () => {
       assert.isNumber(stateA.remoteId);
       assert.isNumber(stateB.id);
       assert.isNumber(stateB.remoteId);
+
+      await stateA.delete();
+      await stateB.delete();
     });
 
     it('should create state with default values', async () => {
@@ -360,6 +367,8 @@ describe(`common::StateManager`, () => {
 
       assert.equal(stateA.get('bool'), true);
       assert.equal(stateA.get('int'), 42);
+
+      await stateA.delete();
     });
 
     it('should create several state of same kind', async () => {
@@ -367,6 +376,9 @@ describe(`common::StateManager`, () => {
       const a1 = await server.stateManager.create('a');
 
       assert.notEqual(a0.id, a1.id);
+
+      await a0.delete();
+      await a1.delete();
     });
   });
 
@@ -386,6 +398,8 @@ describe(`common::StateManager`, () => {
       if (errored === false) {
         assert.fail('should throw error');
       }
+
+      await a.delete();
     });
 
     it('should throw if second argument is not an object', async () => {
@@ -403,6 +417,8 @@ describe(`common::StateManager`, () => {
       if (errored === false) {
         assert.fail('should throw error');
       }
+
+      await a.delete();
     });
 
     it('should throw on undefined param name', async () => {
@@ -420,6 +436,8 @@ describe(`common::StateManager`, () => {
       if (errored === false) {
         assert.fail('should throw error');
       }
+
+      await a.delete();
     });
 
     it('should return the updated values', async () => {
@@ -429,23 +447,23 @@ describe(`common::StateManager`, () => {
 
       assert.deepEqual(result, updates);
       assert.equal(a.get('bool'), true);
+
+      await a.delete();
     });
 
     it('should resolve after `onUpdate` even if onUpdate callback is async', async () => {
       const a = await server.stateManager.create('a');
       let asyncCallbackCalled = false;
 
-      a.onUpdate(updates => {
-        return new Promise(resolve => {
-          setTimeout(() => {
-            asyncCallbackCalled = true;
-            resolve();
-          }, 100);
-        });
+      a.onUpdate(async updates => {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        asyncCallbackCalled = true;
       });
 
       await a.set({ bool: true });
       assert.equal(asyncCallbackCalled, true);
+
+      await a.delete();
     });
 
     it('should keep states of same kind isolated', async () => {
@@ -478,6 +496,10 @@ describe(`common::StateManager`, () => {
             assert.equal(state.get('int'), 0);
           }
         }
+      }
+
+      for (let state of states) {
+        await state.delete();
       }
     });
   });
@@ -571,6 +593,9 @@ describe(`common::StateManager`, () => {
         await state.set({ bool: true, int: 42 });
         await state.set({ bool: false, int: 76 }, { someContext: true });
         await Promise.all([statePromise, attachedPromise]);
+
+        await state.delete();
+
         resolve();
       });
     });
@@ -578,42 +603,46 @@ describe(`common::StateManager`, () => {
     it(`should return working unsubscribe() function`, async () => {
       const a = await server.stateManager.create('a');
 
-      const unsubsribe = a.onUpdate(updates => {
-        assert.fail('should not be called')
-      });
+      let onUpdateCalled = false;
+      const unsubsribe = a.onUpdate(updates => onUpdateCalled = true);
 
       unsubsribe();
 
       await a.set({ int: 1 });
 
-      return new Promise((resolve, reject) => {
-        setTimeout(resolve, 100);
-      });
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      assert.equal(onUpdateCalled, false);
+      await a.delete();
     });
 
     it('should not execute immediately if `executeListener=false` (default)', async () => {
       const a = await server.stateManager.create('a');
 
-      const unsubsribe = a.onUpdate(updates => {
-        assert.fail('should not be called')
-      });
+      let onUpdateCalled = false;
+      const unsubsribe = a.onUpdate(updates => { onUpdateCalled = true; }, false);
 
-      return new Promise((resolve, reject) => {
-        setTimeout(resolve, 100);
-      });
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      assert.equal(onUpdateCalled, false);
+      await a.delete();
     });
 
     it('should execute immediately if `executeListener=true`', async () => {
-      return new Promise(async (resolve) => {
-        const a = await server.stateManager.create('a');
+      const a = await server.stateManager.create('a');
 
-        const unsubsribe = a.onUpdate((newValues, oldValues, context) => {
-          assert.deepEqual(newValues, { bool: false, int: 0 });
-          assert.deepEqual(oldValues, {});
-          assert.deepEqual(context, null);
-          resolve();
-        }, true);
-      });
+      let onUpdateCalled = false;
+      const unsubsribe = a.onUpdate((newValues, oldValues, context) => {
+        onUpdateCalled = true;
+        assert.deepEqual(newValues, { bool: false, int: 0 });
+        assert.deepEqual(oldValues, {});
+        assert.deepEqual(context, null);
+      }, true);
+
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      assert.equal(onUpdateCalled, true);
+      await a.delete();
     });
 
     it('should copy stored value for "any" type to have a predictable behavior', async () => {
@@ -650,28 +679,26 @@ describe(`common::StateManager`, () => {
 
   describe('schema options', () => {
     it('default options [event=false, filterChange=true, immediate=false] should behave correctly', async () => {
-      return new Promise(async (resolve, reject) => {
-        const a = await server.stateManager.create('a');
-        let counter = 0;
+      const a = await server.stateManager.create('a');
+      let counter = 0;
 
-        a.onUpdate(updates => {
-          try {
-            assert.deepEqual(updates, { bool: true });
-            counter += 1;
-          } catch(err) {
-            reject(err);
-          }
-        });
-
-        await a.set({ bool: true });
-        await a.set({ bool: true });
-        await a.set({ bool: true });
-
-        setTimeout(() => {
-          assert.equal(counter, 1);
-          resolve();
-        }, 100);
+      a.onUpdate(updates => {
+        try {
+          assert.deepEqual(updates, { bool: true });
+          counter += 1;
+        } catch(err) {
+          reject(err);
+        }
       });
+
+      await a.set({ bool: true });
+      await a.set({ bool: true });
+      await a.set({ bool: true });
+
+      await new Promise(resolve => setTimeout(resolve, 200));
+      assert.equal(counter, 1);
+
+      await a.delete();
     });
 
     it('[event=true] should behave correctly', async () => {
@@ -1067,33 +1094,31 @@ describe(`common::StateManager`, () => {
       const a1 = await server.stateManager.attach('a', a0.id);
       const a2 = await server.stateManager.attach('a', a0.id);
 
-      return new Promise(async (resolve, reject) => {
-        const called = [0, 0, 0];
+      const called = [0, 0, 0];
 
-        [a0, a1, a2].forEach((state, index) => {
-          state.onUpdate(updates => {
-            assert.equal(updates.int, called[index] % 100 + 1);
-            called[index] += 1;
-          });
+      [a0, a1, a2].forEach((state, index) => {
+        state.onUpdate(updates => {
+          assert.equal(updates.int, called[index] % 100 + 1);
+          called[index] += 1;
         });
-
-        for (let state of [a0, a1, a2]) {
-          for (let i = 1; i <= 100; i++) {
-            await state.set({ int: i });
-
-            assert.equal(a0.get('int'), i);
-            assert.equal(a1.get('int'), i);
-            assert.equal(a2.get('int'), i);
-          }
-        }
-
-        setTimeout(() => {
-          assert.equal(called[0], 300);
-          assert.equal(called[1], 300);
-          assert.equal(called[2], 300);
-          resolve();
-        }, 200);
       });
+
+      for (let state of [a0, a1, a2]) {
+        for (let i = 1; i <= 100; i++) {
+          await state.set({ int: i });
+
+          assert.equal(a0.get('int'), i);
+          assert.equal(a1.get('int'), i);
+          assert.equal(a2.get('int'), i);
+        }
+      }
+
+      await new Promise(resolve => setTimeout(resolve, 200));
+      assert.equal(called[0], 300);
+      assert.equal(called[1], 300);
+      assert.equal(called[2], 300);
+
+      await a0.delete();
     });
 
     it('should propagate updates to all attached states (client)', async () => {
@@ -1101,33 +1126,31 @@ describe(`common::StateManager`, () => {
       const a1 = await client.stateManager.attach('a', a0.id);
       const a2 = await client.stateManager.attach('a', a0.id);
 
-      return new Promise(async (resolve, reject) => {
-        const called = [0, 0, 0];
+      const called = [0, 0, 0];
 
-        [a0, a1, a2].forEach((state, index) => {
-          state.onUpdate(updates => {
-            assert.equal(updates.int, called[index] % 100 + 1);
-            called[index] += 1;
-          });
+      [a0, a1, a2].forEach((state, index) => {
+        state.onUpdate(updates => {
+          assert.equal(updates.int, called[index] % 100 + 1);
+          called[index] += 1;
         });
-
-        for (let state of [a0, a1, a2]) {
-          for (let i = 1; i <= 100; i++) {
-            await state.set({ int: i });
-
-            assert.equal(a0.get('int'), i);
-            assert.equal(a1.get('int'), i);
-            assert.equal(a2.get('int'), i);
-          }
-        }
-
-        setTimeout(() => {
-          assert.equal(called[0], 300);
-          assert.equal(called[1], 300);
-          assert.equal(called[2], 300);
-          resolve();
-        }, 200);
       });
+
+      for (let state of [a0, a1, a2]) {
+        for (let i = 1; i <= 100; i++) {
+          await state.set({ int: i });
+
+          assert.equal(a0.get('int'), i);
+          assert.equal(a1.get('int'), i);
+          assert.equal(a2.get('int'), i);
+        }
+      }
+
+      await new Promise(resolve => setTimeout(resolve, 200));
+      assert.equal(called[0], 300);
+      assert.equal(called[1], 300);
+      assert.equal(called[2], 300);
+
+      await a0.delete();
     });
   });
 
@@ -1137,68 +1160,85 @@ describe(`common::StateManager`, () => {
       const a1 = await server.stateManager.attach('a', a0.id);
       const a2 = await server.stateManager.attach('a', a0.id);
 
-      return new Promise(async (resolve, reject) => {
-        a1.onUpdate(() => assert.fail('subscribe should not be called'));
+      let subscribeCalled = false;
+      a1.onUpdate(() => subscribeCalled = true);
 
-        await a1.detach();
-        await a0.set({ bool: true });
+      await a1.detach();
+      await a0.set({ bool: true });
 
-        assert.equal(a0.get('bool'), true);
-        assert.equal(a1.get('bool'), false);
-        assert.equal(a2.get('bool'), true); // this one is still attached
+      assert.equal(a0.get('bool'), true);
+      assert.equal(a1.get('bool'), false);
+      assert.equal(a2.get('bool'), true); // this one is still attached
 
-        setTimeout(resolve, 200);
-      });
+      a0.delete();
+      await new Promise(resolve => setTimeout(resolve, 200));
+
+      if (subscribeCalled) {
+        assert.fail('subscribe should not be called after detach');
+      }
     });
 
     it('should call state.onDetach', async () => {
       const a0 = await server.stateManager.create('a');
       const a1 = await server.stateManager.attach('a', a0.id);
 
-      return new Promise(async (resolve, reject) => {
-        a1.onDetach(() => {
-          // timeout to see if onDelete is called
-          setTimeout(resolve, 100);
-        });
-        a1.onDelete(() => assert.fail('should call onDelete when not owner'));
+      let onDetachCalled = false;
+      let onDeleteCalled = false;
+      a1.onDetach(() => onDetachCalled = true);
+      a1.onDelete(() => onDeleteCalled = true);
 
-        await a1.detach();
-      });
+      await a1.detach();
+      await new Promise(resolve => setTimeout(resolve, 200));
+
+      assert.equal(onDetachCalled, true);
+      assert.equal(onDeleteCalled, false);
+
+      await a0.delete();
+      await new Promise(resolve => setTimeout(resolve, 200));
+
+      assert.equal(onDeleteCalled, false);
     });
 
     it('should call state.onDetach and state.onDelete if owner', async () => {
       const a = await server.stateManager.create('a');
 
-      return new Promise(async (resolve, reject) => {
-        let detachedCalled = false;
-        a.onDetach(() => detachedCalled = true);
-        a.onDelete(() => {
-          assert.equal(detachedCalled, true);
-          resolve();
-        });
+      let onDetachCalled = false;
+      let onDeleteCalled = false;
 
-        await a.detach();
+      a.onDetach(() => onDetachCalled = true);
+      a.onDelete(() => {
+        onDeleteCalled = true;
+        assert.equal(onDetachCalled, true);
       });
+
+      await a.delete();
+
+      await new Promise(resolve => setTimeout(resolve, 200));
+      assert.equal(onDetachCalled, true);
+      assert.equal(onDeleteCalled, true);
     });
 
-    it('should call state.onDetach and state.onDelete on attached states if owner', async () => {
+    it('(may be an issue) should call state.onDetach and state.onDelete also on attached states if owner', async () => {
       const a0 = await server.stateManager.create('a');
       const a1 = await server.stateManager.attach('a', a0.id);
 
-      return new Promise(async (resolve, reject) => {
-        let detachedCalled = false;
-        a1.onDetach(() => detachedCalled = true);
-        a1.onDelete(() => {
-          assert.equal(detachedCalled, true);
-          resolve();
-        });
+      let onDetachCalled = false;
+      let onDeleteCalled = false;
 
-        await a0.detach();
+      a1.onDetach(() => onDetachCalled = true);
+      a1.onDelete(() => {
+        onDeleteCalled = true;
+        assert.equal(onDetachCalled, true);
       });
+
+      await a0.detach();
+
+      await new Promise(resolve => setTimeout(resolve, 200));
+      assert.equal(onDetachCalled, true);
+      assert.equal(onDeleteCalled, true);
     });
 
     it('should throw on a second `detach` call', async () => {
-      const a = await server.stateManager.create('a');
       const b = await server.stateManager.create('b');
 
       let index = 0;
@@ -1212,7 +1252,18 @@ describe(`common::StateManager`, () => {
       });
 
       await b.detach();
-      assert.throws(() => b.detach());
+
+      let errored = false;
+      try {
+        await b.detach();
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      if (!errored) {
+        assert.fail();
+      }
     });
 
   });
@@ -1247,7 +1298,7 @@ describe(`common::StateManager`, () => {
     });
   });
 
-  describe.only(`await getCollection()`, () => {
+  describe(`await getCollection()`, () => {
     it(`should return a working state collection`, async () => {
       const client0 = clients[0];
       const client1 = clients[1];
@@ -1262,6 +1313,7 @@ describe(`common::StateManager`, () => {
       const collection = await client2.stateManager.getCollection('a');
 
       collection.sort((a, b) => a.get('int') < b.get('int') ? -1 : 1);
+
       const values = collection.getValues();
       assert.deepEqual(values, [ { bool: false, int: 21 }, { bool: false, int: 42 } ]);
       const ints = collection.get('int');

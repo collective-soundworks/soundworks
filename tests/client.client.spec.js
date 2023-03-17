@@ -65,7 +65,7 @@ describe('client::Client', () => {
   });
 
   describe(`await client.init()`, () => {
-    it(`should have opened socket`, async () => {
+    it(`should open the sockets`, async () => {
       const server = new Server(config);
       await server.init();
       await server.start();
@@ -86,7 +86,7 @@ describe('client::Client', () => {
       await server.stop();
     });
 
-    it(`should throw if invalid client type/role`, async () => {
+    it(`should throw if invalid client role`, async () => {
       const server = new Server(config);
       await server.init();
       await server.start();
