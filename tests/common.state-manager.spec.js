@@ -391,7 +391,7 @@ describe(`common::StateManager`, () => {
       try {
         await a.set('fail', true);
       } catch(err) {
-        console.log(err);
+        console.log(err.message);
         errored = true;
       }
 
@@ -410,7 +410,7 @@ describe(`common::StateManager`, () => {
       try {
         await a.set({}, 'fail');
       } catch(err) {
-        console.log(err);
+        console.log(err.message);
         errored = true;
       }
 
@@ -429,7 +429,7 @@ describe(`common::StateManager`, () => {
       try {
         await a.set({ unkown: true })
       } catch(err) {
-        console.log(err);
+        console.log(err.message);
         errored = true;
       }
 

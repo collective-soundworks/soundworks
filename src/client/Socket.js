@@ -1,4 +1,5 @@
 import { isBrowser } from '@ircam/sc-utils';
+import fetch from 'cross-fetch';
 import WebSocket from 'isomorphic-ws';
 
 import {
@@ -110,7 +111,11 @@ class Socket {
       };
     }
 
-    const queryParams = `role=${role}&key=${key}`;
+    let queryParams = `role=${role}&key=${key}`;
+
+    if (config.token) {
+      queryParams += `&token=${config.token}`;
+    }
 
     // ----------------------------------------------------------
     // init string socket
@@ -146,19 +151,22 @@ class Socket {
 
         // cf. https://github.com/collective-soundworks/soundworks/issues/17
         ws.addEventListener('error', e => {
-          if (e.type === 'error' && e.error.code === 'ECONNREFUSED') {
-            if (!connectionRefusedLogged) {
-              logger.log('[soundworks.Socket] Connection refused, waiting for the server to start');
-              connectionRefusedLogged = true;
-            }
-
+          if (e.type === 'error') {
             if (ws.terminate) {
               ws.terminate();
             } else {
               ws.close();
             }
 
-            setTimeout(trySocket, 1000);
+            // for node clients, retry connection
+            if (e.error && e.error.code === 'ECONNREFUSED') {
+              if (!connectionRefusedLogged) {
+                logger.log('[soundworks.Socket] Connection refused, waiting for the server to start');
+                connectionRefusedLogged = true;
+              }
+
+              setTimeout(trySocket, 1000);
+            }
           }
         });
       };

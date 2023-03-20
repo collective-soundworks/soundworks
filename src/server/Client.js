@@ -43,6 +43,12 @@ class Client {
      * @type {server.Socket}
      */
     this.socket = socket;
+
+    /**
+     * Is set in server._onSocketConnection
+     * @private
+     */
+    this.token = null;
   }
 }
 

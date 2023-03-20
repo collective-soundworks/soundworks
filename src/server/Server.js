@@ -5,7 +5,8 @@ import path from 'node:path';
 import os from 'node:os';
 import { X509Certificate, createPrivateKey } from 'node:crypto';
 
-import { isPlainObject } from '@ircam/sc-utils';
+import { getTime } from '@ircam/sc-gettime';
+import { isPlainObject, idGenerator } from '@ircam/sc-utils';
 import chalk from 'chalk';
 import compression from 'compression';
 import express from 'express';
@@ -16,6 +17,7 @@ import pem from 'pem';
 import compile from 'template-literal';
 
 import auditSchema from './audit-schema.js';
+import { encryptData, decryptData } from './crypto.js';
 import Client from './Client.js';
 import ContextManager from './ContextManager.js';
 import PluginManager from './PluginManager.js';
@@ -28,6 +30,7 @@ import {
   CLIENT_HANDSHAKE_ERROR,
   AUDIT_STATE_NAME,
 } from '../common/constants.js';
+
 
 let _dbNamespaces = new Set();
 
@@ -72,6 +75,8 @@ const DEFAULT_CONFIG = {
     clients: {},
   },
 };
+
+const TOKEN_VALID_DURATION = 20; // sec
 
 // set terminal title
 /** @private */
@@ -156,8 +161,8 @@ class Server {
       throw new Error(`[soundworks:Server] Invalid argument for Server constructor, config should be an object`);
     }
     /**
-     * Given config object merged with the following defaults:
-     * ```
+     * @description Given config object merged with the following defaults:
+     * @example
      * {
      *   env: {
      *     type: 'development',
@@ -178,7 +183,6 @@ class Server {
      *     clients: {},
      *   }
      * }
-     * ```
      */
     this.config = merge({}, DEFAULT_CONFIG, config);
 
@@ -236,8 +240,10 @@ class Server {
      * // expose assets located in the `soundfiles` directory on the network
      * server.router.use('/soundfiles', express.static('soundfiles')));
      */
-    this.router = express.Router();
-    // compression (must be set before serve-static)
+    // @note: we use express() instead of express.Router() because all 404 and
+    // error stuff is handled by default
+    this.router = express();
+    // compression (must be set before express.static())
     this.router.use(compression());
 
     /**
@@ -313,6 +319,10 @@ class Server {
     this._onStatusChangeCallbacks = new Set();
     /** @private */
     this._auditState = null;
+    /** @private */
+    this._pendingConnectionTokens = new Set();
+    /** @private */
+    this._trustedClients = new Set();
 
     // register audit state schema
     this.stateManager.registerSchema(AUDIT_STATE_NAME, auditSchema);
@@ -357,11 +367,24 @@ class Server {
 
     // basic http authentication
     if (this.config.env.auth) {
-      const soundworksAuth = (req, res, next) => {
+      const ids = idGenerator();
 
-        const isProtected  = this.config.env.auth.clients
-          .map(type => req.path.endsWith(`/${type}`))
-          .reduce((acc, value) => acc || value, false);
+      const soundworksAuth = (req, res, next) => {
+        let role = null;
+
+        for (let [_role, config] of Object.entries(this.config.app.clients)) {
+          if (req.path === config.route) {
+            role = _role;
+          }
+        }
+
+        // route that are not client entry points just pass through the middleware
+        if (role === null) {
+          next();
+          return;
+        }
+
+        const isProtected  = this.isProtected(role);
 
         if (isProtected) {
           // authentication middleware
@@ -373,17 +396,34 @@ class Server {
           // verify login and password are set and correct
           if (login && password && login === auth.login && password === auth.password) {
             // -> access granted...
+            // generate token for web socket to check connections
+            const id = ids.next().value;
+            const ip = req.ip;
+            const time = getTime();
+            const token = { id, ip, time };
+            const encryptedToken = encryptData(token);
+
+            this._pendingConnectionTokens.add(encryptedToken);
+
+            setTimeout(() => {
+              this._pendingConnectionTokens.delete(encryptedToken);
+            }, TOKEN_VALID_DURATION * 1000);
+
+            // pass to the response object to be send to the client
+            res.swToken = encryptedToken;
+
             return next();
           }
 
-          // -> access denied...
+          // show login / password modal
           res.writeHead(401, {
             'WWW-Authenticate':'Basic',
             'Content-Type':'text/plain',
           });
+
           res.end('Authentication required.');
         } else {
-          // route not protected
+          // route is not protected
           return next();
         }
       };
@@ -593,7 +633,7 @@ Invalid certificate files, please check your:
     await this.sockets.start(
       this,
       this.config.env.websockets,
-      (role, socket) => this._onSocketConnection(role, socket),
+      (...args) => this._onSocketConnection(...args),
     );
 
     // ------------------------------------------------------------
@@ -712,6 +752,8 @@ Invalid certificate files, please check your:
       route += `${role}`;
     }
 
+    this.config.app.clients[role].route = route;
+
     // define template filename: `${role}.html` or `default.html`
     const {
       templatePath,
@@ -745,6 +787,12 @@ Invalid certificate files, please check your:
     const soundworksClientHandler = (req, res) => {
       const data = clientConfigFunction(role, this.config, req);
 
+      // if the client has gone through the connection middleware (add succedeed),
+      // add the token to the data object
+      if (res.swToken) {
+        data.token = res.swToken;
+      }
+
       // CORS / COOP / COEP headers for `crossOriginIsolated pages,
       // enables `sharedArrayBuffers` and high precision timers
       // cf. https://web.dev/why-coop-coep/
@@ -759,6 +807,7 @@ Invalid certificate files, please check your:
       const appIndex = tmpl(data);
       res.end(appIndex);
     };
+
     // http request
     router.get(route, soundworksClientHandler);
 
@@ -770,18 +819,38 @@ Invalid certificate files, please check your:
    * Socket connection callback.
    * @private
    */
-  _onSocketConnection(role, socket) {
+  _onSocketConnection(role, socket, connectionToken) {
     const client = new Client(role, socket);
     const roles = Object.keys(this.config.app.clients);
 
+    // this has been validated
+    if (this.isProtected(role) && this.isValidConnectionToken(connectionToken)) {
+      const { ip } = decryptData(connectionToken);
+      const newData = {
+        ip: ip,
+        id: client.id,
+      };
+
+      const newToken = encryptData(newData);
+
+      client.token = newToken;
+
+      this._pendingConnectionTokens.delete(connectionToken);
+      this._trustedClients.add(client);
+    }
+
     socket.addListener('close', async () => {
-      // do nothin if client type was invalid
+      // do nothing if client role is invalid
       if (roles.includes(role)) {
         // decrement audit state counter
         const numClients = this._auditState.get('numClients');
         numClients[role] -= 1;
         this._auditState.set({ numClients });
 
+        // delete token
+        if (this._trustedClients.has(client)) {
+          this._trustedClients.delete(client);
+        }
         // clean context manager, await before cleaning state manager
         await this.contextManager.removeClient(client);
         // remove client from pluginManager
@@ -834,8 +903,8 @@ Invalid certificate files, please check your:
       // add client to context manager
       await this.contextManager.addClient(client);
 
-      const { id, uuid } = client;
-      socket.send(CLIENT_HANDSHAKE_RESPONSE, { id, uuid });
+      const { id, uuid, token } = client;
+      socket.send(CLIENT_HANDSHAKE_RESPONSE, { id, uuid, token });
     });
   }
 
@@ -967,6 +1036,81 @@ Invalid certificate files, please check your:
     }
 
     return this._auditState;
+  }
+
+  /** @private */
+  isProtected(role) {
+    if (this.config.env.auth && Array.isArray(this.config.env.auth.clients)) {
+      return this.config.env.auth.clients.includes(role);
+    }
+
+    return false;
+  }
+
+  /** @private */
+  isValidConnectionToken(token) {
+    // token should be in pending token list
+    if (!this._pendingConnectionTokens.has(token)) {
+      return false;
+    }
+
+    // check the token is not too old
+    const data = decryptData(token);
+    const now = getTime();
+
+    // token is valid only for 30 seconds (this is arbitrary)
+    if (now > data.time + TOKEN_VALID_DURATION) {
+      // delete the token, is too old
+      this._pendingConnectionTokens.delete(token);
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  /**
+   * Check if the given client is trusted, i.e. config.env.type == 'production'
+   * and the client is protected behind a password.
+   *
+   * @param {server.Client} client - Client to be tested
+   * @returns {Boolean}
+   */
+  isTrustedClient(client) {
+    if (this.config.env.type !== 'production') {
+      return true;
+    } else {
+      return this._trustedClients.has(client);
+    }
+  }
+
+  /**
+   * Check if the token from a client is trusted, i.e. config.env.type == 'production'
+   * and the client is protected behind a password.
+   *
+   * @param {Number} clientId - Id of the client
+   * @param {Number} clientIp - Ip of the client
+   * @param {String} token - Token to be tested
+   * @returns {Boolean}
+   */
+  // for stateless interactions, e.g. POST files
+  isTrustedToken(clientId, clientIp, token) {
+    if (this.config.env.type !== 'production') {
+      return true;
+    } else {
+      for (let client of this._trustedClients) {
+        if (client.id === clientId && client.token === token) {
+          // check that given token is consistent with client ip and id
+          const { id, ip } = decryptData(client.token);
+
+          if (clientId === id && clientIp === ip) {
+            return true;
+          }
+        }
+
+      }
+
+      return false;
+    }
   }
 }
 

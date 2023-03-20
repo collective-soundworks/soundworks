@@ -2,9 +2,9 @@ import { Worker } from 'node:worker_threads';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import querystring from 'querystring';
 import { WebSocketServer } from 'ws';
 import WebSocket from 'ws';
-import querystring from 'querystring';
 
 import Socket from './Socket.js';
 
@@ -69,13 +69,13 @@ class Sockets {
 
     // init ws server
     this._wss = new WebSocketServer({
-      server: server.httpServer,
+      noServer: true,
       path: `/${config.path}`, // @note - update according to existing config files (aka cosima-apps)
     });
 
     this._wss.on('connection', (ws, req) => {
       const queryString = querystring.decode(req.url.split('?')[1]);
-      const { role, key } = queryString;
+      const { role, key, token } = queryString;
       const binary = !!(parseInt(queryString.binary));
 
       if (binary) {
@@ -96,8 +96,29 @@ class Sockets {
         socket.addToRoom('*');
         socket.addToRoom(role);
 
-        onConnectionCallback(role, socket);
+        onConnectionCallback(role, socket, token);
       }
+    });
+
+    // check if client can connect
+    server.httpServer.on('upgrade', async (req, socket, head) => {
+      const queryString = querystring.decode(req.url.split('?')[1]);
+
+      const { role, token } = queryString;
+
+      if (server.isProtected(role)) {
+        // we don't have any ip in the upgrade request, so we just check the
+        // connection token is pending
+        const allowed = server.isValidConnectionToken(token);
+
+        if (!allowed) {
+          socket.destroy('not allowed');
+        }
+      }
+
+      this._wss.handleUpgrade(req, socket, head, (ws) => {
+        this._wss.emit('connection', ws, req);
+      });
     });
   }
 

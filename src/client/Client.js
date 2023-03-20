@@ -198,6 +198,12 @@ class Client {
      */
     this.status = 'idle';
 
+    /**
+     * Token of the client if connected through HTTP authentication.
+     * @private
+     */
+    this.token = null;
+
     /** @private */
     this._onStatusChangeCallbacks = new Set();
     /** @private */
@@ -240,9 +246,10 @@ class Client {
     try {
       await new Promise((resolve, reject) => {
         // wait for handshake response before starting stateManager and pluginManager
-        this.socket.addListener(CLIENT_HANDSHAKE_RESPONSE, async ({ id, uuid }) => {
+        this.socket.addListener(CLIENT_HANDSHAKE_RESPONSE, async ({ id, uuid, token }) => {
           this.id = id;
           this.uuid = uuid;
+          this.token = token;
 
           resolve();
         });
