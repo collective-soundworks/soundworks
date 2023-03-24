@@ -1,5 +1,6 @@
 import { isString, isFunction } from '@ircam/sc-utils';
 import SharedState from './BaseSharedState.js';
+import SharedStateCollection from './BaseSharedStateCollection.js';
 import {
   CREATE_REQUEST,
   CREATE_RESPONSE,
@@ -18,100 +19,6 @@ import {
   resolveRequest,
   rejectRequest,
 } from './promise-store.js';
-
-class StateCollection {
-  constructor(stateManager, schemaName) {
-    this._stateManager = stateManager;
-    this._schemaName = schemaName;
-    this._states = [];
-    this._onUpdateCallbacks = new Set();
-    this._onDetachCallbacks = new Set();
-    this._unobserve = null;
-  }
-
-  async _init() {
-    this._unobserve = await this._stateManager.observe(this._schemaName, async (schemaName, stateId, nodeId) => {
-      const state = await this._stateManager.attach(schemaName, stateId);
-
-      this._states.push(state);
-
-      state.onDetach(() => {
-        const index = this._states.indexOf(state);
-        this._states.splice(index, 1);
-
-        this._onDetachCallbacks.forEach(callback => callback(state));
-      });
-
-      state.onUpdate((newValues, oldValues, context) => {
-        Array.from(this._onUpdateCallbacks).forEach(callback => {
-          callback(state, newValues, oldValues, context);
-        });
-      });
-    });
-  }
-
-  get length() {
-    return this._states.length;
-  }
-
-  async detach() {
-    this._unobserve();
-
-    const promises = Array.from(this._states).map(state => state.detach());
-    await Promise.all(promises);
-
-    this._onUpdateCallbacks.clear();
-    this._onDetachCallbacks.clear();
-  }
-
-  getValues() {
-    return this._states.map(state => state.getValues());
-  }
-
-  get(name) {
-    return this._states.map(state => state.get(name));
-  }
-
-  onUpdate(callback, executeListener = false) {
-    this._onUpdateCallbacks.add(callback);
-
-    if (executeListener === true) {
-      this._states.forEach(state => {
-        const currentValues = state.getValues();
-        const oldValues = {};
-        const context = null;
-
-        callback(state, currentValues, oldValues, context);
-      });
-    }
-
-    return () => this._onUpdateCallbacks.delete(callback);
-  }
-
-  onDetach(callback) {
-    this._onDetachCallbacks.add(callback);
-  }
-
-  forEach(func) {
-    this._states.forEach(func);
-  }
-
-  map(func) {
-    return this._states.map(func);
-  }
-
-  filter(func) {
-    return this._states.filter(func);
-  }
-
-  sort(func) {
-    this._states.sort(func);
-  }
-
-  find(func) {
-    return this._states.find(func);
-  }
-}
 
 /**
  * @private
@@ -327,8 +234,15 @@ class BaseStateManager {
     });
   }
 
+  /**
+   * Returns a collection of all the states created from the schema name. Except
+   * the ones created by the current node.
+   *
+   * @param {string} schemaName - Name of the schema.
+   * @returns {server.SharedStateCollection|client.SharedStateCollection}
+   */
   async getCollection(schemaName) {
-    const collection = new StateCollection(this, schemaName);
+    const collection = new SharedStateCollection(this, schemaName);
     await collection._init();
 
     return collection;

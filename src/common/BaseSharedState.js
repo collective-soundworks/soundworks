@@ -423,7 +423,7 @@ ${JSON.stringify(initValues, null, 2)}`);
   /**
    * Subscribe to state updates.
    *
-   * @param {client.SharedState~onUpdateCallback|client.SharedState~onUpdateCallback} callback
+   * @param {client.SharedState~onUpdateCallback|server.SharedState~onUpdateCallback} callback
    *  Callback to execute when an update is applied on the state.
    * @param {Boolean} [executeListener=false] - Execute the callback immediately
    *  with current state values. (`oldValues` will be set to `{}`, and `context` to `null`)
@@ -458,8 +458,8 @@ ${JSON.stringify(initValues, null, 2)}`);
   /**
    * Register a function to execute when detaching from the state
    *
-   * @param {Function} callback - callback to execute when detaching from the state.
-   *   wether the client as called `detach`, or the state has been deleted by its
+   * @param {Function} callback - Callback to execute when detaching from the state.
+   *   Whether the client as called `detach`, or the state has been deleted by its
    *   creator.
    */
   onDetach(callback) {
@@ -471,7 +471,7 @@ ${JSON.stringify(initValues, null, 2)}`);
    * Register a function to execute when the state is deleted. Only called if the
    * node was the creator of the state. Is called after `onDetach`
    *
-   * @param {Function} callback - callback to execute when the state is deleted.
+   * @param {Function} callback - Callback to execute when the state is deleted.
    */
   onDelete(callback) {
     this._onDeleteCallbacks.add(callback);

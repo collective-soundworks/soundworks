@@ -20,8 +20,7 @@ npm install --save @soundworks/core
 
 ## Other Links
 
+- [General Documentation / Tutorials](https://soundworks.dev/)
 - [Github](https://github.com/collective-soundworks)
 - [Issue Tracker](https://github.com/collective-soundworks/soundworks/issues)
-- [General Documentation / Tutorials](https://soundworks.dev/)
 - [Examples](https://github.com/collective-soundworks/soundworks-examples)
-- [Working with Max/MSP](https://github.com/collective-soundworks/soundworks-max)
