@@ -981,6 +981,27 @@ Invalid certificate files, please check your:
    * you should rely on these defaults._
    */
   useDefaultApplicationTemplate() {
+    const buildDirectory = path.join('.build', 'public');
+
+    const useMinifiedFile = {};
+    const roles = Object.keys(this.config.app.clients);
+
+    roles.forEach(role => {
+      if (this.config.env.type === 'production') {
+        // check if minified file exists
+        const minifiedFilePath = path.join(buildDirectory, `${role}.min.js`);
+
+        if (fs.existsSync(minifiedFilePath)) {
+          useMinifiedFile[role] = true;
+        } else {
+          console.log(chalk.yellow(`    > Minified file not found for client "${role}", falling back to normal build file (use \`npm run build:production\` and \`npm start\` to use minified files)`));
+          useMinifiedFile[role] = false;
+        }
+      } else {
+        useMinifiedFile[role] = false;
+      }
+    });
+
     this._applicationTemplateOptions = {
       templateEngine: { compile },
       templatePath: path.join('.build', 'server', 'tmpl'),
@@ -995,13 +1016,14 @@ Invalid certificate files, please check your:
             type: config.env.type,
             websockets: config.env.websockets,
             subpath: config.env.subpath,
+            useMinifiedFile: useMinifiedFile[role],
           },
         };
       },
     };
 
     this.router.use(express.static('public'));
-    this.router.use('/build', express.static(path.join('.build', 'public')));
+    this.router.use('/build', express.static(buildDirectory));
   }
 
   /**

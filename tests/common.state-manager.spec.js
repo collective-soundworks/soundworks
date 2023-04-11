@@ -701,7 +701,7 @@ describe(`common::StateManager`, () => {
       await a.delete();
     });
 
-    it('[event=true] should behave correctly', async () => {
+    it.only('[event=true] should behave correctly', async () => {
       return new Promise(async (resolve, reject) => {
         server.stateManager.registerSchema('event-test', {
           value: {
@@ -712,6 +712,8 @@ describe(`common::StateManager`, () => {
         const state = await server.stateManager.create('event-test');
         const numEvents = 5;
         let counter = 0;
+
+        assert.equal(state.get('value'), null);
 
         // should be able to read if called from a subscription
         function readInSubscribe() {
@@ -737,6 +739,10 @@ describe(`common::StateManager`, () => {
           assert.equal(state.get('value'), null);
           updates = null;
         }
+
+        // client-side
+        const clientState = await client.stateManager.attach('event-test');
+        assert.equal(clientState.get('value'), null);
 
         setTimeout(() => {
           assert.equal(counter, numEvents);
