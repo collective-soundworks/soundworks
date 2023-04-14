@@ -386,8 +386,8 @@ describe(`common::StateManager`, () => {
     it('should throw if first argument is not an object', async () => {
       const a = await server.stateManager.create('a');
 
-      // weird stuff with async chai, did find better solution
       let errored = false;
+
       try {
         await a.set('fail', true);
       } catch(err) {
@@ -428,6 +428,25 @@ describe(`common::StateManager`, () => {
       let errored = false;
       try {
         await a.set({ unkown: true })
+      } catch(err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      if (errored === false) {
+        assert.fail('should throw error');
+      }
+
+      await a.delete();
+    });
+
+    it('should throw if value is of bad type', async () => {
+      const a = await server.stateManager.create('a');
+
+      // weird stuff with async chai, did find better solution
+      let errored = false;
+      try {
+        await a.set({ bool: {} })
       } catch(err) {
         console.log(err.message);
         errored = true;

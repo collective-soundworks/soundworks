@@ -17,7 +17,7 @@ export const types = {
     },
     coerceFunction: (name, def, value) => {
       if (typeof value !== 'boolean') {
-        throw new TypeError(`[SharedState] Invalid value for boolean param "${name}": ${value}`);
+        throw new TypeError(`[SharedState] Invalid value "${value}" for boolean parameter "${name}"`);
       }
 
       return value;
@@ -30,7 +30,7 @@ export const types = {
     },
     coerceFunction: (name, def, value) => {
       if (typeof value !== 'string') {
-        throw new TypeError(`[SharedState] Invalid value for string param "${name}": ${value}`);
+        throw new TypeError(`[SharedState] Invalid value "${value}" for string parameter "${name}"`);
       }
 
       return value;
@@ -63,7 +63,7 @@ export const types = {
     },
     coerceFunction: (name, def, value) => {
       if (!(typeof value === 'number' && Math.floor(value) === value)) {
-        throw new TypeError(`[SharedState] Invalid value for integer param "${name}": ${value}`);
+        throw new TypeError(`[SharedState] Invalid value "${value}" for integer parameter "${name}"`);
       }
 
       return Math.max(def.min, Math.min(def.max, value));
@@ -96,7 +96,7 @@ export const types = {
     },
     coerceFunction: (name, def, value) => {
       if (typeof value !== 'number' || value !== value) { // reject NaN
-        throw new TypeError(`[SharedState] Invalid value for float param "${name}": ${value}`);
+        throw new TypeError(`[SharedState] Invalid value "${value}" for float parameter "${name}"`);
       }
 
       return Math.max(def.min, Math.min(def.max, value));
@@ -109,7 +109,7 @@ export const types = {
     },
     coerceFunction: (name, def, value) => {
       if (def.list.indexOf(value) === -1) {
-        throw new TypeError(`[SharedState] Invalid value for enum param "${name}": ${value}`);
+        throw new TypeError(`[SharedState] Invalid value "${value}" for enum parameter "${name}"`);
       }
 
 
@@ -315,39 +315,48 @@ class ParameterBag {
   }
 
   /**
-   * Set the value of a parameter. If the value of the parameter is updated
-   * (aka if previous value is different from new value) all registered
-   * callbacks are registered.
+   * Check that the value is valid according to the schema and return it coerced
+   * to the schema definition
    *
-   * @param {string} name - Name of the parameter.
+   * @param {String} name - Name of the parameter.
    * @param {Mixed} value - Value of the parameter.
-   * @param {boolean} [forcePropagation=false] - if true, propagate value even
-   *    if the value has not changed.
-   * @return {Array} - [new value, updated flag].
    */
-  set(name, value) {
+  coerceValue(name, value) {
     if (!this.has(name)) {
       throw new ReferenceError(`[SharedState] Cannot set value of undefined parameter "${name}"`);
     }
 
     const def = this._schema[name];
-    const { coerceFunction } = types[def.type];
 
     if (value === null && def.nullable === false) {
       throw new TypeError(`[SharedState] Invalid value for ${def.type} param "${name}": value is null and param is not nullable`);
     } else if (value === null && def.nullable === true) {
       value = null;
     } else {
+      const { coerceFunction } = types[def.type];
       value = coerceFunction(name, def, value);
     }
 
+    return value;
+  }
+
+  /**
+   * Set the value of a parameter. If the value of the parameter is updated
+   * (aka if previous value is different from new value) all registered
+   * callbacks are registered.
+   *
+   * @param {string} name - Name of the parameter.
+   * @param {Mixed} value - Value of the parameter.
+   * @return {Array} - [new value, updated flag].
+   */
+  set(name, value) {
+    value = this.coerceValue(name, value);
     const currentValue = this._values[name];
     const updated = !equal(currentValue, value);
 
     // we store a deep copy of the object as we don't want the client to be able
-    // to modify our underlying data, which leads unexpected behavior where the
+    // to modify our underlying data, which leads to unexpected behavior where the
     // deep equal check to returns true, and therefore the update is not triggered.
-    //
     // @see tests/common.state-manager.spec.js
     // 'should copy stored value for "any" type to have a predictable behavior'
     if (this._schema[name].type === 'any') {

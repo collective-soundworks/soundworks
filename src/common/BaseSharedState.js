@@ -270,10 +270,9 @@ ${JSON.stringify(initValues, null, 2)}`);
     let propagateNow = false;
 
     for (let name in updates) {
-      // throw early (client-side and not only server-side) if parameter is undefined
-      if (!this._parameters.has(name)) {
-        throw new ReferenceError(`[SharedState] State "${this.schemaName}": cannot set value of undefined parameter "${name}"`);
-      }
+      // try to coerce value early, so that eventual errors are triggered early
+      // on the node requesting the update
+      const _ = this._parameters.coerceValue(name, updates[name]);
 
       // @note: general idea...
       // if immediate=true
