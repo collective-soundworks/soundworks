@@ -994,7 +994,7 @@ Invalid certificate files, please check your:
         if (fs.existsSync(minifiedFilePath)) {
           useMinifiedFile[role] = true;
         } else {
-          console.log(chalk.yellow(`    > Minified file not found for client "${role}", falling back to normal build file (use \`npm run build:production\` and \`npm start\` to use minified files)`));
+          console.log(chalk.yellow(`    > Minified file not found for client "${role}", falling back to normal build file (use \`npm run build:production && npm start\` to use minified files)`));
           useMinifiedFile[role] = false;
         }
       } else {
