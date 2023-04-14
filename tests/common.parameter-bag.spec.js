@@ -141,6 +141,14 @@ describe('common::ParameterBag (private)', () => {
     });
   });
 
+  describe(`getValuesUnsafe()`, () => {
+    it(`should return reference for "any" type`, () => {
+      const a = params.getValuesUnsafe();
+      const b = params.getValuesUnsafe();
+      assert.equal(a.nullable, b.nullable);
+    });
+  });
+
   describe(`get(name)`, () => {
     it(`should throw if name is undefined`, () => {
       assert.throw(() => params.get('doNotExists'), ReferenceError, `[SharedState] Cannot get value of undefined parameter "doNotExists"`)
@@ -151,6 +159,18 @@ describe('common::ParameterBag (private)', () => {
       assert.strictEqual(params.get('int'), -2);
       assert.deepEqual(params.get('nullable'), {});
       assert.strictEqual(params.get('event'), null);
+    });
+  });
+
+  describe(`getUnsafe(name)`, () => {
+    it(`should throw if name is undefined`, () => {
+      assert.throw(() => params.get('doNotExists'), ReferenceError, `[SharedState] Cannot get value of undefined parameter "doNotExists"`)
+    });
+
+    it(`should return reference`, () => {
+      const a = params.getUnsafe('nullable');
+      const b = params.getUnsafe('nullable');
+      assert.equal(a, b);
     });
   });
 

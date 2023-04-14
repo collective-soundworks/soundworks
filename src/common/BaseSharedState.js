@@ -312,21 +312,41 @@ ${JSON.stringify(initValues, null, 2)}`);
   }
 
   /**
-   * Get the value of a paramter of the state.
+   * Get the value of a parameter of the state. If the parameter is of `any` type,
+   * a deep copy is returned.
    *
    * @param {string} name - Name of the param.
    * @throws Throws if `name` does not correspond to an existing field
    *  of the state.
    * @return {mixed}
    * @example
-   * const value = state.get('name');
+   * const value = state.get('paramName');
    */
   get(name) {
     return this._parameters.get(name);
   }
 
   /**
-   * Get all the key / value pairs of the state.
+   * Similar to `get` but returns a reference to the underlying value in case of
+   * `any` type. May be usefull if the underlying value is big (e.g. sensors
+   * recordings, etc.) and deep cloning expensive. Be aware that if changes are
+   * made on the returned object, the state of your application will become
+   * inconsistent.
+   *
+   * @param {string} name - Name of the param.
+   * @throws Throws if `name` does not correspond to an existing field
+   *  of the state.
+   * @return {mixed}
+   * @example
+   * const value = state.getUnsafe('paramName');
+   */
+  getUnsafe(name) {
+    return this._parameters.getUnsafe(name);
+  }
+
+  /**
+   * Get all the key / value pairs of the state. If a parameter is of `any`
+   * type, a deep copy is made.
    *
    * @return {object}
    * @example
@@ -334,6 +354,23 @@ ${JSON.stringify(initValues, null, 2)}`);
    */
   getValues() {
     return this._parameters.getValues();
+  }
+
+  /**
+   * Get all the key / value pairs of the state. If a parameter is of `any`
+   * type, a deep copy is made.
+   * Similar to `getValues` but returns a reference to the underlying value in
+   * case of `any` type. May be usefull if the underlying value is big (e.g.
+   * sensors recordings, etc.) and deep cloning expensive. Be aware that if
+   * changes are made on the returned object, the state of your application will
+   * become inconsistent.
+   *
+   * @return {object}
+   * @example
+   * const values = state.getValues();
+   */
+  getValuesUnsafe() {
+    return this._parameters.getValuesUnsafe();
   }
 
   /**

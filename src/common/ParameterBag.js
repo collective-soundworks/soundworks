@@ -241,7 +241,8 @@ class ParameterBag {
   }
 
   /**
-   * Return values of all parameters as a flat object.
+   * Return values of all parameters as a flat object. If a parameter is of `any`
+   * type, a deep copy is made.
    *
    * @return {object}
    */
@@ -250,6 +251,25 @@ class ParameterBag {
 
     for (let name in this._values) {
       values[name] = this.get(name);
+    }
+
+    return values;
+  }
+
+  /**
+   * Return values of all parameters as a flat object. Similar to `getValues` but
+   * returns a reference to the underlying value in case of `any` type. May be
+   * usefull if the underlying value is big (e.g. sensors recordings, etc.) and
+   * deep cloning expensive. Be aware that if changes are made on the returned
+   * object, the state of your application will become inconsistent.
+   *
+   * @return {object}
+   */
+  getValuesUnsafe() {
+    let values = {};
+
+    for (let name in this._values) {
+      values[name] = this.getUnsafe(name);
     }
 
     return values;
@@ -274,6 +294,24 @@ class ParameterBag {
     } else {
       return this._values[name];
     }
+  }
+
+  /**
+   * Similar to `get` but returns a reference to the underlying value in case of
+   * `any` type. May be usefull if the underlying value is big (e.g. sensors
+   * recordings, etc.) and deep cloning expensive. Be aware that if changes are
+   * made on the returned object, the state of your application will become
+   * inconsistent.
+   *
+   * @param {string} name - Name of the parameter.
+   * @return {Mixed} - Value of the parameter.
+   */
+  getUnsafe(name) {
+    if (!this.has(name)) {
+      throw new ReferenceError(`[SharedState] Cannot get value of undefined parameter "${name}"`);
+    }
+
+    return this._values[name];
   }
 
   /**

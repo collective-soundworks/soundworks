@@ -505,7 +505,7 @@ describe(`common::StateManager`, () => {
   });
 
   describe('state.get(name) - state.getValues()', () => {
-    it('get(name) `any` type should not allow to mutate internal value', async() => {
+    it('get(name) `any` type should be a deep copy', async() => {
       server.stateManager.registerSchema('any', {
         ref: {
           type: 'any',
@@ -526,7 +526,7 @@ describe(`common::StateManager`, () => {
       assert.equal(ref2.inner.test, false);
     });
 
-    it('getValues() `any` type should not allow to mutate internal value', async() => {
+    it('getValues() `any` type should be a deep copy', async() => {
       server.stateManager.registerSchema('any-all', {
         ref: {
           type: 'any',
@@ -539,6 +539,42 @@ describe(`common::StateManager`, () => {
       ref1.ref.test = true;
       const ref2 = a.get('ref');
       assert.equal(ref2.test, undefined);
+    });
+  });
+
+  describe('state.getUnsafe(name) - state.getValuesUnsafe()', () => {
+    it('get(name) `any` type should be a reference', async() => {
+      server.stateManager.registerSchema('any-unsafe', {
+        ref: {
+          type: 'any',
+          default: {
+            inner: { test: false },
+          },
+        },
+      });
+
+      const a = await server.stateManager.create('any-unsafe');
+
+      const ref1 = a.getUnsafe('ref');
+      const ref2 = a.getUnsafe('ref');
+
+      assert.equal(ref1, ref2)
+    });
+
+    it('getValuesUnsafe() `any` type be a reference', async() => {
+      server.stateManager.registerSchema('any-all-unsafe', {
+        ref: {
+          type: 'any',
+          default: {},
+        },
+      });
+
+      const a = await server.stateManager.create('any-all-unsafe');
+
+      const ref1 = a.getValuesUnsafe();
+      const ref2 = a.getValuesUnsafe();
+
+      assert.equal(ref1.ref, ref2.ref);
     });
   });
 
@@ -701,7 +737,7 @@ describe(`common::StateManager`, () => {
       await a.delete();
     });
 
-    it.only('[event=true] should behave correctly', async () => {
+    it('[event=true] should behave correctly', async () => {
       return new Promise(async (resolve, reject) => {
         server.stateManager.registerSchema('event-test', {
           value: {
