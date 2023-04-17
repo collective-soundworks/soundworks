@@ -185,9 +185,9 @@ class BaseStateManager {
    * @todo Optionnal schema name
    * @param {server.StateManager~ObserveCallback|client.StateManager~ObserveCallback}
    *  callback - Function to be called when a new state is created on the network.
-   * @returns {Promise<Function>} - Return a Promise that resolves when the callback
-   *  as been executed for the first time. The promise value is a function which
-   *  allows to stop observing the network.
+   * @returns {Promise<Function>} - Return a Promise that resolves when the given
+   *  callback as been executed on each existing states. The promise value is a
+   *  function which allows to stop observing the states on the network.
    * @example
    * client.stateManager.observe(async (schemaName, stateId, nodeId) => {
    *   if (schemaName === 'something') {
