@@ -43,8 +43,7 @@
     "node": ">=16.0.0"
   },
   "scripts": {
-    "doc": "npm run jsdoc",
-    "jsdoc": "rm -Rf docs && jsdoc -c .jsdoc.json --verbose && cp -R assets docs/",
+    "doc": "rm -Rf docs && jsdoc -c .jsdoc.json --verbose && cp -R assets docs/",
     "lint": "npx eslint src",
     "test": "mocha",
     "toc": "markdown-toc -i README.md",

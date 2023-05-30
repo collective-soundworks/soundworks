@@ -5,6 +5,7 @@
 .DS_Store
 Thumbs.db
 .data
+docs
 
 # personnal files
 __*
