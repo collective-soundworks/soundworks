@@ -103,7 +103,7 @@ describe(`common::StateManager`, () => {
   });
 
 
-  describe('stateManager.observe((schemaName, stateId, nodeId) => {}) => unobserve', async () => {
+  describe('stateManager.observe([schemaName, ] callback) => Promise<unobserve>', async () => {
     it(`should be notified of states created on the network`, async () => {
       let numCalled = 0;
 
@@ -292,7 +292,7 @@ describe(`common::StateManager`, () => {
       await state4.delete();
     });
 
-    it(`should properly behave with filtered signature: observe(schemaName callback)`, async () => {
+    it(`should properly behave with filtered schema name: observe(schemaName, callback)`, async () => {
       const a1 = await client.stateManager.create('a');
       const b1 = await client.stateManager.create('b');
 

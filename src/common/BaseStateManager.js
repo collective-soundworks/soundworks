@@ -182,10 +182,11 @@ class BaseStateManager {
    * Note that the states that are created by the same node are not propagated through
    * the observe callback.
    *
-   * @todo Optionnal schema name
+   * @param {String} [schemaName] - optionnal schema name to filter the observed
+   *  states.
    * @param {server.StateManager~ObserveCallback|client.StateManager~ObserveCallback}
    *  callback - Function to be called when a new state is created on the network.
-   * @returns {Promise<Function>} - Return a Promise that resolves when the given
+   * @returns {Promise<Function>} - Returns a Promise that resolves when the given
    *  callback as been executed on each existing states. The promise value is a
    *  function which allows to stop observing the states on the network.
    * @example
