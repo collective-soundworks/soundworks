@@ -10,6 +10,8 @@ To create a new application, you will probably prefer using the `@soundworks/cre
 npx @soundworks/create@latest
 ```
 
+See [getting started](https://soundworks.dev/tutorials/getting-started.html) for a step by step guide.
+
 ## Manual Install
 
 But if you are advanturous, you can also install `soundworks` manually:
