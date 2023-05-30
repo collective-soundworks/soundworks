@@ -1,9 +1,9 @@
-name: GitHub pages
+name: GH Pages
 
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   deploy:
@@ -12,17 +12,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Build
-        uses: andstor/jsdoc-action@v1
-        with:
-          source_dir: ./src
-          output_dir: ./docs
-          config_file: .jsdoc.json
-          template: docdash
-          front_page: README.md
+      - name: 'Install Node'
+        uses: actions/setup-node@v3.6.0
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build Docs
+        run: npm run docs
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
+        permissions: write
         with:
-          deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
+          deploy_key: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./docs
