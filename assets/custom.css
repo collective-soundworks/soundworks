@@ -1,0 +1,155 @@
+body {
+  font-size: 14px;
+}
+
+.params td, .params .name, .props .name, .name code {
+  font-size: 12px;
+}
+
+/* inline code */
+code {
+  font-size: 12px;
+}
+
+#main {
+  max-width: 1000px;
+  float: left;
+  margin-left: 280px;
+}
+
+a, a:active {
+  color: #282922;
+}
+
+a:hover, a:active {
+  color: #767676;
+}
+
+nav {
+  padding-bottom: 50px;
+}
+
+footer {
+  color: #767676;
+  text-align: left;
+  font-size: 75%;
+}
+
+nav > ul > li > a {
+  color: #282922;
+  margin-top: 10px;
+}
+nav > ul > li > a:hover,
+nav > ul > li > a:active {
+  color: #767676;
+}
+
+nav ul ul a:hover,
+nav ul ul a:active {
+  color: #3e4035;
+}
+
+nav > h2 > a {
+  margin: 10px 0 -10px;
+  color: #282922 !important;
+}
+
+nav > h2 > a::before {
+  content: ">";
+  margin-right: 5px;
+}
+
+/* home button */
+nav h2 a:not(.menu-item) {
+  display: block;
+  margin: 25px 0;
+  width: 210px;
+  height: 210px;
+  background-image: url(./logo-200x200.png);
+  background-size: cover;
+  font-size: 0;
+}
+
+.package { display: none; }
+
+.usertext h1, h1 {
+  font-size: 48px;
+  margin: 0;
+  color: #3e4035;
+}
+
+.usertext h1 {
+  padding: 10px 0 20px;
+  border-bottom: 1px solid #767676;
+}
+
+.usertext h2 {
+  font-size: 24px;
+
+}
+
+h1 > code {
+  padding: 0.5em;
+  font-size: 48px;
+  display: block;
+}
+
+h4.name {
+  color: #282922;
+  background: #dedede;
+  border-top: 1px solid #efefef;
+  box-shadow: 0 0.05em 0.1em #e1e1e1;
+}
+
+.class-description {
+  font-size: 100%;
+}
+
+.signature {
+  color: #3e4035;
+}
+
+.signature-attributes {
+  font-size: 60%;
+  color: #616354;
+  font-style: italic;
+  font-weight: lighter;
+}
+
+.type-signature {
+  color: #3e4035;
+}
+
+.type-signature:last-child {
+  color: #616354;
+}
+
+h4.name a {
+  color: #3e4035;
+}
+
+h4.name a:hover {
+  border-bottom-color: #3e4035;
+}
+
+article a {
+  border-bottom: 1px solid #616354;
+}
+
+span.param-type, .params td .param-type, .param-type dd {
+  color: #616354;
+  font-family: Consolas, Monaco, 'Andale Mono', monospace;
+}
+
+/* block code */
+.prettyprint {
+  border-radius: 2px;
+}
+.prettyprint code {
+  font-size: 12px;
+  background-color: #282922;
+}
+
+.details {
+  margin-bottom: 24px;
+}

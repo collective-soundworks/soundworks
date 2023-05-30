@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>server/Sockets.js - soundworks</title>
+    
+    <meta name="description" content="Documentation of soundworks, a full-stack JavaScript framework for distributed WebAudio and multimedia applications" />
+    
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    <input type="text" id="nav-search" placeholder="Search" />
+    
+    
+    <h2><a href="index.html">Home</a></h2><h2><a href="http://soundworks.dev/" target="_blank" class="menu-item" >General Documentation</a></h2><h2><a href="https://github.com/collective-soundworks/soundworks" target="_blank" class="menu-item" >Github</a></h2><h3>Namespaces</h3><ul><li><a href="client.html">client</a></li><li><a href="server.html">server</a></li></ul><h3>Classes</h3><ul><li><a href="client.Client.html">client.Client</a><ul class='methods'><li data-type='method'><a href="client.Client.html#getAuditState">getAuditState</a></li><li data-type='method'><a href="client.Client.html#init">init</a></li><li data-type='method'><a href="client.Client.html#onStatusChange">onStatusChange</a></li><li data-type='method'><a href="client.Client.html#start">start</a></li><li data-type='method'><a href="client.Client.html#stop">stop</a></li></ul></li><li><a href="client.Context.html">client.Context</a><ul class='methods'><li data-type='method'><a href="client.Context.html#enter">enter</a></li><li data-type='method'><a href="client.Context.html#exit">exit</a></li><li data-type='method'><a href="client.Context.html#start">start</a></li><li data-type='method'><a href="client.Context.html#stop">stop</a></li></ul></li><li><a href="client.ContextManager.html">client.ContextManager</a><ul class='methods'><li data-type='method'><a href="client.ContextManager.html#get">get</a></li></ul></li><li><a href="client.Plugin.html">client.Plugin</a><ul class='methods'><li data-type='method'><a href="client.Plugin.html#onStateChange">onStateChange</a></li><li data-type='method'><a href="client.Plugin.html#propagateStateChange">propagateStateChange</a></li><li data-type='method'><a href="client.Plugin.html#start">start</a></li><li data-type='method'><a href="client.Plugin.html#stop">stop</a></li></ul></li><li><a href="client.PluginManager.html">client.PluginManager</a><ul class='methods'><li data-type='method'><a href="client.PluginManager.html#getRegisteredPlugins">getRegisteredPlugins</a></li><li data-type='method'><a href="client.PluginManager.html#onStateChange">onStateChange</a></li><li data-type='method'><a href="client.PluginManager.html#register">register</a></li></ul></li><li><a href="client.SharedState.html">client.SharedState</a><ul class='methods'><li data-type='method'><a href="client.SharedState.html#delete">delete</a></li><li data-type='method'><a href="client.SharedState.html#detach">detach</a></li><li data-type='method'><a href="client.SharedState.html#get">get</a></li><li data-type='method'><a href="client.SharedState.html#getDefaults">getDefaults</a></li><li data-type='method'><a href="client.SharedState.html#getInitValues">getInitValues</a></li><li data-type='method'><a href="client.SharedState.html#getSchema">getSchema</a></li><li data-type='method'><a href="client.SharedState.html#getUnsafe">getUnsafe</a></li><li data-type='method'><a href="client.SharedState.html#getValues">getValues</a></li><li data-type='method'><a href="client.SharedState.html#getValuesUnsafe">getValuesUnsafe</a></li><li data-type='method'><a href="client.SharedState.html#onDelete">onDelete</a></li><li data-type='method'><a href="client.SharedState.html#onDetach">onDetach</a></li><li data-type='method'><a href="client.SharedState.html#onUpdate">onUpdate</a></li><li data-type='method'><a href="client.SharedState.html#set">set</a></li></ul></li><li><a href="client.SharedStateCollection.html">client.SharedStateCollection</a><ul class='methods'><li data-type='method'><a href="client.SharedStateCollection.html#detach">detach</a></li><li data-type='method'><a href="client.SharedStateCollection.html#filter">filter</a></li><li data-type='method'><a href="client.SharedStateCollection.html#find">find</a></li><li data-type='method'><a href="client.SharedStateCollection.html#forEach">forEach</a></li><li data-type='method'><a href="client.SharedStateCollection.html#get">get</a></li><li data-type='method'><a href="client.SharedStateCollection.html#getValues">getValues</a></li><li data-type='method'><a href="client.SharedStateCollection.html#map">map</a></li><li data-type='method'><a href="client.SharedStateCollection.html#onDetach">onDetach</a></li><li data-type='method'><a href="client.SharedStateCollection.html#onUpdate">onUpdate</a></li><li data-type='method'><a href="client.SharedStateCollection.html#sort">sort</a></li></ul></li><li><a href="client.Socket.html">client.Socket</a><ul class='methods'><li data-type='method'><a href="client.Socket.html#addBinaryListener">addBinaryListener</a></li><li data-type='method'><a href="client.Socket.html#addListener">addListener</a></li><li data-type='method'><a href="client.Socket.html#removeAllBinaryListeners">removeAllBinaryListeners</a></li><li data-type='method'><a href="client.Socket.html#removeAllListeners">removeAllListeners</a></li><li data-type='method'><a href="client.Socket.html#removeBinaryListener">removeBinaryListener</a></li><li data-type='method'><a href="client.Socket.html#removeListener">removeListener</a></li><li data-type='method'><a href="client.Socket.html#send">send</a></li><li data-type='method'><a href="client.Socket.html#sendBinary">sendBinary</a></li></ul></li><li><a href="client.StateManager.html">client.StateManager</a><ul class='methods'><li data-type='method'><a href="client.StateManager.html#attach">attach</a></li><li data-type='method'><a href="client.StateManager.html#create">create</a></li><li data-type='method'><a href="client.StateManager.html#getCollection">getCollection</a></li><li data-type='method'><a href="client.StateManager.html#observe">observe</a></li></ul></li><li><a href="server.Client.html">server.Client</a></li><li><a href="server.Context.html">server.Context</a><ul class='methods'><li data-type='method'><a href="server.Context.html#enter">enter</a></li><li data-type='method'><a href="server.Context.html#exit">exit</a></li><li data-type='method'><a href="server.Context.html#start">start</a></li><li data-type='method'><a href="server.Context.html#stop">stop</a></li></ul></li><li><a href="server.ContextManager.html">server.ContextManager</a><ul class='methods'><li data-type='method'><a href="server.ContextManager.html#get">get</a></li></ul></li><li><a href="server.Plugin.html">server.Plugin</a><ul class='methods'><li data-type='method'><a href="server.Plugin.html#addClient">addClient</a></li><li data-type='method'><a href="server.Plugin.html#onStateChange">onStateChange</a></li><li data-type='method'><a href="server.Plugin.html#propagateStateChange">propagateStateChange</a></li><li data-type='method'><a href="server.Plugin.html#removeClient">removeClient</a></li><li data-type='method'><a href="server.Plugin.html#start">start</a></li><li data-type='method'><a href="server.Plugin.html#stop">stop</a></li></ul></li><li><a href="server.PluginManager.html">server.PluginManager</a><ul class='methods'><li data-type='method'><a href="server.PluginManager.html#checkRegisteredPlugins">checkRegisteredPlugins</a></li><li data-type='method'><a href="server.PluginManager.html#getRegisteredPlugins">getRegisteredPlugins</a></li><li data-type='method'><a href="server.PluginManager.html#onStateChange">onStateChange</a></li><li data-type='method'><a href="server.PluginManager.html#register">register</a></li></ul></li><li><a href="server.Server.html">server.Server</a><ul class='methods'><li data-type='method'><a href="server.Server.html#getAuditState">getAuditState</a></li><li data-type='method'><a href="server.Server.html#init">init</a></li><li data-type='method'><a href="server.Server.html#isTrustedClient">isTrustedClient</a></li><li data-type='method'><a href="server.Server.html#isTrustedToken">isTrustedToken</a></li><li data-type='method'><a href="server.Server.html#setCustomApplicationTemplateOptions">setCustomApplicationTemplateOptions</a></li><li data-type='method'><a href="server.Server.html#start">start</a></li><li data-type='method'><a href="server.Server.html#stop">stop</a></li><li data-type='method'><a href="server.Server.html#useDefaultApplicationTemplate">useDefaultApplicationTemplate</a></li></ul></li><li><a href="server.SharedState.html">server.SharedState</a><ul class='methods'><li data-type='method'><a href="server.SharedState.html#delete">delete</a></li><li data-type='method'><a href="server.SharedState.html#detach">detach</a></li><li data-type='method'><a href="server.SharedState.html#get">get</a></li><li data-type='method'><a href="server.SharedState.html#getDefaults">getDefaults</a></li><li data-type='method'><a href="server.SharedState.html#getInitValues">getInitValues</a></li><li data-type='method'><a href="server.SharedState.html#getSchema">getSchema</a></li><li data-type='method'><a href="server.SharedState.html#getUnsafe">getUnsafe</a></li><li data-type='method'><a href="server.SharedState.html#getValues">getValues</a></li><li data-type='method'><a href="server.SharedState.html#getValuesUnsafe">getValuesUnsafe</a></li><li data-type='method'><a href="server.SharedState.html#onDelete">onDelete</a></li><li data-type='method'><a href="server.SharedState.html#onDetach">onDetach</a></li><li data-type='method'><a href="server.SharedState.html#onUpdate">onUpdate</a></li><li data-type='method'><a href="server.SharedState.html#set">set</a></li></ul></li><li><a href="server.SharedStateCollection.html">server.SharedStateCollection</a><ul class='methods'><li data-type='method'><a href="server.SharedStateCollection.html#detach">detach</a></li><li data-type='method'><a href="server.SharedStateCollection.html#filter">filter</a></li><li data-type='method'><a href="server.SharedStateCollection.html#find">find</a></li><li data-type='method'><a href="server.SharedStateCollection.html#forEach">forEach</a></li><li data-type='method'><a href="server.SharedStateCollection.html#get">get</a></li><li data-type='method'><a href="server.SharedStateCollection.html#getValues">getValues</a></li><li data-type='method'><a href="server.SharedStateCollection.html#map">map</a></li><li data-type='method'><a href="server.SharedStateCollection.html#onDetach">onDetach</a></li><li data-type='method'><a href="server.SharedStateCollection.html#onUpdate">onUpdate</a></li><li data-type='method'><a href="server.SharedStateCollection.html#sort">sort</a></li></ul></li><li><a href="server.Socket.html">server.Socket</a><ul class='methods'><li data-type='method'><a href="server.Socket.html#addBinaryListener">addBinaryListener</a></li><li data-type='method'><a href="server.Socket.html#addListener">addListener</a></li><li data-type='method'><a href="server.Socket.html#addToRoom">addToRoom</a></li><li data-type='method'><a href="server.Socket.html#removeAllBinaryListeners">removeAllBinaryListeners</a></li><li data-type='method'><a href="server.Socket.html#removeAllListeners">removeAllListeners</a></li><li data-type='method'><a href="server.Socket.html#removeBinaryListener">removeBinaryListener</a></li><li data-type='method'><a href="server.Socket.html#removeFromRoom">removeFromRoom</a></li><li data-type='method'><a href="server.Socket.html#removeListener">removeListener</a></li><li data-type='method'><a href="server.Socket.html#send">send</a></li><li data-type='method'><a href="server.Socket.html#sendBinary">sendBinary</a></li></ul></li><li><a href="server.Sockets.html">server.Sockets</a><ul class='methods'><li data-type='method'><a href="server.Sockets.html#addToRoom">addToRoom</a></li><li data-type='method'><a href="server.Sockets.html#broadcast">broadcast</a></li><li data-type='method'><a href="server.Sockets.html#broadcastBinary">broadcastBinary</a></li><li data-type='method'><a href="server.Sockets.html#removeFromRoom">removeFromRoom</a></li></ul></li><li><a href="server.StateManager.html">server.StateManager</a><ul class='methods'><li data-type='method'><a href="server.StateManager.html#attach">attach</a></li><li data-type='method'><a href="server.StateManager.html#create">create</a></li><li data-type='method'><a href="server.StateManager.html#deleteSchema">deleteSchema</a></li><li data-type='method'><a href="server.StateManager.html#getCollection">getCollection</a></li><li data-type='method'><a href="server.StateManager.html#observe">observe</a></li><li data-type='method'><a href="server.StateManager.html#registerSchema">registerSchema</a></li><li data-type='method'><a href="server.StateManager.html#registerUpdateHook">registerUpdateHook</a></li></ul></li></ul>
+    
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">server/Sockets.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import { Worker } from 'node:worker_threads';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+import querystring from 'querystring';
+import { WebSocketServer } from 'ws';
+import WebSocket from 'ws';
+
+import Socket from './Socket.js';
+
+const __dirname = fileURLToPath(new URL('.', import.meta.url));
+
+/**
+ * Manager all {@link server.Socket} instances.
+ *
+ * Most of the time, you shouldn't have to use this class instance directely, but
+ * it could be usefull in some situations, for broadcasting messages, creating rooms, etc.
+ *
+ * @memberof server
+ */
+class Sockets {
+  constructor() {
+    /** @private */
+    this._wss = null;
+    /** @private */
+    this._rooms = new Map();
+    // The special `'*'` romm stores all current connections.
+    this._rooms.set('*', new Set());
+    /** @private */
+    this._initializationCache = new Map();
+
+    /** @private */
+    this._latencyStatsWorker = null; // protected - used in Socket instances
+    /** @private */
+    this._auditState = null;
+
+  }
+
+  /**
+   * Initialize sockets, all sockets are added to two rooms by default:
+   * - to the room corresponding to the client `role`
+   * - to the '*' room that holds all connected sockets
+   *
+   * @private
+   */
+  async start(server, config, onConnectionCallback) {
+    // init audit stuff for network latency estimation
+    const workerPathname = path.join(__dirname, 'audit-network-latency.worker.js');
+    this._latencyStatsWorker = new Worker(workerPathname);
+    this._auditState = await server.getAuditState();
+
+    this._auditState.onUpdate(updates => {
+      if ('averageNetworkLatencyWindow' in updates || 'averageNetworkLatencyPeriod' in updates) {
+        this._latencyStatsWorker.postMessage({
+          type: 'config',
+          value: {
+            averageLatencyWindow: updates.averageNetworkLatencyWindow,
+            averageLatencyPeriod: updates.averageNetworkLatencyPeriod,
+          },
+        });
+      }
+    }, true);
+
+    this._latencyStatsWorker.on('message', msg => {
+      if (msg.type === 'computed-average-latency') {
+        this._auditState.set({ averageNetworkLatency: msg.value });
+      }
+    });
+
+    // init ws server
+    this._wss = new WebSocketServer({
+      noServer: true,
+      path: `/${config.path}`, // @note - update according to existing config files (aka cosima-apps)
+    });
+
+    this._wss.on('connection', (ws, req) => {
+      const queryString = querystring.decode(req.url.split('?')[1]);
+      const { role, key, token } = queryString;
+      const binary = !!(parseInt(queryString.binary));
+
+      if (binary) {
+        ws.binaryType = 'arraybuffer';
+      }
+
+      if (!this._initializationCache.has(key)) {
+        this._initializationCache.set(key, { ws, binary });
+      } else {
+        const cached = this._initializationCache.get(key);
+        this._initializationCache.delete(key);
+
+        // should be in order, but just to be sure
+        const stringWs = cached.binary ? ws : cached.ws;
+        const binaryWs = cached.binary ? cached.ws : ws;
+        const socket = new Socket(stringWs, binaryWs, this._rooms, this, config);
+
+        socket.addToRoom('*');
+        socket.addToRoom(role);
+
+        onConnectionCallback(role, socket, token);
+      }
+    });
+
+    // check if client can connect
+    server.httpServer.on('upgrade', async (req, socket, head) => {
+      const queryString = querystring.decode(req.url.split('?')[1]);
+
+      const { role, token } = queryString;
+
+      if (server.isProtected(role)) {
+        // we don't have any ip in the upgrade request, so we just check the
+        // connection token is pending
+        const allowed = server.isValidConnectionToken(token);
+
+        if (!allowed) {
+          socket.destroy('not allowed');
+        }
+      }
+
+      this._wss.handleUpgrade(req, socket, head, (ws) => {
+        this._wss.emit('connection', ws, req);
+      });
+    });
+  }
+
+  /**
+   * Terminate all existing sockets
+   *
+   * @private
+   */
+  terminate() {
+    // terminate stat worker thread
+    this._latencyStatsWorker.terminate();
+    // clean sockets
+    const sockets = this._rooms.get('*');
+    sockets.forEach(socket => socket.terminate());
+  }
+
+  /** @private */
+  _broadcast(binary, roomIds, excludeSocket, channel, ...args) {
+    const method = binary ? 'sendBinary' : 'send';
+    let targets = new Set();
+
+    if (typeof roomIds === 'string' || Array.isArray(roomIds)) {
+      if (typeof roomIds === 'string') {
+        roomIds = [roomIds];
+      }
+
+      roomIds.forEach(roomId => {
+        if (this._rooms.has(roomId)) {
+          const room = this._rooms.get(roomId);
+          room.forEach(socket => targets.add(socket));
+        }
+      });
+    } else {
+      targets = this._rooms.get('*');
+    }
+
+    targets.forEach(socket => {
+      if (socket.ws.readyState === WebSocket.OPEN) {
+        if (excludeSocket !== null) {
+          if (socket !== excludeSocket) {
+            socket[method](channel, ...args);
+          }
+        } else {
+          socket[method](channel, ...args);
+        }
+      }
+    });
+  }
+
+  /**
+   * Add a socket to a room
+   *
+   * @param {server.Socket} socket - Socket to add to the room.
+   * @param {String} roomId - Id of the room.
+   */
+  addToRoom(socket, roomId) {
+    socket.addToRoom(roomId);
+  }
+
+  /**
+   * Remove a socket from a room
+   *
+   * @param {server.Socket} socket - Socket to remove from the room.
+   * @param {String} roomId - Id of the room.
+   */
+  removeFromRoom(socket, roomId) {
+    socket.removeFromRoom(roomId);
+  }
+
+  /**
+   * Send a message of JSON compatible data types to all client of given room(s).
+   * If no room is specified, the message is sent to all clients.
+   *
+   *
+   * @param {String|Array} roomsIds - Ids of the rooms that must receive
+   *  the message. If `null` the message is sent to all clients.
+   * @param {server.Socket} excludeSocket - Optionnal socket to ignore when
+   *  broadcasting the message, typically the client at the origin of the message.
+   * @param {String} channel - Channel name.
+   * @param {...*} args - Payload of the message. As many arguments as needed, of
+   *  JSON compatible data types (i.e. string, number, boolean, object, array and null).
+   */
+  broadcast(roomIds, excludeSocket, channel, ...args) {
+    this._broadcast(false, roomIds, excludeSocket, channel, ...args);
+  }
+
+  /**
+   * Send a binary message to all client of given room(s). If no room is specified
+   * specified, the message is sent to all clients.
+   *
+   * @param {String|Array} roomsIds - Ids of the rooms that must receive
+   *  the message. If `null` the message is sent to all clients.
+   * @param {server.Socket} excludeSocket - Optionnal socket to ignore when
+   *  broadcasting the message, typically the client at the origin of the message.
+   * @param {string} channel - Channel name.
+   * @param {TypedArray} typedArray - Binary data to be sent.
+   */
+  broadcastBinary(roomIds, excludeSocket, channel, typedArray) {
+    this._broadcast(true, roomIds, excludeSocket, channel, typedArray);
+  }
+}
+
+export default Sockets;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a> on Tue May 30 2023 08:15:03 GMT+0000 (Coordinated Universal Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+<script src="scripts/search.js" defer></script>
+
+
+
+    <link type="text/css" rel="stylesheet" href="assets/custom.css">
+    
+</body>
+</html>
