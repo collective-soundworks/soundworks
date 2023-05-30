@@ -297,7 +297,6 @@ describe('server::Server', () => {
         assert.isUndefined(server.httpsInfos.validTo);
         assert.isUndefined(server.httpsInfos.isValid);
       });
-
     });
   });
 
