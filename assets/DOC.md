@@ -14,7 +14,7 @@ See [getting started](https://soundworks.dev/tutorials/getting-started.html) for
 
 ## Manual Install
 
-But if you are advanturous, you can also install `soundworks` manually:
+But if you are adventurous, you can also install `soundworks` manually:
 
 ```sh
 npm install --save @soundworks/core
