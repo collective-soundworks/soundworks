@@ -42,7 +42,7 @@
     },
     "search": true,
     "menu": {
-      "General Documentation": {
+      "Website": {
         "href":"http://soundworks.dev/",
         "target":"_blank",
         "class":"menu-item"
