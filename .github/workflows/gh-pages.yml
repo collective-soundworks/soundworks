@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: 'Install Node'
         uses: actions/setup-node@v3.6.0
@@ -22,7 +22,7 @@ jobs:
         run: npm install
 
       - name: Build Docs
-        run: npm run docs
+        run: npm run doc
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
