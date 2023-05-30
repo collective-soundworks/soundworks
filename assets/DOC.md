@@ -10,7 +10,7 @@ To create a new application, you will probably prefer using the `@soundworks/cre
 npx @soundworks/create@latest
 ```
 
-See [getting started](https://soundworks.dev/tutorials/getting-started.html) for a step by step guide.
+See the [getting started](https://soundworks.dev/tutorials/getting-started.html) page for a step by step guide.
 
 ## Manual Install
 
@@ -25,4 +25,4 @@ npm install --save @soundworks/core
 - [General Documentation / Tutorials](https://soundworks.dev/)
 - [Github](https://github.com/collective-soundworks)
 - [Issue Tracker](https://github.com/collective-soundworks/soundworks/issues)
-- [Examples](https://github.com/collective-soundworks/soundworks-examples)
+<!-- - [Examples](https://github.com/collective-soundworks/soundworks-examples) -->
