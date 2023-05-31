@@ -7,6 +7,7 @@ class BaseSharedStateCollection {
     this._schemaName = schemaName;
     this._states = [];
     this._onUpdateCallbacks = new Set();
+    this._onAttachCallbacks = new Set();
     this._onDetachCallbacks = new Set();
     this._unobserve = null;
   }
@@ -29,6 +30,8 @@ class BaseSharedStateCollection {
           callback(state, newValues, oldValues, context);
         });
       });
+
+      this._onAttachCallbacks.forEach(callback => callback(state));
     });
   }
 
@@ -55,7 +58,7 @@ class BaseSharedStateCollection {
   }
 
   /**
-   * Return the current values of all the underlying shared states.
+   * Return the current values of all the states in the collection.
    * @return {Object[]}
    */
   getValues() {
@@ -63,7 +66,8 @@ class BaseSharedStateCollection {
   }
 
   /**
-   * Return the current param value of all the underlying shared states.
+   * Return the current param value of all the states in the collection.
+   *
    * @param {String} name - Name of the parameter
    * @return {any[]}
    */
@@ -72,7 +76,8 @@ class BaseSharedStateCollection {
   }
 
   /**
-   * Subscribe to any state update of the underlying states.
+   * Subscribe to any state update of the collection.
+   *
    * @param {server.SharedStateCollection~onUpdateCallback|client.SharedStateCollection~onUpdateCallback}
    *  callback - Callback to execute when an update is applied on a state.
    * @param {Boolean} [executeListener=false] - Execute the callback immediately
@@ -97,11 +102,20 @@ class BaseSharedStateCollection {
   }
 
   /**
-   * Register a function to execute when detaching from an underlying state.
+   * Register a function to execute when a state is added to the collection.
    *
-   * @param {Function} callback - callback to execute when detaching from a state.
-   *   Whether the client as called `detach`, or the state has been deleted by its
-   *   creator.
+   * @param {Function} callback - callback to execute  when a state is added to
+   *   the collection.
+   */
+  onAttach(callback) {
+    this._onAttachCallbacks.add(callback);
+  }
+
+  /**
+   * Register a function to execute when a state is removed from the collection.
+   *
+   * @param {Function} callback - callback to execute  when a state is removed
+   *   from the collection.
    */
   onDetach(callback) {
     this._onDetachCallbacks.add(callback);

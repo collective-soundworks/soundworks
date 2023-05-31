@@ -1429,6 +1429,26 @@ describe(`common::StateManager`, () => {
       state.delete();
     });
 
+    it(`collection.onAttach(callback)`, async () => {
+      const collection = await clients[1].stateManager.getCollection('a');
+
+      let onAttachCalled = false;
+
+      collection.onAttach((s) => {
+        onAttachCalled = true;
+      });
+
+      const state = await client.stateManager.create('a');
+
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      state.delete();
+
+      if (onAttachCalled === false) {
+        assert.fail('onAttach should have been called');
+      }
+    });
+
     it(`collection.onDetach(callback)`, async () => {
       const state = await client.stateManager.create('a');
       const collection = await clients[1].stateManager.getCollection('a');
@@ -1444,7 +1464,7 @@ describe(`common::StateManager`, () => {
       await new Promise(resolve => setTimeout(resolve, 100));
 
       if (onDetachCalled === false) {
-        assert.fail('onUpdate should have been called');
+        assert.fail('onDetach should have been called');
       }
     });
   });
