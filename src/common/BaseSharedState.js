@@ -138,7 +138,6 @@ ${JSON.stringify(initValues, null, 2)}`);
       this._client.transport.addListener(`${DETACH_ERROR}-${this.id}`, (reqId, msg) => {
         rejectRequest(reqId, msg);
       });
-
     }
   }
 
