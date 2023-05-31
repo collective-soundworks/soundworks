@@ -48,7 +48,7 @@
     "test": "mocha",
     "toc": "markdown-toc -i README.md",
     "types": "rm -Rf types && tsc",
-    "version": "npm run toc && npm run doc && git add docs"
+    "version": "npm run toc"
   },
   "dependencies": {
     "@ircam/sc-gettime": "^1.0.0",
