@@ -83,7 +83,7 @@ class PluginManager extends BasePluginManager {
    */
   constructor(client) {
     if (!(client instanceof Client)) {
-      throw new Error(`[soundworks.PluginManager] Invalid argument, "new PluginManager(client)" should receive an instance of "soundworks.Client as argument"`);
+      throw new Error(`[soundworks.PluginManager] Invalid argument, "new PluginManager(client)" should receive an instance of "soundworks.Client" as argument`);
     }
 
     super(client);

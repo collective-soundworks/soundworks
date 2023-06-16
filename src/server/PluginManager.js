@@ -78,7 +78,7 @@ import Server from './Server.js';
 class PluginManager extends BasePluginManager {
   constructor(server) {
     if (!(server instanceof Server)) {
-      throw new Error(`[soundworks.PluginManager] Invalid argument, "new PluginManager(server)" should receive an instance of "soundworks.Server as argument"`);
+      throw new Error(`[soundworks.PluginManager] Invalid argument, "new PluginManager(server)" should receive an instance of "soundworks.Server" as argument`);
     }
 
     super(server);

@@ -13,7 +13,7 @@ class BasePluginManager {
     /** @private */
     this._node = node;
     /** @private */
-    this._registeredPlugins = new Map();
+    this._dependencies = new Map();
     /** @private */
     this._instances = new Map();
     /** @private */
@@ -67,11 +67,29 @@ class BasePluginManager {
       throw new Error(`[soundworks.PluginManager] Invalid argument, "pluginManager.register" fourth optionnal argument should be an array`);
     }
 
-    if (this._registeredPlugins.has(id)) {
-      throw new Error(`[soundworks:PluginManager] Plugin "${id}" of type "${ctor.name}" already registered`);
+    if (this._instances.has(id)) {
+      throw new Error(`[soundworks:PluginManager] Plugin "${id}" already registered`);
     }
 
-    this._registeredPlugins.set(id, { ctor, options, deps });
+    // we instanciate the plugin here, so that a plugin can register another one
+    // in its own constructor.
+    //
+    // the dependencies must be created first, so that the instance can call
+    // addDependency in its constructor
+    this._dependencies.set(id, deps);
+
+    const instance = new ctor(this._node, id, options);
+    this._instances.set(id, instance);
+  }
+
+  /**
+   * Manually add a dependency to a given plugin. Usefull to require a plugin
+   * within a plugin
+   *
+   */
+  addDependency(pluginId, dependencyId) {
+    const deps = this._dependencies.get(pluginId);
+    deps.push(dependencyId);
   }
 
   /**
@@ -79,7 +97,7 @@ class BasePluginManager {
    * @returns {string[]}
    */
   getRegisteredPlugins() {
-    return Array.from(this._registeredPlugins.keys());
+    return Array.from(this._instances.keys());
   }
 
   /**
@@ -96,16 +114,14 @@ class BasePluginManager {
 
     this.status = 'inited';
     // instanciate all plugins
-    for (let [id, { ctor, options }] of this._registeredPlugins.entries()) {
-      const instance = new ctor(this._node, id, options);
-      this._instances.set(id, instance);
+    for (let [id, instance] of this._instances.entries()) {
       instance.onStateChange(_values => this._propagateStateChange(instance));
     }
 
     // propagate all 'idle' statuses before start
     this._propagateStateChange();
 
-    const promises = Array.from(this._registeredPlugins.keys()).map(id => this.unsafeGet(id));
+    const promises = Array.from(this._instances.keys()).map(id => this.unsafeGet(id));
 
     try {
       await Promise.all(promises);
@@ -125,8 +141,8 @@ class BasePluginManager {
 
   /**
    * Retrieve an fully started instance of a registered plugin, without checking
-   * that the pluginManager is started. This is important for starting the plugin
-   * manager itself.
+   * that the pluginManager has started. This is required for starting the plugin
+   * manager itself and to require a plugin from within another plugin
    *
    * @private
    */
@@ -135,7 +151,7 @@ class BasePluginManager {
       throw new Error(`[soundworks.PluginManager] Invalid argument, "pluginManager.get(name)" argument should be a string`);
     }
 
-    if (!this._registeredPlugins.has(id)) {
+    if (!this._instances.has(id)) {
       throw new Error(`[soundworks:PluginManager] Cannot get plugin "${id}", plugin is not registered`);
     }
 
@@ -144,7 +160,7 @@ class BasePluginManager {
     // to dynamically register and launch plugins at runtime.
     //
     // if (!this._instances.has(id)) {
-    //   const { ctor, options } = this._registeredPlugins.get(id);
+    //   const { ctor, options } = this._dependencies.get(id);
     //   const instance = new ctor(this._node, id, options);
     //   this._instances.set(id, instance);
     // }
@@ -152,7 +168,7 @@ class BasePluginManager {
     const instance = this._instances.get(id);
 
     // recursively get the dependency chain
-    const { deps } = this._registeredPlugins.get(id);
+    const deps = this._dependencies.get(id);
     const promises = deps.map(id => this.unsafeGet(id));
 
     await Promise.all(promises);

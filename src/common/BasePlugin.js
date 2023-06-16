@@ -5,26 +5,10 @@ import merge from 'lodash.merge';
  */
 class BasePlugin {
   constructor(id) {
-    /**
-     * User defined ID of the plugin.
-     *
-     * @type {string}
-     * @see {@link client.PluginManager#register}
-     * @see {@link server.PluginManager#register}
-     */
-    this.id = id;
-
-    /**
-     * Type of the plugin, i.e. the ClassName.
-     *
-     * Usefull to do perform some logic based on certain types of plugins without
-     * knowing under which `id` they have been registered. (e.g. creating some generic
-     * views, etc.)
-     *
-     * @type {string}
-     * @readonly
-     */
-    this.type = this.constructor.name;
+    /** @private */
+    this._id = id;
+    /** @private */
+    this._type = this.constructor.name;
 
     /**
      * Options of the plugin.
@@ -56,6 +40,32 @@ class BasePlugin {
 
     /** @private */
     this._onStateChangeCallbacks = new Set();
+  }
+
+  /**
+   * User defined ID of the plugin.
+   *
+   * @type {string}
+   * @readonly
+   * @see {@link client.PluginManager#register}
+   * @see {@link server.PluginManager#register}
+   */
+  get id() {
+    return this._id;
+  }
+
+  /**
+   * Type of the plugin, i.e. the ClassName.
+   *
+   * Usefull to do perform some logic based on certain types of plugins without
+   * knowing under which `id` they have been registered. (e.g. creating some generic
+   * views, etc.)
+   *
+   * @type {string}
+   * @readonly
+   */
+  get type() {
+    return this._type;
   }
 
   /**
