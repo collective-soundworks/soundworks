@@ -24,7 +24,6 @@ const config = {
 };
 
 // accepted error in delay plugin timeouts (in ms)
-const TIMEOUT_ERROR = 15.;
 
 describe(`client::PluginManager`, () => {
   let server = null;
@@ -46,7 +45,7 @@ describe(`client::PluginManager`, () => {
     await server.stop();
   });
 
-  describe(`(protected) new PluginManager(client)`, () => {
+  describe(`# (protected) new PluginManager(client)`, () => {
     it(`should throw if argument is not instance of Client`, () => {
       let errored = false;
       try {
@@ -59,7 +58,7 @@ describe(`client::PluginManager`, () => {
     });
   });
 
-  describe(`register(id, pluginFactory)`, () => {
+  describe(`# register(id, pluginFactory)`, () => {
     let client;
 
     beforeEach(() => {
@@ -157,14 +156,14 @@ describe(`client::PluginManager`, () => {
     });
   });
 
-  describe(`(protected) await pluginManager.init()`, () => {
+  describe(`# (protected) await pluginManager.init()`, () => {
     it(`should throw if started twice`, async () => {
       const client = new Client({ role: 'test', ...config });
       await client.init(); // run pluginManager.init()
 
       let errored = false;
       try {
-        await client.pluginManager.init();
+        await client.pluginManager.start();
       } catch(err) {
         errored = true;
         console.log(err.message);
@@ -173,7 +172,7 @@ describe(`client::PluginManager`, () => {
     });
   });
 
-  describe(`await pluginManager.get(id)`, () => {
+  describe(`# await pluginManager.get(id)`, () => {
     it(`should throw if called before server.init()`, async () => {
       const client = new Client({ role: 'test', ...config });
       client.pluginManager.register('delay', clientPluginDelayFactory, { delayTime: 100 });
@@ -214,20 +213,19 @@ describe(`client::PluginManager`, () => {
       if (!errored) { assert.fail('should throw'); }
     });
 
-    it(`should be able to immediately get a plugin after client.init()`, async function() {
+    it(`plugin should be started and immediately available after server.init()`, async function() {
       const client = new Client({ role: 'test', ...config });
       client.pluginManager.register('delay-1', clientPluginDelayFactory, { delayTime: 100 });
 
+      const TIMEOUT_ERROR = 30;
       await client.init();
 
       const startTime = Date.now();
 
       const plugin = await client.pluginManager.get('delay-1');
 
-      const now = Date.now();
-      const delta = now - startTime;
-      assert.isBelow(delta, TIMEOUT_ERROR);
-
+      assert.isBelow(Date.now() - startTime, TIMEOUT_ERROR);
+      assert.equal(plugin.status, 'started');
       assert.ok(plugin instanceof Plugin);
     });
 
@@ -264,7 +262,7 @@ describe(`client::PluginManager`, () => {
     // });
   });
 
-  describe(`pluginManager.onStateChange((states, updatedPlugin) => {})`, () => {
+  describe(`# pluginManager.onStateChange((states, updatedPlugin) => {})`, () => {
     it(`should properly propagate statuses`, async function() {
       this.timeout(3 * 1000);
 
@@ -296,9 +294,12 @@ describe(`client::PluginManager`, () => {
         delayTime: 100,
       });
 
+      const TIMEOUT_ERROR = 30;
       const startTime = Date.now();
+      let onStateChangeCalled = false;
 
       client.pluginManager.onStateChange(plugins => {
+        onStateChangeCalled = true;
         const now = Date.now();
         const delta = now - startTime;
         // assume we can 20ms jitter in the setTimeout
@@ -310,10 +311,14 @@ describe(`client::PluginManager`, () => {
       });
 
       await client.init();
+
+      if (!onStateChangeCalled) {
+        assert.fail('onStateChange not called');
+      }
     });
   });
 
-  describe(`plugin initialization lifecycle`, () => {
+  describe(`# plugin initialization lifecycle`, () => {
     it(`client should start if no plugins registered`, async function() {
       const client = new Client({ role: 'test', ...config });
       await client.init();
@@ -353,6 +358,9 @@ describe(`client::PluginManager`, () => {
     it(`should be able to require several plugins in parallel`, async function() {
       this.timeout(3 * 1000);
 
+      // delay-1 --|
+      // delay-2 --|
+
       const client = new Client({ role: 'test', ...config });
       client.pluginManager.register('delay-1', clientPluginDelayFactory, {
         delayTime: 100,
@@ -361,33 +369,42 @@ describe(`client::PluginManager`, () => {
         delayTime: 100,
       });
 
-      await client.init();
-
+      const TIMEOUT_ERROR = 30; // take websocket connection latency into account
       const startTime = Date.now();
+      let onStateChangeCalled = false;
 
       client.pluginManager.onStateChange((plugins, updatedPlugin) => {
+        onStateChangeCalled = true;
+        if (!updatedPlugin) { return }
+
         const now = Date.now();
         const delta = now - startTime;
-        // assume we can 20ms jitter in the setTimeout
-        if (updatedPlugin['delay-1'].status === 'inited') {
+        // assume we some jitter in the setTimeout
+        if (updatedPlugin.id === 'delay-1' && updatedPlugin.status === 'inited') {
           assert.isBelow(Math.abs(delta - 0.), TIMEOUT_ERROR);
-        } else if (updatedPlugin['delay-1'].status === 'started') {
+        } else if (updatedPlugin.id === 'delay-1' && updatedPlugin.status === 'started') {
           assert.isBelow(Math.abs(delta - 100), TIMEOUT_ERROR);
         }
 
-        if (updatedPlugin['delay-2'].status === 'inited') {
+        if (updatedPlugin.id === 'delay-2' && updatedPlugin.status === 'inited') {
           assert.isBelow(Math.abs(delta - 0.), TIMEOUT_ERROR);
-        } else if (updatedPlugin['delay-2'].status === 'started') {
+        } else if (updatedPlugin.id === 'delay-2' && updatedPlugin.status === 'started') {
           assert.isBelow(Math.abs(delta - 100), TIMEOUT_ERROR);
         }
       });
 
       await client.start();
       await client.stop();
+
+      if (!onStateChangeCalled) {
+        assert.fail('onStateChange not called');
+      }
     });
 
     it(`should be able to chain plugin initialization`, async function() {
       this.timeout(3 * 1000);
+
+      // delay-1 --> delay-2 --|
 
       const client = new Client({ role: 'test', ...config });
 
@@ -399,29 +416,36 @@ describe(`client::PluginManager`, () => {
         delayTime: 100,
       }, ['delay-1']);
 
-      await client.init();
-
+      const TIMEOUT_ERROR = 30; // take websocket connection latency into account
       const startTime = Date.now();
+      let onStateChangeCalled = false;
 
       client.pluginManager.onStateChange((plugins, updatedPlugin) => {
+        onStateChangeCalled = true;
+        if (!updatedPlugin) { return }
+
         const now = Date.now();
         const delta = now - startTime;
         // assume we can 20ms jitter in the setTimeout
-        if (updatedPlugin['delay-1'].status === 'inited') {
+        if (updatedPlugin.id === 'delay-1' && updatedPlugin.status === 'inited') {
           assert.isBelow(Math.abs(delta - 0.), TIMEOUT_ERROR);
-        } else if (updatedPlugin['delay-1'] === 'started') {
+        } else if (updatedPlugin.id === 'delay-1' && updatedPlugin === 'started') {
           assert.isBelow(Math.abs(delta - 100), TIMEOUT_ERROR);
         }
 
-        if (updatedPlugin['delay-2'].status === 'inited') {
+        if (updatedPlugin.id === 'delay-2' && updatedPlugin.status === 'inited') {
           assert.isBelow(Math.abs(delta - 100), TIMEOUT_ERROR);
-        } else if (updatedPlugin['delay-2'] === 'started') {
+        } else if (updatedPlugin.id === 'delay-2' && updatedPlugin === 'started') {
           assert.isBelow(Math.abs(delta - 200), TIMEOUT_ERROR);
         }
       });
 
       await client.start();
       await client.stop();
+
+      if (!onStateChangeCalled) {
+        assert.fail('onStateChange not called');
+      }
     });
 
     it(`should support complex plugin dependency graphs`, async function() {
@@ -449,45 +473,53 @@ describe(`client::PluginManager`, () => {
         delayTime: 200,
       }, ['delay-2', 'delay-3']);
 
-      await client.init();
-
+      const TIMEOUT_ERROR = 30; // take websocket connection latency into account
       const startTime = Date.now();
+      let onStateChangeCalled = false;
 
       client.pluginManager.onStateChange((plugins, updatedPlugin) => {
+        onStateChangeCalled = true;
+        if (!updatedPlugin) { return }
+
         const now = Date.now();
         const delta = now - startTime;
+
         // assume we can 20ms jitter in the setTimeout
-        if (updatedPlugin['delay-1'].status === 'inited') {
+        if (updatedPlugin.id === 'delay-1' && updatedPlugin.status === 'inited') {
           assert.isBelow(Math.abs(delta - 0.), TIMEOUT_ERROR);
-        } else if (updatedPlugin['delay-1'].status === 'started') {
+        } else if (updatedPlugin.id === 'delay-1' && updatedPlugin.status === 'started') {
           assert.isBelow(Math.abs(delta - 200), TIMEOUT_ERROR);
         }
 
-        if (updatedPlugin['delay-2'].status === 'inited') {
+        if (updatedPlugin.id === 'delay-2' && updatedPlugin.status === 'inited') {
           assert.isBelow(Math.abs(delta - 200), TIMEOUT_ERROR);
-        } else if (updatedPlugin['delay-2'].status === 'started') {
+        } else if (updatedPlugin.id === 'delay-2' && updatedPlugin.status === 'started') {
           assert.isBelow(Math.abs(delta - 400), TIMEOUT_ERROR);
         }
 
-        if (updatedPlugin['delay-3'].status === 'inited') {
+        if (updatedPlugin.id === 'delay-3' && updatedPlugin.status === 'inited') {
           assert.isBelow(Math.abs(delta - 0.), TIMEOUT_ERROR);
-        } else if (updatedPlugin['delay-3'].status === 'started') {
+        } else if (updatedPlugin.id === 'delay-3' && updatedPlugin.status === 'started') {
           assert.isBelow(Math.abs(delta - 600), TIMEOUT_ERROR);
         }
 
-        if (updatedPlugin['delay-4'].status === 'inited') {
+        if (updatedPlugin.id === 'delay-4' && updatedPlugin.status === 'inited') {
           assert.isBelow(Math.abs(delta - 600), TIMEOUT_ERROR);
-        } else if (updatedPlugin['delay-4'].status === 'started') {
+        } else if (updatedPlugin.id === 'delay-4' && updatedPlugin.status === 'started') {
           assert.isBelow(Math.abs(delta - 800), TIMEOUT_ERROR);
         }
       });
 
       await client.start();
       await client.stop();
+
+      if (!onStateChangeCalled) {
+        assert.fail('onStateChange not called');
+      }
     });
   });
 
-  describe(`pluginManager.getRegisteredPlugins()`, () => {
+  describe(`# pluginManager.getRegisteredPlugins()`, () => {
     it(`should return the list of registered plugins`, () => {
       const client = new Client({ role: 'test', ...config });
       client.pluginManager.register('delay-1', clientPluginDelayFactory, { delayTime: 0 });
