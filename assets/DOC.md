@@ -1,5 +1,7 @@
 # soundworks
 
+[![npm version](https://badge.fury.io/js/@soundworks%2Fcore.svg)](https://badge.fury.io/js/@soundworks%2Fcore)
+
 Welcome to the `@soundworks/core` API documentation
 
 ## Create new application
