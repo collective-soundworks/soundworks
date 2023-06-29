@@ -136,6 +136,10 @@ article a {
   border-bottom: 1px solid #616354;
 }
 
+article a:has(img) {
+  border-bottom: none;
+}
+
 span.param-type, .params td .param-type, .param-type dd {
   color: #616354;
   font-family: Consolas, Monaco, 'Andale Mono', monospace;
