@@ -25,6 +25,7 @@ import StateManager from './StateManager.js';
 import Sockets from './Sockets.js';
 import logger from '../common/logger.js';
 import {
+  SERVER_ID,
   CLIENT_HANDSHAKE_REQUEST,
   CLIENT_HANDSHAKE_RESPONSE,
   CLIENT_HANDSHAKE_ERROR,
@@ -329,6 +330,15 @@ class Server {
 
     logger.configure(this.config.env.verbose);
     setTerminalTitle(this);
+  }
+
+  /**
+   * Id of the server (-1)
+   * @type {Number}
+   * @readonly
+   */
+  get id() {
+    return SERVER_ID;
   }
 
   /**
