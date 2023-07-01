@@ -333,7 +333,7 @@ class Server {
   }
 
   /**
-   * Id of the server (-1)
+   * Id of the server, a constant set to -1
    * @type {Number}
    * @readonly
    */
