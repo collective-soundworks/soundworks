@@ -21,10 +21,12 @@ import {
 
 class BaseSharedState {
   constructor(id, remoteId, schemaName, schema, client, isOwner, manager, initValues = {}) {
-    this.id = id;
-    this.remoteId = remoteId;
-    this.schemaName = schemaName;
-
+    /** @private */
+    this._id = id;
+    /** @private */
+    this._remoteId = remoteId;
+    /** @private */
+    this._schemaName = schemaName;
     /** @private */
     this._isOwner = isOwner; // may be the server or any client
     /** @private */
@@ -139,6 +141,43 @@ ${JSON.stringify(initValues, null, 2)}`);
         rejectRequest(reqId, msg);
       });
     }
+  }
+
+  /**
+   * Id of the state
+   * @type {Number}
+   * @readonly
+   */
+  get id() {
+    return this._id;
+  }
+
+  /**
+   * Unique id of the state for the current node
+   * @readonly
+   * @type {Number}
+   * @private
+   */
+  get remoteId() {
+    return this._remoteId;
+  }
+
+  /**
+   * Name of the schema
+   * @type {String}
+   * @readonly
+   */
+  get schemaName() {
+    return this._schemaName;
+  }
+
+  /**
+   * Indicates if the node is the owner of the state
+   * @type {Boolean}
+   * @readonly
+   */
+  get isOwner() {
+    return this._isOwner;
   }
 
   /** @private */
