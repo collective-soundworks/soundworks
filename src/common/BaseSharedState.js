@@ -34,6 +34,8 @@ class BaseSharedState {
     /** @private */
     this._manager = manager;
 
+    this._detached = false;
+
     try {
       /** @private */
       this._parameters = new ParameterBag(schema, initValues);
@@ -90,14 +92,25 @@ ${JSON.stringify(initValues, null, 2)}`);
     });
 
     // ---------------------------------------------
-    // DELETE initiated by creator, or schema deleted
+    // state has been deleted by its creator or the schema has been deleted
     // ---------------------------------------------
-    this._client.transport.addListener(`${DELETE_NOTIFICATION}-${this.id}-${this.remoteId}`, () => {
+    this._client.transport.addListener(`${DELETE_NOTIFICATION}-${this.id}-${this.remoteId}`, async () => {
       this._manager._statesById.delete(this.id);
       this._clearTransport();
 
-      this._onDetachCallbacks.forEach(callback => callback());
-      this._onDeleteCallbacks.forEach(callback => callback());
+      for (let callback of this._onDetachCallbacks) {
+        try {
+          await callback();
+        } catch(err) {
+          console.error(err.message);
+        }
+      }
+
+      if (this._isOwner) {
+        for (let callback of this._onDeleteCallbacks) {
+          await callback();
+        }
+      }
 
       this._clearDetach();
     });
@@ -105,14 +118,19 @@ ${JSON.stringify(initValues, null, 2)}`);
 
     if (this._isOwner) {
       // ---------------------------------------------
-      // DELETE (can only delete if creator)
+      // the creator has called `.delete()`
       // ---------------------------------------------
-      this._client.transport.addListener(`${DELETE_RESPONSE}-${this.id}-${this.remoteId}`, (reqId) => {
+      this._client.transport.addListener(`${DELETE_RESPONSE}-${this.id}-${this.remoteId}`, async (reqId) => {
         this._manager._statesById.delete(this.id);
         this._clearTransport();
 
-        this._onDetachCallbacks.forEach(callback => callback());
-        this._onDeleteCallbacks.forEach(callback => callback());
+        for (let callback of this._onDetachCallbacks) {
+          await callback();
+        }
+
+        for (let callback of this._onDeleteCallbacks) {
+          await callback();
+        }
 
         this._clearDetach();
         resolveRequest(reqId, this);
@@ -124,13 +142,15 @@ ${JSON.stringify(initValues, null, 2)}`);
 
     } else {
       // ---------------------------------------------
-      // DETACH
+      // the attached node has called `.detach()`
       // ---------------------------------------------
-      this._client.transport.addListener(`${DETACH_RESPONSE}-${this.id}-${this.remoteId}`, (reqId) => {
+      this._client.transport.addListener(`${DETACH_RESPONSE}-${this.id}-${this.remoteId}`, async (reqId) => {
         this._manager._statesById.delete(this.id);
         this._clearTransport();
 
-        this._onDetachCallbacks.forEach(func => func());
+        for (let callback of this._onDetachCallbacks) {
+          await callback();
+        }
 
         this._clearDetach();
         resolveRequest(reqId, this);
@@ -184,12 +204,7 @@ ${JSON.stringify(initValues, null, 2)}`);
   _clearDetach() {
     this._onDetachCallbacks.clear();
     this._onDeleteCallbacks.clear();
-
-    // Monkey patch detach so it throws if called twice. Doing nothing blocks
-    // the process on a second `detach` call as the Promise never resolves
-    this.detach = () => {
-      throw new Error(`[SharedState] State "${this.schemaName} (${this.id})" already detached, cannot detach twice`);
-    };
+    this._detached = true;
   }
 
   /** @private */
@@ -450,7 +465,7 @@ ${JSON.stringify(initValues, null, 2)}`);
 
   /**
    * Detach from the state. If the client is the creator of the state, the state
-   * is deleted and all attached nodes get notified
+   * is deleted and all attached nodes get notified.
    *
    * @example
    * const state = await client.state.attach('globals');
@@ -458,6 +473,10 @@ ${JSON.stringify(initValues, null, 2)}`);
    * await state.detach();
    */
   async detach() {
+    if (this._detached) {
+      throw new Error(`[SharedState] State "${this.schemaName} (${this.id})" already detached, cannot detach twice`);
+    }
+
     this._onUpdateCallbacks.clear();
 
     if (this._isOwner) {
@@ -475,9 +494,11 @@ ${JSON.stringify(initValues, null, 2)}`);
 
   /**
    * Delete the state. Only the creator/owner of the state can use this method.
-   * All nodes attached to the state will be deteched, triggering the `onDetach`
-   * callback. The creator of the state will also have its `onDelete` callback
-   * triggered.
+   *
+   * All nodes attached to the state will be detached, triggering any registered
+   * `onDetach` callbacks. The creator of the state will also have its own `onDelete`
+   * callback triggered. The local `onDeatch` and `onDelete` callbacks will be
+   * executed *before* the returned Promise resolves
    *
    * @throws Throws if the method is called by a node which is not the owner of
    * the state.
@@ -488,6 +509,10 @@ ${JSON.stringify(initValues, null, 2)}`);
    */
   async delete() {
     if (this._isOwner) {
+      if (this._detached) {
+        throw new Error(`[SharedState] State "${this.schemaName} (${this.id})" already deleted, cannot delete twice`);
+      }
+
       return this.detach();
     } else {
       throw new Error(`[SharedState] Cannot delete state "${this.schemaName}", only the owner of the state (i.e. the node that created it) can delete the state. Use "detach" instead.`);
@@ -530,7 +555,8 @@ ${JSON.stringify(initValues, null, 2)}`);
   }
 
   /**
-   * Register a function to execute when detaching from the state
+   * Register a function to execute when detaching from the state. The function
+   * will be executed before the `detach` promise resolves.
    *
    * @param {Function} callback - Callback to execute when detaching from the state.
    *   Whether the client as called `detach`, or the state has been deleted by its
@@ -543,7 +569,8 @@ ${JSON.stringify(initValues, null, 2)}`);
 
   /**
    * Register a function to execute when the state is deleted. Only called if the
-   * node was the creator of the state. Is called after `onDetach`
+   * node was the creator of the state. Is called after `onDetach` and executed
+   * before the `delete` Promise resolves.
    *
    * @param {Function} callback - Callback to execute when the state is deleted.
    */

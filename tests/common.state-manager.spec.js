@@ -1,4 +1,5 @@
 import { assert } from 'chai';
+import { delay } from '@ircam/sc-utils';
 
 import { Server } from '../src/server/index.js';
 import { Client } from '../src/client/index.js';
@@ -6,6 +7,7 @@ import {
   OBSERVE_RESPONSE,
   OBSERVE_NOTIFICATION,
 } from '../src/common/constants.js';
+
 
 const a = {
   bool: {
@@ -1239,7 +1241,7 @@ describe(`common::StateManager`, () => {
       }
     });
 
-    it('should call state.onDetach', async () => {
+    it('should call state.onDetach but not on onDelete if not owner', async () => {
       const a0 = await server.stateManager.create('a');
       const a1 = await server.stateManager.attach('a', a0.id);
 
@@ -1248,15 +1250,9 @@ describe(`common::StateManager`, () => {
       a1.onDetach(() => onDetachCalled = true);
       a1.onDelete(() => onDeleteCalled = true);
 
-      await a1.detach();
-      await new Promise(resolve => setTimeout(resolve, 200));
+      await a0.delete();
 
       assert.equal(onDetachCalled, true);
-      assert.equal(onDeleteCalled, false);
-
-      await a0.delete();
-      await new Promise(resolve => setTimeout(resolve, 200));
-
       assert.equal(onDeleteCalled, false);
     });
 
@@ -1274,27 +1270,35 @@ describe(`common::StateManager`, () => {
 
       await a.delete();
 
-      await new Promise(resolve => setTimeout(resolve, 200));
       assert.equal(onDetachCalled, true);
       assert.equal(onDeleteCalled, true);
     });
 
-    it('(may be an issue) should call state.onDetach and state.onDelete also on attached states if owner', async () => {
-      const a0 = await server.stateManager.create('a');
-      const a1 = await server.stateManager.attach('a', a0.id);
+    it('should call state.onDetach and state.onDelete before delete() promise resolves', async () => {
+      const a = await server.stateManager.create('a');
 
+      let step = 0;
       let onDetachCalled = false;
       let onDeleteCalled = false;
 
-      a1.onDetach(() => onDetachCalled = true);
-      a1.onDelete(() => {
-        onDeleteCalled = true;
-        assert.equal(onDetachCalled, true);
+      a.onDetach(async () => {
+        await delay(50);
+        step += 1;
+        onDetachCalled = true;
+        assert.equal(step, 1);
       });
 
-      await a0.detach();
+      a.onDelete(async () => {
+        await delay(50);
+        step += 1;
+        onDeleteCalled = true;
+        assert.equal(step, 2);
+      });
 
-      await new Promise(resolve => setTimeout(resolve, 200));
+      await a.delete();
+
+      step += 1;
+      assert.equal(step, 3);
       assert.equal(onDetachCalled, true);
       assert.equal(onDeleteCalled, true);
     });
@@ -1348,11 +1352,9 @@ describe(`common::StateManager`, () => {
         server.stateManager.deleteSchema('aa');
 
         setTimeout(() => {
-          const allDetach = detachCalled.reduce((acc, value) => acc && value, true);
-          const allDelete = deleteCalled.reduce((acc, value) => acc && value, true);
-
-          assert.equal(allDetach, true);
-          assert.equal(allDelete, true);
+          assert.deepEqual([true, true, true, true], detachCalled);
+          // onDelete is not called on attached state
+          assert.deepEqual([true, false, true, false], deleteCalled);
           resolve();
         }, 200);
       });
@@ -1797,6 +1799,7 @@ describe(`common::StateManager`, () => {
 
       attached.forEach((state, index) => {
         state.onDetach(() => detachCalled[index] = true);
+        // onDelete is not called on attached states
         state.onDelete(() => deleteCalled[index] = true);
       });
 
@@ -1811,6 +1814,7 @@ describe(`common::StateManager`, () => {
           if (index < 50) {
             assert.deepEqual(values, expected);
             expected.int += 1;
+
             if (values.int === 100) {
               unsubscribe();
             }
@@ -1821,20 +1825,19 @@ describe(`common::StateManager`, () => {
         });
       }
 
+      detachCalled.forEach((value, index) => assert.equal(value, index >= 50));
+
       for (let i = 1; i <= 100; i++) {
         await global.set({ int: i });
       }
 
-      global.detach();
+      await global.detach();
       console.timeEnd('  + brute force time');
+      // wait for message propagation
+      await delay(100);
 
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          detachCalled.forEach(value => assert.equal(value, true));
-          deleteCalled.forEach((value, index) => assert.equal(value, index < 50));
-          resolve();
-        }, 1000);
-      });
+      detachCalled.forEach((value, index) => assert.equal(value, true));
+      deleteCalled.forEach((value, index) => assert.equal(value, false));
     });
 
     it(`should keep message order in case of modification by the server in the subscribe callback (1)`, async () => {

@@ -179,8 +179,11 @@ class BaseStateManager {
    * the state of all other clients of the application, to monitor them and/or take
    * control over them from a single point.
    *
-   * Note that the states that are created by the same node are not propagated through
+   * Notes:
+   * - The states that are created by the same node are not propagated through
    * the observe callback.
+   * - The order of execution is not guaranted, i.e. an state attached in the
+   * `observe` callback could be created before the `async create` method resolves.
    *
    * @param {String} [schemaName] - optionnal schema name to filter the observed
    *  states.
