@@ -7,13 +7,13 @@
 
 Open-source creative coding framework for distributed applications based on Web technologies.
 
-Primarily focused on music, `soundworks` aims at supporting rapid development of real-time distributed applications using _JavaScript_. It provides abstractions to hide the complexity of the network and to foster very rapid-prototyping and trial-and-error workflows that are typical in artistic practices.
+Primarily focused on music, **soundworks** aims at supporting rapid development of real-time distributed applications using _JavaScript_. It provides abstractions to hide the complexity of the network and to foster very rapid-prototyping and trial-and-error workflows that are typical in artistic practices.
 
 *__WARNING: The version 4 of `@soundworks/core` is under heavy development.__*
 
 ## Getting Started
 
-The best and most simple way to start using `soundworks` is to use the `@soundworks/create` wizard. 
+The best and most simple way to start using **soundworks** is to use the `@soundworks/create` wizard. 
 
 ```sh
 npx @soundworks/create@latest
@@ -21,7 +21,7 @@ npx @soundworks/create@latest
 
 ![./assets/soundworks-create-min.gif](./assets/soundworks-create-min.gif)
 
-See [https://soundworks.dev/tutorials/getting-started.html](https://soundworks.dev/tutorials/getting-started.html) for more informations on the wizard and how to start with `soundworks`.
+See [https://soundworks.dev/tutorials/getting-started.html](https://soundworks.dev/tutorials/getting-started.html) for more informations on the wizard and how to start with **soundworks**.
 
 <!--
 ## Documentation
@@ -45,7 +45,7 @@ Feel welcome to open an [issue](https://github.com/collective-soundworks/soundwo
 
 ## Share with Us
 
-If you made an application using `soundworks` please let us know here: https://github.com/collective-soundworks/soundworks/discussions/61
+If you made an application using **soundworks** please let us know here: https://github.com/collective-soundworks/soundworks/discussions/61
 
 ## TypeScript Support
 
@@ -55,7 +55,7 @@ However, for maintenance reasons, we aim at following the TC39 and W3C specifica
 
 ## Install
 
-Note that the `@soundworks/core` package is automatically installed when creating an application using the `@soundworks/create` wizard, so most of the time you should not have to install this package manually. See [https://soundworks.dev/guides/getting-started.html](https://soundworks.dev/guides/getting-started.html) for more informations on the `soundworks` wizard.
+Note that the `@soundworks/core` package is automatically installed when creating an application using the `@soundworks/create` wizard, so most of the time you should not have to install this package manually. See [https://soundworks.dev/guides/getting-started.html](https://soundworks.dev/guides/getting-started.html) for more informations on the **soundworks** wizard.
 
 ```
 npm install @soundworks/core
@@ -63,7 +63,7 @@ npm install @soundworks/core
 
 ## Credits
 
-`soundworks` has been initiated by [Norbert Schnell](https://github.com/NorbertSchnell), [Sébastien Robaszkiewicz](https://github.com/i-Robi), and [Benjamin Matuszewski](https://github.com/b-ma) at the [ISMM](http://ismm.ircam.fr/) team at [Ircam - Centre Pompidou](http://www.ircam.fr/) in the context of the [CoSiMa](http://cosima.ircam.fr/) research project founded by the French National Research Agency (ANR).
+**soundworks** has been initiated by [Norbert Schnell](https://github.com/NorbertSchnell), [Sébastien Robaszkiewicz](https://github.com/i-Robi), and [Benjamin Matuszewski](https://github.com/b-ma) at the [ISMM](http://ismm.ircam.fr/) team at [Ircam - Centre Pompidou](http://www.ircam.fr/) in the context of the [CoSiMa](http://cosima.ircam.fr/) research project founded by the French National Research Agency (ANR).
 
 Development is now led by Benjamin Matuszewski, in the [Sound Music Movement Interaction Team](https://www.stms-lab.fr/team/interaction-son-musique-mouvement/) from the Ircam's STMS-LAB.
 
