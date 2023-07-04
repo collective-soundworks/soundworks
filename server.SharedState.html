@@ -137,6 +137,259 @@ setInterval(() => {
     
 
     
+        <h3 class="subsection-title">Members</h3>
+
+        
+            
+<h4 class="name" id="id"><span class="type-signature type-signature-readonly">(readonly) </span>id<span class="type-signature"> :Number</span></h4>
+
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>Id of the state</p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="common_BaseSharedState.js.html">common/BaseSharedState.js</a>, <a href="common_BaseSharedState.js.html#line171">line 171</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="BaseSharedState.html#id">BaseSharedState#id</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description usertext">
+    <p>Id of the state</p>
+</div>
+
+
+
+    <h5 class="h5-types">Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Number</span>
+
+
+
+        </li>
+    </ul>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="isOwner"><span class="type-signature type-signature-readonly">(readonly) </span>isOwner<span class="type-signature"> :Boolean</span></h4>
+
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>Indicates if the node is the owner of the state</p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="common_BaseSharedState.js.html">common/BaseSharedState.js</a>, <a href="common_BaseSharedState.js.html#line199">line 199</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="BaseSharedState.html#isOwner">BaseSharedState#isOwner</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description usertext">
+    <p>Indicates if the node is the owner of the state</p>
+</div>
+
+
+
+    <h5 class="h5-types">Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Boolean</span>
+
+
+
+        </li>
+    </ul>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="schemaName"><span class="type-signature type-signature-readonly">(readonly) </span>schemaName<span class="type-signature"> :String</span></h4>
+
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>Name of the schema</p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="common_BaseSharedState.js.html">common/BaseSharedState.js</a>, <a href="common_BaseSharedState.js.html#line190">line 190</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="BaseSharedState.html#schemaName">BaseSharedState#schemaName</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description usertext">
+    <p>Name of the schema</p>
+</div>
+
+
+
+    <h5 class="h5-types">Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">String</span>
+
+
+
+        </li>
+    </ul>
+
+
+
+
+
+
+        
+    
 
     
         <h3 class="subsection-title">Methods</h3>
@@ -156,16 +409,17 @@ setInterval(() => {
 <dl class="details">
     
     <dt class="tag-description">Description:</dt>
-    <dd class="tag-description"><ul class="dummy"><li><p>Delete the state. Only the creator/owner of the state can use this method.
-All nodes attached to the state will be deteched, triggering the <code>onDetach</code>
-callback. The creator of the state will also have its <code>onDelete</code> callback
-triggered.</p></li></ul></dd>
+    <dd class="tag-description"><ul class="dummy"><li><p>Delete the state. Only the creator/owner of the state can use this method.</p>
+<p>All nodes attached to the state will be detached, triggering any registered
+<code>onDetach</code> callbacks. The creator of the state will also have its own <code>onDelete</code>
+callback triggered. The local <code>onDeatch</code> and <code>onDelete</code> callbacks will be
+executed <em>before</em> the returned Promise resolves</p></li></ul></dd>
     
 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_BaseSharedState.js.html">common/BaseSharedState.js</a>, <a href="common_BaseSharedState.js.html#line450">line 450</a>
+        <a href="common_BaseSharedState.js.html">common/BaseSharedState.js</a>, <a href="common_BaseSharedState.js.html#line510">line 510</a>
     </li></ul></dd>
     
 
@@ -270,13 +524,13 @@ the state.</p>
     
     <dt class="tag-description">Description:</dt>
     <dd class="tag-description"><ul class="dummy"><li><p>Detach from the state. If the client is the creator of the state, the state
-is deleted and all attached nodes get notified</p></li></ul></dd>
+is deleted and all attached nodes get notified.</p></li></ul></dd>
     
 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_BaseSharedState.js.html">common/BaseSharedState.js</a>, <a href="common_BaseSharedState.js.html#line421">line 421</a>
+        <a href="common_BaseSharedState.js.html">common/BaseSharedState.js</a>, <a href="common_BaseSharedState.js.html#line475">line 475</a>
     </li></ul></dd>
     
 
@@ -374,7 +628,7 @@ a deep copy is returned.</p></li></ul></dd>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_BaseSharedState.js.html">common/BaseSharedState.js</a>, <a href="common_BaseSharedState.js.html#line323">line 323</a>
+        <a href="common_BaseSharedState.js.html">common/BaseSharedState.js</a>, <a href="common_BaseSharedState.js.html#line377">line 377</a>
     </li></ul></dd>
     
 
@@ -551,7 +805,7 @@ of the state.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_BaseSharedState.js.html">common/BaseSharedState.js</a>, <a href="common_BaseSharedState.js.html#line408">line 408</a>
+        <a href="common_BaseSharedState.js.html">common/BaseSharedState.js</a>, <a href="common_BaseSharedState.js.html#line462">line 462</a>
     </li></ul></dd>
     
 
@@ -666,7 +920,7 @@ default values declared in the schema.</p></li></ul></dd>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_BaseSharedState.js.html">common/BaseSharedState.js</a>, <a href="common_BaseSharedState.js.html#line397">line 397</a>
+        <a href="common_BaseSharedState.js.html">common/BaseSharedState.js</a>, <a href="common_BaseSharedState.js.html#line451">line 451</a>
     </li></ul></dd>
     
 
@@ -780,7 +1034,7 @@ default values declared in the schema.</p></li></ul></dd>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_BaseSharedState.js.html">common/BaseSharedState.js</a>, <a href="common_BaseSharedState.js.html#line385">line 385</a>
+        <a href="common_BaseSharedState.js.html">common/BaseSharedState.js</a>, <a href="common_BaseSharedState.js.html#line439">line 439</a>
     </li></ul></dd>
     
 
@@ -982,7 +1236,7 @@ inconsistent.</p></li></ul></dd>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_BaseSharedState.js.html">common/BaseSharedState.js</a>, <a href="common_BaseSharedState.js.html#line341">line 341</a>
+        <a href="common_BaseSharedState.js.html">common/BaseSharedState.js</a>, <a href="common_BaseSharedState.js.html#line395">line 395</a>
     </li></ul></dd>
     
 
@@ -1160,7 +1414,7 @@ type, a deep copy is made.</p></li></ul></dd>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_BaseSharedState.js.html">common/BaseSharedState.js</a>, <a href="common_BaseSharedState.js.html#line353">line 353</a>
+        <a href="common_BaseSharedState.js.html">common/BaseSharedState.js</a>, <a href="common_BaseSharedState.js.html#line407">line 407</a>
     </li></ul></dd>
     
 
@@ -1280,7 +1534,7 @@ become inconsistent.</p></li></ul></dd>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_BaseSharedState.js.html">common/BaseSharedState.js</a>, <a href="common_BaseSharedState.js.html#line370">line 370</a>
+        <a href="common_BaseSharedState.js.html">common/BaseSharedState.js</a>, <a href="common_BaseSharedState.js.html#line424">line 424</a>
     </li></ul></dd>
     
 
@@ -1389,13 +1643,14 @@ become inconsistent.</p></li></ul></dd>
     
     <dt class="tag-description">Description:</dt>
     <dd class="tag-description"><ul class="dummy"><li><p>Register a function to execute when the state is deleted. Only called if the
-node was the creator of the state. Is called after <code>onDetach</code></p></li></ul></dd>
+node was the creator of the state. Is called after <code>onDetach</code> and executed
+before the <code>delete</code> Promise resolves.</p></li></ul></dd>
     
 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_BaseSharedState.js.html">common/BaseSharedState.js</a>, <a href="common_BaseSharedState.js.html#line511">line 511</a>
+        <a href="common_BaseSharedState.js.html">common/BaseSharedState.js</a>, <a href="common_BaseSharedState.js.html#line577">line 577</a>
     </li></ul></dd>
     
 
@@ -1529,13 +1784,14 @@ node was the creator of the state. Is called after <code>onDetach</code></p></li
 <dl class="details">
     
     <dt class="tag-description">Description:</dt>
-    <dd class="tag-description"><ul class="dummy"><li><p>Register a function to execute when detaching from the state</p></li></ul></dd>
+    <dd class="tag-description"><ul class="dummy"><li><p>Register a function to execute when detaching from the state. The function
+will be executed before the <code>detach</code> promise resolves.</p></li></ul></dd>
     
 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_BaseSharedState.js.html">common/BaseSharedState.js</a>, <a href="common_BaseSharedState.js.html#line500">line 500</a>
+        <a href="common_BaseSharedState.js.html">common/BaseSharedState.js</a>, <a href="common_BaseSharedState.js.html#line565">line 565</a>
     </li></ul></dd>
     
 
@@ -1677,7 +1933,7 @@ creator.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_BaseSharedState.js.html">common/BaseSharedState.js</a>, <a href="common_BaseSharedState.js.html#line478">line 478</a>
+        <a href="common_BaseSharedState.js.html">common/BaseSharedState.js</a>, <a href="common_BaseSharedState.js.html#line542">line 542</a>
     </li></ul></dd>
     
 
@@ -1934,7 +2190,7 @@ assert.deepEqual(updates, { myBool: true });
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_BaseSharedState.js.html">common/BaseSharedState.js</a>, <a href="common_BaseSharedState.js.html#line257">line 257</a>
+        <a href="common_BaseSharedState.js.html">common/BaseSharedState.js</a>, <a href="common_BaseSharedState.js.html#line311">line 311</a>
     </li></ul></dd>
     
 
@@ -2476,7 +2732,7 @@ with the values updates in the <code>set</code> call.</p></td>
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a> on Thu Jun 29 2023 15:38:59 GMT+0000 (Coordinated Universal Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a> on Tue Jul 04 2023 08:57:43 GMT+0000 (Coordinated Universal Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>
