@@ -861,12 +861,19 @@ Invalid certificate files, please check your:
         if (this._trustedClients.has(client)) {
           this._trustedClients.delete(client);
         }
-        // clean context manager, await before cleaning state manager
-        await this.contextManager.removeClient(client);
-        // remove client from pluginManager
-        await this.pluginManager.removeClient(client);
-        // clean state manager
-        await this.stateManager.removeClient(client.id);
+
+        // if something goes wrong here, the 'close' event is called again and
+        // again and again... let's just log the error and terminate the socket
+        try {
+          // clean context manager, await before cleaning state manager
+          await this.contextManager.removeClient(client);
+          // remove client from pluginManager
+          await this.pluginManager.removeClient(client);
+          // clean state manager
+          await this.stateManager.removeClient(client.id);
+        } catch (err) {
+          console.error(err);
+        }
       }
 
       // clean sockets
