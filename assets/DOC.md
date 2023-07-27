@@ -4,9 +4,9 @@ Welcome to the `@soundworks/core` API documentation
 
 [![npm version](https://badge.fury.io/js/@soundworks%2Fcore.svg)](https://badge.fury.io/js/@soundworks%2Fcore)
 
-## Create new application
+## Create new applications
 
-To create a new application, you will probably prefer using the `@soundworks/create` wizard:
+To create a new application, you will probably prefer to use the `@soundworks/create` wizard:
 
 ```sh
 npx @soundworks/create@latest

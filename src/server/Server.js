@@ -319,6 +319,10 @@ class Server {
     /** @private */
     this._onStatusChangeCallbacks = new Set();
     /** @private */
+    this._onClientConnectCallbacks = new Set();
+    /** @private */
+    this._onClientDisconnectCallbacks = new Set();
+    /** @private */
     this._auditState = null;
     /** @private */
     this._pendingConnectionTokens = new Set();
@@ -825,6 +829,18 @@ Invalid certificate files, please check your:
     return route;
   }
 
+  onClientConnect(callback) {
+    this._onClientConnectCallbacks.add(callback);
+
+    return () => this._onClientConnectCallbacks.delete(callback);
+  }
+
+  onClientDisconnect(callback) {
+    this._onClientDisconnectCallbacks.add(callback);
+
+    return () => this._onClientDisconnectCallbacks.delete(callback);
+  }
+
   /**
    * Socket connection callback.
    * @private
@@ -871,6 +887,8 @@ Invalid certificate files, please check your:
           await this.pluginManager.removeClient(client);
           // clean state manager
           await this.stateManager.removeClient(client.id);
+
+          this._onClientDisconnectCallbacks.forEach(callback => callback(client));
         } catch (err) {
           console.error(err);
         }
@@ -919,6 +937,8 @@ Invalid certificate files, please check your:
       await this.pluginManager.addClient(client, registeredPlugins);
       // add client to context manager
       await this.contextManager.addClient(client);
+
+      this._onClientConnectCallbacks.forEach(callback => callback(client));
 
       const { id, uuid, token } = client;
       socket.send(CLIENT_HANDSHAKE_RESPONSE, { id, uuid, token });
