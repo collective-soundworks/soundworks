@@ -76,6 +76,18 @@ class BaseSharedStateCollection {
   }
 
   /**
+   * Update all states of the collection with given values.
+   * @param {object} updates - key / value pairs of updates to apply to the state.
+   * @param {mixed} [context=null] - optionnal contextual object that will be propagated
+   *   alongside the updates of the state. The context is valid only for the
+   *   current call and will be passed as third argument to all update listeners.
+   */
+  async set(updates, context = null) {
+    const promises = this._states.map(state => state.set(updates, context));
+    return Promise.all(promises);
+  }
+
+  /**
    * Subscribe to any state update of the collection.
    *
    * @param {server.SharedStateCollection~onUpdateCallback|client.SharedStateCollection~onUpdateCallback}

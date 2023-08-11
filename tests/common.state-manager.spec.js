@@ -1407,6 +1407,18 @@ describe(`common::StateManager`, () => {
       state.delete();
     });
 
+    it.only(`collection.set(updates, context = null)`, async () => {
+      const state = await client.stateManager.create('a');
+      const collection = await clients[1].stateManager.getCollection('a');
+
+      const results = await collection.set({ bool: true });
+      const expected = [ { bool: true } ];
+
+      assert.deepEqual(expected, results);
+
+      state.delete();
+    });
+
     it(`collection.onUpdate(callback)`, async () => {
       const state = await client.stateManager.create('a');
 
