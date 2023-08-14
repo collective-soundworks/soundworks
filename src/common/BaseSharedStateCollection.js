@@ -195,10 +195,11 @@ class BaseSharedStateCollection {
 
     return {
       next: () => {
-        const value = this._states[index++];
-        const done = index >= this._states.length;
-
-        return { value, done };
+        if (index >= this._states.length) {
+          return { value: undefined, done: true };
+        } else {
+          return { value: this._states[index++], done: false };
+        }
       }
     }
   }

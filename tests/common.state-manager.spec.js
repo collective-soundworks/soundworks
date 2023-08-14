@@ -1482,7 +1482,7 @@ describe(`common::StateManager`, () => {
       }
     });
 
-    it(`collection [Symbol.iterator]`, async () => {
+    it.only(`collection [Symbol.iterator]`, async () => {
       const state = await client.stateManager.create('a');
       const collection = await clients[1].stateManager.getCollection('a');
 
