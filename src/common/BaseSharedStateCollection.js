@@ -186,6 +186,22 @@ class BaseSharedStateCollection {
   find(func) {
     return this._states.find(func);
   }
+
+  /**
+   * Iterable API for use in `for .. of` loops
+   */
+  [Symbol.iterator]() {
+    let index = 0;
+
+    return {
+      next: () => {
+        const value = this._states[index++];
+        const done = index >= this._states.length;
+
+        return { value, done };
+      }
+    }
+  }
 }
 
 export default BaseSharedStateCollection;

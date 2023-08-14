@@ -1407,7 +1407,7 @@ describe(`common::StateManager`, () => {
       state.delete();
     });
 
-    it.only(`collection.set(updates, context = null)`, async () => {
+    it(`collection.set(updates, context = null)`, async () => {
       const state = await client.stateManager.create('a');
       const collection = await clients[1].stateManager.getCollection('a');
 
@@ -1480,6 +1480,19 @@ describe(`common::StateManager`, () => {
       if (onDetachCalled === false) {
         assert.fail('onDetach should have been called');
       }
+    });
+
+    it(`collection [Symbol.iterator]`, async () => {
+      const state = await client.stateManager.create('a');
+      const collection = await clients[1].stateManager.getCollection('a');
+
+      let size = 0;
+
+      for (let state of collection) {
+        size += 1;
+      }
+
+      assert.equal(size, 1);
     });
   });
 
