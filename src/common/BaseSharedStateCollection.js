@@ -188,7 +188,7 @@ class BaseSharedStateCollection {
   }
 
   /**
-   * Iterable API for use in `for .. of` loops
+   * Iterable API, e.g. for use in `for .. of` loops
    */
   [Symbol.iterator]() {
     let index = 0;
