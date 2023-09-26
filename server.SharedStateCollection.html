@@ -303,7 +303,7 @@ the estates that pass the test implemented by the provided function (see <code>A
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_BaseSharedStateCollection.js.html">common/BaseSharedStateCollection.js</a>, <a href="common_BaseSharedStateCollection.js.html#line165">line 165</a>
+        <a href="common_BaseSharedStateCollection.js.html">common/BaseSharedStateCollection.js</a>, <a href="common_BaseSharedStateCollection.js.html#line177">line 177</a>
     </li></ul></dd>
     
 
@@ -446,7 +446,7 @@ function. If no values satisfy the testing function, undefined is returned.</p><
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_BaseSharedStateCollection.js.html">common/BaseSharedStateCollection.js</a>, <a href="common_BaseSharedStateCollection.js.html#line186">line 186</a>
+        <a href="common_BaseSharedStateCollection.js.html">common/BaseSharedStateCollection.js</a>, <a href="common_BaseSharedStateCollection.js.html#line198">line 198</a>
     </li></ul></dd>
     
 
@@ -593,7 +593,7 @@ It should return a truthy value to indicate a matching element has been found.</
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_BaseSharedStateCollection.js.html">common/BaseSharedStateCollection.js</a>, <a href="common_BaseSharedStateCollection.js.html#line142">line 142</a>
+        <a href="common_BaseSharedStateCollection.js.html">common/BaseSharedStateCollection.js</a>, <a href="common_BaseSharedStateCollection.js.html#line154">line 154</a>
     </li></ul></dd>
     
 
@@ -1003,7 +1003,7 @@ on every state of the collection (see <code>Array.map</code>).</p></li></ul></dd
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_BaseSharedStateCollection.js.html">common/BaseSharedStateCollection.js</a>, <a href="common_BaseSharedStateCollection.js.html#line153">line 153</a>
+        <a href="common_BaseSharedStateCollection.js.html">common/BaseSharedStateCollection.js</a>, <a href="common_BaseSharedStateCollection.js.html#line165">line 165</a>
     </li></ul></dd>
     
 
@@ -1128,7 +1128,7 @@ Its return value is added as a single element in the new array.</p></td>
 
     
 
-    <h4 class="name" id="onAttach"><span class="type-signature"></span>onAttach<span class="signature">(callback)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="onAttach"><span class="type-signature"></span>onAttach<span class="signature">(callback, executeListener)</span><span class="type-signature"> &rarr; {function}</span></h4>
 
     
 
@@ -1144,7 +1144,7 @@ Its return value is added as a single element in the new array.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_BaseSharedStateCollection.js.html">common/BaseSharedStateCollection.js</a>, <a href="common_BaseSharedStateCollection.js.html#line122">line 122</a>
+        <a href="common_BaseSharedStateCollection.js.html">common/BaseSharedStateCollection.js</a>, <a href="common_BaseSharedStateCollection.js.html#line125">line 125</a>
     </li></ul></dd>
     
 
@@ -1211,6 +1211,8 @@ Its return value is added as a single element in the new array.</p></td>
         
 
         
+        <th>Default</th>
+        
 
         <th class="last">Description</th>
     </tr>
@@ -1237,9 +1239,44 @@ Its return value is added as a single element in the new array.</p></td>
             
 
             
+                <td class="default">
+                
+                </td>
+            
 
             <td class="description last"><p>callback to execute  when a state is added to
 the collection.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>executeListener</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                    <code>false</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>execute the callback with the states
+already present in the collection.</p></td>
         </tr>
 
     
@@ -1261,6 +1298,31 @@ the collection.</p></td>
 
 
 
+<h5 class="h5-returns">Returns:</h5>
+
+        
+<div class="param-desc">
+    <ul>
+<li>Function that delete the registered listener.</li>
+</ul>
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">function</span>
+
+
+
+    </dd>
+</dl>
+
+    
 
 
 
@@ -1269,7 +1331,7 @@ the collection.</p></td>
 
     
 
-    <h4 class="name" id="onDetach"><span class="type-signature"></span>onDetach<span class="signature">(callback)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="onDetach"><span class="type-signature"></span>onDetach<span class="signature">(callback)</span><span class="type-signature"> &rarr; {function}</span></h4>
 
     
 
@@ -1285,7 +1347,7 @@ the collection.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_BaseSharedStateCollection.js.html">common/BaseSharedStateCollection.js</a>, <a href="common_BaseSharedStateCollection.js.html#line132">line 132</a>
+        <a href="common_BaseSharedStateCollection.js.html">common/BaseSharedStateCollection.js</a>, <a href="common_BaseSharedStateCollection.js.html#line142">line 142</a>
     </li></ul></dd>
     
 
@@ -1402,6 +1464,31 @@ from the collection.</p></td>
 
 
 
+<h5 class="h5-returns">Returns:</h5>
+
+        
+<div class="param-desc">
+    <ul>
+<li>Function that delete the registered listener.</li>
+</ul>
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">function</span>
+
+
+
+    </dd>
+</dl>
+
+    
 
 
 
@@ -1850,7 +1937,7 @@ current call and will be passed as third argument to all update listeners.</p></
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_BaseSharedStateCollection.js.html">common/BaseSharedStateCollection.js</a>, <a href="common_BaseSharedStateCollection.js.html#line174">line 174</a>
+        <a href="common_BaseSharedStateCollection.js.html">common/BaseSharedStateCollection.js</a>, <a href="common_BaseSharedStateCollection.js.html#line186">line 186</a>
     </li></ul></dd>
     
 
@@ -2256,7 +2343,7 @@ with the values updates in the <code>set</code> call.</p></td>
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a> on Mon Aug 14 2023 14:54:01 GMT+0000 (Coordinated Universal Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a> on Tue Sep 26 2023 15:04:03 GMT+0000 (Coordinated Universal Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>
