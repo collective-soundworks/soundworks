@@ -118,9 +118,18 @@ class BaseSharedStateCollection {
    *
    * @param {Function} callback - callback to execute  when a state is added to
    *   the collection.
+   * @param {Function} executeListener - execute the callback with the states
+   *   already present in the collection.
+   * @returns {Function} - Function that delete the registered listener.
    */
-  onAttach(callback) {
+  onAttach(callback, executeListener = false) {
+    if (executeListener === true) {
+      this._states.forEach(state => callback(state));
+    }
+
     this._onAttachCallbacks.add(callback);
+
+    return () => this._onAttachCallbacks.delete(callback);
   }
 
   /**
@@ -128,9 +137,12 @@ class BaseSharedStateCollection {
    *
    * @param {Function} callback - callback to execute  when a state is removed
    *   from the collection.
+   * @returns {Function} - Function that delete the registered listener.
    */
   onDetach(callback) {
     this._onDetachCallbacks.add(callback);
+
+    return () => this._onDetachCallbacks.delete(callback);
   }
 
   /**
