@@ -1,4 +1,4 @@
-import { getTime } from '@ircam/sc-gettime';
+import { getTime } from '@ircam/sc-utils';
 import {
   packBinaryMessage,
   unpackBinaryMessage,

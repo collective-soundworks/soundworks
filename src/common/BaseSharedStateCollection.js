@@ -13,7 +13,7 @@ class BaseSharedStateCollection {
   }
 
   async _init() {
-    this._unobserve = await this._stateManager.observe(this._schemaName, async (schemaName, stateId, nodeId) => {
+    this._unobserve = await this._stateManager.observe(this._schemaName, async (schemaName, stateId) => {
       const state = await this._stateManager.attach(schemaName, stateId);
 
       this._states.push(state);
@@ -212,8 +212,8 @@ class BaseSharedStateCollection {
         } else {
           return { value: this._states[index++], done: false };
         }
-      }
-    }
+      },
+    };
   }
 }
 

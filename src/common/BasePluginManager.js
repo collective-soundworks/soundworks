@@ -114,7 +114,7 @@ class BasePluginManager {
 
     this.status = 'inited';
     // instanciate all plugins
-    for (let [id, instance] of this._instances.entries()) {
+    for (let [_id, instance] of this._instances.entries()) {
       instance.onStateChange(_values => this._propagateStateChange(instance));
     }
 

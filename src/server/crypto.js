@@ -23,16 +23,15 @@ const encryptionIV = crypto
 
 export function encryptData(obj) {
   const data = JSON.stringify(obj);
-  const cipher = crypto.createCipheriv(encryptionMethod, key, encryptionIV)
-  return Buffer.from(
-    cipher.update(data, 'utf8', 'hex') + cipher.final('hex')
-  ).toString('base64')
+  const cipher = crypto.createCipheriv(encryptionMethod, key, encryptionIV);
+
+  return Buffer.from(cipher.update(data, 'utf8', 'hex') + cipher.final('hex')).toString('base64');
 }
 
 export function decryptData(encryptedData) {
-  const buff = Buffer.from(encryptedData, 'base64')
-  const decipher = crypto.createDecipheriv(encryptionMethod, key, encryptionIV)
+  const buff = Buffer.from(encryptedData, 'base64');
+  const decipher = crypto.createDecipheriv(encryptionMethod, key, encryptionIV);
 
-  const decrypted = `${decipher.update(buff.toString('utf8'), 'hex', 'utf8')}${decipher.final('utf8')}`
+  const decrypted = `${decipher.update(buff.toString('utf8'), 'hex', 'utf8')}${decipher.final('utf8')}`;
   return JSON.parse(decrypted);
 }

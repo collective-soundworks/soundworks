@@ -1,6 +1,6 @@
 import { parentPort } from 'node:worker_threads';
 
-import { getTime } from '@ircam/sc-gettime';
+import { getTime } from '@ircam/sc-utils';
 
 let stack = [];
 let averageLatencyWindow = 5;

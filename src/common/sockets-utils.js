@@ -1,8 +1,7 @@
 import 'fast-text-encoding';
-import root from 'window-or-global';
 
-const encoder = new root.TextEncoder('utf-8');
-const decoder = new root.TextDecoder('utf-8');
+const encoder = new TextEncoder('utf-8');
+const decoder = new TextDecoder('utf-8');
 
 const types = [
   'Int8Array',
@@ -57,7 +56,7 @@ export function unpackBinaryMessage(buffer /* arraybuffer */) {
   const channel = decoder.decode(channelBuffer);
   const type = types[typeIndex];
   // slice (copy) the underlying ArrayBuffer to create a clean TypedArray
-  const data = new root[type](buffer.slice(startOffset));
+  const data = new globalThis[type](buffer.slice(startOffset));
 
   return [channel, data];
 }

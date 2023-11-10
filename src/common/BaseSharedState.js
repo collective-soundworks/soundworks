@@ -101,7 +101,7 @@ ${JSON.stringify(initValues, null, 2)}`);
       for (let callback of this._onDetachCallbacks) {
         try {
           await callback();
-        } catch(err) {
+        } catch (err) {
           console.error(err.message);
         }
       }
@@ -325,7 +325,7 @@ ${JSON.stringify(initValues, null, 2)}`);
     for (let name in updates) {
       // try to coerce value early, so that eventual errors are triggered early
       // on the node requesting the update
-      const _ = this._parameters.coerceValue(name, updates[name]);
+      this._parameters.coerceValue(name, updates[name]);
 
       // @note: general idea...
       // if immediate=true

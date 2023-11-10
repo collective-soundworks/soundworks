@@ -5,8 +5,7 @@ import path from 'node:path';
 import os from 'node:os';
 import { X509Certificate, createPrivateKey } from 'node:crypto';
 
-import { getTime } from '@ircam/sc-gettime';
-import { isPlainObject, idGenerator } from '@ircam/sc-utils';
+import { isPlainObject, idGenerator, getTime } from '@ircam/sc-utils';
 import chalk from 'chalk';
 import compression from 'compression';
 import express from 'express';
