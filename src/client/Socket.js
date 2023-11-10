@@ -1,5 +1,4 @@
 import { isBrowser } from '@ircam/sc-utils';
-import fetch from 'cross-fetch';
 import WebSocket from 'isomorphic-ws';
 
 import {

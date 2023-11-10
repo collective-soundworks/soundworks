@@ -1361,7 +1361,7 @@ describe(`common::StateManager`, () => {
     });
   });
 
-  describe.only(`await getCollection()`, () => {
+  describe(`await getCollection()`, () => {
     it(`should return a working state collection`, async () => {
       const client0 = clients[0];
       const client1 = clients[1];

@@ -12,7 +12,7 @@ import compression from 'compression';
 import express from 'express';
 import Keyv from 'keyv';
 import { KeyvFile } from 'keyv-file';
-import merge from 'lodash.merge';
+import merge from 'lodash/merge.js';
 import pem from 'pem';
 import compile from 'template-literal';
 
