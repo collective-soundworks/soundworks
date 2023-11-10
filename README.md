@@ -9,8 +9,6 @@ Open-source creative coding framework for distributed applications based on Web 
 
 Primarily focused on music, **soundworks** aims at supporting rapid development of real-time distributed applications using _JavaScript_. It provides abstractions to hide the complexity of the network and to foster very rapid-prototyping and trial-and-error workflows that are typical in artistic practices.
 
-*__WARNING: The version 4 of `@soundworks/core` is under heavy development.__*
-
 ## Getting Started
 
 The best and most simple way to start using **soundworks** is to use the `@soundworks/create` wizard. 
