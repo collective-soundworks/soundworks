@@ -1,7 +1,7 @@
 import EventEmitter from 'node:events';
 
 import { idGenerator, isString, isPlainObject } from '@ircam/sc-utils';
-import clonedeep from 'lodash/clonedeep.js';
+import clonedeep from 'lodash/cloneDeep.js';
 
 import BaseStateManager from '../common/BaseStateManager.js';
 import ParameterBag from '../common/ParameterBag.js';
