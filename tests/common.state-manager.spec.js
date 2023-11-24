@@ -2079,5 +2079,86 @@ describe(`common::StateManager`, () => {
   //     assert.equal(count, clients.length);
   //   });
   // });
-});
+
+  describe(`stateManager quick requests`, async () => {
+
+    ['server', 'client'].forEach( s => {
+      it(`${s} should be able to quickly create states (await)`, async () => {
+        let source = (s === 'server' ? server : client);
+        const states = [];
+        for(let s = 0; s < 3; ++s) {
+          const state = await source.stateManager.create('a', { int: s } );
+          states.push(state);
+        }
+      });
+
+      it(`${s} should be able to quickly create states (no await)`, async () => {
+        let source = (s === 'server' ? server : client);
+        const states = [];
+        for(let s = 0; s < 3; ++s) {
+          // no await
+          const state = source.stateManager.create('a', { int: s } );
+          states.push(state);
+        }
+        await Promise.all(states);
+      });
+
+      it(`${s} should be able to quickly create states (await), then delete them (await)`, async () => {
+        let source = (s === 'server' ? server : client);
+        const states = [];
+        for(let s = 0; s < 3; ++s) {
+          const state = await source.stateManager.create('a', { int: s } );
+          states.push(state);
+        }
+
+        states.forEach( async (state) => {
+          await state.delete();
+        });
+
+      });
+
+      it(`${s} should be able to quickly create states (no await), then delete them (no await)`, async () => {
+        let source = (s === 'server' ? server : client);
+        const states = [];
+        for(let s = 0; s < 3; ++s) {
+          // no await
+          const state = source.stateManager.create('a', { int: s } );
+          states.push(state);
+        }
+
+        const deletions = [];
+        states.forEach((state) => {
+          deletions.push(state.then(s => s.delete() ) );
+        });
+
+        await Promise.all(deletions);
+      });
+
+      // client seem to fail except on last run
+      it(`again, ${s} should be able to quickly create states (no await), then delete them (no await)`, async () => {
+        let source = (s === 'server' ? server : client);
+        const states = [];
+        for(let s = 0; s < 3; ++s) {
+          // no await
+          const state = source.stateManager.create('a', { int: s } );
+          states.push(state);
+        }
+
+        const deletions = [];
+        states.forEach((state) => {
+          deletions.push(state.then(s => s.delete() ) );
+        });
+
+        await Promise.all(deletions);
+      });
+
+
+
+    });
+
+
+  }); // source: server or client
+
+
+}); // quick state create and deletion
 
