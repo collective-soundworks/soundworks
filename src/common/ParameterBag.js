@@ -416,7 +416,7 @@ class ParameterBag {
   getDefaults() {
     const defaults = {};
     for (let [name, def] of Object.entries(this._schema)) {
-      defaults[name] = def.defaults;
+      defaults[name] = def.default;
     }
     return defaults;
   }

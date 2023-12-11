@@ -210,6 +210,18 @@ describe('common::ParameterBag (private)', () => {
     });
   });
 
+  describe.only(`getDefaults()`, () => {
+    it(`should return the default values of the schema`, () => {
+      console.log(params.getDefaults());
+      assert.shallowDeepEqual(params.getDefaults(), {
+        bool: false,
+        int: 0,
+        nullable: {},
+        event: null,
+      });
+    });
+  });
+
   // ---------------------------------------------------------------
   // TYPES
   // ---------------------------------------------------------------
