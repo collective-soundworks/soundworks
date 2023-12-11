@@ -3,23 +3,10 @@ import { assert } from 'chai';
 import { Server, Context as ServerContext } from '../src/server/index.js';
 import { Client, Context as ClientContext } from '../src/client/index.js';
 
-const config = {
-  app: {
-    clients: {
-      test: { target: 'node' },
-    },
-  },
-  env: {
-    type: 'development',
-    port: 8081,
-    serverAddress: '127.0.0.1',
-    useHttps: false,
-    verbose: process.env.VERBOSE === '1' ? true : false,
-  },
-};
+import config from './utils/config.js';
 
-describe('Contexts', () => {
-  describe(`contructor()`, () => {
+describe('# Context', () => {
+  describe(`## contructor()`, () => {
     it(`[server] should throw if first argument is not instance of Server`,  async () => {
       const server = new Server(config);
       await server.init();
@@ -140,7 +127,7 @@ describe('Contexts', () => {
     });
   })
 
-  describe(`.start()`, () => {
+  describe(`## .start()`, () => {
     it(`[server] should be called by server.start()`, async () => {
       // server
       const server = new Server(config);
@@ -189,7 +176,7 @@ describe('Contexts', () => {
     });
   });
 
-  describe(`.enter()`, () => {
+  describe(`## .enter()`, () => {
     it(`should throw if client is not given to server::Context.enter(client)`, async () => {
       // server
       const server = new Server(config);
@@ -395,7 +382,7 @@ describe('Contexts', () => {
     });
   });
 
-  describe(`.exit()`, () => {
+  describe(`## .exit()`, () => {
     it(`should throw if client is not given to server::Context.exit(client)`, async () => {
       // server
       const server = new Server(config);
@@ -518,7 +505,7 @@ describe('Contexts', () => {
     });
   });
 
-  describe(`dynamic creation & runtime support`, () => {
+  describe(`## dynamic creation & runtime support`, () => {
     it(`should suuport the creation of new contexts at runtime, i.e. after "soundworks.start()"`, async () => {
       const server = new Server(config);
       await server.init();
@@ -576,7 +563,7 @@ describe('Contexts', () => {
     });
   });
 
-  describe(`serial / parallel contexts`, () => {
+  describe(`## serial / parallel contexts`, () => {
     // not that this test works with DefaultContext server-side
     it(`should support any serial / parallel combinaison of contexts`, async () => {
       const server = new Server(config);
@@ -676,7 +663,7 @@ describe('Contexts', () => {
     });
   });
 
-  describe('server.contextManager', () => {
+  describe('## server.contextManager', () => {
     describe('[protected] contextManager.removeClient(client)', () => {
       it(`should properly remove client when client stops`, async () => {
         const server = new Server(config);

@@ -1,15 +1,15 @@
-import { fork } from 'child_process';
-import path from 'path';
+import { fork } from 'node:child_process';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
 import { assert } from 'chai';
 
-// inited
-// started
-// stopped
-// [errored] - @todo
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 describe('# server in child process', () => {
   it(`should receive lifecycle events`, () => {
-    const pathname = path.join(process.cwd(), 'tests', 'server.child-process.child.js')
+    const pathname = path.join(__dirname, 'server.child-process.child.js')
     const child = fork(pathname, {
       cwd: process.cwd(),
     });

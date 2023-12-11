@@ -1,26 +1,12 @@
 import { assert } from 'chai';
 
-import { Server } from '../src/server/index.js';
-import { Client } from '../src/client/index.js';
-import Plugin from '../src/server/Plugin.js';
-import PluginManager from '../src/server/PluginManager.js';
-import { pluginDelayFactory } from './utils/plugin-delay.server.js';
+import { Server } from '../../src/server/index.js';
+import { Client } from '../../src/client/index.js';
+import Plugin from '../../src/server/Plugin.js';
+import PluginManager from '../../src/server/PluginManager.js';
 
-const config = {
-  app: {
-    name: 'plugin-manager-test',
-    clients: {
-      test: { target: 'node' },
-    },
-  },
-  env: {
-    type: 'development',
-    port: 8081,
-    serverAddress: '127.0.0.1',
-    useHttps: false,
-    verbose: process.env.VERBOSE === '1' ? true : false,
-  },
-};
+import pluginDelayServer from '../utils/PluginDelayServer.js';
+import config from '../utils/config.js';
 
 describe(`server::PluginManager`, () => {
   describe(`# (protected) new PluginManager(server)`, () => {
@@ -46,7 +32,7 @@ describe(`server::PluginManager`, () => {
     it(`should throw if first argument is not a string`, () => {
       let errored = false;
       try {
-        server.pluginManager.register(true, pluginDelayFactory);
+        server.pluginManager.register(true, pluginDelayServer);
       } catch(err) {
         console.log(err.message);
         errored = true;
@@ -70,7 +56,7 @@ describe(`server::PluginManager`, () => {
     it(`should throw if third argument is not an object`, () => {
       let errored = false;
       try {
-        server.pluginManager.register('plugin-name', pluginDelayFactory, true);
+        server.pluginManager.register('plugin-name', pluginDelayServer, true);
       } catch(err) {
         console.log(err.message);
         errored = true;
@@ -79,14 +65,14 @@ describe(`server::PluginManager`, () => {
     });
 
     it(`third argument should be optionnal`, () => {
-      server.pluginManager.register('plugin-name', pluginDelayFactory);
+      server.pluginManager.register('plugin-name', pluginDelayServer);
       assert.ok('should pass');
     });
 
     it(`should throw if fourth argument is not an array`, () => {
       let errored = false;
       try {
-        server.pluginManager.register('plugin-name', pluginDelayFactory, {}, true);
+        server.pluginManager.register('plugin-name', pluginDelayServer, {}, true);
       } catch(err) {
         console.log(err.message);
         errored = true;
@@ -95,17 +81,17 @@ describe(`server::PluginManager`, () => {
     });
 
     it(`fourth argument should be optionnal`, () => {
-      server.pluginManager.register('plugin-name', pluginDelayFactory, {});
+      server.pluginManager.register('plugin-name', pluginDelayServer, {});
       assert.ok('should pass');
     });
 
     it(`should throw if id already registered`, () => {
       const server = new Server(config);
-      server.pluginManager.register('delay', pluginDelayFactory, {});
+      server.pluginManager.register('delay', pluginDelayServer, {});
 
       let errored = false;
       try {
-        server.pluginManager.register('delay', pluginDelayFactory, {});
+        server.pluginManager.register('delay', pluginDelayServer, {});
       } catch(err) {
         console.log(err.message);
         errored = true;
@@ -118,7 +104,7 @@ describe(`server::PluginManager`, () => {
 
       let errored = false;
       try {
-        server.pluginManager.register('delay-1', pluginDelayFactory, {});
+        server.pluginManager.register('delay-1', pluginDelayServer, {});
       } catch(err) {
         console.log(err.message);
         errored = true;
@@ -128,8 +114,8 @@ describe(`server::PluginManager`, () => {
 
     it(`should allow to registered same plugin factory with different ids`, () => {
       const server = new Server(config);
-      server.pluginManager.register('delay-1', pluginDelayFactory, {});
-      server.pluginManager.register('delay-2', pluginDelayFactory, {});
+      server.pluginManager.register('delay-1', pluginDelayServer, {});
+      server.pluginManager.register('delay-2', pluginDelayServer, {});
 
       assert.ok('should not throw');
     });
@@ -154,7 +140,7 @@ describe(`server::PluginManager`, () => {
   describe(`# await pluginManager.get(id)`, () => {
     it(`should throw if called before server.init()`, async () => {
       const server = new Server(config);
-      server.pluginManager.register('delay', pluginDelayFactory, { delayTime: 100 });
+      server.pluginManager.register('delay', pluginDelayServer, { delayTime: 100 });
 
       let errored = false;
       try {
@@ -196,7 +182,7 @@ describe(`server::PluginManager`, () => {
 
     it(`plugin should be started and immediately available after server.init()`, async function() {
       const server = new Server(config);
-      server.pluginManager.register('delay', pluginDelayFactory, { delayTime: 100 });
+      server.pluginManager.register('delay', pluginDelayServer, { delayTime: 100 });
 
       const TIMEOUT_ERROR = 15;
       await server.init();
@@ -216,7 +202,7 @@ describe(`server::PluginManager`, () => {
     //   const server = new Server(config);
     //   await server.init();
 
-    //   server.pluginManager.register('delay', pluginDelayFactory, {
+    //   server.pluginManager.register('delay', pluginDelayServer, {
     //     delayTime: 100,
     //   });
 
@@ -248,7 +234,7 @@ describe(`server::PluginManager`, () => {
       this.timeout(3 * 1000);
 
       const server = new Server(config);
-      server.pluginManager.register('delay', pluginDelayFactory, {
+      server.pluginManager.register('delay', pluginDelayServer, {
         delayTime: 100,
       });
 
@@ -273,7 +259,7 @@ describe(`server::PluginManager`, () => {
       const TIMEOUT_ERROR = 15
 
       const server = new Server(config);
-      server.pluginManager.register('delay', pluginDelayFactory, {
+      server.pluginManager.register('delay', pluginDelayServer, {
         delayTime: 100,
       });
 
@@ -493,7 +479,7 @@ describe(`server::PluginManager`, () => {
 
     it(`server should start if plugin registered`, async function() {
       const server = new Server(config);
-      server.pluginManager.register('delay', pluginDelayFactory, { delayTime: 0.1 });
+      server.pluginManager.register('delay', pluginDelayServer, { delayTime: 0.1 });
       await server.init();
       await server.start();
 
@@ -503,7 +489,7 @@ describe(`server::PluginManager`, () => {
 
     it(`should propagate plugin start() errors`, async () => {
       const server = new Server(config);
-      server.pluginManager.register('delay', pluginDelayFactory, {
+      server.pluginManager.register('delay', pluginDelayServer, {
         delayTime: 0.1,
         throwError: true,
       });
@@ -528,10 +514,10 @@ describe(`server::PluginManager`, () => {
       const TIMEOUT_ERROR = 15.;
       const server = new Server(config);
 
-      server.pluginManager.register('delay-1', pluginDelayFactory, {
+      server.pluginManager.register('delay-1', pluginDelayServer, {
         delayTime: 100,
       });
-      server.pluginManager.register('delay-2', pluginDelayFactory, {
+      server.pluginManager.register('delay-2', pluginDelayServer, {
         delayTime: 100,
       });
 
@@ -577,11 +563,11 @@ describe(`server::PluginManager`, () => {
       const TIMEOUT_ERROR = 15.;
       const server = new Server(config);
 
-      server.pluginManager.register('delay-1', pluginDelayFactory, {
+      server.pluginManager.register('delay-1', pluginDelayServer, {
         delayTime: 100,
       });
       // delay-2 depends on delay-1
-      server.pluginManager.register('delay-2', pluginDelayFactory, {
+      server.pluginManager.register('delay-2', pluginDelayServer, {
         delayTime: 100,
       }, ['delay-1']);
 
@@ -628,20 +614,20 @@ describe(`server::PluginManager`, () => {
       const TIMEOUT_ERROR = 15.;
       const server = new Server(config);
 
-      server.pluginManager.register('delay-1', pluginDelayFactory, {
+      server.pluginManager.register('delay-1', pluginDelayServer, {
         delayTime: 200,
       });
       // delay-2 depends on delay-1
-      server.pluginManager.register('delay-2', pluginDelayFactory, {
+      server.pluginManager.register('delay-2', pluginDelayServer, {
         delayTime: 200,
       }, ['delay-1']);
 
       // delay 3 ready (at 0.6) after delay delay-2 (at 0.4)
-      server.pluginManager.register('delay-3', pluginDelayFactory, {
+      server.pluginManager.register('delay-3', pluginDelayServer, {
         delayTime: 600,
       });
 
-      server.pluginManager.register('delay-4', pluginDelayFactory, {
+      server.pluginManager.register('delay-4', pluginDelayServer, {
         delayTime: 200,
       }, ['delay-2', 'delay-3']);
 

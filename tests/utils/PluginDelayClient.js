@@ -1,5 +1,5 @@
-export function pluginDelayFactory(Plugin) {
-  return class PluginDelay extends Plugin {
+export default function(Plugin) {
+  return class PluginDelayClient extends Plugin {
     constructor(server, id, options) {
       super(server, id);
 
@@ -22,7 +22,7 @@ export function pluginDelayFactory(Plugin) {
       await new Promise(resolve => setTimeout(resolve, this.options.delayTime));
 
       if (this.options.throwError) {
-        throw new Error(`Plugin delay error`);
+        throw new Error(`[soundworks.PluginDelay] Plugin delay error`);
       }
     }
   }

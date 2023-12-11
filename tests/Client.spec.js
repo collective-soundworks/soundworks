@@ -2,25 +2,12 @@ import { assert }  from 'chai';
 
 import { Server, Context as ServerContext } from '../src/server/index.js';
 import { Client, Context as ClientContext } from '../src/client/index.js';
-import { pluginDelayFactory } from './utils/plugin-delay.client.js';
 
-const config = {
-  app: {
-    clients: {
-      test: { target: 'node' },
-    },
-  },
-  env: {
-    type: 'development',
-    port: 8081,
-    serverAddress: '127.0.0.1',
-    useHttps: false,
-    verbose: process.env.VERBOSE === '1' ? true : false,
-  },
-};
+import pluginDelayClient from './utils/PluginDelayClient.js';
+import config from './utils/config.js';
 
-describe('client::Client', () => {
-  describe(`new Client(config)`, () => {
+describe('# client::Client', () => {
+  describe(`## new Client(config)`, () => {
     it(`should throw if no config is given`, () => {
       try {
         const client = new Client();
@@ -41,30 +28,28 @@ describe('client::Client', () => {
       }
     });
 
-    describe(`node clients only`, () => {
-      it(`should throw if no config.env is missing`, () => {
-        try {
-          const client = new Client({ role: 'test' });
-          assert.fail('should have thrown');
-        } catch(err) {
-          console.log(err.message);
-          assert.ok('should throw');
-        }
-      });
+    it(`[node only] should throw if no config.env is missing`, () => {
+      try {
+        const client = new Client({ role: 'test' });
+        assert.fail('should have thrown');
+      } catch(err) {
+        console.log(err.message);
+        assert.ok('should throw');
+      }
+    });
 
-      it(`should throw if no config.env is missing 1 or several entries`, () => {
-        try {
-          const client = new Client({ role: 'test', env: { useHttps: false } });
-          assert.fail('should have thrown');
-        } catch(err) {
-          console.log(err.message);
-          assert.ok('should throw');
-        }
-      });
+    it(`[node only] should throw if no config.env is missing 1 or several entries`, () => {
+      try {
+        const client = new Client({ role: 'test', env: { useHttps: false } });
+        assert.fail('should have thrown');
+      } catch(err) {
+        console.log(err.message);
+        assert.ok('should throw');
+      }
     });
   });
 
-  describe(`await client.init()`, () => {
+  describe(`## await client.init()`, () => {
     it(`should open the sockets`, async () => {
       const server = new Server(config);
       await server.init();
@@ -111,7 +96,7 @@ describe('client::Client', () => {
       await server.start();
 
       const client = new Client({ role: 'test', ...config });
-      client.pluginManager.register('unknown-server-side', pluginDelayFactory, { delayTime: 0 });
+      client.pluginManager.register('unknown-server-side', pluginDelayClient, { delayTime: 0 });
 
       let errored = false;
       try {
@@ -156,7 +141,7 @@ describe('client::Client', () => {
     });
   });
 
-  describe(`await client.start()`, () => {
+  describe(`## await client.start()`, () => {
     it(`should throw if called before init()`, async () => {
       const server = new Server(config);
       await server.init();
@@ -199,7 +184,7 @@ describe('client::Client', () => {
     });
   });
 
-  describe(`await client.stop()`, () => {
+  describe(`## await client.stop()`, () => {
     it(`should throw if called before start()`, async () => {
       const server = new Server(config);
       await server.init();
@@ -440,7 +425,7 @@ describe('client::Client', () => {
     });
   });
 
-  describe(`client.getAuditState()`, () => {
+  describe(`## client.getAuditState()`, () => {
     it(`should throw if called before init`, async () => {
       const server = new Server(config);
       await server.start();

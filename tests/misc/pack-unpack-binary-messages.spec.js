@@ -1,8 +1,8 @@
 import { assert } from 'chai';
 
-import { packBinaryMessage, unpackBinaryMessage } from '../src/common/sockets-utils.js';
+import { packBinaryMessage, unpackBinaryMessage } from '../../src/common/sockets-utils.js';
 
-describe(`common::<packBinaryMessage, unpackBinaryMessage>`, () => {
+describe(`# packBinaryMessage, unpackBinaryMessage`, () => {
   it('should pack/unpack Float32Array', () => {
     const channel = 'a really strange channel $^selfkj"pçé!"';
 

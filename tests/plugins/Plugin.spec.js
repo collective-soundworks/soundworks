@@ -1,11 +1,11 @@
 import { assert } from 'chai';
 
-import { Server } from '../src/server/index.js';
-import { Client } from '../src/client/index.js';
-import ServerPlugin from '../src/server/Plugin.js';
-import ClientPlugin from '../src/client/Plugin.js';
-import { pluginDelayFactory as serverPluginDelayFactory } from './utils/plugin-delay.server.js';
-import { pluginDelayFactory as clientPluginDelayFactory } from './utils/plugin-delay.client.js';
+import { Server } from '../../src/server/index.js';
+import { Client } from '../../src/client/index.js';
+import ServerPlugin from '../../src/server/Plugin.js';
+import ClientPlugin from '../../src/client/Plugin.js';
+import pluginDelayServer from '../utils/PluginDelayServer.js';
+import pluginDelayClient from '../utils/PluginDelayClient.js';
 
 const config = {
   app: {
@@ -26,7 +26,7 @@ describe('Plugin', () => {
   describe(`# new Plugin(server|client, options)`, () => {
     it(`id and type should be readonly`, async () => {
       const server = new Server(config);
-      server.pluginManager.register('delay', serverPluginDelayFactory, {
+      server.pluginManager.register('delay', pluginDelayServer, {
         delayTime: 0,
       });
 
@@ -37,7 +37,7 @@ describe('Plugin', () => {
       await server.start();
 
       const client = new Client({ role: 'test', ...config });
-      client.pluginManager.register('delay', clientPluginDelayFactory, {
+      client.pluginManager.register('delay', pluginDelayClient, {
         delayTime: 0,
       });
       await client.init();
@@ -45,8 +45,8 @@ describe('Plugin', () => {
       const pluginClient = await client.pluginManager.get('delay');
 
       assert.equal(pluginServer.id, 'delay');
-      assert.equal(pluginServer.type, 'PluginDelay');
-      assert.equal(pluginClient.type, 'PluginDelay');
+      assert.equal(pluginServer.type, 'PluginDelayServer');
+      assert.equal(pluginClient.type, 'PluginDelayClient');
       assert.equal(pluginClient.id, 'delay');
 
       // id and type are readonly
@@ -135,8 +135,87 @@ describe('Plugin', () => {
     });
   });
 
+  describe(`# [client|server] Require plugin within plugin`, () => {
+    it(`should work`, async function() {
+      this.timeout(2000);
+
+      const server = new Server(config);
+
+      server.pluginManager.register('dependent', (Plugin) => {
+        return class Dependant extends Plugin {
+          constructor(server, id) {
+            super(server, id);
+
+            this.server.pluginManager.register('delay', pluginDelayServer, { delayTime: 200 })
+            this.server.pluginManager.addDependency(this.id, 'delay');
+          }
+        }
+      });
+
+      // accepted error in delay plugin timeouts (in ms)
+      const TIMEOUT_ERROR = 15.;
+      const startTime = Date.now();
+
+      server.pluginManager.onStateChange((plugins, updatedPlugin) => {
+        const now = Date.now();
+        const delta = now - startTime;
+
+        if (updatedPlugin) {
+          if (updatedPlugin.id === 'delay' && updatedPlugin.status === 'inited') {
+            assert.isBelow(Math.abs(delta - 0.), TIMEOUT_ERROR);
+          } else if (updatedPlugin.id === 'delay' && updatedPlugin.status === 'started') {
+            assert.isBelow(Math.abs(delta - 200), TIMEOUT_ERROR);
+          } else if (updatedPlugin.id === 'dependent' && updatedPlugin.status === 'inited') {
+            assert.isBelow(Math.abs(delta - 200.), TIMEOUT_ERROR);
+          } else if (updatedPlugin.id === 'dependent' && updatedPlugin.status === 'started') {
+            assert.isBelow(Math.abs(delta - 200), TIMEOUT_ERROR);
+          }
+        }
+      });
+
+      await server.start();
+
+      const client = new Client({ role: 'test', ...config });
+
+      client.pluginManager.register('dependent', (Plugin) => {
+        return class Dependant extends Plugin {
+          constructor(client, id) {
+            super(client, id);
+
+            this.client.pluginManager.register('delay', pluginDelayClient, { delayTime: 200 })
+            this.client.pluginManager.addDependency(this.id, 'delay');
+          }
+        }
+      });
+
+      const CLIENT_TIMEOUT_ERROR = 50.; // larger error as the socket must be setup, etc.
+      const clientStartTime = Date.now();
+
+      client.pluginManager.onStateChange((plugins, updatedPlugin) => {
+        const now = Date.now();
+        const delta = now - clientStartTime;
+
+        if (updatedPlugin) {
+          if (updatedPlugin.id === 'delay' && updatedPlugin.status === 'inited') {
+            assert.isBelow(Math.abs(delta - 0.), CLIENT_TIMEOUT_ERROR);
+          } else if (updatedPlugin.id === 'delay' && updatedPlugin.status === 'started') {
+            assert.isBelow(Math.abs(delta - 200), CLIENT_TIMEOUT_ERROR);
+          } else if (updatedPlugin.id === 'dependent' && updatedPlugin.status === 'inited') {
+            assert.isBelow(Math.abs(delta - 200.), CLIENT_TIMEOUT_ERROR);
+          } else if (updatedPlugin.id === 'dependent' && updatedPlugin.status === 'started') {
+            assert.isBelow(Math.abs(delta - 200), CLIENT_TIMEOUT_ERROR);
+          }
+        }
+      });
+
+      await client.start();
+
+      await server.stop();
+    });
+  });
+
   describe(`# [server] Plugin.state propagation`, () => {
-    it('should implement the tests', async () => {
+    it('PluginManager should properly propagate plugin state', async () => {
       const server = new Server(config);
       server.pluginManager.register('stateful', (ClientPlugin) => {
         return class StatefulPlugin extends ClientPlugin {
@@ -172,84 +251,5 @@ describe('Plugin', () => {
 
       await server.stop();
     });
-
-    describe(`# [client|server] Require plugin within plugin`, () => {
-      it(`should work`, async function() {
-        this.timeout(2000);
-
-        const server = new Server(config);
-
-        server.pluginManager.register('dependent', (Plugin) => {
-          return class Dependant extends Plugin {
-            constructor(server, id) {
-              super(server, id);
-
-              this.server.pluginManager.register('delay', serverPluginDelayFactory, { delayTime: 200 })
-              this.server.pluginManager.addDependency(this.id, 'delay');
-            }
-          }
-        });
-
-        // accepted error in delay plugin timeouts (in ms)
-        const TIMEOUT_ERROR = 15.;
-        const startTime = Date.now();
-
-        server.pluginManager.onStateChange((plugins, updatedPlugin) => {
-          const now = Date.now();
-          const delta = now - startTime;
-
-          if (updatedPlugin) {
-            if (updatedPlugin.id === 'delay' && updatedPlugin.status === 'inited') {
-              assert.isBelow(Math.abs(delta - 0.), TIMEOUT_ERROR);
-            } else if (updatedPlugin.id === 'delay' && updatedPlugin.status === 'started') {
-              assert.isBelow(Math.abs(delta - 200), TIMEOUT_ERROR);
-            } else if (updatedPlugin.id === 'dependent' && updatedPlugin.status === 'inited') {
-              assert.isBelow(Math.abs(delta - 200.), TIMEOUT_ERROR);
-            } else if (updatedPlugin.id === 'dependent' && updatedPlugin.status === 'started') {
-              assert.isBelow(Math.abs(delta - 200), TIMEOUT_ERROR);
-            }
-          }
-        });
-
-        await server.start();
-
-        const client = new Client({ role: 'test', ...config });
-
-        client.pluginManager.register('dependent', (Plugin) => {
-          return class Dependant extends Plugin {
-            constructor(client, id) {
-              super(client, id);
-
-              this.client.pluginManager.register('delay', clientPluginDelayFactory, { delayTime: 200 })
-              this.client.pluginManager.addDependency(this.id, 'delay');
-            }
-          }
-        });
-
-        const CLIENT_TIMEOUT_ERROR = 50.; // larger error as the socket must be setup, etc.
-        const clientStartTime = Date.now();
-
-        client.pluginManager.onStateChange((plugins, updatedPlugin) => {
-          const now = Date.now();
-          const delta = now - clientStartTime;
-
-          if (updatedPlugin) {
-            if (updatedPlugin.id === 'delay' && updatedPlugin.status === 'inited') {
-              assert.isBelow(Math.abs(delta - 0.), CLIENT_TIMEOUT_ERROR);
-            } else if (updatedPlugin.id === 'delay' && updatedPlugin.status === 'started') {
-              assert.isBelow(Math.abs(delta - 200), CLIENT_TIMEOUT_ERROR);
-            } else if (updatedPlugin.id === 'dependent' && updatedPlugin.status === 'inited') {
-              assert.isBelow(Math.abs(delta - 200.), CLIENT_TIMEOUT_ERROR);
-            } else if (updatedPlugin.id === 'dependent' && updatedPlugin.status === 'started') {
-              assert.isBelow(Math.abs(delta - 200), CLIENT_TIMEOUT_ERROR);
-            }
-          }
-        });
-
-        await client.start();
-
-        await server.stop();
-      });
-    });
-  })
+  });
 });

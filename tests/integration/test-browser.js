@@ -1,11 +1,14 @@
 import { fork, exec } from 'node:child_process';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import { assert } from 'chai';
 import puppeteer from 'puppeteer';
 
-// path of the soundworks app
-const appPath = path.join(process.cwd(), 'tests', 'browser-integration');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const appPath = path.join(__dirname, 'test-browser');
 
 describe('Browser client integration (install, build, start)', () => {
   it(`should install deps`, async function() {

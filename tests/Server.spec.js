@@ -10,26 +10,13 @@ import tcpp from 'tcp-ping';
 import { Server, Context as ServerContext } from '../src/server/index.js';
 import { Client } from '../src/client/index.js';
 
+import config from './utils/config.js';
+
 const __filename = url.fileURLToPath(import.meta.url);
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
 
-const config = {
-  app: {
-    clients: {
-      test: { target: 'node' },
-    },
-  },
-  env: {
-    type: 'development',
-    port: 8081,
-    serverAddress: '127.0.0.1',
-    useHttps: false,
-    verbose: process.env.VERBOSE === '1' ? true : false,
-  },
-};
-
-describe('server::Server', () => {
-  describe(`new Server(config)`, () => {
+describe('# server::Server', () => {
+  describe(`## new Server(config)`, () => {
     it(`should throw if invalid config object`, () => {
 
       let errored = false;
@@ -145,7 +132,7 @@ describe('server::Server', () => {
     });
   });
 
-  describe(`await server.init()`, () => {
+  describe(`## await server.init()`, () => {
     it('should throw if browser client is declared and `setDefaultTemplateConfig` or `setCustomTemplateConfig` have not been called', async () => {
       const browserConfig = merge({}, config);
       browserConfig.app.clients.hello = { target: 'browser' };
@@ -223,7 +210,7 @@ describe('server::Server', () => {
     });
 
     it(`should store self-signed certificated in db`, async () => {
-      // these crash the ci test for some reason... so just ignore them in ci too
+      // these test crash the CI for some reason,just ignore them in CI too
       const envPathname = path.join(__dirname, '.env');
 
       if (!fs.existsSync(envPathname)) {
@@ -244,63 +231,64 @@ describe('server::Server', () => {
       assert.isDefined(key);
     });
 
-    describe('Check https infos', () => {
-      // this test will exit early if the `.env` file is not found in the tests
-      // directory, making it work should be straightforward reading the code...
-      it(`should get infos about valid certificates`, async () => {
-        const envPathname = path.join(__dirname, '.env');
+    //
+    // NOTE:
+    // the subsequent tests will exit early if the `.env` file is not found in the
+    // tests directory, making it work should be straightforward reading the code...
+    //
+    it(`should get infos about valid certificates`, async () => {
+      const envPathname = path.join(__dirname, '.env');
 
-        if (!fs.existsSync(envPathname)) {
-          assert.ok('no .env file, skip this test');
-          return;
-        }
+      if (!fs.existsSync(envPathname)) {
+        assert.ok('no .env file, skip this test');
+        return;
+      }
 
-        const envBuffer = fs.readFileSync(envPathname);
-        const env = dotenv.parse(envBuffer);
+      const envBuffer = fs.readFileSync(envPathname);
+      const env = dotenv.parse(envBuffer);
 
-        const httpsConfig = merge({}, config);
-        httpsConfig.env.useHttps = true;
-        httpsConfig.env.httpsInfos = {
-          key: env.HTTPS_KEY,
-          cert: env.HTTPS_CERT,
-        };
+      const httpsConfig = merge({}, config);
+      httpsConfig.env.useHttps = true;
+      httpsConfig.env.httpsInfos = {
+        key: env.HTTPS_KEY,
+        cert: env.HTTPS_CERT,
+      };
 
-        const server = new Server(httpsConfig);
-        await server.init();
+      const server = new Server(httpsConfig);
+      await server.init();
 
-        assert.notEqual(server.httpsInfos, null);
-        assert.equal(server.httpsInfos.selfSigned, false);
-        assert.isDefined(server.httpsInfos.validFrom);
-        assert.isDefined(server.httpsInfos.validTo);
-        assert.isDefined(server.httpsInfos.isValid);
-      });
+      assert.notEqual(server.httpsInfos, null);
+      assert.equal(server.httpsInfos.selfSigned, false);
+      assert.isDefined(server.httpsInfos.validFrom);
+      assert.isDefined(server.httpsInfos.validTo);
+      assert.isDefined(server.httpsInfos.isValid);
+    });
 
-      it(`should get infos about self-signed certificates`, async () => {
-        // these crash the ci test for some reason... so just ignore them in ci too
-        const envPathname = path.join(__dirname, '.env');
+    it(`should get infos about self-signed certificates`, async () => {
+      // these test crash the CI for some reason,just ignore them in CI too
+      const envPathname = path.join(__dirname, '.env');
 
-        if (!fs.existsSync(envPathname)) {
-          assert.ok('no .env file, skip this test');
-          return;
-        }
+      if (!fs.existsSync(envPathname)) {
+        assert.ok('no .env file, skip this test');
+        return;
+      }
 
-        const httpsConfig = merge({}, config);
-        httpsConfig.env.useHttps = true;
-        httpsConfig.env.httpsInfos = null;
+      const httpsConfig = merge({}, config);
+      httpsConfig.env.useHttps = true;
+      httpsConfig.env.httpsInfos = null;
 
-        const server = new Server(httpsConfig);
-        await server.init();
+      const server = new Server(httpsConfig);
+      await server.init();
 
-        assert.notEqual(server.httpsInfos, null);
-        assert.equal(server.httpsInfos.selfSigned, true);
-        assert.isUndefined(server.httpsInfos.validFrom);
-        assert.isUndefined(server.httpsInfos.validTo);
-        assert.isUndefined(server.httpsInfos.isValid);
-      });
+      assert.notEqual(server.httpsInfos, null);
+      assert.equal(server.httpsInfos.selfSigned, true);
+      assert.isUndefined(server.httpsInfos.validFrom);
+      assert.isUndefined(server.httpsInfos.validTo);
+      assert.isUndefined(server.httpsInfos.isValid);
     });
   });
 
-  describe(`await server.start()`, () => {
+  describe(`## await server.start()`, () => {
     it(`should launch the server (http)`, async () => {
       const server = new Server(config);
       await server.init();
@@ -326,7 +314,7 @@ describe('server::Server', () => {
     });
 
     it(`should launch the server (self-signed https)`, async () => {
-      // these crash the ci test for some reason... so just ignore them in ci too
+      // these test crash the CI for some reason,just ignore them in CI too
       const envPathname = path.join(__dirname, '.env');
 
       if (!fs.existsSync(envPathname)) {
@@ -360,6 +348,11 @@ describe('server::Server', () => {
       });
     });
 
+    //
+    // NOTE:
+    // the subsequent tests will exit early if the `.env` file is not found in the
+    // tests directory, making it work should be straightforward reading the code...
+    //
     it(`should launch the server (valid https)`, async () => {
       const envPathname = path.join(__dirname, '.env');
 
@@ -402,7 +395,7 @@ describe('server::Server', () => {
     });
   });
 
-  describe('await server.stop()', () => {
+  describe('## await server.stop()', () => {
     it('should throw if stop() is called before start()', async () => {
       const server = new Server(config);
 
@@ -491,7 +484,7 @@ describe('server::Server', () => {
     });
   });
 
-  describe('server.onStatusChange(state => {}) - state: (inited, started, stopped)', () => {
+  describe('## server.onStatusChange(state => {}) - state: (inited, started, stopped)', () => {
     let server;
 
     before(async () => {
@@ -596,7 +589,7 @@ describe('server::Server', () => {
     });
   });
 
-  describe(`server.useDefaultApplicationTemplate()`, () => {
+  describe(`## server.useDefaultApplicationTemplate()`, () => {
     it(`should populate server._applicationTemplateOptions`, () => {
       const server = new Server(config);
       server.useDefaultApplicationTemplate();
@@ -607,7 +600,7 @@ describe('server::Server', () => {
     });
   });
 
-  describe(`server.setCustomApplicationTemplateOptions(options)`, () => {
+  describe(`## server.setCustomApplicationTemplateOptions(options)`, () => {
     it(`should override server._applicationTemplateOptions`, () => {
       const server = new Server(config);
       server.useDefaultApplicationTemplate();
@@ -636,7 +629,7 @@ describe('server::Server', () => {
     });
   });
 
-  describe(`server.getAuditState()`, () => {
+  describe(`## server.getAuditState()`, () => {
     it(`should throw if called before init`, async () => {
       const server = new Server(config);
 
