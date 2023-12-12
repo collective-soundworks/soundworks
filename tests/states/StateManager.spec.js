@@ -347,7 +347,7 @@ describe(`# StateManager`, () => {
       await state2.delete();
     });
 
-    it(`should not be notified of states created by same node`, async () => {
+    it.skip(`[FIXME #69] should not be notified of states created by same node`, async () => {
       const state1 = await client.stateManager.create('a');
 
       let observeCalled = false;

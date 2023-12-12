@@ -172,7 +172,6 @@ class SharedStatePrivate {
     } else {
       // detach only if not creator
       client.transport.addListener(`${DETACH_REQUEST}-${this.id}-${remoteId}`, (reqId) => {
-        console.log('SharedStatePrivate: receive detach request', reqId);
         this._detachClient(remoteId, client);
         client.transport.emit(`${DETACH_RESPONSE}-${this.id}-${remoteId}`, reqId);
       });

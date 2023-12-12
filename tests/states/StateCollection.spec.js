@@ -84,10 +84,10 @@ describe(`# SharedStateCollection`, () => {
       await delay(50); // delay is required here, see #73
 
       await collection1.detach();
-      // await collection2.detach();
+      await collection2.detach();
     });
 
-    it.skip(`[FIXME] getting same collection twice should return same instance`, async () => {
+    it.skip(`[FIXME #74] getting same collection twice should return same instance`, async () => {
       const state = await clients[0].stateManager.create('a');
       const collection1 = await clients[1].stateManager.getCollection('a');
       const collection2 = await clients[1].stateManager.getCollection('a');
@@ -108,19 +108,25 @@ describe(`# SharedStateCollection`, () => {
 
   describe(`## size (alias length)`, () => {
     before(async () => {
+      // make sure the first collection doesn't "leak" into the other one, cf. 2058d6e
       const collection = await clients[1].stateManager.getCollection('a');
     });
 
-    it.only(`should have proper length`, async () => {
-      console.log('START : size test ------------------------------------');
-      const state = await clients[0].stateManager.create('a');
-      console.log('> created state id', state.id);
+    it(`should have proper length`, async () => {
+      const state1 = await clients[0].stateManager.create('a');
       const collection = await clients[1].stateManager.getCollection('a');
 
       assert.equal(collection.size, 1);
       assert.equal(collection.length, 1);
 
-      await state.delete();
+      const state2 = await clients[2].stateManager.create('a');
+      await delay(50);
+
+      assert.equal(collection.size, 2);
+      assert.equal(collection.length, 2);
+
+      await state1.delete();
+      await state2.delete();
       await delay(50);
 
       assert.equal(collection.size, 0);
@@ -132,9 +138,6 @@ describe(`# SharedStateCollection`, () => {
     it(`should properly progate updates`, async () => {
       const state = await clients[0].stateManager.create('a');
       const collection = await clients[1].stateManager.getCollection('a');
-
-      console.log('in test:', state.id)
-      console.log('in test:', collection._states.map(s => s.id));
 
       const results = await collection.set({ bool: true });
       const expected = [ { bool: true } ];
@@ -228,10 +231,8 @@ describe(`# SharedStateCollection`, () => {
 
       let size = 0;
 
-      console.log(collection.length);
-
-      for (let state of collection) {
-        console.log(state.id);
+      for (let s of collection) {
+        assert.equal(state.id, s.id)
         size += 1;
       }
 
