@@ -40,7 +40,7 @@ describe('# SharedState - schema options', () => {
     server.stop();
   });
 
-  describe('## Behavioral options', () => {
+  describe('## Behavioural options', () => {
     it('default options [event=false, filterChange=true, immediate=false] should behave correctly', async () => {
       const a = await server.stateManager.create('a');
       let counter = 0;

@@ -93,6 +93,10 @@ class BaseStateManager {
       const [callback, filterSchemaName] = this._observeRequestCallbacks.get(reqId);
       this._observeRequestCallbacks.delete(reqId);
 
+      // now that the OBSERVE_REPOSNSE callback is executed, store it in
+      // OBSERVE_NOTIFICATION listeners
+      this._observeListeners.set(callback, filterSchemaName);
+
       const promises = list.map(([schemaName, stateId, nodeId]) => {
         if (filterSchemaName === '*' || filterSchemaName === schemaName) {
           return callback(schemaName, stateId, nodeId);
@@ -231,8 +235,22 @@ class BaseStateManager {
       // store the callback for execution on the response. the returned Promise
       // is fullfiled once callback has been executed with each existing states
       this._observeRequestCallbacks.set(reqId, [callback, filterSchemaName]);
-      // store the callback for execution on subsequent notifications
-      this._observeListeners.set(callback, filterSchemaName);
+
+      // NOTE: do not store in `_observeListeners` yet as it can produce races, e.g.:
+      // cf. test `observe should properly behave in race condition`
+      // ```
+      // await client.stateManager.observe(async (schemaName, stateId, nodeId) => {});
+      // // client now receives OBSERVE_NOTIFICATIONS
+      // await otherClient.stateManager.create('a');
+      // // second observer added in between
+      // client.stateManager.observe(async (schemaName, stateId, nodeId) => {});
+      // ````
+      // OBSERVE_NOTIFICATION is received before the OBSERVE_RESPONSE, then the
+      // second observer is called twice:
+      // - OBSERVE_RESPONSE 1 []
+      // - OBSERVE_NOTIFICATION [ 'a', 1, 0 ]
+      // - OBSERVE_NOTIFICATION [ 'a', 1, 0 ] // this should not be executed
+      // - OBSERVE_RESPONSE 1 [ [ 'a', 1, 0 ] ]
 
       this.client.transport.emit(OBSERVE_REQUEST, reqId);
     });

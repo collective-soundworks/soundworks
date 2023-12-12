@@ -369,15 +369,18 @@ describe(`# StateManager`, () => {
     });
 
     it(`should properly behave with several observers`, async () => {
+      const other = new Client({ role: 'test', ...config });
+      await other.start();
+
       let responsesReceived = 0;
 
-      server.stateManager.client.transport.addListener(OBSERVE_RESPONSE, () => {
+      other.stateManager.client.transport.addListener(OBSERVE_RESPONSE, () => {
         responsesReceived += 1;
       });
 
       let notificationsReceived = 0;
 
-      server.stateManager.client.transport.addListener(OBSERVE_NOTIFICATION, () => {
+      other.stateManager.client.transport.addListener(OBSERVE_NOTIFICATION, () => {
         notificationsReceived += 1;
       });
 
@@ -385,40 +388,45 @@ describe(`# StateManager`, () => {
       let numCalled = 0;
       const state1 = await client.stateManager.create('a');
 
-      const unobserve1 = await server.stateManager.observe(async (schemaName, stateId, nodeId) => {
+      const unobserve1 = await other.stateManager.observe(async (schemaName, stateId, nodeId) => {
         numCalled += 1;
       });
 
-      const unobserve2 = await server.stateManager.observe(async (schemaName, stateId, nodeId) => {
+      const unobserve2 = await other.stateManager.observe(async (schemaName, stateId, nodeId) => {
         numCalled += 1;
       });
+
+      await delay(50);
 
       // each observer receives its own response and is called
-      assert.equal(responsesReceived, 2);
-      assert.equal(notificationsReceived, 0);
-      assert.equal(numCalled, 2);
+      assert.equal(responsesReceived, 2, 'responsesReceived');
+      assert.equal(notificationsReceived, 0, 'notificationsReceived');
+      assert.equal(numCalled, 2, 'numCalled');
 
       const state2 = await client.stateManager.create('a');
+      await delay(50);
 
       // 1 notifications received, but both observers called
-      assert.equal(responsesReceived, 2);
-      assert.equal(notificationsReceived, 1);
-      assert.equal(numCalled, 4);
+      assert.equal(responsesReceived, 2, 'responsesReceived');
+      assert.equal(notificationsReceived, 1, 'notificationsReceived');
+      assert.equal(numCalled, 4, 'numCalled');
 
       // delete first observer
       unobserve1();
 
       const state3 = await client.stateManager.create('a');
+      await delay(50);
 
       // 1 notifications received, but only second observer called
-      assert.equal(responsesReceived, 2);
-      assert.equal(notificationsReceived, 2);
-      assert.equal(numCalled, 5);
+      assert.equal(responsesReceived, 2, 'responsesReceived');
+      assert.equal(notificationsReceived, 2, 'notificationsReceived');
+      assert.equal(numCalled, 5, 'numCalled');
 
       // delete second observer
       unobserve2();
 
       const state4 = await client.stateManager.create('a');
+      await delay(50);
       // nothing should happen
       assert.equal(responsesReceived, 2);
       assert.equal(notificationsReceived, 2);
@@ -428,6 +436,54 @@ describe(`# StateManager`, () => {
       await state2.delete();
       await state3.delete();
       await state4.delete();
+    });
+
+    it(`observe should properly behave with race condition`, async () => {
+      const other = new Client({ role: 'test', ...config });
+      await other.start();
+
+      // make sure we don't have this:
+      // OBSERVE_RESPONSE 1 []
+      // OBSERVE_NOTIFICATION [ 'a', 1, 0 ]
+      // OBSERVE_NOTIFICATION [ 'a', 1, 0 ] // this should not be executed
+      // OBSERVE_RESPONSE 1 [ [ 'a', 1, 0 ] ]
+
+      let firstObserverNumCalled = 0;
+      let secondObserverNumCalled = 0;
+      let responsesReceived = 0;
+      let notificationsReceived = 0;
+
+      other.stateManager.client.transport.addListener(OBSERVE_RESPONSE, (...args) => {
+        // console.log('OBSERVE_RESPONSE', ...args);
+        responsesReceived += 1;
+      });
+
+      other.stateManager.client.transport.addListener(OBSERVE_NOTIFICATION, (...args) => {
+        // console.log('OBSERVE_NOTIFICATION', args);
+        notificationsReceived += 1;
+      });
+
+      const state1 = await client.stateManager.create('a');
+
+      const unobserve1 = await other.stateManager.observe(async (schemaName, stateId, nodeId) => {
+        firstObserverNumCalled += 1;
+      });
+      // other receives UPDATE_NOTIFICATION now
+
+      const state2 = await client.stateManager.create('a');
+
+      const unobserve2 = await other.stateManager.observe(async (schemaName, stateId, nodeId) => {
+        secondObserverNumCalled += 1;
+      });
+
+      await state1.delete();
+      await state2.delete();
+      delay(50);
+
+      assert.equal(firstObserverNumCalled, 2); // 1 within OBSERVE, 1 for NOTIFICATION
+      assert.equal(secondObserverNumCalled, 2); // 2 within OBSERVE
+      assert.equal(responsesReceived, 2); // for each observer
+      assert.equal(notificationsReceived, 1); // only for first observer
     });
 
     it(`should properly behave with filtered schema name: observe(schemaName, callback)`, async () => {

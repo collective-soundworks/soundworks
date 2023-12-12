@@ -496,4 +496,22 @@ describe('# ShareState', () => {
       }
     });
   });
+
+  describe(`## Race conditions`, () => {
+    it.skip(`[FIXME #73] should not stuck the program`, async () => {
+      const aCreated = await server.stateManager.create('a');
+      const aAttached = await client.stateManager.attach('a');
+
+      // DELETE_REQUEST is received first on the SharedStatePrivate which deletes all its listeners
+      // The DETACH_REQUEST is sent but have not response, then it never resolves so the program is stuck...
+
+      // Possible fix:
+      // keep track of all requests and reject them if a DELETE_NOTIFICATION or
+      // a DETACH_NOTIFICATION is received
+      // is received
+
+      await aCreated.delete();
+      await aAttached.detach(); // program is stuck here...
+    });
+  });
 });

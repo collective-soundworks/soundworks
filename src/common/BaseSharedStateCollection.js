@@ -1,6 +1,8 @@
 /**
  * @private
  */
+let id = 0;
+
 class BaseSharedStateCollection {
   constructor(stateManager, schemaName) {
     this._stateManager = stateManager;
@@ -10,6 +12,8 @@ class BaseSharedStateCollection {
     this._onAttachCallbacks = new Set();
     this._onDetachCallbacks = new Set();
     this._unobserve = null;
+    // testing
+    this._id = id++;
   }
 
   async _init() {
@@ -36,10 +40,18 @@ class BaseSharedStateCollection {
   }
 
   /**
-   * Size of the collection
+   * Size of the collection, alias `size`
    * @type {number}
    */
   get length() {
+    return this._states.length;
+  }
+
+  /**
+   * Size of the collection, , alias `length`
+   * @type {number}
+   */
+  get size() {
     return this._states.length;
   }
 
@@ -49,11 +61,11 @@ class BaseSharedStateCollection {
    */
   async detach() {
     this._unobserve();
+    this._onUpdateCallbacks.clear();
 
-    const promises = Array.from(this._states).map(state => state.detach());
+    const promises = this._states.map(state => state.detach());
     await Promise.all(promises);
 
-    this._onUpdateCallbacks.clear();
     this._onDetachCallbacks.clear();
   }
 
