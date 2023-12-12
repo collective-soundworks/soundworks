@@ -1,6 +1,7 @@
 import { isString, isFunction } from '@ircam/sc-utils';
 import SharedState from './BaseSharedState.js';
 import SharedStateCollection from './BaseSharedStateCollection.js';
+import PromiseStore from './PromiseStore.js';
 import {
   CREATE_REQUEST,
   CREATE_RESPONSE,
@@ -14,11 +15,6 @@ import {
   UNOBSERVE_NOTIFICATION,
   DELETE_SCHEMA,
 } from './constants.js';
-import {
-  storeRequestPromise,
-  resolveRequest,
-  rejectRequest,
-} from './promise-store.js';
 
 /**
  * @private
@@ -37,6 +33,8 @@ class BaseStateManager {
     this._cachedSchemas = new Map();
     this._observeRequestCallbacks = new Map();
 
+    this._promiseStore = new PromiseStore();
+
     // ---------------------------------------------
     // CREATE
     // ---------------------------------------------
@@ -53,11 +51,11 @@ class BaseStateManager {
       const state = new SharedState(stateId, remoteId, schemaName, schema, this.client, true, this, initValues);
       this._statesById.set(state.id, state);
 
-      resolveRequest(reqId, state);
+      this._promiseStore.resolve(reqId, state);
     });
 
     this.client.transport.addListener(CREATE_ERROR, (reqId, msg) => {
-      rejectRequest(reqId, msg);
+      this._promiseStore.reject(reqId, msg);
     });
 
     // ---------------------------------------------
@@ -77,11 +75,11 @@ class BaseStateManager {
       const state = new SharedState(stateId, remoteId, schemaName, schema, this.client, false, this, currentValues);
       this._statesById.set(state.id, state);
 
-      resolveRequest(reqId, state);
+      this._promiseStore.resolve(reqId, state);
     });
 
     this.client.transport.addListener(ATTACH_ERROR, (reqId, msg) => {
-      rejectRequest(reqId, msg);
+      this._promiseStore.reject(reqId, msg);
     });
 
     // ---------------------------------------------
@@ -115,7 +113,7 @@ class BaseStateManager {
         }
       };
 
-      resolveRequest(reqId, unsubscribe);
+      this._promiseStore.resolve(reqId, unsubscribe);
     });
 
     this.client.transport.addListener(OBSERVE_NOTIFICATION, (schemaName, stateId, nodeId) => {
@@ -148,7 +146,7 @@ class BaseStateManager {
    */
   async create(schemaName, initValues = {}) {
     return new Promise((resolve, reject) => {
-      const reqId = storeRequestPromise(resolve, reject);
+      const reqId = this._promiseStore.add(resolve, reject, 'create-create');
       const requireSchema = this._cachedSchemas.has(schemaName) ? false : true;
       this.client.transport.emit(CREATE_REQUEST, reqId, schemaName, requireSchema, initValues);
     });
@@ -171,7 +169,7 @@ class BaseStateManager {
   async attach(schemaName, stateId = null) {
     return new Promise((resolve, reject) => {
       // @todo - add a timeout
-      const reqId = storeRequestPromise(resolve, reject);
+      const reqId = this._promiseStore.add(resolve, reject, 'attach-request');
       const requireSchema = this._cachedSchemas.has(schemaName) ? false : true;
       this.client.transport.emit(ATTACH_REQUEST, reqId, schemaName, stateId, requireSchema);
     });
@@ -231,7 +229,7 @@ class BaseStateManager {
 
     // resend request to get updated list of states
     return new Promise((resolve, reject) => {
-      const reqId = storeRequestPromise(resolve, reject);
+      const reqId = this._promiseStore.add(resolve, reject, 'observe-request');
       // store the callback for execution on the response. the returned Promise
       // is fullfiled once callback has been executed with each existing states
       this._observeRequestCallbacks.set(reqId, [callback, filterSchemaName]);

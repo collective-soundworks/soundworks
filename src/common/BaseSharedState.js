@@ -1,5 +1,6 @@
 import { isPlainObject } from '@ircam/sc-utils';
 import ParameterBag from './ParameterBag.js';
+import PromiseStore from './PromiseStore.js';
 import {
   DELETE_REQUEST,
   DELETE_RESPONSE,
@@ -13,11 +14,6 @@ import {
   UPDATE_ABORT,
   UPDATE_NOTIFICATION,
 } from './constants.js';
-import {
-  storeRequestPromise,
-  resolveRequest,
-  rejectRequest,
-} from './promise-store.js';
 
 class BaseSharedState {
   constructor(id, remoteId, schemaName, schema, client, isOwner, manager, initValues = {}) {
@@ -33,8 +29,13 @@ class BaseSharedState {
     this._client = client;
     /** @private */
     this._manager = manager;
-
+    /**
+     * true is the state has been detached or deleted
+     * @private
+     */
     this._detached = false;
+    /* @private */
+    this._promiseStore = new PromiseStore(this.constructor.name);
 
     try {
       /** @private */
@@ -56,13 +57,13 @@ ${JSON.stringify(initValues, null, 2)}`);
     // add listener for state updates
     this._client.transport.addListener(`${UPDATE_RESPONSE}-${this.id}-${this.remoteId}`, async (reqId, updates, context) => {
       const updated = await this._commit(updates, context, true, true);
-      resolveRequest(reqId, updated);
+      this._promiseStore.resolve(reqId, updated);
     });
 
     // retrieve values but do not propagate to subscriptions
     this._client.transport.addListener(`${UPDATE_ABORT}-${this.id}-${this.remoteId}`, async (reqId, updates, context) => {
       const updated = await this._commit(updates, context, false, true);
-      resolveRequest(reqId, updated);
+      this._promiseStore.resolve(reqId, updated);
     });
 
     this._client.transport.addListener(`${UPDATE_NOTIFICATION}-${this.id}-${this.remoteId}`, async (updates, context) => {
@@ -112,7 +113,9 @@ ${JSON.stringify(initValues, null, 2)}`);
         }
       }
 
-      this._clearDetach();
+      this._onDetachCallbacks.clear();
+      this._onDeleteCallbacks.clear();
+      this._promiseStore.flush();
     });
 
 
@@ -132,12 +135,14 @@ ${JSON.stringify(initValues, null, 2)}`);
           await callback();
         }
 
-        this._clearDetach();
-        resolveRequest(reqId, this);
+        this._onDetachCallbacks.clear();
+        this._onDeleteCallbacks.clear();
+        this._promiseStore.resolve(reqId, this);
+        this._promiseStore.flush();
       });
 
       this._client.transport.addListener(`${DELETE_ERROR}-${this.id}`, (reqId, msg) => {
-        rejectRequest(reqId, msg);
+        this._promiseStore.reject(reqId, msg);
       });
 
     } else {
@@ -152,13 +157,18 @@ ${JSON.stringify(initValues, null, 2)}`);
           await callback();
         }
 
-        this._clearDetach();
-        resolveRequest(reqId, this);
+        this._onDetachCallbacks.clear();
+        this._onDeleteCallbacks.clear();
+        this._promiseStore.resolve(reqId, this);
+        this._promiseStore.flush();
       });
 
       // the state does not exists anymore in the server (should not happen)
       this._client.transport.addListener(`${DETACH_ERROR}-${this.id}`, (reqId, msg) => {
-        rejectRequest(reqId, msg);
+        this._onDetachCallbacks.clear();
+        this._onDeleteCallbacks.clear();
+        this._promiseStore.reject(reqId, msg);
+        this._promiseStore.flush();
       });
     }
   }
@@ -198,13 +208,6 @@ ${JSON.stringify(initValues, null, 2)}`);
    */
   get isOwner() {
     return this._isOwner;
-  }
-
-  /** @private */
-  _clearDetach() {
-    this._onDetachCallbacks.clear();
-    this._onDeleteCallbacks.clear();
-    this._detached = true;
   }
 
   /** @private */
@@ -358,7 +361,7 @@ ${JSON.stringify(initValues, null, 2)}`);
 
     // go through server-side normal behavior
     return new Promise((resolve, reject) => {
-      const reqId = storeRequestPromise(resolve, reject);
+      const reqId = this._promiseStore.add(resolve, reject, 'update-request');
       this._client.transport.emit(`${UPDATE_REQUEST}-${this.id}-${this.remoteId}`, reqId, updates, context);
     });
   }
@@ -477,16 +480,17 @@ ${JSON.stringify(initValues, null, 2)}`);
       throw new Error(`[SharedState] State "${this.schemaName} (${this.id})" already detached, cannot detach twice`);
     }
 
+    this._detached = true; // mark detached early
     this._onUpdateCallbacks.clear();
 
     if (this._isOwner) {
       return new Promise((resolve, reject) => {
-        const reqId = storeRequestPromise(resolve, reject);
+        const reqId = this._promiseStore.add(resolve, reject, 'delete-request');
         this._client.transport.emit(`${DELETE_REQUEST}-${this.id}-${this.remoteId}`, reqId);
       });
     } else {
       return new Promise((resolve, reject) => {
-        const reqId = storeRequestPromise(resolve, reject);
+        const reqId = this._promiseStore.add(resolve, reject, 'detach-request');
         this._client.transport.emit(`${DETACH_REQUEST}-${this.id}-${this.remoteId}`, reqId);
       });
     }

@@ -7,7 +7,7 @@ import { Client } from '../../src/client/index.js';
 import config from '../utils/config.js';
 import { a, b } from '../utils/schemas.js';
 
-describe('# ShareState', () => {
+describe('# SharedState', () => {
   let server;
   let client;
 
@@ -498,20 +498,28 @@ describe('# ShareState', () => {
   });
 
   describe(`## Race conditions`, () => {
-    it.skip(`[FIXME #73] should not stuck the program`, async () => {
+    it(`[FIXME #73] should not stuck the program`, async () => {
       const aCreated = await server.stateManager.create('a');
       const aAttached = await client.stateManager.attach('a');
 
-      // DELETE_REQUEST is received first on the SharedStatePrivate which deletes all its listeners
-      // The DETACH_REQUEST is sent but have not response, then it never resolves so the program is stuck...
+      // DELETE_REQUEST is received first on the SharedStatePrivate which deletes
+      // all its listeners.
+      // Concurrently DETACH_REQUEST is sent but have not response, request is flush when
+      // DELETE_NOTIFICATION or DETACH_NOTIFICATION is received
+      aCreated.delete();
 
-      // Possible fix:
-      // keep track of all requests and reject them if a DELETE_NOTIFICATION or
-      // a DETACH_NOTIFICATION is received
-      // is received
+      let errored = false;
 
-      await aCreated.delete();
-      await aAttached.detach(); // program is stuck here...
+      try {
+        await aAttached.detach();
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      if (!errored) {
+        assert.fail('should have thrown');
+      }
     });
   });
 });
