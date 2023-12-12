@@ -364,12 +364,15 @@ class StateManager extends BaseStateManager {
             }
           });
         } catch (err) {
-          client.transport.emit(CREATE_ERROR, reqId, err.message);
-          console.error(err.message);
+          const msg = `Cannot create state "${schemaName}", ${err.message}`;
+          console.error(msg);
+
+          client.transport.emit(CREATE_ERROR, reqId, msg);
         }
       } else {
         const msg = `Cannot create state "${schemaName}", schema does not exists`;
         console.error(msg);
+
         client.transport.emit(CREATE_ERROR, reqId, msg);
       }
     });
@@ -410,13 +413,15 @@ class StateManager extends BaseStateManager {
           client.transport.emit(ATTACH_RESPONSE, reqId, state.id, remoteId, schemaName, sendedSchema, currentValues);
         } else {
           const msg = `Cannot attach, no existing state for schema "${schemaName}" with stateId: "${stateId}"`;
-          client.transport.emit(ATTACH_ERROR, reqId, msg);
           console.error(msg);
+
+          client.transport.emit(ATTACH_ERROR, reqId, msg);
         }
       } else {
         const msg = `Cannot attach, schema "${schemaName}" does not exists`;
-        client.transport.emit(ATTACH_ERROR, reqId, msg);
         console.error(msg);
+
+        client.transport.emit(ATTACH_ERROR, reqId, msg);
       }
     });
 

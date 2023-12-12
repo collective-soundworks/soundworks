@@ -49,7 +49,7 @@ describe(`# StateManager`, () => {
     });
   });
 
-  describe('## async create(schemaName) => state', () => {
+  describe('## async create(schemaName[, initValues]) => state', () => {
     it('should create state', async () => {
       const stateA = await server.stateManager.create('a');
       const stateB = await server.stateManager.create('a');
@@ -85,9 +85,36 @@ describe(`# StateManager`, () => {
       await a1.delete();
     });
 
-    it.skip('[FIXME #72] should properly handle default values', async () => {
-      // todo - should throw
-      const state = await server.stateManager.create('a', { int: 'test' });
+    it('[server] should properly handle wrong default values', async () => {
+      // cf. SharedState.spec.js 'should throw if value is of bad type'
+      let errored = false;
+
+      try {
+        const state = await server.stateManager.create('a', { int: 'test' });
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      if (errored === false) {
+        assert.fail(`should throw error`);
+      }
+    });
+
+    it('[client] should properly handle wrong default values', async () => {
+      // cf. SharedState.spec.js 'should throw if value is of bad type'
+      let errored = false;
+
+      try {
+        const state = await client.stateManager.create('a', { int: 'test' });
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      if (errored === false) {
+        assert.fail(`should throw error`);
+      }
     });
   });
 
@@ -187,7 +214,7 @@ describe(`# StateManager`, () => {
     });
   });
 
-  describe('## observe([schemaName, ] callback) => Promise<unobserve>', async () => {
+  describe('## observe([schemaName,] callback) => Promise<unobserve>', async () => {
     it(`should be notified of states created on the network`, async () => {
       let numCalled = 0;
 

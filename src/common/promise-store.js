@@ -17,9 +17,9 @@ export function resolveRequest(reqId, data) {
   resolve(data);
 }
 
-export function rejectRequest(reqId, data) {
+export function rejectRequest(reqId, msg) {
   const { reject } = requestPromises.get(reqId);
   requestPromises.delete(reqId);
 
-  reject(data);
+  reject(new Error(msg));
 }
