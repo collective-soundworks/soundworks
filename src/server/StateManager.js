@@ -17,6 +17,7 @@ import {
   ATTACH_ERROR,
   OBSERVE_REQUEST,
   OBSERVE_RESPONSE,
+  OBSERVE_ERROR,
   OBSERVE_NOTIFICATION,
   UNOBSERVE_NOTIFICATION,
   DELETE_SCHEMA,
@@ -428,23 +429,28 @@ class StateManager extends BaseStateManager {
     // ---------------------------------------------
     // OBSERVE PEERS (be notified when a state is created, lazy)
     // ---------------------------------------------
-    client.transport.addListener(OBSERVE_REQUEST, reqId => {
-      const statesInfos = [];
+    client.transport.addListener(OBSERVE_REQUEST, (reqId, observedSchemaName) => {
+      if (observedSchemaName === null || this._schemas.has(observedSchemaName)) {
+        const statesInfos = [];
 
-      this._serverStatesById.forEach(state => {
-        const { schemaName, id, _creatorId } = state;
-        // only track application states
-        // (e.g. do not propagate infos about audit state)
-        if (!PRIVATE_STATES.includes(schemaName) && _creatorId !== client.id) {
-          statesInfos.push([schemaName, id, _creatorId]);
-        }
-      });
+        this._serverStatesById.forEach(state => {
+          const { schemaName, id, _creatorId } = state;
+          // only track application states
+          // (e.g. do not propagate infos about audit state)
+          if (!PRIVATE_STATES.includes(schemaName) && _creatorId !== client.id) {
+            statesInfos.push([schemaName, id, _creatorId]);
+          }
+        });
 
-      // add client to observers first because if some (sync) server side
-      // callback throws, the client would never be added to the list
-      this._observers.add(client);
+        // add client to observers first because if some (sync) server side
+        // callback throws, the client would never be added to the list
+        this._observers.add(client);
 
-      client.transport.emit(OBSERVE_RESPONSE, reqId, ...statesInfos);
+        client.transport.emit(OBSERVE_RESPONSE, reqId, ...statesInfos);
+      } else {
+        const msg = `Cannot observe, schema "${observedSchemaName}" does not exists`;
+        client.transport.emit(OBSERVE_ERROR, reqId, msg);
+      }
     });
 
     client.transport.addListener(UNOBSERVE_NOTIFICATION, () => {

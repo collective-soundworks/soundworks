@@ -498,14 +498,14 @@ describe('# SharedState', () => {
   });
 
   describe(`## Race conditions`, () => {
-    it(`[FIXME #73] should not stuck the program`, async () => {
+    it(`should flush pending requests when state is deleted / detached`, async () => {
       const aCreated = await server.stateManager.create('a');
       const aAttached = await client.stateManager.attach('a');
 
       // DELETE_REQUEST is received first on the SharedStatePrivate which deletes
       // all its listeners.
-      // Concurrently DETACH_REQUEST is sent but have not response, request is flush when
-      // DELETE_NOTIFICATION or DETACH_NOTIFICATION is received
+      // Concurrently DETACH_REQUEST is sent but cannot have a response,
+      // flush pending requests when DELETE_NOTIFICATION is received
       aCreated.delete();
 
       let errored = false;

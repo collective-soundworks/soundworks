@@ -104,6 +104,21 @@ describe(`# SharedStateCollection`, () => {
       await state.delete();
       await delay(50);
     });
+
+    it('should thow if collection, i.e. schemaName, does not exists', async () => {
+      let errored = false;
+
+      try {
+        const collection = await server.stateManager.getCollection('do-not-exists');
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      if (!errored) {
+        assert.fail('should have failed');
+      }
+    });
   });
 
   describe(`## size (alias length)`, () => {

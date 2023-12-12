@@ -21,6 +21,7 @@ export const DETACH_ERROR = 's:dt:err';
 
 export const OBSERVE_REQUEST = 's:o:req';
 export const OBSERVE_RESPONSE = 's:o:res';
+export const OBSERVE_ERROR = 's:o:err';
 export const OBSERVE_NOTIFICATION = 's:o:not';
 
 export const UNOBSERVE_NOTIFICATION = 's:uo:not';
@@ -47,5 +48,5 @@ export const CLIENT_HANDSHAKE_RESPONSE = 'cl:h:res';
 export const CLIENT_HANDSHAKE_ERROR = 'cl:h:err';
 
 // audit state schema name
-export const AUDIT_STATE_NAME = 's:c:audit';
+export const AUDIT_STATE_NAME = 'p:s:audit';
 export const PRIVATE_STATES = [AUDIT_STATE_NAME];

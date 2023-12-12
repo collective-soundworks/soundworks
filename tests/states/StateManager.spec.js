@@ -241,7 +241,7 @@ describe(`# StateManager`, () => {
     });
   });
 
-  describe('## observe([schemaName,] callback) => Promise<unobserve>', async () => {
+  describe('## observe(callback) => Promise<unobserve>', async () => {
     it(`should be notified of states created on the network`, async () => {
       let numCalled = 0;
 
@@ -485,8 +485,10 @@ describe(`# StateManager`, () => {
       assert.equal(responsesReceived, 2); // for each observer
       assert.equal(notificationsReceived, 1); // only for first observer
     });
+  });
 
-    it(`should properly behave with filtered schema name: observe(schemaName, callback)`, async () => {
+  describe('## observe(schemaName, callback) => Promise<unobserve>', async () => {
+    it(`should properly behave`, async () => {
       const a1 = await client.stateManager.create('a');
       const b1 = await client.stateManager.create('b');
 
@@ -537,6 +539,21 @@ describe(`# StateManager`, () => {
       await a4.delete();
       await b1.delete();
       await b2.delete();
+    });
+
+    it(`should thow if given schema name does not exists`, async () => {
+      let errored = false;
+
+      try {
+        await client.stateManager.observe('do-not-exist', () => {});
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      if (!errored) {
+        assert.fail('should have thrown');
+      }
     });
   });
 

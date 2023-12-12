@@ -11,6 +11,7 @@ import {
   ATTACH_ERROR,
   OBSERVE_REQUEST,
   OBSERVE_RESPONSE,
+  OBSERVE_ERROR,
   OBSERVE_NOTIFICATION,
   UNOBSERVE_NOTIFICATION,
   DELETE_SCHEMA,
@@ -29,7 +30,7 @@ class BaseStateManager {
     this.client = { id, transport };
 
     this._statesById = new Map();
-    this._observeListeners = new Map(); // Map <callback, filterSchemaName>
+    this._observeListeners = new Map(); // Map <callback, observedSchemaName>
     this._cachedSchemas = new Map();
     this._observeRequestCallbacks = new Map();
 
@@ -88,15 +89,15 @@ class BaseStateManager {
     this.client.transport.addListener(OBSERVE_RESPONSE, async (reqId, ...list) => {
       // retrieve the callback that have been stored in observe to make sure
       // we don't call another callback that may have been registered earlier.
-      const [callback, filterSchemaName] = this._observeRequestCallbacks.get(reqId);
+      const [callback, observedSchemaName] = this._observeRequestCallbacks.get(reqId);
       this._observeRequestCallbacks.delete(reqId);
 
       // now that the OBSERVE_REPOSNSE callback is executed, store it in
       // OBSERVE_NOTIFICATION listeners
-      this._observeListeners.set(callback, filterSchemaName);
+      this._observeListeners.set(callback, observedSchemaName);
 
       const promises = list.map(([schemaName, stateId, nodeId]) => {
-        if (filterSchemaName === '*' || filterSchemaName === schemaName) {
+        if (observedSchemaName === null || observedSchemaName === schemaName) {
           return callback(schemaName, stateId, nodeId);
         } else {
           return Promise.resolve();
@@ -116,9 +117,15 @@ class BaseStateManager {
       this._promiseStore.resolve(reqId, unsubscribe);
     });
 
+    // Observe error can occur if observed schema name does not exists
+    this.client.transport.addListener(OBSERVE_ERROR, (reqId, msg) => {
+      this._observeRequestCallbacks.delete(reqId);
+      this._promiseStore.reject(reqId, msg);
+    });
+
     this.client.transport.addListener(OBSERVE_NOTIFICATION, (schemaName, stateId, nodeId) => {
-      this._observeListeners.forEach((filterSchemaName, callback) => {
-        if (filterSchemaName === '*' || filterSchemaName === schemaName) {
+      this._observeListeners.forEach((observedSchemaName, callback) => {
+        if (observedSchemaName === null || observedSchemaName === schemaName) {
           callback(schemaName, stateId, nodeId);
         }
       });
@@ -206,21 +213,21 @@ class BaseStateManager {
   // handle this way and the network overhead is very low for observe notifications:
   // i.e. schemaName, stateId, nodeId
   async observe(...args) {
-    let filterSchemaName;
+    let observedSchemaName;
     let callback;
 
     if (args.length === 1) {
-      filterSchemaName = '*';
+      observedSchemaName = null;
       callback = args[0];
 
       if (!isFunction(callback)) {
         throw new Error(`[stateManager] Invalid arguments, valid signatures are "stateManager.observe(callback)" or "stateManager.observe(schemaName, callback)"`);
       }
     } else if (args.length === 2) {
-      filterSchemaName = args[0];
+      observedSchemaName = args[0];
       callback = args[1];
 
-      if (!isString(filterSchemaName) || !isFunction(callback)) {
+      if (!isString(observedSchemaName) || !isFunction(callback)) {
         throw new Error(`[stateManager] Invalid arguments, valid signatures are "stateManager.observe(callback)" or "stateManager.observe(schemaName, callback)"`);
       }
     } else {
@@ -232,7 +239,7 @@ class BaseStateManager {
       const reqId = this._promiseStore.add(resolve, reject, 'observe-request');
       // store the callback for execution on the response. the returned Promise
       // is fullfiled once callback has been executed with each existing states
-      this._observeRequestCallbacks.set(reqId, [callback, filterSchemaName]);
+      this._observeRequestCallbacks.set(reqId, [callback, observedSchemaName]);
 
       // NOTE: do not store in `_observeListeners` yet as it can produce races, e.g.:
       // cf. test `observe should properly behave in race condition`
@@ -250,7 +257,7 @@ class BaseStateManager {
       // - OBSERVE_NOTIFICATION [ 'a', 1, 0 ] // this should not be executed
       // - OBSERVE_RESPONSE 1 [ [ 'a', 1, 0 ] ]
 
-      this.client.transport.emit(OBSERVE_REQUEST, reqId);
+      this.client.transport.emit(OBSERVE_REQUEST, reqId, observedSchemaName);
     });
   }
 
@@ -263,9 +270,13 @@ class BaseStateManager {
    */
   async getCollection(schemaName) {
     const collection = new SharedStateCollection(this, schemaName);
-    await collection._init();
 
-    return collection;
+    try {
+      await collection._init();
+      return collection;
+    } catch(err) {
+      throw new Error(`Cannot create collection, schema "${schemaName}" does not exists`);
+    }
   }
 }
 
