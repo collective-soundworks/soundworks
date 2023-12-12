@@ -7,7 +7,7 @@ import { Client } from '../../src/client/index.js';
 import config from '../utils/config.js';
 import { a, b } from '../utils/schemas.js';
 
-describe(`await getCollection()`, () => {
+describe(`# SharedStateCollection`, () => {
   let server;
   let clients = [];
 

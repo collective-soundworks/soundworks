@@ -1,9 +1,9 @@
 import { assert } from 'chai';
 
-import { Server, Context as ServerContext } from '../src/server/index.js';
-import { Client, Context as ClientContext } from '../src/client/index.js';
+import { Server, Context as ServerContext } from '../../src/server/index.js';
+import { Client, Context as ClientContext } from '../../src/client/index.js';
 
-import config from './utils/config.js';
+import config from '../utils/config.js';
 
 describe('# Context', () => {
   describe(`## contructor()`, () => {

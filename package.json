@@ -45,7 +45,8 @@
   "scripts": {
     "doc": "rm -Rf docs && jsdoc -c .jsdoc.json --verbose && cp -R assets docs/",
     "lint": "npx eslint src",
-    "test": "mocha",
+    "test": "npx mocha",
+    "test:all": "npx mocha tests/*/*.spec.js",
     "toc": "markdown-toc -i README.md",
     "types": "rm -Rf types && tsc",
     "preversion": "npm run toc && git commit -am 'docs: build' --allow-empty",

@@ -8,8 +8,8 @@ import PluginManager from '../../src/server/PluginManager.js';
 import pluginDelayServer from '../utils/PluginDelayServer.js';
 import config from '../utils/config.js';
 
-describe(`server::PluginManager`, () => {
-  describe(`# (protected) new PluginManager(server)`, () => {
+describe(`# PluginManagerServer`, () => {
+  describe(`## [private] constructor(server)`, () => {
     it(`should throw if argument is not instance of Server`, () => {
       let errored = false;
       try {
@@ -22,7 +22,7 @@ describe(`server::PluginManager`, () => {
     });
   });
 
-  describe(`# register(id, pluginFactory)`, () => {
+  describe(`## register(id, pluginFactory)`, () => {
     let server;
 
     beforeEach(() => {
@@ -121,7 +121,7 @@ describe(`server::PluginManager`, () => {
     });
   });
 
-  describe(`# [protected] await pluginManager.init()`, () => {
+  describe(`## [private] async init()`, () => {
     it(`should throw if started twice`, async () => {
       const server = new Server(config);
       await server.init(); // run pluginManager.start()
@@ -137,7 +137,7 @@ describe(`server::PluginManager`, () => {
     });
   });
 
-  describe(`# await pluginManager.get(id)`, () => {
+  describe(`## async get(id)`, () => {
     it(`should throw if called before server.init()`, async () => {
       const server = new Server(config);
       server.pluginManager.register('delay', pluginDelayServer, { delayTime: 100 });
@@ -229,7 +229,7 @@ describe(`server::PluginManager`, () => {
     // });
   });
 
-  describe(`# pluginManager.onStateChange((plugins, updatedPlugin) => {})`, () => {
+  describe(`## onStateChange((plugins, updatedPlugin) => {})`, () => {
     it(`should properly propagate statuses`, async function() {
       this.timeout(3 * 1000);
 
@@ -287,7 +287,7 @@ describe(`server::PluginManager`, () => {
     });
   });
 
-  describe(`# [protected] pluginManager.addClient(client)`, () => {
+  describe(`## [private] addClient(client)`, () => {
     it(`should properly add clients to Plugin`, async () => {
       let addClientCalled = false;
 
@@ -360,7 +360,7 @@ describe(`server::PluginManager`, () => {
     });
   });
 
-  describe(`# [protected] pluginManager.removeClient(client)`, () => {
+  describe(`## [private] removeClient(client)`, () => {
     it(`should be called on client.stop()`, async () => {
       let removeClientCalled = false;
 
@@ -467,7 +467,7 @@ describe(`server::PluginManager`, () => {
     });
   });
 
-  describe(`# plugin initialization lifecycle`, () => {
+  describe(`## [lifecycle] plugin initialization`, () => {
     it(`server should start if no plugins registered`, async function() {
       const server = new Server(config);
       await server.init();

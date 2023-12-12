@@ -22,8 +22,8 @@ const config = {
   },
 };
 
-describe('Plugin', () => {
-  describe(`# new Plugin(server|client, options)`, () => {
+describe('# Plugin', () => {
+  describe(`## constructor(server|client, options)`, () => {
     it(`id and type should be readonly`, async () => {
       const server = new Server(config);
       server.pluginManager.register('delay', pluginDelayServer, {
@@ -59,7 +59,7 @@ describe('Plugin', () => {
     });
   });
 
-  describe(`# [client] Plugin.state propagation`, () => {
+  describe(`## [client] Plugin.state propagation`, () => {
     it(`should propagate its inner state`, async () => {
       const server = new Server(config);
       server.pluginManager.register('stateful', (ServerPlugin) => class StatefulPlugin extends ServerPlugin {});
@@ -135,7 +135,7 @@ describe('Plugin', () => {
     });
   });
 
-  describe(`# [client|server] Require plugin within plugin`, () => {
+  describe(`## [client|server] Require plugin within plugin`, () => {
     it(`should work`, async function() {
       this.timeout(2000);
 
@@ -214,7 +214,7 @@ describe('Plugin', () => {
     });
   });
 
-  describe(`# [server] Plugin.state propagation`, () => {
+  describe(`## [server] Plugin.state propagation`, () => {
     it('PluginManager should properly propagate plugin state', async () => {
       const server = new Server(config);
       server.pluginManager.register('stateful', (ClientPlugin) => {

@@ -9,7 +9,7 @@ import pluginDelayServer from '../utils/PluginDelayServer.js';
 import pluginDelayClient from '../utils/PluginDelayClient.js';
 import config from '../utils/config.js';
 
-describe(`client::PluginManager`, () => {
+describe(`# PluginManagerClient`, () => {
   let server = null;
 
   before(async function() {
@@ -29,7 +29,7 @@ describe(`client::PluginManager`, () => {
     await server.stop();
   });
 
-  describe(`# (protected) new PluginManager(client)`, () => {
+  describe(`## [private] constructor(client)`, () => {
     it(`should throw if argument is not instance of Client`, () => {
       let errored = false;
       try {
@@ -42,7 +42,7 @@ describe(`client::PluginManager`, () => {
     });
   });
 
-  describe(`# register(id, pluginFactory)`, () => {
+  describe(`## register(id, pluginFactory)`, () => {
     let client;
 
     beforeEach(() => {
@@ -140,7 +140,7 @@ describe(`client::PluginManager`, () => {
     });
   });
 
-  describe(`# (protected) await pluginManager.init()`, () => {
+  describe(`## [private] async init()`, () => {
     it(`should throw if started twice`, async () => {
       const client = new Client({ role: 'test', ...config });
       await client.init(); // run pluginManager.init()
@@ -156,7 +156,7 @@ describe(`client::PluginManager`, () => {
     });
   });
 
-  describe(`# await pluginManager.get(id)`, () => {
+  describe(`## async get(id)`, () => {
     it(`should throw if called before server.init()`, async () => {
       const client = new Client({ role: 'test', ...config });
       client.pluginManager.register('delay', pluginDelayClient, { delayTime: 100 });
@@ -246,7 +246,7 @@ describe(`client::PluginManager`, () => {
     // });
   });
 
-  describe(`# pluginManager.onStateChange((states, updatedPlugin) => {})`, () => {
+  describe(`## onStateChange((states, updatedPlugin) => {})`, () => {
     it(`should properly propagate statuses`, async function() {
       this.timeout(3 * 1000);
 
@@ -302,7 +302,18 @@ describe(`client::PluginManager`, () => {
     });
   });
 
-  describe(`# plugin initialization lifecycle`, () => {
+  describe(`## getRegisteredPlugins()`, () => {
+    it(`should return the list of registered plugins`, () => {
+      const client = new Client({ role: 'test', ...config });
+      client.pluginManager.register('delay-1', pluginDelayClient, { delayTime: 0 });
+      client.pluginManager.register('delay-2', pluginDelayClient, { delayTime: 0 });
+
+      const registeredPlugins = client.pluginManager.getRegisteredPlugins();
+      assert.deepEqual(['delay-1', 'delay-2'], registeredPlugins)
+    });
+  });
+
+  describe(`## [lifecyle] plugin initialization`, () => {
     it(`client should start if no plugins registered`, async function() {
       const client = new Client({ role: 'test', ...config });
       await client.init();
@@ -500,17 +511,6 @@ describe(`client::PluginManager`, () => {
       if (!onStateChangeCalled) {
         assert.fail('onStateChange not called');
       }
-    });
-  });
-
-  describe(`# pluginManager.getRegisteredPlugins()`, () => {
-    it(`should return the list of registered plugins`, () => {
-      const client = new Client({ role: 'test', ...config });
-      client.pluginManager.register('delay-1', pluginDelayClient, { delayTime: 0 });
-      client.pluginManager.register('delay-2', pluginDelayClient, { delayTime: 0 });
-
-      const registeredPlugins = client.pluginManager.getRegisteredPlugins();
-      assert.deepEqual(['delay-1', 'delay-2'], registeredPlugins)
     });
   });
 });

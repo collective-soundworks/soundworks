@@ -7,10 +7,10 @@ import dotenv from 'dotenv';
 import merge from 'lodash.merge';
 import tcpp from 'tcp-ping';
 
-import { Server, Context as ServerContext } from '../src/server/index.js';
-import { Client } from '../src/client/index.js';
+import { Server, Context as ServerContext } from '../../src/server/index.js';
+import { Client } from '../../src/client/index.js';
 
-import config from './utils/config.js';
+import config from '../utils/config.js';
 
 const __filename = url.fileURLToPath(import.meta.url);
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
