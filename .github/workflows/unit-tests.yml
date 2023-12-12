@@ -15,4 +15,4 @@ jobs:
         run: npm install
 
       - name: "Run Test"
-        run: npm test -- tests/**.spec.js
+        run: npm run test:all
