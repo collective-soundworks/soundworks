@@ -37,14 +37,14 @@ describe(`# StateManager`, () => {
   });
 
   describe('## registerSchema(schemaName, definition)', () => {
-    it('should register schema', () => {
+    it('should throw if reusing same schema name', () => {
       assert.throws(() => {
         server.stateManager.registerSchema('a', a);
       }, Error, '[stateManager.registerSchema] cannot register schema with name: "a", schema name already exists');
 
     });
 
-    it ('should register another schema reusing same definition', () => {
+    it ('should register same definition with another name', () => {
       server.stateManager.registerSchema('aa', a);
     });
   });
@@ -185,7 +185,7 @@ describe(`# StateManager`, () => {
   });
 
   describe('## deleteSchema(name)', () => {
-    it.skip('[FIXME #72] should call state.onDetach and state.onDelete on all states of its kind', async () => {
+    it('should call state.onDetach and state.onDelete on all states of its kind', async () => {
       server.stateManager.registerSchema('a-delete', a);
 
       const a0 = await server.stateManager.create('a-delete');
@@ -211,6 +211,33 @@ describe(`# StateManager`, () => {
           resolve();
         }, 200);
       });
+    });
+
+    // cf. https://github.com/collective-soundworks/soundworks/issues/71
+    it(`should not propagate deleted schema in observe`, async () => {
+      server.stateManager.registerSchema('a-delete-observe', a);
+
+      const state = await client.stateManager.create('a-delete-observe');
+      let deleteCalled = false;;
+      // assert
+      state.onDelete(() => {
+        deleteCalled = true;
+      });
+
+      server.stateManager.deleteSchema('a-delete-observe');
+      await delay(100);
+
+      assert.equal(deleteCalled, true);
+
+      let observeCalled = false;
+      const unobserve = await server.stateManager.observe((schemaName, stateId) => {
+        observeCalled = true;
+      });
+
+      await delay(100); // is not needed as observe should await, but just to make sure
+
+      assert.equal(observeCalled, false);
+      unobserve();
     });
   });
 
@@ -403,7 +430,7 @@ describe(`# StateManager`, () => {
       await state4.delete();
     });
 
-    it.skip(`[FIXME #71] should properly behave with filtered schema name: observe(schemaName, callback)`, async () => {
+    it(`should properly behave with filtered schema name: observe(schemaName, callback)`, async () => {
       const a1 = await client.stateManager.create('a');
       const b1 = await client.stateManager.create('b');
 
@@ -414,7 +441,6 @@ describe(`# StateManager`, () => {
       await other.start();
 
       const unobserveStar = await other.stateManager.observe(async (schemaName, stateId) => {
-        console.log(schemaName);
         starCalled += 1;
       });
 
@@ -422,7 +448,6 @@ describe(`# StateManager`, () => {
         filteredCalled += 1;
       });
 
-      console.log(starCalled, filteredCalled);
       assert.equal(starCalled, 2);
       assert.equal(filteredCalled, 1);
 

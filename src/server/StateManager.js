@@ -559,7 +559,7 @@ class StateManager extends BaseStateManager {
           attached.transport.emit(`${DELETE_NOTIFICATION}-${state.id}-${remoteId}`);
         }
 
-        this._serverStatesById.delete(this.id);
+        this._serverStatesById.delete(state.id);
       }
     }
 
