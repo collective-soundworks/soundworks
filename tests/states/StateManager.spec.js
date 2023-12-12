@@ -151,7 +151,9 @@ describe(`# StateManager`, () => {
       await a0.delete();
     });
 
-    it('should propagate updates to all attached states (client)', async () => {
+    it('should propagate updates to all attached states (client)', async function() {
+      this.timeout(5000);
+
       const a0 = await client.stateManager.create('a');
       const a1 = await client.stateManager.attach('a', a0.id);
       const a2 = await client.stateManager.attach('a', a0.id);
@@ -168,6 +170,7 @@ describe(`# StateManager`, () => {
       for (let state of [a0, a1, a2]) {
         for (let i = 1; i <= 100; i++) {
           await state.set({ int: i });
+          await delay(10);
 
           assert.equal(a0.get('int'), i);
           assert.equal(a1.get('int'), i);

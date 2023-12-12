@@ -89,48 +89,45 @@ class SharedStatePrivate {
         }
 
         if (hasUpdates) {
-          // send response to requester
-          // client.transport.emit(`${UPDATE_RESPONSE}-${this.id}-${remoteId}`, reqId, filteredUpdates);
-
-          // @note: we propagate server-side last, because as the server transport
-          // is synchronous it can break ordering if a subscription function makes
-          // itself an update in reaction to an update, therefore network messages
-          // order would be broken,
-
-          // we need to handle cases where:
-          // client state (client.id: 2) sends a request
-          // server attached state (client.id: -1) spot a problem and overrides the value
-          // we want the remote client (id: 2) to receive in the right order:
+          // We need to handle cases where:
+          // - client state (client.id: 2) sends a request
+          // - server attached state (client.id: -1) spot a problem and overrides the value
+          // We want the remote client (id: 2) to receive in the right order:
           // * 1. the value it requested,
           // * 2. the value overriden by the server-side attached state (id: -1)
+          //
+          // such problem is now better solved with the the upateHook system, none
+          // nonetheway we don't want to introduce inconsistencies here
+          //
+          // Then we propagate server-side last, because as the server transport
+          // is synchronous it can break ordering if a subscription function makes
+          // itself an update in reaction to an update. Propagating to server last
+          // alllows to maintain network messages order consistent.
 
-          // this problem could be solved properly with a reducer system:
-          // if (dirty) {
-          //   -> call (async) reducer
-          //   -> get values from reducer
-          //.  -> dispatch to everybody
-          // }
+          // @note - remoteId correspond to unique remote state id
 
-          for (let [peerRemoteId, peer] of this._attachedClients.entries()) {
-            // propagate notification to all other attached clients except server
+          // propagate RESPONSE to the client that originates the request if not the server
+          if (client.id !== -1) {
+            client.transport.emit(`${UPDATE_RESPONSE}-${this.id}-${remoteId}`, reqId, filteredUpdates, context);
+          }
+
+          // propagate NOTIFICATION to all other attached clients except server
+          for (let [peerRemoteId, peer] of this._attachedClients) {
             if (remoteId !== peerRemoteId && peer.id !== -1) {
               peer.transport.emit(`${UPDATE_NOTIFICATION}-${this.id}-${peerRemoteId}`, filteredUpdates, context);
             }
           }
 
-          if (client.id !== -1) {
+          // propagate RESPONSE to server if it is the requester
+          if (client.id === -1) {
             client.transport.emit(`${UPDATE_RESPONSE}-${this.id}-${remoteId}`, reqId, filteredUpdates, context);
           }
 
-          for (let [peerRemoteId, peer] of this._attachedClients.entries()) {
-            // propagate notification to server
+          // propagate NOTIFICATION other attached state that belongs to server
+          for (let [peerRemoteId, peer] of this._attachedClients) {
             if (remoteId !== peerRemoteId && peer.id === -1) {
               peer.transport.emit(`${UPDATE_NOTIFICATION}-${this.id}-${peerRemoteId}`, filteredUpdates, context);
             }
-          }
-
-          if (client.id === -1) {
-            client.transport.emit(`${UPDATE_RESPONSE}-${this.id}-${remoteId}`, reqId, filteredUpdates, context);
           }
         } else {
           // propagate back to the requester that the update has been aborted
