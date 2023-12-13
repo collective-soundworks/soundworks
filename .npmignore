@@ -1,14 +1,14 @@
 tests
 docs
+misc
+
 .github
 .data
 
-CHANGELOG.md
 .jsdoc.json
 .editorconfig
 .eslintrc.json
+tsconfig.json
 
 __*
-assets
-
 NOTES.md
