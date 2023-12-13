@@ -365,7 +365,7 @@ class BaseStateManager {
 
     try {
       await collection._init();
-    } catch(err) {
+    } catch (err) {
       throw new Error(`Cannot create collection, schema "${schemaName}" does not exists`);
     }
 
