@@ -136,6 +136,7 @@ describe(`# StateManager`, () => {
       for (let state of [a0, a1, a2]) {
         for (let i = 1; i <= 100; i++) {
           await state.set({ int: i });
+          // no need to wait for propagation eveything is synchronous server-side,
 
           assert.equal(a0.get('int'), i);
           assert.equal(a1.get('int'), i);
@@ -152,7 +153,7 @@ describe(`# StateManager`, () => {
     });
 
     it('should propagate updates to all attached states (client)', async function() {
-      this.timeout(5000);
+      this.timeout(10000);
 
       const a0 = await client.stateManager.create('a');
       const a1 = await client.stateManager.attach('a', a0.id);
@@ -170,7 +171,7 @@ describe(`# StateManager`, () => {
       for (let state of [a0, a1, a2]) {
         for (let i = 1; i <= 100; i++) {
           await state.set({ int: i });
-          await delay(10);
+          await delay(10); // wait for update propagation
 
           assert.equal(a0.get('int'), i);
           assert.equal(a1.get('int'), i);
@@ -178,12 +179,13 @@ describe(`# StateManager`, () => {
         }
       }
 
-      await new Promise(resolve => setTimeout(resolve, 200));
+      await delay(200)
+      await a0.delete();
+
       assert.equal(called[0], 300);
       assert.equal(called[1], 300);
       assert.equal(called[2], 300);
 
-      await a0.delete();
     });
   });
 

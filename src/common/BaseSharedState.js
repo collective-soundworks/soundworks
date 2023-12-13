@@ -15,6 +15,14 @@ import {
   UPDATE_NOTIFICATION,
 } from './constants.js';
 
+// @todo - replace isOwner by `type`:
+// enum {
+//   'owner'
+//   'attached'
+//   'collection-controlller'
+//   'collection-attached'
+// }
+
 class BaseSharedState {
   constructor(id, remoteId, schemaName, schema, client, isOwner, manager, initValues = {}) {
     /** @private */

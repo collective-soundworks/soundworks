@@ -16,7 +16,13 @@ class BaseSharedStateCollection {
   }
 
   async _init() {
+    // used for global set improvements
+    // this._controlState = await this._stateManager.create(schemaName);
+
     this._unobserve = await this._stateManager.observe(this._schemaName, async (schemaName, stateId) => {
+      // we don't want the control state to be listed
+
+
       const state = await this._stateManager.attach(schemaName, stateId);
 
       this._states.push(state);

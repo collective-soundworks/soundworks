@@ -176,9 +176,19 @@ class BaseStateManager {
    */
   async create(schemaName, initValues = {}) {
     return new Promise((resolve, reject) => {
-      const reqId = this._promiseStore.add(resolve, reject, 'create-create');
+      const reqId = this._promiseStore.add(resolve, reject, 'create-request');
       const requireSchema = this._cachedSchemas.has(schemaName) ? false : true;
       this.client.transport.emit(CREATE_REQUEST, reqId, schemaName, requireSchema, initValues);
+    });
+  }
+
+  async _createCollectionController(schemaName) {
+    return new Promise((resolve, reject) => {
+      const reqId = this._promiseStore.add(resolve, reject, 'create-collection-controller-request');
+      const requireSchema = this._cachedSchemas.has(schemaName) ? false : true;
+      this.client.transport.emit(CREATE_REQUEST, reqId, schemaName, requireSchema, {}, {
+        collectionController: true,
+      });
     });
   }
 

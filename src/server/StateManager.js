@@ -315,7 +315,7 @@ class StateManager extends BaseStateManager {
     super(localClientId, localTransport);
 
     this._clientByNodeId = new Map();
-    this._serverStatesById = new Map();
+    this._sharedStatePrivateById = new Map();
     this._schemas = new Map();
     this._observers = new Set();
     this._hooksBySchemaName = new Map(); // protected
@@ -348,23 +348,24 @@ class StateManager extends BaseStateManager {
           const schema = this._schemas.get(schemaName);
           const stateId = generateStateId.next().value;
           const remoteId = generateRemoteId.next().value;
-          // id, schemaName, schema, manager, initValues = {}
+
           const state = new SharedStatePrivate(stateId, schemaName, schema, this, initValues);
 
           state._attachClient(remoteId, client, true); // attach client to the state
-          this._serverStatesById.set(stateId, state);
+          this._sharedStatePrivateById.set(stateId, state);
 
           const currentValues = state._parameters.getValues();
-          const sendedSchema = requireSchema ? schema : null;
+          const schemaOption = requireSchema ? schema : null;
 
-          client.transport.emit(CREATE_RESPONSE, reqId, stateId, remoteId, schemaName, sendedSchema, currentValues);
+          client.transport.emit(CREATE_RESPONSE, reqId, stateId, remoteId, schemaName, schemaOption, currentValues);
 
-          this._observers.forEach(observer => {
-            // prevent propagating infos about internal states
-            if (!PRIVATE_STATES.includes(schemaName)) {
+          const isObservable = this._isObservableState(state);
+
+          if (isObservable) {
+            this._observers.forEach(observer => {
               observer.transport.emit(OBSERVE_NOTIFICATION, schemaName, stateId, nodeId);
-            }
-          });
+            });
+          }
         } catch (err) {
           const msg = `Cannot create state "${schemaName}", ${err.message}`;
           console.error(msg);
@@ -386,14 +387,14 @@ class StateManager extends BaseStateManager {
       if (this._schemas.has(schemaName)) {
         let state = null;
 
-        if (stateId !== null && this._serverStatesById.has(stateId)) {
-          state = this._serverStatesById.get(stateId);
+        if (stateId !== null && this._sharedStatePrivateById.has(stateId)) {
+          state = this._sharedStatePrivateById.get(stateId);
         } else if (stateId === null) {
           // if no `stateId` given, we try to find the first state with the given
           // `schemaName` in the list, this allow a client to attach to a global
           // state created by the server (or some persistant client) without
           // having to know the `stateId` (e.g. some global state...)
-          for (let existingState of this._serverStatesById.values()) {
+          for (let existingState of this._sharedStatePrivateById.values()) {
             if (existingState.schemaName === schemaName) {
               state = existingState;
               break;
@@ -411,8 +412,8 @@ class StateManager extends BaseStateManager {
 
           state._attachClient(remoteId, client, false);
           // send schema for client-side instanciation
-          const sendedSchema = requireSchema ? schema : null;
-          client.transport.emit(ATTACH_RESPONSE, reqId, state.id, remoteId, schemaName, sendedSchema, currentValues);
+          const schemaOption = requireSchema ? schema : null;
+          client.transport.emit(ATTACH_RESPONSE, reqId, state.id, remoteId, schemaName, schemaOption, currentValues);
         } else {
           const msg = `Cannot attach, no existing state for schema "${schemaName}" with stateId: "${stateId}"`;
           console.error(msg);
@@ -434,11 +435,11 @@ class StateManager extends BaseStateManager {
       if (observedSchemaName === null || this._schemas.has(observedSchemaName)) {
         const statesInfos = [];
 
-        this._serverStatesById.forEach(state => {
-          const { schemaName, id, _creatorId } = state;
+        this._sharedStatePrivateById.forEach(state => {
+          const isObservable = this._isObservableState(state);
 
-          // prevent propagating infos about internal states
-          if (!PRIVATE_STATES.includes(schemaName)) {
+          if (isObservable) {
+            const { schemaName, id, _creatorId } = state;
             statesInfos.push([schemaName, id, _creatorId]);
           }
         });
@@ -459,6 +460,13 @@ class StateManager extends BaseStateManager {
     });
   }
 
+  _isObservableState(state) {
+    const { schemaName, isCollectionController } = state;
+    // is observable only if not in private state or not a controller state
+    // return !PRIVATE_STATES.includes(schemaName) || !isCollectionController;
+    return !PRIVATE_STATES.includes(schemaName);
+  }
+
   /**
    * Remove a client from the manager. Clean all created or attached states.
    *
@@ -470,7 +478,7 @@ class StateManager extends BaseStateManager {
    * @private
    */
   removeClient(nodeId) {
-    for (let [_id, state] of this._serverStatesById.entries()) {
+    for (let [_id, state] of this._sharedStatePrivateById.entries()) {
       let deleteState = false;
 
       // define if the client is the creator of the state, in which case
@@ -492,7 +500,7 @@ class StateManager extends BaseStateManager {
             attachedClient.transport.emit(`${DELETE_NOTIFICATION}-${state.id}-${remoteId}`);
           }
 
-          this._serverStatesById.delete(state.id);
+          this._sharedStatePrivateById.delete(state.id);
         }
       }
     }
@@ -559,14 +567,14 @@ class StateManager extends BaseStateManager {
    */
   deleteSchema(schemaName) {
     // @note: deleting schema
-    for (let [_id, state] of this._serverStatesById.entries()) {
+    for (let [_id, state] of this._sharedStatePrivateById.entries()) {
       if (state.schemaName === schemaName) {
         for (let [remoteId, attached] of state._attachedClients.entries()) {
           state._detachClient(remoteId, attached);
           attached.transport.emit(`${DELETE_NOTIFICATION}-${state.id}-${remoteId}`);
         }
 
-        this._serverStatesById.delete(state.id);
+        this._sharedStatePrivateById.delete(state.id);
       }
     }
 

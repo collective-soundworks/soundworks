@@ -13,7 +13,7 @@ import {
 
 /**
  * The "real" state, this instance is kept private by the server.StateManager.
- * It cannot be accessed without a SharedState proxy
+ * It can only be accessed through a SharedState proxy.
  * @private
  */
 class SharedStatePrivate {
@@ -149,7 +149,7 @@ class SharedStatePrivate {
     if (isOwner) {
       // delete only if creator
       client.transport.addListener(`${DELETE_REQUEST}-${this.id}-${remoteId}`, (reqId) => {
-        this._manager._serverStatesById.delete(this.id);
+        this._manager._sharedStatePrivateById.delete(this.id);
         // --------------------------------------------------------------------
         // WARNING - MAKE SURE WE DON'T HAVE PROBLEM W/ THAT
         // --------------------------------------------------------------------
