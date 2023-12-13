@@ -47,9 +47,7 @@
     "lint": "npx eslint src",
     "test": "npx mocha",
     "test:all": "npx mocha tests/*/*.spec.js",
-    "toc": "markdown-toc -i README.md",
     "types": "rm -Rf types && tsc",
-    "preversion": "npm run toc && git commit -am 'docs: build' --allow-empty",
     "postversion": "node ./bin/check-changelog.js"
   },
   "dependencies": {
@@ -79,9 +77,7 @@
     "dotenv": "^16.3.1",
     "eslint": "^8.55.0",
     "eslint-plugin-jsdoc": "^46.9.0",
-    "generate-changelog": "^1.8.0",
     "jsdoc": "^4.0.0",
-    "markdown-toc": "^1.2.0",
     "mocha": "^10.2.0",
     "puppeteer": "^21.6.0",
     "tcp-ping": "^0.1.1",
