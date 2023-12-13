@@ -43,7 +43,7 @@
     "node": ">=16.0.0"
   },
   "scripts": {
-    "doc": "rm -Rf docs && jsdoc -c .jsdoc.json --verbose && cp -R misc/assets docs/",
+    "doc": "rm -Rf docs && jsdoc -c .jsdoc --verbose && cp -R misc/assets docs/",
     "lint": "npx eslint src",
     "test": "npx mocha",
     "test:all": "npx mocha tests/*/*.spec.js",
