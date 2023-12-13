@@ -3,7 +3,7 @@
 [![npm version](https://badge.fury.io/js/@soundworks%2Fcore.svg)](https://badge.fury.io/js/@soundworks%2Fcore)
 [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
 
-![soundworks-logo](./assets/logo-200x200.png)
+![soundworks-logo](./misc/assets/logo-200x200.png)
 
 Open-source creative coding framework for distributed applications based on Web technologies.
 
@@ -22,7 +22,7 @@ The best and most simple way to start using **soundworks** is to use the `@sound
 npx @soundworks/create@latest
 ```
 
-![./assets/soundworks-create-min.gif](./assets/soundworks-create-min.gif)
+![soundworks-create](./misc/assets/soundworks-create-min.gif)
 
 See [https://soundworks.dev/tutorials/getting-started.html](https://soundworks.dev/tutorials/getting-started.html) for more informations on the wizard and how to start using **soundworks**.
 

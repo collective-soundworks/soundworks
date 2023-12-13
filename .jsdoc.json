@@ -1,7 +1,7 @@
 {
   "source": {
     "include": [
-      "assets/DOC.md",
+      "misc/assets/DOC.md",
       "src/client",
       "src/server",
       "src/common"
