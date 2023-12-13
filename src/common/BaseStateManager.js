@@ -1,4 +1,4 @@
-import { isString, isFunction } from '@ircam/sc-utils';
+import { isString, isFunction, isPlainObject } from '@ircam/sc-utils';
 import SharedState from './BaseSharedState.js';
 import SharedStateCollection from './BaseSharedStateCollection.js';
 import PromiseStore from './PromiseStore.js';
@@ -29,10 +29,11 @@ class BaseStateManager {
   constructor(id, transport) {
     this.client = { id, transport };
 
-    this._statesById = new Map();
-    this._observeListeners = new Map(); // Map <callback, observedSchemaName>
-    this._cachedSchemas = new Map();
-    this._observeRequestCallbacks = new Map();
+    this._statesById = new Map(); // <id, state>
+    this._cachedSchemas = new Map(); // <shemaName, definition>
+
+    this._observeListeners = new Set(); // Set <[observedSchemaName, callback, options]>
+    this._observeRequestCallbacks = new Map(); // Map <reqId, [observedSchemaName, callback, options]>
 
     this._promiseStore = new PromiseStore();
 
@@ -89,15 +90,18 @@ class BaseStateManager {
     this.client.transport.addListener(OBSERVE_RESPONSE, async (reqId, ...list) => {
       // retrieve the callback that have been stored in observe to make sure
       // we don't call another callback that may have been registered earlier.
-      const [callback, observedSchemaName] = this._observeRequestCallbacks.get(reqId);
-      this._observeRequestCallbacks.delete(reqId);
+      const observeInfos = this._observeRequestCallbacks.get(reqId);
+      const [observedSchemaName, callback, options] = observeInfos;
 
-      // now that the OBSERVE_REPOSNSE callback is executed, store it in
-      // OBSERVE_NOTIFICATION listeners
-      this._observeListeners.set(callback, observedSchemaName);
+      // move observeInfos from `_observeRequestCallbacks` to `_observeListeners`
+      // to guarantee order of execution, @see not in `.observe`
+      this._observeRequestCallbacks.delete(reqId);
+      this._observeListeners.add(observeInfos);
 
       const promises = list.map(([schemaName, stateId, nodeId]) => {
-        if (observedSchemaName === null || observedSchemaName === schemaName) {
+        const filter = this._filterObserve(observedSchemaName, schemaName, nodeId, options);
+
+        if (!filter) {
           return callback(schemaName, stateId, nodeId);
         } else {
           return Promise.resolve();
@@ -107,8 +111,9 @@ class BaseStateManager {
       await Promise.all(promises);
 
       const unsubscribe = () => {
-        this._observeListeners.delete(callback);
-        // no more listeners, we can stop receiving notification from the server
+        this._observeListeners.delete(observeInfos);
+
+        // no more listeners, we can stop receiving notifications from the server
         if (this._observeListeners.size === 0) {
           this.client.transport.emit(UNOBSERVE_NOTIFICATION);
         }
@@ -124,8 +129,11 @@ class BaseStateManager {
     });
 
     this.client.transport.addListener(OBSERVE_NOTIFICATION, (schemaName, stateId, nodeId) => {
-      this._observeListeners.forEach((observedSchemaName, callback) => {
-        if (observedSchemaName === null || observedSchemaName === schemaName) {
+      this._observeListeners.forEach(observeInfos => {
+        const [observedSchemaName, callback, options] = observeInfos;
+        const filter = this._filterObserve(observedSchemaName, schemaName, nodeId, options);
+
+        if (!filter) {
           callback(schemaName, stateId, nodeId);
         }
       });
@@ -137,6 +145,21 @@ class BaseStateManager {
     this.client.transport.addListener(DELETE_SCHEMA, schemaName => {
       this._cachedSchemas.delete(schemaName);
     });
+  }
+
+  /** @private */
+  _filterObserve(observedSchemaName, schemaName, creatorId, options) {
+    let filter = true;
+    // schema name filter filer
+    if (observedSchemaName === null || observedSchemaName === schemaName) {
+      filter = false;
+    }
+    // filter state created by client if excludeLocal is true
+    if (options.excludeLocal === true && creatorId === this.client.id) {
+      filter = true;
+    }
+
+    return filter;
   }
 
   /**
@@ -191,8 +214,17 @@ class BaseStateManager {
    * Notes:
    * - The states that are created by the same node are not propagated through
    * the observe callback.
-   * - The order of execution is not guaranted, i.e. an state attached in the
-   * `observe` callback could be created before the `async create` method resolves.
+   * - The order of execution is not guaranted between nodes, i.e. an state attached
+   * in the `observe` callback could be created before the `async create` method resolves.
+   * - Filtering, i.e. `observedSchemaName` and `options.excludeLocal` are handled
+   * on the client-side, the server just notify of all state creation activity and
+   * the client executes the given callbacks according to the different filter rules.
+   * Such strategy allows to share the obersve notifications between all observers.
+   *
+   * - observe(callback)
+   * - observe(schemaName, callback)
+   * - observe(callback, options)
+   * - observe(schemaName, callback, options)
    *
    * @param {String} [schemaName] - optionnal schema name to filter the observed
    *  states.
@@ -202,7 +234,7 @@ class BaseStateManager {
    *  callback as been executed on each existing states. The promise value is a
    *  function which allows to stop observing the states on the network.
    * @example
-   * client.stateManager.observe(async (schemaName, stateId, nodeId) => {
+   * client.stateManager.observe(async (schemaName, stateId) => {
    *   if (schemaName === 'something') {
    *     const state = await this.client.stateManager.attach(schemaName, stateId);
    *     console.log(state.getValues());
@@ -213,25 +245,78 @@ class BaseStateManager {
   // handle this way and the network overhead is very low for observe notifications:
   // i.e. schemaName, stateId, nodeId
   async observe(...args) {
+
+    const defaultOptions = {
+      excludeLocal: false,
+    };
+
     let observedSchemaName;
     let callback;
+    let options;
 
-    if (args.length === 1) {
-      observedSchemaName = null;
-      callback = args[0];
+    switch (args.length) {
+      case 1: {
+        // variation: .observe(callback)
+        if (!isFunction(args[0])) {
+          throw new TypeError(`[stateManager] Invalid arguments, argument 1 should be a function"`);
+        }
 
-      if (!isFunction(callback)) {
-        throw new Error(`[stateManager] Invalid arguments, valid signatures are "stateManager.observe(callback)" or "stateManager.observe(schemaName, callback)"`);
+        observedSchemaName = null;
+        callback = args[0];
+        options = defaultOptions;
+        break;
       }
-    } else if (args.length === 2) {
-      observedSchemaName = args[0];
-      callback = args[1];
+      case 2: {
+        // variation: .observe(schemaName, callback)
+        if (isString(args[0])) {
+          if (!isFunction(args[1])) {
+            throw new TypeError(`[stateManager] Invalid arguments, argument 2 should be a function"`);
+          }
 
-      if (!isString(observedSchemaName) || !isFunction(callback)) {
-        throw new Error(`[stateManager] Invalid arguments, valid signatures are "stateManager.observe(callback)" or "stateManager.observe(schemaName, callback)"`);
+          observedSchemaName = args[0];
+          callback = args[1];
+          options = defaultOptions;
+
+        // variation: .observe(callback, options) API
+        } else if (isFunction(args[0])) {
+          if (!isPlainObject(args[1])) {
+            throw new TypeError(`[stateManager] Invalid arguments, argument 2 should be an object"`);
+          }
+
+          observedSchemaName = null;
+          callback = args[0];
+          options = Object.assign(defaultOptions, args[1]);
+
+        } else {
+          throw new Error(`[stateManager] Invalid signature, refer to the StateManager.observe documentation"`);
+        }
+
+        break;
       }
-    } else {
-      throw new Error(`[stateManager] Invalid arguments, valid signatures are "stateManager.observe(callback)" or "stateManager.observe(schemaName, callback)"`);
+      case 3: {
+        // variation: .observe(schemaName, callback, options)
+        if (!isString(args[0])) {
+          throw new TypeError(`[stateManager] Invalid arguments, argument 1 should be a string"`);
+        }
+
+        if (!isFunction(args[1])) {
+          throw new TypeError(`[stateManager] Invalid arguments, argument 2 should be a function"`);
+        }
+
+        if (!isPlainObject(args[2])) {
+          throw new TypeError(`[stateManager] Invalid arguments, argument 2 should be an object"`);
+        }
+
+        observedSchemaName = args[0];
+        callback = args[1];
+        options = Object.assign(defaultOptions, args[2]);
+
+        break;
+      }
+      // throw in all other cases
+      default: {
+        throw new Error(`[stateManager] Invalid signature, refer to the StateManager.observe documentation"`);
+      }
     }
 
     // resend request to get updated list of states
@@ -239,10 +324,11 @@ class BaseStateManager {
       const reqId = this._promiseStore.add(resolve, reject, 'observe-request');
       // store the callback for execution on the response. the returned Promise
       // is fullfiled once callback has been executed with each existing states
-      this._observeRequestCallbacks.set(reqId, [callback, observedSchemaName]);
+      const observeInfos = [observedSchemaName, callback, options];
+      this._observeRequestCallbacks.set(reqId, observeInfos);
 
-      // NOTE: do not store in `_observeListeners` yet as it can produce races, e.g.:
-      // cf. test `observe should properly behave in race condition`
+      // NOTE: do not store in `_observeListeners` yet as it can produce race
+      // conditions, e.g.:
       // ```
       // await client.stateManager.observe(async (schemaName, stateId, nodeId) => {});
       // // client now receives OBSERVE_NOTIFICATIONS
@@ -254,8 +340,10 @@ class BaseStateManager {
       // second observer is called twice:
       // - OBSERVE_RESPONSE 1 []
       // - OBSERVE_NOTIFICATION [ 'a', 1, 0 ]
-      // - OBSERVE_NOTIFICATION [ 'a', 1, 0 ] // this should not be executed
+      // - OBSERVE_NOTIFICATION [ 'a', 1, 0 ] // this should not happen
       // - OBSERVE_RESPONSE 1 [ [ 'a', 1, 0 ] ]
+      //
+      // cf. unit test `observe should properly behave in race condition`
 
       this.client.transport.emit(OBSERVE_REQUEST, reqId, observedSchemaName);
     });

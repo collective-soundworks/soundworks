@@ -350,27 +350,6 @@ describe(`# StateManager`, () => {
       await state2.delete();
     });
 
-    it.skip(`[FIXME #69] should not be notified of states created by same node`, async () => {
-      const state1 = await client.stateManager.create('a');
-
-      let observeCalled = false;
-
-      const unobserve = await client.stateManager.observe('a', (schemaName, stateId, nodeId) => {
-        observeCalled = true;
-      });
-
-      const state2 = await client.stateManager.create('a');
-
-      await new Promise(resolve => setTimeout(resolve, 300));
-
-      if (observeCalled === true) {
-        assert.fail('observe should not have been called')
-      }
-
-      await state1.delete();
-      await state2.delete();
-    });
-
     it(`should properly behave with several observers`, async () => {
       const other = new Client({ role: 'test', ...config });
       await other.start();
@@ -557,6 +536,56 @@ describe(`# StateManager`, () => {
       if (!errored) {
         assert.fail('should have thrown');
       }
+    });
+
+    it(`[FIXME #69] should be notified of all states created, even by same node`, async () => {
+      const state1 = await client.stateManager.create('a');
+
+      let observeCalled = 0;
+
+      const unobserve = await client.stateManager.observe('a', (schemaName, stateId, nodeId) => {
+        // console.log(schemaName, stateId, state1.id);
+        observeCalled +=1;
+      });
+
+      const state2 = await client.stateManager.create('a');
+      await delay(50);
+
+      assert.equal(observeCalled, 2);
+
+      await state1.delete();
+      await state2.delete();
+      unobserve();
+    });
+  });
+
+  describe('## observe(schemaName, callback, options) => Promise<unobserve>', async () => {
+    it(`API should not throw`, async () => {
+      const unobserve = await client.stateManager.observe('a', function() {}, {
+        excludeLocal: true,
+      });
+      unobserve();
+    });
+
+    it(`[FIXME #69] should not be notified of states created by same node if option.excludeLocal = true`, async () => {
+      const state1 = await client.stateManager.create('a');
+
+      let observeCalled = false;
+
+      const unobserve = await client.stateManager.observe('a', (schemaName, stateId, nodeId) => {
+        console.log('HEHO ?')
+        observeCalled = true;
+      }, { excludeLocal: true });
+
+      const state2 = await client.stateManager.create('a');
+      await delay(50);
+
+      if (observeCalled === true) {
+        assert.fail('observe should not have been called')
+      }
+
+      await state1.delete();
+      await state2.delete();
     });
   });
 

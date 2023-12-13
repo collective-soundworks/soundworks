@@ -394,30 +394,34 @@ class ParameterBag {
   getSchema(name = null) {
     if (name === null) {
       return this._schema;
-    } else {
-      if (!this.has(name)) {
-        throw new ReferenceError(`[SharedState] Cannot get schema description of undefined parameter "${name}"`);
-      }
-
-      return this._schema[name];
     }
+
+    if (!this.has(name)) {
+      throw new ReferenceError(`[SharedState] Cannot get schema description of undefined parameter "${name}"`);
+    }
+
+    return this._schema[name];
   }
 
   // return the default value, if initValue has been given, return init values
   getInitValues() {
     const initValues = {};
+
     for (let [name, def] of Object.entries(this._schema)) {
       initValues[name] = def.initValue;
     }
+
     return initValues;
   }
 
   // return the default value, if initValue has been given, return init values
   getDefaults() {
     const defaults = {};
+
     for (let [name, def] of Object.entries(this._schema)) {
       defaults[name] = def.default;
     }
+
     return defaults;
   }
 }

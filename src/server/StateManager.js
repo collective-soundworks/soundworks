@@ -360,7 +360,8 @@ class StateManager extends BaseStateManager {
           client.transport.emit(CREATE_RESPONSE, reqId, stateId, remoteId, schemaName, sendedSchema, currentValues);
 
           this._observers.forEach(observer => {
-            if (observer.id !== nodeId) {
+            // prevent propagating infos about internal states
+            if (!PRIVATE_STATES.includes(schemaName)) {
               observer.transport.emit(OBSERVE_NOTIFICATION, schemaName, stateId, nodeId);
             }
           });
@@ -435,14 +436,14 @@ class StateManager extends BaseStateManager {
 
         this._serverStatesById.forEach(state => {
           const { schemaName, id, _creatorId } = state;
-          // only track application states
-          // (e.g. do not propagate infos about audit state)
-          if (!PRIVATE_STATES.includes(schemaName) && _creatorId !== client.id) {
+
+          // prevent propagating infos about internal states
+          if (!PRIVATE_STATES.includes(schemaName)) {
             statesInfos.push([schemaName, id, _creatorId]);
           }
         });
 
-        // add client to observers first because if some (sync) server side
+        // add client to observers first because if some synchronous server side
         // callback throws, the client would never be added to the list
         this._observers.add(client);
 
