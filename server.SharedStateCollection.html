@@ -61,8 +61,9 @@
         </h2>
         
             <div class="class-description usertext"><p>The <code>SharedStateCollection</code> interface represent a collection of all states
-created from a given schema name on the network, at the execption of the ones
-created by the current node.</p>
+created from a given schema name on the network.</p>
+<p>It can optionnaly exclude the states created by the current node.</p>
+<p>See <a href="server.StateManager.html#getCollection">server.StateManager#getCollection</a> for factory method API</p>
 <pre class="prettyprint source"><code>const collection = await server.stateManager.getCollection('my-schema');
 const allValues = collection.getValues();
 collection.onUpdate((state, newValues, oldValues, context) => {
@@ -113,13 +114,13 @@ collection.onUpdate((state, newValues, oldValues, context) => {
 <dl class="details">
     
     <dt class="tag-description">Description:</dt>
-    <dd class="tag-description"><ul class="dummy"><li><p>Size of the collection</p></li></ul></dd>
+    <dd class="tag-description"><ul class="dummy"><li><p>Size of the collection, alias <code>size</code></p></li></ul></dd>
     
 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_BaseSharedStateCollection.js.html">common/BaseSharedStateCollection.js</a>, <a href="common_BaseSharedStateCollection.js.html#line42">line 42</a>
+        <a href="common_BaseSharedStateCollection.js.html">common/BaseSharedStateCollection.js</a>, <a href="common_BaseSharedStateCollection.js.html#line45">line 45</a>
     </li></ul></dd>
     
 
@@ -164,7 +165,90 @@ collection.onUpdate((state, newValues, oldValues, context) => {
 
 
 <div class="description usertext">
-    <p>Size of the collection</p>
+    <p>Size of the collection, alias <code>size</code></p>
+</div>
+
+
+
+    <h5 class="h5-types">Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">number</span>
+
+
+
+        </li>
+    </ul>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="size"><span class="type-signature"></span>size<span class="type-signature"> :number</span></h4>
+
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>Size of the collection, , alias <code>length</code></p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="common_BaseSharedStateCollection.js.html">common/BaseSharedStateCollection.js</a>, <a href="common_BaseSharedStateCollection.js.html#line53">line 53</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="BaseSharedStateCollection.html#size">BaseSharedStateCollection#size</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description usertext">
+    <p>Size of the collection, , alias <code>length</code></p>
 </div>
 
 
@@ -212,7 +296,7 @@ collection.onUpdate((state, newValues, oldValues, context) => {
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_BaseSharedStateCollection.js.html">common/BaseSharedStateCollection.js</a>, <a href="common_BaseSharedStateCollection.js.html#line50">line 50</a>
+        <a href="common_BaseSharedStateCollection.js.html">common/BaseSharedStateCollection.js</a>, <a href="common_BaseSharedStateCollection.js.html#line61">line 61</a>
     </li></ul></dd>
     
 
@@ -303,7 +387,7 @@ the estates that pass the test implemented by the provided function (see <code>A
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_BaseSharedStateCollection.js.html">common/BaseSharedStateCollection.js</a>, <a href="common_BaseSharedStateCollection.js.html#line177">line 177</a>
+        <a href="common_BaseSharedStateCollection.js.html">common/BaseSharedStateCollection.js</a>, <a href="common_BaseSharedStateCollection.js.html#line188">line 188</a>
     </li></ul></dd>
     
 
@@ -446,7 +530,7 @@ function. If no values satisfy the testing function, undefined is returned.</p><
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_BaseSharedStateCollection.js.html">common/BaseSharedStateCollection.js</a>, <a href="common_BaseSharedStateCollection.js.html#line198">line 198</a>
+        <a href="common_BaseSharedStateCollection.js.html">common/BaseSharedStateCollection.js</a>, <a href="common_BaseSharedStateCollection.js.html#line209">line 209</a>
     </li></ul></dd>
     
 
@@ -593,7 +677,7 @@ It should return a truthy value to indicate a matching element has been found.</
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_BaseSharedStateCollection.js.html">common/BaseSharedStateCollection.js</a>, <a href="common_BaseSharedStateCollection.js.html#line154">line 154</a>
+        <a href="common_BaseSharedStateCollection.js.html">common/BaseSharedStateCollection.js</a>, <a href="common_BaseSharedStateCollection.js.html#line165">line 165</a>
     </li></ul></dd>
     
 
@@ -734,7 +818,7 @@ Its return value is discarded.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_BaseSharedStateCollection.js.html">common/BaseSharedStateCollection.js</a>, <a href="common_BaseSharedStateCollection.js.html#line74">line 74</a>
+        <a href="common_BaseSharedStateCollection.js.html">common/BaseSharedStateCollection.js</a>, <a href="common_BaseSharedStateCollection.js.html#line85">line 85</a>
     </li></ul></dd>
     
 
@@ -893,7 +977,7 @@ Its return value is discarded.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_BaseSharedStateCollection.js.html">common/BaseSharedStateCollection.js</a>, <a href="common_BaseSharedStateCollection.js.html#line64">line 64</a>
+        <a href="common_BaseSharedStateCollection.js.html">common/BaseSharedStateCollection.js</a>, <a href="common_BaseSharedStateCollection.js.html#line75">line 75</a>
     </li></ul></dd>
     
 
@@ -1003,7 +1087,7 @@ on every state of the collection (see <code>Array.map</code>).</p></li></ul></dd
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_BaseSharedStateCollection.js.html">common/BaseSharedStateCollection.js</a>, <a href="common_BaseSharedStateCollection.js.html#line165">line 165</a>
+        <a href="common_BaseSharedStateCollection.js.html">common/BaseSharedStateCollection.js</a>, <a href="common_BaseSharedStateCollection.js.html#line176">line 176</a>
     </li></ul></dd>
     
 
@@ -1144,7 +1228,7 @@ Its return value is added as a single element in the new array.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_BaseSharedStateCollection.js.html">common/BaseSharedStateCollection.js</a>, <a href="common_BaseSharedStateCollection.js.html#line125">line 125</a>
+        <a href="common_BaseSharedStateCollection.js.html">common/BaseSharedStateCollection.js</a>, <a href="common_BaseSharedStateCollection.js.html#line136">line 136</a>
     </li></ul></dd>
     
 
@@ -1347,7 +1431,7 @@ already present in the collection.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_BaseSharedStateCollection.js.html">common/BaseSharedStateCollection.js</a>, <a href="common_BaseSharedStateCollection.js.html#line142">line 142</a>
+        <a href="common_BaseSharedStateCollection.js.html">common/BaseSharedStateCollection.js</a>, <a href="common_BaseSharedStateCollection.js.html#line153">line 153</a>
     </li></ul></dd>
     
 
@@ -1513,7 +1597,7 @@ from the collection.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_BaseSharedStateCollection.js.html">common/BaseSharedStateCollection.js</a>, <a href="common_BaseSharedStateCollection.js.html#line100">line 100</a>
+        <a href="common_BaseSharedStateCollection.js.html">common/BaseSharedStateCollection.js</a>, <a href="common_BaseSharedStateCollection.js.html#line111">line 111</a>
     </li></ul></dd>
     
 
@@ -1739,7 +1823,7 @@ set to <code>{}</code>, and <code>context</code> to <code>null</code>)</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_BaseSharedStateCollection.js.html">common/BaseSharedStateCollection.js</a>, <a href="common_BaseSharedStateCollection.js.html#line85">line 85</a>
+        <a href="common_BaseSharedStateCollection.js.html">common/BaseSharedStateCollection.js</a>, <a href="common_BaseSharedStateCollection.js.html#line96">line 96</a>
     </li></ul></dd>
     
 
@@ -1937,7 +2021,7 @@ current call and will be passed as third argument to all update listeners.</p></
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_BaseSharedStateCollection.js.html">common/BaseSharedStateCollection.js</a>, <a href="common_BaseSharedStateCollection.js.html#line186">line 186</a>
+        <a href="common_BaseSharedStateCollection.js.html">common/BaseSharedStateCollection.js</a>, <a href="common_BaseSharedStateCollection.js.html#line197">line 197</a>
     </li></ul></dd>
     
 
@@ -2343,7 +2427,7 @@ with the values updates in the <code>set</code> call.</p></td>
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a> on Tue Sep 26 2023 15:04:03 GMT+0000 (Coordinated Universal Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a> on Wed Dec 13 2023 11:32:54 GMT+0000 (Coordinated Universal Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>

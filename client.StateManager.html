@@ -156,7 +156,7 @@ setInterval(() => {
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_BaseStateManager.js.html">common/BaseStateManager.js</a>, <a href="common_BaseStateManager.js.html#line167">line 167</a>
+        <a href="common_BaseStateManager.js.html">common/BaseStateManager.js</a>, <a href="common_BaseStateManager.js.html#line199">line 199</a>
     </li></ul></dd>
     
 
@@ -391,7 +391,7 @@ globally shared states owned by the server).</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_BaseStateManager.js.html">common/BaseStateManager.js</a>, <a href="common_BaseStateManager.js.html#line145">line 145</a>
+        <a href="common_BaseStateManager.js.html">common/BaseStateManager.js</a>, <a href="common_BaseStateManager.js.html#line177">line 177</a>
     </li></ul></dd>
     
 
@@ -608,7 +608,7 @@ globally shared states owned by the server).</p></td>
 
     
 
-    <h4 class="name" id="getCollection"><span class="type-signature type-signature-async">(async) </span>getCollection<span class="signature">(schemaName)</span><span class="type-signature"> &rarr; {<a href="server.SharedStateCollection.html">server.SharedStateCollection</a>|<a href="client.SharedStateCollection.html">client.SharedStateCollection</a>}</span></h4>
+    <h4 class="name" id="getCollection"><span class="type-signature type-signature-async">(async) </span>getCollection<span class="signature">(schemaName, options)</span><span class="type-signature"> &rarr; {<a href="server.SharedStateCollection.html">server.SharedStateCollection</a>|<a href="client.SharedStateCollection.html">client.SharedStateCollection</a>}</span></h4>
 
     
 
@@ -618,14 +618,13 @@ globally shared states owned by the server).</p></td>
 <dl class="details">
     
     <dt class="tag-description">Description:</dt>
-    <dd class="tag-description"><ul class="dummy"><li><p>Returns a collection of all the states created from the schema name. Except
-the ones created by the current node.</p></li></ul></dd>
+    <dd class="tag-description"><ul class="dummy"><li><p>Returns a collection of all the states created from the schema name.</p></li></ul></dd>
     
 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_BaseStateManager.js.html">common/BaseStateManager.js</a>, <a href="common_BaseStateManager.js.html#line248">line 248</a>
+        <a href="common_BaseStateManager.js.html">common/BaseStateManager.js</a>, <a href="common_BaseStateManager.js.html#line363">line 363</a>
     </li></ul></dd>
     
 
@@ -723,6 +722,101 @@ the ones created by the current node.</p></li></ul></dd>
         </tr>
 
     
+
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Options.</p>
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>excludeLocal</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>false</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>If set to true, exclude states
+created locallly, i.e. by the same node, from the collection.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
     </tbody>
 </table>
 
@@ -771,7 +865,7 @@ the ones created by the current node.</p></li></ul></dd>
 
     
 
-    <h4 class="name" id="observe"><span class="type-signature type-signature-async">(async) </span>observe<span class="signature">(schemaName<span class="signature-attributes">opt</span>, callback)</span><span class="type-signature"> &rarr; {Promise.&lt;function()>}</span></h4>
+    <h4 class="name" id="observe"><span class="type-signature type-signature-async">(async) </span>observe<span class="signature">(schemaName<span class="signature-attributes">opt</span>, callback, options)</span><span class="type-signature"> &rarr; {Promise.&lt;function()>}</span></h4>
 
     
 
@@ -787,17 +881,26 @@ the state of all other clients of the application, to monitor them and/or take
 control over them from a single point.</p>
 <p>Notes:</p>
 <ul>
-<li>The states that are created by the same node are not propagated through
-the observe callback.</li>
-<li>The order of execution is not guaranted, i.e. an state attached in the
-<code>observe</code> callback could be created before the <code>async create</code> method resolves.</li>
+<li>The order of execution is not guaranted between nodes, i.e. an state attached
+in the <code>observe</code> callback could be created before the <code>async create</code> method resolves.</li>
+<li>Filtering, i.e. <code>observedSchemaName</code> and <code>options.excludeLocal</code> are handled
+on the node side, the server just notify all state creation activity and
+the node executes the given callbacks according to the different filter rules.
+Such strategy allows to share the observe notifications between all observers.</li>
+</ul>
+<p>Alternative signatures:</p>
+<ul>
+<li>.observe(callback)</li>
+<li>.observe(schemaName, callback)</li>
+<li>.observe(callback, options)</li>
+<li>.observe(schemaName, callback, options)</li>
 </ul></li></ul></dd>
     
 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="common_BaseStateManager.js.html">common/BaseStateManager.js</a>, <a href="common_BaseStateManager.js.html#line206">line 206</a>
+        <a href="common_BaseStateManager.js.html">common/BaseStateManager.js</a>, <a href="common_BaseStateManager.js.html#line249">line 249</a>
     </li></ul></dd>
     
 
@@ -849,7 +952,7 @@ the observe callback.</li>
 
     <h5 class="h5-examples">Example</h5>
     
-    <pre class="prettyprint"><code>client.stateManager.observe(async (schemaName, stateId, nodeId) => {
+    <pre class="prettyprint"><code>client.stateManager.observe(async (schemaName, stateId) => {
   if (schemaName === 'something') {
     const state = await this.client.stateManager.attach(schemaName, stateId);
     console.log(state.getValues());
@@ -892,7 +995,7 @@ the observe callback.</li>
             <td class="type">
             
                 
-<span class="param-type">String</span>
+<span class="param-type">string</span>
 
 
 
@@ -950,6 +1053,109 @@ states.</p></td>
             
 
             <td class="description last"><p>Function to be called when a new state is created on the network.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Options.</p>
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>excludeLocal</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>false</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>If set to true, exclude states
+created locallly, i.e. by the same node, from the collection.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
         </tr>
 
     
@@ -1205,7 +1411,7 @@ function which allows to stop observing the states on the network.</li>
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a> on Tue Sep 26 2023 15:04:03 GMT+0000 (Coordinated Universal Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a> on Wed Dec 13 2023 11:32:54 GMT+0000 (Coordinated Universal Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>
