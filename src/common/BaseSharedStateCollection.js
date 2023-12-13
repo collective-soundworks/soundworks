@@ -1,3 +1,8 @@
+import {
+  kCreateCollectionController,
+  kAttachInCollection,
+} from './BaseStateManager.js';
+
 /**
  * @private
  */
@@ -7,6 +12,7 @@ class BaseSharedStateCollection {
     this._schemaName = schemaName;
     this._options = Object.assign({ excludeLocal: false }, options);
 
+    this._controller = null;
     this._states = [];
 
     this._onUpdateCallbacks = new Set();
@@ -16,15 +22,10 @@ class BaseSharedStateCollection {
   }
 
   async _init() {
-    // used for global set improvements
-    // this._controlState = await this._stateManager.create(schemaName);
+    this._controller = await this._stateManager[kCreateCollectionController](this._schemaName);
 
     this._unobserve = await this._stateManager.observe(this._schemaName, async (schemaName, stateId) => {
-      // we don't want the control state to be listed
-
-
-      const state = await this._stateManager.attach(schemaName, stateId);
-
+      const state = await this._stateManager[kAttachInCollection](schemaName, stateId);
       this._states.push(state);
 
       state.onDetach(() => {
@@ -68,6 +69,8 @@ class BaseSharedStateCollection {
     this._unobserve();
     this._onUpdateCallbacks.clear();
 
+    await this._controller.delete();
+
     const promises = this._states.map(state => state.detach());
     await Promise.all(promises);
 
@@ -100,7 +103,11 @@ class BaseSharedStateCollection {
    *   current call and will be passed as third argument to all update listeners.
    */
   async set(updates, context = null) {
-    const promises = this._states.map(state => state.set(updates, context));
+    const updatesResult = await this._controller.set(updates, context);
+    const promises = this._states.map(state => {
+      return state._commit(updatesResult, context, true, false);
+    });
+
     return Promise.all(promises);
   }
 

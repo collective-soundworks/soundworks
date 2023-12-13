@@ -28,6 +28,8 @@ import {
 const generateStateId = idGenerator();
 const generateRemoteId = idGenerator();
 
+const kIsObservableState = Symbol('StateManager::isObservableState');
+
 /**
  * @typedef {object} server.StateManager~schema
  *
@@ -323,6 +325,12 @@ class StateManager extends BaseStateManager {
     this.addClient(localClientId, localTransport);
   }
 
+  [kIsObservableState](state) {
+    const { schemaName, isCollectionController } = state;
+    // is observable only if not in private state and not a controller state
+    return !PRIVATE_STATES.includes(schemaName) && !isCollectionController;
+  }
+
   /**
    * Add a client to the manager.
    *
@@ -342,91 +350,107 @@ class StateManager extends BaseStateManager {
     // ---------------------------------------------
     // CREATE
     // ---------------------------------------------
-    client.transport.addListener(CREATE_REQUEST, (reqId, schemaName, requireSchema, initValues = {}) => {
-      if (this._schemas.has(schemaName)) {
-        try {
-          const schema = this._schemas.get(schemaName);
-          const stateId = generateStateId.next().value;
-          const remoteId = generateRemoteId.next().value;
+    client.transport.addListener(
+      CREATE_REQUEST,
+      (reqId, schemaName, requireSchema, initValues = {}, inCollection = false) => {
+        if (this._schemas.has(schemaName)) {
+          try {
+            const schema = this._schemas.get(schemaName);
+            const stateId = generateStateId.next().value;
+            const remoteId = generateRemoteId.next().value;
+            const state = new SharedStatePrivate(stateId, schemaName, schema, this, initValues);
 
-          const state = new SharedStatePrivate(stateId, schemaName, schema, this, initValues);
+             // attach client to the state as owner
+            const isOwner = true;
+            state._attachClient(remoteId, client, isOwner, inCollection);
 
-          state._attachClient(remoteId, client, true); // attach client to the state
-          this._sharedStatePrivateById.set(stateId, state);
+            this._sharedStatePrivateById.set(stateId, state);
 
-          const currentValues = state._parameters.getValues();
-          const schemaOption = requireSchema ? schema : null;
+            const currentValues = state._parameters.getValues();
+            const schemaOption = requireSchema ? schema : null;
 
-          client.transport.emit(CREATE_RESPONSE, reqId, stateId, remoteId, schemaName, schemaOption, currentValues);
+            client.transport.emit(
+              CREATE_RESPONSE,
+              reqId, stateId, remoteId, schemaName, schemaOption, currentValues
+            );
 
-          const isObservable = this._isObservableState(state);
+            const isObservable = this[kIsObservableState](state);
 
-          if (isObservable) {
-            this._observers.forEach(observer => {
-              observer.transport.emit(OBSERVE_NOTIFICATION, schemaName, stateId, nodeId);
-            });
+            if (isObservable) {
+              this._observers.forEach(observer => {
+                observer.transport.emit(OBSERVE_NOTIFICATION, schemaName, stateId, nodeId);
+              });
+            }
+          } catch (err) {
+            const msg = `Cannot create state "${schemaName}", ${err.message}`;
+            console.error(msg);
+
+            client.transport.emit(CREATE_ERROR, reqId, msg);
           }
-        } catch (err) {
-          const msg = `Cannot create state "${schemaName}", ${err.message}`;
+        } else {
+          const msg = `Cannot create state "${schemaName}", schema does not exists`;
           console.error(msg);
 
           client.transport.emit(CREATE_ERROR, reqId, msg);
         }
-      } else {
-        const msg = `Cannot create state "${schemaName}", schema does not exists`;
-        console.error(msg);
-
-        client.transport.emit(CREATE_ERROR, reqId, msg);
       }
-    });
+    );
 
     // ---------------------------------------------
     // ATTACH (when creator, is attached by default)
     // ---------------------------------------------
-    client.transport.addListener(ATTACH_REQUEST, (reqId, schemaName, stateId = null, requireSchema = true) => {
-      if (this._schemas.has(schemaName)) {
-        let state = null;
+    client.transport.addListener(
+      ATTACH_REQUEST,
+      (reqId, schemaName, stateId = null, requireSchema = true, inCollection = false) => {
+        if (this._schemas.has(schemaName)) {
+          let state = null;
 
-        if (stateId !== null && this._sharedStatePrivateById.has(stateId)) {
-          state = this._sharedStatePrivateById.get(stateId);
-        } else if (stateId === null) {
-          // if no `stateId` given, we try to find the first state with the given
-          // `schemaName` in the list, this allow a client to attach to a global
-          // state created by the server (or some persistant client) without
-          // having to know the `stateId` (e.g. some global state...)
-          for (let existingState of this._sharedStatePrivateById.values()) {
-            if (existingState.schemaName === schemaName) {
-              state = existingState;
-              break;
+          if (stateId !== null && this._sharedStatePrivateById.has(stateId)) {
+            state = this._sharedStatePrivateById.get(stateId);
+          } else if (stateId === null) {
+            // if no `stateId` given, we try to find the first state with the given
+            // `schemaName` in the list, this allow a client to attach to a global
+            // state created by the server (or some persistant client) without
+            // having to know the `stateId` (e.g. some global state...)
+            for (let existingState of this._sharedStatePrivateById.values()) {
+              if (existingState.schemaName === schemaName) {
+                state = existingState;
+                break;
+              }
             }
           }
-        }
 
-        if (state !== null) {
-          // @note - we use a unique remote id to allow a client to attach
-          // several times to the same state.
-          // i.e. same state -> several remote attach on the same node
-          const remoteId = generateRemoteId.next().value;
-          const schema = this._schemas.get(schemaName);
-          const currentValues = state._parameters.getValues();
+          if (state !== null) {
+            // @note - we use a unique remote id to allow a client to attach
+            // several times to the same state.
+            // i.e. same state -> several remote attach on the same node
+            const remoteId = generateRemoteId.next().value;
+            const isOwner = false;
+            state._attachClient(remoteId, client, isOwner, inCollection);
 
-          state._attachClient(remoteId, client, false);
-          // send schema for client-side instanciation
-          const schemaOption = requireSchema ? schema : null;
-          client.transport.emit(ATTACH_RESPONSE, reqId, state.id, remoteId, schemaName, schemaOption, currentValues);
+            const currentValues = state._parameters.getValues();
+            const schema = this._schemas.get(schemaName);
+            const schemaOption = requireSchema ? schema : null;
+
+            client.transport.emit(
+              ATTACH_RESPONSE,
+              reqId, state.id, remoteId, schemaName, schemaOption, currentValues
+            );
+
+          } else {
+            const msg = `Cannot attach, no existing state for schema "${schemaName}" with stateId: "${stateId}"`;
+            console.error(msg);
+
+            client.transport.emit(ATTACH_ERROR, reqId, msg);
+          }
         } else {
-          const msg = `Cannot attach, no existing state for schema "${schemaName}" with stateId: "${stateId}"`;
+          const msg = `Cannot attach, schema "${schemaName}" does not exists`;
           console.error(msg);
 
           client.transport.emit(ATTACH_ERROR, reqId, msg);
         }
-      } else {
-        const msg = `Cannot attach, schema "${schemaName}" does not exists`;
-        console.error(msg);
-
-        client.transport.emit(ATTACH_ERROR, reqId, msg);
       }
-    });
+    );
 
     // ---------------------------------------------
     // OBSERVE PEERS (be notified when a state is created, lazy)
@@ -436,7 +460,7 @@ class StateManager extends BaseStateManager {
         const statesInfos = [];
 
         this._sharedStatePrivateById.forEach(state => {
-          const isObservable = this._isObservableState(state);
+          const isObservable = this[kIsObservableState](state);
 
           if (isObservable) {
             const { schemaName, id, _creatorId } = state;
@@ -460,13 +484,6 @@ class StateManager extends BaseStateManager {
     });
   }
 
-  _isObservableState(state) {
-    const { schemaName, isCollectionController } = state;
-    // is observable only if not in private state or not a controller state
-    // return !PRIVATE_STATES.includes(schemaName) || !isCollectionController;
-    return !PRIVATE_STATES.includes(schemaName);
-  }
-
   /**
    * Remove a client from the manager. Clean all created or attached states.
    *
@@ -483,13 +500,17 @@ class StateManager extends BaseStateManager {
 
       // define if the client is the creator of the state, in which case
       // everybody must delete it
-      for (let [remoteId, attachedClient] of state._attachedClients.entries()) {
+      for (let [remoteId, clientInfos] of state._attachedClients) {
+        const attachedClient = clientInfos.client;
+
         if (nodeId === attachedClient.id && remoteId === state._creatorRemoteId) {
           deleteState = true;
         }
       }
 
-      for (let [remoteId, attachedClient] of state._attachedClients.entries()) {
+      for (let [remoteId, clientInfos] of state._attachedClients) {
+        const attachedClient = clientInfos.client;
+
         if (nodeId === attachedClient.id) {
           state._detachClient(remoteId, attachedClient);
         }
@@ -567,9 +588,10 @@ class StateManager extends BaseStateManager {
    */
   deleteSchema(schemaName) {
     // @note: deleting schema
-    for (let [_id, state] of this._sharedStatePrivateById.entries()) {
+    for (let [_id, state] of this._sharedStatePrivateById) {
       if (state.schemaName === schemaName) {
-        for (let [remoteId, attached] of state._attachedClients.entries()) {
+        for (let [remoteId, clientInfos] of state._attachedClients) {
+          const attached = clientInfos.client;
           state._detachClient(remoteId, attached);
           attached.transport.emit(`${DELETE_NOTIFICATION}-${state.id}-${remoteId}`);
         }

@@ -17,6 +17,9 @@ import {
   DELETE_SCHEMA,
 } from './constants.js';
 
+export const kCreateCollectionController = Symbol('BaseStateManager::createCollectionController');
+export const kAttachInCollection = Symbol('BaseStateManager::attachInCollection');
+
 /**
  * @private
  */
@@ -182,13 +185,15 @@ class BaseStateManager {
     });
   }
 
-  async _createCollectionController(schemaName) {
+
+  /**
+   * @private
+   */
+  async [kCreateCollectionController](schemaName) {
     return new Promise((resolve, reject) => {
       const reqId = this._promiseStore.add(resolve, reject, 'create-collection-controller-request');
       const requireSchema = this._cachedSchemas.has(schemaName) ? false : true;
-      this.client.transport.emit(CREATE_REQUEST, reqId, schemaName, requireSchema, {}, {
-        collectionController: true,
-      });
+      this.client.transport.emit(CREATE_REQUEST, reqId, schemaName, requireSchema, {}, true);
     });
   }
 
@@ -208,10 +213,17 @@ class BaseStateManager {
    */
   async attach(schemaName, stateId = null) {
     return new Promise((resolve, reject) => {
-      // @todo - add a timeout
       const reqId = this._promiseStore.add(resolve, reject, 'attach-request');
       const requireSchema = this._cachedSchemas.has(schemaName) ? false : true;
       this.client.transport.emit(ATTACH_REQUEST, reqId, schemaName, stateId, requireSchema);
+    });
+  }
+
+  async [kAttachInCollection](schemaName, stateId) {
+    return new Promise((resolve, reject) => {
+      const reqId = this._promiseStore.add(resolve, reject, 'attach-in-collection-request');
+      const requireSchema = this._cachedSchemas.has(schemaName) ? false : true;
+      this.client.transport.emit(ATTACH_REQUEST, reqId, schemaName, stateId, requireSchema, true);
     });
   }
 
@@ -376,6 +388,7 @@ class BaseStateManager {
     try {
       await collection._init();
     } catch (err) {
+      console.log(err.message)
       throw new Error(`Cannot create collection, schema "${schemaName}" does not exists`);
     }
 
