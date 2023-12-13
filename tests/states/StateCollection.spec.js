@@ -95,9 +95,19 @@ describe(`# SharedStateCollection`, () => {
       assert.isTrue(collection1 === collection2);
     });
 
-    it.skip(`[FIXME #69] should not behave like this by default`, async () => {
+    it(`should not exclude locally created states by default`, async () => {
       const state = await clients[0].stateManager.create('a');
       const collection = await clients[0].stateManager.getCollection('a');
+
+      assert.equal(collection.length, 1);
+
+      await state.delete();
+      await delay(50);
+    });
+
+    it(`should exclude locally created states is excludeLocal is set to true`, async () => {
+      const state = await clients[0].stateManager.create('a');
+      const collection = await clients[0].stateManager.getCollection('a', { excludeLocal: true });
 
       assert.equal(collection.length, 0);
 

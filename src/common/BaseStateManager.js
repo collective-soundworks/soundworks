@@ -212,24 +212,26 @@ class BaseStateManager {
    * control over them from a single point.
    *
    * Notes:
-   * - The states that are created by the same node are not propagated through
-   * the observe callback.
    * - The order of execution is not guaranted between nodes, i.e. an state attached
    * in the `observe` callback could be created before the `async create` method resolves.
    * - Filtering, i.e. `observedSchemaName` and `options.excludeLocal` are handled
-   * on the client-side, the server just notify of all state creation activity and
-   * the client executes the given callbacks according to the different filter rules.
-   * Such strategy allows to share the obersve notifications between all observers.
+   * on the node side, the server just notify all state creation activity and
+   * the node executes the given callbacks according to the different filter rules.
+   * Such strategy allows to share the observe notifications between all observers.
    *
-   * - observe(callback)
-   * - observe(schemaName, callback)
-   * - observe(callback, options)
-   * - observe(schemaName, callback, options)
+   * Alternative signatures:
+   * - .observe(callback)
+   * - .observe(schemaName, callback)
+   * - .observe(callback, options)
+   * - .observe(schemaName, callback, options)
    *
-   * @param {String} [schemaName] - optionnal schema name to filter the observed
+   * @param {string} [schemaName] - optionnal schema name to filter the observed
    *  states.
    * @param {server.StateManager~ObserveCallback|client.StateManager~ObserveCallback}
    *  callback - Function to be called when a new state is created on the network.
+   * @param {object} options - Options.
+   * @param {boolean} [options.excludeLocal = false] - If set to true, exclude states
+   *  created locallly, i.e. by the same node, from the collection.
    * @returns {Promise<Function>} - Returns a Promise that resolves when the given
    *  callback as been executed on each existing states. The promise value is a
    *  function which allows to stop observing the states on the network.
@@ -350,21 +352,24 @@ class BaseStateManager {
   }
 
   /**
-   * Returns a collection of all the states created from the schema name. Except
-   * the ones created by the current node.
+   * Returns a collection of all the states created from the schema name.
    *
    * @param {string} schemaName - Name of the schema.
+   * @param {object} options - Options.
+   * @param {boolean} [options.excludeLocal = false] - If set to true, exclude states
+   *  created locallly, i.e. by the same node, from the collection.
    * @returns {server.SharedStateCollection|client.SharedStateCollection}
    */
-  async getCollection(schemaName) {
-    const collection = new SharedStateCollection(this, schemaName);
+  async getCollection(schemaName, options) {
+    const collection = new SharedStateCollection(this, schemaName, options);
 
     try {
       await collection._init();
-      return collection;
     } catch(err) {
       throw new Error(`Cannot create collection, schema "${schemaName}" does not exists`);
     }
+
+    return collection;
   }
 }
 

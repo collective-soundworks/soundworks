@@ -15,8 +15,11 @@ import BaseSharedStateCollection from '../common/BaseSharedStateCollection.js';
 
 /**
  * The `SharedStateCollection` interface represent a collection of all states
- * created from a given schema name on the network, at the execption of the ones
- * created by the current node.
+ * created from a given schema name on the network.
+ *
+ * It can optionnaly exclude the states created by the current node.
+ *
+ * See {@link server.StateManager#getCollection} for factory method API
  *
  * ```
  * const collection = await server.stateManager.getCollection('my-schema');

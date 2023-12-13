@@ -1,19 +1,18 @@
 /**
  * @private
  */
-let id = 0;
-
 class BaseSharedStateCollection {
-  constructor(stateManager, schemaName) {
+  constructor(stateManager, schemaName, options = {}) {
     this._stateManager = stateManager;
     this._schemaName = schemaName;
+    this._options = Object.assign({ excludeLocal: false }, options);
+
     this._states = [];
+
     this._onUpdateCallbacks = new Set();
     this._onAttachCallbacks = new Set();
     this._onDetachCallbacks = new Set();
     this._unobserve = null;
-    // testing
-    this._id = id++;
   }
 
   async _init() {
@@ -36,7 +35,7 @@ class BaseSharedStateCollection {
       });
 
       this._onAttachCallbacks.forEach(callback => callback(state));
-    });
+    }, this._options);
   }
 
   /**
