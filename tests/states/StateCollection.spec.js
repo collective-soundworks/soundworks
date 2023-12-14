@@ -182,7 +182,39 @@ describe(`# SharedStateCollection`, () => {
       await state0.delete();
       await state1.delete();
       await collection.detach();
+    });
+
+    it.skip(`test several collections from same schema`, async () => {});
+    it.skip(`test socket message numbers`, async () => {});
+
+    it(`"normal" state communication should work as expected`, async () => {
+      const state0 = await clients[0].stateManager.create('a');
+      const state1 = await clients[1].stateManager.create('a');
+      // cross attached states
+      const attached0 = await clients[1].stateManager.attach('a', state0.id);
+      const attached1 = await clients[0].stateManager.attach('a', state1.id);
+
+      const collection = await clients[2].stateManager.getCollection('a');
+
+      let onUpdateCalled = false;
+      collection.onUpdate((state, updates) => {
+        onUpdateCalled = true;
+        assert.equal(state.id, state0.id);
+        assert.deepEqual(updates, { bool: true });
+      });
+
+      await state0.set({ bool: true });
       await delay(50);
+      // should be propagated to everyone
+      assert.equal(state0.get('bool'), true);
+      assert.equal(state1.get('bool'), false);
+      assert.equal(attached0.get('bool'), true);
+      assert.equal(attached1.get('bool'), false);
+      assert.isTrue(onUpdateCalled);
+
+      await state0.delete();
+      await state1.delete();
+      await collection.detach();
     });
   });
 

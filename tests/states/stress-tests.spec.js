@@ -36,21 +36,17 @@ describe('# SharedStates - Stress test', () => {
     }
 
     client = clients[0];
-
-    console.log(`
-  > created ${numClients} clients
-    `);
   });
 
   afterEach(async function() {
     server.stop();
   });
 
-  describe('WebSocket transport', () => {
+  describe('## WebSocket transport', () => {
     it('should work properly with async transport - brute force testing', async function() {
       this.timeout(5 * 1000);
 
-      console.time('  + brute force time');
+      console.time('      + brute force time');
       const global = await server.stateManager.create('a');
       const attached = [];
 
@@ -132,7 +128,7 @@ describe('# SharedStates - Stress test', () => {
       }
 
       await global.detach();
-      console.timeEnd('  + brute force time');
+      console.timeEnd('      + brute force time');
       // wait for message propagation
       await delay(100);
 
@@ -232,57 +228,54 @@ describe('# SharedStates - Stress test', () => {
     });
   });
 
-  describe.skip(`## [should fail...] stateManager quick requests`, async () => {
-    ['server', 'client'].forEach(s => {
-      it(`${s} should be able to quickly create states (await)`, async () => {
-        const source = s === 'server' ? server : client;
+  describe(`## stateManager quick requests`, async () => {
+    ['server', 'client'].forEach(sourceName => {
+      it(`${sourceName} should be able to quickly create states (await)`, async () => {
+        const source = sourceName === 'server' ? server : client;
         const states = [];
 
-        for (let s = 0; s < 50; ++s) {
-          // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-          // Passing a string `s` should throw an error
-          // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-          const state = await source.stateManager.create('a', { int: s });
+        for (let i = 0; i < 50; ++i) {
+          const state = await source.stateManager.create('a', { int: i });
           states.push(state);
         }
 
         assert.equal(states.length, 50);
       });
 
-      it(`${s} should be able to quickly create states (no await)`, async () => {
-        const source = s === 'server' ? server : client;
+      it(`${sourceName} should be able to quickly create states (no await)`, async () => {
+        const source = sourceName === 'server' ? server : client;
         const states = [];
 
-        for (let s = 0; s < 50; ++s) {
+        for (let i = 0; i < 50; ++i) {
           // no await
-          const state = source.stateManager.create('a', { int: s });
+          const state = source.stateManager.create('a', { int: i });
           states.push(state);
         }
         await Promise.all(states);
       });
 
-      it(`${s} should be able to quickly create states (await), then delete them (await)`, async () => {
-        const source = s === 'server' ? server : client;
+      it(`${sourceName} should be able to quickly create states (await), then delete them (await)`, async () => {
+        const source = sourceName === 'server' ? server : client;
         const states = [];
 
-        for (let s = 0; s < 50; ++s) {
-          const state = await source.stateManager.create('a', { int: s });
+        for (let i = 0; i < 50; ++i) {
+          const state = await source.stateManager.create('a', { int: i });
           states.push(state);
         }
 
-        states.forEach( async (state) => {
+        // warning: `forEach` is not asynchronous
+        for (let state of states) {
           await state.delete();
-        });
-
+        }
       });
 
-      it(`${s} should be able to quickly create states (no await), then delete them (no await)`, async () => {
-        const source = s === 'server' ? server : client;
+      it(`${sourceName} should be able to quickly create states (no await), then delete them (no await)`, async () => {
+        const source = sourceName === 'server' ? server : client;
         const states = [];
 
-        for (let s = 0; s < 50; ++s) {
+        for (let i = 0; i < 50; ++i) {
           // no await
-          const state = source.stateManager.create('a', { int: s });
+          const state = source.stateManager.create('a', { int: i });
           states.push(state);
         }
 
@@ -295,13 +288,13 @@ describe('# SharedStates - Stress test', () => {
       });
 
       // client seem to fail except on last run
-      it(`again, ${s} should be able to quickly create states (no await), then delete them (no await)`, async () => {
-        const source = s === 'server' ? server : client;
+      it(`again, ${sourceName} should be able to quickly create states (no await), then delete them (no await)`, async () => {
+        const source = sourceName === 'server' ? server : client;
         const states = [];
 
-        for (let s = 0; s < 50; ++s) {
+        for (let i = 0; i < 50; ++i) {
           // no await
-          const state = source.stateManager.create('a', { int: s });
+          const state = source.stateManager.create('a', { int: i });
           states.push(state);
         }
 
@@ -312,7 +305,10 @@ describe('# SharedStates - Stress test', () => {
 
         await Promise.all(deletions);
       });
-    }); // source: server or client
-  }); // quick state create and deletion
+    });
+  });
 
+  describe(`## StateCollection`, () => {
+    it.skip(`brute force test`, async () => {})
+  });
 });
