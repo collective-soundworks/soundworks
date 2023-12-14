@@ -11,7 +11,7 @@ describe('# SharedState', () => {
   let server;
   let client;
 
-  before(async () => {
+  beforeEach(async () => {
     // ---------------------------------------------------
     // server
     // ---------------------------------------------------
@@ -27,7 +27,7 @@ describe('# SharedState', () => {
     await client.start();
   });
 
-  after(async function() {
+  afterEach(async function() {
     server.stop();
   });
 

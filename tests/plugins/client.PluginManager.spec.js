@@ -12,7 +12,7 @@ import config from '../utils/config.js';
 describe(`# PluginManagerClient`, () => {
   let server = null;
 
-  before(async function() {
+  beforeEach(async function() {
     server = new Server(config);
 
     ['delay-1', 'delay-2', 'delay-3', 'delay-4'].forEach((id) => {
@@ -25,7 +25,7 @@ describe(`# PluginManagerClient`, () => {
     await server.start();
   });
 
-  after(async () => {
+  afterEach(async () => {
     await server.stop();
   });
 

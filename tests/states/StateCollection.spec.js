@@ -11,7 +11,7 @@ describe(`# SharedStateCollection`, () => {
   let server;
   let clients = [];
 
-  before(async () => {
+  beforeEach(async () => {
     // ---------------------------------------------------
     // server
     // ---------------------------------------------------
@@ -31,7 +31,7 @@ describe(`# SharedStateCollection`, () => {
     await clients[2].start();
   });
 
-  after(async function() {
+  afterEach(async function() {
     server.stop();
   });
 
@@ -131,15 +131,12 @@ describe(`# SharedStateCollection`, () => {
     });
   });
 
-  describe(`## size (alias length)`, () => {
-    before(async () => {
-      // make sure the first collection doesn't "leak" into the other one, cf. 2058d6e
-      const collection = await clients[1].stateManager.getCollection('a');
-    });
-
+  describe(`## size (alias length)`, async () => {
     it(`should have proper length`, async () => {
       const state1 = await clients[0].stateManager.create('a');
       const collection = await clients[1].stateManager.getCollection('a');
+      // make sure the first collection doesn't "leak" into the other one, cf. 2058d6e
+      const collection2 = await clients[1].stateManager.getCollection('a');
 
       assert.equal(collection.size, 1);
       assert.equal(collection.length, 1);
@@ -163,10 +160,6 @@ describe(`# SharedStateCollection`, () => {
     it(`should properly progate updates`, async () => {
       const state0 = await clients[0].stateManager.create('a');
       const state1 = await clients[1].stateManager.create('a');
-
-      console.log('state0.id', state0.id);
-      console.log('state1.id', state1.id);
-
       // cross attached states
       const attached0 = await clients[1].stateManager.attach('a', state0.id);
       const attached1 = await clients[0].stateManager.attach('a', state1.id);
@@ -176,7 +169,6 @@ describe(`# SharedStateCollection`, () => {
       assert.equal(collection.size, 2);
 
       const results = await collection.set({ bool: true });
-      console.log(results);
       const expected = [ { bool: true }, { bool: true } ];
       assert.deepEqual(results, expected);
 

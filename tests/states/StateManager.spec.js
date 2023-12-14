@@ -15,7 +15,7 @@ describe(`# StateManager`, () => {
   let server;
   let client;
 
-  before(async () => {
+  beforeEach(async () => {
     // ---------------------------------------------------
     // server
     // ---------------------------------------------------
@@ -32,7 +32,7 @@ describe(`# StateManager`, () => {
     await client.start();
   });
 
-  after(async function() {
+  afterEach(async function() {
     server.stop();
   });
 

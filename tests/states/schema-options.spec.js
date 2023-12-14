@@ -16,7 +16,7 @@ describe('# SharedState - schema options', () => {
   let client1;
   let client2;
 
-  before(async () => {
+  beforeEach(async () => {
     // ---------------------------------------------------
     // server
     // ---------------------------------------------------
@@ -36,7 +36,7 @@ describe('# SharedState - schema options', () => {
     await client2.start();
   });
 
-  after(async function() {
+  afterEach(async function() {
     server.stop();
   });
 
