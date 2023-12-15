@@ -437,12 +437,12 @@ ${JSON.stringify(initValues, null, 2)}`);
   }
 
   /**
-   * Get the schema from which the state has been created.
+   * Definition of schema from which the state has been created.
    *
-   * @param {string} [name=null] - If given, returns only the definition corresponding
-   *  to the given param name.
+   * @param {string} [name=null] - If given, returns only the definition
+   *  corresponding to the given param name.
    * @throws Throws if `name` does not correspond to an existing field
-   *  of the state.
+   *  of the schema.
    * @return {object}
    * @example
    * const schema = state.getSchema();

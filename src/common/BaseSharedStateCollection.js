@@ -62,19 +62,38 @@ class BaseSharedStateCollection {
   }
 
   /**
-   * Detach from the collection, i.e. detach all underlying shared states.
-   * @type {number}
+   * Name of the schema from which the collection has been created.
+   * @type {String}
+   * @readonly
    */
-  async detach() {
-    this._unobserve();
-    this._onUpdateCallbacks.clear();
+  get schemaName() {
+    return this._controller.schemaName;
+  }
 
-    await this._controller.delete();
+  /**
+   * Definition of schema from which the collection has been created.
+   *
+   * @param {string} [name=null] - If given, returns only the definition
+   *  corresponding to the given param name.
+   * @throws Throws if `name` does not correspond to an existing field
+   *  of the schema.
+   * @return {object}
+   * @example
+   * const schema = collection.getSchema();
+   */
+  getSchema(name = null) {
+    return this._controller.getSchema(name);
+  }
 
-    const promises = this._states.map(state => state.detach());
-    await Promise.all(promises);
-
-    this._onDetachCallbacks.clear();
+  /**
+   * Get the default values as declared in the schema.
+   *
+   * @return {object}
+   * @example
+   * const defaults = state.getDefaults();
+   */
+  getDefaults() {
+    return this._controller.getDefaults();
   }
 
   /**
@@ -167,6 +186,22 @@ class BaseSharedStateCollection {
     this._onDetachCallbacks.add(callback);
 
     return () => this._onDetachCallbacks.delete(callback);
+  }
+
+  /**
+   * Detach from the collection, i.e. detach all underlying shared states.
+   * @type {number}
+   */
+  async detach() {
+    this._unobserve();
+    this._onUpdateCallbacks.clear();
+
+    await this._controller.delete();
+
+    const promises = this._states.map(state => state.detach());
+    await Promise.all(promises);
+
+    this._onDetachCallbacks.clear();
   }
 
   /**

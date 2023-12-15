@@ -156,6 +156,67 @@ describe(`# SharedStateCollection`, () => {
     });
   });
 
+  describe(`## schemaName`, () => {
+    it(`should return the schema name`, async () => {
+      const collection = await clients[0].stateManager.getCollection('a');
+      const schemaName = collection.schemaName;
+      assert.equal(schemaName, 'a')
+
+      await collection.detach();
+    });
+  });
+
+  describe(`## getSchema()`, () => {
+    it(`should return the schema name`, async () => {
+      const collection = await clients[0].stateManager.getCollection('a');
+      const schema = collection.getSchema();
+      const expected = {
+        "bool": {
+          "default": false,
+          "event": false,
+          "filterChange": true,
+          "immediate": false,
+          "initValue": false,
+          "metas": {},
+          "nullable": false,
+          "type": "boolean",
+        },
+        "int": {
+          "default": 0,
+          "event": false,
+          "filterChange": true,
+          "immediate": false,
+          "initValue": 0,
+          "max": 100,
+          "metas": {},
+          "min": 0,
+          "nullable": false,
+          "step": 1,
+          "type": "integer",
+        },
+      };
+
+      assert.deepEqual(schema, expected);
+
+      await collection.detach();
+    });
+  });
+
+  describe(`## getDefaults()`, () => {
+    it(`should return the schema name`, async () => {
+      const collection = await clients[0].stateManager.getCollection('a');
+      const defaults = collection.getDefaults();
+      const expected = {
+        bool: false,
+        int: 0,
+      };
+
+      assert.deepEqual(defaults, expected);
+
+      await collection.detach();
+    });
+  });
+
   describe(`## set(updates, context = null)`, () => {
     it(`should properly progate updates`, async () => {
       const state0 = await clients[0].stateManager.create('a');
