@@ -229,9 +229,9 @@ describe(`# SharedStateCollection`, () => {
 
       assert.equal(collection.size, 2);
 
-      const results = await collection.set({ bool: true });
-      const expected = [ { bool: true }, { bool: true } ];
-      assert.deepEqual(results, expected);
+      const result = await collection.set({ bool: true });
+      const expected = { bool: true };
+      assert.deepEqual(result, expected);
 
       await delay(50);
       // should be propagated to everyone
@@ -245,7 +245,46 @@ describe(`# SharedStateCollection`, () => {
       await collection.detach();
     });
 
-    it.skip(`test several collections from same schema`, async () => {});
+    it(`test several collections from same schema`, async () => {
+      const state0 = await clients[0].stateManager.create('a');
+      const state1 = await clients[1].stateManager.create('a');
+      // cross attached states
+      const attached0 = await clients[1].stateManager.attach('a', state0.id);
+      const attached1 = await clients[0].stateManager.attach('a', state1.id);
+
+      const collection0 = await clients[2].stateManager.getCollection('a');
+      const collection1 = await clients[0].stateManager.getCollection('a');
+
+      assert.equal(collection0.size, 2);
+      assert.equal(collection1.size, 2);
+
+      // update from collection0
+      await collection0.set({ bool: true });
+      await delay(50);
+
+      assert.equal(state0.get('bool'), true);
+      assert.equal(state1.get('bool'), true);
+      assert.equal(attached0.get('bool'), true);
+      assert.equal(attached1.get('bool'), true);
+      assert.deepEqual(collection0.get('bool'), [true, true]);
+      assert.deepEqual(collection1.get('bool'), [true, true]);
+
+      await collection0.set({ int: 42 });
+      await delay(50);
+
+      assert.equal(state0.get('int'), 42);
+      assert.equal(state1.get('int'), 42);
+      assert.equal(attached0.get('int'), 42);
+      assert.equal(attached1.get('int'), 42);
+      assert.deepEqual(collection0.get('int'), [42, 42]);
+      assert.deepEqual(collection1.get('int'), [42, 42]);
+
+      await state0.delete();
+      await state1.delete();
+      await collection0.detach();
+      await collection1.detach();
+    });
+
     it.skip(`test socket message numbers`, async () => {});
 
     it(`"normal" state communication should work as expected`, async () => {

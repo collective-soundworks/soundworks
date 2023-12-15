@@ -23,6 +23,11 @@ class BaseSharedStateCollection {
 
   async _init() {
     this._controller = await this._stateManager[kCreateCollectionController](this._schemaName);
+    this._controller.onUpdate(async (updates, context) => {
+      for (let state of this._states) {
+        await state._commit(updates, context, true, false);
+      }
+    });
 
     this._unobserve = await this._stateManager.observe(this._schemaName, async (schemaName, stateId) => {
       const state = await this._stateManager[kAttachInCollection](schemaName, stateId);
@@ -122,12 +127,7 @@ class BaseSharedStateCollection {
    *   current call and will be passed as third argument to all update listeners.
    */
   async set(updates, context = null) {
-    const updatesResult = await this._controller.set(updates, context);
-    const promises = this._states.map(state => {
-      return state._commit(updatesResult, context, true, false);
-    });
-
-    return Promise.all(promises);
+    return await this._controller.set(updates, context);
   }
 
   /**
