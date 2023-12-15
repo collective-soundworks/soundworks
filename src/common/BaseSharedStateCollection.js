@@ -3,9 +3,7 @@ import {
   kAttachInCollection,
 } from './BaseStateManager.js';
 
-/**
- * @private
- */
+/** @private */
 class BaseSharedStateCollection {
   constructor(stateManager, schemaName, options = {}) {
     this._stateManager = stateManager;
@@ -21,6 +19,7 @@ class BaseSharedStateCollection {
     this._unobserve = null;
   }
 
+  /** @private */
   async _init() {
     this._controller = await this._stateManager[kCreateCollectionController](this._schemaName);
     this._controller.onUpdate(async (updates, context) => {

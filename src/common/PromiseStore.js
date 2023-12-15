@@ -1,32 +1,39 @@
 import { idGenerator } from '@ircam/sc-utils';
 
-const generateRequestId = idGenerator();
-
 export default class PromiseStore {
   constructor(name) {
     this.name = name;
     this.store = new Map();
+    this.generateRequestId = idGenerator();
   }
 
   add(resolve, reject, type) {
-    const reqId = generateRequestId.next().value;
+    const reqId = this.generateRequestId.next().value;
     this.store.set(reqId, { resolve, reject, type });
 
     return reqId;
   }
 
   resolve(reqId, data) {
-    const { resolve } = this.store.get(reqId);
-    this.store.delete(reqId);
+    if (this.store.has(reqId)) {
+      const { resolve } = this.store.get(reqId);
+      this.store.delete(reqId);
 
-    resolve(data);
+      resolve(data);
+    } else {
+      throw new Error(`[${this.name}] cannot resolve request id (${reqId}), id does not exist`);
+    }
   }
 
   reject(reqId, msg) {
-    const { reject } = this.store.get(reqId);
-    this.store.delete(reqId);
+    if (this.store.has(reqId)) {
+      const { reject } = this.store.get(reqId);
+      this.store.delete(reqId);
 
-    reject(new Error(msg));
+      reject(new Error(msg));
+    } else {
+      throw new Error(`[${this.name}] cannot reject request id (${reqId}), id does not exist`);
+    }
   }
 
   // reject all pendeing request

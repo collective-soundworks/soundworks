@@ -320,6 +320,10 @@ ${JSON.stringify(initValues, null, 2)}`);
    * const updates = await state.set({ myParam: Math.random() });
    */
   async set(updates, context = null) {
+    if (this._detached) {
+      return;
+    }
+
     if (!isPlainObject(updates)) {
       throw new ReferenceError(`[SharedState] State "${this.schemaName}": state.set(updates[, context]) should receive an object as first parameter`);
     }
