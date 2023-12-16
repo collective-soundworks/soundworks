@@ -1,14 +1,17 @@
 import { Worker } from 'node:worker_threads';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+// import { fileURLToPath } from 'node:url';
 
 import querystring from 'querystring';
 import { WebSocketServer } from 'ws';
 import WebSocket from 'ws';
 
 import Socket from './Socket.js';
+import networkLatencyWorker from './audit-network-latency.worker.js';
 
-const __dirname = fileURLToPath(new URL('.', import.meta.url));
+// this crashes when bundling server to cjs module for Max, fallback to
+// string worker for now
+// const __dirname = fileURLToPath(new URL('.', import.meta.url));
 
 /**
  * Manager all {@link server.Socket} instances.
@@ -45,8 +48,9 @@ class Sockets {
    */
   async start(server, config, onConnectionCallback) {
     // init audit stuff for network latency estimation
-    const workerPathname = path.join(__dirname, 'audit-network-latency.worker.js');
-    this._latencyStatsWorker = new Worker(workerPathname);
+    // @see note about __dirname
+    // const workerPathname = path.join(__dirname, 'audit-network-latency.worker.js');
+    this._latencyStatsWorker = new Worker(networkLatencyWorker, { eval: true });
     this._auditState = await server.getAuditState();
 
     this._auditState.onUpdate(updates => {

@@ -1,6 +1,8 @@
-import { parentPort } from 'node:worker_threads';
-
-import { getTime } from '@ircam/sc-utils';
+// NOTICE: we use this syntax so that the server can be bundled to cjs
+// with esbuild, so we can ship a cjs server bundle into Max.
+// Should move back to regular esm module once Max has fixed its loader
+export default `
+const { parentPort } = require('node:worker_threads');
 
 let stack = [];
 let averageLatencyWindow = 5;
@@ -9,11 +11,20 @@ let averageLatencyPeriod = 2;
 let intervalId = null;
 let meanLatency = 0;
 
-parentPort.on('message', msg => {
+let getTime;
+let inited = new Promise(async (resolve) => {
+  module = await import('@ircam/sc-utils');
+  getTime = module.getTime;
+  resolve(true);
+});
+
+parentPort.on('message', async msg => {
   switch (msg.type) {
     case 'config': {
       averageLatencyWindow = msg.value.averageLatencyWindow;
       averageLatencyPeriod = msg.value.averageLatencyPeriod;
+
+      await inited;
 
       // launch compute in its own loop so that the number of computation is
       // decoupled from the number of connected clients
@@ -55,3 +66,4 @@ function computeAverageLatency() {
     });
   }
 }
+`;
