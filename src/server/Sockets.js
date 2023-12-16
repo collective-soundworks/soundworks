@@ -1,10 +1,7 @@
 import { Worker } from 'node:worker_threads';
 import path from 'node:path';
-// import { fileURLToPath } from 'node:url';
-
 import querystring from 'querystring';
-import { WebSocketServer } from 'ws';
-import WebSocket from 'ws';
+import { default as WebSocket, WebSocketServer } from 'ws';
 
 import Socket from './Socket.js';
 import networkLatencyWorker from './audit-network-latency.worker.js';
