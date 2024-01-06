@@ -1,6 +1,9 @@
 // id of the server when owner of a state
 export const SERVER_ID = -1;
 
+// batched transport channel
+export const BATCHED_TRANSPORT_CHANNEL = 'b:t';
+
 // shared states channels
 export const CREATE_REQUEST = 's:c:req';
 export const CREATE_RESPONSE = 's:c:res';
