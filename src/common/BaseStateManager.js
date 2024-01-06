@@ -1,6 +1,7 @@
 import { isString, isFunction, isPlainObject } from '@ircam/sc-utils';
 import SharedState from './BaseSharedState.js';
 import SharedStateCollection from './BaseSharedStateCollection.js';
+import BatchedTransport from './BatchedTransport.js';
 import PromiseStore from './PromiseStore.js';
 import {
   CREATE_REQUEST,
@@ -30,7 +31,8 @@ class BaseStateManager {
    *  Must implement a basic EventEmitter API.
    */
   constructor(id, transport) {
-    this.client = { id, transport };
+    // proxy transport with BatchedTransport;
+    this.client = { id, transport: new BatchedTransport(transport) };
 
     this._statesById = new Map(); // <id, state>
     this._cachedSchemas = new Map(); // <shemaName, definition>

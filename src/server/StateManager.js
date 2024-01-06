@@ -4,6 +4,7 @@ import { idGenerator, isString, isPlainObject } from '@ircam/sc-utils';
 import clonedeep from 'lodash/cloneDeep.js';
 
 import BaseStateManager from '../common/BaseStateManager.js';
+import BatchedTransport from '../common/BatchedTransport.js';
 import ParameterBag from '../common/ParameterBag.js';
 import SharedStatePrivate from '../common/SharedStatePrivate.js';
 import {
@@ -344,6 +345,8 @@ class StateManager extends BaseStateManager {
    * @private
    */
   addClient(nodeId, transport) {
+    transport = new BatchedTransport(transport);
+
     const client = { id: nodeId, transport };
     this._clientByNodeId.set(nodeId, client);
 
