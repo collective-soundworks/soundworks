@@ -503,10 +503,11 @@ describe('# SharedState', () => {
       const aCreated = await server.stateManager.create('a');
       const aAttached = await client.stateManager.attach('a');
 
-      // DELETE_REQUEST is received first on the SharedStatePrivate which deletes
-      // all its listeners.
-      // Concurrently DETACH_REQUEST is sent but cannot have a response,
-      // flush pending requests when DELETE_NOTIFICATION is received
+      // - DELETE_REQUEST sent by `aCreated` is received first on the
+      // SharedStatePrivate which deletes all its listeners.
+      // - Concurrently DETACH_REQUEST is sent by `aAttached` but cannot have a response,
+      // - Flush pending requests on `aAttached` when DELETE_NOTIFICATION is received
+
       aCreated.delete();
 
       let errored = false;
@@ -543,10 +544,6 @@ describe('# SharedState', () => {
         });
       });
 
-      // ---------------------------------------------------
-      // clients
-      // ---------------------------------------------------
-
       const client = new Client({ role: 'test', ...localConfig });
       await client.start();
 
@@ -564,7 +561,8 @@ describe('# SharedState', () => {
 
       await delay(20);
 
-      // we have both the create request and the batched update requests
+      // 1 message for create request / response (i.e.await client.stateManager.create)
+      // 1 message for the batched updates requests / responses
       assert.equal(batchedRequests, 2);
       assert.equal(batchedResponses, 2);
 

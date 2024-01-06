@@ -706,4 +706,30 @@ describe('# server::Server', () => {
       await server.stop();
     });
   });
+
+  describe(`## server.onClientDisconnect(func)`, () => {
+    it(`should be called`, async () => {
+      const server = new Server(config);
+      await server.start();
+
+      let onDisconnectCalled = false;
+      let onDisconnectClientId = null;
+
+      server.onClientDisconnect(client => {
+        onDisconnectCalled = true;
+        onDisconnectClientId = client.id;
+      });
+
+      const client = new Client({ role: 'test', ...config });
+      await client.start();
+      await client.stop();
+
+      await delay(20);
+
+      assert.equal(onDisconnectCalled, true);
+      assert.equal(onDisconnectClientId, client.id);
+
+      await server.stop();
+    });
+  });
 });
