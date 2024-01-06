@@ -70,16 +70,7 @@ class SharedStatePrivate {
         let hasUpdates = false;
 
         for (let name in updates) {
-          // from v3.1.0 - the `filteredUpdates` check is made using 'fast-deep-equal'
-          //    cf. https://github.com/epoberezkin/fast-deep-equal
-          //    therefore unchanged objects are not considered changed
-          //    nor propagated anymore.
-          // until v3.0.4 - we checked the `schema[name].type === 'any'`, to always consider
-          //    objects as dirty, because if the state is attached locally, we
-          //    compare the Object instances instead of their values.
-          //    @note - this should be made more robust but how?
           const [newValue, changed] = this._parameters.set(name, updates[name]);
-
           // if `filterChange` is set to `false` we don't check if the value
           // has been changed or not, it is always propagated to client states
           const { event, filterChange } = this._parameters.getSchema(name);
@@ -96,25 +87,23 @@ class SharedStatePrivate {
         }
 
         if (hasUpdates) {
-          // Collection Controller logic
+
+          // Collection controller logic
           if (isOwner && inCollection) {
-            // notify the requester back
-            // no need to check for attached clients as it is not observable
+            // notify the collection controller back
             client.transport.emit(
               `${UPDATE_RESPONSE}-${this.id}-${remoteId}`,
-              reqId, filteredUpdates, context
+              reqId, filteredUpdates, context,
             );
 
             // loop through all private states
-            for (let [stateId, state] of this._manager._sharedStatePrivateById) {
+            for (let [_stateId, state] of this._manager._sharedStatePrivateById) {
               // pick all states with same schema name and not this
               if (state !== this && this.schemaName === state.schemaName) {
                 // notify all attached clients except those who belong to a collection
                 // i.e. !isOwner && inCollection, they will be notified by their own
                 // collection controller
                 for (let [remoteId, clientInfos] of state._attachedClients) {
-                  const { client, isOwner, inCollection } = clientInfos;
-
                   if (!clientInfos.isOwner && clientInfos.inCollection) {
                     continue;
                   } else {
@@ -122,7 +111,7 @@ class SharedStatePrivate {
 
                     peer.transport.emit(
                       `${UPDATE_NOTIFICATION}-${state.id}-${remoteId}`,
-                      filteredUpdates, context
+                      filteredUpdates, context,
                     );
                   }
                 }
@@ -131,7 +120,7 @@ class SharedStatePrivate {
           } else {
 
             // Normal case
-
+            //
             // We need to handle cases where:
             // - client state (client.id: 2) sends a request
             // - server attached state (client.id: -1) spot a problem and overrides the value
@@ -146,14 +135,14 @@ class SharedStatePrivate {
             // is synchronous it can break ordering if a subscription function makes
             // itself an update in reaction to an update. Propagating to server last
             // alllows to maintain network messages order consistent.
-
+            //
             // @note - remoteId correspond to unique remote state id
 
             // propagate RESPONSE to the client that originates the request if not the server
             if (client.id !== -1) {
               client.transport.emit(
                 `${UPDATE_RESPONSE}-${this.id}-${remoteId}`,
-                reqId, filteredUpdates, context
+                reqId, filteredUpdates, context,
               );
             }
 
@@ -164,7 +153,7 @@ class SharedStatePrivate {
               if (remoteId !== peerRemoteId && peer.id !== -1) {
                 peer.transport.emit(
                   `${UPDATE_NOTIFICATION}-${this.id}-${peerRemoteId}`,
-                  filteredUpdates, context
+                  filteredUpdates, context,
                 );
               }
             }
@@ -173,7 +162,7 @@ class SharedStatePrivate {
             if (client.id === -1) {
               client.transport.emit(
                 `${UPDATE_RESPONSE}-${this.id}-${remoteId}`,
-                reqId, filteredUpdates, context
+                reqId, filteredUpdates, context,
               );
             }
 
@@ -184,7 +173,7 @@ class SharedStatePrivate {
               if (remoteId !== peerRemoteId && peer.id === -1) {
                 peer.transport.emit(
                   `${UPDATE_NOTIFICATION}-${this.id}-${peerRemoteId}`,
-                  filteredUpdates, context
+                  filteredUpdates, context,
                 );
               }
             }

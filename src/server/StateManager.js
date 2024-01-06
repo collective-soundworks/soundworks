@@ -363,7 +363,7 @@ class StateManager extends BaseStateManager {
             const remoteId = generateRemoteId.next().value;
             const state = new SharedStatePrivate(stateId, schemaName, schema, this, initValues);
 
-             // attach client to the state as owner
+            // attach client to the state as owner
             const isOwner = true;
             state._attachClient(remoteId, client, isOwner, inCollection);
 
@@ -374,7 +374,7 @@ class StateManager extends BaseStateManager {
 
             client.transport.emit(
               CREATE_RESPONSE,
-              reqId, stateId, remoteId, schemaName, schemaOption, currentValues
+              reqId, stateId, remoteId, schemaName, schemaOption, currentValues,
             );
 
             const isObservable = this[kIsObservableState](state);
@@ -396,7 +396,7 @@ class StateManager extends BaseStateManager {
 
           client.transport.emit(CREATE_ERROR, reqId, msg);
         }
-      }
+      },
     );
 
     // ---------------------------------------------
@@ -437,7 +437,7 @@ class StateManager extends BaseStateManager {
 
             client.transport.emit(
               ATTACH_RESPONSE,
-              reqId, state.id, remoteId, schemaName, schemaOption, currentValues
+              reqId, state.id, remoteId, schemaName, schemaOption, currentValues,
             );
 
           } else {
@@ -452,7 +452,7 @@ class StateManager extends BaseStateManager {
 
           client.transport.emit(ATTACH_ERROR, reqId, msg);
         }
-      }
+      },
     );
 
     // ---------------------------------------------

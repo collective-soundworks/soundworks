@@ -1,13 +1,11 @@
 import { Worker } from 'node:worker_threads';
-import path from 'node:path';
 import querystring from 'querystring';
 import { default as WebSocket, WebSocketServer } from 'ws';
 
 import Socket from './Socket.js';
 import networkLatencyWorker from './audit-network-latency.worker.js';
 
-// this crashes when bundling server to cjs module for Max, fallback to
-// string worker for now
+// this crashes when bundling server to cjs module for Max, fallback to cjs worker
 // const __dirname = fileURLToPath(new URL('.', import.meta.url));
 
 /**

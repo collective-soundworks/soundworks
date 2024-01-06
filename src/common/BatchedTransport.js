@@ -1,5 +1,9 @@
-import { BATCHED_TRANSPORT_CHANNEL } from './constants.js'
+import { BATCHED_TRANSPORT_CHANNEL } from './constants.js';
 
+/**
+ * This class proxies transports given the SharedStateManager to batch messages
+ * @private
+ */
 class BatchedTransport {
   constructor(transport) {
     this._transport = transport;
@@ -16,7 +20,7 @@ class BatchedTransport {
         if (this._listeners.has(channel)) {
           const callbacks = this._listeners.get(channel);
           callbacks.forEach(callback => callback(...args));
-        };
+        }
       });
     });
   }
