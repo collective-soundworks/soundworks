@@ -1,8 +1,9 @@
-import { assert } from 'chai';
 import { delay } from '@ircam/sc-utils';
+import { assert } from 'chai';
 
 import { Server } from '../../src/server/index.js';
 import { Client } from '../../src/client/index.js';
+import { BATCHED_TRANSPORT_CHANNEL } from '../../src/common/constants.js';
 
 import config from '../utils/config.js';
 import { a, b } from '../utils/schemas.js';
@@ -520,6 +521,56 @@ describe('# SharedState', () => {
       if (!errored) {
         assert.fail('should have thrown');
       }
+    });
+  });
+
+  describe(`## Batched transport`, () => {
+    it(`should send only one message on several consecutive update requests`, async () => {
+      // launch new server so we can grab the server side representation of the client
+      const localConfig = structuredClone(config);
+      localConfig.env.port = 8082;
+
+      const server = new Server(localConfig);
+      server.stateManager.registerSchema('a', a);
+      await server.start();
+
+      let batchedRequests = 0;
+      let batchedResponses = 0;
+
+      server.onClientConnect(client => {
+        client.socket.addListener(BATCHED_TRANSPORT_CHANNEL, (args) => {
+          batchedRequests += 1;
+        });
+      });
+
+      // ---------------------------------------------------
+      // clients
+      // ---------------------------------------------------
+
+      const client = new Client({ role: 'test', ...localConfig });
+      await client.start();
+
+      // update response
+      client.socket.addListener(BATCHED_TRANSPORT_CHANNEL, (args) => {
+        batchedResponses += 1;
+      });
+
+      const state = await client.stateManager.create('a');
+
+      state.set({ bool: true });
+      for (let i = 1; i < 42; i++) {
+        state.set({ int: i });
+      }
+
+      await delay(20);
+
+      // we have both the create request and the batched update requests
+      assert.equal(batchedRequests, 2);
+      assert.equal(batchedResponses, 2);
+
+      state.delete();
+      await client.stop();
+      await server.stop();
     });
   });
 });

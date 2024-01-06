@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import * as url from 'node:url';
 
+import { delay } from '@ircam/sc-utils';
 import { assert } from 'chai';
 import dotenv from 'dotenv';
 import merge from 'lodash.merge';
@@ -650,33 +651,59 @@ describe('# server::Server', () => {
       const server = new Server(config);
       await server.start();
 
-      // const auditState = await server.getAuditState();
+      const auditState = await server.getAuditState();
 
-      // {
-      //   const numClients = auditState.get('numClients');
-      //   assert.equal(numClients.test, 0);
-      // }
+      {
+        const numClients = auditState.get('numClients');
+        assert.equal(numClients.test, 0);
+      }
 
-      // // const client = new Client({ role: 'test', ...config });
-      // // await client.start();
+      const client = new Client({ role: 'test', ...config });
+      await client.start();
 
-      // // {
-      // //   const numClients = auditState.get('numClients');
-      // //   assert.equal(numClients.test, 1);
-      // // }
+      {
+        const numClients = auditState.get('numClients');
+        assert.equal(numClients.test, 1);
+      }
 
-      // // await client.stop();
-      // // // wait for the server to clean things
-      // // await new Promise(resolve => setTimeout(resolve, 50));
+      await client.stop();
+      // wait for the server to clean things
+      await new Promise(resolve => setTimeout(resolve, 50));
 
-      // {
-      //   const numClients = auditState.get('numClients');
-      //   assert.equal(numClients.test, 0);
-      // }
+      {
+        const numClients = auditState.get('numClients');
+        assert.equal(numClients.test, 0);
+      }
 
       // await auditState.delete();
       await server.stop();
       console.log('server stopped');
+    });
+  });
+
+  describe(`## server.onClientConnect(func)`, () => {
+    it(`should be called`, async () => {
+      const server = new Server(config);
+      await server.start();
+
+      let onConnectCalled = false;
+      let onConnectClientId = null;
+
+      server.onClientConnect(client => {
+        onConnectCalled = true;
+        onConnectClientId = client.id;
+      });
+
+      const client = new Client({ role: 'test', ...config });
+      await client.start();
+
+      await delay(20);
+
+      assert.equal(onConnectCalled, true);
+      assert.equal(onConnectClientId, client.id);
+
+      await client.stop();
+      await server.stop();
     });
   });
 });
