@@ -10,11 +10,13 @@ class BatchedTransport {
     this._transport.addListener(BATCHED_TRANSPORT_CHANNEL, stack => {
       stack.forEach(entry => {
         const [channel, args] = entry;
-        const callbacks = this._listeners.get(channel);
-
-        callbacks.forEach(callback => {
-          callback(...args);
-        });
+        // server side the transport is the same EventEmitter instance
+        // for both state manager server and client, so channel might not exist
+        // one side or the other.
+        if (this._listeners.has(channel)) {
+          const callbacks = this._listeners.get(channel);
+          callbacks.forEach(callback => callback(...args));
+        };
       });
     });
   }

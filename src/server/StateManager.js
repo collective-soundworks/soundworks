@@ -323,7 +323,7 @@ class StateManager extends BaseStateManager {
     this._observers = new Set();
     this._hooksBySchemaName = new Map(); // protected
 
-    this.addClient(localClientId, this.client.transport);
+    this.addClient(localClientId, localTransport);
   }
 
   [kIsObservableState](state) {
@@ -345,11 +345,7 @@ class StateManager extends BaseStateManager {
    * @private
    */
   addClient(nodeId, transport) {
-    // server adds itself as client, and its transport is a raw EventEmitter
-    // so we don't want to proxy it twice with BatchedTransport.
-    if (nodeId !== SERVER_ID) {
-      transport = new BatchedTransport(transport);
-    }
+    transport = new BatchedTransport(transport);
 
     const client = { id: nodeId, transport };
     this._clientByNodeId.set(nodeId, client);
