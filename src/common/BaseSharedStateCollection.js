@@ -126,7 +126,11 @@ class BaseSharedStateCollection {
    *   current call and will be passed as third argument to all update listeners.
    */
   async set(updates, context = null) {
-    return await this._controller.set(updates, context);
+    // hot fix for https://github.com/collective-soundworks/soundworks/issues/85
+    // to be cleaned soon
+    const promises = this._states.map(state => state.set(updates, context));
+    return Promise.all(promises);
+    // return await this._controller.set(updates, context);
   }
 
   /**
