@@ -1,3 +1,11 @@
+## v4.0.0-alpha.19 - 17/01/2024
+
+- Hotfix for #85
+
+## v4.0.0-alpha.18 - 15/01/2024
+
+- Batch network message for SharedStates
+
 ## v4.0.0-alpha.17 - 16/12/2023
 
 - Support bundling the server to cjs for Max externals
