@@ -70,6 +70,8 @@ class Socket {
     this._stringListeners = new Map();
     /** @private */
     this._binaryListeners = new Map();
+    /** @private */
+    this._heartbeatId = null;
   }
 
   /**
@@ -136,14 +138,11 @@ class Socket {
         ws.addEventListener('open', connectEvent => {
           // parse incoming messages for pubsub
           this.ws = ws;
-
-          // ping/pong behaviour
-          let pingTimeout = null;
-
+          // ping / pong to check connection
           const heartbeat = () => {
-            clearTimeout(pingTimeout);
+            clearTimeout(this._heartbeatId);
 
-            pingTimeout = setTimeout(() => {
+            this._heartbeatId = setTimeout(() => {
               this.terminate();
             }, PING_INTERVAL + PING_LATENCY_TOLERANCE);
           }
@@ -163,10 +162,22 @@ class Socket {
           });
 
           // broadcast all `WebSocket` native events
-          ['close', 'error', 'upgrade', 'message'].forEach(eventName => {
-            this.ws.addEventListener(eventName, (e) => {
-              this._emit(false, eventName, e);
-            });
+          this.ws.addEventListener('close', (e) => {
+            clearTimeout(this._heartbeatId);
+            this._emit(false, 'close', e);
+          });
+
+          this.ws.addEventListener('error', (e) => {
+            clearTimeout(this._heartbeatId);
+            this._emit(false, 'error', e);
+          });
+
+          this.ws.addEventListener('upgrade', (e) => {
+            this._emit(false, 'upgrade', e);
+          });
+
+          this.ws.addEventListener('message', (e) => {
+            this._emit(false, 'message', e);
           });
 
           // forward open event

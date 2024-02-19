@@ -76,6 +76,8 @@ class Socket {
     this._stringListeners = new Map();
     /** @private */
     this._binaryListeners = new Map();
+    /** @private */
+    this._heartbeatId
 
     // heartbeat system (run only on string socket), adapted from:
     // https://github.com/websockets/ws#how-to-detect-and-close-broken-connections
@@ -107,7 +109,7 @@ class Socket {
       this._emit(false, channel, ...args);
     });
 
-    const heartbeat = () => {
+    this._heartbeatId = setInterval(() => {
       if (this._isAlive === false) {
         // emit a 'close' event to go trough all the disconnection pipeline
         this._emit(false, 'close');
@@ -118,11 +120,7 @@ class Socket {
       msg.value.ping = getTime();
 
       this.ws.send(PING_MESSAGE);
-
-      setTimeout(heartbeat, PING_INTERVAL);
-    };
-
-    setTimeout(heartbeat, PING_INTERVAL);
+    }, PING_INTERVAL);
 
     // broadcast all "native" events
     [
@@ -173,7 +171,7 @@ class Socket {
    */
   terminate() {
     // clear ping/pong check
-    clearInterval(this._intervalId);
+    clearInterval(this._heartbeatId);
 
     // clean rooms
     for (let [_key, room] of this.rooms) {
