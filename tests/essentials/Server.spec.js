@@ -210,6 +210,18 @@ describe('# server::Server', () => {
       if (!errored) { assert.fail('should have thrown'); }
     });
 
+    it(`should use self-signed certificates if both cert and key file are null`, async () => {
+      const selfSignedConfig = merge({}, config);
+      selfSignedConfig.env.useHttps = true;
+      selfSignedConfig.env.httpsInfos = {
+        cert: null,
+        key: null, // this is invalid
+      };
+
+      const server = new Server(selfSignedConfig);
+      await server.init();
+    });
+
     it(`should store self-signed certificated in db`, async () => {
       // these test crash the CI for some reason,just ignore them in CI too
       const envPathname = path.join(__dirname, '.env');
@@ -421,6 +433,7 @@ describe('# server::Server', () => {
       assert.isOk('server and process should stop');
     });
 
+    // this will stop after a timeout
     it('should stop the server even if a client is connected', async() => {
       const server = new Server(config);
 

@@ -9,6 +9,7 @@ import { isPlainObject, idGenerator, getTime } from '@ircam/sc-utils';
 import chalk from 'chalk';
 import compression from 'compression';
 import express from 'express';
+import equal from 'fast-deep-equal';
 import Keyv from 'keyv';
 import { KeyvFile } from 'keyv-file';
 import merge from 'lodash/merge.js';
@@ -214,11 +215,11 @@ class Server {
         throw new Error(`[soundworks:Server] Invalid "env.httpsInfos" config, should contain both "cert" and "key" entries`);
       }
       // @todo - move that to constructor
-      if (!fs.existsSync(httpsInfos.cert)) {
+      if (httpsInfos.cert !== null && !fs.existsSync(httpsInfos.cert)) {
         throw new Error(`[soundworks:Server] Invalid "env.httpsInfos" config, "cert" file not found`);
       }
 
-      if (!fs.existsSync(httpsInfos.key)) {
+      if (httpsInfos.key !== null && !fs.existsSync(httpsInfos.key)) {
         throw new Error(`[soundworks:Server] Invalid "env.httpsInfos" config, "key" file not found`);
       }
     }
@@ -444,19 +445,22 @@ class Server {
       this.router.use(soundworksAuth);
     }
 
-    // start http server
-    const useHttps = this.config.env.useHttps || false;
-
     // ------------------------------------------------------------
     // create HTTP(S) SERVER
     // ------------------------------------------------------------
+    const useHttps = this.config.env.useHttps || false;
+
     if (!useHttps) {
       this.httpServer = http.createServer(this.router);
     } else {
       const httpsInfos = this.config.env.httpsInfos;
+      let useSelfSigned = false;
 
-      // if certs have been given in config
-      if (httpsInfos !== null) {
+      if (!httpsInfos || equal(httpsInfos, { cert: null, key: null })) {
+        useSelfSigned = true;
+      }
+
+      if (!useSelfSigned) {
         try {
           // existance of file is checked in contructor
           let cert = fs.readFileSync(httpsInfos.cert);
