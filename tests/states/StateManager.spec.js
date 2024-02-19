@@ -36,7 +36,7 @@ describe(`# StateManager`, () => {
     server.stop();
   });
 
-  describe('## registerSchema(schemaName, definition)', () => {
+  describe('## [server] registerSchema(schemaName, definition)', () => {
     it('should throw if reusing same schema name', () => {
       assert.throws(() => {
         server.stateManager.registerSchema('a', a);
@@ -46,6 +46,54 @@ describe(`# StateManager`, () => {
 
     it ('should register same definition with another name', () => {
       server.stateManager.registerSchema('aa', a);
+    });
+  });
+
+  describe(`## getSchema(schemaName)`, () => {
+    it(`should return the schema`, async () => {
+      const schema = await client.stateManager.getSchema('a');
+      const expected = {
+        bool: {
+          nullable: false,
+          event: false,
+          metas: {},
+          filterChange: true,
+          immediate: false,
+          type: 'boolean',
+          default: false,
+          initValue: false
+        },
+        int: {
+          nullable: false,
+          event: false,
+          metas: {},
+          filterChange: true,
+          immediate: false,
+          min: 0,
+          max: 100,
+          type: 'integer',
+          default: 0,
+          step: 1,
+          initValue: 0
+        }
+      };
+
+      assert.deepEqual(schema, expected);
+    });
+
+    it(`should throw if given name does not exists`, async () => {
+      let errored = false;
+
+      try {
+        await client.stateManager.getSchema('do-not-exists');
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      if (!errored) {
+        assert.fail('should have thrown');
+      }
     });
   });
 
@@ -189,7 +237,7 @@ describe(`# StateManager`, () => {
     });
   });
 
-  describe('## deleteSchema(name)', () => {
+  describe('## [server] deleteSchema(name)', () => {
     it('should call state.onDetach and state.onDelete on all states of its kind', async () => {
       server.stateManager.registerSchema('a-delete', a);
 
@@ -569,7 +617,7 @@ describe(`# StateManager`, () => {
       unobserve();
     });
 
-    it(`[FIXME #69] should not be notified of states created by same node if option.excludeLocal = true`, async () => {
+    it(`should not be notified of states created by same node if option.excludeLocal = true`, async () => {
       const state1 = await client.stateManager.create('a');
 
       let observeCalled = false;
@@ -591,7 +639,7 @@ describe(`# StateManager`, () => {
     });
   });
 
-  describe('## registerUpdateHook(schemaName, updateHook)', () => {
+  describe('## [server] registerUpdateHook(schemaName, updateHook)', () => {
     const hookSchema = {
       name: {
         type: 'string',

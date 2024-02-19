@@ -226,7 +226,6 @@ class ParameterBag {
 
       this._schema[name].initValue = initValue;
       this._values[name] = initValue;
-
     }
   }
 

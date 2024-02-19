@@ -2,6 +2,7 @@ import { isString, isFunction, isPlainObject } from '@ircam/sc-utils';
 import SharedState from './BaseSharedState.js';
 import SharedStateCollection from './BaseSharedStateCollection.js';
 import BatchedTransport from './BatchedTransport.js';
+import ParameterBag from './ParameterBag.js';
 import PromiseStore from './PromiseStore.js';
 import {
   CREATE_REQUEST,
@@ -16,10 +17,10 @@ import {
   OBSERVE_NOTIFICATION,
   UNOBSERVE_NOTIFICATION,
   DELETE_SCHEMA,
+  GET_SCHEMA_REQUEST,
+  GET_SCHEMA_RESPONSE,
+  GET_SCHEMA_ERROR,
 } from './constants.js';
-
-export const kCreateCollectionController = Symbol('BaseStateManager::createCollectionController');
-export const kAttachInCollection = Symbol('BaseStateManager::attachInCollection');
 
 /**
  * @private
@@ -150,6 +151,22 @@ class BaseStateManager {
     this.client.transport.addListener(DELETE_SCHEMA, schemaName => {
       this._cachedSchemas.delete(schemaName);
     });
+
+    // ---------------------------------------------
+    // GET SCHEMA
+    // ---------------------------------------------
+    this.client.transport.addListener(GET_SCHEMA_RESPONSE, (reqId, schemaName, schema) => {
+      if (!this._cachedSchemas.has(schemaName)) {
+        this._cachedSchemas.set(schemaName, schema);
+      }
+      // return a populated schema
+      const parameterBag = new ParameterBag(schema);
+      this._promiseStore.resolve(reqId, parameterBag.getSchema());
+    });
+
+    this.client.transport.addListener(GET_SCHEMA_ERROR, (reqId, msg) => {
+      this._promiseStore.reject(reqId, msg);
+    });
   }
 
   /** @private */
@@ -165,6 +182,28 @@ class BaseStateManager {
     }
 
     return filter;
+  }
+
+  /**
+   * Return the schema from a given registered schema name
+   *
+   * @param {String} schemaName - Name of the schema as given on registration
+   *  (cf. ServerStateManager)
+   * @example
+   * const schema = await client.stateManager.getSchema('my-schema');
+   */
+  async getSchema(schemaName) {
+    if (this._cachedSchemas.has(schemaName)) {
+      const schema = this._cachedSchemas.get(schemaName);
+      // return a populated schema
+      const parameterBag = new ParameterBag(schema);
+      return parameterBag.getSchema();
+    }
+
+    return new Promise((resolve, reject) => {
+      const reqId = this._promiseStore.add(resolve, reject, 'get-schema');
+      this.client.transport.emit(GET_SCHEMA_REQUEST, reqId, schemaName);
+    });
   }
 
   /**
@@ -187,18 +226,6 @@ class BaseStateManager {
     });
   }
 
-
-  /**
-   * @private
-   */
-  async [kCreateCollectionController](schemaName) {
-    return new Promise((resolve, reject) => {
-      const reqId = this._promiseStore.add(resolve, reject, 'create-collection-controller-request');
-      const requireSchema = this._cachedSchemas.has(schemaName) ? false : true;
-      this.client.transport.emit(CREATE_REQUEST, reqId, schemaName, requireSchema, {}, true);
-    });
-  }
-
   /**
    * Attach to an existing `SharedState` instance.
    *
@@ -218,14 +245,6 @@ class BaseStateManager {
       const reqId = this._promiseStore.add(resolve, reject, 'attach-request');
       const requireSchema = this._cachedSchemas.has(schemaName) ? false : true;
       this.client.transport.emit(ATTACH_REQUEST, reqId, schemaName, stateId, requireSchema);
-    });
-  }
-
-  async [kAttachInCollection](schemaName, stateId) {
-    return new Promise((resolve, reject) => {
-      const reqId = this._promiseStore.add(resolve, reject, 'attach-in-collection-request');
-      const requireSchema = this._cachedSchemas.has(schemaName) ? false : true;
-      this.client.transport.emit(ATTACH_REQUEST, reqId, schemaName, stateId, requireSchema, true);
     });
   }
 
@@ -391,7 +410,7 @@ class BaseStateManager {
       await collection._init();
     } catch (err) {
       console.log(err.message);
-      throw new Error(`Cannot create collection, schema "${schemaName}" does not exists`);
+      throw new Error(`[stateManager] Cannot create collection, schema "${schemaName}" does not exists`);
     }
 
     return collection;

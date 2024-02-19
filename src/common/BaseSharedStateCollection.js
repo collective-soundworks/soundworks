@@ -1,8 +1,3 @@
-import {
-  kCreateCollectionController,
-  kAttachInCollection,
-} from './BaseStateManager.js';
-
 /** @private */
 class BaseSharedStateCollection {
   constructor(stateManager, schemaName, options = {}) {
@@ -10,7 +5,7 @@ class BaseSharedStateCollection {
     this._schemaName = schemaName;
     this._options = Object.assign({ excludeLocal: false }, options);
 
-    this._controller = null;
+    this._schema = null;
     this._states = [];
 
     this._onUpdateCallbacks = new Set();
@@ -21,15 +16,10 @@ class BaseSharedStateCollection {
 
   /** @private */
   async _init() {
-    this._controller = await this._stateManager[kCreateCollectionController](this._schemaName);
-    this._controller.onUpdate(async (updates, context) => {
-      for (let state of this._states) {
-        await state._commit(updates, context, true, false);
-      }
-    });
+    this._schema = await this._stateManager.getSchema(this._schemaName);
 
     this._unobserve = await this._stateManager.observe(this._schemaName, async (schemaName, stateId) => {
-      const state = await this._stateManager[kAttachInCollection](schemaName, stateId);
+      const state = await this._stateManager.attach(schemaName, stateId);
       this._states.push(state);
 
       state.onDetach(() => {
@@ -52,6 +42,7 @@ class BaseSharedStateCollection {
   /**
    * Size of the collection, alias `size`
    * @type {number}
+   * @readonly
    */
   get length() {
     return this._states.length;
@@ -60,6 +51,7 @@ class BaseSharedStateCollection {
   /**
    * Size of the collection, , alias `length`
    * @type {number}
+   * @readonly
    */
   get size() {
     return this._states.length;
@@ -71,7 +63,7 @@ class BaseSharedStateCollection {
    * @readonly
    */
   get schemaName() {
-    return this._controller.schemaName;
+    return this._schemaName;
   }
 
   /**
@@ -86,7 +78,7 @@ class BaseSharedStateCollection {
    * const schema = collection.getSchema();
    */
   getSchema(name = null) {
-    return this._controller.getSchema(name);
+    return this._schema;
   }
 
   /**
@@ -97,7 +89,11 @@ class BaseSharedStateCollection {
    * const defaults = state.getDefaults();
    */
   getDefaults() {
-    return this._controller.getDefaults();
+    const defaults = {};
+    for (let name in this._schema) {
+      defaults[name] = this._schema[name].default;
+    }
+    return defaults;
   }
 
   /**
@@ -130,7 +126,6 @@ class BaseSharedStateCollection {
     // to be cleaned soon
     const promises = this._states.map(state => state.set(updates, context));
     return Promise.all(promises);
-    // return await this._controller.set(updates, context);
   }
 
   /**
@@ -198,8 +193,6 @@ class BaseSharedStateCollection {
   async detach() {
     this._unobserve();
     this._onUpdateCallbacks.clear();
-
-    await this._controller.delete();
 
     const promises = this._states.map(state => state.detach());
     await Promise.all(promises);

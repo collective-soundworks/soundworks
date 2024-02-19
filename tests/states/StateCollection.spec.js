@@ -3,6 +3,7 @@ import { delay } from '@ircam/sc-utils';
 
 import { Server } from '../../src/server/index.js';
 import { Client } from '../../src/client/index.js';
+import { BATCHED_TRANSPORT_CHANNEL } from '../../src/common/constants.js';
 
 import config from '../utils/config.js';
 import { a, b } from '../utils/schemas.js';
@@ -167,7 +168,7 @@ describe(`# SharedStateCollection`, () => {
   });
 
   describe(`## getSchema()`, () => {
-    it(`should return the schema name`, async () => {
+    it(`should return the schema definition`, async () => {
       const collection = await clients[0].stateManager.getCollection('a');
       const schema = collection.getSchema();
       const expected = {
@@ -203,7 +204,7 @@ describe(`# SharedStateCollection`, () => {
   });
 
   describe(`## getDefaults()`, () => {
-    it(`should return the schema name`, async () => {
+    it(`should return the default values`, async () => {
       const collection = await clients[0].stateManager.getCollection('a');
       const defaults = collection.getDefaults();
       const expected = {
@@ -230,7 +231,7 @@ describe(`# SharedStateCollection`, () => {
       assert.equal(collection.size, 2);
 
       const result = await collection.set({ bool: true });
-      const expected = { bool: true };
+      const expected = [{ bool: true }, { bool: true }];
       assert.deepEqual(result, expected);
 
       await delay(50);
@@ -240,9 +241,9 @@ describe(`# SharedStateCollection`, () => {
       assert.equal(attached0.get('bool'), true);
       assert.equal(attached1.get('bool'), true);
 
+      await collection.detach();
       await state0.delete();
       await state1.delete();
-      await collection.detach();
     });
 
     it(`test several collections from same schema`, async () => {
@@ -279,13 +280,12 @@ describe(`# SharedStateCollection`, () => {
       assert.deepEqual(collection0.get('int'), [42, 42]);
       assert.deepEqual(collection1.get('int'), [42, 42]);
 
-      await state0.delete();
-      await state1.delete();
       await collection0.detach();
       await collection1.detach();
-    });
 
-    it.skip(`test socket message numbers`, async () => {});
+      await state0.delete();
+      await state1.delete();
+    });
 
     it(`"normal" state communication should work as expected`, async () => {
       const state0 = await clients[0].stateManager.create('a');
@@ -312,9 +312,10 @@ describe(`# SharedStateCollection`, () => {
       assert.equal(attached1.get('bool'), false);
       assert.isTrue(onUpdateCalled);
 
+      await collection.detach();
+
       await state0.delete();
       await state1.delete();
-      await collection.detach();
     });
   });
 
@@ -406,6 +407,67 @@ describe(`# SharedStateCollection`, () => {
       }
 
       await assert.equal(size, 1);
+    });
+  });
+
+  describe(`## Batched transport`, () => {
+    it(`should send only one message on update requests and response`, async () => {
+      // launch new server so we can grab the server side representation of the client
+      const localConfig = structuredClone(config);
+      localConfig.env.port = 8083;
+
+      const server = new Server(localConfig);
+      server.stateManager.registerSchema('a', a);
+      await server.start();
+
+      let states = [];
+      const numStates = 1000;
+
+      for (let i = 0; i < numStates; i++) {
+        const state = await server.stateManager.create('a');
+        states.push(state);
+      }
+
+      let batchedRequests = 0;
+      let batchedResponses = 0;
+
+      server.onClientConnect(client => {
+        client.socket.addListener(BATCHED_TRANSPORT_CHANNEL, (args) => {
+          // console.log('server BATCHED_TRANSPORT_CHANNEL');
+          batchedRequests += 1;
+        });
+      });
+
+      const client = new Client({ role: 'test', ...localConfig });
+      await client.start();
+
+      // update response
+      client.socket.addListener(BATCHED_TRANSPORT_CHANNEL, (args) => {
+        // console.log('client BATCHED_TRANSPORT_CHANNEL', args);
+        batchedResponses += 1;
+      });
+
+      const collection = await client.stateManager.getCollection('a');
+      await collection.set({ int: 42 });
+
+      // // await delay(20);
+      const expected = new Array(numStates).fill(42);
+      assert.deepEqual(collection.get('int'), expected);
+
+      // console.log(collection.get('int'));
+      // 1 message for getSchema request / response
+      // 1 message for observe request / response
+      // 1 message for attach requests / responses
+      // 1 message for update requests / responses
+      assert.equal(batchedRequests, 4);
+      assert.equal(batchedResponses, 4);
+
+      await collection.detach();
+      for (let i = 0; i < states.length; i++) {
+        await states[i].delete();
+      }
+      await client.stop();
+      await server.stop();
     });
   });
 });

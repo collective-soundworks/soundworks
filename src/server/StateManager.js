@@ -22,6 +22,9 @@ import {
   OBSERVE_NOTIFICATION,
   UNOBSERVE_NOTIFICATION,
   DELETE_SCHEMA,
+  GET_SCHEMA_REQUEST,
+  GET_SCHEMA_RESPONSE,
+  GET_SCHEMA_ERROR,
   PRIVATE_STATES,
 } from '../common/constants.js';
 
@@ -355,7 +358,7 @@ class StateManager extends BaseStateManager {
     // ---------------------------------------------
     client.transport.addListener(
       CREATE_REQUEST,
-      (reqId, schemaName, requireSchema, initValues = {}, inCollection = false) => {
+      (reqId, schemaName, requireSchema, initValues = {}) => {
         if (this._schemas.has(schemaName)) {
           try {
             const schema = this._schemas.get(schemaName);
@@ -365,7 +368,7 @@ class StateManager extends BaseStateManager {
 
             // attach client to the state as owner
             const isOwner = true;
-            state._attachClient(remoteId, client, isOwner, inCollection);
+            state._attachClient(remoteId, client, isOwner);
 
             this._sharedStatePrivateById.set(stateId, state);
 
@@ -385,13 +388,13 @@ class StateManager extends BaseStateManager {
               });
             }
           } catch (err) {
-            const msg = `Cannot create state "${schemaName}", ${err.message}`;
+            const msg = `[stateManager] Cannot create state "${schemaName}", ${err.message}`;
             console.error(msg);
 
             client.transport.emit(CREATE_ERROR, reqId, msg);
           }
         } else {
-          const msg = `Cannot create state "${schemaName}", schema does not exists`;
+          const msg = `[stateManager] Cannot create state "${schemaName}", schema does not exists`;
           console.error(msg);
 
           client.transport.emit(CREATE_ERROR, reqId, msg);
@@ -404,7 +407,7 @@ class StateManager extends BaseStateManager {
     // ---------------------------------------------
     client.transport.addListener(
       ATTACH_REQUEST,
-      (reqId, schemaName, stateId = null, requireSchema = true, inCollection = false) => {
+      (reqId, schemaName, stateId = null, requireSchema = true) => {
         if (this._schemas.has(schemaName)) {
           let state = null;
 
@@ -429,7 +432,7 @@ class StateManager extends BaseStateManager {
             // i.e. same state -> several remote attach on the same node
             const remoteId = generateRemoteId.next().value;
             const isOwner = false;
-            state._attachClient(remoteId, client, isOwner, inCollection);
+            state._attachClient(remoteId, client, isOwner);
 
             const currentValues = state._parameters.getValues();
             const schema = this._schemas.get(schemaName);
@@ -441,13 +444,13 @@ class StateManager extends BaseStateManager {
             );
 
           } else {
-            const msg = `Cannot attach, no existing state for schema "${schemaName}" with stateId: "${stateId}"`;
+            const msg = `[stateManager] Cannot attach, no existing state for schema "${schemaName}" with stateId: "${stateId}"`;
             console.error(msg);
 
             client.transport.emit(ATTACH_ERROR, reqId, msg);
           }
         } else {
-          const msg = `Cannot attach, schema "${schemaName}" does not exists`;
+          const msg = `[stateManager] Cannot attach, schema "${schemaName}" does not exists`;
           console.error(msg);
 
           client.transport.emit(ATTACH_ERROR, reqId, msg);
@@ -477,13 +480,26 @@ class StateManager extends BaseStateManager {
 
         client.transport.emit(OBSERVE_RESPONSE, reqId, ...statesInfos);
       } else {
-        const msg = `Cannot observe, schema "${observedSchemaName}" does not exists`;
+        const msg = `[stateManager] Cannot observe, schema "${observedSchemaName}" does not exists`;
         client.transport.emit(OBSERVE_ERROR, reqId, msg);
       }
     });
 
     client.transport.addListener(UNOBSERVE_NOTIFICATION, () => {
       this._observers.delete(client);
+    });
+
+    // ---------------------------------------------
+    // GET SCHEMA
+    // ---------------------------------------------
+    client.transport.addListener(GET_SCHEMA_REQUEST, (reqId, schemaName) => {
+      if (this._schemas.has(schemaName)) {
+        const schema = this._schemas.get(schemaName);
+        client.transport.emit(GET_SCHEMA_RESPONSE, reqId, schemaName, schema);
+      } else {
+        const msg = `[stateManager] Cannot get schema, schema "${schemaName}" does not exists`;
+        client.transport.emit(GET_SCHEMA_ERROR, reqId, msg);
+      }
     });
   }
 

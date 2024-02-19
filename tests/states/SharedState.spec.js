@@ -555,12 +555,13 @@ describe('# SharedState', () => {
       const state = await client.stateManager.create('a');
 
       state.set({ bool: true });
-      for (let i = 1; i < 42; i++) {
+      for (let i = 1; i <= 42; i++) {
         state.set({ int: i });
       }
 
       await delay(20);
-
+      // make sure the state is up to date
+      assert.equal(state.get('int'), 42);
       // 1 message for create request / response (i.e.await client.stateManager.create)
       // 1 message for the batched updates requests / responses
       assert.equal(batchedRequests, 2);

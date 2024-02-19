@@ -309,6 +309,6 @@ describe('# SharedStates - Stress test', () => {
   });
 
   describe(`## StateCollection`, () => {
-    it.skip(`brute force test`, async () => {})
+    it.skip(`@todo - brute force test`, async () => {})
   });
 });
