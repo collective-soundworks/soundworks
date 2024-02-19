@@ -2,12 +2,18 @@ import { isBrowser } from '@ircam/sc-utils';
 import WebSocket from 'isomorphic-ws';
 
 import {
+  PING_INTERVAL,
+  PING_LATENCY_TOLERANCE,
+  PING_MESSAGE,
+  PONG_MESSAGE,
+} from '../common/constants.js';
+import logger from '../common/logger.js';
+import {
   packBinaryMessage,
   unpackBinaryMessage,
   packStringMessage,
   unpackStringMessage,
 } from '../common/sockets-utils.js';
-import logger from '../common/logger.js';
 
 // WebSocket events:
 //
@@ -130,7 +136,28 @@ class Socket {
         ws.addEventListener('open', connectEvent => {
           // parse incoming messages for pubsub
           this.ws = ws;
+
+          // ping/pong behaviour
+          let pingTimeout = null;
+
+          const heartbeat = () => {
+            clearTimeout(pingTimeout);
+
+            pingTimeout = setTimeout(() => {
+              this.terminate();
+            }, PING_INTERVAL + PING_LATENCY_TOLERANCE);
+          }
+
+          heartbeat();
+
           this.ws.addEventListener('message', e => {
+            if (e.data === PING_MESSAGE) {
+              heartbeat();
+              this.ws.send(PONG_MESSAGE);
+              // do not propagate ping / pong messages
+              return;
+            }
+
             const [channel, args] = unpackStringMessage(e.data);
             this._emit(false, channel, ...args);
           });
@@ -144,6 +171,7 @@ class Socket {
 
           // forward open event
           this._emit(false, 'open', connectEvent);
+
           // continue with raw socket
           resolve();
         });
@@ -172,36 +200,6 @@ class Socket {
 
       trySocket();
     });
-
-    // @todo - review/fix
-    // - the `ws.on` method only exists on node implementation, and the 'ping'
-    //   message is not received on addEventListener
-    // - there seems to be no way to access the ping event in browsers...
-    //
-    // let pingTimeoutId = null;
-    // const pingInterval = config.env.websockets.pingInterval;
-    // // detect broken connection
-    // // cf. https://github.com/websockets/ws#how-to-detect-and-close-broken-connections
-    // const heartbeat = () => {
-    //   try {
-    //     console.log('ping received');
-    //     clearTimeout(pingTimeoutId);
-
-    //   // pingTimeoutId = setTimeout(() => {
-    //   //   console.log('terminate');
-    //   //   this.terminate();
-    //   // }, pingInterval + 2000);
-    //   } catch (err) {
-    //     console.error(err);
-    //   }
-    // };
-    //
-    // this.ws.on('ping', heartbeat);
-    // this.ws.addEventListener('close', () => {
-    //   clearTimeout(pingTimeoutId);
-    // });
-
-    // heartbeat();
 
     // ----------------------------------------------------------
     // init binary socket

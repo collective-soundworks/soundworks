@@ -1,5 +1,10 @@
 import { getTime } from '@ircam/sc-utils';
 import {
+  PING_INTERVAL,
+  PING_MESSAGE,
+  PONG_MESSAGE,
+} from '../common/constants.js';
+import {
   packBinaryMessage,
   unpackBinaryMessage,
   packStringMessage,
@@ -32,17 +37,7 @@ import {
  * @hideconstructor
  */
 class Socket {
-  constructor(ws, binaryWs, rooms, sockets, options = {}) {
-    /**
-     * Configuration object
-     *
-     * @type {object}
-     */
-    this.config = {
-      pingInterval: 5 * 1000,
-      ...options,
-    };
-
+  constructor(ws, binaryWs, rooms, sockets) {
     /**
      * `ws` socket instance configured with `binaryType=blob` (string)
      *
@@ -82,15 +77,54 @@ class Socket {
     /** @private */
     this._binaryListeners = new Map();
 
+    // heartbeat system (run only on string socket), adapted from:
+    // https://github.com/websockets/ws#how-to-detect-and-close-broken-connections
+    /** @private */
+    this._isAlive = true;
+    let msg = {
+      type: 'add-measurement',
+      value: {
+        ping: 0,
+        pong: 0,
+      },
+    };
+
     // ----------------------------------------------------------
-    // init string socket
+    // String socket
+    // implements ping/pong behavior
     // ----------------------------------------------------------
     this.ws.addEventListener('message', e => {
+      if (e.data === PONG_MESSAGE) {
+        this._isAlive = true;
+
+        msg.value.pong = getTime();
+        this.sockets._latencyStatsWorker.postMessage(msg);
+        // do not propagate ping / pong messages
+        return;
+      }
+
       const [channel, args] = unpackStringMessage(e.data);
       this._emit(false, channel, ...args);
     });
 
-    // broadcast all `ws` "native" events
+    const heartbeat = () => {
+      if (this._isAlive === false) {
+        // emit a 'close' event to go trough all the disconnection pipeline
+        this._emit(false, 'close');
+        return;
+      }
+
+      this._isAlive = false;
+      msg.value.ping = getTime();
+
+      this.ws.send(PING_MESSAGE);
+
+      setTimeout(heartbeat, PING_INTERVAL);
+    };
+
+    setTimeout(heartbeat, PING_INTERVAL);
+
+    // broadcast all "native" events
     [
       'close',
       'error',
@@ -107,14 +141,14 @@ class Socket {
     });
 
     // ----------------------------------------------------------
-    // init binary socket
+    // Binary socket
     // ----------------------------------------------------------
     this.binaryWs.addEventListener('message', e => {
       const [channel, data] = unpackBinaryMessage(e.data);
       this._emit(true, channel, data);
     });
 
-    // broadcast all `ws` "native" events
+    // broadcast all "native" events
     [
       'close',
       'error',
@@ -129,38 +163,6 @@ class Socket {
         this._emit(true, eventName, e.data);
       });
     });
-
-    // heartbeat system (run only on string socket), adapted from:
-    // https://github.com/websockets/ws#how-to-detect-and-close-broken-connections
-    this._isAlive = true;
-    let msg = {
-      type: 'add-measurement',
-      value: {
-        ping: 0,
-        pong: 0,
-      },
-    };
-
-    // heartbeat system, only on "regular" socket
-    this.ws.on('pong', () => {
-      this._isAlive = true;
-
-      msg.value.pong = getTime();
-      this.sockets._latencyStatsWorker.postMessage(msg);
-    });
-
-    this._intervalId = setInterval(() => {
-      if (this._isAlive === false) {
-        // emit a 'close' event to go trough all the disconnection pipeline
-        this._emit(false, 'close');
-        return;
-      }
-
-      this._isAlive = false;
-      msg.value.ping = getTime();
-
-      this.ws.ping();
-    }, this.config.pingInterval);
   }
 
   /**
@@ -172,6 +174,7 @@ class Socket {
   terminate() {
     // clear ping/pong check
     clearInterval(this._intervalId);
+
     // clean rooms
     for (let [_key, room] of this.rooms) {
       room.delete(this);

@@ -1,0 +1,10 @@
+{
+  name: 'ping-pong',
+  author: '',
+  clients: {
+    player: {
+      target: 'browser',
+      default: true,
+    },
+  },
+}

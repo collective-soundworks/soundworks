@@ -1,0 +1,16 @@
+# transpiled files and dependencies
+/node_modules
+# application build files
+.build
+.data
+
+# ignore all environment config files
+/config/env-*
+
+# junk files
+package-lock.json
+.DS_Store
+Thumbs.db
+
+# TLS certificates
+/**/*.pem

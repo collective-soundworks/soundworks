@@ -1,0 +1,36 @@
+{
+  "name": "ping-pong",
+  "description": "soundworks application",
+  "authors": [],
+  "license": "BSD-3-Clause",
+  "version": "0.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "npm run clean && sass src/clients/styles:.build/public/css && soundworks-build -b",
+    "build:production": "npm run clean && sass src/clients/styles:.build/public/css && soundworks-build -b -m",
+    "clean": "soundworks-build -D",
+    "dev": "npm run build && (concurrently -i -p \"none\" \"npm run watch:inspect server\" \"soundworks-build -b -w\" \"npm run watch:sass\")",
+    "postinstall": "soundworks-build -C",
+    "start": "node .build/server/index.js",
+    "watch": "soundworks-build -p",
+    "watch:inspect": "soundworks-build -d -p",
+    "watch:sass": "sass --watch src/clients/styles:.build/public/css",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@ircam/sc-components": "^3.0.0-alpha.44",
+    "@soundworks/core": "^4.0.0-alpha.0",
+    "@soundworks/helpers": "^1.0.0-alpha.2",
+    "json5": "^2.2.2",
+    "lit": "^3.0.2"
+  },
+  "devDependencies": {
+    "@ircam/eslint-config": "^1.2.1",
+    "@soundworks/build": "^1.0.0-alpha.0",
+    "@soundworks/create": "^1.0.0-alpha.19",
+    "concurrently": "^8.2.2",
+    "eslint": "^8.56.0",
+    "sass": "^1.57.1"
+  }
+}

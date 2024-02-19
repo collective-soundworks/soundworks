@@ -1,0 +1,79 @@
+:root {
+  --sw-background-color: #000000;
+  --sw-medium-background-color: #121212;
+  --sw-light-background-color: #242424;
+  --sw-lighter-background-color: #363636;
+  --sw-font-color: #ffffff;
+  --sw-light-font-color: #cccccc;
+  --sw-font-color-error: #a94442;
+  --sw-font-family: Consolas, monaco, monospace;
+  --sw-font-size: 62.5%; // such that 1rem == 10px
+}
+
+html, body {
+  width: 100%;
+  min-height: 100vh;
+  background-color: var(--sw-background-color);
+  color: var(--sw-font-color);
+}
+
+html {
+  font-size: var(--sw-font-size);
+}
+
+body {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+* {
+  box-sizing: border-box;
+  font-family: var(--sw-font-family);
+}
+
+body.loading {
+  background-image: url(../../images/loader.gif);
+  background-position: 50% 50%;
+  background-repeat: no-repeat;
+}
+
+.simple-layout {
+  display: block;
+  flex-grow: 1;
+  padding: 20px;
+  position: relative;
+}
+
+// default styles for controller layout
+.controller-layout {
+  display: block;
+  flex-grow: 1;
+  position: relative;
+
+  & > header {
+    display: block;
+    height: 38px;
+    line-height: 38px;
+    background-color: var(--sw-medium-background-color);
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--sw-lighter-background-color);
+
+    h1 {
+      font-size: 12px;
+      margin: 0;
+      padding-left: 20px;
+      max-width: 50%;
+      overflow: hidden;
+    }
+
+    sc-audit {
+      max-width: 50%;
+    }
+  }
+
+  & > section {
+    padding: 20px;
+  }
+}
