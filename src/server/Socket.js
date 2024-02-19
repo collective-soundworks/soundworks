@@ -77,7 +77,7 @@ class Socket {
     /** @private */
     this._binaryListeners = new Map();
     /** @private */
-    this._heartbeatId
+    this._heartbeatId = null;
 
     // heartbeat system (run only on string socket), adapted from:
     // https://github.com/websockets/ws#how-to-detect-and-close-broken-connections

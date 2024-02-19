@@ -145,7 +145,7 @@ class Socket {
             this._heartbeatId = setTimeout(() => {
               this.terminate();
             }, PING_INTERVAL + PING_LATENCY_TOLERANCE);
-          }
+          };
 
           heartbeat();
 

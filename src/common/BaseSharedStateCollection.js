@@ -78,6 +78,10 @@ class BaseSharedStateCollection {
    * const schema = collection.getSchema();
    */
   getSchema(name = null) {
+    if (name) {
+      return this._schema[name];
+    }
+
     return this._schema;
   }
 
