@@ -1,7 +1,7 @@
 export default function(Plugin) {
   return class PluginDelayClient extends Plugin {
-    constructor(server, id, options) {
-      super(server, id);
+    constructor(client, id, options) {
+      super(client, id);
 
       const defaults = {
         delayTime: 1000, // in ms

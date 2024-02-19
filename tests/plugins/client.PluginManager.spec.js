@@ -21,7 +21,6 @@ describe(`# PluginManagerClient`, () => {
       });
     });
 
-    await server.init();
     await server.start();
   });
 
@@ -132,11 +131,26 @@ describe(`# PluginManagerClient`, () => {
     });
 
     it(`should allow to registered same plugin factory with different ids`, () => {
-      const client = new Server(config);
       client.pluginManager.register('delay-1', pluginDelayClient, {});
       client.pluginManager.register('delay-2', pluginDelayClient, {});
 
       assert.ok('should not throw');
+    });
+
+    it.only(`[FIXME #83] should throw when registering server side plugin on client side`, async () => {
+      client.pluginManager.register('delay-1', pluginDelayServer, {});
+
+      let errored = false;
+      try {
+        await client.init();
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      if (!errored) {
+        assert.fail(`should have thrown`);
+      }
     });
   });
 
