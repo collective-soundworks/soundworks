@@ -24,7 +24,7 @@ npx @soundworks/create@latest
 
 ![soundworks-create](./misc/assets/soundworks-create-min.gif)
 
-See [https://soundworks.dev/tutorials/getting-started.html](https://soundworks.dev/tutorials/getting-started.html) for more informations on the wizard and how to start using **soundworks**.
+See [https://soundworks.dev/tutorials/getting-started.html](https://soundworks.dev/tutorials/getting-started.html) for more information on the wizard and how to start using **soundworks**.
 
 ## Misc
 
@@ -36,7 +36,7 @@ However, for maintenance reasons, we aim at following the TC39 and W3C specifica
 
 ### Manual install
 
-Note that the `@soundworks/core` package is automatically installed when creating an application using the `@soundworks/create` wizard, so most of the time you should not have to install this package manually. See [https://soundworks.dev/guides/getting-started.html](https://soundworks.dev/guides/getting-started.html) for more informations on the **soundworks** wizard.
+Note that the `@soundworks/core` package is automatically installed when creating an application using the `@soundworks/create` wizard, so most of the time you should not have to install this package manually. See [https://soundworks.dev/guides/getting-started.html](https://soundworks.dev/guides/getting-started.html) for more information on the **soundworks** wizard.
 
 ```
 npm install @soundworks/core
