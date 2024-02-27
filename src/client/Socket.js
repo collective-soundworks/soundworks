@@ -253,11 +253,22 @@ class Socket {
    * @private
    */
   async terminate() {
+    const closeListeners = this._stringListeners.get('close');
+    const closeBinaryListeners = this._binaryListeners.get('close');
+
     this.removeAllListeners();
     this.removeAllBinaryListeners();
 
     this.ws.close();
     this.binaryWs.close();
+
+    if (closeListeners) {
+      closeListeners.forEach(listener => listener());
+    }
+
+    if (closeBinaryListeners) {
+      closeBinaryListeners.forEach(listener => listener());
+    }
 
     return Promise.resolve();
   }
