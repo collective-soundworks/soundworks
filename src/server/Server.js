@@ -905,11 +905,11 @@ Invalid certificate files, please check your:
       const { role, registeredPlugins } = payload;
 
       if (!roles.includes(role)) {
-        console.error(`[soundworks.Server] A client with invalid type ("${role}") attempted to connect`);
+        console.error(`[soundworks.Server] A client with invalid role ("${role}") attempted to connect`);
 
         socket.send(CLIENT_HANDSHAKE_ERROR, {
           type: 'invalid-client-type',
-          message: `Invalid client type, please check server configuration (valid client types are: ${roles.join(', ')})`,
+          message: `Invalid client role, please check server configuration (valid client roles are: ${roles.join(', ')})`,
         });
         return;
       }
