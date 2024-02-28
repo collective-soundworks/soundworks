@@ -122,6 +122,11 @@ class Socket {
       this.ws.send(PING_MESSAGE);
     }, PING_INTERVAL);
 
+    // for testing purpose
+    if (this.sockets._DEBUG_PREVENT_HEARTBEAT === true) {
+      clearInterval(this._heartbeatId);
+    }
+
     // broadcast all "native" events
     [
       'close',

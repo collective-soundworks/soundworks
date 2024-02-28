@@ -32,6 +32,8 @@ class Sockets {
     /** @private */
     this._auditState = null;
 
+    /** @private */
+    this._DEBUG_PREVENT_HEARTBEAT = false;
   }
 
   /**

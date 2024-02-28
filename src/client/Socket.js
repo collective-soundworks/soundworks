@@ -250,6 +250,10 @@ class Socket {
    * Removes all listeners and immediately close the two sockets. Is automatically
    * called on `client.stop()`
    *
+   * Is also called when a disconnection is detected by the heartbeat (note that
+   * in this case, the launcher will call `client.stop()` but the listeners are
+   * already cleared so the event will be trigerred only once)
+   *
    * @private
    */
   async terminate() {

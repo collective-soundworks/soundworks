@@ -47,6 +47,22 @@ describe('# client::Socket', () => {
       await delay(10);
       assert.equal(closeCalled, true);
     });
+
+    it.skip('[long 12 seconds test, unskip manually] should be called when heartbeat is not received from server', async function() {
+      this.timeout(20 * 1000);
+      // server will send haertbeat ping to clients
+      server.sockets._DEBUG_PREVENT_HEARTBEAT = true;
+
+      const client = new Client({ role: 'test',  ...config });
+      await client.start();
+
+      let closeCalled = 0;
+      client.socket.addListener('close', () => closeCalled += 1);
+
+      await delay(12 * 1000);
+
+      assert.equal(closeCalled, 1);
+    });
   });
 });
 
