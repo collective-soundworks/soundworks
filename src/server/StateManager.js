@@ -1,5 +1,3 @@
-import EventEmitter from 'node:events';
-
 import { idGenerator, isString, isPlainObject } from '@ircam/sc-utils';
 import clonedeep from 'lodash/cloneDeep.js';
 
@@ -8,7 +6,6 @@ import BatchedTransport from '../common/BatchedTransport.js';
 import ParameterBag from '../common/ParameterBag.js';
 import SharedStatePrivate from '../common/SharedStatePrivate.js';
 import {
-  SERVER_ID,
   CREATE_REQUEST,
   CREATE_RESPONSE,
   CREATE_ERROR,
@@ -314,19 +311,19 @@ const kIsObservableState = Symbol('StateManager::isObservableState');
  */
 class StateManager extends BaseStateManager {
   constructor() {
-    // acts as a client of itself locally
-    const localClientId = SERVER_ID;
-    const localTransport = new EventEmitter();
-
-    super(localClientId, localTransport);
+    super();
 
     this._clientByNodeId = new Map();
     this._sharedStatePrivateById = new Map();
     this._schemas = new Map();
     this._observers = new Set();
     this._hooksBySchemaName = new Map(); // protected
+  }
 
-    this.addClient(localClientId, localTransport);
+  init(id, transport) {
+    super.init(id, transport);
+    // add itself as client of the state manager server
+    this.addClient(id, transport);
   }
 
   [kIsObservableState](state) {
@@ -348,7 +345,9 @@ class StateManager extends BaseStateManager {
    * @private
    */
   addClient(nodeId, transport) {
-    transport = new BatchedTransport(transport);
+    transport = new BatchedTransport(transport, {
+      transportBatchTimeout: this._options.transportBatchTimeout,
+    });
 
     const client = { id: nodeId, transport };
     this._clientByNodeId.set(nodeId, client);

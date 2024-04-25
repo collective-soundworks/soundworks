@@ -1,3 +1,4 @@
+import EventEmitter from 'node:events';
 import fs from 'node:fs';
 import http from 'node:http';
 import https from 'node:https';
@@ -371,6 +372,11 @@ class Server {
    * await server.start(); // init is called implicitely
    */
   async init() {
+    // ------------------------------------------------------------
+    // INIT STATE MANAGER
+    // ------------------------------------------------------------
+    this.stateManager.init(SERVER_ID, new EventEmitter());
+
     const numClients = {};
     for (let name in this.config.app.clients) {
       numClients[name] = 0;

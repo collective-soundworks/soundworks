@@ -524,52 +524,156 @@ describe('# SharedState', () => {
       }
     });
   });
+});
 
-  describe(`## Batched transport`, () => {
-    it(`should send only one message on several consecutive update requests`, async () => {
-      // launch new server so we can grab the server side representation of the client
-      const localConfig = structuredClone(config);
-      localConfig.env.port = 8082;
+describe(`# SharedState - Batched transport`, () => {
+  it(`wait = 0 - should send only one message on consecutive synchronous update requests`, async () => {
+    // launch new server so we can grab the server side representation of the client
+    // @note to self - please explain...
+    const localConfig = structuredClone(config);
+    localConfig.env.port = 8082;
 
-      const server = new Server(localConfig);
-      server.stateManager.registerSchema('a', a);
-      await server.start();
+    const server = new Server(localConfig);
+    server.stateManager.registerSchema('a', a);
+    await server.start();
 
-      let batchedRequests = 0;
-      let batchedResponses = 0;
+    let batchedRequests = 0;
+    let batchedResponses = 0;
 
-      server.onClientConnect(client => {
-        client.socket.addListener(BATCHED_TRANSPORT_CHANNEL, (args) => {
-          batchedRequests += 1;
-        });
-      });
-
-      const client = new Client({ role: 'test', ...localConfig });
-      await client.start();
-
-      // update response
+    server.onClientConnect(client => {
       client.socket.addListener(BATCHED_TRANSPORT_CHANNEL, (args) => {
-        batchedResponses += 1;
+        batchedRequests += 1;
       });
-
-      const state = await client.stateManager.create('a');
-
-      state.set({ bool: true });
-      for (let i = 1; i <= 42; i++) {
-        state.set({ int: i });
-      }
-
-      await delay(20);
-      // make sure the state is up to date
-      assert.equal(state.get('int'), 42);
-      // 1 message for create request / response (i.e.await client.stateManager.create)
-      // 1 message for the batched updates requests / responses
-      assert.equal(batchedRequests, 2);
-      assert.equal(batchedResponses, 2);
-
-      state.delete();
-      await client.stop();
-      await server.stop();
     });
+
+    const client = new Client({ role: 'test', ...localConfig });
+    await client.start();
+
+    // update response
+    client.socket.addListener(BATCHED_TRANSPORT_CHANNEL, (args) => {
+      batchedResponses += 1;
+    });
+
+    const state = await client.stateManager.create('a');
+
+    state.set({ bool: true });
+
+    for (let i = 1; i <= 42; i++) {
+      state.set({ int: i });
+    }
+
+    await delay(20);
+    // make sure the state is up to date
+    assert.equal(state.get('int'), 42);
+    // 1 message for create request / response (i.e.await client.stateManager.create)
+    // 1 message for the batched updates requests / responses
+    assert.equal(batchedRequests, 2);
+    assert.equal(batchedResponses, 2);
+
+    state.delete();
+    await client.stop();
+    await server.stop();
+  });
+
+  it(`transportBatchTimeout > 0 - server should send only one message on consecutive asynchronous update requests`, async () => {
+    // launch new server so we can grab the server side representation of the client
+    // @note to self - please explain...
+    const localConfig = structuredClone(config);
+    localConfig.env.port = 8082;
+
+    const server = new Server(localConfig);
+    server.stateManager.configure({ transportBatchTimeout: 20 });
+    server.stateManager.registerSchema('a', a);
+    await server.start();
+
+    let batchedRequests = 0;
+    let batchedResponses = 0;
+
+    server.onClientConnect(client => {
+      client.socket.addListener(BATCHED_TRANSPORT_CHANNEL, (args) => {
+        batchedRequests += 1;
+      });
+    });
+
+    const client = new Client({ role: 'test', ...localConfig });
+    await client.start();
+
+    // update response
+    client.socket.addListener(BATCHED_TRANSPORT_CHANNEL, (args) => {
+      batchedResponses += 1;
+    });
+
+    const state = await client.stateManager.create('a');
+
+    for (let i = 1; i <= 10; i++) {
+      await delay(1);
+      state.set({ int: i });
+    }
+
+    await delay(30);
+    // make sure the state is up to date
+    assert.equal(state.get('int'), 10);
+    // 1 message for create request / response (i.e.await client.stateManager.create)
+    // 10 message for the updates requests
+    assert.equal(batchedRequests, 11);
+    // 1 message for create request / response (i.e.await client.stateManager.create)
+    // 1 message for the updates responses
+    assert.equal(batchedResponses, 2);
+
+    state.delete();
+    await client.stop();
+    await server.stop();
+  });
+
+  it(`transportBatchTimeout > 0 - client should send only one message on consecutive asynchronous update requests`, async () => {
+    // launch new server so we can grab the server side representation of the client
+    // @note to self - please explain...
+    const localConfig = structuredClone(config);
+    localConfig.env.port = 8082;
+
+    const server = new Server(localConfig);
+    server.stateManager.registerSchema('a', a);
+    await server.start();
+
+    let batchedRequests = 0;
+    let batchedResponses = 0;
+
+    server.onClientConnect(client => {
+      client.socket.addListener(BATCHED_TRANSPORT_CHANNEL, (args) => {
+        // console.log('requests', args);
+        batchedRequests += 1;
+      });
+    });
+
+    const client = new Client({ role: 'test', ...localConfig });
+    client.stateManager.configure({ transportBatchTimeout: 20 });
+    await client.start();
+
+    // update response
+    client.socket.addListener(BATCHED_TRANSPORT_CHANNEL, (args) => {
+      // console.log('responses', args);
+      batchedResponses += 1;
+    });
+
+    const state = await client.stateManager.create('a');
+
+    for (let i = 1; i <= 10; i++) {
+      await delay(1);
+      state.set({ int: i });
+    }
+
+    await delay(30);
+    // make sure the state is up to date
+    assert.equal(state.get('int'), 10);
+    // 1 message for create request / response (i.e.await client.stateManager.create)
+    // 1 message for the updates requests
+    assert.equal(batchedRequests, 2);
+    // 1 message for create request / response (i.e.await client.stateManager.create)
+    // only 1 message for the updates responses as they are handled in a batch by the server
+    assert.equal(batchedResponses, 2);
+
+    state.delete();
+    await client.stop();
+    await server.stop();
   });
 });

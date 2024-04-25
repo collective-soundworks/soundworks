@@ -189,7 +189,7 @@ class Client {
      * @see {@link client.StateManager}
      * @type {client.StateManager}
      */
-    this.stateManager = null;
+    this.stateManager = new StateManager();
 
     /**
      * Status of the client, 'idle', 'inited', 'started' or 'errored'.
@@ -288,7 +288,7 @@ class Client {
     // ------------------------------------------------------------
     // CREATE STATE MANAGER
     // ------------------------------------------------------------
-    this.stateManager = new StateManager(this.id, {
+    this.stateManager.init(this.id, {
       emit: this.socket.send.bind(this.socket), // need to alias this
       addListener: this.socket.addListener.bind(this.socket),
       removeAllListeners: this.socket.removeAllListeners.bind(this.socket),
