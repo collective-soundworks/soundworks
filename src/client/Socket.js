@@ -138,20 +138,25 @@ class Socket {
         ws.addEventListener('open', connectEvent => {
           // parse incoming messages for pubsub
           this.ws = ws;
-          // ping / pong to check connection
-          const heartbeat = () => {
-            clearTimeout(this._heartbeatId);
 
-            this._heartbeatId = setTimeout(() => {
-              this.terminate();
-            }, PING_INTERVAL + PING_LATENCY_TOLERANCE);
-          };
+          // Heartbeat ping / pong check, to detect if connection has been
+          // broken but not detected by the client
+          // @note (2024-04): unstable and creates more issues than it solves, disable
+          // for now and review later
+          // const heartbeat = () => {
+          //   clearTimeout(this._heartbeatId);
 
-          heartbeat();
+          //   this._heartbeatId = setTimeout(() => {
+          //     console.log('> HEARTBEAT missed, closing...');
+          //     this.terminate();
+          //   }, PING_INTERVAL + PING_LATENCY_TOLERANCE);
+          // };
+
+          // heartbeat();
 
           this.ws.addEventListener('message', e => {
             if (e.data === PING_MESSAGE) {
-              heartbeat();
+              // heartbeat();
               this.ws.send(PONG_MESSAGE);
               // do not propagate ping / pong messages
               return;
