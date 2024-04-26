@@ -34,33 +34,6 @@ class BaseStateManager {
     this._observeRequestCallbacks = new Map(); // Map <reqId, [observedSchemaName, callback, options]>
 
     this._promiseStore = new PromiseStore();
-
-    this._options = {
-      transportBatchTimeout: 0,
-    };
-  }
-
-  /**
-   * Configure
-   *
-   */
-  configure(options) {
-    if (!(typeof options === 'object') || options === null) {
-      throw new TypeError(`Cannot execute 'configure' on 'BaseStateManager': given option is not a valid options object`);
-    }
-
-    if (options.transportBatchTimeout !== undefined) {
-      if (!Number.isFinite(options.transportBatchTimeout) || options.transportBatchTimeout < 0) {
-        throw new TypeError(`Failed to execute 'configure' on 'BaseStateManager': The provided option 'transportBatchTimeout' must be equal to or greater than 0`);
-      }
-
-      if (options.transportBatchTimeout !== 0 && options.transportBatchTimeout < 1) {
-        options.transportBatchTimeout = 1;
-        console.warn(`Warning: Executing 'configure' on 'BaseStateManager': The provided option 'transportBatchTimeout' has been clamped to 1, make sure the given 'transportBatchTimeout' is expressed in milliseconds`);
-      }
-
-      this._options.transportBatchTimeout = options.transportBatchTimeout;
-    }
   }
 
   /**
@@ -70,10 +43,7 @@ class BaseStateManager {
    *  Must implement a basic EventEmitter API.
    */
   init(id, transport) {
-    const batchedTransport = new BatchedTransport(transport, {
-      transportBatchTimeout: this._options.transportBatchTimeout,
-    });
-
+    const batchedTransport = new BatchedTransport(transport);
     this.client = { id, transport: batchedTransport };
 
     // ---------------------------------------------

@@ -38,10 +38,8 @@ export default class PromiseStore {
 
   // reject all pending request
   flush() {
-    console.log('flush called');
     for (let [_reqId, entry] of this.store) {
       const { reject, type } = entry;
-      console.log('reject err');
       reject(new Error(`[${this.name}] Discard promise "${type}", cannot resolve`));
     }
 

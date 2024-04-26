@@ -11,17 +11,10 @@ import { BATCHED_TRANSPORT_CHANNEL } from './constants.js';
  * @private
  */
 class BatchedTransport {
-  constructor(transport, {
-    transportBatchTimeout = 0, // in ms
-  } = {}) {
-    if (!Number.isFinite(transportBatchTimeout) || transportBatchTimeout < 0) {
-      throw new TypeError(`Failed to construct BatchedTransport: The provided option 'transportBatchTimeout' must equal to or  greater than 0`);
-    }
-
+  constructor(transport) {
     this._transport = transport;
     this._listeners = new Map();
     this._stack = [];
-    this._transportBatchTimeout = transportBatchTimeout;
     this._sending = false;
 
     this._transport.addListener(BATCHED_TRANSPORT_CHANNEL, stack => {
@@ -52,13 +45,7 @@ class BatchedTransport {
 
     if (!this._sending) {
       this._sending = true;
-
-      if (this._transportBatchTimeout === 0) {
-        await false;
-      } else {
-        await delay(this._transportBatchTimeout);
-      }
-
+      await false;
       this._sending = false;
       const stack = this._stack;
       this._stack = [];

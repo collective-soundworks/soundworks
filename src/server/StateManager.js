@@ -345,11 +345,12 @@ class StateManager extends BaseStateManager {
    * @private
    */
   addClient(nodeId, transport) {
-    transport = new BatchedTransport(transport, {
-      transportBatchTimeout: this._options.transportBatchTimeout,
-    });
+    const batchedTransport = new BatchedTransport(transport);
+    const client = {
+      id: nodeId,
+      transport: batchedTransport,
+    };
 
-    const client = { id: nodeId, transport };
     this._clientByNodeId.set(nodeId, client);
 
     // ---------------------------------------------
