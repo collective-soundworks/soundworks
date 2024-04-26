@@ -7,17 +7,22 @@ export default class PromiseStore {
     this.generateRequestId = idGenerator();
   }
 
-  add(resolve, reject, type) {
+  add(resolve, reject, type, localParams) {
     const reqId = this.generateRequestId.next().value;
-    this.store.set(reqId, { resolve, reject, type });
+    this.store.set(reqId, { resolve, reject, type, localParams });
 
     return reqId;
   }
 
   resolve(reqId, data) {
     if (this.store.has(reqId)) {
-      const { resolve } = this.store.get(reqId);
+      const { resolve, localParams } = this.store.get(reqId);
       this.store.delete(reqId);
+
+      // re-merge local params into network response
+      if (localParams !== undefined) {
+        Object.assign(data, localParams);
+      }
 
       resolve(data);
     } else {

@@ -528,8 +528,8 @@ describe('# SharedState', () => {
 
 describe(`# SharedState - Batched transport`, () => {
   it(`wait = 0 - should send only one message on consecutive synchronous update requests`, async () => {
-    // launch new server so we can grab the server side representation of the client
-    // @note to self - please explain... this looks like a bug...
+    // launch new server so we can catch the server side representation of the
+    // client which is already connected if we rely on beforeEeach hook
     const localConfig = structuredClone(config);
     localConfig.env.port = 8082;
 
@@ -577,8 +577,6 @@ describe(`# SharedState - Batched transport`, () => {
 
   // [2024-04] keep this around for now, might be re-introduced later
   // it(`transportBatchTimeout > 0 - server should send only one message on consecutive asynchronous update requests`, async () => {
-  //   // launch new server so we can grab the server side representation of the client
-  //   // @note to self - please explain...
   //   const localConfig = structuredClone(config);
   //   localConfig.env.port = 8082;
 
@@ -627,8 +625,6 @@ describe(`# SharedState - Batched transport`, () => {
   // });
 
   // it(`transportBatchTimeout > 0 - client should send only one message on consecutive asynchronous update requests`, async () => {
-  //   // launch new server so we can grab the server side representation of the client
-  //   // @note to self - please explain...
   //   const localConfig = structuredClone(config);
   //   localConfig.env.port = 8082;
 

@@ -339,48 +339,88 @@ ${JSON.stringify(initValues, null, 2)}`);
       throw new ReferenceError(`[SharedState] State "${this.schemaName}": state.set(updates[, context]) should receive an object as second parameter`);
     }
 
-    // handle immediate option
-    const immediateNewValues = {};
-    const immediateOldValues = {};
+    const newValues = {};
+    const oldValues = {};
+    const localParams = {};
+    const sharedParams = {};
+    let hasLocalParam = false;
+    let hasSharedParam = false;
+    let forwardParams = undefined;
     let propagateNow = false;
 
     for (let name in updates) {
       // try to coerce value early, so that eventual errors are triggered early
-      // on the node requesting the update
+      // on the node requesting the update, and not only on the server side
       this._parameters.coerceValue(name, updates[name]);
 
-      // @note: general idea...
-      // if immediate=true
+      // `immediate` option behavior
+      //
+      // If immediate=true
       //  - call listeners if value changed
       //  - go through normal server path
       //  - retrigger only if response from server is different from current value
-      // if immediate=true && (filterChange=false || event=true)
+      // If immediate=true && (filterChange=false || event=true)
       //  - call listeners with value regarless it changed
       //  - go through normal server path
       //  - if the node is initiator of the update (UPDATE_RESPONSE), (re-)check
       //    to prevent execute the listeners twice
 
-      const { immediate, filterChange, event } = this._parameters.getSchema(name);
+      // `local` option behavior
+      //
+      // - If the `updates` object only contains local variables, we can call the
+      // update listeners and return a fulfilled promise immediately
+      // - If parameters that require network communication are present, we call the
+      // update callback onces with the local payload, then we need to wait for the server
+      // response, call update listeners with server response and resolve promise with
+      // the full payload, i.e. reintegrating the local params in the resolve payload
 
-      if (immediate) {
+      const { local, immediate, filterChange, event } = this._parameters.getSchema(name);
+
+      if (immediate || local) {
         const oldValue = this._parameters.get(name);
         const [newValue, changed] = this._parameters.set(name, updates[name]);
 
+        // prepare data for immediate propagation of listeners
         if (changed || filterChange === false || event) {
-          immediateOldValues[name] = oldValue;
-          immediateNewValues[name] = newValue;
+          oldValues[name] = oldValue;
+          newValues[name] = newValue;
           propagateNow = true;
         }
       }
+
+      // define params that must go through network or not
+      if (local) {
+        hasLocalParam = true;
+        // get sanitize value for fulfilling promise
+        localParams[name] = this._parameters.get(name);
+      } else {
+        // note that immediate are shared params too
+        hasSharedParam = true;
+        sharedParams[name] = updates[name];
+      }
     }
 
+    // propagate immediate params if changed
     if (propagateNow) {
-      this._onUpdateCallbacks.forEach(listener => listener(immediateNewValues, immediateOldValues, context));
+      this._onUpdateCallbacks.forEach(listener => listener(newValues, oldValues, context));
     }
+
+    // check if we can resolve immediately or if we need to go through network
+    if (hasLocalParam) {
+      if (!hasSharedParam) {
+        return Promise.resolve(localParams);
+      } else {
+        // store local params to fulfill promise with all values, see PromiseStore
+        forwardParams = localParams;
+      }
+    }
+
+    // override updates to be shared on network without local params
+    updates = sharedParams;
 
     // go through server-side normal behavior
     return new Promise((resolve, reject) => {
-      const reqId = this._promiseStore.add(resolve, reject, 'update-request');
+      const reqId = this._promiseStore.add(resolve, reject, 'update-request', forwardParams);
       this._client.transport.emit(`${UPDATE_REQUEST}-${this.id}-${this.remoteId}`, reqId, updates, context);
     });
   }

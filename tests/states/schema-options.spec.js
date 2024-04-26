@@ -6,6 +6,7 @@ import { Client } from '../../src/client/index.js';
 import {
   OBSERVE_RESPONSE,
   OBSERVE_NOTIFICATION,
+  BATCHED_TRANSPORT_CHANNEL,
 } from '../../src/common/constants.js';
 
 import config from '../utils/config.js';
@@ -123,6 +124,7 @@ describe('# SharedState - schema options', () => {
             filterChange: false,
           }
         });
+
         const state = await server.stateManager.create('filter-change-test');
         const numCalls = 5;
         let counter = 0;
@@ -454,6 +456,110 @@ describe('# SharedState - schema options', () => {
 
         Promise.all([statePromise, attachedPromise]).then(() => resolve());
       });
+    });
+
+    it('[local=true]', async () => {
+      const localConfig = structuredClone(config);
+      localConfig.env.port = 8082;
+      const server = new Server(localConfig);
+      await server.start();
+
+      server.stateManager.registerSchema('local-test', {
+        value: {
+          type: 'boolean',
+          default: false,
+          local: true,
+        },
+      });
+
+      let requests = 0;
+      server.onClientConnect(client => {
+        client.socket.addListener(BATCHED_TRANSPORT_CHANNEL, (args) => {
+          requests += 1;
+        });
+      });
+
+      const client = new Client({ role: 'test', ...localConfig });
+      await client.start();
+
+      const owned = await client.stateManager.create('local-test');
+      const expected = { value: true };
+      owned.onUpdate(updates => {
+        assert.deepEqual(updates, expected);
+      });
+
+      let result;
+      try {
+        result = await owned.set(expected);
+      } catch (err) {
+        console.log(err.message);
+      }
+      assert.deepEqual(result, expected);
+      // 1 - for state create request
+      assert.equal(requests, 1);
+
+      await client.stop();
+      await server.stop();
+    });
+
+    it('[local=true]  mixed with regular param', async () => {
+      const localConfig = structuredClone(config);
+      localConfig.env.port = 8082;
+      const server = new Server(localConfig);
+      await server.start();
+
+      server.stateManager.registerSchema('local-test', {
+        local: {
+          type: 'boolean',
+          default: false,
+          local: true,
+        },
+        shared: {
+          type: 'boolean',
+          default: false,
+        }
+      });
+
+      let requests = 0;
+      server.onClientConnect(client => {
+        client.socket.addListener(BATCHED_TRANSPORT_CHANNEL, (args) => {
+          requests += 1;
+        });
+      });
+
+      const client = new Client({ role: 'test', ...localConfig });
+      await client.start();
+
+      const owned = await client.stateManager.create('local-test');
+      const attached = await client.stateManager.create('local-test');
+
+      const expected = { local: true, shared: true };
+
+      // update is called twice, once with the local param, a second time with
+      // "normal" shared param
+      let updateIndex = 0;
+      const updatesExpected = [{ local: true }, { shared: true}];
+      owned.onUpdate(updates => {
+        assert.deepEqual(updates, updatesExpected[updateIndex]);
+        updateIndex += 1;
+      });
+
+      // receive only the shared param
+      attached.onUpdate(updates => {
+        assert.deepEqual(updates, { shared: true });
+      });
+
+      const result = await owned.set(expected);
+      assert.deepEqual(result, expected);
+      // 1 - for state create request
+      // 1 - for state attach request
+      // 1 - for update shared param request
+      assert.equal(requests, 3);
+      assert.equal(updateIndex, 2);
+
+      await delay(50);
+      await client.stop();
+      await server.stop();
     });
   });
 
