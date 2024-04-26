@@ -1,4 +1,4 @@
-import { delay } from '@ircam/sc-utils';
+import { delay, getTime } from '@ircam/sc-utils';
 import { assert } from 'chai';
 
 import { Server } from '../../src/server/index.js';
@@ -529,7 +529,7 @@ describe('# SharedState', () => {
 describe(`# SharedState - Batched transport`, () => {
   it(`wait = 0 - should send only one message on consecutive synchronous update requests`, async () => {
     // launch new server so we can grab the server side representation of the client
-    // @note to self - please explain...
+    // @note to self - please explain... this looks like a bug...
     const localConfig = structuredClone(config);
     localConfig.env.port = 8082;
 
@@ -676,4 +676,162 @@ describe(`# SharedState - Batched transport`, () => {
     await client.stop();
     await server.stop();
   });
+
+  it.only(`transportBatchTimeout > 0 - attached states should not be delayed more than expected [same client]`, async () => {
+    const localConfig = structuredClone(config);
+    localConfig.env.port = 8082;
+
+    const server = new Server(localConfig);
+    server.stateManager.configure({ transportBatchTimeout: 10 });
+    server.stateManager.registerSchema('a', a);
+    await server.start();
+
+    const client = new Client({ role: 'test', ...localConfig });
+    await client.start();
+
+    const owned = await client.stateManager.create('a');
+    const attached = await client.stateManager.attach('a');
+
+    let updateRequest;
+    let ownedReceived;
+    let attachedReceived;
+
+    owned.onUpdate(updates => ownedReceived = getTime());
+    attached.onUpdate(updates => attachedReceived = getTime());
+
+    updateRequest = getTime();
+    owned.set({ int: 42 });
+
+    await delay(50);
+
+    // accpet 5ms of network latency
+    assert.isAbove(ownedReceived - updateRequest, 0.01);
+    assert.isBelow(ownedReceived - updateRequest, 0.015);
+
+    assert.isAbove(attachedReceived - updateRequest, 0.01);
+    assert.isBelow(attachedReceived - updateRequest, 0.015);
+
+    owned.delete();
+    await client.stop();
+    await server.stop();
+  });
+
+  it.only(`transportBatchTimeout > 0 - attached states should not be delayed more than expected [different clients]`, async () => {
+    const localConfig = structuredClone(config);
+    localConfig.env.port = 8082;
+
+    const server = new Server(localConfig);
+    server.stateManager.configure({ transportBatchTimeout: 10 });
+    server.stateManager.registerSchema('a', a);
+    await server.start();
+
+    const client1 = new Client({ role: 'test', ...localConfig });
+    await client1.start();
+
+    const client2 = new Client({ role: 'test', ...localConfig });
+    await client2.start();
+
+    const owned = await client1.stateManager.create('a');
+    const attached = await client2.stateManager.attach('a');
+
+    let updateRequest;
+    let ownedReceived;
+    let attachedReceived;
+
+    owned.onUpdate(updates => ownedReceived = getTime());
+    attached.onUpdate(updates => attachedReceived = getTime());
+
+    updateRequest = getTime();
+    owned.set({ int: 42 });
+
+    await delay(50);
+
+    // accpet 5ms of network latency
+    assert.isAbove(ownedReceived - updateRequest, 0.01);
+    assert.isBelow(ownedReceived - updateRequest, 0.015);
+
+    assert.isAbove(attachedReceived - updateRequest, 0.01);
+    assert.isBelow(attachedReceived - updateRequest, 0.015);
+
+    owned.delete();
+    await client1.stop();
+    await client2.stop();
+    await server.stop();
+  });
+
+  it.only(`transportBatchTimeout > 0 - attached states should not be delayed more than expected [owned by server]`, async () => {
+    const localConfig = structuredClone(config);
+    localConfig.env.port = 8082;
+
+    const server = new Server(localConfig);
+    server.stateManager.configure({ transportBatchTimeout: 10 });
+    server.stateManager.registerSchema('a', a);
+    await server.start();
+
+    const client1 = new Client({ role: 'test', ...localConfig });
+    await client1.start();
+
+    const client2 = new Client({ role: 'test', ...localConfig });
+    await client2.start();
+
+    const owned = await server.stateManager.create('a');
+    const attached1 = await client1.stateManager.attach('a');
+    const attached2 = await client2.stateManager.attach('a');
+
+    let updateRequest;
+    let attached1Received;
+    let attached2Received;
+
+    attached1.onUpdate(updates => attached1Received = getTime());
+    attached2.onUpdate(updates => attached2Received = getTime());
+
+    updateRequest = getTime();
+    attached1.set({ int: 42 });
+
+    await delay(50);
+
+    // accpet 5ms of network latency
+    assert.isAbove(attached1Received - updateRequest, 0.01);
+    assert.isBelow(attached1Received - updateRequest, 0.015);
+
+    assert.isAbove(attached2Received - updateRequest, 0.01);
+    assert.isBelow(attached2Received - updateRequest, 0.015);
+
+    owned.delete();
+    await client1.stop();
+    await client2.stop();
+    await server.stop();
+  });
+
+  // it.skip(`Flushing PromiseStore should not crash the server`, async () => {
+  //   // launch new server so we can grab the server side representation of the client
+  //   // @note to self - please explain...
+  //   const localConfig = structuredClone(config);
+  //   localConfig.env.port = 8082;
+
+  //   const server = new Server(localConfig);
+  //   server.stateManager.configure({ transportBatchTimeout: 100 });
+  //   server.stateManager.registerSchema('a', a);
+  //   await server.start();
+
+  //   const client = new Client({ role: 'test', ...localConfig });
+  //   await client.start();
+
+  //   const state = await client.stateManager.create('a');
+  //   const attached = await server.stateManager.attach('a');
+
+  //   try {
+  //     // server request update
+  //     attached.set({ int: 42 });
+  //     // client stop for some reason, so the PromiseStore is flushed
+  //     await delay(10);
+  //     await client.stop();
+
+  //     await delay(1000);
+  //   } catch (err) {
+  //     console.log(err.message);
+  //   }
+  //   // state.delete();
+  //   // await server.stop();
+  // });
 });
