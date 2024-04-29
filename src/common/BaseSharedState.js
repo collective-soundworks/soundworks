@@ -24,7 +24,7 @@ import {
 // }
 
 class BaseSharedState {
-  constructor(id, remoteId, schemaName, schema, client, isOwner, manager, initValues = {}) {
+  constructor(id, remoteId, schemaName, schema, client, isOwner, manager, initValues, filter) {
     /** @private */
     this._id = id;
     /** @private */
@@ -37,6 +37,9 @@ class BaseSharedState {
     this._client = client;
     /** @private */
     this._manager = manager;
+    /** @private */
+    this._filter = filter;
+
     /**
      * true is the state has been detached or deleted
      * @private
@@ -332,12 +335,14 @@ ${JSON.stringify(initValues, null, 2)}`);
     }
 
     if (!isPlainObject(updates)) {
-      throw new ReferenceError(`[SharedState] State "${this.schemaName}": state.set(updates[, context]) should receive an object as first parameter`);
+      throw new TypeError(`[SharedState] State "${this.schemaName}": state.set(updates[, context]) should receive an object as first parameter`);
     }
 
     if (context !== null && !isPlainObject(context)) {
-      throw new ReferenceError(`[SharedState] State "${this.schemaName}": state.set(updates[, context]) should receive an object as second parameter`);
+      throw new TypeError(`[SharedState] State "${this.schemaName}": state.set(updates[, context]) should receive an object as second parameter`);
     }
+
+
 
     const newValues = {};
     const oldValues = {};
@@ -349,9 +354,17 @@ ${JSON.stringify(initValues, null, 2)}`);
     let propagateNow = false;
 
     for (let name in updates) {
-      // try to coerce value early, so that eventual errors are triggered early
+      // Try to coerce value early, so that eventual errors are triggered early
       // on the node requesting the update, and not only on the server side
+      // This throws if name does not exists
       this._parameters.coerceValue(name, updates[name]);
+
+      // Check that name is in filter list, if any
+      if (this._filter !== null) {
+        if (!this._filter.includes(name)) {
+          throw new DOMException(`[SharedState] State "${this.schemaName}": cannot set parameter '${name}', parameter is not in filter list`, 'NotSupportedError');
+        }
+      }
 
       // `immediate` option behavior
       //
@@ -437,6 +450,16 @@ ${JSON.stringify(initValues, null, 2)}`);
    * const value = state.get('paramName');
    */
   get(name) {
+    if (!this._parameters.has(name)) {
+      throw new ReferenceError(`[SharedState] State "${this.schemaName}": Cannot get value of undefined parameter "${name}"`);
+    }
+
+    if (this._filter !== null) {
+      if (!this._filter.includes(name)) {
+        throw new DOMException(`[SharedState] State "${this.schemaName}": cannot get parameter '${name}', parameter is not in filter list`, 'NotSupportedError');
+      }
+    }
+
     return this._parameters.get(name);
   }
 
@@ -455,6 +478,16 @@ ${JSON.stringify(initValues, null, 2)}`);
    * const value = state.getUnsafe('paramName');
    */
   getUnsafe(name) {
+    if (!this._parameters.has(name)) {
+      throw new ReferenceError(`[SharedState] State "${this.schemaName}": Cannot get value of undefined parameter "${name}"`);
+    }
+
+    if (this._filter !== null) {
+      if (!this._filter.includes(name)) {
+        throw new DOMException(`[SharedState] State "${this.schemaName}": cannot get parameter '${name}', parameter is not in filter list`, 'NotSupportedError');
+      }
+    }
+
     return this._parameters.getUnsafe(name);
   }
 
@@ -467,7 +500,17 @@ ${JSON.stringify(initValues, null, 2)}`);
    * const values = state.getValues();
    */
   getValues() {
-    return this._parameters.getValues();
+    const values = this._parameters.getValues();
+
+    if (this._filter !== null) {
+      for (let name in values) {
+        if (!this._filter.includes(name)) {
+          delete values[name];
+        }
+      }
+    }
+
+    return values;
   }
 
   /**
@@ -484,7 +527,17 @@ ${JSON.stringify(initValues, null, 2)}`);
    * const values = state.getValues();
    */
   getValuesUnsafe() {
-    return this._parameters.getValuesUnsafe();
+    const values = this._parameters.getValuesUnsafe();
+
+    if (this._filter !== null) {
+      for (let name in values) {
+        if (!this._filter.includes(name)) {
+          delete values[name];
+        }
+      }
+    }
+
+    return values;
   }
 
   /**

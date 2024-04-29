@@ -368,7 +368,8 @@ class StateManager extends BaseStateManager {
 
             // attach client to the state as owner
             const isOwner = true;
-            state._attachClient(remoteId, client, isOwner);
+            const filter = null;
+            state._attachClient(remoteId, client, isOwner, filter);
 
             this._sharedStatePrivateById.set(stateId, state);
 
@@ -407,7 +408,7 @@ class StateManager extends BaseStateManager {
     // ---------------------------------------------
     client.transport.addListener(
       ATTACH_REQUEST,
-      (reqId, schemaName, stateId = null, requireSchema = true) => {
+      (reqId, schemaName, stateId = null, requireSchema = true, filter = null) => {
         if (this._schemas.has(schemaName)) {
           let state = null;
 
@@ -432,15 +433,29 @@ class StateManager extends BaseStateManager {
             // i.e. same state -> several remote attach on the same node
             const remoteId = generateRemoteId.next().value;
             const isOwner = false;
-            state._attachClient(remoteId, client, isOwner);
-
             const currentValues = state._parameters.getValues();
             const schema = this._schemas.get(schemaName);
             const schemaOption = requireSchema ? schema : null;
 
+            // if filter given, check that all filter entries are valid schema keys
+            // @todo - improve error reportin: report invalid filters
+            if (filter !== null) {
+              const keys = Object.keys(schema);
+              const isValid = filter.reduce((acc, key) => acc && keys.includes(key), true);
+
+              if (!isValid) {
+                const msg = `[stateManager] Cannot attach, invalid filter (${filter.join(', ')}) for schema "${schemaName}"`;
+                console.error(msg);
+
+                return client.transport.emit(ATTACH_ERROR, reqId, msg);
+              }
+            }
+
+            state._attachClient(remoteId, client, isOwner, filter);
+
             client.transport.emit(
               ATTACH_RESPONSE,
-              reqId, state.id, remoteId, schemaName, schemaOption, currentValues,
+              reqId, state.id, remoteId, schemaName, schemaOption, currentValues, filter,
             );
 
           } else {

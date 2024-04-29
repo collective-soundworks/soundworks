@@ -50,7 +50,7 @@ class BaseStateManager {
     // CREATE
     // ---------------------------------------------
 
-    this.client.transport.addListener(CREATE_RESPONSE, (reqId, stateId, remoteId, schemaName, schema, initValues) => {
+    this.client.transport.addListener(CREATE_RESPONSE, (reqId, stateId, remoteId, schemaName, schema, initValues, filter) => {
 
       // cache schema when first dealing it to save some bandwidth
       if (!this._cachedSchemas.has(schemaName)) {
@@ -59,7 +59,7 @@ class BaseStateManager {
 
       schema = this._cachedSchemas.get(schemaName);
 
-      const state = new SharedState(stateId, remoteId, schemaName, schema, this.client, true, this, initValues);
+      const state = new SharedState(stateId, remoteId, schemaName, schema, this.client, true, this, initValues, null);
       this._statesById.set(state.id, state);
 
       this._promiseStore.resolve(reqId, state);
@@ -72,7 +72,7 @@ class BaseStateManager {
     // ---------------------------------------------
     // ATTACH (when creator, is attached by default)
     // ---------------------------------------------
-    this.client.transport.addListener(ATTACH_RESPONSE, (reqId, stateId, remoteId, schemaName, schema, currentValues) => {
+    this.client.transport.addListener(ATTACH_RESPONSE, (reqId, stateId, remoteId, schemaName, schema, currentValues, filter) => {
       // cache schema when first dealing with it to save some bandwidth
       // note: when we make the schemas dynamic at some point
       // the server should be able to invalidate the schema and send
@@ -83,7 +83,7 @@ class BaseStateManager {
 
       schema = this._cachedSchemas.get(schemaName);
 
-      const state = new SharedState(stateId, remoteId, schemaName, schema, this.client, false, this, currentValues);
+      const state = new SharedState(stateId, remoteId, schemaName, schema, this.client, false, this, currentValues, filter);
       this._statesById.set(state.id, state);
 
       this._promiseStore.resolve(reqId, state);
@@ -243,11 +243,41 @@ class BaseStateManager {
    * @example
    * const state = await client.stateManager.attach('my-schema');
    */
-  async attach(schemaName, stateId = null) {
+  async attach(schemaName, stateIdOrFilter = null, filter = null) {
+    let stateId = null;
+
+    if (!isString(schemaName)) {
+      throw new TypeError(`Cannot execute 'attach' on 'StateManager': argument 1 should be either a number or an array`);
+    }
+
+    if (arguments.length === 2) {
+      if (Number.isFinite(stateIdOrFilter)) {
+        stateId = stateIdOrFilter;
+        filter = null;
+      } else if (Array.isArray(stateIdOrFilter)) {
+        stateId = null;
+        filter = stateIdOrFilter;
+      } else {
+        throw new TypeError(`Cannot execute 'attach' on 'StateManager': argument 2 should be either a number or an array`);
+      }
+    }
+
+    if (arguments.length === 3) {
+      stateId = stateIdOrFilter;
+
+      if (!Number.isFinite(stateId)) {
+        throw new TypeError(`Cannot execute 'attach' on 'StateManager': argument 2 should be a number`);
+      }
+
+      if (!Array.isArray(filter)) {
+        throw new TypeError(`Cannot execute 'attach' on 'StateManager': argument 2 should be a number`);
+      }
+    }
+
     return new Promise((resolve, reject) => {
       const reqId = this._promiseStore.add(resolve, reject, 'attach-request');
       const requireSchema = this._cachedSchemas.has(schemaName) ? false : true;
-      this.client.transport.emit(ATTACH_REQUEST, reqId, schemaName, stateId, requireSchema);
+      this.client.transport.emit(ATTACH_REQUEST, reqId, schemaName, stateId, requireSchema, filter);
     });
   }
 

@@ -12,6 +12,25 @@ import {
 } from '../common/constants.js';
 
 /**
+ * Filter update object according to filter list.
+ * Return identity is filter is null
+ * @param {object} updates
+ * @param {array|null} filter
+ */
+function filterUpdates(updates, filter) {
+  if (filter === null) {
+    return updates;
+  }
+
+  return filter.reduce((acc, key) => {
+    if (key in updates) {
+      acc[key] = updates[key];
+    }
+    return acc;
+  }, {});
+}
+
+/**
  * The "real" state, this instance is kept private by the server.StateManager.
  * It can only be accessed through a SharedState proxy.
  *
@@ -30,8 +49,8 @@ class SharedStatePrivate {
     this._creatorId = null;
   }
 
-  _attachClient(remoteId, client, isOwner = false) {
-    const clientInfos = { client, isOwner };
+  _attachClient(remoteId, client, isOwner, filter) {
+    const clientInfos = { client, isOwner, filter };
     this._attachedClients.set(remoteId, clientInfos);
 
     if (isOwner) {
@@ -61,7 +80,7 @@ class SharedStatePrivate {
       }
 
       if (hookAborted === false) {
-        const filteredUpdates = {};
+        let acknowledgedUpdates = {};
         let hasUpdates = false;
 
         for (let name in updates) {
@@ -76,7 +95,7 @@ class SharedStatePrivate {
           }
 
           if ((filterChange && changed) || !filterChange) {
-            filteredUpdates[name] = newValue;
+            acknowledgedUpdates[name] = newValue;
             hasUpdates = true;
           }
         }
@@ -103,41 +122,54 @@ class SharedStatePrivate {
 
           // propagate RESPONSE to the client that originates the request if not the server
           if (client.id !== -1) {
+            // no need to filter updates on requested, is blocked on client-side
             client.transport.emit(
               `${UPDATE_RESPONSE}-${this.id}-${remoteId}`,
-              reqId, filteredUpdates, context,
+              reqId, acknowledgedUpdates, context,
             );
           }
 
-          // propagate NOTIFICATION to all other attached clients except server
+          // propagate NOTIFICATION to all attached clients except server
           for (let [peerRemoteId, clientInfos] of this._attachedClients) {
             const peer = clientInfos.client;
 
             if (remoteId !== peerRemoteId && peer.id !== -1) {
-              peer.transport.emit(
-                `${UPDATE_NOTIFICATION}-${this.id}-${peerRemoteId}`,
-                filteredUpdates, context,
-              );
+              const filter = clientInfos.filter;
+              const filteredUpdates = filterUpdates(acknowledgedUpdates, filter);
+
+              // propagate only if there something left after applying the filter
+              if (Object.keys(filteredUpdates).length > 0) {
+                peer.transport.emit(
+                  `${UPDATE_NOTIFICATION}-${this.id}-${peerRemoteId}`,
+                  filteredUpdates, context,
+                );
+              }
             }
           }
 
           // propagate RESPONSE to server if it is the requester
           if (client.id === -1) {
+            // no need to filter updates on requested, is blocked on client-side
             client.transport.emit(
               `${UPDATE_RESPONSE}-${this.id}-${remoteId}`,
-              reqId, filteredUpdates, context,
+              reqId, acknowledgedUpdates, context,
             );
           }
 
-          // propagate NOTIFICATION other attached state that belongs to server
+          // propagate NOTIFICATION to other state attached on the server
           for (let [peerRemoteId, clientInfos] of this._attachedClients) {
             const peer = clientInfos.client;
 
             if (remoteId !== peerRemoteId && peer.id === -1) {
-              peer.transport.emit(
-                `${UPDATE_NOTIFICATION}-${this.id}-${peerRemoteId}`,
-                filteredUpdates, context,
-              );
+              const filter = clientInfos.filter;
+              const filteredUpdates = filterUpdates(acknowledgedUpdates, filter);
+
+              if (Object.keys(filteredUpdates).length > 0) {
+                peer.transport.emit(
+                  `${UPDATE_NOTIFICATION}-${this.id}-${peerRemoteId}`,
+                  filteredUpdates, context,
+                );
+              }
             }
           }
         } else {

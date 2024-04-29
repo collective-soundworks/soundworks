@@ -526,6 +526,202 @@ describe('# SharedState', () => {
   });
 });
 
+describe('# SharedState - filtered attached state', () => {
+  let server;
+  let client;
+
+  beforeEach(async () => {
+    // ---------------------------------------------------
+    // server
+    // ---------------------------------------------------
+    server = new Server(config);
+    server.stateManager.registerSchema('filtered', {
+      bool: {
+        type: 'boolean',
+        default: false,
+      },
+      int: {
+        type: 'integer',
+        default: 0,
+      },
+      string: {
+        type: 'string',
+        default: 'a',
+      },
+    });
+    await server.start();
+
+    // ---------------------------------------------------
+    // clients
+    // ---------------------------------------------------
+    client = new Client({ role: 'test', ...config });
+    await client.start();
+  });
+
+  afterEach(async function() {
+    server.stop();
+  });
+
+  describe(`## attach() [overload]`, () => {
+    it(`should support attach(schemaName, filter)`, async () => {
+      const owned = await server.stateManager.create('filtered');
+      const attached = await client.stateManager.attach('filtered', ['bool', 'string']);
+    });
+
+    it(`should support attach(schemaName, stateId, filter)`, async () => {
+      const owned = await server.stateManager.create('filtered');
+      const attached = await client.stateManager.attach('filtered', owned.id, ['bool', 'string']);
+    });
+
+    it(`should throw if filter contains invalid keys`, async () => {
+      const owned = await server.stateManager.create('filtered');
+      let errored = false;
+
+      try {
+        const attached = await client.stateManager.attach('filtered', ['invalid', 'toto']);
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      assert.isTrue(errored);
+    });
+  });
+
+  describe(`## onUpdate(callback)`, () => {
+    it(`should propagate only filtered keys`, async () => {
+      const filter = ['bool', 'string'];
+      const owned = await server.stateManager.create('filtered');
+      const attached = await client.stateManager.attach('filtered', filter);
+      const expected = { bool: true, int: 1, string: 'b' };
+
+      owned.onUpdate(updates => {
+        assert.deepEqual(updates, expected);
+      });
+
+      attached.onUpdate(updates => {
+        assert.deepEqual(Object.keys(updates), filter);
+      });
+
+      await owned.set(expected);
+      await delay(20);
+    });
+
+    it(`should not propagate if filtered updates is empty object`, async () => {
+      const filter = ['bool', 'string'];
+      const owned = await server.stateManager.create('filtered');
+      const attached = await client.stateManager.attach('filtered', owned.id, filter);
+      const expected = { int: 1 };
+      let callbackExecuted = false;
+      let batchedResponses = 0;
+
+      client.socket.addListener(BATCHED_TRANSPORT_CHANNEL, (args) => {
+        batchedResponses += 1;
+      });
+
+      owned.onUpdate(updates => {
+        assert.deepEqual(updates, expected);
+      });
+
+      attached.onUpdate(updates => {
+        callbackExecuted = true;
+      });
+
+      await owned.set(expected);
+      await delay(20);
+
+      assert.isFalse(callbackExecuted);
+      assert.equal(batchedResponses, 0);
+    });
+  });
+
+  describe(`## set(updates)`, () => {
+    it(`should throw early if trying to set modify a param which is not filtered`, async () => {
+      const filter = ['bool', 'string'];
+      const owned = await server.stateManager.create('filtered');
+      const attached = await client.stateManager.attach('filtered', filter);
+      let onUpdateCalled = false;
+      let errored = false;
+
+      owned.onUpdate(() => onUpdateCalled = true);
+
+      try {
+        await attached.set({ int: 42 });
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      await delay(20);
+
+      assert.isTrue(errored);
+      assert.isFalse(onUpdateCalled);
+    });
+  });
+
+  describe(`## get(name)`, () => {
+    it(`should throw if trying to access a param which is not filtered`, async () => {
+      const filter = ['bool', 'string'];
+      const owned = await server.stateManager.create('filtered');
+      const attached = await client.stateManager.attach('filtered', filter);
+      let errored = false;
+
+      try {
+        await attached.get('int');
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      await delay(20);
+
+      assert.isTrue(errored);
+    });
+  });
+
+  describe(`## getUnsafe(name)`, () => {
+    it(`should throw if trying to access a param which is not filtered`, async () => {
+      const filter = ['bool', 'string'];
+      const owned = await server.stateManager.create('filtered');
+      const attached = await client.stateManager.attach('filtered', filter);
+      let errored = false;
+
+      try {
+        await attached.get('int');
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      await delay(20);
+
+      assert.isTrue(errored);
+    });
+  });
+
+  describe(`## getValues()`, () => {
+    it(`should return a filtered object`, async () => {
+      const filter = ['bool', 'string'];
+      const owned = await server.stateManager.create('filtered');
+      const attached = await client.stateManager.attach('filtered', filter);
+
+      const values = attached.getValues();
+      assert.deepEqual(values, { bool: false, string: 'a' });
+    });
+  });
+
+  describe(`## getValuesUnsafe()`, () => {
+    it(`should return a filtered object`, async () => {
+      const filter = ['bool', 'string'];
+      const owned = await server.stateManager.create('filtered');
+      const attached = await client.stateManager.attach('filtered', filter);
+
+      const values = attached.getValues();
+      assert.deepEqual(values, { bool: false, string: 'a' });
+    });
+  });
+});
+
 describe(`# SharedState - Batched transport`, () => {
   it(`wait = 0 - should send only one message on consecutive synchronous update requests`, async () => {
     // launch new server so we can catch the server side representation of the
@@ -574,229 +770,4 @@ describe(`# SharedState - Batched transport`, () => {
     await client.stop();
     await server.stop();
   });
-
-  // [2024-04] keep this around for now, might be re-introduced later
-  // it(`transportBatchTimeout > 0 - server should send only one message on consecutive asynchronous update requests`, async () => {
-  //   const localConfig = structuredClone(config);
-  //   localConfig.env.port = 8082;
-
-  //   const server = new Server(localConfig);
-  //   server.stateManager.configure({ transportBatchTimeout: 20 });
-  //   server.stateManager.registerSchema('a', a);
-  //   await server.start();
-
-  //   let batchedRequests = 0;
-  //   let batchedResponses = 0;
-
-  //   server.onClientConnect(client => {
-  //     client.socket.addListener(BATCHED_TRANSPORT_CHANNEL, (args) => {
-  //       batchedRequests += 1;
-  //     });
-  //   });
-
-  //   const client = new Client({ role: 'test', ...localConfig });
-  //   await client.start();
-
-  //   // update response
-  //   client.socket.addListener(BATCHED_TRANSPORT_CHANNEL, (args) => {
-  //     batchedResponses += 1;
-  //   });
-
-  //   const state = await client.stateManager.create('a');
-
-  //   for (let i = 1; i <= 10; i++) {
-  //     await delay(1);
-  //     state.set({ int: i });
-  //   }
-
-  //   await delay(30);
-  //   // make sure the state is up to date
-  //   assert.equal(state.get('int'), 10);
-  //   // 1 message for create request / response (i.e.await client.stateManager.create)
-  //   // 10 message for the updates requests
-  //   assert.equal(batchedRequests, 11);
-  //   // 1 message for create request / response (i.e.await client.stateManager.create)
-  //   // 1 message for the updates responses
-  //   assert.equal(batchedResponses, 2);
-
-  //   state.delete();
-  //   await client.stop();
-  //   await server.stop();
-  // });
-
-  // it(`transportBatchTimeout > 0 - client should send only one message on consecutive asynchronous update requests`, async () => {
-  //   const localConfig = structuredClone(config);
-  //   localConfig.env.port = 8082;
-
-  //   const server = new Server(localConfig);
-  //   server.stateManager.registerSchema('a', a);
-  //   await server.start();
-
-  //   let batchedRequests = 0;
-  //   let batchedResponses = 0;
-
-  //   server.onClientConnect(client => {
-  //     client.socket.addListener(BATCHED_TRANSPORT_CHANNEL, (args) => {
-  //       // console.log('requests', args);
-  //       batchedRequests += 1;
-  //     });
-  //   });
-
-  //   const client = new Client({ role: 'test', ...localConfig });
-  //   client.stateManager.configure({ transportBatchTimeout: 20 });
-  //   await client.start();
-
-  //   // update response
-  //   client.socket.addListener(BATCHED_TRANSPORT_CHANNEL, (args) => {
-  //     // console.log('responses', args);
-  //     batchedResponses += 1;
-  //   });
-
-  //   const state = await client.stateManager.create('a');
-
-  //   for (let i = 1; i <= 10; i++) {
-  //     await delay(1);
-  //     state.set({ int: i });
-  //   }
-
-  //   await delay(30);
-  //   // make sure the state is up to date
-  //   assert.equal(state.get('int'), 10);
-  //   // 1 message for create request / response (i.e.await client.stateManager.create)
-  //   // 1 message for the updates requests
-  //   assert.equal(batchedRequests, 2);
-  //   // 1 message for create request / response (i.e.await client.stateManager.create)
-  //   // only 1 message for the updates responses as they are handled in a batch by the server
-  //   assert.equal(batchedResponses, 2);
-
-  //   state.delete();
-  //   await client.stop();
-  //   await server.stop();
-  // });
-
-  // it.only(`transportBatchTimeout > 0 - attached states should not be delayed more than expected [same client]`, async () => {
-  //   const localConfig = structuredClone(config);
-  //   localConfig.env.port = 8082;
-
-  //   const server = new Server(localConfig);
-  //   server.stateManager.configure({ transportBatchTimeout: 10 });
-  //   server.stateManager.registerSchema('a', a);
-  //   await server.start();
-
-  //   const client = new Client({ role: 'test', ...localConfig });
-  //   await client.start();
-
-  //   const owned = await client.stateManager.create('a');
-  //   const attached = await client.stateManager.attach('a');
-
-  //   let updateRequest;
-  //   let ownedReceived;
-  //   let attachedReceived;
-
-  //   owned.onUpdate(updates => ownedReceived = getTime());
-  //   attached.onUpdate(updates => attachedReceived = getTime());
-
-  //   updateRequest = getTime();
-  //   owned.set({ int: 42 });
-
-  //   await delay(50);
-
-  //   // accpet 5ms of network latency
-  //   assert.isAbove(ownedReceived - updateRequest, 0.01);
-  //   assert.isBelow(ownedReceived - updateRequest, 0.015);
-
-  //   assert.isAbove(attachedReceived - updateRequest, 0.01);
-  //   assert.isBelow(attachedReceived - updateRequest, 0.015);
-
-  //   owned.delete();
-  //   await client.stop();
-  //   await server.stop();
-  // });
-
-  // it.only(`transportBatchTimeout > 0 - attached states should not be delayed more than expected [different clients]`, async () => {
-  //   const localConfig = structuredClone(config);
-  //   localConfig.env.port = 8082;
-
-  //   const server = new Server(localConfig);
-  //   server.stateManager.configure({ transportBatchTimeout: 10 });
-  //   server.stateManager.registerSchema('a', a);
-  //   await server.start();
-
-  //   const client1 = new Client({ role: 'test', ...localConfig });
-  //   await client1.start();
-
-  //   const client2 = new Client({ role: 'test', ...localConfig });
-  //   await client2.start();
-
-  //   const owned = await client1.stateManager.create('a');
-  //   const attached = await client2.stateManager.attach('a');
-
-  //   let updateRequest;
-  //   let ownedReceived;
-  //   let attachedReceived;
-
-  //   owned.onUpdate(updates => ownedReceived = getTime());
-  //   attached.onUpdate(updates => attachedReceived = getTime());
-
-  //   updateRequest = getTime();
-  //   owned.set({ int: 42 });
-
-  //   await delay(50);
-
-  //   // accpet 5ms of network latency
-  //   assert.isAbove(ownedReceived - updateRequest, 0.01);
-  //   assert.isBelow(ownedReceived - updateRequest, 0.015);
-
-  //   assert.isAbove(attachedReceived - updateRequest, 0.01);
-  //   assert.isBelow(attachedReceived - updateRequest, 0.015);
-
-  //   owned.delete();
-  //   await client1.stop();
-  //   await client2.stop();
-  //   await server.stop();
-  // });
-
-  // it.only(`transportBatchTimeout > 0 - attached states should not be delayed more than expected [owned by server]`, async () => {
-  //   const localConfig = structuredClone(config);
-  //   localConfig.env.port = 8082;
-
-  //   const server = new Server(localConfig);
-  //   server.stateManager.configure({ transportBatchTimeout: 10 });
-  //   server.stateManager.registerSchema('a', a);
-  //   await server.start();
-
-  //   const client1 = new Client({ role: 'test', ...localConfig });
-  //   await client1.start();
-
-  //   const client2 = new Client({ role: 'test', ...localConfig });
-  //   await client2.start();
-
-  //   const owned = await server.stateManager.create('a');
-  //   const attached1 = await client1.stateManager.attach('a');
-  //   const attached2 = await client2.stateManager.attach('a');
-
-  //   let updateRequest;
-  //   let attached1Received;
-  //   let attached2Received;
-
-  //   attached1.onUpdate(updates => attached1Received = getTime());
-  //   attached2.onUpdate(updates => attached2Received = getTime());
-
-  //   updateRequest = getTime();
-  //   attached1.set({ int: 42 });
-
-  //   await delay(50);
-
-  //   // accpet 5ms of network latency
-  //   assert.isAbove(attached1Received - updateRequest, 0.01);
-  //   assert.isBelow(attached1Received - updateRequest, 0.015);
-
-  //   assert.isAbove(attached2Received - updateRequest, 0.01);
-  //   assert.isBelow(attached2Received - updateRequest, 0.015);
-
-  //   owned.delete();
-  //   await client1.stop();
-  //   await client2.stop();
-  //   await server.stop();
-  // });
 });
