@@ -566,11 +566,36 @@ describe('# SharedState - filtered attached state', () => {
     it(`should support attach(schemaName, filter)`, async () => {
       const owned = await server.stateManager.create('filtered');
       const attached = await client.stateManager.attach('filtered', ['bool', 'string']);
+
+      assert.equal(attached.id, owned.id);
     });
 
     it(`should support attach(schemaName, stateId, filter)`, async () => {
       const owned = await server.stateManager.create('filtered');
       const attached = await client.stateManager.attach('filtered', owned.id, ['bool', 'string']);
+
+      assert.equal(attached.id, owned.id);
+    });
+
+    it(`should support explicit default values, attach(schemaName, null)`, async () => {
+      const owned = await server.stateManager.create('filtered');
+      const attached = await client.stateManager.attach('filtered', null);
+
+      assert.equal(attached.id, owned.id);
+    });
+
+    it(`should support attach(schemaName, stateId, null)`, async () => {
+      const owned = await server.stateManager.create('filtered');
+      const attached = await client.stateManager.attach('filtered', owned.id, null);
+
+      assert.equal(attached.id, owned.id);
+    });
+
+    it(`should support explicit default values, attach(schemaName, null, null)`, async () => {
+      const owned = await server.stateManager.create('filtered');
+      const attached = await client.stateManager.attach('filtered', null, null);
+
+      assert.equal(attached.id, owned.id);
     });
 
     it(`should throw if filter contains invalid keys`, async () => {

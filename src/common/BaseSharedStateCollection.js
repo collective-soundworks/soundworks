@@ -1,8 +1,9 @@
 /** @private */
 class BaseSharedStateCollection {
-  constructor(stateManager, schemaName, options = {}) {
+  constructor(stateManager, schemaName, filter = null, options = {}) {
     this._stateManager = stateManager;
     this._schemaName = schemaName;
+    this._filter = filter;
     this._options = Object.assign({ excludeLocal: false }, options);
 
     this._schema = null;
@@ -18,8 +19,19 @@ class BaseSharedStateCollection {
   async _init() {
     this._schema = await this._stateManager.getSchema(this._schemaName);
 
+    // if filter is set, check that it contains only valid param names
+    if (this._filter !== null) {
+      const keys = Object.keys(this._schema);
+
+      for (let filter of this._filter) {
+        if (!keys.includes(filter)) {
+          throw new ReferenceError(`[SharedStateCollection] Invalid filter key (${filter}) for schema "${this._schemaName}"`)
+        }
+      }
+    }
+
     this._unobserve = await this._stateManager.observe(this._schemaName, async (schemaName, stateId) => {
-      const state = await this._stateManager.attach(schemaName, stateId);
+      const state = await this._stateManager.attach(schemaName, stateId, this._filter);
       this._states.push(state);
 
       state.onDetach(() => {
@@ -109,12 +121,45 @@ class BaseSharedStateCollection {
   }
 
   /**
+   * Return the current values of all the states in the collection.
+   *
+   * Similar to `getValues` but returns a reference to the underlying value in
+   * case of `any` type. May be usefull if the underlying value is big (e.g.
+   * sensors recordings, etc.) and deep cloning expensive. Be aware that if
+   * changes are made on the returned object, the state of your application will
+   * become inconsistent.
+   *
+   * @return {Object[]}
+   */
+  getValuesUnsafe() {
+    return this._states.map(state => state.getValues());
+  }
+
+  /**
    * Return the current param value of all the states in the collection.
    *
    * @param {String} name - Name of the parameter
    * @return {any[]}
    */
   get(name) {
+    // we can delegate to the state.get(name) method for throwing in case of filtered
+    // keys, as the Promise.all will reject on first reject Promise
+    return this._states.map(state => state.get(name));
+  }
+
+  /**
+   * Similar to `get` but returns a reference to the underlying value in case of
+   * `any` type. May be usefull if the underlying value is big (e.g. sensors
+   * recordings, etc.) and deep cloning expensive. Be aware that if changes are
+   * made on the returned object, the state of your application will become
+   * inconsistent.
+   *
+   * @param {String} name - Name of the parameter
+   * @return {any[]}
+   */
+  getUnsafe(name) {
+    // we can delegate to the state.get(name) method for throwing in case of filtered
+    // keys, as the Promise.all will reject on first reject Promise
     return this._states.map(state => state.get(name));
   }
 
@@ -126,8 +171,8 @@ class BaseSharedStateCollection {
    *   current call and will be passed as third argument to all update listeners.
    */
   async set(updates, context = null) {
-    // hot fix for https://github.com/collective-soundworks/soundworks/issues/85
-    // to be cleaned soon
+    // we can delegate to the state.set(update) method for throwing in case of
+    // filtered keys, as the Promise.all will reject on first reject Promise
     const promises = this._states.map(state => state.set(updates, context));
     return Promise.all(promises);
   }

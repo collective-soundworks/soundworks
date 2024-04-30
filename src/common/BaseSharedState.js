@@ -492,8 +492,9 @@ ${JSON.stringify(initValues, null, 2)}`);
   }
 
   /**
-   * Get all the key / value pairs of the state. If a parameter is of `any`
-   * type, a deep copy is made.
+   * Get all the key / value pairs of the state.
+   *
+   * If a parameter is of `any` type, a deep copy is made.
    *
    * @return {object}
    * @example
@@ -514,8 +515,8 @@ ${JSON.stringify(initValues, null, 2)}`);
   }
 
   /**
-   * Get all the key / value pairs of the state. If a parameter is of `any`
-   * type, a deep copy is made.
+   * Get all the key / value pairs of the state.
+   *
    * Similar to `getValues` but returns a reference to the underlying value in
    * case of `any` type. May be usefull if the underlying value is big (e.g.
    * sensors recordings, etc.) and deep cloning expensive. Be aware that if

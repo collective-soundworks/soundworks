@@ -251,26 +251,29 @@ class BaseStateManager {
     }
 
     if (arguments.length === 2) {
-      if (Number.isFinite(stateIdOrFilter)) {
+      if (stateIdOrFilter === null) {
+        stateId = null;
+        filter = null;
+      } else if (Number.isFinite(stateIdOrFilter)) {
         stateId = stateIdOrFilter;
         filter = null;
       } else if (Array.isArray(stateIdOrFilter)) {
         stateId = null;
         filter = stateIdOrFilter;
       } else {
-        throw new TypeError(`Cannot execute 'attach' on 'StateManager': argument 2 should be either a number or an array`);
+        throw new TypeError(`Cannot execute 'attach' on 'StateManager': argument 2 should be either null, a number or an array`);
       }
     }
 
     if (arguments.length === 3) {
       stateId = stateIdOrFilter;
 
-      if (!Number.isFinite(stateId)) {
-        throw new TypeError(`Cannot execute 'attach' on 'StateManager': argument 2 should be a number`);
+      if (stateId !== null && !Number.isFinite(stateId)) {
+        throw new TypeError(`Cannot execute 'attach' on 'StateManager': argument 2 should be either null or a number`);
       }
 
-      if (!Array.isArray(filter)) {
-        throw new TypeError(`Cannot execute 'attach' on 'StateManager': argument 2 should be a number`);
+      if (filter !== null && !Array.isArray(filter)) {
+        throw new TypeError(`Cannot execute 'attach' on 'StateManager': argument 3 should be either null or an array`);
       }
     }
 
@@ -366,7 +369,7 @@ class BaseStateManager {
           options = Object.assign(defaultOptions, args[1]);
 
         } else {
-          throw new Error(`[stateManager] Invalid signature, refer to the StateManager.observe documentation"`);
+          throw new TypeError(`[stateManager] Invalid signature, refer to the StateManager.observe documentation"`);
         }
 
         break;
@@ -431,20 +434,49 @@ class BaseStateManager {
    * Returns a collection of all the states created from the schema name.
    *
    * @param {string} schemaName - Name of the schema.
+   * @param {array|null} [filter=null] - Array of parameter names that are of interest
+   *  for every state of the collection. No filter is apllied if set to `null` (default).
    * @param {object} options - Options.
    * @param {boolean} [options.excludeLocal = false] - If set to true, exclude states
    *  created locallly, i.e. by the same node, from the collection.
    * @returns {server.SharedStateCollection|client.SharedStateCollection}
    */
-  async getCollection(schemaName, options) {
-    const collection = new SharedStateCollection(this, schemaName, options);
-
-    try {
-      await collection._init();
-    } catch (err) {
-      console.log(err.message);
-      throw new Error(`[stateManager] Cannot create collection, schema "${schemaName}" does not exists`);
+  async getCollection(schemaName, filterOrOptions = null, options = {}) {
+    if (!isString(schemaName)) {
+      throw new TypeError(`[stateManager] Cannot execute 'getCollection' on 'StateManager': 'schemaName' should be a string"`);
     }
+
+    let filter;
+
+    if (arguments.length === 2) {
+      if (filterOrOptions === null) {
+        filter = null;
+        options = null;
+      } else if (Array.isArray(filterOrOptions)) {
+        filter = filterOrOptions;
+        options = {};
+      } else if (typeof filterOrOptions === 'object') {
+        filter = null;
+        options = filterOrOptions;
+      } else {
+        throw new TypeError(`[stateManager] Cannot execute 'getCollection' on 'StateManager': argument 2 should be either null, an array or an object"`);
+      }
+    }
+
+    if (arguments.length === 3) {
+      filter = filterOrOptions;
+
+      if (filter !== null && !Array.isArray(filter)) {
+        throw new TypeError(`[stateManager] Cannot execute 'getCollection' on 'StateManager': 'filter' should be either an array or null"`);
+      }
+
+      if (options === null || typeof options !== 'object') {
+        throw new TypeError(`[stateManager] Cannot execute 'getCollection' on 'StateManager': 'options' should be an object"`);
+      }
+    }
+
+    const collection = new SharedStateCollection(this, schemaName, filter, options);
+    await collection._init();
 
     return collection;
   }
