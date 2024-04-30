@@ -22,9 +22,7 @@ import {
   GET_SCHEMA_ERROR,
 } from './constants.js';
 
-/**
- * @private
- */
+/** @private */
 class BaseStateManager {
   constructor() {
     this._statesById = new Map(); // <id, state>
@@ -42,6 +40,7 @@ class BaseStateManager {
    * @param {Object} transport - Transport to use for synchronizing the states.
    *  Must implement a basic EventEmitter API.
    */
+  /** @private */
   init(id, transport) {
     const batchedTransport = new BatchedTransport(transport);
     this.client = { id, transport: batchedTransport };
@@ -232,14 +231,23 @@ class BaseStateManager {
   /**
    * Attach to an existing `SharedState` instance.
    *
+   * Alternative signatures:
+   * - `stateManager.attach(schemaName)`
+   * - `stateManager.attach(schemaName, stateId)`
+   * - `stateManager.attach(schemaName, filter)`
+   * - `stateManager.attach(schemaName, stateId, filter)`
+   *
    * @param {String} schemaName - Name of the schema as given on registration
    *  (cf. ServerStateManager)
    * @param {Object} [stateId=null] - Id of the state to attach to. If `null`,
    *  attach to the first state found with the given schema name (usefull for
    *  globally shared states owned by the server).
+   * @param {array|null} [filter=null] - Filter parameters of interest in the
+   *  returned state. If set to `null`, no filter applied.
    * @returns {client.SharedState|server.SharedState}
    * @see {@link client.SharedState}
    * @see {@link server.SharedState}
+   *
    * @example
    * const state = await client.stateManager.attach('my-schema');
    */
@@ -299,10 +307,10 @@ class BaseStateManager {
    * Such strategy allows to share the observe notifications between all observers.
    *
    * Alternative signatures:
-   * - .observe(callback)
-   * - .observe(schemaName, callback)
-   * - .observe(callback, options)
-   * - .observe(schemaName, callback, options)
+   * - `stateManager.observe(callback)`
+   * - `stateManager.observe(schemaName, callback)`
+   * - `stateManager.observe(callback, options)`
+   * - `stateManager.observe(schemaName, callback, options)`
    *
    * @param {string} [schemaName] - optionnal schema name to filter the observed
    *  states.
@@ -314,6 +322,7 @@ class BaseStateManager {
    * @returns {Promise<Function>} - Returns a Promise that resolves when the given
    *  callback as been executed on each existing states. The promise value is a
    *  function which allows to stop observing the states on the network.
+   *
    * @example
    * client.stateManager.observe(async (schemaName, stateId) => {
    *   if (schemaName === 'something') {
@@ -433,13 +442,22 @@ class BaseStateManager {
   /**
    * Returns a collection of all the states created from the schema name.
    *
+   * Alternitive signatures:
+   * - `stateManager.getCollection(schemaName)`
+   * - `stateManager.getCollection(schemaName, filter)`
+   * - `stateManager.getCollection(schemaName, options)`
+   * - `stateManager.getCollection(schemaName, filter, options)`
+   *
    * @param {string} schemaName - Name of the schema.
-   * @param {array|null} [filter=null] - Array of parameter names that are of interest
-   *  for every state of the collection. No filter is apllied if set to `null` (default).
-   * @param {object} options - Options.
-   * @param {boolean} [options.excludeLocal = false] - If set to true, exclude states
-   *  created locallly, i.e. by the same node, from the collection.
+   * @param {array|null} [filter=null] - Filter parameter of interest for each
+   *  state of the collection. If set to `null`, no filter applied.
+   * @param {object} [options={}] - Options.
+   * @param {boolean} [options.excludeLocal=false] - If set to true, exclude states
+   *  created by the same node from the collection.
    * @returns {server.SharedStateCollection|client.SharedStateCollection}
+   *
+   * @example
+   * const collection = await client.stateManager.getCollection(schemaName);
    */
   async getCollection(schemaName, filterOrOptions = null, options = {}) {
     if (!isString(schemaName)) {
