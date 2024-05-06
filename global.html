@@ -3,7 +3,7 @@
 <head>
     
     <meta charset="utf-8">
-    <title>ContextManager - soundworks</title>
+    <title>Global - soundworks</title>
     
     <meta name="description" content="Documentation of soundworks, a full-stack JavaScript framework for distributed WebAudio and multimedia applications" />
     
@@ -40,7 +40,7 @@
 
 <div id="main">
     
-    <h1 class="page-title">ContextManager</h1>
+    <h1 class="page-title">Global</h1>
     
 
     
@@ -53,21 +53,64 @@
 <header>
     
         <h2>
-            <span class="ancestors"><a href="server.html">server</a>.</span>
         
-        
-            ContextManager
+            
         
         </h2>
-        
-            <div class="class-description usertext"><p>Manage the different server-side contexts and their lifecycle. The <code>ContextManager</code>
-is automatically instantiated by the <a href="server.Server.html">server.Server</a>.</p>
-<p><em>WARNING: Most of the time, you should not have to manipulate the context manager directly.</em></p></div>
         
     
 </header>
 
 <article>
+    
+        <div class="container-overview">
+        
+            
+
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+            
+
+            
+        
+        </div>
     
 
     
@@ -92,7 +135,7 @@ is automatically instantiated by the <a href="server.Server.html">server.Server<
 
     
 
-    <h4 class="name" id="get"><span class="type-signature type-signature-async">(async) </span>get<span class="signature">(contextName)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="filterUpdates"><span class="type-signature"></span>filterUpdates<span class="signature">(updates, filter)</span><span class="type-signature"></span></h4>
 
     
 
@@ -102,14 +145,14 @@ is automatically instantiated by the <a href="server.Server.html">server.Server<
 <dl class="details">
     
     <dt class="tag-description">Description:</dt>
-    <dd class="tag-description"><ul class="dummy"><li><p>Retrieve a started context from its name.</p>
-<p><em>WARNING: Most of the time, you should not have to call this method manually.</em></p></li></ul></dd>
+    <dd class="tag-description"><ul class="dummy"><li><p>Filter update object according to filter list.
+Return identity is filter is null</p></li></ul></dd>
     
 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="server_ContextManager.js.html">server/ContextManager.js</a>, <a href="server_ContextManager.js.html#line99">line 99</a>
+        <a href="common_SharedStatePrivate.js.html">common/SharedStatePrivate.js</a>, <a href="common_SharedStatePrivate.js.html#line20">line 20</a>
     </li></ul></dd>
     
 
@@ -181,13 +224,13 @@ is automatically instantiated by the <a href="server.Server.html">server.Server<
 
         <tr>
             
-                <td class="name"><code>contextName</code></td>
+                <td class="name"><code>updates</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type"><a href="server.Context.html#name">server.Context#name</a></span>
+<span class="param-type">object</span>
 
 
 
@@ -198,7 +241,34 @@ is automatically instantiated by the <a href="server.Server.html">server.Server<
 
             
 
-            <td class="description last"><p>Name of the context.</p></td>
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>filter</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">array</span>
+|
+
+<span class="param-type">null</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
         </tr>
 
     
