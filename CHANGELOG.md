@@ -1,3 +1,10 @@
+## v4.0.0-alpha.21 - 19/02/2025
+
+- Fix: prevent multiple 'close' events
+- Fix: disable heartbeat check on client-side, was unstable
+- Feat(SharedState): introduce 'local' option for parameters
+- Feat(SharedState): ability to filter parameters of interest
+
 ## v4.0.0-alpha.20 - 19/02/2024
 
 - Refactor heartbeat - #86
