@@ -342,8 +342,6 @@ ${JSON.stringify(initValues, null, 2)}`);
       throw new TypeError(`[SharedState] State "${this.schemaName}": state.set(updates[, context]) should receive an object as second parameter`);
     }
 
-
-
     const newValues = {};
     const oldValues = {};
     const localParams = {};
