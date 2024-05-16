@@ -5,7 +5,7 @@ import chalk from 'chalk';
 // Generates the `src/common/version.js` file, for checking that client and
 // server use the same soundworks version
 
-// testing: git reset --hard 7ac11bf6aad64de12872f4bd02043636b5dd62a4 && git tag -d v4.0.0-alpha.21
+// testing: git reset --hard 67b505d8a0e7dbed5435c296e8db9d07d3a71fed && git tag -d v4.0.0-alpha.22
 
 const newVersion = process.argv[2];
 const pathname = path.join('src', 'common', 'version.js');
