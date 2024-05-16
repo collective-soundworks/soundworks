@@ -32,7 +32,7 @@ import {
   CLIENT_HANDSHAKE_ERROR,
   AUDIT_STATE_NAME,
 } from '../common/constants.js';
-
+import version from '../common/version.js';
 
 let _dbNamespaces = new Set();
 
@@ -162,6 +162,7 @@ class Server {
     if (!isPlainObject(config)) {
       throw new Error(`[soundworks:Server] Invalid argument for Server constructor, config should be an object`);
     }
+
     /**
      * @description Given config object merged with the following defaults:
      * @example
@@ -224,6 +225,8 @@ class Server {
         throw new Error(`[soundworks:Server] Invalid "env.httpsInfos" config, "key" file not found`);
       }
     }
+
+    this.version = version;
 
     /**
      * Instance of the express router.
@@ -908,7 +911,8 @@ Invalid certificate files, please check your:
     });
 
     socket.addListener(CLIENT_HANDSHAKE_REQUEST, async payload => {
-      const { role, registeredPlugins } = payload;
+      const { role, version, registeredPlugins } = payload;
+
 
       if (!roles.includes(role)) {
         console.error(`[soundworks.Server] A client with invalid role ("${role}") attempted to connect`);
@@ -918,6 +922,21 @@ Invalid certificate files, please check your:
           message: `Invalid client role, please check server configuration (valid client roles are: ${roles.join(', ')})`,
         });
         return;
+      }
+
+      if (version !== this.version) {
+        console.warn(`
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+WARNING
+
+Version discrepancies between server and "${role}" client:
++ server: ${this.version} | client: ${version}
+
+This might lead to unexpected behavior, you should consider to update your
+dependancies on both your server and clients.
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!`);
       }
 
       try {
@@ -950,7 +969,7 @@ Invalid certificate files, please check your:
       this._onClientConnectCallbacks.forEach(callback => callback(client));
 
       const { id, uuid, token } = client;
-      socket.send(CLIENT_HANDSHAKE_RESPONSE, { id, uuid, token });
+      socket.send(CLIENT_HANDSHAKE_RESPONSE, { id, uuid, token, version: this.version });
     });
   }
 

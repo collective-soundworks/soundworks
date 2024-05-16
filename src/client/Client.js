@@ -11,6 +11,7 @@ import {
   AUDIT_STATE_NAME,
 } from '../common/constants.js';
 import logger from '../common/logger.js';
+import version from '../common/version.js';
 
 /**
  * Configuration object for a client running in a browser runtime.
@@ -88,6 +89,13 @@ class Client {
         throw new Error(`[soundworks:Client] Invalid config object, "config.env" is missing: ${missing.join(', ')}`);
       }
     }
+
+    /**
+     * package version
+     * @type string
+     * @readonly
+     */
+    this.version = version;
 
     /**
      * Role of the client in the application.
@@ -231,10 +239,25 @@ class Client {
     try {
       await new Promise((resolve, reject) => {
         // wait for handshake response before starting stateManager and pluginManager
-        this.socket.addListener(CLIENT_HANDSHAKE_RESPONSE, async ({ id, uuid, token }) => {
+        this.socket.addListener(CLIENT_HANDSHAKE_RESPONSE, async ({ id, uuid, token, version }) => {
           this.id = id;
           this.uuid = uuid;
           this.token = token;
+
+          if (version !== this.version) {
+            console.warn(`
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+WARNING
+
+Version discrepancies between server and "${this.role}" client:
++ server: ${version} | client: ${this.version}
+
+This might lead to unexpected behavior, you should consider to update your
+dependancies on both your server and clients.
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!`);
+          }
 
           resolve();
         });
@@ -261,6 +284,7 @@ class Client {
         // send handshake request
         const payload = {
           role: this.role,
+          version: this.version,
           registeredPlugins: this.pluginManager.getRegisteredPlugins(),
         };
 
