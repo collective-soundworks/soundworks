@@ -48,7 +48,7 @@
     "test": "npx mocha",
     "test:all": "npx mocha tests/*/*.spec.js",
     "types": "rm -Rf types && tsc",
-    "preversion": "node ./misc/scripts/generate-version-file.js \"$npm_new_version\"",
+    "preversion": "node ./misc/scripts/generate-version-file.js $npm_new_version",
     "postversion": "node ./misc/scripts/check-changelog.js"
   },
   "dependencies": {
