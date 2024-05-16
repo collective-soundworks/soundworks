@@ -1,1 +1,2 @@
-export default '4.0.0-alpha.21';
+// [WARNING] This file is generated, do not edit
+export default '4.0.0-alpha.22';
