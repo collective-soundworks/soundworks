@@ -49,7 +49,7 @@
     "test:all": "npx mocha tests/*/*.spec.js",
     "types": "rm -Rf types && tsc",
     "preversion": "node ./misc/scripts/generate-version-file.js $npm_new_version",
-    "postversion": "node ./misc/scripts/check-changelog.js && git commit --allow-empty $npm_new_version"
+    "postversion": "node ./misc/scripts/check-changelog.js && git commit -am --allow-empty \"$npm_new_version\""
   },
   "dependencies": {
     "@ircam/sc-utils": "^1.3.2",
