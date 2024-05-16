@@ -15,7 +15,7 @@ import logger from '../common/logger.js';
 /**
  * Configuration object for a client running in a browser runtime.
  *
- * @typedef BrowserClientConfig
+ * @typedef ClientConfig
  * @memberof client
  * @type {object}
  * @property {string} role - Role of the client in the application (e.g. 'player', 'controller').
@@ -23,24 +23,10 @@ import logger from '../common/logger.js';
  * @property {string} [app.name=''] - Name of the application.
  * @property {string} [app.author=''] - Name of the author.
  * @property {object} [env] - Environment configration object.
- * @property {string} [env.websockets={}] - Configuration options for websockets.
- * @property {string} [env.subpath=''] - If running behind a proxy, path to the application.
- */
-
-/**
- * Configuration object for a client running in a node runtime.
- *
- * @typedef NodeClientConfig
- * @memberof client
- * @type {object}
- * @property {string} role - Role of the client in the application (e.g. 'player', 'controller').
- * @property {object} [app] - Application configration object.
- * @property {string} [app.name=''] - Name of the application.
- * @property {string} [app.author=''] - Name of the author.
- * @property {object} env - Environment configration object.
- * @property {boolean} env.serverAddress - Domain name or IP of the server.
- * @property {boolean} env.useHttps - Define is the server run in http or in https.
- * @property {boolean} env.port - Port on which the server is listening.
+ * @property {boolean} env.useHttps - Define if the websocket should use secure connection.
+ * @property {boolean} [env.serverAddress=''] - Address the socket server. Mandatory for
+ *  node clients. For browser clients, use `window.location.domain` as fallback if empty.
+ * @property {boolean} env.port - Port of the socket server.
  * @property {string} [env.websockets={}] - Configuration options for websockets.
  * @property {string} [env.subpath=''] - If running behind a proxy, path to the application.
  */
@@ -66,8 +52,7 @@ import logger from '../common/logger.js';
  */
 class Client {
   /**
-   * @param {client.BrowserClientConfig|client.NodeClientConfig} config -
-   *  Configuration of the soundworks client.
+   * @param {client.ClientConfig} config - Configuration of the soundworks client.
    * @throws Will throw if the given config object is invalid.
    */
   constructor(config) {
@@ -114,7 +99,7 @@ class Client {
     /**
      * Configuration object.
      *
-     * @type {client.BrowserClientConfig|client.NodeClientConfig}
+     * @type {client.ClientConfig}
      */
     this.config = config;
 

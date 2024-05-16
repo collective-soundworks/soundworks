@@ -1,4 +1,10 @@
 /**
+ * @license
+ * Copyright (c) 2014-present IRCAM – Centre Pompidou (France, Paris)
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+
+/**
  * Client-side part of the `soundworks` framework.
  *
  * A `soundworks` client can run seamlessly in a browser or in a Node.js runtime.

@@ -99,25 +99,29 @@ class Socket {
       path = `${config.env.subpath}/${path}`;
     }
 
-    let url;
+    const protocol = config.env.useHttps ? 'wss:' : 'ws:';
+    const port = config.env.port;
+    let serverAddress;
     let webSocketOptions;
 
     if (isBrowser()) {
-      const protocol = window.location.protocol.replace(/^http?/, 'ws');
-      const { hostname, port } = window.location;
+      // if a server address is given in config, use it, else fallback to URL hostname
+      if (config.env.serverAddress !== '') {
+        serverAddress = config.env.serverAddress;
+      } else {
+        serverAddress = window.location.hostname;
+      }
 
-      url = `${protocol}//${hostname}:${port}/${path}`;
       webSocketOptions = [];
     } else {
-      const protocol = config.env.useHttps ? 'wss:' : 'ws:';
-      const { serverAddress, port } = config.env;
+      serverAddress = config.env.serverAddress;
 
-      url = `${protocol}//${serverAddress}:${port}/${path}`;
       webSocketOptions = {
         rejectUnauthorized: false,
       };
     }
 
+    const url = `${protocol}//${serverAddress}:${port}/${path}`;
     let queryParams = `role=${role}&key=${key}`;
 
     if (config.token) {

@@ -1060,6 +1060,12 @@ Invalid certificate files, please check your:
           },
           env: {
             type: config.env.type,
+            // use to configure the socket if the server is running on a different
+            // location than the one the client was served from (cf. #90)
+            useHttps: config.env.useHttps,
+            serverAddress: config.env.serverAddress,
+            port: config.env.port,
+            // other config, to review
             websockets: config.env.websockets,
             subpath: config.env.subpath,
             useMinifiedFile: useMinifiedFile[role],
