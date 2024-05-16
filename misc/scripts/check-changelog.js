@@ -1,5 +1,4 @@
 import fs from 'node:fs';
-
 import chalk from 'chalk';
 
 // just check that the changelog has been updated in postversion script
