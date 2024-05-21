@@ -51,39 +51,66 @@ declare class Context {
     constructor(client: client.Client);
     /**
      * The soundworks client instance.
+     * @type {client.Client}
+     * @readonly
      */
-    client: Client;
+    readonly client: client.Client;
     /**
      * Status of the context, i.e. 'idle', 'inited', 'started', 'errored'
+     * @type {string}
+     * @readonly
      */
-    status: string;
+    readonly status: string;
     /**
-     * Name of the context. Defaults to the class name, override to use a user-defined name.
+     * Optionnal user-defined name of the context (defaults to the class name).
      *
-     * @returns {string} - Name of the context.
+     * The context manager will match the client-side and server-side contexts based
+     * on this name. If the {@link server.ContextManager} don't find a corresponding
+     * user-defined context with the same name, it will use a default (noop) context.
+     *
+     * @readonly
+     * @type {string}
      * @example
+     * // server-side and client-side contexts are matched based on their respective `name`
      * class MyContext extends Context {
      *   get name() {
      *     return 'my-user-defined-context-name';
      *   }
      * }
      */
-    get name(): string;
+    readonly get name(): string;
     /**
-     * Start the context. This method is automatically called when `await client.start()`
-     * is called, or lazilly called when entering the context (i.e. `context.enter()`)
-     * if the context has been created after `client.start()`.
+     * Start the context. This method is lazilly called when the client enters the
+     * context for the first time (cf. ${client.Context#enter}). If you know some
+     * some heavy and/or potentially long job has to be done  when starting the context
+     * (e.g. call to a web service) it may be a good practice to call it explicitely.
      *
-     * In some situation, you might want to implement this method to handle application
-     * wise behavior regardeless the client enters or exists the context.
+     * This method should be implemented to perform operations that are valid for the
+     * whole lifetime of the context, regardless the client enters or exits the context.
+     *
+     * @example
+     * import { Context } from '@soundworks/core/client.js';
+     *
+     * class MyContext extends Context {
+     *   async start() {
+     *     await super.start();
+     *     await this.doSomeLongJob();
+     *   }
+     * }
+     *
+     * // Instantiate the context
+     * const myContext = new Context(client);
+     * // manually start the context to perform the long operation before the client
+     * // enters the context.
+     * await myContext.start();
      */
     start(): Promise<void>;
     /**
      * Stop the context. This method is automatically called when `await client.stop()`
-     * is called.
+     * is called. It should be used to cleanup context wise operations made in `start()`
+     * (e.g. destroy the reusable audio graph).
      *
-     * In some situation, you might want to implement this method to handle application
-     * wise behavior regardeless the client enters or exists the context.
+     * _WARNING: this method should never be called manually._
      */
     stop(): Promise<void>;
     /**
@@ -135,5 +162,4 @@ declare class Context {
      */
     exit(): Promise<any>;
 }
-import Client from "./Client.js";
 //# sourceMappingURL=Context.d.ts.map

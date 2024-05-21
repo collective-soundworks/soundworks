@@ -36,5 +36,10 @@ declare class Client {
      * @type {server.Socket}
      */
     socket: server.Socket;
+    /**
+     * Is set in server._onSocketConnection
+     * @private
+     */
+    private token;
 }
 //# sourceMappingURL=Client.d.ts.map

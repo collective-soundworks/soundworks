@@ -9,7 +9,7 @@ declare class BasePluginManager {
     /** @private */
     private _node;
     /** @private */
-    private _registeredPlugins;
+    private _dependencies;
     /** @private */
     private _instances;
     /** @private */
@@ -42,20 +42,32 @@ declare class BasePluginManager {
      */
     register(id: string, ctor: any, options?: object, deps?: any[]): void;
     /**
+     * Manually add a dependency to a given plugin. Usefull to require a plugin
+     * within a plugin
+     *
+     */
+    addDependency(pluginId: any, dependencyId: any): void;
+    /**
+     * Returns the list of the registered plugins ids
+     * @returns {string[]}
+     */
+    getRegisteredPlugins(): string[];
+    /**
      * Initialize all the registered plugin. Executed during the `Client.init()` or
      * `Server.init()` initialization step.
      * @private
      */
     private start;
-    stop(): Promise<void>;
+    /** @private */
+    private stop;
     /**
      * Retrieve an fully started instance of a registered plugin, without checking
-     * that the pluginManager is started. This is important for starting the plugin
-     * manager itself.
+     * that the pluginManager has started. This is required for starting the plugin
+     * manager itself and to require a plugin from within another plugin
      *
      * @private
      */
-    private getUnsafe;
+    private unsafeGet;
     /**
      * Propagate a notification each time a plugin is updated (status or inner state).
      * The callback will receive the list of all plugins as first parameter, and the

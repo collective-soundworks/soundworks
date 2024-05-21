@@ -68,5 +68,5 @@ export namespace client {
  */
 declare class StateManager extends BaseStateManager {
 }
-import BaseStateManager from "../common/BaseStateManager.js";
+import BaseStateManager from '../common/BaseStateManager.js';
 //# sourceMappingURL=StateManager.d.ts.map

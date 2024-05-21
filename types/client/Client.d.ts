@@ -1,6 +1,28 @@
 export default Client;
 /**
- * The `Client` class is the main entry point for  the client-side of soundworks
+ * Configuration object for a client running in a browser runtime.
+ */
+export type ClientConfig = any;
+/**
+ * Configuration object for a client running in a browser runtime.
+ *
+ * @typedef ClientConfig
+ * @memberof client
+ * @type {object}
+ * @property {string} role - Role of the client in the application (e.g. 'player', 'controller').
+ * @property {object} [app] - Application configration object.
+ * @property {string} [app.name=''] - Name of the application.
+ * @property {string} [app.author=''] - Name of the author.
+ * @property {object} [env] - Environment configration object.
+ * @property {boolean} env.useHttps - Define if the websocket should use secure connection.
+ * @property {boolean} [env.serverAddress=''] - Address the socket server. Mandatory for
+ *  node clients. For browser clients, use `window.location.domain` as fallback if empty.
+ * @property {boolean} env.port - Port of the socket server.
+ * @property {string} [env.websockets={}] - Configuration options for websockets.
+ * @property {string} [env.subpath=''] - If running behind a proxy, path to the application.
+ */
+/**
+ * The `Client` class is the main entry point for the client-side of a soundworks
  * application.
  *
  * A `Client` instance allows to access soundworks components such as {@link client.StateManager},
@@ -20,11 +42,16 @@ export default Client;
  */
 declare class Client {
     /**
-     * @param {client.BrowserClientConfig|client.NodeClientConfig} config -
-     *  Configuration of the soundworks client.
+     * @param {client.ClientConfig} config - Configuration of the soundworks client.
      * @throws Will throw if the given config object is invalid.
      */
-    constructor(config: client.BrowserClientConfig | client.NodeClientConfig);
+    constructor(config: client.ClientConfig);
+    /**
+     * package version
+     * @type string
+     * @readonly
+     */
+    readonly version: string;
     /**
      * Role of the client in the application.
      *
@@ -34,9 +61,9 @@ declare class Client {
     /**
      * Configuration object.
      *
-     * @type {client.BrowserClientConfig|client.NodeClientConfig}
+     * @type {client.ClientConfig}
      */
-    config: client.BrowserClientConfig | client.NodeClientConfig;
+    config: client.ClientConfig;
     /**
      * Session id of the client (incremeted positive number), generated and
      * retrieved by the server during `client.init`. The counter is reset when
@@ -99,6 +126,11 @@ declare class Client {
      * @type {string}
      */
     status: string;
+    /**
+     * Token of the client if connected through HTTP authentication.
+     * @private
+     */
+    private token;
     /** @private */
     private _onStatusChangeCallbacks;
     /** @private */
@@ -136,8 +168,9 @@ declare class Client {
      * method if it has not been called manually.
      *
      * What it does:
-     * - optionnaly call {@link client.Client#init}
-     * - starts all the already created contexts (see {@link client.Context})
+     * - implicitly call {@link client.Client#init} if not done manually
+     * - start all created contexts. For that to happen, you will have to call `client.init`
+     * manually and instantiate the contexts between `client.init()` and `client.start()`
      *
      * @example
      * import { Client } from '@soundworks/core/client.js'

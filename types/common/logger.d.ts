@@ -1,6 +1,6 @@
 export default logger;
 declare namespace logger {
-    const verbose: boolean;
+    let verbose: boolean;
     function configure(verbose: any): void;
     function title(msg: any): void;
     function clientConfigAndRouting(routes: any, config: any): void;

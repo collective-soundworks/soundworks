@@ -1,15 +1,26 @@
 export default BaseSharedState;
 declare class BaseSharedState {
-    constructor(id: any, remoteId: any, schemaName: any, schema: any, client: any, isOwner: any, manager: any, initValues?: {});
-    id: any;
-    remoteId: any;
-    schemaName: any;
+    constructor(id: any, remoteId: any, schemaName: any, schema: any, client: any, isOwner: any, manager: any, initValues: any, filter: any);
+    /** @private */
+    private _id;
+    /** @private */
+    private _remoteId;
+    /** @private */
+    private _schemaName;
     /** @private */
     private _isOwner;
     /** @private */
     private _client;
     /** @private */
     private _manager;
+    /** @private */
+    private _filter;
+    /**
+     * true is the state has been detached or deleted
+     * @private
+     */
+    private _detached;
+    _promiseStore: PromiseStore;
     /** @private */
     private _parameters;
     /** @private */
@@ -18,18 +29,31 @@ declare class BaseSharedState {
     private _onDetachCallbacks;
     /** @private */
     private _onDeleteCallbacks;
-    /** @private */
-    private _clearDetach;
     /**
-     * Detach from the state. If the client is the creator of the state, the state
-     * is deleted and all attached nodes get notified
-     *
-     * @example
-     * const state = await client.state.attach('globals');
-     * // later
-     * await state.detach();
+     * Id of the state
+     * @type {Number}
+     * @readonly
      */
-    detach(): Promise<any>;
+    readonly get id(): number;
+    /**
+     * Unique id of the state for the current node
+     * @readonly
+     * @type {Number}
+     * @private
+     */
+    private readonly get remoteId();
+    /**
+     * Name of the schema
+     * @type {String}
+     * @readonly
+     */
+    readonly get schemaName(): string;
+    /**
+     * Indicates if the node is the owner of the state
+     * @type {Boolean}
+     * @readonly
+     */
+    readonly get isOwner(): boolean;
     /** @private */
     private _clearTransport;
     /** @private */
@@ -72,18 +96,36 @@ declare class BaseSharedState {
      */
     set(updates: object, context?: mixed): Promise<any>;
     /**
-     * Get the value of a paramter of the state.
+     * Get the value of a parameter of the state. If the parameter is of `any` type,
+     * a deep copy is returned.
      *
      * @param {string} name - Name of the param.
      * @throws Throws if `name` does not correspond to an existing field
      *  of the state.
      * @return {mixed}
      * @example
-     * const value = state.get('name');
+     * const value = state.get('paramName');
      */
     get(name: string): mixed;
     /**
+     * Similar to `get` but returns a reference to the underlying value in case of
+     * `any` type. May be usefull if the underlying value is big (e.g. sensors
+     * recordings, etc.) and deep cloning expensive. Be aware that if changes are
+     * made on the returned object, the state of your application will become
+     * inconsistent.
+     *
+     * @param {string} name - Name of the param.
+     * @throws Throws if `name` does not correspond to an existing field
+     *  of the state.
+     * @return {mixed}
+     * @example
+     * const value = state.getUnsafe('paramName');
+     */
+    getUnsafe(name: string): mixed;
+    /**
      * Get all the key / value pairs of the state.
+     *
+     * If a parameter is of `any` type, a deep copy is made.
      *
      * @return {object}
      * @example
@@ -91,12 +133,26 @@ declare class BaseSharedState {
      */
     getValues(): object;
     /**
-     * Get the schema from which the state has been created.
+     * Get all the key / value pairs of the state.
      *
-     * @param {string} [name=null] - If given, returns only the definition corresponding
-     *  to the given param name.
+     * Similar to `getValues` but returns a reference to the underlying value in
+     * case of `any` type. May be usefull if the underlying value is big (e.g.
+     * sensors recordings, etc.) and deep cloning expensive. Be aware that if
+     * changes are made on the returned object, the state of your application will
+     * become inconsistent.
+     *
+     * @return {object}
+     * @example
+     * const values = state.getValues();
+     */
+    getValuesUnsafe(): object;
+    /**
+     * Definition of schema from which the state has been created.
+     *
+     * @param {string} [name=null] - If given, returns only the definition
+     *  corresponding to the given param name.
      * @throws Throws if `name` does not correspond to an existing field
-     *  of the state.
+     *  of the schema.
      * @return {object}
      * @example
      * const schema = state.getSchema();
@@ -120,10 +176,22 @@ declare class BaseSharedState {
      */
     getDefaults(): object;
     /**
+     * Detach from the state. If the client is the creator of the state, the state
+     * is deleted and all attached nodes get notified.
+     *
+     * @example
+     * const state = await client.state.attach('globals');
+     * // later
+     * await state.detach();
+     */
+    detach(): Promise<any>;
+    /**
      * Delete the state. Only the creator/owner of the state can use this method.
-     * All nodes attached to the state will be deteched, triggering the `onDetach`
-     * callback. The creator of the state will also have its `onDelete` callback
-     * triggered.
+     *
+     * All nodes attached to the state will be detached, triggering any registered
+     * `onDetach` callbacks. The creator of the state will also have its own `onDelete`
+     * callback triggered. The local `onDeatch` and `onDelete` callbacks will be
+     * executed *before* the returned Promise resolves
      *
      * @throws Throws if the method is called by a node which is not the owner of
      * the state.
@@ -136,7 +204,7 @@ declare class BaseSharedState {
     /**
      * Subscribe to state updates.
      *
-     * @param {client.SharedState~onUpdateCallback|client.SharedState~onUpdateCallback} callback
+     * @param {client.SharedState~onUpdateCallback|server.SharedState~onUpdateCallback} callback
      *  Callback to execute when an update is applied on the state.
      * @param {Boolean} [executeListener=false] - Execute the callback immediately
      *  with current state values. (`oldValues` will be set to `{}`, and `context` to `null`)
@@ -155,19 +223,22 @@ declare class BaseSharedState {
      */
     onUpdate(listener: any, executeListener?: boolean): client.SharedState;
     /**
-     * Register a function to execute when detaching from the state
+     * Register a function to execute when detaching from the state. The function
+     * will be executed before the `detach` promise resolves.
      *
-     * @param {Function} callback - callback to execute when detaching from the state.
-     *   wether the client as called `detach`, or the state has been deleted by its
+     * @param {Function} callback - Callback to execute when detaching from the state.
+     *   Whether the client as called `detach`, or the state has been deleted by its
      *   creator.
      */
     onDetach(callback: Function): () => boolean;
     /**
      * Register a function to execute when the state is deleted. Only called if the
-     * node was the creator of the state. Is called after `onDetach`
+     * node was the creator of the state. Is called after `onDetach` and executed
+     * before the `delete` Promise resolves.
      *
-     * @param {Function} callback - callback to execute when the state is deleted.
+     * @param {Function} callback - Callback to execute when the state is deleted.
      */
     onDelete(callback: Function): () => boolean;
 }
+import PromiseStore from './PromiseStore.js';
 //# sourceMappingURL=BaseSharedState.d.ts.map

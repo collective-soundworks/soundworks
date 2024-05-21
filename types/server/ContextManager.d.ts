@@ -6,6 +6,7 @@ export default ContextManager;
  * _WARNING: Most of the time, you should not have to manipulate the context manager directly._
  *
  * @memberof server
+ * @hideconstructor
  */
 declare class ContextManager {
     /**
@@ -30,12 +31,11 @@ declare class ContextManager {
     /**
      * Retrieve a started context from its name.
      *
-     * @see {server.Context#name}
-     * @param {String} contextName - Name of the context.
+     * _WARNING: Most of the time, you should not have to call this method manually._
      *
-     * @private
+     * @param {server.Context#name} contextName - Name of the context.
      */
-    private get;
+    get(contextName: any): Promise<any>;
     /**
      * Called when a client connects to the server (websocket handshake)
      *

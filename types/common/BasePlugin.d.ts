@@ -4,25 +4,10 @@ export default BasePlugin;
  */
 declare class BasePlugin {
     constructor(id: any);
-    /**
-     * User defined ID of the plugin.
-     *
-     * @type {string}
-     * @see {@link client.PluginManager#register}
-     * @see {@link server.PluginManager#register}
-     */
-    id: string;
-    /**
-     * Type of the plugin, i.e. the ClassName.
-     *
-     * Usefull to do perform some logic based on certain types of plugins without
-     * knowing under which `id` they have been registered. (e.g. creating some generic
-     * views, etc.)
-     *
-     * @type {string}
-     * @readonly
-     */
-    readonly type: string;
+    /** @private */
+    private _id;
+    /** @private */
+    private _type;
     /**
      * Options of the plugin.
      *
@@ -50,6 +35,26 @@ declare class BasePlugin {
     status: string;
     /** @private */
     private _onStateChangeCallbacks;
+    /**
+     * User defined ID of the plugin.
+     *
+     * @type {string}
+     * @readonly
+     * @see {@link client.PluginManager#register}
+     * @see {@link server.PluginManager#register}
+     */
+    readonly get id(): string;
+    /**
+     * Type of the plugin, i.e. the ClassName.
+     *
+     * Usefull to do perform some logic based on certain types of plugins without
+     * knowing under which `id` they have been registered. (e.g. creating some generic
+     * views, etc.)
+     *
+     * @type {string}
+     * @readonly
+     */
+    readonly get type(): string;
     /**
      * Start the plugin. This method is automatically called during the client or
      * server `init()` lifecyle step. After `start()` is fulfilled the plugin should

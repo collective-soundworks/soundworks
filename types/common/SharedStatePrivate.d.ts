@@ -1,7 +1,8 @@
 export default SharedStatePrivate;
 /**
  * The "real" state, this instance is kept private by the server.StateManager.
- * It cannot be accessed without a SharedState proxy
+ * It can only be accessed through a SharedState proxy.
+ *
  * @private
  */
 declare class SharedStatePrivate {
@@ -13,8 +14,8 @@ declare class SharedStatePrivate {
     _attachedClients: Map<any, any>;
     _creatorRemoteId: any;
     _creatorId: any;
-    _attachClient(remoteId: any, client: any, isOwner?: boolean): void;
+    _attachClient(remoteId: any, client: any, isOwner: any, filter: any): void;
     _detachClient(remoteId: any, client: any): void;
 }
-import ParameterBag from "../common/ParameterBag.js";
+import ParameterBag from '../common/ParameterBag.js';
 //# sourceMappingURL=SharedStatePrivate.d.ts.map

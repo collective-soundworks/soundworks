@@ -82,5 +82,5 @@ export namespace server {
  */
 declare class SharedState extends BaseSharedState {
 }
-import BaseSharedState from "../common/BaseSharedState.js";
+import BaseSharedState from '../common/BaseSharedState.js';
 //# sourceMappingURL=SharedState.d.ts.map
