@@ -4,7 +4,7 @@ import { Client } from '../../src/client/index.js';
 import config from '../utils/config.js';
 
 describe(`Client / Server version test`, () => {
-  it.only(`client and server should check soundworks version used`, async () => {
+  it(`client and server should check soundworks version used`, async () => {
     const server = new Server(config);
     await server.start();
 

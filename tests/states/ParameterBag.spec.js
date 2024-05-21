@@ -1,10 +1,10 @@
-import { default as chai, assert } from 'chai';
+import { use, assert } from 'chai';
 import shallowDeepEqual from 'chai-shallow-deep-equal';
 
 // import ParameterBag from '../src/common/ParameterBag.js';
 import { default as ParameterBag, sharedOptions, types } from '../../src/common/ParameterBag.js';
 
-chai.use(shallowDeepEqual);
+use(shallowDeepEqual);
 
 describe('# [private] ParameterBag', () => {
   // ---------------------------------------------------------------
