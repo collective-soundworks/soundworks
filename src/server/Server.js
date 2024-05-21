@@ -80,27 +80,6 @@ const DEFAULT_CONFIG = {
 
 const TOKEN_VALID_DURATION = 20; // sec
 
-// set terminal title
-/** @private */
-function setTerminalTitle(server) {
-  let title = '';
-
-  if (server._auditState !== null) {
-    const numClients = server._auditState.get('numClients');
-    let numClientStrings = [];
-    for (let name in numClients) {
-      numClientStrings.push(`${name}: ${numClients[name]}`);
-    }
-
-    title = `${server.config.app.name} | ${numClientStrings.join(' - ')}`;
-  } else {
-    title = `${server.config.app.name}`;
-  }
-
-  const msg = String.fromCharCode(27) + ']0;' + title + String.fromCharCode(7);
-  process.stdout.write(msg);
-}
-
 /**
  * The `Server` class is the main entry point for the server-side of a soundworks
  * application.
@@ -337,7 +316,6 @@ class Server {
     this.stateManager.registerSchema(AUDIT_STATE_NAME, auditSchema);
 
     logger.configure(this.config.env.verbose);
-    setTerminalTitle(this);
   }
 
   /**
@@ -386,7 +364,6 @@ class Server {
     }
     /** @private */
     this._auditState = await this.stateManager.create(AUDIT_STATE_NAME, { numClients });
-    this._auditState.onUpdate(() => setTerminalTitle(this));
 
     // basic http authentication
     if (this.config.env.auth) {

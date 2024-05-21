@@ -212,6 +212,7 @@ class Socket {
                 connectionRefusedLogged = true;
               }
 
+              // retry in 1 second
               setTimeout(trySocket, 1000);
             }
           }
