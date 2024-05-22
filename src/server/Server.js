@@ -23,6 +23,9 @@ import Client from './Client.js';
 import ContextManager from './ContextManager.js';
 import PluginManager from './PluginManager.js';
 import StateManager from './StateManager.js';
+import {
+  kSocketTerminate,
+} from './Socket.js';
 import Sockets from './Sockets.js';
 import logger from '../common/logger.js';
 import {
@@ -884,12 +887,11 @@ Invalid certificate files, please check your:
       }
 
       // clean sockets
-      socket.terminate();
+      socket[kSocketTerminate]();
     });
 
     socket.addListener(CLIENT_HANDSHAKE_REQUEST, async payload => {
       const { role, version, registeredPlugins } = payload;
-
 
       if (!roles.includes(role)) {
         console.error(`[soundworks.Server] A client with invalid role ("${role}") attempted to connect`);

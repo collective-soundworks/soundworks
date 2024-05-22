@@ -3,6 +3,7 @@ import { delay } from '@ircam/sc-utils';
 
 import { Server } from '../../src/server/index.js';
 import { Client } from '../../src/client/index.js';
+import { kSocketTerminate } from '../../src/client/Socket.js';
 
 import config from '../utils/config.js';
 
@@ -21,13 +22,13 @@ describe('# client::Socket', () => {
   });
 
   describe(`## "close" event`, () => {
-    it('should be triggered when calling socket.terminate()', async () => {
+    it('should be triggered when calling socket[kSocketTerminate]()', async () => {
       const client = new Client({ role: 'test',  ...config });
       await client.start();
 
       let closeCalled = false;
       client.socket.addListener('close', () => closeCalled = true);
-      client.socket.terminate();
+      client.socket[kSocketTerminate]();
 
       await delay(10);
 

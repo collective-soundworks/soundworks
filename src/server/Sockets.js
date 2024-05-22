@@ -1,39 +1,41 @@
-import { Worker } from 'node:worker_threads';
-import querystring from 'querystring';
-import { default as WebSocket, WebSocketServer } from 'ws';
+import {
+  Worker,
+} from 'node:worker_threads';
 
-import Socket from './Socket.js';
+import querystring from 'querystring';
+import {
+  default as WebSocket,
+  WebSocketServer,
+} from 'ws';
+
+import Socket, {
+  kSocketTerminate,
+} from './Socket.js';
 import networkLatencyWorker from './audit-network-latency.worker.js';
 
-// this crashes when bundling server to cjs module for Max, fallback to cjs worker
-// const __dirname = fileURLToPath(new URL('.', import.meta.url));
+
+export const kSocketsRemoveFromAllRooms = Symbol('soundworks:sockets-remove-from-all-rooms');
+export const kSocketsLatencyStatsWorker = Symbol('soundworks:sockets-latency-stats-worker');
+export const kSocketsDebugPreventHeartBeat = Symbol('soundworks:sockets-debug-prevent-heartbeat');
 
 /**
- * Manager all {@link server.Socket} instances.
+ * Manage all {@link server.Socket} instances.
  *
- * Most of the time, you shouldn't have to use this class instance directely, but
- * it could be usefull in some situations, for broadcasting messages, creating rooms, etc.
+ * _Important: In most cases, you should consider using a {@link client.SharedState}
+ * rather than directly using the Socket instance._
  *
  * @memberof server
  */
 class Sockets {
+  #wsServer = null;
+  #rooms = new Map();
+
   constructor() {
-    /** @private */
-    this._wss = null;
-    /** @private */
-    this._rooms = new Map();
-    // The special `'*'` romm stores all current connections.
-    this._rooms.set('*', new Set());
-    /** @private */
-    this._initializationCache = new Map();
+    // Init special `'*'` room which stores all current connections.
+    this.#rooms.set('*', new Set());
 
-    /** @private */
-    this._latencyStatsWorker = null; // protected - used in Socket instances
-    /** @private */
-    this._auditState = null;
-
-    /** @private */
-    this._DEBUG_PREVENT_HEARTBEAT = false;
+    this[kSocketsLatencyStatsWorker] = null;
+    this[kSocketsDebugPreventHeartBeat] = false;
   }
 
   /**
@@ -44,15 +46,15 @@ class Sockets {
    * @private
    */
   async start(server, config, onConnectionCallback) {
-    // init audit stuff for network latency estimation
-    // @see note about __dirname
-    // const workerPathname = path.join(__dirname, 'audit-network-latency.worker.js');
-    this._latencyStatsWorker = new Worker(networkLatencyWorker, { eval: true });
-    this._auditState = await server.getAuditState();
+    // Audit for network latency estimation, the worker is written in cjs so that we
+    // can make builds for Max, move back to modules once Max support modules
+    this[kSocketsLatencyStatsWorker] = new Worker(networkLatencyWorker, { eval: true });
 
-    this._auditState.onUpdate(updates => {
+    const auditState = await server.getAuditState();
+
+    auditState.onUpdate(updates => {
       if ('averageNetworkLatencyWindow' in updates || 'averageNetworkLatencyPeriod' in updates) {
-        this._latencyStatsWorker.postMessage({
+        this[kSocketsLatencyStatsWorker].postMessage({
           type: 'config',
           value: {
             averageLatencyWindow: updates.averageNetworkLatencyWindow,
@@ -62,137 +64,103 @@ class Sockets {
       }
     }, true);
 
-    this._latencyStatsWorker.on('message', msg => {
+    this[kSocketsLatencyStatsWorker].on('message', msg => {
       if (msg.type === 'computed-average-latency') {
-        this._auditState.set({ averageNetworkLatency: msg.value });
+        auditState.set({ averageNetworkLatency: msg.value });
       }
     });
 
-    // init ws server
-    this._wss = new WebSocketServer({
+    // Init ws server
+    this.#wsServer = new WebSocketServer({
       noServer: true,
-      path: `/${config.path}`, // @note - update according to existing config files (aka cosima-apps)
+      path: `/${config.path}`,
     });
 
-    this._wss.on('connection', (ws, req) => {
+    this.#wsServer.on('connection', (ws, req) => {
       const queryString = querystring.decode(req.url.split('?')[1]);
-      const { role, key, token } = queryString;
-      const binary = !!(parseInt(queryString.binary));
+      const { role, token } = queryString;
+      const socket = new Socket(ws, this);
 
-      if (binary) {
-        ws.binaryType = 'arraybuffer';
-      }
+      socket.addToRoom('*');
+      socket.addToRoom(role);
 
-      if (!this._initializationCache.has(key)) {
-        this._initializationCache.set(key, { ws, binary });
-      } else {
-        const cached = this._initializationCache.get(key);
-        this._initializationCache.delete(key);
-
-        // should be in order, but just to be sure
-        const stringWs = cached.binary ? ws : cached.ws;
-        const binaryWs = cached.binary ? cached.ws : ws;
-        const socket = new Socket(stringWs, binaryWs, this._rooms, this, config);
-
-        socket.addToRoom('*');
-        socket.addToRoom(role);
-
-        onConnectionCallback(role, socket, token);
-      }
+      onConnectionCallback(role, socket, token);
     });
 
-    // check if client can connect
+    // Prevent socket with protected role to connect is token is invalid
     server.httpServer.on('upgrade', async (req, socket, head) => {
       const queryString = querystring.decode(req.url.split('?')[1]);
-
       const { role, token } = queryString;
 
       if (server.isProtected(role)) {
-        // we don't have any ip in the upgrade request, so we just check the
-        // connection token is pending
-        const allowed = server.isValidConnectionToken(token);
-
-        if (!allowed) {
+        // we don't have any IP in the upgrade request object,
+        // so we just check the connection token is pending and valid
+        if (!server.isValidConnectionToken(token)) {
           socket.destroy('not allowed');
         }
       }
 
-      this._wss.handleUpgrade(req, socket, head, (ws) => {
-        this._wss.emit('connection', ws, req);
+      this.#wsServer.handleUpgrade(req, socket, head, (ws) => {
+        this.#wsServer.emit('connection', ws, req);
       });
     });
   }
 
   /**
    * Terminate all existing sockets
-   *
    * @private
    */
   terminate() {
     // terminate stat worker thread
-    this._latencyStatsWorker.terminate();
+    this[kSocketsLatencyStatsWorker].terminate();
     // clean sockets
-    const sockets = this._rooms.get('*');
-    sockets.forEach(socket => socket.terminate());
-  }
-
-  /** @private */
-  _broadcast(binary, roomIds, excludeSocket, channel, ...args) {
-    const method = binary ? 'sendBinary' : 'send';
-    let targets = new Set();
-
-    if (typeof roomIds === 'string' || Array.isArray(roomIds)) {
-      if (typeof roomIds === 'string') {
-        roomIds = [roomIds];
-      }
-
-      roomIds.forEach(roomId => {
-        if (this._rooms.has(roomId)) {
-          const room = this._rooms.get(roomId);
-          room.forEach(socket => targets.add(socket));
-        }
-      });
-    } else {
-      targets = this._rooms.get('*');
-    }
-
-    targets.forEach(socket => {
-      if (socket.ws.readyState === WebSocket.OPEN) {
-        if (excludeSocket !== null) {
-          if (socket !== excludeSocket) {
-            socket[method](channel, ...args);
-          }
-        } else {
-          socket[method](channel, ...args);
-        }
-      }
-    });
+    const sockets = this.#rooms.get('*');
+    sockets.forEach(socket => socket[kSocketTerminate]());
   }
 
   /**
-   * Add a socket to a room
+   * Add a socket to a room.
+   *
+   * _Note that in most cases, you should use a shared state instead_
    *
    * @param {server.Socket} socket - Socket to add to the room.
    * @param {String} roomId - Id of the room.
    */
   addToRoom(socket, roomId) {
-    socket.addToRoom(roomId);
+    if (!this.#rooms.has(roomId)) {
+      this.#rooms.set(roomId, new Set());
+    }
+
+    const room = this.#rooms.get(roomId);
+    room.add(socket);
   }
 
   /**
-   * Remove a socket from a room
+   * Remove a socket from a room.
+   *
+   * _Note that in most cases, you should use a shared state instead_
    *
    * @param {server.Socket} socket - Socket to remove from the room.
    * @param {String} roomId - Id of the room.
    */
   removeFromRoom(socket, roomId) {
-    socket.removeFromRoom(roomId);
+    if (this.#rooms.has(roomId)) {
+      const room = this.#rooms.get(roomId);
+      room.delete(socket);
+    }
+  }
+
+  [kSocketsRemoveFromAllRooms](socket) {
+    for (let [_key, room] of this.#rooms) {
+      room.delete(socket);
+    }
   }
 
   /**
-   * Send a message of JSON compatible data types to all client of given room(s).
-   * If no room is specified, the message is sent to all clients.
+   * Send a message to all clients os given room(s). If no room is specified,
+   * the message is sent to all clients.
    *
+   * _Note that in most cases, you should use a shared state instead_
    *
    * @param {String|Array} roomsIds - Ids of the rooms that must receive
    *  the message. If `null` the message is sent to all clients.
@@ -203,22 +171,28 @@ class Sockets {
    *  JSON compatible data types (i.e. string, number, boolean, object, array and null).
    */
   broadcast(roomIds, excludeSocket, channel, ...args) {
-    this._broadcast(false, roomIds, excludeSocket, channel, ...args);
-  }
+    const targets = new Set();
 
-  /**
-   * Send a binary message to all client of given room(s). If no room is specified
-   * specified, the message is sent to all clients.
-   *
-   * @param {String|Array} roomsIds - Ids of the rooms that must receive
-   *  the message. If `null` the message is sent to all clients.
-   * @param {server.Socket} excludeSocket - Optionnal socket to ignore when
-   *  broadcasting the message, typically the client at the origin of the message.
-   * @param {string} channel - Channel name.
-   * @param {TypedArray} typedArray - Binary data to be sent.
-   */
-  broadcastBinary(roomIds, excludeSocket, channel, typedArray) {
-    this._broadcast(true, roomIds, excludeSocket, channel, typedArray);
+    if (typeof roomIds === 'string' || Array.isArray(roomIds)) {
+      if (typeof roomIds === 'string') {
+        roomIds = [roomIds];
+      }
+
+      roomIds.forEach(roomId => {
+        if (this.#rooms.has(roomId)) {
+          const room = this.#rooms.get(roomId);
+          room.forEach(socket => targets.add(socket));
+        }
+      });
+    } else {
+      targets = this.#rooms.get('*');
+    }
+
+    targets.forEach(socket => {
+      if (socket.readyState === WebSocket.OPEN && socket !== excludeSocket) {
+        socket.send(channel, ...args);
+      }
+    });
   }
 }
 

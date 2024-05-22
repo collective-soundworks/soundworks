@@ -2,34 +2,16 @@ import { isBrowser } from '@ircam/sc-utils';
 import WebSocket from 'isomorphic-ws';
 
 import {
-  PING_INTERVAL,
-  PING_LATENCY_TOLERANCE,
   PING_MESSAGE,
   PONG_MESSAGE,
 } from '../common/constants.js';
 import logger from '../common/logger.js';
 import {
-  packBinaryMessage,
-  unpackBinaryMessage,
   packStringMessage,
   unpackStringMessage,
 } from '../common/sockets-utils.js';
 
-// WebSocket events:
-//
-// `close`:
-//   Fired when a connection with a websocket is closed.
-//   Also available via the onclose property
-// `error`:
-//   Fired when a connection with a websocket has been closed because of an error,
-//   such as whensome data couldn't be sent.
-//   Also available via the onerror property.
-// `message`:
-//   Fired when data is received through a websocket.
-//   Also available via the onmessage property.
-// `open`:
-//   Fired when a connection with a websocket is opened.
-//   Also available via the onopen property.
+export const kSocketTerminate = Symbol('soundworks:socket-terminate');
 
 /**
  * The Socket class is a simple publish / subscribe wrapper built on top of the
@@ -53,26 +35,10 @@ import {
  * @hideconstructor
  */
 class Socket {
-  constructor() {
-    /**
-     * WebSocket instance configured with `binaryType = 'blob'`.
-     *
-     * @private
-     */
-    this.ws = null;
-    /**
-     * WebSocket instance configured with `binaryType = 'arraybuffer'`.
-     *
-     * @private
-     */
-    this.binaryWs = null;
-    /** @private */
-    this._stringListeners = new Map();
-    /** @private */
-    this._binaryListeners = new Map();
-    /** @private */
-    this._heartbeatId = null;
-  }
+  #socket = null;
+  #listeners = new Map();
+
+  constructor() {}
 
   /**
    * Initialize a websocket connection with the server. Automatically called
@@ -80,20 +46,10 @@ class Socket {
    *
    * @param {string} role - Role of the client (see {@link client.Client#role})
    * @param {object} config - Configuration of the sockets
-   * @protected
-   * @ignore
+   * @private
    */
   async init(role, config) {
-    // unique key that allows to associate the two sockets to the same client.
-    // note: the key is only used to pair to two sockets, so its usage is very
-    // limited in time therefore a random number should hopefully be sufficient.
-    const key = (Math.random() + '').replace(/^0\./, '');
-
-    // open web sockets
     let { path } = config.env.websockets;
-
-    // @note: keep this check
-    // backward compatibility w/ assetsDomain and websocket old config way
     // cf. https://github.com/collective-soundworks/soundworks/issues/35
     if (config.env.subpath) {
       path = `${config.env.subpath}/${path}`;
@@ -121,77 +77,66 @@ class Socket {
       };
     }
 
-    const url = `${protocol}//${serverAddress}:${port}/${path}`;
-    let queryParams = `role=${role}&key=${key}`;
+    let queryParams = `role=${role}`;
 
     if (config.token) {
       queryParams += `&token=${config.token}`;
     }
 
-    // ----------------------------------------------------------
-    // init string socket
-    // ----------------------------------------------------------
-    const stringSocketUrl = `${url}?binary=0&${queryParams}`;
+    const url = `${protocol}//${serverAddress}:${port}/${path}?${queryParams}`;
 
-    await new Promise(resolve => {
+    // ----------------------------------------------------------
+    // Init socket
+    // ----------------------------------------------------------
+    return new Promise(resolve => {
       let connectionRefusedLogged = false;
 
       const trySocket = async () => {
-        const ws = new WebSocket(stringSocketUrl, webSocketOptions);
+        const ws = new WebSocket(url, webSocketOptions);
 
-        ws.addEventListener('open', connectEvent => {
+        ws.addEventListener('open', openEvent => {
           // parse incoming messages for pubsub
-          this.ws = ws;
+          this.#socket = ws;
 
-          // Heartbeat ping / pong check, to detect if connection has been
-          // broken but not detected by the client
-          // @note (2024-04): unstable and creates more issues than it solves, disable
-          // for now and review later
-          // const heartbeat = () => {
-          //   clearTimeout(this._heartbeatId);
-
-          //   this._heartbeatId = setTimeout(() => {
-          //     console.log('> HEARTBEAT missed, closing...');
-          //     this.terminate();
-          //   }, PING_INTERVAL + PING_LATENCY_TOLERANCE);
-          // };
-
-          // heartbeat();
-
-          this.ws.addEventListener('message', e => {
+          this.#socket.addEventListener('message', e => {
             if (e.data === PING_MESSAGE) {
               // heartbeat();
-              this.ws.send(PONG_MESSAGE);
+              this.#socket.send(PONG_MESSAGE);
               // do not propagate ping / pong messages
               return;
             }
 
             const [channel, args] = unpackStringMessage(e.data);
-            this._emit(false, channel, ...args);
+            this.#dispatchEvent(channel, ...args);
           });
 
-          // broadcast all `WebSocket` native events
-          this.ws.addEventListener('close', (e) => {
-            clearTimeout(this._heartbeatId);
-            this._emit(false, 'close', e);
-          });
-
-          this.ws.addEventListener('error', (e) => {
-            clearTimeout(this._heartbeatId);
-            this._emit(false, 'error', e);
-          });
-
-          this.ws.addEventListener('upgrade', (e) => {
-            this._emit(false, 'upgrade', e);
-          });
-
-          this.ws.addEventListener('message', (e) => {
-            this._emit(false, 'message', e);
-          });
+          // propagate "native" events
+          // `close`:
+          //   Fired when a connection with a websocket is closed.
+          //   Also available via the onclose property
+          // `error`:
+          //   Fired when a connection with a websocket has been closed because of an error,
+          //   such as whensome data couldn't be sent.
+          //   Also available via the onerror property.
+          // `message`:
+          //   Fired when data is received through a websocket.
+          //   Also available via the onmessage property.
+          // `open`:
+          //   Fired when a connection with a websocket is opened.
+          //   Also available via the onopen property.
+          [
+            'close',
+            'error',
+            'upgrade',
+            'message',
+          ].forEach(eventName => {
+            this.#socket.addEventListener(eventName, e => {
+              this.#dispatchEvent(eventName, e);
+            });
+          })
 
           // forward open event
-          this._emit(false, 'open', connectEvent);
-
+          this.#dispatchEvent('open', openEvent);
           // continue with raw socket
           resolve();
         });
@@ -207,6 +152,7 @@ class Socket {
 
             // for node clients, retry connection
             if (e.error && e.error.code === 'ECONNREFUSED') {
+              // we want to log the warning just once
               if (!connectionRefusedLogged) {
                 logger.log('[soundworks.Socket] Connection refused, waiting for the server to start');
                 connectionRefusedLogged = true;
@@ -221,39 +167,6 @@ class Socket {
 
       trySocket();
     });
-
-    // ----------------------------------------------------------
-    // init binary socket
-    // ----------------------------------------------------------
-    const binarySocketUrl = `${url}?binary=1&${queryParams}`;
-
-    await new Promise(resolve => {
-      const ws = new WebSocket(binarySocketUrl, webSocketOptions);
-      ws.binaryType = 'arraybuffer';
-
-      ws.addEventListener('open', connectEvent => {
-        // parse incoming messages for pubsub
-        this.binaryWs = ws;
-        this.binaryWs.addEventListener('message', e => {
-          const [channel, data] = unpackBinaryMessage(e.data);
-          this._emit(true, channel, data);
-        });
-
-        // broadcast all `WebSocket` native events
-        ['close', 'error', 'upgrade', 'message'].forEach(eventName => {
-          this.binaryWs.addEventListener(eventName, (e) => {
-            this._emit(true, eventName, e);
-          });
-        });
-
-        // forward open event
-        this._emit(true, 'open', connectEvent);
-        resolve();
-      });
-    });
-
-    // wait for both sockets connected
-    return Promise.resolve();
   }
 
   /**
@@ -262,26 +175,16 @@ class Socket {
    *
    * Is also called when a disconnection is detected by the heartbeat (note that
    * in this case, the launcher will call `client.stop()` but the listeners are
-   * already cleared so the event will be trigerred only once)
-   *
-   * @private
+   * already cleared so the event will be trigerred only once.
    */
-  async terminate() {
-    const closeListeners = this._stringListeners.get('close');
-    const closeBinaryListeners = this._binaryListeners.get('close');
-
+  async [kSocketTerminate]() {
+    const closeListeners = this.#listeners.get('close');
     this.removeAllListeners();
-    this.removeAllBinaryListeners();
 
-    this.ws.close();
-    this.binaryWs.close();
+    this.#socket.close();
 
     if (closeListeners) {
       closeListeners.forEach(listener => listener());
-    }
-
-    if (closeBinaryListeners) {
-      closeBinaryListeners.forEach(listener => listener());
     }
 
     return Promise.resolve();
@@ -291,60 +194,11 @@ class Socket {
    * @param {boolean} binary - Emit to either the string or binary socket.
    * @param {string} channel - Channel name.
    * @param {...*} args - Content of the message.
-   * @private
    */
-  _emit(binary, channel, ...args) {
-    const listeners = binary ? this._binaryListeners : this._stringListeners;
-
-    if (listeners.has(channel)) {
-      const callbacks = listeners.get(channel);
+  #dispatchEvent(channel, ...args) {
+    if (this.#listeners.has(channel)) {
+      const callbacks = this.#listeners.get(channel);
       callbacks.forEach(callback => callback(...args));
-    }
-  }
-
-  /**
-   * @param {Function[]} listeners - List of listeners, either for the string or binary socket.
-   * @param {string} channel - Channel name.
-   * @param {Function} callback - The function to be added to the listeners.
-   * @private
-   */
-  _addListener(listeners, channel, callback) {
-    if (!listeners.has(channel)) {
-      listeners.set(channel, new Set());
-    }
-
-    const callbacks = listeners.get(channel);
-    callbacks.add(callback);
-  }
-
-  /**
-   * @param {Function[]} listeners - List of listeners, either for the string or binary socket.
-   * @param {string} channel - Channel name.
-   * @param {Function} callback - The function to be removed from the listeners.
-   * @private
-   */
-  _removeListener(listeners, channel, callback) {
-    if (listeners.has(channel)) {
-      const callbacks = listeners.get(channel);
-      callbacks.delete(callback);
-
-      if (callbacks.size === 0) {
-        listeners.delete(channel);
-      }
-    }
-  }
-
-  /**
-   * @param {Function[]} listeners - List of listeners, either for the string or binary socket.
-   * @param {string} [channel=null] - Channel name of the listeners to remove. If null
-   *  all the listeners are cleared.
-   * @private
-   */
-  _removeAllListeners(listeners, channel = null) {
-    if (channel === null) {
-      listeners.clear();
-    } else if (listeners.has(channel)) {
-      listeners.delete(channel);
     }
   }
 
@@ -357,7 +211,7 @@ class Socket {
    */
   send(channel, ...args) {
     const msg = packStringMessage(channel, ...args);
-    this.ws.send(msg);
+    this.#socket.send(msg);
   }
 
   /**
@@ -369,7 +223,12 @@ class Socket {
    *  {@link server.Socket#send} method.
    */
   addListener(channel, callback) {
-    this._addListener(this._stringListeners, channel, callback);
+    if (!this.#listeners.has(channel)) {
+      this.#listeners.set(channel, new Set());
+    }
+
+    const callbacks = this.#listeners.get(channel);
+    callbacks.add(callback);
   }
 
   /**
@@ -379,7 +238,14 @@ class Socket {
    * @param {Function} callback - Callback to remove.
    */
   removeListener(channel, callback) {
-    this._removeListener(this._stringListeners, channel, callback);
+    if (this.#listeners.has(channel)) {
+      const callbacks = this.#listeners.get(channel);
+      callbacks.delete(callback);
+
+      if (callbacks.size === 0) {
+        this.#listeners.delete(channel);
+      }
+    }
   }
 
   /**
@@ -388,47 +254,11 @@ class Socket {
    * @param {string} channel - Channel name.
    */
   removeAllListeners(channel = null) {
-    this._removeAllListeners(this._stringListeners, channel);
-  }
-
-  /**
-   * Send binary messages on a given channel.
-   *
-   * @param {string} channel - Channel name.
-   * @param {TypedArray} typedArray - Binary data to be sent.
-   */
-  sendBinary(channel, typedArray) {
-    const msg = packBinaryMessage(channel, typedArray);
-    this.binaryWs.send(msg);
-  }
-
-  /**
-   * Listen binary messages on a given channel
-   *
-   * @param {string} channel - Channel name.
-   * @param {Function} callback - Callback to execute when a message is received.
-   */
-  addBinaryListener(channel, callback) {
-    this._addListener(this._binaryListeners, channel, callback);
-  }
-
-  /**
-   * Remove a listener of binary compatible messages from a given channel
-   *
-   * @param {string} channel - Channel name.
-   * @param {Function} callback - Callback to remove.
-   */
-  removeBinaryListener(channel, callback) {
-    this._removeListener(this._binaryListeners, channel, callback);
-  }
-
-  /**
-   * Remove all listeners of binary compatible messages on a given channel
-   *
-   * @param {string} channel - Channel of the message.
-   */
-  removeAllBinaryListeners(channel = null) {
-    this._removeAllListeners(this._binaryListeners, channel);
+    if (channel === null) {
+      this.#listeners.clear();
+    } else if (this.#listeners.has(channel)) {
+      this.#listeners.delete(channel);
+    }
   }
 }
 

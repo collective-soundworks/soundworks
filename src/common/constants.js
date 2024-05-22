@@ -2,7 +2,6 @@
 export const SERVER_ID = -1;
 
 export const PING_INTERVAL = 10 * 1000;
-export const PING_LATENCY_TOLERANCE = 1000;
 export const PING_MESSAGE = 'h:ping';
 export const PONG_MESSAGE = 'h:pong';
 

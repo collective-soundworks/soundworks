@@ -2,8 +2,11 @@ import { isBrowser, isPlainObject } from '@ircam/sc-utils';
 
 import ContextManager from './ContextManager.js';
 import PluginManager from './PluginManager.js';
-import Socket from './Socket.js';
+import Socket, {
+  kSocketTerminate,
+} from './Socket.js';
 import StateManager from './StateManager.js';
+
 import {
   CLIENT_HANDSHAKE_REQUEST,
   CLIENT_HANDSHAKE_RESPONSE,
@@ -232,7 +235,7 @@ class Client {
    * await client.start();
    */
   async init() {
-    // init socket communications (string and binary)
+    // init socket communications
     await this.socket.init(this.role, this.config);
 
     // we need the try/catch block to change the promise rejection into proper error
@@ -277,7 +280,7 @@ dependancies on both your server and clients.
               break;
           }
 
-          this.socket.terminate();
+          this.socket[kSocketTerminate]();
           reject(msg);
         });
 
@@ -371,7 +374,7 @@ dependancies on both your server and clients.
 
     await this.contextManager.stop();
     await this.pluginManager.stop();
-    await this.socket.terminate();
+    await this.socket[kSocketTerminate]();
 
     await this._dispatchStatus('stopped');
   }
