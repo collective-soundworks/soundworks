@@ -1,14 +1,14 @@
 ## v4.0.0-alpha.22 - 16/05/2025
 
 - Feat: allow configuring socket endpoint on browser clients
-- Check and warn if version inconsistency between server and client
+- Feat: check and warn if version inconsistency between server and client
 
 ## v4.0.0-alpha.21 - 6/05/2025
 
 - Fix: prevent multiple 'close' events
 - Fix: disable heartbeat check on client-side, was unstable
-- Feat(SharedState): introduce 'local' option for parameters
-- Feat(SharedState): ability to filter parameters of interest
+- Feat: introduce 'local' option for SharedState parameters
+- Feat: ability to filter parameters of interest in SharedState
 
 ## v4.0.0-alpha.20 - 19/02/2024
 
