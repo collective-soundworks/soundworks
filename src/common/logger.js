@@ -126,6 +126,21 @@ const logger = {
     console.log(`    ${name} ${chalk.red('errors')}`);
   },
 
+  warnVersionDiscepancies(clientRole, clientVersion, serverVersion) {
+    console.warn(`
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+WARNING
+
+Version discrepancies between server and "${clientRole}" client:
++ server: ${serverVersion} | client: ${clientVersion}
+
+This might lead to unexpected behavior, you should consider to re-install your
+dependencies on both your server and clients.
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!`);
+  },
+
   log(msg) {
     if (!this.verbose) {
       return;

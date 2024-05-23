@@ -314,18 +314,7 @@ class Client {
           this.#token = token;
 
           if (version !== this.#version) {
-            console.warn(`
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-WARNING
-
-Version discrepancies between server and "${this.#role}" client:
-+ server: ${version} | client: ${this.#version}
-
-This might lead to unexpected behavior, you should consider to update your
-dependancies on both your server and clients.
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!`);
+            logger.warnVersionDiscepancies(this.#role, this.#version, version);
           }
 
           resolve();

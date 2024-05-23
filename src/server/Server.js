@@ -912,18 +912,7 @@ Invalid certificate files, please check your:
       }
 
       if (version !== this.version) {
-        console.warn(`
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-WARNING
-
-Version discrepancies between server and "${role}" client:
-+ server: ${this.version} | client: ${version}
-
-This might lead to unexpected behavior, you should consider to re-install your
-dependencies on both your server and clients.
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!`);
+        logger.warnVersionDiscepancies(role, version, this.version);
       }
 
       try {

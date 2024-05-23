@@ -75,7 +75,7 @@
     "cz-conventional-changelog": "^3.3.0",
     "docdash": "^2.0.2",
     "dotenv": "^16.4.5",
-    "eslint": "^9.3.0",
+    "eslint": "^8.0.0",
     "eslint-plugin-jsdoc": "^48.2.5",
     "jsdoc": "^4.0.3",
     "mocha": "^10.4.0",
