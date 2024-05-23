@@ -68,13 +68,12 @@ class Socket {
       },
     };
 
-    let isAlive = true;
-
+    let heartbeatMissed = 0;
     // heartbeat system (run only on string socket), adapted from:
     // https://github.com/websockets/ws#how-to-detect-and-close-broken-connections
     this.#socket.addEventListener('message', e => {
       if (e.data === PONG_MESSAGE) {
-        isAlive = true;
+        heartbeatMissed = 0;
 
         msg.value.pong = getTime();
         this.#sockets[kSocketsLatencyStatsWorker].postMessage(msg);
@@ -87,18 +86,20 @@ class Socket {
     });
 
     this.#heartbeatId = setInterval(() => {
-      if (isAlive === false) {
+      // we didn't receive the pong message
+      if (heartbeatMissed > 0) {
         // Emit a 'close' event to go trough all the disconnection pipeline
         //
         // @note - this seems to create false positive disconnections when
         // client is busy, e.g. when loading large sound files so let's just warn
         // until we gather more feedback
+        // cf. https://making.close.com/posts/reliable-websockets/
+        console.warn(`[Socket] client (id: ${this[kSocketClientId]}) did not respond to ping message in time (missed: ${heartbeatMissed},  interval: ${PING_INTERVAL})`);
         // this.#dispatchEvent('close');
-        console.warn(`[Socket] client (id: ${this[kSocketClientId]}) did not respond to ping message in time, interval: ${PING_INTERVAL}`);
-        return;
+        // return;
       }
 
-      isAlive = false;
+      heartbeatMissed += 1;
       msg.value.ping = getTime();
 
       this.#socket.send(PING_MESSAGE);

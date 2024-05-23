@@ -846,11 +846,7 @@ Invalid certificate files, please check your:
     // this has been validated
     if (this.isProtected(role) && this.isValidConnectionToken(connectionToken)) {
       const { ip } = decryptData(connectionToken);
-      const newData = {
-        ip: ip,
-        id: client.id,
-      };
-
+      const newData = { ip, id: client.id };
       const newToken = encryptData(newData);
 
       client.token = newToken;
