@@ -16,6 +16,9 @@ import {
 import logger from '../common/logger.js';
 import version from '../common/version.js';
 
+// for testing purposes
+export const kClientVersionTest = Symbol('soundworks:client-version-test');
+
 /**
  * Configuration object for a client running in a browser runtime.
  *
@@ -55,6 +58,22 @@ import version from '../common/version.js';
  * @memberof client
  */
 class Client {
+  #version = null;
+  #role = null;
+  #config = null;
+  #id = null;
+  #uuid = null;
+  #target = null;
+  #socket = null;
+  #contextManager = null;
+  #pluginManager = null;
+  #stateManager = null;
+  #status = 'idle';
+  // Token of the client if connected through HTTP authentication.
+  #token = null;
+  #onStatusChangeCallbacks = new Set();
+  #auditState = null;
+
   /**
    * @param {client.ClientConfig} config - Configuration of the soundworks client.
    * @throws Will throw if the given config object is invalid.
@@ -93,119 +112,166 @@ class Client {
       }
     }
 
-    /**
-     * package version
-     * @type string
-     * @readonly
-     */
-    this.version = version;
+    this.#config = config;
 
-    /**
-     * Role of the client in the application.
-     *
-     * @type {string}
-     */
-    this.role = config.role;
-
-    /**
-     * Configuration object.
-     *
-     * @type {client.ClientConfig}
-     */
-    this.config = config;
-
-    if (!this.config.env) {
-      this.config.env = {};
+    if (!this.#config.env) {
+      this.#config.env = {};
     }
 
     // minimal configuration for websockets
-    this.config.env.websockets = Object.assign({
+    this.#config.env.websockets = Object.assign({
       path: 'socket',
       pingInterval: 5000,
     }, config.env.websockets);
 
-    /**
-     * Session id of the client (incremeted positive number), generated and
-     * retrieved by the server during `client.init`. The counter is reset when
-     * the server restarts.
-     *
-     * @type {number}
-     */
-    this.id = null;
+    this.#version = version;
+    // allow override though config for testing
+    if (config[kClientVersionTest]) {
+      this.#version = config[kClientVersionTest];
+    }
 
-    /**
-     * Unique session uuid of the client (uuidv4), generated and retrieved by
-     * the server during {@link client.Client#init}.
-     *
-     * @type {string}
-     */
-    this.uuid = null;
-
-    /**
-     * Instance of the {@link client.Socket} class that handle websockets communications with
-     * the server.
-     *
-     * @see {@link client.Socket}
-     * @type {client.Socket}
-     */
-    this.socket = new Socket();
-
-    /**
-     * Runtime platform on which the client is executed, i.e. 'browser' or 'node'.
-     *
-     * @type {string}
-     */
-    this.target = isBrowser() ? 'browser' : 'node';
-
-    /**
-     * Instance of the {@link client.ContextManager} class.
-     *
-     * The context manager can be safely used after `client.init()` has been fulfilled.
-     *
-     * @see {@link client.ContextManager}
-     * @type {client.ContextManager}
-     */
-    this.contextManager = new ContextManager();
-
-    /**
-     * Instance of the {@link client.PluginManager} class.
-     *
-     * The context manager can be safely used after `client.init()` has been fulfilled.
-     *
-     * @see {@link client.PluginManager}
-     * @type {client.PluginManager}
-     */
-    this.pluginManager = new PluginManager(this);
-
-    /**
-     * Instance of the {@link client.StateManager} class.
-     *
-     * The context manager can be safely used after `client.init()` has been fulfilled.
-     *
-     * @see {@link client.StateManager}
-     * @type {client.StateManager}
-     */
-    this.stateManager = new StateManager();
-
-    /**
-     * Status of the client, 'idle', 'inited', 'started' or 'errored'.
-     *
-     * @type {string}
-     */
-    this.status = 'idle';
-
-    /**
-     * Token of the client if connected through HTTP authentication.
-     * @private
-     */
-    this.token = null;
-
-    /** @private */
-    this._onStatusChangeCallbacks = new Set();
-    /** @private */
-    this._auditState = null;
+    this.#role = config.role;
+    this.#target = isBrowser() ? 'browser' : 'node';
+    this.#socket = new Socket();
+    this.#contextManager = new ContextManager();
+    this.#pluginManager = new PluginManager(this);
+    this.#stateManager = new StateManager();
+    this.#status = 'idle';
 
     logger.configure(!!config.env.verbose);
+  }
+
+  /**
+   * Package version.
+   *
+   * @type {string}
+   */
+  get version() {
+    return this.#version;
+  }
+
+  /**
+   * Role of the client in the application.
+   *
+   * @type {string}
+   */
+  get role() {
+    return this.#role;
+  }
+
+  /**
+   * Configuration object.
+   *
+   * @type {client.ClientConfig}
+   */
+  get config() {
+    return this.#config;
+  }
+
+  /**
+   * Session id of the client.
+   *
+   * Incremeted positive integer generated and retrieved by the server during
+   * `client.init`. The counter is reset when the server restarts.
+   *
+   * @type {number}
+   */
+  get id() {
+    return this.#id;
+  }
+
+  /**
+   * Unique session uuid of the client (uuidv4).
+   *
+   * Generated and retrieved by the server during {@link client.Client#init}.
+   * @type {string}
+   */
+  get uuid() {
+    return this.#uuid;
+  }
+
+
+  /**
+   * Runtime platform on which the client is executed, i.e. 'browser' or 'node'.
+   *
+   * @type {string}
+   */
+  get target() {
+    return this.#target;
+  }
+
+  /**
+   * Instance of the {@link client.Socket} class.
+   *
+   * @see {@link client.Socket}
+   * @type {client.Socket}
+   */
+  get socket() {
+    return this.#socket;
+  }
+
+  /**
+   * Instance of the {@link client.ContextManager} class.
+   *
+   * The context manager can be safely used after `client.init()` has been fulfilled.
+   *
+   * @see {@link client.ContextManager}
+   * @type {client.ContextManager}
+   */
+  get contextManager() {
+    return this.#contextManager;
+  }
+
+  /**
+   * Instance of the {@link client.PluginManager} class.
+   *
+   * The context manager can be safely used after `client.init()` has been fulfilled.
+   *
+   * @see {@link client.PluginManager}
+   * @type {client.PluginManager}
+   */
+  get pluginManager() {
+    return this.#pluginManager;
+  }
+
+  /**
+   * Instance of the {@link client.StateManager} class.
+   *
+   * The context manager can be safely used after `client.init()` has been fulfilled.
+   *
+   * @see {@link client.StateManager}
+   * @type {client.StateManager}
+   */
+  get stateManager() {
+    return this.#stateManager;
+  }
+
+  /**
+   * Status of the client, 'idle', 'inited', 'started' or 'errored'.
+   *
+   * @type {string}
+   */
+  get status() {
+    return this.#status;
+  }
+
+    /** @private */
+  async #dispatchStatus(status) {
+    this.#status = status;
+
+    // if node target and launched in a child process, forward status to parent process
+    if (this.#target === 'node' && process.send !== undefined) {
+      process.send(`soundworks:client:${status}`);
+    }
+
+    // execute all callbacks in parallel
+    const promises = [];
+
+    for (let callback of this.#onStatusChangeCallbacks) {
+      promises.push(callback(status));
+    }
+
+    await Promise.all(promises);
   }
 
   /**
@@ -236,25 +302,25 @@ class Client {
    */
   async init() {
     // init socket communications
-    await this.socket.init(this.role, this.config);
+    await this.#socket.init(this.#role, this.#config);
 
     // we need the try/catch block to change the promise rejection into proper error
     try {
       await new Promise((resolve, reject) => {
         // wait for handshake response before starting stateManager and pluginManager
-        this.socket.addListener(CLIENT_HANDSHAKE_RESPONSE, async ({ id, uuid, token, version }) => {
-          this.id = id;
-          this.uuid = uuid;
-          this.token = token;
+        this.#socket.addListener(CLIENT_HANDSHAKE_RESPONSE, async ({ id, uuid, token, version }) => {
+          this.#id = id;
+          this.#uuid = uuid;
+          this.#token = token;
 
-          if (version !== this.version) {
+          if (version !== this.#version) {
             console.warn(`
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 WARNING
 
-Version discrepancies between server and "${this.role}" client:
-+ server: ${version} | client: ${this.version}
+Version discrepancies between server and "${this.#role}" client:
++ server: ${version} | client: ${this.#version}
 
 This might lead to unexpected behavior, you should consider to update your
 dependancies on both your server and clients.
@@ -265,7 +331,7 @@ dependancies on both your server and clients.
           resolve();
         });
 
-        this.socket.addListener(CLIENT_HANDSHAKE_ERROR, (err) => {
+        this.#socket.addListener(CLIENT_HANDSHAKE_ERROR, (err) => {
           let msg = ``;
 
           switch (err.type) {
@@ -287,32 +353,27 @@ dependancies on both your server and clients.
 
         // send handshake request
         const payload = {
-          role: this.role,
-          version: this.version,
-          registeredPlugins: this.pluginManager.getRegisteredPlugins(),
+          role: this.#role,
+          version: this.#version,
+          registeredPlugins: this.#pluginManager.getRegisteredPlugins(),
         };
 
-        this.socket.send(CLIENT_HANDSHAKE_REQUEST, payload);
+        this.#socket.send(CLIENT_HANDSHAKE_REQUEST, payload);
       });
     } catch (msg) {
       throw new Error(msg);
     }
 
-    // ------------------------------------------------------------
-    // CREATE STATE MANAGER
-    // ------------------------------------------------------------
-    this.stateManager.init(this.id, {
-      emit: this.socket.send.bind(this.socket), // need to alias this
-      addListener: this.socket.addListener.bind(this.socket),
-      removeAllListeners: this.socket.removeAllListeners.bind(this.socket),
+    // init state manager
+    this.#stateManager.init(this.id, {
+      emit: this.#socket.send.bind(this.#socket), // need to alias this
+      addListener: this.#socket.addListener.bind(this.#socket),
+      removeAllListeners: this.#socket.removeAllListeners.bind(this.#socket),
     });
 
-    // ------------------------------------------------------------
-    // INIT PLUGIN MANAGER
-    // ------------------------------------------------------------
-    await this.pluginManager.start();
+    await this.#pluginManager.start();
 
-    await this._dispatchStatus('inited');
+    await this.#dispatchStatus('inited');
   }
 
   /**
@@ -332,24 +393,24 @@ dependancies on both your server and clients.
    * await client.start();
    */
   async start() {
-    if (this.status === 'idle') {
+    if (this.#status === 'idle') {
       await this.init();
     }
 
-    if (this.status === 'started') {
+    if (this.#status === 'started') {
       throw new Error(`[soundworks:Server] Cannot call "client.start()" twice`);
     }
 
-    if (this.status !== 'inited') {
+    if (this.#status !== 'inited') {
       throw new Error(`[soundworks:Server] Cannot "client.start()" before "client.init()"`);
     }
 
     // ------------------------------------------------------------
     // START CONTEXT MANAGER
     // ------------------------------------------------------------
-    await this.contextManager.start();
+    await this.#contextManager.start();
 
-    await this._dispatchStatus('started');
+    await this.#dispatchStatus('started');
   }
 
   /**
@@ -369,15 +430,15 @@ dependancies on both your server and clients.
    * await client.stop();
    */
   async stop() {
-    if (this.status !== 'started') {
+    if (this.#status !== 'started') {
       throw new Error(`[soundworks:Client] Cannot "client.stop()" before "client.start()"`);
     }
 
-    await this.contextManager.stop();
-    await this.pluginManager.stop();
-    await this.socket[kSocketTerminate]();
+    await this.#contextManager.stop();
+    await this.#pluginManager.stop();
+    await this.#socket[kSocketTerminate]();
 
-    await this._dispatchStatus('stopped');
+    await this.#dispatchStatus('stopped');
   }
 
   /**
@@ -398,46 +459,26 @@ dependancies on both your server and clients.
    * auditState.onUpdate(() => console.log(auditState.getValues()), true);
    */
   async getAuditState() {
-    if (this.status === 'idle') {
+    if (this.#status === 'idle') {
       throw new Error(`[soundworks.Client] Cannot access audit state before "client.init()"`);
     }
 
-    if (this._auditState === null) {
-      this._auditState = await this.stateManager.attach(AUDIT_STATE_NAME);
+    if (this.#auditState === null) {
+      this.#auditState = await this.#stateManager.attach(AUDIT_STATE_NAME);
     }
 
-    return this._auditState;
+    return this.#auditState;
   }
 
   /**
    * Listen for the status change ('inited', 'started', 'stopped') of the client.
    *
    * @param {Function} callback - Listener to the status change.
-   * @returns {Function} Delete the listener.
+   * @returns {Function} Function that delete the listener when executed.
    */
   onStatusChange(callback) {
-    this._onStatusChangeCallbacks.add(callback);
-
-    return () => this._onStatusChangeCallbacks.delete(callback);
-  }
-
-  /** @private */
-  async _dispatchStatus(status) {
-    this.status = status;
-
-    // if node target and launched in a child process, forward status to parent process
-    if (this.target === 'node' && process.send !== undefined) {
-      process.send(`soundworks:client:${status}`);
-    }
-
-    // execute all callbacks in parallel
-    const promises = [];
-
-    for (let callback of this._onStatusChangeCallbacks) {
-      promises.push(callback(status));
-    }
-
-    await Promise.all(promises);
+    this.#onStatusChangeCallbacks.add(callback);
+    return () => this.#onStatusChangeCallbacks.delete(callback);
   }
 }
 
