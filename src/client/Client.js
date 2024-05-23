@@ -401,15 +401,7 @@ dependancies on both your server and clients.
       throw new Error(`[soundworks:Server] Cannot call "client.start()" twice`);
     }
 
-    if (this.#status !== 'inited') {
-      throw new Error(`[soundworks:Server] Cannot "client.start()" before "client.init()"`);
-    }
-
-    // ------------------------------------------------------------
-    // START CONTEXT MANAGER
-    // ------------------------------------------------------------
     await this.#contextManager.start();
-
     await this.#dispatchStatus('started');
   }
 
