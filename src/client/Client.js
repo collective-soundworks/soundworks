@@ -463,4 +463,14 @@ class Client {
   }
 }
 
+Object.defineProperties(Client.prototype, {
+  [Symbol.toStringTag]: {
+    __proto__: null,
+    writable: false,
+    enumerable: false,
+    configurable: true,
+    value: 'Client',
+  },
+});
+
 export default Client;
