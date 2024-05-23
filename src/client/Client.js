@@ -276,11 +276,12 @@ dependancies on both your server and clients.
               msg = `[soundworks:Client] ${err.message}`;
               break;
             default:
-              msg = `Undefined error`;
+              msg = `[soundworks:Client] Undefined error: ${err.message}`;
               break;
           }
 
-          this.socket[kSocketTerminate]();
+          // These are development errors, we can just hang. If we terminate the
+          // socket, a reload is triggered by the launcher which is bad in terms of DX
           reject(msg);
         });
 
@@ -293,8 +294,8 @@ dependancies on both your server and clients.
 
         this.socket.send(CLIENT_HANDSHAKE_REQUEST, payload);
       });
-    } catch (err) {
-      throw new Error(err);
+    } catch (msg) {
+      throw new Error(msg);
     }
 
     // ------------------------------------------------------------

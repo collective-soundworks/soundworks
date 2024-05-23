@@ -4,9 +4,16 @@ import http from 'node:http';
 import https from 'node:https';
 import path from 'node:path';
 import os from 'node:os';
-import { X509Certificate, createPrivateKey } from 'node:crypto';
+import {
+  X509Certificate,
+  createPrivateKey,
+} from 'node:crypto';
 
-import { isPlainObject, idGenerator, getTime } from '@ircam/sc-utils';
+import {
+  isPlainObject,
+  idGenerator,
+  getTime,
+} from '@ircam/sc-utils';
 import chalk from 'chalk';
 import compression from 'compression';
 import express from 'express';
@@ -18,7 +25,10 @@ import pem from 'pem';
 import compile from 'template-literal';
 
 import auditSchema from './audit-schema.js';
-import { encryptData, decryptData } from './crypto.js';
+import {
+  encryptData,
+  decryptData,
+} from './crypto.js';
 import Client from './Client.js';
 import ContextManager from './ContextManager.js';
 import PluginManager from './PluginManager.js';
@@ -678,7 +688,7 @@ Invalid certificate files, please check your:
             // this.httpsInfos.isValid = false; // for testing
             if (!this.httpsInfos.isValid) {
               logger.error(chalk.red`    -------------------------------------------`);
-              logger.error(chalk.red`    > INVALID CERTIFICATE`);
+              logger.error(chalk.red`    > INVALID CERTIFICATE                      `);
               logger.error(chalk.red`    i.e. you pretend to be safe but you are not`);
               logger.error(chalk.red`    -------------------------------------------`);
             } else {
