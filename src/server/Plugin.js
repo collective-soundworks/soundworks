@@ -33,6 +33,9 @@ import BasePlugin from '../common/BasePlugin.js';
  * @inheritdoc
  */
 class Plugin extends BasePlugin {
+  #server = null;
+  #clients = new Set();
+
   /**
    * @param {server.Server} server - The soundworks server instance.
    * @param {string} id - User defined id of the plugin as defined in
@@ -40,16 +43,25 @@ class Plugin extends BasePlugin {
    */
   constructor(server, id) {
     super(id);
+    this.#server = server;
+  }
 
-    /**
-     * Instance of soundworks server.
-     * @type {server.Server}
-     * @see {@link server.Server}
-     */
-    this.server = server;
+  /**
+   * Instance of soundworks server.
+   * @type {server.Server}
+   * @see {@link server.Server}
+   */
+  get server() {
+    return this.#server;
+  }
 
-    /** @private */
-    this.clients = new Set();
+  /**
+   * Set of the clients registered in the plugin.
+   * @type {Set<server.Client>}
+   * @see {@link server.Client}
+   */
+  get clients() {
+    return this.#clients;
   }
 
   /**

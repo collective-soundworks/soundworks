@@ -24,6 +24,7 @@ import ContextManager from './ContextManager.js';
 import PluginManager from './PluginManager.js';
 import StateManager from './StateManager.js';
 import {
+  kSocketClientId,
   kSocketTerminate,
 } from './Socket.js';
 import Sockets from './Sockets.js';
@@ -839,6 +840,7 @@ Invalid certificate files, please check your:
    */
   _onSocketConnection(role, socket, connectionToken) {
     const client = new Client(role, socket);
+    socket[kSocketClientId] = client.id;
     const roles = Object.keys(this.config.app.clients);
 
     // this has been validated
@@ -912,8 +914,8 @@ WARNING
 Version discrepancies between server and "${role}" client:
 + server: ${this.version} | client: ${version}
 
-This might lead to unexpected behavior, you should consider to update your
-dependancies on both your server and clients.
+This might lead to unexpected behavior, you should consider to re-install your
+dependencies on both your server and clients.
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!`);
       }

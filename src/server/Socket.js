@@ -14,6 +14,7 @@ import {
   kSocketsRemoveFromAllRooms,
 } from './Sockets.js';
 
+export const kSocketClientId = Symbol('soundworks:socket-client-id');
 export const kSocketTerminate = Symbol('soundworks:socket-terminate');
 
 /**
@@ -87,9 +88,13 @@ class Socket {
 
     this.#heartbeatId = setInterval(() => {
       if (isAlive === false) {
-        // emit a 'close' event to go trough all the disconnection pipeline
+        // Emit a 'close' event to go trough all the disconnection pipeline
+        //
         // @note - this seems to create false positive disconnections when
-        this.#dispatchEvent('close');
+        // client is busy, e.g. when loading large sound files so let's just warn
+        // until we gather more feedback
+        // this.#dispatchEvent('close');
+        console.warn(`[Socket] client (id: ${this[kSocketClientId]}) did not respond to ping message in time, interval: ${PING_INTERVAL}`);
         return;
       }
 
@@ -198,7 +203,7 @@ class Socket {
     if (this.#socket.readyState === 1) {
       this.#socket.send(msg, (err) => {
         if (err) {
-          console.error('error sending msg:', channel, args, err.message);
+          console.error('[Socket] error sending msg:', channel, args, err.message);
         }
       });
     }

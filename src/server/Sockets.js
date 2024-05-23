@@ -1,8 +1,8 @@
+import querystring from 'node:querystring';
 import {
   Worker,
 } from 'node:worker_threads';
 
-import querystring from 'querystring';
 import {
   default as WebSocket,
   WebSocketServer,
@@ -11,8 +11,9 @@ import {
 import Socket, {
   kSocketTerminate,
 } from './Socket.js';
-import networkLatencyWorker from './audit-network-latency.worker.js';
 
+// @note - fs.readFileSync creates some cwd() issues...
+import networkLatencyWorker from './audit-network-latency.worker.js';
 
 export const kSocketsRemoveFromAllRooms = Symbol('soundworks:sockets-remove-from-all-rooms');
 export const kSocketsLatencyStatsWorker = Symbol('soundworks:sockets-latency-stats-worker');
@@ -77,8 +78,7 @@ class Sockets {
     });
 
     this.#wsServer.on('connection', (ws, req) => {
-      const queryString = querystring.decode(req.url.split('?')[1]);
-      const { role, token } = queryString;
+      const { role, token } = querystring.parse(req.url.split('?')[1]);
       const socket = new Socket(ws, this);
 
       socket.addToRoom('*');
@@ -89,8 +89,7 @@ class Sockets {
 
     // Prevent socket with protected role to connect is token is invalid
     server.httpServer.on('upgrade', async (req, socket, head) => {
-      const queryString = querystring.decode(req.url.split('?')[1]);
-      const { role, token } = queryString;
+      const { role, token } = querystring.parse(req.url.split('?')[1]);
 
       if (server.isProtected(role)) {
         // we don't have any IP in the upgrade request object,
@@ -107,7 +106,7 @@ class Sockets {
   }
 
   /**
-   * Terminate all existing sockets
+   * Terminate all existing sockets.
    * @private
    */
   terminate() {
@@ -116,6 +115,15 @@ class Sockets {
     // clean sockets
     const sockets = this.#rooms.get('*');
     sockets.forEach(socket => socket[kSocketTerminate]());
+  }
+
+  /**
+   * Remove given socket from all rooms.
+   */
+  [kSocketsRemoveFromAllRooms](socket) {
+    for (let [_, room] of this.#rooms) {
+      room.delete(socket);
+    }
   }
 
   /**
@@ -146,12 +154,6 @@ class Sockets {
   removeFromRoom(socket, roomId) {
     if (this.#rooms.has(roomId)) {
       const room = this.#rooms.get(roomId);
-      room.delete(socket);
-    }
-  }
-
-  [kSocketsRemoveFromAllRooms](socket) {
-    for (let [_key, room] of this.#rooms) {
       room.delete(socket);
     }
   }

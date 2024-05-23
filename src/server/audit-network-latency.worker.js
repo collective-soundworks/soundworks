@@ -1,5 +1,6 @@
-// NOTICE: we use this syntax so that the server can be bundled to cjs
-// with esbuild, so we can ship a cjs server bundle into Max.
+// @note - We use this common js syntax so that the server can be bundled to cjs
+// which allows to build a server that can be accepted by Max `node.script`
+//
 // Should move back to regular esm module once Max has fixed its loader
 export default `
 const { parentPort } = require('node:worker_threads');
@@ -11,6 +12,7 @@ let averageLatencyPeriod = 2;
 let intervalId = null;
 let meanLatency = 0;
 
+// workaround that sc-utils is pure emascript module
 let getTime;
 let inited = new Promise(async (resolve) => {
   module = await import('@ircam/sc-utils');
@@ -25,7 +27,6 @@ parentPort.on('message', async msg => {
       averageLatencyPeriod = msg.value.averageLatencyPeriod;
 
       await inited;
-
       // launch compute in its own loop so that the number of computation is
       // decoupled from the number of connected clients
       clearInterval(intervalId);

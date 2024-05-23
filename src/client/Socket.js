@@ -210,8 +210,10 @@ class Socket {
    *  JSON compatible data types (i.e. string, number, boolean, object, array and null).
    */
   send(channel, ...args) {
-    const msg = packStringMessage(channel, ...args);
-    this.#socket.send(msg);
+    if (this.#socket.readyState === 1) {
+      const msg = packStringMessage(channel, ...args);
+      this.#socket.send(msg);
+    }
   }
 
   /**
