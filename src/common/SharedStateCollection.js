@@ -1,5 +1,33 @@
-/** @private */
-class BaseSharedStateCollection {
+/**
+ * @callback client.SharedStateCollection~onUpdateCallback
+ * @param {client.SharedState} state - State that triggered the update.
+ * @param {Object} newValues - Key / value pairs of the updates that have been
+ *  applied to the state.
+ * @param {Object} oldValues - Key / value pairs of the updated params before
+ *  the updates has been applied to the state.
+ * @param {Mixed} [context=null] - Optionnal context object that has been passed
+ *  with the values updates in the `set` call.
+ */
+
+/**
+ * The `SharedStateCollection` interface represent a collection of all states
+ * created from a given schema name on the network.
+ *
+ * It can optionnaly exclude the states created by the current node.
+ *
+ * See {@link ClientStateManager#getCollection} and
+ * {@link ServerStateManager#getCollection} for factory methods API
+ *
+ * ```
+ * const collection = await client.stateManager.getCollection('my-schema');
+ * const allValues = collection.getValues();
+ * collection.onUpdate((state, newValues, oldValues, context) => {
+ *   // do something
+ * });
+ * ```
+ * @hideconstructor
+ */
+class SharedStateCollection {
   constructor(stateManager, schemaName, filter = null, options = {}) {
     this._stateManager = stateManager;
     this._schemaName = schemaName;
@@ -321,4 +349,4 @@ class BaseSharedStateCollection {
   }
 }
 
-export default BaseSharedStateCollection;
+export default SharedStateCollection;

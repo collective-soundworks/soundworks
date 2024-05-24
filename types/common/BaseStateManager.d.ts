@@ -1,25 +1,20 @@
+export const kStateManagerDeleteState: unique symbol;
 export default BaseStateManager;
 /** @private */
 declare class BaseStateManager {
-    _statesById: Map<any, any>;
-    _cachedSchemas: Map<any, any>;
-    _observeListeners: Set<any>;
-    _observeRequestCallbacks: Map<any, any>;
-    _promiseStore: PromiseStore;
     /**
      * Executed on `client.init`
      * @param {Number} id - Id of the node.
      * @param {Object} transport - Transport to use for synchronizing the states.
      *  Must implement a basic EventEmitter API.
+     *
+     * @private
      */
-    /** @private */
     private init;
     client: {
-        id: any;
+        id: number;
         transport: BatchedTransport;
     };
-    /** @private */
-    private _filterObserve;
     /**
      * Return the schema from a given registered schema name
      *
@@ -32,16 +27,16 @@ declare class BaseStateManager {
     /**
      * Create a `SharedState` instance from a registered schema.
      *
-     * @param {String} schemaName - Name of the schema as given on registration
+     * @param {string} schemaName - Name of the schema as given on registration
      *  (cf. ServerStateManager)
-     * @param {Object} [initValues={}] - Default values for the state.
-     * @returns {client.SharedState|server.SharedState}
-     * @see {@link client.SharedState}
-     * @see {@link server.SharedState}
+     * @param {Object.<string, any>} [initValues={}] - Default values for the state.
+     * @returns {Promise<SharedState>}
      * @example
      * const state = await client.stateManager.create('my-schema');
      */
-    create(schemaName: string, initValues?: any): client.SharedState | server.SharedState;
+    create(schemaName: string, initValues?: {
+        [x: string]: any;
+    }): Promise<SharedState>;
     /**
      * Attach to an existing `SharedState` instance.
      *
@@ -51,21 +46,19 @@ declare class BaseStateManager {
      * - `stateManager.attach(schemaName, filter)`
      * - `stateManager.attach(schemaName, stateId, filter)`
      *
-     * @param {String} schemaName - Name of the schema as given on registration
+     * @param {string} schemaName - Name of the schema as given on registration
      *  (cf. ServerStateManager)
-     * @param {Object} [stateId=null] - Id of the state to attach to. If `null`,
+     * @param {number|string[]} [stateIdOrFilter=null] - Id of the state to attach to. If `null`,
      *  attach to the first state found with the given schema name (usefull for
      *  globally shared states owned by the server).
-     * @param {array|null} [filter=null] - Filter parameters of interest in the
+     * @param {string[]} [filter=null] - Filter parameters of interest in the
      *  returned state. If set to `null`, no filter applied.
-     * @returns {client.SharedState|server.SharedState}
-     * @see {@link client.SharedState}
-     * @see {@link server.SharedState}
+     * @returns {Promise<SharedState>}
      *
      * @example
      * const state = await client.stateManager.attach('my-schema');
      */
-    attach(schemaName: string, stateIdOrFilter?: any, filter?: any[] | null, ...args: any[]): client.SharedState | server.SharedState;
+    attach(schemaName: string, stateIdOrFilter?: number | string[], filter?: string[], ...args: any[]): Promise<SharedState>;
     /**
      * Observe all the `SharedState` instances that are created on the network.
      * This can be usefull for clients with some controller role that might want to track
@@ -109,7 +102,7 @@ declare class BaseStateManager {
     /**
      * Returns a collection of all the states created from the schema name.
      *
-     * Alternitive signatures:
+     * Alternative signatures:
      * - `stateManager.getCollection(schemaName)`
      * - `stateManager.getCollection(schemaName, filter)`
      * - `stateManager.getCollection(schemaName, options)`
@@ -121,15 +114,17 @@ declare class BaseStateManager {
      * @param {object} [options={}] - Options.
      * @param {boolean} [options.excludeLocal=false] - If set to true, exclude states
      *  created by the same node from the collection.
-     * @returns {server.SharedStateCollection|client.SharedStateCollection}
+     * @returns {Promise<SharedStateCollection>}
      *
      * @example
      * const collection = await client.stateManager.getCollection(schemaName);
      */
     getCollection(schemaName: string, filterOrOptions?: any, options?: {
         excludeLocal?: boolean;
-    }, ...args: any[]): server.SharedStateCollection | client.SharedStateCollection;
+    }, ...args: any[]): Promise<SharedStateCollection>;
+    [kStateManagerDeleteState](stateId: any): void;
+    #private;
 }
-import PromiseStore from './PromiseStore.js';
 import BatchedTransport from './BatchedTransport.js';
-//# sourceMappingURL=BaseStateManager.d.ts.map
+import SharedState from './SharedState.js';
+import SharedStateCollection from './SharedStateCollection.js';

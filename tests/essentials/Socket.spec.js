@@ -3,7 +3,7 @@ import { delay } from '@ircam/sc-utils';
 
 import { Server } from '../../src/server/index.js';
 import { Client } from '../../src/client/index.js';
-import { kSocketTerminate } from '../../src/client/Socket.js';
+import { kSocketTerminate } from '../../src/client/ClientSocket.js';
 
 import config from '../utils/config.js';
 

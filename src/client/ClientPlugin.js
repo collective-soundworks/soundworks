@@ -3,14 +3,14 @@ import BasePlugin from '../common/BasePlugin.js';
 /**
  * Callback executed when the plugin state is updated.
  *
- * @callback client.Plugin~onStateChangeCallback
- * @param {client.Plugin#state} state - Current state of the plugin.
+ * @callback ClientPlugin~onStateChangeCallback
+ * @param {ClientPlugin#state} state - Current state of the plugin.
  */
 
 /**
- * Delete the registered {@link client.Plugin~onStateChangeCallback}.
+ * Delete the registered {@link ClientPlugin~onStateChangeCallback}.
  *
- * @callback client.Plugin~deleteOnStateChangeCallback
+ * @callback ClientPlugin~deleteOnStateChangeCallback
  */
 
 /**
@@ -28,26 +28,30 @@ import BasePlugin from '../common/BasePlugin.js';
  *
  * _Creating new plugins should be considered an advanced usage._
  *
- * @memberof client
  * @extends BasePlugin
  * @inheritdoc
  */
-class Plugin extends BasePlugin {
+class ClientPlugin extends BasePlugin {
+  #client = null;
   /**
-   * @param {client.Client} client - The soundworks client instance.
+   * @param {Client} client - A soundworks client instance.
    * @param {string} id - User defined id of the plugin as defined in
-   *  {@link client.PluginManager#register}.
+   *  {@link ClientPluginManager#register}.
    */
   constructor(client, id) {
     super(id);
 
-    /**
-     * Instance of soundworks client.
-     *
-     * @type {client.Client}
-     * @see {@link client.Client}
-     */
-    this.client = client;
+    this.#client = client;
+  }
+
+  /**
+   * Instance of soundworks client.
+   *
+   * @type {Client}
+   * @see {@link Client}
+   */
+  get client() {
+    return this.#client;
   }
 
   // @todo
@@ -64,4 +68,4 @@ class Plugin extends BasePlugin {
   // async deactivate() {}
 }
 
-export default Plugin;
+export default ClientPlugin;

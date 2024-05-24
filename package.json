@@ -43,11 +43,11 @@
     "node": ">=16.0.0"
   },
   "scripts": {
-    "doc": "rm -Rf docs && jsdoc -c .jsdoc --verbose && cp -R misc/assets docs/",
+    "doc": "npm run types && rm -rf docs && jsdoc -c .jsdoc --verbose && cp -R misc/assets docs/",
     "lint": "npx eslint src",
     "test": "npx mocha",
     "test:all": "npx mocha tests/*/*.spec.js",
-    "types": "rm -Rf types && tsc",
+    "types": "rm -rf types && tsc",
     "preversion": "node ./misc/scripts/generate-version-file.js $npm_new_version",
     "postversion": "node ./misc/scripts/check-changelog.js && git commit -am \"$npm_new_version\" --allow-empty"
   },

@@ -1,29 +1,29 @@
-export default PluginManager;
-export namespace client {
-    /**
-     * ~onStateChangeCallback
-     */
-    type PluginManager = (: object, initiator: client.Plugin | null) => any;
-}
+export default ClientPluginManager;
+/**
+ * ~onStateChangeCallback
+ */
+export type ClientPluginManager = (fullState: {
+    [x: string]: ClientPlugin;
+}, initiator: ClientPlugin | null) => any;
 /**
  * Callback executed when a plugin internal state is updated.
  *
- * @callback client.PluginManager~onStateChangeCallback
- * @param {object<client.Plugin#id, client.Plugin>} fullState - List of all plugins.
- * @param {client.Plugin|null} initiator - Plugin that initiated the update or `null`
+ * @callback ClientPluginManager~onStateChangeCallback
+ * @param {Object.<string, ClientPlugin>} fullState - List of all plugins.
+ * @param {ClientPlugin|null} initiator - Plugin that initiated the update or `null`
  *  if the change was initiated by the state manager (i.e. when the initialization
  *  of the plugins starts).
  */
 /**
- * Delete the registered {@link client.PluginManager~onStateChangeCallback}.
+ * Delete the registered {@link ClientPluginManager~onStateChangeCallback}.
  *
- * @callback client.PluginManager~deleteOnStateChangeCallback
+ * @callback ClientPluginManager~deleteOnStateChangeCallback
  */
 /**
  * The `PluginManager` allows to register and retrieve `soundworks` plugins.
  *
  * Plugins should always be registered both client-side and server-side,
- * and before {@link client.Client#start} or {@link server.Server#start}
+ * and before {@link Client#start} or {@link server.Server#start}
  * to be properly initialized.
  *
  * In some sitautions, you might want to register the same plugin factory several times
@@ -33,7 +33,7 @@ export namespace client {
  * they expose. See [https://soundworks.dev/guide/ecosystem](https://soundworks.dev/guide/ecosystem)
  * for more informations on the available plugins.
  *
- * See {@link client.Client#pluginManager}
+ * See {@link Client#pluginManager}
  *
  * ```
  * // client-side
@@ -73,17 +73,26 @@ export namespace client {
  * }, 1000);
  * ```
  *
- * @memberof client
  * @extends BasePluginManager
  * @inheritdoc
  * @hideconstructor
  */
-declare class PluginManager extends BasePluginManager {
+declare class ClientPluginManager extends BasePluginManager {
     /**
-     * @param {client.Client} client - The soundworks client instance.
+     * @param {Client} client - The soundworks client instance.
      */
-    constructor(client: client.Client);
-    register(id: any, factory: any, options?: {}, deps?: any[]): void;
+    constructor(client: Client);
+    /**
+     * Register a plugin.
+     * @param {string} id - User defined id, must match the id given on server-side.
+     * @param {function} factory - Factory function of the plugin.
+     * @param {Object.<string, any>} [options] - Options to be given to the plugin at instanciation.
+     * @param {string[]} [deps] - List of plugin ids that should be properly initialized
+     *  before initializing this plugin.
+     */
+    register(id: string, factory: Function, options?: {
+        [x: string]: any;
+    }, deps?: string[]): void;
     /**
      * Retrieve an fully started instance of a registered plugin.
      *
@@ -97,15 +106,14 @@ declare class PluginManager extends BasePluginManager {
      * on the `onStateChange` method.
      *
      * _Note: the async API is designed to enable the dynamic creation of plugins
-     * (hopefully without brealing changes) in a future release._
+     * in a future release._
      *
-     * @param {client.Plugin#id} id - Id of the plugin as defined when registered.
-     * @returns {client.Plugin}
-     * @see {@link client.PluginManager#onStateChange}
-     *
-     * @private
+     * @param {string} id - Id of the plugin as defined when registered.
+     * @returns {Promise<ClientPlugin>}
+     * @see {@link ClientPluginManager#onStateChange}
      */
-    private get;
+    get(id: string): Promise<ClientPlugin>;
 }
+import ClientPlugin from './ClientPlugin.js';
 import BasePluginManager from '../common/BasePluginManager.js';
-//# sourceMappingURL=PluginManager.d.ts.map
+import Client from './Client.js';

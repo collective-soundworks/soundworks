@@ -18,4 +18,3 @@ declare class BatchedTransport {
     removeListener(channel: any, callback: any): void;
     removeAllListeners(channel?: any): void;
 }
-//# sourceMappingURL=BatchedTransport.d.ts.map

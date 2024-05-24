@@ -1,5 +1,6 @@
 import { assert } from 'chai';
 import PromiseStore from '../../src/common/PromiseStore.js';
+// import { kStateManagerPromiseStore } from '../../src/common/BaseStateManager.js';
 
 import { Server } from '../../src/server/index.js';
 import { Client } from '../../src/client/index.js';

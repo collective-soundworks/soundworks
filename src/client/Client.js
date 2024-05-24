@@ -1,11 +1,11 @@
 import { isBrowser, isPlainObject } from '@ircam/sc-utils';
 
-import ContextManager from './ContextManager.js';
-import PluginManager from './PluginManager.js';
-import Socket, {
+import ClientContextManager from './ClientContextManager.js';
+import ClientPluginManager from './ClientPluginManager.js';
+import ClientSocket, {
   kSocketTerminate,
-} from './Socket.js';
-import StateManager from './StateManager.js';
+} from './ClientSocket.js';
+import ClientStateManager from './ClientStateManager.js';
 
 import {
   CLIENT_HANDSHAKE_REQUEST,
@@ -23,18 +23,16 @@ export const kClientVersionTest = Symbol('soundworks:client-version-test');
  * Configuration object for a client running in a browser runtime.
  *
  * @typedef ClientConfig
- * @memberof client
  * @type {object}
  * @property {string} role - Role of the client in the application (e.g. 'player', 'controller').
  * @property {object} [app] - Application configration object.
  * @property {string} [app.name=''] - Name of the application.
  * @property {string} [app.author=''] - Name of the author.
- * @property {object} [env] - Environment configration object.
+ * @property {object} env - Environment configration object.
  * @property {boolean} env.useHttps - Define if the websocket should use secure connection.
- * @property {boolean} [env.serverAddress=''] - Address the socket server. Mandatory for
+ * @property {string} env.serverAddress - Address the socket server. Mandatory for
  *  node clients. For browser clients, use `window.location.domain` as fallback if empty.
- * @property {boolean} env.port - Port of the socket server.
- * @property {string} [env.websockets={}] - Configuration options for websockets.
+ * @property {number} env.port=8000 - Port of the socket server.
  * @property {string} [env.subpath=''] - If running behind a proxy, path to the application.
  */
 
@@ -42,20 +40,25 @@ export const kClientVersionTest = Symbol('soundworks:client-version-test');
  * The `Client` class is the main entry point for the client-side of a soundworks
  * application.
  *
- * A `Client` instance allows to access soundworks components such as {@link client.StateManager},
- * {@link client.PluginManager},{@link client.Socket} or {@link client.ContextManager}.
- * Its is also responsible for handling the initialization lifecycles of the different
- * soundworks components.
+ * A `soundworks` client can run seamlessly in a browser or in a Node.js runtime.
+ *
+ * It provides an access to the different soundworks components such as the {@link ClientStateManager},
+ * {@link ClientPluginManager}, {@link ClientSocket} and the {@link ClientContextManager}.
  *
  * ```
  * import { Client } from '@soundworks/core/client.js';
- * // create a new soundworks `Client` instance
- * const client = new Client({ role: 'player' });
- * // init and start the client
+ * // create a `Client` instance
+ * const client = new Client({
+ *   role: 'player',
+ *   env: {
+ *     useHttps: false,
+ *     serverAddress: 'localhost',
+ *     port: 8000,
+ *   },
+ * });
+ * // start the client
  * await client.start();
  * ```
- *
- * @memberof client
  */
 class Client {
   #version = null;
@@ -75,7 +78,7 @@ class Client {
   #auditState = null;
 
   /**
-   * @param {client.ClientConfig} config - Configuration of the soundworks client.
+   * @param {ClientConfig} config - Configuration of the soundworks client.
    * @throws Will throw if the given config object is invalid.
    */
   constructor(config) {
@@ -132,10 +135,10 @@ class Client {
 
     this.#role = config.role;
     this.#target = isBrowser() ? 'browser' : 'node';
-    this.#socket = new Socket();
-    this.#contextManager = new ContextManager();
-    this.#pluginManager = new PluginManager(this);
-    this.#stateManager = new StateManager();
+    this.#socket = new ClientSocket();
+    this.#contextManager = new ClientContextManager();
+    this.#pluginManager = new ClientPluginManager(this);
+    this.#stateManager = new ClientStateManager();
     this.#status = 'idle';
 
     logger.configure(!!config.env.verbose);
@@ -162,7 +165,7 @@ class Client {
   /**
    * Configuration object.
    *
-   * @type {client.ClientConfig}
+   * @type {ClientConfig}
    */
   get config() {
     return this.#config;
@@ -203,44 +206,44 @@ class Client {
   /**
    * Instance of the {@link client.Socket} class.
    *
-   * @see {@link client.Socket}
-   * @type {client.Socket}
+   * @see {@link ClientSocket}
+   * @type {ClientSocket}
    */
   get socket() {
     return this.#socket;
   }
 
   /**
-   * Instance of the {@link client.ContextManager} class.
+   * Instance of the {@link ClientContextManager} class.
    *
    * The context manager can be safely used after `client.init()` has been fulfilled.
    *
-   * @see {@link client.ContextManager}
-   * @type {client.ContextManager}
+   * @see {@link ClientContextManager}
+   * @type {ClientContextManager}
    */
   get contextManager() {
     return this.#contextManager;
   }
 
   /**
-   * Instance of the {@link client.PluginManager} class.
+   * Instance of the {@link ClientPluginManager} class.
    *
    * The context manager can be safely used after `client.init()` has been fulfilled.
    *
-   * @see {@link client.PluginManager}
-   * @type {client.PluginManager}
+   * @see {@link ClientPluginManager}
+   * @type {ClientPluginManager}
    */
   get pluginManager() {
     return this.#pluginManager;
   }
 
   /**
-   * Instance of the {@link client.StateManager} class.
+   * Instance of the {@link ClientStateManager} class.
    *
    * The context manager can be safely used after `client.init()` has been fulfilled.
    *
-   * @see {@link client.StateManager}
-   * @type {client.StateManager}
+   * @see {@link ClientStateManager}
+   * @type {ClientStateManager}
    */
   get stateManager() {
     return this.#stateManager;

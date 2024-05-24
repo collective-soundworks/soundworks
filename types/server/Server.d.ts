@@ -357,4 +357,3 @@ declare class Server {
      */
     isTrustedToken(clientId: number, clientIp: number, token: string): boolean;
 }
-//# sourceMappingURL=Server.d.ts.map

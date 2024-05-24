@@ -1,3 +1,4 @@
+/** @private */
 export default class PromiseStore {
     constructor(name: any);
     name: any;
@@ -8,4 +9,3 @@ export default class PromiseStore {
     reject(reqId: any, msg: any): void;
     flush(): void;
 }
-//# sourceMappingURL=PromiseStore.d.ts.map

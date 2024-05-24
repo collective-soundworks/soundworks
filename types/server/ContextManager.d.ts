@@ -66,4 +66,3 @@ declare class ContextManager {
      */
     private stop;
 }
-//# sourceMappingURL=ContextManager.d.ts.map

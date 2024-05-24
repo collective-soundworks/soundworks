@@ -1,28 +1,28 @@
 import BasePluginManager from '../common/BasePluginManager.js';
-import Plugin from './Plugin.js';
+import ClientPlugin from './ClientPlugin.js';
 import Client from './Client.js';
 
 /**
  * Callback executed when a plugin internal state is updated.
  *
- * @callback client.PluginManager~onStateChangeCallback
- * @param {object<client.Plugin#id, client.Plugin>} fullState - List of all plugins.
- * @param {client.Plugin|null} initiator - Plugin that initiated the update or `null`
+ * @callback ClientPluginManager~onStateChangeCallback
+ * @param {Object.<string, ClientPlugin>} fullState - List of all plugins.
+ * @param {ClientPlugin|null} initiator - Plugin that initiated the update or `null`
  *  if the change was initiated by the state manager (i.e. when the initialization
  *  of the plugins starts).
  */
 
 /**
- * Delete the registered {@link client.PluginManager~onStateChangeCallback}.
+ * Delete the registered {@link ClientPluginManager~onStateChangeCallback}.
  *
- * @callback client.PluginManager~deleteOnStateChangeCallback
+ * @callback ClientPluginManager~deleteOnStateChangeCallback
  */
 
 /**
  * The `PluginManager` allows to register and retrieve `soundworks` plugins.
  *
  * Plugins should always be registered both client-side and server-side,
- * and before {@link client.Client#start} or {@link server.Server#start}
+ * and before {@link Client#start} or {@link server.Server#start}
  * to be properly initialized.
  *
  * In some sitautions, you might want to register the same plugin factory several times
@@ -32,7 +32,7 @@ import Client from './Client.js';
  * they expose. See [https://soundworks.dev/guide/ecosystem](https://soundworks.dev/guide/ecosystem)
  * for more informations on the available plugins.
  *
- * See {@link client.Client#pluginManager}
+ * See {@link Client#pluginManager}
  *
  * ```
  * // client-side
@@ -72,28 +72,35 @@ import Client from './Client.js';
  * }, 1000);
  * ```
  *
- * @memberof client
  * @extends BasePluginManager
  * @inheritdoc
  * @hideconstructor
  */
-class PluginManager extends BasePluginManager {
+class ClientPluginManager extends BasePluginManager {
   /**
-   * @param {client.Client} client - The soundworks client instance.
+   * @param {Client} client - The soundworks client instance.
    */
   constructor(client) {
     if (!(client instanceof Client)) {
-      throw new Error(`[soundworks.PluginManager] Invalid argument, "new PluginManager(client)" should receive an instance of "soundworks.Client" as argument`);
+      throw new Error(`[soundworks.ClientPluginManager] Invalid argument, "new ClientPluginManager(client)" should receive an instance of "soundworks.Client" as argument`);
     }
 
     super(client);
   }
 
+  /**
+   * Register a plugin.
+   * @param {string} id - User defined id, must match the id given on server-side.
+   * @param {function} factory - Factory function of the plugin.
+   * @param {Object.<string, any>} [options] - Options to be given to the plugin at instanciation.
+   * @param {string[]} [deps] - List of plugin ids that should be properly initialized
+   *  before initializing this plugin.
+   */
   register(id, factory, options = {}, deps = []) {
-    const ctor = factory(Plugin);
+    const ctor = factory(ClientPlugin);
 
-    if (!(ctor.prototype instanceof Plugin)) {
-      throw new Error(`[soundworks.PluginManager] Invalid argument, "pluginManager.register" second argument should be a factory function returning a class extending the "Plugin" base class`);
+    if (!(ctor.prototype instanceof ClientPlugin)) {
+      throw new Error(`[soundworks.ClientPluginManager] Invalid argument, "pluginManager.register" second argument should be a factory function returning a class extending the "Plugin" base class`);
     }
 
     super.register(id, ctor, options, deps);
@@ -112,21 +119,19 @@ class PluginManager extends BasePluginManager {
    * on the `onStateChange` method.
    *
    * _Note: the async API is designed to enable the dynamic creation of plugins
-   * (hopefully without brealing changes) in a future release._
+   * in a future release._
    *
-   * @param {client.Plugin#id} id - Id of the plugin as defined when registered.
-   * @returns {client.Plugin}
-   * @see {@link client.PluginManager#onStateChange}
-   *
-   * @private
+   * @param {string} id - Id of the plugin as defined when registered.
+   * @returns {Promise<ClientPlugin>}
+   * @see {@link ClientPluginManager#onStateChange}
    */
   async get(id) {
     if (this.status !== 'started') {
-      throw new Error(`[soundworks.PluginManager] Cannot get plugin before "client.init()"`);
+      throw new Error(`[soundworks.ClientPluginManager] Cannot get plugin before "client.init()"`);
     }
 
     return super.unsafeGet(id);
   }
 }
 
-export default PluginManager;
+export default ClientPluginManager;

@@ -18,4 +18,3 @@ declare class SharedStatePrivate {
     _detachClient(remoteId: any, client: any): void;
 }
 import ParameterBag from '../common/ParameterBag.js';
-//# sourceMappingURL=SharedStatePrivate.d.ts.map

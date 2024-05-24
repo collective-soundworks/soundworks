@@ -35,7 +35,5 @@ export namespace server {
  * @inheritdoc
  * @hideconstructor
  */
-declare class SharedStateCollection extends BaseSharedStateCollection {
+declare class SharedStateCollection {
 }
-import BaseSharedStateCollection from '../common/BaseSharedStateCollection.js';
-//# sourceMappingURL=SharedStateCollection.d.ts.map

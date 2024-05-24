@@ -301,6 +301,7 @@ declare class StateManager extends BaseStateManager {
     _schemas: Map<any, any>;
     _observers: Set<any>;
     _hooksBySchemaName: Map<any, any>;
+    init(id: any, transport: any): void;
     /**
      * Add a client to the manager.
      *
@@ -402,4 +403,3 @@ declare class StateManager extends BaseStateManager {
 }
 import BaseStateManager from '../common/BaseStateManager.js';
 declare const kIsObservableState: unique symbol;
-//# sourceMappingURL=StateManager.d.ts.map

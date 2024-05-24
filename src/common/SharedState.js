@@ -1,4 +1,5 @@
 import { isPlainObject } from '@ircam/sc-utils';
+
 import ParameterBag from './ParameterBag.js';
 import PromiseStore from './PromiseStore.js';
 import {
@@ -15,15 +16,81 @@ import {
   UPDATE_NOTIFICATION,
 } from './constants.js';
 
-// @todo - replace isOwner by `type`:
-// enum {
-//   'owner'
-//   'attached'
-//   'collection-controlller'
-//   'collection-attached'
-// }
+import {
+  kStateManagerDeleteState,
+} from './BaseStateManager.js';
 
-class BaseSharedState {
+/**
+ * @callback SharedState~onUpdateCallback
+ * @param {Object} newValues - Key / value pairs of the updates that have been
+ *  applied to the state.
+ * @param {Object} oldValues - Key / value pairs of the updated params before
+ *  the updates has been applied to the state.
+ * @param {Mixed} [context=null] - Optionnal context object that has been passed
+ *  with the values updates in the `set` call.
+ */
+
+/**
+ * Delete the registered {@link SharedState~onUpdateCallback}.
+ * @callback SharedState~deleteOnUpdateCallback
+ */
+
+/**
+ * The `SharedState` is one of the most important and versatile abstraction provided
+ * by `soundworks`. It represents a set of parameters that are synchronized accross
+ * every nodes of the application (clients and server) that declared some interest
+ * to the shared state.
+ *
+ * A `SharedState` is created according to a "schema" (in the sense of a database
+ * schema) that must be declared and registered server-side. Any number of `SharedState`s
+ * can be created from a single schema.
+ *
+ * A shared state can be created both by the clients or by the server (in which case
+ * it is generally considered as a global state of the application). Similarly any
+ * node of the application (clients or server) can declare interest and "attach" to
+ * a state created by another node. All node attached to a state can modify its values
+ * and/or react to the modifications applied by other nodes.
+ *
+ * Tutorial: {@link https://soundworks.dev/guide/state-manager.html}
+ *
+ * ```
+ * // server-side
+ * import { Server } from '@soundworks/server/index.js';
+ *
+ * const server = new Server(config);
+ * // declare and register the schema of a shared state.
+ * server.stateManager.registerSchema('some-global-state', {
+ *   myRandom: {
+ *     type: 'float',
+ *     default: 0,
+ *   }
+ * });
+ *
+ * await server.start();
+ *
+ * // create a global state server-side
+ * const globalState = await server.stateManager.create('some-global-state');
+ * // listen and react to the changes made by the clients
+ * globalState.onUpdate(updates => console.log(updates));
+ * ```
+ *
+ * ```
+ * // client-side
+ * import { Client } from '@soundworks/client.index.js';
+ *
+ * const client = new Client(config);
+ * await client.start();
+ *
+ * // attach to the global state created by the server
+ * const globalState = await client.stateManager.attach('some-global-state');
+ *
+ * // update the value of a `myRandom` parameter every seconds
+ * setInterval(() => {
+ *   globalState.set({ myRandom: Math.random() });
+ * }, 1000);
+ * ```
+ */
+class SharedState {
   constructor(id, remoteId, schemaName, schema, client, isOwner, manager, initValues, filter) {
     /** @private */
     this._id = id;
@@ -107,7 +174,7 @@ ${JSON.stringify(initValues, null, 2)}`);
     // state has been deleted by its creator or the schema has been deleted
     // ---------------------------------------------
     this._client.transport.addListener(`${DELETE_NOTIFICATION}-${this.id}-${this.remoteId}`, async () => {
-      this._manager._statesById.delete(this.id);
+      this._manager[kStateManagerDeleteState](this.id);
       this._clearTransport();
 
       for (let callback of this._onDetachCallbacks) {
@@ -135,7 +202,7 @@ ${JSON.stringify(initValues, null, 2)}`);
       // the creator has called `.delete()`
       // ---------------------------------------------
       this._client.transport.addListener(`${DELETE_RESPONSE}-${this.id}-${this.remoteId}`, async (reqId) => {
-        this._manager._statesById.delete(this.id);
+        this._manager[kStateManagerDeleteState](this.id);
         this._clearTransport();
 
         for (let callback of this._onDetachCallbacks) {
@@ -161,7 +228,7 @@ ${JSON.stringify(initValues, null, 2)}`);
       // the attached node has called `.detach()`
       // ---------------------------------------------
       this._client.transport.addListener(`${DETACH_RESPONSE}-${this.id}-${this.remoteId}`, async (reqId) => {
-        this._manager._statesById.delete(this.id);
+        this._manager[kStateManagerDeleteState](this.id);
         this._clearTransport();
 
         for (let callback of this._onDetachCallbacks) {
@@ -637,11 +704,11 @@ ${JSON.stringify(initValues, null, 2)}`);
   /**
    * Subscribe to state updates.
    *
-   * @param {client.SharedState~onUpdateCallback|server.SharedState~onUpdateCallback} callback
+   * @param {SharedState~onUpdateCallback} callback
    *  Callback to execute when an update is applied on the state.
    * @param {Boolean} [executeListener=false] - Execute the callback immediately
    *  with current state values. (`oldValues` will be set to `{}`, and `context` to `null`)
-   * @returns {client.SharedState~deleteOnUpdateCallback|server.SharedState~deleteOnUpdateCallback}
+   * @returns {SharedState~deleteOnUpdateCallback}
    * @example
    * const unsubscribe = state.onUpdate(async (newValues, oldValues, context) =>  {
    *   for (let [key, value] of Object.entries(newValues)) {
@@ -695,4 +762,4 @@ ${JSON.stringify(initValues, null, 2)}`);
   }
 }
 
-export default BaseSharedState;
+export default SharedState;

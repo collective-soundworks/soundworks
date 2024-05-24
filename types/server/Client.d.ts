@@ -42,4 +42,3 @@ declare class Client {
      */
     private token;
 }
-//# sourceMappingURL=Client.d.ts.map

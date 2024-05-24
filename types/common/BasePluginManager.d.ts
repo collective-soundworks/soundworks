@@ -97,4 +97,3 @@ declare class BasePluginManager {
     /** @private */
     private _propagateStateChange;
 }
-//# sourceMappingURL=BasePluginManager.d.ts.map

@@ -4,11 +4,12 @@ import merge from 'lodash/merge.js';
  * @private
  */
 class BasePlugin {
+  #id = null;
+  #onStateChangeCallbacks = new Set();
+
   constructor(id) {
     /** @private */
-    this._id = id;
-    /** @private */
-    this._type = this.constructor.name;
+    this.#id = id;
 
     /**
      * Options of the plugin.
@@ -37,9 +38,6 @@ class BasePlugin {
      * @type {string}
      */
     this.status = 'idle';
-
-    /** @private */
-    this._onStateChangeCallbacks = new Set();
   }
 
   /**
@@ -51,7 +49,7 @@ class BasePlugin {
    * @see {@link server.PluginManager#register}
    */
   get id() {
-    return this._id;
+    return this.#id;
   }
 
   /**
@@ -65,7 +63,7 @@ class BasePlugin {
    * @readonly
    */
   get type() {
-    return this._type;
+    return this.constructor.name;
   }
 
   /**
@@ -149,8 +147,8 @@ class BasePlugin {
    * unsubscribe();
    */
   onStateChange(callback) {
-    this._onStateChangeCallbacks.add(callback);
-    return () => this._onStateChangeCallbacks.delete(callback);
+    this.#onStateChangeCallbacks.add(callback);
+    return () => this.#onStateChangeCallbacks.delete(callback);
   }
 
   /**
@@ -166,7 +164,7 @@ class BasePlugin {
    */
   propagateStateChange(updates) {
     merge(this.state, updates);
-    this._onStateChangeCallbacks.forEach(callback => callback(this.state));
+    this.#onStateChangeCallbacks.forEach(callback => callback(this.state));
   }
 }
 

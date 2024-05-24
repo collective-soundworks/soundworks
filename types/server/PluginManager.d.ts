@@ -108,4 +108,3 @@ declare class PluginManager extends BasePluginManager {
     private removeClient;
 }
 import BasePluginManager from '../common/BasePluginManager.js';
-//# sourceMappingURL=PluginManager.d.ts.map

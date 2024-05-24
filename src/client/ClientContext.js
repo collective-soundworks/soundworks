@@ -53,34 +53,28 @@ const promiseStore = new PromiseStore('Context');
  * await new Promise(resolve => setTimeout(resolve, 2000));
  * await myContext.exit();
  * ```
- *
- * @memberof client
  */
-class Context {
+class ClientContext {
+  #client = null;
+
   /**
-   * @param {client.Client} client - The soundworks client instance.
+   * @param {Client} client - The soundworks client instance.
    * @throws Will throw if the first argument is not a soundworks client instance.
    */
   constructor(client) {
     if (!(client instanceof Client)) {
-      throw new Error(`[soundworks:Context] Invalid argument, context "${this.name}" should receive a "soundworks.Client" instance as first argument`);
+      throw new Error(`[soundworks:ClientContext] Invalid argument, context "${this.name}" should receive a "soundworks.Client" instance as first argument`);
     }
 
-    /**
-     * The soundworks client instance.
-     * @type {client.Client}
-     * @readonly
-     */
-    this.client = client;
+    this.#client = client;
 
     /**
-     * Status of the context, i.e. 'idle', 'inited', 'started', 'errored'
-     * @type {string}
-     * @readonly
+     * Status of the context.
+     * @type {'idle'|'inited'|'started'|'errored'}
      */
     this.status = 'idle';
 
-    this.client.socket.addListener(CONTEXT_ENTER_RESPONSE, (reqId, contextName) => {
+    this.#client.socket.addListener(CONTEXT_ENTER_RESPONSE, (reqId, contextName) => {
       if (contextName !== this.name) {
         return;
       }
@@ -88,7 +82,7 @@ class Context {
       promiseStore.resolve(reqId);
     });
 
-    this.client.socket.addListener(CONTEXT_ENTER_ERROR, (reqId, contextName, msg) => {
+    this.#client.socket.addListener(CONTEXT_ENTER_ERROR, (reqId, contextName, msg) => {
       if (contextName !== this.name) {
         return;
       }
@@ -96,7 +90,7 @@ class Context {
       promiseStore.reject(reqId, msg);
     });
 
-    this.client.socket.addListener(CONTEXT_EXIT_RESPONSE, (reqId, contextName) => {
+    this.#client.socket.addListener(CONTEXT_EXIT_RESPONSE, (reqId, contextName) => {
       if (contextName !== this.name) {
         return;
       }
@@ -104,7 +98,7 @@ class Context {
       promiseStore.resolve(reqId);
     });
 
-    this.client.socket.addListener(CONTEXT_EXIT_ERROR, (reqId, contextName, msg) => {
+    this.#client.socket.addListener(CONTEXT_EXIT_ERROR, (reqId, contextName, msg) => {
       if (contextName !== this.name) {
         return;
       }
@@ -112,7 +106,15 @@ class Context {
       promiseStore.reject(reqId, msg);
     });
 
-    this.client.contextManager.register(this);
+    this.#client.contextManager.register(this);
+  }
+
+  /**
+   * The soundworks client instance.
+   * @type {Client}
+   */
+  get client() {
+    return this.#client;
   }
 
   /**
@@ -138,7 +140,7 @@ class Context {
 
   /**
    * Start the context. This method is lazilly called when the client enters the
-   * context for the first time (cf. ${client.Context#enter}). If you know some
+   * context for the first time (cf. ${client.ClientContext#enter}). If you know some
    * some heavy and/or potentially long job has to be done  when starting the context
    * (e.g. call to a web service) it may be a good practice to call it explicitely.
    *
@@ -177,12 +179,12 @@ class Context {
    * done (e.g. creating a shared state, etc.) when the context is entered.
    *
    * If a server-side part of the context is defined (i.e. a context with the same
-   * {@link client.Context#name}), the corresponding server-side `enter()` method
+   * {@link client.ClientContext#name}), the corresponding server-side `enter()` method
    * will be executed before the returned Promise is fulfilled.
    *
    * If the context has not been started yet, the `start` method is implicitely executed.
    *
-   * @returns {Promise} - Promise that resolves when the context is entered.
+   * @returns {Promise<void>} - Promise that resolves when the context is entered.
    * @example
    * class MyContext extends Context {
    *   async enter() {
@@ -199,14 +201,14 @@ class Context {
   async enter() {
     // lazily start the context if registered after `client.start()`
     if (this.status !== 'started' && this.status !== 'errored') {
-      await this.client.contextManager.get(this.name);
+      await this.#client.contextManager.get(this.name);
     }
 
     // we need the try/catch block to change the promise rejection into proper error
     try {
       await new Promise((resolve, reject) => {
         const reqId = promiseStore.add(resolve, reject, 'enter-context');
-        this.client.socket.send(CONTEXT_ENTER_REQUEST, reqId, this.name);
+        this.#client.socket.send(CONTEXT_ENTER_REQUEST, reqId, this.name);
       });
     } catch (err) {
       throw new Error(err);
@@ -218,10 +220,10 @@ class Context {
    * done (e.g. delete a shared state, etc.) when the context is exited.
    *
    * If a server-side part of the context is defined (i.e. a context with the same
-   * {@link client.Context#name}), the corresponding server-side `exit()` method
+   * {@link client.ClientContext#name}), the corresponding server-side `exit()` method
    * will be executed before the returned Promise is fulfilled.
    *
-   * @returns {Promise} - Promise that resolves when the context is exited.
+   * @returns {Promise<void>} - Promise that resolves when the context is exited.
    * @example
    * class MyContext extends Context {
    *   async enter() {
@@ -240,7 +242,7 @@ class Context {
     try {
       await new Promise((resolve, reject) => {
         const reqId = promiseStore.add(resolve, reject, 'exit-context');
-        this.client.socket.send(CONTEXT_EXIT_REQUEST, reqId, this.name);
+        this.#client.socket.send(CONTEXT_EXIT_REQUEST, reqId, this.name);
       });
     } catch (err) {
       throw new Error(err);
@@ -248,4 +250,4 @@ class Context {
   }
 }
 
-export default Context;
+export default ClientContext;

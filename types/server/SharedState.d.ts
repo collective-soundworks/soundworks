@@ -80,7 +80,5 @@ export namespace server {
  * @hideconstructor
  * @see {server.StateManager}
  */
-declare class SharedState extends BaseSharedState {
+declare class SharedState {
 }
-import BaseSharedState from '../common/BaseSharedState.js';
-//# sourceMappingURL=SharedState.d.ts.map

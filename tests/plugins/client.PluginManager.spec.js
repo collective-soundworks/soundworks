@@ -2,8 +2,8 @@ import { assert } from 'chai';
 
 import { Server } from '../../src/server/index.js';
 import { Client } from '../../src/client/index.js';
-import PluginManager from '../../src/client/PluginManager.js';
-import Plugin from '../../src/client/Plugin.js';
+import ClientPluginManager from '../../src/client/ClientPluginManager.js';
+import ClientPlugin from '../../src/client/ClientPlugin.js';
 
 import pluginDelayServer from '../utils/PluginDelayServer.js';
 import pluginDelayClient from '../utils/PluginDelayClient.js';
@@ -224,7 +224,7 @@ describe(`# PluginManagerClient`, () => {
 
       assert.isBelow(Date.now() - startTime, TIMEOUT_ERROR);
       assert.equal(plugin.status, 'started');
-      assert.ok(plugin instanceof Plugin);
+      assert.ok(plugin instanceof ClientPlugin);
     });
 
     // @note - for now we just forbid this,

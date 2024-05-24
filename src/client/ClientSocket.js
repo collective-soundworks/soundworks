@@ -14,15 +14,15 @@ import {
 export const kSocketTerminate = Symbol('soundworks:socket-terminate');
 
 /**
- * The Socket class is a simple publish / subscribe wrapper built on top of the
+ * The ClientSocket class is a simple publish / subscribe wrapper built on top of the
  * [isomorphic-ws](https://github.com/heineiuo/isomorphic-ws) library.
- * An instance of `Socket` is automatically created by the `soundworks.Client`
+ * An instance of `ClientSocket` is automatically created by the `soundworks.Client`
  * (see {@link client.Client#socket}).
  *
  * _Important: In most cases, you should consider using a {@link client.SharedState}
  * rather than directly using the sockets._
  *
- * The Socket class concurrently opens two different WebSockets:
+ * The ClientSocket class concurrently opens two different WebSockets:
  * - a socket configured with `binaryType = 'blob'` for JSON compatible data
  *  types (i.e. string, number, boolean, object, array and null).
  * - a socket configured with `binaryType= 'arraybuffer'` for efficient streaming
@@ -31,10 +31,9 @@ export const kSocketTerminate = Symbol('soundworks:socket-terminate');
  * Both sockets re-emits all "native" ws events ('open', 'upgrade', 'close', 'error'
  *  and 'message'.
  *
- * @memberof client
  * @hideconstructor
  */
-class Socket {
+class ClientSocket {
   #socket = null;
   #listeners = new Map();
 
@@ -42,7 +41,7 @@ class Socket {
 
   /**
    * Initialize a websocket connection with the server. Automatically called
-   * during `client.init()`
+   * during {@link Client#init}
    *
    * @param {string} role - Role of the client (see {@link client.Client#role})
    * @param {object} config - Configuration of the sockets
@@ -191,7 +190,6 @@ class Socket {
   }
 
   /**
-   * @param {boolean} binary - Emit to either the string or binary socket.
    * @param {string} channel - Channel name.
    * @param {...*} args - Content of the message.
    */
@@ -264,4 +262,4 @@ class Socket {
   }
 }
 
-export default Socket;
+export default ClientSocket;

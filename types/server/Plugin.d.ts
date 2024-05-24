@@ -47,9 +47,13 @@ declare class Plugin extends BasePlugin {
      * @type {server.Server}
      * @see {@link server.Server}
      */
-    server: server.Server;
-    /** @private */
-    private clients;
+    get server(): server.Server;
+    /**
+     * Set of the clients registered in the plugin.
+     * @type {Set<server.Client>}
+     * @see {@link server.Client}
+     */
+    get clients(): Set<server.Client>;
     /**
      * Method called when a client (which registered the client-side plugin),
      * connects to the application. Override this method if you need to perform
@@ -66,6 +70,6 @@ declare class Plugin extends BasePlugin {
      * @param {server.Client} client
      */
     removeClient(client: server.Client): Promise<void>;
+    #private;
 }
 import BasePlugin from '../common/BasePlugin.js';
-//# sourceMappingURL=Plugin.d.ts.map

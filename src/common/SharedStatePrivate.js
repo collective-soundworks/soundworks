@@ -16,6 +16,7 @@ import {
  * Return identity is filter is null
  * @param {object} updates
  * @param {array|null} filter
+ * @private
  */
 function filterUpdates(updates, filter) {
   if (filter === null) {

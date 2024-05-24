@@ -1,4 +1,4 @@
-export default Context;
+export default ClientContext;
 /**
  * Base class to extend in order to implement a new Context.
  *
@@ -40,27 +40,23 @@ export default Context;
  * await new Promise(resolve => setTimeout(resolve, 2000));
  * await myContext.exit();
  * ```
- *
- * @memberof client
  */
-declare class Context {
+declare class ClientContext {
     /**
-     * @param {client.Client} client - The soundworks client instance.
+     * @param {Client} client - The soundworks client instance.
      * @throws Will throw if the first argument is not a soundworks client instance.
      */
-    constructor(client: client.Client);
+    constructor(client: Client);
+    /**
+     * Status of the context.
+     * @type {'idle'|'inited'|'started'|'errored'}
+     */
+    status: 'idle' | 'inited' | 'started' | 'errored';
     /**
      * The soundworks client instance.
-     * @type {client.Client}
-     * @readonly
+     * @type {Client}
      */
-    readonly client: client.Client;
-    /**
-     * Status of the context, i.e. 'idle', 'inited', 'started', 'errored'
-     * @type {string}
-     * @readonly
-     */
-    readonly status: string;
+    get client(): Client;
     /**
      * Optionnal user-defined name of the context (defaults to the class name).
      *
@@ -81,7 +77,7 @@ declare class Context {
     readonly get name(): string;
     /**
      * Start the context. This method is lazilly called when the client enters the
-     * context for the first time (cf. ${client.Context#enter}). If you know some
+     * context for the first time (cf. ${client.ClientContext#enter}). If you know some
      * some heavy and/or potentially long job has to be done  when starting the context
      * (e.g. call to a web service) it may be a good practice to call it explicitely.
      *
@@ -118,12 +114,12 @@ declare class Context {
      * done (e.g. creating a shared state, etc.) when the context is entered.
      *
      * If a server-side part of the context is defined (i.e. a context with the same
-     * {@link client.Context#name}), the corresponding server-side `enter()` method
+     * {@link client.ClientContext#name}), the corresponding server-side `enter()` method
      * will be executed before the returned Promise is fulfilled.
      *
      * If the context has not been started yet, the `start` method is implicitely executed.
      *
-     * @returns {Promise} - Promise that resolves when the context is entered.
+     * @returns {Promise<void>} - Promise that resolves when the context is entered.
      * @example
      * class MyContext extends Context {
      *   async enter() {
@@ -137,16 +133,16 @@ declare class Context {
      *   }
      * }
      */
-    enter(): Promise<any>;
+    enter(): Promise<void>;
     /**
      * Exit the context. Implement this method to define the logic that should be
      * done (e.g. delete a shared state, etc.) when the context is exited.
      *
      * If a server-side part of the context is defined (i.e. a context with the same
-     * {@link client.Context#name}), the corresponding server-side `exit()` method
+     * {@link client.ClientContext#name}), the corresponding server-side `exit()` method
      * will be executed before the returned Promise is fulfilled.
      *
-     * @returns {Promise} - Promise that resolves when the context is exited.
+     * @returns {Promise<void>} - Promise that resolves when the context is exited.
      * @example
      * class MyContext extends Context {
      *   async enter() {
@@ -160,6 +156,7 @@ declare class Context {
      *   }
      * }
      */
-    exit(): Promise<any>;
+    exit(): Promise<void>;
+    #private;
 }
-//# sourceMappingURL=Context.d.ts.map
+import Client from './Client.js';

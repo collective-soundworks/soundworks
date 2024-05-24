@@ -1,23 +1,21 @@
-export default StateManager;
-export namespace client {
-    /**
-     * ~ObserveCallback
-     */
-    type StateManager = () => any;
-}
+export default ClientStateManager;
 /**
- * @callback client.StateManager~ObserveCallback
+ * ~ObserveCallback
+ */
+export type ClientStateManager = () => any;
+/**
+ * @callback ClientStateManager~ObserveCallback
  * @async
  * @param {String} schemaName - name of the schema
  * @param {Number} stateId - id of the state
  * @param {Number} nodeId - id of the node that created the state
  */
 /**
- * The `StateManager` allows to create new {@link client.SharedState}s, or attach
+ * The `ClientStateManager` allows to create new {@link client.SharedState}s, or attach
  * to {@link client.SharedState}s created by other nodes (clients or server). It
  * can also track all the {@link client.SharedState}s created by other nodes.
  *
- * An instance of `StateManager` is automatically created by the `soundworks.Client`
+ * An instance of `ClientStateManager` is automatically created by the `soundworks.Client`
  * at initialization (cf. {@link client.Client#stateManager}).
  *
  * See {@link client.Client#stateManager}
@@ -61,12 +59,10 @@ export namespace client {
  * }, 1000);
  * ```
  *
- * @memberof client
  * @extends BaseStateManager
  * @inheritdoc
  * @hideconstructor
  */
-declare class StateManager extends BaseStateManager {
+declare class ClientStateManager extends BaseStateManager {
 }
 import BaseStateManager from '../common/BaseStateManager.js';
-//# sourceMappingURL=StateManager.d.ts.map

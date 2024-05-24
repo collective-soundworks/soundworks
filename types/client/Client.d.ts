@@ -1,140 +1,156 @@
+export const kClientVersionTest: unique symbol;
 export default Client;
 /**
  * Configuration object for a client running in a browser runtime.
  */
-export type ClientConfig = any;
+export type ClientConfig = {
+    /**
+     * - Role of the client in the application (e.g. 'player', 'controller').
+     */
+    role: string;
+    /**
+     * - Application configration object.
+     */
+    app?: {
+        name?: string;
+        author?: string;
+    };
+    /**
+     * - Environment configration object.
+     */
+    env: {
+        useHttps: boolean;
+        serverAddress: string;
+        port: number;
+        subpath?: string;
+    };
+};
 /**
  * Configuration object for a client running in a browser runtime.
  *
  * @typedef ClientConfig
- * @memberof client
  * @type {object}
  * @property {string} role - Role of the client in the application (e.g. 'player', 'controller').
  * @property {object} [app] - Application configration object.
  * @property {string} [app.name=''] - Name of the application.
  * @property {string} [app.author=''] - Name of the author.
- * @property {object} [env] - Environment configration object.
+ * @property {object} env - Environment configration object.
  * @property {boolean} env.useHttps - Define if the websocket should use secure connection.
- * @property {boolean} [env.serverAddress=''] - Address the socket server. Mandatory for
+ * @property {string} env.serverAddress - Address the socket server. Mandatory for
  *  node clients. For browser clients, use `window.location.domain` as fallback if empty.
- * @property {boolean} env.port - Port of the socket server.
- * @property {string} [env.websockets={}] - Configuration options for websockets.
+ * @property {number} env.port=8000 - Port of the socket server.
  * @property {string} [env.subpath=''] - If running behind a proxy, path to the application.
  */
 /**
  * The `Client` class is the main entry point for the client-side of a soundworks
  * application.
  *
- * A `Client` instance allows to access soundworks components such as {@link client.StateManager},
- * {@link client.PluginManager},{@link client.Socket} or {@link client.ContextManager}.
- * Its is also responsible for handling the initialization lifecycles of the different
- * soundworks components.
+ * A `soundworks` client can run seamlessly in a browser or in a Node.js runtime.
+ *
+ * It provides an access to the different soundworks components such as the {@link ClientStateManager},
+ * {@link ClientPluginManager}, {@link ClientSocket} and the {@link ClientContextManager}.
  *
  * ```
  * import { Client } from '@soundworks/core/client.js';
- * // create a new soundworks `Client` instance
- * const client = new Client({ role: 'player' });
- * // init and start the client
+ * // create a `Client` instance
+ * const client = new Client({
+ *   role: 'player',
+ *   env: {
+ *     useHttps: false,
+ *     serverAddress: 'localhost',
+ *     port: 8000,
+ *   },
+ * });
+ * // start the client
  * await client.start();
  * ```
- *
- * @memberof client
  */
 declare class Client {
     /**
-     * @param {client.ClientConfig} config - Configuration of the soundworks client.
+     * @param {ClientConfig} config - Configuration of the soundworks client.
      * @throws Will throw if the given config object is invalid.
      */
-    constructor(config: client.ClientConfig);
+    constructor(config: ClientConfig);
     /**
-     * package version
-     * @type string
-     * @readonly
+     * Package version.
+     *
+     * @type {string}
      */
-    readonly version: string;
+    get version(): string;
     /**
      * Role of the client in the application.
      *
      * @type {string}
      */
-    role: string;
+    get role(): string;
     /**
      * Configuration object.
      *
-     * @type {client.ClientConfig}
+     * @type {ClientConfig}
      */
-    config: client.ClientConfig;
+    get config(): ClientConfig;
     /**
-     * Session id of the client (incremeted positive number), generated and
-     * retrieved by the server during `client.init`. The counter is reset when
-     * the server restarts.
+     * Session id of the client.
+     *
+     * Incremeted positive integer generated and retrieved by the server during
+     * `client.init`. The counter is reset when the server restarts.
      *
      * @type {number}
      */
-    id: number;
+    get id(): number;
     /**
-     * Unique session uuid of the client (uuidv4), generated and retrieved by
-     * the server during {@link client.Client#init}.
+     * Unique session uuid of the client (uuidv4).
      *
+     * Generated and retrieved by the server during {@link client.Client#init}.
      * @type {string}
      */
-    uuid: string;
-    /**
-     * Instance of the {@link client.Socket} class that handle websockets communications with
-     * the server.
-     *
-     * @see {@link client.Socket}
-     * @type {client.Socket}
-     */
-    socket: client.Socket;
+    get uuid(): string;
     /**
      * Runtime platform on which the client is executed, i.e. 'browser' or 'node'.
      *
      * @type {string}
      */
-    target: string;
+    get target(): string;
     /**
-     * Instance of the {@link client.ContextManager} class.
+     * Instance of the {@link client.Socket} class.
+     *
+     * @see {@link ClientSocket}
+     * @type {ClientSocket}
+     */
+    get socket(): ClientSocket;
+    /**
+     * Instance of the {@link ClientContextManager} class.
      *
      * The context manager can be safely used after `client.init()` has been fulfilled.
      *
-     * @see {@link client.ContextManager}
-     * @type {client.ContextManager}
+     * @see {@link ClientContextManager}
+     * @type {ClientContextManager}
      */
-    contextManager: client.ContextManager;
+    get contextManager(): ClientContextManager;
     /**
-     * Instance of the {@link client.PluginManager} class.
+     * Instance of the {@link ClientPluginManager} class.
      *
      * The context manager can be safely used after `client.init()` has been fulfilled.
      *
-     * @see {@link client.PluginManager}
-     * @type {client.PluginManager}
+     * @see {@link ClientPluginManager}
+     * @type {ClientPluginManager}
      */
-    pluginManager: client.PluginManager;
+    get pluginManager(): ClientPluginManager;
     /**
-     * Instance of the {@link client.StateManager} class.
+     * Instance of the {@link ClientStateManager} class.
      *
      * The context manager can be safely used after `client.init()` has been fulfilled.
      *
-     * @see {@link client.StateManager}
-     * @type {client.StateManager}
+     * @see {@link ClientStateManager}
+     * @type {ClientStateManager}
      */
-    stateManager: client.StateManager;
+    get stateManager(): ClientStateManager;
     /**
      * Status of the client, 'idle', 'inited', 'started' or 'errored'.
      *
      * @type {string}
      */
-    status: string;
-    /**
-     * Token of the client if connected through HTTP authentication.
-     * @private
-     */
-    private token;
-    /** @private */
-    private _onStatusChangeCallbacks;
-    /** @private */
-    private _auditState;
+    get status(): string;
     /**
      * The `init` method is part of the initialization lifecycle of the `soundworks`
      * client. Most of the time, the `init` method will be implicitly called by the
@@ -218,10 +234,12 @@ declare class Client {
      * Listen for the status change ('inited', 'started', 'stopped') of the client.
      *
      * @param {Function} callback - Listener to the status change.
-     * @returns {Function} Delete the listener.
+     * @returns {Function} Function that delete the listener when executed.
      */
     onStatusChange(callback: Function): Function;
-    /** @private */
-    private _dispatchStatus;
+    #private;
 }
-//# sourceMappingURL=Client.d.ts.map
+import ClientSocket from './ClientSocket.js';
+import ClientContextManager from './ClientContextManager.js';
+import ClientPluginManager from './ClientPluginManager.js';
+import ClientStateManager from './ClientStateManager.js';

@@ -4,10 +4,6 @@ export default BasePlugin;
  */
 declare class BasePlugin {
     constructor(id: any);
-    /** @private */
-    private _id;
-    /** @private */
-    private _type;
     /**
      * Options of the plugin.
      *
@@ -33,8 +29,6 @@ declare class BasePlugin {
      * @type {string}
      */
     status: string;
-    /** @private */
-    private _onStateChangeCallbacks;
     /**
      * User defined ID of the plugin.
      *
@@ -146,5 +140,5 @@ declare class BasePlugin {
      * @see {@link server.PluginManager#onStateChange}
      */
     propagateStateChange(updates: object): void;
+    #private;
 }
-//# sourceMappingURL=BasePlugin.d.ts.map

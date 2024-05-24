@@ -1,20 +1,18 @@
-export default Plugin;
-export namespace client {
-    /**
-     * ~onStateChangeCallback
-     */
-    type Plugin = (#state: client.Plugin) => any;
-}
+export default ClientPlugin;
+/**
+ * ~onStateChangeCallback
+ */
+export type ClientPlugin = (#state: ClientPlugin) => any;
 /**
  * Callback executed when the plugin state is updated.
  *
- * @callback client.Plugin~onStateChangeCallback
- * @param {client.Plugin#state} state - Current state of the plugin.
+ * @callback ClientPlugin~onStateChangeCallback
+ * @param {ClientPlugin#state} state - Current state of the plugin.
  */
 /**
- * Delete the registered {@link client.Plugin~onStateChangeCallback}.
+ * Delete the registered {@link ClientPlugin~onStateChangeCallback}.
  *
- * @callback client.Plugin~deleteOnStateChangeCallback
+ * @callback ClientPlugin~deleteOnStateChangeCallback
  */
 /**
  * Base class to extend in order to create the client-side counterpart of a
@@ -31,24 +29,23 @@ export namespace client {
  *
  * _Creating new plugins should be considered an advanced usage._
  *
- * @memberof client
  * @extends BasePlugin
  * @inheritdoc
  */
-declare class Plugin extends BasePlugin {
+declare class ClientPlugin extends BasePlugin {
     /**
-     * @param {client.Client} client - The soundworks client instance.
+     * @param {Client} client - A soundworks client instance.
      * @param {string} id - User defined id of the plugin as defined in
-     *  {@link client.PluginManager#register}.
+     *  {@link ClientPluginManager#register}.
      */
-    constructor(client: client.Client, id: string);
+    constructor(client: Client, id: string);
     /**
      * Instance of soundworks client.
      *
-     * @type {client.Client}
-     * @see {@link client.Client}
+     * @type {Client}
+     * @see {@link Client}
      */
-    client: client.Client;
+    get client(): Client;
+    #private;
 }
 import BasePlugin from '../common/BasePlugin.js';
-//# sourceMappingURL=Plugin.d.ts.map

@@ -1,7 +1,7 @@
 import BaseStateManager from '../common/BaseStateManager.js';
 
 /**
- * @callback client.StateManager~ObserveCallback
+ * @callback ClientStateManager~ObserveCallback
  * @async
  * @param {String} schemaName - name of the schema
  * @param {Number} stateId - id of the state
@@ -9,11 +9,11 @@ import BaseStateManager from '../common/BaseStateManager.js';
  */
 
 /**
- * The `StateManager` allows to create new {@link client.SharedState}s, or attach
+ * The `ClientStateManager` allows to create new {@link client.SharedState}s, or attach
  * to {@link client.SharedState}s created by other nodes (clients or server). It
  * can also track all the {@link client.SharedState}s created by other nodes.
  *
- * An instance of `StateManager` is automatically created by the `soundworks.Client`
+ * An instance of `ClientStateManager` is automatically created by the `soundworks.Client`
  * at initialization (cf. {@link client.Client#stateManager}).
  *
  * See {@link client.Client#stateManager}
@@ -57,11 +57,10 @@ import BaseStateManager from '../common/BaseStateManager.js';
  * }, 1000);
  * ```
  *
- * @memberof client
  * @extends BaseStateManager
  * @inheritdoc
  * @hideconstructor
  */
-class StateManager extends BaseStateManager {}
+class ClientStateManager extends BaseStateManager {}
 
-export default StateManager;
+export default ClientStateManager;
