@@ -72,7 +72,7 @@ class Plugin extends BasePlugin {
    * @param {server.Client} client
    */
   async addClient(client) {
-    this.clients.add(client);
+    this.#clients.add(client);
   }
 
   /**
@@ -83,7 +83,7 @@ class Plugin extends BasePlugin {
    * @param {server.Client} client
    */
   async removeClient(client) {
-    this.clients.delete(client);
+    this.#clients.delete(client);
   }
 }
 
