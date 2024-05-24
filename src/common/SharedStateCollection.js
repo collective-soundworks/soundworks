@@ -1,5 +1,5 @@
 /**
- * @callback client.SharedStateCollection~onUpdateCallback
+ * @callback sharedStateCollectionOnUpdateCallback
  * @param {client.SharedState} state - State that triggered the update.
  * @param {Object} newValues - Key / value pairs of the updates that have been
  *  applied to the state.
@@ -28,55 +28,58 @@
  * @hideconstructor
  */
 class SharedStateCollection {
+  #stateManager = null;
+  #schemaName = null;
+  #filter = null;
+  #options = null;
+  #schema = null;
+  #states = [];
+  #onUpdateCallbacks = new Set();
+  #onAttachCallbacks = new Set();
+  #onDetachCallbacks = new Set();
+  #unobserve = null;
+
   constructor(stateManager, schemaName, filter = null, options = {}) {
-    this._stateManager = stateManager;
-    this._schemaName = schemaName;
-    this._filter = filter;
-    this._options = Object.assign({ excludeLocal: false }, options);
-
-    this._schema = null;
-    this._states = [];
-
-    this._onUpdateCallbacks = new Set();
-    this._onAttachCallbacks = new Set();
-    this._onDetachCallbacks = new Set();
-    this._unobserve = null;
+    this.#stateManager = stateManager;
+    this.#schemaName = schemaName;
+    this.#filter = filter;
+    this.#options = Object.assign({ excludeLocal: false }, options);
   }
 
   /** @private */
   async _init() {
-    this._schema = await this._stateManager.getSchema(this._schemaName);
+    this.#schema = await this.#stateManager.getSchema(this.#schemaName);
 
     // if filter is set, check that it contains only valid param names
-    if (this._filter !== null) {
-      const keys = Object.keys(this._schema);
+    if (this.#filter !== null) {
+      const keys = Object.keys(this.#schema);
 
-      for (let filter of this._filter) {
+      for (let filter of this.#filter) {
         if (!keys.includes(filter)) {
-          throw new ReferenceError(`[SharedStateCollection] Invalid filter key (${filter}) for schema "${this._schemaName}"`)
+          throw new ReferenceError(`[SharedStateCollection] Invalid filter key (${filter}) for schema "${this.#schemaName}"`)
         }
       }
     }
 
-    this._unobserve = await this._stateManager.observe(this._schemaName, async (schemaName, stateId) => {
-      const state = await this._stateManager.attach(schemaName, stateId, this._filter);
-      this._states.push(state);
+    this.#unobserve = await this.#stateManager.observe(this.#schemaName, async (schemaName, stateId) => {
+      const state = await this.#stateManager.attach(schemaName, stateId, this.#filter);
+      this.#states.push(state);
 
       state.onDetach(() => {
-        const index = this._states.indexOf(state);
-        this._states.splice(index, 1);
+        const index = this.#states.indexOf(state);
+        this.#states.splice(index, 1);
 
-        this._onDetachCallbacks.forEach(callback => callback(state));
+        this.#onDetachCallbacks.forEach(callback => callback(state));
       });
 
       state.onUpdate((newValues, oldValues, context) => {
-        Array.from(this._onUpdateCallbacks).forEach(callback => {
+        Array.from(this.#onUpdateCallbacks).forEach(callback => {
           callback(state, newValues, oldValues, context);
         });
       });
 
-      this._onAttachCallbacks.forEach(callback => callback(state));
-    }, this._options);
+      this.#onAttachCallbacks.forEach(callback => callback(state));
+    }, this.#options);
   }
 
   /**
@@ -85,7 +88,7 @@ class SharedStateCollection {
    * @readonly
    */
   get length() {
-    return this._states.length;
+    return this.#states.length;
   }
 
   /**
@@ -94,7 +97,7 @@ class SharedStateCollection {
    * @readonly
    */
   get size() {
-    return this._states.length;
+    return this.#states.length;
   }
 
   /**
@@ -103,7 +106,7 @@ class SharedStateCollection {
    * @readonly
    */
   get schemaName() {
-    return this._schemaName;
+    return this.#schemaName;
   }
 
   /**
@@ -119,10 +122,10 @@ class SharedStateCollection {
    */
   getSchema(name = null) {
     if (name) {
-      return this._schema[name];
+      return this.#schema[name];
     }
 
-    return this._schema;
+    return this.#schema;
   }
 
   /**
@@ -134,8 +137,8 @@ class SharedStateCollection {
    */
   getDefaults() {
     const defaults = {};
-    for (let name in this._schema) {
-      defaults[name] = this._schema[name].default;
+    for (let name in this.#schema) {
+      defaults[name] = this.#schema[name].default;
     }
     return defaults;
   }
@@ -145,7 +148,7 @@ class SharedStateCollection {
    * @return {Object[]}
    */
   getValues() {
-    return this._states.map(state => state.getValues());
+    return this.#states.map(state => state.getValues());
   }
 
   /**
@@ -160,7 +163,7 @@ class SharedStateCollection {
    * @return {Object[]}
    */
   getValuesUnsafe() {
-    return this._states.map(state => state.getValues());
+    return this.#states.map(state => state.getValues());
   }
 
   /**
@@ -172,7 +175,7 @@ class SharedStateCollection {
   get(name) {
     // we can delegate to the state.get(name) method for throwing in case of filtered
     // keys, as the Promise.all will reject on first reject Promise
-    return this._states.map(state => state.get(name));
+    return this.#states.map(state => state.get(name));
   }
 
   /**
@@ -188,7 +191,7 @@ class SharedStateCollection {
   getUnsafe(name) {
     // we can delegate to the state.get(name) method for throwing in case of filtered
     // keys, as the Promise.all will reject on first reject Promise
-    return this._states.map(state => state.get(name));
+    return this.#states.map(state => state.get(name));
   }
 
   /**
@@ -201,14 +204,14 @@ class SharedStateCollection {
   async set(updates, context = null) {
     // we can delegate to the state.set(update) method for throwing in case of
     // filtered keys, as the Promise.all will reject on first reject Promise
-    const promises = this._states.map(state => state.set(updates, context));
+    const promises = this.#states.map(state => state.set(updates, context));
     return Promise.all(promises);
   }
 
   /**
    * Subscribe to any state update of the collection.
    *
-   * @param {server.SharedStateCollection~onUpdateCallback|client.SharedStateCollection~onUpdateCallback}
+   * @param {sharedStateCollectionOnUpdateCallback}
    *  callback - Callback to execute when an update is applied on a state.
    * @param {Boolean} [executeListener=false] - Execute the callback immediately
    *  for all underlying states with current state values. (`oldValues` will be
@@ -216,10 +219,10 @@ class SharedStateCollection {
    * @returns {Function} - Function that delete the registered listener.
    */
   onUpdate(callback, executeListener = false) {
-    this._onUpdateCallbacks.add(callback);
+    this.#onUpdateCallbacks.add(callback);
 
     if (executeListener === true) {
-      this._states.forEach(state => {
+      this.#states.forEach(state => {
         const currentValues = state.getValues();
         const oldValues = {};
         const context = null;
@@ -228,7 +231,7 @@ class SharedStateCollection {
       });
     }
 
-    return () => this._onUpdateCallbacks.delete(callback);
+    return () => this.#onUpdateCallbacks.delete(callback);
   }
 
   /**
@@ -242,12 +245,12 @@ class SharedStateCollection {
    */
   onAttach(callback, executeListener = false) {
     if (executeListener === true) {
-      this._states.forEach(state => callback(state));
+      this.#states.forEach(state => callback(state));
     }
 
-    this._onAttachCallbacks.add(callback);
+    this.#onAttachCallbacks.add(callback);
 
-    return () => this._onAttachCallbacks.delete(callback);
+    return () => this.#onAttachCallbacks.delete(callback);
   }
 
   /**
@@ -258,9 +261,9 @@ class SharedStateCollection {
    * @returns {Function} - Function that delete the registered listener.
    */
   onDetach(callback) {
-    this._onDetachCallbacks.add(callback);
+    this.#onDetachCallbacks.add(callback);
 
-    return () => this._onDetachCallbacks.delete(callback);
+    return () => this.#onDetachCallbacks.delete(callback);
   }
 
   /**
@@ -268,13 +271,13 @@ class SharedStateCollection {
    * @type {number}
    */
   async detach() {
-    this._unobserve();
-    this._onUpdateCallbacks.clear();
+    this.#unobserve();
+    this.#onUpdateCallbacks.clear();
 
-    const promises = this._states.map(state => state.detach());
+    const promises = this.#states.map(state => state.detach());
     await Promise.all(promises);
 
-    this._onDetachCallbacks.clear();
+    this.#onDetachCallbacks.clear();
   }
 
   /**
@@ -284,7 +287,7 @@ class SharedStateCollection {
    *  Its return value is discarded.
    */
   forEach(func) {
-    this._states.forEach(func);
+    this.#states.forEach(func);
   }
 
   /**
@@ -295,7 +298,7 @@ class SharedStateCollection {
    *  Its return value is added as a single element in the new array.
    */
   map(func) {
-    return this._states.map(func);
+    return this.#states.map(func);
   }
 
   /**
@@ -307,7 +310,7 @@ class SharedStateCollection {
    *  alsy value otherwise.
    */
   filter(func) {
-    return this._states.filter(func);
+    return this.#states.filter(func);
   }
 
   /**
@@ -316,7 +319,7 @@ class SharedStateCollection {
    * @param {Function} func - Function that defines the sort order.
    */
   sort(func) {
-    this._states.sort(func);
+    this.#states.sort(func);
   }
 
   /**
@@ -328,7 +331,7 @@ class SharedStateCollection {
    * @return {}
    */
   find(func) {
-    return this._states.find(func);
+    return this.#states.find(func);
   }
 
   /**
@@ -339,10 +342,10 @@ class SharedStateCollection {
 
     return {
       next: () => {
-        if (index >= this._states.length) {
+        if (index >= this.#states.length) {
           return { value: undefined, done: true };
         } else {
-          return { value: this._states[index++], done: false };
+          return { value: this.#states[index++], done: false };
         }
       },
     };

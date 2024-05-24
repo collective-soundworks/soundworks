@@ -31,6 +31,9 @@ function filterUpdates(updates, filter) {
   }, {});
 }
 
+export const kSharedStatePrivateAttachClient = Symbol('soundworks:shared-state-private-attach-client');
+export const kSharedStatePrivateDetachClient = Symbol('soundworks:shared-state-private-detach-client');
+
 /**
  * The "real" state, this instance is kept private by the server.StateManager.
  * It can only be accessed through a SharedState proxy.
@@ -38,32 +41,59 @@ function filterUpdates(updates, filter) {
  * @private
  */
 class SharedStatePrivate {
+  #id = null;
+  #schemaName = null;
+  #manager = null;
+  #parameters = null;
+  #creatorId = null;
+  #creatorRemoteId = null;
+  #attachedClients = new Map();
+
   constructor(id, schemaName, schema, manager, initValues = {}) {
-    this.id = id;
-    this.schemaName = schemaName;
-
-    this._manager = manager;
-    this._parameters = new ParameterBag(schema, initValues);
-    this._attachedClients = new Map(); // other peers interested in watching / controlling the state
-
-    this._creatorRemoteId = null;
-    this._creatorId = null;
+    this.#id = id;
+    this.#schemaName = schemaName;
+    this.#manager = manager;
+    this.#parameters = new ParameterBag(schema, initValues);
   }
 
-  _attachClient(remoteId, client, isOwner, filter) {
+  get id() {
+    return this.#id;
+  }
+
+  get schemaName() {
+    return this.#schemaName;
+  }
+
+  get creatorId() {
+    return this.#creatorId;
+  }
+
+  get creatorRemoteId() {
+    return this.#creatorRemoteId;
+  }
+
+  get attachedClients() {
+    return this.#attachedClients;
+  }
+
+  get parameters() {
+    return this.#parameters;
+  }
+
+  [kSharedStatePrivateAttachClient](remoteId, client, isOwner, filter) {
     const clientInfos = { client, isOwner, filter };
-    this._attachedClients.set(remoteId, clientInfos);
+    this.#attachedClients.set(remoteId, clientInfos);
 
     if (isOwner) {
-      this._creatorRemoteId = remoteId;
-      this._creatorId = client.id;
+      this.#creatorId = client.id;
+      this.#creatorRemoteId = remoteId;
     }
 
     // attach client listeners
     client.transport.addListener(`${UPDATE_REQUEST}-${this.id}-${remoteId}`, async (reqId, updates, context) => {
       // apply registered hooks
-      const hooks = this._manager._hooksBySchemaName.get(this.schemaName);
-      const values = this._parameters.getValues();
+      const hooks = this.#manager._hooksBySchemaName.get(this.schemaName);
+      const values = this.#parameters.getValues();
       let hookAborted = false;
 
       // cf. https://github.com/collective-soundworks/soundworks/issues/45
@@ -85,14 +115,14 @@ class SharedStatePrivate {
         let hasUpdates = false;
 
         for (let name in updates) {
-          const [newValue, changed] = this._parameters.set(name, updates[name]);
+          const [newValue, changed] = this.#parameters.set(name, updates[name]);
           // if `filterChange` is set to `false` we don't check if the value
           // has been changed or not, it is always propagated to client states
-          const { event, filterChange } = this._parameters.getSchema(name);
+          const { event, filterChange } = this.#parameters.getSchema(name);
 
           // if event type reset internal value to null
           if (event) {
-            this._parameters.set(name, null);
+            this.#parameters.set(name, null);
           }
 
           if ((filterChange && changed) || !filterChange) {
@@ -131,7 +161,7 @@ class SharedStatePrivate {
           }
 
           // propagate NOTIFICATION to all attached clients except server
-          for (let [peerRemoteId, clientInfos] of this._attachedClients) {
+          for (let [peerRemoteId, clientInfos] of this.#attachedClients) {
             const peer = clientInfos.client;
 
             if (remoteId !== peerRemoteId && peer.id !== -1) {
@@ -158,7 +188,7 @@ class SharedStatePrivate {
           }
 
           // propagate NOTIFICATION to other state attached on the server
-          for (let [peerRemoteId, clientInfos] of this._attachedClients) {
+          for (let [peerRemoteId, clientInfos] of this.#attachedClients) {
             const peer = clientInfos.client;
 
             if (remoteId !== peerRemoteId && peer.id === -1) {
@@ -183,7 +213,7 @@ class SharedStatePrivate {
         const oldValues = {};
 
         for (let name in updates) {
-          oldValues[name] = this._parameters.get(name);
+          oldValues[name] = this.#parameters.get(name);
         }
         // aborted by hook (updates have been overriden to {})
         client.transport.emit(`${UPDATE_ABORT}-${this.id}-${remoteId}`, reqId, oldValues, context);
@@ -193,18 +223,18 @@ class SharedStatePrivate {
     if (isOwner) {
       // delete only if creator
       client.transport.addListener(`${DELETE_REQUEST}-${this.id}-${remoteId}`, (reqId) => {
-        this._manager._sharedStatePrivateById.delete(this.id);
+        this.#manager._sharedStatePrivateById.delete(this.id);
         // --------------------------------------------------------------------
         // WARNING - MAKE SURE WE DON'T HAVE PROBLEM W/ THAT
         // --------------------------------------------------------------------
         // @todo - propagate server-side last, because if a subscription function sends a
         // message to a client, network messages order are kept coherent
         // this._subscriptions.forEach(func => func(updated));
-        for (let [remoteId, clientInfos] of this._attachedClients) {
+        for (let [remoteId, clientInfos] of this.#attachedClients) {
           const attached = clientInfos.client;
-          this._detachClient(remoteId, attached);
+          this[kSharedStatePrivateDetachClient](remoteId, attached);
 
-          if (remoteId === this._creatorRemoteId) {
+          if (remoteId === this.#creatorRemoteId) {
             attached.transport.emit(`${DELETE_RESPONSE}-${this.id}-${remoteId}`, reqId);
           } else {
             attached.transport.emit(`${DELETE_NOTIFICATION}-${this.id}-${remoteId}`);
@@ -214,14 +244,14 @@ class SharedStatePrivate {
     } else {
       // detach only if not creator
       client.transport.addListener(`${DETACH_REQUEST}-${this.id}-${remoteId}`, (reqId) => {
-        this._detachClient(remoteId, client);
+        this[kSharedStatePrivateDetachClient](remoteId, client);
         client.transport.emit(`${DETACH_RESPONSE}-${this.id}-${remoteId}`, reqId);
       });
     }
   }
 
-  _detachClient(remoteId, client) {
-    this._attachedClients.delete(remoteId);
+  [kSharedStatePrivateDetachClient](remoteId, client) {
+    this.#attachedClients.delete(remoteId);
     // delete listeners
     client.transport.removeAllListeners(`${UPDATE_REQUEST}-${this.id}-${remoteId}`);
     client.transport.removeAllListeners(`${DELETE_REQUEST}-${this.id}-${remoteId}`);

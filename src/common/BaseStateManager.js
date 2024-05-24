@@ -23,16 +23,21 @@ import {
 } from './constants.js';
 
 export const kStateManagerDeleteState = Symbol('soundworks:state-manager-delete-state');
+// for testing purposes
+export const kStateManagerClient = Symbol('soundworks:state-manager-client');
 
 /** @private */
 class BaseStateManager {
+  #client = null;
   #statesById = new Map();
   #cachedSchemas = new Map(); // <shemaName, definition>
   #observeListeners = new Set(); // Set <[observedSchemaName, callback, options]>
   #observeRequestCallbacks = new Map(); // Map <reqId, [observedSchemaName, callback, options]>
-  #promiseStore = new PromiseStore();
+  #promiseStore = null;
 
-  constructor() {}
+  constructor() {
+    this.#promiseStore = new PromiseStore('BaseStateManager');
+  }
 
     /** @private */
   #filterObserve(observedSchemaName, schemaName, creatorId, options) {
@@ -42,7 +47,7 @@ class BaseStateManager {
       filter = false;
     }
     // filter state created by client if excludeLocal is true
-    if (options.excludeLocal === true && creatorId === this.client.id) {
+    if (options.excludeLocal === true && creatorId === this[kStateManagerClient].id) {
       filter = true;
     }
 
@@ -64,13 +69,13 @@ class BaseStateManager {
    */
   init(id, transport) {
     const batchedTransport = new BatchedTransport(transport);
-    this.client = { id, transport: batchedTransport };
+    this[kStateManagerClient] = { id, transport: batchedTransport };
 
     // ---------------------------------------------
     // CREATE
     // ---------------------------------------------
 
-    this.client.transport.addListener(CREATE_RESPONSE, (reqId, stateId, remoteId, schemaName, schema, initValues, filter) => {
+    this[kStateManagerClient].transport.addListener(CREATE_RESPONSE, (reqId, stateId, remoteId, schemaName, schema, initValues, filter) => {
 
       // cache schema when first dealing it to save some bandwidth
       if (!this.#cachedSchemas.has(schemaName)) {
@@ -79,20 +84,20 @@ class BaseStateManager {
 
       schema = this.#cachedSchemas.get(schemaName);
 
-      const state = new SharedState(stateId, remoteId, schemaName, schema, this.client, true, this, initValues, null);
+      const state = new SharedState(stateId, remoteId, schemaName, schema, this[kStateManagerClient], true, this, initValues, null);
       this.#statesById.set(state.id, state);
 
       this.#promiseStore.resolve(reqId, state);
     });
 
-    this.client.transport.addListener(CREATE_ERROR, (reqId, msg) => {
+    this[kStateManagerClient].transport.addListener(CREATE_ERROR, (reqId, msg) => {
       this.#promiseStore.reject(reqId, msg);
     });
 
     // ---------------------------------------------
     // ATTACH (when creator, is attached by default)
     // ---------------------------------------------
-    this.client.transport.addListener(ATTACH_RESPONSE, (reqId, stateId, remoteId, schemaName, schema, currentValues, filter) => {
+    this[kStateManagerClient].transport.addListener(ATTACH_RESPONSE, (reqId, stateId, remoteId, schemaName, schema, currentValues, filter) => {
       // cache schema when first dealing with it to save some bandwidth
       // note: when we make the schemas dynamic at some point
       // the server should be able to invalidate the schema and send
@@ -103,20 +108,20 @@ class BaseStateManager {
 
       schema = this.#cachedSchemas.get(schemaName);
 
-      const state = new SharedState(stateId, remoteId, schemaName, schema, this.client, false, this, currentValues, filter);
+      const state = new SharedState(stateId, remoteId, schemaName, schema, this[kStateManagerClient], false, this, currentValues, filter);
       this.#statesById.set(state.id, state);
 
       this.#promiseStore.resolve(reqId, state);
     });
 
-    this.client.transport.addListener(ATTACH_ERROR, (reqId, msg) => {
+    this[kStateManagerClient].transport.addListener(ATTACH_ERROR, (reqId, msg) => {
       this.#promiseStore.reject(reqId, msg);
     });
 
     // ---------------------------------------------
     // OBSERVE PEERS (be notified when a state is created, lazy)
     // ---------------------------------------------
-    this.client.transport.addListener(OBSERVE_RESPONSE, async (reqId, ...list) => {
+    this[kStateManagerClient].transport.addListener(OBSERVE_RESPONSE, async (reqId, ...list) => {
       // retrieve the callback that have been stored in observe to make sure
       // we don't call another callback that may have been registered earlier.
       const observeInfos = this.#observeRequestCallbacks.get(reqId);
@@ -144,7 +149,7 @@ class BaseStateManager {
 
         // no more listeners, we can stop receiving notifications from the server
         if (this.#observeListeners.size === 0) {
-          this.client.transport.emit(UNOBSERVE_NOTIFICATION);
+          this[kStateManagerClient].transport.emit(UNOBSERVE_NOTIFICATION);
         }
       };
 
@@ -152,12 +157,12 @@ class BaseStateManager {
     });
 
     // Observe error can occur if observed schema name does not exists
-    this.client.transport.addListener(OBSERVE_ERROR, (reqId, msg) => {
+    this[kStateManagerClient].transport.addListener(OBSERVE_ERROR, (reqId, msg) => {
       this.#observeRequestCallbacks.delete(reqId);
       this.#promiseStore.reject(reqId, msg);
     });
 
-    this.client.transport.addListener(OBSERVE_NOTIFICATION, (schemaName, stateId, nodeId) => {
+    this[kStateManagerClient].transport.addListener(OBSERVE_NOTIFICATION, (schemaName, stateId, nodeId) => {
       this.#observeListeners.forEach(observeInfos => {
         const [observedSchemaName, callback, options] = observeInfos;
         const filter = this.#filterObserve(observedSchemaName, schemaName, nodeId, options);
@@ -171,14 +176,14 @@ class BaseStateManager {
     // ---------------------------------------------
     // Clear cache when schema is deleted
     // ---------------------------------------------
-    this.client.transport.addListener(DELETE_SCHEMA, schemaName => {
+    this[kStateManagerClient].transport.addListener(DELETE_SCHEMA, schemaName => {
       this.#cachedSchemas.delete(schemaName);
     });
 
     // ---------------------------------------------
     // GET SCHEMA
     // ---------------------------------------------
-    this.client.transport.addListener(GET_SCHEMA_RESPONSE, (reqId, schemaName, schema) => {
+    this[kStateManagerClient].transport.addListener(GET_SCHEMA_RESPONSE, (reqId, schemaName, schema) => {
       if (!this.#cachedSchemas.has(schemaName)) {
         this.#cachedSchemas.set(schemaName, schema);
       }
@@ -187,7 +192,7 @@ class BaseStateManager {
       this.#promiseStore.resolve(reqId, parameterBag.getSchema());
     });
 
-    this.client.transport.addListener(GET_SCHEMA_ERROR, (reqId, msg) => {
+    this[kStateManagerClient].transport.addListener(GET_SCHEMA_ERROR, (reqId, msg) => {
       this.#promiseStore.reject(reqId, msg);
     });
   }
@@ -210,7 +215,7 @@ class BaseStateManager {
 
     return new Promise((resolve, reject) => {
       const reqId = this.#promiseStore.add(resolve, reject, 'get-schema');
-      this.client.transport.emit(GET_SCHEMA_REQUEST, reqId, schemaName);
+      this[kStateManagerClient].transport.emit(GET_SCHEMA_REQUEST, reqId, schemaName);
     });
   }
 
@@ -228,7 +233,7 @@ class BaseStateManager {
     return new Promise((resolve, reject) => {
       const reqId = this.#promiseStore.add(resolve, reject, 'create-request');
       const requireSchema = this.#cachedSchemas.has(schemaName) ? false : true;
-      this.client.transport.emit(CREATE_REQUEST, reqId, schemaName, requireSchema, initValues);
+      this[kStateManagerClient].transport.emit(CREATE_REQUEST, reqId, schemaName, requireSchema, initValues);
     });
   }
 
@@ -290,7 +295,7 @@ class BaseStateManager {
     return new Promise((resolve, reject) => {
       const reqId = this.#promiseStore.add(resolve, reject, 'attach-request');
       const requireSchema = this.#cachedSchemas.has(schemaName) ? false : true;
-      this.client.transport.emit(ATTACH_REQUEST, reqId, schemaName, stateId, requireSchema, filter);
+      this[kStateManagerClient].transport.emit(ATTACH_REQUEST, reqId, schemaName, stateId, requireSchema, filter);
     });
   }
 
@@ -328,7 +333,7 @@ class BaseStateManager {
    * @example
    * client.stateManager.observe(async (schemaName, stateId) => {
    *   if (schemaName === 'something') {
-   *     const state = await this.client.stateManager.attach(schemaName, stateId);
+   *     const state = await this[kStateManagerClient].stateManager.attach(schemaName, stateId);
    *     console.log(state.getValues());
    *   }
    * });
@@ -437,7 +442,7 @@ class BaseStateManager {
       //
       // cf. unit test `observe should properly behave in race condition`
 
-      this.client.transport.emit(OBSERVE_REQUEST, reqId, observedSchemaName);
+      this[kStateManagerClient].transport.emit(OBSERVE_REQUEST, reqId, observedSchemaName);
     });
   }
 

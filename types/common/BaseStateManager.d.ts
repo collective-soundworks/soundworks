@@ -1,4 +1,5 @@
 export const kStateManagerDeleteState: unique symbol;
+export const kStateManagerClient: unique symbol;
 export default BaseStateManager;
 /** @private */
 declare class BaseStateManager {
@@ -11,10 +12,6 @@ declare class BaseStateManager {
      * @private
      */
     private init;
-    client: {
-        id: number;
-        transport: BatchedTransport;
-    };
     /**
      * Return the schema from a given registered schema name
      *
@@ -93,7 +90,7 @@ declare class BaseStateManager {
      * @example
      * client.stateManager.observe(async (schemaName, stateId) => {
      *   if (schemaName === 'something') {
-     *     const state = await this.client.stateManager.attach(schemaName, stateId);
+     *     const state = await this[kStateManagerClient].stateManager.attach(schemaName, stateId);
      *     console.log(state.getValues());
      *   }
      * });
@@ -123,8 +120,12 @@ declare class BaseStateManager {
         excludeLocal?: boolean;
     }, ...args: any[]): Promise<SharedStateCollection>;
     [kStateManagerDeleteState](stateId: any): void;
+    [kStateManagerClient]: {
+        id: number;
+        transport: BatchedTransport;
+    };
     #private;
 }
-import BatchedTransport from './BatchedTransport.js';
 import SharedState from './SharedState.js';
 import SharedStateCollection from './SharedStateCollection.js';
+import BatchedTransport from './BatchedTransport.js';

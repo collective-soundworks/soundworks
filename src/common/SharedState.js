@@ -20,8 +20,11 @@ import {
   kStateManagerDeleteState,
 } from './BaseStateManager.js';
 
+// for testing purposes
+export const kSharedStatePromiseStore = Symbol('soundworks:shared-state-promise-store');
+
 /**
- * @callback SharedState~onUpdateCallback
+ * @callback sharedStateOnUpdateCallback
  * @param {Object} newValues - Key / value pairs of the updates that have been
  *  applied to the state.
  * @param {Object} oldValues - Key / value pairs of the updated params before
@@ -31,8 +34,8 @@ import {
  */
 
 /**
- * Delete the registered {@link SharedState~onUpdateCallback}.
- * @callback SharedState~deleteOnUpdateCallback
+ * Delete the registered {@link sharedStateOnUpdateCallback}.
+ * @callback sharedStateDeleteOnUpdateCallback
  */
 
 /**
@@ -91,33 +94,31 @@ import {
  * ```
  */
 class SharedState {
-  constructor(id, remoteId, schemaName, schema, client, isOwner, manager, initValues, filter) {
-    /** @private */
-    this._id = id;
-    /** @private */
-    this._remoteId = remoteId;
-    /** @private */
-    this._schemaName = schemaName;
-    /** @private */
-    this._isOwner = isOwner; // may be the server or any client
-    /** @private */
-    this._client = client;
-    /** @private */
-    this._manager = manager;
-    /** @private */
-    this._filter = filter;
+  #id = null;
+  #remoteId = null;
+  #schemaName = null;
+  #isOwner = null;
+  #client = null;
+  #manager = null;
+  #filter = null;
+  // true is the state has been detached or deleted
+  #detached = false;
+  #parameters = null;
+  #onUpdateCallbacks = new Set();
+  #onDetachCallbacks = new Set();
+  #onDeleteCallbacks = new Set();
 
-    /**
-     * true is the state has been detached or deleted
-     * @private
-     */
-    this._detached = false;
-    /* @private */
-    this._promiseStore = new PromiseStore(this.constructor.name);
+  constructor(id, remoteId, schemaName, schema, client, isOwner, manager, initValues, filter) {
+    this.#id = id;
+    this.#remoteId = remoteId;
+    this.#schemaName = schemaName;
+    this.#isOwner = isOwner; // may be any node
+    this.#client = client;
+    this.#manager = manager;
+    this.#filter = filter;
 
     try {
-      /** @private */
-      this._parameters = new ParameterBag(schema, initValues);
+      this.#parameters = new ParameterBag(schema, initValues);
     } catch (err) {
       console.error(err.stack);
 
@@ -126,34 +127,30 @@ ${JSON.stringify(initValues, null, 2)}`);
     }
 
     /** @private */
-    this._onUpdateCallbacks = new Set();
-    /** @private */
-    this._onDetachCallbacks = new Set();
-    /** @private */
-    this._onDeleteCallbacks = new Set();
+    this[kSharedStatePromiseStore] = new PromiseStore(this.constructor.name);
 
     // add listener for state updates
-    this._client.transport.addListener(`${UPDATE_RESPONSE}-${this.id}-${this.remoteId}`, async (reqId, updates, context) => {
-      const updated = await this._commit(updates, context, true, true);
-      this._promiseStore.resolve(reqId, updated);
+    this.#client.transport.addListener(`${UPDATE_RESPONSE}-${this.#id}-${this.#remoteId}`, async (reqId, updates, context) => {
+      const updated = await this.#commit(updates, context, true, true);
+      this[kSharedStatePromiseStore].resolve(reqId, updated);
     });
 
     // retrieve values but do not propagate to subscriptions
-    this._client.transport.addListener(`${UPDATE_ABORT}-${this.id}-${this.remoteId}`, async (reqId, updates, context) => {
-      const updated = await this._commit(updates, context, false, true);
-      this._promiseStore.resolve(reqId, updated);
+    this.#client.transport.addListener(`${UPDATE_ABORT}-${this.#id}-${this.#remoteId}`, async (reqId, updates, context) => {
+      const updated = await this.#commit(updates, context, false, true);
+      this[kSharedStatePromiseStore].resolve(reqId, updated);
     });
 
-    this._client.transport.addListener(`${UPDATE_NOTIFICATION}-${this.id}-${this.remoteId}`, async (updates, context) => {
+    this.#client.transport.addListener(`${UPDATE_NOTIFICATION}-${this.#id}-${this.#remoteId}`, async (updates, context) => {
       // https://github.com/collective-soundworks/soundworks/issues/18
       //
       // # note: 2002-10-03
       //
-      // `setTimeout(async () => this._commit(updates, context, true, false));`
+      // `setTimeout(async () => this.#commit(updates, context, true, false));`
       // appears to be the only way to push the update commit in the next event
       // cycle so that `attach` can resolve before the update notification is
       // actually dispatched. The alternative:
-      // `Promise.resolve().then(() => this._commit(updates, context, true, false))``
+      // `Promise.resolve().then(() => this.#commit(updates, context, true, false))``
       // does not behave as expected...
       //
       // However this breaks the reliability of:
@@ -167,17 +164,17 @@ ${JSON.stringify(initValues, null, 2)}`);
       // ```
       // which is far more important than the edge case reported in the issue
       // therefore this wont be fixed for now
-      this._commit(updates, context, true, false);
+      this.#commit(updates, context, true, false);
     });
 
     // ---------------------------------------------
     // state has been deleted by its creator or the schema has been deleted
     // ---------------------------------------------
-    this._client.transport.addListener(`${DELETE_NOTIFICATION}-${this.id}-${this.remoteId}`, async () => {
-      this._manager[kStateManagerDeleteState](this.id);
-      this._clearTransport();
+    this.#client.transport.addListener(`${DELETE_NOTIFICATION}-${this.#id}-${this.#remoteId}`, async () => {
+      this.#manager[kStateManagerDeleteState](this.#id);
+      this.#clearTransport();
 
-      for (let callback of this._onDetachCallbacks) {
+      for (let callback of this.#onDetachCallbacks) {
         try {
           await callback();
         } catch (err) {
@@ -185,68 +182,68 @@ ${JSON.stringify(initValues, null, 2)}`);
         }
       }
 
-      if (this._isOwner) {
-        for (let callback of this._onDeleteCallbacks) {
+      if (this.#isOwner) {
+        for (let callback of this.#onDeleteCallbacks) {
           await callback();
         }
       }
 
-      this._onDetachCallbacks.clear();
-      this._onDeleteCallbacks.clear();
-      this._promiseStore.flush();
+      this.#onDetachCallbacks.clear();
+      this.#onDeleteCallbacks.clear();
+      this[kSharedStatePromiseStore].flush();
     });
 
 
-    if (this._isOwner) {
+    if (this.#isOwner) {
       // ---------------------------------------------
       // the creator has called `.delete()`
       // ---------------------------------------------
-      this._client.transport.addListener(`${DELETE_RESPONSE}-${this.id}-${this.remoteId}`, async (reqId) => {
-        this._manager[kStateManagerDeleteState](this.id);
-        this._clearTransport();
+      this.#client.transport.addListener(`${DELETE_RESPONSE}-${this.#id}-${this.#remoteId}`, async (reqId) => {
+        this.#manager[kStateManagerDeleteState](this.#id);
+        this.#clearTransport();
 
-        for (let callback of this._onDetachCallbacks) {
+        for (let callback of this.#onDetachCallbacks) {
           await callback();
         }
 
-        for (let callback of this._onDeleteCallbacks) {
+        for (let callback of this.#onDeleteCallbacks) {
           await callback();
         }
 
-        this._onDetachCallbacks.clear();
-        this._onDeleteCallbacks.clear();
-        this._promiseStore.resolve(reqId, this);
-        this._promiseStore.flush();
+        this.#onDetachCallbacks.clear();
+        this.#onDeleteCallbacks.clear();
+        this[kSharedStatePromiseStore].resolve(reqId, this);
+        this[kSharedStatePromiseStore].flush();
       });
 
-      this._client.transport.addListener(`${DELETE_ERROR}-${this.id}`, (reqId, msg) => {
-        this._promiseStore.reject(reqId, msg);
+      this.#client.transport.addListener(`${DELETE_ERROR}-${this.#id}`, (reqId, msg) => {
+        this[kSharedStatePromiseStore].reject(reqId, msg);
       });
 
     } else {
       // ---------------------------------------------
       // the attached node has called `.detach()`
       // ---------------------------------------------
-      this._client.transport.addListener(`${DETACH_RESPONSE}-${this.id}-${this.remoteId}`, async (reqId) => {
-        this._manager[kStateManagerDeleteState](this.id);
-        this._clearTransport();
+      this.#client.transport.addListener(`${DETACH_RESPONSE}-${this.#id}-${this.#remoteId}`, async (reqId) => {
+        this.#manager[kStateManagerDeleteState](this.#id);
+        this.#clearTransport();
 
-        for (let callback of this._onDetachCallbacks) {
+        for (let callback of this.#onDetachCallbacks) {
           await callback();
         }
 
-        this._onDetachCallbacks.clear();
-        this._onDeleteCallbacks.clear();
-        this._promiseStore.resolve(reqId, this);
-        this._promiseStore.flush();
+        this.#onDetachCallbacks.clear();
+        this.#onDeleteCallbacks.clear();
+        this[kSharedStatePromiseStore].resolve(reqId, this);
+        this[kSharedStatePromiseStore].flush();
       });
 
       // the state does not exists anymore in the server (should not happen)
-      this._client.transport.addListener(`${DETACH_ERROR}-${this.id}`, (reqId, msg) => {
-        this._onDetachCallbacks.clear();
-        this._onDeleteCallbacks.clear();
-        this._promiseStore.reject(reqId, msg);
-        this._promiseStore.flush();
+      this.#client.transport.addListener(`${DETACH_ERROR}-${this.#id}`, (reqId, msg) => {
+        this.#onDetachCallbacks.clear();
+        this.#onDeleteCallbacks.clear();
+        this[kSharedStatePromiseStore].reject(reqId, msg);
+        this[kSharedStatePromiseStore].flush();
       });
     }
   }
@@ -257,7 +254,7 @@ ${JSON.stringify(initValues, null, 2)}`);
    * @readonly
    */
   get id() {
-    return this._id;
+    return this.#id;
   }
 
   /**
@@ -267,7 +264,7 @@ ${JSON.stringify(initValues, null, 2)}`);
    * @private
    */
   get remoteId() {
-    return this._remoteId;
+    return this.#remoteId;
   }
 
   /**
@@ -276,7 +273,7 @@ ${JSON.stringify(initValues, null, 2)}`);
    * @readonly
    */
   get schemaName() {
-    return this._schemaName;
+    return this.#schemaName;
   }
 
   /**
@@ -285,39 +282,37 @@ ${JSON.stringify(initValues, null, 2)}`);
    * @readonly
    */
   get isOwner() {
-    return this._isOwner;
+    return this.#isOwner;
   }
 
-  /** @private */
-  _clearTransport() {
+  #clearTransport() {
     // remove listeners
-    this._client.transport.removeAllListeners(`${UPDATE_RESPONSE}-${this.id}-${this.remoteId}`);
-    this._client.transport.removeAllListeners(`${UPDATE_NOTIFICATION}-${this.id}-${this.remoteId}`);
-    this._client.transport.removeAllListeners(`${UPDATE_ABORT}-${this.id}-${this.remoteId}`);
-    this._client.transport.removeAllListeners(`${DELETE_NOTIFICATION}-${this.id}-${this.remoteId}`);
+    this.#client.transport.removeAllListeners(`${UPDATE_RESPONSE}-${this.#id}-${this.#remoteId}`);
+    this.#client.transport.removeAllListeners(`${UPDATE_NOTIFICATION}-${this.#id}-${this.#remoteId}`);
+    this.#client.transport.removeAllListeners(`${UPDATE_ABORT}-${this.#id}-${this.#remoteId}`);
+    this.#client.transport.removeAllListeners(`${DELETE_NOTIFICATION}-${this.#id}-${this.#remoteId}`);
 
-    if (this._isOwner) {
-      this._client.transport.removeAllListeners(`${DELETE_RESPONSE}-${this.id}-${this.remoteId}`);
-      this._client.transport.removeAllListeners(`${DELETE_ERROR}-${this.id}-${this.remoteId}`);
+    if (this.#isOwner) {
+      this.#client.transport.removeAllListeners(`${DELETE_RESPONSE}-${this.#id}-${this.#remoteId}`);
+      this.#client.transport.removeAllListeners(`${DELETE_ERROR}-${this.#id}-${this.#remoteId}`);
     } else {
-      this._client.transport.removeAllListeners(`${DETACH_RESPONSE}-${this.id}-${this.remoteId}`);
-      this._client.transport.removeAllListeners(`${DETACH_ERROR}-${this.id}-${this.remoteId}`);
+      this.#client.transport.removeAllListeners(`${DETACH_RESPONSE}-${this.#id}-${this.#remoteId}`);
+      this.#client.transport.removeAllListeners(`${DETACH_ERROR}-${this.#id}-${this.#remoteId}`);
     }
   }
 
-  /** @private */
-  async _commit(updates, context, propagate = true, initiator = false) {
+  async #commit(updates, context, propagate = true, initiator = false) {
     const newValues = {};
     const oldValues = {};
 
     for (let name in updates) {
-      const { immediate, event } = this._parameters.getSchema(name);
+      const { immediate, event } = this.#parameters.getSchema(name);
       // @note 20211209 - we had an issue here server-side, because if the value
       // is an object or an array, the reference is shared by everybody, therefore
       // `changed` is always false and the new value is never propagated...
       // FIXED - `state.get` now returns a deep copy when `type` is `any`
-      const oldValue = this._parameters.get(name);
-      const [newValue, changed] = this._parameters.set(name, updates[name]);
+      const oldValue = this.#parameters.get(name);
+      const [newValue, changed] = this.#parameters.set(name, updates[name]);
 
       // handle immediate stuff
       if (initiator && immediate) {
@@ -339,7 +334,7 @@ ${JSON.stringify(initValues, null, 2)}`);
     let promises = [];
 
     if (propagate && Object.keys(newValues).length > 0) {
-      this._onUpdateCallbacks.forEach(listener => {
+      this.#onUpdateCallbacks.forEach(listener => {
         promises.push(listener(newValues, oldValues, context));
       });
     }
@@ -350,10 +345,10 @@ ${JSON.stringify(initValues, null, 2)}`);
 
     // reset events to null after propagation of all listeners
     for (let name in newValues) {
-      const { event } = this._parameters.getSchema(name);
+      const { event } = this.#parameters.getSchema(name);
 
       if (event) {
-        this._parameters.set(name, null);
+        this.#parameters.set(name, null);
       }
     }
 
@@ -397,16 +392,16 @@ ${JSON.stringify(initValues, null, 2)}`);
    * const updates = await state.set({ myParam: Math.random() });
    */
   async set(updates, context = null) {
-    if (this._detached) {
+    if (this.#detached) {
       return;
     }
 
     if (!isPlainObject(updates)) {
-      throw new TypeError(`[SharedState] State "${this.schemaName}": state.set(updates[, context]) should receive an object as first parameter`);
+      throw new TypeError(`[SharedState] State "${this.#schemaName}": state.set(updates[, context]) should receive an object as first parameter`);
     }
 
     if (context !== null && !isPlainObject(context)) {
-      throw new TypeError(`[SharedState] State "${this.schemaName}": state.set(updates[, context]) should receive an object as second parameter`);
+      throw new TypeError(`[SharedState] State "${this.#schemaName}": state.set(updates[, context]) should receive an object as second parameter`);
     }
 
     const newValues = {};
@@ -422,12 +417,12 @@ ${JSON.stringify(initValues, null, 2)}`);
       // Try to coerce value early, so that eventual errors are triggered early
       // on the node requesting the update, and not only on the server side
       // This throws if name does not exists
-      this._parameters.coerceValue(name, updates[name]);
+      this.#parameters.coerceValue(name, updates[name]);
 
       // Check that name is in filter list, if any
-      if (this._filter !== null) {
-        if (!this._filter.includes(name)) {
-          throw new DOMException(`[SharedState] State "${this.schemaName}": cannot set parameter '${name}', parameter is not in filter list`, 'NotSupportedError');
+      if (this.#filter !== null) {
+        if (!this.#filter.includes(name)) {
+          throw new DOMException(`[SharedState] State "${this.#schemaName}": cannot set parameter '${name}', parameter is not in filter list`, 'NotSupportedError');
         }
       }
 
@@ -452,11 +447,11 @@ ${JSON.stringify(initValues, null, 2)}`);
       // response, call update listeners with server response and resolve promise with
       // the full payload, i.e. reintegrating the local params in the resolve payload
 
-      const { local, immediate, filterChange, event } = this._parameters.getSchema(name);
+      const { local, immediate, filterChange, event } = this.#parameters.getSchema(name);
 
       if (immediate || local) {
-        const oldValue = this._parameters.get(name);
-        const [newValue, changed] = this._parameters.set(name, updates[name]);
+        const oldValue = this.#parameters.get(name);
+        const [newValue, changed] = this.#parameters.set(name, updates[name]);
 
         // prepare data for immediate propagation of listeners
         if (changed || filterChange === false || event) {
@@ -470,7 +465,7 @@ ${JSON.stringify(initValues, null, 2)}`);
       if (local) {
         hasLocalParam = true;
         // get sanitize value for fulfilling promise
-        localParams[name] = this._parameters.get(name);
+        localParams[name] = this.#parameters.get(name);
       } else {
         // note that immediate are shared params too
         hasSharedParam = true;
@@ -480,7 +475,7 @@ ${JSON.stringify(initValues, null, 2)}`);
 
     // propagate immediate params if changed
     if (propagateNow) {
-      this._onUpdateCallbacks.forEach(listener => listener(newValues, oldValues, context));
+      this.#onUpdateCallbacks.forEach(listener => listener(newValues, oldValues, context));
     }
 
     // check if we can resolve immediately or if we need to go through network
@@ -498,8 +493,8 @@ ${JSON.stringify(initValues, null, 2)}`);
 
     // go through server-side normal behavior
     return new Promise((resolve, reject) => {
-      const reqId = this._promiseStore.add(resolve, reject, 'update-request', forwardParams);
-      this._client.transport.emit(`${UPDATE_REQUEST}-${this.id}-${this.remoteId}`, reqId, updates, context);
+      const reqId = this[kSharedStatePromiseStore].add(resolve, reject, 'update-request', forwardParams);
+      this.#client.transport.emit(`${UPDATE_REQUEST}-${this.#id}-${this.#remoteId}`, reqId, updates, context);
     });
   }
 
@@ -515,17 +510,17 @@ ${JSON.stringify(initValues, null, 2)}`);
    * const value = state.get('paramName');
    */
   get(name) {
-    if (!this._parameters.has(name)) {
-      throw new ReferenceError(`[SharedState] State "${this.schemaName}": Cannot get value of undefined parameter "${name}"`);
+    if (!this.#parameters.has(name)) {
+      throw new ReferenceError(`[SharedState] State "${this.#schemaName}": Cannot get value of undefined parameter "${name}"`);
     }
 
-    if (this._filter !== null) {
-      if (!this._filter.includes(name)) {
-        throw new DOMException(`[SharedState] State "${this.schemaName}": cannot get parameter '${name}', parameter is not in filter list`, 'NotSupportedError');
+    if (this.#filter !== null) {
+      if (!this.#filter.includes(name)) {
+        throw new DOMException(`[SharedState] State "${this.#schemaName}": cannot get parameter '${name}', parameter is not in filter list`, 'NotSupportedError');
       }
     }
 
-    return this._parameters.get(name);
+    return this.#parameters.get(name);
   }
 
   /**
@@ -543,17 +538,17 @@ ${JSON.stringify(initValues, null, 2)}`);
    * const value = state.getUnsafe('paramName');
    */
   getUnsafe(name) {
-    if (!this._parameters.has(name)) {
-      throw new ReferenceError(`[SharedState] State "${this.schemaName}": Cannot get value of undefined parameter "${name}"`);
+    if (!this.#parameters.has(name)) {
+      throw new ReferenceError(`[SharedState] State "${this.#schemaName}": Cannot get value of undefined parameter "${name}"`);
     }
 
-    if (this._filter !== null) {
-      if (!this._filter.includes(name)) {
-        throw new DOMException(`[SharedState] State "${this.schemaName}": cannot get parameter '${name}', parameter is not in filter list`, 'NotSupportedError');
+    if (this.#filter !== null) {
+      if (!this.#filter.includes(name)) {
+        throw new DOMException(`[SharedState] State "${this.#schemaName}": cannot get parameter '${name}', parameter is not in filter list`, 'NotSupportedError');
       }
     }
 
-    return this._parameters.getUnsafe(name);
+    return this.#parameters.getUnsafe(name);
   }
 
   /**
@@ -566,11 +561,11 @@ ${JSON.stringify(initValues, null, 2)}`);
    * const values = state.getValues();
    */
   getValues() {
-    const values = this._parameters.getValues();
+    const values = this.#parameters.getValues();
 
-    if (this._filter !== null) {
+    if (this.#filter !== null) {
       for (let name in values) {
-        if (!this._filter.includes(name)) {
+        if (!this.#filter.includes(name)) {
           delete values[name];
         }
       }
@@ -593,11 +588,11 @@ ${JSON.stringify(initValues, null, 2)}`);
    * const values = state.getValues();
    */
   getValuesUnsafe() {
-    const values = this._parameters.getValuesUnsafe();
+    const values = this.#parameters.getValuesUnsafe();
 
-    if (this._filter !== null) {
+    if (this.#filter !== null) {
       for (let name in values) {
-        if (!this._filter.includes(name)) {
+        if (!this.#filter.includes(name)) {
           delete values[name];
         }
       }
@@ -618,7 +613,7 @@ ${JSON.stringify(initValues, null, 2)}`);
    * const schema = state.getSchema();
    */
   getSchema(name = null) {
-    return this._parameters.getSchema(name);
+    return this.#parameters.getSchema(name);
   }
 
   /**
@@ -630,7 +625,7 @@ ${JSON.stringify(initValues, null, 2)}`);
    * const initValues = state.getInitValues();
    */
   getInitValues() {
-    return this._parameters.getInitValues();
+    return this.#parameters.getInitValues();
   }
 
   /**
@@ -641,7 +636,7 @@ ${JSON.stringify(initValues, null, 2)}`);
    * const defaults = state.getDefaults();
    */
   getDefaults() {
-    return this._parameters.getDefaults();
+    return this.#parameters.getDefaults();
   }
 
   /**
@@ -654,22 +649,22 @@ ${JSON.stringify(initValues, null, 2)}`);
    * await state.detach();
    */
   async detach() {
-    if (this._detached) {
-      throw new Error(`[SharedState] State "${this.schemaName} (${this.id})" already detached, cannot detach twice`);
+    if (this.#detached) {
+      throw new Error(`[SharedState] State "${this.#schemaName} (${this.#id})" already detached, cannot detach twice`);
     }
 
-    this._detached = true; // mark detached early
-    this._onUpdateCallbacks.clear();
+    this.#detached = true; // mark detached early
+    this.#onUpdateCallbacks.clear();
 
-    if (this._isOwner) {
+    if (this.#isOwner) {
       return new Promise((resolve, reject) => {
-        const reqId = this._promiseStore.add(resolve, reject, 'delete-request');
-        this._client.transport.emit(`${DELETE_REQUEST}-${this.id}-${this.remoteId}`, reqId);
+        const reqId = this[kSharedStatePromiseStore].add(resolve, reject, 'delete-request');
+        this.#client.transport.emit(`${DELETE_REQUEST}-${this.#id}-${this.#remoteId}`, reqId);
       });
     } else {
       return new Promise((resolve, reject) => {
-        const reqId = this._promiseStore.add(resolve, reject, 'detach-request');
-        this._client.transport.emit(`${DETACH_REQUEST}-${this.id}-${this.remoteId}`, reqId);
+        const reqId = this[kSharedStatePromiseStore].add(resolve, reject, 'detach-request');
+        this.#client.transport.emit(`${DETACH_REQUEST}-${this.#id}-${this.#remoteId}`, reqId);
       });
     }
   }
@@ -690,25 +685,25 @@ ${JSON.stringify(initValues, null, 2)}`);
    * await state.delete();
    */
   async delete() {
-    if (this._isOwner) {
-      if (this._detached) {
-        throw new Error(`[SharedState] State "${this.schemaName} (${this.id})" already deleted, cannot delete twice`);
+    if (this.#isOwner) {
+      if (this.#detached) {
+        throw new Error(`[SharedState] State "${this.#schemaName} (${this.#id})" already deleted, cannot delete twice`);
       }
 
       return this.detach();
     } else {
-      throw new Error(`[SharedState] Cannot delete state "${this.schemaName}", only the owner of the state (i.e. the node that created it) can delete the state. Use "detach" instead.`);
+      throw new Error(`[SharedState] Cannot delete state "${this.#schemaName}", only the owner of the state (i.e. the node that created it) can delete the state. Use "detach" instead.`);
     }
   }
 
   /**
    * Subscribe to state updates.
    *
-   * @param {SharedState~onUpdateCallback} callback
+   * @param {sharedStateOnUpdateCallback} callback
    *  Callback to execute when an update is applied on the state.
    * @param {Boolean} [executeListener=false] - Execute the callback immediately
    *  with current state values. (`oldValues` will be set to `{}`, and `context` to `null`)
-   * @returns {SharedState~deleteOnUpdateCallback}
+   * @returns {sharedStateDeleteOnUpdateCallback}
    * @example
    * const unsubscribe = state.onUpdate(async (newValues, oldValues, context) =>  {
    *   for (let [key, value] of Object.entries(newValues)) {
@@ -722,7 +717,7 @@ ${JSON.stringify(initValues, null, 2)}`);
    * unsubscribe();
    */
   onUpdate(listener, executeListener = false) {
-    this._onUpdateCallbacks.add(listener);
+    this.#onUpdateCallbacks.add(listener);
 
     if (executeListener === true) {
       const currentValues = this.getValues();
@@ -732,7 +727,7 @@ ${JSON.stringify(initValues, null, 2)}`);
     }
 
     return () => {
-      this._onUpdateCallbacks.delete(listener);
+      this.#onUpdateCallbacks.delete(listener);
     };
   }
 
@@ -745,8 +740,8 @@ ${JSON.stringify(initValues, null, 2)}`);
    *   creator.
    */
   onDetach(callback) {
-    this._onDetachCallbacks.add(callback);
-    return () => this._onDetachCallbacks.delete(callback);
+    this.#onDetachCallbacks.add(callback);
+    return () => this.#onDetachCallbacks.delete(callback);
   }
 
   /**
@@ -757,8 +752,8 @@ ${JSON.stringify(initValues, null, 2)}`);
    * @param {Function} callback - Callback to execute when the state is deleted.
    */
   onDelete(callback) {
-    this._onDeleteCallbacks.add(callback);
-    return () => this._onDeleteCallbacks.delete(callback);
+    this.#onDeleteCallbacks.add(callback);
+    return () => this.#onDeleteCallbacks.delete(callback);
   }
 }
 

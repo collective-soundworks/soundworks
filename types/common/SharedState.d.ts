@@ -1,10 +1,12 @@
+export const kSharedStatePromiseStore: unique symbol;
 export default SharedState;
+export type sharedStateOnUpdateCallback = (newValues: any, oldValues: any, context?: Mixed) => any;
 /**
- * ~onUpdateCallback
+ * Delete the registered {@link sharedStateOnUpdateCallback }.
  */
-export type SharedState = (newValues: any, oldValues: any, context?: Mixed) => any;
+export type sharedStateDeleteOnUpdateCallback = () => any;
 /**
- * @callback SharedState~onUpdateCallback
+ * @callback sharedStateOnUpdateCallback
  * @param {Object} newValues - Key / value pairs of the updates that have been
  *  applied to the state.
  * @param {Object} oldValues - Key / value pairs of the updated params before
@@ -13,8 +15,8 @@ export type SharedState = (newValues: any, oldValues: any, context?: Mixed) => a
  *  with the values updates in the `set` call.
  */
 /**
- * Delete the registered {@link SharedState~onUpdateCallback}.
- * @callback SharedState~deleteOnUpdateCallback
+ * Delete the registered {@link sharedStateOnUpdateCallback}.
+ * @callback sharedStateDeleteOnUpdateCallback
  */
 /**
  * The `SharedState` is one of the most important and versatile abstraction provided
@@ -73,34 +75,6 @@ export type SharedState = (newValues: any, oldValues: any, context?: Mixed) => a
  */
 declare class SharedState {
     constructor(id: any, remoteId: any, schemaName: any, schema: any, client: any, isOwner: any, manager: any, initValues: any, filter: any);
-    /** @private */
-    private _id;
-    /** @private */
-    private _remoteId;
-    /** @private */
-    private _schemaName;
-    /** @private */
-    private _isOwner;
-    /** @private */
-    private _client;
-    /** @private */
-    private _manager;
-    /** @private */
-    private _filter;
-    /**
-     * true is the state has been detached or deleted
-     * @private
-     */
-    private _detached;
-    _promiseStore: PromiseStore;
-    /** @private */
-    private _parameters;
-    /** @private */
-    private _onUpdateCallbacks;
-    /** @private */
-    private _onDetachCallbacks;
-    /** @private */
-    private _onDeleteCallbacks;
     /**
      * Id of the state
      * @type {Number}
@@ -126,10 +100,6 @@ declare class SharedState {
      * @readonly
      */
     readonly get isOwner(): boolean;
-    /** @private */
-    private _clearTransport;
-    /** @private */
-    private _commit;
     /**
      * Update values of the state.
      *
@@ -276,11 +246,11 @@ declare class SharedState {
     /**
      * Subscribe to state updates.
      *
-     * @param {SharedState~onUpdateCallback} callback
+     * @param {sharedStateOnUpdateCallback} callback
      *  Callback to execute when an update is applied on the state.
      * @param {Boolean} [executeListener=false] - Execute the callback immediately
      *  with current state values. (`oldValues` will be set to `{}`, and `context` to `null`)
-     * @returns {SharedState~deleteOnUpdateCallback}
+     * @returns {sharedStateDeleteOnUpdateCallback}
      * @example
      * const unsubscribe = state.onUpdate(async (newValues, oldValues, context) =>  {
      *   for (let [key, value] of Object.entries(newValues)) {
@@ -293,7 +263,7 @@ declare class SharedState {
      * // later
      * unsubscribe();
      */
-    onUpdate(listener: any, executeListener?: boolean): SharedState;
+    onUpdate(listener: any, executeListener?: boolean): sharedStateDeleteOnUpdateCallback;
     /**
      * Register a function to execute when detaching from the state. The function
      * will be executed before the `detach` promise resolves.
@@ -311,5 +281,7 @@ declare class SharedState {
      * @param {Function} callback - Callback to execute when the state is deleted.
      */
     onDelete(callback: Function): () => boolean;
+    /** @private */
+    private [kSharedStatePromiseStore];
+    #private;
 }
-import PromiseStore from './PromiseStore.js';

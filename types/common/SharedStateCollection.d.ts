@@ -1,12 +1,7 @@
 export default SharedStateCollection;
-export namespace client {
-    /**
-     * ~onUpdateCallback
-     */
-    type SharedStateCollection = (state: client.SharedState, newValues: any, oldValues: any, context?: Mixed) => any;
-}
+export type sharedStateCollectionOnUpdateCallback = (state: client.SharedState, newValues: any, oldValues: any, context?: Mixed) => any;
 /**
- * @callback client.SharedStateCollection~onUpdateCallback
+ * @callback sharedStateCollectionOnUpdateCallback
  * @param {client.SharedState} state - State that triggered the update.
  * @param {Object} newValues - Key / value pairs of the updates that have been
  *  applied to the state.
@@ -35,18 +30,6 @@ export namespace client {
  */
 declare class SharedStateCollection {
     constructor(stateManager: any, schemaName: any, filter?: any, options?: {});
-    _stateManager: any;
-    _schemaName: any;
-    _filter: any;
-    _options: {
-        excludeLocal: boolean;
-    };
-    _schema: any;
-    _states: any[];
-    _onUpdateCallbacks: Set<any>;
-    _onAttachCallbacks: Set<any>;
-    _onDetachCallbacks: Set<any>;
-    _unobserve: any;
     /** @private */
     private _init;
     /**
@@ -133,14 +116,14 @@ declare class SharedStateCollection {
     /**
      * Subscribe to any state update of the collection.
      *
-     * @param {server.SharedStateCollection~onUpdateCallback|client.SharedStateCollection~onUpdateCallback}
+     * @param {sharedStateCollectionOnUpdateCallback}
      *  callback - Callback to execute when an update is applied on a state.
      * @param {Boolean} [executeListener=false] - Execute the callback immediately
      *  for all underlying states with current state values. (`oldValues` will be
      *  set to `{}`, and `context` to `null`)
      * @returns {Function} - Function that delete the registered listener.
      */
-    onUpdate(callback: any, executeListener?: boolean): Function;
+    onUpdate(callback: sharedStateCollectionOnUpdateCallback, executeListener?: boolean): Function;
     /**
      * Register a function to execute when a state is added to the collection.
      *
@@ -212,4 +195,5 @@ declare class SharedStateCollection {
             done: boolean;
         };
     };
+    #private;
 }
