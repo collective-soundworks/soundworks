@@ -4,7 +4,10 @@ import clonedeep from 'lodash/cloneDeep.js';
 import BaseStateManager from '../common/BaseStateManager.js';
 import BatchedTransport from '../common/BatchedTransport.js';
 import ParameterBag from '../common/ParameterBag.js';
-import SharedStatePrivate from '../common/SharedStatePrivate.js';
+import SharedStatePrivate, {
+  kSharedStatePrivateAttachClient,
+  kSharedStatePrivateDetachClient,
+} from '../common/SharedStatePrivate.js';
 import {
   CREATE_REQUEST,
   CREATE_RESPONSE,
@@ -28,8 +31,6 @@ import {
 
 const generateStateId = idGenerator();
 const generateRemoteId = idGenerator();
-
-const kIsObservableState = Symbol('StateManager::isObservableState');
 
 /**
  * @typedef {object} server.StateManager~schema
@@ -320,16 +321,16 @@ class StateManager extends BaseStateManager {
     this._hooksBySchemaName = new Map(); // protected
   }
 
+  #isObservableState(state) {
+    const { schemaName, isCollectionController } = state;
+    // is observable only if not in private state and not a controller state
+    return !PRIVATE_STATES.includes(schemaName) && !isCollectionController;
+  }
+
   init(id, transport) {
     super.init(id, transport);
     // add itself as client of the state manager server
     this.addClient(id, transport);
-  }
-
-  [kIsObservableState](state) {
-    const { schemaName, isCollectionController } = state;
-    // is observable only if not in private state and not a controller state
-    return !PRIVATE_STATES.includes(schemaName) && !isCollectionController;
   }
 
   /**
@@ -369,11 +370,11 @@ class StateManager extends BaseStateManager {
             // attach client to the state as owner
             const isOwner = true;
             const filter = null;
-            state._attachClient(remoteId, client, isOwner, filter);
+            state[kSharedStatePrivateAttachClient](remoteId, client, isOwner, filter);
 
             this._sharedStatePrivateById.set(stateId, state);
 
-            const currentValues = state._parameters.getValues();
+            const currentValues = state.parameters.getValues();
             const schemaOption = requireSchema ? schema : null;
 
             client.transport.emit(
@@ -381,7 +382,7 @@ class StateManager extends BaseStateManager {
               reqId, stateId, remoteId, schemaName, schemaOption, currentValues,
             );
 
-            const isObservable = this[kIsObservableState](state);
+            const isObservable = this.#isObservableState(state);
 
             if (isObservable) {
               this._observers.forEach(observer => {
@@ -433,7 +434,7 @@ class StateManager extends BaseStateManager {
             // i.e. same state -> several remote attach on the same node
             const remoteId = generateRemoteId.next().value;
             const isOwner = false;
-            const currentValues = state._parameters.getValues();
+            const currentValues = state.parameters.getValues();
             const schema = this._schemas.get(schemaName);
             const schemaOption = requireSchema ? schema : null;
 
@@ -451,7 +452,7 @@ class StateManager extends BaseStateManager {
               }
             }
 
-            state._attachClient(remoteId, client, isOwner, filter);
+            state[kSharedStatePrivateAttachClient](remoteId, client, isOwner, filter);
 
             client.transport.emit(
               ATTACH_RESPONSE,
@@ -481,11 +482,11 @@ class StateManager extends BaseStateManager {
         const statesInfos = [];
 
         this._sharedStatePrivateById.forEach(state => {
-          const isObservable = this[kIsObservableState](state);
+          const isObservable = this.#isObservableState(state);
 
           if (isObservable) {
-            const { schemaName, id, _creatorId } = state;
-            statesInfos.push([schemaName, id, _creatorId]);
+            const { schemaName, id, creatorId } = state;
+            statesInfos.push([schemaName, id, creatorId]);
           }
         });
 
@@ -534,23 +535,23 @@ class StateManager extends BaseStateManager {
 
       // define if the client is the creator of the state, in which case
       // everybody must delete it
-      for (let [remoteId, clientInfos] of state._attachedClients) {
+      for (let [remoteId, clientInfos] of state.attachedClients) {
         const attachedClient = clientInfos.client;
 
-        if (nodeId === attachedClient.id && remoteId === state._creatorRemoteId) {
+        if (nodeId === attachedClient.id && remoteId === state.creatorRemoteId) {
           deleteState = true;
         }
       }
 
-      for (let [remoteId, clientInfos] of state._attachedClients) {
+      for (let [remoteId, clientInfos] of state.attachedClients) {
         const attachedClient = clientInfos.client;
 
         if (nodeId === attachedClient.id) {
-          state._detachClient(remoteId, attachedClient);
+          state[kSharedStatePrivateDetachClient](remoteId, attachedClient);
         }
 
         if (deleteState) {
-          if (remoteId !== state._creatorRemoteId) {
+          if (remoteId !== state.creatorRemoteId) {
             // send notification to other attached nodes
             attachedClient.transport.emit(`${DELETE_NOTIFICATION}-${state.id}-${remoteId}`);
           }
@@ -624,9 +625,9 @@ class StateManager extends BaseStateManager {
     // @note: deleting schema
     for (let [_id, state] of this._sharedStatePrivateById) {
       if (state.schemaName === schemaName) {
-        for (let [remoteId, clientInfos] of state._attachedClients) {
+        for (let [remoteId, clientInfos] of state.attachedClients) {
           const attached = clientInfos.client;
-          state._detachClient(remoteId, attached);
+          state[kSharedStatePrivateDetachClient](remoteId, attached);
           attached.transport.emit(`${DELETE_NOTIFICATION}-${state.id}-${remoteId}`);
         }
 

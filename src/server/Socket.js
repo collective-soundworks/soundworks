@@ -12,7 +12,7 @@ import {
   kSocketsLatencyStatsWorker,
   kSocketsDebugPreventHeartBeat,
   kSocketsRemoveFromAllRooms,
-} from './Sockets.js';
+} from './ServerSockets.js';
 
 export const kSocketClientId = Symbol('soundworks:socket-client-id');
 export const kSocketTerminate = Symbol('soundworks:socket-terminate');

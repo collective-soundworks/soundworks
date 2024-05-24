@@ -34,10 +34,17 @@ export const kSocketTerminate = Symbol('soundworks:socket-terminate');
  * @hideconstructor
  */
 class ClientSocket {
+  #role = null;
+  #config = null;
+  #socketOptions = null;
   #socket = null;
   #listeners = new Map();
 
-  constructor() {}
+  constructor(role, config, socketOptions) {
+    this.#role = role;
+    this.#config = config;
+    this.#socketOptions = socketOptions;
+  }
 
   /**
    * Initialize a websocket connection with the server. Automatically called
@@ -47,39 +54,39 @@ class ClientSocket {
    * @param {object} config - Configuration of the sockets
    * @private
    */
-  async init(role, config) {
-    let { path } = config.env.websockets;
+  async init() {
+    let { path } = this.#socketOptions;
     // cf. https://github.com/collective-soundworks/soundworks/issues/35
-    if (config.env.subpath) {
-      path = `${config.env.subpath}/${path}`;
+    if (this.#config.env.subpath) {
+      path = `${this.#config.env.subpath}/${path}`;
     }
 
-    const protocol = config.env.useHttps ? 'wss:' : 'ws:';
-    const port = config.env.port;
+    const protocol = this.#config.env.useHttps ? 'wss:' : 'ws:';
+    const port = this.#config.env.port;
     let serverAddress;
     let webSocketOptions;
 
     if (isBrowser()) {
       // if a server address is given in config, use it, else fallback to URL hostname
-      if (config.env.serverAddress !== '') {
-        serverAddress = config.env.serverAddress;
+      if (this.#config.env.serverAddress !== '') {
+        serverAddress = this.#config.env.serverAddress;
       } else {
         serverAddress = window.location.hostname;
       }
 
       webSocketOptions = [];
     } else {
-      serverAddress = config.env.serverAddress;
+      serverAddress = this.#config.env.serverAddress;
 
       webSocketOptions = {
         rejectUnauthorized: false,
       };
     }
 
-    let queryParams = `role=${role}`;
+    let queryParams = `role=${this.#role}`;
 
-    if (config.token) {
-      queryParams += `&token=${config.token}`;
+    if (this.#config.token) {
+      queryParams += `&token=${this.#config.token}`;
     }
 
     const url = `${protocol}//${serverAddress}:${port}/${path}?${queryParams}`;

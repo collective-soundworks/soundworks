@@ -37,7 +37,10 @@ import {
   kSocketClientId,
   kSocketTerminate,
 } from './Socket.js';
-import Sockets from './Sockets.js';
+import ServerSockets, {
+  kSocketsStart,
+  kSocketsStop,
+} from './ServerSockets.js';
 import logger from '../common/logger.js';
 import {
   SERVER_ID,
@@ -46,7 +49,7 @@ import {
   CLIENT_HANDSHAKE_ERROR,
   AUDIT_STATE_NAME,
 } from '../common/constants.js';
-import version from '../common/version.js';
+import VERSION from '../common/version.js';
 
 let _dbNamespaces = new Set();
 
@@ -54,19 +57,18 @@ let _dbNamespaces = new Set();
  * Configuration object for the server.
  *
  * @typedef ServerConfig
- * @memberof server
  * @type {object}
  * @property {object} [app] - Application configration object.
  * @property {object} app.clients - Definition of the application clients.
  * @property {string} [app.name=''] - Name of the application.
  * @property {string} [app.author=''] - Name of the author.
  * @property {object} [env] - Environment configration object.
- * @property {boolean} env.port - Port on which the server is listening.
  * @property {boolean} env.useHttps - Define is the server run in http or in https.
- * @property {boolean} [env.httpsInfos={}] - Path to cert files for https.
- * @property {boolean} env.serverAddress - Domain name or IP of the server.
- *  Mandatory if node clients are defined
- * @property {string} [env.websockets={}] - Configuration options for websockets.
+ * @property {string} env.serverAddress - Domain name or IP of the server.
+ *  Mandatory when node clients are declared
+ * @property {number} env.port - Port on which the server is listening.
+ * @property {obj} [env.httpsInfos=null] - Path to cert files ( cert, key } for https.
+ *  If not given and useHttps is true self certifified certificates will be created.
  * @property {string} [env.subpath=''] - If running behind a proxy, path to the application.
  */
 
@@ -77,10 +79,6 @@ const DEFAULT_CONFIG = {
     port: 8000,
     serverAddress: null,
     subpath: '',
-    websockets: {
-      path: 'socket',
-      pingInterval: 5000,
-    },
     useHttps: false,
     httpsInfos: null,
     crossOriginIsolated: true,
@@ -93,6 +91,8 @@ const DEFAULT_CONFIG = {
 };
 
 const TOKEN_VALID_DURATION = 20; // sec
+
+export const kServerOnSocketConnection = Symbol('soundworks:server-on-socket-connection');
 
 /**
  * The `Server` class is the main entry point for the server-side of a soundworks
@@ -138,12 +138,16 @@ const TOKEN_VALID_DURATION = 20; // sec
  * The server will listen to the following URLs:
  * - `http://127.0.0.1:8000/` for the `player` role, which is defined as the default client.
  * - `http://127.0.0.1:8000/controller` for the `controller` role.
- *
- * @memberof server
  */
 class Server {
+  #config = null;
+  #version = null;
+  #router = null;
+  #httpServer = null;
+  #sockets = null;
+
   /**
-   * @param {server.ServerConfig} config - Configuration object for the server.
+   * @param {ServerConfig} config - Configuration object for the server.
    * @throws
    * - If `config.app.clients` is empty.
    * - If a `node` client is defined but `config.env.serverAddress` is not defined.
@@ -156,53 +160,29 @@ class Server {
       throw new Error(`[soundworks:Server] Invalid argument for Server constructor, config should be an object`);
     }
 
-    /**
-     * @description Given config object merged with the following defaults:
-     * @example
-     * {
-     *   env: {
-     *     type: 'development',
-     *     port: 8000,
-     *     serverAddress: null,
-     *     subpath: '',
-     *     websockets: {
-     *       path: 'socket',
-     *       pingInterval: 5000,
-     *     },
-     *     useHttps: false,
-     *     httpsInfos: null,
-     *     crossOriginIsolated: true,
-     *     verbose: true,
-     *   },
-     *   app: {
-     *     name: 'soundworks',
-     *     clients: {},
-     *   }
-     * }
-     */
-    this.config = merge({}, DEFAULT_CONFIG, config);
+    this.#config = merge({}, DEFAULT_CONFIG, config);
 
     // parse config
-    if (Object.keys(this.config.app.clients).length === 0) {
+    if (Object.keys(this.#config.app.clients).length === 0) {
       throw new Error(`[soundworks:Server] Invalid "app.clients" config, at least one client should be declared`);
     }
 
     // if a node client is defined, serverAddress should be defined
     let hasNodeClient = false;
-    for (let name in this.config.app.clients) {
-      if (this.config.app.clients[name].target === 'node') {
+    for (let name in this.#config.app.clients) {
+      if (this.#config.app.clients[name].target === 'node') {
         hasNodeClient = true;
       }
     }
 
-    if (hasNodeClient && this.config.env.serverAddress === null) {
+    if (hasNodeClient && this.#config.env.serverAddress === null) {
       throw new Error(`[soundworks:Server] Invalid "env.serverAddress" config, is mandatory when a node client target is defined`);
     }
 
-    if (this.config.env.useHttps && this.config.env.httpsInfos !== null) {
-      const httpsInfos = this.config.env.httpsInfos;
+    if (this.#config.env.useHttps && this.#config.env.httpsInfos !== null) {
+      const httpsInfos = this.#config.env.httpsInfos;
 
-      if (!isPlainObject(this.config.env.httpsInfos)) {
+      if (!isPlainObject(this.#config.env.httpsInfos)) {
         throw new Error(`[soundworks:Server] Invalid "env.httpsInfos" config, should be null or object { cert, key }`);
       }
 
@@ -219,46 +199,13 @@ class Server {
       }
     }
 
-    this.version = version;
-
-    /**
-     * Instance of the express router.
-     *
-     * The router can be used to open new route, for example to expose a directory
-     * of static assets (in default soundworks applications only the `public` is exposed).
-     *
-     * @see {@link https://github.com/expressjs/express}
-     * @example
-     * import { Server } from '@soundworks/core/server.js';
-     * import express from 'express';
-     *
-     * // create the soundworks server instance
-     * const server = new Server(config);
-     *
-     * // expose assets located in the `soundfiles` directory on the network
-     * server.router.use('/soundfiles', express.static('soundfiles')));
-     */
+    this.#version = VERSION;
     // @note: we use express() instead of express.Router() because all 404 and
     // error stuff is handled by default
-    this.router = express();
-    // compression (must be set before express.static())
-    this.router.use(compression());
-
-    /**
-     * Raw Node.js `http` or `https` instance
-     *
-     * @see {@link https://nodejs.org/api/http.html}
-     * @see {@link https://nodejs.org/api/https.html}
-     */
-    this.httpServer = null;
-
-    /**
-     * Instance of the {@link server.Sockets} class.
-     *
-     * @see {@link server.Sockets}
-     * @type {server.Sockets}
-     */
-    this.sockets = new Sockets();
+    this.#router = express();
+    // compression - must be set before express.static()
+    this.#router.use(compression());
+    this.#sockets = new ServerSockets(this, { path: 'socket' });
 
     /**
      * Instance of the {@link server.PluginManager} class.
@@ -329,16 +276,90 @@ class Server {
     // register audit state schema
     this.stateManager.registerSchema(AUDIT_STATE_NAME, auditSchema);
 
-    logger.configure(this.config.env.verbose);
+    logger.configure(this.#config.env.verbose);
+  }
+
+  /**
+   * Given config object merged with the following defaults:
+   * @example
+   * {
+   *   env: {
+   *     type: 'development',
+   *     port: 8000,
+   *     serverAddress: null,
+   *     subpath: '',
+   *     useHttps: false,
+   *     httpsInfos: null,
+   *     crossOriginIsolated: true,
+   *     verbose: true,
+   *   },
+   *   app: {
+   *     name: 'soundworks',
+   *     clients: {},
+   *   }
+   * }
+   * @type {ServerConfig}
+   */
+  get config() {
+    return this.#config;
+  }
+
+  /**
+   * Package version.
+   *
+   * @type {string}
+   */
+  get version() {
+    return this.#version;
   }
 
   /**
    * Id of the server, a constant set to -1
-   * @type {Number}
+   * @type {number}
    * @readonly
    */
   get id() {
     return SERVER_ID;
+  }
+
+  /**
+   * Instance of the express router.
+   *
+   * The router can be used to open new route, for example to expose a directory
+   * of static assets (in default soundworks applications only the `public` is exposed).
+   *
+   * @see {@link https://github.com/expressjs/express}
+   * @example
+   * import { Server } from '@soundworks/core/server.js';
+   * import express from 'express';
+   *
+   * // create the soundworks server instance
+   * const server = new Server(config);
+   *
+   * // expose assets located in the `soundfiles` directory on the network
+   * server.router.use('/soundfiles', express.static('soundfiles')));
+   */
+  get router() {
+    return this.#router;
+  }
+
+  /**
+   * Raw Node.js `http` or `https` instance
+   *
+   * @see {@link https://nodejs.org/api/http.html}
+   * @see {@link https://nodejs.org/api/https.html}
+   */
+  get httpServer() {
+    return this.#httpServer;
+  }
+
+  /**
+   * Instance of the {@link ServerSockets} class.
+   *
+   * @type {ServerSockets}
+   */
+  get sockets() {
+    return this.#sockets;
   }
 
   /**
@@ -373,20 +394,20 @@ class Server {
     this.stateManager.init(SERVER_ID, new EventEmitter());
 
     const numClients = {};
-    for (let name in this.config.app.clients) {
+    for (let name in this.#config.app.clients) {
       numClients[name] = 0;
     }
     /** @private */
     this._auditState = await this.stateManager.create(AUDIT_STATE_NAME, { numClients });
 
     // basic http authentication
-    if (this.config.env.auth) {
+    if (this.#config.env.auth) {
       const ids = idGenerator();
 
       const soundworksAuth = (req, res, next) => {
         let role = null;
 
-        for (let [_role, config] of Object.entries(this.config.app.clients)) {
+        for (let [_role, config] of Object.entries(this.#config.app.clients)) {
           if (req.path === config.route) {
             role = _role;
           }
@@ -402,7 +423,7 @@ class Server {
 
         if (isProtected) {
           // authentication middleware
-          const auth = this.config.env.auth;
+          const auth = this.#config.env.auth;
           // parse login and password from headers
           const b64auth = (req.headers.authorization || '').split(' ')[1] || '';
           const [login, password] = Buffer.from(b64auth, 'base64').toString().split(':');
@@ -442,18 +463,18 @@ class Server {
         }
       };
 
-      this.router.use(soundworksAuth);
+      this.#router.use(soundworksAuth);
     }
 
     // ------------------------------------------------------------
     // create HTTP(S) SERVER
     // ------------------------------------------------------------
-    const useHttps = this.config.env.useHttps || false;
+    const useHttps = this.#config.env.useHttps || false;
 
     if (!useHttps) {
-      this.httpServer = http.createServer(this.router);
+      this.#httpServer = http.createServer(this.#router);
     } else {
-      const httpsInfos = this.config.env.httpsInfos;
+      const httpsInfos = this.#config.env.httpsInfos;
       let useSelfSigned = false;
 
       if (!httpsInfos || equal(httpsInfos, { cert: null, key: null })) {
@@ -505,7 +526,7 @@ class Server {
             daysRemaining: daysRemaining,
           };
 
-          this.httpServer = https.createServer({ key, cert }, this.router);
+          this.#httpServer = https.createServer({ key, cert }, this.#router);
         } catch (err) {
           logger.error(`
 Invalid certificate files, please check your:
@@ -524,9 +545,9 @@ Invalid certificate files, please check your:
 
         if (key && cert) {
           this.httpsInfos = { selfSigned: true };
-          this.httpServer = https.createServer({ cert, key }, this.router);
+          this.#httpServer = https.createServer({ cert, key }, this.#router);
         } else {
-          this.httpServer = await new Promise((resolve, reject) => {
+          this.#httpServer = await new Promise((resolve, reject) => {
             // generate certificate on the fly (for development purposes)
             pem.createCertificate({ days: 1, selfSigned: true }, async (err, keys) => {
               if (err) {
@@ -546,7 +567,7 @@ Invalid certificate files, please check your:
               await this.db.set('httpsCert', cert);
               await this.db.set('httpsKey', key);
 
-              const httpsServer = https.createServer({ cert, key }, this.router);
+              const httpsServer = https.createServer({ cert, key }, this.#router);
 
               resolve(httpsServer);
             });
@@ -558,8 +579,8 @@ Invalid certificate files, please check your:
     let nodeOnly = true;
     // do not throw if no browser clients are defined, very usefull for
     // cleaning tests in particular
-    for (let role in this.config.app.clients) {
-      if (this.config.app.clients[role].target === 'browser') {
+    for (let role in this.#config.app.clients) {
+      if (this.#config.app.clients[role].target === 'browser') {
         nodeOnly = false;
       }
     }
@@ -581,8 +602,8 @@ Invalid certificate files, please check your:
     const routes = [];
     const clientsConfig = [];
 
-    for (let role in this.config.app.clients) {
-      const config = Object.assign({}, this.config.app.clients[role]);
+    for (let role in this.#config.app.clients) {
+      const config = Object.assign({}, this.#config.app.clients[role]);
       config.role = role;
       clientsConfig.push(config);
     }
@@ -591,11 +612,11 @@ Invalid certificate files, please check your:
     clientsConfig
       .sort(a => a.default === true ? 1 : -1)
       .forEach(config => {
-        const path = this._openClientRoute(this.router, config);
+        const path = this._openClientRoute(this.#router, config);
         routes.push({ role: config.role, path });
       });
 
-    logger.clientConfigAndRouting(routes, this.config);
+    logger.clientConfigAndRouting(routes, this.#config);
 
     // ------------------------------------------------------------
     // START PLUGIN MANAGER
@@ -647,22 +668,18 @@ Invalid certificate files, please check your:
     // ------------------------------------------------------------
     // START SOCKET SERVER
     // ------------------------------------------------------------
-    await this.sockets.start(
-      this,
-      this.config.env.websockets,
-      (...args) => this._onSocketConnection(...args),
-    );
+    await this.#sockets[kSocketsStart]();
 
     // ------------------------------------------------------------
     // START HTTP SERVER
     // ------------------------------------------------------------
     return new Promise(resolve => {
-      const port = this.config.env.port;
-      const useHttps = this.config.env.useHttps || false;
+      const port = this.#config.env.port;
+      const useHttps = this.#config.env.useHttps || false;
       const protocol = useHttps ? 'https' : 'http';
       const ifaces = os.networkInterfaces();
 
-      this.httpServer.listen(port, async () => {
+      this.#httpServer.listen(port, async () => {
         logger.title(`${protocol} server listening on`);
 
         Object.keys(ifaces).forEach(dev => {
@@ -707,7 +724,7 @@ Invalid certificate files, please check your:
 
         await this._dispatchStatus('started');
 
-        if (this.config.env.type === 'development') {
+        if (this.#config.env.type === 'development') {
           logger.log(`\n> press "${chalk.bold('Ctrl + C')}" to exit`);
         }
 
@@ -741,8 +758,9 @@ Invalid certificate files, please check your:
     await this.contextManager.stop();
     await this.pluginManager.stop();
 
-    this.sockets.terminate();
-    this.httpServer.close(err => {
+    this.#sockets[kSocketsStop]();
+
+    this.#httpServer.close(err => {
       if (err) {
         throw new Error(err.message);
       }
@@ -769,7 +787,7 @@ Invalid certificate files, please check your:
       route += `${role}`;
     }
 
-    this.config.app.clients[role].route = route;
+    this.#config.app.clients[role].route = route;
 
     // define template filename: `${role}.html` or `default.html`
     const {
@@ -802,7 +820,7 @@ Invalid certificate files, please check your:
     const tmpl = templateEngine.compile(tmplString);
 
     const soundworksClientHandler = (req, res) => {
-      const data = clientConfigFunction(role, this.config, req);
+      const data = clientConfigFunction(role, this.#config, req);
 
       // if the client has gone through the connection middleware (add succedeed),
       // add the token to the data object
@@ -813,7 +831,7 @@ Invalid certificate files, please check your:
       // CORS / COOP / COEP headers for `crossOriginIsolated pages,
       // enables `sharedArrayBuffers` and high precision timers
       // cf. https://web.dev/why-coop-coep/
-      if (this.config.env.crossOriginIsolated) {
+      if (this.#config.env.crossOriginIsolated) {
         res.writeHead(200, {
           'Cross-Origin-Resource-Policy': 'same-origin',
           'Cross-Origin-Embedder-Policy': 'require-corp',
@@ -848,10 +866,10 @@ Invalid certificate files, please check your:
    * Socket connection callback.
    * @private
    */
-  _onSocketConnection(role, socket, connectionToken) {
+  [kServerOnSocketConnection](role, socket, connectionToken) {
     const client = new Client(role, socket);
     socket[kSocketClientId] = client.id;
-    const roles = Object.keys(this.config.app.clients);
+    const roles = Object.keys(this.#config.app.clients);
 
     // this has been validated
     if (this.isProtected(role) && this.isValidConnectionToken(connectionToken)) {
@@ -911,8 +929,8 @@ Invalid certificate files, please check your:
         return;
       }
 
-      if (version !== this.version) {
-        logger.warnVersionDiscepancies(role, version, this.version);
+      if (version !== this.#version) {
+        logger.warnVersionDiscepancies(role, version, this.#version);
       }
 
       try {
@@ -945,7 +963,7 @@ Invalid certificate files, please check your:
       this._onClientConnectCallbacks.forEach(callback => callback(client));
 
       const { id, uuid, token } = client;
-      socket.send(CLIENT_HANDSHAKE_RESPONSE, { id, uuid, token, version: this.version });
+      socket.send(CLIENT_HANDSHAKE_RESPONSE, { id, uuid, token, version: this.#version });
     });
   }
 
@@ -1025,10 +1043,10 @@ Invalid certificate files, please check your:
     const buildDirectory = path.join('.build', 'public');
 
     const useMinifiedFile = {};
-    const roles = Object.keys(this.config.app.clients);
+    const roles = Object.keys(this.#config.app.clients);
 
     roles.forEach(role => {
-      if (this.config.env.type === 'production') {
+      if (this.#config.env.type === 'production') {
         // check if minified file exists
         const minifiedFilePath = path.join(buildDirectory, `${role}.min.js`);
 
@@ -1069,8 +1087,8 @@ Invalid certificate files, please check your:
       },
     };
 
-    this.router.use(express.static('public'));
-    this.router.use('/build', express.static(buildDirectory));
+    this.#router.use(express.static('public'));
+    this.#router.use('/build', express.static(buildDirectory));
   }
 
   /**
@@ -1109,8 +1127,8 @@ Invalid certificate files, please check your:
 
   /** @private */
   isProtected(role) {
-    if (this.config.env.auth && Array.isArray(this.config.env.auth.clients)) {
-      return this.config.env.auth.clients.includes(role);
+    if (this.#config.env.auth && Array.isArray(this.#config.env.auth.clients)) {
+      return this.#config.env.auth.clients.includes(role);
     }
 
     return false;
@@ -1145,7 +1163,7 @@ Invalid certificate files, please check your:
    * @returns {Boolean}
    */
   isTrustedClient(client) {
-    if (this.config.env.type !== 'production') {
+    if (this.#config.env.type !== 'production') {
       return true;
     } else {
       return this._trustedClients.has(client);
@@ -1163,7 +1181,7 @@ Invalid certificate files, please check your:
    */
   // for stateless interactions, e.g. POST files
   isTrustedToken(clientId, clientIp, token) {
-    if (this.config.env.type !== 'production') {
+    if (this.#config.env.type !== 'production') {
       return true;
     } else {
       for (let client of this._trustedClients) {

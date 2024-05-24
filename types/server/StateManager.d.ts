@@ -399,7 +399,6 @@ declare class StateManager extends BaseStateManager {
      * assert.deepEqual(result, { name: 'test', numUpdates: 1 });
      */
     registerUpdateHook(schemaName: string, updateHook: any): Fuction;
-    [kIsObservableState](state: any): boolean;
+    #private;
 }
 import BaseStateManager from '../common/BaseStateManager.js';
-declare const kIsObservableState: unique symbol;

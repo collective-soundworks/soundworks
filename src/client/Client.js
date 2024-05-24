@@ -14,7 +14,7 @@ import {
   AUDIT_STATE_NAME,
 } from '../common/constants.js';
 import logger from '../common/logger.js';
-import version from '../common/version.js';
+import VERSION from '../common/version.js';
 
 // for testing purposes
 export const kClientVersionTest = Symbol('soundworks:client-version-test');
@@ -61,9 +61,9 @@ export const kClientVersionTest = Symbol('soundworks:client-version-test');
  * ```
  */
 class Client {
+  #config = null;
   #version = null;
   #role = null;
-  #config = null;
   #id = null;
   #uuid = null;
   #target = null;
@@ -121,13 +121,7 @@ class Client {
       this.#config.env = {};
     }
 
-    // minimal configuration for websockets
-    this.#config.env.websockets = Object.assign({
-      path: 'socket',
-      pingInterval: 5000,
-    }, config.env.websockets);
-
-    this.#version = version;
+    this.#version = VERSION;
     // allow override though config for testing
     if (config[kClientVersionTest]) {
       this.#version = config[kClientVersionTest];
@@ -135,7 +129,7 @@ class Client {
 
     this.#role = config.role;
     this.#target = isBrowser() ? 'browser' : 'node';
-    this.#socket = new ClientSocket();
+    this.#socket = new ClientSocket(this.#role, this.#config, { path: 'socket' });
     this.#contextManager = new ClientContextManager();
     this.#pluginManager = new ClientPluginManager(this);
     this.#stateManager = new ClientStateManager();
@@ -305,7 +299,7 @@ class Client {
    */
   async init() {
     // init socket communications
-    await this.#socket.init(this.#role, this.#config);
+    await this.#socket.init();
 
     // we need the try/catch block to change the promise rejection into proper error
     try {

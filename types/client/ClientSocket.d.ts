@@ -21,6 +21,7 @@ export default ClientSocket;
  * @hideconstructor
  */
 declare class ClientSocket {
+    constructor(role: any, config: any, socketOptions: any);
     /**
      * Initialize a websocket connection with the server. Automatically called
      * during {@link Client#init}

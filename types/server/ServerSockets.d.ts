@@ -1,29 +1,17 @@
+export const kSocketsStart: unique symbol;
+export const kSocketsStop: unique symbol;
 export const kSocketsRemoveFromAllRooms: unique symbol;
 export const kSocketsLatencyStatsWorker: unique symbol;
 export const kSocketsDebugPreventHeartBeat: unique symbol;
-export default Sockets;
+export default ServerSockets;
 /**
  * Manage all {@link server.Socket} instances.
  *
  * _Important: In most cases, you should consider using a {@link client.SharedState}
  * rather than directly using the Socket instance._
- *
- * @memberof server
  */
-declare class Sockets {
-    /**
-     * Initialize sockets, all sockets are added to two rooms by default:
-     * - to the room corresponding to the client `role`
-     * - to the '*' room that holds all connected sockets
-     *
-     * @private
-     */
-    private start;
-    /**
-     * Terminate all existing sockets.
-     * @private
-     */
-    private terminate;
+declare class ServerSockets {
+    constructor(server: any, config: any);
     /**
      * Add a socket to a room.
      *

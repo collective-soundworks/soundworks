@@ -1,8 +1,28 @@
+export const kServerOnSocketConnection: unique symbol;
 export default Server;
 /**
  * Configuration object for the server.
  */
-export type ServerConfig = any;
+export type ServerConfig = {
+    /**
+     * - Application configration object.
+     */
+    app?: {
+        clients: object;
+        name?: string;
+        author?: string;
+    };
+    /**
+     * - Environment configration object.
+     */
+    env?: {
+        useHttps: boolean;
+        serverAddress: string;
+        port: number;
+        httpsInfos?: obj;
+        subpath?: string;
+    };
+};
 /**
  * The `Server` class is the main entry point for the server-side of a soundworks
  * application.
@@ -47,12 +67,10 @@ export type ServerConfig = any;
  * The server will listen to the following URLs:
  * - `http://127.0.0.1:8000/` for the `player` role, which is defined as the default client.
  * - `http://127.0.0.1:8000/controller` for the `controller` role.
- *
- * @memberof server
  */
 declare class Server {
     /**
-     * @param {server.ServerConfig} config - Configuration object for the server.
+     * @param {ServerConfig} config - Configuration object for the server.
      * @throws
      * - If `config.app.clients` is empty.
      * - If a `node` client is defined but `config.env.serverAddress` is not defined.
@@ -60,65 +78,7 @@ declare class Server {
      *   (which generates self signed certificated), `config.env.httpsInfos.cert` and
      *   `config.env.httpsInfos.key` should point to valid cert files.
      */
-    constructor(config: server.ServerConfig);
-    /**
-     * @description Given config object merged with the following defaults:
-     * @example
-     * {
-     *   env: {
-     *     type: 'development',
-     *     port: 8000,
-     *     serverAddress: null,
-     *     subpath: '',
-     *     websockets: {
-     *       path: 'socket',
-     *       pingInterval: 5000,
-     *     },
-     *     useHttps: false,
-     *     httpsInfos: null,
-     *     crossOriginIsolated: true,
-     *     verbose: true,
-     *   },
-     *   app: {
-     *     name: 'soundworks',
-     *     clients: {},
-     *   }
-     * }
-     */
-    config: any;
-    version: string;
-    /**
-     * Instance of the express router.
-     *
-     * The router can be used to open new route, for example to expose a directory
-     * of static assets (in default soundworks applications only the `public` is exposed).
-     *
-     * @see {@link https://github.com/expressjs/express}
-     * @example
-     * import { Server } from '@soundworks/core/server.js';
-     * import express from 'express';
-     *
-     * // create the soundworks server instance
-     * const server = new Server(config);
-     *
-     * // expose assets located in the `soundfiles` directory on the network
-     * server.router.use('/soundfiles', express.static('soundfiles')));
-     */
-    router: any;
-    /**
-     * Raw Node.js `http` or `https` instance
-     *
-     * @see {@link https://nodejs.org/api/http.html}
-     * @see {@link https://nodejs.org/api/https.html}
-     */
-    httpServer: any;
-    /**
-     * Instance of the {@link server.Sockets} class.
-     *
-     * @see {@link server.Sockets}
-     * @type {server.Sockets}
-     */
-    sockets: server.Sockets;
+    constructor(config: ServerConfig);
     /**
      * Instance of the {@link server.PluginManager} class.
      *
@@ -198,11 +158,70 @@ declare class Server {
     /** @private */
     private _trustedClients;
     /**
+     * Given config object merged with the following defaults:
+     * @example
+     * {
+     *   env: {
+     *     type: 'development',
+     *     port: 8000,
+     *     serverAddress: null,
+     *     subpath: '',
+     *     useHttps: false,
+     *     httpsInfos: null,
+     *     crossOriginIsolated: true,
+     *     verbose: true,
+     *   },
+     *   app: {
+     *     name: 'soundworks',
+     *     clients: {},
+     *   }
+     * }
+     * @type {ServerConfig}
+     */
+    get config(): ServerConfig;
+    /**
+     * Package version.
+     *
+     * @type {string}
+     */
+    get version(): string;
+    /**
      * Id of the server, a constant set to -1
-     * @type {Number}
+     * @type {number}
      * @readonly
      */
     readonly get id(): number;
+    /**
+     * Instance of the express router.
+     *
+     * The router can be used to open new route, for example to expose a directory
+     * of static assets (in default soundworks applications only the `public` is exposed).
+     *
+     * @see {@link https://github.com/expressjs/express}
+     * @example
+     * import { Server } from '@soundworks/core/server.js';
+     * import express from 'express';
+     *
+     * // create the soundworks server instance
+     * const server = new Server(config);
+     *
+     * // expose assets located in the `soundfiles` directory on the network
+     * server.router.use('/soundfiles', express.static('soundfiles')));
+     */
+    get router(): any;
+    /**
+     * Raw Node.js `http` or `https` instance
+     *
+     * @see {@link https://nodejs.org/api/http.html}
+     * @see {@link https://nodejs.org/api/https.html}
+     */
+    get httpServer(): any;
+    /**
+     * Instance of the {@link ServerSockets} class.
+     *
+     * @type {ServerSockets}
+     */
+    get sockets(): ServerSockets;
     /**
      * The `init` method is part of the initialization lifecycle of the `soundworks`
      * server. Most of the time, the `init` method will be implicitly called by the
@@ -274,11 +293,6 @@ declare class Server {
     private _openClientRoute;
     onClientConnect(callback: any): () => boolean;
     onClientDisconnect(callback: any): () => boolean;
-    /**
-     * Socket connection callback.
-     * @private
-     */
-    private _onSocketConnection;
     /**
      * Create namespaced databases for core and plugins
      * (kind of experimental API do not expose in doc for now)
@@ -356,4 +370,11 @@ declare class Server {
      * @returns {Boolean}
      */
     isTrustedToken(clientId: number, clientIp: number, token: string): boolean;
+    /**
+     * Socket connection callback.
+     * @private
+     */
+    private [kServerOnSocketConnection];
+    #private;
 }
+import ServerSockets from './ServerSockets.js';

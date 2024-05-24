@@ -7,6 +7,9 @@ import {
   OBSERVE_RESPONSE,
   OBSERVE_NOTIFICATION,
 } from '../../src/common/constants.js';
+import {
+  kStateManagerClient
+} from '../../src/common/BaseStateManager.js';
 
 import config from '../utils/config.js';
 import { a, b } from '../utils/schemas.js';
@@ -385,7 +388,7 @@ describe(`# StateManager`, () => {
 
       let notificationReceived = false;
       // check low level transport messages
-      server.stateManager.client.transport.addListener(OBSERVE_NOTIFICATION, () => {
+      server.stateManager[kStateManagerClient].transport.addListener(OBSERVE_NOTIFICATION, () => {
         notificationReceived = true;
       });
 
@@ -406,13 +409,13 @@ describe(`# StateManager`, () => {
 
       let responsesReceived = 0;
 
-      other.stateManager.client.transport.addListener(OBSERVE_RESPONSE, () => {
+      other.stateManager[kStateManagerClient].transport.addListener(OBSERVE_RESPONSE, () => {
         responsesReceived += 1;
       });
 
       let notificationsReceived = 0;
 
-      other.stateManager.client.transport.addListener(OBSERVE_NOTIFICATION, () => {
+      other.stateManager[kStateManagerClient].transport.addListener(OBSERVE_NOTIFICATION, () => {
         notificationsReceived += 1;
       });
 
@@ -485,12 +488,12 @@ describe(`# StateManager`, () => {
       let responsesReceived = 0;
       let notificationsReceived = 0;
 
-      other.stateManager.client.transport.addListener(OBSERVE_RESPONSE, (...args) => {
+      other.stateManager[kStateManagerClient].transport.addListener(OBSERVE_RESPONSE, (...args) => {
         // console.log('OBSERVE_RESPONSE', ...args);
         responsesReceived += 1;
       });
 
-      other.stateManager.client.transport.addListener(OBSERVE_NOTIFICATION, (...args) => {
+      other.stateManager[kStateManagerClient].transport.addListener(OBSERVE_NOTIFICATION, (...args) => {
         // console.log('OBSERVE_NOTIFICATION', args);
         notificationsReceived += 1;
       });

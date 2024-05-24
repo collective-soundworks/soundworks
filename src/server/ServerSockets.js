@@ -8,12 +8,18 @@ import {
   WebSocketServer,
 } from 'ws';
 
+import {
+  kServerOnSocketConnection,
+} from './Server.js';
 import Socket, {
   kSocketTerminate,
 } from './Socket.js';
 
 // @note - fs.readFileSync creates some cwd() issues...
 import networkLatencyWorker from './audit-network-latency.worker.js';
+
+export const kSocketsStart = Symbol('soundworks:sockets-start');
+export const kSocketsStop = Symbol('soundworks:sockets-stop');
 
 export const kSocketsRemoveFromAllRooms = Symbol('soundworks:sockets-remove-from-all-rooms');
 export const kSocketsLatencyStatsWorker = Symbol('soundworks:sockets-latency-stats-worker');
@@ -24,14 +30,16 @@ export const kSocketsDebugPreventHeartBeat = Symbol('soundworks:sockets-debug-pr
  *
  * _Important: In most cases, you should consider using a {@link client.SharedState}
  * rather than directly using the Socket instance._
- *
- * @memberof server
  */
-class Sockets {
+class ServerSockets {
+  #server = null;
+  #config = null;
   #wsServer = null;
   #rooms = new Map();
 
-  constructor() {
+  constructor(server, config) {
+    this.#server = server;
+    this.#config = config;
     // Init special `'*'` room which stores all current connections.
     this.#rooms.set('*', new Set());
 
@@ -43,15 +51,14 @@ class Sockets {
    * Initialize sockets, all sockets are added to two rooms by default:
    * - to the room corresponding to the client `role`
    * - to the '*' room that holds all connected sockets
-   *
    * @private
    */
-  async start(server, config, onConnectionCallback) {
+  async [kSocketsStart]() {
     // Audit for network latency estimation, the worker is written in cjs so that we
     // can make builds for Max, move back to modules once Max support modules
     this[kSocketsLatencyStatsWorker] = new Worker(networkLatencyWorker, { eval: true });
 
-    const auditState = await server.getAuditState();
+    const auditState = await this.#server.getAuditState();
 
     auditState.onUpdate(updates => {
       if ('averageNetworkLatencyWindow' in updates || 'averageNetworkLatencyPeriod' in updates) {
@@ -74,7 +81,7 @@ class Sockets {
     // Init ws server
     this.#wsServer = new WebSocketServer({
       noServer: true,
-      path: `/${config.path}`,
+      path: `/${this.#config.path}`,
     });
 
     this.#wsServer.on('connection', (ws, req) => {
@@ -84,17 +91,17 @@ class Sockets {
       socket.addToRoom('*');
       socket.addToRoom(role);
 
-      onConnectionCallback(role, socket, token);
+      this.#server[kServerOnSocketConnection](role, socket, token);
     });
 
-    // Prevent socket with protected role to connect is token is invalid
-    server.httpServer.on('upgrade', async (req, socket, head) => {
+    // Prevent socket with protected role to connect if token is invalid
+    this.#server.httpServer.on('upgrade', async (req, socket, head) => {
       const { role, token } = querystring.parse(req.url.split('?')[1]);
 
-      if (server.isProtected(role)) {
+      if (this.#server.isProtected(role)) {
         // we don't have any IP in the upgrade request object,
         // so we just check the connection token is pending and valid
-        if (!server.isValidConnectionToken(token)) {
+        if (!this.#server.isValidConnectionToken(token)) {
           socket.destroy('not allowed');
         }
       }
@@ -109,7 +116,7 @@ class Sockets {
    * Terminate all existing sockets.
    * @private
    */
-  terminate() {
+  [kSocketsStop]() {
     // terminate stat worker thread
     this[kSocketsLatencyStatsWorker].terminate();
     // clean sockets
@@ -119,6 +126,7 @@ class Sockets {
 
   /**
    * Remove given socket from all rooms.
+   * @private
    */
   [kSocketsRemoveFromAllRooms](socket) {
     for (let [_, room] of this.#rooms) {
@@ -198,4 +206,4 @@ class Sockets {
   }
 }
 
-export default Sockets;
+export default ServerSockets;
