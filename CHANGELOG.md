@@ -1,3 +1,9 @@
+## v4.0.0-alpha.23 - 24/05/2025
+
+- Breaking: remove binary socket
+- Fix: do not terminate socket on missed heartbeat, which seems to create false positive, just warn instead
+- Refactor: some work toward upgrading code to es2022
+
 ## v4.0.0-alpha.22 - 16/05/2025
 
 - Feat: allow configuring socket endpoint on browser clients
