@@ -10,6 +10,7 @@ import {
 
 import {
   kServerOnSocketConnection,
+  kServerIsProtectedRole,
 } from './Server.js';
 import Socket, {
   kSocketTerminate,
@@ -26,9 +27,9 @@ export const kSocketsLatencyStatsWorker = Symbol('soundworks:sockets-latency-sta
 export const kSocketsDebugPreventHeartBeat = Symbol('soundworks:sockets-debug-prevent-heartbeat');
 
 /**
- * Manage all {@link server.Socket} instances.
+ * Manage all {@link ServerSocket} instances.
  *
- * _Important: In most cases, you should consider using a {@link client.SharedState}
+ * _Important: In most cases, you should consider using a {@link SharedState}
  * rather than directly using the Socket instance._
  */
 class ServerSockets {
@@ -98,10 +99,10 @@ class ServerSockets {
     this.#server.httpServer.on('upgrade', async (req, socket, head) => {
       const { role, token } = querystring.parse(req.url.split('?')[1]);
 
-      if (this.#server.isProtected(role)) {
+      if (this.#server[kServerIsProtectedRole](role)) {
         // we don't have any IP in the upgrade request object,
         // so we just check the connection token is pending and valid
-        if (!this.#server.isValidConnectionToken(token)) {
+        if (!this.#server[kServerIsValidConnectionToken](token)) {
           socket.destroy('not allowed');
         }
       }
@@ -137,9 +138,9 @@ class ServerSockets {
   /**
    * Add a socket to a room.
    *
-   * _Note that in most cases, you should use a shared state instead_
+   * _Note that in most cases, you should use a {@link SharedState} instead_
    *
-   * @param {server.Socket} socket - Socket to add to the room.
+   * @param {ServerSocket} socket - Socket to add to the room.
    * @param {String} roomId - Id of the room.
    */
   addToRoom(socket, roomId) {
@@ -154,9 +155,9 @@ class ServerSockets {
   /**
    * Remove a socket from a room.
    *
-   * _Note that in most cases, you should use a shared state instead_
+   * _Note that in most cases, you should use a {@link SharedState} instead_
    *
-   * @param {server.Socket} socket - Socket to remove from the room.
+   * @param {ServerSocket} socket - Socket to remove from the room.
    * @param {String} roomId - Id of the room.
    */
   removeFromRoom(socket, roomId) {
@@ -170,11 +171,11 @@ class ServerSockets {
    * Send a message to all clients os given room(s). If no room is specified,
    * the message is sent to all clients.
    *
-   * _Note that in most cases, you should use a shared state instead_
+   * _Note that in most cases, you should use a {@link SharedState} instead_
    *
    * @param {String|Array} roomsIds - Ids of the rooms that must receive
    *  the message. If `null` the message is sent to all clients.
-   * @param {server.Socket} excludeSocket - Optionnal socket to ignore when
+   * @param {ServerSocket} excludeSocket - Optionnal socket to ignore when
    *  broadcasting the message, typically the client at the origin of the message.
    * @param {String} channel - Channel name.
    * @param {...*} args - Payload of the message. As many arguments as needed, of

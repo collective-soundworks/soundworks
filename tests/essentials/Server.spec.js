@@ -11,6 +11,11 @@ import tcpp from 'tcp-ping';
 import { Server, Context as ServerContext } from '../../src/server/index.js';
 import { Client } from '../../src/client/index.js';
 
+import {
+  kServerOnStatusChangeCallbacks,
+  kServerApplicationTemplateOptions,
+} from '../../src/server/Server.js';
+
 import config from '../utils/config.js';
 
 const __filename = url.fileURLToPath(import.meta.url);
@@ -509,7 +514,7 @@ describe('# server::Server', () => {
       const unsubscribe = server.onStatusChange(async () => {});
       unsubscribe();
 
-      assert.equal(server._onStatusChangeCallbacks.size, 0)
+      assert.equal(server[kServerOnStatusChangeCallbacks].size, 0)
     });
 
     it('should receive "inited" events', async () => {
@@ -604,18 +609,18 @@ describe('# server::Server', () => {
   });
 
   describe(`## server.useDefaultApplicationTemplate()`, () => {
-    it(`should populate server._applicationTemplateOptions`, () => {
+    it(`should populate server[kServerApplicationTemplateOptions]`, () => {
       const server = new Server(config);
       server.useDefaultApplicationTemplate();
 
-      assert.notEqual(server._applicationTemplateOptions.templateEngine, null);
-      assert.notEqual(server._applicationTemplateOptions.templatePath, null);
-      assert.notEqual(server._applicationTemplateOptions.clientConfigFunction, null);
+      assert.notEqual(server[kServerApplicationTemplateOptions].templateEngine, null);
+      assert.notEqual(server[kServerApplicationTemplateOptions].templatePath, null);
+      assert.notEqual(server[kServerApplicationTemplateOptions].clientConfigFunction, null);
     });
   });
 
   describe(`## server.setCustomApplicationTemplateOptions(options)`, () => {
-    it(`should override server._applicationTemplateOptions`, () => {
+    it(`should override server[kServerApplicationTemplateOptions]`, () => {
       const server = new Server(config);
       server.useDefaultApplicationTemplate();
       // returns the config to be sent to the client
@@ -637,9 +642,9 @@ describe('# server::Server', () => {
 
       server.setCustomApplicationTemplateOptions({ clientConfigFunction });
 
-      assert.notEqual(server._applicationTemplateOptions.templateEngine, null);
-      assert.notEqual(server._applicationTemplateOptions.templatePath, null);
-      assert.equal(server._applicationTemplateOptions.clientConfigFunction, clientConfigFunction);
+      assert.notEqual(server[kServerApplicationTemplateOptions].templateEngine, null);
+      assert.notEqual(server[kServerApplicationTemplateOptions].templatePath, null);
+      assert.equal(server[kServerApplicationTemplateOptions].clientConfigFunction, clientConfigFunction);
     });
   });
 

@@ -3,17 +3,17 @@ import { assert } from 'chai';
 import { Server } from '../../src/server/index.js';
 import { Client } from '../../src/client/index.js';
 import Plugin from '../../src/server/Plugin.js';
-import PluginManager from '../../src/server/PluginManager.js';
+import ServerPluginManager from '../../src/server/ServerPluginManager.js';
 
 import pluginDelayServer from '../utils/PluginDelayServer.js';
 import config from '../utils/config.js';
 
-describe(`# PluginManagerServer`, () => {
+describe(`# ServerPluginManager`, () => {
   describe(`## [private] constructor(server)`, () => {
     it(`should throw if argument is not instance of Server`, () => {
       let errored = false;
       try {
-        new PluginManager({});
+        new ServerPluginManager({});
       } catch(err) {
         console.log(err.message);
         errored = true;

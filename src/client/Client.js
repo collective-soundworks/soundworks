@@ -18,6 +18,7 @@ import VERSION from '../common/version.js';
 
 // for testing purposes
 export const kClientVersionTest = Symbol('soundworks:client-version-test');
+export const kClientOnStatusChangeCallbacks = Symbol('soundworks:client-on-status-change-callbacks');
 
 /**
  * Configuration object for a client running in a browser runtime.
@@ -74,7 +75,6 @@ class Client {
   #status = 'idle';
   // Token of the client if connected through HTTP authentication.
   #token = null;
-  #onStatusChangeCallbacks = new Set();
   #auditState = null;
 
   /**
@@ -134,6 +134,8 @@ class Client {
     this.#pluginManager = new ClientPluginManager(this);
     this.#stateManager = new ClientStateManager();
     this.#status = 'idle';
+
+    this[kClientOnStatusChangeCallbacks] = new Set();
 
     logger.configure(!!config.env.verbose);
   }
@@ -264,7 +266,7 @@ class Client {
     // execute all callbacks in parallel
     const promises = [];
 
-    for (let callback of this.#onStatusChangeCallbacks) {
+    for (let callback of this[kClientOnStatusChangeCallbacks]) {
       promises.push(callback(status));
     }
 
@@ -455,8 +457,8 @@ class Client {
    * @returns {Function} Function that delete the listener when executed.
    */
   onStatusChange(callback) {
-    this.#onStatusChangeCallbacks.add(callback);
-    return () => this.#onStatusChangeCallbacks.delete(callback);
+    this[kClientOnStatusChangeCallbacks].add(callback);
+    return () => this[kClientOnStatusChangeCallbacks].delete(callback);
   }
 }
 

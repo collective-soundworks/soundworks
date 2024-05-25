@@ -1,6 +1,14 @@
 export const kStateManagerDeleteState: unique symbol;
 export const kStateManagerClient: unique symbol;
 export default BaseStateManager;
+export type stateManagerObserveCallback = () => any;
+/**
+ * @callback stateManagerObserveCallback
+ * @async
+ * @param {string} schemaName - name of the schema
+ * @param {number} stateId - id of the state
+ * @param {number} nodeId - id of the node that created the state
+ */
 /** @private */
 declare class BaseStateManager {
     /**
@@ -78,11 +86,11 @@ declare class BaseStateManager {
      *
      * @param {string} [schemaName] - optionnal schema name to filter the observed
      *  states.
-     * @param {server.StateManager~ObserveCallback|client.StateManager~ObserveCallback}
+     * @param {stateManagerObserveCallback}
      *  callback - Function to be called when a new state is created on the network.
      * @param {object} options - Options.
      * @param {boolean} [options.excludeLocal = false] - If set to true, exclude states
-     *  created locallly, i.e. by the same node, from the collection.
+     *  created locally, i.e. by the same node, from the collection.
      * @returns {Promise<Function>} - Returns a Promise that resolves when the given
      *  callback as been executed on each existing states. The promise value is a
      *  function which allows to stop observing the states on the network.

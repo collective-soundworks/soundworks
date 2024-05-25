@@ -30,9 +30,9 @@ import {
   decryptData,
 } from './crypto.js';
 import Client from './Client.js';
-import ContextManager from './ContextManager.js';
-import PluginManager from './PluginManager.js';
-import StateManager from './StateManager.js';
+import ServerContextManager from './ServerContextManager.js';
+import ServerPluginManager from './ServerPluginManager.js';
+import ServerStateManager from './ServerStateManager.js';
 import {
   kSocketClientId,
   kSocketTerminate,
@@ -93,13 +93,18 @@ const DEFAULT_CONFIG = {
 const TOKEN_VALID_DURATION = 20; // sec
 
 export const kServerOnSocketConnection = Symbol('soundworks:server-on-socket-connection');
+export const kServerIsProtectedRole = Symbol('soundworks:server-is-protected-role');
+export const kServerIsValidConnectionToken = Symbol('soundworks:server-is-valid-connection-token');
+// for testing purposes
+export const kServerOnStatusChangeCallbacks = Symbol('soundworks:server-on-status-change-callbacks');
+export const kServerApplicationTemplateOptions = Symbol('soundworks:server-application-template-options');
 
 /**
  * The `Server` class is the main entry point for the server-side of a soundworks
  * application.
  *
- * The `Server` instance allows to access soundworks components such as {@link server.StateManager},
- * {@link server.PluginManager},{@link server.Socket} or {@link server.ContextManager}.
+ * The `Server` instance allows to access soundworks components such as {@link ServerStateManager},
+ * {@link ServerPluginManager}, {@link ServerSocket} or {@link ServerContextManager}.
  * Its is also responsible for handling the initialization lifecycles of the different
  * soundworks components.
  *
@@ -142,9 +147,24 @@ export const kServerOnSocketConnection = Symbol('soundworks:server-on-socket-con
 class Server {
   #config = null;
   #version = null;
+  #status = null;
   #router = null;
   #httpServer = null;
+  #db = null;
+
   #sockets = null;
+  #pluginManager = null;
+  #stateManager = null;
+  #contextManager = null;
+
+  // If `https` is required, hold informations about the certificates, e.g. if
+  // self-signed, the dates of validity of the certificates, etc.
+  #httpsInfos = null;
+  #onClientConnectCallbacks = new Set();
+  #onClientDisconnectCallbacks = new Set();
+  #auditState = null;
+  #pendingConnectionTokens = new Set();
+  #trustedClients = new Set();
 
   /**
    * @param {ServerConfig} config - Configuration object for the server.
@@ -202,79 +222,25 @@ class Server {
     this.#version = VERSION;
     // @note: we use express() instead of express.Router() because all 404 and
     // error stuff is handled by default
+    // compression must be set before `express.static()`
     this.#router = express();
-    // compression - must be set before express.static()
     this.#router.use(compression());
     this.#sockets = new ServerSockets(this, { path: 'socket' });
+    this.#pluginManager = new ServerPluginManager(this);
+    this.#stateManager = new ServerStateManager();
+    this.#contextManager = new ServerContextManager(this);
+    this.#status = 'idle';
+    this.#db = this.createNamespacedDb('core');
 
-    /**
-     * Instance of the {@link server.PluginManager} class.
-     *
-     * @see {@link server.PluginManager}
-     * @type {server.PluginManager}
-     */
-    this.pluginManager = new PluginManager(this);
-
-    /**
-     * Instance of the {@link server.StateManager} class.
-     *
-     * @see {@link server.StateManager}
-     * @type {server.StateManager}
-     */
-    this.stateManager = new StateManager();
-
-    /**
-     * Instance of the {@link server.ContextManager} class.
-     *
-     * @see {@link server.ContextManager}
-     * @type {server.ContextManager}
-     */
-    this.contextManager = new ContextManager(this);
-
-    /**
-     * If `https` is required, hold informations about the certificates, e.g. if
-     * self-signed, the dates of validity of the certificates, etc.
-     */
-    this.httpsInfos = null;
-
-    /**
-     * Status of the server, 'idle', 'inited', 'started' or 'errored'.
-     *
-     * @type {string}
-     */
-    this.status = 'idle';
-
-    /**
-     * Simple key / value database with Promise based Map API store on filesystem,
-     * basically a tiny wrapper around the `kvey` package.
-     *
-     * @private
-     * @see {@link https://github.com/lukechilds/keyv}
-     */
-    this.db = this.createNamespacedDb('core');
-
-    /** @private */
-    this._applicationTemplateOptions = {
+    this[kServerOnStatusChangeCallbacks] = new Set();
+    this[kServerApplicationTemplateOptions] = {
       templateEngine: null,
       templatePath: null,
       clientConfigFunction: null,
     };
 
-    /** @private */
-    this._onStatusChangeCallbacks = new Set();
-    /** @private */
-    this._onClientConnectCallbacks = new Set();
-    /** @private */
-    this._onClientDisconnectCallbacks = new Set();
-    /** @private */
-    this._auditState = null;
-    /** @private */
-    this._pendingConnectionTokens = new Set();
-    /** @private */
-    this._trustedClients = new Set();
-
     // register audit state schema
-    this.stateManager.registerSchema(AUDIT_STATE_NAME, auditSchema);
+    this.#stateManager.registerSchema(AUDIT_STATE_NAME, auditSchema);
 
     logger.configure(this.#config.env.verbose);
   }
@@ -323,6 +289,15 @@ class Server {
   }
 
   /**
+   * Status of the server.
+   *
+   * @type {'idle'|'inited'|'started'|'errored'}
+   */
+  get status() {
+    return this.#status;
+  }
+
+  /**
    * Instance of the express router.
    *
    * The router can be used to open new route, for example to expose a directory
@@ -353,6 +328,16 @@ class Server {
     return this.#httpServer;
   }
 
+
+  /**
+   * Simple key / value filesystem database with Promise based Map API.
+   *
+   * Basically a tiny wrapper around the {@link https://github.com/lukechilds/keyv} package.
+   */
+  get db() {
+    return this.#db;
+  }
+
   /**
    * Instance of the {@link ServerSockets} class.
    *
@@ -363,12 +348,92 @@ class Server {
   }
 
   /**
+   * Instance of the {@link ServerPluginManager} class.
+   *
+   * @type {ServerPluginManager}
+   */
+  get pluginManager() {
+    return this.#pluginManager;
+  }
+
+  /**
+   * Instance of the {@link ServerStateManager} class.
+   *
+   * @type {ServerStateManager}
+   */
+  get stateManager() {
+    return this.#stateManager;
+  }
+
+  /**
+   * Instance of the {@link ServerContextManager} class.
+   *
+   * @type {ServerContextManager}
+   */
+  get contextManager() {
+    return this.#contextManager;
+  }
+
+  /** @private */
+  async #dispatchStatus(status) {
+    this.#status = status;
+
+    // if launched in a child process, forward status to parent process
+    if (process.send !== undefined) {
+      process.send(`soundworks:server:${status}`);
+    }
+
+    // execute all callbacks in parallel
+    const promises = [];
+
+    for (let callback of this[kServerOnStatusChangeCallbacks]) {
+      promises.push(callback(status));
+    }
+
+    await Promise.all(promises);
+  }
+
+  /**
+   * Register a callback to execute when status change
+   *
+   * @param {function} callback
+   */
+  onStatusChange(callback) {
+    this[kServerOnStatusChangeCallbacks].add(callback);
+    return () => this[kServerOnStatusChangeCallbacks].delete(callback);
+  }
+
+  /**
+   * Attach and retrieve the global audit state of the application.
+   *
+   * The audit state is a {@link SharedState} instance that keeps track of
+   * global informations about the application such as, the number of connected
+   * clients, network latency estimation, etc.
+   *
+   * The audit state is created by the server on start up.
+   *
+   * @returns {Promise<SharedState>}
+   * @throws Will throw if called before `server.init()`
+   *
+   * @example
+   * const auditState = await server.getAuditState();
+   * auditState.onUpdate(() => console.log(auditState.getValues()), true);
+   */
+  async getAuditState() {
+    if (this.#status === 'idle') {
+      throw new Error(`[soundworks.Server] Cannot access audit state before init`);
+    }
+
+    return this.#auditState;
+  }
+
+  /**
    * The `init` method is part of the initialization lifecycle of the `soundworks`
    * server. Most of the time, the `init` method will be implicitly called by the
-   * {@link server.Server#start} method.
+   * {@link Server#start} method.
    *
    * In some situations you might want to call this method manually, in such cases
-   * the method should be called before the {@link server.Server#start} method.
+   * the method should be called before the {@link Server#start} method.
    *
    * What it does:
    * - create the audit state
@@ -376,7 +441,7 @@ class Server {
    * declared in `config.app.clients`
    * - initialize all registered plugins
    *
-   * After `await server.init()` is fulfilled, the {@link server.Server#stateManager}
+   * After `await server.init()` is fulfilled, the {@link Server#stateManager}
    * and all registered plugins can be safely used.
    *
    * @example
@@ -388,17 +453,14 @@ class Server {
    * await server.start(); // init is called implicitely
    */
   async init() {
-    // ------------------------------------------------------------
-    // INIT STATE MANAGER
-    // ------------------------------------------------------------
-    this.stateManager.init(SERVER_ID, new EventEmitter());
+    this.#stateManager.init(SERVER_ID, new EventEmitter());
 
     const numClients = {};
     for (let name in this.#config.app.clients) {
       numClients[name] = 0;
     }
     /** @private */
-    this._auditState = await this.stateManager.create(AUDIT_STATE_NAME, { numClients });
+    this.#auditState = await this.#stateManager.create(AUDIT_STATE_NAME, { numClients });
 
     // basic http authentication
     if (this.#config.env.auth) {
@@ -419,7 +481,7 @@ class Server {
           return;
         }
 
-        const isProtected  = this.isProtected(role);
+        const isProtected  = this[kServerIsProtectedRole](role);
 
         if (isProtected) {
           // authentication middleware
@@ -438,10 +500,10 @@ class Server {
             const token = { id, ip, time };
             const encryptedToken = encryptData(token);
 
-            this._pendingConnectionTokens.add(encryptedToken);
+            this.#pendingConnectionTokens.add(encryptedToken);
 
             setTimeout(() => {
-              this._pendingConnectionTokens.delete(encryptedToken);
+              this.#pendingConnectionTokens.delete(encryptedToken);
             }, TOKEN_VALID_DURATION * 1000);
 
             // pass to the response object to be send to the client
@@ -492,7 +554,7 @@ class Server {
           try {
             x509 = new X509Certificate(cert);
           } catch (err) {
-            this._dispatchStatus('errored');
+            this.#dispatchStatus('errored');
             throw new Error(`[soundworks:Server] Invalid https cert file`);
           }
 
@@ -500,11 +562,11 @@ class Server {
             const keyObj = createPrivateKey(key);
 
             if (!x509.checkPrivateKey(keyObj)) {
-              this._dispatchStatus('errored');
+              this.#dispatchStatus('errored');
               throw new Error(`[soundworks:Server] Invalid https key file`);
             }
           } catch (err) {
-            this._dispatchStatus('errored');
+            this.#dispatchStatus('errored');
             throw new Error(`[soundworks:Server] Invalid https key file`);
           }
 
@@ -516,7 +578,7 @@ class Server {
           const diff = certExpire - now;
           const daysRemaining = Math.round(diff / 1000 / 60 / 60 / 24);
 
-          this.httpsInfos = {
+          this.#httpsInfos = {
             selfSigned: false,
             CN: x509.subject.split('=')[1],
             altNames: x509.subjectAltName.split(',').map(e => e.trim().split(':')[1]),
@@ -534,17 +596,17 @@ Invalid certificate files, please check your:
 - cert file: ${httpsInfos.cert}
           `);
 
-          this._dispatchStatus('errored');
+          this.#dispatchStatus('errored');
           throw err;
         }
       } else {
         // generate certs
         // --------------------------------------------------------
-        const cert = await this.db.get('httpsCert');
-        const key = await this.db.get('httpsKey');
+        const cert = await this.#db.get('httpsCert');
+        const key = await this.#db.get('httpsKey');
 
         if (key && cert) {
-          this.httpsInfos = { selfSigned: true };
+          this.#httpsInfos = { selfSigned: true };
           this.#httpServer = https.createServer({ cert, key }, this.#router);
         } else {
           this.#httpServer = await new Promise((resolve, reject) => {
@@ -552,7 +614,7 @@ Invalid certificate files, please check your:
             pem.createCertificate({ days: 1, selfSigned: true }, async (err, keys) => {
               if (err) {
                 logger.error(err.stack);
-                this._dispatchStatus('errored');
+                this.#dispatchStatus('errored');
 
                 reject(err);
                 return;
@@ -561,11 +623,11 @@ Invalid certificate files, please check your:
               const cert = keys.certificate;
               const key = keys.serviceKey;
 
-              this.httpsInfos = { selfSigned: true };
+              this.#httpsInfos = { selfSigned: true };
               // we store the generated cert so that we don't have to re-accept
               // the cert each time the server restarts in development
-              await this.db.set('httpsCert', cert);
-              await this.db.set('httpsKey', key);
+              await this.#db.set('httpsCert', cert);
+              await this.#db.set('httpsKey', key);
 
               const httpsServer = https.createServer({ cert, key }, this.#router);
 
@@ -586,9 +648,9 @@ Invalid certificate files, please check your:
     }
 
     if (!nodeOnly) {
-      if (this._applicationTemplateOptions.templateEngine === null
-        || this._applicationTemplateOptions.templatePath === null
-        || this._applicationTemplateOptions.clientConfigFunction === null
+      if (this[kServerApplicationTemplateOptions].templateEngine === null
+        || this[kServerApplicationTemplateOptions].templatePath === null
+        || this[kServerApplicationTemplateOptions].clientConfigFunction === null
       ) {
         throw new Error('[soundworks:Server] A browser client has been found in "config.app.clients" but configuration for html templating is missing. You should probably call `server.setDefaultTemplateConfig()` if you use the soundworks-template and/or refer (at your own risks) to the documentation of `setCustomTemplateConfig()`');
       }
@@ -612,7 +674,7 @@ Invalid certificate files, please check your:
     clientsConfig
       .sort(a => a.default === true ? 1 : -1)
       .forEach(config => {
-        const path = this._openClientRoute(this.#router, config);
+        const path = this.#openClientRoute(this.#router, config);
         routes.push({ role: config.role, path });
       });
 
@@ -621,20 +683,20 @@ Invalid certificate files, please check your:
     // ------------------------------------------------------------
     // START PLUGIN MANAGER
     // ------------------------------------------------------------
-    await this.pluginManager.start();
+    await this.#pluginManager.start();
 
-    await this._dispatchStatus('inited');
+    await this.#dispatchStatus('inited');
 
     return Promise.resolve();
   }
 
   /**
    * The `start` method is part of the initialization lifecycle of the `soundworks`
-   * server. The `start` method will implicitly call the {@link server.Server#init}
+   * server. The `start` method will implicitly call the {@link Server#init}
    * method if it has not been called manually.
    *
    * What it does:
-   * - implicitely call {@link server.Server#init} if not done manually
+   * - implicitely call {@link Server#init} if not done manually
    * - launch the HTTP and WebSocket servers
    * - start all created contexts. To this end, you will have to call `server.init`
    * manually and instantiate the contexts between `server.init()` and `server.start()`
@@ -648,22 +710,22 @@ Invalid certificate files, please check your:
    * await server.start();
    */
   async start() {
-    if (this.status === 'idle') {
+    if (this.#status === 'idle') {
       await this.init();
     }
 
-    if (this.status === 'started') {
+    if (this.#status === 'started') {
       throw new Error(`[soundworks:Server] Cannot call "server.start()" twice`);
     }
 
-    if (this.status !== 'inited') {
+    if (this.#status !== 'inited') {
       throw new Error(`[soundworks:Server] Cannot "server.start()" before "server.init()"`);
     }
 
     // ------------------------------------------------------------
     // START CONTEXT MANAGER
     // ------------------------------------------------------------
-    await this.contextManager.start();
+    await this.#contextManager.start();
 
     // ------------------------------------------------------------
     // START SOCKET SERVER
@@ -690,39 +752,39 @@ Invalid certificate files, please check your:
           });
         });
 
-        if (this.httpsInfos !== null) {
+        if (this.#httpsInfos !== null) {
           logger.title(`https certificates infos`);
 
-          // this.httpsInfos.selfSigned = true;
-          if (this.httpsInfos.selfSigned) {
-            logger.log(`    self-signed: ${this.httpsInfos.selfSigned ? 'true' : 'false'}`);
+          // this.#httpsInfos.selfSigned = true;
+          if (this.#httpsInfos.selfSigned) {
+            logger.log(`    self-signed: ${this.#httpsInfos.selfSigned ? 'true' : 'false'}`);
             logger.log(chalk.yellow`    > INVALID CERTIFICATE (self-signed)`);
 
           } else {
-            logger.log(`    valid from: ${this.httpsInfos.validFrom}`);
-            logger.log(`    valid to:   ${this.httpsInfos.validTo}`);
+            logger.log(`    valid from: ${this.#httpsInfos.validFrom}`);
+            logger.log(`    valid to:   ${this.#httpsInfos.validTo}`);
 
-            // this.httpsInfos.isValid = false; // for testing
-            if (!this.httpsInfos.isValid) {
+            // this.#httpsInfos.isValid = false; // for testing
+            if (!this.#httpsInfos.isValid) {
               logger.error(chalk.red`    -------------------------------------------`);
               logger.error(chalk.red`    > INVALID CERTIFICATE                      `);
               logger.error(chalk.red`    i.e. you pretend to be safe but you are not`);
               logger.error(chalk.red`    -------------------------------------------`);
             } else {
-              // this.httpsInfos.daysRemaining = 2; // for testing
-              if (this.httpsInfos.daysRemaining < 5) {
-                logger.log(chalk.red`    > CERTIFICATE IS VALID... BUT ONLY ${this.httpsInfos.daysRemaining} DAYS LEFT, PLEASE CONSIDER UPDATING YOUR CERTS!`);
-              } else if (this.httpsInfos.daysRemaining < 15) {
-                logger.log(chalk.yellow`    > CERTIFICATE IS VALID - only ${this.httpsInfos.daysRemaining} days left, be careful...`);
+              // this.#httpsInfos.daysRemaining = 2; // for testing
+              if (this.#httpsInfos.daysRemaining < 5) {
+                logger.log(chalk.red`    > CERTIFICATE IS VALID... BUT ONLY ${this.#httpsInfos.daysRemaining} DAYS LEFT, PLEASE CONSIDER UPDATING YOUR CERTS!`);
+              } else if (this.#httpsInfos.daysRemaining < 15) {
+                logger.log(chalk.yellow`    > CERTIFICATE IS VALID - only ${this.#httpsInfos.daysRemaining} days left, be careful...`);
               } else {
-                logger.log(chalk.green`    > CERTIFICATE IS VALID (${this.httpsInfos.daysRemaining} days left)`);
+                logger.log(chalk.green`    > CERTIFICATE IS VALID (${this.#httpsInfos.daysRemaining} days left)`);
               }
             }
 
           }
         }
 
-        await this._dispatchStatus('started');
+        await this.#dispatchStatus('started');
 
         if (this.#config.env.type === 'development') {
           logger.log(`\n> press "${chalk.bold('Ctrl + C')}" to exit`);
@@ -751,12 +813,12 @@ Invalid certificate files, please check your:
    * await server.stop();
    */
   async stop() {
-    if (this.status !== 'started') {
+    if (this.#status !== 'started') {
       throw new Error(`[soundworks:Server] Cannot stop() before start()`);
     }
 
-    await this.contextManager.stop();
-    await this.pluginManager.stop();
+    await this.#contextManager.stop();
+    await this.#pluginManager.stop();
 
     this.#sockets[kSocketsStop]();
 
@@ -766,14 +828,14 @@ Invalid certificate files, please check your:
       }
     });
 
-    await this._dispatchStatus('stopped');
+    await this.#dispatchStatus('stopped');
   }
 
   /**
    * Open the route for a given client.
    * @private
    */
-  _openClientRoute(router, config) {
+  #openClientRoute(router, config) {
     const { role, target } = config;
     const isDefault = (config.default === true);
     // only browser targets need a route
@@ -794,7 +856,7 @@ Invalid certificate files, please check your:
       templatePath,
       templateEngine,
       clientConfigFunction,
-    } = this._applicationTemplateOptions;
+    } = this[kServerApplicationTemplateOptions];
 
     const clientTmpl = path.join(templatePath, `${role}.tmpl`);
     const defaultTmpl = path.join(templatePath, `default.tmpl`);
@@ -851,15 +913,15 @@ Invalid certificate files, please check your:
   }
 
   onClientConnect(callback) {
-    this._onClientConnectCallbacks.add(callback);
+    this.#onClientConnectCallbacks.add(callback);
 
-    return () => this._onClientConnectCallbacks.delete(callback);
+    return () => this.#onClientConnectCallbacks.delete(callback);
   }
 
   onClientDisconnect(callback) {
-    this._onClientDisconnectCallbacks.add(callback);
+    this.#onClientDisconnectCallbacks.add(callback);
 
-    return () => this._onClientDisconnectCallbacks.delete(callback);
+    return () => this.#onClientDisconnectCallbacks.delete(callback);
   }
 
   /**
@@ -872,41 +934,41 @@ Invalid certificate files, please check your:
     const roles = Object.keys(this.#config.app.clients);
 
     // this has been validated
-    if (this.isProtected(role) && this.isValidConnectionToken(connectionToken)) {
+    if (this[kServerIsProtectedRole](role) && this[kServerIsValidConnectionToken](connectionToken)) {
       const { ip } = decryptData(connectionToken);
       const newData = { ip, id: client.id };
       const newToken = encryptData(newData);
 
       client.token = newToken;
 
-      this._pendingConnectionTokens.delete(connectionToken);
-      this._trustedClients.add(client);
+      this.#pendingConnectionTokens.delete(connectionToken);
+      this.#trustedClients.add(client);
     }
 
     socket.addListener('close', async () => {
       // do nothing if client role is invalid
       if (roles.includes(role)) {
         // decrement audit state counter
-        const numClients = this._auditState.get('numClients');
+        const numClients = this.#auditState.get('numClients');
         numClients[role] -= 1;
-        this._auditState.set({ numClients });
+        this.#auditState.set({ numClients });
 
         // delete token
-        if (this._trustedClients.has(client)) {
-          this._trustedClients.delete(client);
+        if (this.#trustedClients.has(client)) {
+          this.#trustedClients.delete(client);
         }
 
         // if something goes wrong here, the 'close' event is called again and
         // again and again... let's just log the error and terminate the socket
         try {
           // clean context manager, await before cleaning state manager
-          await this.contextManager.removeClient(client);
+          await this.#contextManager.removeClient(client);
           // remove client from pluginManager
-          await this.pluginManager.removeClient(client);
+          await this.#pluginManager.removeClient(client);
           // clean state manager
-          await this.stateManager.removeClient(client.id);
+          await this.#stateManager.removeClient(client.id);
 
-          this._onClientDisconnectCallbacks.forEach(callback => callback(client));
+          this.#onClientDisconnectCallbacks.forEach(callback => callback(client));
         } catch (err) {
           console.error(err);
         }
@@ -934,7 +996,7 @@ Invalid certificate files, please check your:
       }
 
       try {
-        this.pluginManager.checkRegisteredPlugins(registeredPlugins);
+        this.#pluginManager.checkRegisteredPlugins(registeredPlugins);
       } catch (err) {
         socket.send(CLIENT_HANDSHAKE_ERROR, {
           type: 'invalid-plugin-list',
@@ -944,23 +1006,23 @@ Invalid certificate files, please check your:
       }
 
       // increment audit state
-      const numClients = this._auditState.get('numClients');
+      const numClients = this.#auditState.get('numClients');
       numClients[role] += 1;
-      this._auditState.set({ numClients });
+      this.#auditState.set({ numClients });
 
       // add client to state manager
-      await this.stateManager.addClient(client.id, {
+      await this.#stateManager.addClient(client.id, {
         emit: client.socket.send.bind(client.socket),
         addListener: client.socket.addListener.bind(client.socket),
         removeAllListeners: client.socket.removeAllListeners.bind(client.socket),
       });
       // add client to plugin manager
       // server-side, all plugins are active for the lifetime of the client
-      await this.pluginManager.addClient(client, registeredPlugins);
+      await this.#pluginManager.addClient(client, registeredPlugins);
       // add client to context manager
-      await this.contextManager.addClient(client);
+      await this.#contextManager.addClient(client);
 
-      this._onClientConnectCallbacks.forEach(callback => callback(client));
+      this.#onClientConnectCallbacks.forEach(callback => callback(client));
 
       const { id, uuid, token } = client;
       socket.send(CLIENT_HANDSHAKE_RESPONSE, { id, uuid, token, version: this.#version });
@@ -994,31 +1056,6 @@ Invalid certificate files, please check your:
     db.on('error', err => logger.error(`[soundworks:Server] db ${namespace} error: ${err}`));
 
     return db;
-  }
-
-  onStatusChange(callback) {
-    this._onStatusChangeCallbacks.add(callback);
-
-    return () => this._onStatusChangeCallbacks.delete(callback);
-  }
-
-  /** @private */
-  async _dispatchStatus(status) {
-    this.status = status;
-
-    // if launched in a child process, forward status to parent process
-    if (process.send !== undefined) {
-      process.send(`soundworks:server:${status}`);
-    }
-
-    // execute all callbacks in parallel
-    const promises = [];
-
-    for (let callback of this._onStatusChangeCallbacks) {
-      promises.push(callback(status));
-    }
-
-    await Promise.all(promises);
   }
 
   /**
@@ -1061,7 +1098,7 @@ Invalid certificate files, please check your:
       }
     });
 
-    this._applicationTemplateOptions = {
+    this[kServerApplicationTemplateOptions] = {
       templateEngine: { compile },
       templatePath: path.join('.build', 'server', 'tmpl'),
       clientConfigFunction: (role, config, _httpRequest) => {
@@ -1098,35 +1135,14 @@ Invalid certificate files, please check your:
    * first to explain your use-case :)
    */
   setCustomApplicationTemplateOptions(options) {
-    Object.assign(this._applicationTemplateOptions, options);
+    Object.assign(this[kServerApplicationTemplateOptions], options);
   }
 
-  /**
-   * Attach and retrieve the global audit state of the application.
-   *
-   * The audit state is a {@link server.SharedState} instance that keeps track of
-   * global informations about the application such as, the number of connected
-   * clients, network latency estimation, etc.
-   *
-   * The audit state is created by the server on start up.
-   *
-   * @returns {Promise<server.SharedState>}
-   * @throws Will throw if called before `server.init()`
-   * @see {@link server.SharedState}
-   * @example
-   * const auditState = await server.getAuditState();
-   * auditState.onUpdate(() => console.log(auditState.getValues()), true);
-   */
-  async getAuditState() {
-    if (this.status === 'idle') {
-      throw new Error(`[soundworks.Server] Cannot access audit state before init`);
-    }
 
-    return this._auditState;
-  }
 
+//
   /** @private */
-  isProtected(role) {
+  [kServerIsProtectedRole](role) {
     if (this.#config.env.auth && Array.isArray(this.#config.env.auth.clients)) {
       return this.#config.env.auth.clients.includes(role);
     }
@@ -1135,9 +1151,9 @@ Invalid certificate files, please check your:
   }
 
   /** @private */
-  isValidConnectionToken(token) {
+  [kServerIsValidConnectionToken](token) {
     // token should be in pending token list
-    if (!this._pendingConnectionTokens.has(token)) {
+    if (!this.#pendingConnectionTokens.has(token)) {
       return false;
     }
 
@@ -1148,7 +1164,7 @@ Invalid certificate files, please check your:
     // token is valid only for 30 seconds (this is arbitrary)
     if (now > data.time + TOKEN_VALID_DURATION) {
       // delete the token, is too old
-      this._pendingConnectionTokens.delete(token);
+      this.#pendingConnectionTokens.delete(token);
       return false;
     } else {
       return true;
@@ -1159,14 +1175,14 @@ Invalid certificate files, please check your:
    * Check if the given client is trusted, i.e. config.env.type == 'production'
    * and the client is protected behind a password.
    *
-   * @param {server.Client} client - Client to be tested
+   * @param {ServerClient} client - Client to be tested
    * @returns {Boolean}
    */
   isTrustedClient(client) {
     if (this.#config.env.type !== 'production') {
       return true;
     } else {
-      return this._trustedClients.has(client);
+      return this.#trustedClients.has(client);
     }
   }
 
@@ -1184,7 +1200,7 @@ Invalid certificate files, please check your:
     if (this.#config.env.type !== 'production') {
       return true;
     } else {
-      for (let client of this._trustedClients) {
+      for (let client of this.#trustedClients) {
         if (client.id === clientId && client.token === token) {
           // check that given token is consistent with client ip and id
           const { id, ip } = decryptData(client.token);

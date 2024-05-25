@@ -27,8 +27,8 @@
     "typedefs": true,
     "sectionOrder": [
       "Namespaces",
-      "Global",
       "Classes",
+      "Global",
       "Modules",
       "Externals",
       "Events",

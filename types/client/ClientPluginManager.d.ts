@@ -1,25 +1,5 @@
 export default ClientPluginManager;
 /**
- * ~onStateChangeCallback
- */
-export type ClientPluginManager = (fullState: {
-    [x: string]: ClientPlugin;
-}, initiator: ClientPlugin | null) => any;
-/**
- * Callback executed when a plugin internal state is updated.
- *
- * @callback ClientPluginManager~onStateChangeCallback
- * @param {Object.<string, ClientPlugin>} fullState - List of all plugins.
- * @param {ClientPlugin|null} initiator - Plugin that initiated the update or `null`
- *  if the change was initiated by the state manager (i.e. when the initialization
- *  of the plugins starts).
- */
-/**
- * Delete the registered {@link ClientPluginManager~onStateChangeCallback}.
- *
- * @callback ClientPluginManager~deleteOnStateChangeCallback
- */
-/**
  * The `PluginManager` allows to register and retrieve `soundworks` plugins.
  *
  * Plugins should always be registered both client-side and server-side,
@@ -114,6 +94,6 @@ declare class ClientPluginManager extends BasePluginManager {
      */
     get(id: string): Promise<ClientPlugin>;
 }
-import ClientPlugin from './ClientPlugin.js';
 import BasePluginManager from '../common/BasePluginManager.js';
+import ClientPlugin from './ClientPlugin.js';
 import Client from './Client.js';

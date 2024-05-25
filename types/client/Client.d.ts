@@ -1,4 +1,5 @@
 export const kClientVersionTest: unique symbol;
+export const kClientOnStatusChangeCallbacks: unique symbol;
 export default Client;
 /**
  * Configuration object for a client running in a browser runtime.
@@ -237,6 +238,7 @@ declare class Client {
      * @returns {Function} Function that delete the listener when executed.
      */
     onStatusChange(callback: Function): Function;
+    [kClientOnStatusChangeCallbacks]: Set<any>;
     #private;
 }
 import ClientSocket from './ClientSocket.js';

@@ -1,4 +1,8 @@
 export const kServerOnSocketConnection: unique symbol;
+export const kServerIsProtectedRole: unique symbol;
+export const kServerIsValidConnectionToken: unique symbol;
+export const kServerOnStatusChangeCallbacks: unique symbol;
+export const kServerApplicationTemplateOptions: unique symbol;
 export default Server;
 /**
  * Configuration object for the server.
@@ -27,8 +31,8 @@ export type ServerConfig = {
  * The `Server` class is the main entry point for the server-side of a soundworks
  * application.
  *
- * The `Server` instance allows to access soundworks components such as {@link server.StateManager},
- * {@link server.PluginManager},{@link server.Socket} or {@link server.ContextManager}.
+ * The `Server` instance allows to access soundworks components such as {@link ServerStateManager},
+ * {@link ServerPluginManager}, {@link ServerSocket} or {@link ServerContextManager}.
  * Its is also responsible for handling the initialization lifecycles of the different
  * soundworks components.
  *
@@ -80,84 +84,6 @@ declare class Server {
      */
     constructor(config: ServerConfig);
     /**
-     * Instance of the {@link server.PluginManager} class.
-     *
-     * @see {@link server.PluginManager}
-     * @type {server.PluginManager}
-     */
-    pluginManager: server.PluginManager;
-    /**
-     * Instance of the {@link server.StateManager} class.
-     *
-     * @see {@link server.StateManager}
-     * @type {server.StateManager}
-     */
-    stateManager: server.StateManager;
-    /**
-     * Instance of the {@link server.ContextManager} class.
-     *
-     * @see {@link server.ContextManager}
-     * @type {server.ContextManager}
-     */
-    contextManager: server.ContextManager;
-    /**
-     * If `https` is required, hold informations about the certificates, e.g. if
-     * self-signed, the dates of validity of the certificates, etc.
-     */
-    httpsInfos: {
-        selfSigned: boolean;
-        CN: string;
-        altNames: string[];
-        validFrom: string;
-        validTo: string;
-        isValid: boolean;
-        daysRemaining: number;
-    } | {
-        selfSigned: boolean;
-        CN?: undefined;
-        altNames?: undefined;
-        validFrom?: undefined;
-        validTo?: undefined;
-        isValid?: undefined;
-        daysRemaining?: undefined;
-    } | {
-        selfSigned: boolean;
-        CN?: undefined;
-        altNames?: undefined;
-        validFrom?: undefined;
-        validTo?: undefined;
-        isValid?: undefined;
-        daysRemaining?: undefined;
-    };
-    /**
-     * Status of the server, 'idle', 'inited', 'started' or 'errored'.
-     *
-     * @type {string}
-     */
-    status: string;
-    /**
-     * Simple key / value database with Promise based Map API store on filesystem,
-     * basically a tiny wrapper around the `kvey` package.
-     *
-     * @private
-     * @see {@link https://github.com/lukechilds/keyv}
-     */
-    private db;
-    /** @private */
-    private _applicationTemplateOptions;
-    /** @private */
-    private _onStatusChangeCallbacks;
-    /** @private */
-    private _onClientConnectCallbacks;
-    /** @private */
-    private _onClientDisconnectCallbacks;
-    /** @private */
-    private _auditState;
-    /** @private */
-    private _pendingConnectionTokens;
-    /** @private */
-    private _trustedClients;
-    /**
      * Given config object merged with the following defaults:
      * @example
      * {
@@ -192,6 +118,12 @@ declare class Server {
      */
     readonly get id(): number;
     /**
+     * Status of the server.
+     *
+     * @type {'idle'|'inited'|'started'|'errored'}
+     */
+    get status(): "idle" | "inited" | "started" | "errored";
+    /**
      * Instance of the express router.
      *
      * The router can be used to open new route, for example to expose a directory
@@ -217,18 +149,65 @@ declare class Server {
      */
     get httpServer(): any;
     /**
+     * Simple key / value filesystem database with Promise based Map API.
+     *
+     * Basically a tiny wrapper around the {@link https://github.com/lukechilds/keyv} package.
+     */
+    get db(): any;
+    /**
      * Instance of the {@link ServerSockets} class.
      *
      * @type {ServerSockets}
      */
     get sockets(): ServerSockets;
     /**
+     * Instance of the {@link ServerPluginManager} class.
+     *
+     * @type {ServerPluginManager}
+     */
+    get pluginManager(): ServerPluginManager;
+    /**
+     * Instance of the {@link ServerStateManager} class.
+     *
+     * @type {ServerStateManager}
+     */
+    get stateManager(): ServerStateManager;
+    /**
+     * Instance of the {@link ServerContextManager} class.
+     *
+     * @type {ServerContextManager}
+     */
+    get contextManager(): ServerContextManager;
+    /**
+     * Register a callback to execute when status change
+     *
+     * @param {function} callback
+     */
+    onStatusChange(callback: Function): () => any;
+    /**
+     * Attach and retrieve the global audit state of the application.
+     *
+     * The audit state is a {@link SharedState} instance that keeps track of
+     * global informations about the application such as, the number of connected
+     * clients, network latency estimation, etc.
+     *
+     * The audit state is created by the server on start up.
+     *
+     * @returns {Promise<SharedState>}
+     * @throws Will throw if called before `server.init()`
+     *
+     * @example
+     * const auditState = await server.getAuditState();
+     * auditState.onUpdate(() => console.log(auditState.getValues()), true);
+     */
+    getAuditState(): Promise<SharedState>;
+    /**
      * The `init` method is part of the initialization lifecycle of the `soundworks`
      * server. Most of the time, the `init` method will be implicitly called by the
-     * {@link server.Server#start} method.
+     * {@link Server#start} method.
      *
      * In some situations you might want to call this method manually, in such cases
-     * the method should be called before the {@link server.Server#start} method.
+     * the method should be called before the {@link Server#start} method.
      *
      * What it does:
      * - create the audit state
@@ -236,7 +215,7 @@ declare class Server {
      * declared in `config.app.clients`
      * - initialize all registered plugins
      *
-     * After `await server.init()` is fulfilled, the {@link server.Server#stateManager}
+     * After `await server.init()` is fulfilled, the {@link Server#stateManager}
      * and all registered plugins can be safely used.
      *
      * @example
@@ -250,11 +229,11 @@ declare class Server {
     init(): Promise<void>;
     /**
      * The `start` method is part of the initialization lifecycle of the `soundworks`
-     * server. The `start` method will implicitly call the {@link server.Server#init}
+     * server. The `start` method will implicitly call the {@link Server#init}
      * method if it has not been called manually.
      *
      * What it does:
-     * - implicitely call {@link server.Server#init} if not done manually
+     * - implicitely call {@link Server#init} if not done manually
      * - launch the HTTP and WebSocket servers
      * - start all created contexts. To this end, you will have to call `server.init`
      * manually and instantiate the contexts between `server.init()` and `server.start()`
@@ -286,11 +265,6 @@ declare class Server {
      * await server.stop();
      */
     stop(): Promise<void>;
-    /**
-     * Open the route for a given client.
-     * @private
-     */
-    private _openClientRoute;
     onClientConnect(callback: any): () => boolean;
     onClientDisconnect(callback: any): () => boolean;
     /**
@@ -302,9 +276,6 @@ declare class Server {
      * @private
      */
     private createNamespacedDb;
-    onStatusChange(callback: any): () => boolean;
-    /** @private */
-    private _dispatchStatus;
     /**
      * Configure the server to work _out-of-the-box_ within the soundworks application
      * template provided by `@soundworks/create.
@@ -332,34 +303,13 @@ declare class Server {
      */
     setCustomApplicationTemplateOptions(options: any): void;
     /**
-     * Attach and retrieve the global audit state of the application.
-     *
-     * The audit state is a {@link server.SharedState} instance that keeps track of
-     * global informations about the application such as, the number of connected
-     * clients, network latency estimation, etc.
-     *
-     * The audit state is created by the server on start up.
-     *
-     * @returns {Promise<server.SharedState>}
-     * @throws Will throw if called before `server.init()`
-     * @see {@link server.SharedState}
-     * @example
-     * const auditState = await server.getAuditState();
-     * auditState.onUpdate(() => console.log(auditState.getValues()), true);
-     */
-    getAuditState(): Promise<server.SharedState>;
-    /** @private */
-    private isProtected;
-    /** @private */
-    private isValidConnectionToken;
-    /**
      * Check if the given client is trusted, i.e. config.env.type == 'production'
      * and the client is protected behind a password.
      *
-     * @param {server.Client} client - Client to be tested
+     * @param {ServerClient} client - Client to be tested
      * @returns {Boolean}
      */
-    isTrustedClient(client: server.Client): boolean;
+    isTrustedClient(client: ServerClient): boolean;
     /**
      * Check if the token from a client is trusted, i.e. config.env.type == 'production'
      * and the client is protected behind a password.
@@ -370,11 +320,9 @@ declare class Server {
      * @returns {Boolean}
      */
     isTrustedToken(clientId: number, clientIp: number, token: string): boolean;
-    /**
-     * Socket connection callback.
-     * @private
-     */
-    private [kServerOnSocketConnection];
     #private;
 }
 import ServerSockets from './ServerSockets.js';
+import ServerPluginManager from './ServerPluginManager.js';
+import ServerStateManager from './ServerStateManager.js';
+import ServerContextManager from './ServerContextManager.js';

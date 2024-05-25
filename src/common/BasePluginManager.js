@@ -3,6 +3,22 @@ import { isPlainObject, isString } from '@ircam/sc-utils';
 import logger from './logger.js';
 
 /**
+ * Callback executed when a plugin internal state is updated.
+ *
+ * @callback pluginManagerOnStateChangeCallback
+ * @param {object<server.Plugin#id, server.Plugin>} fullState - List of all plugins.
+ * @param {server.Plugin|null} initiator - Plugin that initiated the update or `null`
+ *  if the change was initiated by the state manager (i.e. when the initialization
+ *  of the plugins starts).
+ */
+
+/**
+ * Delete the registered {@link pluginManagerOnStateChangeCallback}.
+ *
+ * @callback pluginManagerDeleteOnStateChangeCallback
+ */
+
+/**
  * Shared functionnality between server-side and client-size plugin manager
  *
  * @private
@@ -24,83 +40,23 @@ class BasePluginManager {
     this.status = 'idle';
   }
 
-  /**
-   * Register a plugin into soundworks.
-   *
-   * _A plugin must always be registered both on client-side and on server-side_
-   *
-   * Refer to the plugin documentation to check its options and proper way of
-   * registering it.
-   *
-   * @param {string} id - Unique id of the plugin. Enables the registration of the
-   *  same plugin factory under different ids.
-   * @param {Function} factory - Factory function that returns the Plugin class.
-   * @param {object} [options={}] - Options to configure the plugin.
-   * @param {array} [deps=[]] - List of plugins' names the plugin depends on, i.e.
-   *  the plugin initialization will start only after the plugins it depends on are
-   *  fully started themselves.
-   * @see {@link client.PluginManager#register}
-   * @see {@link server.PluginManager#register}
-   * @example
-   * // client-side
-   * client.pluginManager.register('user-defined-id', pluginFactory);
-   * // server-side
-   * server.pluginManager.register('user-defined-id', pluginFactory);
-   */
-  register(id, ctor, options = {}, deps = []) {
-    // For now we don't allow to register a plugin after `client|server.init()`.
-    // This is subject to change in the future as we may want to dynamically
-    // register new plugins during application lifetime.
-    if (this._node.status === 'inited') {
-      throw new Error(`[soundworks.PluginManager] Cannot register plugin (${id}) after "client.init()"`);
+  /** @private */
+  #propagateStateChange(instance = null, status = null) {
+    if (instance !== null) {
+      // status is null if wew forward some inner state change from the instance
+      if (status !== null) {
+        instance.status = status;
+      }
+
+      const fullState = Object.fromEntries(this._instances);
+      this._onStateChangeCallbacks.forEach(callback => callback(fullState, instance));
+    } else {
+      const fullState = Object.fromEntries(this._instances);
+      this._onStateChangeCallbacks.forEach(callback => callback(fullState, null));
     }
-
-    if (!isString(id)) {
-      throw new Error(`[soundworks.PluginManager] Invalid argument, "pluginManager.register" first argument should be a string`);
-    }
-
-    if (!isPlainObject(options)) {
-      throw new Error(`[soundworks.PluginManager] Invalid argument, "pluginManager.register" third optionnal argument should be an object`);
-    }
-
-    if (!Array.isArray(deps)) {
-      throw new Error(`[soundworks.PluginManager] Invalid argument, "pluginManager.register" fourth optionnal argument should be an array`);
-    }
-
-    if (this._instances.has(id)) {
-      throw new Error(`[soundworks:PluginManager] Plugin "${id}" already registered`);
-    }
-
-    // we instanciate the plugin here, so that a plugin can register another one
-    // in its own constructor.
-    //
-    // the dependencies must be created first, so that the instance can call
-    // addDependency in its constructor
-    this._dependencies.set(id, deps);
-
-    const instance = new ctor(this._node, id, options);
-    this._instances.set(id, instance);
   }
 
-  /**
-   * Manually add a dependency to a given plugin. Usefull to require a plugin
-   * within a plugin
-   *
-   */
-  addDependency(pluginId, dependencyId) {
-    const deps = this._dependencies.get(pluginId);
-    deps.push(dependencyId);
-  }
-
-  /**
-   * Returns the list of the registered plugins ids
-   * @returns {string[]}
-   */
-  getRegisteredPlugins() {
-    return Array.from(this._instances.keys());
-  }
-
-  /**
+    /**
    * Initialize all the registered plugin. Executed during the `Client.init()` or
    * `Server.init()` initialization step.
    * @private
@@ -115,11 +71,11 @@ class BasePluginManager {
     this.status = 'inited';
     // instanciate all plugins
     for (let [_id, instance] of this._instances.entries()) {
-      instance.onStateChange(_values => this._propagateStateChange(instance));
+      instance.onStateChange(_values => this.#propagateStateChange(instance));
     }
 
     // propagate all 'idle' statuses before start
-    this._propagateStateChange();
+    this.#propagateStateChange();
 
     const promises = Array.from(this._instances.keys()).map(id => this.unsafeGet(id));
 
@@ -177,7 +133,7 @@ class BasePluginManager {
     if (this._instanceStartPromises.has(id)) {
       await this._instanceStartPromises.get(id);
     } else {
-      this._propagateStateChange(instance, 'inited');
+      this.#propagateStateChange(instance, 'inited');
       let errored = false;
 
       try {
@@ -187,18 +143,94 @@ class BasePluginManager {
         await startPromise;
       } catch (err) {
         errored = true;
-        this._propagateStateChange(instance, 'errored');
+        this.#propagateStateChange(instance, 'errored');
         throw err;
       }
 
       // this looks silly but it prevents the try / catch to catch errors that could
       // be triggered by the propagate status callback, putting the plugin in errored state
       if (!errored) {
-        this._propagateStateChange(instance, 'started');
+        this.#propagateStateChange(instance, 'started');
       }
     }
 
     return instance;
+  }
+
+  /**
+   * Register a plugin into the manager.
+   *
+   * _A plugin must always be registered both on client-side and on server-side_
+   *
+   * Refer to the plugin documentation to check its options and proper way of
+   * registering it.
+   *
+   * @param {string} id - Unique id of the plugin. Enables the registration of the
+   *  same plugin factory under different ids.
+   * @param {Function} factory - Factory function that returns the Plugin class.
+   * @param {object} [options={}] - Options to configure the plugin.
+   * @param {array} [deps=[]] - List of plugins' names the plugin depends on, i.e.
+   *  the plugin initialization will start only after the plugins it depends on are
+   *  fully started themselves.
+   * @see {@link ClientPluginManager#register}
+   * @see {@link ServerPluginManager#register}
+   * @example
+   * // client-side
+   * client.pluginManager.register('user-defined-id', pluginFactory);
+   * // server-side
+   * server.pluginManager.register('user-defined-id', pluginFactory);
+   */
+  register(id, ctor, options = {}, deps = []) {
+    // For now we don't allow to register a plugin after `client|server.init()`.
+    // This is subject to change in the future as we may want to dynamically
+    // register new plugins during application lifetime.
+    if (this._node.status === 'inited') {
+      throw new Error(`[soundworks.PluginManager] Cannot register plugin (${id}) after "client.init()"`);
+    }
+
+    if (!isString(id)) {
+      throw new Error(`[soundworks.PluginManager] Invalid argument, "pluginManager.register" first argument should be a string`);
+    }
+
+    if (!isPlainObject(options)) {
+      throw new Error(`[soundworks.PluginManager] Invalid argument, "pluginManager.register" third optionnal argument should be an object`);
+    }
+
+    if (!Array.isArray(deps)) {
+      throw new Error(`[soundworks.PluginManager] Invalid argument, "pluginManager.register" fourth optionnal argument should be an array`);
+    }
+
+    if (this._instances.has(id)) {
+      throw new Error(`[soundworks:PluginManager] Plugin "${id}" already registered`);
+    }
+
+    // we instanciate the plugin here, so that a plugin can register another one
+    // in its own constructor.
+    //
+    // the dependencies must be created first, so that the instance can call
+    // addDependency in its constructor
+    this._dependencies.set(id, deps);
+
+    const instance = new ctor(this._node, id, options);
+    this._instances.set(id, instance);
+  }
+
+  /**
+   * Manually add a dependency to a given plugin.
+   *
+   * Usefull to require a plugin within a plugin
+   */
+  addDependency(pluginId, dependencyId) {
+    const deps = this._dependencies.get(pluginId);
+    deps.push(dependencyId);
+  }
+
+  /**
+   * Returns the list of the registered plugins ids
+   * @returns {string[]}
+   */
+  getRegisteredPlugins() {
+    return Array.from(this._instances.keys());
   }
 
   /**
@@ -208,10 +240,8 @@ class BasePluginManager {
    *
    * _In most cases, you should not have to rely on this method._
    *
-   * @param {client.PluginManager~onStateChangeCallback|server.PluginManager~onStateChangeCallback} callback
-   *  Callback to be executed on state change
-   * @param {client.PluginManager~deleteOnStateChangeCallback|client.PluginManager~deleteOnStateChangeCallback}
-   *  Function to execute to listening for changes.
+   * @param {pluginManagerOnStateChangeCallback} callback - Callback to execute on state change
+   * @returns {pluginManagerDeleteOnStateChangeCallback} - Clear the subscription when executed
    * @example
    * const unsubscribe = client.pluginManager.onStateChange(pluginList, initiator => {
    *   // log the current status of all plugins
@@ -229,22 +259,6 @@ class BasePluginManager {
   onStateChange(callback) {
     this._onStateChangeCallbacks.add(callback);
     return () => this._onStateChangeCallbacks.delete(callback);
-  }
-
-  /** @private */
-  _propagateStateChange(instance = null, status = null) {
-    if (instance !== null) {
-      // status is null if wew forward some inner state change from the instance
-      if (status !== null) {
-        instance.status = status;
-      }
-
-      const fullState = Object.fromEntries(this._instances);
-      this._onStateChangeCallbacks.forEach(callback => callback(fullState, instance));
-    } else {
-      const fullState = Object.fromEntries(this._instances);
-      this._onStateChangeCallbacks.forEach(callback => callback(fullState, null));
-    }
   }
 }
 

@@ -33,9 +33,9 @@ const generateStateId = idGenerator();
 const generateRemoteId = idGenerator();
 
 /**
- * @typedef {object} server.StateManager~schema
+ * @typedef {object} ServerStateManager~schema
  *
- * Description of a schema to be registered by the {@link server.StateManager#registerSchema}
+ * Description of a schema to be registered by the {@link ServerStateManager#registerSchema}
  *
  * A schema is the blueprint, or definition from which shared states can be created.
  *
@@ -43,12 +43,12 @@ const generateRemoteId = idGenerator();
  * the parameter, and the value is an object describing the parameter.
  *
  * The value can be of any of the foolowing types:
- * - {@link server.StateManager~schemaBooleanDefinition}
- * - {@link server.StateManager~schemaStringDefinition}
- * - {@link server.StateManager~schemaIntegerDefinition}
- * - {@link server.StateManager~schemaFloatDefinition}
- * - {@link server.StateManager~schemaEnumDefinition}
- * - {@link server.StateManager~schemaAnyDefinition}
+ * - {@link ServerStateManager~schemaBooleanDefinition}
+ * - {@link ServerStateManager~schemaStringDefinition}
+ * - {@link ServerStateManager~schemaIntegerDefinition}
+ * - {@link ServerStateManager~schemaFloatDefinition}
+ * - {@link ServerStateManager~schemaEnumDefinition}
+ * - {@link ServerStateManager~schemaAnyDefinition}
  *
  * @example
  * const mySchema = {
@@ -67,9 +67,9 @@ const generateRemoteId = idGenerator();
  * server.stateManager.registerSchema('my-schema-name', mySchema);
  */
 /**
- * Describe a {@link server.StateManager~schema} entry of "boolean" type.
+ * Describe a {@link ServerStateManager~schema} entry of "boolean" type.
  *
- * @typedef {object} server.StateManager~schemaBooleanDefinition
+ * @typedef {object} ServerStateManager~schemaBooleanDefinition
  * @property {string} type='boolean' - Define a boolean parameter.
  * @property {boolean} default - Default value of the parameter.
  * @property {boolean} [nullable=false] - Define if the parameter is nullable. If
@@ -93,9 +93,9 @@ const generateRemoteId = idGenerator();
  * @property {object} [metas={}] - Optionnal metadata of the parameter.
  */
 /**
- * Describe a {@link server.StateManager~schema} entry of "string" type.
+ * Describe a {@link ServerStateManager~schema} entry of "string" type.
  *
- * @typedef {object} server.StateManager~schemaStringDefinition
+ * @typedef {object} ServerStateManager~schemaStringDefinition
  * @property {string} type='string' - Define a boolean parameter.
  * @property {string} default - Default value of the parameter.
  * @property {boolean} [nullable=false] - Define if the parameter is nullable. If
@@ -119,9 +119,9 @@ const generateRemoteId = idGenerator();
  * @property {object} [metas={}] - Optionnal metadata of the parameter.
  */
 /**
- * Describe a {@link server.StateManager~schema} entry of "integer" type.
+ * Describe a {@link ServerStateManager~schema} entry of "integer" type.
  *
- * @typedef {object} server.StateManager~schemaIntegerDefinition
+ * @typedef {object} ServerStateManager~schemaIntegerDefinition
  * @property {string} type='integer' - Define a boolean parameter.
  * @property {number} default - Default value of the parameter.
  * @property {number} [min=-Infinity] - Minimum value of the parameter.
@@ -147,9 +147,9 @@ const generateRemoteId = idGenerator();
  * @property {object} [metas={}] - Optionnal metadata of the parameter.
  */
 /**
- * Describe a {@link server.StateManager~schema} entry of "float" type.
+ * Describe a {@link ServerStateManager~schema} entry of "float" type.
  *
- * @typedef {object} server.StateManager~schemaFloatDefinition
+ * @typedef {object} ServerStateManager~schemaFloatDefinition
  * @property {string} [type='float'] - Float parameter.
  * @property {number} default - Default value.
  * @property {number} [min=-Infinity] - Minimum value.
@@ -175,9 +175,9 @@ const generateRemoteId = idGenerator();
  * @property {object} [metas={}] - Optionnal metadata of the parameter.
  */
 /**
- * Describe a {@link server.StateManager~schema} entry of "enum" type.
+ * Describe a {@link ServerStateManager~schema} entry of "enum" type.
  *
- * @typedef {object} server.StateManager~schemaEnumDefinition
+ * @typedef {object} ServerStateManager~schemaEnumDefinition
  * @property {string} [type='enum'] - Enum parameter.
  * @property {string} default - Default value of the parameter.
  * @property {Array} list - Possible values of the parameter.
@@ -202,12 +202,12 @@ const generateRemoteId = idGenerator();
  * @property {object} [metas={}] - Optionnal metadata of the parameter.
  */
 /**
- * Describe a {@link server.StateManager~schema} entry of "any" type.
+ * Describe a {@link ServerStateManager~schema} entry of "any" type.
  *
  * Note that the `any` type always return a shallow copy of the state internal
  * value. Mutating the returned value will therefore not modify the internal state.
  *
- * @typedef {object} server.StateManager~schemaAnyDefinition
+ * @typedef {object} ServerStateManager~schemaAnyDefinition
  * @property {string} [type='any'] - Parameter of any type.
  * @property {*} default - Default value of the parameter.
  * @property {boolean} [nullable=false] - Define if the parameter is nullable. If
@@ -232,15 +232,7 @@ const generateRemoteId = idGenerator();
  */
 
 /**
- * @callback server.StateManager~ObserveCallback
- * @async
- * @param {string} schemaName - name of the schema
- * @param {number} stateId - id of the state
- * @param {number} nodeId - id of the node that created the state
- */
-
-/**
- * @callback server.StateManager~updateHook
+ * @callback serverStateManagerUpdateHook
  * @async
  *
  * @param {object} updates - Update object as given on a set callback, or
@@ -249,7 +241,7 @@ const generateRemoteId = idGenerator();
  * @param {object} [context=null] - Optionnal context passed by the creator
  *  of the update.
  *
- * @return {object} The "real" updates to be applied on the state.
+ * @returns {object} The "real" updates to be applied on the state.
  */
 
 /**
@@ -260,7 +252,7 @@ const generateRemoteId = idGenerator();
  * An instance of `StateManager` is automatically created by the `soundworks.Server`
  * at initialization (cf. {@link server.Server#stateManager}).
  *
- * Compared to the {@link client.StateManager}, the `server.StateManager` can also
+ * Compared to the {@link client.StateManager}, the `ServerStateManager` can also
  * create and delete schemas, as well as register update hook that are executed when
  * a state is updated.
  *
@@ -305,12 +297,11 @@ const generateRemoteId = idGenerator();
  * }, 1000);
  * ```
  *
- * @memberof server
  * @extends BaseStateManager
  * @inheritdoc
  * @hideconstructor
  */
-class StateManager extends BaseStateManager {
+class ServerStateManager extends BaseStateManager {
   constructor() {
     super();
 
@@ -572,11 +563,11 @@ class StateManager extends BaseStateManager {
    * can be instanciated.
    *
    * @param {string} schemaName - Name of the schema.
-   * @param {server.StateManager~schema} schema - Data structure
+   * @param {ServerStateManagerSchema} schema - Data structure
    *  describing the states that will be created from this schema.
    *
-   * @see {@link server.StateManager#create}
-   * @see {@link client.StateManager#create}
+   * @see {@link ServerStateManager#create}
+   * @see {@link ClientStateManager#create}
    *
    * @example
    * server.stateManager.registerSchema('my-schema', {
@@ -658,7 +649,7 @@ class StateManager extends BaseStateManager {
    * the "actual" update of the state (e.g. before the call of `onUpdate`).
    *
    * @param {string} schemaName - Kind of states on which applying the hook.
-   * @param {server.StateManager~updateHook} updateHook - Function
+   * @param {serverStateManagerUpdateHook} updateHook - Function
    *   called between the `set` call and the actual update.
    *
    * @returns {Fuction} deleteHook - Handler that deletes the hook when executed.
@@ -694,4 +685,4 @@ class StateManager extends BaseStateManager {
   }
 }
 
-export default StateManager;
+export default ServerStateManager;

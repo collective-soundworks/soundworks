@@ -3,22 +3,6 @@ import Plugin from './Plugin.js';
 import Server from './Server.js';
 
 /**
- * Callback executed when a plugin internal state is updated.
- *
- * @callback server.PluginManager~onStateChangeCallback
- * @param {object<server.Plugin#id, server.Plugin>} fullState - List of all plugins.
- * @param {server.Plugin|null} initiator - Plugin that initiated the update or `null`
- *  if the change was initiated by the state manager (i.e. when the initialization
- *  of the plugins starts).
- */
-
-/**
- * Delete the registered {@link server.PluginManager~onStateChangeCallback}.
- *
- * @callback server.PluginManager~deleteOnStateChangeCallback
- */
-
-/**
  * The `PluginManager` allows to register and retrieve `soundworks` plugins.
  *
  * Plugins should always be registered both client-side and server-side,
@@ -70,12 +54,11 @@ import Server from './Server.js';
  * }, 1000);
  * ```
  *
- * @memberof server
  * @extends BasePluginManager
  * @inheritdoc
  * @hideconstructor
  */
-class PluginManager extends BasePluginManager {
+class ServerPluginManager extends BasePluginManager {
   constructor(server) {
     if (!(server instanceof Server)) {
       throw new Error(`[soundworks.PluginManager] Invalid argument, "new PluginManager(server)" should receive an instance of "soundworks.Server" as argument`);
@@ -95,7 +78,7 @@ class PluginManager extends BasePluginManager {
   }
 
   /**
-   * Retrieve an fully started instance of a registered plugin.
+   * Retrieve a fully started instance of a registered plugin.
    *
    * Be aware that the `get` method resolves only when the plugin is fully 'started',
    * which is what we want 99.99% of the time. As such, and to prevent the application
@@ -111,9 +94,7 @@ class PluginManager extends BasePluginManager {
    *
    * @param {server.Plugin#id} id - Id of the plugin as defined when registered.
    * @returns {server.Plugin}
-   * @see {@link server.PluginManager#onStateChange}
-   *
-   * @private
+   * @see {@link ServerPluginManager#onStateChange}
    */
   async get(id) {
     if (this.status !== 'started') {
@@ -125,7 +106,7 @@ class PluginManager extends BasePluginManager {
 
   // server only methods
 
-  /** private */
+  /** @private */
   checkRegisteredPlugins(registeredPlugins) {
     let missingPlugins = [];
 
@@ -167,4 +148,4 @@ class PluginManager extends BasePluginManager {
   }
 }
 
-export default PluginManager;
+export default ServerPluginManager;

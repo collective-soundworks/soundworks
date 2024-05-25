@@ -3,6 +3,10 @@ import { assert } from 'chai';
 import { Server, Context as ServerContext } from '../../src/server/index.js';
 import { Client, ClientContext } from '../../src/client/index.js';
 
+import {
+  kContextManagerContexts,
+} from '../../src/server/ServerContextManager.js'
+
 import config from '../utils/config.js';
 
 describe('# Context', () => {
@@ -41,7 +45,6 @@ describe('# Context', () => {
     it(`[client] should throw if first argument is not instance of Client`, async () => {
             // server
       const server = new Server(config);
-      await server.init();
       await server.start();
 
       // client
@@ -290,8 +293,8 @@ describe('# Context', () => {
       await client.start();
       await clientTestContext.enter();
 
-      assert.equal(entered, true, 'enter() was not called');
-      assert.equal(server.contextManager._contexts.inner.length, 1, 'default context was not created');
+      assert.isTrue(entered);
+      assert.equal(server.contextManager[kContextManagerContexts].length, 1);
 
       await server.stop();
     });

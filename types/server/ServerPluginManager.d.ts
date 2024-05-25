@@ -1,24 +1,4 @@
-export default PluginManager;
-export namespace server {
-    /**
-     * ~onStateChangeCallback
-     */
-    type PluginManager = (: object, initiator: server.Plugin | null) => any;
-}
-/**
- * Callback executed when a plugin internal state is updated.
- *
- * @callback server.PluginManager~onStateChangeCallback
- * @param {object<server.Plugin#id, server.Plugin>} fullState - List of all plugins.
- * @param {server.Plugin|null} initiator - Plugin that initiated the update or `null`
- *  if the change was initiated by the state manager (i.e. when the initialization
- *  of the plugins starts).
- */
-/**
- * Delete the registered {@link server.PluginManager~onStateChangeCallback}.
- *
- * @callback server.PluginManager~deleteOnStateChangeCallback
- */
+export default ServerPluginManager;
 /**
  * The `PluginManager` allows to register and retrieve `soundworks` plugins.
  *
@@ -71,15 +51,14 @@ export namespace server {
  * }, 1000);
  * ```
  *
- * @memberof server
  * @extends BasePluginManager
  * @inheritdoc
  * @hideconstructor
  */
-declare class PluginManager extends BasePluginManager {
+declare class ServerPluginManager extends BasePluginManager {
     register(id: any, factory?: any, options?: {}, deps?: any[]): void;
     /**
-     * Retrieve an fully started instance of a registered plugin.
+     * Retrieve a fully started instance of a registered plugin.
      *
      * Be aware that the `get` method resolves only when the plugin is fully 'started',
      * which is what we want 99.99% of the time. As such, and to prevent the application
@@ -95,13 +74,11 @@ declare class PluginManager extends BasePluginManager {
      *
      * @param {server.Plugin#id} id - Id of the plugin as defined when registered.
      * @returns {server.Plugin}
-     * @see {@link server.PluginManager#onStateChange}
-     *
-     * @private
+     * @see {@link ServerPluginManager#onStateChange}
      */
-    private get;
-    /** private */
-    checkRegisteredPlugins(registeredPlugins: any): void;
+    get(id: any): server.Plugin;
+    /** @private */
+    private checkRegisteredPlugins;
     /** @private */
     private addClient;
     /** @private */

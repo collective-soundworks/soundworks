@@ -2,6 +2,9 @@ import { assert }  from 'chai';
 
 import { Server, Context as ServerContext } from '../../src/server/index.js';
 import { Client, ClientContext } from '../../src/client/index.js';
+import {
+  kClientOnStatusChangeCallbacks,
+} from '../../src/client/Client.js';
 
 import pluginDelayClient from '../utils/PluginDelayClient.js';
 import config from '../utils/config.js';
@@ -331,7 +334,7 @@ describe('# client::Client', () => {
       const unsubscribe = client.onStatusChange(async () => {});
       unsubscribe();
 
-      assert.equal(server._onStatusChangeCallbacks.size, 0)
+      assert.equal(client[kClientOnStatusChangeCallbacks].size, 0)
     });
 
     it('should receive "inited" events', async () => {
