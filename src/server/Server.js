@@ -29,7 +29,9 @@ import {
   encryptData,
   decryptData,
 } from './crypto.js';
-import Client from './Client.js';
+import ServerClient, {
+  kServerClientToken,
+} from './ServerClient.js';
 import ServerContextManager, {
   kServerContextManagerStart,
   kServerContextManagerStop,
@@ -948,7 +950,7 @@ Invalid certificate files, please check your:
    * @private
    */
   [kServerOnSocketConnection](role, socket, connectionToken) {
-    const client = new Client(role, socket);
+    const client = new ServerClient(role, socket);
     socket[kSocketClientId] = client.id;
     const roles = Object.keys(this.#config.app.clients);
 
@@ -958,7 +960,7 @@ Invalid certificate files, please check your:
       const newData = { ip, id: client.id };
       const newToken = encryptData(newData);
 
-      client.token = newToken;
+      client[kServerClientToken] = newToken;
 
       this.#pendingConnectionTokens.delete(connectionToken);
       this.#trustedClients.add(client);
@@ -1221,9 +1223,9 @@ Invalid certificate files, please check your:
       return true;
     } else {
       for (let client of this.#trustedClients) {
-        if (client.id === clientId && client.token === token) {
+        if (client.id === clientId && client[kServerClientToken] === token) {
           // check that given token is consistent with client ip and id
-          const { id, ip } = decryptData(client.token);
+          const { id, ip } = decryptData(client[kServerClientToken]);
 
           if (clientId === id && clientIp === ip) {
             return true;

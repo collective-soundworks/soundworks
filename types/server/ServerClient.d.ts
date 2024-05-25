@@ -1,44 +1,45 @@
-export default Client;
+export const kServerClientToken: unique symbol;
+export default ServerClient;
 /**
  * Server-side representation of a `soundworks` client.
  *
- * @memberof server
  * @hideconstructor
- * @see {@link client.Client}
+ * @see {@link Client}
  */
-declare class Client {
+declare class ServerClient {
     /**
      * @param {String} role - Role of the client
-     * @param {server.Socket} socket - Socket connection with the client
+     * @param {ServerSocket} socket - Socket connection with the client
      */
-    constructor(role: string, socket: server.Socket);
+    constructor(role: string, socket: ServerSocket);
     /**
-     * Client role, as specified in client side config {@link client.Client}.
+     * Client role, as specified in client side config {@link Client}.
      *
      * @type {String}
      */
-    role: string;
+    get role(): string;
     /**
      * Session Id (incremented positive number).
      *
      * @type {Number}
      */
-    id: number;
+    get id(): number;
     /**
      * Unique session Id (uuidv4).
      *
      * @type {String}
      */
-    uuid: string;
+    get uuid(): string;
     /**
      * Socket connection with the remote client {@link client.Client}.
      *
      * @type {server.Socket}
      */
-    socket: server.Socket;
+    get socket(): server.Socket;
     /**
-     * Is set in server._onSocketConnection
+     * Is set in server[kServerOnSocketConnection]
      * @private
      */
-    private token;
+    private [kServerClientToken];
+    #private;
 }

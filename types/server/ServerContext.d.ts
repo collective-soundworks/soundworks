@@ -14,11 +14,12 @@ export default ServerContext;
  * If a `ServerContext` is recognized as the server-side counterpart of a
  * {@link ClientContext}, based on their respective `name` (see {@link ClientContext#name}
  * and {@link ServerContext#name}), `soundworks` will ensure the logic defined
- * by the server-side Context will be executed at the beginning of the
- * {@link Client#enter} and {@link Client#exit} methods. The example
- * show how soundwords handles (and guarantees) the order of the `enter()` steps
- * between the client-side and the server-side parts of the context. The same goes
- * for the `exit()` method.
+ * by the ServerContext will be executed at the beginning of the
+ * {@link ClientContext#enter} and {@link ClientContext#exit} methods.
+ *
+ * The example above shows how soundwords handles (and guarantees) the order of
+ * the `enter()` steps between the client-side and the server-side parts of the
+ * context. The same goes for the `exit()` method.
  *
  * ```js
  * // client-side
@@ -205,3 +206,4 @@ declare class ServerContext {
     #private;
 }
 import Server from './Server.js';
+import ServerClient from './ServerClient.js';
