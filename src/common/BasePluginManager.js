@@ -14,10 +14,10 @@ export const kPluginManagerInstances = Symbol('soundworks:plugin-manager-instanc
  * Callback executed when a plugin internal state is updated.
  *
  * @callback pluginManagerOnStateChangeCallback
- * @param {object<server.Plugin#id, server.Plugin>} fullState - List of all plugins.
- * @param {server.Plugin|null} initiator - Plugin that initiated the update or `null`
- *  if the change was initiated by the state manager (i.e. when the initialization
- *  of the plugins starts).
+ * @param {object<string, ClientPlugin|ServerPlugin>} fullState - List of all plugins.
+ * @param {ClientPlugin|ServerPlugin|null} initiator - Plugin that initiated the
+ *  update. The value is `null` if the change was initiated by the state manager
+ *  (e.g. when the initialization of the plugins starts).
  */
 
 /**

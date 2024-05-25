@@ -192,7 +192,7 @@ class Client {
   /**
    * Unique session uuid of the client (uuidv4).
    *
-   * Generated and retrieved by the server during {@link client.Client#init}.
+   * Generated and retrieved by the server during {@link Client#init}.
    * @type {string}
    */
   get uuid() {
@@ -256,9 +256,9 @@ class Client {
   }
 
   /**
-   * Status of the client, 'idle', 'inited', 'started' or 'errored'.
+   * Status of the client.
    *
-   * @type {string}
+   * @type {'idle'|'inited'|'started'|'errored'}
    */
   get status() {
     return this.#status;
@@ -286,10 +286,10 @@ class Client {
   /**
    * The `init` method is part of the initialization lifecycle of the `soundworks`
    * client. Most of the time, the `init` method will be implicitly called by the
-   * {@link client.Client#start} method.
+   * {@link Client#start} method.
    *
    * In some situations you might want to call this method manually, in such cases
-   * the method should be called before the {@link client.Client#start} method.
+   * the method should be called before the {@link Client#start} method.
    *
    * What it does:
    * - connect the sockets to be server
@@ -297,8 +297,8 @@ class Client {
    * - launch the state manager
    * - initialize all registered plugin
    *
-   * After `await client.init()` is fulfilled, the {@link client.Client#stateManager},
-   * the {@link client.Client#pluginManager} and the {@link client.Client#socket}
+   * After `await client.init()` is fulfilled, the {@link Client#stateManager},
+   * the {@link Client#pluginManager} and the {@link Client#socket}
    * can be safely used.
    *
    * @example
@@ -376,11 +376,11 @@ class Client {
 
   /**
    * The `start` method is part of the initialization lifecycle of the `soundworks`
-   * client. The `start` method will implicitly call the {@link client.Client#init}
+   * client. The `start` method will implicitly call the {@link Client#init}
    * method if it has not been called manually.
    *
    * What it does:
-   * - implicitly call {@link client.Client#init} if not done manually
+   * - implicitly call {@link Client#init} if not done manually
    * - start all created contexts. For that to happen, you will have to call `client.init`
    * manually and instantiate the contexts between `client.init()` and `client.start()`
    *
@@ -434,16 +434,16 @@ class Client {
   /**
    * Attach and retrieve the global audit state of the application.
    *
-   * The audit state is a {@link client.SharedState} instance that keeps track of
+   * The audit state is a {@link SharedState} instance that keeps track of
    * global informations about the application such as, the number of connected
    * clients, network latency estimation, etc. It is usefull for controller client
    * roles to give the user an overview about the state of the application.
    *
    * The audit state is lazily attached to the client only if this method is called.
    *
-   * @returns {Promise<client.SharedState>}
+   * @returns {Promise<SharedState>}
    * @throws Will throw if called before `client.init()`
-   * @see {@link client.SharedState}
+   * @see {@link SharedState}
    * @example
    * const auditState = await client.getAuditState();
    * auditState.onUpdate(() => console.log(auditState.getValues()), true);

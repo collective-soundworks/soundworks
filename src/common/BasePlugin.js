@@ -32,10 +32,10 @@ class BasePlugin {
      *
      * @type {object}
      * @protected
-     * @see {@link client.Plugin#onStateChange}
-     * @see {@link server.Plugin#onStateChange}
-     * @see {@link client.Plugin#propagateStateChange}
-     * @see {@link server.Plugin#propagateStateChange}
+     * @see {@link ClientPlugin#onStateChange}
+     * @see {@link ServerPlugin#onStateChange}
+     * @see {@link ClientPlugin#propagateStateChange}
+     * @see {@link ServerPlugin#propagateStateChange}
      */
     this.state = {};
   }
@@ -45,8 +45,8 @@ class BasePlugin {
    *
    * @type {string}
    * @readonly
-   * @see {@link client.PluginManager#register}
-   * @see {@link server.PluginManager#register}
+   * @see {@link ClientPluginManager#register}
+   * @see {@link ServerPluginManager#register}
    */
   get id() {
     return this.#id;

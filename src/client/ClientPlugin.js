@@ -57,13 +57,13 @@ class ClientPlugin extends BasePlugin {
   // @todo
   // /**
   //  * Interface method to implement if specific logic should be done when a
-  //  * {@link client.Client} enters the plugin.
+  //  * {@link Client} enters the plugin.
   //  */
   // async activate() {}
   //
   // /**
   //  * Interface method to implement if specific logic should be done when a
-  //  * {@link client.Client} exists the plugin.
+  //  * {@link Client} exists the plugin.
   //  */
   // async deactivate() {}
 }

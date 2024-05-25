@@ -22,9 +22,9 @@ export const kSocketTerminate = Symbol('soundworks:socket-terminate');
  * [ws](https://github.com/websockets/ws) library.
  *
  * An instance of {@link ServerSocket} is automatically created per client
- * when it connects (see {@link server.Client#socket}).
+ * when it connects (see {@link SeverClient#socket}).
  *
- * _Important: In most cases, you should consider using a {@link client.SharedState}
+ * _Important: In most cases, you should consider using a {@link SharedState}
  * rather than directly using the Socket instance._
  *
  * @hideconstructor
@@ -177,6 +177,12 @@ class ServerSocket {
     return this.#sockets;
   }
 
+  /**
+   * Reay state of the underlying socket instance.
+   *
+   * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/readyState}
+   * @type {number}
+   */
   get readyState() {
     return this.#socket.readyState;
   }

@@ -57,18 +57,18 @@ export const kStateManagerClientsByNodeId = Symbol('soundworks:server-state-clie
  */
 
 /**
- * The `StateManager` allows to create new {@link server.SharedState}s, or attach
- * to {@link server.SharedState}s created by other nodes (clients or server). It
- * can also track all the {@link server.SharedState}s created by other nodes.
+ * The `StateManager` allows to create new {@link SharedState}s, or attach
+ * to {@link SharedState}s created by other nodes (clients or server). It
+ * can also track all the {@link SharedState}s created by other nodes.
  *
  * An instance of `StateManager` is automatically created by the `soundworks.Server`
- * at initialization (cf. {@link server.Server#stateManager}).
+ * at initialization (cf. {@link Server#stateManager}).
  *
- * Compared to the {@link client.StateManager}, the `ServerStateManager` can also
- * create and delete schemas, as well as register update hook that are executed when
+ * Compared to the {@link ClientStateManager}, the `ServerStateManager` can also
+ * register and delete schemas, as well as register update hook that are executed when
  * a state is updated.
  *
- * See {@link server.Server#stateManager}
+ * See {@link Server#stateManager}
  *
  * Tutorial: {@link https://soundworks.dev/guide/state-manager.html}
  *
@@ -151,7 +151,7 @@ class ServerStateManager extends BaseStateManager {
   /**
    * Add a client to the manager.
    *
-   * This is automatically handled by the {@link server.Server} when a client connects.
+   * This is automatically handled by the {@link Server} when a client connects.
    *
    * @param {number} nodeId - Id of the client node, as given in
    *  {@link client.StateManager}
@@ -337,7 +337,7 @@ class ServerStateManager extends BaseStateManager {
   /**
    * Remove a client from the manager. Clean all created or attached states.
    *
-   * This is automatically handled by the {@link server.Server} when a client disconnects.
+   * This is automatically handled by the {@link Server} when a client disconnects.
    *
    * @param {number} nodeId - Id of the client node, as given in
    *  {@link client.StateManager}

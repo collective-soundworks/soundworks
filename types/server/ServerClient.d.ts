@@ -31,11 +31,11 @@ declare class ServerClient {
      */
     get uuid(): string;
     /**
-     * Socket connection with the remote client {@link client.Client}.
+     * Socket connection with the remote {@link Client}.
      *
-     * @type {server.Socket}
+     * @type {ServerSocket}
      */
-    get socket(): server.Socket;
+    get socket(): ServerSocket;
     /**
      * Is set in server[kServerOnSocketConnection]
      * @private

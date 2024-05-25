@@ -4,7 +4,7 @@ export default ClientContext;
  * Base class to extend in order to implement a new Context.
  *
  * In the `soundworks` paradigm, a client has a "role" (e.g. _player_, _controller_)
- * see {@link client.Client#role}) and can be in different "contexts" (e.g. different
+ * see {@link Client#role}) and can be in different "contexts" (e.g. different
  * part of the experience such as sections of a music piece, etc.). This class
  * provides a simple and unified way to model these reccuring aspects of an application.
  *
@@ -62,7 +62,7 @@ declare class ClientContext {
      * Optionnal user-defined name of the context (defaults to the class name).
      *
      * The context manager will match the client-side and server-side contexts based
-     * on this name. If the {@link server.ContextManager} don't find a corresponding
+     * on this name. If the {@link ServerContextManager} don't find a corresponding
      * user-defined context with the same name, it will use a default (noop) context.
      *
      * @readonly
@@ -78,7 +78,7 @@ declare class ClientContext {
     readonly get name(): string;
     /**
      * Start the context. This method is lazilly called when the client enters the
-     * context for the first time (cf. ${client.ClientContext#enter}). If you know some
+     * context for the first time (cf. ${ClientContext#enter}). If you know some
      * some heavy and/or potentially long job has to be done  when starting the context
      * (e.g. call to a web service) it may be a good practice to call it explicitely.
      *
@@ -115,7 +115,7 @@ declare class ClientContext {
      * done (e.g. creating a shared state, etc.) when the context is entered.
      *
      * If a server-side part of the context is defined (i.e. a context with the same
-     * {@link client.ClientContext#name}), the corresponding server-side `enter()` method
+     * {@link ClientContext#name}), the corresponding server-side `enter()` method
      * will be executed before the returned Promise is fulfilled.
      *
      * If the context has not been started yet, the `start` method is implicitely executed.
@@ -140,7 +140,7 @@ declare class ClientContext {
      * done (e.g. delete a shared state, etc.) when the context is exited.
      *
      * If a server-side part of the context is defined (i.e. a context with the same
-     * {@link client.ClientContext#name}), the corresponding server-side `exit()` method
+     * {@link ClientContext#name}), the corresponding server-side `exit()` method
      * will be executed before the returned Promise is fulfilled.
      *
      * @returns {Promise<void>} - Promise that resolves when the context is exited.

@@ -9,9 +9,9 @@ import BaseStateManager from '../common/BaseStateManager.js';
  */
 
 /**
- * The `ClientStateManager` allows to create new {@link client.SharedState}s, or attach
- * to {@link client.SharedState}s created by other nodes (clients or server). It
- * can also track all the {@link client.SharedState}s created by other nodes.
+ * The `ClientStateManager` allows to create new {@link SharedState}s, or attach
+ * to {@link SharedState}s created by other nodes (clients or server). It
+ * can also track all the {@link SharedState}s created by other nodes.
  *
  * An instance of `ClientStateManager` is automatically created by the `soundworks.Client`
  * at initialization (cf. {@link client.Client#stateManager}).

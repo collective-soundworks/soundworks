@@ -3,7 +3,7 @@ export default ClientPluginManager;
  * The `PluginManager` allows to register and retrieve `soundworks` plugins.
  *
  * Plugins should always be registered both client-side and server-side,
- * and before {@link Client#start} or {@link server.Server#start}
+ * and before {@link Client#start} or {@link Server#start}
  * to be properly initialized.
  *
  * In some sitautions, you might want to register the same plugin factory several times

@@ -61,9 +61,9 @@ class ServerClient {
   }
 
   /**
-   * Socket connection with the remote client {@link client.Client}.
+   * Socket connection with the remote {@link Client}.
    *
-   * @type {server.Socket}
+   * @type {ServerSocket}
    */
   get socket() {
     return this.#socket;

@@ -65,7 +65,7 @@ class ContextCollection {
 /**
  * Manage the different server-side contexts and their lifecycle.
  *
- * The `ServerContextManager` is automatically instantiated by the {@link server.Server}.
+ * The `ServerContextManager` is automatically instantiated by the {@link Server}.
  *
  * _WARNING: Most of the time, you should not have to manipulate the context manager directly._
  *
@@ -77,7 +77,7 @@ class ServerContextManager {
   #contextStartPromises = new Map();
 
   /**
-   * @param {server.Server} server - Instance of the soundworks server.
+   * @param {Server} server - Instance of the soundworks server.
    */
   constructor(server) {
     this.#server = server;
@@ -104,7 +104,7 @@ class ServerContextManager {
 
   /**
    * Start all contexts registered before `await server.start()`.
-   * Called on {@link server.Server#start}
+   * Called on {@link Server#start}
    *
    * @private
    */
@@ -114,7 +114,7 @@ class ServerContextManager {
   }
 
   /**
-   * Stop all contexts. Called on {@link server.Server#stop}
+   * Stop all contexts. Called on {@link Server#stop}
    *
    * @private
    */
@@ -126,7 +126,7 @@ class ServerContextManager {
   /**
    * Called when a client connects to the server (websocket handshake)
    *
-   * @param {server.Client} client
+   * @param {ServerClient} client
    *
    * @private
    */
@@ -224,7 +224,7 @@ class ServerContextManager {
   /**
    * Called when a client connects to the server (websocket 'close' event)
    *
-   * @param {server.Client} client
+   * @param {ServerClient} client
    *
    * @private
    */

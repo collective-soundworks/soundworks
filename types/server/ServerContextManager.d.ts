@@ -8,7 +8,7 @@ export default ServerContextManager;
 /**
  * Manage the different server-side contexts and their lifecycle.
  *
- * The `ServerContextManager` is automatically instantiated by the {@link server.Server}.
+ * The `ServerContextManager` is automatically instantiated by the {@link Server}.
  *
  * _WARNING: Most of the time, you should not have to manipulate the context manager directly._
  *
@@ -16,9 +16,9 @@ export default ServerContextManager;
  */
 declare class ServerContextManager {
     /**
-     * @param {server.Server} server - Instance of the soundworks server.
+     * @param {Server} server - Instance of the soundworks server.
      */
-    constructor(server: server.Server);
+    constructor(server: Server);
     /**
      * Retrieve a started context from its name.
      *
@@ -38,13 +38,13 @@ declare class ServerContextManager {
     private [kServerContextManagerRegister];
     /**
      * Start all contexts registered before `await server.start()`.
-     * Called on {@link server.Server#start}
+     * Called on {@link Server#start}
      *
      * @private
      */
     private [kServerContextManagerStart];
     /**
-     * Stop all contexts. Called on {@link server.Server#stop}
+     * Stop all contexts. Called on {@link Server#stop}
      *
      * @private
      */
@@ -52,7 +52,7 @@ declare class ServerContextManager {
     /**
      * Called when a client connects to the server (websocket handshake)
      *
-     * @param {server.Client} client
+     * @param {ServerClient} client
      *
      * @private
      */
@@ -60,7 +60,7 @@ declare class ServerContextManager {
     /**
      * Called when a client connects to the server (websocket 'close' event)
      *
-     * @param {server.Client} client
+     * @param {ServerClient} client
      *
      * @private
      */

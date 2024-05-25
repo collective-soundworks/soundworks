@@ -1,8 +1,8 @@
 export default SharedStateCollection;
-export type sharedStateCollectionOnUpdateCallback = (state: client.SharedState, newValues: any, oldValues: any, context?: Mixed) => any;
+export type sharedStateCollectionOnUpdateCallback = (state: SharedState, newValues: any, oldValues: any, context?: Mixed) => any;
 /**
  * @callback sharedStateCollectionOnUpdateCallback
- * @param {client.SharedState} state - State that triggered the update.
+ * @param {SharedState} state - State that triggered the update.
  * @param {Object} newValues - Key / value pairs of the updates that have been
  *  applied to the state.
  * @param {Object} oldValues - Key / value pairs of the updated params before

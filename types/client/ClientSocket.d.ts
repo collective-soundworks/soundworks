@@ -4,9 +4,9 @@ export default ClientSocket;
  * The ClientSocket class is a simple publish / subscribe wrapper built on top of the
  * [isomorphic-ws](https://github.com/heineiuo/isomorphic-ws) library.
  * An instance of `ClientSocket` is automatically created by the `soundworks.Client`
- * (see {@link client.Client#socket}).
+ * (see {@link Client#socket}).
  *
- * _Important: In most cases, you should consider using a {@link client.SharedState}
+ * _Important: In most cases, you should consider using a {@link SharedState}
  * rather than directly using the sockets._
  *
  * The ClientSocket class concurrently opens two different WebSockets:
@@ -26,7 +26,7 @@ declare class ClientSocket {
      * Initialize a websocket connection with the server. Automatically called
      * during {@link Client#init}
      *
-     * @param {string} role - Role of the client (see {@link client.Client#role})
+     * @param {string} role - Role of the client (see {@link Client#role})
      * @param {object} config - Configuration of the sockets
      * @private
      */
@@ -45,7 +45,7 @@ declare class ClientSocket {
      * @param {string} channel - Channel name.
      * @param {Function} callback - Callback to execute when a message is received,
      *  arguments of the callback function will match the arguments sent using the
-     *  {@link server.Socket#send} method.
+     *  {@link ServerSocket#send} method.
      */
     addListener(channel: string, callback: Function): void;
     /**
