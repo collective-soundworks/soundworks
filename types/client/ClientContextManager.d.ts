@@ -1,3 +1,6 @@
+export const kClientContextManagerStart: unique symbol;
+export const kClientContextManagerStop: unique symbol;
+export const kClientContextManagerRegister: unique symbol;
 export default ClientContextManager;
 /**
  * Manage the different contexts and their lifecycle.
@@ -10,13 +13,6 @@ export default ClientContextManager;
  */
 declare class ClientContextManager {
     /**
-     * Register the context into the manager. Is called in context constructor.
-     *
-     * @param {ClientContext} context - The context to be registered.
-     * @private
-     */
-    private register;
-    /**
      * Retrieve a started context from its name.
      *
      * _WARNING: Most of the time, you should not have to call this method manually._
@@ -26,14 +22,21 @@ declare class ClientContextManager {
      */
     get(contextName: string): Promise<ClientContext>;
     /**
+     * Register the context into the manager. Is called in context constructor.
+     *
+     * @param {ClientContext} context - The context to be registered.
+     * @private
+     */
+    private [kClientContextManagerRegister];
+    /**
      * Start all registered contexts. Called during `client.start()`
      * @private
      */
-    private start;
+    private [kClientContextManagerStart];
     /**
      * Stop all registered contexts. Called during `client.stop()`
      * @private
      */
-    private stop;
+    private [kClientContextManagerStop];
     #private;
 }

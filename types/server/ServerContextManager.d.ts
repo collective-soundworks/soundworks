@@ -1,4 +1,9 @@
-export const kContextManagerContexts: unique symbol;
+export const kServerContextManagerStart: unique symbol;
+export const kServerContextManagerStop: unique symbol;
+export const kServerContextManagerAddClient: unique symbol;
+export const kServerContextManagerRemoveClient: unique symbol;
+export const kServerContextManagerRegister: unique symbol;
+export const kServerContextManagerContexts: unique symbol;
 export default ServerContextManager;
 /**
  * Manage the different server-side contexts and their lifecycle.
@@ -19,18 +24,31 @@ declare class ServerContextManager {
      *
      * _WARNING: Most of the time, you should not have to call this method manually._
      *
-     * @param {server.Context#name} contextName - Name of the context.
+     * @param {ServerContext#name} contextName - Name of the context.
      */
     get(contextName: any): Promise<any>;
     /**
      * Register a context in the manager.
-     * This method is called in the {@link server.Context} constructor
+     * This method is called in the {@link ServerContext} constructor
      *
-     * @param {server.Context} context - Context instance to register.
+     * @param {ServerContext} context - Context instance to register.
      *
      * @private
      */
-    private register;
+    private [kServerContextManagerRegister];
+    /**
+     * Start all contexts registered before `await server.start()`.
+     * Called on {@link server.Server#start}
+     *
+     * @private
+     */
+    private [kServerContextManagerStart];
+    /**
+     * Stop all contexts. Called on {@link server.Server#stop}
+     *
+     * @private
+     */
+    private [kServerContextManagerStop];
     /**
      * Called when a client connects to the server (websocket handshake)
      *
@@ -38,7 +56,7 @@ declare class ServerContextManager {
      *
      * @private
      */
-    private addClient;
+    private [kServerContextManagerAddClient];
     /**
      * Called when a client connects to the server (websocket 'close' event)
      *
@@ -46,21 +64,8 @@ declare class ServerContextManager {
      *
      * @private
      */
-    private removeClient;
-    /**
-     * Start all contexts registered before `await server.start()`.
-     * Called on {@link server.Server#start}
-     *
-     * @private
-     */
-    private start;
-    /**
-     * Stop all contexts. Called on {@link server.Server#stop}
-     *
-     * @private
-     */
-    private stop;
-    [kContextManagerContexts]: ContextCollection;
+    private [kServerContextManagerRemoveClient];
+    [kServerContextManagerContexts]: ContextCollection;
     #private;
 }
 /** @private */

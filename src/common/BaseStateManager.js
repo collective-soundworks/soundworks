@@ -22,6 +22,7 @@ import {
   GET_SCHEMA_ERROR,
 } from './constants.js';
 
+export const kStateManagerInit = Symbol('soundworks:state-manager-init');
 export const kStateManagerDeleteState = Symbol('soundworks:state-manager-delete-state');
 // for testing purposes
 export const kStateManagerClient = Symbol('soundworks:state-manager-client');
@@ -78,7 +79,7 @@ class BaseStateManager {
    *
    * @private
    */
-  init(id, transport) {
+  [kStateManagerInit](id, transport) {
     const batchedTransport = new BatchedTransport(transport);
     this[kStateManagerClient] = { id, transport: batchedTransport };
 

@@ -1,6 +1,6 @@
-export const kBasePluginManagerStart: unique symbol;
-export const kBasePluginManagerStop: unique symbol;
-export const kBasePluginManagerInstances: unique symbol;
+export const kPluginManagerStart: unique symbol;
+export const kPluginManagerStop: unique symbol;
+export const kPluginManagerInstances: unique symbol;
 export default BasePluginManager;
 /**
  * Callback executed when a plugin internal state is updated.
@@ -115,10 +115,10 @@ declare class BasePluginManager {
      *
      * @private
      */
-    private [kBasePluginManagerStart];
+    private [kPluginManagerStart];
     /** @private */
-    private [kBasePluginManagerStop];
+    private [kPluginManagerStop];
     /** #private */
-    [kBasePluginManagerInstances]: Map<any, any>;
+    [kPluginManagerInstances]: Map<any, any>;
     #private;
 }

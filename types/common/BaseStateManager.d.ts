@@ -1,3 +1,4 @@
+export const kStateManagerInit: unique symbol;
 export const kStateManagerDeleteState: unique symbol;
 export const kStateManagerClient: unique symbol;
 export default BaseStateManager;
@@ -11,15 +12,6 @@ export type stateManagerObserveCallback = () => any;
  */
 /** @private */
 declare class BaseStateManager {
-    /**
-     * Executed on `client.init`
-     * @param {Number} id - Id of the node.
-     * @param {Object} transport - Transport to use for synchronizing the states.
-     *  Must implement a basic EventEmitter API.
-     *
-     * @private
-     */
-    private init;
     /**
      * Return the schema from a given registered schema name
      *
@@ -129,6 +121,15 @@ declare class BaseStateManager {
     }, ...args: any[]): Promise<SharedStateCollection>;
     /** @private */
     private [kStateManagerDeleteState];
+    /**
+     * Executed on `client.init`
+     * @param {Number} id - Id of the node.
+     * @param {Object} transport - Transport to use for synchronizing the states.
+     *  Must implement a basic EventEmitter API.
+     *
+     * @private
+     */
+    private [kStateManagerInit];
     /** @private */
     private [kStateManagerClient];
     #private;

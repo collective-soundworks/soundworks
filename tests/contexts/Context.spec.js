@@ -1,10 +1,10 @@
 import { assert } from 'chai';
 
-import { Server, Context as ServerContext } from '../../src/server/index.js';
+import { Server, ServerContext } from '../../src/server/index.js';
 import { Client, ClientContext } from '../../src/client/index.js';
 
 import {
-  kContextManagerContexts,
+  kServerContextManagerContexts,
 } from '../../src/server/ServerContextManager.js'
 
 import config from '../utils/config.js';
@@ -294,7 +294,7 @@ describe('# Context', () => {
       await clientTestContext.enter();
 
       assert.isTrue(entered);
-      assert.equal(server.contextManager[kContextManagerContexts].length, 1);
+      assert.equal(server.contextManager[kServerContextManagerContexts].length, 1);
 
       await server.stop();
     });

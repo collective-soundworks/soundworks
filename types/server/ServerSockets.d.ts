@@ -8,7 +8,7 @@ export default ServerSockets;
  * Manage all {@link ServerSocket} instances.
  *
  * _Important: In most cases, you should consider using a {@link SharedState}
- * rather than directly using the Socket instance._
+ * rather than directly using the ServerSocket instance._
  */
 declare class ServerSockets {
     constructor(server: any, config: any);
@@ -47,3 +47,4 @@ declare class ServerSockets {
     broadcast(roomIds: any, excludeSocket: ServerSocket, channel: string, ...args: any[]): void;
     #private;
 }
+import ServerSocket from './ServerSocket.js';

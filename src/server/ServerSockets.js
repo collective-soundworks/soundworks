@@ -12,9 +12,9 @@ import {
   kServerOnSocketConnection,
   kServerIsProtectedRole,
 } from './Server.js';
-import Socket, {
+import ServerSocket, {
   kSocketTerminate,
-} from './Socket.js';
+} from './ServerSocket.js';
 
 // @note - fs.readFileSync creates some cwd() issues...
 import networkLatencyWorker from './audit-network-latency.worker.js';
@@ -30,7 +30,7 @@ export const kSocketsDebugPreventHeartBeat = Symbol('soundworks:sockets-debug-pr
  * Manage all {@link ServerSocket} instances.
  *
  * _Important: In most cases, you should consider using a {@link SharedState}
- * rather than directly using the Socket instance._
+ * rather than directly using the ServerSocket instance._
  */
 class ServerSockets {
   #server = null;
@@ -87,7 +87,7 @@ class ServerSockets {
 
     this.#wsServer.on('connection', (ws, req) => {
       const { role, token } = querystring.parse(req.url.split('?')[1]);
-      const socket = new Socket(ws, this);
+      const socket = new ServerSocket(ws, this);
 
       socket.addToRoom('*');
       socket.addToRoom(role);

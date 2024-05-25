@@ -1,7 +1,9 @@
 import { idGenerator, isString, isPlainObject } from '@ircam/sc-utils';
 import clonedeep from 'lodash/cloneDeep.js';
 
-import BaseStateManager from '../common/BaseStateManager.js';
+import BaseStateManager, {
+  kStateManagerInit,
+} from '../common/BaseStateManager.js';
 import BatchedTransport from '../common/BatchedTransport.js';
 import ParameterBag from '../common/ParameterBag.js';
 import {
@@ -33,6 +35,8 @@ import SharedStatePrivate, {
 const generateStateId = idGenerator();
 const generateRemoteId = idGenerator();
 
+export const kServerStateManagerAddClient = Symbol('soundworks:server-state-manager-add-client');
+export const kServerStateManagerRemoveClient = Symbol('soundworks:server-state-manager-remove-client');
 export const kServerStateManagerDeletePrivateState = Symbol('soundworks:server-state-manager-delete-private-state');
 export const kServerStateManagerGetHooks = Symbol('soundworks:server-state-manager-get-hooks');
 // for testing purposes
@@ -117,7 +121,7 @@ class ServerStateManager extends BaseStateManager {
 
   constructor() {
     super();
-
+    /** @private */
     this[kStateManagerClientsByNodeId] = new Map();
   }
 
@@ -138,10 +142,10 @@ class ServerStateManager extends BaseStateManager {
   }
 
   /** @private */
-  init(id, transport) {
-    super.init(id, transport);
+  [kStateManagerInit](id, transport) {
+    super[kStateManagerInit](id, transport);
     // add itself as client of the state manager server
-    this.addClient(id, transport);
+    this[kServerStateManagerAddClient](id, transport);
   }
 
   /**
@@ -156,7 +160,7 @@ class ServerStateManager extends BaseStateManager {
    *
    * @private
    */
-  addClient(nodeId, transport) {
+  [kServerStateManagerAddClient](nodeId, transport) {
     const batchedTransport = new BatchedTransport(transport);
     const client = {
       id: nodeId,
@@ -340,7 +344,7 @@ class ServerStateManager extends BaseStateManager {
    *
    * @private
    */
-  removeClient(nodeId) {
+  [kServerStateManagerRemoveClient](nodeId) {
     for (let [_id, state] of this.#sharedStatePrivateById.entries()) {
       let deleteState = false;
 

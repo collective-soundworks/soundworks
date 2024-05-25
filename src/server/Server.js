@@ -30,21 +30,32 @@ import {
   decryptData,
 } from './crypto.js';
 import Client from './Client.js';
-import ServerContextManager from './ServerContextManager.js';
+import ServerContextManager, {
+  kServerContextManagerStart,
+  kServerContextManagerStop,
+  kServerContextManagerAddClient,
+  kServerContextManagerRemoveClient,
+} from './ServerContextManager.js';
 import ServerPluginManager, {
   kServerPluginManagerCheckRegisteredPlugins,
   kServerPluginManagerAddClient,
   kServerPluginManagerRemoveClient,
 } from './ServerPluginManager.js';
 import {
-  kBasePluginManagerStart,
-  kBasePluginManagerStop,
+  kPluginManagerStart,
+  kPluginManagerStop,
 } from '../common/BasePluginManager.js';
-import ServerStateManager from './ServerStateManager.js';
+import ServerStateManager, {
+  kServerStateManagerAddClient,
+  kServerStateManagerRemoveClient,
+} from './ServerStateManager.js';
+import {
+  kStateManagerInit,
+} from '../common/BaseStateManager.js';
 import {
   kSocketClientId,
   kSocketTerminate,
-} from './Socket.js';
+} from './ServerSocket.js';
 import ServerSockets, {
   kSocketsStart,
   kSocketsStop,
@@ -461,7 +472,7 @@ class Server {
    * await server.start(); // init is called implicitely
    */
   async init() {
-    this.#stateManager.init(SERVER_ID, new EventEmitter());
+    this.#stateManager[kStateManagerInit](SERVER_ID, new EventEmitter());
 
     const numClients = {};
     for (let name in this.#config.app.clients) {
@@ -691,7 +702,7 @@ Invalid certificate files, please check your:
     // ------------------------------------------------------------
     // START PLUGIN MANAGER
     // ------------------------------------------------------------
-    await this.#pluginManager[kBasePluginManagerStart]();
+    await this.#pluginManager[kPluginManagerStart]();
 
     await this.#dispatchStatus('inited');
 
@@ -733,7 +744,7 @@ Invalid certificate files, please check your:
     // ------------------------------------------------------------
     // START CONTEXT MANAGER
     // ------------------------------------------------------------
-    await this.#contextManager.start();
+    await this.#contextManager[kServerContextManagerStart]();
 
     // ------------------------------------------------------------
     // START SOCKET SERVER
@@ -825,8 +836,8 @@ Invalid certificate files, please check your:
       throw new Error(`[soundworks:Server] Cannot stop() before start()`);
     }
 
-    await this.#contextManager.stop();
-    await this.#pluginManager[kBasePluginManagerStop]();
+    await this.#contextManager[kServerContextManagerStop]();
+    await this.#pluginManager[kPluginManagerStop]();
 
     this.#sockets[kSocketsStop]();
 
@@ -970,11 +981,11 @@ Invalid certificate files, please check your:
         // again and again... let's just log the error and terminate the socket
         try {
           // clean context manager, await before cleaning state manager
-          await this.#contextManager.removeClient(client);
+          await this.#contextManager[kServerContextManagerRemoveClient](client);
           // remove client from pluginManager
           await this.#pluginManager[kServerPluginManagerRemoveClient](client);
           // clean state manager
-          await this.#stateManager.removeClient(client.id);
+          await this.#stateManager[kServerStateManagerRemoveClient](client.id);
 
           this.#onClientDisconnectCallbacks.forEach(callback => callback(client));
         } catch (err) {
@@ -1018,17 +1029,18 @@ Invalid certificate files, please check your:
       numClients[role] += 1;
       this.#auditState.set({ numClients });
 
-      // add client to state manager
-      await this.#stateManager.addClient(client.id, {
+      const transport = {
         emit: client.socket.send.bind(client.socket),
         addListener: client.socket.addListener.bind(client.socket),
         removeAllListeners: client.socket.removeAllListeners.bind(client.socket),
-      });
+      };
+      // add client to state manager
+      await this.#stateManager[kServerStateManagerAddClient](client.id, transport);
       // add client to plugin manager
       // server-side, all plugins are active for the lifetime of the client
       await this.#pluginManager[kServerPluginManagerAddClient](client, registeredPlugins);
       // add client to context manager
-      await this.#contextManager.addClient(client);
+      await this.#contextManager[kServerContextManagerAddClient](client);
 
       this.#onClientConnectCallbacks.forEach(callback => callback(client));
 

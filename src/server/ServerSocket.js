@@ -21,22 +21,15 @@ export const kSocketTerminate = Symbol('soundworks:socket-terminate');
  * Simple publish / subscribe wrapper built on top of the
  * [ws](https://github.com/websockets/ws) library.
  *
- * An instance of {@link server.Socket} is automatically created per client
+ * An instance of {@link ServerSocket} is automatically created per client
  * when it connects (see {@link server.Client#socket}).
  *
  * _Important: In most cases, you should consider using a {@link client.SharedState}
  * rather than directly using the Socket instance._
  *
- * The Socket class contains two different WebSockets:
- * - a socket configured with `binaryType = 'blob'` for JSON compatible data
- *  types (i.e. string, number, boolean, object, array and null).
- * - a socket configured with `binaryType= 'arraybuffer'` for efficient streaming
- *  of binary data.
- *
- * @memberof server
  * @hideconstructor
  */
-class Socket {
+class ServerSocket {
   #socket = null;
   #sockets = null;
   #listeners = new Map();
@@ -53,7 +46,7 @@ class Socket {
      * Reference to the sockets object, is mainly dedicated to allow
      * broadcasting from a given socket instance.
      *
-     * @type {server.Sockets}
+     * @type {ServerSockets}
      * @example
      * socket.sockets.broadcast('my-room', this, 'update-value', 1);
      */
@@ -94,7 +87,7 @@ class Socket {
         // client is busy, e.g. when loading large sound files so let's just warn
         // until we gather more feedback
         // cf. https://making.close.com/posts/reliable-websockets/
-        console.warn(`[Socket] client (id: ${this[kSocketClientId]}) did not respond to ping message in time (missed: ${heartbeatMissed},  interval: ${PING_INTERVAL})`);
+        console.warn(`[ServerSocket] client (id: ${this[kSocketClientId]}) did not respond to ping message in time (missed: ${heartbeatMissed},  interval: ${PING_INTERVAL})`);
         // this.#dispatchEvent('close');
         // return;
       }
@@ -144,6 +137,8 @@ class Socket {
    *
    * Is automatically called when socket is closed on the client side or when
    * Server is stopped
+   *
+   * @private
    */
   [kSocketTerminate]() {
     // clear ping / pong interval
@@ -170,11 +165,11 @@ class Socket {
   }
 
   /**
-   * Reference to the @link{server.Sockets} instance.
+   * Reference to the @link{ServerSockets} instance.
    *
    * Allows for broadcasting from a given socket instance.
    *
-   * @type {server.Sockets}
+   * @type {ServerSockets}
    * @example
    * socket.sockets.broadcast('my-room', this, 'update-value', 1);
    */
@@ -216,7 +211,7 @@ class Socket {
    * @param {string} channel - Channel name.
    * @param {Function} callback - Callback to execute when a message is received.
    *  Arguments of the callback function will match the arguments sent using the
-   *  {@link server.Socket#send} method.
+   *  {@link ServerSocket#send} method.
    */
   addListener(channel, callback) {
     if (!this.#listeners.has(channel)) {
@@ -275,4 +270,4 @@ class Socket {
 
 }
 
-export default Socket;
+export default ServerSocket;

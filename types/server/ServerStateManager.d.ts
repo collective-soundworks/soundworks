@@ -1,3 +1,5 @@
+export const kServerStateManagerAddClient: unique symbol;
+export const kServerStateManagerRemoveClient: unique symbol;
 export const kServerStateManagerDeletePrivateState: unique symbol;
 export const kServerStateManagerGetHooks: unique symbol;
 export const kStateManagerClientsByNodeId: unique symbol;
@@ -73,32 +75,6 @@ export type serverStateManagerUpdateHook = () => any;
  * @hideconstructor
  */
 declare class ServerStateManager extends BaseStateManager {
-    /** @private */
-    private init;
-    /**
-     * Add a client to the manager.
-     *
-     * This is automatically handled by the {@link server.Server} when a client connects.
-     *
-     * @param {number} nodeId - Id of the client node, as given in
-     *  {@link client.StateManager}
-     * @param {object} transport - Transport mecanism to communicate with the
-     *  client. Must implement a basic EventEmitter API.
-     *
-     * @private
-     */
-    private addClient;
-    /**
-     * Remove a client from the manager. Clean all created or attached states.
-     *
-     * This is automatically handled by the {@link server.Server} when a client disconnects.
-     *
-     * @param {number} nodeId - Id of the client node, as given in
-     *  {@link client.StateManager}
-     *
-     * @private
-     */
-    private removeClient;
     /**
      * Register a schema from which shared states (cf. {@link common.SharedState})
      * can be instanciated.
@@ -176,7 +152,35 @@ declare class ServerStateManager extends BaseStateManager {
     private [kServerStateManagerDeletePrivateState];
     /** @private */
     private [kServerStateManagerGetHooks];
-    [kStateManagerClientsByNodeId]: Map<any, any>;
+    /** @private */
+    private [kStateManagerInit];
+    /**
+     * Add a client to the manager.
+     *
+     * This is automatically handled by the {@link server.Server} when a client connects.
+     *
+     * @param {number} nodeId - Id of the client node, as given in
+     *  {@link client.StateManager}
+     * @param {object} transport - Transport mecanism to communicate with the
+     *  client. Must implement a basic EventEmitter API.
+     *
+     * @private
+     */
+    private [kServerStateManagerAddClient];
+    /**
+     * Remove a client from the manager. Clean all created or attached states.
+     *
+     * This is automatically handled by the {@link server.Server} when a client disconnects.
+     *
+     * @param {number} nodeId - Id of the client node, as given in
+     *  {@link client.StateManager}
+     *
+     * @private
+     */
+    private [kServerStateManagerRemoveClient];
+    /** @private */
+    private [kStateManagerClientsByNodeId];
     #private;
 }
 import BaseStateManager from '../common/BaseStateManager.js';
+import { kStateManagerInit } from '../common/BaseStateManager.js';

@@ -1,15 +1,21 @@
 import { isBrowser, isPlainObject } from '@ircam/sc-utils';
 
-import ClientContextManager from './ClientContextManager.js';
+import ClientContextManager, {
+  kClientContextManagerStart,
+  kClientContextManagerStop,
+} from './ClientContextManager.js';
 import ClientPluginManager from './ClientPluginManager.js';
 import {
-  kBasePluginManagerStart,
-  kBasePluginManagerStop,
+  kPluginManagerStart,
+  kPluginManagerStop,
 } from '../common/BasePluginManager.js';
 import ClientSocket, {
   kSocketTerminate,
 } from './ClientSocket.js';
 import ClientStateManager from './ClientStateManager.js';
+import {
+  kStateManagerInit,
+} from '../common/BaseStateManager.js';
 
 import {
   CLIENT_HANDSHAKE_REQUEST,
@@ -357,13 +363,13 @@ class Client {
     }
 
     // init state manager
-    this.#stateManager.init(this.id, {
+    this.#stateManager[kStateManagerInit](this.id, {
       emit: this.#socket.send.bind(this.#socket), // need to alias this
       addListener: this.#socket.addListener.bind(this.#socket),
       removeAllListeners: this.#socket.removeAllListeners.bind(this.#socket),
     });
 
-    await this.#pluginManager[kBasePluginManagerStart]();
+    await this.#pluginManager[kPluginManagerStart]();
 
     await this.#dispatchStatus('inited');
   }
@@ -393,7 +399,7 @@ class Client {
       throw new Error(`[soundworks:Server] Cannot call "client.start()" twice`);
     }
 
-    await this.#contextManager.start();
+    await this.#contextManager[kClientContextManagerStart]();
     await this.#dispatchStatus('started');
   }
 
@@ -418,8 +424,8 @@ class Client {
       throw new Error(`[soundworks:Client] Cannot "client.stop()" before "client.start()"`);
     }
 
-    await this.#contextManager.stop();
-    await this.#pluginManager[kBasePluginManagerStop]();
+    await this.#contextManager[kClientContextManagerStop]();
+    await this.#pluginManager[kPluginManagerStop]();
     await this.#socket[kSocketTerminate]();
 
     await this.#dispatchStatus('stopped');

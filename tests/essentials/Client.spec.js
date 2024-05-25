@@ -1,6 +1,6 @@
 import { assert }  from 'chai';
 
-import { Server, Context as ServerContext } from '../../src/server/index.js';
+import { Server, ServerContext } from '../../src/server/index.js';
 import { Client, ClientContext } from '../../src/client/index.js';
 import {
   kClientOnStatusChangeCallbacks,

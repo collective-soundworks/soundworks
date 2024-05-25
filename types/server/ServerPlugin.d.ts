@@ -14,7 +14,6 @@ export default ServerPlugin;
  *
  * _Creating new plugins should be considered an advanced usage._
  *
- * @memberof server
  * @extends BasePlugin
  * @inheritdoc
  */

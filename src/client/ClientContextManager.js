@@ -1,3 +1,11 @@
+import {
+  kClientContextStatus,
+} from './ClientContext.js';
+
+export const kClientContextManagerStart = Symbol('soundworks:client-context-manager-start');
+export const kClientContextManagerStop = Symbol('soundworks:client-context-manager-stop');
+export const kClientContextManagerRegister = Symbol('soundworks:client-context-manager-register');
+
 /** @private */
 class ContextCollection {
   #inner = [];
@@ -36,20 +44,36 @@ class ClientContextManager {
   #contexts = new ContextCollection();
   #contextStartPromises = new Map();
 
-  constructor() {}
-
   /**
    * Register the context into the manager. Is called in context constructor.
    *
    * @param {ClientContext} context - The context to be registered.
    * @private
    */
-  register(context) {
+  [kClientContextManagerRegister](context) {
     if (this.#contexts.has(context.name)) {
       throw new Error(`[soundworks:context-manager] Context "${context.name}" already registered`);
     }
 
     this.#contexts.add(context);
+  }
+
+  /**
+   * Start all registered contexts. Called during `client.start()`
+   * @private
+   */
+  async [kClientContextManagerStart]() {
+    const promises = this.#contexts.map(context => this.get(context.name));
+    await Promise.all(promises);
+  }
+
+  /**
+   * Stop all registered contexts. Called during `client.stop()`
+   * @private
+   */
+  async [kClientContextManagerStop]() {
+    const promises = this.#contexts.map(context => context.stop());
+    await Promise.all(promises);
   }
 
   /**
@@ -71,38 +95,20 @@ class ClientContextManager {
       const startPromise = this.#contextStartPromises.get(contextName);
       await startPromise;
     } else {
-      context.status = 'inited';
+      context[kClientContextStatus] = 'inited';
 
       try {
         const startPromise = context.start();
         this.#contextStartPromises.set(contextName, startPromise);
         await startPromise;
-        context.status = 'started';
+        context[kClientContextStatus] = 'started';
       } catch (err) {
-        context.status = 'errored';
+        context[kClientContextStatus] = 'errored';
         throw new Error(err);
       }
     }
 
     return context;
-  }
-
-  /**
-   * Start all registered contexts. Called during `client.start()`
-   * @private
-   */
-  async start() {
-    const promises = this.#contexts.map(context => this.get(context.name));
-    await Promise.all(promises);
-  }
-
-  /**
-   * Stop all registered contexts. Called during `client.stop()`
-   * @private
-   */
-  async stop() {
-    const promises = this.#contexts.map(context => context.stop());
-    await Promise.all(promises);
   }
 }
 

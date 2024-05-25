@@ -1,3 +1,4 @@
+export const kClientContextStatus: unique symbol;
 export default ClientContext;
 /**
  * Base class to extend in order to implement a new Context.
@@ -16,12 +17,12 @@ export default ClientContext;
  * the context. In such case, `soundworks` guarantees that the server-side
  * logic is executed before the `enter()` and `exit()` promises are fulfilled.
  *
- * ```
- * import { Client, Context } from '@soundworks/core/index.js'
+ * ```js
+ * import { Client, ClientContext } from '@soundworks/core/index.js'
  *
  * const client = new Client(config);
  *
- * class MyContext extends Context {
+ * class MyContext extends ClientContext {
  *   async enter() {
  *     await super.enter();
  *     console.log(`client ${this.client.id} entered my context`);
@@ -48,15 +49,15 @@ declare class ClientContext {
      */
     constructor(client: Client);
     /**
-     * Status of the context.
-     * @type {'idle'|'inited'|'started'|'errored'}
-     */
-    status: 'idle' | 'inited' | 'started' | 'errored';
-    /**
      * The soundworks client instance.
      * @type {Client}
      */
     get client(): Client;
+    /**
+     * Status of the context.
+     * @type {'idle'|'inited'|'started'|'errored'}
+     */
+    get status(): "idle" | "inited" | "started" | "errored";
     /**
      * Optionnal user-defined name of the context (defaults to the class name).
      *
@@ -157,6 +158,7 @@ declare class ClientContext {
      * }
      */
     exit(): Promise<void>;
+    [kClientContextStatus]: string;
     #private;
 }
 import Client from './Client.js';

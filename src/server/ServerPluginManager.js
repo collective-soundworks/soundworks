@@ -1,5 +1,5 @@
 import BasePluginManager, {
-  kBasePluginManagerInstances,
+  kPluginManagerInstances,
 } from '../common/BasePluginManager.js';
 import ServerPlugin from './ServerPlugin.js';
 import Server from './Server.js';
@@ -78,13 +78,13 @@ class ServerPluginManager extends BasePluginManager {
     let missingPlugins = [];
 
     for (let id of registeredPlugins) {
-      if (!this[kBasePluginManagerInstances].has(id)) {
+      if (!this[kPluginManagerInstances].has(id)) {
         missingPlugins.push(id);
       }
     }
 
     if (missingPlugins.length > 0) {
-      throw new Error(`Invalid plugin list, the following plugins registered client-side: [${missingPlugins.join(', ')}] have not been registered server-side. Registered server-side plugins are: [${Array.from(this[kBasePluginManagerInstances].keys()).join(', ')}].`);
+      throw new Error(`Invalid plugin list, the following plugins registered client-side: [${missingPlugins.join(', ')}] have not been registered server-side. Registered server-side plugins are: [${Array.from(this[kPluginManagerInstances].keys()).join(', ')}].`);
     }
   }
 
@@ -105,7 +105,7 @@ class ServerPluginManager extends BasePluginManager {
   async [kServerPluginManagerRemoveClient](client) {
     let promises = [];
 
-    for (let plugin of this[kBasePluginManagerInstances].values()) {
+    for (let plugin of this[kPluginManagerInstances].values()) {
       if (plugin.clients.has(client)) {
         promises.push(plugin.removeClient(client));
       }

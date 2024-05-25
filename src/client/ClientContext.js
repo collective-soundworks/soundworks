@@ -1,4 +1,7 @@
 import Client from './Client.js';
+import {
+  kClientContextManagerRegister,
+} from './ClientContextManager.js';
 import PromiseStore from '../common/PromiseStore.js';
 import {
   CONTEXT_ENTER_REQUEST,
@@ -8,6 +11,8 @@ import {
   CONTEXT_EXIT_RESPONSE,
   CONTEXT_EXIT_ERROR,
 } from '../common/constants.js';
+
+export const kClientContextStatus = Symbol('soundworks:client-context-status');
 
 // share between all context, as channels are common to all contexts
 const promiseStore = new PromiseStore('Context');
@@ -29,12 +34,12 @@ const promiseStore = new PromiseStore('Context');
  * the context. In such case, `soundworks` guarantees that the server-side
  * logic is executed before the `enter()` and `exit()` promises are fulfilled.
  *
- * ```
- * import { Client, Context } from '@soundworks/core/index.js'
+ * ```js
+ * import { Client, ClientContext } from '@soundworks/core/index.js'
  *
  * const client = new Client(config);
  *
- * class MyContext extends Context {
+ * class MyContext extends ClientContext {
  *   async enter() {
  *     await super.enter();
  *     console.log(`client ${this.client.id} entered my context`);
@@ -67,12 +72,7 @@ class ClientContext {
     }
 
     this.#client = client;
-
-    /**
-     * Status of the context.
-     * @type {'idle'|'inited'|'started'|'errored'}
-     */
-    this.status = 'idle';
+    this[kClientContextStatus] = 'idle';
 
     this.#client.socket.addListener(CONTEXT_ENTER_RESPONSE, (reqId, contextName) => {
       if (contextName !== this.name) {
@@ -106,7 +106,7 @@ class ClientContext {
       promiseStore.reject(reqId, msg);
     });
 
-    this.#client.contextManager.register(this);
+    this.#client.contextManager[kClientContextManagerRegister](this);
   }
 
   /**
@@ -115,6 +115,14 @@ class ClientContext {
    */
   get client() {
     return this.#client;
+  }
+
+  /**
+   * Status of the context.
+   * @type {'idle'|'inited'|'started'|'errored'}
+   */
+  get status() {
+    return this[kClientContextStatus];
   }
 
   /**
