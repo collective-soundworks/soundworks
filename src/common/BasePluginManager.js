@@ -1,6 +1,14 @@
 import { isPlainObject, isString } from '@ircam/sc-utils';
 
+import {
+  kBasePluginStatus,
+} from './BasePlugin.js';
+
 import logger from './logger.js';
+
+export const kBasePluginManagerStart = Symbol('soundworks:base-plugin-manager-start');
+export const kBasePluginManagerStop = Symbol('soundworks:base-plugin-manager-stop');
+export const kBasePluginManagerInstances = Symbol('soundworks:base-plugin-manager-instances');
 
 /**
  * Callback executed when a plugin internal state is updated.
@@ -18,96 +26,110 @@ import logger from './logger.js';
  * @callback pluginManagerDeleteOnStateChangeCallback
  */
 
-/**
- * Shared functionnality between server-side and client-size plugin manager
- *
- * @private
- */
+/** @private */
 class BasePluginManager {
-  constructor(node) {
-    // node may be either a soundworks server or a soundworks client
-    /** @private */
-    this._node = node;
-    /** @private */
-    this._dependencies = new Map();
-    /** @private */
-    this._instances = new Map();
-    /** @private */
-    this._instanceStartPromises = new Map();
-    /** @private */
-    this._onStateChangeCallbacks = new Set();
+  // node may be either the server or a client
+  #node = null;
+  #status = 'idle';
+  #dependencies = new Map();
+  #instanceStartPromises = new Map();
+  #onStateChangeCallbacks = new Set();
 
-    this.status = 'idle';
+  constructor(node) {
+    this.#node = node;
+    /** #private */
+    this[kBasePluginManagerInstances] = new Map();
   }
 
-  /** @private */
   #propagateStateChange(instance = null, status = null) {
     if (instance !== null) {
-      // status is null if wew forward some inner state change from the instance
+      // status is null if we forward some inner state change from the instance
       if (status !== null) {
-        instance.status = status;
+        instance[kBasePluginStatus] = status;
       }
 
-      const fullState = Object.fromEntries(this._instances);
-      this._onStateChangeCallbacks.forEach(callback => callback(fullState, instance));
+      const fullState = Object.fromEntries(this[kBasePluginManagerInstances]);
+      this.#onStateChangeCallbacks.forEach(callback => callback(fullState, instance));
     } else {
-      const fullState = Object.fromEntries(this._instances);
-      this._onStateChangeCallbacks.forEach(callback => callback(fullState, null));
+      const fullState = Object.fromEntries(this[kBasePluginManagerInstances]);
+      this.#onStateChangeCallbacks.forEach(callback => callback(fullState, null));
     }
   }
 
-    /**
-   * Initialize all the registered plugin. Executed during the `Client.init()` or
-   * `Server.init()` initialization step.
+  /**
+   * Initialize all registered plugins.
+   *
+   * Executed during the `Client.init()` or `Server.init()` initialization step.
+   *
    * @private
    */
-  async start() {
+  async [kBasePluginManagerStart]() {
     logger.title('starting registered plugins');
 
-    if (this.status !== 'idle') {
+    if (this.#status !== 'idle') {
       throw new Error(`[soundworks:PluginManager] Cannot call "pluginManager.init()" twice`);
     }
 
-    this.status = 'inited';
+    this.#status = 'inited';
     // instanciate all plugins
-    for (let [_id, instance] of this._instances.entries()) {
-      instance.onStateChange(_values => this.#propagateStateChange(instance));
+    for (let instance of this[kBasePluginManagerInstances].values()) {
+      instance.onStateChange(() => this.#propagateStateChange(instance, null));
     }
 
-    // propagate all 'idle' statuses before start
-    this.#propagateStateChange();
+    // propagate all 'idle' status before start
+    this.#propagateStateChange(null, null);
 
-    const promises = Array.from(this._instances.keys()).map(id => this.unsafeGet(id));
+    const promises = Array.from(this[kBasePluginManagerInstances].keys()).map(id => this.getUnsafe(id));
 
     try {
       await Promise.all(promises);
-      this.status = 'started';
+      this.#status = 'started';
     } catch (err) {
-      this.status = 'errored';
+      this.#status = 'errored';
       throw err; // throw initial error
     }
   }
 
   /** @private */
-  async stop() {
-    for (let instance of this._instances.values()) {
+  async [kBasePluginManagerStop]() {
+    for (let instance of this[kBasePluginManagerInstances].values()) {
       await instance.stop();
     }
   }
 
   /**
-   * Retrieve an fully started instance of a registered plugin, without checking
-   * that the pluginManager has started. This is required for starting the plugin
-   * manager itself and to require a plugin from within another plugin
+   * Status of the plugin manager
    *
+   * @type {'idle'|'inited'|'started'|'errored'}
+   */
+  get status() {
+    return this.#status;
+  }
+
+  /**
+   * Alias for existing plugins (i.e. plugin-scriptin), remove once updated
    * @private
    */
   async unsafeGet(id) {
+    return this.getUnsafe(id);
+  }
+
+  /**
+   * Retrieve an fully started instance of a registered plugin without checking
+   * that the pluginManager is started.
+   *
+   * This method is required for starting the plugin manager itself and to require
+   * a plugin from within another plugin.
+   *
+   * _Warning: Unless you are developing your own plugins, you should not have to use
+   * this method_
+   */
+  async getUnsafe(id) {
     if (!isString(id)) {
       throw new Error(`[soundworks.PluginManager] Invalid argument, "pluginManager.get(name)" argument should be a string`);
     }
 
-    if (!this._instances.has(id)) {
+    if (!this[kBasePluginManagerInstances].has(id)) {
       throw new Error(`[soundworks:PluginManager] Cannot get plugin "${id}", plugin is not registered`);
     }
 
@@ -115,30 +137,30 @@ class BasePluginManager {
     // to be able to properly propagate the states. The code bellow should allow
     // to dynamically register and launch plugins at runtime.
     //
-    // if (!this._instances.has(id)) {
-    //   const { ctor, options } = this._dependencies.get(id);
-    //   const instance = new ctor(this._node, id, options);
-    //   this._instances.set(id, instance);
+    // if (!this[kBasePluginManagerInstances].has(id)) {
+    //   const { ctor, options } = this.#dependencies.get(id);
+    //   const instance = new ctor(this.#node, id, options);
+    //   this[kBasePluginManagerInstances].set(id, instance);
     // }
 
-    const instance = this._instances.get(id);
+    const instance = this[kBasePluginManagerInstances].get(id);
 
     // recursively get the dependency chain
-    const deps = this._dependencies.get(id);
-    const promises = deps.map(id => this.unsafeGet(id));
+    const deps = this.#dependencies.get(id);
+    const promises = deps.map(id => this.getUnsafe(id));
 
     await Promise.all(promises);
 
     // 'plugin.start' has already been called, just await the start promise
-    if (this._instanceStartPromises.has(id)) {
-      await this._instanceStartPromises.get(id);
+    if (this.#instanceStartPromises.has(id)) {
+      await this.#instanceStartPromises.get(id);
     } else {
       this.#propagateStateChange(instance, 'inited');
       let errored = false;
 
       try {
         const startPromise = instance.start();
-        this._instanceStartPromises.set(id, startPromise);
+        this.#instanceStartPromises.set(id, startPromise);
 
         await startPromise;
       } catch (err) {
@@ -184,7 +206,7 @@ class BasePluginManager {
     // For now we don't allow to register a plugin after `client|server.init()`.
     // This is subject to change in the future as we may want to dynamically
     // register new plugins during application lifetime.
-    if (this._node.status === 'inited') {
+    if (this.#node.status === 'inited') {
       throw new Error(`[soundworks.PluginManager] Cannot register plugin (${id}) after "client.init()"`);
     }
 
@@ -200,19 +222,19 @@ class BasePluginManager {
       throw new Error(`[soundworks.PluginManager] Invalid argument, "pluginManager.register" fourth optionnal argument should be an array`);
     }
 
-    if (this._instances.has(id)) {
+    if (this[kBasePluginManagerInstances].has(id)) {
       throw new Error(`[soundworks:PluginManager] Plugin "${id}" already registered`);
     }
 
-    // we instanciate the plugin here, so that a plugin can register another one
+    // We instanciate the plugin here, so that a plugin can register another one
     // in its own constructor.
     //
-    // the dependencies must be created first, so that the instance can call
+    // The dependencies must be created first, so that the instance can call
     // addDependency in its constructor
-    this._dependencies.set(id, deps);
+    this.#dependencies.set(id, deps);
 
-    const instance = new ctor(this._node, id, options);
-    this._instances.set(id, instance);
+    const instance = new ctor(this.#node, id, options);
+    this[kBasePluginManagerInstances].set(id, instance);
   }
 
   /**
@@ -221,7 +243,7 @@ class BasePluginManager {
    * Usefull to require a plugin within a plugin
    */
   addDependency(pluginId, dependencyId) {
-    const deps = this._dependencies.get(pluginId);
+    const deps = this.#dependencies.get(pluginId);
     deps.push(dependencyId);
   }
 
@@ -230,7 +252,7 @@ class BasePluginManager {
    * @returns {string[]}
    */
   getRegisteredPlugins() {
-    return Array.from(this._instances.keys());
+    return Array.from(this[kBasePluginManagerInstances].keys());
   }
 
   /**
@@ -257,8 +279,8 @@ class BasePluginManager {
    * unsubscribe();
    */
   onStateChange(callback) {
-    this._onStateChangeCallbacks.add(callback);
-    return () => this._onStateChangeCallbacks.delete(callback);
+    this.#onStateChangeCallbacks.add(callback);
+    return () => this.#onStateChangeCallbacks.delete(callback);
   }
 }
 

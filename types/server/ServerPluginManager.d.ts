@@ -1,3 +1,6 @@
+export const kServerPluginManagerCheckRegisteredPlugins: unique symbol;
+export const kServerPluginManagerAddClient: unique symbol;
+export const kServerPluginManagerRemoveClient: unique symbol;
 export default ServerPluginManager;
 /**
  * The `PluginManager` allows to register and retrieve `soundworks` plugins.
@@ -56,7 +59,30 @@ export default ServerPluginManager;
  * @hideconstructor
  */
 declare class ServerPluginManager extends BasePluginManager {
-    register(id: any, factory?: any, options?: {}, deps?: any[]): void;
+    /**
+     * Register a plugin into the manager.
+     *
+     * _A plugin must always be registered both on client-side and on server-side_
+     *
+     * Refer to the plugin documentation to check its options and proper way of
+     * registering it.
+     *
+     * @param {string} id - Unique id of the plugin. Enables the registration of the
+     *  same plugin factory under different ids.
+     * @param {Function} factory - Factory function that returns the Plugin class.
+     * @param {object} [options={}] - Options to configure the plugin.
+     * @param {array} [deps=[]] - List of plugins' names the plugin depends on, i.e.
+     *  the plugin initialization will start only after the plugins it depends on are
+     *  fully started themselves.
+     * @see {@link ClientPluginManager#register}
+     * @see {@link ServerPluginManager#register}
+     * @example
+     * // client-side
+     * client.pluginManager.register('user-defined-id', pluginFactory);
+     * // server-side
+     * server.pluginManager.register('user-defined-id', pluginFactory);
+     */
+    register(id: string, factory?: Function, options?: object, deps?: any[]): void;
     /**
      * Retrieve a fully started instance of a registered plugin.
      *
@@ -72,16 +98,16 @@ declare class ServerPluginManager extends BasePluginManager {
      * _Note: the async API is designed to enable the dynamic creation of plugins
      * (hopefully without brealing changes) in a future release._
      *
-     * @param {server.Plugin#id} id - Id of the plugin as defined when registered.
-     * @returns {server.Plugin}
-     * @see {@link ServerPluginManager#onStateChange}
+     * @param {ServerPlugin#id} id - Id of the plugin as defined when registered.
+     * @returns {ServerPlugin}
      */
-    get(id: any): server.Plugin;
+    get(id: any): ServerPlugin;
     /** @private */
-    private checkRegisteredPlugins;
+    private [kServerPluginManagerCheckRegisteredPlugins];
     /** @private */
-    private addClient;
+    private [kServerPluginManagerAddClient];
     /** @private */
-    private removeClient;
+    private [kServerPluginManagerRemoveClient];
 }
 import BasePluginManager from '../common/BasePluginManager.js';
+import ServerPlugin from './ServerPlugin.js';

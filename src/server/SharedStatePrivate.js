@@ -10,6 +10,10 @@ import {
   UPDATE_ABORT,
   UPDATE_NOTIFICATION,
 } from '../common/constants.js';
+import {
+  kServerStateManagerDeletePrivateState,
+  kServerStateManagerGetHooks,
+} from '../server/ServerStateManager.js';
 
 /**
  * Filter update object according to filter list.
@@ -92,7 +96,7 @@ class SharedStatePrivate {
     // attach client listeners
     client.transport.addListener(`${UPDATE_REQUEST}-${this.id}-${remoteId}`, async (reqId, updates, context) => {
       // apply registered hooks
-      const hooks = this.#manager._hooksBySchemaName.get(this.schemaName);
+      const hooks = this.#manager[kServerStateManagerGetHooks](this.schemaName);
       const values = this.#parameters.getValues();
       let hookAborted = false;
 
@@ -223,7 +227,7 @@ class SharedStatePrivate {
     if (isOwner) {
       // delete only if creator
       client.transport.addListener(`${DELETE_REQUEST}-${this.id}-${remoteId}`, (reqId) => {
-        this.#manager._sharedStatePrivateById.delete(this.id);
+        this.#manager[kServerStateManagerDeletePrivateState](this.id);
         // --------------------------------------------------------------------
         // WARNING - MAKE SURE WE DON'T HAVE PROBLEM W/ THAT
         // --------------------------------------------------------------------

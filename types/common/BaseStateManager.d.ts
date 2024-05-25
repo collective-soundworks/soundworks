@@ -127,13 +127,11 @@ declare class BaseStateManager {
     getCollection(schemaName: string, filterOrOptions?: any, options?: {
         excludeLocal?: boolean;
     }, ...args: any[]): Promise<SharedStateCollection>;
-    [kStateManagerDeleteState](stateId: any): void;
-    [kStateManagerClient]: {
-        id: number;
-        transport: BatchedTransport;
-    };
+    /** @private */
+    private [kStateManagerDeleteState];
+    /** @private */
+    private [kStateManagerClient];
     #private;
 }
 import SharedState from './SharedState.js';
 import SharedStateCollection from './SharedStateCollection.js';
-import BatchedTransport from './BatchedTransport.js';

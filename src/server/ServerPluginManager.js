@@ -1,6 +1,12 @@
-import BasePluginManager from '../common/BasePluginManager.js';
-import Plugin from './Plugin.js';
+import BasePluginManager, {
+  kBasePluginManagerInstances,
+} from '../common/BasePluginManager.js';
+import ServerPlugin from './ServerPlugin.js';
 import Server from './Server.js';
+
+export const kServerPluginManagerCheckRegisteredPlugins = Symbol('soundworks:server-plugin-manager-check-registered-plugins');
+export const kServerPluginManagerAddClient = Symbol('soundworks:server-plugin-manager-add-client');
+export const kServerPluginManagerRemoveClient = Symbol('soundworks:server-plugin-manager-remove-client');
 
 /**
  * The `PluginManager` allows to register and retrieve `soundworks` plugins.
@@ -67,11 +73,75 @@ class ServerPluginManager extends BasePluginManager {
     super(server);
   }
 
-  register(id, factory = null, options = {}, deps = []) {
-    const ctor = factory(Plugin);
+  /** @private */
+  [kServerPluginManagerCheckRegisteredPlugins](registeredPlugins) {
+    let missingPlugins = [];
 
-    if (!(ctor.prototype instanceof Plugin)) {
-      throw new Error(`[soundworks.PluginManager] Invalid argument, "pluginManager.register" second argument should be a factory function returning a class extending the "Plugin" base class`);
+    for (let id of registeredPlugins) {
+      if (!this[kBasePluginManagerInstances].has(id)) {
+        missingPlugins.push(id);
+      }
+    }
+
+    if (missingPlugins.length > 0) {
+      throw new Error(`Invalid plugin list, the following plugins registered client-side: [${missingPlugins.join(', ')}] have not been registered server-side. Registered server-side plugins are: [${Array.from(this[kBasePluginManagerInstances].keys()).join(', ')}].`);
+    }
+  }
+
+  /** @private */
+  async [kServerPluginManagerAddClient](client, registeredPlugins = []) {
+    let promises = [];
+
+    for (let pluginName of registeredPlugins) {
+      const plugin = await this.get(pluginName);
+      const promise = plugin.addClient(client);
+      promises.push(promise);
+    }
+
+    await Promise.all(promises);
+  }
+
+  /** @private */
+  async [kServerPluginManagerRemoveClient](client) {
+    let promises = [];
+
+    for (let plugin of this[kBasePluginManagerInstances].values()) {
+      if (plugin.clients.has(client)) {
+        promises.push(plugin.removeClient(client));
+      }
+    }
+
+    await Promise.all(promises);
+  }
+
+  /**
+   * Register a plugin into the manager.
+   *
+   * _A plugin must always be registered both on client-side and on server-side_
+   *
+   * Refer to the plugin documentation to check its options and proper way of
+   * registering it.
+   *
+   * @param {string} id - Unique id of the plugin. Enables the registration of the
+   *  same plugin factory under different ids.
+   * @param {Function} factory - Factory function that returns the Plugin class.
+   * @param {object} [options={}] - Options to configure the plugin.
+   * @param {array} [deps=[]] - List of plugins' names the plugin depends on, i.e.
+   *  the plugin initialization will start only after the plugins it depends on are
+   *  fully started themselves.
+   * @see {@link ClientPluginManager#register}
+   * @see {@link ServerPluginManager#register}
+   * @example
+   * // client-side
+   * client.pluginManager.register('user-defined-id', pluginFactory);
+   * // server-side
+   * server.pluginManager.register('user-defined-id', pluginFactory);
+   */
+  register(id, factory = null, options = {}, deps = []) {
+    const ctor = factory(ServerPlugin);
+
+    if (!(ctor.prototype instanceof ServerPlugin)) {
+      throw new Error(`[soundworks.PluginManager] Invalid argument, "pluginManager.register" second argument should be a factory function returning a class extending the "ServerPlugin" base class`);
     }
 
     super.register(id, ctor, options, deps);
@@ -92,59 +162,15 @@ class ServerPluginManager extends BasePluginManager {
    * _Note: the async API is designed to enable the dynamic creation of plugins
    * (hopefully without brealing changes) in a future release._
    *
-   * @param {server.Plugin#id} id - Id of the plugin as defined when registered.
-   * @returns {server.Plugin}
-   * @see {@link ServerPluginManager#onStateChange}
+   * @param {ServerPlugin#id} id - Id of the plugin as defined when registered.
+   * @returns {ServerPlugin}
    */
   async get(id) {
     if (this.status !== 'started') {
       throw new Error(`[soundworks.PluginManager] Cannot get plugin before "server.init()"`);
     }
 
-    return super.unsafeGet(id);
-  }
-
-  // server only methods
-
-  /** @private */
-  checkRegisteredPlugins(registeredPlugins) {
-    let missingPlugins = [];
-
-    for (let id of registeredPlugins) {
-      if (!this._instances.has(id)) {
-        missingPlugins.push(id);
-      }
-    }
-
-    if (missingPlugins.length > 0) {
-      throw new Error(`Invalid plugin list, the following plugins registered client-side: [${missingPlugins.join(', ')}] have not been registered server-side. Registered server-side plugins are: [${Array.from(this._instances.keys()).join(', ')}].`);
-    }
-  }
-
-  /** @private */
-  async addClient(client, registeredPlugins = []) {
-    let promises = [];
-
-    for (let pluginName of registeredPlugins) {
-      const plugin = await this.get(pluginName);
-      const promise = plugin.addClient(client);
-      promises.push(promise);
-    }
-
-    await Promise.all(promises);
-  }
-
-  /** @private */
-  async removeClient(client) {
-    let promises = [];
-
-    for (let plugin of this._instances.values()) {
-      if (plugin.clients.has(client)) {
-        promises.push(plugin.removeClient(client));
-      }
-    }
-
-    await Promise.all(promises);
+    return super.getUnsafe(id);
   }
 }
 

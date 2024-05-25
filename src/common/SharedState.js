@@ -24,6 +24,8 @@ import {
 export const kSharedStatePromiseStore = Symbol('soundworks:shared-state-promise-store');
 
 /**
+ * Callback executed when updates are applied on a {@link SharedState}.
+ *
  * @callback sharedStateOnUpdateCallback
  * @param {Object} newValues - Key / value pairs of the updates that have been
  *  applied to the state.
@@ -35,6 +37,7 @@ export const kSharedStatePromiseStore = Symbol('soundworks:shared-state-promise-
 
 /**
  * Delete the registered {@link sharedStateOnUpdateCallback}.
+ *
  * @callback sharedStateDeleteOnUpdateCallback
  */
 

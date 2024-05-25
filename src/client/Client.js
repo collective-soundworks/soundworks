@@ -2,6 +2,10 @@ import { isBrowser, isPlainObject } from '@ircam/sc-utils';
 
 import ClientContextManager from './ClientContextManager.js';
 import ClientPluginManager from './ClientPluginManager.js';
+import {
+  kBasePluginManagerStart,
+  kBasePluginManagerStop,
+} from '../common/BasePluginManager.js';
 import ClientSocket, {
   kSocketTerminate,
 } from './ClientSocket.js';
@@ -359,7 +363,7 @@ class Client {
       removeAllListeners: this.#socket.removeAllListeners.bind(this.#socket),
     });
 
-    await this.#pluginManager.start();
+    await this.#pluginManager[kBasePluginManagerStart]();
 
     await this.#dispatchStatus('inited');
   }
@@ -415,7 +419,7 @@ class Client {
     }
 
     await this.#contextManager.stop();
-    await this.#pluginManager.stop();
+    await this.#pluginManager[kBasePluginManagerStop]();
     await this.#socket[kSocketTerminate]();
 
     await this.#dispatchStatus('stopped');

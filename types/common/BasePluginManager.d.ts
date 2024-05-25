@@ -1,3 +1,6 @@
+export const kBasePluginManagerStart: unique symbol;
+export const kBasePluginManagerStop: unique symbol;
+export const kBasePluginManagerInstances: unique symbol;
 export default BasePluginManager;
 /**
  * Callback executed when a plugin internal state is updated.
@@ -21,40 +24,31 @@ export type pluginManagerDeleteOnStateChangeCallback = () => any;
  *
  * @callback pluginManagerDeleteOnStateChangeCallback
  */
-/**
- * Shared functionnality between server-side and client-size plugin manager
- *
- * @private
- */
+/** @private */
 declare class BasePluginManager {
     constructor(node: any);
-    /** @private */
-    private _node;
-    /** @private */
-    private _dependencies;
-    /** @private */
-    private _instances;
-    /** @private */
-    private _instanceStartPromises;
-    /** @private */
-    private _onStateChangeCallbacks;
-    status: string;
     /**
-   * Initialize all the registered plugin. Executed during the `Client.init()` or
-   * `Server.init()` initialization step.
-   * @private
-   */
-    private start;
-    /** @private */
-    private stop;
-    /**
-     * Retrieve an fully started instance of a registered plugin, without checking
-     * that the pluginManager has started. This is required for starting the plugin
-     * manager itself and to require a plugin from within another plugin
+     * Status of the plugin manager
      *
+     * @type {'idle'|'inited'|'started'|'errored'}
+     */
+    get status(): "idle" | "inited" | "started" | "errored";
+    /**
+     * Alias for existing plugins (i.e. plugin-scriptin), remove once updated
      * @private
      */
     private unsafeGet;
+    /**
+     * Retrieve an fully started instance of a registered plugin without checking
+     * that the pluginManager is started.
+     *
+     * This method is required for starting the plugin manager itself and to require
+     * a plugin from within another plugin.
+     *
+     * _Warning: Unless you are developing your own plugins, you should not have to use
+     * this method_
+     */
+    getUnsafe(id: any): Promise<any>;
     /**
      * Register a plugin into the manager.
      *
@@ -114,5 +108,17 @@ declare class BasePluginManager {
      * unsubscribe();
      */
     onStateChange(callback: pluginManagerOnStateChangeCallback): pluginManagerDeleteOnStateChangeCallback;
+    /**
+     * Initialize all registered plugins.
+     *
+     * Executed during the `Client.init()` or `Server.init()` initialization step.
+     *
+     * @private
+     */
+    private [kBasePluginManagerStart];
+    /** @private */
+    private [kBasePluginManagerStop];
+    /** #private */
+    [kBasePluginManagerInstances]: Map<any, any>;
     #private;
 }

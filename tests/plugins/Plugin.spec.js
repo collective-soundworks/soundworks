@@ -2,7 +2,7 @@ import { assert } from 'chai';
 
 import { Server } from '../../src/server/index.js';
 import { Client } from '../../src/client/index.js';
-import ServerPlugin from '../../src/server/Plugin.js';
+import ServerPlugin from '../../src/server/ServerPlugin.js';
 import ClientPlugin from '../../src/client/ClientPlugin.js';
 import pluginDelayServer from '../utils/PluginDelayServer.js';
 import pluginDelayClient from '../utils/PluginDelayClient.js';

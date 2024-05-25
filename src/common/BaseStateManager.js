@@ -46,6 +46,8 @@ class BaseStateManager {
 
   constructor() {
     this.#promiseStore = new PromiseStore('BaseStateManager');
+    /** @private */
+    this[kStateManagerClient] = null;
   }
 
     /** @private */
@@ -63,7 +65,7 @@ class BaseStateManager {
     return filter;
   }
 
-  // called from SharedState
+  /** @private */
   [kStateManagerDeleteState](stateId) {
     this.#statesById.delete(stateId);
   }

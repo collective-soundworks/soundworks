@@ -2,11 +2,13 @@ import { assert } from 'chai';
 
 import { Server } from '../../src/server/index.js';
 import { Client } from '../../src/client/index.js';
-import Plugin from '../../src/server/Plugin.js';
 import ServerPluginManager from '../../src/server/ServerPluginManager.js';
-
+import ServerPlugin from '../../src/server/ServerPlugin.js';
 import pluginDelayServer from '../utils/PluginDelayServer.js';
 import config from '../utils/config.js';
+import {
+  kStateManagerClientsByNodeId,
+} from '../../src/server/ServerStateManager.js';
 
 describe(`# ServerPluginManager`, () => {
   describe(`## [private] constructor(server)`, () => {
@@ -193,7 +195,7 @@ describe(`# ServerPluginManager`, () => {
       // make sure we didn't get the delay in `get`
       assert.isBelow(Date.now() - startTime, TIMEOUT_ERROR);
       assert.equal(plugin.status, 'started');
-      assert.ok(plugin instanceof Plugin);
+      assert.ok(plugin instanceof ServerPlugin);
     });
 
     // @note - for now we just forbid this,
@@ -225,7 +227,7 @@ describe(`# ServerPluginManager`, () => {
     //   const delta = now - startTime;
     //   assert.isBelow(Math.abs(delta - 100), TIMEOUT_ERROR);
 
-    //   assert.ok(plugin instanceof Plugin);
+    //   assert.ok(plugin instanceof ServerPlugin);
     // });
   });
 
@@ -393,15 +395,16 @@ describe(`# ServerPluginManager`, () => {
 
     it(`stateManager should still be usable`, async () => {
       let removeClientCalled = false;
+      let errored = false;
 
       function testPluginFactory(Plugin) {
         return class TestPlugin extends Plugin {
           async removeClient(client) {
             await super.removeClient(client);
 
-            removeClientCalled = true;
-            assert.equal(this.server.stateManager._clientByNodeId.has(client.id), true);
+            assert.equal(this.server.stateManager[kStateManagerClientsByNodeId].has(client.id), true);
             assert.equal(this.clients.has(client), false);
+            removeClientCalled = true;
           }
         }
       }

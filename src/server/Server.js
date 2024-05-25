@@ -31,7 +31,15 @@ import {
 } from './crypto.js';
 import Client from './Client.js';
 import ServerContextManager from './ServerContextManager.js';
-import ServerPluginManager from './ServerPluginManager.js';
+import ServerPluginManager, {
+  kServerPluginManagerCheckRegisteredPlugins,
+  kServerPluginManagerAddClient,
+  kServerPluginManagerRemoveClient,
+} from './ServerPluginManager.js';
+import {
+  kBasePluginManagerStart,
+  kBasePluginManagerStop,
+} from '../common/BasePluginManager.js';
 import ServerStateManager from './ServerStateManager.js';
 import {
   kSocketClientId,
@@ -683,7 +691,7 @@ Invalid certificate files, please check your:
     // ------------------------------------------------------------
     // START PLUGIN MANAGER
     // ------------------------------------------------------------
-    await this.#pluginManager.start();
+    await this.#pluginManager[kBasePluginManagerStart]();
 
     await this.#dispatchStatus('inited');
 
@@ -818,7 +826,7 @@ Invalid certificate files, please check your:
     }
 
     await this.#contextManager.stop();
-    await this.#pluginManager.stop();
+    await this.#pluginManager[kBasePluginManagerStop]();
 
     this.#sockets[kSocketsStop]();
 
@@ -964,7 +972,7 @@ Invalid certificate files, please check your:
           // clean context manager, await before cleaning state manager
           await this.#contextManager.removeClient(client);
           // remove client from pluginManager
-          await this.#pluginManager.removeClient(client);
+          await this.#pluginManager[kServerPluginManagerRemoveClient](client);
           // clean state manager
           await this.#stateManager.removeClient(client.id);
 
@@ -996,7 +1004,7 @@ Invalid certificate files, please check your:
       }
 
       try {
-        this.#pluginManager.checkRegisteredPlugins(registeredPlugins);
+        this.#pluginManager[kServerPluginManagerCheckRegisteredPlugins](registeredPlugins);
       } catch (err) {
         socket.send(CLIENT_HANDSHAKE_ERROR, {
           type: 'invalid-plugin-list',
@@ -1018,7 +1026,7 @@ Invalid certificate files, please check your:
       });
       // add client to plugin manager
       // server-side, all plugins are active for the lifetime of the client
-      await this.#pluginManager.addClient(client, registeredPlugins);
+      await this.#pluginManager[kServerPluginManagerAddClient](client, registeredPlugins);
       // add client to context manager
       await this.#contextManager.addClient(client);
 

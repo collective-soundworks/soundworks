@@ -1,21 +1,4 @@
-export default Plugin;
-export namespace server {
-    /**
-     * ~onStateChangeCallback
-     */
-    type Plugin = (#state: server.Plugin) => any;
-}
-/**
- * Callback executed when the plugin state is updated.
- *
- * @callback server.Plugin~onStateChangeCallback
- * @param {server.Plugin#state} state - Current state of the plugin.
- */
-/**
- * Delete the registered {@link server.Plugin~onStateChangeCallback}.
- *
- * @callback server.Plugin~deleteOnStateChangeCallback
- */
+export default ServerPlugin;
 /**
  * Base class to extend in order to create the server-side counterpart of a
  * `soundworks` plugin.
@@ -35,41 +18,41 @@ export namespace server {
  * @extends BasePlugin
  * @inheritdoc
  */
-declare class Plugin extends BasePlugin {
+declare class ServerPlugin extends BasePlugin {
     /**
-     * @param {server.Server} server - The soundworks server instance.
+     * @param {Server} server - The soundworks server instance.
      * @param {string} id - User defined id of the plugin as defined in
-     *  {@link server.PluginManager#register}.
+     *  {@link ServerPluginManager#register}.
      */
-    constructor(server: server.Server, id: string);
+    constructor(server: Server, id: string);
     /**
      * Instance of soundworks server.
-     * @type {server.Server}
-     * @see {@link server.Server}
+     * @type {Server}
+     * @see {@link Server}
      */
-    get server(): server.Server;
+    get server(): Server;
     /**
      * Set of the clients registered in the plugin.
-     * @type {Set<server.Client>}
-     * @see {@link server.Client}
+     * @type {Set<ServerClient>}
+     * @see {@link ServerClient}
      */
-    get clients(): Set<server.Client>;
+    get clients(): Set<ServerClient>;
     /**
      * Method called when a client (which registered the client-side plugin),
      * connects to the application. Override this method if you need to perform
      * some particular logic (e.g. creating a shared state) for each clients.
      *
-     * @param {server.Client} client
+     * @param {ServerClient} client
      */
-    addClient(client: server.Client): Promise<void>;
+    addClient(client: ServerClient): Promise<void>;
     /**
      * Method called when a client (which registered the client-side plugin),
      * disconnects from the application. Override this method if you need to perform
      * some particular logic (e.g. creating a shared state) for each clients.
      *
-     * @param {server.Client} client
+     * @param {ServerClient} client
      */
-    removeClient(client: server.Client): Promise<void>;
+    removeClient(client: ServerClient): Promise<void>;
     #private;
 }
 import BasePlugin from '../common/BasePlugin.js';

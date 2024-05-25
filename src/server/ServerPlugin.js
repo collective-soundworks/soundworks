@@ -1,19 +1,6 @@
 import BasePlugin from '../common/BasePlugin.js';
 
 /**
- * Callback executed when the plugin state is updated.
- *
- * @callback server.Plugin~onStateChangeCallback
- * @param {server.Plugin#state} state - Current state of the plugin.
- */
-
-/**
- * Delete the registered {@link server.Plugin~onStateChangeCallback}.
- *
- * @callback server.Plugin~deleteOnStateChangeCallback
- */
-
-/**
  * Base class to extend in order to create the server-side counterpart of a
  * `soundworks` plugin.
  *
@@ -32,14 +19,14 @@ import BasePlugin from '../common/BasePlugin.js';
  * @extends BasePlugin
  * @inheritdoc
  */
-class Plugin extends BasePlugin {
+class ServerPlugin extends BasePlugin {
   #server = null;
   #clients = new Set();
 
   /**
-   * @param {server.Server} server - The soundworks server instance.
+   * @param {Server} server - The soundworks server instance.
    * @param {string} id - User defined id of the plugin as defined in
-   *  {@link server.PluginManager#register}.
+   *  {@link ServerPluginManager#register}.
    */
   constructor(server, id) {
     super(id);
@@ -48,8 +35,8 @@ class Plugin extends BasePlugin {
 
   /**
    * Instance of soundworks server.
-   * @type {server.Server}
-   * @see {@link server.Server}
+   * @type {Server}
+   * @see {@link Server}
    */
   get server() {
     return this.#server;
@@ -57,8 +44,8 @@ class Plugin extends BasePlugin {
 
   /**
    * Set of the clients registered in the plugin.
-   * @type {Set<server.Client>}
-   * @see {@link server.Client}
+   * @type {Set<ServerClient>}
+   * @see {@link ServerClient}
    */
   get clients() {
     return this.#clients;
@@ -69,7 +56,7 @@ class Plugin extends BasePlugin {
    * connects to the application. Override this method if you need to perform
    * some particular logic (e.g. creating a shared state) for each clients.
    *
-   * @param {server.Client} client
+   * @param {ServerClient} client
    */
   async addClient(client) {
     this.#clients.add(client);
@@ -80,11 +67,11 @@ class Plugin extends BasePlugin {
    * disconnects from the application. Override this method if you need to perform
    * some particular logic (e.g. creating a shared state) for each clients.
    *
-   * @param {server.Client} client
+   * @param {ServerClient} client
    */
   async removeClient(client) {
     this.#clients.delete(client);
   }
 }
 
-export default Plugin;
+export default ServerPlugin;

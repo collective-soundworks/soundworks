@@ -1,11 +1,16 @@
 export const kSharedStatePromiseStore: unique symbol;
 export default SharedState;
+/**
+ * Callback executed when updates are applied on a {@link SharedState }.
+ */
 export type sharedStateOnUpdateCallback = (newValues: any, oldValues: any, context?: Mixed) => any;
 /**
  * Delete the registered {@link sharedStateOnUpdateCallback }.
  */
 export type sharedStateDeleteOnUpdateCallback = () => any;
 /**
+ * Callback executed when updates are applied on a {@link SharedState}.
+ *
  * @callback sharedStateOnUpdateCallback
  * @param {Object} newValues - Key / value pairs of the updates that have been
  *  applied to the state.
@@ -16,6 +21,7 @@ export type sharedStateDeleteOnUpdateCallback = () => any;
  */
 /**
  * Delete the registered {@link sharedStateOnUpdateCallback}.
+ *
  * @callback sharedStateDeleteOnUpdateCallback
  */
 /**
