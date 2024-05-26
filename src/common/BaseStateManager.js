@@ -29,11 +29,19 @@ export const kStateManagerClient = Symbol('soundworks:state-manager-client');
 
 
 /**
+ * Callback executed when a state is created on the network.
+ *
  * @callback stateManagerObserveCallback
  * @async
  * @param {string} schemaName - name of the schema
  * @param {number} stateId - id of the state
  * @param {number} nodeId - id of the node that created the state
+ */
+/**
+ * Callback to execute in order to remove a {@link stateManagerObserveCallback}
+ * from the list of observer.
+ *
+ * @callback stateManagerDeleteObserveCallback
  */
 
 /** @private */
@@ -50,7 +58,7 @@ class BaseStateManager {
     this[kStateManagerClient] = null;
   }
 
-    /** @private */
+  /** @private */
   #filterObserve(observedSchemaName, schemaName, creatorId, options) {
     let filter = true;
     // schema name filter filer
@@ -137,7 +145,6 @@ class BaseStateManager {
       // we don't call another callback that may have been registered earlier.
       const observeInfos = this.#observeRequestCallbacks.get(reqId);
       const [observedSchemaName, callback, options] = observeInfos;
-
       // move observeInfos from `_observeRequestCallbacks` to `_observeListeners`
       // to guarantee order of execution, @see not in `.observe`
       this.#observeRequestCallbacks.delete(reqId);
@@ -157,7 +164,6 @@ class BaseStateManager {
 
       const unsubscribe = () => {
         this.#observeListeners.delete(observeInfos);
-
         // no more listeners, we can stop receiving notifications from the server
         if (this.#observeListeners.size === 0) {
           this[kStateManagerClient].transport.emit(UNOBSERVE_NOTIFICATION);
@@ -214,7 +220,7 @@ class BaseStateManager {
    * @param {String} schemaName - Name of the schema as given on registration
    *  (cf. ServerStateManager)
    * @example
-   * const schema = await client.stateManager.getSchema('my-schema');
+   * const schema = await client.stateManager.getSchema('my-class');
    */
   async getSchema(schemaName) {
     if (this.#cachedSchemas.has(schemaName)) {
@@ -238,7 +244,7 @@ class BaseStateManager {
    * @param {Object.<string, any>} [initValues={}] - Default values for the state.
    * @returns {Promise<SharedState>}
    * @example
-   * const state = await client.stateManager.create('my-schema');
+   * const state = await client.stateManager.create('my-class');
    */
   async create(schemaName, initValues = {}) {
     return new Promise((resolve, reject) => {
@@ -249,24 +255,48 @@ class BaseStateManager {
   }
 
   /**
+   * Attach to an existing `SharedState` instance.
+   *
    * @overload
    * @param {string} schemaName
+   * @returns {Promise<SharedState>}
+   *
+   * @example
+   * const state = await client.stateManager.attach('my-class');
    */
   /**
+   * Attach to an existing `SharedState` instance.
+   *
    * @overload
    * @param {string} schemaName - Name of the schema
    * @param {number} stateId - Id of the state
+   * @returns {Promise<SharedState>}
+   *
+   * @example
+   * const state = await client.stateManager.attach('my-class', stateId);
    */
   /**
+   * Attach to an existing `SharedState` instance.
+   *
    * @overload
    * @param {string} schemaName - Name of the schema
    * @param {string[]} filter - List of parameters of interest
+   * @returns {Promise<SharedState>}
+   *
+   * @example
+   * const state = await client.stateManager.attach('my-class', ['some-param']);
    */
   /**
+   * Attach to an existing `SharedState` instance.
+   *
    * @overload
    * @param {string} schemaName - Name of the schema
    * @param {number} stateId - Id of the state
    * @param {string[]} filter - List of parameters of interest
+   * @returns {Promise<SharedState>}
+   *
+   * @example
+   * const state = await client.stateManager.attach('my-class', stateId, ['some-param']);
    */
   /**
    * Attach to an existing `SharedState` instance.
@@ -286,7 +316,7 @@ class BaseStateManager {
    * @returns {Promise<SharedState>}
    *
    * @example
-   * const state = await client.stateManager.attach('my-schema');
+   * const state = await client.stateManager.attach('my-class');
    */
   async attach(schemaName, stateIdOrFilter = null, filter = null) {
     let stateId = null;
@@ -331,17 +361,15 @@ class BaseStateManager {
 
   /**
    * Observe all the `SharedState` instances that are created on the network.
-   * This can be usefull for clients with some controller role that might want to track
-   * the state of all other clients of the application, to monitor them and/or take
-   * control over them from a single point.
    *
    * Notes:
-   * - The order of execution is not guaranted between nodes, i.e. an state attached
-   * in the `observe` callback could be created before the `async create` method resolves.
+   * - The order of execution is not guaranted between nodes, i.e. a state attached
+   * in the `observe` callback can be instantiated before the `async create` method
+   * resolves on the creator node.
    * - Filtering, i.e. `observedSchemaName` and `options.excludeLocal` are handled
    * on the node side, the server just notify all state creation activity and
    * the node executes the given callbacks according to the different filter rules.
-   * Such strategy allows to share the observe notifications between all observers.
+   * Such strategy allows to simply share the observe notifications between all observers.
    *
    * Alternative signatures:
    * - `stateManager.observe(callback)`
@@ -356,23 +384,19 @@ class BaseStateManager {
    * @param {object} options - Options.
    * @param {boolean} [options.excludeLocal = false] - If set to true, exclude states
    *  created locally, i.e. by the same node, from the collection.
-   * @returns {Promise<Function>} - Returns a Promise that resolves when the given
+   * @returns {Promise<stateManagerDeleteObserveCallback>} - Returns a Promise that resolves when the given
    *  callback as been executed on each existing states. The promise value is a
    *  function which allows to stop observing the states on the network.
    *
    * @example
    * client.stateManager.observe(async (schemaName, stateId) => {
    *   if (schemaName === 'something') {
-   *     const state = await this[kStateManagerClient].stateManager.attach(schemaName, stateId);
-   *     console.log(state.getValues());
+   *     const attached = await client.stateManager.attach(schemaName, stateId);
+   *     console.log(attached.getValues());
    *   }
    * });
    */
-  // note: all filtering is done only on client-side as it is really more simple to
-  // handle this way and the network overhead is very low for observe notifications:
-  // i.e. schemaName, stateId, nodeId
   async observe(...args) {
-
     const defaultOptions = {
       excludeLocal: false,
     };

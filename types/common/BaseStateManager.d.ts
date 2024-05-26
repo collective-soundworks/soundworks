@@ -18,7 +18,7 @@ declare class BaseStateManager {
      * @param {String} schemaName - Name of the schema as given on registration
      *  (cf. ServerStateManager)
      * @example
-     * const schema = await client.stateManager.getSchema('my-schema');
+     * const schema = await client.stateManager.getSchema('my-class');
      */
     getSchema(schemaName: string): Promise<any>;
     /**
@@ -29,35 +29,59 @@ declare class BaseStateManager {
      * @param {Object.<string, any>} [initValues={}] - Default values for the state.
      * @returns {Promise<SharedState>}
      * @example
-     * const state = await client.stateManager.create('my-schema');
+     * const state = await client.stateManager.create('my-class');
      */
     create(schemaName: string, initValues?: {
         [x: string]: any;
     }): Promise<SharedState>;
     /**
+     * Attach to an existing `SharedState` instance.
+     *
      * @overload
      * @param {string} schemaName
+     * @returns {Promise<SharedState>}
+     *
+     * @example
+     * const state = await client.stateManager.attach('my-class');
      */
-    attach(schemaName: string): any;
+    attach(schemaName: string): Promise<SharedState>;
     /**
+     * Attach to an existing `SharedState` instance.
+     *
      * @overload
      * @param {string} schemaName - Name of the schema
      * @param {number} stateId - Id of the state
+     * @returns {Promise<SharedState>}
+     *
+     * @example
+     * const state = await client.stateManager.attach('my-class', stateId);
      */
-    attach(schemaName: string, stateId: number): any;
+    attach(schemaName: string, stateId: number): Promise<SharedState>;
     /**
+     * Attach to an existing `SharedState` instance.
+     *
      * @overload
      * @param {string} schemaName - Name of the schema
      * @param {string[]} filter - List of parameters of interest
+     * @returns {Promise<SharedState>}
+     *
+     * @example
+     * const state = await client.stateManager.attach('my-class', ['some-param']);
      */
-    attach(schemaName: string, filter: string[]): any;
+    attach(schemaName: string, filter: string[]): Promise<SharedState>;
     /**
+     * Attach to an existing `SharedState` instance.
+     *
      * @overload
      * @param {string} schemaName - Name of the schema
      * @param {number} stateId - Id of the state
      * @param {string[]} filter - List of parameters of interest
+     * @returns {Promise<SharedState>}
+     *
+     * @example
+     * const state = await client.stateManager.attach('my-class', stateId, ['some-param']);
      */
-    attach(schemaName: string, stateId: number, filter: string[]): any;
+    attach(schemaName: string, stateId: number, filter: string[]): Promise<SharedState>;
     /**
      * Observe all the `SharedState` instances that are created on the network.
      * This can be usefull for clients with some controller role that might want to track

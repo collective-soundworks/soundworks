@@ -5,7 +5,7 @@ export { default as ServerContext } from "./ServerContext.js";
  */
 export type ServerConfig = {
     /**
-     * - Application configration object.
+     * - Application configuration object.
      */
     app?: {
         clients: object;
@@ -13,7 +13,7 @@ export type ServerConfig = {
         author?: string;
     };
     /**
-     * - Environment configration object.
+     * - Environment configuration object.
      */
     env?: {
         useHttps: boolean;

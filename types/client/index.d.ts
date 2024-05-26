@@ -1,5 +1,5 @@
-export { default as ClientContext } from "./ClientContext.js";
 export { default as Client } from "./Client.js";
+export { default as ClientContext } from "./ClientContext.js";
 /**
  * Configuration object for a client running in a browser runtime.
  */
@@ -9,14 +9,14 @@ export type ClientConfig = {
      */
     role: string;
     /**
-     * - Application configration object.
+     * - Application configuration object.
      */
     app?: {
         name?: string;
         author?: string;
     };
     /**
-     * - Environment configration object.
+     * - Environment configuration object.
      */
     env: {
         useHttps: boolean;
