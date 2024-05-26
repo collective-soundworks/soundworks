@@ -35,27 +35,29 @@ declare class BaseStateManager {
         [x: string]: any;
     }): Promise<SharedState>;
     /**
-     * Attach to an existing `SharedState` instance.
-     *
-     * Alternative signatures:
-     * - `stateManager.attach(schemaName)`
-     * - `stateManager.attach(schemaName, stateId)`
-     * - `stateManager.attach(schemaName, filter)`
-     * - `stateManager.attach(schemaName, stateId, filter)`
-     *
-     * @param {string} schemaName - Name of the schema as given on registration
-     *  (cf. ServerStateManager)
-     * @param {number|string[]} [stateIdOrFilter=null] - Id of the state to attach to. If `null`,
-     *  attach to the first state found with the given schema name (usefull for
-     *  globally shared states owned by the server).
-     * @param {string[]} [filter=null] - Filter parameters of interest in the
-     *  returned state. If set to `null`, no filter applied.
-     * @returns {Promise<SharedState>}
-     *
-     * @example
-     * const state = await client.stateManager.attach('my-schema');
+     * @overload
+     * @param {string} schemaName
      */
-    attach(schemaName: string, stateIdOrFilter?: number | string[], filter?: string[], ...args: any[]): Promise<SharedState>;
+    attach(schemaName: string): any;
+    /**
+     * @overload
+     * @param {string} schemaName - Name of the schema
+     * @param {number} stateId - Id of the state
+     */
+    attach(schemaName: string, stateId: number): any;
+    /**
+     * @overload
+     * @param {string} schemaName - Name of the schema
+     * @param {string[]} filter - List of parameters of interest
+     */
+    attach(schemaName: string, filter: string[]): any;
+    /**
+     * @overload
+     * @param {string} schemaName - Name of the schema
+     * @param {number} stateId - Id of the state
+     * @param {string[]} filter - List of parameters of interest
+     */
+    attach(schemaName: string, stateId: number, filter: string[]): any;
     /**
      * Observe all the `SharedState` instances that are created on the network.
      * This can be usefull for clients with some controller role that might want to track

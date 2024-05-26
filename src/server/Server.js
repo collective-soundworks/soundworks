@@ -74,25 +74,6 @@ import VERSION from '../common/version.js';
 
 let _dbNamespaces = new Set();
 
-/**
- * Configuration object for the server.
- *
- * @typedef ServerConfig
- * @type {object}
- * @property {object} [app] - Application configration object.
- * @property {object} app.clients - Definition of the application clients.
- * @property {string} [app.name=''] - Name of the application.
- * @property {string} [app.author=''] - Name of the author.
- * @property {object} [env] - Environment configration object.
- * @property {boolean} env.useHttps - Define is the server run in http or in https.
- * @property {string} env.serverAddress - Domain name or IP of the server.
- *  Mandatory when node clients are declared
- * @property {number} env.port - Port on which the server is listening.
- * @property {obj} [env.httpsInfos=null] - Path to cert files ( cert, key } for https.
- *  If not given and useHttps is true self certifified certificates will be created.
- * @property {string} [env.subpath=''] - If running behind a proxy, path to the application.
- */
-
 /** @private */
 const DEFAULT_CONFIG = {
   env: {

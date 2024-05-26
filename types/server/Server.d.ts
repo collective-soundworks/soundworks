@@ -5,29 +5,6 @@ export const kServerOnStatusChangeCallbacks: unique symbol;
 export const kServerApplicationTemplateOptions: unique symbol;
 export default Server;
 /**
- * Configuration object for the server.
- */
-export type ServerConfig = {
-    /**
-     * - Application configration object.
-     */
-    app?: {
-        clients: object;
-        name?: string;
-        author?: string;
-    };
-    /**
-     * - Environment configration object.
-     */
-    env?: {
-        useHttps: boolean;
-        serverAddress: string;
-        port: number;
-        httpsInfos?: obj;
-        subpath?: string;
-    };
-};
-/**
  * The `Server` class is the main entry point for the server-side of a soundworks
  * application.
  *

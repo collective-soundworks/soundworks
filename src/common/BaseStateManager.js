@@ -38,7 +38,6 @@ export const kStateManagerClient = Symbol('soundworks:state-manager-client');
 
 /** @private */
 class BaseStateManager {
-  #client = null;
   #statesById = new Map();
   #cachedSchemas = new Map(); // <shemaName, definition>
   #observeListeners = new Set(); // Set <[observedSchemaName, callback, options]>
@@ -87,7 +86,7 @@ class BaseStateManager {
     // CREATE
     // ---------------------------------------------
 
-    this[kStateManagerClient].transport.addListener(CREATE_RESPONSE, (reqId, stateId, remoteId, schemaName, schema, initValues, filter) => {
+    this[kStateManagerClient].transport.addListener(CREATE_RESPONSE, (reqId, stateId, remoteId, schemaName, schema, initValues) => {
 
       // cache schema when first dealing it to save some bandwidth
       if (!this.#cachedSchemas.has(schemaName)) {
@@ -250,6 +249,26 @@ class BaseStateManager {
   }
 
   /**
+   * @overload
+   * @param {string} schemaName
+   */
+  /**
+   * @overload
+   * @param {string} schemaName - Name of the schema
+   * @param {number} stateId - Id of the state
+   */
+  /**
+   * @overload
+   * @param {string} schemaName - Name of the schema
+   * @param {string[]} filter - List of parameters of interest
+   */
+  /**
+   * @overload
+   * @param {string} schemaName - Name of the schema
+   * @param {number} stateId - Id of the state
+   * @param {string[]} filter - List of parameters of interest
+   */
+  /**
    * Attach to an existing `SharedState` instance.
    *
    * Alternative signatures:
@@ -259,12 +278,11 @@ class BaseStateManager {
    * - `stateManager.attach(schemaName, stateId, filter)`
    *
    * @param {string} schemaName - Name of the schema as given on registration
-   *  (cf. ServerStateManager)
-   * @param {number|string[]} [stateIdOrFilter=null] - Id of the state to attach to. If `null`,
+   * @param {number|string[]} [stateIdOrFilter] - Id of the state to attach to. If `null`,
    *  attach to the first state found with the given schema name (usefull for
    *  globally shared states owned by the server).
-   * @param {string[]} [filter=null] - Filter parameters of interest in the
-   *  returned state. If set to `null`, no filter applied.
+   * @param {string[]} [filter] - List of parameters of interest in the
+   *  returned state. If set to `null`, no filter is applied.
    * @returns {Promise<SharedState>}
    *
    * @example

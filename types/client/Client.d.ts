@@ -2,47 +2,6 @@ export const kClientVersionTest: unique symbol;
 export const kClientOnStatusChangeCallbacks: unique symbol;
 export default Client;
 /**
- * Configuration object for a client running in a browser runtime.
- */
-export type ClientConfig = {
-    /**
-     * - Role of the client in the application (e.g. 'player', 'controller').
-     */
-    role: string;
-    /**
-     * - Application configration object.
-     */
-    app?: {
-        name?: string;
-        author?: string;
-    };
-    /**
-     * - Environment configration object.
-     */
-    env: {
-        useHttps: boolean;
-        serverAddress: string;
-        port: number;
-        subpath?: string;
-    };
-};
-/**
- * Configuration object for a client running in a browser runtime.
- *
- * @typedef ClientConfig
- * @type {object}
- * @property {string} role - Role of the client in the application (e.g. 'player', 'controller').
- * @property {object} [app] - Application configration object.
- * @property {string} [app.name=''] - Name of the application.
- * @property {string} [app.author=''] - Name of the author.
- * @property {object} env - Environment configration object.
- * @property {boolean} env.useHttps - Define if the websocket should use secure connection.
- * @property {string} env.serverAddress - Address the socket server. Mandatory for
- *  node clients. For browser clients, use `window.location.domain` as fallback if empty.
- * @property {number} env.port=8000 - Port of the socket server.
- * @property {string} [env.subpath=''] - If running behind a proxy, path to the application.
- */
-/**
  * The `Client` class is the main entry point for the client-side of a soundworks
  * application.
  *

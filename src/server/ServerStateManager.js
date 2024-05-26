@@ -383,11 +383,12 @@ class ServerStateManager extends BaseStateManager {
   }
 
   /**
-   * Register a schema from which shared states (cf. {@link common.SharedState})
-   * can be instanciated.
+   * Define a class of data structure from which {@link SharedState} can be instanciated.
    *
-   * @param {string} schemaName - Name of the schema.
-   * @param {ServerStateManagerSchema} schema - Data structure
+   * _In a future revision, this method and its arguments will be renamed_
+   *
+   * @param {SharedStateClassName} schemaName - Name of the schema.
+   * @param {SharedStateSchema} schema - Data structure
    *  describing the states that will be created from this schema.
    *
    * @see {@link ServerStateManager#create}
@@ -428,13 +429,15 @@ class ServerStateManager extends BaseStateManager {
   }
 
   /**
-   * Delete a schema and all associated states.
+   * Delete a whole class of {@link ShareState}.
    *
-   * When a schema is deleted, all states created from this schema are deleted
-   * as well, therefore all attached clients are detached and the `onDetach`
-   * and `onDelete` callbacks are called on the related states.
+   * All {@link SharedState} instance that belong to this class are deleted
+   * as well, triggering the `onDetach` and `onDelete` callbacks are called on
+   * the actual {@link SharedState} instances.
    *
-   * @param {string} schemaName - Name of the schema.
+   * _In a future revision, this method and its arguments will be renamed_
+   *
+   * @param {SharedStateClassName} schemaName - Name of the schema.
    */
   deleteSchema(schemaName) {
     // @note: deleting schema
