@@ -483,8 +483,8 @@ class ServerStateManager extends BaseStateManager {
    *
    * @example
    * server.stateManager.registerSchema('hooked', {
-   *   name: { type: 'string', default: null, nullable: true },
-   *   name: { numUpdates: 'integer', default: 0 },
+   *   value: { type: 'string', default: null, nullable: true },
+   *   numUpdates: { type: 'integer', default: 0 },
    * });
    * server.stateManager.registerUpdateHook('hooked', updates => {
    *   return {
@@ -495,9 +495,9 @@ class ServerStateManager extends BaseStateManager {
    *
    * const state = await server.stateManager.create('hooked');
    *
-   * await state.set({ name: 'test' });
+   * await state.set({ value: 'test' });
    * const values = state.getValues();
-   * assert.deepEqual(result, { name: 'test', numUpdates: 1 });
+   * assert.deepEqual(result, { value: 'test', numUpdates: 1 });
    */
   registerUpdateHook(schemaName, updateHook) {
     // throw error if schemaName has not been registered

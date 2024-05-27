@@ -53,6 +53,25 @@ describe(`# StateManager`, () => {
   });
 
   describe(`## getSchema(schemaName)`, () => {
+    it(`should throw if node is not inited`, async () => {
+      const localConfig = structuredClone(config);
+      localConfig.env.port = 8082;
+
+      const server = new Server(config);
+      server.stateManager.registerSchema('a', a);
+
+      let errored = false;
+
+      try {
+        await server.stateManager.getSchema('a');
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      assert.isTrue(errored);
+    });
+
     it(`should return the schema`, async () => {
       const schema = await client.stateManager.getSchema('a');
       const expected = {
@@ -101,6 +120,25 @@ describe(`# StateManager`, () => {
   });
 
   describe('## async create(schemaName[, initValues]) => state', () => {
+    it(`should throw if node is not inited`, async () => {
+      const localConfig = structuredClone(config);
+      localConfig.env.port = 8082;
+
+      const server = new Server(config);
+      server.stateManager.registerSchema('a', a);
+
+      let errored = false;
+
+      try {
+        await server.stateManager.create('a');
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      assert.isTrue(errored);
+    });
+
     it('should create state', async () => {
       const stateA = await server.stateManager.create('a');
       const stateB = await server.stateManager.create('a');
@@ -170,6 +208,25 @@ describe(`# StateManager`, () => {
   });
 
   describe('## async attach(schema[, stateId]) => state', () => {
+    it(`should throw if node is not inited`, async () => {
+      const localConfig = structuredClone(config);
+      localConfig.env.port = 8082;
+
+      const server = new Server(config);
+      server.stateManager.registerSchema('a', a);
+
+      let errored = false;
+
+      try {
+        await server.stateManager.attach('a');
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      assert.isTrue(errored);
+    });
+
     it('should propagate updates to all attached states (server)', async () => {
       const a0 = await server.stateManager.create('a');
       const a1 = await server.stateManager.attach('a', a0.id);
@@ -298,6 +355,25 @@ describe(`# StateManager`, () => {
   });
 
   describe('## observe(callback) => Promise<unobserve>', async () => {
+    it(`should throw if node is not inited`, async () => {
+      const localConfig = structuredClone(config);
+      localConfig.env.port = 8082;
+
+      const server = new Server(config);
+      server.stateManager.registerSchema('a', a);
+
+      let errored = false;
+
+      try {
+        await server.stateManager.observe('a', () => {});
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      assert.isTrue(errored);
+    });
+
     it(`should be notified of states created on the network`, async () => {
       let numCalled = 0;
 
@@ -626,7 +702,6 @@ describe(`# StateManager`, () => {
       let observeCalled = false;
 
       const unobserve = await client.stateManager.observe('a', (schemaName, stateId, nodeId) => {
-        console.log('HEHO ?')
         observeCalled = true;
       }, { excludeLocal: true });
 
@@ -639,6 +714,27 @@ describe(`# StateManager`, () => {
 
       await state1.delete();
       await state2.delete();
+    });
+  });
+
+  describe('## getCollection(schemaName) => Promise<SharedStateCollection>', async () => {
+    it(`should throw if node is not inited`, async () => {
+      const localConfig = structuredClone(config);
+      localConfig.env.port = 8082;
+
+      const server = new Server(config);
+      server.stateManager.registerSchema('a', a);
+
+      let errored = false;
+
+      try {
+        await server.stateManager.getCollection('a');
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      assert.isTrue(errored);
     });
   });
 

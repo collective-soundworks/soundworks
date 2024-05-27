@@ -15,7 +15,7 @@
  *
  * @typedef {object} SharedStateParameterDescription
  * @property {'boolean'|'string'|'integer'|'float'|'enum'|'any'} type - Type of the parameter
- * @property {*} default - Default value of the parameter. Optional only if
+ * @property {any} default - Default value of the parameter. Optional only if
  *  `nullable = true` or `event = true`
  * @property {boolean} [nullable=false] - Defines if the parameter is nullable.
  *   When `true` the parameter `default` is set to `null`.
@@ -39,7 +39,7 @@
  *   for `integer` and `float` types.
  * @property {number} [max=Number.MAX_VALUE] - Maximum value of the parameter. Only applies
  *   for `integer` and `float` types.
- * @property {Array<*>} [list] - Possible values of the parameter. Only applies and
+ * @property {Array<any>} [list] - Possible values of the parameter. Only applies and
  *   mandatory for `enum` type.
  * @property {object} [metas={}] - Optional metadata of the parameter.
  */

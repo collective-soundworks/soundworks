@@ -51,11 +51,13 @@ class BaseStateManager {
   #observeListeners = new Set(); // Set <[observedSchemaName, callback, options]>
   #observeRequestCallbacks = new Map(); // Map <reqId, [observedSchemaName, callback, options]>
   #promiseStore = null;
+  #status = 'idle';
 
   constructor() {
     this.#promiseStore = new PromiseStore('BaseStateManager');
     /** @private */
     this[kStateManagerClient] = null;
+
   }
 
   /** @private */
@@ -212,6 +214,8 @@ class BaseStateManager {
     this[kStateManagerClient].transport.addListener(GET_SCHEMA_ERROR, (reqId, msg) => {
       this.#promiseStore.reject(reqId, msg);
     });
+
+    this.#status = 'inited';
   }
 
   /**
@@ -224,6 +228,10 @@ class BaseStateManager {
    * const schema = await client.stateManager.getSchema('my-class');
    */
   async getSchema(schemaName) {
+    if (this.#status !== 'inited') {
+      throw new DOMException(`Cannot execute 'getSchema' on 'StateManager': state manager is not inited. This method can be safely called only once 'client' or 'server' is inited itself`, 'InvalidStateError');
+    }
+
     if (this.#cachedSchemas.has(schemaName)) {
       const schema = this.#cachedSchemas.get(schemaName);
       // return a populated schema
@@ -248,6 +256,10 @@ class BaseStateManager {
    * const state = await client.stateManager.create('my-class');
    */
   async create(schemaName, initValues = {}) {
+    if (this.#status !== 'inited') {
+      throw new DOMException(`Cannot execute 'create' on 'StateManager': state manager is not inited. This method can be safely called only once 'client' or 'server' is inited itself`, 'InvalidStateError');
+    }
+
     return new Promise((resolve, reject) => {
       const reqId = this.#promiseStore.add(resolve, reject, 'create-request');
       const requireSchema = this.#cachedSchemas.has(schemaName) ? false : true;
@@ -320,6 +332,10 @@ class BaseStateManager {
    * const state = await client.stateManager.attach('my-class');
    */
   async attach(schemaName, stateIdOrFilter = null, filter = null) {
+    if (this.#status !== 'inited') {
+      throw new DOMException(`Cannot execute 'attach' on 'StateManager': state manager is not inited. This method can be safely called only once 'client' or 'server' is inited itself`, 'InvalidStateError');
+    }
+
     let stateId = null;
 
     if (!isString(schemaName)) {
@@ -458,6 +474,10 @@ class BaseStateManager {
    * });
    */
   async observe(...args) {
+    if (this.#status !== 'inited') {
+      throw new DOMException(`Cannot execute 'observe' on 'StateManager': state manager is not inited. This method can be safely called only once 'client' or 'server' is inited itself`, 'InvalidStateError');
+    }
+
     const defaultOptions = {
       excludeLocal: false,
     };
@@ -632,8 +652,12 @@ class BaseStateManager {
    * const collection = await client.stateManager.getCollection(schemaName);
    */
   async getCollection(schemaName, filterOrOptions = null, options = {}) {
+    if (this.#status !== 'inited') {
+      throw new DOMException(`Cannot execute 'getCollection' on 'StateManager': state manager is not inited. This method can be safely called only once 'client' or 'server' is inited itself`, 'InvalidStateError');
+    }
+
     if (!isString(schemaName)) {
-      throw new TypeError(`[stateManager] Cannot execute 'getCollection' on 'StateManager': 'schemaName' should be a string"`);
+      throw new TypeError(`Cannot execute 'getCollection' on 'StateManager': 'schemaName' should be a string"`);
     }
 
     let filter;
@@ -649,7 +673,7 @@ class BaseStateManager {
         filter = null;
         options = filterOrOptions;
       } else {
-        throw new TypeError(`[stateManager] Cannot execute 'getCollection' on 'StateManager': argument 2 should be either null, an array or an object"`);
+        throw new TypeError(`Cannot execute 'getCollection' on 'StateManager': argument 2 should be either null, an array or an object"`);
       }
     }
 
@@ -657,11 +681,11 @@ class BaseStateManager {
       filter = filterOrOptions;
 
       if (filter !== null && !Array.isArray(filter)) {
-        throw new TypeError(`[stateManager] Cannot execute 'getCollection' on 'StateManager': 'filter' should be either an array or null"`);
+        throw new TypeError(`Cannot execute 'getCollection' on 'StateManager': 'filter' should be either an array or null"`);
       }
 
       if (options === null || typeof options !== 'object') {
-        throw new TypeError(`[stateManager] Cannot execute 'getCollection' on 'StateManager': 'options' should be an object"`);
+        throw new TypeError(`Cannot execute 'getCollection' on 'StateManager': 'options' should be an object"`);
       }
     }
 
