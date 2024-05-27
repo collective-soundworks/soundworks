@@ -219,6 +219,7 @@ class BaseStateManager {
    *
    * @param {String} schemaName - Name of the schema as given on registration
    *  (cf. ServerStateManager)
+   * @return {SharedStateSchema}
    * @example
    * const schema = await client.stateManager.getSchema('my-class');
    */
@@ -237,7 +238,7 @@ class BaseStateManager {
   }
 
   /**
-   * Create a `SharedState` instance from a registered schema.
+   * Create a {@link SharedState} instance from a registered schema.
    *
    * @param {string} schemaName - Name of the schema as given on registration
    *  (cf. ServerStateManager)
@@ -255,7 +256,7 @@ class BaseStateManager {
   }
 
   /**
-   * Attach to an existing `SharedState` instance.
+   * Attach to an existing {@link SharedState} instance.
    *
    * @overload
    * @param {string} schemaName
@@ -265,7 +266,7 @@ class BaseStateManager {
    * const state = await client.stateManager.attach('my-class');
    */
   /**
-   * Attach to an existing `SharedState` instance.
+   * Attach to an existing {@link SharedState} instance.
    *
    * @overload
    * @param {string} schemaName - Name of the schema
@@ -276,7 +277,7 @@ class BaseStateManager {
    * const state = await client.stateManager.attach('my-class', stateId);
    */
   /**
-   * Attach to an existing `SharedState` instance.
+   * Attach to an existing {@link SharedState} instance.
    *
    * @overload
    * @param {string} schemaName - Name of the schema
@@ -287,7 +288,7 @@ class BaseStateManager {
    * const state = await client.stateManager.attach('my-class', ['some-param']);
    */
   /**
-   * Attach to an existing `SharedState` instance.
+   * Attach to an existing {@link SharedState} instance.
    *
    * @overload
    * @param {string} schemaName - Name of the schema
@@ -299,7 +300,7 @@ class BaseStateManager {
    * const state = await client.stateManager.attach('my-class', stateId, ['some-param']);
    */
   /**
-   * Attach to an existing `SharedState` instance.
+   * Attach to an existing {@link SharedState} instance.
    *
    * Alternative signatures:
    * - `stateManager.attach(schemaName)`
@@ -360,7 +361,68 @@ class BaseStateManager {
   }
 
   /**
-   * Observe all the `SharedState` instances that are created on the network.
+   * Observe all the {@link SharedState} instances that are created on the network.
+   *
+   * @overload
+   * @param {stateManagerObserveCallback} callback - Function to execute when a
+   *   new {@link SharedState} is created on the network.
+   * @example
+   * client.stateManager.observe(async (schemaName, stateId) => {
+   *   if (schemaName === 'my-shared-state-class') {
+   *     const attached = await client.stateManager.attach(schemaName, stateId);
+   *   }
+   * });
+   */
+  /**
+   * Observe all the {@link SharedState} instances of given {@link SharedStateClassName}
+   * that are created on the network.
+   *
+   * @overload
+   * @param {SharedStateClassName} schemaName - Observe only ${@link SharedState}
+   *   of given name.
+   * @param {stateManagerObserveCallback} callback - Function to execute when a
+   *   new {@link SharedState} is created on the network.
+   * @example
+   * client.stateManager.observe('my-shared-state-class', async (schemaName, stateId) => {
+   *   const attached = await client.stateManager.attach(schemaName, stateId);
+   * });
+   */
+  /**
+   * Observe all the {@link SharedState} instances of given excluding the ones
+   * created by the current node.
+   *
+   * @overload
+   * @param {stateManagerObserveCallback} callback - Function to execute when a
+   *   new {@link SharedState} is created on the network.
+   * @param {object} options - Options.
+   * @param {boolean} options.excludeLocal=false - If set to true, exclude states
+   *   created by the same node from the collection.
+   * @example
+   * client.stateManager.observe(async (schemaName, stateId) => {
+   *   if (schemaName === 'my-shared-state-class') {
+   *     const attached = await client.stateManager.attach(schemaName, stateId);
+   *   }
+   * }, { excludeLocal: true });
+   */
+  /**
+   * Observe all the {@link SharedState} instances of given {@link SharedStateClassName}
+   * that are created on the network, excluding the ones created by the current node.
+   *
+   * @overload
+   * @param {SharedStateClassName} schemaName - Observe only ${@link SharedState}
+   *   of given name.
+   * @param {stateManagerObserveCallback} callback - Function to execute when a
+   *   new {@link SharedState} is created on the network.
+   * @param {object} options - Options.
+   * @param {boolean} options.excludeLocal=false - If set to true, exclude states
+   *   created by the same node from the collection.
+   * @example
+   * client.stateManager.observe('my-shared-state-class', async (schemaName, stateId) => {
+   *   const attached = await client.stateManager.attach(schemaName, stateId);
+   * }, { excludeLocal: true });
+   */
+  /**
+   * Observe all the {@link SharedState} instances that are created on the network.
    *
    * Notes:
    * - The order of execution is not guaranted between nodes, i.e. a state attached
@@ -390,9 +452,8 @@ class BaseStateManager {
    *
    * @example
    * client.stateManager.observe(async (schemaName, stateId) => {
-   *   if (schemaName === 'something') {
+   *   if (schemaName === 'my-shared-state-class') {
    *     const attached = await client.stateManager.attach(schemaName, stateId);
-   *     console.log(attached.getValues());
    *   }
    * });
    */
@@ -500,6 +561,56 @@ class BaseStateManager {
     });
   }
 
+  /**
+   * Returns a collection of all the states created from the schema name.
+   *
+   * @overload
+   * @param {string} schemaName - Name of the schema.
+   * @returns {Promise<SharedStateCollection>}
+   *
+   * @example
+   * const collection = await client.stateManager.getCollection(schemaName);
+   */
+  /**
+   * Returns a collection of all the states created from the schema name.
+   *
+   * @overload
+   * @param {string} schemaName - Name of the schema.
+   * @param {SharedStateParameterName[]} filter - Filter parameter of interest for each
+   *  state of the collection.
+   * @returns {Promise<SharedStateCollection>}
+   *
+   * @example
+   * const collection = await client.stateManager.getCollection(schemaName, ['my-param']);
+   */
+  /**
+   * Returns a collection of all the states created from the schema name.
+   *
+   * @overload
+   * @param {string} schemaName - Name of the schema.
+   * @param {object} options - Options.
+   * @param {boolean} options.excludeLocal=false - If set to true, exclude states
+   *  created by the same node from the collection.
+   * @returns {Promise<SharedStateCollection>}
+   *
+   * @example
+   * const collection = await client.stateManager.getCollection(schemaName, { excludeLocal: true });
+   */
+  /**
+   * Returns a collection of all the states created from the schema name.
+   *
+   * @overload
+   * @param {string} schemaName - Name of the schema.
+   * @param {SharedStateParameterName[]} filter - Filter parameter of interest for each
+   *  state of the collection.
+   * @param {object} options - Options.
+   * @param {boolean} options.excludeLocal=false - If set to true, exclude states
+   *  created by the same node from the collection.
+   * @returns {Promise<SharedStateCollection>}
+   *
+   * @example
+   * const collection = await client.stateManager.getCollection(schemaName, ['my-param'], { excludeLocal: true });
+   */
   /**
    * Returns a collection of all the states created from the schema name.
    *
