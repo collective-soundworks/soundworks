@@ -268,7 +268,7 @@ class Client {
 
   /**
    * The `init` method is part of the initialization lifecycle of the `soundworks`
-   * client. Most of the time, the `init` method will be implicitly called by the
+   * client. Most of the time, this method will be implicitly executed by the
    * {@link Client#start} method.
    *
    * In some situations you might want to call this method manually, in such cases
@@ -359,8 +359,8 @@ class Client {
 
   /**
    * The `start` method is part of the initialization lifecycle of the `soundworks`
-   * client. The `start` method will implicitly call the {@link Client#init}
-   * method if it has not been called manually.
+   * client. This method will implicitly execute {@link Client#init} method if it
+   * has not been called manually.
    *
    * What it does:
    * - implicitly call {@link Client#init} if not done manually
