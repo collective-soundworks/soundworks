@@ -5,6 +5,36 @@
  */
 
 /**
+ * Description of a {@link SharedState} data structure that describes the structure
+ * of a class of {@link SharedState} to be registered by {@link ServerStateManager#registerSchema}
+ *
+ * A schema is the blueprint, or the definition from which shared states from a
+ * given class can be created.
+ *
+ * It consists of a set of key / value pairs where the key is the name of
+ * the parameter (cf. ${SharedStateParameterName}), and the value is an object
+ * describing the parameter (cf. ${SharedStateParameterDescription}).
+ *
+ * @typedef {Object.<SharedStateParameterName, SharedStateParameterDescription>} SharedStateClassSchema
+ *
+ * @example
+ * const mySchema = {
+ *   triggerSound: {
+ *     type: 'boolean',
+ *     event: true,
+ *   },
+ *   volume: {
+ *     type: 'float'
+ *     default: 0,
+ *     min: -80,
+ *     max: 6,
+ *   }
+ * };
+ *
+ * server.stateManager.registerSchema('my-class-name', mySchema);
+ */
+
+/**
  * User defined name of a parameter in a class of {@link SharedState}
  *
  * @typedef {string} SharedStateParameterName
@@ -44,32 +74,3 @@
  * @property {object} [metas={}] - Optional metadata of the parameter.
  */
 
-/**
- * Description of a {@link SharedState} data structure that describes the structure
- * of a class of {@link SharedState} to be registered by {@link ServerStateManager#registerSchema}
- *
- * A schema is the blueprint, or the definition from which shared states from a
- * given class can be created.
- *
- * It consists of a set of key / value pairs where the key is the name of
- * the parameter (cf. ${SharedStateParameterName}), and the value is an object
- * describing the parameter (cf. ${SharedStateParameterDescription}).
- *
- * @typedef {Object.<SharedStateParameterName, SharedStateParameterDescription>} SharedStateSchema
- *
- * @example
- * const mySchema = {
- *   triggerSound: {
- *     type: 'boolean',
- *     event: true,
- *   },
- *   volume: {
- *     type: 'float'
- *     default: 0,
- *     min: -80,
- *     max: 6,
- *   }
- * };
- *
- * server.stateManager.registerSchema('my-class-name', mySchema);
- */

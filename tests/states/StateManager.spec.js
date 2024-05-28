@@ -10,6 +10,7 @@ import {
 import {
   kStateManagerClient
 } from '../../src/common/BaseStateManager.js';
+import SharedState from '../../src/common/SharedState.js';
 
 import config from '../utils/config.js';
 import { a, b } from '../utils/schemas.js';
@@ -139,14 +140,12 @@ describe(`# StateManager`, () => {
       assert.isTrue(errored);
     });
 
-    it('should create state', async () => {
+    it('should create a shared state', async () => {
       const stateA = await server.stateManager.create('a');
       const stateB = await server.stateManager.create('a');
 
-      assert.isNumber(stateA.id);
-      assert.isNumber(stateA.remoteId);
-      assert.isNumber(stateB.id);
-      assert.isNumber(stateB.remoteId);
+      assert.isTrue(stateA instanceof SharedState);
+      assert.isTrue(stateB instanceof SharedState);
 
       await stateA.delete();
       await stateB.delete();

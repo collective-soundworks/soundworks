@@ -20,6 +20,8 @@ import {
   kStateManagerDeleteState,
 } from './BaseStateManager.js';
 
+import logger from './logger.js';
+
 // for testing purposes
 export const kSharedStatePromiseStore = Symbol('soundworks:shared-state-promise-store');
 
@@ -47,12 +49,13 @@ export const kSharedStatePromiseStore = Symbol('soundworks:shared-state-promise-
  * every nodes of the application (clients and server) that declared some interest
  * to the shared state.
  *
- * A `SharedState` is created according to a "schema" (in the sense of a database
- * schema) that must be declared and registered server-side. Any number of `SharedState`s
- * can be created from a single schema.
+ * A `SharedState` instance is created according to a shared state class definition
+ * which is composed of a {@link SharedStateClassName} and of a {@link SharedStateClassSchema}
+ * registered in the {@link ServerStateManager}. Any number of `SharedState`s
+ * can be created from a single class definition.
  *
- * A shared state can be created both by the clients or by the server (in which case
- * it is generally considered as a global state of the application). Similarly any
+ * A shared state can be created both by the clients or by the server, in which case
+ * it is generally considered as a global state of the application. Similarly any
  * node of the application (clients or server) can declare interest and "attach" to
  * a state created by another node. All node attached to a state can modify its values
  * and/or react to the modifications applied by other nodes.
@@ -64,7 +67,7 @@ export const kSharedStatePromiseStore = Symbol('soundworks:shared-state-promise-
  * import { Server } from '@soundworks/server/index.js';
  *
  * const server = new Server(config);
- * // declare and register the schema of a shared state.
+ * // define a shared state class
  * server.stateManager.registerSchema('some-global-state', {
  *   myRandom: {
  *     type: 'float',
@@ -99,7 +102,7 @@ export const kSharedStatePromiseStore = Symbol('soundworks:shared-state-promise-
 class SharedState {
   #id = null;
   #remoteId = null;
-  #schemaName = null;
+  #className = null;
   #isOwner = null;
   #client = null;
   #manager = null;
@@ -111,10 +114,10 @@ class SharedState {
   #onDetachCallbacks = new Set();
   #onDeleteCallbacks = new Set();
 
-  constructor(id, remoteId, schemaName, schema, client, isOwner, manager, initValues, filter) {
+  constructor(id, remoteId, className, schema, client, isOwner, manager, initValues, filter) {
     this.#id = id;
     this.#remoteId = remoteId;
-    this.#schemaName = schemaName;
+    this.#className = className;
     this.#isOwner = isOwner; // may be any node
     this.#client = client;
     this.#manager = manager;
@@ -125,7 +128,7 @@ class SharedState {
     } catch (err) {
       console.error(err.stack);
 
-      throw new Error(`Error creating or attaching state "${schemaName}" w/ values:\n
+      throw new Error(`Error creating or attaching state "${className}" w/ values:\n
 ${JSON.stringify(initValues, null, 2)}`);
     }
 
@@ -254,35 +257,32 @@ ${JSON.stringify(initValues, null, 2)}`);
   /**
    * Id of the state
    * @type {Number}
-   * @readonly
    */
   get id() {
     return this.#id;
   }
 
   /**
-   * Unique id of the state for the current node
-   * @readonly
-   * @type {Number}
-   * @private
-   */
-  get remoteId() {
-    return this.#remoteId;
-  }
-
-  /**
-   * Name of the schema
+   * Name of the underlying {@link SharedState} class.
    * @type {String}
-   * @readonly
+   * @deprecated
    */
   get schemaName() {
-    return this.#schemaName;
+    logger.deprecated('SharedState#schemaName', 'SharedState#className');
+    return this.#className;
   }
 
   /**
-   * Indicates if the node is the owner of the state
+   * Name of the underlying {@link SharedState} class.
+   * @type {String}
+   */
+  get className() {
+    return this.#className;
+  }
+
+  /**
+   * Indicates if the node is the owner of the state, i.e. if it created the state.
    * @type {Boolean}
-   * @readonly
    */
   get isOwner() {
     return this.#isOwner;
@@ -361,14 +361,15 @@ ${JSON.stringify(initValues, null, 2)}`);
   /**
    * Update values of the state.
    *
-   * The returned `Promise` resolves on the applied updates, when all the `onUpdate`
-   * callbacks have resolved themselves, i.e.:
+   * The returned `Promise` resolves on an object that contains the applied updates,
+   * and resolves after all the `onUpdate` callbacks have resolved themselves, i.e.:
    *
    * ```js
    * server.stateManager.registerSchema('test', {
    *   myBool: { type: 'boolean', default: false },
    * });
    * const a = await server.stateManager.create('a');
+   *
    * let asyncCallbackCalled = false;
    *
    * a.onUpdate(updates => {
@@ -385,13 +386,14 @@ ${JSON.stringify(initValues, null, 2)}`);
    * assert.deepEqual(updates, { myBool: true });
    * ```
    *
-   * @param {object} updates - key / value pairs of updates to apply to the state.
-   * @param {mixed} [context=null] - optionnal contextual object that will be propagated
+   * @param {object} updates - Key / value pairs of updates to apply to the state.
+   * @param {mixed} [context=null] - Optionnal contextual object that will be propagated
    *   alongside the updates of the state. The context is valid only for the
    *   current call and will be passed as third argument to all update listeners.
    * @returns {Promise<Object>} A promise to the (coerced) updates.
+   *
    * @example
-   * const state = await client.state.attach('globals');
+   * const state = await client.stateManager.attach('globals');
    * const updates = await state.set({ myParam: Math.random() });
    */
   async set(updates, context = null) {
@@ -400,11 +402,11 @@ ${JSON.stringify(initValues, null, 2)}`);
     }
 
     if (!isPlainObject(updates)) {
-      throw new TypeError(`[SharedState] State "${this.#schemaName}": state.set(updates[, context]) should receive an object as first parameter`);
+      throw new TypeError(`[SharedState] State "${this.#className}": state.set(updates[, context]) should receive an object as first parameter`);
     }
 
     if (context !== null && !isPlainObject(context)) {
-      throw new TypeError(`[SharedState] State "${this.#schemaName}": state.set(updates[, context]) should receive an object as second parameter`);
+      throw new TypeError(`[SharedState] State "${this.#className}": state.set(updates[, context]) should receive an object as second parameter`);
     }
 
     const newValues = {};
@@ -425,7 +427,7 @@ ${JSON.stringify(initValues, null, 2)}`);
       // Check that name is in filter list, if any
       if (this.#filter !== null) {
         if (!this.#filter.includes(name)) {
-          throw new DOMException(`[SharedState] State "${this.#schemaName}": cannot set parameter '${name}', parameter is not in filter list`, 'NotSupportedError');
+          throw new DOMException(`[SharedState] State "${this.#className}": cannot set parameter '${name}', parameter is not in filter list`, 'NotSupportedError');
         }
       }
 
@@ -502,24 +504,28 @@ ${JSON.stringify(initValues, null, 2)}`);
   }
 
   /**
-   * Get the value of a parameter of the state. If the parameter is of `any` type,
-   * a deep copy is returned.
+   * Get the value of a parameter of the state.
    *
-   * @param {string} name - Name of the param.
-   * @throws Throws if `name` does not correspond to an existing field
-   *  of the state.
-   * @return {mixed}
+   * Be aware that in case of 'any' typethe returned value is deeply copied.
+   * While this prevents from pollution of the state by mutating the reference,
+   * this can also lead to performance issues when the parameter contains large
+   * data. In such cases you should use the {@link SharedState#getUnsafe} method
+   * and make sure to treat the returned object as readonly.
+   *
+   * @param {SharedStateParameterName} name - Name of the param.
+   * @return {any}
+   * @throws Throws if `name` does not exists.
    * @example
    * const value = state.get('paramName');
    */
   get(name) {
     if (!this.#parameters.has(name)) {
-      throw new ReferenceError(`[SharedState] State "${this.#schemaName}": Cannot get value of undefined parameter "${name}"`);
+      throw new ReferenceError(`[SharedState] State "${this.#className}": Cannot get value of undefined parameter "${name}"`);
     }
 
     if (this.#filter !== null) {
       if (!this.#filter.includes(name)) {
-        throw new DOMException(`[SharedState] State "${this.#schemaName}": cannot get parameter '${name}', parameter is not in filter list`, 'NotSupportedError');
+        throw new DOMException(`[SharedState] State "${this.#className}": cannot get parameter '${name}', parameter is not in filter list`, 'NotSupportedError');
       }
     }
 
@@ -527,27 +533,28 @@ ${JSON.stringify(initValues, null, 2)}`);
   }
 
   /**
+   * Get an unsafe reference to the value of a parameter of the state.
+   *
    * Similar to `get` but returns a reference to the underlying value in case of
-   * `any` type. May be usefull if the underlying value is big (e.g. sensors
+   * `any` type. Can be usefull if the underlying value is large (e.g. sensors
    * recordings, etc.) and deep cloning expensive. Be aware that if changes are
    * made on the returned object, the state of your application will become
    * inconsistent.
    *
-   * @param {string} name - Name of the param.
-   * @throws Throws if `name` does not correspond to an existing field
-   *  of the state.
-   * @return {mixed}
+   * @param {SharedStateParameterName} name - Name of the param.
+   * @return {any}
+   * @throws Throws if `name` does not exists.
    * @example
    * const value = state.getUnsafe('paramName');
    */
   getUnsafe(name) {
     if (!this.#parameters.has(name)) {
-      throw new ReferenceError(`[SharedState] State "${this.#schemaName}": Cannot get value of undefined parameter "${name}"`);
+      throw new ReferenceError(`[SharedState] State "${this.#className}": Cannot get value of undefined parameter "${name}"`);
     }
 
     if (this.#filter !== null) {
       if (!this.#filter.includes(name)) {
-        throw new DOMException(`[SharedState] State "${this.#schemaName}": cannot get parameter '${name}', parameter is not in filter list`, 'NotSupportedError');
+        throw new DOMException(`[SharedState] State "${this.#className}": cannot get parameter '${name}', parameter is not in filter list`, 'NotSupportedError');
       }
     }
 
@@ -581,7 +588,7 @@ ${JSON.stringify(initValues, null, 2)}`);
    * Get all the key / value pairs of the state.
    *
    * Similar to `getValues` but returns a reference to the underlying value in
-   * case of `any` type. May be usefull if the underlying value is big (e.g.
+   * case of `any` type. Can be usefull if the underlying value is big (e.g.
    * sensors recordings, etc.) and deep cloning expensive. Be aware that if
    * changes are made on the returned object, the state of your application will
    * become inconsistent.
@@ -605,13 +612,13 @@ ${JSON.stringify(initValues, null, 2)}`);
   }
 
   /**
-   * Definition of schema from which the state has been created.
+   * Return the underlying {@link SharedStateClassSchema} or the
+   * {@link SharedStateParameterDescription} if name is given.
    *
-   * @param {string} [name=null] - If given, returns only the definition
-   *  corresponding to the given param name.
-   * @throws Throws if `name` does not correspond to an existing field
-   *  of the schema.
-   * @return {object}
+   * @param {string} [name] - If defined, returns only the parameter description
+   *  of the given param name.
+   * @return {SharedStateClassSchema|SharedStateParameterDescription}
+   * @throws Throws if `name` does not exists.
    * @example
    * const schema = state.getSchema();
    */
@@ -653,7 +660,7 @@ ${JSON.stringify(initValues, null, 2)}`);
    */
   async detach() {
     if (this.#detached) {
-      throw new Error(`[SharedState] State "${this.#schemaName} (${this.#id})" already detached, cannot detach twice`);
+      throw new Error(`[SharedState] State "${this.#className} (${this.#id})" already detached, cannot detach twice`);
     }
 
     this.#detached = true; // mark detached early
@@ -690,12 +697,12 @@ ${JSON.stringify(initValues, null, 2)}`);
   async delete() {
     if (this.#isOwner) {
       if (this.#detached) {
-        throw new Error(`[SharedState] State "${this.#schemaName} (${this.#id})" already deleted, cannot delete twice`);
+        throw new Error(`[SharedState] State "${this.#className} (${this.#id})" already deleted, cannot delete twice`);
       }
 
       return this.detach();
     } else {
-      throw new Error(`[SharedState] Cannot delete state "${this.#schemaName}", only the owner of the state (i.e. the node that created it) can delete the state. Use "detach" instead.`);
+      throw new Error(`[SharedState] Cannot delete state "${this.#className}", only the owner of the state (i.e. the node that created it) can delete the state. Use "detach" instead.`);
     }
   }
 
