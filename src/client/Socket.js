@@ -62,11 +62,11 @@ class Socket {
 
     if (isBrowser()) {
       const hostname = window.location.hostname;
-      // if a server address is given in config, use it, else fallback to URL hostname
-      if (config.env.serverAddress !== '') {
-        serverAddress = config.env.serverAddress;
-      } else {
+
+      if (config.env.serverAddress === '') {
         serverAddress = hostname;
+      } else {
+        serverAddress = config.env.serverAddress;
       }
 
       // when in https with self-signed certificates, we don't want to use
@@ -79,12 +79,16 @@ class Socket {
       }
 
       if (config.env.useHttps && window.location.hostname !== serverAddress) {
-        console.warn(`The WebSocket will try to connect at ${serverAddress} as defined in environment configuration while the page is accessed from ${hostname}. If you run the application with self-signed certificates, this can lead to socket errors as the certificate may not have been accepted for ${serverAddress}. In such case you should rather access the page from ${serverAddress}.`);
+        console.warn(`The WebSocket will try to connect at ${serverAddress} while the page is accessed from ${hostname}. This can lead to socket errors, e.g. If you run the application with self-signed certificates as the certificate may not have been accepted for ${serverAddress}. In such case you should rather access the page from ${serverAddress}.`);
       }
 
       webSocketOptions = [];
     } else {
-      serverAddress = config.env.serverAddress;
+      if (config.env.serverAddress === '') {
+        serverAddress = '127.0.0.1';
+      } else {
+        serverAddress = config.env.serverAddress;
+      }
 
       webSocketOptions = {
         rejectUnauthorized: false,
@@ -169,7 +173,7 @@ class Socket {
               // we want to log the warning just once
               if (!connectionRefusedLogged) {
                 logger.log('[soundworks.Socket] Connection refused, waiting for the server to start');
-                console.log(e.error);
+                // console.log(e.error);
                 connectionRefusedLogged = true;
               }
 

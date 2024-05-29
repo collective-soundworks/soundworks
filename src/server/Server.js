@@ -75,7 +75,7 @@ const DEFAULT_CONFIG = {
   env: {
     type: 'development',
     port: 8000,
-    serverAddress: null,
+    serverAddress: '',
     subpath: '',
     websockets: {
       path: 'socket',
@@ -163,7 +163,7 @@ class Server {
      *   env: {
      *     type: 'development',
      *     port: 8000,
-     *     serverAddress: null,
+     *     serverAddress: '',
      *     subpath: '',
      *     websockets: {
      *       path: 'socket',
@@ -187,16 +187,12 @@ class Server {
       throw new Error(`[soundworks:Server] Invalid "app.clients" config, at least one client should be declared`);
     }
 
-    // if a node client is defined, serverAddress should be defined
-    let hasNodeClient = false;
-    for (let name in this.config.app.clients) {
-      if (this.config.app.clients[name].target === 'node') {
-        hasNodeClient = true;
-      }
-    }
-
-    if (hasNodeClient && this.config.env.serverAddress === null) {
-      throw new Error(`[soundworks:Server] Invalid "env.serverAddress" config, is mandatory when a node client target is defined`);
+    // @peeka - remove
+    // [2024-05-29] Override default `config.env.serverAddress`` provided from
+    // template `loadConfig` to '' so that browser clients can default to
+    // window.location.hostname and node clients to `127.0.0.1`
+    if (process.env.ENV === undefined && this.config.env.serverAddress === '127.0.0.1') {
+      this.config.env.serverAddress = '';
     }
 
     if (this.config.env.useHttps && this.config.env.httpsInfos !== null) {

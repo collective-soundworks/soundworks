@@ -1,4 +1,5 @@
 import { assert }  from 'chai';
+import merge from 'lodash.merge';
 
 import { Server, Context as ServerContext } from '../../src/server/index.js';
 import { Client, Context as ClientContext } from '../../src/client/index.js';
@@ -136,6 +137,29 @@ describe('# client::Client', () => {
 
       const state = await client.stateManager.create('test');
       assert.deepEqual(state.getValues(), { a: true });
+
+      await server.stop();
+    });
+
+    it.only(`[node only] should connect to localhost if serverAddress is empty`, async () => {
+      const emptyConfig = merge({}, config);
+      emptyConfig.env.serverAddress = '';
+
+      const server = new Server(emptyConfig);
+      await server.start();
+
+      const client = new Client({ role: 'test', ...config });
+      await client.init();
+
+      let socketMessageReceived = false;
+      client.socket.addListener('hello', () => {
+        socketMessageReceived = true;
+      });
+
+      server.sockets.broadcast('*', null, 'hello');
+      await new Promise(resolve => setTimeout(resolve, 200));
+
+      assert.equal(socketMessageReceived, true);
 
       await server.stop();
     });

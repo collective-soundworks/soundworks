@@ -115,22 +115,6 @@ describe('# server::Server', () => {
         assert.fail('should have thrown');
       }
     });
-
-    it(`should throw if serverAddress is not defined when a node client is declared`, () => {
-      const wrongConfig = merge({}, config);
-      wrongConfig.env.serverAddress = undefined;
-
-      let errored = false;
-      try {
-        const server = new Server(wrongConfig);
-      } catch (err) {
-        console.log(err.message);
-        errored = true;
-      }
-      if (!errored) {
-        assert.fail('should have thrown');
-      }
-    });
   });
 
   describe(`## await server.init()`, () => {
