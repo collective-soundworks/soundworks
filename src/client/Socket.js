@@ -61,11 +61,25 @@ class Socket {
     let webSocketOptions;
 
     if (isBrowser()) {
+      const hostname = window.location.hostname;
       // if a server address is given in config, use it, else fallback to URL hostname
       if (config.env.serverAddress !== '') {
         serverAddress = config.env.serverAddress;
       } else {
+        serverAddress = hostname;
+      }
+
+      // when in https with self-signed certificates, we don't want to use
+      // the serverAddress defined in config as the socket would be blocked, so we
+      // just override serverAddress with hostname in this case
+      const localhosts = ['127.0.0.1', 'localhost'];
+
+      if (config.env.useHttps && localhosts.includes(hostname)) {
         serverAddress = window.location.hostname;
+      }
+
+      if (config.env.useHttps && window.location.hostname !== serverAddress) {
+        console.warn(`The WebSocket will try to connect at ${serverAddress} as defined in environment configuration while the page is accessed from ${hostname}. If you run the application with self-signed certificates, this can lead to socket errors as the certificate may not have been accepted for ${serverAddress}. In such case you should rather access the page from ${serverAddress}.`);
       }
 
       webSocketOptions = [];
@@ -155,6 +169,7 @@ class Socket {
               // we want to log the warning just once
               if (!connectionRefusedLogged) {
                 logger.log('[soundworks.Socket] Connection refused, waiting for the server to start');
+                console.log(e.error);
                 connectionRefusedLogged = true;
               }
 
