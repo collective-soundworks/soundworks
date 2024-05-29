@@ -1,3 +1,7 @@
+## v4.0.0-alpha.24 - 24/05/2025
+
+- Fix: unexpected behavior with new `serverAddress` behavior on browser clients and self-signed certificates
+
 ## v4.0.0-alpha.23 - 24/05/2025
 
 - Breaking: remove binary socket
