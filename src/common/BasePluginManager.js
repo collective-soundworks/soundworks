@@ -106,8 +106,6 @@ class BasePluginManager {
    * @private
    */
   async start() {
-    logger.title('starting registered plugins');
-
     if (this.status !== 'idle') {
       throw new Error(`[soundworks:PluginManager] Cannot call "pluginManager.init()" twice`);
     }

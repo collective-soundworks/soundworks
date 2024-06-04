@@ -1,6 +1,6 @@
 ## v4.0.0-alpha.25 - 24/05/2025
 
-- Fix: better default behavior for websocket connection URL
+- Fix: better default behavior for WebSocket connection URL
 
 ## v4.0.0-alpha.24 - 24/05/2025
 
@@ -10,14 +10,14 @@
 
 - Breaking: remove binary socket
 - Fix: do not terminate socket on missed heartbeat, which seems to create false positive, just warn instead
-- Refactor: some work toward upgrading code to es2022
+- Refactor: some work toward upgrading code to ES2022
 
 ## v4.0.0-alpha.22 - 16/05/2025
 
 - Feat: allow configuring socket endpoint on browser clients
 - Feat: check and warn if version inconsistency between server and client
 
-## v4.0.0-alpha.21 - 6/05/2025
+## v4.0.0-alpha.21 - 06/05/2025
 
 - Fix: prevent multiple 'close' events
 - Fix: disable heartbeat check on client-side, was unstable
@@ -32,7 +32,7 @@
 
 ## v4.0.0-alpha.19 - 17/01/2024
 
-- Hotfix for #85
+- Hot fix for #85
 
 ## v4.0.0-alpha.18 - 15/01/2024
 
@@ -40,7 +40,7 @@
 
 ## v4.0.0-alpha.17 - 16/12/2023
 
-- Support bundling the server to cjs for Max externals
+- Support bundling the server to common js for Max externals
 
 ## v4.0.0-alpha.16 - 15/12/2023
 
