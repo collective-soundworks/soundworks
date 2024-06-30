@@ -7,6 +7,10 @@ import {
   OBSERVE_RESPONSE,
   OBSERVE_NOTIFICATION,
 } from '../../src/common/constants.js';
+import {
+  kStateManagerClient
+} from '../../src/common/BaseStateManager.js';
+import SharedState from '../../src/common/SharedState.js';
 
 import config from '../utils/config.js';
 import { a, b } from '../utils/schemas.js';
@@ -50,6 +54,25 @@ describe(`# StateManager`, () => {
   });
 
   describe(`## getSchema(schemaName)`, () => {
+    it(`should throw if node is not inited`, async () => {
+      const localConfig = structuredClone(config);
+      localConfig.env.port = 8082;
+
+      const server = new Server(config);
+      server.stateManager.registerSchema('a', a);
+
+      let errored = false;
+
+      try {
+        await server.stateManager.getSchema('a');
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      assert.isTrue(errored);
+    });
+
     it(`should return the schema`, async () => {
       const schema = await client.stateManager.getSchema('a');
       const expected = {
@@ -98,14 +121,31 @@ describe(`# StateManager`, () => {
   });
 
   describe('## async create(schemaName[, initValues]) => state', () => {
-    it('should create state', async () => {
+    it(`should throw if node is not inited`, async () => {
+      const localConfig = structuredClone(config);
+      localConfig.env.port = 8082;
+
+      const server = new Server(config);
+      server.stateManager.registerSchema('a', a);
+
+      let errored = false;
+
+      try {
+        await server.stateManager.create('a');
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      assert.isTrue(errored);
+    });
+
+    it('should create a shared state', async () => {
       const stateA = await server.stateManager.create('a');
       const stateB = await server.stateManager.create('a');
 
-      assert.isNumber(stateA.id);
-      assert.isNumber(stateA.remoteId);
-      assert.isNumber(stateB.id);
-      assert.isNumber(stateB.remoteId);
+      assert.isTrue(stateA instanceof SharedState);
+      assert.isTrue(stateB instanceof SharedState);
 
       await stateA.delete();
       await stateB.delete();
@@ -167,6 +207,25 @@ describe(`# StateManager`, () => {
   });
 
   describe('## async attach(schema[, stateId]) => state', () => {
+    it(`should throw if node is not inited`, async () => {
+      const localConfig = structuredClone(config);
+      localConfig.env.port = 8082;
+
+      const server = new Server(config);
+      server.stateManager.registerSchema('a', a);
+
+      let errored = false;
+
+      try {
+        await server.stateManager.attach('a');
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      assert.isTrue(errored);
+    });
+
     it('should propagate updates to all attached states (server)', async () => {
       const a0 = await server.stateManager.create('a');
       const a1 = await server.stateManager.attach('a', a0.id);
@@ -295,6 +354,25 @@ describe(`# StateManager`, () => {
   });
 
   describe('## observe(callback) => Promise<unobserve>', async () => {
+    it(`should throw if node is not inited`, async () => {
+      const localConfig = structuredClone(config);
+      localConfig.env.port = 8082;
+
+      const server = new Server(config);
+      server.stateManager.registerSchema('a', a);
+
+      let errored = false;
+
+      try {
+        await server.stateManager.observe('a', () => {});
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      assert.isTrue(errored);
+    });
+
     it(`should be notified of states created on the network`, async () => {
       let numCalled = 0;
 
@@ -385,7 +463,7 @@ describe(`# StateManager`, () => {
 
       let notificationReceived = false;
       // check low level transport messages
-      server.stateManager.client.transport.addListener(OBSERVE_NOTIFICATION, () => {
+      server.stateManager[kStateManagerClient].transport.addListener(OBSERVE_NOTIFICATION, () => {
         notificationReceived = true;
       });
 
@@ -406,13 +484,13 @@ describe(`# StateManager`, () => {
 
       let responsesReceived = 0;
 
-      other.stateManager.client.transport.addListener(OBSERVE_RESPONSE, () => {
+      other.stateManager[kStateManagerClient].transport.addListener(OBSERVE_RESPONSE, () => {
         responsesReceived += 1;
       });
 
       let notificationsReceived = 0;
 
-      other.stateManager.client.transport.addListener(OBSERVE_NOTIFICATION, () => {
+      other.stateManager[kStateManagerClient].transport.addListener(OBSERVE_NOTIFICATION, () => {
         notificationsReceived += 1;
       });
 
@@ -485,12 +563,12 @@ describe(`# StateManager`, () => {
       let responsesReceived = 0;
       let notificationsReceived = 0;
 
-      other.stateManager.client.transport.addListener(OBSERVE_RESPONSE, (...args) => {
+      other.stateManager[kStateManagerClient].transport.addListener(OBSERVE_RESPONSE, (...args) => {
         // console.log('OBSERVE_RESPONSE', ...args);
         responsesReceived += 1;
       });
 
-      other.stateManager.client.transport.addListener(OBSERVE_NOTIFICATION, (...args) => {
+      other.stateManager[kStateManagerClient].transport.addListener(OBSERVE_NOTIFICATION, (...args) => {
         // console.log('OBSERVE_NOTIFICATION', args);
         notificationsReceived += 1;
       });
@@ -623,7 +701,6 @@ describe(`# StateManager`, () => {
       let observeCalled = false;
 
       const unobserve = await client.stateManager.observe('a', (schemaName, stateId, nodeId) => {
-        console.log('HEHO ?')
         observeCalled = true;
       }, { excludeLocal: true });
 
@@ -636,6 +713,27 @@ describe(`# StateManager`, () => {
 
       await state1.delete();
       await state2.delete();
+    });
+  });
+
+  describe('## getCollection(schemaName) => Promise<SharedStateCollection>', async () => {
+    it(`should throw if node is not inited`, async () => {
+      const localConfig = structuredClone(config);
+      localConfig.env.port = 8082;
+
+      const server = new Server(config);
+      server.stateManager.registerSchema('a', a);
+
+      let errored = false;
+
+      try {
+        await server.stateManager.getCollection('a');
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      assert.isTrue(errored);
     });
   });
 
@@ -911,25 +1009,6 @@ describe(`# StateManager`, () => {
         server.stateManager.deleteSchema('hooked');
         return Promise.reject(err);
       }
-    });
-  });
-
-  describe.only('MISC', () => {
-    it.only(`create - should throw if used before init`, async () => {
-      const server = new Server(config);
-      server.stateManager.registerSchema('test', {
-        a: { type: 'boolean', default: true }
-      });
-
-      let errored = false;
-      try {
-        const a = await server.stateManager.create('test');
-      } catch(err) {
-        console.log(err.message);
-        errored = true;
-      }
-
-      assert.equal(errored, true);
     });
   });
 });

@@ -1,6 +1,5 @@
 export const SERVER_ID: -1;
 export const PING_INTERVAL: number;
-export const PING_LATENCY_TOLERANCE: 1000;
 export const PING_MESSAGE: "h:ping";
 export const PONG_MESSAGE: "h:pong";
 export const BATCHED_TRANSPORT_CHANNEL: "b:t";
@@ -41,4 +40,3 @@ export const CLIENT_HANDSHAKE_RESPONSE: "cl:h:res";
 export const CLIENT_HANDSHAKE_ERROR: "cl:h:err";
 export const AUDIT_STATE_NAME: "p:s:audit";
 export const PRIVATE_STATES: string[];
-//# sourceMappingURL=constants.d.ts.map

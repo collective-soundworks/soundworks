@@ -21,6 +21,7 @@ const encryptionIV = crypto
   .substring(0, 16);
 
 
+/** @private */
 export function encryptData(obj) {
   const data = JSON.stringify(obj);
   const cipher = crypto.createCipheriv(encryptionMethod, key, encryptionIV);
@@ -28,6 +29,7 @@ export function encryptData(obj) {
   return Buffer.from(cipher.update(data, 'utf8', 'hex') + cipher.final('hex')).toString('base64');
 }
 
+/** @private */
 export function decryptData(encryptedData) {
   const buff = Buffer.from(encryptedData, 'base64');
   const decipher = crypto.createDecipheriv(encryptionMethod, key, encryptionIV);

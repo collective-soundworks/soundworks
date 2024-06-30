@@ -164,6 +164,11 @@ dependencies on both your server and clients.
 
     console.error(chalk.red(msg));
   },
+
+  deprecated(oldAPI, newAPI) {
+    const msg = `[warning] '${oldAPI}' is deprecated and will be removed in next major version, please use '${newAPI}' instead`;
+    console.warn(chalk.yellow(msg));
+  }
 };
 
 export default logger;

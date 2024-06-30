@@ -129,10 +129,7 @@ export const types = {
 };
 
 
-/**
- * Bag of parameters.
- * @private
- */
+/** @private */
 class ParameterBag {
   static validateSchema(schema) {
     for (let name in schema) {

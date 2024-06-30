@@ -1,24 +1,56 @@
+export const kPluginManagerStart: unique symbol;
+export const kPluginManagerStop: unique symbol;
+export const kPluginManagerInstances: unique symbol;
 export default BasePluginManager;
 /**
- * Shared functionnality between server-side and client-size plugin manager
- *
- * @private
+ * Callback executed when a plugin internal state is updated.
  */
+export type pluginManagerOnStateChangeCallback = (: object, initiator: ClientPlugin | ServerPlugin | null) => any;
+/**
+ * Delete the registered {@link pluginManagerOnStateChangeCallback }.
+ */
+export type pluginManagerDeleteOnStateChangeCallback = () => any;
+/**
+ * Callback executed when a plugin internal state is updated.
+ *
+ * @callback pluginManagerOnStateChangeCallback
+ * @param {object<string, ClientPlugin|ServerPlugin>} fullState - List of all plugins.
+ * @param {ClientPlugin|ServerPlugin|null} initiator - Plugin that initiated the
+ *  update. The value is `null` if the change was initiated by the state manager
+ *  (e.g. when the initialization of the plugins starts).
+ */
+/**
+ * Delete the registered {@link pluginManagerOnStateChangeCallback}.
+ *
+ * @callback pluginManagerDeleteOnStateChangeCallback
+ */
+/** @private */
 declare class BasePluginManager {
     constructor(node: any);
-    /** @private */
-    private _node;
-    /** @private */
-    private _dependencies;
-    /** @private */
-    private _instances;
-    /** @private */
-    private _instanceStartPromises;
-    /** @private */
-    private _onStateChangeCallbacks;
-    status: string;
     /**
-     * Register a plugin into soundworks.
+     * Status of the plugin manager
+     *
+     * @type {'idle'|'inited'|'started'|'errored'}
+     */
+    get status(): "idle" | "inited" | "started" | "errored";
+    /**
+     * Alias for existing plugins (i.e. plugin-scriptin), remove once updated
+     * @private
+     */
+    private unsafeGet;
+    /**
+     * Retrieve an fully started instance of a registered plugin without checking
+     * that the pluginManager is started.
+     *
+     * This method is required for starting the plugin manager itself and to require
+     * a plugin from within another plugin.
+     *
+     * _Warning: Unless you are developing your own plugins, you should not have to use
+     * this method_
+     */
+    getUnsafe(id: any): Promise<any>;
+    /**
+     * Register a plugin into the manager.
      *
      * _A plugin must always be registered both on client-side and on server-side_
      *
@@ -32,8 +64,8 @@ declare class BasePluginManager {
      * @param {array} [deps=[]] - List of plugins' names the plugin depends on, i.e.
      *  the plugin initialization will start only after the plugins it depends on are
      *  fully started themselves.
-     * @see {@link client.PluginManager#register}
-     * @see {@link server.PluginManager#register}
+     * @see {@link ClientPluginManager#register}
+     * @see {@link ServerPluginManager#register}
      * @example
      * // client-side
      * client.pluginManager.register('user-defined-id', pluginFactory);
@@ -42,9 +74,9 @@ declare class BasePluginManager {
      */
     register(id: string, ctor: any, options?: object, deps?: any[]): void;
     /**
-     * Manually add a dependency to a given plugin. Usefull to require a plugin
-     * within a plugin
+     * Manually add a dependency to a given plugin.
      *
+     * Usefull to require a plugin within a plugin
      */
     addDependency(pluginId: any, dependencyId: any): void;
     /**
@@ -53,32 +85,14 @@ declare class BasePluginManager {
      */
     getRegisteredPlugins(): string[];
     /**
-     * Initialize all the registered plugin. Executed during the `Client.init()` or
-     * `Server.init()` initialization step.
-     * @private
-     */
-    private start;
-    /** @private */
-    private stop;
-    /**
-     * Retrieve an fully started instance of a registered plugin, without checking
-     * that the pluginManager has started. This is required for starting the plugin
-     * manager itself and to require a plugin from within another plugin
-     *
-     * @private
-     */
-    private unsafeGet;
-    /**
      * Propagate a notification each time a plugin is updated (status or inner state).
      * The callback will receive the list of all plugins as first parameter, and the
      * plugin instance that initiated the state change event as second parameter.
      *
      * _In most cases, you should not have to rely on this method._
      *
-     * @param {client.PluginManager~onStateChangeCallback|server.PluginManager~onStateChangeCallback} callback
-     *  Callback to be executed on state change
-     * @param {client.PluginManager~deleteOnStateChangeCallback|client.PluginManager~deleteOnStateChangeCallback}
-     *  Function to execute to listening for changes.
+     * @param {pluginManagerOnStateChangeCallback} callback - Callback to execute on state change
+     * @returns {pluginManagerDeleteOnStateChangeCallback} - Clear the subscription when executed
      * @example
      * const unsubscribe = client.pluginManager.onStateChange(pluginList, initiator => {
      *   // log the current status of all plugins
@@ -93,8 +107,18 @@ declare class BasePluginManager {
      * // stop listening for updates later
      * unsubscribe();
      */
-    onStateChange(callback: any): () => boolean;
+    onStateChange(callback: pluginManagerOnStateChangeCallback): pluginManagerDeleteOnStateChangeCallback;
+    /**
+     * Initialize all registered plugins.
+     *
+     * Executed during the `Client.init()` or `Server.init()` initialization step.
+     *
+     * @private
+     */
+    private [kPluginManagerStart];
     /** @private */
-    private _propagateStateChange;
+    private [kPluginManagerStop];
+    /** #private */
+    [kPluginManagerInstances]: Map<any, any>;
+    #private;
 }
-//# sourceMappingURL=BasePluginManager.d.ts.map

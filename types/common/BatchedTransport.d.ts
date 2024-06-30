@@ -9,13 +9,9 @@ export default BatchedTransport;
  */
 declare class BatchedTransport {
     constructor(transport: any);
-    _transport: any;
-    _listeners: Map<any, any>;
-    _stack: any[];
-    _sending: boolean;
     addListener(channel: any, callback: any): void;
     emit(channel: any, ...args: any[]): Promise<void>;
     removeListener(channel: any, callback: any): void;
     removeAllListeners(channel?: any): void;
+    #private;
 }
-//# sourceMappingURL=BatchedTransport.d.ts.map
