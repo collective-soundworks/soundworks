@@ -913,4 +913,23 @@ describe(`# StateManager`, () => {
       }
     });
   });
+
+  describe.only('MISC', () => {
+    it.only(`create - should throw if used before init`, async () => {
+      const server = new Server(config);
+      server.stateManager.registerSchema('test', {
+        a: { type: 'boolean', default: true }
+      });
+
+      let errored = false;
+      try {
+        const a = await server.stateManager.create('test');
+      } catch(err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      assert.equal(errored, true);
+    });
+  });
 });
