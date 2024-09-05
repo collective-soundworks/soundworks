@@ -91,6 +91,8 @@ class Socket {
       }
 
       webSocketOptions = {
+        // handshakeTimeout: 2000,
+        // do not reject self-signed certificates
         rejectUnauthorized: false,
       };
     }
@@ -107,30 +109,15 @@ class Socket {
     // Init socket
     // ----------------------------------------------------------
     return new Promise(resolve => {
-      let connectionRefusedLogged = false;
-      let hangingTimeoutDuration = 5; // 5, 10, 20, 40
-
       const trySocket = async () => {
         const ws = new WebSocket(url, webSocketOptions);
 
-        // If after a given delay, we receive neither an 'open' nor an 'error'
-        // message (e.g. hardware is not ready), let's just drop and recreate a new socket
-        // cf. https://github.com/collective-soundworks/soundworks/issues/97
-        const hangingTimeoutId = setTimeout(() => {
-          ws.terminate ? ws.terminate() : ws.close();
-          trySocket();
-        }, hangingTimeoutDuration * 1000);
-        // exponentialy increase hangingTimeoutDuration on each try and clamp at 40sec
-        hangingTimeoutDuration = Math.min(hangingTimeoutDuration * 2, 40);
-
         ws.addEventListener('open', openEvent => {
-          clearTimeout(hangingTimeoutId);
           // parse incoming messages for pubsub
           this.#socket = ws;
 
           this.#socket.addEventListener('message', e => {
             if (e.data === PING_MESSAGE) {
-              // heartbeat();
               this.#socket.send(PONG_MESSAGE);
               // do not propagate ping / pong messages
               return;
@@ -173,28 +160,20 @@ class Socket {
 
         // cf. https://github.com/collective-soundworks/soundworks/issues/17
         ws.addEventListener('error', e => {
-          clearTimeout(hangingTimeoutId);
-
-          if (e.type === 'error') {
-            if (ws.terminate) {
-              ws.terminate();
-            } else {
-              ws.close();
-            }
-
-            // for node clients, retry connection
-            if (e.error && e.error.code === 'ECONNREFUSED') {
-              // we want to log the warning just once
-              if (!connectionRefusedLogged) {
-                logger.log('[soundworks.Socket] Connection refused, waiting for the server to start');
-                // console.log(e.error);
-                connectionRefusedLogged = true;
-              }
-
-              // retry in 1 second
-              setTimeout(trySocket, 1000);
-            }
+          if (ws.terminate) {
+            ws.terminate();
+          } else {
+            ws.close();
           }
+
+          if (e.error) {
+            const msg = `[Socket Error] code: ${e.error.code}, message: ${e.error.message}`;
+            logger.log(msg);
+          }
+
+          // Try reconnect in all cases, note that if the socket has been connected the
+          // close event will be propagated and the launcher will restart the process.
+          setTimeout(trySocket, 1000);
         });
       };
 

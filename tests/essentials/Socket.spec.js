@@ -8,20 +8,20 @@ import { kSocketTerminate } from '../../src/client/Socket.js';
 import config from '../utils/config.js';
 
 describe('# client::Socket', () => {
-  let server;
-
-  beforeEach(async () => {
-    server = new Server(config);
-    await server.start();
-  });
-
-  afterEach(async () => {
-    if (server.status !== 'stopped') {
-      await server.stop();
-    }
-  });
-
   describe(`## "close" event`, () => {
+    let server;
+
+    beforeEach(async () => {
+      server = new Server(config);
+      await server.start();
+    });
+
+    afterEach(async () => {
+      if (server.status !== 'stopped') {
+        await server.stop();
+      }
+    });
+
     it('should be triggered when calling socket[kSocketTerminate]()', async () => {
       const client = new Client({ role: 'test',  ...config });
       await client.start();
@@ -63,6 +63,29 @@ describe('# client::Socket', () => {
       await delay(12 * 1000);
 
       assert.equal(closeCalled, 1);
+    });
+  });
+
+  describe('connect retry', () => {
+    it(`should connect when server is started later than client`, async function() {
+      this.timeout(4 * 1000);
+
+      let connected = false;
+      const client = new Client({ role: 'test',  ...config });
+      client.start();
+      client.socket.addListener('open', () => {
+        connected = true;
+      });
+
+      await delay(2 * 1000);
+
+      const server = new Server(config);
+      await server.start();
+      // socket connection retry timeout is 1 second
+      await delay(1 * 1000);
+      await server.stop();
+
+      assert.isTrue(connected);
     });
   });
 });
