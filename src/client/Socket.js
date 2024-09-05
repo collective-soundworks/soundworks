@@ -91,6 +91,8 @@ class Socket {
       }
 
       webSocketOptions = {
+        // handshakeTimeout: 2000,
+        // do not reject self-signed certificates
         rejectUnauthorized: false,
       };
     }
@@ -107,8 +109,6 @@ class Socket {
     // Init socket
     // ----------------------------------------------------------
     return new Promise(resolve => {
-      let connectionRefusedLogged = false;
-
       const trySocket = async () => {
         const ws = new WebSocket(url, webSocketOptions);
 
@@ -118,7 +118,6 @@ class Socket {
 
           this.#socket.addEventListener('message', e => {
             if (e.data === PING_MESSAGE) {
-              // heartbeat();
               this.#socket.send(PONG_MESSAGE);
               // do not propagate ping / pong messages
               return;
@@ -161,26 +160,20 @@ class Socket {
 
         // cf. https://github.com/collective-soundworks/soundworks/issues/17
         ws.addEventListener('error', e => {
-          if (e.type === 'error') {
-            if (ws.terminate) {
-              ws.terminate();
-            } else {
-              ws.close();
-            }
-
-            // for node clients, retry connection
-            if (e.error && e.error.code === 'ECONNREFUSED') {
-              // we want to log the warning just once
-              if (!connectionRefusedLogged) {
-                logger.log('[soundworks.Socket] Connection refused, waiting for the server to start');
-                // console.log(e.error);
-                connectionRefusedLogged = true;
-              }
-
-              // retry in 1 second
-              setTimeout(trySocket, 1000);
-            }
+          if (ws.terminate) {
+            ws.terminate();
+          } else {
+            ws.close();
           }
+
+          if (e.error) {
+            const msg = `[Socket Error] code: ${e.error.code}, message: ${e.error.message}`;
+            logger.log(msg);
+          }
+
+          // Try reconnect in all cases, note that if the socket has been connected the
+          // close event will be propagated and the launcher will restart the process.
+          setTimeout(trySocket, 1000);
         });
       };
 
