@@ -125,7 +125,6 @@ class Client {
     this.#socket = new ClientSocket(this.#role, this.#config, {
       path: 'socket',
       retryConnectionRefusedTimeout: 1000,
-      retryHangingTimeout: 5 * 1000,
     });
     this.#contextManager = new ClientContextManager();
     this.#pluginManager = new ClientPluginManager(this);
