@@ -122,7 +122,11 @@ class Client {
 
     this.#role = config.role;
     this.#target = isBrowser() ? 'browser' : 'node';
-    this.#socket = new ClientSocket(this.#role, this.#config, { path: 'socket' });
+    this.#socket = new ClientSocket(this.#role, this.#config, {
+      path: 'socket',
+      retryConnectionRefusedTimeout: 1000,
+      retryHangingTimeout: 5 * 1000,
+    });
     this.#contextManager = new ClientContextManager();
     this.#pluginManager = new ClientPluginManager(this);
     this.#stateManager = new ClientStateManager();
