@@ -113,26 +113,17 @@ class ClientSocket {
     // Init socket
     // ----------------------------------------------------------
     return new Promise(resolve => {
-      let connectionRefusedLogged = false;
-      let hangingTimeoutDuration = 5;
-
       const trySocket = async () => {
         const ws = new WebSocket(url, webSocketOptions);
 
-        // If after a given delay, we receive neither an 'open' nor an 'error'
-        // message (e.g. hardware is not ready), let's just drop and recreate a new socket
-        // cf. https://github.com/collective-soundworks/soundworks/issues/97
-        const hangingTimeoutId = setTimeout(() => {
-          ws.terminate ? ws.terminate() : ws.close();
-          trySocket();
-        }, hangingTimeoutDuration * 1000);
-        // Exponentialy increase hangingTimeoutDuration on each try and clamp at 40sec
-        // i.e.: 5, 10, 20, 40, 40, 40, ...
-        hangingTimeoutDuration = Math.min(hangingTimeoutDuration * 2, 40);
+        // WebSocket "native" events:
+        // - `close`: Fired when a connection with a websocket is closed.
+        // - `error`: Fired when a connection with a websocket has been closed
+        //   because of an error, such as whensome data couldn't be sent.
+        // - `message`: Fired when data is received through a websocket.
+        // - `open`: Fired when a connection with a websocket is opened.
 
         ws.addEventListener('open', openEvent => {
-          clearTimeout(hangingTimeoutId);
-          // parse incoming messages for pubsub
           this.#socket = ws;
 
           this.#socket.addEventListener('message', e => {
@@ -141,16 +132,13 @@ class ClientSocket {
               return; // do not propagate ping pong messages
             }
 
+            // Parse incoming message and dispatch in pubsub system.
             const [channel, args] = unpackStringMessage(e.data);
             this.#dispatchEvent(channel, ...args);
           });
 
-          // propagate "native" events
-          // - `close`: Fired when a connection with a websocket is closed.
-          // - `error`: Fired when a connection with a websocket has been closed
-          //   because of an error, such as whensome data couldn't be sent.
-          // - `message`: Fired when data is received through a websocket.
-          // - `open`: Fired when a connection with a websocket is opened.
+          // @todo - propagate raw 'message' events in the callback above, no
+          //  need to execute to function instad of one per message...
           ['close', 'error', 'upgrade', 'message'].forEach(eventName => {
             this.#socket.addEventListener(eventName, e => {
               this.#dispatchEvent(eventName, e);
@@ -163,21 +151,18 @@ class ClientSocket {
         });
 
         // cf. https://github.com/collective-soundworks/soundworks/issues/17
+        // cf. https://github.com/collective-soundworks/soundworks/issues/97
         ws.addEventListener('error', e => {
-          clearTimeout(hangingTimeoutId);
+          ws.terminate ? ws.terminate() : ws.close();
 
-          if (e.type === 'error') {
-            ws.terminate ? ws.terminate() : ws.close();
-            // Try to establish new connection in 1 second
-            if (e.error && e.error.code === 'ECONNREFUSED') {
-              if (!connectionRefusedLogged) {
-                logger.log('[soundworks.Socket] Connection refused, waiting for the server to start');
-                connectionRefusedLogged = true;
-              }
-
-              setTimeout(trySocket, this.#socketOptions.retryConnectionRefusedTimeout);
-            }
+          if (e.error) {
+            const msg = `[Socket Error] code: ${e.error.code}, message: ${e.error.message}`;
+            logger.log(msg);
           }
+
+          // Try to reconnect in all cases. Note that if the socket has been connected,
+          // the close event will be propagated and the launcher will restart the process.
+          setTimeout(trySocket, 1000);
         });
       };
 
