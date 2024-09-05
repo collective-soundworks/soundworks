@@ -108,6 +108,7 @@ class Socket {
     // ----------------------------------------------------------
     return new Promise(resolve => {
       let connectionRefusedLogged = false;
+      let hangingTimeoutDuration = 5; // 5, 10, 20, 40
 
       const trySocket = async () => {
         const ws = new WebSocket(url, webSocketOptions);
@@ -118,7 +119,9 @@ class Socket {
         const hangingTimeoutId = setTimeout(() => {
           ws.terminate ? ws.terminate() : ws.close();
           trySocket();
-        }, 5 * 1000);
+        }, hangingTimeoutDuration * 1000);
+        // exponentialy increase hangingTimeoutDuration on each try and clamp at 40sec
+        hangingTimeoutDuration = Math.min(hangingTimeoutDuration * 2, 40);
 
         ws.addEventListener('open', openEvent => {
           clearTimeout(hangingTimeoutId);
