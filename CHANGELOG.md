@@ -1,3 +1,7 @@
+## v4.0.0-alpha.26 - 05/09/2025
+
+- Fix: improve reconnect strategy in case of socket connection failure
+
 ## v4.0.0-alpha.25 - 24/05/2025
 
 - Fix: better default behavior for websocket connection URL
