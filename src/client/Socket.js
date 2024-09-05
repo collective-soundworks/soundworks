@@ -112,7 +112,16 @@ class Socket {
       const trySocket = async () => {
         const ws = new WebSocket(url, webSocketOptions);
 
+        // If after a given delay, we receive neither an 'open' nor an 'error'
+        // message (e.g. hardware is not ready), let's just drop and recreate a new socket
+        // cf. https://github.com/collective-soundworks/soundworks/issues/97
+        const hangingTimeoutId = setTimeout(() => {
+          ws.terminate ? ws.terminate() : ws.close();
+          trySocket();
+        }, 5 * 1000);
+
         ws.addEventListener('open', openEvent => {
+          clearTimeout(hangingTimeoutId);
           // parse incoming messages for pubsub
           this.#socket = ws;
 
@@ -161,6 +170,8 @@ class Socket {
 
         // cf. https://github.com/collective-soundworks/soundworks/issues/17
         ws.addEventListener('error', e => {
+          clearTimeout(hangingTimeoutId);
+
           if (e.type === 'error') {
             if (ws.terminate) {
               ws.terminate();

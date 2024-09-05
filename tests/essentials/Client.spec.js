@@ -141,7 +141,7 @@ describe('# client::Client', () => {
       await server.stop();
     });
 
-    it.only(`[node only] should connect to localhost if serverAddress is empty`, async () => {
+    it(`[node only] should connect to localhost if serverAddress is empty`, async () => {
       const emptyConfig = merge({}, config);
       emptyConfig.env.serverAddress = '';
 
