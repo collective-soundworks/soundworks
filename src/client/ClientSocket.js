@@ -138,7 +138,7 @@ class ClientSocket {
           });
 
           // @todo - propagate raw 'message' events in the callback above, no
-          //  need to execute to function instad of one per message...
+          // need to execute to function instad of one per message...
           ['close', 'error', 'upgrade', 'message'].forEach(eventName => {
             this.#socket.addEventListener(eventName, e => {
               this.#dispatchEvent(eventName, e);
