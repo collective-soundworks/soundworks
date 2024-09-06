@@ -97,6 +97,8 @@ class ClientSocket {
       }
 
       webSocketOptions = {
+        // handshakeTimeout: 2000,
+        // do not reject self-signed certificates
         rejectUnauthorized: false,
       };
     }
@@ -132,18 +134,17 @@ class ClientSocket {
               return; // do not propagate ping pong messages
             }
 
-            // Parse incoming message and dispatch in pubsub system.
+            // Parse incoming message, dispatch in pubsub system and propagate raw event.
             const [channel, args] = unpackStringMessage(e.data);
             this.#dispatchEvent(channel, ...args);
+            this.#dispatchEvent('message', e);
           });
 
-          // @todo - propagate raw 'message' events in the callback above, no
-          // need to execute to function instad of one per message...
-          ['close', 'error', 'upgrade', 'message'].forEach(eventName => {
-            this.#socket.addEventListener(eventName, e => {
-              this.#dispatchEvent(eventName, e);
-            });
-          })
+          // Propagate other "native" events
+          this.#socket.addEventListener('close', e => this.#dispatchEvent('close', e));
+          this.#socket.addEventListener('error', e => this.#dispatchEvent('close', e));
+          // @note - isn't it too late for this one?
+          this.#socket.addEventListener('upgrade', e => this.#dispatchEvent('upgrade', e));
 
           // Forward open event and continue initialization
           this.#dispatchEvent('open', openEvent);

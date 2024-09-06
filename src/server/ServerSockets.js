@@ -182,7 +182,7 @@ class ServerSockets {
    *  JSON compatible data types (i.e. string, number, boolean, object, array and null).
    */
   broadcast(roomIds, excludeSocket, channel, ...args) {
-    const targets = new Set();
+    let targets = new Set();
 
     if (typeof roomIds === 'string' || Array.isArray(roomIds)) {
       if (typeof roomIds === 'string') {
