@@ -1,3 +1,7 @@
+## v4.0.0-alpha.28 - 06/09/2025
+
+- Fix: make it can work without `node_modules` when bundled to `.cjs` for use in Max
+
 ## v4.0.0-alpha.27 - 06/09/2025
 
 - Fix: assign to `const`
