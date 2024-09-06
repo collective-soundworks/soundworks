@@ -140,11 +140,11 @@ class ClientSocket {
             this.#dispatchEvent('message', e);
           });
 
-          // Propagate other "native" events
-          this.#socket.addEventListener('close', e => this.#dispatchEvent('close', e));
-          this.#socket.addEventListener('error', e => this.#dispatchEvent('close', e));
-          // @note - isn't it too late for this one?
-          this.#socket.addEventListener('upgrade', e => this.#dispatchEvent('upgrade', e));
+          // Propagate other native events
+          // @note - isn't it too late for the 'upgrade' message?
+          ['close', 'error', 'upgrade'].forEach(eventName => {
+            this.#socket.addEventListener(eventName, e => this.#dispatchEvent(eventName, e));
+          });
 
           // Forward open event and continue initialization
           this.#dispatchEvent('open', openEvent);

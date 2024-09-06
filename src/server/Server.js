@@ -650,7 +650,7 @@ Invalid certificate files, please check your:
         || this[kServerApplicationTemplateOptions].templatePath === null
         || this[kServerApplicationTemplateOptions].clientConfigFunction === null
       ) {
-        throw new Error('[soundworks:Server] A browser client has been found in "config.app.clients" but configuration for html templating is missing. You should probably call `server.setDefaultTemplateConfig()` if you use the soundworks-template and/or refer (at your own risks) to the documentation of `setCustomTemplateConfig()`');
+        throw new Error('[soundworks:Server] A browser client has been found in "config.app.clients" but configuration for html templating is missing. You should probably call `server.useDefaultApplicationTemplate()` if you use the soundworks-template and/or refer (at your own risks) to the documentation of `setCustomTemplateConfig()`');
       }
     }
 
