@@ -4,6 +4,7 @@
 // Should move back to regular esm module once Max has fixed its loader
 export default `
 const { parentPort } = require('node:worker_threads');
+const { hrtime } =  require('node:process');
 
 let stack = [];
 let averageLatencyWindow = 5;
@@ -13,12 +14,14 @@ let intervalId = null;
 let meanLatency = 0;
 
 // workaround that sc-utils is pure emascript module
-let getTime;
-let inited = new Promise(async (resolve) => {
-  module = await import('@ircam/sc-utils');
-  getTime = module.getTime;
-  resolve(true);
-});
+// 2024/09/06 - Just copy getTime implementation so that we don't even need the node_modules
+const start = hrtime.bigint();
+
+function getTime() {
+  const now = hrtime.bigint();
+  const delta = now - start;
+  return Number(delta) * 1e-9;
+}
 
 parentPort.on('message', async msg => {
   switch (msg.type) {
@@ -26,7 +29,6 @@ parentPort.on('message', async msg => {
       averageLatencyWindow = msg.value.averageLatencyWindow;
       averageLatencyPeriod = msg.value.averageLatencyPeriod;
 
-      await inited;
       // launch compute in its own loop so that the number of computation is
       // decoupled from the number of connected clients
       clearInterval(intervalId);
