@@ -15,4 +15,4 @@ jobs:
         run: npm install
 
       - name: "Run Test"
-        run: npm run test:all
+        run: npm run test

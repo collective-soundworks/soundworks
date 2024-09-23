@@ -17,7 +17,7 @@ export default {
   },
 
   /**
-   * Average latency in seconds computed from ping/pong.
+   * Average latency in seconds computed from ping/pong informations.
    */
   averageNetworkLatency: {
     type: 'float',

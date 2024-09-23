@@ -1,11 +1,21 @@
 import { isBrowser, isPlainObject } from '@ircam/sc-utils';
 
-import ContextManager from './ContextManager.js';
-import PluginManager from './PluginManager.js';
-import Socket, {
+import ClientContextManager, {
+  kClientContextManagerStart,
+  kClientContextManagerStop,
+} from './ClientContextManager.js';
+import ClientPluginManager from './ClientPluginManager.js';
+import {
+  kPluginManagerStart,
+  kPluginManagerStop,
+} from '../common/BasePluginManager.js';
+import ClientSocket, {
   kSocketTerminate,
-} from './Socket.js';
-import StateManager from './StateManager.js';
+} from './ClientSocket.js';
+import ClientStateManager from './ClientStateManager.js';
+import {
+  kStateManagerInit,
+} from '../common/BaseStateManager.js';
 
 import {
   CLIENT_HANDSHAKE_REQUEST,
@@ -14,53 +24,40 @@ import {
   AUDIT_STATE_NAME,
 } from '../common/constants.js';
 import logger from '../common/logger.js';
-import version from '../common/version.js';
+import VERSION from '../common/version.js';
 
 // for testing purposes
 export const kClientVersionTest = Symbol('soundworks:client-version-test');
-
-/**
- * Configuration object for a client running in a browser runtime.
- *
- * @typedef ClientConfig
- * @memberof client
- * @type {object}
- * @property {string} role - Role of the client in the application (e.g. 'player', 'controller').
- * @property {object} [app] - Application configration object.
- * @property {string} [app.name=''] - Name of the application.
- * @property {string} [app.author=''] - Name of the author.
- * @property {object} [env] - Environment configration object.
- * @property {boolean} env.useHttps - Define if the websocket should use secure connection.
- * @property {boolean} [env.serverAddress=''] - Address the socket server. Mandatory for
- *  node clients. For browser clients, use `window.location.domain` as fallback if empty.
- * @property {boolean} env.port - Port of the socket server.
- * @property {string} [env.websockets={}] - Configuration options for websockets.
- * @property {string} [env.subpath=''] - If running behind a proxy, path to the application.
- */
+export const kClientOnStatusChangeCallbacks = Symbol('soundworks:client-on-status-change-callbacks');
 
 /**
  * The `Client` class is the main entry point for the client-side of a soundworks
  * application.
  *
- * A `Client` instance allows to access soundworks components such as {@link client.StateManager},
- * {@link client.PluginManager},{@link client.Socket} or {@link client.ContextManager}.
- * Its is also responsible for handling the initialization lifecycles of the different
- * soundworks components.
+ * A `soundworks` client can run seamlessly in a browser or in a Node.js runtime.
+ *
+ * It provides an access to the different soundworks components such as the {@link ClientStateManager},
+ * {@link ClientPluginManager}, {@link ClientSocket} and the {@link ClientContextManager}.
  *
  * ```
  * import { Client } from '@soundworks/core/client.js';
- * // create a new soundworks `Client` instance
- * const client = new Client({ role: 'player' });
- * // init and start the client
+ * // create a `Client` instance
+ * const client = new Client({
+ *   role: 'player',
+ *   env: {
+ *     useHttps: false,
+ *     serverAddress: 'localhost',
+ *     port: 8000,
+ *   },
+ * });
+ * // start the client
  * await client.start();
  * ```
- *
- * @memberof client
  */
 class Client {
+  #config = null;
   #version = null;
   #role = null;
-  #config = null;
   #id = null;
   #uuid = null;
   #target = null;
@@ -71,11 +68,10 @@ class Client {
   #status = 'idle';
   // Token of the client if connected through HTTP authentication.
   #token = null;
-  #onStatusChangeCallbacks = new Set();
   #auditState = null;
 
   /**
-   * @param {client.ClientConfig} config - Configuration of the soundworks client.
+   * @param {ClientConfig} config - Configuration of the soundworks client.
    * @throws Will throw if the given config object is invalid.
    */
   constructor(config) {
@@ -118,13 +114,7 @@ class Client {
       this.#config.env = {};
     }
 
-    // minimal configuration for websockets
-    this.#config.env.websockets = Object.assign({
-      path: 'socket',
-      pingInterval: 5000,
-    }, config.env.websockets);
-
-    this.#version = version;
+    this.#version = VERSION;
     // allow override though config for testing
     if (config[kClientVersionTest]) {
       this.#version = config[kClientVersionTest];
@@ -132,11 +122,16 @@ class Client {
 
     this.#role = config.role;
     this.#target = isBrowser() ? 'browser' : 'node';
-    this.#socket = new Socket();
-    this.#contextManager = new ContextManager();
-    this.#pluginManager = new PluginManager(this);
-    this.#stateManager = new StateManager();
+    this.#socket = new ClientSocket(this.#role, this.#config, {
+      path: 'socket',
+      retryConnectionRefusedTimeout: 1000,
+    });
+    this.#contextManager = new ClientContextManager();
+    this.#pluginManager = new ClientPluginManager(this);
+    this.#stateManager = new ClientStateManager();
     this.#status = 'idle';
+
+    this[kClientOnStatusChangeCallbacks] = new Set();
 
     logger.configure(!!config.env.verbose);
   }
@@ -162,7 +157,7 @@ class Client {
   /**
    * Configuration object.
    *
-   * @type {client.ClientConfig}
+   * @type {ClientConfig}
    */
   get config() {
     return this.#config;
@@ -183,7 +178,7 @@ class Client {
   /**
    * Unique session uuid of the client (uuidv4).
    *
-   * Generated and retrieved by the server during {@link client.Client#init}.
+   * Generated and retrieved by the server during {@link Client#init}.
    * @type {string}
    */
   get uuid() {
@@ -203,53 +198,53 @@ class Client {
   /**
    * Instance of the {@link client.Socket} class.
    *
-   * @see {@link client.Socket}
-   * @type {client.Socket}
+   * @see {@link ClientSocket}
+   * @type {ClientSocket}
    */
   get socket() {
     return this.#socket;
   }
 
   /**
-   * Instance of the {@link client.ContextManager} class.
+   * Instance of the {@link ClientContextManager} class.
    *
    * The context manager can be safely used after `client.init()` has been fulfilled.
    *
-   * @see {@link client.ContextManager}
-   * @type {client.ContextManager}
+   * @see {@link ClientContextManager}
+   * @type {ClientContextManager}
    */
   get contextManager() {
     return this.#contextManager;
   }
 
   /**
-   * Instance of the {@link client.PluginManager} class.
+   * Instance of the {@link ClientPluginManager} class.
    *
    * The context manager can be safely used after `client.init()` has been fulfilled.
    *
-   * @see {@link client.PluginManager}
-   * @type {client.PluginManager}
+   * @see {@link ClientPluginManager}
+   * @type {ClientPluginManager}
    */
   get pluginManager() {
     return this.#pluginManager;
   }
 
   /**
-   * Instance of the {@link client.StateManager} class.
+   * Instance of the {@link ClientStateManager} class.
    *
    * The context manager can be safely used after `client.init()` has been fulfilled.
    *
-   * @see {@link client.StateManager}
-   * @type {client.StateManager}
+   * @see {@link ClientStateManager}
+   * @type {ClientStateManager}
    */
   get stateManager() {
     return this.#stateManager;
   }
 
   /**
-   * Status of the client, 'idle', 'inited', 'started' or 'errored'.
+   * Status of the client.
    *
-   * @type {string}
+   * @type {'idle'|'inited'|'started'|'errored'}
    */
   get status() {
     return this.#status;
@@ -267,7 +262,7 @@ class Client {
     // execute all callbacks in parallel
     const promises = [];
 
-    for (let callback of this.#onStatusChangeCallbacks) {
+    for (let callback of this[kClientOnStatusChangeCallbacks]) {
       promises.push(callback(status));
     }
 
@@ -276,11 +271,11 @@ class Client {
 
   /**
    * The `init` method is part of the initialization lifecycle of the `soundworks`
-   * client. Most of the time, the `init` method will be implicitly called by the
-   * {@link client.Client#start} method.
+   * client. Most of the time, this method will be implicitly executed by the
+   * {@link Client#start} method.
    *
    * In some situations you might want to call this method manually, in such cases
-   * the method should be called before the {@link client.Client#start} method.
+   * the method should be called before the {@link Client#start} method.
    *
    * What it does:
    * - connect the sockets to be server
@@ -288,8 +283,8 @@ class Client {
    * - launch the state manager
    * - initialize all registered plugin
    *
-   * After `await client.init()` is fulfilled, the {@link client.Client#stateManager},
-   * the {@link client.Client#pluginManager} and the {@link client.Client#socket}
+   * After `await client.init()` is fulfilled, the {@link Client#stateManager},
+   * the {@link Client#pluginManager} and the {@link Client#socket}
    * can be safely used.
    *
    * @example
@@ -302,7 +297,7 @@ class Client {
    */
   async init() {
     // init socket communications
-    await this.#socket.init(this.#role, this.#config);
+    await this.#socket.init();
 
     // we need the try/catch block to change the promise rejection into proper error
     try {
@@ -354,24 +349,24 @@ class Client {
     }
 
     // init state manager
-    this.#stateManager.init(this.id, {
+    this.#stateManager[kStateManagerInit](this.id, {
       emit: this.#socket.send.bind(this.#socket), // need to alias this
       addListener: this.#socket.addListener.bind(this.#socket),
       removeAllListeners: this.#socket.removeAllListeners.bind(this.#socket),
     });
 
-    await this.#pluginManager.start();
+    await this.#pluginManager[kPluginManagerStart]();
 
     await this.#dispatchStatus('inited');
   }
 
   /**
    * The `start` method is part of the initialization lifecycle of the `soundworks`
-   * client. The `start` method will implicitly call the {@link client.Client#init}
-   * method if it has not been called manually.
+   * client. This method will implicitly execute {@link Client#init} method if it
+   * has not been called manually.
    *
    * What it does:
-   * - implicitly call {@link client.Client#init} if not done manually
+   * - implicitly call {@link Client#init} if not done manually
    * - start all created contexts. For that to happen, you will have to call `client.init`
    * manually and instantiate the contexts between `client.init()` and `client.start()`
    *
@@ -390,7 +385,7 @@ class Client {
       throw new Error(`[soundworks:Server] Cannot call "client.start()" twice`);
     }
 
-    await this.#contextManager.start();
+    await this.#contextManager[kClientContextManagerStart]();
     await this.#dispatchStatus('started');
   }
 
@@ -415,8 +410,8 @@ class Client {
       throw new Error(`[soundworks:Client] Cannot "client.stop()" before "client.start()"`);
     }
 
-    await this.#contextManager.stop();
-    await this.#pluginManager.stop();
+    await this.#contextManager[kClientContextManagerStop]();
+    await this.#pluginManager[kPluginManagerStop]();
     await this.#socket[kSocketTerminate]();
 
     await this.#dispatchStatus('stopped');
@@ -425,16 +420,16 @@ class Client {
   /**
    * Attach and retrieve the global audit state of the application.
    *
-   * The audit state is a {@link client.SharedState} instance that keeps track of
+   * The audit state is a {@link SharedState} instance that keeps track of
    * global informations about the application such as, the number of connected
    * clients, network latency estimation, etc. It is usefull for controller client
    * roles to give the user an overview about the state of the application.
    *
    * The audit state is lazily attached to the client only if this method is called.
    *
-   * @returns {Promise<client.SharedState>}
+   * @returns {Promise<SharedState>}
    * @throws Will throw if called before `client.init()`
-   * @see {@link client.SharedState}
+   * @see {@link SharedState}
    * @example
    * const auditState = await client.getAuditState();
    * auditState.onUpdate(() => console.log(auditState.getValues()), true);
@@ -458,8 +453,8 @@ class Client {
    * @returns {Function} Function that delete the listener when executed.
    */
   onStatusChange(callback) {
-    this.#onStatusChangeCallbacks.add(callback);
-    return () => this.#onStatusChangeCallbacks.delete(callback);
+    this[kClientOnStatusChangeCallbacks].add(callback);
+    return () => this[kClientOnStatusChangeCallbacks].delete(callback);
   }
 }
 

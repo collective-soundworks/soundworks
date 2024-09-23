@@ -57,10 +57,7 @@ export namespace types {
     }
 }
 export default ParameterBag;
-/**
- * Bag of parameters.
- * @private
- */
+/** @private */
 declare class ParameterBag {
     static validateSchema(schema: any): void;
     constructor(schema: any, initValues?: {});
@@ -161,4 +158,3 @@ declare class ParameterBag {
     getInitValues(): {};
     getDefaults(): {};
 }
-//# sourceMappingURL=ParameterBag.d.ts.map

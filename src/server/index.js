@@ -4,28 +4,25 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
+// this must be defined here so that we can import it into the application
 /**
- * Server-side part of the *soundworks* framework.
+ * Configuration object for the server.
  *
- * ```
- * import '@soundworks/helpers/polyfills.js';
- * import { Server } from '@soundworks/core/server.js';
- * import { loadConfig } from '../utils/load-config.js';
- *
- * // - General documentation: https://soundworks.dev/
- * // - API documentation:     https://soundworks.dev/api
- * // - Issue Tracker:         https://github.com/collective-soundworks/soundworks/issues
- * // - Wizard & Tools:        `npx soundworks`
- *
- * const config = loadConfig(process.env.ENV, import.meta.url);
- *
- * const server = new Server(config);
- * server.setDefaultTemplateConfig();
- *
- * await server.start();
- * ```
- *
- * @namespace server
+ * @typedef ServerConfig
+ * @type {object}
+ * @property {object} [app] - Application configuration object.
+ * @property {object} app.clients - Definition of the application clients.
+ * @property {string} [app.name=''] - Name of the application.
+ * @property {string} [app.author=''] - Name of the author.
+ * @property {object} [env] - Environment configuration object.
+ * @property {boolean} env.useHttps - Define is the server run in http or in https.
+ * @property {string} env.serverAddress - Domain name or IP of the server.
+ *  Mandatory when node clients are declared
+ * @property {number} env.port - Port on which the server is listening.
+ * @property {obj} [env.httpsInfos=null] - Path to cert files ( cert, key } for https.
+ *  If not given and useHttps is true self certifified certificates will be created.
+ * @property {string} [env.subpath=''] - If running behind a proxy, path to the application.
  */
+
 export { default as Server } from './Server.js';
-export { default as Context } from './Context.js';
+export { default as ServerContext } from './ServerContext.js';

@@ -4,6 +4,7 @@ import equal from 'fast-deep-equal';
 export const sharedOptions = {
   nullable: false,
   event: false, // if event=true, nullable=true
+  required: false, // if required=true, default is set to init value
   metas: {},
   filterChange: true,
   immediate: false,
@@ -129,10 +130,7 @@ export const types = {
 };
 
 
-/**
- * Bag of parameters.
- * @private
- */
+/** @private */
 class ParameterBag {
   static validateSchema(schema) {
     for (let name in schema) {
@@ -149,8 +147,13 @@ class ParameterBag {
       const required = types[def.type].required;
 
       required.forEach(key => {
-        if (def.event === true && key === 'default') {
-          // do nothing, default is always null for `event` params
+        if ((def.event === true || def.required === true) && key === 'default') {
+          // do nothing:
+          // - default is always null for `event` params
+          // - default is always null for `required` params
+          if ('default' in def && def.default !== null) {
+            throw new TypeError(`[StateManager.registerSchema] Invalid schema definition for param ${name} - "default" propaerty is set and not null while the parameter definition is declared as "event" or "required"`);
+          }
         } else if (!Object.prototype.hasOwnProperty.call(def, key)) {
           throw new TypeError(`[StateManager.registerSchema] Invalid schema definition - param "${name}" (type "${def.type}"): "${key}" key is required`);
         }
@@ -209,6 +212,15 @@ class ParameterBag {
       if (def.event === true) {
         def.nullable = true;
         def.default = null;
+      }
+
+      if (def.required === true) {
+        // throw if value is not given in init values
+        if (initValues[name] === undefined || initValues[name] === null) {
+          throw new Error(`[SharedState.create] Invalid init value for required param "${name}", cannot be null or undefined`);
+        }
+
+        def.default = initValues[name];
       }
 
       let initValue;

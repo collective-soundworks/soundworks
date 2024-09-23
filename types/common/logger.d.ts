@@ -9,8 +9,8 @@ declare namespace logger {
     function pluginStarted(name: any): void;
     function pluginReady(name: any): void;
     function pluginErrored(name: any): void;
+    function warnVersionDiscepancies(clientRole: any, clientVersion: any, serverVersion: any): void;
     function log(msg: any): void;
     function warn(msg: any): void;
     function error(msg: any): void;
 }
-//# sourceMappingURL=logger.d.ts.map

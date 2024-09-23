@@ -1,45 +1,43 @@
 import merge from 'lodash/merge.js';
 
-/**
- * @private
- */
-class BasePlugin {
-  constructor(id) {
-    /** @private */
-    this._id = id;
-    /** @private */
-    this._type = this.constructor.name;
+export const kBasePluginStatus = Symbol('soundworks:base-plugin-status');
 
-    /**
-     * Options of the plugin.
-     *
-     * @type {object}
-     */
-    this.options = {};
+/**
+ * Callback executed when the plugin state is updated.
+ *
+ * @callback pluginOnStateChangeCallback
+ * @param {BasePlugin#state} state - Current state of the plugin.
+ */
+
+/**
+ * Delete the registered {@link pluginOnStateChangeCallback}.
+ *
+ * @callback pluginDeleteOnStateChangeCallback
+ */
+
+/** @private */
+class BasePlugin {
+  #id = null;
+  #onStateChangeCallbacks = new Set();
+
+  constructor(id) {
+    this.#id = id;
+    /** @private */
+    this[kBasePluginStatus] = 'idle';
 
     /**
      * Placeholder that stores internal (local) state of the plugin. The state
      * should be modified through the `propagateStateChange` method to ensure
-     * the change to be properly propagated to `onStateChange` callbacks.
+     * the change to be properly propagated to manager `onStateChange` callbacks.
      *
      * @type {object}
      * @protected
-     * @see {@link client.Plugin#onStateChange}
-     * @see {@link server.Plugin#onStateChange}
-     * @see {@link client.Plugin#propagateStateChange}
-     * @see {@link server.Plugin#propagateStateChange}
+     * @see {@link ClientPlugin#onStateChange}
+     * @see {@link ServerPlugin#onStateChange}
+     * @see {@link ClientPlugin#propagateStateChange}
+     * @see {@link ServerPlugin#propagateStateChange}
      */
     this.state = {};
-
-    /**
-     * Current status of the plugin, i.e. 'idle', 'inited', 'started', 'errored'
-     *
-     * @type {string}
-     */
-    this.status = 'idle';
-
-    /** @private */
-    this._onStateChangeCallbacks = new Set();
   }
 
   /**
@@ -47,11 +45,11 @@ class BasePlugin {
    *
    * @type {string}
    * @readonly
-   * @see {@link client.PluginManager#register}
-   * @see {@link server.PluginManager#register}
+   * @see {@link ClientPluginManager#register}
+   * @see {@link ServerPluginManager#register}
    */
   get id() {
-    return this._id;
+    return this.#id;
   }
 
   /**
@@ -65,18 +63,28 @@ class BasePlugin {
    * @readonly
    */
   get type() {
-    return this._type;
+    return this.constructor.name;
   }
 
   /**
-   * Start the plugin. This method is automatically called during the client or
-   * server `init()` lifecyle step. After `start()` is fulfilled the plugin should
-   * be ready to use.
+   * Current status of the plugin.
+   *
+   * @type {'idle'|'inited'|'started'|'errored'}
+   */
+  get status() {
+    return this[kBasePluginStatus];
+  }
+
+  /**
+   * Start the plugin.
+   *
+   * This method is automatically called during the client or server `init()` lifecyle
+   * step. After `start()` is fulfilled the plugin should be ready to use.
    *
    * @example
    * // server-side couterpart of a plugin that creates a dedicated global shared
    * // state on which the server-side part can attach.
-   * class MyPlugin extends Plugin {
+   * class MyPlugin extends ServerPlugin {
    *   constructor(server, id) {
    *     super(server, id);
    *
@@ -102,13 +110,14 @@ class BasePlugin {
   async start() {}
 
   /**
-   * Stop the plugin. This method is automatically called during the client or server
-   * `stop()` lifecyle step.
+   * Stop the plugin.
+   *
+   * This method is automatically called during the client or server `stop()` lifecyle step.
    *
    * @example
    * // server-side couterpart of a plugin that creates a dedicated global shared
-   * // state on which the server-side part can attach.
-   * class MyPlugin extends Plugin {
+   * // state on which the client-side part can attach.
+   * class MyPlugin extends ServerPlugin {
    *   constructor(server, id) {
    *     super(server, id);
    *
@@ -137,20 +146,17 @@ class BasePlugin {
   /**
    * Listen to the state changes propagated by {@link BasePlugin.propagateStateChange}
    *
-   * @param {client.Plugin~onStateChangeCallback|server.Plugin~onStateChangeCallback} callback -
-   *  Callback to execute when a state change is propagated.
-   * @returns {client.Plugin~deleteOnStateChangeCallback|server.Plugin~deleteOnStateChangeCallback}
-   *  Execute the function to delete the listener from the callback list.
-   * @see {@link client.Plugin#propagateStateChange}
-   * @see {@link server.Plugin#propagateStateChange}
+   * @param {pluginOnStateChangeCallback} callback - Callback to execute when a state change is propagated.
+   * @returns {pluginDeleteOnStateChangeCallback}
+   *
    * @example
    * const unsubscribe = plugin.onStateChange(pluginState => console.log(pluginState));
    * // stop listening state changes
    * unsubscribe();
    */
   onStateChange(callback) {
-    this._onStateChangeCallbacks.add(callback);
-    return () => this._onStateChangeCallbacks.delete(callback);
+    this.#onStateChangeCallbacks.add(callback);
+    return () => this.#onStateChangeCallbacks.delete(callback);
   }
 
   /**
@@ -159,14 +165,13 @@ class BasePlugin {
    * through the `PluginManager#onStateChange` listeners.
    *
    * @param {object} updates - Updates to be merged in the plugin state.
-   * @see {@link client.Plugin#onStateChange}
-   * @see {@link server.Plugin#onStateChange}
-   * @see {@link client.PluginManager#onStateChange}
-   * @see {@link server.PluginManager#onStateChange}
+   *
+   * @see {@link BasePlugin#onStateChange}
+   * @see {@link BasePluginManager#onStateChange}
    */
   propagateStateChange(updates) {
     merge(this.state, updates);
-    this._onStateChangeCallbacks.forEach(callback => callback(this.state));
+    this.#onStateChangeCallbacks.forEach(callback => callback(this.state));
   }
 }
 

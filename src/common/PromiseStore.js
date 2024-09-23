@@ -1,5 +1,6 @@
 import { idGenerator } from '@ircam/sc-utils';
 
+/** @private */
 export default class PromiseStore {
   constructor(name) {
     this.name = name;

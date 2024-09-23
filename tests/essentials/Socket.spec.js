@@ -3,7 +3,7 @@ import { delay } from '@ircam/sc-utils';
 
 import { Server } from '../../src/server/index.js';
 import { Client } from '../../src/client/index.js';
-import { kSocketTerminate } from '../../src/client/Socket.js';
+import { kSocketTerminate } from '../../src/client/ClientSocket.js';
 
 import config from '../utils/config.js';
 
@@ -49,7 +49,7 @@ describe('# client::Socket', () => {
       assert.equal(closeCalled, true);
     });
 
-    it.skip('[long 12 seconds test, unskip manually] should be called when heartbeat is not received from server', async function() {
+    it.skip('[DEPRECATED] [long 12 seconds test, unskip manually] should be called when heartbeat is not received from server', async function() {
       this.timeout(20 * 1000);
       // server will send haertbeat ping to clients
       server.sockets._DEBUG_PREVENT_HEARTBEAT = true;

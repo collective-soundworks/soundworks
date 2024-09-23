@@ -23,9 +23,12 @@
     "footer": ""
   },
   "docdash": {
+    "search": true,
+    "typedefs": true,
     "sectionOrder": [
       "Namespaces",
       "Classes",
+      "Global",
       "Modules",
       "Externals",
       "Events",
@@ -40,7 +43,6 @@
         "title": "soundworks",
         "description": "Documentation of soundworks, a full-stack JavaScript framework for distributed WebAudio and multimedia applications"
     },
-    "search": true,
     "menu": {
       "Website": {
         "href":"http://soundworks.dev/",

@@ -1,6 +1,6 @@
 import { isString, isFunction, isPlainObject } from '@ircam/sc-utils';
-import SharedState from './BaseSharedState.js';
-import SharedStateCollection from './BaseSharedStateCollection.js';
+import SharedState from './SharedState.js';
+import SharedStateCollection from './SharedStateCollection.js';
 import BatchedTransport from './BatchedTransport.js';
 import ParameterBag from './ParameterBag.js';
 import PromiseStore from './PromiseStore.js';
@@ -22,16 +22,62 @@ import {
   GET_SCHEMA_ERROR,
 } from './constants.js';
 
+export const kStateManagerInit = Symbol('soundworks:state-manager-init');
+export const kStateManagerDeleteState = Symbol('soundworks:state-manager-delete-state');
+// for testing purposes
+export const kStateManagerClient = Symbol('soundworks:state-manager-client');
+
+
+/**
+ * Callback executed when a state is created on the network.
+ *
+ * @callback stateManagerObserveCallback
+ * @async
+ * @param {string} schemaName - name of the schema
+ * @param {number} stateId - id of the state
+ * @param {number} nodeId - id of the node that created the state
+ */
+/**
+ * Callback to execute in order to remove a {@link stateManagerObserveCallback}
+ * from the list of observer.
+ *
+ * @callback stateManagerDeleteObserveCallback
+ */
+
 /** @private */
 class BaseStateManager {
+  #statesById = new Map();
+  #cachedSchemas = new Map(); // <shemaName, definition>
+  #observeListeners = new Set(); // Set <[observedSchemaName, callback, options]>
+  #observeRequestCallbacks = new Map(); // Map <reqId, [observedSchemaName, callback, options]>
+  #promiseStore = null;
+  #status = 'idle';
+
   constructor() {
-    this._statesById = new Map(); // <id, state>
-    this._cachedSchemas = new Map(); // <shemaName, definition>
+    this.#promiseStore = new PromiseStore('BaseStateManager');
+    /** @private */
+    this[kStateManagerClient] = null;
 
-    this._observeListeners = new Set(); // Set <[observedSchemaName, callback, options]>
-    this._observeRequestCallbacks = new Map(); // Map <reqId, [observedSchemaName, callback, options]>
+  }
 
-    this._promiseStore = new PromiseStore();
+  /** @private */
+  #filterObserve(observedSchemaName, schemaName, creatorId, options) {
+    let filter = true;
+    // schema name filter filer
+    if (observedSchemaName === null || observedSchemaName === schemaName) {
+      filter = false;
+    }
+    // filter state created by client if excludeLocal is true
+    if (options.excludeLocal === true && creatorId === this[kStateManagerClient].id) {
+      filter = true;
+    }
+
+    return filter;
+  }
+
+  /** @private */
+  [kStateManagerDeleteState](stateId) {
+    this.#statesById.delete(stateId);
   }
 
   /**
@@ -39,75 +85,75 @@ class BaseStateManager {
    * @param {Number} id - Id of the node.
    * @param {Object} transport - Transport to use for synchronizing the states.
    *  Must implement a basic EventEmitter API.
+   *
+   * @private
    */
-  /** @private */
-  init(id, transport) {
+  [kStateManagerInit](id, transport) {
     const batchedTransport = new BatchedTransport(transport);
-    this.client = { id, transport: batchedTransport };
+    this[kStateManagerClient] = { id, transport: batchedTransport };
 
     // ---------------------------------------------
     // CREATE
     // ---------------------------------------------
 
-    this.client.transport.addListener(CREATE_RESPONSE, (reqId, stateId, remoteId, schemaName, schema, initValues, filter) => {
+    this[kStateManagerClient].transport.addListener(CREATE_RESPONSE, (reqId, stateId, remoteId, schemaName, schema, initValues) => {
 
       // cache schema when first dealing it to save some bandwidth
-      if (!this._cachedSchemas.has(schemaName)) {
-        this._cachedSchemas.set(schemaName, schema);
+      if (!this.#cachedSchemas.has(schemaName)) {
+        this.#cachedSchemas.set(schemaName, schema);
       }
 
-      schema = this._cachedSchemas.get(schemaName);
+      schema = this.#cachedSchemas.get(schemaName);
 
-      const state = new SharedState(stateId, remoteId, schemaName, schema, this.client, true, this, initValues, null);
-      this._statesById.set(state.id, state);
+      const state = new SharedState(stateId, remoteId, schemaName, schema, this[kStateManagerClient], true, this, initValues, null);
+      this.#statesById.set(state.id, state);
 
-      this._promiseStore.resolve(reqId, state);
+      this.#promiseStore.resolve(reqId, state);
     });
 
-    this.client.transport.addListener(CREATE_ERROR, (reqId, msg) => {
-      this._promiseStore.reject(reqId, msg);
+    this[kStateManagerClient].transport.addListener(CREATE_ERROR, (reqId, msg) => {
+      this.#promiseStore.reject(reqId, msg);
     });
 
     // ---------------------------------------------
     // ATTACH (when creator, is attached by default)
     // ---------------------------------------------
-    this.client.transport.addListener(ATTACH_RESPONSE, (reqId, stateId, remoteId, schemaName, schema, currentValues, filter) => {
+    this[kStateManagerClient].transport.addListener(ATTACH_RESPONSE, (reqId, stateId, remoteId, schemaName, schema, currentValues, filter) => {
       // cache schema when first dealing with it to save some bandwidth
       // note: when we make the schemas dynamic at some point
       // the server should be able to invalidate the schema and send
       // it again despite the caching.
-      if (!this._cachedSchemas.has(schemaName)) {
-        this._cachedSchemas.set(schemaName, schema);
+      if (!this.#cachedSchemas.has(schemaName)) {
+        this.#cachedSchemas.set(schemaName, schema);
       }
 
-      schema = this._cachedSchemas.get(schemaName);
+      schema = this.#cachedSchemas.get(schemaName);
 
-      const state = new SharedState(stateId, remoteId, schemaName, schema, this.client, false, this, currentValues, filter);
-      this._statesById.set(state.id, state);
+      const state = new SharedState(stateId, remoteId, schemaName, schema, this[kStateManagerClient], false, this, currentValues, filter);
+      this.#statesById.set(state.id, state);
 
-      this._promiseStore.resolve(reqId, state);
+      this.#promiseStore.resolve(reqId, state);
     });
 
-    this.client.transport.addListener(ATTACH_ERROR, (reqId, msg) => {
-      this._promiseStore.reject(reqId, msg);
+    this[kStateManagerClient].transport.addListener(ATTACH_ERROR, (reqId, msg) => {
+      this.#promiseStore.reject(reqId, msg);
     });
 
     // ---------------------------------------------
     // OBSERVE PEERS (be notified when a state is created, lazy)
     // ---------------------------------------------
-    this.client.transport.addListener(OBSERVE_RESPONSE, async (reqId, ...list) => {
+    this[kStateManagerClient].transport.addListener(OBSERVE_RESPONSE, async (reqId, ...list) => {
       // retrieve the callback that have been stored in observe to make sure
       // we don't call another callback that may have been registered earlier.
-      const observeInfos = this._observeRequestCallbacks.get(reqId);
+      const observeInfos = this.#observeRequestCallbacks.get(reqId);
       const [observedSchemaName, callback, options] = observeInfos;
-
       // move observeInfos from `_observeRequestCallbacks` to `_observeListeners`
       // to guarantee order of execution, @see not in `.observe`
-      this._observeRequestCallbacks.delete(reqId);
-      this._observeListeners.add(observeInfos);
+      this.#observeRequestCallbacks.delete(reqId);
+      this.#observeListeners.add(observeInfos);
 
       const promises = list.map(([schemaName, stateId, nodeId]) => {
-        const filter = this._filterObserve(observedSchemaName, schemaName, nodeId, options);
+        const filter = this.#filterObserve(observedSchemaName, schemaName, nodeId, options);
 
         if (!filter) {
           return callback(schemaName, stateId, nodeId);
@@ -119,27 +165,26 @@ class BaseStateManager {
       await Promise.all(promises);
 
       const unsubscribe = () => {
-        this._observeListeners.delete(observeInfos);
-
+        this.#observeListeners.delete(observeInfos);
         // no more listeners, we can stop receiving notifications from the server
-        if (this._observeListeners.size === 0) {
-          this.client.transport.emit(UNOBSERVE_NOTIFICATION);
+        if (this.#observeListeners.size === 0) {
+          this[kStateManagerClient].transport.emit(UNOBSERVE_NOTIFICATION);
         }
       };
 
-      this._promiseStore.resolve(reqId, unsubscribe);
+      this.#promiseStore.resolve(reqId, unsubscribe);
     });
 
     // Observe error can occur if observed schema name does not exists
-    this.client.transport.addListener(OBSERVE_ERROR, (reqId, msg) => {
-      this._observeRequestCallbacks.delete(reqId);
-      this._promiseStore.reject(reqId, msg);
+    this[kStateManagerClient].transport.addListener(OBSERVE_ERROR, (reqId, msg) => {
+      this.#observeRequestCallbacks.delete(reqId);
+      this.#promiseStore.reject(reqId, msg);
     });
 
-    this.client.transport.addListener(OBSERVE_NOTIFICATION, (schemaName, stateId, nodeId) => {
-      this._observeListeners.forEach(observeInfos => {
+    this[kStateManagerClient].transport.addListener(OBSERVE_NOTIFICATION, (schemaName, stateId, nodeId) => {
+      this.#observeListeners.forEach(observeInfos => {
         const [observedSchemaName, callback, options] = observeInfos;
-        const filter = this._filterObserve(observedSchemaName, schemaName, nodeId, options);
+        const filter = this.#filterObserve(observedSchemaName, schemaName, nodeId, options);
 
         if (!filter) {
           callback(schemaName, stateId, nodeId);
@@ -150,40 +195,27 @@ class BaseStateManager {
     // ---------------------------------------------
     // Clear cache when schema is deleted
     // ---------------------------------------------
-    this.client.transport.addListener(DELETE_SCHEMA, schemaName => {
-      this._cachedSchemas.delete(schemaName);
+    this[kStateManagerClient].transport.addListener(DELETE_SCHEMA, schemaName => {
+      this.#cachedSchemas.delete(schemaName);
     });
 
     // ---------------------------------------------
     // GET SCHEMA
     // ---------------------------------------------
-    this.client.transport.addListener(GET_SCHEMA_RESPONSE, (reqId, schemaName, schema) => {
-      if (!this._cachedSchemas.has(schemaName)) {
-        this._cachedSchemas.set(schemaName, schema);
+    this[kStateManagerClient].transport.addListener(GET_SCHEMA_RESPONSE, (reqId, schemaName, schema) => {
+      if (!this.#cachedSchemas.has(schemaName)) {
+        this.#cachedSchemas.set(schemaName, schema);
       }
       // return a populated schema
       const parameterBag = new ParameterBag(schema);
-      this._promiseStore.resolve(reqId, parameterBag.getSchema());
+      this.#promiseStore.resolve(reqId, parameterBag.getSchema());
     });
 
-    this.client.transport.addListener(GET_SCHEMA_ERROR, (reqId, msg) => {
-      this._promiseStore.reject(reqId, msg);
+    this[kStateManagerClient].transport.addListener(GET_SCHEMA_ERROR, (reqId, msg) => {
+      this.#promiseStore.reject(reqId, msg);
     });
-  }
 
-  /** @private */
-  _filterObserve(observedSchemaName, schemaName, creatorId, options) {
-    let filter = true;
-    // schema name filter filer
-    if (observedSchemaName === null || observedSchemaName === schemaName) {
-      filter = false;
-    }
-    // filter state created by client if excludeLocal is true
-    if (options.excludeLocal === true && creatorId === this.client.id) {
-      filter = true;
-    }
-
-    return filter;
+    this.#status = 'inited';
   }
 
   /**
@@ -191,45 +223,96 @@ class BaseStateManager {
    *
    * @param {String} schemaName - Name of the schema as given on registration
    *  (cf. ServerStateManager)
+   * @return {SharedStateSchema}
    * @example
-   * const schema = await client.stateManager.getSchema('my-schema');
+   * const schema = await client.stateManager.getSchema('my-class');
    */
   async getSchema(schemaName) {
-    if (this._cachedSchemas.has(schemaName)) {
-      const schema = this._cachedSchemas.get(schemaName);
+    if (this.#status !== 'inited') {
+      throw new DOMException(`Cannot execute 'getSchema' on 'StateManager': state manager is not inited. This method can be safely called only once 'client' or 'server' is inited itself`, 'InvalidStateError');
+    }
+
+    if (this.#cachedSchemas.has(schemaName)) {
+      const schema = this.#cachedSchemas.get(schemaName);
       // return a populated schema
       const parameterBag = new ParameterBag(schema);
       return parameterBag.getSchema();
     }
 
     return new Promise((resolve, reject) => {
-      const reqId = this._promiseStore.add(resolve, reject, 'get-schema');
-      this.client.transport.emit(GET_SCHEMA_REQUEST, reqId, schemaName);
+      const reqId = this.#promiseStore.add(resolve, reject, 'get-schema');
+      this[kStateManagerClient].transport.emit(GET_SCHEMA_REQUEST, reqId, schemaName);
     });
   }
 
   /**
-   * Create a `SharedState` instance from a registered schema.
+   * Create a {@link SharedState} instance from a registered schema.
    *
-   * @param {String} schemaName - Name of the schema as given on registration
+   * @param {string} schemaName - Name of the schema as given on registration
    *  (cf. ServerStateManager)
-   * @param {Object} [initValues={}] - Default values for the state.
-   * @returns {client.SharedState|server.SharedState}
-   * @see {@link client.SharedState}
-   * @see {@link server.SharedState}
+   * @param {Object.<string, any>} [initValues={}] - Default values for the state.
+   * @returns {Promise<SharedState>}
    * @example
-   * const state = await client.stateManager.create('my-schema');
+   * const state = await client.stateManager.create('my-class');
    */
   async create(schemaName, initValues = {}) {
+    if (this.#status !== 'inited') {
+      throw new DOMException(`Cannot execute 'create' on 'StateManager': state manager is not inited. This method can be safely called only once 'client' or 'server' is inited itself`, 'InvalidStateError');
+    }
+
     return new Promise((resolve, reject) => {
-      const reqId = this._promiseStore.add(resolve, reject, 'create-request');
-      const requireSchema = this._cachedSchemas.has(schemaName) ? false : true;
-      this.client.transport.emit(CREATE_REQUEST, reqId, schemaName, requireSchema, initValues);
+      const reqId = this.#promiseStore.add(resolve, reject, 'create-request');
+      const requireSchema = this.#cachedSchemas.has(schemaName) ? false : true;
+      this[kStateManagerClient].transport.emit(CREATE_REQUEST, reqId, schemaName, requireSchema, initValues);
     });
   }
 
   /**
-   * Attach to an existing `SharedState` instance.
+   * Attach to an existing {@link SharedState} instance.
+   *
+   * @overload
+   * @param {string} schemaName
+   * @returns {Promise<SharedState>}
+   *
+   * @example
+   * const state = await client.stateManager.attach('my-class');
+   */
+  /**
+   * Attach to an existing {@link SharedState} instance.
+   *
+   * @overload
+   * @param {string} schemaName - Name of the schema
+   * @param {number} stateId - Id of the state
+   * @returns {Promise<SharedState>}
+   *
+   * @example
+   * const state = await client.stateManager.attach('my-class', stateId);
+   */
+  /**
+   * Attach to an existing {@link SharedState} instance.
+   *
+   * @overload
+   * @param {string} schemaName - Name of the schema
+   * @param {string[]} filter - List of parameters of interest
+   * @returns {Promise<SharedState>}
+   *
+   * @example
+   * const state = await client.stateManager.attach('my-class', ['some-param']);
+   */
+  /**
+   * Attach to an existing {@link SharedState} instance.
+   *
+   * @overload
+   * @param {string} schemaName - Name of the schema
+   * @param {number} stateId - Id of the state
+   * @param {string[]} filter - List of parameters of interest
+   * @returns {Promise<SharedState>}
+   *
+   * @example
+   * const state = await client.stateManager.attach('my-class', stateId, ['some-param']);
+   */
+  /**
+   * Attach to an existing {@link SharedState} instance.
    *
    * Alternative signatures:
    * - `stateManager.attach(schemaName)`
@@ -237,21 +320,22 @@ class BaseStateManager {
    * - `stateManager.attach(schemaName, filter)`
    * - `stateManager.attach(schemaName, stateId, filter)`
    *
-   * @param {String} schemaName - Name of the schema as given on registration
-   *  (cf. ServerStateManager)
-   * @param {Object} [stateId=null] - Id of the state to attach to. If `null`,
+   * @param {string} schemaName - Name of the schema as given on registration
+   * @param {number|string[]} [stateIdOrFilter] - Id of the state to attach to. If `null`,
    *  attach to the first state found with the given schema name (usefull for
    *  globally shared states owned by the server).
-   * @param {array|null} [filter=null] - Filter parameters of interest in the
-   *  returned state. If set to `null`, no filter applied.
-   * @returns {client.SharedState|server.SharedState}
-   * @see {@link client.SharedState}
-   * @see {@link server.SharedState}
+   * @param {string[]} [filter] - List of parameters of interest in the
+   *  returned state. If set to `null`, no filter is applied.
+   * @returns {Promise<SharedState>}
    *
    * @example
-   * const state = await client.stateManager.attach('my-schema');
+   * const state = await client.stateManager.attach('my-class');
    */
   async attach(schemaName, stateIdOrFilter = null, filter = null) {
+    if (this.#status !== 'inited') {
+      throw new DOMException(`Cannot execute 'attach' on 'StateManager': state manager is not inited. This method can be safely called only once 'client' or 'server' is inited itself`, 'InvalidStateError');
+    }
+
     let stateId = null;
 
     if (!isString(schemaName)) {
@@ -286,25 +370,84 @@ class BaseStateManager {
     }
 
     return new Promise((resolve, reject) => {
-      const reqId = this._promiseStore.add(resolve, reject, 'attach-request');
-      const requireSchema = this._cachedSchemas.has(schemaName) ? false : true;
-      this.client.transport.emit(ATTACH_REQUEST, reqId, schemaName, stateId, requireSchema, filter);
+      const reqId = this.#promiseStore.add(resolve, reject, 'attach-request');
+      const requireSchema = this.#cachedSchemas.has(schemaName) ? false : true;
+      this[kStateManagerClient].transport.emit(ATTACH_REQUEST, reqId, schemaName, stateId, requireSchema, filter);
     });
   }
 
   /**
-   * Observe all the `SharedState` instances that are created on the network.
-   * This can be usefull for clients with some controller role that might want to track
-   * the state of all other clients of the application, to monitor them and/or take
-   * control over them from a single point.
+   * Observe all the {@link SharedState} instances that are created on the network.
+   *
+   * @overload
+   * @param {stateManagerObserveCallback} callback - Function to execute when a
+   *   new {@link SharedState} is created on the network.
+   * @example
+   * client.stateManager.observe(async (schemaName, stateId) => {
+   *   if (schemaName === 'my-shared-state-class') {
+   *     const attached = await client.stateManager.attach(schemaName, stateId);
+   *   }
+   * });
+   */
+  /**
+   * Observe all the {@link SharedState} instances of given {@link SharedStateClassName}
+   * that are created on the network.
+   *
+   * @overload
+   * @param {SharedStateClassName} schemaName - Observe only ${@link SharedState}
+   *   of given name.
+   * @param {stateManagerObserveCallback} callback - Function to execute when a
+   *   new {@link SharedState} is created on the network.
+   * @example
+   * client.stateManager.observe('my-shared-state-class', async (schemaName, stateId) => {
+   *   const attached = await client.stateManager.attach(schemaName, stateId);
+   * });
+   */
+  /**
+   * Observe all the {@link SharedState} instances of given excluding the ones
+   * created by the current node.
+   *
+   * @overload
+   * @param {stateManagerObserveCallback} callback - Function to execute when a
+   *   new {@link SharedState} is created on the network.
+   * @param {object} options - Options.
+   * @param {boolean} options.excludeLocal=false - If set to true, exclude states
+   *   created by the same node from the collection.
+   * @example
+   * client.stateManager.observe(async (schemaName, stateId) => {
+   *   if (schemaName === 'my-shared-state-class') {
+   *     const attached = await client.stateManager.attach(schemaName, stateId);
+   *   }
+   * }, { excludeLocal: true });
+   */
+  /**
+   * Observe all the {@link SharedState} instances of given {@link SharedStateClassName}
+   * that are created on the network, excluding the ones created by the current node.
+   *
+   * @overload
+   * @param {SharedStateClassName} schemaName - Observe only ${@link SharedState}
+   *   of given name.
+   * @param {stateManagerObserveCallback} callback - Function to execute when a
+   *   new {@link SharedState} is created on the network.
+   * @param {object} options - Options.
+   * @param {boolean} options.excludeLocal=false - If set to true, exclude states
+   *   created by the same node from the collection.
+   * @example
+   * client.stateManager.observe('my-shared-state-class', async (schemaName, stateId) => {
+   *   const attached = await client.stateManager.attach(schemaName, stateId);
+   * }, { excludeLocal: true });
+   */
+  /**
+   * Observe all the {@link SharedState} instances that are created on the network.
    *
    * Notes:
-   * - The order of execution is not guaranted between nodes, i.e. an state attached
-   * in the `observe` callback could be created before the `async create` method resolves.
+   * - The order of execution is not guaranted between nodes, i.e. a state attached
+   * in the `observe` callback can be instantiated before the `async create` method
+   * resolves on the creator node.
    * - Filtering, i.e. `observedSchemaName` and `options.excludeLocal` are handled
    * on the node side, the server just notify all state creation activity and
    * the node executes the given callbacks according to the different filter rules.
-   * Such strategy allows to share the observe notifications between all observers.
+   * Such strategy allows to simply share the observe notifications between all observers.
    *
    * Alternative signatures:
    * - `stateManager.observe(callback)`
@@ -314,27 +457,26 @@ class BaseStateManager {
    *
    * @param {string} [schemaName] - optionnal schema name to filter the observed
    *  states.
-   * @param {server.StateManager~ObserveCallback|client.StateManager~ObserveCallback}
+   * @param {stateManagerObserveCallback}
    *  callback - Function to be called when a new state is created on the network.
    * @param {object} options - Options.
    * @param {boolean} [options.excludeLocal = false] - If set to true, exclude states
-   *  created locallly, i.e. by the same node, from the collection.
-   * @returns {Promise<Function>} - Returns a Promise that resolves when the given
+   *  created locally, i.e. by the same node, from the collection.
+   * @returns {Promise<stateManagerDeleteObserveCallback>} - Returns a Promise that resolves when the given
    *  callback as been executed on each existing states. The promise value is a
    *  function which allows to stop observing the states on the network.
    *
    * @example
    * client.stateManager.observe(async (schemaName, stateId) => {
-   *   if (schemaName === 'something') {
-   *     const state = await this.client.stateManager.attach(schemaName, stateId);
-   *     console.log(state.getValues());
+   *   if (schemaName === 'my-shared-state-class') {
+   *     const attached = await client.stateManager.attach(schemaName, stateId);
    *   }
    * });
    */
-  // note: all filtering is done only on client-side as it is really more simple to
-  // handle this way and the network overhead is very low for observe notifications:
-  // i.e. schemaName, stateId, nodeId
   async observe(...args) {
+    if (this.#status !== 'inited') {
+      throw new DOMException(`Cannot execute 'observe' on 'StateManager': state manager is not inited. This method can be safely called only once 'client' or 'server' is inited itself`, 'InvalidStateError');
+    }
 
     const defaultOptions = {
       excludeLocal: false,
@@ -411,11 +553,11 @@ class BaseStateManager {
 
     // resend request to get updated list of states
     return new Promise((resolve, reject) => {
-      const reqId = this._promiseStore.add(resolve, reject, 'observe-request');
+      const reqId = this.#promiseStore.add(resolve, reject, 'observe-request');
       // store the callback for execution on the response. the returned Promise
       // is fullfiled once callback has been executed with each existing states
       const observeInfos = [observedSchemaName, callback, options];
-      this._observeRequestCallbacks.set(reqId, observeInfos);
+      this.#observeRequestCallbacks.set(reqId, observeInfos);
 
       // NOTE: do not store in `_observeListeners` yet as it can produce race
       // conditions, e.g.:
@@ -435,14 +577,64 @@ class BaseStateManager {
       //
       // cf. unit test `observe should properly behave in race condition`
 
-      this.client.transport.emit(OBSERVE_REQUEST, reqId, observedSchemaName);
+      this[kStateManagerClient].transport.emit(OBSERVE_REQUEST, reqId, observedSchemaName);
     });
   }
 
   /**
    * Returns a collection of all the states created from the schema name.
    *
-   * Alternitive signatures:
+   * @overload
+   * @param {string} schemaName - Name of the schema.
+   * @returns {Promise<SharedStateCollection>}
+   *
+   * @example
+   * const collection = await client.stateManager.getCollection(schemaName);
+   */
+  /**
+   * Returns a collection of all the states created from the schema name.
+   *
+   * @overload
+   * @param {string} schemaName - Name of the schema.
+   * @param {SharedStateParameterName[]} filter - Filter parameter of interest for each
+   *  state of the collection.
+   * @returns {Promise<SharedStateCollection>}
+   *
+   * @example
+   * const collection = await client.stateManager.getCollection(schemaName, ['my-param']);
+   */
+  /**
+   * Returns a collection of all the states created from the schema name.
+   *
+   * @overload
+   * @param {string} schemaName - Name of the schema.
+   * @param {object} options - Options.
+   * @param {boolean} options.excludeLocal=false - If set to true, exclude states
+   *  created by the same node from the collection.
+   * @returns {Promise<SharedStateCollection>}
+   *
+   * @example
+   * const collection = await client.stateManager.getCollection(schemaName, { excludeLocal: true });
+   */
+  /**
+   * Returns a collection of all the states created from the schema name.
+   *
+   * @overload
+   * @param {string} schemaName - Name of the schema.
+   * @param {SharedStateParameterName[]} filter - Filter parameter of interest for each
+   *  state of the collection.
+   * @param {object} options - Options.
+   * @param {boolean} options.excludeLocal=false - If set to true, exclude states
+   *  created by the same node from the collection.
+   * @returns {Promise<SharedStateCollection>}
+   *
+   * @example
+   * const collection = await client.stateManager.getCollection(schemaName, ['my-param'], { excludeLocal: true });
+   */
+  /**
+   * Returns a collection of all the states created from the schema name.
+   *
+   * Alternative signatures:
    * - `stateManager.getCollection(schemaName)`
    * - `stateManager.getCollection(schemaName, filter)`
    * - `stateManager.getCollection(schemaName, options)`
@@ -454,14 +646,18 @@ class BaseStateManager {
    * @param {object} [options={}] - Options.
    * @param {boolean} [options.excludeLocal=false] - If set to true, exclude states
    *  created by the same node from the collection.
-   * @returns {server.SharedStateCollection|client.SharedStateCollection}
+   * @returns {Promise<SharedStateCollection>}
    *
    * @example
    * const collection = await client.stateManager.getCollection(schemaName);
    */
   async getCollection(schemaName, filterOrOptions = null, options = {}) {
+    if (this.#status !== 'inited') {
+      throw new DOMException(`Cannot execute 'getCollection' on 'StateManager': state manager is not inited. This method can be safely called only once 'client' or 'server' is inited itself`, 'InvalidStateError');
+    }
+
     if (!isString(schemaName)) {
-      throw new TypeError(`[stateManager] Cannot execute 'getCollection' on 'StateManager': 'schemaName' should be a string"`);
+      throw new TypeError(`Cannot execute 'getCollection' on 'StateManager': 'schemaName' should be a string"`);
     }
 
     let filter;
@@ -477,7 +673,7 @@ class BaseStateManager {
         filter = null;
         options = filterOrOptions;
       } else {
-        throw new TypeError(`[stateManager] Cannot execute 'getCollection' on 'StateManager': argument 2 should be either null, an array or an object"`);
+        throw new TypeError(`Cannot execute 'getCollection' on 'StateManager': argument 2 should be either null, an array or an object"`);
       }
     }
 
@@ -485,11 +681,11 @@ class BaseStateManager {
       filter = filterOrOptions;
 
       if (filter !== null && !Array.isArray(filter)) {
-        throw new TypeError(`[stateManager] Cannot execute 'getCollection' on 'StateManager': 'filter' should be either an array or null"`);
+        throw new TypeError(`Cannot execute 'getCollection' on 'StateManager': 'filter' should be either an array or null"`);
       }
 
       if (options === null || typeof options !== 'object') {
-        throw new TypeError(`[stateManager] Cannot execute 'getCollection' on 'StateManager': 'options' should be an object"`);
+        throw new TypeError(`Cannot execute 'getCollection' on 'StateManager': 'options' should be an object"`);
       }
     }
 
