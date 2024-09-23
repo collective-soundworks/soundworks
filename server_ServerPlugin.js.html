@@ -3,7 +3,7 @@
 <head>
     
     <meta charset="utf-8">
-    <title>Home - soundworks</title>
+    <title>server/ServerPlugin.js - soundworks</title>
     
     <meta name="description" content="Documentation of soundworks, a full-stack JavaScript framework for distributed WebAudio and multimedia applications" />
     
@@ -40,53 +40,95 @@
 
 <div id="main">
     
+    <h1 class="page-title">server/ServerPlugin.js</h1>
+    
 
     
 
 
 
     
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import BasePlugin from '../common/BasePlugin.js';
 
+/**
+ * Base class to extend in order to create the server-side counterpart of a
+ * `soundworks` plugin.
+ *
+ * In the `soundworks` paradigm, a plugin is a component that allows to extend
+ * the framework capabilities by encapsulating common and reusable logic in
+ * an application wise perspective. For example, plugins are available to handle
+ * clock synchronization, to deal with the file system, etc. Plugin should always
+ * have both a client-side and a server-side part.
+ *
+ * See [https://soundworks.dev/guide/ecosystem](https://soundworks.dev/guide/ecosystem)
+ * for more informations on the available plugins.
+ *
+ * _Creating new plugins should be considered an advanced usage._
+ *
+ * @extends BasePlugin
+ * @inheritdoc
+ */
+class ServerPlugin extends BasePlugin {
+  #server = null;
+  #clients = new Set();
 
-    <section class="package">
-        <h3> </h3>		
-    </section>
+  /**
+   * @param {Server} server - The soundworks server instance.
+   * @param {string} id - User defined id of the plugin as defined in
+   *  {@link ServerPluginManager#register}.
+   */
+  constructor(server, id) {
+    super(id);
+    this.#server = server;
+  }
 
+  /**
+   * Instance of soundworks server.
+   * @type {Server}
+   * @see {@link Server}
+   */
+  get server() {
+    return this.#server;
+  }
 
+  /**
+   * Set of the clients registered in the plugin.
+   * @type {Set&lt;ServerClient>}
+   * @see {@link ServerClient}
+   */
+  get clients() {
+    return this.#clients;
+  }
 
+  /**
+   * Method called when a client (which registered the client-side plugin),
+   * connects to the application. Override this method if you need to perform
+   * some particular logic (e.g. creating a shared state) for each clients.
+   *
+   * @param {ServerClient} client
+   */
+  async addClient(client) {
+    this.#clients.add(client);
+  }
 
+  /**
+   * Method called when a client (which registered the client-side plugin),
+   * disconnects from the application. Override this method if you need to perform
+   * some particular logic (e.g. creating a shared state) for each clients.
+   *
+   * @param {ServerClient} client
+   */
+  async removeClient(client) {
+    this.#clients.delete(client);
+  }
+}
 
-
-
-
-
-    
-
-
-
-    <section class="readme usertext">
-        <article><h1>soundworks</h1>
-<p>Welcome to the <code>@soundworks/core</code> API documentation</p>
-<p><a href="https://badge.fury.io/js/@soundworks%2Fcore"><img src="https://badge.fury.io/js/@soundworks%2Fcore.svg" alt="npm version"></a></p>
-<h2>Create new applications</h2>
-<p>To create a new application, you will probably prefer to use the <code>@soundworks/create</code> wizard:</p>
-<pre class="prettyprint source lang-sh"><code>npx @soundworks/create@latest
+export default ServerPlugin;
 </code></pre>
-<p>See the <a href="https://soundworks.dev/tutorials/getting-started.html">getting started</a> page for a step by step guide.</p>
-<h2>Manual Install</h2>
-<p>But if you are adventurous, you can also install <code>soundworks</code> manually:</p>
-<pre class="prettyprint source lang-sh"><code>npm install --save @soundworks/core
-</code></pre>
-<h2>Other Links</h2>
-<ul>
-<li><a href="https://soundworks.dev/">General Documentation / Tutorials</a></li>
-<li><a href="https://github.com/collective-soundworks">Github</a></li>
-<li><a href="https://github.com/collective-soundworks/soundworks/issues">Issue Tracker</a></li>
-</ul>
-<!-- - [Examples](https://github.com/collective-soundworks/soundworks-examples) --></article>
+        </article>
     </section>
-
-
 
 
 

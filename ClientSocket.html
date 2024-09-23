@@ -3,7 +3,7 @@
 <head>
     
     <meta charset="utf-8">
-    <title>Home - soundworks</title>
+    <title>ClientSocket - soundworks</title>
     
     <meta name="description" content="Documentation of soundworks, a full-stack JavaScript framework for distributed WebAudio and multimedia applications" />
     
@@ -40,53 +40,804 @@
 
 <div id="main">
     
+    <h1 class="page-title">ClientSocket</h1>
+    
 
     
 
 
 
+
+<section>
+
+<header>
     
-
-
-    <section class="package">
-        <h3> </h3>		
-    </section>
-
-
-
-
-
-
-
-
-
-    
-
-
-
-    <section class="readme usertext">
-        <article><h1>soundworks</h1>
-<p>Welcome to the <code>@soundworks/core</code> API documentation</p>
-<p><a href="https://badge.fury.io/js/@soundworks%2Fcore"><img src="https://badge.fury.io/js/@soundworks%2Fcore.svg" alt="npm version"></a></p>
-<h2>Create new applications</h2>
-<p>To create a new application, you will probably prefer to use the <code>@soundworks/create</code> wizard:</p>
-<pre class="prettyprint source lang-sh"><code>npx @soundworks/create@latest
-</code></pre>
-<p>See the <a href="https://soundworks.dev/tutorials/getting-started.html">getting started</a> page for a step by step guide.</p>
-<h2>Manual Install</h2>
-<p>But if you are adventurous, you can also install <code>soundworks</code> manually:</p>
-<pre class="prettyprint source lang-sh"><code>npm install --save @soundworks/core
-</code></pre>
-<h2>Other Links</h2>
+        <h2>
+        
+            ClientSocket
+        
+        </h2>
+        
+            <div class="class-description usertext"><p>The ClientSocket class is a simple publish / subscribe wrapper built on top of the
+<a href="https://github.com/heineiuo/isomorphic-ws">isomorphic-ws</a> library.
+An instance of <code>ClientSocket</code> is automatically created by the <code>soundworks.Client</code>
+(see <a href="Client.html#socket">Client#socket</a>).</p>
+<p><em>Important: In most cases, you should consider using a <a href="SharedState.html">SharedState</a>
+rather than directly using the sockets.</em></p>
+<p>The ClientSocket class concurrently opens two different WebSockets:</p>
 <ul>
-<li><a href="https://soundworks.dev/">General Documentation / Tutorials</a></li>
-<li><a href="https://github.com/collective-soundworks">Github</a></li>
-<li><a href="https://github.com/collective-soundworks/soundworks/issues">Issue Tracker</a></li>
+<li>a socket configured with <code>binaryType = 'blob'</code> for JSON compatible data
+types (i.e. string, number, boolean, object, array and null).</li>
+<li>a socket configured with <code>binaryType= 'arraybuffer'</code> for efficient streaming
+of binary data.</li>
 </ul>
-<!-- - [Examples](https://github.com/collective-soundworks/soundworks-examples) --></article>
-    </section>
+<p>Both sockets re-emits all &quot;native&quot; ws events ('open', 'upgrade', 'close', 'error'
+and 'message'.</p></div>
+        
+    
+</header>
+
+<article>
+    
+
+    
+
+    
+
+    
+    
+    
+
+     
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    <h4 class="name" id="addListener"><span class="type-signature"></span>addListener<span class="signature">(channel, callback)</span><span class="type-signature"></span></h4>
+
+    
 
 
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>Listen messages with JSON compatible data types on a given channel.</p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="client_ClientSocket.js.html">client/ClientSocket.js</a>, <a href="client_ClientSocket.js.html#line228">line 228</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>channel</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Channel name.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Callback to execute when a message is received,
+arguments of the callback function will match the arguments sent using the
+<a href="ServerSocket.html#send">ServerSocket#send</a> method.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="kSocketTerminate"><span class="type-signature type-signature-async">(async) </span>kSocketTerminate<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>Removes all listeners and immediately close the two sockets. Is automatically
+called on <code>client.stop()</code></p>
+<p>Is also called when a disconnection is detected by the heartbeat (note that
+in this case, the launcher will call <code>client.stop()</code> but the listeners are
+already cleared so the event will be trigerred only once.</p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="client_ClientSocket.js.html">client/ClientSocket.js</a>, <a href="client_ClientSocket.js.html#line182">line 182</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="removeAllListeners"><span class="type-signature"></span>removeAllListeners<span class="signature">(channel)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>Remove all listeners of messages with JSON compatible data types.</p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="client_ClientSocket.js.html">client/ClientSocket.js</a>, <a href="client_ClientSocket.js.html#line259">line 259</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>channel</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                    <code>null</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Channel name.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="removeListener"><span class="type-signature"></span>removeListener<span class="signature">(channel, callback)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>Remove a listener from JSON compatible messages on a given channel.</p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="client_ClientSocket.js.html">client/ClientSocket.js</a>, <a href="client_ClientSocket.js.html#line243">line 243</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>channel</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Channel name.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Callback to remove.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="send"><span class="type-signature"></span>send<span class="signature">(channel, &hellip;args)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>Send messages with JSON compatible data types on a given channel.</p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="client_ClientSocket.js.html">client/ClientSocket.js</a>, <a href="client_ClientSocket.js.html#line213">line 213</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>channel</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Channel name.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>args</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">*</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                    &lt;repeatable><br>
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Payload of the message. As many arguments as needed, of
+JSON compatible data types (i.e. string, number, boolean, object, array and null).</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+    
+
+    
+
+    
+</article>
+
+</section>
 
 
 

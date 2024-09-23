@@ -3,7 +3,7 @@
 <head>
     
     <meta charset="utf-8">
-    <title>Home - soundworks</title>
+    <title>client/ClientStateManager.js - soundworks</title>
     
     <meta name="description" content="Documentation of soundworks, a full-stack JavaScript framework for distributed WebAudio and multimedia applications" />
     
@@ -40,53 +40,85 @@
 
 <div id="main">
     
+    <h1 class="page-title">client/ClientStateManager.js</h1>
+    
 
     
 
 
 
     
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import BaseStateManager from '../common/BaseStateManager.js';
 
+/**
+ * @callback ClientStateManager~ObserveCallback
+ * @async
+ * @param {String} schemaName - name of the schema
+ * @param {Number} stateId - id of the state
+ * @param {Number} nodeId - id of the node that created the state
+ */
 
-    <section class="package">
-        <h3> </h3>		
-    </section>
+/**
+ * The `ClientStateManager` allows to create new {@link SharedState}s, or attach
+ * to {@link SharedState}s created by other nodes (clients or server). It
+ * can also track all the {@link SharedState}s created by other nodes.
+ *
+ * An instance of `ClientStateManager` is automatically created by the `soundworks.Client`
+ * at initialization (cf. {@link client.Client#stateManager}).
+ *
+ * See {@link client.Client#stateManager}
+ *
+ * Tutorial: {@link https://soundworks.dev/guide/state-manager.html}
+ *
+ * ```
+ * // server-side
+ * import { Server } from '@soundworks/server/index.js';
+ *
+ * const server = new Server(config);
+ * // declare and register the schema of a shared state.
+ * server.stateManager.registerSchema('some-global-state', {
+ *   myRandom: {
+ *     type: 'float',
+ *     default: 0,
+ *   }
+ * });
+ *
+ * await server.start();
+ *
+ * // create a global state server-side
+ * const globalState = await server.stateManager.create('some-global-state');
+ * // listen and react to the changes made by the clients
+ * globalState.onUpdate(updates => console.log(updates));
+ * ```
+ *
+ * ```
+ * // client-side
+ * import { Client } from '@soundworks/client.index.js';
+ *
+ * const client = new Client(config);
+ * await client.start();
+ *
+ * // attach to the global state created by the server
+ * const globalState = await client.stateManager.attach('some-global-state');
+ *
+ * // update the value of a `myRandom` parameter every seconds
+ * setInterval(() => {
+ *   globalState.set({ myRandom: Math.random() });
+ * }, 1000);
+ * ```
+ *
+ * @extends BaseStateManager
+ * @inheritdoc
+ * @hideconstructor
+ */
+class ClientStateManager extends BaseStateManager {}
 
-
-
-
-
-
-
-
-
-    
-
-
-
-    <section class="readme usertext">
-        <article><h1>soundworks</h1>
-<p>Welcome to the <code>@soundworks/core</code> API documentation</p>
-<p><a href="https://badge.fury.io/js/@soundworks%2Fcore"><img src="https://badge.fury.io/js/@soundworks%2Fcore.svg" alt="npm version"></a></p>
-<h2>Create new applications</h2>
-<p>To create a new application, you will probably prefer to use the <code>@soundworks/create</code> wizard:</p>
-<pre class="prettyprint source lang-sh"><code>npx @soundworks/create@latest
+export default ClientStateManager;
 </code></pre>
-<p>See the <a href="https://soundworks.dev/tutorials/getting-started.html">getting started</a> page for a step by step guide.</p>
-<h2>Manual Install</h2>
-<p>But if you are adventurous, you can also install <code>soundworks</code> manually:</p>
-<pre class="prettyprint source lang-sh"><code>npm install --save @soundworks/core
-</code></pre>
-<h2>Other Links</h2>
-<ul>
-<li><a href="https://soundworks.dev/">General Documentation / Tutorials</a></li>
-<li><a href="https://github.com/collective-soundworks">Github</a></li>
-<li><a href="https://github.com/collective-soundworks/soundworks/issues">Issue Tracker</a></li>
-</ul>
-<!-- - [Examples](https://github.com/collective-soundworks/soundworks-examples) --></article>
+        </article>
     </section>
-
-
 
 
 

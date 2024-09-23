@@ -3,7 +3,7 @@
 <head>
     
     <meta charset="utf-8">
-    <title>Home - soundworks</title>
+    <title>ServerSockets - soundworks</title>
     
     <meta name="description" content="Documentation of soundworks, a full-stack JavaScript framework for distributed WebAudio and multimedia applications" />
     
@@ -40,17 +40,88 @@
 
 <div id="main">
     
+    <h1 class="page-title">ServerSockets</h1>
+    
 
     
 
 
 
+
+<section>
+
+<header>
+    
+        <h2>
+        
+            ServerSockets
+        
+        </h2>
+        
+            <div class="class-description usertext"><p>Manage all <a href="ServerSocket.html">ServerSocket</a> instances.</p>
+<p><em>Important: In most cases, you should consider using a <a href="SharedState.html">SharedState</a>
+rather than directly using the ServerSocket instance.</em></p></div>
+        
+    
+</header>
+
+<article>
+    
+        <div class="container-overview">
+        
+            
+
+    
+    <h2>Constructor</h2>
+    
+
+    <h4 class="name" id="ServerSockets"><span class="type-signature"></span>new ServerSockets<span class="signature">()</span><span class="type-signature"></span></h4>
+
     
 
 
-    <section class="package">
-        <h3> </h3>		
-    </section>
+
+
+<dl class="details">
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="server_ServerSockets.js.html">server/ServerSockets.js</a>, <a href="server_ServerSockets.js.html#line35">line 35</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
 
 
 
@@ -59,34 +130,629 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+        </div>
+    
+
+    
+
+    
+
+    
+    
+    
+
+     
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    <h4 class="name" id="addToRoom"><span class="type-signature"></span>addToRoom<span class="signature">(socket, roomId)</span><span class="type-signature"></span></h4>
 
     
 
 
 
-    <section class="readme usertext">
-        <article><h1>soundworks</h1>
-<p>Welcome to the <code>@soundworks/core</code> API documentation</p>
-<p><a href="https://badge.fury.io/js/@soundworks%2Fcore"><img src="https://badge.fury.io/js/@soundworks%2Fcore.svg" alt="npm version"></a></p>
-<h2>Create new applications</h2>
-<p>To create a new application, you will probably prefer to use the <code>@soundworks/create</code> wizard:</p>
-<pre class="prettyprint source lang-sh"><code>npx @soundworks/create@latest
-</code></pre>
-<p>See the <a href="https://soundworks.dev/tutorials/getting-started.html">getting started</a> page for a step by step guide.</p>
-<h2>Manual Install</h2>
-<p>But if you are adventurous, you can also install <code>soundworks</code> manually:</p>
-<pre class="prettyprint source lang-sh"><code>npm install --save @soundworks/core
-</code></pre>
-<h2>Other Links</h2>
-<ul>
-<li><a href="https://soundworks.dev/">General Documentation / Tutorials</a></li>
-<li><a href="https://github.com/collective-soundworks">Github</a></li>
-<li><a href="https://github.com/collective-soundworks/soundworks/issues">Issue Tracker</a></li>
-</ul>
-<!-- - [Examples](https://github.com/collective-soundworks/soundworks-examples) --></article>
-    </section>
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>Add a socket to a room.</p>
+<p><em>Note that in most cases, you should use a <a href="SharedState.html">SharedState</a> instead</em></p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="server_ServerSockets.js.html">server/ServerSockets.js</a>, <a href="server_ServerSockets.js.html#line146">line 146</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
 
 
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>socket</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="ServerSocket.html">ServerSocket</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Socket to add to the room.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>roomId</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Id of the room.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="broadcast"><span class="type-signature"></span>broadcast<span class="signature">(roomsIds, excludeSocket, channel, &hellip;args)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>Send a message to all clients os given room(s). If no room is specified,
+the message is sent to all clients.</p>
+<p><em>Note that in most cases, you should use a <a href="SharedState.html">SharedState</a> instead</em></p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="server_ServerSockets.js.html">server/ServerSockets.js</a>, <a href="server_ServerSockets.js.html#line184">line 184</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>roomsIds</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+|
+
+<span class="param-type">Array</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Ids of the rooms that must receive
+the message. If <code>null</code> the message is sent to all clients.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>excludeSocket</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="ServerSocket.html">ServerSocket</a></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Optionnal socket to ignore when
+broadcasting the message, typically the client at the origin of the message.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>channel</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Channel name.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>args</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">*</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                    &lt;repeatable><br>
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Payload of the message. As many arguments as needed, of
+JSON compatible data types (i.e. string, number, boolean, object, array and null).</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="removeFromRoom"><span class="type-signature"></span>removeFromRoom<span class="signature">(socket, roomId)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>Remove a socket from a room.</p>
+<p><em>Note that in most cases, you should use a <a href="SharedState.html">SharedState</a> instead</em></p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="server_ServerSockets.js.html">server/ServerSockets.js</a>, <a href="server_ServerSockets.js.html#line163">line 163</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>socket</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="ServerSocket.html">ServerSocket</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Socket to remove from the room.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>roomId</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Id of the room.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+    
+
+    
+
+    
+</article>
+
+</section>
 
 
 

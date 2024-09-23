@@ -3,7 +3,7 @@
 <head>
     
     <meta charset="utf-8">
-    <title>Home - soundworks</title>
+    <title>client/ClientContextManager.js - soundworks</title>
     
     <meta name="description" content="Documentation of soundworks, a full-stack JavaScript framework for distributed WebAudio and multimedia applications" />
     
@@ -40,53 +40,134 @@
 
 <div id="main">
     
+    <h1 class="page-title">client/ClientContextManager.js</h1>
+    
 
     
 
 
 
     
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import {
+  kClientContextStatus,
+} from './ClientContext.js';
 
+export const kClientContextManagerStart = Symbol('soundworks:client-context-manager-start');
+export const kClientContextManagerStop = Symbol('soundworks:client-context-manager-stop');
+export const kClientContextManagerRegister = Symbol('soundworks:client-context-manager-register');
 
-    <section class="package">
-        <h3> </h3>		
-    </section>
+/** @private */
+class ContextCollection {
+  #inner = [];
 
+  constructor() {
+    this.#inner = [];
+  }
 
+  add(context) {
+    this.#inner.push(context);
+  }
 
+  has(name) {
+    return this.#inner.find(c => c.name === name) !== undefined;
+  }
 
+  get(name) {
+    return this.#inner.find(c => c.name === name);
+  }
 
+  map(func) {
+    return this.#inner.map(func);
+  }
+}
 
+/**
+ * Manage the different contexts and their lifecycle.
+ *
+ * See {@link Client#contextManager}
+ *
+ * _WARNING: In most cases, you should not have to manipulate the context manager directly._
+ *
+ * @hideconstructor
+ */
+class ClientContextManager {
+  #contexts = new ContextCollection();
+  #contextStartPromises = new Map();
 
+  /**
+   * Register the context into the manager. Is called in context constructor.
+   *
+   * @param {ClientContext} context - The context to be registered.
+   * @private
+   */
+  [kClientContextManagerRegister](context) {
+    if (this.#contexts.has(context.name)) {
+      throw new Error(`[soundworks:context-manager] Context "${context.name}" already registered`);
+    }
 
+    this.#contexts.add(context);
+  }
 
-    
+  /**
+   * Start all registered contexts. Called during `client.start()`
+   * @private
+   */
+  async [kClientContextManagerStart]() {
+    const promises = this.#contexts.map(context => this.get(context.name));
+    await Promise.all(promises);
+  }
 
+  /**
+   * Stop all registered contexts. Called during `client.stop()`
+   * @private
+   */
+  async [kClientContextManagerStop]() {
+    const promises = this.#contexts.map(context => context.stop());
+    await Promise.all(promises);
+  }
 
+  /**
+   * Retrieve a started context from its name.
+   *
+   * _WARNING: Most of the time, you should not have to call this method manually._
+   *
+   * @param {string} contextName - Name of the context.
+   * @returns {Promise&lt;ClientContext>}
+   */
+  async get(contextName) {
+    if (!this.#contexts.has(contextName)) {
+      throw new Error(`[soundworks:ClientContextManager] Can't get context "${contextName}", not registered`);
+    }
 
-    <section class="readme usertext">
-        <article><h1>soundworks</h1>
-<p>Welcome to the <code>@soundworks/core</code> API documentation</p>
-<p><a href="https://badge.fury.io/js/@soundworks%2Fcore"><img src="https://badge.fury.io/js/@soundworks%2Fcore.svg" alt="npm version"></a></p>
-<h2>Create new applications</h2>
-<p>To create a new application, you will probably prefer to use the <code>@soundworks/create</code> wizard:</p>
-<pre class="prettyprint source lang-sh"><code>npx @soundworks/create@latest
+    const context = this.#contexts.get(contextName);
+
+    if (this.#contextStartPromises.has(contextName)) {
+      const startPromise = this.#contextStartPromises.get(contextName);
+      await startPromise;
+    } else {
+      context[kClientContextStatus] = 'inited';
+
+      try {
+        const startPromise = context.start();
+        this.#contextStartPromises.set(contextName, startPromise);
+        await startPromise;
+        context[kClientContextStatus] = 'started';
+      } catch (err) {
+        context[kClientContextStatus] = 'errored';
+        throw new Error(err);
+      }
+    }
+
+    return context;
+  }
+}
+
+export default ClientContextManager;
 </code></pre>
-<p>See the <a href="https://soundworks.dev/tutorials/getting-started.html">getting started</a> page for a step by step guide.</p>
-<h2>Manual Install</h2>
-<p>But if you are adventurous, you can also install <code>soundworks</code> manually:</p>
-<pre class="prettyprint source lang-sh"><code>npm install --save @soundworks/core
-</code></pre>
-<h2>Other Links</h2>
-<ul>
-<li><a href="https://soundworks.dev/">General Documentation / Tutorials</a></li>
-<li><a href="https://github.com/collective-soundworks">Github</a></li>
-<li><a href="https://github.com/collective-soundworks/soundworks/issues">Issue Tracker</a></li>
-</ul>
-<!-- - [Examples](https://github.com/collective-soundworks/soundworks-examples) --></article>
+        </article>
     </section>
-
-
 
 
 

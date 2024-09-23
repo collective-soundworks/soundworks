@@ -3,7 +3,7 @@
 <head>
     
     <meta charset="utf-8">
-    <title>Home - soundworks</title>
+    <title>server/ServerClient.js - soundworks</title>
     
     <meta name="description" content="Documentation of soundworks, a full-stack JavaScript framework for distributed WebAudio and multimedia applications" />
     
@@ -40,53 +40,92 @@
 
 <div id="main">
     
+    <h1 class="page-title">server/ServerClient.js</h1>
+    
 
     
 
 
 
     
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import { idGenerator } from '@ircam/sc-utils';
+import { v4 as uuid } from 'uuid';
 
+const generateId = idGenerator();
 
-    <section class="package">
-        <h3> </h3>		
-    </section>
+export const kServerClientToken = Symbol('soundworks:server-client-token');
 
+/**
+ * Server-side representation of a `soundworks` client.
+ *
+ * @hideconstructor
+ * @see {@link Client}
+ */
+class ServerClient {
+  #role = null;
+  #id = null;
+  #uuid = null;
+  #socket = null;
 
+  /**
+   * @param {String} role - Role of the client
+   * @param {ServerSocket} socket - Socket connection with the client
+   */
+  constructor(role, socket) {
+    this.#role = role;
+    this.#id = generateId.next().value;
+    this.#uuid = uuid();
+    this.#socket = socket;
+    /**
+     * Is set in server[kServerOnSocketConnection]
+     * @private
+     */
+    this[kServerClientToken] = null;
+  }
 
+  /**
+   * Client role, as specified in client side config {@link Client}.
+   *
+   * @type {String}
+   */
+  get role() {
+    return this.#role;
+  }
 
+  /**
+   * Session Id (incremented positive number).
+   *
+   * @type {Number}
+   */
+  get id() {
+    return this.#id;
+  }
 
+  /**
+   * Unique session Id (uuidv4).
+   *
+   * @type {String}
+   */
+  get uuid() {
+    return this.#uuid;
+  }
 
+  /**
+   * Socket connection with the remote {@link Client}.
+   *
+   * @type {ServerSocket}
+   */
+  get socket() {
+    return this.#socket;
+  }
+}
 
-
-
-    
-
-
-
-    <section class="readme usertext">
-        <article><h1>soundworks</h1>
-<p>Welcome to the <code>@soundworks/core</code> API documentation</p>
-<p><a href="https://badge.fury.io/js/@soundworks%2Fcore"><img src="https://badge.fury.io/js/@soundworks%2Fcore.svg" alt="npm version"></a></p>
-<h2>Create new applications</h2>
-<p>To create a new application, you will probably prefer to use the <code>@soundworks/create</code> wizard:</p>
-<pre class="prettyprint source lang-sh"><code>npx @soundworks/create@latest
+export default ServerClient;
 </code></pre>
-<p>See the <a href="https://soundworks.dev/tutorials/getting-started.html">getting started</a> page for a step by step guide.</p>
-<h2>Manual Install</h2>
-<p>But if you are adventurous, you can also install <code>soundworks</code> manually:</p>
-<pre class="prettyprint source lang-sh"><code>npm install --save @soundworks/core
-</code></pre>
-<h2>Other Links</h2>
-<ul>
-<li><a href="https://soundworks.dev/">General Documentation / Tutorials</a></li>
-<li><a href="https://github.com/collective-soundworks">Github</a></li>
-<li><a href="https://github.com/collective-soundworks/soundworks/issues">Issue Tracker</a></li>
-</ul>
-<!-- - [Examples](https://github.com/collective-soundworks/soundworks-examples) --></article>
+        </article>
     </section>
-
-
 
 
 

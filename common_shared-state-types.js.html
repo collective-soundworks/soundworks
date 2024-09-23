@@ -3,7 +3,7 @@
 <head>
     
     <meta charset="utf-8">
-    <title>Home - soundworks</title>
+    <title>common/shared-state-types.js - soundworks</title>
     
     <meta name="description" content="Documentation of soundworks, a full-stack JavaScript framework for distributed WebAudio and multimedia applications" />
     
@@ -40,53 +40,95 @@
 
 <div id="main">
     
+    <h1 class="page-title">common/shared-state-types.js</h1>
+    
 
     
 
 
 
     
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * User defined name for a class of {@link SharedState}
+ *
+ * @typedef {string} SharedStateClassName
+ */
 
+/**
+ * Description of a {@link SharedState} data structure that describes the structure
+ * of a class of {@link SharedState} to be registered by {@link ServerStateManager#registerSchema}
+ *
+ * A schema is the blueprint, or the definition from which shared states from a
+ * given class can be created.
+ *
+ * It consists of a set of key / value pairs where the key is the name of
+ * the parameter (cf. ${SharedStateParameterName}), and the value is an object
+ * describing the parameter (cf. ${SharedStateParameterDescription}).
+ *
+ * @typedef {Object.&lt;SharedStateParameterName, SharedStateParameterDescription>} SharedStateClassSchema
+ *
+ * @example
+ * const mySchema = {
+ *   triggerSound: {
+ *     type: 'boolean',
+ *     event: true,
+ *   },
+ *   volume: {
+ *     type: 'float'
+ *     default: 0,
+ *     min: -80,
+ *     max: 6,
+ *   }
+ * };
+ *
+ * server.stateManager.registerSchema('my-class-name', mySchema);
+ */
 
-    <section class="package">
-        <h3> </h3>		
-    </section>
+/**
+ * User defined name of a parameter in a class of {@link SharedState}
+ *
+ * @typedef {string} SharedStateParameterName
+ */
 
+/**
+ * Description of a parameter in a class of {@link SharedState}
+ *
+ * @typedef {object} SharedStateParameterDescription
+ * @property {'boolean'|'string'|'integer'|'float'|'enum'|'any'} type - Type of the parameter
+ * @property {any} default - Default value of the parameter. Optional only if
+ *  `nullable = true` or `event = true`
+ * @property {boolean} [nullable=false] - Defines if the parameter is nullable.
+ *   When `true` the parameter `default` is set to `null`.
+ * @property {boolean} [event=false] - Define if the parameter is a volatile, i.e.
+ *   its value only exists on an update and is set back to `null` after propagation.
+ *   When `true`, `nullable` is automatically set to `true` and `default` to `null`.
+  * @property {boolean} [filterChange=true] - When set to `false`, an update will
+ *   trigger the propagation of a parameter even when its value didn't change.
+ *   This option provides a sort of middle ground between the default bahavior
+ *   (e.g. where only changed values are propagated) and the behavior of the `event`
+ *   option (which has no state per se). Hence, setting this options to `false` if
+ *   `event=true` makes no sens.
+  * @property {boolean} [immediate=false] - When set to `true`, an update will
+ *   trigger the update listeners immediately on the node that generated the update,
+ *   before propagating the change on the network.
+ *   This option is usefull in cases the network would introduce a noticeable
+ *   latency on the client.
+ *   If for some reason the value is overriden server-side (e.g. in an `updateHook`)
+ *   the listeners will be called again when the "real" value is received.
+ * @property {number} [min=-Number.MIN_VALUE] - Minimum value of the parameter. Only applies
+ *   for `integer` and `float` types.
+ * @property {number} [max=Number.MAX_VALUE] - Maximum value of the parameter. Only applies
+ *   for `integer` and `float` types.
+ * @property {Array&lt;any>} [list] - Possible values of the parameter. Only applies and
+ *   mandatory for `enum` type.
+ * @property {object} [metas={}] - Optional metadata of the parameter.
+ */
 
-
-
-
-
-
-
-
-    
-
-
-
-    <section class="readme usertext">
-        <article><h1>soundworks</h1>
-<p>Welcome to the <code>@soundworks/core</code> API documentation</p>
-<p><a href="https://badge.fury.io/js/@soundworks%2Fcore"><img src="https://badge.fury.io/js/@soundworks%2Fcore.svg" alt="npm version"></a></p>
-<h2>Create new applications</h2>
-<p>To create a new application, you will probably prefer to use the <code>@soundworks/create</code> wizard:</p>
-<pre class="prettyprint source lang-sh"><code>npx @soundworks/create@latest
 </code></pre>
-<p>See the <a href="https://soundworks.dev/tutorials/getting-started.html">getting started</a> page for a step by step guide.</p>
-<h2>Manual Install</h2>
-<p>But if you are adventurous, you can also install <code>soundworks</code> manually:</p>
-<pre class="prettyprint source lang-sh"><code>npm install --save @soundworks/core
-</code></pre>
-<h2>Other Links</h2>
-<ul>
-<li><a href="https://soundworks.dev/">General Documentation / Tutorials</a></li>
-<li><a href="https://github.com/collective-soundworks">Github</a></li>
-<li><a href="https://github.com/collective-soundworks/soundworks/issues">Issue Tracker</a></li>
-</ul>
-<!-- - [Examples](https://github.com/collective-soundworks/soundworks-examples) --></article>
+        </article>
     </section>
-
-
 
 
 

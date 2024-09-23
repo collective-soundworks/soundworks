@@ -1,0 +1,1696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>ClientStateManager - soundworks</title>
+    
+    <meta name="description" content="Documentation of soundworks, a full-stack JavaScript framework for distributed WebAudio and multimedia applications" />
+    
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    <input type="text" id="nav-search" placeholder="Search" />
+    
+    
+    <h2><a href="index.html">Home</a></h2><h2><a href="http://soundworks.dev/" target="_blank" class="menu-item" >Website</a></h2><h2><a href="https://github.com/collective-soundworks/soundworks" target="_blank" class="menu-item" >Github</a></h2><h3>Classes</h3><ul><li><a href="Client.html">Client</a><ul class='methods'><li data-type='method'><a href="Client.html#getAuditState">getAuditState</a></li><li data-type='method'><a href="Client.html#init">init</a></li><li data-type='method'><a href="Client.html#onStatusChange">onStatusChange</a></li><li data-type='method'><a href="Client.html#start">start</a></li><li data-type='method'><a href="Client.html#stop">stop</a></li></ul></li><li><a href="ClientContext.html">ClientContext</a><ul class='methods'><li data-type='method'><a href="ClientContext.html#enter">enter</a></li><li data-type='method'><a href="ClientContext.html#exit">exit</a></li><li data-type='method'><a href="ClientContext.html#start">start</a></li><li data-type='method'><a href="ClientContext.html#stop">stop</a></li></ul></li><li><a href="ClientContextManager.html">ClientContextManager</a><ul class='methods'><li data-type='method'><a href="ClientContextManager.html#get">get</a></li></ul></li><li><a href="ClientPlugin.html">ClientPlugin</a><ul class='methods'><li data-type='method'><a href="ClientPlugin.html#onStateChange">onStateChange</a></li><li data-type='method'><a href="ClientPlugin.html#propagateStateChange">propagateStateChange</a></li><li data-type='method'><a href="ClientPlugin.html#start">start</a></li><li data-type='method'><a href="ClientPlugin.html#stop">stop</a></li></ul></li><li><a href="ClientPluginManager.html">ClientPluginManager</a><ul class='methods'><li data-type='method'><a href="ClientPluginManager.html#addDependency">addDependency</a></li><li data-type='method'><a href="ClientPluginManager.html#get">get</a></li><li data-type='method'><a href="ClientPluginManager.html#getRegisteredPlugins">getRegisteredPlugins</a></li><li data-type='method'><a href="ClientPluginManager.html#getUnsafe">getUnsafe</a></li><li data-type='method'><a href="ClientPluginManager.html#onStateChange">onStateChange</a></li><li data-type='method'><a href="ClientPluginManager.html#register">register</a></li></ul></li><li><a href="ClientSocket.html">ClientSocket</a><ul class='methods'><li data-type='method'><a href="ClientSocket.html#addListener">addListener</a></li><li data-type='method'><a href="ClientSocket.html#kSocketTerminate">kSocketTerminate</a></li><li data-type='method'><a href="ClientSocket.html#removeAllListeners">removeAllListeners</a></li><li data-type='method'><a href="ClientSocket.html#removeListener">removeListener</a></li><li data-type='method'><a href="ClientSocket.html#send">send</a></li></ul></li><li><a href="ClientStateManager.html">ClientStateManager</a><ul class='methods'><li data-type='method'><a href="ClientStateManager.html#attach">attach</a></li><li data-type='method'><a href="ClientStateManager.html#create">create</a></li><li data-type='method'><a href="ClientStateManager.html#getCollection">getCollection</a></li><li data-type='method'><a href="ClientStateManager.html#getSchema">getSchema</a></li><li data-type='method'><a href="ClientStateManager.html#observe">observe</a></li></ul></li><li><a href="Server.html">Server</a><ul class='methods'><li data-type='method'><a href="Server.html#getAuditState">getAuditState</a></li><li data-type='method'><a href="Server.html#init">init</a></li><li data-type='method'><a href="Server.html#isTrustedClient">isTrustedClient</a></li><li data-type='method'><a href="Server.html#isTrustedToken">isTrustedToken</a></li><li data-type='method'><a href="Server.html#onStatusChange">onStatusChange</a></li><li data-type='method'><a href="Server.html#setCustomApplicationTemplateOptions">setCustomApplicationTemplateOptions</a></li><li data-type='method'><a href="Server.html#start">start</a></li><li data-type='method'><a href="Server.html#stop">stop</a></li><li data-type='method'><a href="Server.html#useDefaultApplicationTemplate">useDefaultApplicationTemplate</a></li></ul></li><li><a href="ServerClient.html">ServerClient</a></li><li><a href="ServerContext.html">ServerContext</a><ul class='methods'><li data-type='method'><a href="ServerContext.html#enter">enter</a></li><li data-type='method'><a href="ServerContext.html#exit">exit</a></li><li data-type='method'><a href="ServerContext.html#start">start</a></li><li data-type='method'><a href="ServerContext.html#stop">stop</a></li></ul></li><li><a href="ServerContextManager.html">ServerContextManager</a><ul class='methods'><li data-type='method'><a href="ServerContextManager.html#get">get</a></li></ul></li><li><a href="ServerPlugin.html">ServerPlugin</a><ul class='methods'><li data-type='method'><a href="ServerPlugin.html#addClient">addClient</a></li><li data-type='method'><a href="ServerPlugin.html#onStateChange">onStateChange</a></li><li data-type='method'><a href="ServerPlugin.html#propagateStateChange">propagateStateChange</a></li><li data-type='method'><a href="ServerPlugin.html#removeClient">removeClient</a></li><li data-type='method'><a href="ServerPlugin.html#start">start</a></li><li data-type='method'><a href="ServerPlugin.html#stop">stop</a></li></ul></li><li><a href="ServerPluginManager.html">ServerPluginManager</a><ul class='methods'><li data-type='method'><a href="ServerPluginManager.html#addDependency">addDependency</a></li><li data-type='method'><a href="ServerPluginManager.html#get">get</a></li><li data-type='method'><a href="ServerPluginManager.html#getRegisteredPlugins">getRegisteredPlugins</a></li><li data-type='method'><a href="ServerPluginManager.html#getUnsafe">getUnsafe</a></li><li data-type='method'><a href="ServerPluginManager.html#onStateChange">onStateChange</a></li><li data-type='method'><a href="ServerPluginManager.html#register">register</a></li></ul></li><li><a href="ServerSocket.html">ServerSocket</a><ul class='methods'><li data-type='method'><a href="ServerSocket.html#addListener">addListener</a></li><li data-type='method'><a href="ServerSocket.html#addToRoom">addToRoom</a></li><li data-type='method'><a href="ServerSocket.html#removeAllListeners">removeAllListeners</a></li><li data-type='method'><a href="ServerSocket.html#removeFromRoom">removeFromRoom</a></li><li data-type='method'><a href="ServerSocket.html#removeListener">removeListener</a></li><li data-type='method'><a href="ServerSocket.html#send">send</a></li></ul></li><li><a href="ServerSockets.html">ServerSockets</a><ul class='methods'><li data-type='method'><a href="ServerSockets.html#addToRoom">addToRoom</a></li><li data-type='method'><a href="ServerSockets.html#broadcast">broadcast</a></li><li data-type='method'><a href="ServerSockets.html#removeFromRoom">removeFromRoom</a></li></ul></li><li><a href="ServerStateManager.html">ServerStateManager</a><ul class='methods'><li data-type='method'><a href="ServerStateManager.html#attach">attach</a></li><li data-type='method'><a href="ServerStateManager.html#create">create</a></li><li data-type='method'><a href="ServerStateManager.html#deleteSchema">deleteSchema</a></li><li data-type='method'><a href="ServerStateManager.html#getCollection">getCollection</a></li><li data-type='method'><a href="ServerStateManager.html#getSchema">getSchema</a></li><li data-type='method'><a href="ServerStateManager.html#observe">observe</a></li><li data-type='method'><a href="ServerStateManager.html#registerSchema">registerSchema</a></li><li data-type='method'><a href="ServerStateManager.html#registerUpdateHook">registerUpdateHook</a></li></ul></li><li><a href="SharedState.html">SharedState</a><ul class='methods'><li data-type='method'><a href="SharedState.html#delete">delete</a></li><li data-type='method'><a href="SharedState.html#detach">detach</a></li><li data-type='method'><a href="SharedState.html#get">get</a></li><li data-type='method'><a href="SharedState.html#getDefaults">getDefaults</a></li><li data-type='method'><a href="SharedState.html#getInitValues">getInitValues</a></li><li data-type='method'><a href="SharedState.html#getSchema">getSchema</a></li><li data-type='method'><a href="SharedState.html#getUnsafe">getUnsafe</a></li><li data-type='method'><a href="SharedState.html#getValues">getValues</a></li><li data-type='method'><a href="SharedState.html#getValuesUnsafe">getValuesUnsafe</a></li><li data-type='method'><a href="SharedState.html#onDelete">onDelete</a></li><li data-type='method'><a href="SharedState.html#onDetach">onDetach</a></li><li data-type='method'><a href="SharedState.html#onUpdate">onUpdate</a></li><li data-type='method'><a href="SharedState.html#set">set</a></li></ul></li><li><a href="SharedStateCollection.html">SharedStateCollection</a><ul class='methods'><li data-type='method'><a href="SharedStateCollection.html#detach">detach</a></li><li data-type='method'><a href="SharedStateCollection.html#filter">filter</a></li><li data-type='method'><a href="SharedStateCollection.html#find">find</a></li><li data-type='method'><a href="SharedStateCollection.html#forEach">forEach</a></li><li data-type='method'><a href="SharedStateCollection.html#get">get</a></li><li data-type='method'><a href="SharedStateCollection.html#getDefaults">getDefaults</a></li><li data-type='method'><a href="SharedStateCollection.html#getSchema">getSchema</a></li><li data-type='method'><a href="SharedStateCollection.html#getUnsafe">getUnsafe</a></li><li data-type='method'><a href="SharedStateCollection.html#getValues">getValues</a></li><li data-type='method'><a href="SharedStateCollection.html#getValuesUnsafe">getValuesUnsafe</a></li><li data-type='method'><a href="SharedStateCollection.html#map">map</a></li><li data-type='method'><a href="SharedStateCollection.html#onAttach">onAttach</a></li><li data-type='method'><a href="SharedStateCollection.html#onDetach">onDetach</a></li><li data-type='method'><a href="SharedStateCollection.html#onUpdate">onUpdate</a></li><li data-type='method'><a href="SharedStateCollection.html#set">set</a></li><li data-type='method'><a href="SharedStateCollection.html#sort">sort</a></li></ul></li></ul><h3>Global</h3><ul><li><a href="global.html#ClientConfig">ClientConfig</a></li><li><a href="global.html#ServerConfig">ServerConfig</a></li><li><a href="global.html#SharedStateClassName">SharedStateClassName</a></li><li><a href="global.html#SharedStateClassSchema">SharedStateClassSchema</a></li><li><a href="global.html#SharedStateParameterDescription">SharedStateParameterDescription</a></li><li><a href="global.html#SharedStateParameterName">SharedStateParameterName</a></li><li><a href="global.html#pluginDeleteOnStateChangeCallback">pluginDeleteOnStateChangeCallback</a></li><li><a href="global.html#pluginManagerDeleteOnStateChangeCallback">pluginManagerDeleteOnStateChangeCallback</a></li><li><a href="global.html#pluginManagerOnStateChangeCallback">pluginManagerOnStateChangeCallback</a></li><li><a href="global.html#pluginOnStateChangeCallback">pluginOnStateChangeCallback</a></li><li><a href="global.html#serverStateManagerUpdateHook">serverStateManagerUpdateHook</a></li><li><a href="global.html#sharedStateCollectionOnUpdateCallback">sharedStateCollectionOnUpdateCallback</a></li><li><a href="global.html#sharedStateDeleteOnUpdateCallback">sharedStateDeleteOnUpdateCallback</a></li><li><a href="global.html#sharedStateOnUpdateCallback">sharedStateOnUpdateCallback</a></li><li><a href="global.html#stateManagerDeleteObserveCallback">stateManagerDeleteObserveCallback</a></li><li><a href="global.html#stateManagerObserveCallback">stateManagerObserveCallback</a></li></ul>
+    
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">ClientStateManager</h1>
+    
+
+    
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>
+        
+            ClientStateManager
+        
+        </h2>
+        
+            <div class="class-description usertext"><p>The <code>ClientStateManager</code> allows to create new <a href="SharedState.html">SharedState</a>s, or attach
+to <a href="SharedState.html">SharedState</a>s created by other nodes (clients or server). It
+can also track all the <a href="SharedState.html">SharedState</a>s created by other nodes.</p>
+<p>An instance of <code>ClientStateManager</code> is automatically created by the <code>soundworks.Client</code>
+at initialization (cf. client.Client#stateManager).</p>
+<p>See client.Client#stateManager</p>
+<p>Tutorial: <a href="https://soundworks.dev/guide/state-manager.html">https://soundworks.dev/guide/state-manager.html</a></p>
+<pre class="prettyprint source"><code>// server-side
+import { Server } from '@soundworks/server/index.js';
+
+const server = new Server(config);
+// declare and register the schema of a shared state.
+server.stateManager.registerSchema('some-global-state', {
+  myRandom: {
+    type: 'float',
+    default: 0,
+  }
+});
+
+await server.start();
+
+// create a global state server-side
+const globalState = await server.stateManager.create('some-global-state');
+// listen and react to the changes made by the clients
+globalState.onUpdate(updates => console.log(updates));
+</code></pre>
+<pre class="prettyprint source"><code>// client-side
+import { Client } from '@soundworks/client.index.js';
+
+const client = new Client(config);
+await client.start();
+
+// attach to the global state created by the server
+const globalState = await client.stateManager.attach('some-global-state');
+
+// update the value of a `myRandom` parameter every seconds
+setInterval(() => {
+  globalState.set({ myRandom: Math.random() });
+}, 1000);
+</code></pre></div>
+        
+    
+</header>
+
+<article>
+    
+
+    
+        <h3 class="subsection-title">Extends</h3>
+
+        
+
+
+    <ul>
+        <li><a href="BaseStateManager.html">BaseStateManager</a></li>
+    </ul>
+
+
+    
+
+    
+
+    
+    
+    
+
+     
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    <h4 class="name" id="attach"><span class="type-signature type-signature-async">(async) </span>attach<span class="signature">(schemaName, stateIdOrFilter<span class="signature-attributes">opt</span>, filter<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="SharedState.html">SharedState</a>>}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>Attach to an existing <a href="SharedState.html">SharedState</a> instance.</p>
+<p>Alternative signatures:</p>
+<ul>
+<li><code>stateManager.attach(schemaName)</code></li>
+<li><code>stateManager.attach(schemaName, stateId)</code></li>
+<li><code>stateManager.attach(schemaName, filter)</code></li>
+<li><code>stateManager.attach(schemaName, stateId, filter)</code></li>
+</ul></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="common_BaseStateManager.js.html">common/BaseStateManager.js</a>, <a href="common_BaseStateManager.js.html#line334">line 334</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="BaseStateManager.html#attach">BaseStateManager#attach</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-examples">Example</h5>
+    
+    <pre class="prettyprint"><code>const state = await client.stateManager.attach('my-class');</code></pre>
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>schemaName</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>Name of the schema as given on registration</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>stateIdOrFilter</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+|
+
+<span class="param-type">Array.&lt;string></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>null</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Id of the state to attach to. If <code>null</code>,
+attach to the first state found with the given schema name (usefull for
+globally shared states owned by the server).</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>filter</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;string></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>null</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>List of parameters of interest in the
+returned state. If set to <code>null</code>, no filter is applied.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5 class="h5-returns">Returns:</h5>
+
+        
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;<a href="SharedState.html">SharedState</a>></span>
+
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="create"><span class="type-signature type-signature-async">(async) </span>create<span class="signature">(schemaName, initValues<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="SharedState.html">SharedState</a>>}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>Create a <a href="SharedState.html">SharedState</a> instance from a registered schema.</p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="common_BaseStateManager.js.html">common/BaseStateManager.js</a>, <a href="common_BaseStateManager.js.html#line258">line 258</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="BaseStateManager.html#create">BaseStateManager#create</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-examples">Example</h5>
+    
+    <pre class="prettyprint"><code>const state = await client.stateManager.create('my-class');</code></pre>
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>schemaName</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>Name of the schema as given on registration
+(cf. ServerStateManager)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>initValues</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object.&lt;string, any></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>{}</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Default values for the state.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5 class="h5-returns">Returns:</h5>
+
+        
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;<a href="SharedState.html">SharedState</a>></span>
+
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="getCollection"><span class="type-signature type-signature-async">(async) </span>getCollection<span class="signature">(schemaName, filter<span class="signature-attributes">opt</span>, options<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="SharedStateCollection.html">SharedStateCollection</a>>}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>Returns a collection of all the states created from the schema name.</p>
+<p>Alternative signatures:</p>
+<ul>
+<li><code>stateManager.getCollection(schemaName)</code></li>
+<li><code>stateManager.getCollection(schemaName, filter)</code></li>
+<li><code>stateManager.getCollection(schemaName, options)</code></li>
+<li><code>stateManager.getCollection(schemaName, filter, options)</code></li>
+</ul></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="common_BaseStateManager.js.html">common/BaseStateManager.js</a>, <a href="common_BaseStateManager.js.html#line654">line 654</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="BaseStateManager.html#getCollection">BaseStateManager#getCollection</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-examples">Example</h5>
+    
+    <pre class="prettyprint"><code>const collection = await client.stateManager.getCollection(schemaName);</code></pre>
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>schemaName</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>Name of the schema.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>filter</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">array</span>
+|
+
+<span class="param-type">null</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>null</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Filter parameter of interest for each
+state of the collection. If set to <code>null</code>, no filter applied.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>{}</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Options.</p>
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>excludeLocal</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>false</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>If set to true, exclude states
+created by the same node from the collection.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5 class="h5-returns">Returns:</h5>
+
+        
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;<a href="SharedStateCollection.html">SharedStateCollection</a>></span>
+
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="getSchema"><span class="type-signature type-signature-async">(async) </span>getSchema<span class="signature">(schemaName)</span><span class="type-signature"> &rarr; {SharedStateSchema}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>Return the schema from a given registered schema name</p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="common_BaseStateManager.js.html">common/BaseStateManager.js</a>, <a href="common_BaseStateManager.js.html#line230">line 230</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="BaseStateManager.html#getSchema">BaseStateManager#getSchema</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-examples">Example</h5>
+    
+    <pre class="prettyprint"><code>const schema = await client.stateManager.getSchema('my-class');</code></pre>
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>schemaName</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Name of the schema as given on registration
+(cf. ServerStateManager)</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5 class="h5-returns">Returns:</h5>
+
+        
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">SharedStateSchema</span>
+
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="observe"><span class="type-signature type-signature-async">(async) </span>observe<span class="signature">(schemaName<span class="signature-attributes">opt</span>, callback, options)</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="global.html#stateManagerDeleteObserveCallback">stateManagerDeleteObserveCallback</a>>}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>Observe all the <a href="SharedState.html">SharedState</a> instances that are created on the network.</p>
+<p>Notes:</p>
+<ul>
+<li>The order of execution is not guaranted between nodes, i.e. a state attached
+in the <code>observe</code> callback can be instantiated before the <code>async create</code> method
+resolves on the creator node.</li>
+<li>Filtering, i.e. <code>observedSchemaName</code> and <code>options.excludeLocal</code> are handled
+on the node side, the server just notify all state creation activity and
+the node executes the given callbacks according to the different filter rules.
+Such strategy allows to simply share the observe notifications between all observers.</li>
+</ul>
+<p>Alternative signatures:</p>
+<ul>
+<li><code>stateManager.observe(callback)</code></li>
+<li><code>stateManager.observe(schemaName, callback)</code></li>
+<li><code>stateManager.observe(callback, options)</code></li>
+<li><code>stateManager.observe(schemaName, callback, options)</code></li>
+</ul></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="common_BaseStateManager.js.html">common/BaseStateManager.js</a>, <a href="common_BaseStateManager.js.html#line476">line 476</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="BaseStateManager.html#observe">BaseStateManager#observe</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-examples">Example</h5>
+    
+    <pre class="prettyprint"><code>client.stateManager.observe(async (schemaName, stateId) => {
+  if (schemaName === 'my-shared-state-class') {
+    const attached = await client.stateManager.attach(schemaName, stateId);
+  }
+});</code></pre>
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>schemaName</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>optionnal schema name to filter the observed
+states.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#stateManagerObserveCallback">stateManagerObserveCallback</a></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Function to be called when a new state is created on the network.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Options.</p>
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>excludeLocal</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>false</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>If set to true, exclude states
+created locally, i.e. by the same node, from the collection.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5 class="h5-returns">Returns:</h5>
+
+        
+<div class="param-desc">
+    <ul>
+<li>Returns a Promise that resolves when the given
+callback as been executed on each existing states. The promise value is a
+function which allows to stop observing the states on the network.</li>
+</ul>
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;<a href="global.html#stateManagerDeleteObserveCallback">stateManagerDeleteObserveCallback</a>></span>
+
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+    
+
+    
+        <h3 class="subsection-title">Type Definitions</h3>
+
+        
+                
+
+    
+
+    <h4 class="name" id="~ObserveCallback"><span class="type-signature type-signature-async">(async) </span>ObserveCallback<span class="signature">(schemaName, stateId, nodeId)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="client_ClientStateManager.js.html">client/ClientStateManager.js</a>, <a href="client_ClientStateManager.js.html#line3">line 3</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>schemaName</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>name of the schema</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>stateId</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>id of the state</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>nodeId</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>id of the node that created the state</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.3</a> on Mon Sep 23 2024 14:41:02 GMT+0000 (Coordinated Universal Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+<script src="scripts/search.js" defer></script>
+
+
+
+    <link type="text/css" rel="stylesheet" href="assets/custom.css">
+    
+</body>
+</html>
