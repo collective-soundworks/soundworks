@@ -281,18 +281,21 @@ describe('# SharedState - schema options', () => {
 
     it('[immediate=true, event=true] should behave correctly', async () => {
       return new Promise(async (resolve, reject) => {
-        server.stateManager.registerSchema('immediate-test-2', {
-          immediateValue: {
-            type: 'integer',
-            default: 0,
-            immediate: true,
-            event: true,
-          },
-          normalValue: {
-            type: 'integer',
-            default: 0,
-          }
-        });
+        try {
+          server.stateManager.registerSchema('immediate-test-2', {
+            immediateValue: {
+              type: 'integer',
+              immediate: true,
+              event: true,
+            },
+            normalValue: {
+              type: 'integer',
+              default: 0,
+            }
+          });
+        } catch (err) {
+          console.log(err.message);
+        }
 
         const state = await client1.stateManager.create('immediate-test-2');
         const attached = await client2.stateManager.attach('immediate-test-2');
@@ -492,7 +495,6 @@ describe('# SharedState - schema options', () => {
       try {
         result = await owned.set(expected);
       } catch (err) {
-        console.log(err.message);
       }
       assert.deepEqual(result, expected);
       // 1 - for state create request

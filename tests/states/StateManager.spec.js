@@ -84,6 +84,7 @@ describe(`# StateManager`, () => {
           immediate: false,
           type: 'boolean',
           default: false,
+          required: false,
           initValue: false
         },
         int: {
@@ -97,6 +98,7 @@ describe(`# StateManager`, () => {
           type: 'integer',
           default: 0,
           step: 1,
+          required: false,
           initValue: 0
         }
       };

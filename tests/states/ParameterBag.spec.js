@@ -30,7 +30,14 @@ describe('# [private] ParameterBag', () => {
       assert.doesNotThrow(() => ParameterBag.validateSchema({
         myBoolean: { type: 'boolean', event: true }
       }));
-    })
+    });
+
+    it(`should allow "default" to not be declared when "required" is true`, () => {
+      // required: true does not require `default` value
+      assert.doesNotThrow(() => ParameterBag.validateSchema({
+        myBoolean: { type: 'boolean', required: true }
+      }));
+    });
   });
 
   describe('## constructor(schema, initValues)', () => {
@@ -47,6 +54,18 @@ describe('# [private] ParameterBag', () => {
           { myFloat: 0.1 }
         )
       }, ReferenceError, `[StateManager.create] init value defined for undefined param "myFloat"`);
+    });
+
+    it('should throw if required param is not given at initialization', () => {
+      let errored = false;
+      try {
+        new ParameterBag({ requiredParam: { type: 'boolean', required: true, } });
+      } catch(err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      if (!errored) { assert.fail('require param should have thrown'); }
     });
 
     it('should complete and deeply clone schema', () => {
@@ -115,11 +134,16 @@ describe('# [private] ParameterBag', () => {
       default: null,
       event: true,
     },
+    required: {
+      type: 'string',
+      required: true,
+    },
   };
 
   const params = new ParameterBag(schema, {
     bool: true,
     int: -4,
+    required: 'coucou',
   });
 
   describe(`## has(name)`, () => {
@@ -131,7 +155,7 @@ describe('# [private] ParameterBag', () => {
 
   describe(`## getValues()`, () => {
     it(`should return current values`, () => {
-      const expected = { bool: true, int: -2, nullable: {}, event: null };
+      const expected = { bool: true, int: -2, nullable: {}, event: null, required: 'coucou' };
       assert.deepEqual(params.getValues(), expected);
     });
 
@@ -158,6 +182,7 @@ describe('# [private] ParameterBag', () => {
       assert.strictEqual(params.get('int'), -2);
       assert.deepEqual(params.get('nullable'), {});
       assert.strictEqual(params.get('event'), null);
+      assert.strictEqual(params.get('required'), 'coucou');
     });
   });
 
@@ -216,6 +241,7 @@ describe('# [private] ParameterBag', () => {
         int: 0,
         nullable: {},
         event: null,
+        required: 'coucou', // default is set to init value
       });
     });
   });

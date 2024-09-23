@@ -180,6 +180,7 @@ describe(`# SharedStateCollection`, () => {
           "initValue": false,
           "metas": {},
           "nullable": false,
+          "required": false,
           "type": "boolean",
         },
         "int": {
@@ -192,6 +193,7 @@ describe(`# SharedStateCollection`, () => {
           "metas": {},
           "min": 0,
           "nullable": false,
+          "required": false,
           "step": 1,
           "type": "integer",
         },
