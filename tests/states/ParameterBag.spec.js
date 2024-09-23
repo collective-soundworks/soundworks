@@ -25,17 +25,25 @@ describe('# [private] ParameterBag', () => {
       }), TypeError, `[StateManager.registerSchema] Invalid schema definition - param "myBoolean" (type "boolean"): "default" key is required`);
     });
 
-    it(`should allow "default" to not be declared when "event" is true`, () => {
+    it(`should throw if "default" is declared when "event" is true`, () => {
       // event: true does not require `default` value
       assert.doesNotThrow(() => ParameterBag.validateSchema({
         myBoolean: { type: 'boolean', event: true }
       }));
+
+      assert.throws(() => ParameterBag.validateSchema({
+        myBoolean: { type: 'boolean', event: true, default: false }
+      }));
     });
 
-    it(`should allow "default" to not be declared when "required" is true`, () => {
+    it(`should throw if "default" is declared when "required" is true`, () => {
       // required: true does not require `default` value
       assert.doesNotThrow(() => ParameterBag.validateSchema({
         myBoolean: { type: 'boolean', required: true }
+      }));
+
+      assert.throws(() => ParameterBag.validateSchema({
+        myBoolean: { type: 'boolean', required: true, default: true }
       }));
     });
   });
