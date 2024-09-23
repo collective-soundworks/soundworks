@@ -1,3 +1,9 @@
+## v4.0.0-alpha.29 - 23/09/2023
+
+- Feat: add required option for SharedState parameter
+- Chore: Renamed all classes to avoid namespace in doc and improve typescript support
+- Chore: improve shared states abstractions naming
+
 ## v4.0.0-alpha.28 - 06/09/2025
 
 - Fix: make it can work without `node_modules` when bundled to `.cjs` for use in Max
