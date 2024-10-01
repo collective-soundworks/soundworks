@@ -116,7 +116,8 @@ describe('# [private] ParameterBag', () => {
 
       const params = new ParameterBag(schema, { myFloat: -1000 });
       const expected = { myBoolean: false, myFloat: 0 };
-      assert.deepEqual(params._values, expected);
+      assert.deepEqual(params.getValues(), expected);
+      assert.deepEqual(params.getValuesUnsafe(), expected);
       assert.deepEqual(params.getInitValues(), expected);
     });
   });
@@ -230,13 +231,13 @@ describe('# [private] ParameterBag', () => {
     // });
   });
 
-  describe(`## getSchema([name])`, () => {
+  describe(`## getDescription([name])`, () => {
     it(`should return the schema with proper default applied`, () => {
-      assert.shallowDeepEqual(params.getSchema(), schema);
+      assert.shallowDeepEqual(params.getDescription(), schema);
     });
 
     it(`should throw if name does not exists`, () => {
-      assert.throw(() => params.getSchema('42'), ReferenceError,
+      assert.throw(() => params.getDescription('42'), ReferenceError,
         `[SharedState] Cannot get schema description of undefined parameter "42"`
       );
     });

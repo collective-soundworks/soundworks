@@ -161,6 +161,9 @@ class ParameterBag {
     }
   }
 
+  #schema = {};
+  #values = {};
+
   constructor(schema, initValues = {}) {
     if (!schema) {
       throw new Error(`[ParameterBag] schema is mandatory`);
@@ -168,28 +171,6 @@ class ParameterBag {
 
     schema = cloneDeep(schema);
     initValues = cloneDeep(initValues);
-
-    /**
-     * List of parameters.
-     *
-     * @type {Object<String, Param>}
-     * @name _params
-     * @memberof ParameterBag
-     * @instance
-     * @private
-     */
-    this._values = {};
-
-    /**
-     * List of schema with init values.
-     *
-     * @type {Object<String, paramDefinition>}
-     * @name _schema
-     * @memberof ParameterBag
-     * @instance
-     * @private
-     */
-    this._schema = {};
 
     ParameterBag.validateSchema(schema);
 
@@ -232,12 +213,12 @@ class ParameterBag {
       }
 
 
-      this._schema[name] = def;
+      this.#schema[name] = def;
       // coerce init value and store in definition
       initValue = this.set(name, initValue)[0];
 
-      this._schema[name].initValue = initValue;
-      this._values[name] = initValue;
+      this.#schema[name].initValue = initValue;
+      this.#values[name] = initValue;
     }
   }
 
@@ -248,7 +229,7 @@ class ParameterBag {
    * @return {Boolean}
    */
   has(name) {
-    return Object.prototype.hasOwnProperty.call(this._schema, name);
+    return Object.prototype.hasOwnProperty.call(this.#schema, name);
   }
 
   /**
@@ -260,7 +241,7 @@ class ParameterBag {
   getValues() {
     let values = {};
 
-    for (let name in this._values) {
+    for (let name in this.#values) {
       values[name] = this.get(name);
     }
 
@@ -279,7 +260,7 @@ class ParameterBag {
   getValuesUnsafe() {
     let values = {};
 
-    for (let name in this._values) {
+    for (let name in this.#values) {
       values[name] = this.getUnsafe(name);
     }
 
@@ -298,12 +279,12 @@ class ParameterBag {
       throw new ReferenceError(`[SharedState] Cannot get value of undefined parameter "${name}"`);
     }
 
-    if (this._schema[name].type === 'any') {
+    if (this.#schema[name].type === 'any') {
       // we return a deep copy of the object as we don't want the client code to
       // be able to modify our underlying data.
-      return cloneDeep(this._values[name]);
+      return cloneDeep(this.#values[name]);
     } else {
-      return this._values[name];
+      return this.#values[name];
     }
   }
 
@@ -322,7 +303,7 @@ class ParameterBag {
       throw new ReferenceError(`[SharedState] Cannot get value of undefined parameter "${name}"`);
     }
 
-    return this._values[name];
+    return this.#values[name];
   }
 
   /**
@@ -337,7 +318,7 @@ class ParameterBag {
       throw new ReferenceError(`[SharedState] Cannot set value of undefined parameter "${name}"`);
     }
 
-    const def = this._schema[name];
+    const def = this.#schema[name];
 
     if (value === null && def.nullable === false) {
       throw new TypeError(`[SharedState] Invalid value for ${def.type} param "${name}": value is null and param is not nullable`);
@@ -362,7 +343,7 @@ class ParameterBag {
    */
   set(name, value) {
     value = this.coerceValue(name, value);
-    const currentValue = this._values[name];
+    const currentValue = this.#values[name];
     const updated = !equal(currentValue, value);
 
     // we store a deep copy of the object as we don't want the client to be able
@@ -370,11 +351,11 @@ class ParameterBag {
     // deep equal check to returns true, and therefore the update is not triggered.
     // @see tests/common.state-manager.spec.js
     // 'should copy stored value for "any" type to have a predictable behavior'
-    if (this._schema[name].type === 'any') {
+    if (this.#schema[name].type === 'any') {
       value = cloneDeep(value);
     }
 
-    this._values[name] = value;
+    this.#values[name] = value;
 
     // return tuple so that the state manager can handle the `filterChange` option
     return [value, updated];
@@ -402,23 +383,23 @@ class ParameterBag {
    *
    * @return {object}
    */
-  getSchema(name = null) {
+  getDescription(name = null) {
     if (name === null) {
-      return this._schema;
+      return this.#schema;
     }
 
     if (!this.has(name)) {
       throw new ReferenceError(`[SharedState] Cannot get schema description of undefined parameter "${name}"`);
     }
 
-    return this._schema[name];
+    return this.#schema[name];
   }
 
   // return the default value, if initValue has been given, return init values
   getInitValues() {
     const initValues = {};
 
-    for (let [name, def] of Object.entries(this._schema)) {
+    for (let [name, def] of Object.entries(this.#schema)) {
       initValues[name] = def.initValue;
     }
 
@@ -429,7 +410,7 @@ class ParameterBag {
   getDefaults() {
     const defaults = {};
 
-    for (let [name, def] of Object.entries(this._schema)) {
+    for (let [name, def] of Object.entries(this.#schema)) {
       defaults[name] = def.default;
     }
 

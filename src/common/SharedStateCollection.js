@@ -139,6 +139,10 @@ class SharedStateCollection {
    */
   getDescription(paramName = null) {
     if (paramName) {
+      if (!(paramName in this.#schema)) {
+        throw new ReferenceError(`Cannot execute "getDescription" on "SharedStateCollection": Parameter "${paramName}" does not exists`);
+      }
+
       return this.#schema[paramName];
     }
 
@@ -241,7 +245,7 @@ class SharedStateCollection {
     if (executeListener === true) {
       // filter `event: true` parameters from currentValues, this is missleading
       // as we are in the context of a callback, not from an active read
-      const schema = this.getSchema();
+      const schema = this.getDescription();
 
       this.#states.forEach(state => {
         const currentValues = state.getValues();

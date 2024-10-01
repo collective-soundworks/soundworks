@@ -53,7 +53,7 @@ describe(`# StateManager`, () => {
     });
   });
 
-  describe(`## getDescription(className)`, () => {
+  describe(`## getSchema(className)`, () => {
     it(`should throw if node is not inited`, async () => {
       const localConfig = structuredClone(config);
       localConfig.env.port = 8082;
@@ -64,7 +64,7 @@ describe(`# StateManager`, () => {
       let errored = false;
 
       try {
-        await server.stateManager.getDescription('a');
+        await server.stateManager.getSchema('a');
       } catch (err) {
         console.log(err.message);
         errored = true;
@@ -74,7 +74,7 @@ describe(`# StateManager`, () => {
     });
 
     it(`should return the description`, async () => {
-      const description = await client.stateManager.getDescription('a');
+      const description = await client.stateManager.getSchema('a');
       assert.deepEqual(description, aExpectedDescription);
     });
 
@@ -82,7 +82,7 @@ describe(`# StateManager`, () => {
       let errored = false;
 
       try {
-        await client.stateManager.getDescription('do-not-exists');
+        await client.stateManager.getSchema('do-not-exists');
       } catch (err) {
         console.log(err.message);
         errored = true;

@@ -307,7 +307,7 @@ ${JSON.stringify(initValues, null, 2)}`);
     const oldValues = {};
 
     for (let name in updates) {
-      const { immediate, event } = this.#parameters.getSchema(name);
+      const { immediate, event } = this.#parameters.getDescription(name);
       // @note 20211209 - we had an issue here server-side, because if the value
       // is an object or an array, the reference is shared by everybody, therefore
       // `changed` is always false and the new value is never propagated...
@@ -346,7 +346,7 @@ ${JSON.stringify(initValues, null, 2)}`);
 
     // reset events to null after propagation of all listeners
     for (let name in newValues) {
-      const { event } = this.#parameters.getSchema(name);
+      const { event } = this.#parameters.getDescription(name);
 
       if (event) {
         this.#parameters.set(name, null);
@@ -369,7 +369,7 @@ ${JSON.stringify(initValues, null, 2)}`);
    * const paramDescription = state.getDescription('my-param');
    */
   getDescription(paramName = null) {
-    return this.#parameters.getSchema(paramName);
+    return this.#parameters.getDescription(paramName);
   }
 
   /**
@@ -474,7 +474,7 @@ ${JSON.stringify(initValues, null, 2)}`);
       // response, call update listeners with server response and resolve promise with
       // the full payload, i.e. reintegrating the local params in the resolve payload
 
-      const { local, immediate, filterChange, event } = this.#parameters.getSchema(name);
+      const { local, immediate, filterChange, event } = this.#parameters.getDescription(name);
 
       if (immediate || local) {
         const oldValue = this.#parameters.get(name);

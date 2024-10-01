@@ -208,7 +208,7 @@ class BaseStateManager {
       }
       // return a populated schema
       const parameterBag = new ParameterBag(schema);
-      this.#promiseStore.resolve(reqId, parameterBag.getSchema());
+      this.#promiseStore.resolve(reqId, parameterBag.getDescription());
     });
 
     this[kStateManagerClient].transport.addListener(GET_SCHEMA_ERROR, (reqId, msg) => {
@@ -236,7 +236,7 @@ class BaseStateManager {
       const schema = this.#cachedSchemas.get(schemaName);
       // return a populated schema
       const parameterBag = new ParameterBag(schema);
-      return parameterBag.getSchema();
+      return parameterBag.getDescription();
     }
 
     return new Promise((resolve, reject) => {

@@ -609,7 +609,7 @@ describe('# SharedState - schema options', () => {
 
       assert.deepEqual(clientResult, serverResult);
 
-      let { min, max } = clientInteger.getSchema('myInt');
+      let { min, max } = clientInteger.getDescription('myInt');
       assert.equal(min, -Infinity);
       assert.equal(max, Infinity);
     });
@@ -650,7 +650,7 @@ describe('# SharedState - schema options', () => {
 
       assert.deepEqual(clientResult, serverResult);
 
-      let { min, max } = clientFloat.getSchema('myFloat');
+      let { min, max } = clientFloat.getDescription('myFloat');
       assert.equal(min, -Infinity);
       assert.equal(max, Infinity);
     });
