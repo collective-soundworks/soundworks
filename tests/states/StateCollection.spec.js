@@ -346,6 +346,29 @@ describe(`# SharedStateCollection`, () => {
       await state.delete();
       await delay(50);
     });
+
+    it('should not propagate event parameters on first call if `executeListener=true`', async () => {
+      server.stateManager.registerSchema('with-event', {
+        bool: { type: 'boolean', event: true, },
+        int: { type: 'integer', default: 20, },
+      });
+      const state = await server.stateManager.create('with-event');
+      const collection = await server.stateManager.getCollection('with-event');
+
+      let onUpdateCalled = false;
+      collection.onUpdate((state, newValues, oldValues, context) => {
+        onUpdateCalled = true;
+        assert.deepEqual(newValues, { int: 20 });
+        assert.deepEqual(oldValues, {});
+        assert.deepEqual(context, null);
+      }, true);
+
+      await delay(10);
+
+      assert.equal(onUpdateCalled, true);
+      server.stateManager.deleteSchema('with-event');
+    });
+
   });
 
   describe(`## onAttach(callback)`, () => {

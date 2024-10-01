@@ -222,8 +222,19 @@ class SharedStateCollection {
     this.#onUpdateCallbacks.add(callback);
 
     if (executeListener === true) {
+      // filter `event: true` parameters from currentValues, this is missleading
+      // as we are in the context of a callback, not from an active read
+      const schema = this.getSchema();
+
       this.#states.forEach(state => {
         const currentValues = state.getValues();
+
+        for (let name in schema) {
+          if (schema[name].event === true) {
+            delete currentValues[name];
+          }
+        }
+
         const oldValues = {};
         const context = null;
 
