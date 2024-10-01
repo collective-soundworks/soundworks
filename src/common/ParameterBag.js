@@ -45,9 +45,9 @@ export const types = {
         max: +Infinity,
       });
     },
-    sanitizeSchema: (def) => {
-      // sanitize `null` values in received schema, this prevent a bug when
-      // `min` and `max` are explicitely set to `±Infinity`, the schema is stringified
+    sanitizeDescription: (def) => {
+      // sanitize `null` values in received description, this prevent a bug when
+      // `min` and `max` are explicitely set to `±Infinity`, the description is stringified
       // when sent over the network and therefore Infinity is transformed to `null`
       //
       // JSON.parse({ a: Infinity });
@@ -78,9 +78,9 @@ export const types = {
         max: +Infinity,
       });
     },
-    sanitizeSchema: (def) => {
-      // sanitize `null` values in received schema, this prevent a bug when
-      // `min` and `max` are explicitely set to `±Infinity`, the schema is stringified
+    sanitizeDescription: (def) => {
+      // sanitize `null` values in received description, this prevent a bug when
+      // `min` and `max` are explicitely set to `±Infinity`, the description is stringified
       // when sent over the network and therefore Infinity is transformed to `null`
       //
       // JSON.parse({ a: Infinity });
@@ -132,16 +132,16 @@ export const types = {
 
 /** @private */
 class ParameterBag {
-  static validateSchema(schema) {
-    for (let name in schema) {
-      const def = schema[name];
+  static validateDescription(description) {
+    for (let name in description) {
+      const def = description[name];
 
       if (!Object.prototype.hasOwnProperty.call(def, 'type')) {
-        throw new TypeError(`[StateManager.registerSchema] Invalid schema definition - param "${name}": "type" key is required`);
+        throw new TypeError(`[StateManager.registerSchema] Invalid class description - param "${name}": "type" key is required`);
       }
 
       if (!Object.prototype.hasOwnProperty.call(types, def.type)) {
-        throw new TypeError(`[StateManager.registerSchema] Invalid schema definition - param "${name}": "{ type: '${def.type}' }" does not exists`);
+        throw new TypeError(`[StateManager.registerSchema] Invalid class description - param "${name}": "{ type: '${def.type}' }" does not exists`);
       }
 
       const required = types[def.type].required;
@@ -152,38 +152,38 @@ class ParameterBag {
           // - default is always null for `event` params
           // - default is always null for `required` params
           if ('default' in def && def.default !== null) {
-            throw new TypeError(`[StateManager.registerSchema] Invalid schema definition for param ${name} - "default" propaerty is set and not null while the parameter definition is declared as "event" or "required"`);
+            throw new TypeError(`[StateManager.registerSchema] Invalid class description for param ${name} - "default" propaerty is set and not null while the parameter definition is declared as "event" or "required"`);
           }
         } else if (!Object.prototype.hasOwnProperty.call(def, key)) {
-          throw new TypeError(`[StateManager.registerSchema] Invalid schema definition - param "${name}" (type "${def.type}"): "${key}" key is required`);
+          throw new TypeError(`[StateManager.registerSchema] Invalid class description - param "${name}" (type "${def.type}"): "${key}" key is required`);
         }
       });
     }
   }
 
-  #schema = {};
+  #description = {};
   #values = {};
 
-  constructor(schema, initValues = {}) {
-    if (!schema) {
-      throw new Error(`[ParameterBag] schema is mandatory`);
+  constructor(description, initValues = {}) {
+    if (!description) {
+      throw new Error(`[ParameterBag] description is mandatory`);
     }
 
-    schema = cloneDeep(schema);
+    description = cloneDeep(description);
     initValues = cloneDeep(initValues);
 
-    ParameterBag.validateSchema(schema);
+    ParameterBag.validateDescription(description);
 
-    // make shure initValues make sens according to the given schema
+    // make shure initValues make sens according to the given description
     for (let name in initValues) {
-      if (!Object.prototype.hasOwnProperty.call(schema, name)) {
+      if (!Object.prototype.hasOwnProperty.call(description, name)) {
         throw new ReferenceError(`[StateManager.create] init value defined for undefined param "${name}"`);
       }
     }
 
-    for (let [name, def] of Object.entries(schema)) {
-      if (types[def.type].sanitizeSchema) {
-        def = types[def.type].sanitizeSchema(def);
+    for (let [name, def] of Object.entries(description)) {
+      if (types[def.type].sanitizeDescription) {
+        def = types[def.type].sanitizeDescription(def);
       }
 
       const { defaultOptions } = types[def.type];
@@ -213,11 +213,11 @@ class ParameterBag {
       }
 
 
-      this.#schema[name] = def;
+      this.#description[name] = def;
       // coerce init value and store in definition
       initValue = this.set(name, initValue)[0];
 
-      this.#schema[name].initValue = initValue;
+      this.#description[name].initValue = initValue;
       this.#values[name] = initValue;
     }
   }
@@ -229,7 +229,7 @@ class ParameterBag {
    * @return {Boolean}
    */
   has(name) {
-    return Object.prototype.hasOwnProperty.call(this.#schema, name);
+    return Object.prototype.hasOwnProperty.call(this.#description, name);
   }
 
   /**
@@ -279,7 +279,7 @@ class ParameterBag {
       throw new ReferenceError(`[SharedState] Cannot get value of undefined parameter "${name}"`);
     }
 
-    if (this.#schema[name].type === 'any') {
+    if (this.#description[name].type === 'any') {
       // we return a deep copy of the object as we don't want the client code to
       // be able to modify our underlying data.
       return cloneDeep(this.#values[name]);
@@ -307,8 +307,7 @@ class ParameterBag {
   }
 
   /**
-   * Check that the value is valid according to the schema and return it coerced
-   * to the schema definition
+   * Check that the value is valid according to the class definition and return it coerced.
    *
    * @param {String} name - Name of the parameter.
    * @param {Mixed} value - Value of the parameter.
@@ -318,7 +317,7 @@ class ParameterBag {
       throw new ReferenceError(`[SharedState] Cannot set value of undefined parameter "${name}"`);
     }
 
-    const def = this.#schema[name];
+    const def = this.#description[name];
 
     if (value === null && def.nullable === false) {
       throw new TypeError(`[SharedState] Invalid value for ${def.type} param "${name}": value is null and param is not nullable`);
@@ -351,7 +350,7 @@ class ParameterBag {
     // deep equal check to returns true, and therefore the update is not triggered.
     // @see tests/common.state-manager.spec.js
     // 'should copy stored value for "any" type to have a predictable behavior'
-    if (this.#schema[name].type === 'any') {
+    if (this.#description[name].type === 'any') {
       value = cloneDeep(value);
     }
 
@@ -379,27 +378,25 @@ class ParameterBag {
   // }
 
   /**
-   * Return the given schema along with the initialization values.
-   *
    * @return {object}
    */
   getDescription(name = null) {
     if (name === null) {
-      return this.#schema;
+      return this.#description;
     }
 
     if (!this.has(name)) {
-      throw new ReferenceError(`[SharedState] Cannot get schema description of undefined parameter "${name}"`);
+      throw new ReferenceError(`[SharedState] Cannot get description of undefined parameter "${name}"`);
     }
 
-    return this.#schema[name];
+    return this.#description[name];
   }
 
   // return the default value, if initValue has been given, return init values
   getInitValues() {
     const initValues = {};
 
-    for (let [name, def] of Object.entries(this.#schema)) {
+    for (let [name, def] of Object.entries(this.#description)) {
       initValues[name] = def.initValue;
     }
 
@@ -410,7 +407,7 @@ class ParameterBag {
   getDefaults() {
     const defaults = {};
 
-    for (let [name, def] of Object.entries(this.#schema)) {
+    for (let [name, def] of Object.entries(this.#description)) {
       defaults[name] = def.default;
     }
 

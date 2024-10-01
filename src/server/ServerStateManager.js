@@ -388,7 +388,7 @@ class ServerStateManager extends BaseStateManager {
    * _In a future revision, this method and its arguments will be renamed_
    *
    * @param {SharedStateClassName} schemaName - Name of the schema.
-   * @param {SharedStateSchema} schema - Data structure
+   * @param {SharedStateClassDescription} schema - Data structure
    *  describing the states that will be created from this schema.
    *
    * @see {@link ServerStateManager#create}
@@ -421,7 +421,7 @@ class ServerStateManager extends BaseStateManager {
       throw new Error(`[stateManager.registerSchema] Invalid schema, should be an object`);
     }
 
-    ParameterBag.validateSchema(schema);
+    ParameterBag.validateDescription(schema);
 
     this.#schemas.set(schemaName, clonedeep(schema));
     // create hooks list

@@ -221,9 +221,9 @@ class BaseStateManager {
   /**
    * Return the schema from a given registered schema name
    *
-   * @param {String} schemaName - Name of the schema as given on registration
+   * @param {SharedStateClassName} schemaName - Name of the schema as given on registration
    *  (cf. ServerStateManager)
-   * @return {SharedStateSchema}
+   * @return {SharedStateClassDescription}
    * @example
    * const schema = await client.stateManager.getSchema('my-class');
    */

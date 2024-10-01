@@ -52,13 +52,13 @@
  * @property {boolean} [event=false] - Define if the parameter is a volatile, i.e.
  *   its value only exists on an update and is set back to `null` after propagation.
  *   When `true`, `nullable` is automatically set to `true` and `default` to `null`.
-  * @property {boolean} [filterChange=true] - When set to `false`, an update will
+ * @property {boolean} [filterChange=true] - When set to `false`, an update will
  *   trigger the propagation of a parameter even when its value didn't change.
  *   This option provides a sort of middle ground between the default bahavior
  *   (e.g. where only changed values are propagated) and the behavior of the `event`
  *   option (which has no state per se). Hence, setting this options to `false` if
  *   `event=true` makes no sens.
-  * @property {boolean} [immediate=false] - When set to `true`, an update will
+ * @property {boolean} [immediate=false] - When set to `true`, an update will
  *   trigger the update listeners immediately on the node that generated the update,
  *   before propagating the change on the network.
  *   This option is usefull in cases the network would introduce a noticeable

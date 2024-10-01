@@ -10,39 +10,39 @@ describe('# [private] ParameterBag', () => {
   // ---------------------------------------------------------------
   // MAIN API
   // ---------------------------------------------------------------
-  describe('## static validateSchema(schema)', () => {
+  describe('## static validateDescription(schema)', () => {
     it('should check if schema is invalid', () => {
-      assert.throw(() => ParameterBag.validateSchema({
+      assert.throw(() => ParameterBag.validateDescription({
         noType: {}
-      }), TypeError, `[StateManager.registerSchema] Invalid schema definition - param "noType": "type" key is required`);
+      }), TypeError, `[StateManager.registerSchema] Invalid class description - param "noType": "type" key is required`);
 
-      assert.throw(() => ParameterBag.validateSchema({
+      assert.throw(() => ParameterBag.validateDescription({
         invalidType: { type: 'invalid' }
-      }), TypeError, `[StateManager.registerSchema] Invalid schema definition - param "invalidType": "{ type: 'invalid' }" does not exists`);
+      }), TypeError, `[StateManager.registerSchema] Invalid class description - param "invalidType": "{ type: 'invalid' }" does not exists`);
 
-      assert.throw(() => ParameterBag.validateSchema({
+      assert.throw(() => ParameterBag.validateDescription({
         myBoolean: { type: 'boolean' }
-      }), TypeError, `[StateManager.registerSchema] Invalid schema definition - param "myBoolean" (type "boolean"): "default" key is required`);
+      }), TypeError, `[StateManager.registerSchema] Invalid class description - param "myBoolean" (type "boolean"): "default" key is required`);
     });
 
     it(`should throw if "default" is declared when "event" is true`, () => {
       // event: true does not require `default` value
-      assert.doesNotThrow(() => ParameterBag.validateSchema({
+      assert.doesNotThrow(() => ParameterBag.validateDescription({
         myBoolean: { type: 'boolean', event: true }
       }));
 
-      assert.throws(() => ParameterBag.validateSchema({
+      assert.throws(() => ParameterBag.validateDescription({
         myBoolean: { type: 'boolean', event: true, default: false }
       }));
     });
 
     it(`should throw if "default" is declared when "required" is true`, () => {
       // required: true does not require `default` value
-      assert.doesNotThrow(() => ParameterBag.validateSchema({
+      assert.doesNotThrow(() => ParameterBag.validateDescription({
         myBoolean: { type: 'boolean', required: true }
       }));
 
-      assert.throws(() => ParameterBag.validateSchema({
+      assert.throws(() => ParameterBag.validateDescription({
         myBoolean: { type: 'boolean', required: true, default: true }
       }));
     });
@@ -52,7 +52,7 @@ describe('# [private] ParameterBag', () => {
     it('should validate the given schema', () => {
       assert.throws(() => new ParameterBag({
         invalidType: { type: 'invalid' }
-      }), TypeError, `[StateManager.registerSchema] Invalid schema definition - param "invalidType": "{ type: 'invalid' }" does not exists`);
+      }), TypeError, `[StateManager.registerSchema] Invalid class description - param "invalidType": "{ type: 'invalid' }" does not exists`);
     });
 
     it('should check initValues consistency', () => {
@@ -238,7 +238,7 @@ describe('# [private] ParameterBag', () => {
 
     it(`should throw if name does not exists`, () => {
       assert.throw(() => params.getDescription('42'), ReferenceError,
-        `[SharedState] Cannot get schema description of undefined parameter "42"`
+        `[SharedState] Cannot get description of undefined parameter "42"`
       );
     });
   });
