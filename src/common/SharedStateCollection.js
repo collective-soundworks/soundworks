@@ -1,3 +1,5 @@
+import logger from './logger.js';
+
 /**
  * @callback sharedStateCollectionOnUpdateCallback
  * @param {SharedState} state - State that triggered the update.
@@ -29,7 +31,7 @@
  */
 class SharedStateCollection {
   #stateManager = null;
-  #schemaName = null;
+  #className = null;
   #filter = null;
   #options = null;
   #schema = null;
@@ -39,16 +41,16 @@ class SharedStateCollection {
   #onDetachCallbacks = new Set();
   #unobserve = null;
 
-  constructor(stateManager, schemaName, filter = null, options = {}) {
+  constructor(stateManager, className, filter = null, options = {}) {
     this.#stateManager = stateManager;
-    this.#schemaName = schemaName;
+    this.#className = className;
     this.#filter = filter;
     this.#options = Object.assign({ excludeLocal: false }, options);
   }
 
   /** @private */
   async _init() {
-    this.#schema = await this.#stateManager.getSchema(this.#schemaName);
+    this.#schema = await this.#stateManager.getSchema(this.#className);
 
     // if filter is set, check that it contains only valid param names
     if (this.#filter !== null) {
@@ -56,13 +58,13 @@ class SharedStateCollection {
 
       for (let filter of this.#filter) {
         if (!keys.includes(filter)) {
-          throw new ReferenceError(`[SharedStateCollection] Invalid filter key (${filter}) for schema "${this.#schemaName}"`)
+          throw new ReferenceError(`[SharedStateCollection] Invalid filter key (${filter}) for schema "${this.#className}"`)
         }
       }
     }
 
-    this.#unobserve = await this.#stateManager.observe(this.#schemaName, async (schemaName, stateId) => {
-      const state = await this.#stateManager.attach(schemaName, stateId, this.#filter);
+    this.#unobserve = await this.#stateManager.observe(this.#className, async (className, stateId) => {
+      const state = await this.#stateManager.attach(className, stateId, this.#filter);
       this.#states.push(state);
 
       state.onDetach(() => {
@@ -94,35 +96,50 @@ class SharedStateCollection {
   /**
    * Size of the collection, , alias `length`
    * @type {number}
-   * @readonly
    */
   get size() {
     return this.#states.length;
   }
 
   /**
-   * Name of the schema from which the collection has been created.
+   * Name of the class from which the collection has been created.
    * @type {String}
-   * @readonly
    */
-  get schemaName() {
-    return this.#schemaName;
+  get className() {
+    return this.#className;
   }
 
   /**
-   * Definition of schema from which the collection has been created.
-   *
-   * @param {string} [name=null] - If given, returns only the definition
-   *  corresponding to the given param name.
-   * @throws Throws if `name` does not correspond to an existing field
-   *  of the schema.
-   * @return {object}
-   * @example
-   * const schema = collection.getSchema();
+   * @deprecated Use ${@link SharedStateCollection#className} instead.
    */
-  getSchema(name = null) {
-    if (name) {
-      return this.#schema[name];
+  get schemaName() {
+    logger.deprecated('SharedStateCollection#schemaName', 'SharedStateCollection#className', '4.0.0-alpha.29');
+    return this.className;
+  }
+
+  /**
+   * @deprecated Use {@link SharedStateCollection#getDescription} instead.
+   */
+  getSchema(paramName = null) {
+    logger.deprecated('SharedStateCollection#getSchema', 'SharedStateCollection#getDescription', '4.0.0-alpha.29');
+    return this.getDescription(paramName);
+  }
+
+  /**
+   * Return the underlying {@link SharedStateClassDescription} or the
+   * {@link SharedStateParameterDescription} if `paramName` is given.
+   *
+   * @param {string} [paramName=null] - If defined, returns the parameter
+   *  description of the given parameter name rather than the full class description.
+   * @return {SharedStateClassDescription|SharedStateParameterDescription}
+   * @throws Throws if `paramName` is not null and does not exists.
+   * @example
+   * const classDescription = collection.getDescription();
+   * const paramDescription = collection.getDescription('my-param');
+   */
+  getDescription(paramName = null) {
+    if (paramName) {
+      return this.#schema[paramName];
     }
 
     return this.#schema;

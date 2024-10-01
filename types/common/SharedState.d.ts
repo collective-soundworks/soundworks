@@ -90,19 +90,34 @@ declare class SharedState {
     /**
      * Name of the underlying {@link SharedState} class.
      * @type {String}
-     * @deprecated
-     */
-    get schemaName(): string;
-    /**
-     * Name of the underlying {@link SharedState} class.
-     * @type {String}
      */
     get className(): string;
+    /**
+     * @deprecated Use {@link SharedState#className} instead.
+     */
+    get schemaName(): string;
     /**
      * Indicates if the node is the owner of the state, i.e. if it created the state.
      * @type {Boolean}
      */
     get isOwner(): boolean;
+    /**
+     * Return the underlying {@link SharedStateClassDescription} or the
+     * {@link SharedStateParameterDescription} if `paramName` is given.
+     *
+     * @param {string} [paramName=null] - If defined, returns the parameter
+     *  description of the given parameter name rather than the full class description.
+     * @return {SharedStateClassDescription|SharedStateParameterDescription}
+     * @throws Throws if `paramName` is not null and does not exists.
+     * @example
+     * const classDescription = state.getDescription();
+     * const paramDescription = state.getDescription('my-param');
+     */
+    getDescription(paramName?: string): SharedStateClassDescription | SharedStateParameterDescription;
+    /**
+     * @deprecated Use {@link SharedState#getDescription} instead.
+     */
+    getSchema(paramName?: any): any;
     /**
      * Update values of the state.
      *
@@ -198,18 +213,6 @@ declare class SharedState {
      * const values = state.getValues();
      */
     getValuesUnsafe(): object;
-    /**
-     * Return the underlying {@link SharedStateClassSchema} or the
-     * {@link SharedStateParameterDescription} if name is given.
-     *
-     * @param {string} [name] - If defined, returns only the parameter description
-     *  of the given param name.
-     * @return {SharedStateClassSchema|SharedStateParameterDescription}
-     * @throws Throws if `name` does not exists.
-     * @example
-     * const schema = state.getSchema();
-     */
-    getSchema(name?: string): SharedStateClassSchema | SharedStateParameterDescription;
     /**
      * Get the values with which the state has been created. May defer from the
      * default values declared in the schema.

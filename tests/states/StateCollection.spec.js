@@ -6,7 +6,7 @@ import { Client } from '../../src/client/index.js';
 import { BATCHED_TRANSPORT_CHANNEL } from '../../src/common/constants.js';
 
 import config from '../utils/config.js';
-import { a, b } from '../utils/schemas.js';
+import { a, aExpectedDescription, b } from '../utils/schemas.js';
 
 describe(`# SharedStateCollection`, () => {
   let server;
@@ -36,7 +36,7 @@ describe(`# SharedStateCollection`, () => {
     server.stop();
   });
 
-  describe(`## StateManager::getCollection(schemaName)`, () => {
+  describe(`## StateManager::getCollection(className)`, () => {
     it(`should return a working state collection`, async () => {
       const client0 = clients[0];
       const client1 = clients[1];
@@ -116,7 +116,7 @@ describe(`# SharedStateCollection`, () => {
       await delay(50);
     });
 
-    it('should thow if collection, i.e. schemaName, does not exists', async () => {
+    it('should thow if collection, i.e. className, does not exists', async () => {
       let errored = false;
 
       try {
@@ -157,49 +157,21 @@ describe(`# SharedStateCollection`, () => {
     });
   });
 
-  describe(`## schemaName`, () => {
+  describe(`## className`, () => {
     it(`should return the schema name`, async () => {
       const collection = await clients[0].stateManager.getCollection('a');
-      const schemaName = collection.schemaName;
-      assert.equal(schemaName, 'a')
+      const className = collection.className;
+      assert.equal(className, 'a')
 
       await collection.detach();
     });
   });
 
-  describe(`## getSchema()`, () => {
-    it(`should return the schema definition`, async () => {
+  describe(`## getDescription()`, () => {
+    it(`should return the class description`, async () => {
       const collection = await clients[0].stateManager.getCollection('a');
-      const schema = collection.getSchema();
-      const expected = {
-        "bool": {
-          "default": false,
-          "event": false,
-          "filterChange": true,
-          "immediate": false,
-          "initValue": false,
-          "metas": {},
-          "nullable": false,
-          "required": false,
-          "type": "boolean",
-        },
-        "int": {
-          "default": 0,
-          "event": false,
-          "filterChange": true,
-          "immediate": false,
-          "initValue": 0,
-          "max": 100,
-          "metas": {},
-          "min": 0,
-          "nullable": false,
-          "required": false,
-          "step": 1,
-          "type": "integer",
-        },
-      };
-
-      assert.deepEqual(schema, expected);
+      const description = collection.getDescription();
+      assert.deepEqual(description, aExpectedDescription);
 
       await collection.detach();
     });
@@ -537,7 +509,7 @@ describe('# SharedStateCollection - filtered collection', () => {
     server.stop();
   });
 
-  describe(`## getCollection(schemaName, filter)`, () => {
+  describe(`## getCollection(className, filter)`, () => {
     it(`should throw if filter contains invalid keys`, async () => {
       const owned1 = await clients[0].stateManager.create('filtered');
       const owned2 = await clients[1].stateManager.create('filtered');

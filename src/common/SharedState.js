@@ -265,19 +265,17 @@ ${JSON.stringify(initValues, null, 2)}`);
   /**
    * Name of the underlying {@link SharedState} class.
    * @type {String}
-   * @deprecated
    */
-  get schemaName() {
-    logger.deprecated('SharedState#schemaName', 'SharedState#className');
+  get className() {
     return this.#className;
   }
 
   /**
-   * Name of the underlying {@link SharedState} class.
-   * @type {String}
+   * @deprecated Use {@link SharedState#className} instead.
    */
-  get className() {
-    return this.#className;
+  get schemaName() {
+    logger.deprecated('SharedState#schemaName', 'SharedState#className', '4.0.0-alpha.29');
+    return this.className;
   }
 
   /**
@@ -356,6 +354,30 @@ ${JSON.stringify(initValues, null, 2)}`);
     }
 
     return newValues;
+  }
+
+  /**
+   * Return the underlying {@link SharedStateClassDescription} or the
+   * {@link SharedStateParameterDescription} if `paramName` is given.
+   *
+   * @param {string} [paramName=null] - If defined, returns the parameter
+   *  description of the given parameter name rather than the full class description.
+   * @return {SharedStateClassDescription|SharedStateParameterDescription}
+   * @throws Throws if `paramName` is not null and does not exists.
+   * @example
+   * const classDescription = state.getDescription();
+   * const paramDescription = state.getDescription('my-param');
+   */
+  getDescription(paramName = null) {
+    return this.#parameters.getSchema(paramName);
+  }
+
+  /**
+   * @deprecated Use {@link SharedState#getDescription} instead.
+   */
+  getSchema(paramName = null) {
+    logger.deprecated('SharedState#getSchema', 'SharedState#getDescription', '4.0.0-alpha.29');
+    return this.getDescription(paramName);
   }
 
   /**
@@ -612,21 +634,6 @@ ${JSON.stringify(initValues, null, 2)}`);
   }
 
   /**
-   * Return the underlying {@link SharedStateClassSchema} or the
-   * {@link SharedStateParameterDescription} if name is given.
-   *
-   * @param {string} [name] - If defined, returns only the parameter description
-   *  of the given param name.
-   * @return {SharedStateClassSchema|SharedStateParameterDescription}
-   * @throws Throws if `name` does not exists.
-   * @example
-   * const schema = state.getSchema();
-   */
-  getSchema(name = null) {
-    return this.#parameters.getSchema(name);
-  }
-
-  /**
    * Get the values with which the state has been created. May defer from the
    * default values declared in the schema.
    *
@@ -733,10 +740,10 @@ ${JSON.stringify(initValues, null, 2)}`);
       const currentValues = this.getValues();
       // filter `event: true` parameters from currentValues, this is missleading
       // as we are in the context of a callback, not from an active read
-      const schema = this.getSchema();
+      const classDescription = this.getDescription();
 
-      for (let name in schema) {
-        if (schema[name].event === true) {
+      for (let name in classDescription) {
+        if (classDescription[name].event === true) {
           delete currentValues[name];
         }
       }

@@ -16,15 +16,37 @@ const logger = {
       return;
     }
 
-
     console.log(chalk.cyan(`+ ${msg}`));
+  },
+
+  log(msg) {
+    if (!this.verbose) {
+      return;
+    }
+
+    console.log(msg);
+  },
+
+  warn(msg) {
+    if (!this.verbose) {
+      return;
+    }
+
+    console.warn(chalk.yellow(msg));
+  },
+
+  error(msg) {
+    if (!this.verbose) {
+      return;
+    }
+
+    console.error(chalk.red(msg));
   },
 
   clientConfigAndRouting(routes, config) {
     if (!this.verbose) {
       return;
     }
-
 
     const clientsConfig = config.app.clients;
     const serverAddress = config.env.serverAddress;
@@ -141,32 +163,12 @@ dependencies on both your server and clients.
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!`);
   },
 
-  log(msg) {
-    if (!this.verbose) {
-      return;
+  deprecated(oldAPI, newAPI, deprecationVersion) {
+    if (!deprecationVersion) {
+      throw new Error(`Invalid 'logger.deprecated call: a deprecation version is required`);
     }
 
-    console.log(msg);
-  },
-
-  warn(msg) {
-    if (!this.verbose) {
-      return;
-    }
-
-    console.warn(chalk.yellow(msg));
-  },
-
-  error(msg) {
-    if (!this.verbose) {
-      return;
-    }
-
-    console.error(chalk.red(msg));
-  },
-
-  deprecated(oldAPI, newAPI) {
-    const msg = `[warning] '${oldAPI}' is deprecated and will be removed in next major version, please use '${newAPI}' instead`;
+    const msg = `[deprecation warning] '${oldAPI}' is deprecated since version ${deprecationVersion} and will be removed in next major revision, please use '${newAPI}' instead`;
     console.warn(chalk.yellow(msg));
   }
 };

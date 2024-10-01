@@ -68,7 +68,9 @@ declare class ClientSocket {
      * Is also called when a disconnection is detected by the heartbeat (note that
      * in this case, the launcher will call `client.stop()` but the listeners are
      * already cleared so the event will be trigerred only once.
+     *
+     * @private
      */
-    [kSocketTerminate](): Promise<void>;
+    private [kSocketTerminate];
     #private;
 }

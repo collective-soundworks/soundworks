@@ -8,17 +8,17 @@
  * Description of a {@link SharedState} data structure that describes the structure
  * of a class of {@link SharedState} to be registered by {@link ServerStateManager#registerSchema}
  *
- * A schema is the blueprint, or the definition from which shared states from a
- * given class can be created.
+ * A `SharedStateClassDescription` is the blueprint, or the definition from which
+ * shared states from a given class can be created.
  *
  * It consists of a set of key / value pairs where the key is the name of
  * the parameter (cf. ${SharedStateParameterName}), and the value is an object
  * describing the parameter (cf. ${SharedStateParameterDescription}).
  *
- * @typedef {Object.<SharedStateParameterName, SharedStateParameterDescription>} SharedStateClassSchema
+ * @typedef {Object.<SharedStateParameterName, SharedStateParameterDescription>} SharedStateClassDescription
  *
  * @example
- * const mySchema = {
+ * const myClassDescription = {
  *   triggerSound: {
  *     type: 'boolean',
  *     event: true,
@@ -31,7 +31,7 @@
  *   }
  * };
  *
- * server.stateManager.registerSchema('my-class-name', mySchema);
+ * server.stateManager.registerSchema('my-class-name', myClassDescription);
  */
 
 /**

@@ -13,7 +13,7 @@ import {
 import SharedState from '../../src/common/SharedState.js';
 
 import config from '../utils/config.js';
-import { a, b } from '../utils/schemas.js';
+import { a, aExpectedDescription, b } from '../utils/schemas.js';
 
 describe(`# StateManager`, () => {
   let server;
@@ -40,7 +40,7 @@ describe(`# StateManager`, () => {
     server.stop();
   });
 
-  describe('## [server] registerSchema(schemaName, definition)', () => {
+  describe('## [server] registerSchema(className, definition)', () => {
     it('should throw if reusing same schema name', () => {
       assert.throws(() => {
         server.stateManager.registerSchema('a', a);
@@ -53,7 +53,7 @@ describe(`# StateManager`, () => {
     });
   });
 
-  describe(`## getSchema(schemaName)`, () => {
+  describe(`## getDescription(className)`, () => {
     it(`should throw if node is not inited`, async () => {
       const localConfig = structuredClone(config);
       localConfig.env.port = 8082;
@@ -64,7 +64,7 @@ describe(`# StateManager`, () => {
       let errored = false;
 
       try {
-        await server.stateManager.getSchema('a');
+        await server.stateManager.getDescription('a');
       } catch (err) {
         console.log(err.message);
         errored = true;
@@ -73,44 +73,16 @@ describe(`# StateManager`, () => {
       assert.isTrue(errored);
     });
 
-    it(`should return the schema`, async () => {
-      const schema = await client.stateManager.getSchema('a');
-      const expected = {
-        bool: {
-          nullable: false,
-          event: false,
-          metas: {},
-          filterChange: true,
-          immediate: false,
-          type: 'boolean',
-          default: false,
-          required: false,
-          initValue: false
-        },
-        int: {
-          nullable: false,
-          event: false,
-          metas: {},
-          filterChange: true,
-          immediate: false,
-          min: 0,
-          max: 100,
-          type: 'integer',
-          default: 0,
-          step: 1,
-          required: false,
-          initValue: 0
-        }
-      };
-
-      assert.deepEqual(schema, expected);
+    it(`should return the description`, async () => {
+      const description = await client.stateManager.getDescription('a');
+      assert.deepEqual(description, aExpectedDescription);
     });
 
     it(`should throw if given name does not exists`, async () => {
       let errored = false;
 
       try {
-        await client.stateManager.getSchema('do-not-exists');
+        await client.stateManager.getDescription('do-not-exists');
       } catch (err) {
         console.log(err.message);
         errored = true;
@@ -122,7 +94,7 @@ describe(`# StateManager`, () => {
     });
   });
 
-  describe('## async create(schemaName[, initValues]) => state', () => {
+  describe('## async create(className[, initValues]) => state', () => {
     it(`should throw if node is not inited`, async () => {
       const localConfig = structuredClone(config);
       localConfig.env.port = 8082;
@@ -208,7 +180,7 @@ describe(`# StateManager`, () => {
     });
   });
 
-  describe('## async attach(schema[, stateId]) => state', () => {
+  describe('## async attach(className[, stateId]) => state', () => {
     it(`should throw if node is not inited`, async () => {
       const localConfig = structuredClone(config);
       localConfig.env.port = 8082;
@@ -344,7 +316,7 @@ describe(`# StateManager`, () => {
       assert.equal(deleteCalled, true);
 
       let observeCalled = false;
-      const unobserve = await server.stateManager.observe((schemaName, stateId) => {
+      const unobserve = await server.stateManager.observe((className, stateId) => {
         observeCalled = true;
       });
 
@@ -380,8 +352,8 @@ describe(`# StateManager`, () => {
 
       const state1 = await client.stateManager.create('a');
 
-      const unobserve = await server.stateManager.observe((schemaName, stateId, nodeId) => {
-        assert.equal(schemaName, 'a');
+      const unobserve = await server.stateManager.observe((className, stateId, nodeId) => {
+        assert.equal(className, 'a');
         assert.isNumber(stateId);
         assert.equal(nodeId, client.id);
 
@@ -407,7 +379,7 @@ describe(`# StateManager`, () => {
       let numCalled = 0;
       const state1 = await client.stateManager.create('a');
 
-      const unobserve1 = await server.stateManager.observe(async (schemaName, stateId, nodeId) => {
+      const unobserve1 = await server.stateManager.observe(async (className, stateId, nodeId) => {
         numCalled += 1;
       });
 
@@ -416,7 +388,7 @@ describe(`# StateManager`, () => {
       await state1.delete();
       unobserve1();
 
-      const unobserve2 = await server.stateManager.observe(async (schemaName, stateId, nodeId) => {
+      const unobserve2 = await server.stateManager.observe(async (className, stateId, nodeId) => {
         numCalled += 1;
       });
 
@@ -430,7 +402,7 @@ describe(`# StateManager`, () => {
       let numCalled = 0;
       const state1 = await client.stateManager.create('a');
 
-      const unobserve = await server.stateManager.observe(async (schemaName, stateId, nodeId) => {
+      const unobserve = await server.stateManager.observe(async (className, stateId, nodeId) => {
         // we just make it wait for the first call, to simplify the test
         if (numCalled === 0) {
           await new Promise(resolve => setTimeout(resolve, 200));
@@ -457,7 +429,7 @@ describe(`# StateManager`, () => {
       let numCalled = 0;
       const state1 = await client.stateManager.create('a');
 
-      const unobserve = await server.stateManager.observe(async (schemaName, stateId, nodeId) => {
+      const unobserve = await server.stateManager.observe(async (className, stateId, nodeId) => {
         numCalled += 1;
       });
 
@@ -500,11 +472,11 @@ describe(`# StateManager`, () => {
       let numCalled = 0;
       const state1 = await client.stateManager.create('a');
 
-      const unobserve1 = await other.stateManager.observe(async (schemaName, stateId, nodeId) => {
+      const unobserve1 = await other.stateManager.observe(async (className, stateId, nodeId) => {
         numCalled += 1;
       });
 
-      const unobserve2 = await other.stateManager.observe(async (schemaName, stateId, nodeId) => {
+      const unobserve2 = await other.stateManager.observe(async (className, stateId, nodeId) => {
         numCalled += 1;
       });
 
@@ -577,14 +549,14 @@ describe(`# StateManager`, () => {
 
       const state1 = await client.stateManager.create('a');
 
-      const unobserve1 = await other.stateManager.observe(async (schemaName, stateId, nodeId) => {
+      const unobserve1 = await other.stateManager.observe(async (className, stateId, nodeId) => {
         firstObserverNumCalled += 1;
       });
       // other receives UPDATE_NOTIFICATION now
 
       const state2 = await client.stateManager.create('a');
 
-      const unobserve2 = await other.stateManager.observe(async (schemaName, stateId, nodeId) => {
+      const unobserve2 = await other.stateManager.observe(async (className, stateId, nodeId) => {
         secondObserverNumCalled += 1;
       });
 
@@ -599,7 +571,7 @@ describe(`# StateManager`, () => {
     });
   });
 
-  describe('## observe(schemaName, callback) => Promise<unobserve>', async () => {
+  describe('## observe(className, callback) => Promise<unobserve>', async () => {
     it(`should properly behave`, async () => {
       const a1 = await client.stateManager.create('a');
       const b1 = await client.stateManager.create('b');
@@ -610,11 +582,11 @@ describe(`# StateManager`, () => {
       const other = new Client({ role: 'test', ...config });
       await other.start();
 
-      const unobserveStar = await other.stateManager.observe(async (schemaName, stateId) => {
+      const unobserveStar = await other.stateManager.observe(async (className, stateId) => {
         starCalled += 1;
       });
 
-      const unobserveFiltered = await other.stateManager.observe('a', async (schemaName, stateId) => {
+      const unobserveFiltered = await other.stateManager.observe('a', async (className, stateId) => {
         filteredCalled += 1;
       });
 
@@ -673,8 +645,8 @@ describe(`# StateManager`, () => {
 
       let observeCalled = 0;
 
-      const unobserve = await client.stateManager.observe('a', (schemaName, stateId, nodeId) => {
-        // console.log(schemaName, stateId, state1.id);
+      const unobserve = await client.stateManager.observe('a', (className, stateId, nodeId) => {
+        // console.log(className, stateId, state1.id);
         observeCalled +=1;
       });
 
@@ -689,7 +661,7 @@ describe(`# StateManager`, () => {
     });
   });
 
-  describe('## observe(schemaName, callback, options) => Promise<unobserve>', async () => {
+  describe('## observe(className, callback, options) => Promise<unobserve>', async () => {
     it(`API should not throw`, async () => {
       const unobserve = await client.stateManager.observe('a', function() {}, {
         excludeLocal: true,
@@ -702,7 +674,7 @@ describe(`# StateManager`, () => {
 
       let observeCalled = false;
 
-      const unobserve = await client.stateManager.observe('a', (schemaName, stateId, nodeId) => {
+      const unobserve = await client.stateManager.observe('a', (className, stateId, nodeId) => {
         observeCalled = true;
       }, { excludeLocal: true });
 
@@ -718,7 +690,7 @@ describe(`# StateManager`, () => {
     });
   });
 
-  describe('## getCollection(schemaName) => Promise<SharedStateCollection>', async () => {
+  describe('## getCollection(className) => Promise<SharedStateCollection>', async () => {
     it(`should throw if node is not inited`, async () => {
       const localConfig = structuredClone(config);
       localConfig.env.port = 8082;
@@ -739,7 +711,7 @@ describe(`# StateManager`, () => {
     });
   });
 
-  describe('## [server] registerUpdateHook(schemaName, updateHook)', () => {
+  describe('## [server] registerUpdateHook(className, updateHook)', () => {
     const hookSchema = {
       name: {
         type: 'string',

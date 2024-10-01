@@ -583,35 +583,35 @@ describe('# SharedState - filtered attached state', () => {
   });
 
   describe(`## attach() [overload]`, () => {
-    it(`should support attach(schemaName, filter)`, async () => {
+    it(`should support attach(className, filter)`, async () => {
       const owned = await server.stateManager.create('filtered');
       const attached = await client.stateManager.attach('filtered', ['bool', 'string']);
 
       assert.equal(attached.id, owned.id);
     });
 
-    it(`should support attach(schemaName, stateId, filter)`, async () => {
+    it(`should support attach(className, stateId, filter)`, async () => {
       const owned = await server.stateManager.create('filtered');
       const attached = await client.stateManager.attach('filtered', owned.id, ['bool', 'string']);
 
       assert.equal(attached.id, owned.id);
     });
 
-    it(`should support explicit default values, attach(schemaName, null)`, async () => {
+    it(`should support explicit default values, attach(className, null)`, async () => {
       const owned = await server.stateManager.create('filtered');
       const attached = await client.stateManager.attach('filtered', null);
 
       assert.equal(attached.id, owned.id);
     });
 
-    it(`should support attach(schemaName, stateId, null)`, async () => {
+    it(`should support attach(className, stateId, null)`, async () => {
       const owned = await server.stateManager.create('filtered');
       const attached = await client.stateManager.attach('filtered', owned.id, null);
 
       assert.equal(attached.id, owned.id);
     });
 
-    it(`should support explicit default values, attach(schemaName, null, null)`, async () => {
+    it(`should support explicit default values, attach(className, null, null)`, async () => {
       const owned = await server.stateManager.create('filtered');
       const attached = await client.stateManager.attach('filtered', null, null);
 

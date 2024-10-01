@@ -18,4 +18,12 @@
     // "Go to Definition" in VSCode
     "declarationMap": false
   },
+
+  // https://github.com/TypeStrong/typedoc/issues/643
+  "typedocOptions": {
+    // "ignoreCompilerErrors": true,
+    // "mode": "modules",
+    "entryPoints": ["src/**/*.js"],
+    "out": "./docs-test"
+  },
 }

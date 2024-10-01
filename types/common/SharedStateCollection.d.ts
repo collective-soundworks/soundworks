@@ -29,7 +29,7 @@ export type sharedStateCollectionOnUpdateCallback = (state: SharedState, newValu
  * @hideconstructor
  */
 declare class SharedStateCollection {
-    constructor(stateManager: any, schemaName: any, filter?: any, options?: {});
+    constructor(stateManager: any, className: any, filter?: any, options?: {});
     /** @private */
     private _init;
     /**
@@ -41,27 +41,34 @@ declare class SharedStateCollection {
     /**
      * Size of the collection, , alias `length`
      * @type {number}
-     * @readonly
      */
-    readonly get size(): number;
+    get size(): number;
     /**
-     * Name of the schema from which the collection has been created.
+     * Name of the class from which the collection has been created.
      * @type {String}
-     * @readonly
      */
-    readonly get schemaName(): string;
+    get className(): string;
     /**
-     * Definition of schema from which the collection has been created.
-     *
-     * @param {string} [name=null] - If given, returns only the definition
-     *  corresponding to the given param name.
-     * @throws Throws if `name` does not correspond to an existing field
-     *  of the schema.
-     * @return {object}
-     * @example
-     * const schema = collection.getSchema();
+     * @deprecated Use ${@link SharedStateCollection#className} instead.
      */
-    getSchema(name?: string): object;
+    get schemaName(): string;
+    /**
+     * @deprecated Use {@link SharedStateCollection#getDescription} instead.
+     */
+    getSchema(paramName?: any): any;
+    /**
+     * Return the underlying {@link SharedStateClassDescription} or the
+     * {@link SharedStateParameterDescription} if `paramName` is given.
+     *
+     * @param {string} [paramName=null] - If defined, returns the parameter
+     *  description of the given parameter name rather than the full class description.
+     * @return {SharedStateClassDescription|SharedStateParameterDescription}
+     * @throws Throws if `paramName` is not null and does not exists.
+     * @example
+     * const classDescription = collection.getDescription();
+     * const paramDescription = collection.getDescription('my-param');
+     */
+    getDescription(paramName?: string): SharedStateClassDescription | SharedStateParameterDescription;
     /**
      * Get the default values as declared in the schema.
      *

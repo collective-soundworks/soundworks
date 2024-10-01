@@ -12,6 +12,34 @@ export const a = {
   },
 };
 
+export const aExpectedDescription = {
+  "bool": {
+    "default": false,
+    "event": false,
+    "filterChange": true,
+    "immediate": false,
+    "initValue": false,
+    "metas": {},
+    "nullable": false,
+    "required": false,
+    "type": "boolean",
+  },
+  "int": {
+    "default": 0,
+    "event": false,
+    "filterChange": true,
+    "immediate": false,
+    "initValue": 0,
+    "max": 100,
+    "metas": {},
+    "min": 0,
+    "nullable": false,
+    "required": false,
+    "step": 1,
+    "type": "integer",
+  }
+}
+
 export const b = {
   bool: {
     type: 'boolean',
