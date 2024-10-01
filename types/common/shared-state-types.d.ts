@@ -3,6 +3,18 @@
  */
 type SharedStateClassName = string;
 /**
+ * Description of a {@link SharedState } data structure that describes the structure
+ * of a class of {@link SharedState } to be registered by {@link ServerStateManagerregisterSchema }
+ *
+ * A schema is the blueprint, or the definition from which shared states from a
+ * given class can be created.
+ *
+ * It consists of a set of key / value pairs where the key is the name of
+ * the parameter (cf. ${SharedStateParameterName}), and the value is an object
+ * describing the parameter (cf. ${SharedStateParameterDescription}).
+ */
+type SharedStateClassSchema = any;
+/**
  * User defined name of a parameter in a class of {@link SharedState }
  */
 type SharedStateParameterName = string;
@@ -69,15 +81,3 @@ type SharedStateParameterDescription = {
      */
     metas?: object;
 };
-/**
- * Description of a {@link SharedState } data structure that describes the structure
- * of a class of {@link SharedState } to be registered by {@link ServerStateManagerregisterSchema }
- *
- * A schema is the blueprint, or the definition from which shared states from a
- * given class can be created.
- *
- * It consists of a set of key / value pairs where the key is the name of
- * the parameter (cf. ${SharedStateParameterName}), and the value is an object
- * describing the parameter (cf. ${SharedStateParameterDescription}).
- */
-type SharedStateSchema = any;

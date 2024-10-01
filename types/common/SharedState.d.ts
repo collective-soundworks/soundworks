@@ -30,12 +30,13 @@ export type sharedStateDeleteOnUpdateCallback = () => any;
  * every nodes of the application (clients and server) that declared some interest
  * to the shared state.
  *
- * A `SharedState` is created according to a "schema" (in the sense of a database
- * schema) that must be declared and registered server-side. Any number of `SharedState`s
- * can be created from a single schema.
+ * A `SharedState` instance is created according to a shared state class definition
+ * which is composed of a {@link SharedStateClassName} and of a {@link SharedStateClassSchema}
+ * registered in the {@link ServerStateManager}. Any number of `SharedState`s
+ * can be created from a single class definition.
  *
- * A shared state can be created both by the clients or by the server (in which case
- * it is generally considered as a global state of the application). Similarly any
+ * A shared state can be created both by the clients or by the server, in which case
+ * it is generally considered as a global state of the application. Similarly any
  * node of the application (clients or server) can declare interest and "attach" to
  * a state created by another node. All node attached to a state can modify its values
  * and/or react to the modifications applied by other nodes.
@@ -47,7 +48,7 @@ export type sharedStateDeleteOnUpdateCallback = () => any;
  * import { Server } from '@soundworks/server/index.js';
  *
  * const server = new Server(config);
- * // declare and register the schema of a shared state.
+ * // define a shared state class
  * server.stateManager.registerSchema('some-global-state', {
  *   myRandom: {
  *     type: 'float',
@@ -80,43 +81,40 @@ export type sharedStateDeleteOnUpdateCallback = () => any;
  * ```
  */
 declare class SharedState {
-    constructor(id: any, remoteId: any, schemaName: any, schema: any, client: any, isOwner: any, manager: any, initValues: any, filter: any);
+    constructor(id: any, remoteId: any, className: any, schema: any, client: any, isOwner: any, manager: any, initValues: any, filter: any);
     /**
      * Id of the state
      * @type {Number}
-     * @readonly
      */
-    readonly get id(): number;
+    get id(): number;
     /**
-     * Unique id of the state for the current node
-     * @readonly
-     * @type {Number}
-     * @private
-     */
-    private readonly get remoteId();
-    /**
-     * Name of the schema
+     * Name of the underlying {@link SharedState} class.
      * @type {String}
-     * @readonly
+     * @deprecated
      */
-    readonly get schemaName(): string;
+    get schemaName(): string;
     /**
-     * Indicates if the node is the owner of the state
-     * @type {Boolean}
-     * @readonly
+     * Name of the underlying {@link SharedState} class.
+     * @type {String}
      */
-    readonly get isOwner(): boolean;
+    get className(): string;
+    /**
+     * Indicates if the node is the owner of the state, i.e. if it created the state.
+     * @type {Boolean}
+     */
+    get isOwner(): boolean;
     /**
      * Update values of the state.
      *
-     * The returned `Promise` resolves on the applied updates, when all the `onUpdate`
-     * callbacks have resolved themselves, i.e.:
+     * The returned `Promise` resolves on an object that contains the applied updates,
+     * and resolves after all the `onUpdate` callbacks have resolved themselves, i.e.:
      *
      * ```js
      * server.stateManager.registerSchema('test', {
      *   myBool: { type: 'boolean', default: false },
      * });
      * const a = await server.stateManager.create('a');
+     *
      * let asyncCallbackCalled = false;
      *
      * a.onUpdate(updates => {
@@ -133,43 +131,49 @@ declare class SharedState {
      * assert.deepEqual(updates, { myBool: true });
      * ```
      *
-     * @param {object} updates - key / value pairs of updates to apply to the state.
-     * @param {mixed} [context=null] - optionnal contextual object that will be propagated
+     * @param {object} updates - Key / value pairs of updates to apply to the state.
+     * @param {mixed} [context=null] - Optionnal contextual object that will be propagated
      *   alongside the updates of the state. The context is valid only for the
      *   current call and will be passed as third argument to all update listeners.
      * @returns {Promise<Object>} A promise to the (coerced) updates.
+     *
      * @example
-     * const state = await client.state.attach('globals');
+     * const state = await client.stateManager.attach('globals');
      * const updates = await state.set({ myParam: Math.random() });
      */
     set(updates: object, context?: mixed): Promise<any>;
     /**
-     * Get the value of a parameter of the state. If the parameter is of `any` type,
-     * a deep copy is returned.
+     * Get the value of a parameter of the state.
      *
-     * @param {string} name - Name of the param.
-     * @throws Throws if `name` does not correspond to an existing field
-     *  of the state.
-     * @return {mixed}
+     * Be aware that in case of 'any' typethe returned value is deeply copied.
+     * While this prevents from pollution of the state by mutating the reference,
+     * this can also lead to performance issues when the parameter contains large
+     * data. In such cases you should use the {@link SharedState#getUnsafe} method
+     * and make sure to treat the returned object as readonly.
+     *
+     * @param {SharedStateParameterName} name - Name of the param.
+     * @return {any}
+     * @throws Throws if `name` does not exists.
      * @example
      * const value = state.get('paramName');
      */
-    get(name: string): mixed;
+    get(name: SharedStateParameterName): any;
     /**
+     * Get an unsafe reference to the value of a parameter of the state.
+     *
      * Similar to `get` but returns a reference to the underlying value in case of
-     * `any` type. May be usefull if the underlying value is big (e.g. sensors
+     * `any` type. Can be usefull if the underlying value is large (e.g. sensors
      * recordings, etc.) and deep cloning expensive. Be aware that if changes are
      * made on the returned object, the state of your application will become
      * inconsistent.
      *
-     * @param {string} name - Name of the param.
-     * @throws Throws if `name` does not correspond to an existing field
-     *  of the state.
-     * @return {mixed}
+     * @param {SharedStateParameterName} name - Name of the param.
+     * @return {any}
+     * @throws Throws if `name` does not exists.
      * @example
      * const value = state.getUnsafe('paramName');
      */
-    getUnsafe(name: string): mixed;
+    getUnsafe(name: SharedStateParameterName): any;
     /**
      * Get all the key / value pairs of the state.
      *
@@ -184,7 +188,7 @@ declare class SharedState {
      * Get all the key / value pairs of the state.
      *
      * Similar to `getValues` but returns a reference to the underlying value in
-     * case of `any` type. May be usefull if the underlying value is big (e.g.
+     * case of `any` type. Can be usefull if the underlying value is big (e.g.
      * sensors recordings, etc.) and deep cloning expensive. Be aware that if
      * changes are made on the returned object, the state of your application will
      * become inconsistent.
@@ -195,17 +199,17 @@ declare class SharedState {
      */
     getValuesUnsafe(): object;
     /**
-     * Definition of schema from which the state has been created.
+     * Return the underlying {@link SharedStateClassSchema} or the
+     * {@link SharedStateParameterDescription} if name is given.
      *
-     * @param {string} [name=null] - If given, returns only the definition
-     *  corresponding to the given param name.
-     * @throws Throws if `name` does not correspond to an existing field
-     *  of the schema.
-     * @return {object}
+     * @param {string} [name] - If defined, returns only the parameter description
+     *  of the given param name.
+     * @return {SharedStateClassSchema|SharedStateParameterDescription}
+     * @throws Throws if `name` does not exists.
      * @example
      * const schema = state.getSchema();
      */
-    getSchema(name?: string): object;
+    getSchema(name?: string): SharedStateClassSchema | SharedStateParameterDescription;
     /**
      * Get the values with which the state has been created. May defer from the
      * default values declared in the schema.

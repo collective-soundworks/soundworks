@@ -59,10 +59,10 @@ declare class BasePluginManager {
      *
      * @param {string} id - Unique id of the plugin. Enables the registration of the
      *  same plugin factory under different ids.
-     * @param {Function} factory - Factory function that returns the Plugin class.
+     * @param {Function} ctor - The class returned by the plugin factory method.
      * @param {object} [options={}] - Options to configure the plugin.
      * @param {array} [deps=[]] - List of plugins' names the plugin depends on, i.e.
-     *  the plugin initialization will start only after the plugins it depends on are
+     *  the plugin initialization will begin only after the plugins it depends on are
      *  fully started themselves.
      * @see {@link ClientPluginManager#register}
      * @see {@link ServerPluginManager#register}
@@ -72,7 +72,7 @@ declare class BasePluginManager {
      * // server-side
      * server.pluginManager.register('user-defined-id', pluginFactory);
      */
-    register(id: string, ctor: any, options?: object, deps?: any[]): void;
+    register(id: string, ctor: Function, options?: object, deps?: any[]): void;
     /**
      * Manually add a dependency to a given plugin.
      *

@@ -13,4 +13,5 @@ declare namespace logger {
     function log(msg: any): void;
     function warn(msg: any): void;
     function error(msg: any): void;
+    function deprecated(oldAPI: any, newAPI: any): void;
 }

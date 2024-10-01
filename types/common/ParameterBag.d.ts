@@ -1,27 +1,29 @@
 export namespace sharedOptions {
     let nullable: boolean;
     let event: boolean;
+    let required: boolean;
     let metas: {};
     let filterChange: boolean;
     let immediate: boolean;
 }
 export namespace types {
     export namespace boolean {
-        let required: string[];
-        const defaultOptions: any;
-        function coerceFunction(name: any, def: any, value: any): boolean;
-    }
-    export namespace string {
         let required_1: string[];
         export { required_1 as required };
+        export const defaultOptions: any;
+        export function coerceFunction(name: any, def: any, value: any): boolean;
+    }
+    export namespace string {
+        let required_2: string[];
+        export { required_2 as required };
         const defaultOptions_1: any;
         export { defaultOptions_1 as defaultOptions };
         export function coerceFunction_1(name: any, def: any, value: any): string;
         export { coerceFunction_1 as coerceFunction };
     }
     export namespace integer {
-        let required_2: string[];
-        export { required_2 as required };
+        let required_3: string[];
+        export { required_3 as required };
         const defaultOptions_2: any;
         export { defaultOptions_2 as defaultOptions };
         export function sanitizeSchema(def: any): any;
@@ -29,8 +31,8 @@ export namespace types {
         export { coerceFunction_2 as coerceFunction };
     }
     export namespace float {
-        let required_3: string[];
-        export { required_3 as required };
+        let required_4: string[];
+        export { required_4 as required };
         const defaultOptions_3: any;
         export { defaultOptions_3 as defaultOptions };
         export function sanitizeSchema_1(def: any): any;
@@ -39,8 +41,8 @@ export namespace types {
         export { coerceFunction_3 as coerceFunction };
     }
     export namespace _enum {
-        let required_4: string[];
-        export { required_4 as required };
+        let required_5: string[];
+        export { required_5 as required };
         const defaultOptions_4: any;
         export { defaultOptions_4 as defaultOptions };
         export function coerceFunction_4(name: any, def: any, value: any): any;
@@ -48,8 +50,8 @@ export namespace types {
     }
     export { _enum as enum };
     export namespace any {
-        let required_5: string[];
-        export { required_5 as required };
+        let required_6: string[];
+        export { required_6 as required };
         const defaultOptions_5: any;
         export { defaultOptions_5 as defaultOptions };
         export function coerceFunction_5(name: any, def: any, value: any): any;

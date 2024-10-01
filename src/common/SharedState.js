@@ -731,6 +731,16 @@ ${JSON.stringify(initValues, null, 2)}`);
 
     if (executeListener === true) {
       const currentValues = this.getValues();
+      // filter `event: true` parameters from currentValues, this is missleading
+      // as we are in the context of a callback, not from an active read
+      const schema = this.getSchema();
+
+      for (let name in schema) {
+        if (schema[name].event === true) {
+          delete currentValues[name];
+        }
+      }
+
       const oldValues = {};
       const context = null;
       listener(currentValues, oldValues, context);

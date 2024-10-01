@@ -1,4 +1,4 @@
-import { delay, getTime } from '@ircam/sc-utils';
+import { delay } from '@ircam/sc-utils';
 import { assert } from 'chai';
 
 import { Server } from '../../src/server/index.js';
@@ -125,7 +125,7 @@ describe('# SharedState', () => {
       let asyncCallbackCalled = false;
 
       a.onUpdate(async updates => {
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await delay(10);
         asyncCallbackCalled = true;
       });
 
@@ -315,8 +315,7 @@ describe('# SharedState', () => {
       unsubsribe();
 
       await a.set({ int: 1 });
-
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await delay(10);
 
       assert.equal(onUpdateCalled, false);
       await a.delete();
@@ -328,7 +327,7 @@ describe('# SharedState', () => {
       let onUpdateCalled = false;
       const unsubsribe = a.onUpdate(updates => { onUpdateCalled = true; }, false);
 
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await delay(10);
 
       assert.equal(onUpdateCalled, false);
       await a.delete();
@@ -345,10 +344,31 @@ describe('# SharedState', () => {
         assert.deepEqual(context, null);
       }, true);
 
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await delay(10);
 
       assert.equal(onUpdateCalled, true);
       await a.delete();
+    });
+
+    it('should not propagate event parameters on first call if `executeListener=true`', async () => {
+      server.stateManager.registerSchema('with-event', {
+        bool: { type: 'boolean', event: true, },
+        int: { type: 'integer', default: 20, },
+      });
+      const state = await server.stateManager.create('with-event');
+
+      let onUpdateCalled = false;
+      state.onUpdate((newValues, oldValues, context) => {
+        onUpdateCalled = true;
+        assert.deepEqual(newValues, { int: 20 });
+        assert.deepEqual(oldValues, {});
+        assert.deepEqual(context, null);
+      }, true);
+
+      await delay(10);
+
+      assert.equal(onUpdateCalled, true);
+      server.stateManager.deleteSchema('with-event');
     });
 
     it('should copy stored value for "any" type to have a predictable behavior', async () => {
@@ -400,7 +420,7 @@ describe('# SharedState', () => {
       assert.equal(a2.get('bool'), true); // this one is still attached
 
       a0.delete();
-      await new Promise(resolve => setTimeout(resolve, 200));
+      await delay(10);
 
       if (subscribeCalled) {
         assert.fail('subscribe should not be called after detach');
@@ -613,6 +633,50 @@ describe('# SharedState - filtered attached state', () => {
     });
   });
 
+  describe(`## set(updates)`, () => {
+    it(`should throw early if trying to set modify a param which is not filtered`, async () => {
+      const filter = ['bool', 'string'];
+      const owned = await server.stateManager.create('filtered');
+      const attached = await client.stateManager.attach('filtered', filter);
+      let onUpdateCalled = false;
+      let errored = false;
+
+      owned.onUpdate(() => onUpdateCalled = true);
+
+      try {
+        await attached.set({ int: 42 });
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      await delay(20);
+
+      assert.isTrue(errored);
+      assert.isFalse(onUpdateCalled);
+    });
+  });
+
+  describe(`## get(name)`, () => {
+    it(`should throw if trying to access a param which is not filtered`, async () => {
+      const filter = ['bool', 'string'];
+      const owned = await server.stateManager.create('filtered');
+      const attached = await client.stateManager.attach('filtered', filter);
+      let errored = false;
+
+      try {
+        await attached.get('int');
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      await delay(20);
+
+      assert.isTrue(errored);
+    });
+  });
+
   describe(`## onUpdate(callback)`, () => {
     it(`should propagate only filtered keys`, async () => {
       const filter = ['bool', 'string'];
@@ -657,50 +721,6 @@ describe('# SharedState - filtered attached state', () => {
 
       assert.isFalse(callbackExecuted);
       assert.equal(batchedResponses, 0);
-    });
-  });
-
-  describe(`## set(updates)`, () => {
-    it(`should throw early if trying to set modify a param which is not filtered`, async () => {
-      const filter = ['bool', 'string'];
-      const owned = await server.stateManager.create('filtered');
-      const attached = await client.stateManager.attach('filtered', filter);
-      let onUpdateCalled = false;
-      let errored = false;
-
-      owned.onUpdate(() => onUpdateCalled = true);
-
-      try {
-        await attached.set({ int: 42 });
-      } catch (err) {
-        console.log(err.message);
-        errored = true;
-      }
-
-      await delay(20);
-
-      assert.isTrue(errored);
-      assert.isFalse(onUpdateCalled);
-    });
-  });
-
-  describe(`## get(name)`, () => {
-    it(`should throw if trying to access a param which is not filtered`, async () => {
-      const filter = ['bool', 'string'];
-      const owned = await server.stateManager.create('filtered');
-      const attached = await client.stateManager.attach('filtered', filter);
-      let errored = false;
-
-      try {
-        await attached.get('int');
-      } catch (err) {
-        console.log(err.message);
-        errored = true;
-      }
-
-      await delay(20);
-
-      assert.isTrue(errored);
     });
   });
 
