@@ -5,7 +5,7 @@ import { Server } from '../../src/server/index.js';
 import { Client } from '../../src/client/index.js';
 
 import config from '../utils/config.js';
-import { a, b } from '../utils/schemas.js';
+import { a, b } from '../utils/class-description.js';
 
 describe('# SharedStates - Stress test', () => {
   let server;

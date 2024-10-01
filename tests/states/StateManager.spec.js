@@ -13,7 +13,7 @@ import {
 import SharedState from '../../src/common/SharedState.js';
 
 import config from '../utils/config.js';
-import { a, aExpectedDescription, b } from '../utils/schemas.js';
+import { a, aExpectedDescription, b } from '../utils/class-description.js';
 
 describe(`# StateManager`, () => {
   let server;

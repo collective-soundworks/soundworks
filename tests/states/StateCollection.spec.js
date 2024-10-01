@@ -6,7 +6,7 @@ import { Client } from '../../src/client/index.js';
 import { BATCHED_TRANSPORT_CHANNEL } from '../../src/common/constants.js';
 
 import config from '../utils/config.js';
-import { a, aExpectedDescription, b } from '../utils/schemas.js';
+import { a, aExpectedDescription, b } from '../utils/class-description.js';
 
 describe(`# SharedStateCollection`, () => {
   let server;

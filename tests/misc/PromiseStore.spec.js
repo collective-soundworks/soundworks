@@ -6,7 +6,7 @@ import { Server } from '../../src/server/index.js';
 import { Client } from '../../src/client/index.js';
 
 import config from '../utils/config.js';
-import { a } from '../utils/schemas.js';
+import { a } from '../utils/class-description.js';
 
 describe('# PromiseStore', () => {
   describe('## resolve(reqId)', () => {

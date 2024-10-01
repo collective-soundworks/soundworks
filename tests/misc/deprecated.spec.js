@@ -4,7 +4,7 @@ import { Server } from '../../src/server/index.js';
 import { Client } from '../../src/client/index.js';
 
 import config from '../utils/config.js';
-import { a, aExpectedDescription } from '../utils/schemas.js';
+import { a, aExpectedDescription } from '../utils/class-description.js';
 
 describe('# deprecated API', () => {
   describe('from v4.0.0-alpha.29', () => {

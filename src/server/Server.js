@@ -24,7 +24,7 @@ import merge from 'lodash/merge.js';
 import pem from 'pem';
 import compile from 'template-literal';
 
-import auditSchema from './audit-schema.js';
+import auditSchema from './audit-state-class-description.js';
 import {
   encryptData,
   decryptData,

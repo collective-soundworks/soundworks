@@ -10,7 +10,7 @@ import {
 } from '../../src/common/constants.js';
 
 import config from '../utils/config.js';
-import { a } from '../utils/schemas.js';
+import { a } from '../utils/class-description.js';
 
 describe('# SharedState - schema options', () => {
   let server;
