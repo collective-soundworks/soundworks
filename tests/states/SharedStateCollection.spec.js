@@ -338,7 +338,7 @@ describe(`# SharedStateCollection`, () => {
       await delay(10);
 
       assert.equal(onUpdateCalled, true);
-      server.stateManager.deleteSchema('with-event');
+      server.stateManager.deleteClass('with-event');
     });
 
   });

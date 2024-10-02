@@ -437,15 +437,12 @@ class ServerStateManager extends BaseStateManager {
   /**
    * Delete a whole class of {@link ShareState}.
    *
-   * All {@link SharedState} instance that belong to this class are deleted
-   * as well. The `onDetach` and `onDelete` callbacks of existing  {@link SharedState}
-   * instances will be called.
-   *
-   * _In a future revision, this method and its arguments will be renamed_
+   * All {@link SharedState} instances created from this class will be deleted
+   * as well, triggering their eventual `onDetach` and `onDelete` callbacks.
    *
    * @param {SharedStateClassName} className - Name of the shared state class to delete.
    */
-  deleteSchema(className) {
+  deleteClass(className) {
     // @note: deleting schema
     for (let [_, state] of this.#sharedStatePrivateById) {
       if (state.className === className) {
@@ -467,6 +464,14 @@ class ServerStateManager extends BaseStateManager {
     this.#classes.delete(className);
     // delete registered hooks
     this.#hooksByClassName.delete(className);
+  }
+
+  /**
+   * @deprecated Use {@link ServerStateManager#defineClass} instead.
+   */
+  deleteSchema(className) {
+    logger.deprecated('ServerStateManager#deleteSchema', 'ServerStateManager#deleteClass', '4.0.0-alpha.29');
+    this.deleteClass(className);
   }
 
   /**

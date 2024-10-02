@@ -270,7 +270,7 @@ describe(`# StateManager`, () => {
     });
   });
 
-  describe('## [server] deleteSchema(name)', () => {
+  describe('## [server] deleteClass(name)', () => {
     it('should call state.onDetach and state.onDelete on all states of its kind', async () => {
       server.stateManager.defineClass('a-delete', a);
 
@@ -288,7 +288,7 @@ describe(`# StateManager`, () => {
           state.onDelete(() => deleteCalled[index] = true);
         });
 
-        server.stateManager.deleteSchema('a-delete');
+        server.stateManager.deleteClass('a-delete');
 
         setTimeout(() => {
           assert.deepEqual([true, true, true, true], detachCalled);
@@ -310,7 +310,7 @@ describe(`# StateManager`, () => {
         deleteCalled = true;
       });
 
-      server.stateManager.deleteSchema('a-delete-observe');
+      server.stateManager.deleteClass('a-delete-observe');
       await delay(10);
 
       assert.equal(deleteCalled, true);
@@ -765,10 +765,10 @@ describe(`# StateManager`, () => {
       // @todo - review, this is weird
       try {
         await Promise.all([serverPromise, clientPromise]);
-        server.stateManager.deleteSchema('hooked');
+        server.stateManager.deleteClass('hooked');
         return Promise.resolve();
       } catch(err) {
-        server.stateManager.deleteSchema('hooked');
+        server.stateManager.deleteClass('hooked');
         return Promise.reject(err);
       }
     });
@@ -792,7 +792,7 @@ describe(`# StateManager`, () => {
 
         await h.set({ name: 'test' }, { myContext: true });
 
-        server.stateManager.deleteSchema('hooked');
+        server.stateManager.deleteClass('hooked');
       });
     });
 
@@ -814,10 +814,10 @@ describe(`# StateManager`, () => {
         assert.deepEqual(h1.getValues(), { name: 'test', value: 'test-value' });
         assert.deepEqual(h2.getValues(), { name: null, value: null });
 
-        server.stateManager.deleteSchema('hooked');
+        server.stateManager.deleteClass('hooked');
         return Promise.resolve();
       } catch(err) {
-        server.stateManager.deleteSchema('hooked');
+        server.stateManager.deleteClass('hooked');
         return Promise.reject(err);
       }
     });
@@ -841,10 +841,10 @@ describe(`# StateManager`, () => {
 
       try {
         assert.deepEqual(h.getValues(), { name: 'test', value: 'async-ok' });
-        server.stateManager.deleteSchema('hooked');
+        server.stateManager.deleteClass('hooked');
         return Promise.resolve();
       } catch(err) {
-        server.stateManager.deleteSchema('hooked');
+        server.stateManager.deleteClass('hooked');
         return Promise.reject(err);
       }
     });
@@ -865,10 +865,10 @@ describe(`# StateManager`, () => {
 
       try {
         assert.deepEqual(h.getValues(), { name: 'test', value: 'ok-2' });
-        server.stateManager.deleteSchema('hooked');
+        server.stateManager.deleteClass('hooked');
         return Promise.resolve();
       } catch(err) {
-        server.stateManager.deleteSchema('hooked');
+        server.stateManager.deleteClass('hooked');
         return Promise.reject(err);
       }
     });
@@ -894,9 +894,9 @@ describe(`# StateManager`, () => {
         await h.set({ name: 'test-2' });
         assert.deepEqual(h.getValues(), { name: 'test-2', value: 'ok-1' });
 
-        server.stateManager.deleteSchema('hooked');
+        server.stateManager.deleteClass('hooked');
       } catch(err) {
-        server.stateManager.deleteSchema('hooked');
+        server.stateManager.deleteClass('hooked');
         return Promise.reject(err);
       }
     });
@@ -920,9 +920,9 @@ describe(`# StateManager`, () => {
         // should have changed
         assert.deepEqual(h.getValues(), { name: null, value: null });
 
-        server.stateManager.deleteSchema('hooked');
+        server.stateManager.deleteClass('hooked');
       } catch(err) {
-        server.stateManager.deleteSchema('hooked');
+        server.stateManager.deleteClass('hooked');
         return Promise.reject(err);
       }
     });
@@ -949,9 +949,9 @@ describe(`# StateManager`, () => {
         // should have changed
         assert.deepEqual(h.getValues(), { value: null });
 
-        server.stateManager.deleteSchema('hooked');
+        server.stateManager.deleteClass('hooked');
       } catch(err) {
-        server.stateManager.deleteSchema('hooked');
+        server.stateManager.deleteClass('hooked');
         return Promise.reject(err);
       }
     });
@@ -978,9 +978,9 @@ describe(`# StateManager`, () => {
         await h.set({ name: 'test-2' });
         assert.deepEqual(h.getValues(), { name: 'test-2', value: 'ok' });
 
-        server.stateManager.deleteSchema('hooked');
+        server.stateManager.deleteClass('hooked');
       } catch(err) {
-        server.stateManager.deleteSchema('hooked');
+        server.stateManager.deleteClass('hooked');
         return Promise.reject(err);
       }
     });
