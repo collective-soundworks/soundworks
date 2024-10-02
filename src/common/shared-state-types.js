@@ -65,6 +65,10 @@
  *   latency on the client.
  *   If for some reason the value is overriden server-side (e.g. in an `updateHook`)
  *   the listeners will be called again when the "real" value is received.
+ * @property {boolean} [local=false] - When set to true, the parameter is never
+ *   propagated on the network (hence it is no longer a shared parameter :). This
+ *   is usefull to declare some common parameter (e.g. some interface state) that
+ *   don't need to be shared but to stay in the shared state API paradigm.
  * @property {number} [min=-Number.MIN_VALUE] - Minimum value of the parameter. Only applies
  *   for `integer` and `float` types.
  * @property {number} [max=Number.MAX_VALUE] - Maximum value of the parameter. Only applies

@@ -267,7 +267,7 @@ class BaseStateManager {
     }
 
     return new Promise((resolve, reject) => {
-      const reqId = this.#promiseStore.add(resolve, reject, 'create-request');
+      const reqId = this.#promiseStore.add(resolve, reject, 'BaseStateManager#create');
       const requireDescription = this.#cachedClasses.has(className) ? false : true;
       this[kStateManagerClient].transport.emit(CREATE_REQUEST, reqId, className, requireDescription, initValues);
     });
@@ -376,7 +376,7 @@ class BaseStateManager {
     }
 
     return new Promise((resolve, reject) => {
-      const reqId = this.#promiseStore.add(resolve, reject, 'attach-request');
+      const reqId = this.#promiseStore.add(resolve, reject, 'BaseStateManager#attach');
       const requireDescription = this.#cachedClasses.has(className) ? false : true;
       this[kStateManagerClient].transport.emit(ATTACH_REQUEST, reqId, className, stateId, requireDescription, filter);
     });
@@ -559,7 +559,7 @@ class BaseStateManager {
 
     // resend request to get updated list of states
     return new Promise((resolve, reject) => {
-      const reqId = this.#promiseStore.add(resolve, reject, 'observe-request');
+      const reqId = this.#promiseStore.add(resolve, reject, 'BaseStateManager#observe');
       // store the callback for execution on the response. the returned Promise
       // is fullfiled once callback has been executed with each existing states
       const observeInfos = [observedClassName, callback, options];

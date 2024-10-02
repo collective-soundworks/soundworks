@@ -504,7 +504,7 @@ describe('# SharedState - schema options', () => {
       await server.stop();
     });
 
-    it('[local=true]  mixed with regular param', async () => {
+    it('[local=true] mixed with regular param', async () => {
       const localConfig = structuredClone(config);
       localConfig.env.port = 8082;
       const server = new Server(localConfig);

@@ -520,7 +520,7 @@ ${JSON.stringify(initValues, null, 2)}`);
 
     // go through server-side normal behavior
     return new Promise((resolve, reject) => {
-      const reqId = this[kSharedStatePromiseStore].add(resolve, reject, 'update-request', forwardParams);
+      const reqId = this[kSharedStatePromiseStore].add(resolve, reject, 'SharedState#set', forwardParams);
       this.#client.transport.emit(`${UPDATE_REQUEST}-${this.#id}-${this.#remoteId}`, reqId, updates, context);
     });
   }
@@ -675,12 +675,12 @@ ${JSON.stringify(initValues, null, 2)}`);
 
     if (this.#isOwner) {
       return new Promise((resolve, reject) => {
-        const reqId = this[kSharedStatePromiseStore].add(resolve, reject, 'delete-request');
+        const reqId = this[kSharedStatePromiseStore].add(resolve, reject, 'SharedState#delete');
         this.#client.transport.emit(`${DELETE_REQUEST}-${this.#id}-${this.#remoteId}`, reqId);
       });
     } else {
       return new Promise((resolve, reject) => {
-        const reqId = this[kSharedStatePromiseStore].add(resolve, reject, 'detach-request');
+        const reqId = this[kSharedStatePromiseStore].add(resolve, reject, 'SharedState#detach');
         this.#client.transport.emit(`${DETACH_REQUEST}-${this.#id}-${this.#remoteId}`, reqId);
       });
     }
