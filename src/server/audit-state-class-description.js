@@ -1,5 +1,5 @@
 /**
- * Internal schema used to audit the application.
+ * Internal shared state class used to audit the application.
  */
 export default {
   /**

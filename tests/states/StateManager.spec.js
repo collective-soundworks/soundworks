@@ -44,7 +44,7 @@ describe(`# StateManager`, () => {
     it('should throw if reusing same schema name', () => {
       assert.throws(() => {
         server.stateManager.registerSchema('a', a);
-      }, Error, '[stateManager.registerSchema] cannot register schema with name: "a", schema name already exists');
+      }, Error, '[stateManager.registerSchema] Cannot define class with name: "a", class already exists');
 
     });
 
@@ -311,7 +311,7 @@ describe(`# StateManager`, () => {
       });
 
       server.stateManager.deleteSchema('a-delete-observe');
-      await delay(100);
+      await delay(10);
 
       assert.equal(deleteCalled, true);
 
@@ -320,7 +320,7 @@ describe(`# StateManager`, () => {
         observeCalled = true;
       });
 
-      await delay(100); // is not needed as observe should await, but just to make sure
+      await delay(10); // is not needed as observe should await, but just to make sure
 
       assert.equal(observeCalled, false);
       unobserve();

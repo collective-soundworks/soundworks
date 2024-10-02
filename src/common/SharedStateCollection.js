@@ -13,7 +13,7 @@ import logger from './logger.js';
 
 /**
  * The `SharedStateCollection` interface represent a collection of all states
- * created from a given schema name on the network.
+ * created from a given class name on the network.
  *
  * It can optionnaly exclude the states created by the current node.
  *
@@ -21,7 +21,7 @@ import logger from './logger.js';
  * {@link ServerStateManager#getCollection} for factory methods API
  *
  * ```
- * const collection = await client.stateManager.getCollection('my-schema');
+ * const collection = await client.stateManager.getCollection('my-class');
  * const allValues = collection.getValues();
  * collection.onUpdate((state, newValues, oldValues, context) => {
  *   // do something
@@ -34,7 +34,7 @@ class SharedStateCollection {
   #className = null;
   #filter = null;
   #options = null;
-  #schema = null;
+  #classDescription = null;
   #states = [];
   #onUpdateCallbacks = new Set();
   #onAttachCallbacks = new Set();
@@ -50,15 +50,15 @@ class SharedStateCollection {
 
   /** @private */
   async _init() {
-    this.#schema = await this.#stateManager.getSchema(this.#className);
+    this.#classDescription = await this.#stateManager.getSchema(this.#className);
 
     // if filter is set, check that it contains only valid param names
     if (this.#filter !== null) {
-      const keys = Object.keys(this.#schema);
+      const keys = Object.keys(this.#classDescription);
 
       for (let filter of this.#filter) {
         if (!keys.includes(filter)) {
-          throw new ReferenceError(`[SharedStateCollection] Invalid filter key (${filter}) for schema "${this.#className}"`)
+          throw new ReferenceError(`[SharedStateCollection] Invalid filter key (${filter}) for class "${this.#className}"`)
         }
       }
     }
@@ -139,18 +139,18 @@ class SharedStateCollection {
    */
   getDescription(paramName = null) {
     if (paramName) {
-      if (!(paramName in this.#schema)) {
+      if (!(paramName in this.#classDescription)) {
         throw new ReferenceError(`Cannot execute "getDescription" on "SharedStateCollection": Parameter "${paramName}" does not exists`);
       }
 
-      return this.#schema[paramName];
+      return this.#classDescription[paramName];
     }
 
-    return this.#schema;
+    return this.#classDescription;
   }
 
   /**
-   * Get the default values as declared in the schema.
+   * Get the default values as declared in the class description.
    *
    * @return {object}
    * @example
@@ -158,8 +158,8 @@ class SharedStateCollection {
    */
   getDefaults() {
     const defaults = {};
-    for (let name in this.#schema) {
-      defaults[name] = this.#schema[name].default;
+    for (let name in this.#classDescription) {
+      defaults[name] = this.#classDescription[name].default;
     }
     return defaults;
   }
@@ -245,13 +245,13 @@ class SharedStateCollection {
     if (executeListener === true) {
       // filter `event: true` parameters from currentValues, this is missleading
       // as we are in the context of a callback, not from an active read
-      const schema = this.getDescription();
+      const description = this.getDescription();
 
       this.#states.forEach(state => {
         const currentValues = state.getValues();
 
-        for (let name in schema) {
-          if (schema[name].event === true) {
+        for (let name in description) {
+          if (description[name].event === true) {
             delete currentValues[name];
           }
         }

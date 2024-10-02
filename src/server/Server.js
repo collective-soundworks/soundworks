@@ -24,7 +24,7 @@ import merge from 'lodash/merge.js';
 import pem from 'pem';
 import compile from 'template-literal';
 
-import auditSchema from './audit-state-class-description.js';
+import auditClassDescription from './audit-state-class-description.js';
 import {
   encryptData,
   decryptData,
@@ -238,7 +238,7 @@ class Server {
     };
 
     // register audit state schema
-    this.#stateManager.registerSchema(AUDIT_STATE_NAME, auditSchema);
+    this.#stateManager.registerSchema(AUDIT_STATE_NAME, auditClassDescription);
 
     logger.configure(this.#config.env.verbose);
   }

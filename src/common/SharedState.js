@@ -50,7 +50,7 @@ export const kSharedStatePromiseStore = Symbol('soundworks:shared-state-promise-
  * to the shared state.
  *
  * A `SharedState` instance is created according to a shared state class definition
- * which is composed of a {@link SharedStateClassName} and of a {@link SharedStateClassSchema}
+ * which is composed of a {@link SharedStateClassName} and of a {@link SharedStateClassDescription}
  * registered in the {@link ServerStateManager}. Any number of `SharedState`s
  * can be created from a single class definition.
  *
@@ -114,7 +114,7 @@ class SharedState {
   #onDetachCallbacks = new Set();
   #onDeleteCallbacks = new Set();
 
-  constructor(id, remoteId, className, schema, client, isOwner, manager, initValues, filter) {
+  constructor(id, remoteId, className, classDescription, client, isOwner, manager, initValues, filter) {
     this.#id = id;
     this.#remoteId = remoteId;
     this.#className = className;
@@ -124,7 +124,7 @@ class SharedState {
     this.#filter = filter;
 
     try {
-      this.#parameters = new ParameterBag(schema, initValues);
+      this.#parameters = new ParameterBag(classDescription, initValues);
     } catch (err) {
       console.error(err.stack);
 
@@ -174,7 +174,7 @@ ${JSON.stringify(initValues, null, 2)}`);
     });
 
     // ---------------------------------------------
-    // state has been deleted by its creator or the schema has been deleted
+    // state has been deleted by its creator or the class has been deleted
     // ---------------------------------------------
     this.#client.transport.addListener(`${DELETE_NOTIFICATION}-${this.#id}-${this.#remoteId}`, async () => {
       this.#manager[kStateManagerDeleteState](this.#id);
@@ -635,7 +635,7 @@ ${JSON.stringify(initValues, null, 2)}`);
 
   /**
    * Get the values with which the state has been created. May defer from the
-   * default values declared in the schema.
+   * default values declared in the class description.
    *
    * @return {object}
    * @example
@@ -646,7 +646,7 @@ ${JSON.stringify(initValues, null, 2)}`);
   }
 
   /**
-   * Get the default values as declared in the schema.
+   * Get the default values as declared in the class description.
    *
    * @return {object}
    * @example
@@ -697,7 +697,7 @@ ${JSON.stringify(initValues, null, 2)}`);
    * @throws Throws if the method is called by a node which is not the owner of
    * the state.
    * @example
-   * const state = await client.state.create('my-schema-name');
+   * const state = await client.stateManaager.create('my-class-name');
    * // later
    * await state.delete();
    */

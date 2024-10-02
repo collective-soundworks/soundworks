@@ -46,26 +46,26 @@ export const kSharedStatePrivateDetachClient = Symbol('soundworks:shared-state-p
  */
 class SharedStatePrivate {
   #id = null;
-  #schemaName = null;
+  #className = null;
   #manager = null;
   #parameters = null;
   #creatorId = null;
   #creatorRemoteId = null;
   #attachedClients = new Map();
 
-  constructor(id, schemaName, schema, manager, initValues = {}) {
+  constructor(id, className, classDefinition, manager, initValues = {}) {
     this.#id = id;
-    this.#schemaName = schemaName;
+    this.#className = className;
     this.#manager = manager;
-    this.#parameters = new ParameterBag(schema, initValues);
+    this.#parameters = new ParameterBag(classDefinition, initValues);
   }
 
   get id() {
     return this.#id;
   }
 
-  get schemaName() {
-    return this.#schemaName;
+  get className() {
+    return this.#className;
   }
 
   get creatorId() {
@@ -96,7 +96,7 @@ class SharedStatePrivate {
     // attach client listeners
     client.transport.addListener(`${UPDATE_REQUEST}-${this.id}-${remoteId}`, async (reqId, updates, context) => {
       // apply registered hooks
-      const hooks = this.#manager[kServerStateManagerGetHooks](this.schemaName);
+      const hooks = this.#manager[kServerStateManagerGetHooks](this.className);
       const values = this.#parameters.getValues();
       let hookAborted = false;
 

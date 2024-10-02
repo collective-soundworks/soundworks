@@ -65,8 +65,8 @@ export const kStateManagerClientsByNodeId = Symbol('soundworks:server-state-clie
  * at initialization (cf. {@link Server#stateManager}).
  *
  * Compared to the {@link ClientStateManager}, the `ServerStateManager` can also
- * register and delete schemas, as well as register update hook that are executed when
- * a state is updated.
+ * define and delete shared state classes, as well as register hooks executed at
+ * lifecycle phases of a shared state
  *
  * See {@link Server#stateManager}
  *
@@ -77,7 +77,7 @@ export const kStateManagerClientsByNodeId = Symbol('soundworks:server-state-clie
  * import { Server } from '@soundworks/server/index.js';
  *
  * const server = new Server(config);
- * // declare and register the schema of a shared state.
+ * // declare and register the class of a shared state.
  * server.stateManager.registerSchema('some-global-state', {
  *   myRandom: {
  *     type: 'float',
@@ -115,9 +115,9 @@ export const kStateManagerClientsByNodeId = Symbol('soundworks:server-state-clie
  */
 class ServerStateManager extends BaseStateManager {
   #sharedStatePrivateById = new Map();
-  #schemas = new Map();
+  #classes = new Map();
   #observers = new Set();
-  #hooksBySchemaName = new Map(); // protected
+  #hooksByClassName = new Map(); // protected
 
   constructor() {
     super();
@@ -125,10 +125,11 @@ class ServerStateManager extends BaseStateManager {
     this[kStateManagerClientsByNodeId] = new Map();
   }
 
-  #isObservableState(state) {
-    const { schemaName, isCollectionController } = state;
-    // is observable only if not in private state and not a controller state
-    return !PRIVATE_STATES.includes(schemaName) && !isCollectionController;
+  /** @private */
+  [kStateManagerInit](id, transport) {
+    super[kStateManagerInit](id, transport);
+    // add itself as client of the state manager server
+    this[kServerStateManagerAddClient](id, transport);
   }
 
   /** @private */
@@ -137,15 +138,8 @@ class ServerStateManager extends BaseStateManager {
   }
 
   /** @private */
-  [kServerStateManagerGetHooks](schemaName) {
-    return this.#hooksBySchemaName.get(schemaName);
-  }
-
-  /** @private */
-  [kStateManagerInit](id, transport) {
-    super[kStateManagerInit](id, transport);
-    // add itself as client of the state manager server
-    this[kServerStateManagerAddClient](id, transport);
+  [kServerStateManagerGetHooks](className) {
+    return this.#hooksByClassName.get(className);
   }
 
   /**
@@ -174,13 +168,13 @@ class ServerStateManager extends BaseStateManager {
     // ---------------------------------------------
     client.transport.addListener(
       CREATE_REQUEST,
-      (reqId, schemaName, requireSchema, initValues = {}) => {
-        if (this.#schemas.has(schemaName)) {
+      (reqId, className, requireDescription, initValues = {}) => {
+        if (this.#classes.has(className)) {
           try {
-            const schema = this.#schemas.get(schemaName);
+            const classDescription = this.#classes.get(className);
             const stateId = generateStateId.next().value;
             const remoteId = generateRemoteId.next().value;
-            const state = new SharedStatePrivate(stateId, schemaName, schema, this, initValues);
+            const state = new SharedStatePrivate(stateId, className, classDescription, this, initValues);
 
             // attach client to the state as owner
             const isOwner = true;
@@ -190,28 +184,28 @@ class ServerStateManager extends BaseStateManager {
             this.#sharedStatePrivateById.set(stateId, state);
 
             const currentValues = state.parameters.getValues();
-            const schemaOption = requireSchema ? schema : null;
+            const classDescriptionOption = requireDescription ? classDescription : null;
 
             client.transport.emit(
               CREATE_RESPONSE,
-              reqId, stateId, remoteId, schemaName, schemaOption, currentValues,
+              reqId, stateId, remoteId, className, classDescriptionOption, currentValues,
             );
 
             const isObservable = this.#isObservableState(state);
 
             if (isObservable) {
               this.#observers.forEach(observer => {
-                observer.transport.emit(OBSERVE_NOTIFICATION, schemaName, stateId, nodeId);
+                observer.transport.emit(OBSERVE_NOTIFICATION, className, stateId, nodeId);
               });
             }
           } catch (err) {
-            const msg = `[stateManager] Cannot create state "${schemaName}", ${err.message}`;
+            const msg = `[stateManager] Cannot create state "${className}", ${err.message}`;
             console.error(msg);
 
             client.transport.emit(CREATE_ERROR, reqId, msg);
           }
         } else {
-          const msg = `[stateManager] Cannot create state "${schemaName}", schema does not exists`;
+          const msg = `[stateManager] Cannot create state "${className}", class is not defined`;
           console.error(msg);
 
           client.transport.emit(CREATE_ERROR, reqId, msg);
@@ -224,19 +218,19 @@ class ServerStateManager extends BaseStateManager {
     // ---------------------------------------------
     client.transport.addListener(
       ATTACH_REQUEST,
-      (reqId, schemaName, stateId = null, requireSchema = true, filter = null) => {
-        if (this.#schemas.has(schemaName)) {
+      (reqId, className, stateId = null, requireDescription = true, filter = null) => {
+        if (this.#classes.has(className)) {
           let state = null;
 
           if (stateId !== null && this.#sharedStatePrivateById.has(stateId)) {
             state = this.#sharedStatePrivateById.get(stateId);
           } else if (stateId === null) {
             // if no `stateId` given, we try to find the first state with the given
-            // `schemaName` in the list, this allow a client to attach to a global
+            // `className` in the list, this allow a client to attach to a global
             // state created by the server (or some persistant client) without
             // having to know the `stateId` (e.g. some global state...)
             for (let existingState of this.#sharedStatePrivateById.values()) {
-              if (existingState.schemaName === schemaName) {
+              if (existingState.className === className) {
                 state = existingState;
                 break;
               }
@@ -250,17 +244,17 @@ class ServerStateManager extends BaseStateManager {
             const remoteId = generateRemoteId.next().value;
             const isOwner = false;
             const currentValues = state.parameters.getValues();
-            const schema = this.#schemas.get(schemaName);
-            const schemaOption = requireSchema ? schema : null;
+            const classDescription = this.#classes.get(className);
+            const classDescriptionOption = requireDescription ? classDescription : null;
 
-            // if filter given, check that all filter entries are valid schema keys
-            // @todo - improve error reportin: report invalid filters
+            // if filter given, check that all filter entries are valid class keys
+            // @todo - improve error reporting: report invalid filters
             if (filter !== null) {
-              const keys = Object.keys(schema);
+              const keys = Object.keys(classDescription);
               const isValid = filter.reduce((acc, key) => acc && keys.includes(key), true);
 
               if (!isValid) {
-                const msg = `[stateManager] Cannot attach, invalid filter (${filter.join(', ')}) for schema "${schemaName}"`;
+                const msg = `[stateManager] Cannot attach, invalid filter (${filter.join(', ')}) for class "${className}"`;
                 console.error(msg);
 
                 return client.transport.emit(ATTACH_ERROR, reqId, msg);
@@ -271,17 +265,17 @@ class ServerStateManager extends BaseStateManager {
 
             client.transport.emit(
               ATTACH_RESPONSE,
-              reqId, state.id, remoteId, schemaName, schemaOption, currentValues, filter,
+              reqId, state.id, remoteId, className, classDescriptionOption, currentValues, filter,
             );
 
           } else {
-            const msg = `[stateManager] Cannot attach, no existing state for schema "${schemaName}" with stateId: "${stateId}"`;
+            const msg = `[stateManager] Cannot attach, no existing state for class "${className}" with stateId: "${stateId}"`;
             console.error(msg);
 
             client.transport.emit(ATTACH_ERROR, reqId, msg);
           }
         } else {
-          const msg = `[stateManager] Cannot attach, schema "${schemaName}" does not exists`;
+          const msg = `[stateManager] Cannot attach, class "${className}" does not exists`;
           console.error(msg);
 
           client.transport.emit(ATTACH_ERROR, reqId, msg);
@@ -292,16 +286,16 @@ class ServerStateManager extends BaseStateManager {
     // ---------------------------------------------
     // OBSERVE PEERS (be notified when a state is created, lazy)
     // ---------------------------------------------
-    client.transport.addListener(OBSERVE_REQUEST, (reqId, observedSchemaName) => {
-      if (observedSchemaName === null || this.#schemas.has(observedSchemaName)) {
+    client.transport.addListener(OBSERVE_REQUEST, (reqId, observedClassName) => {
+      if (observedClassName === null || this.#classes.has(observedClassName)) {
         const statesInfos = [];
 
         this.#sharedStatePrivateById.forEach(state => {
           const isObservable = this.#isObservableState(state);
 
           if (isObservable) {
-            const { schemaName, id, creatorId } = state;
-            statesInfos.push([schemaName, id, creatorId]);
+            const { className, id, creatorId } = state;
+            statesInfos.push([className, id, creatorId]);
           }
         });
 
@@ -311,7 +305,7 @@ class ServerStateManager extends BaseStateManager {
 
         client.transport.emit(OBSERVE_RESPONSE, reqId, ...statesInfos);
       } else {
-        const msg = `[stateManager] Cannot observe, schema "${observedSchemaName}" does not exists`;
+        const msg = `[stateManager] Cannot observe class "${observedClassName}", class does not exists`;
         client.transport.emit(OBSERVE_ERROR, reqId, msg);
       }
     });
@@ -323,12 +317,12 @@ class ServerStateManager extends BaseStateManager {
     // ---------------------------------------------
     // GET SCHEMA
     // ---------------------------------------------
-    client.transport.addListener(GET_SCHEMA_REQUEST, (reqId, schemaName) => {
-      if (this.#schemas.has(schemaName)) {
-        const schema = this.#schemas.get(schemaName);
-        client.transport.emit(GET_SCHEMA_RESPONSE, reqId, schemaName, schema);
+    client.transport.addListener(GET_SCHEMA_REQUEST, (reqId, className) => {
+      if (this.#classes.has(className)) {
+        const classDescription = this.#classes.get(className);
+        client.transport.emit(GET_SCHEMA_RESPONSE, reqId, className, classDescription);
       } else {
-        const msg = `[stateManager] Cannot get schema, schema "${schemaName}" does not exists`;
+        const msg = `[stateManager] Cannot get class "${className}", class does not exists`;
         client.transport.emit(GET_SCHEMA_ERROR, reqId, msg);
       }
     });
@@ -382,20 +376,24 @@ class ServerStateManager extends BaseStateManager {
     this[kStateManagerClientsByNodeId].delete(nodeId);
   }
 
+  #isObservableState(state) {
+    // is observable if not in private states list
+    return !PRIVATE_STATES.includes(state.className);
+  }
+
   /**
-   * Define a class of data structure from which {@link SharedState} can be instanciated.
+   * Define a generic class from which {@link SharedState} can be created.
    *
    * _In a future revision, this method and its arguments will be renamed_
    *
-   * @param {SharedStateClassName} schemaName - Name of the schema.
-   * @param {SharedStateClassDescription} schema - Data structure
-   *  describing the states that will be created from this schema.
+   * @param {SharedStateClassName} className - Name of the class.
+   * @param {SharedStateClassDescription} classDescription - Description of the class.
    *
    * @see {@link ServerStateManager#create}
    * @see {@link ClientStateManager#create}
    *
    * @example
-   * server.stateManager.registerSchema('my-schema', {
+   * server.stateManager.registerSchema('my-class', {
    *   myBoolean: {
    *     type: 'boolean'
    *     default: false,
@@ -408,41 +406,41 @@ class ServerStateManager extends BaseStateManager {
    *   }
    * })
    */
-  registerSchema(schemaName, schema) {
-    if (!isString(schemaName)) {
-      throw new Error(`[stateManager.registerSchema] Invalid schema name "${schemaName}", should be a string`);
+  registerSchema(className, classDescription) {
+    if (!isString(className)) {
+      throw new Error(`[stateManager.registerSchema] Invalid class name "${className}", should be a string`);
     }
 
-    if (this.#schemas.has(schemaName)) {
-      throw new Error(`[stateManager.registerSchema] cannot register schema with name: "${schemaName}", schema name already exists`);
+    if (this.#classes.has(className)) {
+      throw new Error(`[stateManager.registerSchema] Cannot define class with name: "${className}", class already exists`);
     }
 
-    if (!isPlainObject(schema)) {
-      throw new Error(`[stateManager.registerSchema] Invalid schema, should be an object`);
+    if (!isPlainObject(classDescription)) {
+      throw new Error(`[stateManager.registerSchema] Invalid class description, should be an object`);
     }
 
-    ParameterBag.validateDescription(schema);
+    ParameterBag.validateDescription(classDescription);
 
-    this.#schemas.set(schemaName, clonedeep(schema));
+    this.#classes.set(className, clonedeep(classDescription));
     // create hooks list
-    this.#hooksBySchemaName.set(schemaName, new Set());
+    this.#hooksByClassName.set(className, new Set());
   }
 
   /**
    * Delete a whole class of {@link ShareState}.
    *
    * All {@link SharedState} instance that belong to this class are deleted
-   * as well, triggering the `onDetach` and `onDelete` callbacks are called on
-   * the actual {@link SharedState} instances.
+   * as well. The `onDetach` and `onDelete` callbacks of existing  {@link SharedState}
+   * instances will be called.
    *
    * _In a future revision, this method and its arguments will be renamed_
    *
-   * @param {SharedStateClassName} schemaName - Name of the schema.
+   * @param {SharedStateClassName} className - Name of the shared state class to delete.
    */
-  deleteSchema(schemaName) {
+  deleteSchema(className) {
     // @note: deleting schema
     for (let [_, state] of this.#sharedStatePrivateById) {
-      if (state.schemaName === schemaName) {
+      if (state.className === className) {
         for (let [remoteId, clientInfos] of state.attachedClients) {
           const attached = clientInfos.client;
           state[kSharedStatePrivateDetachClient](remoteId, attached);
@@ -453,31 +451,32 @@ class ServerStateManager extends BaseStateManager {
       }
     }
 
-    // clear schema cache of all connected clients
+    // clear class cache of all connected clients
     for (let client of this[kStateManagerClientsByNodeId].values()) {
-      client.transport.emit(`${DELETE_SCHEMA}`, schemaName);
+      client.transport.emit(`${DELETE_SCHEMA}`, className);
     }
 
-    this.#schemas.delete(schemaName);
+    this.#classes.delete(className);
     // delete registered hooks
-    this.#hooksBySchemaName.delete(schemaName);
+    this.#hooksByClassName.delete(className);
   }
 
   /**
-   * Register a function for a given schema (e.g. will be applied on all states
-   * created from this schema) that will be executed before the update values
-   * are propagated. For example, this could be used to implement a preset system
+   * Register a function for a given shared state class the be executed between
+   * `set` instructions and `onUpdate` callback(s).
+   *
+   * For example, this could be used to implement a preset system
    * where all the values of the state are updated from e.g. some data stored in
    * filesystem while the consumer of the state only want to update the preset name.
    *
-   * The hook is associated to every state of its kind (i.e. schemaName) and
-   * executed on every update (call of `set`). Note that the hooks are executed
-   * server-side regarless the node on which `set` has been called and before
-   * the "actual" update of the state (e.g. before the call of `onUpdate`).
+   * The hook is associated to each states created from the given class name
+   * executed on each update (i.e. `state.set(updates)`). Note that the hooks are
+   * executed server-side regarless the node on which `set` has been called and
+   * before the call of the `onUpdate` callback of the shared state.
    *
-   * @param {string} schemaName - Kind of states on which applying the hook.
-   * @param {serverStateManagerUpdateHook} updateHook - Function
-   *   called between the `set` call and the actual update.
+   * @param {string} className - Kind of states on which applying the hook.
+   * @param {serverStateManagerUpdateHook} updateHook - Function called between
+   *  the `set` call and the actual update.
    *
    * @returns {Fuction} deleteHook - Handler that deletes the hook when executed.
    *
@@ -499,13 +498,13 @@ class ServerStateManager extends BaseStateManager {
    * const values = state.getValues();
    * assert.deepEqual(result, { value: 'test', numUpdates: 1 });
    */
-  registerUpdateHook(schemaName, updateHook) {
-    // throw error if schemaName has not been registered
-    if (!this.#schemas.has(schemaName)) {
-      throw new Error(`[stateManager.registerUpdateHook] cannot register update hook for schema name "${schemaName}", schema name does not exists`);
+  registerUpdateHook(className, updateHook) {
+    // throw error if className has not been registered
+    if (!this.#classes.has(className)) {
+      throw new Error(`[stateManager.registerUpdateHook] Cannot register update hook for class "${className}", class does not exists`);
     }
 
-    const hooks = this.#hooksBySchemaName.get(schemaName);
+    const hooks = this.#hooksByClassName.get(className);
     hooks.add(updateHook);
 
     return () => hooks.delete(updateHook);
