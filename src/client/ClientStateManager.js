@@ -3,15 +3,16 @@ import BaseStateManager from '../common/BaseStateManager.js';
 /**
  * @callback ClientStateManager~ObserveCallback
  * @async
- * @param {String} schemaName - name of the schema
- * @param {Number} stateId - id of the state
- * @param {Number} nodeId - id of the node that created the state
+ * @param {String} className - Name of the shared state class.
+ * @param {Number} stateId - Id of the state.
+ * @param {Number} nodeId - Id of the node that created the state.
  */
 
 /**
  * The `ClientStateManager` allows to create new {@link SharedState}s, or attach
- * to {@link SharedState}s created by other nodes (clients or server). It
- * can also track all the {@link SharedState}s created by other nodes.
+ * to {@link SharedState}s created by other nodes (clients or server) on the network.
+ *
+ * It can also observe all the {@link SharedState}s created on the network.
  *
  * An instance of `ClientStateManager` is automatically created by the `soundworks.Client`
  * at initialization (cf. {@link client.Client#stateManager}).
@@ -25,7 +26,7 @@ import BaseStateManager from '../common/BaseStateManager.js';
  * import { Server } from '@soundworks/server/index.js';
  *
  * const server = new Server(config);
- * // declare and register the schema of a shared state.
+ * // define a class of shared state.
  * server.stateManager.registerSchema('some-global-state', {
  *   myRandom: {
  *     type: 'float',
