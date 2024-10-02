@@ -22,7 +22,7 @@ import networkLatencyWorker from './audit-network-latency.worker.js';
 export const kSocketsStart = Symbol('soundworks:sockets-start');
 export const kSocketsStop = Symbol('soundworks:sockets-stop');
 
-export const kSocketsRemoveFromAllRooms = Symbol('soundworks:sockets-remove-from-all-rooms');
+export const kSocketsDeleteSocket = Symbol('soundworks:sockets-delete-socket');
 export const kSocketsLatencyStatsWorker = Symbol('soundworks:sockets-latency-stats-worker');
 export const kSocketsDebugPreventHeartBeat = Symbol('soundworks:sockets-debug-prevent-heartbeat');
 
@@ -36,13 +36,11 @@ class ServerSockets {
   #server = null;
   #config = null;
   #wsServer = null;
-  #rooms = new Map();
+  #sockets = new Set();
 
   constructor(server, config) {
     this.#server = server;
     this.#config = config;
-    // Init special `'*'` room which stores all current connections.
-    this.#rooms.set('*', new Set());
 
     this[kSocketsLatencyStatsWorker] = null;
     this[kSocketsDebugPreventHeartBeat] = false;
@@ -89,9 +87,7 @@ class ServerSockets {
       const { role, token } = querystring.parse(req.url.split('?')[1]);
       const socket = new ServerSocket(ws, this);
 
-      socket.addToRoom('*');
-      socket.addToRoom(role);
-
+      this.#sockets.add(socket);
       this.#server[kServerOnSocketConnection](role, socket, token);
     });
 
@@ -120,90 +116,32 @@ class ServerSockets {
   [kSocketsStop]() {
     // terminate stat worker thread
     this[kSocketsLatencyStatsWorker].terminate();
-    // clean sockets
-    const sockets = this.#rooms.get('*');
-    sockets.forEach(socket => socket[kSocketTerminate]());
+    // terminate sockets
+    this.#sockets.forEach(socket => socket[kSocketTerminate]());
   }
 
   /**
    * Remove given socket from all rooms.
    * @private
    */
-  [kSocketsRemoveFromAllRooms](socket) {
-    for (let [_, room] of this.#rooms) {
-      room.delete(socket);
-    }
+  [kSocketsDeleteSocket](socket) {
+    this.#sockets.delete(socket);
   }
 
-  /**
-   * Add a socket to a room.
-   *
-   * _Note that in most cases, you should use a {@link SharedState} instead_
-   *
-   * @param {ServerSocket} socket - Socket to add to the room.
-   * @param {String} roomId - Id of the room.
-   */
-  addToRoom(socket, roomId) {
-    if (!this.#rooms.has(roomId)) {
-      this.#rooms.set(roomId, new Set());
-    }
-
-    const room = this.#rooms.get(roomId);
-    room.add(socket);
+  entries() {
+    return this.#sockets.entries();
   }
 
-  /**
-   * Remove a socket from a room.
-   *
-   * _Note that in most cases, you should use a {@link SharedState} instead_
-   *
-   * @param {ServerSocket} socket - Socket to remove from the room.
-   * @param {String} roomId - Id of the room.
-   */
-  removeFromRoom(socket, roomId) {
-    if (this.#rooms.has(roomId)) {
-      const room = this.#rooms.get(roomId);
-      room.delete(socket);
-    }
+  keys() {
+    return this.#sockets.keys();
   }
 
-  /**
-   * Send a message to all clients os given room(s). If no room is specified,
-   * the message is sent to all clients.
-   *
-   * _Note that in most cases, you should use a {@link SharedState} instead_
-   *
-   * @param {String|Array} roomsIds - Ids of the rooms that must receive
-   *  the message. If `null` the message is sent to all clients.
-   * @param {ServerSocket} excludeSocket - Optionnal socket to ignore when
-   *  broadcasting the message, typically the client at the origin of the message.
-   * @param {String} channel - Channel name.
-   * @param {...*} args - Payload of the message. As many arguments as needed, of
-   *  JSON compatible data types (i.e. string, number, boolean, object, array and null).
-   */
-  broadcast(roomIds, excludeSocket, channel, ...args) {
-    let targets = new Set();
+  values() {
+    return this.#sockets.values();
+  }
 
-    if (typeof roomIds === 'string' || Array.isArray(roomIds)) {
-      if (typeof roomIds === 'string') {
-        roomIds = [roomIds];
-      }
-
-      roomIds.forEach(roomId => {
-        if (this.#rooms.has(roomId)) {
-          const room = this.#rooms.get(roomId);
-          room.forEach(socket => targets.add(socket));
-        }
-      });
-    } else {
-      targets = this.#rooms.get('*');
-    }
-
-    targets.forEach(socket => {
-      if (socket.readyState === WebSocket.OPEN && socket !== excludeSocket) {
-        socket.send(channel, ...args);
-      }
-    });
+  forEach(func) {
+    return this.#sockets.forEach(func);
   }
 }
 

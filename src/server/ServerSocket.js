@@ -11,7 +11,7 @@ import {
 import {
   kSocketsLatencyStatsWorker,
   kSocketsDebugPreventHeartBeat,
-  kSocketsRemoveFromAllRooms,
+  kSocketsDeleteSocket,
 } from './ServerSockets.js';
 
 export const kSocketClientId = Symbol('soundworks:socket-client-id');
@@ -144,7 +144,7 @@ class ServerSocket {
     // clear ping / pong interval
     clearInterval(this.#heartbeatId);
     // remove socket from all rooms
-    this.#sockets[kSocketsRemoveFromAllRooms](this);
+    this.#sockets[kSocketsDeleteSocket](this);
     // clear references to sockets
     this.#sockets = null;
     // clear all listeners
@@ -166,12 +166,6 @@ class ServerSocket {
 
   /**
    * Reference to the @link{ServerSockets} instance.
-   *
-   * Allows for broadcasting from a given socket instance.
-   *
-   * @type {ServerSockets}
-   * @example
-   * socket.sockets.broadcast('my-room', this, 'update-value', 1);
    */
   get sockets() {
     return this.#sockets;
@@ -257,23 +251,6 @@ class ServerSocket {
       this.#listeners.delete(channel);
     }
   }
-
-  /**
-   * Add the socket to a room
-   * @param {string} roomId - Id of the room.
-   */
-  addToRoom(roomId) {
-    this.sockets.addToRoom(this, roomId);
-  }
-
-  /**
-   * Remove the socket from a room
-   * @param {string} roomId - Id of the room.
-   */
-  removeFromRoom(roomId) {
-    this.sockets.removeFromRoom(this, roomId);
-  }
-
 }
 
 export default ServerSocket;

@@ -1,5 +1,6 @@
 import { assert }  from 'chai';
 import merge from 'lodash.merge';
+import { delay } from '@ircam/sc-utils';
 
 import { Server, ServerContext } from '../../src/server/index.js';
 import { Client, ClientContext } from '../../src/client/index.js';
@@ -67,8 +68,11 @@ describe('# client::Client', () => {
         socketMessageReceived = true;
       });
 
-      server.sockets.broadcast('*', null, 'hello');
-      await new Promise(resolve => setTimeout(resolve, 200));
+      for (let socket of server.sockets.values()) {
+        socket.send('hello');
+      }
+
+      await delay(10)
 
       assert.equal(socketMessageReceived, true);
 
@@ -159,9 +163,8 @@ describe('# client::Client', () => {
         socketMessageReceived = true;
       });
 
-      server.sockets.broadcast('*', null, 'hello');
-      await new Promise(resolve => setTimeout(resolve, 200));
-
+      server.sockets.forEach(socket => socket.send('hello'));
+      await delay(10)
       assert.equal(socketMessageReceived, true);
 
       await server.stop();
@@ -248,8 +251,8 @@ describe('# client::Client', () => {
 
       await client.stop();
 
-      server.sockets.broadcast('*', null, 'hello');
-      await new Promise(resolve => setTimeout(resolve, 200));
+      server.sockets.forEach(socket => socket.send('hello'));
+      await delay(10)
 
       assert.equal(socketMessageReceived, false);
 
