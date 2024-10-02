@@ -16,10 +16,10 @@ import {
   OBSERVE_ERROR,
   OBSERVE_NOTIFICATION,
   UNOBSERVE_NOTIFICATION,
-  DELETE_SCHEMA,
-  GET_SCHEMA_REQUEST,
-  GET_SCHEMA_RESPONSE,
-  GET_SCHEMA_ERROR,
+  DELETE_SHARED_STATE_CLASS,
+  GET_CLASS_DESCRIPTION_REQUEST,
+  GET_CLASS_DESCRIPTION_RESPONSE,
+  GET_CLASS_DESCRIPTION_ERROR,
 } from './constants.js';
 
 export const kStateManagerInit = Symbol('soundworks:state-manager-init');
@@ -194,14 +194,14 @@ class BaseStateManager {
     // ---------------------------------------------
     // Clear cache when a shared state class is deleted
     // ---------------------------------------------
-    this[kStateManagerClient].transport.addListener(DELETE_SCHEMA, className => {
+    this[kStateManagerClient].transport.addListener(DELETE_SHARED_STATE_CLASS, className => {
       this.#cachedClasses.delete(className);
     });
 
     // ---------------------------------------------
     // Get class description
     // ---------------------------------------------
-    this[kStateManagerClient].transport.addListener(GET_SCHEMA_RESPONSE, (reqId, className, classDescription) => {
+    this[kStateManagerClient].transport.addListener(GET_CLASS_DESCRIPTION_RESPONSE, (reqId, className, classDescription) => {
       if (!this.#cachedClasses.has(className)) {
         this.#cachedClasses.set(className, classDescription);
       }
@@ -210,7 +210,7 @@ class BaseStateManager {
       this.#promiseStore.resolve(reqId, parameterBag.getDescription());
     });
 
-    this[kStateManagerClient].transport.addListener(GET_SCHEMA_ERROR, (reqId, msg) => {
+    this[kStateManagerClient].transport.addListener(GET_CLASS_DESCRIPTION_ERROR, (reqId, msg) => {
       this.#promiseStore.reject(reqId, msg);
     });
 
@@ -240,7 +240,7 @@ class BaseStateManager {
 
     return new Promise((resolve, reject) => {
       const reqId = this.#promiseStore.add(resolve, reject, 'get-schema');
-      this[kStateManagerClient].transport.emit(GET_SCHEMA_REQUEST, reqId, className);
+      this[kStateManagerClient].transport.emit(GET_CLASS_DESCRIPTION_REQUEST, reqId, className);
     });
   }
 

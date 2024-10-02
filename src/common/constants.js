@@ -38,11 +38,11 @@ export const UPDATE_RESPONSE = 's:u:res';
 export const UPDATE_ABORT = 's:u:ab';
 export const UPDATE_NOTIFICATION = 's:u:not';
 
-export const DELETE_SCHEMA = 's:d:s';
+export const DELETE_SHARED_STATE_CLASS = 's:d:s';
 
-export const GET_SCHEMA_REQUEST = 's:s:req';
-export const GET_SCHEMA_RESPONSE = 's:s:res';
-export const GET_SCHEMA_ERROR = 's:s:err';
+export const GET_CLASS_DESCRIPTION_REQUEST = 's:s:req';
+export const GET_CLASS_DESCRIPTION_RESPONSE = 's:s:res';
+export const GET_CLASS_DESCRIPTION_ERROR = 's:s:err';
 
 // context channels
 export const CONTEXT_ENTER_REQUEST = 'c:en:req';

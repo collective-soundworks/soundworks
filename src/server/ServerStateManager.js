@@ -19,10 +19,10 @@ import {
   OBSERVE_ERROR,
   OBSERVE_NOTIFICATION,
   UNOBSERVE_NOTIFICATION,
-  DELETE_SCHEMA,
-  GET_SCHEMA_REQUEST,
-  GET_SCHEMA_RESPONSE,
-  GET_SCHEMA_ERROR,
+  DELETE_SHARED_STATE_CLASS,
+  GET_CLASS_DESCRIPTION_REQUEST,
+  GET_CLASS_DESCRIPTION_RESPONSE,
+  GET_CLASS_DESCRIPTION_ERROR,
   PRIVATE_STATES,
 } from '../common/constants.js';
 
@@ -317,13 +317,13 @@ class ServerStateManager extends BaseStateManager {
     // ---------------------------------------------
     // GET SCHEMA
     // ---------------------------------------------
-    client.transport.addListener(GET_SCHEMA_REQUEST, (reqId, className) => {
+    client.transport.addListener(GET_CLASS_DESCRIPTION_REQUEST, (reqId, className) => {
       if (this.#classes.has(className)) {
         const classDescription = this.#classes.get(className);
-        client.transport.emit(GET_SCHEMA_RESPONSE, reqId, className, classDescription);
+        client.transport.emit(GET_CLASS_DESCRIPTION_RESPONSE, reqId, className, classDescription);
       } else {
         const msg = `[stateManager] Cannot get class "${className}", class does not exists`;
-        client.transport.emit(GET_SCHEMA_ERROR, reqId, msg);
+        client.transport.emit(GET_CLASS_DESCRIPTION_ERROR, reqId, msg);
       }
     });
   }
@@ -453,7 +453,7 @@ class ServerStateManager extends BaseStateManager {
 
     // clear class cache of all connected clients
     for (let client of this[kStateManagerClientsByNodeId].values()) {
-      client.transport.emit(`${DELETE_SCHEMA}`, className);
+      client.transport.emit(`${DELETE_SHARED_STATE_CLASS}`, className);
     }
 
     this.#classes.delete(className);
