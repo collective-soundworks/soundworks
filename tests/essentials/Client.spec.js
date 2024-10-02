@@ -130,7 +130,7 @@ describe('# client::Client', () => {
 
     it(`should have inited the state manager`, async () => {
       const server = new Server(config);
-      server.stateManager.registerSchema('test', { a: { type: 'boolean', default: true } });
+      server.stateManager.defineClass('test', { a: { type: 'boolean', default: true } });
 
       await server.init();
       await server.start();

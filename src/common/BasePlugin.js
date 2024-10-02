@@ -88,7 +88,7 @@ class BasePlugin {
    *   constructor(server, id) {
    *     super(server, id);
    *
-   *     this.server.stateManager.registerSchema(`my-plugin:${this.id}`, {
+   *     this.server.stateManager.defineClass(`my-plugin:${this.id}`, {
    *       someParam: {
    *         type: 'boolean',
    *         default: false,
@@ -121,7 +121,7 @@ class BasePlugin {
    *   constructor(server, id) {
    *     super(server, id);
    *
-   *     this.server.stateManager.registerSchema(`my-plugin:${this.id}`, {
+   *     this.server.stateManager.defineClass(`my-plugin:${this.id}`, {
    *       someParam: {
    *         type: 'boolean',
    *         default: false,

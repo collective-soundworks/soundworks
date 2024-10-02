@@ -22,8 +22,8 @@ describe('# SharedState - schema options', () => {
     // server
     // ---------------------------------------------------
     server = new Server(config);
-    server.stateManager.registerSchema('a', a);
-    // server.stateManager.registerSchema('b', b);
+    server.stateManager.defineClass('a', a);
+    // server.stateManager.defineClass('b', b);
 
     await server.start();
 
@@ -67,7 +67,7 @@ describe('# SharedState - schema options', () => {
 
     it('[event=true] should behave correctly', async () => {
       return new Promise(async (resolve, reject) => {
-        server.stateManager.registerSchema('event-test', {
+        server.stateManager.defineClass('event-test', {
           value: {
             type: 'boolean',
             event: true,
@@ -117,7 +117,7 @@ describe('# SharedState - schema options', () => {
 
     it('[filterChange=false] should behave correctly', async () => {
       return new Promise(async (resolve, reject) => {
-        server.stateManager.registerSchema('filter-change-test', {
+        server.stateManager.defineClass('filter-change-test', {
           value: {
             type: 'boolean',
             default: true,
@@ -158,7 +158,7 @@ describe('# SharedState - schema options', () => {
 
     it('[immediate=true] (w/ [event=false, filterChange=true]) should behave correctly', async () => {
       return new Promise(async (resolve, reject) => {
-        server.stateManager.registerSchema('immediate-test', {
+        server.stateManager.defineClass('immediate-test', {
           immediateValue: {
             type: 'integer',
             default: 0,
@@ -282,7 +282,7 @@ describe('# SharedState - schema options', () => {
     it('[immediate=true, event=true] should behave correctly', async () => {
       return new Promise(async (resolve, reject) => {
         try {
-          server.stateManager.registerSchema('immediate-test-2', {
+          server.stateManager.defineClass('immediate-test-2', {
             immediateValue: {
               type: 'integer',
               immediate: true,
@@ -374,7 +374,7 @@ describe('# SharedState - schema options', () => {
 
     it('[immediate=true, filterChange=false] should behave correctly', async () => {
       return new Promise(async (resolve, reject) => {
-        server.stateManager.registerSchema('immediate-test-3', {
+        server.stateManager.defineClass('immediate-test-3', {
           immediateValue: {
             type: 'integer',
             default: 0,
@@ -467,7 +467,7 @@ describe('# SharedState - schema options', () => {
       const server = new Server(localConfig);
       await server.start();
 
-      server.stateManager.registerSchema('local-test', {
+      server.stateManager.defineClass('local-test', {
         value: {
           type: 'boolean',
           default: false,
@@ -510,7 +510,7 @@ describe('# SharedState - schema options', () => {
       const server = new Server(localConfig);
       await server.start();
 
-      server.stateManager.registerSchema('local-test', {
+      server.stateManager.defineClass('local-test', {
         local: {
           type: 'boolean',
           default: false,
@@ -585,7 +585,7 @@ describe('# SharedState - schema options', () => {
         },
       };
 
-      server.stateManager.registerSchema('test-integer', schema);
+      server.stateManager.defineClass('test-integer', schema);
 
       const serverInteger = await server.stateManager.create('test-integer');
       const serverResult = [];
@@ -626,7 +626,7 @@ describe('# SharedState - schema options', () => {
         },
       };
 
-      server.stateManager.registerSchema('test-float', schema);
+      server.stateManager.defineClass('test-float', schema);
 
       const serverInteger = await server.stateManager.create('test-float');
       const serverResult = [];

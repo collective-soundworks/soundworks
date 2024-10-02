@@ -18,8 +18,8 @@ describe('# SharedStates - Stress test', () => {
     // server
     // ---------------------------------------------------
     server = new Server(config);
-    server.stateManager.registerSchema('a', a);
-    server.stateManager.registerSchema('b', b);
+    server.stateManager.defineClass('a', a);
+    server.stateManager.defineClass('b', b);
 
     await server.init();
     await server.start();

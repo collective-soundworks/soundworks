@@ -17,8 +17,8 @@ describe(`# SharedStateCollection`, () => {
     // server
     // ---------------------------------------------------
     server = new Server(config);
-    server.stateManager.registerSchema('a', a);
-    server.stateManager.registerSchema('b', b);
+    server.stateManager.defineClass('a', a);
+    server.stateManager.defineClass('b', b);
     await server.start();
 
     // ---------------------------------------------------
@@ -320,7 +320,7 @@ describe(`# SharedStateCollection`, () => {
     });
 
     it('should not propagate event parameters on first call if `executeListener=true`', async () => {
-      server.stateManager.registerSchema('with-event', {
+      server.stateManager.defineClass('with-event', {
         bool: { type: 'boolean', event: true, },
         int: { type: 'integer', default: 20, },
       });
@@ -414,7 +414,7 @@ describe(`# SharedStateCollection`, () => {
       localConfig.env.port = 8083;
 
       const server = new Server(localConfig);
-      server.stateManager.registerSchema('a', a);
+      server.stateManager.defineClass('a', a);
       await server.start();
 
       let states = [];
@@ -478,7 +478,7 @@ describe('# SharedStateCollection - filtered collection', () => {
     // server
     // ---------------------------------------------------
     server = new Server(config);
-    server.stateManager.registerSchema('filtered', {
+    server.stateManager.defineClass('filtered', {
       bool: {
         type: 'boolean',
         default: false,

@@ -31,6 +31,8 @@ import SharedStatePrivate, {
   kSharedStatePrivateDetachClient,
 } from './SharedStatePrivate.js';
 
+import logger from '../common/logger.js';
+
 
 const generateStateId = idGenerator();
 const generateRemoteId = idGenerator();
@@ -78,7 +80,7 @@ export const kStateManagerClientsByNodeId = Symbol('soundworks:server-state-clie
  *
  * const server = new Server(config);
  * // declare and register the class of a shared state.
- * server.stateManager.registerSchema('some-global-state', {
+ * server.stateManager.defineClass('some-global-state', {
  *   myRandom: {
  *     type: 'float',
  *     default: 0,
@@ -382,9 +384,7 @@ class ServerStateManager extends BaseStateManager {
   }
 
   /**
-   * Define a generic class from which {@link SharedState} can be created.
-   *
-   * _In a future revision, this method and its arguments will be renamed_
+   * Define a generic class from which {@link SharedState}s can be created.
    *
    * @param {SharedStateClassName} className - Name of the class.
    * @param {SharedStateClassDescription} classDescription - Description of the class.
@@ -393,7 +393,7 @@ class ServerStateManager extends BaseStateManager {
    * @see {@link ClientStateManager#create}
    *
    * @example
-   * server.stateManager.registerSchema('my-class', {
+   * server.stateManager.defineClass('my-class', {
    *   myBoolean: {
    *     type: 'boolean'
    *     default: false,
@@ -404,19 +404,19 @@ class ServerStateManager extends BaseStateManager {
    *     min: -1,
    *     max: 1
    *   }
-   * })
+   * });
    */
-  registerSchema(className, classDescription) {
+  defineClass(className, classDescription) {
     if (!isString(className)) {
-      throw new Error(`[stateManager.registerSchema] Invalid class name "${className}", should be a string`);
+      throw new Error(`[stateManager.defineClass] Invalid class name "${className}", should be a string`);
     }
 
     if (this.#classes.has(className)) {
-      throw new Error(`[stateManager.registerSchema] Cannot define class with name: "${className}", class already exists`);
+      throw new Error(`[stateManager.defineClass] Cannot define class with name: "${className}", class already exists`);
     }
 
     if (!isPlainObject(classDescription)) {
-      throw new Error(`[stateManager.registerSchema] Invalid class description, should be an object`);
+      throw new Error(`[stateManager.defineClass] Invalid class description, should be an object`);
     }
 
     ParameterBag.validateDescription(classDescription);
@@ -424,6 +424,14 @@ class ServerStateManager extends BaseStateManager {
     this.#classes.set(className, clonedeep(classDescription));
     // create hooks list
     this.#hooksByClassName.set(className, new Set());
+  }
+
+  /**
+   * @deprecated Use {@link ServerStateManager#defineClass} instead.
+   */
+  registerSchema(className, classDescription) {
+    logger.deprecated('ServerStateManager#registerSchema', 'ServerStateManager#defineClass', '4.0.0-alpha.29');
+    this.defineClass(className, classDescription);
   }
 
   /**
@@ -481,7 +489,7 @@ class ServerStateManager extends BaseStateManager {
    * @returns {Fuction} deleteHook - Handler that deletes the hook when executed.
    *
    * @example
-   * server.stateManager.registerSchema('hooked', {
+   * server.stateManager.defineClass('hooked', {
    *   value: { type: 'string', default: null, nullable: true },
    *   numUpdates: { type: 'integer', default: 0 },
    * });

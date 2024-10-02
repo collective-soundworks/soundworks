@@ -137,11 +137,11 @@ class ParameterBag {
       const def = description[name];
 
       if (!Object.prototype.hasOwnProperty.call(def, 'type')) {
-        throw new TypeError(`[StateManager.registerSchema] Invalid class description - param "${name}": "type" key is required`);
+        throw new TypeError(`[StateManager.defineClass] Invalid class description - param "${name}": "type" key is required`);
       }
 
       if (!Object.prototype.hasOwnProperty.call(types, def.type)) {
-        throw new TypeError(`[StateManager.registerSchema] Invalid class description - param "${name}": "{ type: '${def.type}' }" does not exists`);
+        throw new TypeError(`[StateManager.defineClass] Invalid class description - param "${name}": "{ type: '${def.type}' }" does not exists`);
       }
 
       const required = types[def.type].required;
@@ -152,10 +152,10 @@ class ParameterBag {
           // - default is always null for `event` params
           // - default is always null for `required` params
           if ('default' in def && def.default !== null) {
-            throw new TypeError(`[StateManager.registerSchema] Invalid class description for param ${name} - "default" propaerty is set and not null while the parameter definition is declared as "event" or "required"`);
+            throw new TypeError(`[StateManager.defineClass] Invalid class description for param ${name} - "default" propaerty is set and not null while the parameter definition is declared as "event" or "required"`);
           }
         } else if (!Object.prototype.hasOwnProperty.call(def, key)) {
-          throw new TypeError(`[StateManager.registerSchema] Invalid class description - param "${name}" (type "${def.type}"): "${key}" key is required`);
+          throw new TypeError(`[StateManager.defineClass] Invalid class description - param "${name}" (type "${def.type}"): "${key}" key is required`);
         }
       });
     }

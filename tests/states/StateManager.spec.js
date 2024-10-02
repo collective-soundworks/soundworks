@@ -24,8 +24,8 @@ describe(`# StateManager`, () => {
     // server
     // ---------------------------------------------------
     server = new Server(config);
-    server.stateManager.registerSchema('a', a);
-    server.stateManager.registerSchema('b', b);
+    server.stateManager.defineClass('a', a);
+    server.stateManager.defineClass('b', b);
 
     await server.start();
 
@@ -40,16 +40,16 @@ describe(`# StateManager`, () => {
     server.stop();
   });
 
-  describe('## [server] registerSchema(className, definition)', () => {
+  describe('## [server] defineClass(className, definition)', () => {
     it('should throw if reusing same schema name', () => {
       assert.throws(() => {
-        server.stateManager.registerSchema('a', a);
-      }, Error, '[stateManager.registerSchema] Cannot define class with name: "a", class already exists');
+        server.stateManager.defineClass('a', a);
+      }, Error, '[stateManager.defineClass] Cannot define class with name: "a", class already exists');
 
     });
 
     it ('should register same definition with another name', () => {
-      server.stateManager.registerSchema('aa', a);
+      server.stateManager.defineClass('aa', a);
     });
   });
 
@@ -59,7 +59,7 @@ describe(`# StateManager`, () => {
       localConfig.env.port = 8082;
 
       const server = new Server(config);
-      server.stateManager.registerSchema('a', a);
+      server.stateManager.defineClass('a', a);
 
       let errored = false;
 
@@ -100,7 +100,7 @@ describe(`# StateManager`, () => {
       localConfig.env.port = 8082;
 
       const server = new Server(config);
-      server.stateManager.registerSchema('a', a);
+      server.stateManager.defineClass('a', a);
 
       let errored = false;
 
@@ -186,7 +186,7 @@ describe(`# StateManager`, () => {
       localConfig.env.port = 8082;
 
       const server = new Server(config);
-      server.stateManager.registerSchema('a', a);
+      server.stateManager.defineClass('a', a);
 
       let errored = false;
 
@@ -272,7 +272,7 @@ describe(`# StateManager`, () => {
 
   describe('## [server] deleteSchema(name)', () => {
     it('should call state.onDetach and state.onDelete on all states of its kind', async () => {
-      server.stateManager.registerSchema('a-delete', a);
+      server.stateManager.defineClass('a-delete', a);
 
       const a0 = await server.stateManager.create('a-delete');
       const a1 = await server.stateManager.attach('a-delete', a0.id);
@@ -301,7 +301,7 @@ describe(`# StateManager`, () => {
 
     // cf. https://github.com/collective-soundworks/soundworks/issues/71
     it(`should not propagate deleted schema in observe`, async () => {
-      server.stateManager.registerSchema('a-delete-observe', a);
+      server.stateManager.defineClass('a-delete-observe', a);
 
       const state = await client.stateManager.create('a-delete-observe');
       let deleteCalled = false;;
@@ -333,7 +333,7 @@ describe(`# StateManager`, () => {
       localConfig.env.port = 8082;
 
       const server = new Server(config);
-      server.stateManager.registerSchema('a', a);
+      server.stateManager.defineClass('a', a);
 
       let errored = false;
 
@@ -696,7 +696,7 @@ describe(`# StateManager`, () => {
       localConfig.env.port = 8082;
 
       const server = new Server(config);
-      server.stateManager.registerSchema('a', a);
+      server.stateManager.defineClass('a', a);
 
       let errored = false;
 
@@ -727,7 +727,7 @@ describe(`# StateManager`, () => {
     };
 
     it('should properly execute hook', async () => {
-      server.stateManager.registerSchema('hooked', hookSchema);
+      server.stateManager.defineClass('hooked', hookSchema);
       server.stateManager.registerUpdateHook('hooked', (updates, currentValues) => {
         updates.value = `${updates.name}-value`;
         return updates;
@@ -775,7 +775,7 @@ describe(`# StateManager`, () => {
 
     it('hook API should be `hook(updates, currentValues, context)`', async () => {
       return new Promise(async (resolve, reject) => {
-        server.stateManager.registerSchema('hooked', hookSchema);
+        server.stateManager.defineClass('hooked', hookSchema);
         server.stateManager.registerUpdateHook('hooked', (updates, currentValues, context) => {
           try {
             assert.deepEqual(updates, { name: 'test' });
@@ -798,7 +798,7 @@ describe(`# StateManager`, () => {
 
 
     it('should not mess around when several states of same kind are created', async () => {
-      server.stateManager.registerSchema('hooked', hookSchema);
+      server.stateManager.defineClass('hooked', hookSchema);
       server.stateManager.registerUpdateHook('hooked', (updates, currentValues) => {
         // just apply name to value
         updates.value = `${updates.name}-value`;
@@ -823,7 +823,7 @@ describe(`# StateManager`, () => {
     });
 
     it('should support asynchronous operation', async () => {
-      server.stateManager.registerSchema('hooked', hookSchema);
+      server.stateManager.defineClass('hooked', hookSchema);
       server.stateManager.registerUpdateHook('hooked', async (updates, currentValues) => {
         return new Promise(resolve => {
           setTimeout(() => {
@@ -850,7 +850,7 @@ describe(`# StateManager`, () => {
     });
 
     it('should apply several hooks in registation order', async () => {
-      server.stateManager.registerSchema('hooked', hookSchema);
+      server.stateManager.defineClass('hooked', hookSchema);
       server.stateManager.registerUpdateHook('hooked', (updates, currentValues) => {
         return { ...updates, value: 'ok-1' };
       });
@@ -874,7 +874,7 @@ describe(`# StateManager`, () => {
     });
 
     it('should unregister hooks properly', async () => {
-      server.stateManager.registerSchema('hooked', hookSchema);
+      server.stateManager.defineClass('hooked', hookSchema);
       server.stateManager.registerUpdateHook('hooked', (updates, currentValues) => {
         return { ...updates, value: 'ok-1' };
       });
@@ -902,7 +902,7 @@ describe(`# StateManager`, () => {
     });
 
     it('should abort when explicitly returning `null`', async () => {
-      server.stateManager.registerSchema('hooked', hookSchema);
+      server.stateManager.defineClass('hooked', hookSchema);
       server.stateManager.registerUpdateHook('hooked', (updates, currentValues) => {
         assert.ok('hook called');
         return null;
@@ -928,7 +928,7 @@ describe(`# StateManager`, () => {
     });
 
     it('should abort when explicitly returning `null` (w/ immediate option)', async () => {
-      server.stateManager.registerSchema('hooked', {
+      server.stateManager.defineClass('hooked', {
         value: {
           type: 'string',
           default: null,
@@ -957,7 +957,7 @@ describe(`# StateManager`, () => {
     });
 
     it('should continue when implicitly returning `undefined`', async () => {
-      server.stateManager.registerSchema('hooked', hookSchema);
+      server.stateManager.defineClass('hooked', hookSchema);
 
       server.stateManager.registerUpdateHook('hooked', (updates, currentValues) => {
         if (updates.name === 'test-1') {

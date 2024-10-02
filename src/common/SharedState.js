@@ -68,7 +68,7 @@ export const kSharedStatePromiseStore = Symbol('soundworks:shared-state-promise-
  *
  * const server = new Server(config);
  * // define a shared state class
- * server.stateManager.registerSchema('some-global-state', {
+ * server.stateManager.defineClass('some-global-state', {
  *   myRandom: {
  *     type: 'float',
  *     default: 0,
@@ -387,7 +387,7 @@ ${JSON.stringify(initValues, null, 2)}`);
    * and resolves after all the `onUpdate` callbacks have resolved themselves, i.e.:
    *
    * ```js
-   * server.stateManager.registerSchema('test', {
+   * server.stateManager.defineClass('test', {
    *   myBool: { type: 'boolean', default: false },
    * });
    * const a = await server.stateManager.create('a');

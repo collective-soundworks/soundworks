@@ -51,7 +51,7 @@ describe('# PromiseStore', () => {
   describe(`## MISC`, () => {
     it(`check consistency of PromiseStore in SharedState`, async () => {
       const server = new Server(config);
-      server.stateManager.registerSchema('a', a);
+      server.stateManager.defineClass('a', a);
       await server.start();
 
       const client = new Client({ role: 'test', ...config });
@@ -118,7 +118,7 @@ describe('# PromiseStore', () => {
 
     it(`stress test`, async () => {
       const server = new Server(config);
-      server.stateManager.registerSchema('a', a);
+      server.stateManager.defineClass('a', a);
       await server.start();
 
       const client = new Client({ role: 'test', ...config });

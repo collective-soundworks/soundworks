@@ -6,7 +6,7 @@
 
 /**
  * Description of a {@link SharedState} data structure that describes the structure
- * of a class of {@link SharedState} to be registered by {@link ServerStateManager#registerSchema}
+ * of a class of {@link SharedState} to be registered by {@link ServerStateManager#defineClass}
  *
  * A `SharedStateClassDescription` is the blueprint, or the definition from which
  * shared states from a given class can be created.
@@ -31,7 +31,7 @@
  *   }
  * };
  *
- * server.stateManager.registerSchema('my-class-name', myClassDescription);
+ * server.stateManager.defineClass('my-class-name', myClassDescription);
  */
 
 /**

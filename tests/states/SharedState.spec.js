@@ -17,8 +17,8 @@ describe('# SharedState', () => {
     // server
     // ---------------------------------------------------
     server = new Server(config);
-    server.stateManager.registerSchema('a', a);
-    server.stateManager.registerSchema('b', b);
+    server.stateManager.defineClass('a', a);
+    server.stateManager.defineClass('b', b);
     await server.start();
 
     // ---------------------------------------------------
@@ -175,7 +175,7 @@ describe('# SharedState', () => {
 
   describe('## get(name) - ## getValues()', () => {
     it('get(name) `any` type should be a deep copy', async() => {
-      server.stateManager.registerSchema('any', {
+      server.stateManager.defineClass('any', {
         ref: {
           type: 'any',
           default: {
@@ -196,7 +196,7 @@ describe('# SharedState', () => {
     });
 
     it('getValues() `any` type should be a deep copy', async() => {
-      server.stateManager.registerSchema('any-all', {
+      server.stateManager.defineClass('any-all', {
         ref: {
           type: 'any',
           default: {},
@@ -213,7 +213,7 @@ describe('# SharedState', () => {
 
   describe('## getUnsafe(name) - state.getValuesUnsafe()', () => {
     it('get(name) `any` type should be a reference', async() => {
-      server.stateManager.registerSchema('any-unsafe', {
+      server.stateManager.defineClass('any-unsafe', {
         ref: {
           type: 'any',
           default: {
@@ -231,7 +231,7 @@ describe('# SharedState', () => {
     });
 
     it('getValuesUnsafe() `any` type be a reference', async() => {
-      server.stateManager.registerSchema('any-all-unsafe', {
+      server.stateManager.defineClass('any-all-unsafe', {
         ref: {
           type: 'any',
           default: {},
@@ -351,7 +351,7 @@ describe('# SharedState', () => {
     });
 
     it('should not propagate event parameters on first call if `executeListener=true`', async () => {
-      server.stateManager.registerSchema('with-event', {
+      server.stateManager.defineClass('with-event', {
         bool: { type: 'boolean', event: true, },
         int: { type: 'integer', default: 20, },
       });
@@ -372,7 +372,7 @@ describe('# SharedState', () => {
     });
 
     it('should copy stored value for "any" type to have a predictable behavior', async () => {
-      server.stateManager.registerSchema('test-any', {
+      server.stateManager.defineClass('test-any', {
         any: {
           type: 'any',
           nullable: true,
@@ -555,7 +555,7 @@ describe('# SharedState - filtered attached state', () => {
     // server
     // ---------------------------------------------------
     server = new Server(config);
-    server.stateManager.registerSchema('filtered', {
+    server.stateManager.defineClass('filtered', {
       bool: {
         type: 'boolean',
         default: false,
@@ -775,7 +775,7 @@ describe(`# SharedState - Batched transport`, () => {
     localConfig.env.port = 8082;
 
     const server = new Server(localConfig);
-    server.stateManager.registerSchema('a', a);
+    server.stateManager.defineClass('a', a);
     await server.start();
 
     let batchedRequests = 0;

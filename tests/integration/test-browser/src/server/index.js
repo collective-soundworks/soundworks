@@ -28,7 +28,7 @@ server.useDefaultApplicationTemplate();
 /**
  * Register plugins and schemas
  */
-server.stateManager.registerSchema('globals', {
+server.stateManager.defineClass('globals', {
   done: {
     type: 'boolean',
     nullable: true,

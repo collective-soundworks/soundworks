@@ -27,7 +27,7 @@ import BaseStateManager from '../common/BaseStateManager.js';
  *
  * const server = new Server(config);
  * // define a class of shared state.
- * server.stateManager.registerSchema('some-global-state', {
+ * server.stateManager.defineClass('some-global-state', {
  *   myRandom: {
  *     type: 'float',
  *     default: 0,

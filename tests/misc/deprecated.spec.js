@@ -10,7 +10,7 @@ describe('# deprecated API', () => {
   describe('from v4.0.0-alpha.29', () => {
     it('SharedState#schemaName', async () => {
       const server = new Server(config);
-      server.stateManager.registerSchema('a', a);
+      server.stateManager.defineClass('a', a);
       await server.start();
 
       const state = await server.stateManager.create('a');
@@ -22,7 +22,7 @@ describe('# deprecated API', () => {
 
     it('SharedStateCollection#schemaName', async () => {
       const server = new Server(config);
-      server.stateManager.registerSchema('a', a);
+      server.stateManager.defineClass('a', a);
       await server.start();
 
       const collection = await server.stateManager.getCollection('a');
@@ -34,7 +34,7 @@ describe('# deprecated API', () => {
 
     it('SharedState#getSchema(name = null)', async () => {
       const server = new Server(config);
-      server.stateManager.registerSchema('a', a);
+      server.stateManager.defineClass('a', a);
       await server.start();
 
       const state = await server.stateManager.create('a');
@@ -46,7 +46,7 @@ describe('# deprecated API', () => {
 
     it('SharedStateCollection#getSchema(name = null)', async () => {
       const server = new Server(config);
-      server.stateManager.registerSchema('a', a);
+      server.stateManager.defineClass('a', a);
       await server.start();
 
       const collection = await server.stateManager.getCollection('a');
@@ -58,7 +58,7 @@ describe('# deprecated API', () => {
 
     it('SharedStateManager#getSchema()', async () => {
       const server = new Server(config);
-      server.stateManager.registerSchema('a', a);
+      server.stateManager.defineClass('a', a);
       await server.start();
 
       const classDescription = await server.stateManager.getClassDescription('a'); // actual

@@ -238,7 +238,7 @@ class Server {
     };
 
     // register audit state schema
-    this.#stateManager.registerSchema(AUDIT_STATE_NAME, auditClassDescription);
+    this.#stateManager.defineClass(AUDIT_STATE_NAME, auditClassDescription);
 
     logger.configure(this.#config.env.verbose);
   }
