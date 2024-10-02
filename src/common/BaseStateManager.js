@@ -21,12 +21,12 @@ import {
   GET_CLASS_DESCRIPTION_RESPONSE,
   GET_CLASS_DESCRIPTION_ERROR,
 } from './constants.js';
+import logger from './logger.js';
 
 export const kStateManagerInit = Symbol('soundworks:state-manager-init');
 export const kStateManagerDeleteState = Symbol('soundworks:state-manager-delete-state');
 // for testing purposes
 export const kStateManagerClient = Symbol('soundworks:state-manager-client');
-
 
 /**
  * Callback executed when a state is created on the network.
@@ -220,15 +220,15 @@ class BaseStateManager {
   /**
    * Return a class description from a given class name
    *
-   * @param {SharedStateClassName} className - Name of the shared state class
+   * @param {SharedStateClassName} className - Name of the shared state class.
    *  (cf. ServerStateManager)
    * @return {SharedStateClassDescription}
    * @example
-   * const classDescription = await client.stateManager.getSchema('my-class');
+   * const classDescription = await client.stateManager.getClassDescription('my-class');
    */
-  async getSchema(className) {
+  async getClassDescription(className) {
     if (this.#status !== 'inited') {
-      throw new DOMException(`Cannot execute 'getSchema' on 'StateManager': state manager is not inited. This method can be safely called only once 'client' or 'server' is inited itself`, 'InvalidStateError');
+      throw new DOMException(`Cannot execute 'getClassDescription' on 'StateManager': state manager is not inited. This method can be safely called only once 'client' or 'server' is inited itself`, 'InvalidStateError');
     }
 
     if (this.#cachedClasses.has(className)) {
@@ -239,9 +239,17 @@ class BaseStateManager {
     }
 
     return new Promise((resolve, reject) => {
-      const reqId = this.#promiseStore.add(resolve, reject, 'get-schema');
+      const reqId = this.#promiseStore.add(resolve, reject, 'BaseStateManager#getClassDescription');
       this[kStateManagerClient].transport.emit(GET_CLASS_DESCRIPTION_REQUEST, reqId, className);
     });
+  }
+
+  /**
+   * @deprecated Use {@link BaseStateManager#getClassDescription} instead.
+   */
+  async getSchema(className) {
+    logger.deprecated('BaseStateManager#getSchema', 'BaseStateManager#getClassDescription', '4.0.0-alpha.29');
+    return this.getClassDescription(className);
   }
 
   /**

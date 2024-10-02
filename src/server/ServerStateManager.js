@@ -315,7 +315,7 @@ class ServerStateManager extends BaseStateManager {
     });
 
     // ---------------------------------------------
-    // GET SCHEMA
+    // GET CLASS DESCRIPTION
     // ---------------------------------------------
     client.transport.addListener(GET_CLASS_DESCRIPTION_REQUEST, (reqId, className) => {
       if (this.#classes.has(className)) {

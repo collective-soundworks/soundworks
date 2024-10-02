@@ -50,7 +50,7 @@ class SharedStateCollection {
 
   /** @private */
   async _init() {
-    this.#classDescription = await this.#stateManager.getSchema(this.#className);
+    this.#classDescription = await this.#stateManager.getClassDescription(this.#className);
 
     // if filter is set, check that it contains only valid param names
     if (this.#filter !== null) {

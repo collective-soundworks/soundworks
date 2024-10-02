@@ -168,7 +168,7 @@ dependencies on both your server and clients.
       throw new Error(`Invalid 'logger.deprecated call: a deprecation version is required`);
     }
 
-    const msg = `[deprecation warning] '${oldAPI}' is deprecated since version ${deprecationVersion} and will be removed in next major revision, please use '${newAPI}' instead`;
+    const msg = `[Deprecation Warning] '${oldAPI}' is deprecated since version ${deprecationVersion} and will be removed in next major revision, please use '${newAPI}' instead`;
     console.warn(chalk.yellow(msg));
   }
 };

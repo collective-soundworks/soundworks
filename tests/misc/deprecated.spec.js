@@ -49,9 +49,24 @@ describe('# deprecated API', () => {
       server.stateManager.registerSchema('a', a);
       await server.start();
 
-      const collaction = await server.stateManager.getCollection('a');
-      assert.deepEqual(collaction.getDescription(), aExpectedDescription); // actual
-      assert.deepEqual(collaction.getSchema(), aExpectedDescription); // deprecated
+      const collection = await server.stateManager.getCollection('a');
+      assert.deepEqual(collection.getDescription(), aExpectedDescription); // actual
+      assert.deepEqual(collection.getSchema(), aExpectedDescription); // deprecated
+      server.stateManager.deleteSchema('a');
+      await server.stop();
+    });
+
+    it('SharedStateManager#getSchema()', async () => {
+      const server = new Server(config);
+      server.stateManager.registerSchema('a', a);
+      await server.start();
+
+      const classDescription = await server.stateManager.getClassDescription('a'); // actual
+      assert.deepEqual(classDescription, aExpectedDescription);
+
+      const schema = await server.stateManager.getSchema('a'); // deprecated
+      assert.deepEqual(schema, aExpectedDescription);
+
       server.stateManager.deleteSchema('a');
       await server.stop();
     });
