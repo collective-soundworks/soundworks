@@ -94,7 +94,7 @@ class SharedStatePrivate {
     }
 
     // attach client listeners
-    client.transport.addListener(`${UPDATE_REQUEST}-${this.id}-${remoteId}`, async (reqId, updates, context) => {
+    client.transport.addListener(`${UPDATE_REQUEST}-${this.id}-${remoteId}`, async (reqId, updates) => {
       // apply registered hooks
       const hooks = this.#manager[kServerStateManagerGetHooks](this.className);
       const values = this.#parameters.getValues();
@@ -102,7 +102,7 @@ class SharedStatePrivate {
 
       // cf. https://github.com/collective-soundworks/soundworks/issues/45
       for (let hook of hooks.values()) {
-        const result = await hook(updates, values, context);
+        const result = await hook(updates, values);
 
         if (result === null) { // explicit abort if hook returns null
           hookAborted = true;
@@ -160,7 +160,8 @@ class SharedStatePrivate {
             // no need to filter updates on requested, is blocked on client-side
             client.transport.emit(
               `${UPDATE_RESPONSE}-${this.id}-${remoteId}`,
-              reqId, acknowledgedUpdates, context,
+              reqId,
+              acknowledgedUpdates
             );
           }
 
@@ -176,7 +177,7 @@ class SharedStatePrivate {
               if (Object.keys(filteredUpdates).length > 0) {
                 peer.transport.emit(
                   `${UPDATE_NOTIFICATION}-${this.id}-${peerRemoteId}`,
-                  filteredUpdates, context,
+                  filteredUpdates,
                 );
               }
             }
@@ -187,7 +188,8 @@ class SharedStatePrivate {
             // no need to filter updates on requested, is blocked on client-side
             client.transport.emit(
               `${UPDATE_RESPONSE}-${this.id}-${remoteId}`,
-              reqId, acknowledgedUpdates, context,
+              reqId,
+              acknowledgedUpdates
             );
           }
 
@@ -202,7 +204,7 @@ class SharedStatePrivate {
               if (Object.keys(filteredUpdates).length > 0) {
                 peer.transport.emit(
                   `${UPDATE_NOTIFICATION}-${this.id}-${peerRemoteId}`,
-                  filteredUpdates, context,
+                  filteredUpdates,
                 );
               }
             }
@@ -210,7 +212,7 @@ class SharedStatePrivate {
         } else {
           // propagate back to the requester that the update has been aborted
           // ignore all other attached clients.
-          client.transport.emit(`${UPDATE_ABORT}-${this.id}-${remoteId}`, reqId, updates, context);
+          client.transport.emit(`${UPDATE_ABORT}-${this.id}-${remoteId}`, reqId, updates);
         }
       } else {
         // retrieve values from inner state (also handle immediate approriately)
@@ -220,7 +222,7 @@ class SharedStatePrivate {
           oldValues[name] = this.#parameters.get(name);
         }
         // aborted by hook (updates have been overriden to {})
-        client.transport.emit(`${UPDATE_ABORT}-${this.id}-${remoteId}`, reqId, oldValues, context);
+        client.transport.emit(`${UPDATE_ABORT}-${this.id}-${remoteId}`, reqId, oldValues);
       }
     });
 

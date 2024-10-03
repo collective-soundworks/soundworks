@@ -33,8 +33,6 @@ export const kSharedStatePromiseStore = Symbol('soundworks:shared-state-promise-
  *  applied to the state.
  * @param {Object} oldValues - Key / value pairs of the updated params before
  *  the updates has been applied to the state.
- * @param {Mixed} [context=null] - Optionnal context object that has been passed
- *  with the values updates in the `set` call.
  */
 
 /**
@@ -136,27 +134,27 @@ ${JSON.stringify(initValues, null, 2)}`);
     this[kSharedStatePromiseStore] = new PromiseStore(this.constructor.name);
 
     // add listener for state updates
-    this.#client.transport.addListener(`${UPDATE_RESPONSE}-${this.#id}-${this.#remoteId}`, async (reqId, updates, context) => {
-      const updated = await this.#commit(updates, context, true, true);
+    this.#client.transport.addListener(`${UPDATE_RESPONSE}-${this.#id}-${this.#remoteId}`, async (reqId, updates) => {
+      const updated = await this.#commit(updates, true, true);
       this[kSharedStatePromiseStore].resolve(reqId, updated);
     });
 
     // retrieve values but do not propagate to subscriptions
-    this.#client.transport.addListener(`${UPDATE_ABORT}-${this.#id}-${this.#remoteId}`, async (reqId, updates, context) => {
-      const updated = await this.#commit(updates, context, false, true);
+    this.#client.transport.addListener(`${UPDATE_ABORT}-${this.#id}-${this.#remoteId}`, async (reqId, updates) => {
+      const updated = await this.#commit(updates, false, true);
       this[kSharedStatePromiseStore].resolve(reqId, updated);
     });
 
-    this.#client.transport.addListener(`${UPDATE_NOTIFICATION}-${this.#id}-${this.#remoteId}`, async (updates, context) => {
+    this.#client.transport.addListener(`${UPDATE_NOTIFICATION}-${this.#id}-${this.#remoteId}`, async (updates) => {
       // https://github.com/collective-soundworks/soundworks/issues/18
       //
       // # note: 2002-10-03
       //
-      // `setTimeout(async () => this.#commit(updates, context, true, false));`
+      // `setTimeout(async () => this.#commit(updates, true, false));`
       // appears to be the only way to push the update commit in the next event
       // cycle so that `attach` can resolve before the update notification is
       // actually dispatched. The alternative:
-      // `Promise.resolve().then(() => this.#commit(updates, context, true, false))``
+      // `Promise.resolve().then(() => this.#commit(updates, true, false))``
       // does not behave as expected...
       //
       // However this breaks the reliability of:
@@ -170,7 +168,7 @@ ${JSON.stringify(initValues, null, 2)}`);
       // ```
       // which is far more important than the edge case reported in the issue
       // therefore this wont be fixed for now
-      this.#commit(updates, context, true, false);
+      this.#commit(updates, true, false);
     });
 
     // ---------------------------------------------
@@ -302,7 +300,7 @@ ${JSON.stringify(initValues, null, 2)}`);
     }
   }
 
-  async #commit(updates, context, propagate = true, initiator = false) {
+  async #commit(updates, propagate = true, initiator = false) {
     const newValues = {};
     const oldValues = {};
 
@@ -336,7 +334,7 @@ ${JSON.stringify(initValues, null, 2)}`);
 
     if (propagate && Object.keys(newValues).length > 0) {
       this.#onUpdateCallbacks.forEach(listener => {
-        promises.push(listener(newValues, oldValues, context));
+        promises.push(listener(newValues, oldValues));
       });
     }
 
@@ -409,26 +407,23 @@ ${JSON.stringify(initValues, null, 2)}`);
    * ```
    *
    * @param {object} updates - Key / value pairs of updates to apply to the state.
-   * @param {mixed} [context=null] - Optionnal contextual object that will be propagated
-   *   alongside the updates of the state. The context is valid only for the
-   *   current call and will be passed as third argument to all update listeners.
    * @returns {Promise<Object>} A promise to the (coerced) updates.
    *
    * @example
    * const state = await client.stateManager.attach('globals');
    * const updates = await state.set({ myParam: Math.random() });
    */
-  async set(updates, context = null) {
+  async set(updates) {
     if (this.#detached) {
       return;
     }
 
-    if (!isPlainObject(updates)) {
-      throw new TypeError(`[SharedState] State "${this.#className}": state.set(updates[, context]) should receive an object as first parameter`);
+    if (isPlainObject(arguments[0]) && isPlainObject(arguments[1])) {
+      logger.deprecated('SharedState.set(updates, context)', 'a regular parameter set with `event=true` behavior', '4.0.0-alpha.29');
     }
 
-    if (context !== null && !isPlainObject(context)) {
-      throw new TypeError(`[SharedState] State "${this.#className}": state.set(updates[, context]) should receive an object as second parameter`);
+    if (!isPlainObject(updates)) {
+      throw new TypeError(`[SharedState] State "${this.#className}": state.set(updates) should receive an object as first parameter`);
     }
 
     const newValues = {};
@@ -502,7 +497,7 @@ ${JSON.stringify(initValues, null, 2)}`);
 
     // propagate immediate params if changed
     if (propagateNow) {
-      this.#onUpdateCallbacks.forEach(listener => listener(newValues, oldValues, context));
+      this.#onUpdateCallbacks.forEach(listener => listener(newValues, oldValues));
     }
 
     // check if we can resolve immediately or if we need to go through network
@@ -521,7 +516,7 @@ ${JSON.stringify(initValues, null, 2)}`);
     // go through server-side normal behavior
     return new Promise((resolve, reject) => {
       const reqId = this[kSharedStatePromiseStore].add(resolve, reject, 'SharedState#set', forwardParams);
-      this.#client.transport.emit(`${UPDATE_REQUEST}-${this.#id}-${this.#remoteId}`, reqId, updates, context);
+      this.#client.transport.emit(`${UPDATE_REQUEST}-${this.#id}-${this.#remoteId}`, reqId, updates);
     });
   }
 
@@ -719,10 +714,10 @@ ${JSON.stringify(initValues, null, 2)}`);
    * @param {sharedStateOnUpdateCallback} callback
    *  Callback to execute when an update is applied on the state.
    * @param {Boolean} [executeListener=false] - Execute the callback immediately
-   *  with current state values. (`oldValues` will be set to `{}`, and `context` to `null`)
+   *  with current state values. Note that `oldValues` will be set to `{}`.
    * @returns {sharedStateDeleteOnUpdateCallback}
    * @example
-   * const unsubscribe = state.onUpdate(async (newValues, oldValues, context) =>  {
+   * const unsubscribe = state.onUpdate(async (newValues, oldValues) =>  {
    *   for (let [key, value] of Object.entries(newValues)) {
    *      switch (key) {
    *        // do something
@@ -738,8 +733,8 @@ ${JSON.stringify(initValues, null, 2)}`);
 
     if (executeListener === true) {
       const currentValues = this.getValues();
-      // filter `event: true` parameters from currentValues, this is missleading
-      // as we are in the context of a callback, not from an active read
+      // filter `event: true` parameters from currentValues, having them here is
+      // misleading as we are in the context of a callback, not from an active read
       const classDescription = this.getDescription();
 
       for (let name in classDescription) {
@@ -749,8 +744,7 @@ ${JSON.stringify(initValues, null, 2)}`);
       }
 
       const oldValues = {};
-      const context = null;
-      listener(currentValues, oldValues, context);
+      listener(currentValues, oldValues);
     }
 
     return () => {

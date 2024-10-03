@@ -32,7 +32,7 @@ describe('# SharedState', () => {
     server.stop();
   });
 
-  describe('## async set(updates[, context]) => updates', () => {
+  describe('## async set(updates) => updates', () => {
     it('should throw if first argument is not an object', async () => {
       const a = await server.stateManager.create('a');
 
@@ -40,25 +40,6 @@ describe('# SharedState', () => {
 
       try {
         await a.set('fail', true);
-      } catch(err) {
-        console.log(err.message);
-        errored = true;
-      }
-
-      if (errored === false) {
-        assert.fail('should throw error');
-      }
-
-      await a.delete();
-    });
-
-    it('should throw if second argument is not an object', async () => {
-      const a = await server.stateManager.create('a');
-
-      // weird stuff with async chai, did find better solution
-      let errored = false;
-      try {
-        await a.set({}, 'fail');
       } catch(err) {
         console.log(err.message);
         errored = true;
@@ -256,15 +237,13 @@ describe('# SharedState', () => {
         const statePromise = new Promise((resolve) => {
           let step = 0;
 
-          state.onUpdate((newValues, oldValues, context) => {
+          state.onUpdate((newValues, oldValues) => {
             if (step === 0) {
               assert.deepEqual(newValues, { bool: true, int: 42 });
               assert.deepEqual(oldValues, { bool: false, int: 0 });
-              assert.deepEqual(context, null);
             } else if (step === 1) {
               assert.deepEqual(newValues, { bool: false, int: 76 });
               assert.deepEqual(oldValues, { bool: true, int: 42 });
-              assert.deepEqual(context, { someContext: true });
               resolve();
             } else {
               reject('something wrong happened');
@@ -277,15 +256,13 @@ describe('# SharedState', () => {
         const attachedPromise = new Promise((resolve) => {
           let step = 0;
 
-          attached.onUpdate((newValues, oldValues, context) => {
+          attached.onUpdate((newValues, oldValues) => {
             if (step === 0) {
               assert.deepEqual(newValues, { bool: true, int: 42 });
               assert.deepEqual(oldValues, { bool: false, int: 0 });
-              assert.deepEqual(context, null);
             } else if (step === 1) {
               assert.deepEqual(newValues, { bool: false, int: 76 });
               assert.deepEqual(oldValues, { bool: true, int: 42 });
-              assert.deepEqual(context, { someContext: true });
               resolve();
             } else {
               reject('something wrong happened');
@@ -296,7 +273,7 @@ describe('# SharedState', () => {
         });
 
         await state.set({ bool: true, int: 42 });
-        await state.set({ bool: false, int: 76 }, { someContext: true });
+        await state.set({ bool: false, int: 76 });
 
         await Promise.all([statePromise, attachedPromise]);
 
@@ -337,11 +314,10 @@ describe('# SharedState', () => {
       const a = await server.stateManager.create('a');
 
       let onUpdateCalled = false;
-      const unsubsribe = a.onUpdate((newValues, oldValues, context) => {
+      const unsubsribe = a.onUpdate((newValues, oldValues) => {
         onUpdateCalled = true;
         assert.deepEqual(newValues, { bool: false, int: 0 });
         assert.deepEqual(oldValues, {});
-        assert.deepEqual(context, null);
       }, true);
 
       await delay(10);
@@ -358,11 +334,10 @@ describe('# SharedState', () => {
       const state = await server.stateManager.create('with-event');
 
       let onUpdateCalled = false;
-      state.onUpdate((newValues, oldValues, context) => {
+      state.onUpdate((newValues, oldValues) => {
         onUpdateCalled = true;
         assert.deepEqual(newValues, { int: 20 });
         assert.deepEqual(oldValues, {});
-        assert.deepEqual(context, null);
       }, true);
 
       await delay(10);

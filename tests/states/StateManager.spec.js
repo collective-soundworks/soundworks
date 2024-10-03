@@ -776,11 +776,10 @@ describe(`# StateManager`, () => {
     it('hook API should be `hook(updates, currentValues, context)`', async () => {
       return new Promise(async (resolve, reject) => {
         server.stateManager.defineClass('hooked', hookSchema);
-        server.stateManager.registerUpdateHook('hooked', (updates, currentValues, context) => {
+        server.stateManager.registerUpdateHook('hooked', (updates, currentValues) => {
           try {
             assert.deepEqual(updates, { name: 'test' });
             assert.deepEqual(currentValues, { name: null, value: null });
-            assert.deepEqual(context, { myContext: true });
             resolve();
           } catch(err) {
             reject(err);
@@ -790,7 +789,7 @@ describe(`# StateManager`, () => {
 
         const h = await server.stateManager.create('hooked');
 
-        await h.set({ name: 'test' }, { myContext: true });
+        await h.set({ name: 'test' });
 
         server.stateManager.deleteClass('hooked');
       });

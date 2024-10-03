@@ -70,5 +70,16 @@ describe('# deprecated API', () => {
       server.stateManager.deleteClass('a');
       await server.stop();
     });
+
+    it('SharedState#set(updates, context)', async () => {
+      const server = new Server(config);
+      server.stateManager.defineClass('a', a);
+      await server.start();
+
+      const state = await server.stateManager.create('a');
+      state.set({}, {});
+
+      await server.stop();
+    });
   });
 });
