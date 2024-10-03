@@ -128,14 +128,17 @@ class ServerSockets {
     this.#sockets.delete(socket);
   }
 
+  /** @private */
   entries() {
     return this.#sockets.entries();
   }
 
+  /** @private */
   keys() {
     return this.#sockets.keys();
   }
 
+  /** @private */
   values() {
     return this.#sockets.values();
   }
