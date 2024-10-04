@@ -163,14 +163,23 @@ dependencies on both your server and clients.
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!`);
   },
 
-  deprecated(oldAPI, newAPI, deprecationVersion) {
-    if (!deprecationVersion) {
+  deprecated(oldAPI, newAPI, lastSupportedVersion) {
+    if (!lastSupportedVersion) {
       throw new Error(`Invalid 'logger.deprecated call: a deprecation version is required`);
     }
 
-    const msg = `[Deprecation Warning] ${oldAPI} is deprecated (last supported version: ${deprecationVersion}) and will be removed in next major revision, please use ${newAPI} instead`;
+    const msg = `[Deprecation Warning] ${oldAPI} is deprecated (last supported version: ${lastSupportedVersion}) and will be removed in next major revision, please use ${newAPI} instead.`;
     console.warn(chalk.yellow(msg));
-  }
+  },
+
+  removed(oldAPI, hint, lastSupportedVersion) {
+    if (!lastSupportedVersion) {
+      throw new Error(`Invalid 'logger.deprecated call: a deprecation version is required`);
+    }
+
+    const msg = `[Removed API] ${oldAPI} has been removed (last supported version: ${lastSupportedVersion}), please use ${hint} instead.`;
+    throw new Error(msg);
+  },
 };
 
 export default logger;

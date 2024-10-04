@@ -224,10 +224,10 @@ class SharedStateCollection {
    * Update all states of the collection with given values.
    * @param {object} updates - key / value pairs of updates to apply to the state.
    */
-  async set(updates) {
+  async set(...args) {
     // we can delegate to the state.set(update) method for throwing in case of
     // filtered keys, as the Promise.all will reject on first reject Promise
-    const promises = this.#states.map(state => state.set(updates));
+    const promises = this.#states.map(state => state.set(...args));
     return Promise.all(promises);
   }
 

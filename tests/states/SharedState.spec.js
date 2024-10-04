@@ -101,6 +101,13 @@ describe('# SharedState', () => {
       await a.delete();
     });
 
+    it('should support `set(name, value)`', async () => {
+      const a = await server.stateManager.create('a');
+      await a.set('bool', true);
+      assert.deepEqual(a.get('bool'), true);
+      await a.delete();
+    });
+
     it('should resolve after `onUpdate` even if onUpdate callback is async', async () => {
       const a = await server.stateManager.create('a');
       let asyncCallbackCalled = false;
@@ -608,7 +615,7 @@ describe('# SharedState - filtered attached state', () => {
     });
   });
 
-  describe(`## set(updates)`, () => {
+  describe(`## async set(updates)`, () => {
     it(`should throw early if trying to set modify a param which is not filtered`, async () => {
       const filter = ['bool', 'string'];
       const owned = await server.stateManager.create('filtered');

@@ -6,8 +6,8 @@ import { Client } from '../../src/client/index.js';
 import config from '../utils/config.js';
 import { a, aExpectedDescription } from '../utils/class-description.js';
 
-describe('# deprecated API', () => {
-  describe('from v4.0.0-alpha.29', () => {
+describe('from v4.0.0-alpha.29', () => {
+  describe('# deprecated API', () => {
     it('SharedState#schemaName', async () => {
       const server = new Server(config);
       server.stateManager.defineClass('a', a);
@@ -70,15 +70,24 @@ describe('# deprecated API', () => {
       server.stateManager.deleteClass('a');
       await server.stop();
     });
+  });
 
+  describe('# removed API', () => {
     it('SharedState#set(updates, context)', async () => {
       const server = new Server(config);
       server.stateManager.defineClass('a', a);
       await server.start();
 
+      let errored = false;
       const state = await server.stateManager.create('a');
-      state.set({}, {});
+      try {
+        await state.set({}, {});
+      } catch (err) {
+        errored = true;
+        console.log(err.message);
+      }
 
+      assert.isTrue(errored);
       await server.stop();
     });
   });

@@ -1,4 +1,4 @@
-import { isPlainObject } from '@ircam/sc-utils';
+import { isPlainObject, isString } from '@ircam/sc-utils';
 
 import ParameterBag from './ParameterBag.js';
 import PromiseStore from './PromiseStore.js';
@@ -419,11 +419,15 @@ ${JSON.stringify(initValues, null, 2)}`);
     }
 
     if (isPlainObject(arguments[0]) && isPlainObject(arguments[1])) {
-      logger.deprecated('SharedState.set(updates, context)', 'a regular parameter set with `event=true` behavior', '4.0.0-alpha.29');
+      logger.removed('`context` argument in SharedState.set(updates, context)', 'a regular parameter set with `event=true` behavior', '4.0.0-alpha.29');
     }
 
-    if (!isPlainObject(updates)) {
-      throw new TypeError(`[SharedState] State "${this.#className}": state.set(updates) should receive an object as first parameter`);
+    if (arguments.length === 2 && isString(updates)) {
+      updates = { [updates]: arguments[1] };
+    } else if (isPlainObject(updates)) {
+      updates = updates;
+    } else {
+      throw new TypeError(`Cannot execute 'set' on SharedState: 'updates' argument should be an object`);
     }
 
     const newValues = {};

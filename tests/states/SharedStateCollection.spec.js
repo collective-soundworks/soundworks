@@ -192,7 +192,7 @@ describe(`# SharedStateCollection`, () => {
     });
   });
 
-  describe(`## set(updates, context = null)`, () => {
+  describe(`## set(updates)`, () => {
     it(`should properly progate updates`, async () => {
       const state0 = await clients[0].stateManager.create('a');
       const state1 = await clients[1].stateManager.create('a');
@@ -208,12 +208,33 @@ describe(`# SharedStateCollection`, () => {
       const expected = [{ bool: true }, { bool: true }];
       assert.deepEqual(result, expected);
 
-      await delay(50);
+      await delay(10);
       // should be propagated to everyone
       assert.equal(state0.get('bool'), true);
       assert.equal(state1.get('bool'), true);
       assert.equal(attached0.get('bool'), true);
       assert.equal(attached1.get('bool'), true);
+
+      await collection.detach();
+      await state0.delete();
+      await state1.delete();
+    });
+
+    it('should support `set(name, value)`', async () => {
+      const state0 = await clients[0].stateManager.create('a');
+      const state1 = await clients[1].stateManager.create('a');
+      const collection = await clients[2].stateManager.getCollection('a');
+
+      const updates = await collection.set('bool', true);
+      const expected = [{ bool: true }, { bool: true }];
+      assert.deepEqual(updates, expected);
+      assert.deepEqual(collection.get('bool'), [true, true]);
+
+      // "real" state are updated async compared to the collection
+      await delay(10);
+      // should be propagated to everyone
+      assert.equal(state0.get('bool'), true);
+      assert.equal(state1.get('bool'), true);
 
       await collection.detach();
       await state0.delete();
@@ -328,11 +349,10 @@ describe(`# SharedStateCollection`, () => {
       const collection = await server.stateManager.getCollection('with-event');
 
       let onUpdateCalled = false;
-      collection.onUpdate((state, newValues, oldValues, context) => {
+      collection.onUpdate((state, newValues, oldValues) => {
         onUpdateCalled = true;
         assert.deepEqual(newValues, { int: 20 });
         assert.deepEqual(oldValues, {});
-        assert.deepEqual(context, null);
       }, true);
 
       await delay(10);
