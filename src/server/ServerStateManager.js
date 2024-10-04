@@ -176,7 +176,7 @@ class ServerStateManager extends BaseStateManager {
             const classDescription = this.#classes.get(className);
             const stateId = generateStateId.next().value;
             const remoteId = generateRemoteId.next().value;
-            const state = new SharedStatePrivate(stateId, className, classDescription, this, initValues);
+            const state = new SharedStatePrivate(this, className, classDescription, stateId, initValues);
 
             // attach client to the state as owner
             const isOwner = true;
@@ -190,7 +190,12 @@ class ServerStateManager extends BaseStateManager {
 
             client.transport.emit(
               CREATE_RESPONSE,
-              reqId, stateId, remoteId, className, classDescriptionOption, currentValues,
+              reqId,
+              stateId,
+              remoteId,
+              className,
+              classDescriptionOption,
+              currentValues,
             );
 
             const isObservable = this.#isObservableState(state);
@@ -202,14 +207,10 @@ class ServerStateManager extends BaseStateManager {
             }
           } catch (err) {
             const msg = `[stateManager] Cannot create state "${className}", ${err.message}`;
-            console.error(msg);
-
             client.transport.emit(CREATE_ERROR, reqId, msg);
           }
         } else {
           const msg = `[stateManager] Cannot create state "${className}", class is not defined`;
-          console.error(msg);
-
           client.transport.emit(CREATE_ERROR, reqId, msg);
         }
       },
@@ -257,8 +258,6 @@ class ServerStateManager extends BaseStateManager {
 
               if (!isValid) {
                 const msg = `[stateManager] Cannot attach, invalid filter (${filter.join(', ')}) for class "${className}"`;
-                console.error(msg);
-
                 return client.transport.emit(ATTACH_ERROR, reqId, msg);
               }
             }
@@ -267,19 +266,21 @@ class ServerStateManager extends BaseStateManager {
 
             client.transport.emit(
               ATTACH_RESPONSE,
-              reqId, state.id, remoteId, className, classDescriptionOption, currentValues, filter,
+              reqId,
+              state.id,
+              remoteId,
+              className,
+              classDescriptionOption,
+              currentValues,
+              filter,
             );
 
           } else {
             const msg = `[stateManager] Cannot attach, no existing state for class "${className}" with stateId: "${stateId}"`;
-            console.error(msg);
-
             client.transport.emit(ATTACH_ERROR, reqId, msg);
           }
         } else {
           const msg = `[stateManager] Cannot attach, class "${className}" does not exists`;
-          console.error(msg);
-
           client.transport.emit(ATTACH_ERROR, reqId, msg);
         }
       },
@@ -290,14 +291,14 @@ class ServerStateManager extends BaseStateManager {
     // ---------------------------------------------
     client.transport.addListener(OBSERVE_REQUEST, (reqId, observedClassName) => {
       if (observedClassName === null || this.#classes.has(observedClassName)) {
-        const statesInfos = [];
+        const list = [];
 
         this.#sharedStatePrivateById.forEach(state => {
           const isObservable = this.#isObservableState(state);
 
           if (isObservable) {
             const { className, id, creatorId } = state;
-            statesInfos.push([className, id, creatorId]);
+            list.push([className, id, creatorId]);
           }
         });
 
@@ -305,7 +306,7 @@ class ServerStateManager extends BaseStateManager {
         // callback throws, the client would never be added to the list
         this.#observers.add(client);
 
-        client.transport.emit(OBSERVE_RESPONSE, reqId, ...statesInfos);
+        client.transport.emit(OBSERVE_RESPONSE, reqId, ...list);
       } else {
         const msg = `[stateManager] Cannot observe class "${observedClassName}", class does not exists`;
         client.transport.emit(OBSERVE_ERROR, reqId, msg);
@@ -322,7 +323,12 @@ class ServerStateManager extends BaseStateManager {
     client.transport.addListener(GET_CLASS_DESCRIPTION_REQUEST, (reqId, className) => {
       if (this.#classes.has(className)) {
         const classDescription = this.#classes.get(className);
-        client.transport.emit(GET_CLASS_DESCRIPTION_RESPONSE, reqId, className, classDescription);
+        client.transport.emit(
+          GET_CLASS_DESCRIPTION_RESPONSE,
+          reqId,
+          className,
+          classDescription
+        );
       } else {
         const msg = `[stateManager] Cannot get class "${className}", class does not exists`;
         client.transport.emit(GET_CLASS_DESCRIPTION_ERROR, reqId, msg);

@@ -53,10 +53,10 @@ class SharedStatePrivate {
   #creatorRemoteId = null;
   #attachedClients = new Map();
 
-  constructor(id, className, classDefinition, manager, initValues = {}) {
-    this.#id = id;
-    this.#className = className;
+  constructor(manager, className, classDefinition, id, initValues = {}) {
     this.#manager = manager;
+    this.#className = className;
+    this.#id = id;
     this.#parameters = new ParameterBag(classDefinition, initValues);
   }
 

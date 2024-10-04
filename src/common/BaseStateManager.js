@@ -95,21 +95,33 @@ class BaseStateManager {
     // ---------------------------------------------
     // CREATE
     // ---------------------------------------------
-    this[kStateManagerClient].transport.addListener(CREATE_RESPONSE, (reqId, stateId, remoteId, className, classDescription, initValues) => {
-      // cache class description to save some bandwidth
-      // @note: when we make the class dynamic, we will need some mecanism to
-      // invalidate the cached description
-      if (!this.#cachedClasses.has(className)) {
-        this.#cachedClasses.set(className, classDescription);
+    this[kStateManagerClient].transport.addListener(
+      CREATE_RESPONSE,
+      (reqId, stateId, remoteId, className, classDescription, initValues) => {
+        // cache class description to save some bandwidth
+        // @note: when we make the class dynamic, we will need some mecanism to
+        // invalidate the cached description
+        if (!this.#cachedClasses.has(className)) {
+          this.#cachedClasses.set(className, classDescription);
+        }
+
+        classDescription = this.#cachedClasses.get(className);
+
+        const state = new SharedState({
+          manager: this,
+          className,
+          classDescription,
+          stateId,
+          remoteId,
+          isOwner: true,
+          initValues,
+          filter: null, // owner cannot filter paramters
+        });
+
+        this.#statesById.set(state.id, state);
+        this.#promiseStore.resolve(reqId, state);
       }
-
-      classDescription = this.#cachedClasses.get(className);
-
-      const state = new SharedState(stateId, remoteId, className, classDescription, this[kStateManagerClient], true, this, initValues, null);
-
-      this.#statesById.set(state.id, state);
-      this.#promiseStore.resolve(reqId, state);
-    });
+    );
 
     this[kStateManagerClient].transport.addListener(CREATE_ERROR, (reqId, msg) => {
       this.#promiseStore.reject(reqId, msg);
@@ -118,21 +130,33 @@ class BaseStateManager {
     // ---------------------------------------------
     // ATTACH (when creator, is attached by default)
     // ---------------------------------------------
-    this[kStateManagerClient].transport.addListener(ATTACH_RESPONSE, (reqId, stateId, remoteId, className, classDescription, currentValues, filter) => {
-      // cache class description to save some bandwidth
-      // @note: when we make the class dynamic, we will need some mecanism to
-      // invalidate the cached description
-      if (!this.#cachedClasses.has(className)) {
-        this.#cachedClasses.set(className, classDescription);
+    this[kStateManagerClient].transport.addListener(
+      ATTACH_RESPONSE,
+      (reqId, stateId, remoteId, className, classDescription, currentValues, filter) => {
+        // cache class description to save some bandwidth
+        // @note: when we make the class dynamic, we will need some mecanism to
+        // invalidate the cached description
+        if (!this.#cachedClasses.has(className)) {
+          this.#cachedClasses.set(className, classDescription);
+        }
+
+        classDescription = this.#cachedClasses.get(className);
+
+        const state = new SharedState({
+          manager: this,
+          className,
+          classDescription,
+          stateId,
+          remoteId,
+          isOwner: false,
+          initValues: currentValues,
+          filter,
+        });
+
+        this.#statesById.set(state.id, state);
+        this.#promiseStore.resolve(reqId, state);
       }
-
-      classDescription = this.#cachedClasses.get(className);
-
-      const state = new SharedState(stateId, remoteId, className, classDescription, this[kStateManagerClient], false, this, currentValues, filter);
-
-      this.#statesById.set(state.id, state);
-      this.#promiseStore.resolve(reqId, state);
-    });
+    );
 
     this[kStateManagerClient].transport.addListener(ATTACH_ERROR, (reqId, msg) => {
       this.#promiseStore.reject(reqId, msg);
@@ -180,16 +204,19 @@ class BaseStateManager {
       this.#promiseStore.reject(reqId, msg);
     });
 
-    this[kStateManagerClient].transport.addListener(OBSERVE_NOTIFICATION, (className, stateId, nodeId) => {
-      this.#observeListeners.forEach(observeInfos => {
-        const [observedClassName, callback, options] = observeInfos;
-        const filter = this.#filterObserve(observedClassName, className, nodeId, options);
+    this[kStateManagerClient].transport.addListener(
+      OBSERVE_NOTIFICATION,
+      (className, stateId, nodeId) => {
+        this.#observeListeners.forEach(observeInfos => {
+          const [observedClassName, callback, options] = observeInfos;
+          const filter = this.#filterObserve(observedClassName, className, nodeId, options);
 
-        if (!filter) {
-          callback(className, stateId, nodeId);
-        }
-      });
-    });
+          if (!filter) {
+            callback(className, stateId, nodeId);
+          }
+        });
+      }
+    );
 
     // ---------------------------------------------
     // Clear cache when a shared state class is deleted
@@ -201,14 +228,17 @@ class BaseStateManager {
     // ---------------------------------------------
     // Get class description
     // ---------------------------------------------
-    this[kStateManagerClient].transport.addListener(GET_CLASS_DESCRIPTION_RESPONSE, (reqId, className, classDescription) => {
-      if (!this.#cachedClasses.has(className)) {
-        this.#cachedClasses.set(className, classDescription);
+    this[kStateManagerClient].transport.addListener(
+      GET_CLASS_DESCRIPTION_RESPONSE,
+      (reqId, className, classDescription) => {
+        if (!this.#cachedClasses.has(className)) {
+          this.#cachedClasses.set(className, classDescription);
+        }
+        // return a full class description
+        const parameterBag = new ParameterBag(classDescription);
+        this.#promiseStore.resolve(reqId, parameterBag.getDescription());
       }
-      // return a full class description
-      const parameterBag = new ParameterBag(classDescription);
-      this.#promiseStore.resolve(reqId, parameterBag.getDescription());
-    });
+    );
 
     this[kStateManagerClient].transport.addListener(GET_CLASS_DESCRIPTION_ERROR, (reqId, msg) => {
       this.#promiseStore.reject(reqId, msg);

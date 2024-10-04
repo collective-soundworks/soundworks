@@ -17,6 +17,7 @@ import {
 } from './constants.js';
 
 import {
+  kStateManagerClient,
   kStateManagerDeleteState,
 } from './BaseStateManager.js';
 
@@ -112,13 +113,22 @@ class SharedState {
   #onDetachCallbacks = new Set();
   #onDeleteCallbacks = new Set();
 
-  constructor(id, remoteId, className, classDescription, client, isOwner, manager, initValues, filter) {
-    this.#id = id;
-    this.#remoteId = remoteId;
-    this.#className = className;
-    this.#isOwner = isOwner; // may be any node
-    this.#client = client;
+  constructor({
+    stateId,
+    remoteId,
+    className,
+    classDescription,
+    isOwner,
+    manager,
+    initValues,
+    filter,
+  }) {
     this.#manager = manager;
+    this.#client = manager[kStateManagerClient];
+    this.#className = className;
+    this.#id = stateId;
+    this.#remoteId = remoteId;
+    this.#isOwner = isOwner; // may be any node
     this.#filter = filter;
 
     try {
