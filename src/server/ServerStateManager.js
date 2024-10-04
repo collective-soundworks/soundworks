@@ -1,4 +1,4 @@
-import { idGenerator, isString, isPlainObject } from '@ircam/sc-utils';
+import { counter, isString, isPlainObject } from '@ircam/sc-utils';
 import clonedeep from 'lodash/cloneDeep.js';
 
 import BaseStateManager, {
@@ -34,8 +34,8 @@ import SharedStatePrivate, {
 import logger from '../common/logger.js';
 
 
-const generateStateId = idGenerator();
-const generateRemoteId = idGenerator();
+const generateStateId = counter();
+const instanceIdGenerator = counter();
 
 export const kServerStateManagerAddClient = Symbol('soundworks:server-state-manager-add-client');
 export const kServerStateManagerRemoveClient = Symbol('soundworks:server-state-manager-remove-client');
@@ -174,14 +174,14 @@ class ServerStateManager extends BaseStateManager {
         if (this.#classes.has(className)) {
           try {
             const classDescription = this.#classes.get(className);
-            const stateId = generateStateId.next().value;
-            const remoteId = generateRemoteId.next().value;
+            const stateId = generateStateId();
+            const instanceId = instanceIdGenerator();
             const state = new SharedStatePrivate(this, className, classDescription, stateId, initValues);
 
             // attach client to the state as owner
             const isOwner = true;
             const filter = null;
-            state[kSharedStatePrivateAttachClient](remoteId, client, isOwner, filter);
+            state[kSharedStatePrivateAttachClient](instanceId, client, isOwner, filter);
 
             this.#sharedStatePrivateById.set(stateId, state);
 
@@ -192,7 +192,7 @@ class ServerStateManager extends BaseStateManager {
               CREATE_RESPONSE,
               reqId,
               stateId,
-              remoteId,
+              instanceId,
               className,
               classDescriptionOption,
               currentValues,
@@ -244,7 +244,7 @@ class ServerStateManager extends BaseStateManager {
             // @note - we use a unique remote id to allow a client to attach
             // several times to the same state.
             // i.e. same state -> several remote attach on the same node
-            const remoteId = generateRemoteId.next().value;
+            const instanceId = instanceIdGenerator();
             const isOwner = false;
             const currentValues = state.parameters.getValues();
             const classDescription = this.#classes.get(className);
@@ -262,13 +262,13 @@ class ServerStateManager extends BaseStateManager {
               }
             }
 
-            state[kSharedStatePrivateAttachClient](remoteId, client, isOwner, filter);
+            state[kSharedStatePrivateAttachClient](instanceId, client, isOwner, filter);
 
             client.transport.emit(
               ATTACH_RESPONSE,
               reqId,
               state.id,
-              remoteId,
+              instanceId,
               className,
               classDescriptionOption,
               currentValues,
@@ -352,25 +352,25 @@ class ServerStateManager extends BaseStateManager {
 
       // define if the client is the creator of the state, in which case
       // everybody must delete it
-      for (let [remoteId, clientInfos] of state.attachedClients) {
+      for (let [instanceId, clientInfos] of state.attachedClients) {
         const attachedClient = clientInfos.client;
 
-        if (nodeId === attachedClient.id && remoteId === state.creatorRemoteId) {
+        if (nodeId === attachedClient.id && instanceId === state.creatorInstanceId) {
           deleteState = true;
         }
       }
 
-      for (let [remoteId, clientInfos] of state.attachedClients) {
+      for (let [instanceId, clientInfos] of state.attachedClients) {
         const attachedClient = clientInfos.client;
 
         if (nodeId === attachedClient.id) {
-          state[kSharedStatePrivateDetachClient](remoteId, attachedClient);
+          state[kSharedStatePrivateDetachClient](instanceId, attachedClient);
         }
 
         if (deleteState) {
-          if (remoteId !== state.creatorRemoteId) {
+          if (instanceId !== state.creatorinstanceId) {
             // send notification to other attached nodes
-            attachedClient.transport.emit(`${DELETE_NOTIFICATION}-${state.id}-${remoteId}`);
+            attachedClient.transport.emit(`${DELETE_NOTIFICATION}-${state.id}-${instanceId}`);
           }
 
           this.#sharedStatePrivateById.delete(state.id);
@@ -452,10 +452,10 @@ class ServerStateManager extends BaseStateManager {
     // @note: deleting schema
     for (let [_, state] of this.#sharedStatePrivateById) {
       if (state.className === className) {
-        for (let [remoteId, clientInfos] of state.attachedClients) {
+        for (let [instanceId, clientInfos] of state.attachedClients) {
           const attached = clientInfos.client;
-          state[kSharedStatePrivateDetachClient](remoteId, attached);
-          attached.transport.emit(`${DELETE_NOTIFICATION}-${state.id}-${remoteId}`);
+          state[kSharedStatePrivateDetachClient](instanceId, attached);
+          attached.transport.emit(`${DELETE_NOTIFICATION}-${state.id}-${instanceId}`);
         }
 
         this.#sharedStatePrivateById.delete(state.id);

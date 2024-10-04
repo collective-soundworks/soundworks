@@ -50,7 +50,7 @@ class SharedStatePrivate {
   #manager = null;
   #parameters = null;
   #creatorId = null;
-  #creatorRemoteId = null;
+  #creatorInstanceId = null;
   #attachedClients = new Map();
 
   constructor(manager, className, classDefinition, id, initValues = {}) {
@@ -72,8 +72,8 @@ class SharedStatePrivate {
     return this.#creatorId;
   }
 
-  get creatorRemoteId() {
-    return this.#creatorRemoteId;
+  get creatorInstanceId() {
+    return this.#creatorInstanceId;
   }
 
   get attachedClients() {
@@ -84,17 +84,17 @@ class SharedStatePrivate {
     return this.#parameters;
   }
 
-  [kSharedStatePrivateAttachClient](remoteId, client, isOwner, filter) {
+  [kSharedStatePrivateAttachClient](instanceId, client, isOwner, filter) {
     const clientInfos = { client, isOwner, filter };
-    this.#attachedClients.set(remoteId, clientInfos);
+    this.#attachedClients.set(instanceId, clientInfos);
 
     if (isOwner) {
       this.#creatorId = client.id;
-      this.#creatorRemoteId = remoteId;
+      this.#creatorInstanceId = instanceId;
     }
 
     // attach client listeners
-    client.transport.addListener(`${UPDATE_REQUEST}-${this.id}-${remoteId}`, async (reqId, updates) => {
+    client.transport.addListener(`${UPDATE_REQUEST}-${this.id}-${instanceId}`, async (reqId, updates) => {
       // apply registered hooks
       const hooks = this.#manager[kServerStateManagerGetHooks](this.className);
       const values = this.#parameters.getValues();
@@ -153,30 +153,30 @@ class SharedStatePrivate {
           // itself an update in reaction to an update. Propagating to server last
           // alllows to maintain network messages order consistent.
           //
-          // @note - remoteId correspond to unique remote state id
+          // @note - instanceId correspond to unique remote state id
 
           // propagate RESPONSE to the client that originates the request if not the server
           if (client.id !== -1) {
             // no need to filter updates on requested, is blocked on client-side
             client.transport.emit(
-              `${UPDATE_RESPONSE}-${this.id}-${remoteId}`,
+              `${UPDATE_RESPONSE}-${this.id}-${instanceId}`,
               reqId,
               acknowledgedUpdates
             );
           }
 
           // propagate NOTIFICATION to all attached clients except server
-          for (let [peerRemoteId, clientInfos] of this.#attachedClients) {
+          for (let [peerInstanceId, clientInfos] of this.#attachedClients) {
             const peer = clientInfos.client;
 
-            if (remoteId !== peerRemoteId && peer.id !== -1) {
+            if (instanceId !== peerInstanceId && peer.id !== -1) {
               const filter = clientInfos.filter;
               const filteredUpdates = filterUpdates(acknowledgedUpdates, filter);
 
               // propagate only if there something left after applying the filter
               if (Object.keys(filteredUpdates).length > 0) {
                 peer.transport.emit(
-                  `${UPDATE_NOTIFICATION}-${this.id}-${peerRemoteId}`,
+                  `${UPDATE_NOTIFICATION}-${this.id}-${peerInstanceId}`,
                   filteredUpdates,
                 );
               }
@@ -187,23 +187,23 @@ class SharedStatePrivate {
           if (client.id === -1) {
             // no need to filter updates on requested, is blocked on client-side
             client.transport.emit(
-              `${UPDATE_RESPONSE}-${this.id}-${remoteId}`,
+              `${UPDATE_RESPONSE}-${this.id}-${instanceId}`,
               reqId,
               acknowledgedUpdates
             );
           }
 
           // propagate NOTIFICATION to other state attached on the server
-          for (let [peerRemoteId, clientInfos] of this.#attachedClients) {
+          for (let [peerInstanceId, clientInfos] of this.#attachedClients) {
             const peer = clientInfos.client;
 
-            if (remoteId !== peerRemoteId && peer.id === -1) {
+            if (instanceId !== peerInstanceId && peer.id === -1) {
               const filter = clientInfos.filter;
               const filteredUpdates = filterUpdates(acknowledgedUpdates, filter);
 
               if (Object.keys(filteredUpdates).length > 0) {
                 peer.transport.emit(
-                  `${UPDATE_NOTIFICATION}-${this.id}-${peerRemoteId}`,
+                  `${UPDATE_NOTIFICATION}-${this.id}-${peerInstanceId}`,
                   filteredUpdates,
                 );
               }
@@ -212,7 +212,7 @@ class SharedStatePrivate {
         } else {
           // propagate back to the requester that the update has been aborted
           // ignore all other attached clients.
-          client.transport.emit(`${UPDATE_ABORT}-${this.id}-${remoteId}`, reqId, updates);
+          client.transport.emit(`${UPDATE_ABORT}-${this.id}-${instanceId}`, reqId, updates);
         }
       } else {
         // retrieve values from inner state (also handle immediate approriately)
@@ -222,13 +222,13 @@ class SharedStatePrivate {
           oldValues[name] = this.#parameters.get(name);
         }
         // aborted by hook (updates have been overriden to {})
-        client.transport.emit(`${UPDATE_ABORT}-${this.id}-${remoteId}`, reqId, oldValues);
+        client.transport.emit(`${UPDATE_ABORT}-${this.id}-${instanceId}`, reqId, oldValues);
       }
     });
 
     if (isOwner) {
       // delete only if creator
-      client.transport.addListener(`${DELETE_REQUEST}-${this.id}-${remoteId}`, (reqId) => {
+      client.transport.addListener(`${DELETE_REQUEST}-${this.id}-${instanceId}`, (reqId) => {
         this.#manager[kServerStateManagerDeletePrivateState](this.id);
         // --------------------------------------------------------------------
         // WARNING - MAKE SURE WE DON'T HAVE PROBLEM W/ THAT
@@ -236,32 +236,32 @@ class SharedStatePrivate {
         // @todo - propagate server-side last, because if a subscription function sends a
         // message to a client, network messages order are kept coherent
         // this._subscriptions.forEach(func => func(updated));
-        for (let [remoteId, clientInfos] of this.#attachedClients) {
+        for (let [instanceId, clientInfos] of this.#attachedClients) {
           const attached = clientInfos.client;
-          this[kSharedStatePrivateDetachClient](remoteId, attached);
+          this[kSharedStatePrivateDetachClient](instanceId, attached);
 
-          if (remoteId === this.#creatorRemoteId) {
-            attached.transport.emit(`${DELETE_RESPONSE}-${this.id}-${remoteId}`, reqId);
+          if (instanceId === this.#creatorInstanceId) {
+            attached.transport.emit(`${DELETE_RESPONSE}-${this.id}-${instanceId}`, reqId);
           } else {
-            attached.transport.emit(`${DELETE_NOTIFICATION}-${this.id}-${remoteId}`);
+            attached.transport.emit(`${DELETE_NOTIFICATION}-${this.id}-${instanceId}`);
           }
         }
       });
     } else {
       // detach only if not creator
-      client.transport.addListener(`${DETACH_REQUEST}-${this.id}-${remoteId}`, (reqId) => {
-        this[kSharedStatePrivateDetachClient](remoteId, client);
-        client.transport.emit(`${DETACH_RESPONSE}-${this.id}-${remoteId}`, reqId);
+      client.transport.addListener(`${DETACH_REQUEST}-${this.id}-${instanceId}`, (reqId) => {
+        this[kSharedStatePrivateDetachClient](instanceId, client);
+        client.transport.emit(`${DETACH_RESPONSE}-${this.id}-${instanceId}`, reqId);
       });
     }
   }
 
-  [kSharedStatePrivateDetachClient](remoteId, client) {
-    this.#attachedClients.delete(remoteId);
+  [kSharedStatePrivateDetachClient](instanceId, client) {
+    this.#attachedClients.delete(instanceId);
     // delete listeners
-    client.transport.removeAllListeners(`${UPDATE_REQUEST}-${this.id}-${remoteId}`);
-    client.transport.removeAllListeners(`${DELETE_REQUEST}-${this.id}-${remoteId}`);
-    client.transport.removeAllListeners(`${DETACH_REQUEST}-${this.id}-${remoteId}`);
+    client.transport.removeAllListeners(`${UPDATE_REQUEST}-${this.id}-${instanceId}`);
+    client.transport.removeAllListeners(`${DELETE_REQUEST}-${this.id}-${instanceId}`);
+    client.transport.removeAllListeners(`${DETACH_REQUEST}-${this.id}-${instanceId}`);
   }
 }
 

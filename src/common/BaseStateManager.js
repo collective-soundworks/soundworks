@@ -97,7 +97,7 @@ class BaseStateManager {
     // ---------------------------------------------
     this[kStateManagerClient].transport.addListener(
       CREATE_RESPONSE,
-      (reqId, stateId, remoteId, className, classDescription, initValues) => {
+      (reqId, stateId, instanceId, className, classDescription, initValues) => {
         // cache class description to save some bandwidth
         // @note: when we make the class dynamic, we will need some mecanism to
         // invalidate the cached description
@@ -112,7 +112,7 @@ class BaseStateManager {
           className,
           classDescription,
           stateId,
-          remoteId,
+          instanceId,
           isOwner: true,
           initValues,
           filter: null, // owner cannot filter paramters
@@ -132,7 +132,7 @@ class BaseStateManager {
     // ---------------------------------------------
     this[kStateManagerClient].transport.addListener(
       ATTACH_RESPONSE,
-      (reqId, stateId, remoteId, className, classDescription, currentValues, filter) => {
+      (reqId, stateId, instanceId, className, classDescription, currentValues, filter) => {
         // cache class description to save some bandwidth
         // @note: when we make the class dynamic, we will need some mecanism to
         // invalidate the cached description
@@ -147,7 +147,7 @@ class BaseStateManager {
           className,
           classDescription,
           stateId,
-          remoteId,
+          instanceId,
           isOwner: false,
           initValues: currentValues,
           filter,

@@ -100,7 +100,7 @@ export const kSharedStatePromiseStore = Symbol('soundworks:shared-state-promise-
  */
 class SharedState {
   #id = null;
-  #remoteId = null;
+  #instanceId = null;
   #className = null;
   #isOwner = null;
   #client = null;
@@ -115,7 +115,7 @@ class SharedState {
 
   constructor({
     stateId,
-    remoteId,
+    instanceId,
     className,
     classDescription,
     isOwner,
@@ -127,7 +127,7 @@ class SharedState {
     this.#client = manager[kStateManagerClient];
     this.#className = className;
     this.#id = stateId;
-    this.#remoteId = remoteId;
+    this.#instanceId = instanceId;
     this.#isOwner = isOwner; // may be any node
     this.#filter = filter;
 
@@ -144,18 +144,18 @@ ${JSON.stringify(initValues, null, 2)}`);
     this[kSharedStatePromiseStore] = new PromiseStore(this.constructor.name);
 
     // add listener for state updates
-    this.#client.transport.addListener(`${UPDATE_RESPONSE}-${this.#id}-${this.#remoteId}`, async (reqId, updates) => {
+    this.#client.transport.addListener(`${UPDATE_RESPONSE}-${this.#id}-${this.#instanceId}`, async (reqId, updates) => {
       const updated = await this.#commit(updates, true, true);
       this[kSharedStatePromiseStore].resolve(reqId, updated);
     });
 
     // retrieve values but do not propagate to subscriptions
-    this.#client.transport.addListener(`${UPDATE_ABORT}-${this.#id}-${this.#remoteId}`, async (reqId, updates) => {
+    this.#client.transport.addListener(`${UPDATE_ABORT}-${this.#id}-${this.#instanceId}`, async (reqId, updates) => {
       const updated = await this.#commit(updates, false, true);
       this[kSharedStatePromiseStore].resolve(reqId, updated);
     });
 
-    this.#client.transport.addListener(`${UPDATE_NOTIFICATION}-${this.#id}-${this.#remoteId}`, async (updates) => {
+    this.#client.transport.addListener(`${UPDATE_NOTIFICATION}-${this.#id}-${this.#instanceId}`, async (updates) => {
       // https://github.com/collective-soundworks/soundworks/issues/18
       //
       // # note: 2002-10-03
@@ -184,7 +184,7 @@ ${JSON.stringify(initValues, null, 2)}`);
     // ---------------------------------------------
     // state has been deleted by its creator or the class has been deleted
     // ---------------------------------------------
-    this.#client.transport.addListener(`${DELETE_NOTIFICATION}-${this.#id}-${this.#remoteId}`, async () => {
+    this.#client.transport.addListener(`${DELETE_NOTIFICATION}-${this.#id}-${this.#instanceId}`, async () => {
       this.#manager[kStateManagerDeleteState](this.#id);
       this.#clearTransport();
 
@@ -212,7 +212,7 @@ ${JSON.stringify(initValues, null, 2)}`);
       // ---------------------------------------------
       // the creator has called `.delete()`
       // ---------------------------------------------
-      this.#client.transport.addListener(`${DELETE_RESPONSE}-${this.#id}-${this.#remoteId}`, async (reqId) => {
+      this.#client.transport.addListener(`${DELETE_RESPONSE}-${this.#id}-${this.#instanceId}`, async (reqId) => {
         this.#manager[kStateManagerDeleteState](this.#id);
         this.#clearTransport();
 
@@ -238,7 +238,7 @@ ${JSON.stringify(initValues, null, 2)}`);
       // ---------------------------------------------
       // the attached node has called `.detach()`
       // ---------------------------------------------
-      this.#client.transport.addListener(`${DETACH_RESPONSE}-${this.#id}-${this.#remoteId}`, async (reqId) => {
+      this.#client.transport.addListener(`${DETACH_RESPONSE}-${this.#id}-${this.#instanceId}`, async (reqId) => {
         this.#manager[kStateManagerDeleteState](this.#id);
         this.#clearTransport();
 
@@ -296,17 +296,17 @@ ${JSON.stringify(initValues, null, 2)}`);
 
   #clearTransport() {
     // remove listeners
-    this.#client.transport.removeAllListeners(`${UPDATE_RESPONSE}-${this.#id}-${this.#remoteId}`);
-    this.#client.transport.removeAllListeners(`${UPDATE_NOTIFICATION}-${this.#id}-${this.#remoteId}`);
-    this.#client.transport.removeAllListeners(`${UPDATE_ABORT}-${this.#id}-${this.#remoteId}`);
-    this.#client.transport.removeAllListeners(`${DELETE_NOTIFICATION}-${this.#id}-${this.#remoteId}`);
+    this.#client.transport.removeAllListeners(`${UPDATE_RESPONSE}-${this.#id}-${this.#instanceId}`);
+    this.#client.transport.removeAllListeners(`${UPDATE_NOTIFICATION}-${this.#id}-${this.#instanceId}`);
+    this.#client.transport.removeAllListeners(`${UPDATE_ABORT}-${this.#id}-${this.#instanceId}`);
+    this.#client.transport.removeAllListeners(`${DELETE_NOTIFICATION}-${this.#id}-${this.#instanceId}`);
 
     if (this.#isOwner) {
-      this.#client.transport.removeAllListeners(`${DELETE_RESPONSE}-${this.#id}-${this.#remoteId}`);
-      this.#client.transport.removeAllListeners(`${DELETE_ERROR}-${this.#id}-${this.#remoteId}`);
+      this.#client.transport.removeAllListeners(`${DELETE_RESPONSE}-${this.#id}-${this.#instanceId}`);
+      this.#client.transport.removeAllListeners(`${DELETE_ERROR}-${this.#id}-${this.#instanceId}`);
     } else {
-      this.#client.transport.removeAllListeners(`${DETACH_RESPONSE}-${this.#id}-${this.#remoteId}`);
-      this.#client.transport.removeAllListeners(`${DETACH_ERROR}-${this.#id}-${this.#remoteId}`);
+      this.#client.transport.removeAllListeners(`${DETACH_RESPONSE}-${this.#id}-${this.#instanceId}`);
+      this.#client.transport.removeAllListeners(`${DETACH_ERROR}-${this.#id}-${this.#instanceId}`);
     }
   }
 
@@ -554,7 +554,7 @@ ${JSON.stringify(initValues, null, 2)}`);
     // go through server-side normal behavior
     return new Promise((resolve, reject) => {
       const reqId = this[kSharedStatePromiseStore].add(resolve, reject, 'SharedState#set', forwardParams);
-      this.#client.transport.emit(`${UPDATE_REQUEST}-${this.#id}-${this.#remoteId}`, reqId, updates);
+      this.#client.transport.emit(`${UPDATE_REQUEST}-${this.#id}-${this.#instanceId}`, reqId, updates);
     });
   }
 
@@ -709,12 +709,12 @@ ${JSON.stringify(initValues, null, 2)}`);
     if (this.#isOwner) {
       return new Promise((resolve, reject) => {
         const reqId = this[kSharedStatePromiseStore].add(resolve, reject, 'SharedState#delete');
-        this.#client.transport.emit(`${DELETE_REQUEST}-${this.#id}-${this.#remoteId}`, reqId);
+        this.#client.transport.emit(`${DELETE_REQUEST}-${this.#id}-${this.#instanceId}`, reqId);
       });
     } else {
       return new Promise((resolve, reject) => {
         const reqId = this[kSharedStatePromiseStore].add(resolve, reject, 'SharedState#detach');
-        this.#client.transport.emit(`${DETACH_REQUEST}-${this.#id}-${this.#remoteId}`, reqId);
+        this.#client.transport.emit(`${DETACH_REQUEST}-${this.#id}-${this.#instanceId}`, reqId);
       });
     }
   }
