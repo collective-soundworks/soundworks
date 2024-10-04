@@ -26,8 +26,8 @@ export type serverStateManagerUpdateHook = () => any;
  * at initialization (cf. {@link Server#stateManager}).
  *
  * Compared to the {@link ClientStateManager}, the `ServerStateManager` can also
- * register and delete schemas, as well as register update hook that are executed when
- * a state is updated.
+ * define and delete shared state classes, as well as register hooks executed at
+ * lifecycle phases of a shared state
  *
  * See {@link Server#stateManager}
  *
@@ -38,8 +38,8 @@ export type serverStateManagerUpdateHook = () => any;
  * import { Server } from '@soundworks/server/index.js';
  *
  * const server = new Server(config);
- * // declare and register the schema of a shared state.
- * server.stateManager.registerSchema('some-global-state', {
+ * // declare and register the class of a shared state.
+ * server.stateManager.defineClass('some-global-state', {
  *   myRandom: {
  *     type: 'float',
  *     default: 0,
@@ -76,19 +76,16 @@ export type serverStateManagerUpdateHook = () => any;
  */
 declare class ServerStateManager extends BaseStateManager {
     /**
-     * Define a class of data structure from which {@link SharedState} can be instanciated.
+     * Define a generic class from which {@link SharedState}s can be created.
      *
-     * _In a future revision, this method and its arguments will be renamed_
-     *
-     * @param {SharedStateClassName} schemaName - Name of the schema.
-     * @param {SharedStateSchema} schema - Data structure
-     *  describing the states that will be created from this schema.
+     * @param {SharedStateClassName} className - Name of the class.
+     * @param {SharedStateClassDescription} classDescription - Description of the class.
      *
      * @see {@link ServerStateManager#create}
      * @see {@link ClientStateManager#create}
      *
      * @example
-     * server.stateManager.registerSchema('my-schema', {
+     * server.stateManager.defineClass('my-class', {
      *   myBoolean: {
      *     type: 'boolean'
      *     default: false,
@@ -99,41 +96,47 @@ declare class ServerStateManager extends BaseStateManager {
      *     min: -1,
      *     max: 1
      *   }
-     * })
+     * });
      */
-    registerSchema(schemaName: SharedStateClassName, schema: SharedStateSchema): void;
+    defineClass(className: SharedStateClassName, classDescription: SharedStateClassDescription): void;
+    /**
+     * @deprecated Use {@link ServerStateManager#defineClass} instead.
+     */
+    registerSchema(className: any, classDescription: any): void;
     /**
      * Delete a whole class of {@link ShareState}.
      *
-     * All {@link SharedState} instance that belong to this class are deleted
-     * as well, triggering the `onDetach` and `onDelete` callbacks are called on
-     * the actual {@link SharedState} instances.
+     * All {@link SharedState} instances created from this class will be deleted
+     * as well, triggering their eventual `onDetach` and `onDelete` callbacks.
      *
-     * _In a future revision, this method and its arguments will be renamed_
-     *
-     * @param {SharedStateClassName} schemaName - Name of the schema.
+     * @param {SharedStateClassName} className - Name of the shared state class to delete.
      */
-    deleteSchema(schemaName: SharedStateClassName): void;
+    deleteClass(className: SharedStateClassName): void;
     /**
-     * Register a function for a given schema (e.g. will be applied on all states
-     * created from this schema) that will be executed before the update values
-     * are propagated. For example, this could be used to implement a preset system
+     * @deprecated Use {@link ServerStateManager#defineClass} instead.
+     */
+    deleteSchema(className: any): void;
+    /**
+     * Register a function for a given shared state class the be executed between
+     * `set` instructions and `onUpdate` callback(s).
+     *
+     * For example, this could be used to implement a preset system
      * where all the values of the state are updated from e.g. some data stored in
      * filesystem while the consumer of the state only want to update the preset name.
      *
-     * The hook is associated to every state of its kind (i.e. schemaName) and
-     * executed on every update (call of `set`). Note that the hooks are executed
-     * server-side regarless the node on which `set` has been called and before
-     * the "actual" update of the state (e.g. before the call of `onUpdate`).
+     * The hook is associated to each states created from the given class name
+     * executed on each update (i.e. `state.set(updates)`). Note that the hooks are
+     * executed server-side regarless the node on which `set` has been called and
+     * before the call of the `onUpdate` callback of the shared state.
      *
-     * @param {string} schemaName - Kind of states on which applying the hook.
-     * @param {serverStateManagerUpdateHook} updateHook - Function
-     *   called between the `set` call and the actual update.
+     * @param {string} className - Kind of states on which applying the hook.
+     * @param {serverStateManagerUpdateHook} updateHook - Function called between
+     *  the `set` call and the actual update.
      *
      * @returns {Fuction} deleteHook - Handler that deletes the hook when executed.
      *
      * @example
-     * server.stateManager.registerSchema('hooked', {
+     * server.stateManager.defineClass('hooked', {
      *   value: { type: 'string', default: null, nullable: true },
      *   numUpdates: { type: 'integer', default: 0 },
      * });
@@ -150,13 +153,13 @@ declare class ServerStateManager extends BaseStateManager {
      * const values = state.getValues();
      * assert.deepEqual(result, { value: 'test', numUpdates: 1 });
      */
-    registerUpdateHook(schemaName: string, updateHook: serverStateManagerUpdateHook): Fuction;
+    registerUpdateHook(className: string, updateHook: serverStateManagerUpdateHook): Fuction;
+    /** @private */
+    private [kStateManagerInit];
     /** @private */
     private [kServerStateManagerDeletePrivateState];
     /** @private */
     private [kServerStateManagerGetHooks];
-    /** @private */
-    private [kStateManagerInit];
     /**
      * Add a client to the manager.
      *

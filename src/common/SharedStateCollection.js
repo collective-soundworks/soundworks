@@ -115,7 +115,7 @@ class SharedStateCollection {
   }
 
   /**
-   * @deprecated Use ${@link SharedStateCollection#className} instead.
+   * @deprecated Use {@link SharedStateCollection#className} instead.
    */
   get schemaName() {
     logger.deprecated('SharedStateCollection#schemaName', 'SharedStateCollection#className', '4.0.0-alpha.29');
@@ -222,7 +222,40 @@ class SharedStateCollection {
 
   /**
    * Update all states of the collection with given values.
-   * @param {object} updates - key / value pairs of updates to apply to the state.
+   *
+   * The returned `Promise` resolves on a list of objects that contains the applied updates,
+   * and resolves after all the `onUpdate` callbacks have resolved themselves
+   *
+   * @overload
+   * @param {object} updates - key / value pairs of updates to apply to the collection.
+   * @returns {Promise<Array<Object>>} - Promise to the list of (coerced) updates.
+   */
+  /**
+   * Update all states of the collection with given values.
+   *
+   * The returned `Promise` resolves on a list of objects that contains the applied updates,
+   * and resolves after all the `onUpdate` callbacks have resolved themselves
+   *
+   * @overload
+   * @param {SharedStateParameterName} name - Name of the parameter.
+   * @param {*} value - Value of the parameter.
+   * @returns {Promise<Array<Object>>} - Promise to the list of (coerced) updates.
+   */
+  /**
+   * Update all states of the collection with given values.
+   *
+   * The returned `Promise` resolves on a list of objects that contains the applied updates,
+   * and resolves after all the `onUpdate` callbacks have resolved themselves
+   *
+   * Alternative signatures:
+   * - `await collection.set(updates)`
+   * - `await collection.set(name, value)`
+   *
+   * @param {object} updates - key / value pairs of updates to apply to the collection.
+   * @returns {Promise<Array<Object>>} - Promise to the list of (coerced) updates.
+   * @example
+   * const collection = await client.stateManager.getCollection('globals');
+   * const updates = await collection.set({ myParam: Math.random() });
    */
   async set(...args) {
     // we can delegate to the state.set(update) method for throwing in case of

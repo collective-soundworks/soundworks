@@ -1,5 +1,9 @@
 export default SharedStateCollection;
-export type sharedStateCollectionOnUpdateCallback = (state: SharedState, newValues: any, oldValues: any, context?: Mixed) => any;
+export type sharedStateCollectionOnUpdateCallback = (state: SharedState, newValues: any, oldValues: any) => any;
+/**
+ * Delete the registered {@link sharedStateCollectionOnUpdateCallback }.
+ */
+export type sharedStateCollectionDeleteOnUpdateCallback = () => any;
 /**
  * @callback sharedStateCollectionOnUpdateCallback
  * @param {SharedState} state - State that triggered the update.
@@ -7,12 +11,15 @@ export type sharedStateCollectionOnUpdateCallback = (state: SharedState, newValu
  *  applied to the state.
  * @param {Object} oldValues - Key / value pairs of the updated params before
  *  the updates has been applied to the state.
- * @param {Mixed} [context=null] - Optionnal context object that has been passed
- *  with the values updates in the `set` call.
+ */
+/**
+ * Delete the registered {@link sharedStateCollectionOnUpdateCallback}.
+ *
+ * @callback sharedStateCollectionDeleteOnUpdateCallback
  */
 /**
  * The `SharedStateCollection` interface represent a collection of all states
- * created from a given schema name on the network.
+ * created from a given class name on the network.
  *
  * It can optionnaly exclude the states created by the current node.
  *
@@ -20,9 +27,9 @@ export type sharedStateCollectionOnUpdateCallback = (state: SharedState, newValu
  * {@link ServerStateManager#getCollection} for factory methods API
  *
  * ```
- * const collection = await client.stateManager.getCollection('my-schema');
+ * const collection = await client.stateManager.getCollection('my-class');
  * const allValues = collection.getValues();
- * collection.onUpdate((state, newValues, oldValues, context) => {
+ * collection.onUpdate((state, newValues, oldValues) => {
  *   // do something
  * });
  * ```
@@ -70,7 +77,7 @@ declare class SharedStateCollection {
      */
     getDescription(paramName?: string): SharedStateClassDescription | SharedStateParameterDescription;
     /**
-     * Get the default values as declared in the schema.
+     * Get the default values as declared in the class description.
      *
      * @return {object}
      * @example
@@ -114,23 +121,38 @@ declare class SharedStateCollection {
     getUnsafe(name: string): any[];
     /**
      * Update all states of the collection with given values.
-     * @param {object} updates - key / value pairs of updates to apply to the state.
-     * @param {mixed} [context=null] - optionnal contextual object that will be propagated
-     *   alongside the updates of the state. The context is valid only for the
-     *   current call and will be passed as third argument to all update listeners.
+     *
+     * The returned `Promise` resolves on a list of objects that contains the applied updates,
+     * and resolves after all the `onUpdate` callbacks have resolved themselves
+     *
+     * @overload
+     * @param {object} updates - key / value pairs of updates to apply to the collection.
+     * @returns {Promise<Array<Object>>} - Promise to the list of (coerced) updates.
      */
-    set(updates: object, context?: mixed): Promise<any[]>;
+    set(updates: object): Promise<Array<any>>;
+    /**
+     * Update all states of the collection with given values.
+     *
+     * The returned `Promise` resolves on a list of objects that contains the applied updates,
+     * and resolves after all the `onUpdate` callbacks have resolved themselves
+     *
+     * @overload
+     * @param {SharedStateParameterName} name - Name of the parameter.
+     * @param {*} value - Value of the parameter.
+     * @returns {Promise<Array<Object>>} - Promise to the list of (coerced) updates.
+     */
+    set(name: SharedStateParameterName, value: any): Promise<Array<any>>;
     /**
      * Subscribe to any state update of the collection.
      *
      * @param {sharedStateCollectionOnUpdateCallback}
      *  callback - Callback to execute when an update is applied on a state.
      * @param {Boolean} [executeListener=false] - Execute the callback immediately
-     *  for all underlying states with current state values. (`oldValues` will be
-     *  set to `{}`, and `context` to `null`)
-     * @returns {Function} - Function that delete the registered listener.
+     *  with current state values. Note that `oldValues` will be set to `{}`.
+     * @returns {sharedStateCollectionDeleteOnUpdateCallback} - Function that delete
+     *  the registered listener.
      */
-    onUpdate(callback: sharedStateCollectionOnUpdateCallback, executeListener?: boolean): Function;
+    onUpdate(callback: sharedStateCollectionOnUpdateCallback, executeListener?: boolean): sharedStateCollectionDeleteOnUpdateCallback;
     /**
      * Register a function to execute when a state is added to the collection.
      *

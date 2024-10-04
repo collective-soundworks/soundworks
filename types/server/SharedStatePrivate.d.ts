@@ -8,9 +8,9 @@ export default SharedStatePrivate;
  * @private
  */
 declare class SharedStatePrivate {
-    constructor(id: any, schemaName: any, schema: any, manager: any, initValues?: {});
+    constructor(id: any, className: any, classDefinition: any, manager: any, initValues?: {});
     get id(): any;
-    get schemaName(): any;
+    get className(): any;
     get creatorId(): any;
     get creatorRemoteId(): any;
     get attachedClients(): Map<any, any>;

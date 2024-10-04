@@ -379,11 +379,31 @@ ${JSON.stringify(initValues, null, 2)}`);
   }
 
   /**
-   * Update values of the state.
+   * Update the values of the state.
+   *
+   * The returned `Promise` resolves on an object that contains the applied updates,
+   * and resolves after all the `onUpdate` callbacks have resolved themselves
+   *
+   * @overload
+   * @param {object} updates - Key / value pairs of updates to apply to the state.
+   * @returns {Promise<Object>} - Promise to the (coerced) updates.
+   */
+  /**
+   * Update the values of the state.
+   *
+   * The returned `Promise` resolves on an object that contains the applied updates,
+   * and resolves after all the `onUpdate` callbacks have resolved themselves
+   *
+   * @overload
+   * @param {SharedStateParameterName} name - Name of the parameter.
+   * @param {*} value - Value of the parameter.
+   * @returns {Promise<Object>} - Promise to the (coerced) updates.
+   */
+  /**
+   * Update the values of the state.
    *
    * The returned `Promise` resolves on an object that contains the applied updates,
    * and resolves after all the `onUpdate` callbacks have resolved themselves, i.e.:
-   *
    * ```js
    * server.stateManager.defineClass('test', {
    *   myBool: { type: 'boolean', default: false },
@@ -406,8 +426,12 @@ ${JSON.stringify(initValues, null, 2)}`);
    * assert.deepEqual(updates, { myBool: true });
    * ```
    *
+   * Alternative signatures:
+   * - `await state.set(updates)`
+   * - `await state.set(name, value)`
+   *
    * @param {object} updates - Key / value pairs of updates to apply to the state.
-   * @returns {Promise<Object>} A promise to the (coerced) updates.
+   * @returns {Promise<Object>} - Promise to the (coerced) updates.
    *
    * @example
    * const state = await client.stateManager.attach('globals');

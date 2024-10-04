@@ -13,5 +13,6 @@ declare namespace logger {
     function pluginReady(name: any): void;
     function pluginErrored(name: any): void;
     function warnVersionDiscepancies(clientRole: any, clientVersion: any, serverVersion: any): void;
-    function deprecated(oldAPI: any, newAPI: any, deprecationVersion: any): void;
+    function deprecated(oldAPI: any, newAPI: any, lastSupportedVersion: any): void;
+    function removed(oldAPI: any, hint: any, lastSupportedVersion: any): never;
 }

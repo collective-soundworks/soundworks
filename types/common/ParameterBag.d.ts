@@ -26,7 +26,7 @@ export namespace types {
         export { required_3 as required };
         const defaultOptions_2: any;
         export { defaultOptions_2 as defaultOptions };
-        export function sanitizeSchema(def: any): any;
+        export function sanitizeDescription(def: any): any;
         export function coerceFunction_2(name: any, def: any, value: any): number;
         export { coerceFunction_2 as coerceFunction };
     }
@@ -35,8 +35,8 @@ export namespace types {
         export { required_4 as required };
         const defaultOptions_3: any;
         export { defaultOptions_3 as defaultOptions };
-        export function sanitizeSchema_1(def: any): any;
-        export { sanitizeSchema_1 as sanitizeSchema };
+        export function sanitizeDescription_1(def: any): any;
+        export { sanitizeDescription_1 as sanitizeDescription };
         export function coerceFunction_3(name: any, def: any, value: any): number;
         export { coerceFunction_3 as coerceFunction };
     }
@@ -61,28 +61,8 @@ export namespace types {
 export default ParameterBag;
 /** @private */
 declare class ParameterBag {
-    static validateSchema(schema: any): void;
-    constructor(schema: any, initValues?: {});
-    /**
-     * List of parameters.
-     *
-     * @type {Object<String, Param>}
-     * @name _params
-     * @memberof ParameterBag
-     * @instance
-     * @private
-     */
-    private _values;
-    /**
-     * List of schema with init values.
-     *
-     * @type {Object<String, paramDefinition>}
-     * @name _schema
-     * @memberof ParameterBag
-     * @instance
-     * @private
-     */
-    private _schema;
+    static validateDescription(description: any): void;
+    constructor(description: any, initValues?: {});
     /**
      * Define if the parameter exists.
      *
@@ -127,8 +107,7 @@ declare class ParameterBag {
      */
     getUnsafe(name: string): Mixed;
     /**
-     * Check that the value is valid according to the schema and return it coerced
-     * to the schema definition
+     * Check that the value is valid according to the class definition and return it coerced.
      *
      * @param {String} name - Name of the parameter.
      * @param {Mixed} value - Value of the parameter.
@@ -152,11 +131,10 @@ declare class ParameterBag {
      * @param {string} [name=null] - Name of the parameter to reset.
      */
     /**
-     * Return the given schema along with the initialization values.
-     *
      * @return {object}
      */
-    getSchema(name?: any): object;
+    getDescription(name?: any): object;
     getInitValues(): {};
     getDefaults(): {};
+    #private;
 }

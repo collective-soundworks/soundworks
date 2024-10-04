@@ -4,7 +4,7 @@
 type SharedStateClassName = string;
 /**
  * Description of a {@link SharedState } data structure that describes the structure
- * of a class of {@link SharedState } to be registered by {@link ServerStateManagerregisterSchema }
+ * of a class of {@link SharedState } to be registered by {@link ServerStateManagerdefineClass }
  *
  * A `SharedStateClassDescription` is the blueprint, or the definition from which
  * shared states from a given class can be created.
@@ -61,6 +61,13 @@ type SharedStateParameterDescription = {
      * the listeners will be called again when the "real" value is received.
      */
     immediate?: boolean;
+    /**
+     * - When set to true, the parameter is never
+     * propagated on the network (hence it is no longer a shared parameter :). This
+     * is usefull to declare some common parameter (e.g. some interface state) that
+     * don't need to be shared but to stay in the shared state API paradigm.
+     */
+    local?: boolean;
     /**
      * - Minimum value of the parameter. Only applies
      * for `integer` and `float` types.

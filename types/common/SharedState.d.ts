@@ -3,7 +3,7 @@ export default SharedState;
 /**
  * Callback executed when updates are applied on a {@link SharedState }.
  */
-export type sharedStateOnUpdateCallback = (newValues: any, oldValues: any, context?: Mixed) => any;
+export type sharedStateOnUpdateCallback = (newValues: any, oldValues: any) => any;
 /**
  * Delete the registered {@link sharedStateOnUpdateCallback }.
  */
@@ -16,8 +16,6 @@ export type sharedStateDeleteOnUpdateCallback = () => any;
  *  applied to the state.
  * @param {Object} oldValues - Key / value pairs of the updated params before
  *  the updates has been applied to the state.
- * @param {Mixed} [context=null] - Optionnal context object that has been passed
- *  with the values updates in the `set` call.
  */
 /**
  * Delete the registered {@link sharedStateOnUpdateCallback}.
@@ -31,7 +29,7 @@ export type sharedStateDeleteOnUpdateCallback = () => any;
  * to the shared state.
  *
  * A `SharedState` instance is created according to a shared state class definition
- * which is composed of a {@link SharedStateClassName} and of a {@link SharedStateClassSchema}
+ * which is composed of a {@link SharedStateClassName} and of a {@link SharedStateClassDescription}
  * registered in the {@link ServerStateManager}. Any number of `SharedState`s
  * can be created from a single class definition.
  *
@@ -49,7 +47,7 @@ export type sharedStateDeleteOnUpdateCallback = () => any;
  *
  * const server = new Server(config);
  * // define a shared state class
- * server.stateManager.registerSchema('some-global-state', {
+ * server.stateManager.defineClass('some-global-state', {
  *   myRandom: {
  *     type: 'float',
  *     default: 0,
@@ -81,7 +79,7 @@ export type sharedStateDeleteOnUpdateCallback = () => any;
  * ```
  */
 declare class SharedState {
-    constructor(id: any, remoteId: any, className: any, schema: any, client: any, isOwner: any, manager: any, initValues: any, filter: any);
+    constructor(id: any, remoteId: any, className: any, classDescription: any, client: any, isOwner: any, manager: any, initValues: any, filter: any);
     /**
      * Id of the state
      * @type {Number}
@@ -119,44 +117,28 @@ declare class SharedState {
      */
     getSchema(paramName?: any): any;
     /**
-     * Update values of the state.
+     * Update the values of the state.
      *
      * The returned `Promise` resolves on an object that contains the applied updates,
-     * and resolves after all the `onUpdate` callbacks have resolved themselves, i.e.:
+     * and resolves after all the `onUpdate` callbacks have resolved themselves
      *
-     * ```js
-     * server.stateManager.registerSchema('test', {
-     *   myBool: { type: 'boolean', default: false },
-     * });
-     * const a = await server.stateManager.create('a');
-     *
-     * let asyncCallbackCalled = false;
-     *
-     * a.onUpdate(updates => {
-     *   return new Promise(resolve => {
-     *     setTimeout(() => {
-     *       asyncCallbackCalled = true;
-     *       resolve();
-     *     }, 100);
-     *   });
-     * });
-     *
-     * const updates = await a.set({ myBool: true });
-     * assert.equal(asyncCallbackCalled, true);
-     * assert.deepEqual(updates, { myBool: true });
-     * ```
-     *
+     * @overload
      * @param {object} updates - Key / value pairs of updates to apply to the state.
-     * @param {mixed} [context=null] - Optionnal contextual object that will be propagated
-     *   alongside the updates of the state. The context is valid only for the
-     *   current call and will be passed as third argument to all update listeners.
-     * @returns {Promise<Object>} A promise to the (coerced) updates.
-     *
-     * @example
-     * const state = await client.stateManager.attach('globals');
-     * const updates = await state.set({ myParam: Math.random() });
+     * @returns {Promise<Object>} - Promise to the (coerced) updates.
      */
-    set(updates: object, context?: mixed): Promise<any>;
+    set(updates: object): Promise<any>;
+    /**
+     * Update the values of the state.
+     *
+     * The returned `Promise` resolves on an object that contains the applied updates,
+     * and resolves after all the `onUpdate` callbacks have resolved themselves
+     *
+     * @overload
+     * @param {SharedStateParameterName} name - Name of the parameter.
+     * @param {*} value - Value of the parameter.
+     * @returns {Promise<Object>} - Promise to the (coerced) updates.
+     */
+    set(name: SharedStateParameterName, value: any): Promise<any>;
     /**
      * Get the value of a parameter of the state.
      *
@@ -215,7 +197,7 @@ declare class SharedState {
     getValuesUnsafe(): object;
     /**
      * Get the values with which the state has been created. May defer from the
-     * default values declared in the schema.
+     * default values declared in the class description.
      *
      * @return {object}
      * @example
@@ -223,7 +205,7 @@ declare class SharedState {
      */
     getInitValues(): object;
     /**
-     * Get the default values as declared in the schema.
+     * Get the default values as declared in the class description.
      *
      * @return {object}
      * @example
@@ -251,7 +233,7 @@ declare class SharedState {
      * @throws Throws if the method is called by a node which is not the owner of
      * the state.
      * @example
-     * const state = await client.state.create('my-schema-name');
+     * const state = await client.stateManaager.create('my-class-name');
      * // later
      * await state.delete();
      */
@@ -262,10 +244,10 @@ declare class SharedState {
      * @param {sharedStateOnUpdateCallback} callback
      *  Callback to execute when an update is applied on the state.
      * @param {Boolean} [executeListener=false] - Execute the callback immediately
-     *  with current state values. (`oldValues` will be set to `{}`, and `context` to `null`)
+     *  with current state values. Note that `oldValues` will be set to `{}`.
      * @returns {sharedStateDeleteOnUpdateCallback}
      * @example
-     * const unsubscribe = state.onUpdate(async (newValues, oldValues, context) =>  {
+     * const unsubscribe = state.onUpdate(async (newValues, oldValues) =>  {
      *   for (let [key, value] of Object.entries(newValues)) {
      *      switch (key) {
      *        // do something

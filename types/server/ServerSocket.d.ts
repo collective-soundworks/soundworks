@@ -17,14 +17,8 @@ declare class ServerSocket {
     constructor(ws: any, sockets: any);
     /**
      * Reference to the @link{ServerSockets} instance.
-     *
-     * Allows for broadcasting from a given socket instance.
-     *
-     * @type {ServerSockets}
-     * @example
-     * socket.sockets.broadcast('my-room', this, 'update-value', 1);
      */
-    get sockets(): ServerSockets;
+    get sockets(): any;
     /**
      * Reay state of the underlying socket instance.
      *
@@ -62,16 +56,6 @@ declare class ServerSocket {
      * @param {string} channel - Channel name.
      */
     removeAllListeners(channel?: string): void;
-    /**
-     * Add the socket to a room
-     * @param {string} roomId - Id of the room.
-     */
-    addToRoom(roomId: string): void;
-    /**
-     * Remove the socket from a room
-     * @param {string} roomId - Id of the room.
-     */
-    removeFromRoom(roomId: string): void;
     /**
      * Removes all listeners and immediately close the web socket.
      *

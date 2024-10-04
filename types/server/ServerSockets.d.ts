@@ -1,6 +1,6 @@
 export const kSocketsStart: unique symbol;
 export const kSocketsStop: unique symbol;
-export const kSocketsRemoveFromAllRooms: unique symbol;
+export const kSocketsDeleteSocket: unique symbol;
 export const kSocketsLatencyStatsWorker: unique symbol;
 export const kSocketsDebugPreventHeartBeat: unique symbol;
 export default ServerSockets;
@@ -12,39 +12,31 @@ export default ServerSockets;
  */
 declare class ServerSockets {
     constructor(server: any, config: any);
+    /** @private */
+    private entries;
+    /** @private */
+    private keys;
+    /** @private */
+    private values;
+    forEach(func: any): void;
     /**
-     * Add a socket to a room.
-     *
-     * _Note that in most cases, you should use a {@link SharedState} instead_
-     *
-     * @param {ServerSocket} socket - Socket to add to the room.
-     * @param {String} roomId - Id of the room.
+     * Initialize sockets, all sockets are added to two rooms by default:
+     * - to the room corresponding to the client `role`
+     * - to the '*' room that holds all connected sockets
+     * @private
      */
-    addToRoom(socket: ServerSocket, roomId: string): void;
+    private [kSocketsStart];
     /**
-     * Remove a socket from a room.
-     *
-     * _Note that in most cases, you should use a {@link SharedState} instead_
-     *
-     * @param {ServerSocket} socket - Socket to remove from the room.
-     * @param {String} roomId - Id of the room.
+     * Terminate all existing sockets.
+     * @private
      */
-    removeFromRoom(socket: ServerSocket, roomId: string): void;
+    private [kSocketsStop];
     /**
-     * Send a message to all clients os given room(s). If no room is specified,
-     * the message is sent to all clients.
-     *
-     * _Note that in most cases, you should use a {@link SharedState} instead_
-     *
-     * @param {String|Array} roomsIds - Ids of the rooms that must receive
-     *  the message. If `null` the message is sent to all clients.
-     * @param {ServerSocket} excludeSocket - Optionnal socket to ignore when
-     *  broadcasting the message, typically the client at the origin of the message.
-     * @param {String} channel - Channel name.
-     * @param {...*} args - Payload of the message. As many arguments as needed, of
-     *  JSON compatible data types (i.e. string, number, boolean, object, array and null).
+     * Remove given socket from all rooms.
+     * @private
      */
-    broadcast(roomIds: any, excludeSocket: ServerSocket, channel: string, ...args: any[]): void;
+    private [kSocketsDeleteSocket];
+    [kSocketsLatencyStatsWorker]: any;
+    [kSocketsDebugPreventHeartBeat]: boolean;
     #private;
 }
-import ServerSocket from './ServerSocket.js';
