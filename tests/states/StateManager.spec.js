@@ -773,7 +773,7 @@ describe(`# StateManager`, () => {
       }
     });
 
-    it('hook API should be `hook(updates, currentValues, context)`', async () => {
+    it('hook API should be `hook(updates, currentValues)`', async () => {
       return new Promise(async (resolve, reject) => {
         server.stateManager.defineClass('hooked', hookSchema);
         server.stateManager.registerUpdateHook('hooked', (updates, currentValues) => {

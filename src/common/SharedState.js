@@ -743,8 +743,7 @@ ${JSON.stringify(initValues, null, 2)}`);
         }
       }
 
-      const oldValues = {};
-      listener(currentValues, oldValues);
+      listener(currentValues, {});
     }
 
     return () => {

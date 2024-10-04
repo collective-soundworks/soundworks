@@ -7,9 +7,14 @@ import logger from './logger.js';
  *  applied to the state.
  * @param {Object} oldValues - Key / value pairs of the updated params before
  *  the updates has been applied to the state.
- * @param {Mixed} [context=null] - Optionnal context object that has been passed
- *  with the values updates in the `set` call.
  */
+
+/**
+ * Delete the registered {@link sharedStateCollectionOnUpdateCallback}.
+ *
+ * @callback sharedStateCollectionDeleteOnUpdateCallback
+ */
+
 
 /**
  * The `SharedStateCollection` interface represent a collection of all states
@@ -23,7 +28,7 @@ import logger from './logger.js';
  * ```
  * const collection = await client.stateManager.getCollection('my-class');
  * const allValues = collection.getValues();
- * collection.onUpdate((state, newValues, oldValues, context) => {
+ * collection.onUpdate((state, newValues, oldValues) => {
  *   // do something
  * });
  * ```
@@ -74,9 +79,9 @@ class SharedStateCollection {
         this.#onDetachCallbacks.forEach(callback => callback(state));
       });
 
-      state.onUpdate((newValues, oldValues, context) => {
+      state.onUpdate((newValues, oldValues) => {
         Array.from(this.#onUpdateCallbacks).forEach(callback => {
-          callback(state, newValues, oldValues, context);
+          callback(state, newValues, oldValues);
         });
       });
 
@@ -218,14 +223,11 @@ class SharedStateCollection {
   /**
    * Update all states of the collection with given values.
    * @param {object} updates - key / value pairs of updates to apply to the state.
-   * @param {mixed} [context=null] - optionnal contextual object that will be propagated
-   *   alongside the updates of the state. The context is valid only for the
-   *   current call and will be passed as third argument to all update listeners.
    */
-  async set(updates, context = null) {
+  async set(updates) {
     // we can delegate to the state.set(update) method for throwing in case of
     // filtered keys, as the Promise.all will reject on first reject Promise
-    const promises = this.#states.map(state => state.set(updates, context));
+    const promises = this.#states.map(state => state.set(updates));
     return Promise.all(promises);
   }
 
@@ -235,16 +237,16 @@ class SharedStateCollection {
    * @param {sharedStateCollectionOnUpdateCallback}
    *  callback - Callback to execute when an update is applied on a state.
    * @param {Boolean} [executeListener=false] - Execute the callback immediately
-   *  for all underlying states with current state values. (`oldValues` will be
-   *  set to `{}`, and `context` to `null`)
-   * @returns {Function} - Function that delete the registered listener.
+   *  with current state values. Note that `oldValues` will be set to `{}`.
+   * @returns {sharedStateCollectionDeleteOnUpdateCallback} - Function that delete
+   *  the registered listener.
    */
   onUpdate(callback, executeListener = false) {
     this.#onUpdateCallbacks.add(callback);
 
     if (executeListener === true) {
-      // filter `event: true` parameters from currentValues, this is missleading
-      // as we are in the context of a callback, not from an active read
+      // filter `event: true` parameters from currentValues, having them here is
+      // misleading as we are in the context of a callback, not from an active read
       const description = this.getDescription();
 
       this.#states.forEach(state => {
@@ -256,10 +258,7 @@ class SharedStateCollection {
           }
         }
 
-        const oldValues = {};
-        const context = null;
-
-        callback(state, currentValues, oldValues, context);
+        callback(state, currentValues, {});
       });
     }
 
