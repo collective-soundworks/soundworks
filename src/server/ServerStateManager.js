@@ -1,4 +1,4 @@
-import { counter, isString, isPlainObject } from '@ircam/sc-utils';
+import { counter, isString, isPlainObject, isFunction } from '@ircam/sc-utils';
 import clonedeep from 'lodash/cloneDeep.js';
 
 import BaseStateManager, {
@@ -525,7 +525,11 @@ class ServerStateManager extends BaseStateManager {
   registerUpdateHook(className, updateHook) {
     // throw error if className has not been registered
     if (!this.#classes.has(className)) {
-      throw new Error(`[stateManager.registerUpdateHook] Cannot register update hook for class "${className}", class does not exists`);
+      throw new TypeError(`[stateManager.registerUpdateHook] Cannot register update hook for class "${className}", class does not exists`);
+    }
+
+    if (!isFunction(updateHook)) {
+      throw new TypeError(`[stateManager.registerUpdateHook] Cannot register update hook for class "${className}", argument 2 must be a function`);
     }
 
     const hooks = this.#hooksByClassName.get(className);

@@ -726,6 +726,29 @@ describe(`# StateManager`, () => {
       },
     };
 
+    it(`should throw if invalid className`, () => {
+      let errored = false;
+
+      try {
+        server.stateManager.registerUpdateHook('hooked', () => {});
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      assert.isTrue(errored);
+    });
+
+    it(`should throw if updateHook is not a function`, () => {
+      server.stateManager.defineClass('hooked', hookSchema);
+      let errored = false;
+
+      assert.throws(() => server.stateManager.registerUpdateHook('hooked', null));
+      assert.throws(() => server.stateManager.registerUpdateHook('hooked', {}));
+      assert.doesNotThrow(() => server.stateManager.registerUpdateHook('hooked', () => {}));
+      assert.doesNotThrow(() => server.stateManager.registerUpdateHook('hooked', async () => {}));
+    });
+
     it('should properly execute hook', async () => {
       server.stateManager.defineClass('hooked', hookSchema);
       server.stateManager.registerUpdateHook('hooked', (updates, currentValues) => {
