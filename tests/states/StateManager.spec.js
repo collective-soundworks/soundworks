@@ -711,6 +711,154 @@ describe(`# StateManager`, () => {
     });
   });
 
+  describe(`## [server] registerCreateHook(className, createHook)`, () => {
+    const hookSchema = {
+      name: {
+        type: 'string',
+        default: null,
+        nullable: true,
+      },
+      // value will be updated according to name from hook
+      value: {
+        type: 'string',
+        default: null,
+        nullable: true,
+      },
+    };
+
+    it(`should throw if invalid className`, () => {
+      let errored = false;
+
+      try {
+        server.stateManager.registerCreateHook('hooked', () => {});
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      assert.isTrue(errored);
+    });
+
+    it(`should throw if updateHook is not a function`, () => {
+      server.stateManager.defineClass('hooked', hookSchema);
+      let errored = false;
+
+      assert.throws(() => server.stateManager.registerCreateHook('hooked', null));
+      assert.throws(() => server.stateManager.registerCreateHook('hooked', {}));
+      assert.doesNotThrow(() => server.stateManager.registerCreateHook('hooked', () => {}));
+      assert.doesNotThrow(() => server.stateManager.registerCreateHook('hooked', async () => {}));
+    });
+
+    it(`should execute hook on creation of state of given class`, async () => {
+      server.stateManager.defineClass('hooked', hookSchema);
+      server.stateManager.defineClass('other', {});
+
+      let hookedCalled = false;
+      let otherCalled = false;
+
+      server.stateManager.registerCreateHook('hooked', () => hookedCalled = true);;
+      server.stateManager.registerCreateHook('other', () => otherCalled = true);;
+
+      const _ = await server.stateManager.create('hooked');
+
+      assert.isTrue(hookedCalled);
+      assert.isFalse(otherCalled);
+    });
+
+    it(`should allow to modify init values`, async () => {
+      server.stateManager.defineClass('hooked', hookSchema);
+      server.stateManager.registerCreateHook('hooked', (initValues) => {
+        if (initValues.name === 'test') {
+          return {
+            value: 'ok',
+            ...initValues
+          };
+        }
+      });
+
+      const hookedState = await server.stateManager.create('hooked', { name: 'test' });
+      const expected = { name: 'test', value: 'ok' };
+      assert.deepEqual(hookedState.getValues(), expected);
+    });
+
+    it(`should throw if create hook explicitly return null`, async () => {
+      server.stateManager.defineClass('hooked', hookSchema);
+      server.stateManager.registerCreateHook('hooked', (initValues) => {
+        return null;
+      });
+
+      let errored = false;
+
+      try {
+        const hookedState = await server.stateManager.create('hooked', { name: 'test' });
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      assert.isTrue(errored);
+    });
+
+    it(`should implicitly continue if hook returns undefined`, async () => {
+      server.stateManager.defineClass('hooked', hookSchema);
+      server.stateManager.registerCreateHook('hooked', initValues => {
+        if (initValues.name === 'test') {
+          return undefined;
+        }
+      });
+
+      const hookedState = await server.stateManager.create('hooked', { name: 'test' });
+      const expected = { name: 'test', value: null };
+      assert.deepEqual(hookedState.getValues(), expected);
+    });
+
+    it(`should support async hooks`, async () => {
+      server.stateManager.defineClass('hooked', hookSchema);
+      server.stateManager.registerCreateHook('hooked', async (initValues) => {
+        await delay(20);
+        if (initValues.name === 'test') {
+          return {
+            value: 'ok',
+            ...initValues
+          };
+        }
+      });
+
+      const hookedState = await server.stateManager.create('hooked', { name: 'test' });
+      const expected = { name: 'test', value: 'ok' };
+      assert.deepEqual(hookedState.getValues(), expected);
+    });
+
+    it(`should allow to chain hooks`, async () => {
+      server.stateManager.defineClass('hooked', hookSchema);
+      server.stateManager.registerCreateHook('hooked', async (initValues) => {
+        await delay(20);
+        if (initValues.name === 'test') {
+          return {
+            ...initValues,
+            value: 'ok1',
+          };
+        }
+      });
+
+      server.stateManager.registerCreateHook('hooked', (initValues) => {
+        // first callback has been properly executed
+        const expected = { name: 'test', value: 'ok1' };
+        assert.deepEqual(initValues, expected)
+        if (initValues.name === 'test') {
+          return {
+            ...initValues,
+            value: 'ok2',
+          };
+        }
+      });
+
+      const hookedState = await server.stateManager.create('hooked', { name: 'test' });
+      const expected = { name: 'test', value: 'ok2' };
+      assert.deepEqual(hookedState.getValues(), expected);
+    });
+  });
+
   describe('## [server] registerUpdateHook(className, updateHook)', () => {
     const hookSchema = {
       name: {

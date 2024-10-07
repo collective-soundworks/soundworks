@@ -41,22 +41,35 @@ export const kServerStateManagerAddClient = Symbol('soundworks:server-state-mana
 export const kServerStateManagerRemoveClient = Symbol('soundworks:server-state-manager-remove-client');
 export const kServerStateManagerHasClient = Symbol('soundworks:server-state-manager-has-client');
 export const kServerStateManagerDeletePrivateState = Symbol('soundworks:server-state-manager-delete-private-state');
-export const kServerStateManagerGetHooks = Symbol('soundworks:server-state-manager-get-hooks');
+export const kServerStateManagerGetUpdateHooks = Symbol('soundworks:server-state-manager-get-update-hooks');
 // for testing purposes
 export const kStateManagerClientsByNodeId = Symbol('soundworks:server-state-clients-by-node-id');
 
 
 /**
+ * @callback serverStateManagerCreateHook
+ * @async
+ *
+ * @param {object} initValues - Initialization values object as given when the
+ *  shared state is created
+ */
+
+/**
  * @callback serverStateManagerUpdateHook
  * @async
  *
- * @param {object} updates - Update object as given on a set callback, or
- *  result of the previous hook
+ * @param {object} updates - Update object as given on a `set` callback, or
+ *  result of the previous hook.
  * @param {object} currentValues - Current values of the state.
- * @param {object} [context=null] - Optionnal context passed by the creator
- *  of the update.
- *
  * @returns {object} The "real" updates to be applied on the state.
+ */
+
+/**
+ * @callback serverStateManagerDeleteHook
+ * @async
+ *
+ * @param {object} currentValues - Update object as given on a `set` callback, or
+ *  result of the previous hook.
  */
 
 /**
@@ -120,7 +133,9 @@ class ServerStateManager extends BaseStateManager {
   #sharedStatePrivateById = new Map();
   #classes = new Map();
   #observers = new Set();
-  #hooksByClassName = new Map(); // protected
+  #createHooksByClassName = new Map();
+  #updateHooksByClassName = new Map();
+  #deleteHooksByClassName = new Map();
 
   constructor() {
     super();
@@ -141,10 +156,11 @@ class ServerStateManager extends BaseStateManager {
   }
 
   /** @private */
-  [kServerStateManagerGetHooks](className) {
-    return this.#hooksByClassName.get(className);
+  [kServerStateManagerGetUpdateHooks](className) {
+    return this.#updateHooksByClassName.get(className);
   }
 
+  /** @private */
   [kServerStateManagerHasClient](nodeId) {
     return this[kStateManagerClientsByNodeId].has(nodeId);
   }
@@ -175,14 +191,35 @@ class ServerStateManager extends BaseStateManager {
     // ---------------------------------------------
     client.transport.addListener(
       CREATE_REQUEST,
-      (reqId, className, requireDescription, initValues = {}) => {
+      async (reqId, className, requireDescription, initValues = {}) => {
         if (this.#classes.has(className)) {
           try {
             const classDescription = this.#classes.get(className);
             const stateId = generateStateId();
             const instanceId = instanceIdGenerator();
-            const state = new SharedStatePrivate(this, className, classDescription, stateId, initValues);
 
+            // apply create hooks on init values
+            const hooks = this.#createHooksByClassName.get(className);
+            let hookAborted = false;
+
+            for (let hook of hooks.values()) {
+              const result = await hook(initValues);
+
+              if (result === null) { // explicit abort
+                hookAborted = true;
+                break;
+              } else if (result === undefined) { // implicit continue
+                continue;
+              } else {
+                initValues = result;
+              }
+            }
+
+            if (hookAborted) {
+              throw new Error(`A create hook function explicitly aborted state creation by returninig 'null'`);
+            }
+
+            const state = new SharedStatePrivate(this, className, classDescription, stateId, initValues);
             // attach client to the state as owner
             const isOwner = true;
             const filter = null;
@@ -211,11 +248,11 @@ class ServerStateManager extends BaseStateManager {
               });
             }
           } catch (err) {
-            const msg = `[stateManager] Cannot create state "${className}", ${err.message}`;
+            const msg = `Cannot execute 'create' on 'BaseStateManager' for class '${className}': ${err.message}`;
             client.transport.emit(CREATE_ERROR, reqId, msg);
           }
         } else {
-          const msg = `[stateManager] Cannot create state "${className}", class is not defined`;
+          const msg = `Cannot execute 'create' on 'BaseStateManager' for class '${className}': class is not defined`;
           client.transport.emit(CREATE_ERROR, reqId, msg);
         }
       },
@@ -434,7 +471,9 @@ class ServerStateManager extends BaseStateManager {
 
     this.#classes.set(className, clonedeep(classDescription));
     // create hooks list
-    this.#hooksByClassName.set(className, new Set());
+    this.#createHooksByClassName.set(className, new Set());
+    this.#updateHooksByClassName.set(className, new Set());
+    this.#deleteHooksByClassName.set(className, new Set());
   }
 
   /**
@@ -474,7 +513,9 @@ class ServerStateManager extends BaseStateManager {
 
     this.#classes.delete(className);
     // delete registered hooks
-    this.#hooksByClassName.delete(className);
+    this.#createHooksByClassName.delete(className);
+    this.#updateHooksByClassName.delete(className);
+    this.#deleteHooksByClassName.delete(className);
   }
 
   /**
@@ -483,6 +524,21 @@ class ServerStateManager extends BaseStateManager {
   deleteSchema(className) {
     logger.deprecated('ServerStateManager#deleteSchema', 'ServerStateManager#deleteClass', '4.0.0-alpha.29');
     this.deleteClass(className);
+  }
+
+  registerCreateHook(className, createHook) {
+    if (!this.#classes.has(className)) {
+      throw new TypeError(`Cannot execute 'registerCreateHook' on 'BaseStateManager': SharedState class '${className}' does not exists`);
+    }
+
+    if (!isFunction(createHook)) {
+      throw new TypeError(`Cannot execute 'registerCreateHook' on 'BaseStateManager': argument 2 must be a function`);
+    }
+
+    const hooks = this.#createHooksByClassName.get(className);
+    hooks.add(createHook);
+
+    return () => hooks.delete(createHook);
   }
 
   /**
@@ -499,10 +555,10 @@ class ServerStateManager extends BaseStateManager {
    * before the call of the `onUpdate` callback of the shared state.
    *
    * @param {string} className - Kind of states on which applying the hook.
-   * @param {serverStateManagerUpdateHook} updateHook - Function called between
-   *  the `set` call and the actual update.
+   * @param {serverStateManagerUpdateHook} updateHook - Function called on each update,
+   *  to eventually modify the updates before they are actually applied.
    *
-   * @returns {Fuction} deleteHook - Handler that deletes the hook when executed.
+   * @returns {function} deleteHook - Handler that deletes the hook when executed.
    *
    * @example
    * server.stateManager.defineClass('hooked', {
@@ -523,16 +579,15 @@ class ServerStateManager extends BaseStateManager {
    * assert.deepEqual(result, { value: 'test', numUpdates: 1 });
    */
   registerUpdateHook(className, updateHook) {
-    // throw error if className has not been registered
     if (!this.#classes.has(className)) {
-      throw new TypeError(`[stateManager.registerUpdateHook] Cannot register update hook for class "${className}", class does not exists`);
+      throw new TypeError(`Cannot execute 'registerUpdateHook' on 'BaseStateManager': SharedState class '${className}' does not exists`);
     }
 
     if (!isFunction(updateHook)) {
-      throw new TypeError(`[stateManager.registerUpdateHook] Cannot register update hook for class "${className}", argument 2 must be a function`);
+      throw new TypeError(`Cannot execute 'registerUpdateHook' on 'BaseStateManager': argument 2 must be a function`);
     }
 
-    const hooks = this.#hooksByClassName.get(className);
+    const hooks = this.#updateHooksByClassName.get(className);
     hooks.add(updateHook);
 
     return () => hooks.delete(updateHook);

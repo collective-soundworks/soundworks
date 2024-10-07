@@ -12,7 +12,7 @@ import {
 } from '../common/constants.js';
 import {
   kServerStateManagerDeletePrivateState,
-  kServerStateManagerGetHooks,
+  kServerStateManagerGetUpdateHooks,
 } from '../server/ServerStateManager.js';
 
 /**
@@ -96,7 +96,7 @@ class SharedStatePrivate {
     // attach client listeners
     client.transport.addListener(`${UPDATE_REQUEST}-${this.id}-${instanceId}`, async (reqId, updates) => {
       // apply registered hooks
-      const hooks = this.#manager[kServerStateManagerGetHooks](this.className);
+      const hooks = this.#manager[kServerStateManagerGetUpdateHooks](this.className);
       const values = this.#parameters.getValues();
       let hookAborted = false;
 
