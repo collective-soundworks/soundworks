@@ -677,9 +677,7 @@ describe('# server::Server', () => {
         assert.equal(numClients.test, 0);
       }
 
-      // await auditState.delete();
       await server.stop();
-      console.log('server stopped');
     });
   });
 

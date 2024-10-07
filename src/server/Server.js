@@ -50,6 +50,7 @@ import {
 import ServerStateManager, {
   kServerStateManagerAddClient,
   kServerStateManagerRemoveClient,
+  kServerStateManagerHasClient,
 } from './ServerStateManager.js';
 import {
   kStateManagerInit,
@@ -944,8 +945,8 @@ Invalid certificate files, please check your:
     }
 
     socket.addListener('close', async () => {
-      // do nothing if client role is invalid
-      if (roles.includes(role)) {
+      // cleanup if role is valid and client finished handshake
+      if (roles.includes(role) && this.#stateManager[kServerStateManagerHasClient](client.id)) {
         // decrement audit state counter
         const numClients = this.#auditState.get('numClients');
         numClients[role] -= 1;

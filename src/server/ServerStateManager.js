@@ -39,6 +39,7 @@ const instanceIdGenerator = counter();
 
 export const kServerStateManagerAddClient = Symbol('soundworks:server-state-manager-add-client');
 export const kServerStateManagerRemoveClient = Symbol('soundworks:server-state-manager-remove-client');
+export const kServerStateManagerHasClient = Symbol('soundworks:server-state-manager-has-client');
 export const kServerStateManagerDeletePrivateState = Symbol('soundworks:server-state-manager-delete-private-state');
 export const kServerStateManagerGetHooks = Symbol('soundworks:server-state-manager-get-hooks');
 // for testing purposes
@@ -142,6 +143,10 @@ class ServerStateManager extends BaseStateManager {
   /** @private */
   [kServerStateManagerGetHooks](className) {
     return this.#hooksByClassName.get(className);
+  }
+
+  [kServerStateManagerHasClient](nodeId) {
+    return this[kStateManagerClientsByNodeId].has(nodeId);
   }
 
   /**
