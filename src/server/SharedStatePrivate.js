@@ -37,6 +37,7 @@ function filterUpdates(updates, filter) {
 
 export const kSharedStatePrivateAttachClient = Symbol('soundworks:shared-state-private-attach-client');
 export const kSharedStatePrivateDetachClient = Symbol('soundworks:shared-state-private-detach-client');
+export const kSharedStatePrivateGetValues = Symbol('soundworks:shared-state-private-get-values');
 
 /**
  * The "real" state, this instance is kept private by the server.StateManager.
@@ -82,6 +83,10 @@ class SharedStatePrivate {
 
   get parameters() {
     return this.#parameters;
+  }
+
+  [kSharedStatePrivateGetValues]() {
+    return this.#parameters.getValues();
   }
 
   [kSharedStatePrivateAttachClient](instanceId, client, isOwner, filter) {
@@ -228,8 +233,9 @@ class SharedStatePrivate {
 
     if (isOwner) {
       // delete only if creator
-      client.transport.addListener(`${DELETE_REQUEST}-${this.id}-${instanceId}`, (reqId) => {
-        this.#manager[kServerStateManagerDeletePrivateState](this.id);
+      client.transport.addListener(`${DELETE_REQUEST}-${this.id}-${instanceId}`, async reqId => {
+        // make sure hooks have been called when `delete()` fulfills
+        await this.#manager[kServerStateManagerDeletePrivateState](this);
         // --------------------------------------------------------------------
         // WARNING - MAKE SURE WE DON'T HAVE PROBLEM W/ THAT
         // --------------------------------------------------------------------

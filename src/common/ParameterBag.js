@@ -4,7 +4,7 @@ import equal from 'fast-deep-equal';
 export const sharedOptions = {
   nullable: false,
   event: false, // if event=true, nullable=true
-  required: false, // if required=true, default is set to init value
+  required: false, // if required=true, value si required in initialization values
   metas: {},
   filterChange: true,
   immediate: false,

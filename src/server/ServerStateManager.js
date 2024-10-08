@@ -29,6 +29,7 @@ import {
 import SharedStatePrivate, {
   kSharedStatePrivateAttachClient,
   kSharedStatePrivateDetachClient,
+  kSharedStatePrivateGetValues,
 } from './SharedStatePrivate.js';
 
 import logger from '../common/logger.js';
@@ -151,8 +152,23 @@ class ServerStateManager extends BaseStateManager {
   }
 
   /** @private */
-  [kServerStateManagerDeletePrivateState](id) {
-    this.#sharedStatePrivateById.delete(id);
+  async [kServerStateManagerDeletePrivateState](state) {
+    this.#sharedStatePrivateById.delete(state.id);
+    // execute hooks
+    let currentValues = state[kSharedStatePrivateGetValues]();
+    const hooks = this.#deleteHooksByClassName.get(state.className);
+
+    for (let hook of hooks.values()) {
+      const result = await hook(currentValues);
+
+      if (result === null) { // explicit abort
+        break;
+      } else if (result === undefined) { // implicit continue
+        continue;
+      } else {
+        currentValues = result;
+      }
+    }
   }
 
   /** @private */
@@ -415,7 +431,7 @@ class ServerStateManager extends BaseStateManager {
             attachedClient.transport.emit(`${DELETE_NOTIFICATION}-${state.id}-${instanceId}`);
           }
 
-          this.#sharedStatePrivateById.delete(state.id);
+          this[kServerStateManagerDeletePrivateState](state);
         }
       }
     }
@@ -502,7 +518,7 @@ class ServerStateManager extends BaseStateManager {
           attached.transport.emit(`${DELETE_NOTIFICATION}-${state.id}-${instanceId}`);
         }
 
-        this.#sharedStatePrivateById.delete(state.id);
+        this[kServerStateManagerDeletePrivateState](state);
       }
     }
 
@@ -526,6 +542,42 @@ class ServerStateManager extends BaseStateManager {
     this.deleteClass(className);
   }
 
+    /**
+   * Register a function for a given class of shared state class to be executed
+   * when a state is created.
+   *
+   * For example, this can be usefull to retrieve some initialization values stored
+   * in the filesystem, given the value (e.g. a hostname) of one the parameters.
+   *
+   * The hook is associated to each states created from the given class name.
+   * Note that the hooks are executed server-side regarless the node on which
+   * `create` has been called.
+   *
+   * @param {string} className - Kind of states on which applying the hook.
+   * @param {serverStateManagerUpdateHook} createHook - Function called on when
+   *  a state of `className` is created on the network.
+   *
+   * @returns {function} deleteHook - Handler that deletes the hook when executed.
+   *
+   * @example
+   * server.stateManager.defineClass('hooked', {
+   *   name: { type: 'string', required: true },
+   *   hookTriggered: { type: 'boolean', default: false },
+   * });
+   * server.stateManager.registerCreateHook('hooked', initValues => {
+   *   return {
+   *     ...initValues
+   *     hookTriggered: true,
+   *   };
+   * });
+   *
+   * const state = await server.stateManager.create('hooked', {
+   *   name: 'coucou',
+   * });
+   *
+   * const values = state.getValues();
+   * assert.deepEqual(result, { value: 'coucou', hookTriggered: true });
+   */
   registerCreateHook(className, createHook) {
     if (!this.#classes.has(className)) {
       throw new TypeError(`Cannot execute 'registerCreateHook' on 'BaseStateManager': SharedState class '${className}' does not exists`);
@@ -541,15 +593,30 @@ class ServerStateManager extends BaseStateManager {
     return () => hooks.delete(createHook);
   }
 
+  registerDeleteHook(className, deleteHook) {
+    if (!this.#classes.has(className)) {
+      throw new TypeError(`Cannot execute 'registerDeleteHook' on 'BaseStateManager': SharedState class '${className}' does not exists`);
+    }
+
+    if (!isFunction(deleteHook)) {
+      throw new TypeError(`Cannot execute 'registerDeleteHook' on 'BaseStateManager': argument 2 must be a function`);
+    }
+
+    const hooks = this.#deleteHooksByClassName.get(className);
+    hooks.add(deleteHook);
+
+    return () => hooks.delete(deleteHook);
+  }
+
   /**
-   * Register a function for a given shared state class the be executed between
+   * Register a function for a given class of shared state to be executed between
    * `set` instructions and `onUpdate` callback(s).
    *
-   * For example, this could be used to implement a preset system
-   * where all the values of the state are updated from e.g. some data stored in
-   * filesystem while the consumer of the state only want to update the preset name.
+   * For example, this can be used to implement a preset system where all the values
+   * of the state are updated from e.g. some data stored in filesystem while the
+   * consumer of the state only want to update the preset name.
    *
-   * The hook is associated to each states created from the given class name
+   * The hook is associated to each states created from the given class name and
    * executed on each update (i.e. `state.set(updates)`). Note that the hooks are
    * executed server-side regarless the node on which `set` has been called and
    * before the call of the `onUpdate` callback of the shared state.

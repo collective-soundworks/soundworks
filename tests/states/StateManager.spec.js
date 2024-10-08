@@ -859,6 +859,156 @@ describe(`# StateManager`, () => {
     });
   });
 
+  describe.only(`## [server] registerDeleteHook(className, createHook)`, () => {
+    const hookSchema = {
+      value: {
+        type: 'integer',
+        default: 0,
+      },
+    };
+
+    it(`should throw if invalid className`, () => {
+      let errored = false;
+
+      try {
+        server.stateManager.registerDeleteHook('hooked', () => {});
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      assert.isTrue(errored);
+    });
+
+    it(`should throw if updateHook is not a function`, () => {
+      server.stateManager.defineClass('hooked', hookSchema);
+      let errored = false;
+
+      assert.throws(() => server.stateManager.registerDeleteHook('hooked', null));
+      assert.throws(() => server.stateManager.registerDeleteHook('hooked', {}));
+      assert.doesNotThrow(() => server.stateManager.registerDeleteHook('hooked', () => {}));
+      assert.doesNotThrow(() => server.stateManager.registerDeleteHook('hooked', async () => {}));
+    });
+
+
+    it(`should be called on state.delete()`, async () => {
+      server.stateManager.defineClass('hooked', hookSchema);
+
+      let called = false;
+      server.stateManager.registerDeleteHook('hooked', finalValues => called = true);
+
+      const state = await server.stateManager.create('hooked');
+      assert.equal(called, false);
+
+      await state.delete(); // order is guaranteed
+      assert.equal(called, true);
+    });
+
+    it(`should accept async hooks + order of execution`, async () => {
+      server.stateManager.defineClass('hooked', hookSchema);
+
+      let called = false;
+      server.stateManager.registerDeleteHook('hooked', async finalValues => {
+        await delay(20);
+        called = true;
+      });
+
+      const state = await server.stateManager.create('hooked');
+      assert.equal(called, false);
+      await state.delete(); // order is guaranteed
+      assert.equal(called, true);
+    });
+
+    it(`should be called on stateManager.deleteClass()`, async () => {
+      server.stateManager.defineClass('hooked', hookSchema);
+
+      let called = false;
+      server.stateManager.registerDeleteHook('hooked', async finalValues => called = true);
+
+      const _ = await server.stateManager.create('hooked');
+      assert.equal(called, false);
+      server.stateManager.deleteClass('hooked'); // order is NOT guaranteed
+      assert.equal(called, true);
+    });
+
+    it(`should be called on owner disconnect`, async () => {
+      server.stateManager.defineClass('hooked', hookSchema);
+
+      let called = false;
+      server.stateManager.registerDeleteHook('hooked', async finalValues => called = true);
+
+      const _ = await client.stateManager.create('hooked');
+      assert.equal(called, false);
+      await client.stop(); // order is NOT guaranteed
+      await delay(10);
+      assert.equal(called, true);
+    });
+
+    it(`should be able to chain hooks`, async () => {
+      server.stateManager.defineClass('hooked', hookSchema);
+
+      let called1 = false;
+      let called2 = false;
+
+      server.stateManager.registerDeleteHook('hooked', async finalValues => {
+        await delay(20);
+        called1 = true;
+        assert.equal(finalValues.value, 0);
+        return { value: 1 };
+      });
+
+      server.stateManager.registerDeleteHook('hooked', finalValues => {
+        assert.equal(finalValues.value, 1);
+        called2 = true;
+      });
+
+      const state = await server.stateManager.create('hooked');
+      await state.delete(); // order is guaranteed
+      assert.equal(called1, true);
+      assert.equal(called2, true);
+    });
+
+    it(`should explicitly abort when hook returns null`, async () => {
+      server.stateManager.defineClass('hooked', hookSchema);
+
+      let called1 = false;
+      let called2 = false;
+
+      server.stateManager.registerDeleteHook('hooked', async finalValues => {
+        called1 = true;
+        return null;
+      });
+
+      server.stateManager.registerDeleteHook('hooked', finalValues => called2 = true);
+
+      const state = await server.stateManager.create('hooked');
+      await state.delete(); // order is guaranteed
+      assert.equal(called1, true);
+      assert.equal(called2, false);
+    });
+
+    it(`should implicitly continue when hook returns undefined`, async () => {
+      server.stateManager.defineClass('hooked', hookSchema);
+
+      let called1 = false;
+      let called2 = false;
+
+      server.stateManager.registerDeleteHook('hooked', async finalValues => {
+        called1 = true;
+      });
+
+      server.stateManager.registerDeleteHook('hooked', finalValues => {
+        assert.equal(finalValues.value, 42);
+        called2 = true
+      });
+
+      const state = await server.stateManager.create('hooked', { value: 42 });
+      await state.delete(); // order is guaranteed
+      assert.equal(called1, true);
+      assert.equal(called2, true);
+    });
+  });
+
   describe('## [server] registerUpdateHook(className, updateHook)', () => {
     const hookSchema = {
       name: {

@@ -44,7 +44,7 @@
  * Description of a parameter in a class of {@link SharedState}
  *
  * @typedef {object} SharedStateParameterDescription
- * @property {'boolean'|'string'|'integer'|'float'|'enum'|'any'} type - Type of the parameter
+ * @property {'boolean'|'string'|'integer'|'float'|'enum'|'any'} type - Type of the parameter.
  * @property {any} default - Default value of the parameter. Optional only if
  *  `nullable = true` or `event = true`
  * @property {boolean} [nullable=false] - Defines if the parameter is nullable.
@@ -65,6 +65,8 @@
  *   latency on the client.
  *   If for some reason the value is overriden server-side (e.g. in an `updateHook`)
  *   the listeners will be called again when the "real" value is received.
+ * @property {boolean} [required=false] - When set to true, the parameter must be
+ *   provided in the initialization values when the state is created.
  * @property {boolean} [local=false] - When set to true, the parameter is never
  *   propagated on the network (hence it is no longer a shared parameter :). This
  *   is usefull to declare some common parameter (e.g. some interface state) that
