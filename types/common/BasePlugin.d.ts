@@ -5,7 +5,7 @@ export default BasePlugin;
  */
 export type pluginOnStateChangeCallback = (#state: BasePlugin) => any;
 /**
- * Delete the registered {@link pluginOnStateChangeCallback }.
+ * Delete the registered {@link pluginOnStateChangeCallback}.
  */
 export type pluginDeleteOnStateChangeCallback = () => any;
 /**

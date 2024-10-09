@@ -1,5 +1,7 @@
 export default function(Plugin) {
   return class PluginDelayServer extends Plugin {
+    static target = 'server';
+
     constructor(server, id, options) {
       super(server, id);
 

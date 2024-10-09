@@ -141,7 +141,11 @@ class ServerPluginManager extends BasePluginManager {
     const ctor = factory(ServerPlugin);
 
     if (!(ctor.prototype instanceof ServerPlugin)) {
-      throw new Error(`[soundworks.PluginManager] Invalid argument, "pluginManager.register" second argument should be a factory function returning a class extending the "ServerPlugin" base class`);
+      throw new Error(`[ServerPluginManager] Invalid argument, "pluginManager.register" second argument should be a factory function returning a class extending the "ServerPlugin" base class`);
+    }
+
+    if (ctor.target === undefined || ctor.target !== 'server') {
+      throw new Error(`[ServerPluginManager] Invalid argument, The plugin class should implement a 'target' static field with value 'server'`)
     }
 
     super.register(id, ctor, options, deps);

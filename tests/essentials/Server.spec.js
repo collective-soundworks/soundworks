@@ -21,7 +21,7 @@ import config from '../utils/config.js';
 const __filename = url.fileURLToPath(import.meta.url);
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
 
-describe('# server::Server', () => {
+describe('# Server', () => {
   describe(`## new Server(config)`, () => {
     it(`should throw if invalid config object`, () => {
 
@@ -445,6 +445,8 @@ describe('# server::Server', () => {
       const server = new Server(config);
       server.pluginManager.register('test-plugin', Plugin => {
         return class TestPlugin extends Plugin {
+          static target = 'server';
+
           async start() {
             await super.start();
             // just check that we are ok with that, and that we are not stuck

@@ -1,11 +1,11 @@
 export const kSharedStatePromiseStore: unique symbol;
 export default SharedState;
 /**
- * Callback executed when updates are applied on a {@link SharedState }.
+ * Callback executed when updates are applied on a {@link SharedState}.
  */
 export type sharedStateOnUpdateCallback = (newValues: any, oldValues: any) => any;
 /**
- * Delete the registered {@link sharedStateOnUpdateCallback }.
+ * Delete the registered {@link sharedStateOnUpdateCallback}.
  */
 export type sharedStateDeleteOnUpdateCallback = () => any;
 /**
@@ -79,7 +79,16 @@ export type sharedStateDeleteOnUpdateCallback = () => any;
  * ```
  */
 declare class SharedState {
-    constructor(id: any, remoteId: any, className: any, classDescription: any, client: any, isOwner: any, manager: any, initValues: any, filter: any);
+    constructor({ stateId, instanceId, className, classDescription, isOwner, manager, initValues, filter, }: {
+        stateId: any;
+        instanceId: any;
+        className: any;
+        classDescription: any;
+        isOwner: any;
+        manager: any;
+        initValues: any;
+        filter: any;
+    });
     /**
      * Id of the state
      * @type {Number}

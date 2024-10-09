@@ -154,7 +154,7 @@ class ServerStateManager extends BaseStateManager {
   /** @private */
   async [kServerStateManagerDeletePrivateState](state) {
     this.#sharedStatePrivateById.delete(state.id);
-    // execute hooks
+    // @todo - could use getValuesUnsafe instead
     let currentValues = state[kSharedStatePrivateGetValues]();
     const hooks = this.#deleteHooksByClassName.get(state.className);
 
@@ -186,8 +186,7 @@ class ServerStateManager extends BaseStateManager {
    *
    * This is automatically handled by the {@link Server} when a client connects.
    *
-   * @param {number} nodeId - Id of the client node, as given in
-   *  {@link client.StateManager}
+   * @param {number} nodeId - Unique id of the client node
    * @param {object} transport - Transport mecanism to communicate with the
    *  client. Must implement a basic EventEmitter API.
    *

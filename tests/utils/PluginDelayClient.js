@@ -1,5 +1,7 @@
 export default function(Plugin) {
   return class PluginDelayClient extends Plugin {
+    static target = 'client';
+
     constructor(client, id, options) {
       super(client, id);
 

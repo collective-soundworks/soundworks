@@ -1,10 +1,10 @@
 /**
- * User defined name for a class of {@link SharedState }
+ * User defined name for a class of {@link SharedState}
  */
 type SharedStateClassName = string;
 /**
- * Description of a {@link SharedState } data structure that describes the structure
- * of a class of {@link SharedState } to be registered by {@link ServerStateManagerdefineClass }
+ * Description of a {@link SharedState} data structure that describes the structure
+ * of a class of {@link SharedState} to be registered by {@link ServerStateManager#defineClass}
  *
  * A `SharedStateClassDescription` is the blueprint, or the definition from which
  * shared states from a given class can be created.
@@ -15,17 +15,17 @@ type SharedStateClassName = string;
  */
 type SharedStateClassDescription = any;
 /**
- * User defined name of a parameter in a class of {@link SharedState }
+ * User defined name of a parameter in a class of {@link SharedState}
  */
 type SharedStateParameterName = string;
 /**
- * Description of a parameter in a class of {@link SharedState }
+ * Description of a parameter in a class of {@link SharedState}
  */
 type SharedStateParameterDescription = {
     /**
-     * - Type of the parameter
+     * - Type of the parameter.
      */
-    type: 'boolean' | 'string' | 'integer' | 'float' | 'enum' | 'any';
+    type: "boolean" | "string" | "integer" | "float" | "enum" | "any";
     /**
      * - Default value of the parameter. Optional only if
      * `nullable = true` or `event = true`
@@ -61,6 +61,11 @@ type SharedStateParameterDescription = {
      * the listeners will be called again when the "real" value is received.
      */
     immediate?: boolean;
+    /**
+     * - When set to true, the parameter must be
+     * provided in the initialization values when the state is created.
+     */
+    required?: boolean;
     /**
      * - When set to true, the parameter is never
      * propagated on the network (hence it is no longer a shared parameter :). This

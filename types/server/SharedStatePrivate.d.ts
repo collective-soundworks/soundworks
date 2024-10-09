@@ -1,5 +1,6 @@
 export const kSharedStatePrivateAttachClient: unique symbol;
 export const kSharedStatePrivateDetachClient: unique symbol;
+export const kSharedStatePrivateGetValues: unique symbol;
 export default SharedStatePrivate;
 /**
  * The "real" state, this instance is kept private by the server.StateManager.
@@ -8,14 +9,15 @@ export default SharedStatePrivate;
  * @private
  */
 declare class SharedStatePrivate {
-    constructor(id: any, className: any, classDefinition: any, manager: any, initValues?: {});
+    constructor(manager: any, className: any, classDefinition: any, id: any, initValues?: {});
     get id(): any;
     get className(): any;
     get creatorId(): any;
-    get creatorRemoteId(): any;
+    get creatorInstanceId(): any;
     get attachedClients(): Map<any, any>;
     get parameters(): any;
-    [kSharedStatePrivateAttachClient](remoteId: any, client: any, isOwner: any, filter: any): void;
-    [kSharedStatePrivateDetachClient](remoteId: any, client: any): void;
+    [kSharedStatePrivateGetValues](): any;
+    [kSharedStatePrivateAttachClient](instanceId: any, client: any, isOwner: any, filter: any): void;
+    [kSharedStatePrivateDetachClient](instanceId: any, client: any): void;
     #private;
 }

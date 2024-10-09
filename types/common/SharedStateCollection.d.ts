@@ -1,7 +1,7 @@
 export default SharedStateCollection;
 export type sharedStateCollectionOnUpdateCallback = (state: SharedState, newValues: any, oldValues: any) => any;
 /**
- * Delete the registered {@link sharedStateCollectionOnUpdateCallback }.
+ * Delete the registered {@link sharedStateCollectionOnUpdateCallback}.
  */
 export type sharedStateCollectionDeleteOnUpdateCallback = () => any;
 /**
@@ -56,7 +56,7 @@ declare class SharedStateCollection {
      */
     get className(): string;
     /**
-     * @deprecated Use ${@link SharedStateCollection#className} instead.
+     * @deprecated Use {@link SharedStateCollection#className} instead.
      */
     get schemaName(): string;
     /**

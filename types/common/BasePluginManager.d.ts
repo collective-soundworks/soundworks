@@ -7,7 +7,7 @@ export default BasePluginManager;
  */
 export type pluginManagerOnStateChangeCallback = (: object, initiator: ClientPlugin | ServerPlugin | null) => any;
 /**
- * Delete the registered {@link pluginManagerOnStateChangeCallback }.
+ * Delete the registered {@link pluginManagerOnStateChangeCallback}.
  */
 export type pluginManagerDeleteOnStateChangeCallback = () => any;
 /**

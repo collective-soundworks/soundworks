@@ -1,21 +1,35 @@
 export const kServerStateManagerAddClient: unique symbol;
 export const kServerStateManagerRemoveClient: unique symbol;
+export const kServerStateManagerHasClient: unique symbol;
 export const kServerStateManagerDeletePrivateState: unique symbol;
-export const kServerStateManagerGetHooks: unique symbol;
+export const kServerStateManagerGetUpdateHooks: unique symbol;
 export const kStateManagerClientsByNodeId: unique symbol;
 export default ServerStateManager;
+export type serverStateManagerCreateHook = () => any;
 export type serverStateManagerUpdateHook = () => any;
+export type serverStateManagerDeleteHook = () => any;
+/**
+ * @callback serverStateManagerCreateHook
+ * @async
+ *
+ * @param {object} initValues - Initialization values object as given when the
+ *  shared state is created
+ */
 /**
  * @callback serverStateManagerUpdateHook
  * @async
  *
- * @param {object} updates - Update object as given on a set callback, or
- *  result of the previous hook
+ * @param {object} updates - Update object as given on a `set` callback, or
+ *  result of the previous hook.
  * @param {object} currentValues - Current values of the state.
- * @param {object} [context=null] - Optionnal context passed by the creator
- *  of the update.
- *
  * @returns {object} The "real" updates to be applied on the state.
+ */
+/**
+ * @callback serverStateManagerDeleteHook
+ * @async
+ *
+ * @param {object} currentValues - Update object as given on a `set` callback, or
+ *  result of the previous hook.
  */
 /**
  * The `StateManager` allows to create new {@link SharedState}s, or attach
@@ -117,30 +131,98 @@ declare class ServerStateManager extends BaseStateManager {
      */
     deleteSchema(className: any): void;
     /**
-     * Register a function for a given shared state class the be executed between
+     * Register a function for a given class of shared state class to be executed
+     * when a state is created.
+     *
+     * For example, this can be usefull to retrieve some initialization values stored
+     * in the filesystem, given the value (e.g. a hostname) of one the parameters.
+     *
+     * The hook is associated to each states created from the given class name.
+     * Note that the hooks are executed server-side regarless the node on which
+     * `create` has been called.
+     *
+     * @param {string} className - Kind of states on which applying the hook.
+     * @param {serverStateManagerUpdateHook} createHook - Function called on when
+     *  a state of `className` is created on the network.
+     *
+     * @returns {function} deleteHook - Handler that deletes the hook when executed.
+     *
+     * @example
+     * server.stateManager.defineClass('hooked', {
+     *   name: { type: 'string', required: true },
+     *   hookTriggered: { type: 'boolean', default: false },
+     * });
+     * server.stateManager.onCreateHook('hooked', initValues => {
+     *   return {
+     *     ...initValues
+     *     hookTriggered: true,
+     *   };
+     * });
+     *
+     * const state = await server.stateManager.create('hooked', {
+     *   name: 'coucou',
+     * });
+     *
+     * const values = state.getValues();
+     * assert.deepEqual(result, { value: 'coucou', hookTriggered: true });
+     */
+    onCreateHook(className: string, createHook: serverStateManagerUpdateHook): Function;
+    /**
+     * Register a function for a given class of shared state class to be executed
+     * when a state is deleted.
+     *
+     * For example, this can be usefull to store the values of a given shared state
+     * in the filesystem.
+     *
+     * The hook is associated to each states created from the given class name.
+     * Note that the hooks are executed server-side regarless the node on which
+     * `delete` has been called.
+     *
+     * @param {string} className - Kind of states on which applying the hook.
+     * @param {serverStateManagerUpdateHook} createHook - Function called on when
+     *  a state of `className` is created on the network.
+     *
+     * @returns {function} deleteHook - Handler that deletes the hook when executed.
+     *
+     * @example
+     * server.stateManager.defineClass('hooked', {
+     *   name: { type: 'string', required: true },
+     *   hookTriggered: { type: 'boolean', default: false },
+     * });
+     * server.stateManager.onDeleteHook('hooked', async currentValues => {
+     *   await doSomethingWithValues(currentValues)
+     * });
+     *
+     * const state = await server.stateManager.create('hooked');
+     * // later
+     * await state.delete();
+     */
+    onDeleteHook(className: string, deleteHook: any): Function;
+    /**
+     * Register a function for a given class of shared state to be executed between
      * `set` instructions and `onUpdate` callback(s).
      *
-     * For example, this could be used to implement a preset system
-     * where all the values of the state are updated from e.g. some data stored in
-     * filesystem while the consumer of the state only want to update the preset name.
+     * For example, this can be used to implement a preset system where all the values
+     * of the state are updated from e.g. some data stored in filesystem while the
+     * consumer of the state only want to update the preset name.
      *
-     * The hook is associated to each states created from the given class name
+     * The hook is associated to each states created from the given class name and
      * executed on each update (i.e. `state.set(updates)`). Note that the hooks are
      * executed server-side regarless the node on which `set` has been called and
      * before the call of the `onUpdate` callback of the shared state.
      *
      * @param {string} className - Kind of states on which applying the hook.
-     * @param {serverStateManagerUpdateHook} updateHook - Function called between
-     *  the `set` call and the actual update.
+     * @param {serverStateManagerUpdateHook} updateHook - Function called on each update,
+     *  to eventually modify the updates before they are actually applied.
      *
-     * @returns {Fuction} deleteHook - Handler that deletes the hook when executed.
+     * @returns {function} deleteHook - Handler that deletes the hook when executed.
      *
      * @example
      * server.stateManager.defineClass('hooked', {
      *   value: { type: 'string', default: null, nullable: true },
      *   numUpdates: { type: 'integer', default: 0 },
      * });
-     * server.stateManager.registerUpdateHook('hooked', updates => {
+     * server.stateManager.onUpdateHook('hooked', updates => {
      *   return {
      *     ...updates
      *     numUpdates: currentValues.numUpdates + 1,
@@ -153,13 +235,19 @@ declare class ServerStateManager extends BaseStateManager {
      * const values = state.getValues();
      * assert.deepEqual(result, { value: 'test', numUpdates: 1 });
      */
-    registerUpdateHook(className: string, updateHook: serverStateManagerUpdateHook): Fuction;
+    onUpdateHook(className: string, updateHook: serverStateManagerUpdateHook): Function;
+    /**
+     * @deprecated Use {@link ServerStateManager#onUpdateHook} instead.
+     */
+    registerUpdateHook(className: any, updateHook: any): Function;
     /** @private */
     private [kStateManagerInit];
     /** @private */
     private [kServerStateManagerDeletePrivateState];
     /** @private */
-    private [kServerStateManagerGetHooks];
+    private [kServerStateManagerGetUpdateHooks];
+    /** @private */
+    private [kServerStateManagerHasClient];
     /**
      * Add a client to the manager.
      *

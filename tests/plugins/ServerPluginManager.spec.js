@@ -5,6 +5,7 @@ import { Client } from '../../src/client/index.js';
 import ServerPluginManager from '../../src/server/ServerPluginManager.js';
 import ServerPlugin from '../../src/server/ServerPlugin.js';
 import pluginDelayServer from '../utils/PluginDelayServer.js';
+import pluginDelayClient from '../utils/PluginDelayClient.js';
 import config from '../utils/config.js';
 import {
   kStateManagerClientsByNodeId,
@@ -120,6 +121,21 @@ describe(`# ServerPluginManager`, () => {
       server.pluginManager.register('delay-2', pluginDelayServer, {});
 
       assert.ok('should not throw');
+    });
+
+    it(`should throw when registering client side plugin on server side`, async () => {
+      let errored = false;
+
+      try {
+        server.pluginManager.register('delay-1', pluginDelayClient, {});
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      if (!errored) {
+        assert.fail(`should have thrown`);
+      }
     });
   });
 
@@ -297,6 +313,8 @@ describe(`# ServerPluginManager`, () => {
 
       function testPluginFactory(Plugin) {
         return class TestPlugin extends Plugin {
+          static target = 'server';
+
           async addClient(client) {
             await super.addClient(client);
             addClientCalled = true;
@@ -311,7 +329,7 @@ describe(`# ServerPluginManager`, () => {
       const plugin = await server.pluginManager.get('test-plugin');
 
       const client = new Client({ role: 'test', ...config });
-      client.pluginManager.register('test-plugin', (Plugin) => class TestPlugin extends Plugin {});
+      client.pluginManager.register('test-plugin', (Plugin) => class TestPlugin extends Plugin { static target = 'client' });
       await client.init();
 
       assert.equal(plugin.clients.size, 1);
@@ -325,6 +343,8 @@ describe(`# ServerPluginManager`, () => {
 
       function testPluginFactory(Plugin) {
         return class TestPlugin extends Plugin {
+          static target = 'server';
+
           async addClient(client) {
             await super.addClient(client);
             assert.equal(this.clients.has(client), true);
@@ -337,6 +357,8 @@ describe(`# ServerPluginManager`, () => {
 
       function testPluginFactory2(Plugin) {
         return class TestPlugin extends Plugin {
+          static target = 'server';
+
           async addClient(client) {
             await super.addClient(client);
             addClientCalled2 = true;
@@ -351,7 +373,7 @@ describe(`# ServerPluginManager`, () => {
       await server.start();
 
       const client = new Client({ role: 'test', ...config });
-      client.pluginManager.register('test-plugin', (Plugin) => class TestPlugin extends Plugin {});
+      client.pluginManager.register('test-plugin', (Plugin) => class TestPlugin extends Plugin { static target = 'client' });
       await client.init();
       await client.start();
 
@@ -368,6 +390,8 @@ describe(`# ServerPluginManager`, () => {
 
       function testPluginFactory(Plugin) {
         return class TestPlugin extends Plugin {
+          static target = 'server';
+
           async removeClient(client) {
             await super.removeClient(client);
             removeClientCalled = true;
@@ -381,7 +405,7 @@ describe(`# ServerPluginManager`, () => {
       await server.start();
 
       const client = new Client({ role: 'test', ...config });
-      client.pluginManager.register('test-plugin', (Plugin) => class TestPlugin extends Plugin {});
+      client.pluginManager.register('test-plugin', (Plugin) => class TestPlugin extends Plugin { static target = 'client' });
       await client.init();
       await client.start();
 
@@ -399,6 +423,8 @@ describe(`# ServerPluginManager`, () => {
 
       function testPluginFactory(Plugin) {
         return class TestPlugin extends Plugin {
+          static target = 'server';
+
           async removeClient(client) {
             await super.removeClient(client);
 
@@ -415,7 +441,7 @@ describe(`# ServerPluginManager`, () => {
       await server.start();
 
       const client = new Client({ role: 'test', ...config });
-      client.pluginManager.register('test-plugin', (Plugin) => class TestPlugin extends Plugin {});
+      client.pluginManager.register('test-plugin', (Plugin) => class TestPlugin extends Plugin { static target = 'client' });
       await client.init();
       await client.start();
 
@@ -432,6 +458,8 @@ describe(`# ServerPluginManager`, () => {
 
       function testPluginFactory(Plugin) {
         return class TestPlugin extends Plugin {
+          static target = 'server';
+
           async removeClient(client) {
             await super.removeClient(client);
             removeClientCalled = true;
@@ -443,6 +471,8 @@ describe(`# ServerPluginManager`, () => {
 
       function testPluginFactory2(Plugin) {
         return class TestPlugin extends Plugin {
+          static target = 'server';
+
           async removeClient(client) {
             await super.removeClient(client);
             removeClientCalled2 = true;
@@ -457,7 +487,7 @@ describe(`# ServerPluginManager`, () => {
       await server.start();
 
       const client = new Client({ role: 'test', ...config });
-      client.pluginManager.register('test-plugin', (Plugin) => class TestPlugin extends Plugin {});
+      client.pluginManager.register('test-plugin', (Plugin) => class TestPlugin extends Plugin { static target = 'client' });
       await client.init();
       await client.start();
       await client.stop();

@@ -136,12 +136,11 @@ describe(`# PluginManagerClient`, () => {
       assert.ok('should not throw');
     });
 
-    it.skip(`[FIXME #83] should throw when registering server side plugin on client side`, async () => {
-      client.pluginManager.register('delay-1', pluginDelayServer, {});
-
+    it(`should throw when registering server side plugin on client side`, async () => {
       let errored = false;
+
       try {
-        await client.init();
+        client.pluginManager.register('delay-1', pluginDelayServer, {});
       } catch (err) {
         console.log(err.message);
         errored = true;

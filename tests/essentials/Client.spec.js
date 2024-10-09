@@ -11,7 +11,7 @@ import {
 import pluginDelayClient from '../utils/PluginDelayClient.js';
 import config from '../utils/config.js';
 
-describe('# client::Client', () => {
+describe('# Client', () => {
   describe(`## new Client(config)`, () => {
     it(`should throw if no config is given`, () => {
       try {
@@ -276,7 +276,9 @@ describe('# client::Client', () => {
     it(`should stop the contexts first and then the plugins`, async () => {
       const server = new Server(config);
       server.pluginManager.register('test-plugin', Plugin => {
-        return class TestPlugin extends Plugin {}
+        return class TestPlugin extends Plugin {
+          static target = 'server';
+        }
       });
 
       await server.init();
@@ -297,6 +299,7 @@ describe('# client::Client', () => {
 
       client.pluginManager.register('test-plugin', Plugin => {
         return class TestPlugin extends Plugin {
+          static target = 'client';
           async start() {
             await super.start();
             // just check that we are ok with that, and that we are not stuck

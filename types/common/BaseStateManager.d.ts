@@ -7,7 +7,7 @@ export default BaseStateManager;
  */
 export type stateManagerObserveCallback = () => any;
 /**
- * Callback to execute in order to remove a {@link stateManagerObserveCallback }
+ * Callback to execute in order to remove a {@link stateManagerObserveCallback}
  * from the list of observer.
  */
 export type stateManagerDeleteObserveCallback = () => any;

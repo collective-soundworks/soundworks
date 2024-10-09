@@ -60,13 +60,13 @@ describe('# Plugin', () => {
   describe(`## [client] Plugin.state propagation`, () => {
     it(`should propagate its inner state`, async () => {
       const server = new Server(config);
-      server.pluginManager.register('stateful', (ServerPlugin) => class StatefulPlugin extends ServerPlugin {});
+      server.pluginManager.register('stateful', (ServerPlugin) => class StatefulPlugin extends ServerPlugin { static target = 'server' });
 
       await server.init();
       await server.start();
 
       const client = new Client({ role: 'test', ...config });
-      client.pluginManager.register('stateful', (ClientPlugin) => class StatefulPlugin extends ClientPlugin {});
+      client.pluginManager.register('stateful', (ClientPlugin) => class StatefulPlugin extends ClientPlugin { static target = 'client' });
       await client.init();
 
       const plugin = await client.pluginManager.get('stateful');
@@ -91,7 +91,9 @@ describe('# Plugin', () => {
     it(`should be forwarded by the stateManager`, async () => {
       const server = new Server(config);
       server.pluginManager.register('stateful', (Plugin) => {
-        return class StatefulPlugin extends Plugin {}
+        return class StatefulPlugin extends Plugin {
+          static target = 'server';
+        }
       });
 
       await server.init();
@@ -102,6 +104,8 @@ describe('# Plugin', () => {
 
       client.pluginManager.register('stateful', (Plugin) => {
         return class StatefulPlugin extends Plugin {
+          static target = 'client';
+
           constructor(client, id) {
             super(client, id);
             this.state = { rand: 0 };
@@ -141,6 +145,8 @@ describe('# Plugin', () => {
 
       server.pluginManager.register('dependent', (Plugin) => {
         return class Dependant extends Plugin {
+          static target = 'server';
+
           constructor(server, id) {
             super(server, id);
 
@@ -177,6 +183,8 @@ describe('# Plugin', () => {
 
       client.pluginManager.register('dependent', (Plugin) => {
         return class Dependant extends Plugin {
+          static target = 'client';
+
           constructor(client, id) {
             super(client, id);
 
@@ -215,8 +223,10 @@ describe('# Plugin', () => {
   describe(`## [server] Plugin.state propagation`, () => {
     it('PluginManager should properly propagate plugin state', async () => {
       const server = new Server(config);
-      server.pluginManager.register('stateful', (ClientPlugin) => {
-        return class StatefulPlugin extends ClientPlugin {
+      server.pluginManager.register('stateful', (Plugin) => {
+        return class StatefulPlugin extends Plugin {
+          static target = 'server';
+
           constructor(client, id) {
             super(client, id);
             this.state = { rand: 0 };
