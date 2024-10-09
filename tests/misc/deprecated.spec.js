@@ -76,7 +76,7 @@ describe('from v4.0.0-alpha.29', () => {
       server.stateManager.defineClass('a', a);
       await server.start();
 
-      await server.stateManager.setUpdateHook('a', () => {}); // actual
+      await server.stateManager.onUpdateHook('a', () => {}); // actual
       await server.stateManager.registerUpdateHook('a', () => {}); // deprecated
 
       server.stateManager.deleteClass('a');

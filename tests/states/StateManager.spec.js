@@ -711,7 +711,7 @@ describe(`# StateManager`, () => {
     });
   });
 
-  describe(`## [server] setCreateHook(className, createHook)`, () => {
+  describe(`## [server] onCreateHook(className, createHook)`, () => {
     const hookSchema = {
       name: {
         type: 'string',
@@ -730,7 +730,7 @@ describe(`# StateManager`, () => {
       let errored = false;
 
       try {
-        server.stateManager.setCreateHook('hooked', () => {});
+        server.stateManager.onCreateHook('hooked', () => {});
       } catch (err) {
         console.log(err.message);
         errored = true;
@@ -743,10 +743,10 @@ describe(`# StateManager`, () => {
       server.stateManager.defineClass('hooked', hookSchema);
       let errored = false;
 
-      assert.throws(() => server.stateManager.setCreateHook('hooked', null));
-      assert.throws(() => server.stateManager.setCreateHook('hooked', {}));
-      assert.doesNotThrow(() => server.stateManager.setCreateHook('hooked', () => {}));
-      assert.doesNotThrow(() => server.stateManager.setCreateHook('hooked', async () => {}));
+      assert.throws(() => server.stateManager.onCreateHook('hooked', null));
+      assert.throws(() => server.stateManager.onCreateHook('hooked', {}));
+      assert.doesNotThrow(() => server.stateManager.onCreateHook('hooked', () => {}));
+      assert.doesNotThrow(() => server.stateManager.onCreateHook('hooked', async () => {}));
     });
 
     it(`should execute hook on creation of state of given class`, async () => {
@@ -756,8 +756,8 @@ describe(`# StateManager`, () => {
       let hookedCalled = false;
       let otherCalled = false;
 
-      server.stateManager.setCreateHook('hooked', () => hookedCalled = true);;
-      server.stateManager.setCreateHook('other', () => otherCalled = true);;
+      server.stateManager.onCreateHook('hooked', () => hookedCalled = true);;
+      server.stateManager.onCreateHook('other', () => otherCalled = true);;
 
       const _ = await server.stateManager.create('hooked');
 
@@ -767,7 +767,7 @@ describe(`# StateManager`, () => {
 
     it(`should allow to modify init values`, async () => {
       server.stateManager.defineClass('hooked', hookSchema);
-      server.stateManager.setCreateHook('hooked', (initValues) => {
+      server.stateManager.onCreateHook('hooked', (initValues) => {
         if (initValues.name === 'test') {
           return {
             value: 'ok',
@@ -783,7 +783,7 @@ describe(`# StateManager`, () => {
 
     it(`should throw if create hook explicitly return null`, async () => {
       server.stateManager.defineClass('hooked', hookSchema);
-      server.stateManager.setCreateHook('hooked', (initValues) => {
+      server.stateManager.onCreateHook('hooked', (initValues) => {
         return null;
       });
 
@@ -801,7 +801,7 @@ describe(`# StateManager`, () => {
 
     it(`should implicitly continue if hook returns undefined`, async () => {
       server.stateManager.defineClass('hooked', hookSchema);
-      server.stateManager.setCreateHook('hooked', initValues => {
+      server.stateManager.onCreateHook('hooked', initValues => {
         if (initValues.name === 'test') {
           return undefined;
         }
@@ -814,7 +814,7 @@ describe(`# StateManager`, () => {
 
     it(`should support async hooks`, async () => {
       server.stateManager.defineClass('hooked', hookSchema);
-      server.stateManager.setCreateHook('hooked', async (initValues) => {
+      server.stateManager.onCreateHook('hooked', async (initValues) => {
         await delay(20);
         if (initValues.name === 'test') {
           return {
@@ -831,7 +831,7 @@ describe(`# StateManager`, () => {
 
     it(`should allow to chain hooks`, async () => {
       server.stateManager.defineClass('hooked', hookSchema);
-      server.stateManager.setCreateHook('hooked', async (initValues) => {
+      server.stateManager.onCreateHook('hooked', async (initValues) => {
         await delay(20);
         if (initValues.name === 'test') {
           return {
@@ -841,7 +841,7 @@ describe(`# StateManager`, () => {
         }
       });
 
-      server.stateManager.setCreateHook('hooked', (initValues) => {
+      server.stateManager.onCreateHook('hooked', (initValues) => {
         // first callback has been properly executed
         const expected = { name: 'test', value: 'ok1' };
         assert.deepEqual(initValues, expected)
@@ -859,7 +859,7 @@ describe(`# StateManager`, () => {
     });
   });
 
-  describe(`## [server] setDeleteHook(className, createHook)`, () => {
+  describe(`## [server] onDeleteHook(className, createHook)`, () => {
     const hookSchema = {
       value: {
         type: 'integer',
@@ -871,7 +871,7 @@ describe(`# StateManager`, () => {
       let errored = false;
 
       try {
-        server.stateManager.setDeleteHook('hooked', () => {});
+        server.stateManager.onDeleteHook('hooked', () => {});
       } catch (err) {
         console.log(err.message);
         errored = true;
@@ -884,10 +884,10 @@ describe(`# StateManager`, () => {
       server.stateManager.defineClass('hooked', hookSchema);
       let errored = false;
 
-      assert.throws(() => server.stateManager.setDeleteHook('hooked', null));
-      assert.throws(() => server.stateManager.setDeleteHook('hooked', {}));
-      assert.doesNotThrow(() => server.stateManager.setDeleteHook('hooked', () => {}));
-      assert.doesNotThrow(() => server.stateManager.setDeleteHook('hooked', async () => {}));
+      assert.throws(() => server.stateManager.onDeleteHook('hooked', null));
+      assert.throws(() => server.stateManager.onDeleteHook('hooked', {}));
+      assert.doesNotThrow(() => server.stateManager.onDeleteHook('hooked', () => {}));
+      assert.doesNotThrow(() => server.stateManager.onDeleteHook('hooked', async () => {}));
     });
 
 
@@ -895,7 +895,7 @@ describe(`# StateManager`, () => {
       server.stateManager.defineClass('hooked', hookSchema);
 
       let called = false;
-      server.stateManager.setDeleteHook('hooked', finalValues => called = true);
+      server.stateManager.onDeleteHook('hooked', finalValues => called = true);
 
       const state = await server.stateManager.create('hooked');
       assert.equal(called, false);
@@ -908,7 +908,7 @@ describe(`# StateManager`, () => {
       server.stateManager.defineClass('hooked', hookSchema);
 
       let called = false;
-      server.stateManager.setDeleteHook('hooked', async finalValues => {
+      server.stateManager.onDeleteHook('hooked', async finalValues => {
         await delay(20);
         called = true;
       });
@@ -923,7 +923,7 @@ describe(`# StateManager`, () => {
       server.stateManager.defineClass('hooked', hookSchema);
 
       let called = false;
-      server.stateManager.setDeleteHook('hooked', async finalValues => called = true);
+      server.stateManager.onDeleteHook('hooked', async finalValues => called = true);
 
       const _ = await server.stateManager.create('hooked');
       assert.equal(called, false);
@@ -935,7 +935,7 @@ describe(`# StateManager`, () => {
       server.stateManager.defineClass('hooked', hookSchema);
 
       let called = false;
-      server.stateManager.setDeleteHook('hooked', async finalValues => called = true);
+      server.stateManager.onDeleteHook('hooked', async finalValues => called = true);
 
       const _ = await client.stateManager.create('hooked');
       assert.equal(called, false);
@@ -950,14 +950,14 @@ describe(`# StateManager`, () => {
       let called1 = false;
       let called2 = false;
 
-      server.stateManager.setDeleteHook('hooked', async finalValues => {
+      server.stateManager.onDeleteHook('hooked', async finalValues => {
         await delay(20);
         called1 = true;
         assert.equal(finalValues.value, 0);
         return { value: 1 };
       });
 
-      server.stateManager.setDeleteHook('hooked', finalValues => {
+      server.stateManager.onDeleteHook('hooked', finalValues => {
         assert.equal(finalValues.value, 1);
         called2 = true;
       });
@@ -974,12 +974,12 @@ describe(`# StateManager`, () => {
       let called1 = false;
       let called2 = false;
 
-      server.stateManager.setDeleteHook('hooked', async finalValues => {
+      server.stateManager.onDeleteHook('hooked', async finalValues => {
         called1 = true;
         return null;
       });
 
-      server.stateManager.setDeleteHook('hooked', finalValues => called2 = true);
+      server.stateManager.onDeleteHook('hooked', finalValues => called2 = true);
 
       const state = await server.stateManager.create('hooked');
       await state.delete(); // order is guaranteed
@@ -993,11 +993,11 @@ describe(`# StateManager`, () => {
       let called1 = false;
       let called2 = false;
 
-      server.stateManager.setDeleteHook('hooked', async finalValues => {
+      server.stateManager.onDeleteHook('hooked', async finalValues => {
         called1 = true;
       });
 
-      server.stateManager.setDeleteHook('hooked', finalValues => {
+      server.stateManager.onDeleteHook('hooked', finalValues => {
         assert.equal(finalValues.value, 42);
         called2 = true
       });
@@ -1009,7 +1009,7 @@ describe(`# StateManager`, () => {
     });
   });
 
-  describe('## [server] setUpdateHook(className, updateHook)', () => {
+  describe('## [server] onUpdateHook(className, updateHook)', () => {
     const hookSchema = {
       name: {
         type: 'string',
@@ -1028,7 +1028,7 @@ describe(`# StateManager`, () => {
       let errored = false;
 
       try {
-        server.stateManager.setUpdateHook('hooked', () => {});
+        server.stateManager.onUpdateHook('hooked', () => {});
       } catch (err) {
         console.log(err.message);
         errored = true;
@@ -1041,15 +1041,15 @@ describe(`# StateManager`, () => {
       server.stateManager.defineClass('hooked', hookSchema);
       let errored = false;
 
-      assert.throws(() => server.stateManager.setUpdateHook('hooked', null));
-      assert.throws(() => server.stateManager.setUpdateHook('hooked', {}));
-      assert.doesNotThrow(() => server.stateManager.setUpdateHook('hooked', () => {}));
-      assert.doesNotThrow(() => server.stateManager.setUpdateHook('hooked', async () => {}));
+      assert.throws(() => server.stateManager.onUpdateHook('hooked', null));
+      assert.throws(() => server.stateManager.onUpdateHook('hooked', {}));
+      assert.doesNotThrow(() => server.stateManager.onUpdateHook('hooked', () => {}));
+      assert.doesNotThrow(() => server.stateManager.onUpdateHook('hooked', async () => {}));
     });
 
     it('should properly execute hook', async () => {
       server.stateManager.defineClass('hooked', hookSchema);
-      server.stateManager.setUpdateHook('hooked', (updates, currentValues) => {
+      server.stateManager.onUpdateHook('hooked', (updates, currentValues) => {
         updates.value = `${updates.name}-value`;
         return updates;
       });
@@ -1097,7 +1097,7 @@ describe(`# StateManager`, () => {
     it('hook API should be `hook(updates, currentValues)`', async () => {
       return new Promise(async (resolve, reject) => {
         server.stateManager.defineClass('hooked', hookSchema);
-        server.stateManager.setUpdateHook('hooked', (updates, currentValues) => {
+        server.stateManager.onUpdateHook('hooked', (updates, currentValues) => {
           try {
             assert.deepEqual(updates, { name: 'test' });
             assert.deepEqual(currentValues, { name: null, value: null });
@@ -1119,7 +1119,7 @@ describe(`# StateManager`, () => {
 
     it('should not mess around when several states of same kind are created', async () => {
       server.stateManager.defineClass('hooked', hookSchema);
-      server.stateManager.setUpdateHook('hooked', (updates, currentValues) => {
+      server.stateManager.onUpdateHook('hooked', (updates, currentValues) => {
         // just apply name to value
         updates.value = `${updates.name}-value`;
         return updates;
@@ -1144,7 +1144,7 @@ describe(`# StateManager`, () => {
 
     it('should support asynchronous operation', async () => {
       server.stateManager.defineClass('hooked', hookSchema);
-      server.stateManager.setUpdateHook('hooked', async (updates, currentValues) => {
+      server.stateManager.onUpdateHook('hooked', async (updates, currentValues) => {
         return new Promise(resolve => {
           setTimeout(() => {
             resolve({
@@ -1171,11 +1171,11 @@ describe(`# StateManager`, () => {
 
     it('should apply several hooks in registation order', async () => {
       server.stateManager.defineClass('hooked', hookSchema);
-      server.stateManager.setUpdateHook('hooked', (updates, currentValues) => {
+      server.stateManager.onUpdateHook('hooked', (updates, currentValues) => {
         return { ...updates, value: 'ok-1' };
       });
 
-      server.stateManager.setUpdateHook('hooked', (updates, currentValues) => {
+      server.stateManager.onUpdateHook('hooked', (updates, currentValues) => {
         return { ...updates, value: 'ok-2' };
       });
 
@@ -1195,11 +1195,11 @@ describe(`# StateManager`, () => {
 
     it('should unregister hooks properly', async () => {
       server.stateManager.defineClass('hooked', hookSchema);
-      server.stateManager.setUpdateHook('hooked', (updates, currentValues) => {
+      server.stateManager.onUpdateHook('hooked', (updates, currentValues) => {
         return { ...updates, value: 'ok-1' };
       });
 
-      const unregister = server.stateManager.setUpdateHook('hooked', (updates, currentValues) => {
+      const unregister = server.stateManager.onUpdateHook('hooked', (updates, currentValues) => {
         return { ...updates, value: 'ok-2' };
       });
 
@@ -1223,12 +1223,12 @@ describe(`# StateManager`, () => {
 
     it('should abort when explicitly returning `null`', async () => {
       server.stateManager.defineClass('hooked', hookSchema);
-      server.stateManager.setUpdateHook('hooked', (updates, currentValues) => {
+      server.stateManager.onUpdateHook('hooked', (updates, currentValues) => {
         assert.ok('hook called');
         return null;
       });
 
-      server.stateManager.setUpdateHook('hooked', (updates, currentValues) => {
+      server.stateManager.onUpdateHook('hooked', (updates, currentValues) => {
         assert.fail('should not be called', updates);
         return { ...updates, value: 'ok-2' };
       });
@@ -1257,7 +1257,7 @@ describe(`# StateManager`, () => {
         },
       });
 
-      server.stateManager.setUpdateHook('hooked', (updates, currentValues) => {
+      server.stateManager.onUpdateHook('hooked', (updates, currentValues) => {
         assert.ok('hook called');
         return null;
       });
@@ -1279,7 +1279,7 @@ describe(`# StateManager`, () => {
     it('should continue when implicitly returning `undefined`', async () => {
       server.stateManager.defineClass('hooked', hookSchema);
 
-      server.stateManager.setUpdateHook('hooked', (updates, currentValues) => {
+      server.stateManager.onUpdateHook('hooked', (updates, currentValues) => {
         if (updates.name === 'test-1') {
           return {
             ...updates,
