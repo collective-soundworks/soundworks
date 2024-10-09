@@ -12,7 +12,7 @@ import {
 import config from '../utils/config.js';
 import { a } from '../utils/class-description.js';
 
-describe('# SharedState - schema options', () => {
+describe('# SharedStateParameterDescription', () => {
   let server;
   let client1;
   let client2;
@@ -23,8 +23,6 @@ describe('# SharedState - schema options', () => {
     // ---------------------------------------------------
     server = new Server(config);
     server.stateManager.defineClass('a', a);
-    // server.stateManager.defineClass('b', b);
-
     await server.start();
 
     // ---------------------------------------------------
@@ -172,7 +170,7 @@ describe('# SharedState - schema options', () => {
 
         let subscribeCalledBeforeHook = false;
 
-        server.stateManager.registerUpdateHook('immediate-test', (updates, currentValues) => {
+        server.stateManager.setUpdateHook('immediate-test', (updates, currentValues) => {
           try {
             // assert.fail();
             assert.isTrue(subscribeCalledBeforeHook, 'subscribe should be called before hook');

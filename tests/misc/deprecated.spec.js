@@ -56,7 +56,7 @@ describe('from v4.0.0-alpha.29', () => {
       await server.stop();
     });
 
-    it('SharedStateManager#getSchema()', async () => {
+    it('StateManager#getSchema()', async () => {
       const server = new Server(config);
       server.stateManager.defineClass('a', a);
       await server.start();
@@ -66,6 +66,18 @@ describe('from v4.0.0-alpha.29', () => {
 
       const schema = await server.stateManager.getSchema('a'); // deprecated
       assert.deepEqual(schema, aExpectedDescription);
+
+      server.stateManager.deleteClass('a');
+      await server.stop();
+    });
+
+    it('ServerStateManager#registerUpdateHook()', async () => {
+      const server = new Server(config);
+      server.stateManager.defineClass('a', a);
+      await server.start();
+
+      await server.stateManager.setUpdateHook('a', () => {}); // actual
+      await server.stateManager.registerUpdateHook('a', () => {}); // deprecated
 
       server.stateManager.deleteClass('a');
       await server.stop();
