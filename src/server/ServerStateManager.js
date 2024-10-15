@@ -552,6 +552,9 @@ class ServerStateManager extends BaseStateManager {
    * Note that the hooks are executed server-side regarless the node on which
    * `create` has been called.
    *
+   * Multiple hook can be added to the same `className`, they will be executed in
+   * order of registration.
+   *
    * @param {string} className - Kind of states on which applying the hook.
    * @param {serverStateManagerUpdateHook} createHook - Function called on when
    *  a state of `className` is created on the network.
@@ -563,7 +566,7 @@ class ServerStateManager extends BaseStateManager {
    *   name: { type: 'string', required: true },
    *   hookTriggered: { type: 'boolean', default: false },
    * });
-   * server.stateManager.onCreateHook('hooked', initValues => {
+   * server.stateManager.addCreateHook('hooked', initValues => {
    *   return {
    *     ...initValues
    *     hookTriggered: true,
@@ -577,13 +580,13 @@ class ServerStateManager extends BaseStateManager {
    * const values = state.getValues();
    * assert.deepEqual(result, { value: 'coucou', hookTriggered: true });
    */
-  onCreateHook(className, createHook) {
+  addCreateHook(className, createHook) {
     if (!this.#classes.has(className)) {
-      throw new TypeError(`Cannot execute 'onCreateHook' on 'BaseStateManager': SharedState class '${className}' does not exists`);
+      throw new TypeError(`Cannot execute 'addCreateHook' on 'BaseStateManager': SharedState class '${className}' does not exists`);
     }
 
     if (!isFunction(createHook)) {
-      throw new TypeError(`Cannot execute 'onCreateHook' on 'BaseStateManager': argument 2 must be a function`);
+      throw new TypeError(`Cannot execute 'addCreateHook' on 'BaseStateManager': argument 2 must be a function`);
     }
 
     const hooks = this.#createHooksByClassName.get(className);
@@ -603,6 +606,9 @@ class ServerStateManager extends BaseStateManager {
    * Note that the hooks are executed server-side regarless the node on which
    * `delete` has been called.
    *
+   * Multiple hook can be added to the same `className`, they will be executed in
+   * order of registration.
+   *
    * @param {string} className - Kind of states on which applying the hook.
    * @param {serverStateManagerUpdateHook} createHook - Function called on when
    *  a state of `className` is created on the network.
@@ -614,7 +620,7 @@ class ServerStateManager extends BaseStateManager {
    *   name: { type: 'string', required: true },
    *   hookTriggered: { type: 'boolean', default: false },
    * });
-   * server.stateManager.onDeleteHook('hooked', async currentValues => {
+   * server.stateManager.addDeleteHook('hooked', async currentValues => {
    *   await doSomethingWithValues(currentValues)
    * });
    *
@@ -622,13 +628,13 @@ class ServerStateManager extends BaseStateManager {
    * // later
    * await state.delete();
    */
-  onDeleteHook(className, deleteHook) {
+  addDeleteHook(className, deleteHook) {
     if (!this.#classes.has(className)) {
-      throw new TypeError(`Cannot execute 'onDeleteHook' on 'BaseStateManager': SharedState class '${className}' does not exists`);
+      throw new TypeError(`Cannot execute 'addDeleteHook' on 'BaseStateManager': SharedState class '${className}' does not exists`);
     }
 
     if (!isFunction(deleteHook)) {
-      throw new TypeError(`Cannot execute 'onDeleteHook' on 'BaseStateManager': argument 2 must be a function`);
+      throw new TypeError(`Cannot execute 'addDeleteHook' on 'BaseStateManager': argument 2 must be a function`);
     }
 
     const hooks = this.#deleteHooksByClassName.get(className);
@@ -650,6 +656,9 @@ class ServerStateManager extends BaseStateManager {
    * executed server-side regarless the node on which `set` has been called and
    * before the call of the `onUpdate` callback of the shared state.
    *
+   * Multiple hook can be added to the same `className`, they will be executed in
+   * order of registration.
+   *
    * @param {string} className - Kind of states on which applying the hook.
    * @param {serverStateManagerUpdateHook} updateHook - Function called on each update,
    *  to eventually modify the updates before they are actually applied.
@@ -661,7 +670,7 @@ class ServerStateManager extends BaseStateManager {
    *   value: { type: 'string', default: null, nullable: true },
    *   numUpdates: { type: 'integer', default: 0 },
    * });
-   * server.stateManager.onUpdateHook('hooked', updates => {
+   * server.stateManager.addUpdateHook('hooked', updates => {
    *   return {
    *     ...updates
    *     numUpdates: currentValues.numUpdates + 1,
@@ -674,13 +683,13 @@ class ServerStateManager extends BaseStateManager {
    * const values = state.getValues();
    * assert.deepEqual(result, { value: 'test', numUpdates: 1 });
    */
-  onUpdateHook(className, updateHook) {
+  addUpdateHook(className, updateHook) {
     if (!this.#classes.has(className)) {
-      throw new TypeError(`Cannot execute 'onUpdateHook' on 'BaseStateManager': SharedState class '${className}' does not exists`);
+      throw new TypeError(`Cannot execute 'addUpdateHook' on 'BaseStateManager': SharedState class '${className}' does not exists`);
     }
 
     if (!isFunction(updateHook)) {
-      throw new TypeError(`Cannot execute 'onUpdateHook' on 'BaseStateManager': argument 2 must be a function`);
+      throw new TypeError(`Cannot execute 'addUpdateHook' on 'BaseStateManager': argument 2 must be a function`);
     }
 
     const hooks = this.#updateHooksByClassName.get(className);
@@ -690,11 +699,11 @@ class ServerStateManager extends BaseStateManager {
   }
 
   /**
-   * @deprecated Use {@link ServerStateManager#onUpdateHook} instead.
+   * @deprecated Use {@link ServerStateManager#addUpdateHook} instead.
    */
   registerUpdateHook(className, updateHook) {
-    logger.deprecated('ServerStateManager#registerUpdateHook', 'ServerStateManager#onUpdateHook', '4.0.0-alpha.29');
-    return this.onUpdateHook(className, updateHook);
+    logger.deprecated('ServerStateManager#registerUpdateHook', 'ServerStateManager#addUpdateHook', '4.0.0-alpha.29');
+    return this.addUpdateHook(className, updateHook);
   }
 }
 
