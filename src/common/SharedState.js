@@ -453,7 +453,7 @@ ${JSON.stringify(initValues, null, 2)}`);
     }
 
     if (isPlainObject(arguments[0]) && isPlainObject(arguments[1])) {
-      logger.removed('`context` argument in SharedState.set(updates, context)', 'a regular parameter set with `event=true` behavior', '4.0.0-alpha.29');
+      logger.removed('`context` argument in SharedState.set(updates, context)', 'a regular parameter configured with `event=true`', '4.0.0-alpha.29');
     }
 
     if (arguments.length === 2 && isString(updates)) {

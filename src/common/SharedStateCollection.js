@@ -44,6 +44,7 @@ class SharedStateCollection {
   #onUpdateCallbacks = new Set();
   #onAttachCallbacks = new Set();
   #onDetachCallbacks = new Set();
+  #onChangeCallbacks = new Set();
   #unobserve = null;
 
   constructor(stateManager, className, filter = null, options = {}) {
@@ -77,15 +78,16 @@ class SharedStateCollection {
         this.#states.splice(index, 1);
 
         this.#onDetachCallbacks.forEach(callback => callback(state));
+        this.#onChangeCallbacks.forEach(callback => callback());
       });
 
       state.onUpdate((newValues, oldValues) => {
-        Array.from(this.#onUpdateCallbacks).forEach(callback => {
-          callback(state, newValues, oldValues);
-        });
+        this.#onUpdateCallbacks.forEach(callback => callback(state, newValues, oldValues));
+        this.#onChangeCallbacks.forEach(callback => callback());
       });
 
       this.#onAttachCallbacks.forEach(callback => callback(state));
+      this.#onChangeCallbacks.forEach(callback => callback());
     }, this.#options);
   }
 
@@ -331,17 +333,39 @@ class SharedStateCollection {
   }
 
   /**
+   * Register a function to execute on any change (i.e. create, delete or update)
+   * that occurs on the the collection.
+   *
+   * @param {Function} callback - callback to execute when a change occurs.
+   * @returns {Function} - Function that delete the registered listener.
+   * @example
+   * const collection = await client.stateManager.getCollection('player');
+   * collection.onChange(() => renderApp(), true);
+   */
+  onChange(callback, executeListener = false) {
+    if (executeListener === true) {
+      callback();
+    }
+
+    this.#onChangeCallbacks.add(callback);
+
+    return () => this.#onChangeCallbacks.delete(callback);
+  }
+
+  /**
    * Detach from the collection, i.e. detach all underlying shared states.
    * @type {number}
    */
   async detach() {
     this.#unobserve();
+    this.#onAttachCallbacks.clear();
     this.#onUpdateCallbacks.clear();
 
     const promises = this.#states.map(state => state.detach());
     await Promise.all(promises);
 
     this.#onDetachCallbacks.clear();
+    this.#onChangeCallbacks.clear();
   }
 
   /**

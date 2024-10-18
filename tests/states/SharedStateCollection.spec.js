@@ -410,6 +410,40 @@ describe(`# SharedStateCollection`, () => {
     });
   });
 
+  describe(`## onChange()`, () => {
+    it(`should be executed on each collection change`, async () => {
+      const collection = await clients[1].stateManager.getCollection('a');
+      let called = 0;
+
+      collection.onChange(() => called += 1);
+
+      const state = await clients[0].stateManager.create('a');
+      await delay(10); // make sure the state is properly attached in collection
+      await state.set({ bool: true });
+      await delay(10);
+      await state.delete();
+      await delay(10);
+
+      assert.equal(called, 3);
+    });
+
+    it(`should be executed now if executeListener is true`, async () => {
+      const collection = await clients[1].stateManager.getCollection('a');
+      let called = 0;
+
+      collection.onChange(() => called += 1, true);
+
+      const state = await clients[0].stateManager.create('a');
+      await delay(10); // make sure the state is properly attached in collection
+      await state.set({ bool: true });
+      await delay(10);
+      await state.delete();
+      await delay(10);
+
+      assert.equal(called, 4);
+    });
+  });
+
   describe(`## [Symbol.iterator]`, () => {
     // this tends to show a bug
     it(`should implement iterator API`, async () => {
