@@ -599,7 +599,7 @@ Invalid certificate files, please check your:
           throw err;
         }
       } else {
-        // generate certs
+        // generate self signed certs or reused already existing certs
         // --------------------------------------------------------
         const cert = await this.#db.get('httpsCert');
         const key = await this.#db.get('httpsKey');
@@ -1138,9 +1138,6 @@ Invalid certificate files, please check your:
     Object.assign(this[kServerApplicationTemplateOptions], options);
   }
 
-
-
-//
   /** @private */
   [kServerIsProtectedRole](role) {
     if (this.#config.env.auth && Array.isArray(this.#config.env.auth.clients)) {

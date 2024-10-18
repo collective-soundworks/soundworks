@@ -170,7 +170,7 @@ describe('# SharedStateParameterDescription', () => {
 
         let subscribeCalledBeforeHook = false;
 
-        server.stateManager.onUpdateHook('immediate-test', (updates, currentValues) => {
+        server.stateManager.registerUpdateHook('immediate-test', (updates, currentValues) => {
           try {
             // assert.fail();
             assert.isTrue(subscribeCalledBeforeHook, 'subscribe should be called before hook');

@@ -566,7 +566,7 @@ class ServerStateManager extends BaseStateManager {
    *   name: { type: 'string', required: true },
    *   hookTriggered: { type: 'boolean', default: false },
    * });
-   * server.stateManager.addCreateHook('hooked', initValues => {
+   * server.stateManager.registerCreateHook('hooked', initValues => {
    *   return {
    *     ...initValues
    *     hookTriggered: true,
@@ -580,13 +580,13 @@ class ServerStateManager extends BaseStateManager {
    * const values = state.getValues();
    * assert.deepEqual(result, { value: 'coucou', hookTriggered: true });
    */
-  addCreateHook(className, createHook) {
+  registerCreateHook(className, createHook) {
     if (!this.#classes.has(className)) {
-      throw new TypeError(`Cannot execute 'addCreateHook' on 'BaseStateManager': SharedState class '${className}' does not exists`);
+      throw new TypeError(`Cannot execute 'registerCreateHook' on 'BaseStateManager': SharedState class '${className}' does not exists`);
     }
 
     if (!isFunction(createHook)) {
-      throw new TypeError(`Cannot execute 'addCreateHook' on 'BaseStateManager': argument 2 must be a function`);
+      throw new TypeError(`Cannot execute 'registerCreateHook' on 'BaseStateManager': argument 2 must be a function`);
     }
 
     const hooks = this.#createHooksByClassName.get(className);
@@ -620,7 +620,7 @@ class ServerStateManager extends BaseStateManager {
    *   name: { type: 'string', required: true },
    *   hookTriggered: { type: 'boolean', default: false },
    * });
-   * server.stateManager.addDeleteHook('hooked', async currentValues => {
+   * server.stateManager.registerDeleteHook('hooked', async currentValues => {
    *   await doSomethingWithValues(currentValues)
    * });
    *
@@ -628,13 +628,13 @@ class ServerStateManager extends BaseStateManager {
    * // later
    * await state.delete();
    */
-  addDeleteHook(className, deleteHook) {
+  registerDeleteHook(className, deleteHook) {
     if (!this.#classes.has(className)) {
-      throw new TypeError(`Cannot execute 'addDeleteHook' on 'BaseStateManager': SharedState class '${className}' does not exists`);
+      throw new TypeError(`Cannot execute 'registerDeleteHook' on 'BaseStateManager': SharedState class '${className}' does not exists`);
     }
 
     if (!isFunction(deleteHook)) {
-      throw new TypeError(`Cannot execute 'addDeleteHook' on 'BaseStateManager': argument 2 must be a function`);
+      throw new TypeError(`Cannot execute 'registerDeleteHook' on 'BaseStateManager': argument 2 must be a function`);
     }
 
     const hooks = this.#deleteHooksByClassName.get(className);
@@ -670,7 +670,7 @@ class ServerStateManager extends BaseStateManager {
    *   value: { type: 'string', default: null, nullable: true },
    *   numUpdates: { type: 'integer', default: 0 },
    * });
-   * server.stateManager.addUpdateHook('hooked', updates => {
+   * server.stateManager.registerUpdateHook('hooked', updates => {
    *   return {
    *     ...updates
    *     numUpdates: currentValues.numUpdates + 1,
@@ -683,27 +683,19 @@ class ServerStateManager extends BaseStateManager {
    * const values = state.getValues();
    * assert.deepEqual(result, { value: 'test', numUpdates: 1 });
    */
-  addUpdateHook(className, updateHook) {
+  registerUpdateHook(className, updateHook) {
     if (!this.#classes.has(className)) {
-      throw new TypeError(`Cannot execute 'addUpdateHook' on 'BaseStateManager': SharedState class '${className}' does not exists`);
+      throw new TypeError(`Cannot execute 'registerUpdateHook' on 'BaseStateManager': SharedState class '${className}' does not exists`);
     }
 
     if (!isFunction(updateHook)) {
-      throw new TypeError(`Cannot execute 'addUpdateHook' on 'BaseStateManager': argument 2 must be a function`);
+      throw new TypeError(`Cannot execute 'registerUpdateHook' on 'BaseStateManager': argument 2 must be a function`);
     }
 
     const hooks = this.#updateHooksByClassName.get(className);
     hooks.add(updateHook);
 
     return () => hooks.delete(updateHook);
-  }
-
-  /**
-   * @deprecated Use {@link ServerStateManager#addUpdateHook} instead.
-   */
-  registerUpdateHook(className, updateHook) {
-    logger.deprecated('ServerStateManager#registerUpdateHook', 'ServerStateManager#addUpdateHook', '4.0.0-alpha.29');
-    return this.addUpdateHook(className, updateHook);
   }
 }
 
