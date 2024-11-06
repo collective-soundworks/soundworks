@@ -74,7 +74,7 @@ declare class Client {
     /**
      * @deprecated Use {@link Client#runtime} instead.
      */
-    get target(): any;
+    get target(): "browser" | "node";
     /**
      * Instance of the {@link client.Socket} class.
      *
