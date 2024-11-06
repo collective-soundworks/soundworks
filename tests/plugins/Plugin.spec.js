@@ -2,23 +2,10 @@ import { assert } from 'chai';
 
 import { Server } from '../../src/server/index.js';
 import { Client } from '../../src/client/index.js';
+
 import pluginDelayServer from '../utils/PluginDelayServer.js';
 import pluginDelayClient from '../utils/PluginDelayClient.js';
-
-const config = {
-  app: {
-    clients: {
-      test: { target: 'node' },
-    },
-  },
-  env: {
-    type: 'development',
-    port: 8081,
-    serverAddress: '127.0.0.1',
-    useHttps: false,
-    verbose: process.env.VERBOSE === '1' ? true : false,
-  },
-};
+import config from '../utils/config.js';
 
 describe('# Plugin', () => {
   describe(`## constructor(server|client, options)`, () => {

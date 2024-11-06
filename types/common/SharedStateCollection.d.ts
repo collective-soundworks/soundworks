@@ -1,21 +1,86 @@
 export default SharedStateCollection;
+/**
+ * Callback to execute when an update is triggered on one of the shared states
+ * of the collection.
+ */
 export type sharedStateCollectionOnUpdateCallback = (state: SharedState, newValues: any, oldValues: any) => any;
 /**
- * Delete the registered {@link sharedStateCollectionOnUpdateCallback}.
+ * Delete the registered {@link sharedStateCollectionOnUpdateCallback} when executed.
  */
 export type sharedStateCollectionDeleteOnUpdateCallback = () => any;
 /**
+ * Callback to execute when an new shared state is added to the collection
+ */
+export type sharedStateCollectionOnAttachCallback = (state: SharedState) => any;
+/**
+ * Delete the registered {@link sharedStateCollectionOnAttachCallback} when executed.
+ */
+export type sharedStateCollectionDeleteOnAttachCallback = () => any;
+/**
+ * Callback to execute when an shared state is removed from the collection, i.e.
+ * has been deleted by its owner.
+ */
+export type sharedStateCollectionOnDetachCallback = (state: SharedState) => any;
+/**
+ * Delete the registered {@link sharedStateCollectionOnDetachCallback} when executed.
+ */
+export type sharedStateCollectionDeleteOnDetachCallback = () => any;
+/**
+ * Callback to execute when any state of the collection is attached, removed, or updated.
+ */
+export type sharedStateCollectionOnChangeCallback = () => any;
+/**
+ * Delete the registered {@link sharedStateCollectionOnChangeCallback}.
+ */
+export type sharedStateCollectionDeleteOnChangeCallback = () => any;
+/**
+ * Callback to execute when an update is triggered on one of the shared states
+ * of the collection.
+ *
  * @callback sharedStateCollectionOnUpdateCallback
- * @param {SharedState} state - State that triggered the update.
+ * @param {SharedState} state - The shared state instance that triggered the update.
  * @param {Object} newValues - Key / value pairs of the updates that have been
  *  applied to the state.
  * @param {Object} oldValues - Key / value pairs of the updated params before
  *  the updates has been applied to the state.
  */
 /**
- * Delete the registered {@link sharedStateCollectionOnUpdateCallback}.
+ * Delete the registered {@link sharedStateCollectionOnUpdateCallback} when executed.
  *
  * @callback sharedStateCollectionDeleteOnUpdateCallback
+ */
+/**
+ * Callback to execute when an new shared state is added to the collection
+ *
+ * @callback sharedStateCollectionOnAttachCallback
+ * @param {SharedState} state - The newly shared state instance added to the collection.
+ */
+/**
+ * Delete the registered {@link sharedStateCollectionOnAttachCallback} when executed.
+ *
+ * @callback sharedStateCollectionDeleteOnAttachCallback
+ */
+/**
+ * Callback to execute when an shared state is removed from the collection, i.e.
+ * has been deleted by its owner.
+ *
+ * @callback sharedStateCollectionOnDetachCallback
+ * @param {SharedState} state - The shared state instance removed from the collection.
+ */
+/**
+ * Delete the registered {@link sharedStateCollectionOnDetachCallback} when executed.
+ *
+ * @callback sharedStateCollectionDeleteOnDetachCallback
+ */
+/**
+ * Callback to execute when any state of the collection is attached, removed, or updated.
+ *
+ * @callback sharedStateCollectionOnChangeCallback
+ */
+/**
+ * Delete the registered {@link sharedStateCollectionOnChangeCallback}.
+ *
+ * @callback sharedStateCollectionDeleteOnChangeCallback
  */
 /**
  * The `SharedStateCollection` interface represent a collection of all states
@@ -143,34 +208,51 @@ declare class SharedStateCollection {
      */
     set(name: SharedStateParameterName, value: any): Promise<Array<any>>;
     /**
-     * Subscribe to any state update of the collection.
+     * Register a function to execute when any shared state of the collection is updated.
      *
      * @param {sharedStateCollectionOnUpdateCallback}
      *  callback - Callback to execute when an update is applied on a state.
      * @param {Boolean} [executeListener=false] - Execute the callback immediately
      *  with current state values. Note that `oldValues` will be set to `{}`.
      * @returns {sharedStateCollectionDeleteOnUpdateCallback} - Function that delete
-     *  the registered listener.
+     *  the registered listener when executed.
      */
     onUpdate(callback: sharedStateCollectionOnUpdateCallback, executeListener?: boolean): sharedStateCollectionDeleteOnUpdateCallback;
     /**
-     * Register a function to execute when a state is added to the collection.
+     * Register a function to execute when a shared state is attached to the collection,
+     * i.e. when a node creates a new state from same {@link SharedState} class.
      *
-     * @param {Function} callback - callback to execute  when a state is added to
-     *   the collection.
-     * @param {Function} executeListener - execute the callback with the states
+     * @param {sharedStateCollectionOnAttachCallback} callback - callback to execute
+     *   when a state is added to the collection.
+     * @param {boolean} executeListener - execute the callback with the states
      *   already present in the collection.
-     * @returns {Function} - Function that delete the registered listener.
+     * @returns {sharedStateCollectionDeleteOnAttachCallback} - Function that delete
+     *   the registered listener when executed.
      */
-    onAttach(callback: Function, executeListener?: Function): Function;
+    onAttach(callback: sharedStateCollectionOnAttachCallback, executeListener?: boolean): sharedStateCollectionDeleteOnAttachCallback;
     /**
-     * Register a function to execute when a state is removed from the collection.
+     * Register a function to execute when a shared state is removed from the collection,
+     * i.e. when it is deleted by its owner.
      *
-     * @param {Function} callback - callback to execute  when a state is removed
-     *   from the collection.
-     * @returns {Function} - Function that delete the registered listener.
+     * @param {sharedStateCollectionOnDetachCallback} callback - callback to execute
+     *   when a state is removed from the collection.
+     * @returns {sharedStateCollectionDeleteOnDetachCallback} - Function that delete
+     *   the registered listener when executed.
      */
-    onDetach(callback: Function): Function;
+    onDetach(callback: sharedStateCollectionOnDetachCallback): sharedStateCollectionDeleteOnDetachCallback;
+    /**
+     * Register a function to execute when any state of the collection is either attached,
+     * removed, or updated.
+     *
+     * @param {sharedStateCollectionOnChangeCallback} callback - callback to execute
+     *   when any state of the collection is either attached, updated, or detached.
+     * @returns {sharedStateCollectionDeleteOnChangeCallback} - Function that delete
+     *   the registered listener when executed.
+     * @example
+     * const collection = await client.stateManager.getCollection('player');
+     * collection.onChange(() => renderApp(), true);
+     */
+    onChange(callback: sharedStateCollectionOnChangeCallback, executeListener?: boolean): sharedStateCollectionDeleteOnChangeCallback;
     /**
      * Detach from the collection, i.e. detach all underlying shared states.
      * @type {number}

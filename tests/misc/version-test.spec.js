@@ -4,8 +4,9 @@ import { kClientVersionTest } from '../../src/client/Client.js';
 
 import config from '../utils/config.js';
 
-describe(`Client / Server version test`, () => {
+describe(`# Client / Server test versions discrepencies`, () => {
   it(`client and server should check soundworks version used`, async () => {
+    // The warning message is logged twice as both server and client will produce it
     const server = new Server(config);
     await server.start();
 

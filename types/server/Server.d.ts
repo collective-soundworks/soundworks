@@ -20,9 +20,9 @@ export default Server;
  *   app: {
  *     name: 'my-example-app',
  *     clients: {
- *       player: { target: 'browser', default: true },
- *       controller: { target: 'browser' },
- *       thing: { target: 'node' }
+ *       player: { runtime: 'browser', default: true },
+ *       controller: { runtime: 'browser' },
+ *       thing: { runtime: 'node' }
  *     },
  *   },
  *   env: {
@@ -34,14 +34,15 @@ export default Server;
  * ```
  *
  * According to the clients definitions provided in `config.app.clients`, the
- * server will automatically create a dedicated route for each browser client role.
+ * server will automatically create a dedicated route for each role decalting a browser
+ * runtime.
  * For example, given the config object of the example above that defines two
- * different client roles for browser targets (i.e. `player` and `controller`):
+ * different client roles for browser (i.e. `player` and `controller`):
  *
  * ```
  * config.app.clients = {
- *   player: { target: 'browser', default: true },
- *   controller: { target: 'browser' },
+ *   player: { runtime: 'browser', default: true },
+ *   controller: { runtime: 'browser' },
  * }
  * ```
  *

@@ -141,6 +141,9 @@ declare class ServerStateManager extends BaseStateManager {
      * Note that the hooks are executed server-side regarless the node on which
      * `create` has been called.
      *
+     * Multiple hook can be added to the same `className`, they will be executed in
+     * order of registration.
+     *
      * @param {string} className - Kind of states on which applying the hook.
      * @param {serverStateManagerUpdateHook} createHook - Function called on when
      *  a state of `className` is created on the network.
@@ -152,7 +155,7 @@ declare class ServerStateManager extends BaseStateManager {
      *   name: { type: 'string', required: true },
      *   hookTriggered: { type: 'boolean', default: false },
      * });
-     * server.stateManager.onCreateHook('hooked', initValues => {
+     * server.stateManager.registerCreateHook('hooked', initValues => {
      *   return {
      *     ...initValues
      *     hookTriggered: true,
@@ -166,7 +169,7 @@ declare class ServerStateManager extends BaseStateManager {
      * const values = state.getValues();
      * assert.deepEqual(result, { value: 'coucou', hookTriggered: true });
      */
-    onCreateHook(className: string, createHook: serverStateManagerUpdateHook): Function;
+    registerCreateHook(className: string, createHook: serverStateManagerUpdateHook): Function;
     /**
      * Register a function for a given class of shared state class to be executed
      * when a state is deleted.
@@ -177,6 +180,9 @@ declare class ServerStateManager extends BaseStateManager {
      * The hook is associated to each states created from the given class name.
      * Note that the hooks are executed server-side regarless the node on which
      * `delete` has been called.
+     *
+     * Multiple hook can be added to the same `className`, they will be executed in
+     * order of registration.
      *
      * @param {string} className - Kind of states on which applying the hook.
      * @param {serverStateManagerUpdateHook} createHook - Function called on when
@@ -189,7 +195,7 @@ declare class ServerStateManager extends BaseStateManager {
      *   name: { type: 'string', required: true },
      *   hookTriggered: { type: 'boolean', default: false },
      * });
-     * server.stateManager.onDeleteHook('hooked', async currentValues => {
+     * server.stateManager.registerDeleteHook('hooked', async currentValues => {
      *   await doSomethingWithValues(currentValues)
      * });
      *
@@ -197,7 +203,7 @@ declare class ServerStateManager extends BaseStateManager {
      * // later
      * await state.delete();
      */
-    onDeleteHook(className: string, deleteHook: any): Function;
+    registerDeleteHook(className: string, deleteHook: any): Function;
     /**
      * Register a function for a given class of shared state to be executed between
      * `set` instructions and `onUpdate` callback(s).
@@ -211,6 +217,9 @@ declare class ServerStateManager extends BaseStateManager {
      * executed server-side regarless the node on which `set` has been called and
      * before the call of the `onUpdate` callback of the shared state.
      *
+     * Multiple hook can be added to the same `className`, they will be executed in
+     * order of registration.
+     *
      * @param {string} className - Kind of states on which applying the hook.
      * @param {serverStateManagerUpdateHook} updateHook - Function called on each update,
      *  to eventually modify the updates before they are actually applied.
@@ -222,7 +231,7 @@ declare class ServerStateManager extends BaseStateManager {
      *   value: { type: 'string', default: null, nullable: true },
      *   numUpdates: { type: 'integer', default: 0 },
      * });
-     * server.stateManager.onUpdateHook('hooked', updates => {
+     * server.stateManager.registerUpdateHook('hooked', updates => {
      *   return {
      *     ...updates
      *     numUpdates: currentValues.numUpdates + 1,
@@ -235,11 +244,7 @@ declare class ServerStateManager extends BaseStateManager {
      * const values = state.getValues();
      * assert.deepEqual(result, { value: 'test', numUpdates: 1 });
      */
-    onUpdateHook(className: string, updateHook: serverStateManagerUpdateHook): Function;
-    /**
-     * @deprecated Use {@link ServerStateManager#onUpdateHook} instead.
-     */
-    registerUpdateHook(className: any, updateHook: any): Function;
+    registerUpdateHook(className: string, updateHook: serverStateManagerUpdateHook): Function;
     /** @private */
     private [kStateManagerInit];
     /** @private */
@@ -253,8 +258,7 @@ declare class ServerStateManager extends BaseStateManager {
      *
      * This is automatically handled by the {@link Server} when a client connects.
      *
-     * @param {number} nodeId - Id of the client node, as given in
-     *  {@link client.StateManager}
+     * @param {number} nodeId - Unique id of the client node
      * @param {object} transport - Transport mecanism to communicate with the
      *  client. Must implement a basic EventEmitter API.
      *

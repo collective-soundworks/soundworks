@@ -4,14 +4,30 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-// this must be defined here so that we can import it into the application
+// these types must be defined here, so that they can be imported into the application
+
+/**
+ * The role of the client in the application.
+ *
+ * For browser client, this infomation is used to create the URL endpoint.
+ *
+ * @typedef ClientRole
+ * @type {string}
+ */
+/**
+ * @typedef ClientDescription
+ * @type {object}
+ * @property {'browser'|'node'} runtime - Runtime on which the client is aimed at running
+ * @property {boolean} [default=false] - For browser client, define is the client should be
+ *   accessible at the default / root HTTP endpoint
+ */
 /**
  * Configuration object for the server.
  *
  * @typedef ServerConfig
  * @type {object}
  * @property {object} [app] - Application configuration object.
- * @property {object} app.clients - Definition of the application clients.
+ * @property {object<ClientRole, ClientDescription>} app.clients - Definition of the application clients.
  * @property {string} [app.name=''] - Name of the application.
  * @property {string} [app.author=''] - Name of the author.
  * @property {object} [env] - Environment configuration object.

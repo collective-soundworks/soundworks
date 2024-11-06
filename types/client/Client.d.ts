@@ -68,9 +68,13 @@ declare class Client {
     /**
      * Runtime platform on which the client is executed, i.e. 'browser' or 'node'.
      *
-     * @type {string}
+     * @type {'node'|'browser'}
      */
-    get target(): string;
+    get runtime(): "browser" | "node";
+    /**
+     * @deprecated Use {@link Client#runtime} instead.
+     */
+    get target(): any;
     /**
      * Instance of the {@link client.Socket} class.
      *

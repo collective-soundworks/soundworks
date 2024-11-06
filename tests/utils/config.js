@@ -2,7 +2,7 @@ export default {
   app: {
     name: 'plugin-manager-test',
     clients: {
-      test: { target: 'node' },
+      test: { runtime: 'node' },
     },
   },
   env: {

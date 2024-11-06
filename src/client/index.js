@@ -4,7 +4,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-// this must be defined here so that we can import it into the application
+// these types must be defined here, so that they can be imported into the application
+
 /**
  * Configuration object for a client running in a browser runtime.
  *
@@ -18,7 +19,7 @@
  * @property {boolean} env.useHttps - Define if the websocket should use secure connection.
  * @property {string} env.serverAddress - Address the socket server. Mandatory for
  *  node clients. For browser clients, use `window.location.domain` as fallback if empty.
- * @property {number} env.port=8000 - Port of the socket server.
+ * @property {number} env.port - Port of the socket server.
  * @property {string} [env.subpath=''] - If running behind a proxy, path to the application.
  */
 

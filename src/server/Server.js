@@ -118,9 +118,9 @@ export const kServerApplicationTemplateOptions = Symbol('soundworks:server-appli
  *   app: {
  *     name: 'my-example-app',
  *     clients: {
- *       player: { target: 'browser', default: true },
- *       controller: { target: 'browser' },
- *       thing: { target: 'node' }
+ *       player: { runtime: 'browser', default: true },
+ *       controller: { runtime: 'browser' },
+ *       thing: { runtime: 'node' }
  *     },
  *   },
  *   env: {
@@ -132,14 +132,15 @@ export const kServerApplicationTemplateOptions = Symbol('soundworks:server-appli
  * ```
  *
  * According to the clients definitions provided in `config.app.clients`, the
- * server will automatically create a dedicated route for each browser client role.
+ * server will automatically create a dedicated route for each role decalting a browser
+ * runtime.
  * For example, given the config object of the example above that defines two
- * different client roles for browser targets (i.e. `player` and `controller`):
+ * different client roles for browser (i.e. `player` and `controller`):
  *
  * ```
  * config.app.clients = {
- *   player: { target: 'browser', default: true },
- *   controller: { target: 'browser' },
+ *   player: { runtime: 'browser', default: true },
+ *   controller: { runtime: 'browser' },
  * }
  * ```
  *
@@ -180,14 +181,35 @@ class Server {
    */
   constructor(config) {
     if (!isPlainObject(config)) {
-      throw new Error(`[soundworks:Server] Invalid argument for Server constructor, config should be an object`);
+      throw new Error(`[soundworks:Server] Cannot construct 'Server': Parameter 1 must be an object`);
     }
 
     this.#config = merge({}, DEFAULT_CONFIG, config);
 
-    // parse config
+    // ---------------------------------------------------------------------
+    // Deprecation checks for config
+    // ---------------------------------------------------------------------
+    for (let role in this.#config.app.clients) {
+      const clientConfig = this.#config.app.clients[role];
+
+      if (clientConfig.target) {
+        logger.deprecated('ClientDescription#target', 'ClientDescription#runtime (or run \`npx soundworks --upgrade-config\` to upgrade your config files)', '4.0.0-alpha.29')
+        clientConfig.runtime = clientConfig.target;
+        delete clientConfig.target;
+      }
+    }
+    // ---------------------------------------------------------------------
+    // ---------------------------------------------------------------------
+
     if (Object.keys(this.#config.app.clients).length === 0) {
-      throw new Error(`[soundworks:Server] Invalid "app.clients" config, at least one client should be declared`);
+      throw new Error(`[soundworks:Server] Cannot construct 'Server': At least one ClientDescription must be declared in 'config.app.clients'`);
+    }
+
+    for (let name in this.#config.app.clients) {
+      // runtime property is mandatory
+      if (!['node', 'browser'].includes(this.#config.app.clients[name].runtime)) {
+        throw new Error(`[soundworks:Server] Cannot construct 'Server': Invalid 'ClientDescription' for client '${name}': 'runtime' property must be either 'node' or 'browser'`);
+      }
     }
 
     // @peeka - remove this check
@@ -638,10 +660,10 @@ Invalid certificate files, please check your:
     }
 
     let nodeOnly = true;
-    // do not throw if no browser clients are defined, very usefull for
-    // cleaning tests in particular
+
+    // do not throw if no browser clients are defined, e.g. for tests
     for (let role in this.#config.app.clients) {
-      if (this.#config.app.clients[role].target === 'browser') {
+      if (this.#config.app.clients[role].runtime === 'browser') {
         nodeOnly = false;
       }
     }
@@ -835,10 +857,11 @@ Invalid certificate files, please check your:
    * @private
    */
   #openClientRoute(router, config) {
-    const { role, target } = config;
+    const { role, runtime } = config;
     const isDefault = (config.default === true);
-    // only browser targets need a route
-    if (target === 'node') {
+
+    // No need to open a route for 'node' runtime
+    if (runtime === 'node') {
       return;
     }
 

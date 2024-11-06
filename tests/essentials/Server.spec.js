@@ -37,9 +37,25 @@ describe('# Server', () => {
       }
     });
 
-    it(`should throw if no client(s) defined in config`, () => {
+    it(`should throw if no ClientDescription is defined in config`, () => {
       const wrongConfig = merge({}, config);
       wrongConfig.app.clients = {};
+
+      let errored = false;
+      try {
+        const server = new Server(wrongConfig);
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+      if (!errored) {
+        assert.fail('should have thrown');
+      }
+    });
+
+    it(`should throw if ClientDescription does not define a runtime`, () => {
+      const wrongConfig = merge({}, config);
+      wrongConfig.app.clients = { test: {} };
 
       let errored = false;
       try {
@@ -125,7 +141,7 @@ describe('# Server', () => {
   describe(`## await server.init()`, () => {
     it('should throw if browser client is declared and `setDefaultTemplateConfig` or `setCustomTemplateConfig` have not been called', async () => {
       const browserConfig = merge({}, config);
-      browserConfig.app.clients.hello = { target: 'browser' };
+      browserConfig.app.clients.hello = { runtime: 'browser' };
 
       const server = new Server(browserConfig);
 

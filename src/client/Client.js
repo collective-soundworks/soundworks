@@ -60,7 +60,7 @@ class Client {
   #role = null;
   #id = null;
   #uuid = null;
-  #target = null;
+  #runtime = null;
   #socket = null;
   #contextManager = null;
   #pluginManager = null;
@@ -121,7 +121,7 @@ class Client {
     }
 
     this.#role = config.role;
-    this.#target = isBrowser() ? 'browser' : 'node';
+    this.#runtime = isBrowser() ? 'browser' : 'node';
     this.#socket = new ClientSocket(this.#role, this.#config, {
       path: 'socket',
       retryConnectionRefusedTimeout: 1000,
@@ -185,14 +185,21 @@ class Client {
     return this.#uuid;
   }
 
-
   /**
    * Runtime platform on which the client is executed, i.e. 'browser' or 'node'.
    *
-   * @type {string}
+   * @type {'node'|'browser'}
+   */
+  get runtime() {
+    return this.#runtime;
+  }
+
+  /**
+   * @deprecated Use {@link Client#runtime} instead.
    */
   get target() {
-    return this.#target;
+    logger.deprecated('Client#target', 'Client#runtime', '4.0.0-alpha.29');
+    return this.runtime;
   }
 
   /**
@@ -255,7 +262,7 @@ class Client {
     this.#status = status;
 
     // if node target and launched in a child process, forward status to parent process
-    if (this.#target === 'node' && process.send !== undefined) {
+    if (this.#runtime === 'node' && process.send !== undefined) {
       process.send(`soundworks:client:${status}`);
     }
 

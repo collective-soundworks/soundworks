@@ -56,20 +56,20 @@ const logger = {
     for (let role in clientsConfig) {
       const client = clientsConfig[role];
 
-      if (client.target === 'node') {
+      if (client.runtime === 'node') {
         const line = {
           role: `> ${role}`,
-          target: chalk.red(client.target),
+          runtime: chalk.red(client.runtime),
           path: `serverAddress: ${chalk.green(serverAddress)}`,
           default: undefined,
           auth: undefined,
         };
 
         table.push(line);
-      } else if (client.target === 'browser') {
+      } else if (client.runtime === 'browser') {
         const line = {
           role: `> ${role}`,
-          target: chalk.red(client.target),
+          runtime: chalk.red(client.runtime),
           path: routes.find(r => r.role === role) ?
             chalk.green(routes.find(r => r.role === role).path) :
             chalk.red('no route defined'),
@@ -78,8 +78,6 @@ const logger = {
         };
 
         table.push(line);
-      } else {
-        console.log(`@warning: no target defined for client ${role}`);
       }
     }
 
@@ -168,7 +166,7 @@ dependencies on both your server and clients.
       throw new Error(`Invalid 'logger.deprecated call: a deprecation version is required`);
     }
 
-    const msg = `[Deprecation Warning] ${oldAPI} is deprecated (last supported version: ${lastSupportedVersion}) and will be removed in next major revision, please use ${newAPI} instead.`;
+    const msg = `[Deprecation Warning] ${oldAPI} is deprecated (last supported version: ${lastSupportedVersion}) and will be removed in the next major revision, please use ${newAPI} instead.`;
     console.warn(chalk.yellow(msg));
   },
 
