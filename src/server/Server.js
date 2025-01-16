@@ -81,9 +81,9 @@ const DEFAULT_CONFIG = {
     type: 'development',
     port: 8000,
     serverAddress: '',
-    subpath: '',
     useHttps: false,
     httpsInfos: null,
+    baseUrl: '',
     crossOriginIsolated: true,
     verbose: true,
   },
@@ -189,6 +189,8 @@ class Server {
     // ---------------------------------------------------------------------
     // Deprecation checks for config
     // ---------------------------------------------------------------------
+
+    // `target` renamed to `runtime`
     for (let role in this.#config.app.clients) {
       const clientConfig = this.#config.app.clients[role];
 
@@ -198,6 +200,14 @@ class Server {
         delete clientConfig.target;
       }
     }
+
+    // `env.subpath` to `env.baseUrl`
+    if ('subpath' in this.#config.env) {
+      logger.deprecated('ServerConfig#subpath', 'ServerConfig#baseUrl (or run \`npx soundworks --upgrade-config\` to upgrade your config files)', '4.0.0-alpha.29')
+      this.#config.env.baseUrl = this.#config.env.subpath;
+      delete this.#config.env.subpath;
+    }
+
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
 
@@ -274,7 +284,7 @@ class Server {
    *     type: 'development',
    *     port: 8000,
    *     serverAddress: null,
-   *     subpath: '',
+   *     baseUrl: '',
    *     useHttps: false,
    *     httpsInfos: null,
    *     crossOriginIsolated: true,
@@ -1140,7 +1150,7 @@ Invalid certificate files, please check your:
             port: config.env.port,
             // other config, to review
             websockets: config.env.websockets,
-            subpath: config.env.subpath,
+            baseUrl: config.env.baseUrl,
             useMinifiedFile: useMinifiedFile[role],
           },
         };

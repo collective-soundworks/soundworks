@@ -7,20 +7,32 @@
 // these types must be defined here, so that they can be imported into the application
 
 /**
+ * Application configuration object.
+ *
+ * @typedef ClientAppConfig
+ * @type {object}
+ * @property {string} [name=''] - Name of the application.
+ * @property {string} [author=''] - Name of the author.
+ */
+/**
+ * Environement configuration object.
+ *
+ * @typedef ClientEnvConfig
+ * @type {objecy}
+ * @property {number} env.port - Port on which the server is listening.
+ * @property {string} env.serverAddress - Domain name or IP of the server.
+ *  Mandatory when node clients are declared
+ * @property {boolean} env.useHttps - Define is the server run in http or in https.
+ * @property {string} [env.baseUrl=''] - If running behind a proxy, base URL of the application.
+ */
+/**
  * Configuration object for a client running in a browser runtime.
  *
  * @typedef ClientConfig
  * @type {object}
  * @property {string} role - Role of the client in the application (e.g. 'player', 'controller').
- * @property {object} [app] - Application configuration object.
- * @property {string} [app.name=''] - Name of the application.
- * @property {string} [app.author=''] - Name of the author.
- * @property {object} env - Environment configuration object.
- * @property {boolean} env.useHttps - Define if the websocket should use secure connection.
- * @property {string} env.serverAddress - Address the socket server. Mandatory for
- *  node clients. For browser clients, use `window.location.domain` as fallback if empty.
- * @property {number} env.port - Port of the socket server.
- * @property {string} [env.subpath=''] - If running behind a proxy, path to the application.
+ * @property {ClientAppConfig} app - Application configuration object.
+ * @property {ClientEnvConfig} env - Environment configuration object.
  */
 
 export { default as Client } from './Client.js';

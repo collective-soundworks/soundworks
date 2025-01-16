@@ -1,4 +1,4 @@
-import { isBrowser, isPlainObject } from '@ircam/sc-utils';
+import { isBrowser, isPlainObject, isString } from '@ircam/sc-utils';
 
 import ClientContextManager, {
   kClientContextManagerStart,
@@ -76,17 +76,17 @@ class Client {
    */
   constructor(config) {
     if (!isPlainObject(config)) {
-      throw new Error(`[soundworks:Client] Invalid argument for Client constructor, config should be an object`);
+      throw new Error(`[soundworks:Client] Cannot instanciate Client: argument 1 should be an object`);
     }
 
-    if (!('role' in config)) {
-      throw new Error('[soundworks:Client] Invalid config object, "config.role" should be defined');
+    if (!('role' in config) || !isString(config.role)) {
+      throw new Error('[soundworks:Client] Cannot instanciate Client: Invalid ClientConfig object: property "role" is not a string defined');
     }
 
-    // for node clients env.https is requires to open the websocket
+    // for node clients env.https is required to open the websocket
     if (!isBrowser()) {
       if (!('env' in config)) {
-        throw new Error('[soundworks:Client] Invalid config object, "config.env" { useHttps, serverAddress, port } should be defined');
+        throw new Error('[soundworks:Client] Cannot instanciate Client: `config.env: ClientEnvConfig { useHttps, serverAddress, port }` must be defined');
       }
 
       let missing = [];

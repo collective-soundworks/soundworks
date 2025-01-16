@@ -22,22 +22,34 @@
  *   accessible at the default / root HTTP endpoint
  */
 /**
+ * Application configuration object.
+ *
+ * @typedef ServerAppConfig
+ * @type {object}
+ * @property {object<ClientRole, ClientDescription>} clients - Definition of the application clients.
+ * @property {string} [name=''] - Name of the application.
+ * @property {string} [author=''] - Name of the author.
+ */
+/**
+ * Environement configuration object.
+ *
+ * @typedef ServerEnvConfig
+ * @type {objecy}
+ * @property {number} env.port - Port on which the server is listening.
+ * @property {string} env.serverAddress - Domain name or IP of the server.
+ *  Mandatory when node clients are declared
+ * @property {boolean} env.useHttps - Define is the server run in http or in https.
+ * @property {obj} [env.httpsInfos=null] - Path to cert files ( cert, key } for https.
+ *  If not given and useHttps is true self certifified certificates will be created.
+ * @property {string} [env.baseUrl=''] - If running behind a proxy, base URL of the application.
+ */
+/**
  * Configuration object for the server.
  *
  * @typedef ServerConfig
  * @type {object}
- * @property {object} [app] - Application configuration object.
- * @property {object<ClientRole, ClientDescription>} app.clients - Definition of the application clients.
- * @property {string} [app.name=''] - Name of the application.
- * @property {string} [app.author=''] - Name of the author.
- * @property {object} [env] - Environment configuration object.
- * @property {boolean} env.useHttps - Define is the server run in http or in https.
- * @property {string} env.serverAddress - Domain name or IP of the server.
- *  Mandatory when node clients are declared
- * @property {number} env.port - Port on which the server is listening.
- * @property {obj} [env.httpsInfos=null] - Path to cert files ( cert, key } for https.
- *  If not given and useHttps is true self certifified certificates will be created.
- * @property {string} [env.subpath=''] - If running behind a proxy, path to the application.
+ * @property {AppConfig} app - Application configuration object.
+ * @property {ServerEnvConfig} env - Environment configuration object.
  */
 
 export { default as Server } from './Server.js';

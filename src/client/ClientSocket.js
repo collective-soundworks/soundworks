@@ -57,8 +57,8 @@ class ClientSocket {
   async init() {
     let { path } = this.#socketOptions;
     // cf. https://github.com/collective-soundworks/soundworks/issues/35
-    if (this.#config.env.subpath) {
-      path = `${this.#config.env.subpath}/${path}`;
+    if (this.#config.env.baseUrl) {
+      path = `${this.#config.env.baseUrl}/${path}`;
     }
 
     const protocol = this.#config.env.useHttps ? 'wss:' : 'ws:';
