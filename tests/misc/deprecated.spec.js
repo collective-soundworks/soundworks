@@ -71,7 +71,7 @@ describe('from v4.0.0-alpha.29', () => {
       await server.stop();
     });
 
-    it('Client#target, ClientDescription#target', async () => {
+    it('Client#target, ClientDescription#target -> runtime', async () => {
       const config = {
         app: {
           name: 'plugin-manager-test',
@@ -89,7 +89,6 @@ describe('from v4.0.0-alpha.29', () => {
       };
 
       const server = new Server(config);
-      server.stateManager.defineClass('a', a);
       await server.start();
 
       const client = new Client({ ...config, role: 'test' });
@@ -98,6 +97,33 @@ describe('from v4.0.0-alpha.29', () => {
       assert.equal(client.target, 'node'); // deprecated
 
       await client.stop();
+      await server.stop();
+    });
+
+    it.only('ServerEnvConfig#subpath -> baseUrl', async () => {
+      const config = {
+        app: {
+          name: 'plugin-manager-test',
+          clients: {
+            test: { runtime: 'node' },
+          },
+        },
+        env: {
+          type: 'development',
+          subpath: 'coucou',
+          port: 8081,
+          serverAddress: '127.0.0.1',
+          useHttps: false,
+          verbose: process.env.VERBOSE === '1' ? true : false,
+        }
+      };
+
+      const server = new Server(config);
+      await server.start();
+
+      assert.equal(server.config.env.baseUrl, 'coucou');
+      assert.equal(server.config.env.subpath, undefined);
+
       await server.stop();
     });
   });
