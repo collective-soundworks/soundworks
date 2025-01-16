@@ -15,7 +15,7 @@
  * @property {string} [author=''] - Name of the author.
  */
 /**
- * Environement configuration object.
+ * Environment configuration object.
  *
  * @typedef ClientEnvConfig
  * @type {objecy}
