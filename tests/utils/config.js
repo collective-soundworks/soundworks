@@ -6,7 +6,7 @@ export default {
     },
   },
   env: {
-    type: 'development',
+    // type: 'development',
     port: 8081,
     serverAddress: '127.0.0.1',
     useHttps: false,

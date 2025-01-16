@@ -1,4 +1,4 @@
-name: Unit Tests
+name: unit-tests
 on: push
 
 jobs:
@@ -6,13 +6,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: 'Install Node'
-        uses: actions/setup-node@v3.6.0
+      - name: Install Node
+        uses: actions/setup-node@v4
 
       - name: Install dependencies
         run: npm install
 
-      - name: "Run Test"
+      - name: Run Test
         run: npm run test
