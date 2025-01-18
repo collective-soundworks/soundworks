@@ -1,4 +1,4 @@
-import merge from 'lodash/merge.js';
+import merge from 'merge-deep';
 
 export const kBasePluginStatus = Symbol('soundworks:base-plugin-status');
 
@@ -170,7 +170,7 @@ class BasePlugin {
    * @see {@link BasePluginManager#onStateChange}
    */
   propagateStateChange(updates) {
-    merge(this.state, updates);
+    this.state = merge(this.state, updates);
     this.#onStateChangeCallbacks.forEach(callback => callback(this.state));
   }
 }
