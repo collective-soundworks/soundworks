@@ -2,6 +2,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import * as url from 'node:url';
 
+import { Server as HttpsServer } from 'node:https';
+import { Server as HttpServer } from 'node:http';
+
 import { delay } from '@ircam/sc-utils';
 import { assert } from 'chai';
 import dotenv from 'dotenv';
@@ -138,12 +141,13 @@ describe('# Server', () => {
   });
 
   describe(`## await server.init()`, () => {
-    it(`should throw if invalid https cert file given`, async () => {
+    it(`should throw if invalid https cert file given`, async function() {
       const envPathname = path.join(__dirname, '.env');
 
       if (!fs.existsSync(envPathname)) {
-        assert.ok('no .env file, skip this test');
-        return;
+        console.log('> no .env file, skip this test');
+        this.skip();
+        // return;
       }
 
       const envBuffer = fs.readFileSync(envPathname);
@@ -168,12 +172,12 @@ describe('# Server', () => {
       if (!errored) { assert.fail('should have thrown'); }
     });
 
-    it(`should throw if invalid https key file given`, async () => {
+    it(`should throw if invalid https key file given`, async function() {
       const envPathname = path.join(__dirname, '.env');
 
       if (!fs.existsSync(envPathname)) {
-        assert.ok('no .env file, skip this test');
-        return;
+        console.log('> no .env file, skip this test');
+        this.skip();
       }
 
       const envBuffer = fs.readFileSync(envPathname);
@@ -210,13 +214,13 @@ describe('# Server', () => {
       await server.init();
     });
 
-    it(`should store self-signed certificated in db`, async () => {
+    it(`should store self-signed certificated in db`, async function() {
       // these test crash the CI for some reason,just ignore them in CI too
       const envPathname = path.join(__dirname, '.env');
 
       if (!fs.existsSync(envPathname)) {
-        assert.ok('no .env file, skip this test');
-        return;
+        console.log('> no .env file, skip this test');
+        this.skip();
       }
 
       const selfSignedConfig = merge({}, config);
@@ -232,17 +236,19 @@ describe('# Server', () => {
       assert.isDefined(key);
     });
 
-    //
-    // NOTE:
-    // the subsequent tests will exit early if the `.env` file is not found in the
-    // tests directory, making it work should be straightforward reading the code...
-    //
-    it(`should get infos about valid certificates`, async () => {
+    it(`should properly create httpServer`, async function() {
+      const server = new Server(config);
+      await server.init();
+
+      assert.isTrue(server.httpServer instanceof HttpServer);
+    });
+
+    it(`should properly create httpsServer - valid certificates`, async function() {
       const envPathname = path.join(__dirname, '.env');
 
       if (!fs.existsSync(envPathname)) {
-        assert.ok('no .env file, skip this test');
-        return;
+        console.log('> no .env file, skip this test');
+        this.skip();
       }
 
       const envBuffer = fs.readFileSync(envPathname);
@@ -258,20 +264,15 @@ describe('# Server', () => {
       const server = new Server(httpsConfig);
       await server.init();
 
-      assert.notEqual(server.httpsInfos, null);
-      assert.equal(server.httpsInfos.selfSigned, false);
-      assert.isDefined(server.httpsInfos.validFrom);
-      assert.isDefined(server.httpsInfos.validTo);
-      assert.isDefined(server.httpsInfos.isValid);
+      assert.isTrue(server.httpServer instanceof HttpsServer);
     });
 
-    it(`should get infos about self-signed certificates`, async () => {
-      // these test crash the CI for some reason,just ignore them in CI too
+    it(`should properly create httpsServer - self-signed certificates`, async function() {
       const envPathname = path.join(__dirname, '.env');
 
       if (!fs.existsSync(envPathname)) {
-        assert.ok('no .env file, skip this test');
-        return;
+        console.log('> no .env file, skip this test');
+        this.skip();
       }
 
       const httpsConfig = merge({}, config);
@@ -281,11 +282,7 @@ describe('# Server', () => {
       const server = new Server(httpsConfig);
       await server.init();
 
-      assert.notEqual(server.httpsInfos, null);
-      assert.equal(server.httpsInfos.selfSigned, true);
-      assert.isUndefined(server.httpsInfos.validFrom);
-      assert.isUndefined(server.httpsInfos.validTo);
-      assert.isUndefined(server.httpsInfos.isValid);
+      assert.isTrue(server.httpServer instanceof HttpsServer);
     });
   });
 
@@ -314,13 +311,13 @@ describe('# Server', () => {
       });
     });
 
-    it(`should launch the server (self-signed https)`, async () => {
+    it(`should launch the server (self-signed https)`, async function() {
       // these test crash the CI for some reason,just ignore them in CI too
       const envPathname = path.join(__dirname, '.env');
 
       if (!fs.existsSync(envPathname)) {
-        assert.ok('no .env file, skip this test');
-        return;
+        console.log('> no .env file, skip this test');
+        this.skip();
       }
 
       const selfSignedConfig = merge({}, config);
@@ -354,12 +351,12 @@ describe('# Server', () => {
     // the subsequent tests will exit early if the `.env` file is not found in the
     // tests directory, making it work should be straightforward reading the code...
     //
-    it(`should launch the server (valid https)`, async () => {
+    it(`should launch the server (valid https)`, async function() {
       const envPathname = path.join(__dirname, '.env');
 
       if (!fs.existsSync(envPathname)) {
-        assert.ok('no .env file, skip this test');
-        return;
+        console.log('> no .env file, skip this test');
+        this.skip();
       }
 
       const envBuffer = fs.readFileSync(envPathname);

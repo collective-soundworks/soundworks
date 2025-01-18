@@ -12,7 +12,7 @@ __*
 NOTES.md
 
 # testing
-/tests/.env
+.env
 
 # changelog
 # CHANGELOG.md
