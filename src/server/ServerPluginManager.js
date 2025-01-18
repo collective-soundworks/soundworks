@@ -15,12 +15,12 @@ export const kServerPluginManagerRemoveClient = Symbol('soundworks:server-plugin
  * and before {@link Client#start} or {@link Server#start}
  * to be properly initialized.
  *
- * In some sitautions, you might want to register the same plugin factory several times
+ * In some situations, you might want to register the same plugin factory several times
  * using different ids (e.g. for watching several parts of the file system, etc.).
  *
  * Refer to the plugins' documentation for more precise examples, and the specific API
  * they expose. See [https://soundworks.dev/guide/ecosystem](https://soundworks.dev/guide/ecosystem)
- * for more informations on the available plugins.
+ * for more information on the available plugins.
  *
  * ```
  * // client-side
@@ -145,7 +145,7 @@ class ServerPluginManager extends BasePluginManager {
     }
 
     if (ctor.target === undefined || ctor.target !== 'server') {
-      throw new Error(`[ServerPluginManager] Invalid argument, The plugin class should implement a 'target' static field with value 'server'`)
+      throw new Error(`[ServerPluginManager] Invalid argument, The plugin class should implement a 'target' static field with value 'server'`);
     }
 
     super.register(id, ctor, options, deps);
@@ -164,7 +164,7 @@ class ServerPluginManager extends BasePluginManager {
    * on the `onStateChange` method.
    *
    * _Note: the async API is designed to enable the dynamic creation of plugins
-   * (hopefully without brealing changes) in a future release._
+   * (hopefully without breaking changes) in a future release._
    *
    * @param {ServerPlugin#id} id - Id of the plugin as defined when registered.
    * @returns {ServerPlugin}

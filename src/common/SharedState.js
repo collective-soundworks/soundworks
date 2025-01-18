@@ -458,9 +458,7 @@ ${JSON.stringify(initValues, null, 2)}`);
 
     if (arguments.length === 2 && isString(updates)) {
       updates = { [updates]: arguments[1] };
-    } else if (isPlainObject(updates)) {
-      updates = updates;
-    } else {
+    } else if (!isPlainObject(updates)) {
       throw new TypeError(`Cannot execute 'set' on SharedState: 'updates' argument should be an object`);
     }
 

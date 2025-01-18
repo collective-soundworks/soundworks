@@ -166,7 +166,7 @@ class SharedStatePrivate {
             client.transport.emit(
               `${UPDATE_RESPONSE}-${this.id}-${instanceId}`,
               reqId,
-              acknowledgedUpdates
+              acknowledgedUpdates,
             );
           }
 
@@ -194,7 +194,7 @@ class SharedStatePrivate {
             client.transport.emit(
               `${UPDATE_RESPONSE}-${this.id}-${instanceId}`,
               reqId,
-              acknowledgedUpdates
+              acknowledgedUpdates,
             );
           }
 

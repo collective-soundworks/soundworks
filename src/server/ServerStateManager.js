@@ -384,7 +384,7 @@ class ServerStateManager extends BaseStateManager {
           GET_CLASS_DESCRIPTION_RESPONSE,
           reqId,
           className,
-          classDescription
+          classDescription,
         );
       } else {
         const msg = `[stateManager] Cannot get class "${className}", class does not exists`;

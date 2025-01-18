@@ -1,5 +1,6 @@
 import http from 'node:http';
 import https from 'node:https';
+import fs from 'node:fs';
 import {
   X509Certificate,
   createPrivateKey,
@@ -42,7 +43,7 @@ export async function createHttpServer(server) {
       // this fails with self-signed certificates for whatever reason...
       try {
         x509 = new X509Certificate(cert);
-      } catch (err) {
+      } catch {
         throw new Error(`[soundworks:Server] Invalid https cert file`);
       }
 
@@ -52,7 +53,7 @@ export async function createHttpServer(server) {
         if (!x509.checkPrivateKey(keyObj)) {
           throw new Error(`[soundworks:Server] Invalid https key file`);
         }
-      } catch (err) {
+      } catch {
         throw new Error(`[soundworks:Server] Invalid https key file`);
       }
 
@@ -120,31 +121,7 @@ Invalid certificate files, please check your:
     httpsServer = https.createServer({ cert, key });
   }
 
-  // log infos about certificate validity
-  if (httpsCertsInfos !== null) {
-    logger.title(`https certificates infos`);
+  logger.httpsCertsInfos(httpsCertsInfos);
 
-    if (httpsCertsInfos.selfSigned) {
-      logger.log(`    self-signed: ${httpsCertsInfos.selfSigned ? 'true' : 'false'}`);
-      logger.log(chalk.yellow`    > INVALID CERTIFICATE (self-signed)`);
-    } else {
-      logger.log(`    valid from: ${httpsCertsInfos.validFrom}`);
-      logger.log(`    valid to:   ${httpsCertsInfos.validTo}`);
-
-      if (!httpsCertsInfos.isValid) {
-        logger.error(chalk.red`    -------------------------------------------`);
-        logger.error(chalk.red`    > INVALID CERTIFICATE                      `);
-        logger.error(chalk.red`    i.e. you pretend to be safe but you are not`);
-        logger.error(chalk.red`    -------------------------------------------`);
-      } else {
-        if (httpsCertsInfos.daysRemaining < 5) {
-          logger.log(chalk.red`    > CERTIFICATE IS VALID... BUT ONLY ${httpsCertsInfos.daysRemaining} DAYS LEFT, PLEASE CONSIDER UPDATING YOUR CERTS!`);
-        } else if (httpsCertsInfos.daysRemaining < 15) {
-          logger.log(chalk.yellow`    > CERTIFICATE IS VALID - only ${httpsCertsInfos.daysRemaining} days left, be careful...`);
-        } else {
-          logger.log(chalk.green`    > CERTIFICATE IS VALID (${httpsCertsInfos.daysRemaining} days left)`);
-        }
-      }
-    }
-  }
+  return httpsServer;
 }

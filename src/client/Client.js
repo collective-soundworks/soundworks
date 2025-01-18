@@ -255,7 +255,7 @@ class Client {
     return this.#status;
   }
 
-    /** @private */
+  /** @private */
   async #dispatchStatus(status) {
     this.#status = status;
 

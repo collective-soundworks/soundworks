@@ -114,6 +114,37 @@ dependencies on both your server and clients.
     const msg = `[Removed API] ${oldAPI} has been removed (last supported version: ${lastSupportedVersion}), please use ${hint} instead.`;
     throw new Error(msg);
   },
+
+  httpsCertsInfos(httpsCertsInfos) {
+    if (!this.verbose) {
+      return;
+    }
+
+    this.title(`https certificates infos`);
+
+    if (httpsCertsInfos.selfSigned) {
+      this.log(`    self-signed: ${httpsCertsInfos.selfSigned ? 'true' : 'false'}`);
+      this.log(chalk.yellow`    > INVALID CERTIFICATE (self-signed)`);
+    } else {
+      this.log(`    valid from: ${httpsCertsInfos.validFrom}`);
+      this.log(`    valid to:   ${httpsCertsInfos.validTo}`);
+
+      if (!httpsCertsInfos.isValid) {
+        this.error(chalk.red`    -------------------------------------------`);
+        this.error(chalk.red`    > INVALID CERTIFICATE                      `);
+        this.error(chalk.red`    i.e. you pretend to be safe but you are not`);
+        this.error(chalk.red`    -------------------------------------------`);
+      } else {
+        if (httpsCertsInfos.daysRemaining < 5) {
+          this.log(chalk.red`    > CERTIFICATE IS VALID... BUT ONLY ${httpsCertsInfos.daysRemaining} DAYS LEFT, PLEASE CONSIDER UPDATING YOUR CERTS!`);
+        } else if (httpsCertsInfos.daysRemaining < 15) {
+          this.log(chalk.yellow`    > CERTIFICATE IS VALID - only ${httpsCertsInfos.daysRemaining} days left, be careful...`);
+        } else {
+          this.log(chalk.green`    > CERTIFICATE IS VALID (${httpsCertsInfos.daysRemaining} days left)`);
+        }
+      }
+    }
+  },
 };
 
 export default logger;

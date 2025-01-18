@@ -20,7 +20,7 @@ import {
   decryptData,
 } from './crypto.js';
 import {
-  createHttpServer
+  createHttpServer,
 } from './create-http-server.js';
 import ServerClient, {
   kServerClientToken,
@@ -169,7 +169,7 @@ class Server {
       const clientConfig = this.#config.app.clients[role];
 
       if (clientConfig.target) {
-        logger.deprecated('ClientDescription#target', 'ClientDescription#runtime (or run \`npx soundworks --upgrade-config\` to upgrade your config files)', '4.0.0-alpha.29')
+        logger.deprecated('ClientDescription#target', 'ClientDescription#runtime (or run `npx soundworks --upgrade-config` to upgrade your config files)', '4.0.0-alpha.29');
         clientConfig.runtime = clientConfig.target;
         delete clientConfig.target;
       }
@@ -177,7 +177,7 @@ class Server {
 
     // `env.subpath` to `env.baseUrl`
     if ('subpath' in this.#config.env) {
-      logger.deprecated('ServerConfig#subpath', 'ServerConfig#baseUrl (or run \`npx soundworks --upgrade-config\` to upgrade your config files)', '4.0.0-alpha.29')
+      logger.deprecated('ServerConfig#subpath', 'ServerConfig#baseUrl (or run `npx soundworks --upgrade-config` to upgrade your config files)', '4.0.0-alpha.29');
       this.#config.env.baseUrl = this.#config.env.subpath;
       delete this.#config.env.subpath;
     }
@@ -492,7 +492,7 @@ class Server {
     } catch (err) {
       logger.error(err.message);
       await this.#dispatchStatus('errored');
-      return;
+      throw err;
     }
 
     // start `ServerPluginManager`

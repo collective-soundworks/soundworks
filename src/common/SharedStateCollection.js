@@ -105,7 +105,7 @@ class SharedStateCollection {
 
       for (let filter of this.#filter) {
         if (!keys.includes(filter)) {
-          throw new ReferenceError(`[SharedStateCollection] Invalid filter key (${filter}) for class "${this.#className}"`)
+          throw new ReferenceError(`[SharedStateCollection] Invalid filter key (${filter}) for class "${this.#className}"`);
         }
       }
     }

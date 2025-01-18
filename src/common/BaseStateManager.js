@@ -120,7 +120,7 @@ class BaseStateManager {
 
         this.#statesById.set(state.id, state);
         this.#promiseStore.resolve(reqId, state);
-      }
+      },
     );
 
     this[kStateManagerClient].transport.addListener(CREATE_ERROR, (reqId, msg) => {
@@ -155,7 +155,7 @@ class BaseStateManager {
 
         this.#statesById.set(state.id, state);
         this.#promiseStore.resolve(reqId, state);
-      }
+      },
     );
 
     this[kStateManagerClient].transport.addListener(ATTACH_ERROR, (reqId, msg) => {
@@ -215,7 +215,7 @@ class BaseStateManager {
             callback(className, stateId, nodeId);
           }
         });
-      }
+      },
     );
 
     // ---------------------------------------------
@@ -237,7 +237,7 @@ class BaseStateManager {
         // return a full class description
         const parameterBag = new ParameterBag(classDescription);
         this.#promiseStore.resolve(reqId, parameterBag.getDescription());
-      }
+      },
     );
 
     this[kStateManagerClient].transport.addListener(GET_CLASS_DESCRIPTION_ERROR, (reqId, msg) => {
