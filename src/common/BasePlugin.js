@@ -1,4 +1,4 @@
-import merge from 'merge-deep';
+import merge from 'lodash/merge.js';
 
 export const kBasePluginStatus = Symbol('soundworks:base-plugin-status');
 

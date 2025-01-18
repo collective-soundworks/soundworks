@@ -1,5 +1,5 @@
 import { counter, isString, isPlainObject, isFunction } from '@ircam/sc-utils';
-import clonedeep from 'clone-deep';
+import clonedeep from 'lodash/cloneDeep.js';
 
 import BaseStateManager, {
   kStateManagerInit,

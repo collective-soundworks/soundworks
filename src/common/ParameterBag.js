@@ -1,4 +1,4 @@
-import cloneDeep from 'clone-deep';
+import cloneDeep from 'lodash/cloneDeep.js';
 import equal from 'fast-deep-equal';
 
 export const sharedOptions = {

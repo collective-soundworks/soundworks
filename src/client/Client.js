@@ -66,8 +66,6 @@ class Client {
   #pluginManager = null;
   #stateManager = null;
   #status = 'idle';
-  // Token of the client if connected through HTTP authentication.
-  #token = null;
   #auditState = null;
 
   /**
@@ -310,10 +308,9 @@ class Client {
     try {
       await new Promise((resolve, reject) => {
         // wait for handshake response before starting stateManager and pluginManager
-        this.#socket.addListener(CLIENT_HANDSHAKE_RESPONSE, async ({ id, uuid, token, version }) => {
+        this.#socket.addListener(CLIENT_HANDSHAKE_RESPONSE, async ({ id, uuid, version }) => {
           this.#id = id;
           this.#uuid = uuid;
-          this.#token = token;
 
           if (version !== this.#version) {
             logger.warnVersionDiscrepancies(this.#role, this.#version, version);

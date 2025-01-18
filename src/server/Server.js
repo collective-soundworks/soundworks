@@ -12,7 +12,7 @@ import {
 import chalk from 'chalk';
 import Keyv from 'keyv';
 import { KeyvFile } from 'keyv-file';
-import merge from 'merge-deep';
+import merge from 'lodash/merge.js';
 
 import auditClassDescription from './audit-state-class-description.js';
 import {
@@ -711,8 +711,8 @@ class Server {
 
       this.#onClientConnectCallbacks.forEach(callback => callback(client));
 
-      const { id, uuid, token } = client;
-      socket.send(CLIENT_HANDSHAKE_RESPONSE, { id, uuid, token, version: this.#version });
+      const { id, uuid } = client;
+      socket.send(CLIENT_HANDSHAKE_RESPONSE, { id, uuid, version: this.#version });
     });
   }
 
