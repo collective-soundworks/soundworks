@@ -65,15 +65,11 @@
     "ws": "^8.17.0"
   },
   "devDependencies": {
-    "@ircam/eslint-config": "^1.3.0",
+    "@ircam/eslint-config": "^2.0.1",
     "chai": "^5.1.1",
-    "chai-shallow-deep-equal": "^1.4.6",
-    "commitizen": "^4.2.5",
-    "cz-conventional-changelog": "^3.3.0",
     "docdash": "^2.0.2",
     "dotenv": "^16.4.5",
-    "eslint": "^8.0.0",
-    "eslint-plugin-jsdoc": "^48.2.5",
+    "eslint": "^9.18.0",
     "jsdoc": "^4.0.3",
     "mocha": "^10.4.0",
     "puppeteer": "^22.9.0",
@@ -83,10 +79,5 @@
   "optionalDependencies": {
     "bufferutil": "^4.0.5",
     "utf-8-validate": "^5.0.7"
-  },
-  "config": {
-    "commitizen": {
-      "path": "./node_modules/cz-conventional-changelog"
-    }
   }
 }
