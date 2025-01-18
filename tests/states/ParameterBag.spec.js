@@ -1,10 +1,10 @@
 import { use, assert } from 'chai';
-import shallowDeepEqual from 'chai-shallow-deep-equal';
 
-// import ParameterBag from '../src/common/ParameterBag.js';
-import { default as ParameterBag, sharedOptions, types } from '../../src/common/ParameterBag.js';
-
-use(shallowDeepEqual);
+import {
+  default as ParameterBag,
+  sharedOptions,
+  types,
+} from '../../src/common/ParameterBag.js';
 
 describe('# [private] ParameterBag', () => {
   // ---------------------------------------------------------------
@@ -233,7 +233,69 @@ describe('# [private] ParameterBag', () => {
 
   describe(`## getDescription([name])`, () => {
     it(`should return the schema with proper default applied`, () => {
-      assert.shallowDeepEqual(params.getDescription(), schema);
+      const expected = {
+        bool: {
+          nullable: false,
+          event: false,
+          required: false,
+          metas: {},
+          filterChange: true,
+          immediate: false,
+          type: 'boolean',
+          default: false,
+          initValue: true
+        },
+        int: {
+          nullable: false,
+          event: false,
+          required: false,
+          metas: {},
+          filterChange: true,
+          immediate: false,
+          min: -2,
+          max: 2,
+          type: 'integer',
+          default: 0,
+          initValue: -2
+        },
+        nullable: {
+          nullable: true,
+          event: false,
+          required: false,
+          metas: {},
+          filterChange: true,
+          immediate: false,
+          type: 'any',
+          default: {},
+          initValue: {}
+        },
+        event: {
+          nullable: true,
+          event: true,
+          required: false,
+          metas: {},
+          filterChange: true,
+          immediate: false,
+          min: -Infinity,
+          max: Infinity,
+          type: 'float',
+          default: null,
+          initValue: null
+        },
+        required: {
+          nullable: false,
+          event: false,
+          required: true,
+          metas: {},
+          filterChange: true,
+          immediate: false,
+          type: 'string',
+          default: 'coucou',
+          initValue: 'coucou'
+        }
+      };
+
+      assert.deepEqual(params.getDescription(), expected);
     });
 
     it(`should throw if name does not exists`, () => {
@@ -245,7 +307,7 @@ describe('# [private] ParameterBag', () => {
 
   describe(`## getDefaults()`, () => {
     it(`should return the default values of the schema`, () => {
-      assert.shallowDeepEqual(params.getDefaults(), {
+      assert.deepEqual(params.getDefaults(), {
         bool: false,
         int: 0,
         nullable: {},

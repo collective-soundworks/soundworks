@@ -1,5 +1,5 @@
 import { assert }  from 'chai';
-import merge from 'lodash.merge';
+import merge from 'merge-deep';
 import { delay } from '@ircam/sc-utils';
 
 import { Server, ServerContext } from '../../src/server/index.js';
