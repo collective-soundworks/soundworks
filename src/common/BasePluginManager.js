@@ -71,7 +71,7 @@ class BasePluginManager {
     }
 
     this.#status = 'inited';
-    // instanciate all plugins
+    // instantiate all plugins
     for (let instance of this[kPluginManagerInstances].values()) {
       instance.onStateChange(() => this.#propagateStateChange(instance, null));
     }
@@ -107,7 +107,7 @@ class BasePluginManager {
   }
 
   /**
-   * Alias for existing plugins (i.e. plugin-scriptin), remove once updated
+   * Alias for existing plugins (i.e. plugin-scripting), remove once updated
    * @private
    */
   async unsafeGet(id) {
@@ -215,18 +215,18 @@ class BasePluginManager {
     }
 
     if (!isPlainObject(options)) {
-      throw new Error(`[soundworks.PluginManager] Invalid argument, "pluginManager.register" third optionnal argument should be an object`);
+      throw new Error(`[soundworks.PluginManager] Invalid argument, "pluginManager.register" third optional argument should be an object`);
     }
 
     if (!Array.isArray(deps)) {
-      throw new Error(`[soundworks.PluginManager] Invalid argument, "pluginManager.register" fourth optionnal argument should be an array`);
+      throw new Error(`[soundworks.PluginManager] Invalid argument, "pluginManager.register" fourth optional argument should be an array`);
     }
 
     if (this[kPluginManagerInstances].has(id)) {
       throw new Error(`[soundworks:PluginManager] Plugin "${id}" already registered`);
     }
 
-    // We instanciate the plugin here, so that a plugin can register another one
+    // We instantiate the plugin here, so that a plugin can register another one
     // in its own constructor.
     //
     // The dependencies must be created first, so that the instance can call
@@ -240,7 +240,7 @@ class BasePluginManager {
   /**
    * Manually add a dependency to a given plugin.
    *
-   * Usefull to require a plugin within a plugin
+   * Useful to require a plugin within a plugin
    */
   addDependency(pluginId, dependencyId) {
     const deps = this.#dependencies.get(pluginId);

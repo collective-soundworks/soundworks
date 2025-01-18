@@ -316,7 +316,7 @@ class Client {
           this.#token = token;
 
           if (version !== this.#version) {
-            logger.warnVersionDiscepancies(this.#role, this.#version, version);
+            logger.warnVersionDiscrepancies(this.#role, this.#version, version);
           }
 
           resolve();
