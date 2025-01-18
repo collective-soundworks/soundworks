@@ -1,5 +1,4 @@
 import chalk from 'chalk';
-import columnify from 'columnify';
 
 /**
  * @private
@@ -43,69 +42,6 @@ const logger = {
     console.error(chalk.red(msg));
   },
 
-  clientConfigAndRouting(routes, config) {
-    if (!this.verbose) {
-      return;
-    }
-
-    const clientsConfig = config.app.clients;
-    const serverAddress = config.env.serverAddress;
-    const auth = config.env.auth;
-    const table = [];
-
-    for (let role in clientsConfig) {
-      const client = clientsConfig[role];
-
-      if (client.runtime === 'node') {
-        const line = {
-          role: `> ${role}`,
-          runtime: chalk.red(client.runtime),
-          path: `serverAddress: ${chalk.green(serverAddress)}`,
-          default: undefined,
-          auth: undefined,
-        };
-
-        table.push(line);
-      } else if (client.runtime === 'browser') {
-        const line = {
-          role: `> ${role}`,
-          runtime: chalk.red(client.runtime),
-          path: routes.find(r => r.role === role) ?
-            chalk.green(routes.find(r => r.role === role).path) :
-            chalk.red('no route defined'),
-          default: (client.default ? 'x' : undefined),
-          auth: auth && auth.clients.indexOf(role) !== -1 ? 'x' : undefined,
-        };
-
-        table.push(line);
-      }
-    }
-
-    console.log(``);
-    console.log(columnify(table, {
-      showHeaders: true,
-      minWidth: 6,
-      columnSplitter: ' | ',
-      config: {
-        default: { align: 'center' },
-        auth: { align: 'center' },
-      },
-    }));
-    console.log(``);
-
-    // check if a route is defined but not in config
-    if (clientsConfig) {
-      const configClientTypes = Object.keys(clientsConfig);
-      routes.forEach(r => {
-        if (configClientTypes.indexOf(r.role) === -1) {
-          console.log(`@warning: no client config found for route ${r.role}`);
-        }
-      });
-    } else {
-      console.log(`@warning: no config found for clients`);
-    }
-  },
-
   ip(protocol, address, port) {
     if (!this.verbose) {
       return;
@@ -146,7 +82,7 @@ const logger = {
     console.log(`    ${name} ${chalk.red('errors')}`);
   },
 
-  warnVersionDiscepancies(clientRole, clientVersion, serverVersion) {
+  warnVersionDiscrepancies(clientRole, clientVersion, serverVersion) {
     console.warn(`
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 

@@ -100,7 +100,7 @@ describe('from v4.0.0-alpha.29', () => {
       await server.stop();
     });
 
-    it.only('ServerEnvConfig#subpath -> baseUrl', async () => {
+    it('ServerEnvConfig#subpath -> baseUrl', async () => {
       const config = {
         app: {
           name: 'plugin-manager-test',
@@ -125,6 +125,11 @@ describe('from v4.0.0-alpha.29', () => {
       assert.equal(server.config.env.subpath, undefined);
 
       await server.stop();
+    });
+
+    it(`should populate server[kServerApplicationTemplateOptions]`, () => {
+      const server = new Server(config);
+      server.useDefaultApplicationTemplate();
     });
   });
 

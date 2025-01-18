@@ -4,13 +4,12 @@ import {
 } from 'node:worker_threads';
 
 import {
-  default as WebSocket,
   WebSocketServer,
 } from 'ws';
 
 import {
   kServerOnSocketConnection,
-  kServerIsProtectedRole,
+  kServerIsValidConnectionToken,
 } from './Server.js';
 import ServerSocket, {
   kSocketTerminate,
@@ -95,7 +94,7 @@ class ServerSockets {
     this.#server.httpServer.on('upgrade', async (req, socket, head) => {
       const { role, token } = querystring.parse(req.url.split('?')[1]);
 
-      if (this.#server[kServerIsProtectedRole](role)) {
+      if (this.#server.isProtectedClientRole(role)) {
         // we don't have any IP in the upgrade request object,
         // so we just check the connection token is pending and valid
         if (!this.#server[kServerIsValidConnectionToken](token)) {

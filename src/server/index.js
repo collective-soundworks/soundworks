@@ -9,7 +9,7 @@
 /**
  * The role of the client in the application.
  *
- * For browser client, this infomation is used to create the URL endpoint.
+ * For browser client, this information is used to create the URL endpoint.
  *
  * @typedef ClientRole
  * @type {string}
@@ -35,12 +35,22 @@
  *
  * @typedef ServerEnvConfig
  * @type {objecy}
- * @property {number} env.port - Port on which the server is listening.
- * @property {string} env.serverAddress - Domain name or IP of the server.
+ * @property {'development'|'production'} type - If set to 'production', will enforce
+ *  some security feature (e.g. blocking access to sensitive APIs, etc.) based on
+ *  the `auth`.
+ * @property {number} port - Port on which the server is listening.
+ * @property {string} serverAddress - Domain name or IP of the server.
  *  Mandatory when node clients are declared
- * @property {boolean} env.useHttps - Define is the server run in http or in https.
- * @property {obj} [env.httpsInfos=null] - Path to cert files ( cert, key } for https.
- *  If not given and useHttps is true self certifified certificates will be created.
+ * @property {boolean} useHttps - Define is the server run in http or in https.
+ * @property {object} [httpsInfos=null] - Path to cert files ( cert, key } for https.
+ *  If not given and `useHttps` is `true` self certified certificates will be created.
+ * @property {string} [httpsInfos.cert=null] - Path to cert file.
+ * @property {string} [httpsInfos.key=null] - Path to key file.
+ * @property {object} [auth=null] - Configuration object for authenticating clients
+ *  using simple HTTP authentication.
+ * @property {array.<ClientRole>} [auth.client=[]] - List of client role that must authenticate.
+ * @property {login} [auth.login=''] - Login
+ * @property {login} [auth.password=''] - Password
  * @property {string} [env.baseUrl=''] - If running behind a proxy, base URL of the application.
  */
 /**

@@ -13,7 +13,6 @@ import { Client } from '../../src/client/index.js';
 
 import {
   kServerOnStatusChangeCallbacks,
-  kServerApplicationTemplateOptions,
 } from '../../src/server/Server.js';
 
 import config from '../utils/config.js';
@@ -139,22 +138,6 @@ describe('# Server', () => {
   });
 
   describe(`## await server.init()`, () => {
-    it('should throw if browser client is declared and `setDefaultTemplateConfig` or `setCustomTemplateConfig` have not been called', async () => {
-      const browserConfig = merge({}, config);
-      browserConfig.app.clients.hello = { runtime: 'browser' };
-
-      const server = new Server(browserConfig);
-
-      let errored = false;
-      try {
-        await server.init();
-      } catch(err) {
-        errored = true;
-        console.log(err.message);
-      }
-      if (!errored) { assert.fail('should have thrown'); }
-    });
-
     it(`should throw if invalid https cert file given`, async () => {
       const envPathname = path.join(__dirname, '.env');
 
@@ -508,7 +491,7 @@ describe('# Server', () => {
   describe('## server.onStatusChange(state => {}) - state: (inited, started, stopped)', () => {
     let server;
 
-    before(async () => {
+    beforeEach(async () => {
       server = new Server(config);
     });
 
@@ -519,23 +502,53 @@ describe('# Server', () => {
       assert.equal(server[kServerOnStatusChangeCallbacks].size, 0)
     });
 
+    it('should receive "http-server-ready" events', async () => {
+      let counter = 0;
+
+      const callback1 = async (status) => {
+        await delay(50);
+        if (status === 'http-server-ready') {
+          assert.equal(counter, 0);
+          counter++;
+        }
+      }
+
+      const callback2 = async (status) => {
+        await delay(100);
+        if (status === 'http-server-ready') {
+          assert.equal(counter, 1);
+          counter++;
+        }
+      }
+
+      const unsubscribe1 = server.onStatusChange(callback1);
+      const unsubscribe2 = server.onStatusChange(callback2);
+
+      await server.init();
+      // assert await resolves after all callbacks
+      assert.equal(counter, 2);
+
+      unsubscribe1();
+      unsubscribe2();
+    });
+
     it('should receive "inited" events', async () => {
       let counter = 0;
 
       const callback1 = async (status) => {
-        await new Promise(resolve => setTimeout(resolve, 50));
+        await delay(50);
         if (status === 'inited') {
           assert.equal(counter, 0);
+          counter++;
         }
-        counter++;
       }
 
       const callback2 = async (status) => {
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await delay(100);
         if (status === 'inited') {
           assert.equal(counter, 1);
+          counter++;
         }
-        counter++;
       }
 
       const unsubscribe1 = server.onStatusChange(callback1);
@@ -553,19 +566,19 @@ describe('# Server', () => {
       let counter = 0;
 
       const callback1 = async (status) => {
-        await new Promise(resolve => setTimeout(resolve, 50));
+        await delay(50);
         if (status === 'started') {
           assert.equal(counter, 0);
+          counter++;
         }
-        counter++;
       }
 
       const callback2 = async (status) => {
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await delay(100);
         if (status === 'started') {
           assert.equal(counter, 1);
+          counter++;
         }
-        counter++;
       }
 
       const unsubscribe1 = server.onStatusChange(callback1);
@@ -577,76 +590,39 @@ describe('# Server', () => {
 
       unsubscribe1();
       unsubscribe2();
+
+      await server.stop();
     });
 
     it('should receive "stopped" events', async () => {
       let counter = 0;
 
       const callback1 = async (status) => {
-        await new Promise(resolve => setTimeout(resolve, 50));
+        await delay(50);
         if (status === 'stopped') {
           assert.equal(counter, 0);
+          counter++;
         }
-        counter++;
       }
 
       const callback2 = async (status) => {
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await delay(100);
         if (status === 'stopped') {
           assert.equal(counter, 1);
+          counter++;
         }
-        counter++;
       }
 
       const unsubscribe1 = server.onStatusChange(callback1);
       const unsubscribe2 = server.onStatusChange(callback2);
 
+      await server.start();
       await server.stop();
       // assert await resolves after all callbacks
       assert.equal(counter, 2);
 
       unsubscribe1();
       unsubscribe2();
-    });
-  });
-
-  describe(`## server.useDefaultApplicationTemplate()`, () => {
-    it(`should populate server[kServerApplicationTemplateOptions]`, () => {
-      const server = new Server(config);
-      server.useDefaultApplicationTemplate();
-
-      assert.notEqual(server[kServerApplicationTemplateOptions].templateEngine, null);
-      assert.notEqual(server[kServerApplicationTemplateOptions].templatePath, null);
-      assert.notEqual(server[kServerApplicationTemplateOptions].clientConfigFunction, null);
-    });
-  });
-
-  describe(`## server.setCustomApplicationTemplateOptions(options)`, () => {
-    it(`should override server[kServerApplicationTemplateOptions]`, () => {
-      const server = new Server(config);
-      server.useDefaultApplicationTemplate();
-      // returns the config to be sent to the client
-      const clientConfigFunction = (role, config, httpRequest) => {
-        return {
-          role: role,
-          app: {
-            name: config.app.name,
-            author: config.app.author,
-          },
-          env: {
-            type: config.env.type,
-            websockets: config.env.websockets,
-            subpath: config.env.subpath,
-          },
-          additionnalInfos: 42
-        }
-      }
-
-      server.setCustomApplicationTemplateOptions({ clientConfigFunction });
-
-      assert.notEqual(server[kServerApplicationTemplateOptions].templateEngine, null);
-      assert.notEqual(server[kServerApplicationTemplateOptions].templatePath, null);
-      assert.equal(server[kServerApplicationTemplateOptions].clientConfigFunction, clientConfigFunction);
     });
   });
 
@@ -688,7 +664,7 @@ describe('# Server', () => {
 
       await client.stop();
       // wait for the server to clean things
-      await new Promise(resolve => setTimeout(resolve, 50));
+      await delay(50);
 
       {
         const numClients = auditState.get('numClients');

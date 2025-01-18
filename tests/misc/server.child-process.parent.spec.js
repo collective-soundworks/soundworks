@@ -15,6 +15,7 @@ describe('# server in child process', () => {
     });
 
     const expected = [
+      `soundworks:server:http-server-ready`,
       `soundworks:server:inited`,
       `soundworks:server:started`,
       `soundworks:server:stopped`,
