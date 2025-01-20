@@ -1,17 +1,17 @@
 import { assert } from 'chai';
 
-import { Server } from '../../src/server/index.js';
-import { Client } from '../../src/client/index.js';
+import { Server, ServerPlugin } from '../../src/server/index.js';
+import { Client, ClientPlugin } from '../../src/client/index.js';
 
-import pluginDelayServer from '../utils/PluginDelayServer.js';
-import pluginDelayClient from '../utils/PluginDelayClient.js';
+import ServerPluginDelay from '../utils/ServerPluginDelay.js';
+import ClientPluginDelay from '../utils/ClientPluginDelay.js';
 import config from '../utils/config.js';
 
 describe('# Plugin', () => {
   describe(`## constructor(server|client, options)`, () => {
     it(`id and type should be readonly`, async () => {
       const server = new Server(config);
-      server.pluginManager.register('delay', pluginDelayServer, {
+      server.pluginManager.register('delay', ServerPluginDelay, {
         delayTime: 0,
       });
 
@@ -22,7 +22,7 @@ describe('# Plugin', () => {
       await server.start();
 
       const client = new Client({ role: 'test', ...config });
-      client.pluginManager.register('delay', pluginDelayClient, {
+      client.pluginManager.register('delay', ClientPluginDelay, {
         delayTime: 0,
       });
       await client.init();
@@ -30,9 +30,9 @@ describe('# Plugin', () => {
       const pluginClient = await client.pluginManager.get('delay');
 
       assert.equal(pluginServer.id, 'delay');
-      assert.equal(pluginServer.type, 'PluginDelayServer');
-      assert.equal(pluginClient.type, 'PluginDelayClient');
+      assert.equal(pluginServer.type, 'ServerPluginDelay');
       assert.equal(pluginClient.id, 'delay');
+      assert.equal(pluginClient.type, 'ClientPluginDelay');
 
       // id and type are readonly
       assert.throws(() => pluginServer.id = 'coucou');
@@ -47,13 +47,13 @@ describe('# Plugin', () => {
   describe(`## [client] Plugin.state propagation`, () => {
     it(`should propagate its inner state`, async () => {
       const server = new Server(config);
-      server.pluginManager.register('stateful', (ServerPlugin) => class StatefulPlugin extends ServerPlugin { static target = 'server' });
+      server.pluginManager.register('stateful', class StatefulPlugin extends ServerPlugin {});
 
       await server.init();
       await server.start();
 
       const client = new Client({ role: 'test', ...config });
-      client.pluginManager.register('stateful', (ClientPlugin) => class StatefulPlugin extends ClientPlugin { static target = 'client' });
+      client.pluginManager.register('stateful', class StatefulPlugin extends ClientPlugin {});
       await client.init();
 
       const plugin = await client.pluginManager.get('stateful');
@@ -77,11 +77,7 @@ describe('# Plugin', () => {
 
     it(`should be forwarded by the stateManager`, async () => {
       const server = new Server(config);
-      server.pluginManager.register('stateful', (Plugin) => {
-        return class StatefulPlugin extends Plugin {
-          static target = 'server';
-        }
-      });
+      server.pluginManager.register('stateful', class StatefulPlugin extends ServerPlugin {});
 
       await server.init();
       await server.start();
@@ -89,14 +85,10 @@ describe('# Plugin', () => {
       let numCalled = 0;
       const client = new Client({ role: 'test', ...config });
 
-      client.pluginManager.register('stateful', (Plugin) => {
-        return class StatefulPlugin extends Plugin {
-          static target = 'client';
-
-          constructor(client, id) {
-            super(client, id);
-            this.state = { rand: 0 };
-          }
+      client.pluginManager.register('stateful', class StatefulPlugin extends ClientPlugin {
+        constructor(client, id) {
+          super(client, id);
+          this.state = { rand: 0 };
         }
       });
 
@@ -130,16 +122,12 @@ describe('# Plugin', () => {
 
       const server = new Server(config);
 
-      server.pluginManager.register('dependent', (Plugin) => {
-        return class Dependant extends Plugin {
-          static target = 'server';
+      server.pluginManager.register('dependent', class Dependant extends ServerPlugin {
+        constructor(server, id) {
+          super(server, id);
 
-          constructor(server, id) {
-            super(server, id);
-
-            this.server.pluginManager.register('delay', pluginDelayServer, { delayTime: 200 })
-            this.server.pluginManager.addDependency(this.id, 'delay');
-          }
+          this.server.pluginManager.register('delay', ServerPluginDelay, { delayTime: 200 })
+          this.server.pluginManager.addDependency(this.id, 'delay');
         }
       });
 
@@ -168,16 +156,12 @@ describe('# Plugin', () => {
 
       const client = new Client({ role: 'test', ...config });
 
-      client.pluginManager.register('dependent', (Plugin) => {
-        return class Dependant extends Plugin {
-          static target = 'client';
+      client.pluginManager.register('dependent', class Dependant extends ClientPlugin {
+        constructor(client, id) {
+          super(client, id);
 
-          constructor(client, id) {
-            super(client, id);
-
-            this.client.pluginManager.register('delay', pluginDelayClient, { delayTime: 200 })
-            this.client.pluginManager.addDependency(this.id, 'delay');
-          }
+          this.client.pluginManager.register('delay', ClientPluginDelay, { delayTime: 200 })
+          this.client.pluginManager.addDependency(this.id, 'delay');
         }
       });
 
@@ -210,14 +194,11 @@ describe('# Plugin', () => {
   describe(`## [server] Plugin.state propagation`, () => {
     it('PluginManager should properly propagate plugin state', async () => {
       const server = new Server(config);
-      server.pluginManager.register('stateful', (Plugin) => {
-        return class StatefulPlugin extends Plugin {
-          static target = 'server';
 
-          constructor(client, id) {
-            super(client, id);
-            this.state = { rand: 0 };
-          }
+      server.pluginManager.register('stateful', class StatefulPlugin extends ServerPlugin {
+        constructor(client, id) {
+          super(client, id);
+          this.state = { rand: 0 };
         }
       });
 

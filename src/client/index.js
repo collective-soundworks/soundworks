@@ -36,4 +36,5 @@
  */
 
 export { default as Client } from './Client.js';
+export { default as ClientPlugin } from './ClientPlugin.js';
 export { default as ClientContext } from './ClientContext.js';

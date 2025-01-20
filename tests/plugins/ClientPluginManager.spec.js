@@ -4,8 +4,8 @@ import { Server } from '../../src/server/index.js';
 import { Client } from '../../src/client/index.js';
 import ClientPluginManager from '../../src/client/ClientPluginManager.js';
 import ClientPlugin from '../../src/client/ClientPlugin.js';
-import pluginDelayServer from '../utils/PluginDelayServer.js';
-import pluginDelayClient from '../utils/PluginDelayClient.js';
+import ServerPluginDelay from '../utils/ServerPluginDelay.js';
+import ClientPluginDelay from '../utils/ClientPluginDelay.js';
 import config from '../utils/config.js';
 
 describe(`# PluginManagerClient`, () => {
@@ -15,7 +15,7 @@ describe(`# PluginManagerClient`, () => {
     server = new Server(config);
 
     ['delay-1', 'delay-2', 'delay-3', 'delay-4'].forEach((id) => {
-      server.pluginManager.register(id, pluginDelayServer, {
+      server.pluginManager.register(id, ServerPluginDelay, {
         delayTime: 0.,
       });
     });
@@ -50,7 +50,7 @@ describe(`# PluginManagerClient`, () => {
     it(`should throw if first argument is not a string`, () => {
       let errored = false;
       try {
-        client.pluginManager.register(true, pluginDelayClient);
+        client.pluginManager.register(true, ClientPluginDelay);
       } catch(err) {
         console.log(err.message);
         errored = true;
@@ -74,7 +74,7 @@ describe(`# PluginManagerClient`, () => {
     it(`should throw if third argument is not an object`, () => {
       let errored = false;
       try {
-        client.pluginManager.register('plugin-id', pluginDelayClient, true);
+        client.pluginManager.register('plugin-id', ClientPluginDelay, true);
       } catch(err) {
         console.log(err.message);
         errored = true;
@@ -83,14 +83,14 @@ describe(`# PluginManagerClient`, () => {
     });
 
     it(`third argument should be optionnal`, () => {
-      client.pluginManager.register('plugin-id', pluginDelayClient);
+      client.pluginManager.register('plugin-id', ClientPluginDelay);
       assert.ok('should pass');
     });
 
     it(`should throw if fourth argument is not an array`, () => {
       let errored = false;
       try {
-        client.pluginManager.register('plugin-id', pluginDelayClient, {}, true);
+        client.pluginManager.register('plugin-id', ClientPluginDelay, {}, true);
       } catch(err) {
         console.log(err.message);
         errored = true;
@@ -99,16 +99,16 @@ describe(`# PluginManagerClient`, () => {
     });
 
     it(`fourth argument should be optionnal`, () => {
-      client.pluginManager.register('plugin-id', pluginDelayClient, {});
+      client.pluginManager.register('plugin-id', ClientPluginDelay, {});
       assert.ok('should pass');
     });
 
     it(`should throw if id already registered`, () => {
-      client.pluginManager.register('delay-1', pluginDelayClient, {});
+      client.pluginManager.register('delay-1', ClientPluginDelay, {});
 
       let errored = false;
       try {
-        client.pluginManager.register('delay-1', pluginDelayClient, {});
+        client.pluginManager.register('delay-1', ClientPluginDelay, {});
       } catch(err) {
         console.log(err.message);
         errored = true;
@@ -121,7 +121,7 @@ describe(`# PluginManagerClient`, () => {
 
       let errored = false;
       try {
-        client.pluginManager.register('delay-1', pluginDelayClient, {});
+        client.pluginManager.register('delay-1', ClientPluginDelay, {});
       } catch(err) {
         console.log(err.message);
         errored = true;
@@ -130,8 +130,8 @@ describe(`# PluginManagerClient`, () => {
     });
 
     it(`should allow to registered same plugin factory with different ids`, () => {
-      client.pluginManager.register('delay-1', pluginDelayClient, {});
-      client.pluginManager.register('delay-2', pluginDelayClient, {});
+      client.pluginManager.register('delay-1', ClientPluginDelay, {});
+      client.pluginManager.register('delay-2', ClientPluginDelay, {});
 
       assert.ok('should not throw');
     });
@@ -140,7 +140,7 @@ describe(`# PluginManagerClient`, () => {
       let errored = false;
 
       try {
-        client.pluginManager.register('delay-1', pluginDelayServer, {});
+        client.pluginManager.register('delay-1', ServerPluginDelay, {});
       } catch (err) {
         console.log(err.message);
         errored = true;
@@ -155,7 +155,7 @@ describe(`# PluginManagerClient`, () => {
   describe(`## async get(id)`, () => {
     it(`should throw if called before server.init()`, async () => {
       const client = new Client({ role: 'test', ...config });
-      client.pluginManager.register('delay', pluginDelayClient, { delayTime: 100 });
+      client.pluginManager.register('delay', ClientPluginDelay, { delayTime: 100 });
 
       let errored = false;
       try {
@@ -195,7 +195,7 @@ describe(`# PluginManagerClient`, () => {
 
     it(`plugin should be started and immediately available after server.init()`, async function() {
       const client = new Client({ role: 'test', ...config });
-      client.pluginManager.register('delay-1', pluginDelayClient, { delayTime: 100 });
+      client.pluginManager.register('delay-1', ClientPluginDelay, { delayTime: 100 });
 
       const TIMEOUT_ERROR = 30;
       await client.init();
@@ -215,7 +215,7 @@ describe(`# PluginManagerClient`, () => {
     //   client = new Client({ role: 'test', ...config });
     //   await client.init();
 
-    //   client.pluginManager.register('delay-1', pluginDelayClient, {
+    //   client.pluginManager.register('delay-1', ClientPluginDelay, {
     //     delayTime: 100,
     //   });
 
@@ -247,7 +247,7 @@ describe(`# PluginManagerClient`, () => {
       this.timeout(3 * 1000);
 
       const client = new Client({ role: 'test', ...config });
-      client.pluginManager.register('delay-1', pluginDelayClient, {
+      client.pluginManager.register('delay-1', ClientPluginDelay, {
         delayTime: 100,
       });
 
@@ -270,7 +270,7 @@ describe(`# PluginManagerClient`, () => {
       this.timeout(3 * 1000);
 
       const client = new Client({ role: 'test', ...config });
-      client.pluginManager.register('delay-1', pluginDelayClient, {
+      client.pluginManager.register('delay-1', ClientPluginDelay, {
         delayTime: 100,
       });
 
@@ -301,8 +301,8 @@ describe(`# PluginManagerClient`, () => {
   describe(`## getRegisteredPlugins()`, () => {
     it(`should return the list of registered plugins`, () => {
       const client = new Client({ role: 'test', ...config });
-      client.pluginManager.register('delay-1', pluginDelayClient, { delayTime: 0 });
-      client.pluginManager.register('delay-2', pluginDelayClient, { delayTime: 0 });
+      client.pluginManager.register('delay-1', ClientPluginDelay, { delayTime: 0 });
+      client.pluginManager.register('delay-2', ClientPluginDelay, { delayTime: 0 });
 
       const registeredPlugins = client.pluginManager.getRegisteredPlugins();
       assert.deepEqual(['delay-1', 'delay-2'], registeredPlugins)
@@ -321,7 +321,7 @@ describe(`# PluginManagerClient`, () => {
 
     it(`client should start if plugin registered`, async function() {
       const client = new Client({ role: 'test', ...config });
-      client.pluginManager.register('delay-1', pluginDelayClient, { delayTime: 0.1 });
+      client.pluginManager.register('delay-1', ClientPluginDelay, { delayTime: 0.1 });
       await client.init();
       await client.start();
 
@@ -331,7 +331,7 @@ describe(`# PluginManagerClient`, () => {
 
     it(`should propagate plugin start() errors`, async () => {
       const client = new Client({ role: 'test', ...config });
-      client.pluginManager.register('delay-1', pluginDelayClient, {
+      client.pluginManager.register('delay-1', ClientPluginDelay, {
         delayTime: 0.1,
         throwError: true,
       });
@@ -353,10 +353,10 @@ describe(`# PluginManagerClient`, () => {
       // delay-2 --|
 
       const client = new Client({ role: 'test', ...config });
-      client.pluginManager.register('delay-1', pluginDelayClient, {
+      client.pluginManager.register('delay-1', ClientPluginDelay, {
         delayTime: 100,
       });
-      client.pluginManager.register('delay-2', pluginDelayClient, {
+      client.pluginManager.register('delay-2', ClientPluginDelay, {
         delayTime: 100,
       });
 
@@ -399,11 +399,11 @@ describe(`# PluginManagerClient`, () => {
 
       const client = new Client({ role: 'test', ...config });
 
-      client.pluginManager.register('delay-1', pluginDelayClient, {
+      client.pluginManager.register('delay-1', ClientPluginDelay, {
         delayTime: 100,
       });
       // delay-2 depends on delay-1
-      client.pluginManager.register('delay-2', pluginDelayClient, {
+      client.pluginManager.register('delay-2', ClientPluginDelay, {
         delayTime: 100,
       }, ['delay-1']);
 
@@ -447,20 +447,20 @@ describe(`# PluginManagerClient`, () => {
 
       const client = new Client({ role: 'test', ...config });
 
-      client.pluginManager.register('delay-1', pluginDelayClient, {
+      client.pluginManager.register('delay-1', ClientPluginDelay, {
         delayTime: 200,
       });
       // delay-2 depends on delay-1
-      client.pluginManager.register('delay-2', pluginDelayClient, {
+      client.pluginManager.register('delay-2', ClientPluginDelay, {
         delayTime: 200,
       }, ['delay-1']);
 
       // delay 3 ready (at 0.6) after delay delay-2 (at 0.4)
-      client.pluginManager.register('delay-3', pluginDelayClient, {
+      client.pluginManager.register('delay-3', ClientPluginDelay, {
         delayTime: 600,
       });
 
-      client.pluginManager.register('delay-4', pluginDelayClient, {
+      client.pluginManager.register('delay-4', ClientPluginDelay, {
         delayTime: 200,
       }, ['delay-2', 'delay-3']);
 

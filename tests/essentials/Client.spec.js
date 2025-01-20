@@ -2,13 +2,13 @@ import { assert }  from 'chai';
 import merge from 'lodash/merge.js';
 import { delay } from '@ircam/sc-utils';
 
-import { Server, ServerContext } from '../../src/server/index.js';
-import { Client, ClientContext } from '../../src/client/index.js';
+import { Server, ServerContext, ServerPlugin } from '../../src/server/index.js';
+import { Client, ClientContext, ClientPlugin } from '../../src/client/index.js';
 import {
   kClientOnStatusChangeCallbacks,
 } from '../../src/client/Client.js';
 
-import pluginDelayClient from '../utils/PluginDelayClient.js';
+import ClientPluginDelay from '../utils/ClientPluginDelay.js';
 import config from '../utils/config.js';
 
 describe('# Client', () => {
@@ -104,7 +104,7 @@ describe('# Client', () => {
       await server.start();
 
       const client = new Client({ role: 'test', ...config });
-      client.pluginManager.register('unknown-server-side', pluginDelayClient, { delayTime: 0 });
+      client.pluginManager.register('unknown-server-side', ClientPluginDelay, { delayTime: 0 });
 
       let errored = false;
       try {
@@ -275,11 +275,7 @@ describe('# Client', () => {
 
     it(`should stop the contexts first and then the plugins`, async () => {
       const server = new Server(config);
-      server.pluginManager.register('test-plugin', Plugin => {
-        return class TestPlugin extends Plugin {
-          static target = 'server';
-        }
-      });
+      server.pluginManager.register('test-plugin', class TestPlugin extends ServerPlugin {});
 
       await server.init();
 
@@ -297,24 +293,21 @@ describe('# Client', () => {
 
       const client = new Client({ role: 'test', ...config });
 
-      client.pluginManager.register('test-plugin', Plugin => {
-        return class TestPlugin extends Plugin {
-          static target = 'client';
-          async start() {
-            await super.start();
-            // just check that we are ok with that, and that we are not stuck
-            // with some on-going processcf. sync
-            this._intervalId = setInterval(() => {}, 500);
-          }
-          async stop() {
-            await super.stop();
+      client.pluginManager.register('test-plugin', class TestPlugin extends ClientPlugin {
+        async start() {
+          await super.start();
+          // just check that we are ok with that, and that we are not stuck
+          // with some on-going processcf. sync
+          this._intervalId = setInterval(() => {}, 500);
+        }
+        async stop() {
+          await super.stop();
 
-            clearInterval(this._intervalId);
-            pluginStop = true;
-            // should be called context.stop()
-            counter += 1;
-            assert.equal(counter, 2);
-          }
+          clearInterval(this._intervalId);
+          pluginStop = true;
+          // should be called context.stop()
+          counter += 1;
+          assert.equal(counter, 2);
         }
       });
 

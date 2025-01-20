@@ -1,11 +1,10 @@
 import { assert } from 'chai';
 
-import { Server } from '../../src/server/index.js';
-import { Client } from '../../src/client/index.js';
+import { Server, ServerPlugin } from '../../src/server/index.js';
+import { Client, ClientPlugin } from '../../src/client/index.js';
 import ServerPluginManager from '../../src/server/ServerPluginManager.js';
-import ServerPlugin from '../../src/server/ServerPlugin.js';
-import pluginDelayServer from '../utils/PluginDelayServer.js';
-import pluginDelayClient from '../utils/PluginDelayClient.js';
+import ServerPluginDelay from '../utils/ServerPluginDelay.js';
+import ClientPluginDelay from '../utils/ClientPluginDelay.js';
 import config from '../utils/config.js';
 import {
   kStateManagerClientsByNodeId,
@@ -35,7 +34,7 @@ describe(`# ServerPluginManager`, () => {
     it(`should throw if first argument is not a string`, () => {
       let errored = false;
       try {
-        server.pluginManager.register(true, pluginDelayServer);
+        server.pluginManager.register(true, ServerPluginDelay);
       } catch(err) {
         console.log(err.message);
         errored = true;
@@ -59,7 +58,7 @@ describe(`# ServerPluginManager`, () => {
     it(`should throw if third argument is not an object`, () => {
       let errored = false;
       try {
-        server.pluginManager.register('plugin-name', pluginDelayServer, true);
+        server.pluginManager.register('plugin-name', ServerPluginDelay, true);
       } catch(err) {
         console.log(err.message);
         errored = true;
@@ -68,14 +67,14 @@ describe(`# ServerPluginManager`, () => {
     });
 
     it(`third argument should be optionnal`, () => {
-      server.pluginManager.register('plugin-name', pluginDelayServer);
+      server.pluginManager.register('plugin-name', ServerPluginDelay);
       assert.ok('should pass');
     });
 
     it(`should throw if fourth argument is not an array`, () => {
       let errored = false;
       try {
-        server.pluginManager.register('plugin-name', pluginDelayServer, {}, true);
+        server.pluginManager.register('plugin-name', ServerPluginDelay, {}, true);
       } catch(err) {
         console.log(err.message);
         errored = true;
@@ -84,17 +83,17 @@ describe(`# ServerPluginManager`, () => {
     });
 
     it(`fourth argument should be optionnal`, () => {
-      server.pluginManager.register('plugin-name', pluginDelayServer, {});
+      server.pluginManager.register('plugin-name', ServerPluginDelay, {});
       assert.ok('should pass');
     });
 
     it(`should throw if id already registered`, () => {
       const server = new Server(config);
-      server.pluginManager.register('delay', pluginDelayServer, {});
+      server.pluginManager.register('delay', ServerPluginDelay, {});
 
       let errored = false;
       try {
-        server.pluginManager.register('delay', pluginDelayServer, {});
+        server.pluginManager.register('delay', ServerPluginDelay, {});
       } catch(err) {
         console.log(err.message);
         errored = true;
@@ -107,7 +106,7 @@ describe(`# ServerPluginManager`, () => {
 
       let errored = false;
       try {
-        server.pluginManager.register('delay-1', pluginDelayServer, {});
+        server.pluginManager.register('delay-1', ServerPluginDelay, {});
       } catch(err) {
         console.log(err.message);
         errored = true;
@@ -117,8 +116,8 @@ describe(`# ServerPluginManager`, () => {
 
     it(`should allow to registered same plugin factory with different ids`, () => {
       const server = new Server(config);
-      server.pluginManager.register('delay-1', pluginDelayServer, {});
-      server.pluginManager.register('delay-2', pluginDelayServer, {});
+      server.pluginManager.register('delay-1', ServerPluginDelay, {});
+      server.pluginManager.register('delay-2', ServerPluginDelay, {});
 
       assert.ok('should not throw');
     });
@@ -127,7 +126,7 @@ describe(`# ServerPluginManager`, () => {
       let errored = false;
 
       try {
-        server.pluginManager.register('delay-1', pluginDelayClient, {});
+        server.pluginManager.register('delay-1', ClientPluginDelay, {});
       } catch (err) {
         console.log(err.message);
         errored = true;
@@ -142,7 +141,7 @@ describe(`# ServerPluginManager`, () => {
   describe(`## async get(id)`, () => {
     it(`should throw if called before server.init()`, async () => {
       const server = new Server(config);
-      server.pluginManager.register('delay', pluginDelayServer, { delayTime: 100 });
+      server.pluginManager.register('delay', ServerPluginDelay, { delayTime: 100 });
 
       let errored = false;
       try {
@@ -184,7 +183,7 @@ describe(`# ServerPluginManager`, () => {
 
     it(`plugin should be started and immediately available after server.init()`, async function() {
       const server = new Server(config);
-      server.pluginManager.register('delay', pluginDelayServer, { delayTime: 100 });
+      server.pluginManager.register('delay', ServerPluginDelay, { delayTime: 100 });
 
       const TIMEOUT_ERROR = 15;
       await server.init();
@@ -204,7 +203,7 @@ describe(`# ServerPluginManager`, () => {
     //   const server = new Server(config);
     //   await server.init();
 
-    //   server.pluginManager.register('delay', pluginDelayServer, {
+    //   server.pluginManager.register('delay', ServerPluginDelay, {
     //     delayTime: 100,
     //   });
 
@@ -236,7 +235,7 @@ describe(`# ServerPluginManager`, () => {
       this.timeout(3 * 1000);
 
       const server = new Server(config);
-      server.pluginManager.register('delay', pluginDelayServer, {
+      server.pluginManager.register('delay', ServerPluginDelay, {
         delayTime: 100,
       });
 
@@ -261,7 +260,7 @@ describe(`# ServerPluginManager`, () => {
       const TIMEOUT_ERROR = 15
 
       const server = new Server(config);
-      server.pluginManager.register('delay', pluginDelayServer, {
+      server.pluginManager.register('delay', ServerPluginDelay, {
         delayTime: 100,
       });
 
@@ -295,25 +294,21 @@ describe(`# ServerPluginManager`, () => {
 
       const server = new Server(config);
 
-      function testPluginFactory(Plugin) {
-        return class TestPlugin extends Plugin {
-          static target = 'server';
-
-          async addClient(client) {
-            await super.addClient(client);
-            addClientCalled = true;
-          }
+      class TestPlugin extends ServerPlugin {
+        async addClient(client) {
+          await super.addClient(client);
+          addClientCalled = true;
         }
       }
 
-      server.pluginManager.register('test-plugin', testPluginFactory);
+      server.pluginManager.register('test-plugin', TestPlugin);
       await server.init();
       await server.start();
 
       const plugin = await server.pluginManager.get('test-plugin');
 
       const client = new Client({ role: 'test', ...config });
-      client.pluginManager.register('test-plugin', (Plugin) => class TestPlugin extends Plugin { static target = 'client' });
+      client.pluginManager.register('test-plugin', class TestPlugin extends ClientPlugin {});
       await client.init();
 
       assert.equal(plugin.clients.size, 1);
@@ -325,39 +320,31 @@ describe(`# ServerPluginManager`, () => {
     it(`should add clients only into registered plugins`, async () => {
       let addClientCalled = false;
 
-      function testPluginFactory(Plugin) {
-        return class TestPlugin extends Plugin {
-          static target = 'server';
-
-          async addClient(client) {
-            await super.addClient(client);
-            assert.equal(this.clients.has(client), true);
-            addClientCalled = true;
-          }
+      class TestPlugin extends ServerPlugin {
+        async addClient(client) {
+          await super.addClient(client);
+          assert.equal(this.clients.has(client), true);
+          addClientCalled = true;
         }
       }
 
       let addClientCalled2 = false;
 
-      function testPluginFactory2(Plugin) {
-        return class TestPlugin extends Plugin {
-          static target = 'server';
-
-          async addClient(client) {
-            await super.addClient(client);
-            addClientCalled2 = true;
-          }
+      class TestPlugin2 extends ServerPlugin {
+        async addClient(client) {
+          await super.addClient(client);
+          addClientCalled2 = true;
         }
       }
 
       const server = new Server(config);
-      server.pluginManager.register('test-plugin', testPluginFactory);
-      server.pluginManager.register('test-plugin-2', testPluginFactory2);
+      server.pluginManager.register('test-plugin', TestPlugin);
+      server.pluginManager.register('test-plugin-2', TestPlugin2);
       await server.init();
       await server.start();
 
       const client = new Client({ role: 'test', ...config });
-      client.pluginManager.register('test-plugin', (Plugin) => class TestPlugin extends Plugin { static target = 'client' });
+      client.pluginManager.register('test-plugin', class TestPlugin extends ClientPlugin {});
       await client.init();
       await client.start();
 
@@ -372,24 +359,20 @@ describe(`# ServerPluginManager`, () => {
     it(`should be called on client.stop()`, async () => {
       let removeClientCalled = false;
 
-      function testPluginFactory(Plugin) {
-        return class TestPlugin extends Plugin {
-          static target = 'server';
-
-          async removeClient(client) {
-            await super.removeClient(client);
-            removeClientCalled = true;
-          }
+      class TestPlugin extends ServerPlugin {
+        async removeClient(client) {
+          await super.removeClient(client);
+          removeClientCalled = true;
         }
       }
 
       const server = new Server(config);
-      server.pluginManager.register('test-plugin', testPluginFactory);
+      server.pluginManager.register('test-plugin', TestPlugin);
       await server.init();
       await server.start();
 
       const client = new Client({ role: 'test', ...config });
-      client.pluginManager.register('test-plugin', (Plugin) => class TestPlugin extends Plugin { static target = 'client' });
+      client.pluginManager.register('test-plugin', class TestPlugin extends ClientPlugin {});
       await client.init();
       await client.start();
 
@@ -403,29 +386,24 @@ describe(`# ServerPluginManager`, () => {
 
     it(`stateManager should still be usable`, async () => {
       let removeClientCalled = false;
-      let errored = false;
 
-      function testPluginFactory(Plugin) {
-        return class TestPlugin extends Plugin {
-          static target = 'server';
+      class TestPlugin extends ServerPlugin {
+        async removeClient(client) {
+          await super.removeClient(client);
 
-          async removeClient(client) {
-            await super.removeClient(client);
-
-            assert.equal(this.server.stateManager[kStateManagerClientsByNodeId].has(client.id), true);
-            assert.equal(this.clients.has(client), false);
-            removeClientCalled = true;
-          }
+          assert.equal(this.server.stateManager[kStateManagerClientsByNodeId].has(client.id), true);
+          assert.equal(this.clients.has(client), false);
+          removeClientCalled = true;
         }
       }
 
       const server = new Server(config);
-      server.pluginManager.register('test-plugin', testPluginFactory);
+      server.pluginManager.register('test-plugin', TestPlugin);
       await server.init();
       await server.start();
 
       const client = new Client({ role: 'test', ...config });
-      client.pluginManager.register('test-plugin', (Plugin) => class TestPlugin extends Plugin { static target = 'client' });
+      client.pluginManager.register('test-plugin', class TestPlugin extends ClientPlugin {});
       await client.init();
       await client.start();
 
@@ -440,38 +418,30 @@ describe(`# ServerPluginManager`, () => {
     it(`should add clients only into registered plugins`, async () => {
       let removeClientCalled = false;
 
-      function testPluginFactory(Plugin) {
-        return class TestPlugin extends Plugin {
-          static target = 'server';
-
-          async removeClient(client) {
-            await super.removeClient(client);
-            removeClientCalled = true;
-          }
+      class TestPlugin extends ServerPlugin {
+        async removeClient(client) {
+          await super.removeClient(client);
+          removeClientCalled = true;
         }
       }
 
       let removeClientCalled2 = false;
 
-      function testPluginFactory2(Plugin) {
-        return class TestPlugin extends Plugin {
-          static target = 'server';
-
-          async removeClient(client) {
-            await super.removeClient(client);
-            removeClientCalled2 = true;
-          }
+      class TestPlugin2 extends ServerPlugin {
+        async removeClient(client) {
+          await super.removeClient(client);
+          removeClientCalled2 = true;
         }
       }
 
       const server = new Server(config);
-      server.pluginManager.register('test-plugin', testPluginFactory);
-      server.pluginManager.register('test-plugin-2', testPluginFactory2);
+      server.pluginManager.register('test-plugin', TestPlugin);
+      server.pluginManager.register('test-plugin-2', TestPlugin2);
       await server.init();
       await server.start();
 
       const client = new Client({ role: 'test', ...config });
-      client.pluginManager.register('test-plugin', (Plugin) => class TestPlugin extends Plugin { static target = 'client' });
+      client.pluginManager.register('test-plugin', class TestPlugin extends ClientPlugin {});
       await client.init();
       await client.start();
       await client.stop();
@@ -496,7 +466,7 @@ describe(`# ServerPluginManager`, () => {
 
     it(`server should start if plugin registered`, async function() {
       const server = new Server(config);
-      server.pluginManager.register('delay', pluginDelayServer, { delayTime: 0.1 });
+      server.pluginManager.register('delay', ServerPluginDelay, { delayTime: 0.1 });
       await server.init();
       await server.start();
 
@@ -506,7 +476,7 @@ describe(`# ServerPluginManager`, () => {
 
     it(`should propagate plugin start() errors`, async () => {
       const server = new Server(config);
-      server.pluginManager.register('delay', pluginDelayServer, {
+      server.pluginManager.register('delay', ServerPluginDelay, {
         delayTime: 0.1,
         throwError: true,
       });
@@ -531,10 +501,10 @@ describe(`# ServerPluginManager`, () => {
       const TIMEOUT_ERROR = 15.;
       const server = new Server(config);
 
-      server.pluginManager.register('delay-1', pluginDelayServer, {
+      server.pluginManager.register('delay-1', ServerPluginDelay, {
         delayTime: 100,
       });
-      server.pluginManager.register('delay-2', pluginDelayServer, {
+      server.pluginManager.register('delay-2', ServerPluginDelay, {
         delayTime: 100,
       });
 
@@ -580,11 +550,11 @@ describe(`# ServerPluginManager`, () => {
       const TIMEOUT_ERROR = 15.;
       const server = new Server(config);
 
-      server.pluginManager.register('delay-1', pluginDelayServer, {
+      server.pluginManager.register('delay-1', ServerPluginDelay, {
         delayTime: 100,
       });
       // delay-2 depends on delay-1
-      server.pluginManager.register('delay-2', pluginDelayServer, {
+      server.pluginManager.register('delay-2', ServerPluginDelay, {
         delayTime: 100,
       }, ['delay-1']);
 
@@ -631,20 +601,20 @@ describe(`# ServerPluginManager`, () => {
       const TIMEOUT_ERROR = 15.;
       const server = new Server(config);
 
-      server.pluginManager.register('delay-1', pluginDelayServer, {
+      server.pluginManager.register('delay-1', ServerPluginDelay, {
         delayTime: 200,
       });
       // delay-2 depends on delay-1
-      server.pluginManager.register('delay-2', pluginDelayServer, {
+      server.pluginManager.register('delay-2', ServerPluginDelay, {
         delayTime: 200,
       }, ['delay-1']);
 
       // delay 3 ready (at 0.6) after delay delay-2 (at 0.4)
-      server.pluginManager.register('delay-3', pluginDelayServer, {
+      server.pluginManager.register('delay-3', ServerPluginDelay, {
         delayTime: 600,
       });
 
-      server.pluginManager.register('delay-4', pluginDelayServer, {
+      server.pluginManager.register('delay-4', ServerPluginDelay, {
         delayTime: 200,
       }, ['delay-2', 'delay-3']);
 

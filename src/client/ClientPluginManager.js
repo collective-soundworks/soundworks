@@ -82,7 +82,7 @@ class ClientPluginManager extends BasePluginManager {
    *
    * @param {string} id - Unique id of the plugin. Enables the registration of the
    *  same plugin factory under different ids.
-   * @param {Function} factory - Factory function that returns the Plugin class.
+   * @param {ClientPlugin} ctor - The client-side Class of the plugin.
    * @param {object} [options={}] - Options to configure the plugin.
    * @param {array} [deps=[]] - List of plugins' names the plugin depends on, i.e.
    *  the plugin initialization will start only after the plugins it depends on are
@@ -95,21 +95,11 @@ class ClientPluginManager extends BasePluginManager {
    * // server-side
    * server.pluginManager.register('user-defined-id', pluginFactory);
    */
-  register(id, factory, options = {}, deps = []) {
-    // Note that additional argument checks are done on the BasePluginManager
-
-    // @todo - review all this
-    const ctor = factory(ClientPlugin);
-
-    if (!(ctor.prototype instanceof ClientPlugin)) {
-      throw new TypeError(`Cannot execute 'register' on ClientPluginManager: argument 2 must be a factory function returning a class extending the "ClientPlugin" base class`);
+  register(id, ctor, options = {}, deps = []) {
+    // Note that other arguments are checked on the BasePluginManager
+    if (!ctor || !(ctor.prototype instanceof ClientPlugin)) {
+      throw new TypeError(`Cannot execute 'register' on ClientPluginManager: argument 2 must be a class that extends 'ClientPlugin'`);
     }
-
-    if (ctor.target === undefined || ctor.target !== 'client') {
-      throw new TypeError(`Cannot execute 'register' on ClientPluginManager: The plugin class must implement a 'target' static field with value 'client'`);
-    }
-
-    // @todo - check deps
 
     super.register(id, ctor, options, deps);
   }

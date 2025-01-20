@@ -11,8 +11,8 @@ import dotenv from 'dotenv';
 import merge from 'lodash.merge';
 import tcpp from 'tcp-ping';
 
-import { Server, ServerContext } from '../../src/server/index.js';
-import { Client } from '../../src/client/index.js';
+import { Server, ServerContext, ServerPlugin } from '../../src/server/index.js';
+import { Client, ClientPlugin } from '../../src/client/index.js';
 
 import {
   kServerOnStatusChangeCallbacks,
@@ -439,26 +439,22 @@ describe('# Server', () => {
       let contextStop = false;
 
       const server = new Server(config);
-      server.pluginManager.register('test-plugin', Plugin => {
-        return class TestPlugin extends Plugin {
-          static target = 'server';
+      server.pluginManager.register('test-plugin', class TestPlugin extends ServerPlugin {
+        async start() {
+          await super.start();
+          // just check that we are ok with that, and that we are not stuck
+          // with some on-going process, cf. sync
+          this._intervalId = setInterval(() => {}, 500);
+        }
+        // should be called after context.stop()
+        async stop() {
+          await super.stop();
 
-          async start() {
-            await super.start();
-            // just check that we are ok with that, and that we are not stuck
-            // with some on-going processcf. sync
-            this._intervalId = setInterval(() => {}, 500);
-          }
-          // should be called after context.stop()
-          async stop() {
-            await super.stop();
+          clearInterval(this._intervalId);
 
-            clearInterval(this._intervalId);
-
-            counter += 1;
-            pluginStop = true;
-            assert.equal(counter, 2);
-          }
+          counter += 1;
+          pluginStop = true;
+          assert.equal(counter, 2);
         }
       });
       await server.init();
@@ -474,6 +470,7 @@ describe('# Server', () => {
           assert.equal(counter, 1);
         }
       }
+
       const serverTestContext = new ServerTestContext(server, 'test');
 
       // we call start after creating the context, so it is started
