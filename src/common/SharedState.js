@@ -44,7 +44,7 @@ export const kSharedStatePromiseStore = Symbol('soundworks:shared-state-promise-
 
 /**
  * The `SharedState` is one of the most important and versatile abstraction provided
- * by `soundworks`. It represents a set of parameters that are synchronized accross
+ * by `soundworks`. It represents a set of parameters that are synchronized across
  * every nodes of the application (clients and server) that declared some interest
  * to the shared state.
  *
@@ -134,10 +134,7 @@ class SharedState {
     try {
       this.#parameters = new ParameterBag(classDescription, initValues);
     } catch (err) {
-      console.error(err.stack);
-
-      throw new Error(`Error creating or attaching state "${className}" w/ values:\n
-${JSON.stringify(initValues, null, 2)}`);
+      throw new Error(`Cannot construct 'SharedState': ${err.message}`);
     }
 
     /** @private */
@@ -328,7 +325,7 @@ ${JSON.stringify(initValues, null, 2)}`);
         // @note - we don't need to check filterChange here because the value
         // has been updated in parameters on the `set` side so can rely on `changed`
         // to avoid retrigger listeners.
-        // If the value has been overriden by the server, `changed` will true
+        // If the value has been overridden by the server, `changed` will true
         // anyway so it should behave correctly.
         if (!changed || event) {
           continue;
@@ -377,7 +374,11 @@ ${JSON.stringify(initValues, null, 2)}`);
    * const paramDescription = state.getDescription('my-param');
    */
   getDescription(paramName = null) {
-    return this.#parameters.getDescription(paramName);
+    try {
+      return this.#parameters.getDescription(paramName);
+    } catch (err) {
+      throw new ReferenceError(`Cannot execute 'getDescription' on SharedState: ${err.message}`);
+    }
   }
 
   /**
@@ -459,7 +460,7 @@ ${JSON.stringify(initValues, null, 2)}`);
     if (arguments.length === 2 && isString(updates)) {
       updates = { [updates]: arguments[1] };
     } else if (!isPlainObject(updates)) {
-      throw new TypeError(`Cannot execute 'set' on SharedState: 'updates' argument should be an object`);
+      throw new TypeError(`Cannot execute 'set' on SharedState (${this.#className}): 'updates' argument should be an object`);
     }
 
     const newValues = {};
@@ -475,12 +476,16 @@ ${JSON.stringify(initValues, null, 2)}`);
       // Try to coerce value early, so that eventual errors are triggered early
       // on the node requesting the update, and not only on the server side
       // This throws if name does not exists
-      this.#parameters.coerceValue(name, updates[name]);
+      try {
+        this.#parameters.coerceValue(name, updates[name]);
+      } catch (err) {
+        throw new TypeError(`Cannot execute 'set' on SharedState (${this.#className}): ${err.message}`);
+      }
 
       // Check that name is in filter list, if any
       if (this.#filter !== null) {
         if (!this.#filter.includes(name)) {
-          throw new DOMException(`[SharedState] State "${this.#className}": cannot set parameter '${name}', parameter is not in filter list`, 'NotSupportedError');
+          throw new DOMException(`Cannot execute 'set' on SharedState (${this.#className}): Parameter '${name}' is not in white list`, 'NotSupportedError');
         }
       }
 
@@ -491,7 +496,7 @@ ${JSON.stringify(initValues, null, 2)}`);
       //  - go through normal server path
       //  - retrigger only if response from server is different from current value
       // If immediate=true && (filterChange=false || event=true)
-      //  - call listeners with value regarless it changed
+      //  - call listeners with value regardless it changed
       //  - go through normal server path
       //  - if the node is initiator of the update (UPDATE_RESPONSE), (re-)check
       //    to prevent execute the listeners twice
@@ -559,7 +564,7 @@ ${JSON.stringify(initValues, null, 2)}`);
   /**
    * Get the value of a parameter of the state.
    *
-   * Be aware that in case of 'any' typethe returned value is deeply copied.
+   * Be aware that in case of 'any' type, the returned value is deeply copied.
    * While this prevents from pollution of the state by mutating the reference,
    * this can also lead to performance issues when the parameter contains large
    * data. In such cases you should use the {@link SharedState#getUnsafe} method
@@ -573,12 +578,12 @@ ${JSON.stringify(initValues, null, 2)}`);
    */
   get(name) {
     if (!this.#parameters.has(name)) {
-      throw new ReferenceError(`[SharedState] State "${this.#className}": Cannot get value of undefined parameter "${name}"`);
+      throw new ReferenceError(`Cannot execute 'get' on SharedState (${this.#className}): Parameter '${name}' is not defined`);
     }
 
     if (this.#filter !== null) {
       if (!this.#filter.includes(name)) {
-        throw new DOMException(`[SharedState] State "${this.#className}": cannot get parameter '${name}', parameter is not in filter list`, 'NotSupportedError');
+        throw new DOMException(`Cannot execute 'get' on SharedState (${this.#className}): Parameter '${name}' is not in white list`, 'NotSupportedError');
       }
     }
 
@@ -589,7 +594,7 @@ ${JSON.stringify(initValues, null, 2)}`);
    * Get an unsafe reference to the value of a parameter of the state.
    *
    * Similar to `get` but returns a reference to the underlying value in case of
-   * `any` type. Can be usefull if the underlying value is large (e.g. sensors
+   * `any` type. Can be useful if the underlying value is large (e.g. sensors
    * recordings, etc.) and deep cloning expensive. Be aware that if changes are
    * made on the returned object, the state of your application will become
    * inconsistent.
@@ -602,12 +607,12 @@ ${JSON.stringify(initValues, null, 2)}`);
    */
   getUnsafe(name) {
     if (!this.#parameters.has(name)) {
-      throw new ReferenceError(`[SharedState] State "${this.#className}": Cannot get value of undefined parameter "${name}"`);
+      throw new ReferenceError(`Cannot execute 'getUnsafe' on SharedState (${this.#className}): Parameter '${name}' is not defined`);
     }
 
     if (this.#filter !== null) {
       if (!this.#filter.includes(name)) {
-        throw new DOMException(`[SharedState] State "${this.#className}": cannot get parameter '${name}', parameter is not in filter list`, 'NotSupportedError');
+        throw new DOMException(`Cannot execute 'getUnsafe' on SharedState (${this.#className}): Parameter '${name}' is not in white list`, 'NotSupportedError');
       }
     }
 
@@ -641,7 +646,7 @@ ${JSON.stringify(initValues, null, 2)}`);
    * Get all the key / value pairs of the state.
    *
    * Similar to `getValues` but returns a reference to the underlying value in
-   * case of `any` type. Can be usefull if the underlying value is big (e.g.
+   * case of `any` type. Can be useful if the underlying value is big (e.g.
    * sensors recordings, etc.) and deep cloning expensive. Be aware that if
    * changes are made on the returned object, the state of your application will
    * become inconsistent.
@@ -698,7 +703,7 @@ ${JSON.stringify(initValues, null, 2)}`);
    */
   async detach() {
     if (this.#detached) {
-      throw new Error(`[SharedState] State "${this.#className} (${this.#id})" already detached, cannot detach twice`);
+      throw new DOMException(`Cannot execute 'detach' on SharedState (${this.#className}): SharedState (${this.#id}) already detached`, 'NotSupportedError');
     }
 
     this.#detached = true; // mark detached early
@@ -722,25 +727,25 @@ ${JSON.stringify(initValues, null, 2)}`);
    *
    * All nodes attached to the state will be detached, triggering any registered
    * `onDetach` callbacks. The creator of the state will also have its own `onDelete`
-   * callback triggered. The local `onDeatch` and `onDelete` callbacks will be
+   * callback triggered. The local `onDetach` and `onDelete` callbacks will be
    * executed *before* the returned Promise resolves
    *
    * @throws Throws if the method is called by a node which is not the owner of
    * the state.
    * @example
-   * const state = await client.stateManaager.create('my-class-name');
+   * const state = await client.stateManager.create('my-class-name');
    * // later
    * await state.delete();
    */
   async delete() {
     if (this.#isOwner) {
       if (this.#detached) {
-        throw new Error(`[SharedState] State "${this.#className} (${this.#id})" already deleted, cannot delete twice`);
+        throw new DOMException(`Cannot execute 'delete' on SharedState (${this.#className}): SharedState (${this.#id}) already deleted`, 'NotSupportedError');
       }
 
       return this.detach();
     } else {
-      throw new Error(`[SharedState] Cannot delete state "${this.#className}", only the owner of the state (i.e. the node that created it) can delete the state. Use "detach" instead.`);
+      throw new DOMException(`Cannot execute 'delete' on SharedState (${this.#className}): SharedState (${this.#id}) is not owned by this node. Use 'SharedState#detach' instead`, 'NotSupportedError');
     }
   }
 

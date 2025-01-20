@@ -1,3 +1,4 @@
+import Server from './Server.js';
 import ServerContext, {
   kServerContextStatus,
 } from './ServerContext.js';
@@ -80,6 +81,10 @@ class ServerContextManager {
    * @param {Server} server - Instance of the soundworks server.
    */
   constructor(server) {
+    if (!(server instanceof Server)) {
+      throw new TypeError(`Cannot construct 'ServerContextManager': argument 1 must be an instance of Server`);
+    }
+
     this.#server = server;
 
     this[kServerContextManagerContexts] = new ContextCollection();
@@ -94,9 +99,9 @@ class ServerContextManager {
    * @private
    */
   [kServerContextManagerRegister](context) {
-    // we must await the contructor initialization end to check the name and throw
+    // we must await the constructor initialization end to check the name and throw
     if (this[kServerContextManagerContexts].has(context.name)) {
-      throw new Error(`[soundworks:ServerContextManager] Context "${context.name}" already registered`);
+      throw new DOMException(`Cannot register '${context.name}': a Context with same name has already been registered`, 'NotSupportedError');
     }
 
     this[kServerContextManagerContexts].add(context);
@@ -140,7 +145,7 @@ class ServerContextManager {
         new ctor(this.#server);
       }
 
-      // we ensure context is started, even lazilly after server.start()
+      // we ensure context is started, even lazily after server.start()
       let context;
       try {
         context = await this.get(contextName);
@@ -161,7 +166,7 @@ class ServerContextManager {
           CONTEXT_ENTER_ERROR,
           reqId,
           contextName,
-          `[soundworks:ServerContextManager] Client already in context (if only one context is created .enter() has been called automatically)`,
+          `Client already in context: if only one context is created 'enter' is called automatically)`,
         );
         return;
       }
@@ -176,7 +181,7 @@ class ServerContextManager {
           CONTEXT_ENTER_ERROR,
           reqId,
           contextName,
-          `[soundworks:ServerContextManager] Clients with role "${client.role}" are not declared as possible consumers of context "${contextName}"`,
+          `Clients with role "${client.role}" are not declared as possible consumers of "${contextName}"`,
         );
         return;
       }
@@ -196,7 +201,7 @@ class ServerContextManager {
           CONTEXT_EXIT_ERROR,
           reqId,
           contextName,
-          `[soundworks:ServerContextManager] Cannot exit(), context ${contextName} does not exists`,
+          `Context ${contextName} does not exists`,
         );
         return;
       }
@@ -215,7 +220,7 @@ class ServerContextManager {
           CONTEXT_EXIT_ERROR,
           reqId,
           contextName,
-          `[soundworks:ServerContextManager] Client with role "${client.role}" is not in context "${contextName}"`,
+          `Client with role "${client.role}" is not entered in context "${contextName}"`,
         );
       }
     });
@@ -249,7 +254,7 @@ class ServerContextManager {
    */
   async get(contextName) {
     if (!this[kServerContextManagerContexts].has(contextName)) {
-      throw new Error(`[soundworks:ServerContextManager] Can't get context "${contextName}", not registered`);
+      throw new ReferenceError(`Cannot execute 'get' on ServerContextManager: Context '${contextName}' is not defined`);
     }
 
     const context = this[kServerContextManagerContexts].get(contextName);

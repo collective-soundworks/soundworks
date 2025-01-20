@@ -85,7 +85,7 @@ class ClientSocket {
       }
 
       if (this.#config.env.useHttps && window.location.hostname !== serverAddress) {
-        console.warn(`The WebSocket will try to connect at ${serverAddress} while the page is accessed from ${hostname}. This can lead to socket errors, e.g. If you run the application with self-signed certificates as the certificate may not have been accepted for ${serverAddress}. In such case you should rather access the page from ${serverAddress}.`);
+        console.warn(`ClientSocket will try to connect at ${serverAddress} while the page is accessed from ${hostname}. This can lead to socket errors, e.g. If you run the application with self-signed certificates as the certificate may not have been accepted for ${serverAddress}. In such case you should rather access the page from ${serverAddress}.`);
       }
 
       webSocketOptions = [];
@@ -121,7 +121,7 @@ class ClientSocket {
         // WebSocket "native" events:
         // - `close`: Fired when a connection with a websocket is closed.
         // - `error`: Fired when a connection with a websocket has been closed
-        //   because of an error, such as whensome data couldn't be sent.
+        //   because of an error, such as when some data couldn't be sent.
         // - `message`: Fired when data is received through a websocket.
         // - `open`: Fired when a connection with a websocket is opened.
 
@@ -157,7 +157,7 @@ class ClientSocket {
           ws.terminate ? ws.terminate() : ws.close();
 
           if (e.error) {
-            const msg = `[Socket Error] code: ${e.error.code}, message: ${e.error.message}`;
+            const msg = `ClientSocket error - code: ${e.error.code}, message: ${e.error.message}`;
             logger.log(msg);
           }
 
@@ -177,7 +177,7 @@ class ClientSocket {
    *
    * Is also called when a disconnection is detected by the heartbeat (note that
    * in this case, the launcher will call `client.stop()` but the listeners are
-   * already cleared so the event will be trigerred only once.
+   * already cleared so the event will be triggered only once.
    *
    * @private
    */

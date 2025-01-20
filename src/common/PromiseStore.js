@@ -27,7 +27,7 @@ export default class PromiseStore {
 
       resolve(data);
     } else {
-      throw new Error(`[${this.name}] cannot resolve request id (${reqId}), id does not exist`);
+      throw new ReferenceError(`Cannot resolve request id (${reqId}): id does not exist`);
     }
   }
 
@@ -38,7 +38,7 @@ export default class PromiseStore {
 
       reject(new Error(msg));
     } else {
-      throw new Error(`[${this.name}] cannot reject request id (${reqId}), id does not exist`);
+      throw new ReferenceError(`Cannot resolve request id (${reqId}): id does not exist`);
     }
   }
 
@@ -46,7 +46,7 @@ export default class PromiseStore {
   flush() {
     for (let [_reqId, entry] of this.store) {
       const { reject, type } = entry;
-      reject(new Error(`[${this.name}] Discard promise "${type}", cannot resolve`));
+      reject(new Error(`Discard promise '${type}'`));
     }
 
     this.store.clear();

@@ -58,6 +58,7 @@ class SharedStatePrivate {
     this.#manager = manager;
     this.#className = className;
     this.#id = id;
+    // This can throw but will be catch in ServerStateManager CREATE_REQUEST handler
     this.#parameters = new ParameterBag(classDefinition, initValues);
   }
 
@@ -148,15 +149,15 @@ class SharedStatePrivate {
           // - server attached state (client.id: -1) spot a problem and overrides the value
           // We want the remote client (id: 2) to receive in the right order:
           // * 1. the value it requested,
-          // * 2. the value overriden by the server-side attached state (id: -1)
+          // * 2. the value overridden by the server-side attached state (id: -1)
           //
-          // such problem is now better solved with the the upateHook system, none
-          // nonetheway we don't want to introduce inconsistencies here
+          // This problem is now better solved with the the updateHook system,
+          // nevertheless we don't want to introduce inconsistencies here
           //
           // Then we propagate server-side last, because as the server transport
           // is synchronous it can break ordering if a subscription function makes
           // itself an update in reaction to an update. Propagating to server last
-          // alllows to maintain network messages order consistent.
+          // allows to maintain network messages order consistent.
           //
           // @note - instanceId correspond to unique remote state id
 
@@ -220,13 +221,13 @@ class SharedStatePrivate {
           client.transport.emit(`${UPDATE_ABORT}-${this.id}-${instanceId}`, reqId, updates);
         }
       } else {
-        // retrieve values from inner state (also handle immediate approriately)
+        // retrieve values from inner state (also handle immediate appropriately)
         const oldValues = {};
 
         for (let name in updates) {
           oldValues[name] = this.#parameters.get(name);
         }
-        // aborted by hook (updates have been overriden to {})
+        // aborted by hook (updates have been overridden to {})
         client.transport.emit(`${UPDATE_ABORT}-${this.id}-${instanceId}`, reqId, oldValues);
       }
     });

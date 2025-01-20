@@ -1,6 +1,8 @@
 import { isString, isFunction, isPlainObject } from '@ircam/sc-utils';
 import SharedState from './SharedState.js';
-import SharedStateCollection from './SharedStateCollection.js';
+import SharedStateCollection, {
+  kSharedStateCollectionInit,
+} from './SharedStateCollection.js';
 import BatchedTransport from './BatchedTransport.js';
 import ParameterBag from './ParameterBag.js';
 import PromiseStore from './PromiseStore.js';
@@ -47,7 +49,7 @@ export const kStateManagerClient = Symbol('soundworks:state-manager-client');
 /** @private */
 class BaseStateManager {
   #statesById = new Map();
-  #cachedClasses = new Map(); // <shemaName, definition>
+  #cachedClasses = new Map(); // <className, definition>
   #observeListeners = new Set(); // Set <[observedClassName, callback, options]>
   #observeRequestCallbacks = new Map(); // Map <reqId, [observedClassName, callback, options]>
   #promiseStore = null;
@@ -99,7 +101,7 @@ class BaseStateManager {
       CREATE_RESPONSE,
       (reqId, stateId, instanceId, className, classDescription, initValues) => {
         // cache class description to save some bandwidth
-        // @note: when we make the class dynamic, we will need some mecanism to
+        // @note: when we make the class dynamic, we will need some mechanism to
         // invalidate the cached description
         if (!this.#cachedClasses.has(className)) {
           this.#cachedClasses.set(className, classDescription);
@@ -115,7 +117,7 @@ class BaseStateManager {
           instanceId,
           isOwner: true,
           initValues,
-          filter: null, // owner cannot filter paramters
+          filter: null, // owner cannot filter parameters
         });
 
         this.#statesById.set(state.id, state);
@@ -124,6 +126,7 @@ class BaseStateManager {
     );
 
     this[kStateManagerClient].transport.addListener(CREATE_ERROR, (reqId, msg) => {
+      msg = `Cannot execute 'create' on BaseStateManager: ${msg}`;
       this.#promiseStore.reject(reqId, msg);
     });
 
@@ -134,7 +137,7 @@ class BaseStateManager {
       ATTACH_RESPONSE,
       (reqId, stateId, instanceId, className, classDescription, currentValues, filter) => {
         // cache class description to save some bandwidth
-        // @note: when we make the class dynamic, we will need some mecanism to
+        // @note: when we make the class dynamic, we will need some mechanism to
         // invalidate the cached description
         if (!this.#cachedClasses.has(className)) {
           this.#cachedClasses.set(className, classDescription);
@@ -159,6 +162,7 @@ class BaseStateManager {
     );
 
     this[kStateManagerClient].transport.addListener(ATTACH_ERROR, (reqId, msg) => {
+      msg = `Cannot execute 'attach' on BaseStateManager: ${msg}`;
       this.#promiseStore.reject(reqId, msg);
     });
 
@@ -200,6 +204,7 @@ class BaseStateManager {
 
     // Observe error occur if observed class name does not exists
     this[kStateManagerClient].transport.addListener(OBSERVE_ERROR, (reqId, msg) => {
+      msg = `Cannot execute 'observe' on BaseStateManager: ${msg}`;
       this.#observeRequestCallbacks.delete(reqId);
       this.#promiseStore.reject(reqId, msg);
     });
@@ -234,13 +239,14 @@ class BaseStateManager {
         if (!this.#cachedClasses.has(className)) {
           this.#cachedClasses.set(className, classDescription);
         }
-        // return a full class description
+        // This cannot throw as the SharedState class has already been registered
         const parameterBag = new ParameterBag(classDescription);
         this.#promiseStore.resolve(reqId, parameterBag.getDescription());
       },
     );
 
     this[kStateManagerClient].transport.addListener(GET_CLASS_DESCRIPTION_ERROR, (reqId, msg) => {
+      msg = `Cannot execute 'getClassDescription' on BaseStateManager: ${msg}`;
       this.#promiseStore.reject(reqId, msg);
     });
 
@@ -258,12 +264,12 @@ class BaseStateManager {
    */
   async getClassDescription(className) {
     if (this.#status !== 'inited') {
-      throw new DOMException(`Cannot execute 'getClassDescription' on 'StateManager': state manager is not inited. This method can be safely called only once 'client' or 'server' is inited itself`, 'InvalidStateError');
+      throw new DOMException(`Cannot execute 'getClassDescription' on BaseStateManager: BaseStateManager is not inited`, 'InvalidStateError');
     }
 
     if (this.#cachedClasses.has(className)) {
       const classDescription = this.#cachedClasses.get(className);
-      // return a full class description
+      // This cannot throw as the SharedState class has already been registered
       const parameterBag = new ParameterBag(classDescription);
       return parameterBag.getDescription();
     }
@@ -293,7 +299,7 @@ class BaseStateManager {
    */
   async create(className, initValues = {}) {
     if (this.#status !== 'inited') {
-      throw new DOMException(`Cannot execute 'create' on 'StateManager': state manager is not inited. This method can be safely called only once 'client' or 'server' is inited itself`, 'InvalidStateError');
+      throw new DOMException(`Cannot execute 'create' on BaseStateManager: BaseStateManager is not inited`, 'InvalidStateError');
     }
 
     return new Promise((resolve, reject) => {
@@ -358,7 +364,7 @@ class BaseStateManager {
    *
    * @param {SharedStateClassName} className - Name of the class.
    * @param {number|string[]} [stateIdOrFilter] - Id of the state to attach to. If `null`,
-   *  attach to the first state found with the given class name (usefull for
+   *  attach to the first state found with the given class name (useful for
    *  globally shared states owned by the server).
    * @param {string[]} [filter] - List of parameters of interest in the
    *  returned state. If set to `null`, no filter is applied.
@@ -369,13 +375,13 @@ class BaseStateManager {
    */
   async attach(className, stateIdOrFilter = null, filter = null) {
     if (this.#status !== 'inited') {
-      throw new DOMException(`Cannot execute 'attach' on 'StateManager': state manager is not inited. This method can be safely called only once 'client' or 'server' is inited itself`, 'InvalidStateError');
+      throw new DOMException(`Cannot execute 'attach' on BaseStateManager: BaseStateManager is not inited`, 'InvalidStateError');
     }
 
     let stateId = null;
 
     if (!isString(className)) {
-      throw new TypeError(`Cannot execute 'attach' on 'StateManager': argument 1 should be either a number or an array`);
+      throw new TypeError(`Cannot execute 'attach' on BaseStateManager: argument 1 must be a string`);
     }
 
     if (arguments.length === 2) {
@@ -389,7 +395,7 @@ class BaseStateManager {
         stateId = null;
         filter = stateIdOrFilter;
       } else {
-        throw new TypeError(`Cannot execute 'attach' on 'StateManager': argument 2 should be either null, a number or an array`);
+        throw new TypeError(`Cannot execute 'attach' on BaseStateManager: argument 2 must be either null, a number or an array`);
       }
     }
 
@@ -397,11 +403,11 @@ class BaseStateManager {
       stateId = stateIdOrFilter;
 
       if (stateId !== null && !Number.isFinite(stateId)) {
-        throw new TypeError(`Cannot execute 'attach' on 'StateManager': argument 2 should be either null or a number`);
+        throw new TypeError(`Cannot execute 'attach' on BaseStateManager: argument 2 must be either null or a number`);
       }
 
       if (filter !== null && !Array.isArray(filter)) {
-        throw new TypeError(`Cannot execute 'attach' on 'StateManager': argument 3 should be either null or an array`);
+        throw new TypeError(`Cannot execute 'attach' on BaseStateManager: argument 3 must be either null or an array`);
       }
     }
 
@@ -477,7 +483,7 @@ class BaseStateManager {
    * Observe all the {@link SharedState} instances that are created on the network.
    *
    * Notes:
-   * - The order of execution is not guaranted between nodes, i.e. a state attached
+   * - The order of execution is not guaranteed between nodes, i.e. a state attached
    * in the `observe` callback can be instantiated before the `async create` method
    * resolves on the creator node.
    * - Filtering, i.e. `observedClassName` and `options.excludeLocal` are handled
@@ -491,7 +497,7 @@ class BaseStateManager {
    * - `stateManager.observe(callback, options)`
    * - `stateManager.observe(className, callback, options)`
    *
-   * @param {SharedStateClassName} [className] - Optionnal class name to filter the observed
+   * @param {SharedStateClassName} [className] - Optional class name to filter the observed
    *  states.
    * @param {stateManagerObserveCallback}
    *  callback - Function to be called when a new state is created on the network.
@@ -511,7 +517,7 @@ class BaseStateManager {
    */
   async observe(...args) {
     if (this.#status !== 'inited') {
-      throw new DOMException(`Cannot execute 'observe' on 'StateManager': state manager is not inited. This method can be safely called only once 'client' or 'server' is inited itself`, 'InvalidStateError');
+      throw new DOMException(`Cannot execute 'observe' on BaseStateManager: BaseStateManager is not inited`, 'InvalidStateError');
     }
 
     const defaultOptions = {
@@ -526,7 +532,7 @@ class BaseStateManager {
       case 1: {
         // variation: .observe(callback)
         if (!isFunction(args[0])) {
-          throw new TypeError(`[stateManager] Invalid arguments, argument 1 should be a function"`);
+          throw new TypeError(`Cannot execute 'observe' on BaseStateManager: Argument 1 should be a function`);
         }
 
         observedClassName = null;
@@ -538,7 +544,7 @@ class BaseStateManager {
         // variation: .observe(className, callback)
         if (isString(args[0])) {
           if (!isFunction(args[1])) {
-            throw new TypeError(`[stateManager] Invalid arguments, argument 2 should be a function"`);
+            throw new TypeError(`Cannot execute 'observe' on BaseStateManager: Argument 2 should be a function`);
           }
 
           observedClassName = args[0];
@@ -548,7 +554,7 @@ class BaseStateManager {
         // variation: .observe(callback, options)
         } else if (isFunction(args[0])) {
           if (!isPlainObject(args[1])) {
-            throw new TypeError(`[stateManager] Invalid arguments, argument 2 should be an object"`);
+            throw new TypeError(`Cannot execute 'observe' on BaseStateManager: Argument 2 should be an object`);
           }
 
           observedClassName = null;
@@ -556,7 +562,7 @@ class BaseStateManager {
           options = Object.assign(defaultOptions, args[1]);
 
         } else {
-          throw new TypeError(`[stateManager] Invalid signature, refer to the StateManager.observe documentation"`);
+          throw new TypeError(`Cannot execute 'observe' on BaseStateManager: Invalid signature, refer to the documentation`);
         }
 
         break;
@@ -564,15 +570,15 @@ class BaseStateManager {
       case 3: {
         // variation: .observe(className, callback, options)
         if (!isString(args[0])) {
-          throw new TypeError(`[stateManager] Invalid arguments, argument 1 should be a string"`);
+          throw new TypeError(`Cannot execute 'observe' on BaseStateManager: Argument 1 should be a string`);
         }
 
         if (!isFunction(args[1])) {
-          throw new TypeError(`[stateManager] Invalid arguments, argument 2 should be a function"`);
+          throw new TypeError(`Cannot execute 'observe' on BaseStateManager: Argument 2 should be a function`);
         }
 
         if (!isPlainObject(args[2])) {
-          throw new TypeError(`[stateManager] Invalid arguments, argument 2 should be an object"`);
+          throw new TypeError(`Cannot execute 'observe' on BaseStateManager: Argument 3 should be an object`);
         }
 
         observedClassName = args[0];
@@ -583,7 +589,7 @@ class BaseStateManager {
       }
       // throw in all other cases
       default: {
-        throw new Error(`[stateManager] Invalid signature, refer to the StateManager.observe documentation"`);
+        throw new TypeError(`Cannot execute 'observe' on BaseStateManager: Invalid signature, refer to the documentation`);
       }
     }
 
@@ -591,7 +597,7 @@ class BaseStateManager {
     return new Promise((resolve, reject) => {
       const reqId = this.#promiseStore.add(resolve, reject, 'BaseStateManager#observe');
       // store the callback for execution on the response. the returned Promise
-      // is fullfiled once callback has been executed with each existing states
+      // is fulfilled once callback has been executed with each existing states
       const observeInfos = [observedClassName, callback, options];
       this.#observeRequestCallbacks.set(reqId, observeInfos);
 
@@ -689,11 +695,11 @@ class BaseStateManager {
    */
   async getCollection(className, filterOrOptions = null, options = {}) {
     if (this.#status !== 'inited') {
-      throw new DOMException(`Cannot execute 'getCollection' on 'StateManager': state manager is not inited. This method can be safely called only once 'client' or 'server' is inited itself`, 'InvalidStateError');
+      throw new DOMException(`Cannot execute 'getCollection' on BaseStateManager: BaseStateManager is not inited`, 'InvalidStateError');
     }
 
     if (!isString(className)) {
-      throw new TypeError(`Cannot execute 'getCollection' on 'StateManager': 'className' should be a string"`);
+      throw new TypeError(`Cannot execute 'getCollection' on BaseStateManager: Argument 1 should be a string"`);
     }
 
     let filter;
@@ -709,7 +715,7 @@ class BaseStateManager {
         filter = null;
         options = filterOrOptions;
       } else {
-        throw new TypeError(`Cannot execute 'getCollection' on 'StateManager': argument 2 should be either null, an array or an object"`);
+        throw new TypeError(`Cannot execute 'getCollection' on BaseStateManager: Argument 2 should be either null, an array or an object"`);
       }
     }
 
@@ -717,16 +723,21 @@ class BaseStateManager {
       filter = filterOrOptions;
 
       if (filter !== null && !Array.isArray(filter)) {
-        throw new TypeError(`Cannot execute 'getCollection' on 'StateManager': 'filter' should be either an array or null"`);
+        throw new TypeError(`Cannot execute 'getCollection' on BaseStateManager: Argument 2 should be either an array or null"`);
       }
 
       if (options === null || typeof options !== 'object') {
-        throw new TypeError(`Cannot execute 'getCollection' on 'StateManager': 'options' should be an object"`);
+        throw new TypeError(`Cannot execute 'getCollection' on BaseStateManager: Argument 3 should be either an object"`);
       }
     }
 
     const collection = new SharedStateCollection(this, className, filter, options);
-    await collection._init();
+
+    try {
+      await collection[kSharedStateCollectionInit]();
+    } catch (err) {
+      throw new ReferenceError(`Cannot execute 'getCollection' on BaseStateManager: ${err.message}`);
+    }
 
     return collection;
   }

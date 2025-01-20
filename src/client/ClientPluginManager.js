@@ -9,12 +9,12 @@ import Client from './Client.js';
  * and before {@link Client#start} or {@link Server#start}
  * to be properly initialized.
  *
- * In some sitautions, you might want to register the same plugin factory several times
+ * In some situations, you might want to register the same plugin factory several times
  * using different ids (e.g. for watching several parts of the file system, etc.).
  *
  * Refer to the plugins' documentation for more precise examples, and the specific API
  * they expose. See [https://soundworks.dev/guide/ecosystem](https://soundworks.dev/guide/ecosystem)
- * for more informations on the available plugins.
+ * for more information on the available plugins.
  *
  * See {@link Client#pluginManager}
  *
@@ -66,7 +66,7 @@ class ClientPluginManager extends BasePluginManager {
    */
   constructor(client) {
     if (!(client instanceof Client)) {
-      throw new Error(`[soundworks.ClientPluginManager] Invalid argument, "new ClientPluginManager(client)" should receive an instance of "soundworks.Client" as argument`);
+      throw new TypeError(`Cannot construct ClientPluginManager: Argument 1 must be an instance of Client`);
     }
 
     super(client);
@@ -96,15 +96,20 @@ class ClientPluginManager extends BasePluginManager {
    * server.pluginManager.register('user-defined-id', pluginFactory);
    */
   register(id, factory, options = {}, deps = []) {
+    // Note that additional argument checks are done on the BasePluginManager
+
+    // @todo - review all this
     const ctor = factory(ClientPlugin);
 
     if (!(ctor.prototype instanceof ClientPlugin)) {
-      throw new Error(`[ClientPluginManager] Invalid argument, "pluginManager.register" second argument should be a factory function returning a class extending the "Plugin" base class`);
+      throw new TypeError(`Cannot execute 'register' on ClientPluginManager: argument 2 must be a factory function returning a class extending the "ClientPlugin" base class`);
     }
 
     if (ctor.target === undefined || ctor.target !== 'client') {
-      throw new Error(`[ClientPluginManager] Invalid argument, The plugin class should implement a 'target' static field with value 'client'`);
+      throw new TypeError(`Cannot execute 'register' on ClientPluginManager: The plugin class must implement a 'target' static field with value 'client'`);
     }
+
+    // @todo - check deps
 
     super.register(id, ctor, options, deps);
   }
@@ -130,7 +135,7 @@ class ClientPluginManager extends BasePluginManager {
    */
   async get(id) {
     if (this.status !== 'started') {
-      throw new Error(`[soundworks.ClientPluginManager] Cannot get plugin before "client.init()"`);
+      throw new DOMException(`Cannot execute 'get' on ClientPluginManager: 'Client#init' has not been called yet`, 'NotSupportedError');
     }
 
     return super.getUnsafe(id);

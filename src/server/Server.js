@@ -441,7 +441,6 @@ class Server {
    */
   async getAuditState() {
     if (this.#status === 'idle') {
-      // DomException InvalidAccessError
       throw new DOMException(`Cannot execute 'getAuditState' on Server: 'init' must be called first`, 'InvalidAccessError');
     }
 

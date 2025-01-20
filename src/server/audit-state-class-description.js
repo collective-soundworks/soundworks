@@ -1,5 +1,6 @@
 /**
  * Internal shared state class used to audit the application.
+ * @private
  */
 export default {
   /**
@@ -17,7 +18,7 @@ export default {
   },
 
   /**
-   * Average latency in seconds computed from ping/pong informations.
+   * Average latency in seconds computed from ping/pong information.
    */
   averageNetworkLatency: {
     type: 'float',

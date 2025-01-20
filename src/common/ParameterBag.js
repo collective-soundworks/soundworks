@@ -1,6 +1,10 @@
 import cloneDeep from 'lodash/cloneDeep.js';
 import equal from 'fast-deep-equal';
 
+import {
+  isPlainObject,
+} from '@ircam/sc-utils';
+
 export const sharedOptions = {
   nullable: false,
   event: false, // if event=true, nullable=true
@@ -18,7 +22,7 @@ export const types = {
     },
     coerceFunction: (name, def, value) => {
       if (typeof value !== 'boolean') {
-        throw new TypeError(`[SharedState] Invalid value "${value}" for boolean parameter "${name}"`);
+        throw new TypeError(`Invalid value (${value}) for boolean parameter '${name}'`);
       }
 
       return value;
@@ -31,7 +35,7 @@ export const types = {
     },
     coerceFunction: (name, def, value) => {
       if (typeof value !== 'string') {
-        throw new TypeError(`[SharedState] Invalid value "${value}" for string parameter "${name}"`);
+        throw new TypeError(`Invalid value (${value}) for string parameter '${name}'`);
       }
 
       return value;
@@ -47,7 +51,7 @@ export const types = {
     },
     sanitizeDescription: (def) => {
       // sanitize `null` values in received description, this prevent a bug when
-      // `min` and `max` are explicitely set to `±Infinity`, the description is stringified
+      // `min` and `max` are explicitly set to `±Infinity`, the description is stringified
       // when sent over the network and therefore Infinity is transformed to `null`
       //
       // JSON.parse({ a: Infinity });
@@ -64,7 +68,7 @@ export const types = {
     },
     coerceFunction: (name, def, value) => {
       if (!(typeof value === 'number' && Math.floor(value) === value)) {
-        throw new TypeError(`[SharedState] Invalid value "${value}" for integer parameter "${name}"`);
+        throw new TypeError(`Invalid value (${value}) for integer parameter '${name}'`);
       }
 
       return Math.max(def.min, Math.min(def.max, value));
@@ -80,7 +84,7 @@ export const types = {
     },
     sanitizeDescription: (def) => {
       // sanitize `null` values in received description, this prevent a bug when
-      // `min` and `max` are explicitely set to `±Infinity`, the description is stringified
+      // `min` and `max` are explicitly set to `±Infinity`, the description is stringified
       // when sent over the network and therefore Infinity is transformed to `null`
       //
       // JSON.parse({ a: Infinity });
@@ -97,7 +101,7 @@ export const types = {
     },
     coerceFunction: (name, def, value) => {
       if (typeof value !== 'number' || value !== value) { // reject NaN
-        throw new TypeError(`[SharedState] Invalid value "${value}" for float parameter "${name}"`);
+        throw new TypeError(`Invalid value (${value}) for float parameter '${name}'`);
       }
 
       return Math.max(def.min, Math.min(def.max, value));
@@ -110,7 +114,7 @@ export const types = {
     },
     coerceFunction: (name, def, value) => {
       if (def.list.indexOf(value) === -1) {
-        throw new TypeError(`[SharedState] Invalid value "${value}" for enum parameter "${name}"`);
+        throw new TypeError(`Invalid value (${value}) for enum parameter '${name}'`);
       }
 
 
@@ -137,11 +141,11 @@ class ParameterBag {
       const def = description[name];
 
       if (!Object.prototype.hasOwnProperty.call(def, 'type')) {
-        throw new TypeError(`[StateManager.defineClass] Invalid class description - param "${name}": "type" key is required`);
+        throw new TypeError(`Invalid ParameterDescription for param '${name}': 'type' key is required`);
       }
 
       if (!Object.prototype.hasOwnProperty.call(types, def.type)) {
-        throw new TypeError(`[StateManager.defineClass] Invalid class description - param "${name}": "{ type: '${def.type}' }" does not exists`);
+        throw new TypeError(`Invalid ParameterDescription for param '${name}': type '${def.type}' is not a valid type`);
       }
 
       const required = types[def.type].required;
@@ -152,10 +156,10 @@ class ParameterBag {
           // - default is always null for `event` params
           // - default is always null for `required` params
           if ('default' in def && def.default !== null) {
-            throw new TypeError(`[StateManager.defineClass] Invalid class description for param ${name} - "default" propaerty is set and not null while the parameter definition is declared as "event" or "required"`);
+            throw new TypeError(`Invalid ParameterDescription for param ${name}: 'default' property is set and not null while the parameter definition is declared as 'event' or 'required'`);
           }
         } else if (!Object.prototype.hasOwnProperty.call(def, key)) {
-          throw new TypeError(`[StateManager.defineClass] Invalid class description - param "${name}" (type "${def.type}"): "${key}" key is required`);
+          throw new TypeError(`Invalid ParameterDescription for param "${name}"; property '${key}' key is required`);
         }
       });
     }
@@ -165,8 +169,8 @@ class ParameterBag {
   #values = {};
 
   constructor(description, initValues = {}) {
-    if (!description) {
-      throw new Error(`[ParameterBag] description is mandatory`);
+    if (!isPlainObject(description)) {
+      throw new TypeError(`Cannot construct ParameterBag: argument 1 must be an object`);
     }
 
     description = cloneDeep(description);
@@ -174,10 +178,10 @@ class ParameterBag {
 
     ParameterBag.validateDescription(description);
 
-    // make shure initValues make sens according to the given description
+    // make sure initValues make sens according to the given description
     for (let name in initValues) {
       if (!Object.prototype.hasOwnProperty.call(description, name)) {
-        throw new ReferenceError(`[StateManager.create] init value defined for undefined param "${name}"`);
+        throw new ReferenceError(`Invalid init value for parameter '${name}': Parameter does not exists`);
       }
     }
 
@@ -198,7 +202,7 @@ class ParameterBag {
       if (def.required === true) {
         // throw if value is not given in init values
         if (initValues[name] === undefined || initValues[name] === null) {
-          throw new Error(`[SharedState.create] Invalid init value for required param "${name}", cannot be null or undefined`);
+          throw new TypeError(`Invalid init value for required param "${name}": Init value must be defined`);
         }
 
         def.default = initValues[name];
@@ -251,7 +255,7 @@ class ParameterBag {
   /**
    * Return values of all parameters as a flat object. Similar to `getValues` but
    * returns a reference to the underlying value in case of `any` type. May be
-   * usefull if the underlying value is big (e.g. sensors recordings, etc.) and
+   * useful if the underlying value is big (e.g. sensors recordings, etc.) and
    * deep cloning expensive. Be aware that if changes are made on the returned
    * object, the state of your application will become inconsistent.
    *
@@ -276,7 +280,7 @@ class ParameterBag {
    */
   get(name) {
     if (!this.has(name)) {
-      throw new ReferenceError(`[SharedState] Cannot get value of undefined parameter "${name}"`);
+      throw new ReferenceError(`Cannot get value of undefined parameter '${name}'`);
     }
 
     if (this.#description[name].type === 'any') {
@@ -290,7 +294,7 @@ class ParameterBag {
 
   /**
    * Similar to `get` but returns a reference to the underlying value in case of
-   * `any` type. May be usefull if the underlying value is big (e.g. sensors
+   * `any` type. May be useful if the underlying value is big (e.g. sensors
    * recordings, etc.) and deep cloning expensive. Be aware that if changes are
    * made on the returned object, the state of your application will become
    * inconsistent.
@@ -300,7 +304,7 @@ class ParameterBag {
    */
   getUnsafe(name) {
     if (!this.has(name)) {
-      throw new ReferenceError(`[SharedState] Cannot get value of undefined parameter "${name}"`);
+      throw new ReferenceError(`Cannot get value of undefined parameter '${name}'`);
     }
 
     return this.#values[name];
@@ -314,13 +318,13 @@ class ParameterBag {
    */
   coerceValue(name, value) {
     if (!this.has(name)) {
-      throw new ReferenceError(`[SharedState] Cannot set value of undefined parameter "${name}"`);
+      throw new ReferenceError(`Cannot set value of undefined parameter "${name}"`);
     }
 
     const def = this.#description[name];
 
     if (value === null && def.nullable === false) {
-      throw new TypeError(`[SharedState] Invalid value for ${def.type} param "${name}": value is null and param is not nullable`);
+      throw new TypeError(`Invalid value for ${def.type} param "${name}": value is null and param is not nullable`);
     } else if (value === null && def.nullable === true) {
       value = null;
     } else {
@@ -386,7 +390,7 @@ class ParameterBag {
     }
 
     if (!this.has(name)) {
-      throw new ReferenceError(`[SharedState] Cannot get description of undefined parameter "${name}"`);
+      throw new ReferenceError(`Cannot get description of undefined parameter "${name}"`);
     }
 
     return this.#description[name];

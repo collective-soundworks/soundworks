@@ -57,11 +57,13 @@ import logger from './logger.js';
  * @callback sharedStateCollectionDeleteOnChangeCallback
  */
 
+export const kSharedStateCollectionInit = Symbol('soundworks:shared-state-collection-init');
+
 /**
  * The `SharedStateCollection` interface represent a collection of all states
  * created from a given class name on the network.
  *
- * It can optionnaly exclude the states created by the current node.
+ * It can optionally exclude the states created by the current node.
  *
  * See {@link ClientStateManager#getCollection} and
  * {@link ServerStateManager#getCollection} for factory methods API
@@ -96,7 +98,7 @@ class SharedStateCollection {
   }
 
   /** @private */
-  async _init() {
+  async [kSharedStateCollectionInit]() {
     this.#classDescription = await this.#stateManager.getClassDescription(this.#className);
 
     // if filter is set, check that it contains only valid param names
@@ -105,7 +107,7 @@ class SharedStateCollection {
 
       for (let filter of this.#filter) {
         if (!keys.includes(filter)) {
-          throw new ReferenceError(`[SharedStateCollection] Invalid filter key (${filter}) for class "${this.#className}"`);
+          throw new ReferenceError(`Invalid filter key (${filter}) for class "${this.#className}"`);
         }
       }
     }
@@ -188,7 +190,7 @@ class SharedStateCollection {
   getDescription(paramName = null) {
     if (paramName) {
       if (!(paramName in this.#classDescription)) {
-        throw new ReferenceError(`Cannot execute "getDescription" on "SharedStateCollection": Parameter "${paramName}" does not exists`);
+        throw new ReferenceError(`Cannot execute 'getDescription' on SharedStateCollection: Parameter "${paramName}" does not exists`);
       }
 
       return this.#classDescription[paramName];
@@ -224,7 +226,7 @@ class SharedStateCollection {
    * Return the current values of all the states in the collection.
    *
    * Similar to `getValues` but returns a reference to the underlying value in
-   * case of `any` type. May be usefull if the underlying value is big (e.g.
+   * case of `any` type. May be useful if the underlying value is big (e.g.
    * sensors recordings, etc.) and deep cloning expensive. Be aware that if
    * changes are made on the returned object, the state of your application will
    * become inconsistent.
@@ -249,7 +251,7 @@ class SharedStateCollection {
 
   /**
    * Similar to `get` but returns a reference to the underlying value in case of
-   * `any` type. May be usefull if the underlying value is big (e.g. sensors
+   * `any` type. May be useful if the underlying value is big (e.g. sensors
    * recordings, etc.) and deep cloning expensive. Be aware that if changes are
    * made on the returned object, the state of your application will become
    * inconsistent.
@@ -441,8 +443,8 @@ class SharedStateCollection {
    * the estates that pass the test implemented by the provided function (see `Array.filter`).
    *
    * @param {Function} func - A function to execute for each element in the array.
-   *  It should return a truthy to keep the element in the resulting array, and a f
-   *  alsy value otherwise.
+   *  It should return a truthy to keep the element in the resulting array, and a
+   *  falsy value otherwise.
    */
   filter(func) {
     return this.#states.filter(func);

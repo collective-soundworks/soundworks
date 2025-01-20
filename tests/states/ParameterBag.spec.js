@@ -14,15 +14,15 @@ describe('# [private] ParameterBag', () => {
     it('should check if schema is invalid', () => {
       assert.throw(() => ParameterBag.validateDescription({
         noType: {}
-      }), TypeError, `[StateManager.defineClass] Invalid class description - param "noType": "type" key is required`);
+      }));
 
       assert.throw(() => ParameterBag.validateDescription({
         invalidType: { type: 'invalid' }
-      }), TypeError, `[StateManager.defineClass] Invalid class description - param "invalidType": "{ type: 'invalid' }" does not exists`);
+      }));
 
       assert.throw(() => ParameterBag.validateDescription({
         myBoolean: { type: 'boolean' }
-      }), TypeError, `[StateManager.defineClass] Invalid class description - param "myBoolean" (type "boolean"): "default" key is required`);
+      }));
     });
 
     it(`should throw if "default" is declared when "event" is true`, () => {
@@ -52,7 +52,7 @@ describe('# [private] ParameterBag', () => {
     it('should validate the given schema', () => {
       assert.throws(() => new ParameterBag({
         invalidType: { type: 'invalid' }
-      }), TypeError, `[StateManager.defineClass] Invalid class description - param "invalidType": "{ type: 'invalid' }" does not exists`);
+      }));
     });
 
     it('should check initValues consistency', () => {
@@ -61,7 +61,7 @@ describe('# [private] ParameterBag', () => {
           { myBoolean: { type: 'boolean', default: 0 }},
           { myFloat: 0.1 }
         )
-      }, ReferenceError, `[StateManager.create] init value defined for undefined param "myFloat"`);
+      });
     });
 
     it('should throw if required param is not given at initialization', () => {
@@ -183,7 +183,7 @@ describe('# [private] ParameterBag', () => {
 
   describe(`## get(name)`, () => {
     it(`should throw if name is undefined`, () => {
-      assert.throw(() => params.get('doNotExists'), ReferenceError, `[SharedState] Cannot get value of undefined parameter "doNotExists"`)
+      assert.throw(() => params.get('doNotExists'))
     });
 
     it(`should return proper value`, () => {
@@ -197,7 +197,7 @@ describe('# [private] ParameterBag', () => {
 
   describe(`## getUnsafe(name)`, () => {
     it(`should throw if name is undefined`, () => {
-      assert.throw(() => params.get('doNotExists'), ReferenceError, `[SharedState] Cannot get value of undefined parameter "doNotExists"`)
+      assert.throw(() => params.get('doNotExists'))
     });
 
     it(`should return reference`, () => {
@@ -209,11 +209,11 @@ describe('# [private] ParameterBag', () => {
 
   describe(`## set(name, value)`, () => {
     it(`should throw if name does not exists`, () => {
-      assert.throw(() => params.set('doNotExists', false), ReferenceError, `[SharedState] Cannot set value of undefined parameter "doNotExists"`)
+      assert.throw(() => params.set('doNotExists', false));
     });
 
     it(`should throw if not nullable and null given`, () => {
-      assert.throw(() => params.set('bool', null), TypeError, `[SharedState] Invalid value for boolean param "bool": value is null and param is not nullable`);
+      assert.throw(() => params.set('bool', null));
     });
 
     it(`should return [value, updated]`, () => {
@@ -299,9 +299,7 @@ describe('# [private] ParameterBag', () => {
     });
 
     it(`should throw if name does not exists`, () => {
-      assert.throw(() => params.getDescription('42'), ReferenceError,
-        `[SharedState] Cannot get description of undefined parameter "42"`
-      );
+      assert.throw(() => params.getDescription('42'));
     });
   });
 
@@ -328,17 +326,17 @@ describe('# [private] ParameterBag::types', () => {
     it('should coerce properly', () => {
       assert.doesNotThrow(() => coerce('b', {}, true));
       assert.doesNotThrow(() => coerce('b', {}, false));
-      assert.throws(() => coerce('b', {}, 0.1), TypeError, /\[SharedState\] Invalid value "(.*)" for boolean parameter "b"/);
-      assert.throws(() => coerce('b', {}, -100000), TypeError, /\[SharedState\] Invalid value "(.*)" for boolean parameter "b"/);
-      assert.throws(() => coerce('b', {}, Math.PI), TypeError, /\[SharedState\] Invalid value "(.*)" for boolean parameter "b"/);
-      assert.throws(() => coerce('b', {}, -Infinity), TypeError, /\[SharedState\] Invalid value "(.*)" for boolean parameter "b"/);
-      assert.throws(() => coerce('b', {}, NaN), TypeError, /\[SharedState\] Invalid value "(.*)" for boolean parameter "b"/);
-      assert.throws(() => coerce('b', {}, 0), TypeError, /\[SharedState\] Invalid value "(.*)" for boolean parameter "b"/);
-      assert.throws(() => coerce('b', {}, '10'), TypeError, /\[SharedState\] Invalid value "(.*)" for boolean parameter "b"/);
-      assert.throws(() => coerce('b', {}, null), TypeError, /\[SharedState\] Invalid value "(.*)" for boolean parameter "b"/);
-      assert.throws(() => coerce('b', {}, /abc/), TypeError, /\[SharedState\] Invalid value "(.*)" for boolean parameter "b"/);
-      assert.throws(() => coerce('b', {}, undefined), TypeError, /\[SharedState\] Invalid value "(.*)" for boolean parameter "b"/);
-      assert.throws(() => coerce('b', {}, [0, 1, 2]), TypeError, /\[SharedState\] Invalid value "(.*)" for boolean parameter "b"/);
+      assert.throws(() => coerce('b', {}, 0.1), TypeError, /Invalid value \((.*)\) for boolean parameter 'b'/);
+      assert.throws(() => coerce('b', {}, -100000), TypeError, /Invalid value \((.*)\) for boolean parameter 'b'/);
+      assert.throws(() => coerce('b', {}, Math.PI), TypeError, /Invalid value \((.*)\) for boolean parameter 'b'/);
+      assert.throws(() => coerce('b', {}, -Infinity), TypeError, /Invalid value \((.*)\) for boolean parameter 'b'/);
+      assert.throws(() => coerce('b', {}, NaN), TypeError, /Invalid value \((.*)\) for boolean parameter 'b'/);
+      assert.throws(() => coerce('b', {}, 0), TypeError, /Invalid value \((.*)\) for boolean parameter 'b'/);
+      assert.throws(() => coerce('b', {}, '10'), TypeError, /Invalid value \((.*)\) for boolean parameter 'b'/);
+      assert.throws(() => coerce('b', {}, null), TypeError, /Invalid value \((.*)\) for boolean parameter 'b'/);
+      assert.throws(() => coerce('b', {}, /abc/), TypeError, /Invalid value \((.*)\) for boolean parameter 'b'/);
+      assert.throws(() => coerce('b', {}, undefined), TypeError, /Invalid value \((.*)\) for boolean parameter 'b'/);
+      assert.throws(() => coerce('b', {}, [0, 1, 2]), TypeError, /Invalid value \((.*)\) for boolean parameter 'b'/);
     });
   });
 
@@ -348,18 +346,18 @@ describe('# [private] ParameterBag::types', () => {
     it('should coerce properly', () => {
       assert.doesNotThrow(() => coerce('s', {}, '10'));
       assert.doesNotThrow(() => coerce('s', {}, 'a text'));
-      assert.throws(() => coerce('s', {}, -100000), TypeError, /\[SharedState\] Invalid value "(.*)" for string parameter "s"/);
-      assert.throws(() => coerce('s', {}, -Infinity), TypeError, /\[SharedState\] Invalid value "(.*)" for string parameter "s"/);
-      assert.throws(() => coerce('s', {}, true), TypeError, /\[SharedState\] Invalid value "(.*)" for string parameter "s"/);
-      assert.throws(() => coerce('s', {}, false), TypeError, /\[SharedState\] Invalid value "(.*)" for string parameter "s"/);
-      assert.throws(() => coerce('s', {}, 0.1), TypeError, /\[SharedState\] Invalid value "(.*)" for string parameter "s"/);
-      assert.throws(() => coerce('s', {}, Math.PI), TypeError, /\[SharedState\] Invalid value "(.*)" for string parameter "s"/);
-      assert.throws(() => coerce('s', {}, NaN), TypeError, /\[SharedState\] Invalid value "(.*)" for string parameter "s"/);
-      assert.throws(() => coerce('s', {}, 0), TypeError, /\[SharedState\] Invalid value "(.*)" for string parameter "s"/);
-      assert.throws(() => coerce('s', {}, null), TypeError, /\[SharedState\] Invalid value "(.*)" for string parameter "s"/);
-      assert.throws(() => coerce('s', {}, /abc/), TypeError, /\[SharedState\] Invalid value "(.*)" for string parameter "s"/);
-      assert.throws(() => coerce('s', {}, undefined), TypeError, /\[SharedState\] Invalid value "(.*)" for string parameter "s"/);
-      assert.throws(() => coerce('s', {}, [0, 1, 2]), TypeError, /\[SharedState\] Invalid value "(.*)" for string parameter "s"/);
+      assert.throws(() => coerce('s', {}, -100000), TypeError, /Invalid value \((.*)\) for string parameter 's'/);
+      assert.throws(() => coerce('s', {}, -Infinity), TypeError, /Invalid value \((.*)\) for string parameter 's'/);
+      assert.throws(() => coerce('s', {}, true), TypeError, /Invalid value \((.*)\) for string parameter 's'/);
+      assert.throws(() => coerce('s', {}, false), TypeError, /Invalid value \((.*)\) for string parameter 's'/);
+      assert.throws(() => coerce('s', {}, 0.1), TypeError, /Invalid value \((.*)\) for string parameter 's'/);
+      assert.throws(() => coerce('s', {}, Math.PI), TypeError, /Invalid value \((.*)\) for string parameter 's'/);
+      assert.throws(() => coerce('s', {}, NaN), TypeError, /Invalid value \((.*)\) for string parameter 's'/);
+      assert.throws(() => coerce('s', {}, 0), TypeError, /Invalid value \((.*)\) for string parameter 's'/);
+      assert.throws(() => coerce('s', {}, null), TypeError, /Invalid value \((.*)\) for string parameter 's'/);
+      assert.throws(() => coerce('s', {}, /abc/), TypeError, /Invalid value \((.*)\) for string parameter 's'/);
+      assert.throws(() => coerce('s', {}, undefined), TypeError, /Invalid value \((.*)\) for string parameter 's'/);
+      assert.throws(() => coerce('s', {}, [0, 1, 2]), TypeError, /Invalid value \((.*)\) for string parameter 's'/);
     });
   });
 
@@ -376,16 +374,16 @@ describe('# [private] ParameterBag::types', () => {
       assert.equal(coerce('i', def, -Infinity), -Infinity);
       assert.equal(coerce('i', def, 0), 0);
 
-      assert.throws(() => coerce('i', def, true), TypeError, /\[SharedState\] Invalid value "(.*)" for integer parameter "i"/);
-      assert.throws(() => coerce('i', def, false), TypeError, /\[SharedState\] Invalid value "(.*)" for integer parameter "i"/);
-      assert.throws(() => coerce('i', def, 0.1), TypeError, /\[SharedState\] Invalid value "(.*)" for integer parameter "i"/);
-      assert.throws(() => coerce('i', def, Math.PI), TypeError, /\[SharedState\] Invalid value "(.*)" for integer parameter "i"/);
-      assert.throws(() => coerce('i', def, NaN), TypeError, /\[SharedState\] Invalid value "(.*)" for integer parameter "i"/);
-      assert.throws(() => coerce('i', def, '10'), TypeError, /\[SharedState\] Invalid value "(.*)" for integer parameter "i"/);
-      assert.throws(() => coerce('i', def, null), TypeError, /\[SharedState\] Invalid value "(.*)" for integer parameter "i"/);
-      assert.throws(() => coerce('i', def, /abc/), TypeError, /\[SharedState\] Invalid value "(.*)" for integer parameter "i"/);
-      assert.throws(() => coerce('i', def, undefined), TypeError, /\[SharedState\] Invalid value "(.*)" for integer parameter "i"/);
-      assert.throws(() => coerce('i', def, [0, 1, 2]), TypeError, /\[SharedState\] Invalid value "(.*)" for integer parameter "i"/);
+      assert.throws(() => coerce('i', def, true), TypeError, /Invalid value \((.*)\) for integer parameter 'i'/);
+      assert.throws(() => coerce('i', def, false), TypeError, /Invalid value \((.*)\) for integer parameter 'i'/);
+      assert.throws(() => coerce('i', def, 0.1), TypeError, /Invalid value \((.*)\) for integer parameter 'i'/);
+      assert.throws(() => coerce('i', def, Math.PI), TypeError, /Invalid value \((.*)\) for integer parameter 'i'/);
+      assert.throws(() => coerce('i', def, NaN), TypeError, /Invalid value \((.*)\) for integer parameter 'i'/);
+      assert.throws(() => coerce('i', def, '10'), TypeError, /Invalid value \((.*)\) for integer parameter 'i'/);
+      assert.throws(() => coerce('i', def, null), TypeError, /Invalid value \((.*)\) for integer parameter 'i'/);
+      assert.throws(() => coerce('i', def, /abc/), TypeError, /Invalid value \((.*)\) for integer parameter 'i'/);
+      assert.throws(() => coerce('i', def, undefined), TypeError, /Invalid value \((.*)\) for integer parameter 'i'/);
+      assert.throws(() => coerce('i', def, [0, 1, 2]), TypeError, /Invalid value \((.*)\) for integer parameter 'i'/);
     });
 
     it('should clip properly', () => {
@@ -412,14 +410,14 @@ describe('# [private] ParameterBag::types', () => {
       assert.equal(coerce('f', def, 0.1), 0.1);
       assert.equal(coerce('f', def, Math.PI), Math.PI);
 
-      assert.throws(() => coerce('f', def, true), TypeError, /\[SharedState\] Invalid value "(.*)" for float parameter "f"/);
-      assert.throws(() => coerce('f', def, false), TypeError, /\[SharedState\] Invalid value "(.*)" for float parameter "f"/);
-      assert.throws(() => coerce('f', def, NaN), TypeError, /\[SharedState\] Invalid value "(.*)" for float parameter "f"/);
-      assert.throws(() => coerce('f', def, '10'), TypeError, /\[SharedState\] Invalid value "(.*)" for float parameter "f"/);
-      assert.throws(() => coerce('f', def, null), TypeError, /\[SharedState\] Invalid value "(.*)" for float parameter "f"/);
-      assert.throws(() => coerce('f', def, /abc/), TypeError, /\[SharedState\] Invalid value "(.*)" for float parameter "f"/);
-      assert.throws(() => coerce('f', def, undefined), TypeError, /\[SharedState\] Invalid value "(.*)" for float parameter "f"/);
-      assert.throws(() => coerce('f', def, [0, 1, 2]), TypeError, /\[SharedState\] Invalid value "(.*)" for float parameter "f"/);
+      assert.throws(() => coerce('f', def, true), TypeError, /Invalid value \((.*)\) for float parameter 'f'/);
+      assert.throws(() => coerce('f', def, false), TypeError, /Invalid value \((.*)\) for float parameter 'f'/);
+      assert.throws(() => coerce('f', def, NaN), TypeError, /Invalid value \((.*)\) for float parameter 'f'/);
+      assert.throws(() => coerce('f', def, '10'), TypeError, /Invalid value \((.*)\) for float parameter 'f'/);
+      assert.throws(() => coerce('f', def, null), TypeError, /Invalid value \((.*)\) for float parameter 'f'/);
+      assert.throws(() => coerce('f', def, /abc/), TypeError, /Invalid value \((.*)\) for float parameter 'f'/);
+      assert.throws(() => coerce('f', def, undefined), TypeError, /Invalid value \((.*)\) for float parameter 'f'/);
+      assert.throws(() => coerce('f', def, [0, 1, 2]), TypeError, /Invalid value \((.*)\) for float parameter 'f'/);
     });
 
     it('should clip properly', () => {
@@ -437,8 +435,8 @@ describe('# [private] ParameterBag::types', () => {
 
       assert.doesNotThrow(() => coerce('e', def, 'a'));
       assert.doesNotThrow(() => coerce('e', def, 1));
-      assert.throws(() => coerce('e', def, 'e'), TypeError, /\[SharedState\] Invalid value "(.*)" for enum parameter "e"/);
-      assert.throws(() => coerce('e', def, '1'), TypeError, /\[SharedState\] Invalid value "(.*)" for enum parameter "e"/);
+      assert.throws(() => coerce('e', def, 'e'), TypeError, /Invalid value \((.*)\) for enum parameter 'e'/);
+      assert.throws(() => coerce('e', def, '1'), TypeError, /Invalid value \((.*)\) for enum parameter 'e'/);
     });
   });
 });

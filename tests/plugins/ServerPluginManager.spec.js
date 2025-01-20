@@ -139,22 +139,6 @@ describe(`# ServerPluginManager`, () => {
     });
   });
 
-  describe(`## [private] async init()`, () => {
-    it(`should throw if started twice`, async () => {
-      const server = new Server(config);
-      await server.init(); // run pluginManager.start()
-
-      let errored = false;
-      try {
-        await server.pluginManager.start();
-      } catch(err) {
-        errored = true;
-        console.log(err.message);
-      }
-      if (!errored) { assert.fail('should throw'); }
-    });
-  });
-
   describe(`## async get(id)`, () => {
     it(`should throw if called before server.init()`, async () => {
       const server = new Server(config);

@@ -67,7 +67,7 @@ export const kServerPluginManagerRemoveClient = Symbol('soundworks:server-plugin
 class ServerPluginManager extends BasePluginManager {
   constructor(server) {
     if (!(server instanceof Server)) {
-      throw new Error(`[soundworks.PluginManager] Invalid argument, "new PluginManager(server)" should receive an instance of "soundworks.Server" as argument`);
+      throw new TypeError(`Cannot construct 'ServerPluginManager': Argument 1 must be an instance of Server`);
     }
 
     super(server);
@@ -84,7 +84,7 @@ class ServerPluginManager extends BasePluginManager {
     }
 
     if (missingPlugins.length > 0) {
-      throw new Error(`Invalid plugin list, the following plugins registered client-side: [${missingPlugins.join(', ')}] have not been registered server-side. Registered server-side plugins are: [${Array.from(this[kPluginManagerInstances].keys()).join(', ')}].`);
+      throw new DOMException(`Invalid 'ServerPluginManager' internal state: The following plugins registered on the client-side: [${missingPlugins.join(', ')}] have not been registered on the server-side. Plugins registered on the server-side are: [${Array.from(this[kPluginManagerInstances].keys()).join(', ')}].`, 'InvalidStateError');
     }
   }
 
@@ -138,15 +138,20 @@ class ServerPluginManager extends BasePluginManager {
    * server.pluginManager.register('user-defined-id', pluginFactory);
    */
   register(id, factory = null, options = {}, deps = []) {
+    // Note that additional argument checks are done on the BasePluginManager
+
+    // @todo - review all this
     const ctor = factory(ServerPlugin);
 
     if (!(ctor.prototype instanceof ServerPlugin)) {
-      throw new Error(`[ServerPluginManager] Invalid argument, "pluginManager.register" second argument should be a factory function returning a class extending the "ServerPlugin" base class`);
+      throw new TypeError(`Cannot execute 'register' on ServerPluginManager: argument 2 must be a factory function returning a class extending the "ServerPlugin" base class`);
     }
 
     if (ctor.target === undefined || ctor.target !== 'server') {
-      throw new Error(`[ServerPluginManager] Invalid argument, The plugin class should implement a 'target' static field with value 'server'`);
+      throw new TypeError(`Cannot execute 'register' on ServerPluginManager: The plugin class must implement a 'target' static field with value 'server'`);
     }
+
+    // @todo - check deps
 
     super.register(id, ctor, options, deps);
   }
@@ -171,7 +176,7 @@ class ServerPluginManager extends BasePluginManager {
    */
   async get(id) {
     if (this.status !== 'started') {
-      throw new Error(`[soundworks.PluginManager] Cannot get plugin before "server.init()"`);
+      throw new DOMException(`Cannot execute 'get' on ServerPluginManager: 'Server#init' has not been called yet`, 'NotSupportedError');
     }
 
     return super.getUnsafe(id);

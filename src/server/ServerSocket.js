@@ -87,7 +87,7 @@ class ServerSocket {
         // client is busy, e.g. when loading large sound files so let's just warn
         // until we gather more feedback
         // cf. https://making.close.com/posts/reliable-websockets/
-        console.warn(`[ServerSocket] client (id: ${this[kSocketClientId]}) did not respond to ping message in time (missed: ${heartbeatMissed},  interval: ${PING_INTERVAL})`);
+        console.warn(`ClientSocket (id: ${this[kSocketClientId]}) did not respond to ping message in time (missed: ${heartbeatMissed},  interval: ${PING_INTERVAL})`);
         // this.#dispatchEvent('close');
         // return;
       }
@@ -121,7 +121,7 @@ class ServerSocket {
   }
 
   /**
-   * Dipatch an event to the listeners of the given channel.
+   * Dispatch an event to the listeners of the given channel.
    * @param {string} channel - Channel name.
    * @param {...*} args - Content of the message.
    */
@@ -172,7 +172,7 @@ class ServerSocket {
   }
 
   /**
-   * Reay state of the underlying socket instance.
+   * Ready state of the underlying socket instance.
    *
    * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/readyState}
    * @type {number}
@@ -199,7 +199,7 @@ class ServerSocket {
     if (this.#socket.readyState === 1) {
       this.#socket.send(msg, (err) => {
         if (err) {
-          console.error('[Socket] error sending msg:', channel, args, err.message);
+          console.error(`ServerSocket failed to send message:`, channel, args, err.message);
         }
       });
     }

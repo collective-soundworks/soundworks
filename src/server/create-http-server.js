@@ -44,17 +44,17 @@ export async function createHttpServer(server) {
       try {
         x509 = new X509Certificate(cert);
       } catch {
-        throw new Error(`[soundworks:Server] Invalid https cert file`);
+        throw new TypeError(`Cannot create https.Server: Invalid https cert file`);
       }
 
       try {
         const keyObj = createPrivateKey(key);
 
         if (!x509.checkPrivateKey(keyObj)) {
-          throw new Error(`[soundworks:Server] Invalid https key file`);
+          throw new TypeError(`Cannot create https.Server: Invalid https key file`);
         }
       } catch {
-        throw new Error(`[soundworks:Server] Invalid https key file`);
+        throw new TypeError(`Cannot create https.Server: Invalid https key file`);
       }
 
       // check is certificate is still valid

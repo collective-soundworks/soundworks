@@ -59,7 +59,7 @@ class BasePluginManager {
   /**
    * Initialize all registered plugins.
    *
-   * Executed during the `Client.init()` or `Server.init()` initialization step.
+   * Executed during the {@link Client#init} or {@link Client#stop} initialization step.
    *
    * @private
    */
@@ -67,7 +67,7 @@ class BasePluginManager {
     logger.title('starting registered plugins');
 
     if (this.#status !== 'idle') {
-      throw new Error(`[soundworks:PluginManager] Cannot call "pluginManager.init()" twice`);
+      throw new DOMException(`Cannot execute 'kPluginManagerStart' on BasePluginManager: Lifecycle methods must be called in following order: kPluginManagerStart, kPluginManagerStop`, 'InvalidAccessError');
     }
 
     this.#status = 'inited';
@@ -92,6 +92,10 @@ class BasePluginManager {
 
   /** @private */
   async [kPluginManagerStop]() {
+    if (this.#status !== 'started') {
+      throw new DOMException(`Cannot execute 'kPluginManagerStop' on BasePluginManager: Lifecycle methods must be called in following order: kPluginManagerStart, kPluginManagerStop`, 'InvalidAccessError');
+    }
+
     for (let instance of this[kPluginManagerInstances].values()) {
       await instance.stop();
     }
@@ -109,6 +113,7 @@ class BasePluginManager {
   /**
    * Alias for existing plugins (i.e. plugin-scripting), remove once updated
    * @private
+   * @deprecated
    */
   async unsafeGet(id) {
     return this.getUnsafe(id);
@@ -126,11 +131,11 @@ class BasePluginManager {
    */
   async getUnsafe(id) {
     if (!isString(id)) {
-      throw new Error(`[soundworks.PluginManager] Invalid argument, "pluginManager.get(name)" argument should be a string`);
+      throw new TypeError(`Cannot execute 'get' on BasePluginManager: Argument 1 must be of type string`);
     }
 
     if (!this[kPluginManagerInstances].has(id)) {
-      throw new Error(`[soundworks:PluginManager] Cannot get plugin "${id}", plugin is not registered`);
+      throw new ReferenceError(`Cannot execute 'get' on BasePluginManager: Plugin '${id}' is not registered`);
     }
 
     // @note - For now, all instances are created at the beginning of `start()`
@@ -184,8 +189,16 @@ class BasePluginManager {
    *
    * _A plugin must always be registered both on client-side and on server-side_
    *
-   * Refer to the plugin documentation to check its options and proper way of
-   * registering it.
+   * Plugins must be registered between the instantiation of {@link Client} and {@link Server},
+   * and their respective initialization, i.e.:
+   *
+   * ```js
+   * const client = new Client(config);
+   * client.pluginManager.register('my-plugin', plugin);
+   * await client.start();
+   * ```
+   *
+   * Refer to the plugins documentation to check their configuration options and API.
    *
    * @param {string} id - Unique id of the plugin. Enables the registration of the
    *  same plugin factory under different ids.
@@ -207,23 +220,23 @@ class BasePluginManager {
     // This is subject to change in the future as we may want to dynamically
     // register new plugins during application lifetime.
     if (this.#node.status === 'inited') {
-      throw new Error(`[soundworks.PluginManager] Cannot register plugin (${id}) after "client.init()"`);
+      throw new DOMException(`Cannot execute 'register' on BasePluginManager: Host (client or server) has already been initialized`, 'InvalidAccessError');
     }
 
     if (!isString(id)) {
-      throw new Error(`[soundworks.PluginManager] Invalid argument, "pluginManager.register" first argument should be a string`);
+      throw new TypeError(`Cannot execute 'register' on BasePluginManager: Argument 1 must be a string`);
     }
 
     if (!isPlainObject(options)) {
-      throw new Error(`[soundworks.PluginManager] Invalid argument, "pluginManager.register" third optional argument should be an object`);
+      throw new TypeError(`Cannot execute 'register' on BasePluginManager: Argument 3 must be an object`);
     }
 
     if (!Array.isArray(deps)) {
-      throw new Error(`[soundworks.PluginManager] Invalid argument, "pluginManager.register" fourth optional argument should be an array`);
+      throw new TypeError(`Cannot execute 'register' on BasePluginManager: Argument 3 must be an array`);
     }
 
     if (this[kPluginManagerInstances].has(id)) {
-      throw new Error(`[soundworks:PluginManager] Plugin "${id}" already registered`);
+      throw new DOMException(`Cannot execute 'register' on BasePluginManager: A plugin with same id (${id}) has already registered`, 'NotSupportedError');
     }
 
     // We instantiate the plugin here, so that a plugin can register another one

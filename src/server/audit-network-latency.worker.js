@@ -13,7 +13,7 @@ let averageLatencyPeriod = 2;
 let intervalId = null;
 let meanLatency = 0;
 
-// workaround that sc-utils is pure emascript module
+// workaround that sc-utils is pure ecmascript module
 // 2024/09/06 - Just copy getTime implementation so that we don't even need the node_modules
 const start = hrtime.bigint();
 

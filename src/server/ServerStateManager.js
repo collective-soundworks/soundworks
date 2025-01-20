@@ -187,7 +187,7 @@ class ServerStateManager extends BaseStateManager {
    * This is automatically handled by the {@link Server} when a client connects.
    *
    * @param {number} nodeId - Unique id of the client node
-   * @param {object} transport - Transport mecanism to communicate with the
+   * @param {object} transport - Transport mechanism to communicate with the
    *  client. Must implement a basic EventEmitter API.
    *
    * @private
@@ -231,7 +231,7 @@ class ServerStateManager extends BaseStateManager {
             }
 
             if (hookAborted) {
-              throw new Error(`A create hook function explicitly aborted state creation by returninig 'null'`);
+              throw new Error(`A 'serverStateManagerCreateHook' explicitly aborted state creation of class '${className}' by returning 'null'`);
             }
 
             const state = new SharedStatePrivate(this, className, classDescription, stateId, initValues);
@@ -263,11 +263,11 @@ class ServerStateManager extends BaseStateManager {
               });
             }
           } catch (err) {
-            const msg = `Cannot execute 'create' on 'BaseStateManager' for class '${className}': ${err.message}`;
+            const msg = `${err.message}`;
             client.transport.emit(CREATE_ERROR, reqId, msg);
           }
         } else {
-          const msg = `Cannot execute 'create' on 'BaseStateManager' for class '${className}': class is not defined`;
+          const msg = `Undefined SharedStateClassName '${className}'`;
           client.transport.emit(CREATE_ERROR, reqId, msg);
         }
       },
@@ -287,7 +287,7 @@ class ServerStateManager extends BaseStateManager {
           } else if (stateId === null) {
             // if no `stateId` given, we try to find the first state with the given
             // `className` in the list, this allow a client to attach to a global
-            // state created by the server (or some persistant client) without
+            // state created by the server (or some persistent client) without
             // having to know the `stateId` (e.g. some global state...)
             for (let existingState of this.#sharedStatePrivateById.values()) {
               if (existingState.className === className) {
@@ -314,7 +314,7 @@ class ServerStateManager extends BaseStateManager {
               const isValid = filter.reduce((acc, key) => acc && keys.includes(key), true);
 
               if (!isValid) {
-                const msg = `[stateManager] Cannot attach, invalid filter (${filter.join(', ')}) for class "${className}"`;
+                const msg = `Invalid filter (${filter.join(', ')}) for class '${className}'`;
                 return client.transport.emit(ATTACH_ERROR, reqId, msg);
               }
             }
@@ -333,11 +333,11 @@ class ServerStateManager extends BaseStateManager {
             );
 
           } else {
-            const msg = `[stateManager] Cannot attach, no existing state for class "${className}" with stateId: "${stateId}"`;
+            const msg = `No existing state for class "${className}" with stateId: "${stateId}"`;
             client.transport.emit(ATTACH_ERROR, reqId, msg);
           }
         } else {
-          const msg = `[stateManager] Cannot attach, class "${className}" does not exists`;
+          const msg = `Undefined SharedStateClassName '${className}'`;
           client.transport.emit(ATTACH_ERROR, reqId, msg);
         }
       },
@@ -365,7 +365,7 @@ class ServerStateManager extends BaseStateManager {
 
         client.transport.emit(OBSERVE_RESPONSE, reqId, ...list);
       } else {
-        const msg = `[stateManager] Cannot observe class "${observedClassName}", class does not exists`;
+        const msg = `Undefined SharedStateClassName '${observedClassName}'`;
         client.transport.emit(OBSERVE_ERROR, reqId, msg);
       }
     });
@@ -387,7 +387,7 @@ class ServerStateManager extends BaseStateManager {
           classDescription,
         );
       } else {
-        const msg = `[stateManager] Cannot get class "${className}", class does not exists`;
+        const msg = `Undefined SharedStateClassName '${className}'`;
         client.transport.emit(GET_CLASS_DESCRIPTION_ERROR, reqId, msg);
       }
     });
@@ -425,7 +425,7 @@ class ServerStateManager extends BaseStateManager {
         }
 
         if (deleteState) {
-          if (instanceId !== state.creatorinstanceId) {
+          if (instanceId !== state.creatorInstanceId) {
             // send notification to other attached nodes
             attachedClient.transport.emit(`${DELETE_NOTIFICATION}-${state.id}-${instanceId}`);
           }
@@ -471,18 +471,22 @@ class ServerStateManager extends BaseStateManager {
    */
   defineClass(className, classDescription) {
     if (!isString(className)) {
-      throw new Error(`[stateManager.defineClass] Invalid class name "${className}", should be a string`);
-    }
-
-    if (this.#classes.has(className)) {
-      throw new Error(`[stateManager.defineClass] Cannot define class with name: "${className}", class already exists`);
+      throw new TypeError(`Cannot execute 'defineClass' on ServerStateManager: argument 1 must be of type SharedStateClassName`);
     }
 
     if (!isPlainObject(classDescription)) {
-      throw new Error(`[stateManager.defineClass] Invalid class description, should be an object`);
+      throw new TypeError(`Cannot execute 'defineClass' on ServerStateManager: argument 2 must be of type SharedStateClassDescription`);
     }
 
-    ParameterBag.validateDescription(classDescription);
+    if (this.#classes.has(className)) {
+      throw new DOMException(`Cannot execute 'defineClass' on ServerStateManager: SharedState class '${className}' is already defined`, 'NotSupportedError');
+    }
+
+    try {
+      ParameterBag.validateDescription(classDescription);
+    } catch (err) {
+      throw new TypeError(`Cannot execute 'defineClass' on ServerStateManager: ${err.message}`);
+    }
 
     this.#classes.set(className, clonedeep(classDescription));
     // create hooks list
@@ -500,7 +504,7 @@ class ServerStateManager extends BaseStateManager {
   }
 
   /**
-   * Delete a whole class of {@link ShareState}.
+   * Delete a whole class of {@link SharedState}.
    *
    * All {@link SharedState} instances created from this class will be deleted
    * as well, triggering their eventual `onDetach` and `onDelete` callbacks.
@@ -545,11 +549,11 @@ class ServerStateManager extends BaseStateManager {
    * Register a function for a given class of shared state class to be executed
    * when a state is created.
    *
-   * For example, this can be usefull to retrieve some initialization values stored
+   * For example, this can be useful to retrieve some initialization values stored
    * in the filesystem, given the value (e.g. a hostname) of one the parameters.
    *
    * The hook is associated to each states created from the given class name.
-   * Note that the hooks are executed server-side regarless the node on which
+   * Note that the hooks are executed server-side regardless the node on which
    * `create` has been called.
    *
    * Multiple hook can be added to the same `className`, they will be executed in
@@ -582,11 +586,11 @@ class ServerStateManager extends BaseStateManager {
    */
   registerCreateHook(className, createHook) {
     if (!this.#classes.has(className)) {
-      throw new TypeError(`Cannot execute 'registerCreateHook' on 'BaseStateManager': SharedState class '${className}' does not exists`);
+      throw new TypeError(`Cannot execute 'registerCreateHook' on BaseStateManager: SharedState class '${className}' is not defined`);
     }
 
     if (!isFunction(createHook)) {
-      throw new TypeError(`Cannot execute 'registerCreateHook' on 'BaseStateManager': argument 2 must be a function`);
+      throw new TypeError(`Cannot execute 'registerCreateHook' on BaseStateManager: argument 2 must be a function`);
     }
 
     const hooks = this.#createHooksByClassName.get(className);
@@ -599,11 +603,11 @@ class ServerStateManager extends BaseStateManager {
    * Register a function for a given class of shared state class to be executed
    * when a state is deleted.
    *
-   * For example, this can be usefull to store the values of a given shared state
+   * For example, this can be useful to store the values of a given shared state
    * in the filesystem.
    *
    * The hook is associated to each states created from the given class name.
-   * Note that the hooks are executed server-side regarless the node on which
+   * Note that the hooks are executed server-side regardless the node on which
    * `delete` has been called.
    *
    * Multiple hook can be added to the same `className`, they will be executed in
@@ -630,11 +634,11 @@ class ServerStateManager extends BaseStateManager {
    */
   registerDeleteHook(className, deleteHook) {
     if (!this.#classes.has(className)) {
-      throw new TypeError(`Cannot execute 'registerDeleteHook' on 'BaseStateManager': SharedState class '${className}' does not exists`);
+      throw new TypeError(`Cannot execute 'registerDeleteHook' on BaseStateManager: SharedState class '${className}' is not defined`);
     }
 
     if (!isFunction(deleteHook)) {
-      throw new TypeError(`Cannot execute 'registerDeleteHook' on 'BaseStateManager': argument 2 must be a function`);
+      throw new TypeError(`Cannot execute 'registerDeleteHook' on BaseStateManager: argument 2 must be a function`);
     }
 
     const hooks = this.#deleteHooksByClassName.get(className);
@@ -653,7 +657,7 @@ class ServerStateManager extends BaseStateManager {
    *
    * The hook is associated to each states created from the given class name and
    * executed on each update (i.e. `state.set(updates)`). Note that the hooks are
-   * executed server-side regarless the node on which `set` has been called and
+   * executed server-side regardless the node on which `set` has been called and
    * before the call of the `onUpdate` callback of the shared state.
    *
    * Multiple hook can be added to the same `className`, they will be executed in
@@ -685,11 +689,11 @@ class ServerStateManager extends BaseStateManager {
    */
   registerUpdateHook(className, updateHook) {
     if (!this.#classes.has(className)) {
-      throw new TypeError(`Cannot execute 'registerUpdateHook' on 'BaseStateManager': SharedState class '${className}' does not exists`);
+      throw new TypeError(`Cannot execute 'registerUpdateHook' on BaseStateManager: SharedState class '${className}' is not defined`);
     }
 
     if (!isFunction(updateHook)) {
-      throw new TypeError(`Cannot execute 'registerUpdateHook' on 'BaseStateManager': argument 2 must be a function`);
+      throw new TypeError(`Cannot execute 'registerUpdateHook' on BaseStateManager: argument 2 must be a function`);
     }
 
     const hooks = this.#updateHooksByClassName.get(className);

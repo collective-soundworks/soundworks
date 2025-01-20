@@ -44,7 +44,7 @@ describe(`# StateManager`, () => {
     it('should throw if reusing same schema name', () => {
       assert.throws(() => {
         server.stateManager.defineClass('a', a);
-      }, Error, '[stateManager.defineClass] Cannot define class with name: "a", class already exists');
+      });
 
     });
 

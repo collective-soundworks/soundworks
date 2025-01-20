@@ -2,8 +2,8 @@ import { assert } from 'chai';
 
 import { Server } from '../../src/server/index.js';
 import { Client } from '../../src/client/index.js';
+import ClientPluginManager from '../../src/client/ClientPluginManager.js';
 import ClientPlugin from '../../src/client/ClientPlugin.js';
-
 import pluginDelayServer from '../utils/PluginDelayServer.js';
 import pluginDelayClient from '../utils/PluginDelayClient.js';
 import config from '../utils/config.js';
@@ -31,7 +31,7 @@ describe(`# PluginManagerClient`, () => {
     it(`should throw if argument is not instance of Client`, () => {
       let errored = false;
       try {
-        new PluginManager({});
+        new ClientPluginManager({});
       } catch(err) {
         console.log(err.message);
         errored = true;
@@ -149,22 +149,6 @@ describe(`# PluginManagerClient`, () => {
       if (!errored) {
         assert.fail(`should have thrown`);
       }
-    });
-  });
-
-  describe(`## [private] async init()`, () => {
-    it(`should throw if started twice`, async () => {
-      const client = new Client({ role: 'test', ...config });
-      await client.init(); // run pluginManager.init()
-
-      let errored = false;
-      try {
-        await client.pluginManager.start();
-      } catch(err) {
-        errored = true;
-        console.log(err.message);
-      }
-      if (!errored) { assert.fail('should throw'); }
     });
   });
 

@@ -52,7 +52,7 @@ class ClientContextManager {
    */
   [kClientContextManagerRegister](context) {
     if (this.#contexts.has(context.name)) {
-      throw new Error(`[soundworks:context-manager] Context "${context.name}" already registered`);
+      throw new DOMException(`Cannot register '${context.name}': a Context with same name has already been registered`, 'NotSupportedError');
     }
 
     this.#contexts.add(context);
@@ -86,7 +86,7 @@ class ClientContextManager {
    */
   async get(contextName) {
     if (!this.#contexts.has(contextName)) {
-      throw new Error(`[soundworks:ClientContextManager] Can't get context "${contextName}", not registered`);
+      throw new ReferenceError(`Cannot execute 'get' on ClientContextManager: Context '${contextName}' is not registered`);
     }
 
     const context = this.#contexts.get(contextName);
@@ -104,7 +104,7 @@ class ClientContextManager {
         context[kClientContextStatus] = 'started';
       } catch (err) {
         context[kClientContextStatus] = 'errored';
-        throw new Error(err);
+        throw new Error(`Cannot execute 'get' on ClientContextManager: ${err.message}`);
       }
     }
 

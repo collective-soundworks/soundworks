@@ -6,7 +6,7 @@ const generateId = idGenerator();
 export const kServerClientToken = Symbol('soundworks:server-client-token');
 
 /**
- * Server-side representation of a `soundworks` client.
+ * Server-side representation of a client.
  *
  * @hideconstructor
  * @see {@link Client}
@@ -26,8 +26,9 @@ class ServerClient {
     this.#id = generateId.next().value;
     this.#uuid = uuid();
     this.#socket = socket;
+
     /**
-     * Is set in server[kServerOnSocketConnection]
+     * Set in `server[kServerOnSocketConnection]`
      * @private
      */
     this[kServerClientToken] = null;

@@ -74,17 +74,17 @@ class Client {
    */
   constructor(config) {
     if (!isPlainObject(config)) {
-      throw new Error(`[soundworks:Client] Cannot instanciate Client: argument 1 should be an object`);
+      throw new Error(`Cannot construct Client: argument 1 must be an object`);
     }
 
     if (!('role' in config) || !isString(config.role)) {
-      throw new Error('[soundworks:Client] Cannot instanciate Client: Invalid ClientConfig object: property "role" is not a string defined');
+      throw new Error('Cannot construct Client: Invalid ClientConfig object: Property "role" must be a string');
     }
 
     // for node clients env.https is required to open the websocket
     if (!isBrowser()) {
       if (!('env' in config)) {
-        throw new Error('[soundworks:Client] Cannot instanciate Client: `config.env: ClientEnvConfig { useHttps, serverAddress, port }` must be defined');
+        throw new Error(`Cannot construct Client: The 'env' property with type 'ClientEnvConfig' must be defined`);
       }
 
       let missing = [];
@@ -102,7 +102,7 @@ class Client {
       }
 
       if (missing.length) {
-        throw new Error(`[soundworks:Client] Invalid config object, "config.env" is missing: ${missing.join(', ')}`);
+        throw new Error(`Cannot construct Client: Invalid 'env' property of type 'ClientEnvConfig': Fields ${missing.join(', ')} are missing`);
       }
     }
 
@@ -164,8 +164,8 @@ class Client {
   /**
    * Session id of the client.
    *
-   * Incremeted positive integer generated and retrieved by the server during
-   * `client.init`. The counter is reset when the server restarts.
+   * Incremented positive integer generated and retrieved by the server during
+   * {@link Client#init}. The counter is reset when the server restarts.
    *
    * @type {number}
    */
@@ -296,11 +296,15 @@ class Client {
    * import { Client } from '@soundworks/core/client.js'
    *
    * const client = new Client(config);
-   * // optionnal explicit call of `init` before `start`
+   * // optional explicit call of `init` before `start`
    * await client.init();
    * await client.start();
    */
   async init() {
+    if (this.#status !== 'idle') {
+      throw new DOMException(`Cannot execute 'init' on Client: Lifecycle methods must be called in following order: init, start, stop`, 'InvalidAccessError');
+    }
+
     // init socket communications
     await this.#socket.init();
 
@@ -320,22 +324,9 @@ class Client {
         });
 
         this.#socket.addListener(CLIENT_HANDSHAKE_ERROR, (err) => {
-          let msg = ``;
-
-          switch (err.type) {
-            case 'invalid-client-type':
-              msg = `[soundworks:Client] ${err.message}`;
-              break;
-            case 'invalid-plugin-list':
-              msg = `[soundworks:Client] ${err.message}`;
-              break;
-            default:
-              msg = `[soundworks:Client] Undefined error: ${err.message}`;
-              break;
-          }
-
+          let msg = `Cannot execute 'init' on Client: ${err.message}`;
           // These are development errors, we can just hang. If we terminate the
-          // socket, a reload is triggered by the launcher which is bad in terms of DX
+          // socket, a reload is triggered by the launcher which is not good DX.
           reject(msg);
         });
 
@@ -381,12 +372,13 @@ class Client {
    * await client.start();
    */
   async start() {
+    // lazily call init for convenience
     if (this.#status === 'idle') {
       await this.init();
     }
 
-    if (this.#status === 'started') {
-      throw new Error(`[soundworks:Server] Cannot call "client.start()" twice`);
+    if (this.#status !== 'inited') {
+      throw new DOMException(`Cannot execute 'start' on Client: Lifecycle methods must be called in following order: init, start, stop`, 'InvalidAccessError');
     }
 
     await this.#contextManager[kClientContextManagerStart]();
@@ -397,7 +389,7 @@ class Client {
    * Stops all started contexts, plugins and terminates the socket connections.
    *
    * In most situations, you might not need to call this method. However, it can
-   * be usefull for unit testing or similar situations where you want to create
+   * be useful for unit testing or similar situations where you want to create
    * and delete several clients in the same process.
    *
    * @example
@@ -411,7 +403,7 @@ class Client {
    */
   async stop() {
     if (this.#status !== 'started') {
-      throw new Error(`[soundworks:Client] Cannot "client.stop()" before "client.start()"`);
+      throw new DOMException(`Cannot execute 'stop' on Client: Lifecycle methods must be called in following order: init, start, stop`, 'InvalidAccessError');
     }
 
     await this.#contextManager[kClientContextManagerStop]();
@@ -425,8 +417,8 @@ class Client {
    * Attach and retrieve the global audit state of the application.
    *
    * The audit state is a {@link SharedState} instance that keeps track of
-   * global informations about the application such as, the number of connected
-   * clients, network latency estimation, etc. It is usefull for controller client
+   * global information about the application such as, the number of connected
+   * clients, network latency estimation, etc. It is useful for controller client
    * roles to give the user an overview about the state of the application.
    *
    * The audit state is lazily attached to the client only if this method is called.
@@ -440,7 +432,7 @@ class Client {
    */
   async getAuditState() {
     if (this.#status === 'idle') {
-      throw new Error(`[soundworks.Client] Cannot access audit state before "client.init()"`);
+      throw new DOMException(`Cannot execute 'getAuditState' on Server: 'init' must be called first`, 'InvalidAccessError');
     }
 
     if (this.#auditState === null) {
