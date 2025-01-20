@@ -6,6 +6,7 @@ import os from 'node:os';
 
 import {
   isPlainObject,
+  isString,
   counter,
   getTime,
 } from '@ircam/sc-utils';
@@ -66,7 +67,7 @@ import {
 } from '../common/constants.js';
 import VERSION from '../common/version.js';
 
-let _dbNamespaces = new Set();
+const dbNamespaces = new Set();
 
 /** @private */
 const DEFAULT_CONFIG = {
@@ -155,18 +156,18 @@ class Server {
    */
   constructor(config) {
     if (!isPlainObject(config)) {
-      throw new Error(`[soundworks:Server] Cannot construct 'Server': Parameter 1 must be an object`);
+      throw new TypeError(`Cannot construct 'Server': Parameter 1 must be an object`);
     }
 
-    this.#config = merge({}, DEFAULT_CONFIG, config);
+    config = merge({}, DEFAULT_CONFIG, config);
 
     // ---------------------------------------------------------------------
     // Deprecation checks for config
     // ---------------------------------------------------------------------
 
     // `target` renamed to `runtime`
-    for (let role in this.#config.app.clients) {
-      const clientConfig = this.#config.app.clients[role];
+    for (let role in config.app.clients) {
+      const clientConfig = config.app.clients[role];
 
       if (clientConfig.target) {
         logger.deprecated('ClientDescription#target', 'ClientDescription#runtime (or run `npx soundworks --upgrade-config` to upgrade your config files)', '4.0.0-alpha.29');
@@ -176,23 +177,23 @@ class Server {
     }
 
     // `env.subpath` to `env.baseUrl`
-    if ('subpath' in this.#config.env) {
+    if ('subpath' in config.env) {
       logger.deprecated('ServerConfig#subpath', 'ServerConfig#baseUrl (or run `npx soundworks --upgrade-config` to upgrade your config files)', '4.0.0-alpha.29');
-      this.#config.env.baseUrl = this.#config.env.subpath;
-      delete this.#config.env.subpath;
+      config.env.baseUrl = config.env.subpath;
+      delete config.env.subpath;
     }
 
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
 
-    if (Object.keys(this.#config.app.clients).length === 0) {
-      throw new Error(`[soundworks:Server] Cannot construct 'Server': At least one ClientDescription must be declared in 'config.app.clients'`);
+    if (Object.keys(config.app.clients).length === 0) {
+      throw new DOMException(`Cannot construct 'Server': At least one ClientDescription must be declared in 'config.app.clients'`, 'NotSupportedError');
     }
 
-    for (let name in this.#config.app.clients) {
+    for (let name in config.app.clients) {
       // runtime property is mandatory
-      if (!['node', 'browser'].includes(this.#config.app.clients[name].runtime)) {
-        throw new Error(`[soundworks:Server] Cannot construct 'Server': Invalid 'ClientDescription' for client '${name}': 'runtime' property must be either 'node' or 'browser'`);
+      if (!['node', 'browser'].includes(config.app.clients[name].runtime)) {
+        throw new TypeError(`Cannot construct 'Server': Invalid 'ClientDescription' for client '${name}': 'runtime' property must be either 'node' or 'browser'`);
       }
     }
 
@@ -200,31 +201,32 @@ class Server {
     // [2024-05-29] Override default `config.env.serverAddress`` provided from
     // template `loadConfig` to '' so that browser clients can default to
     // window.location.hostname and node clients to `127.0.0.1`
-    if (process.env.ENV === undefined && this.config.env.serverAddress === '127.0.0.1') {
-      this.config.env.serverAddress = '';
+    if (process.env.ENV === undefined && config.env.serverAddress === '127.0.0.1') {
+      config.env.serverAddress = '';
     }
 
-    if (this.#config.env.useHttps && this.#config.env.httpsInfos !== null) {
-      const httpsInfos = this.#config.env.httpsInfos;
+    if (config.env.useHttps && config.env.httpsInfos !== null) {
+      const httpsInfos = config.env.httpsInfos;
 
-      if (!isPlainObject(this.#config.env.httpsInfos)) {
-        throw new Error(`[soundworks:Server] Invalid "env.httpsInfos" config, should be null or object { cert, key }`);
+      if (!isPlainObject(config.env.httpsInfos)) {
+        throw new TypeError(`Cannot construct 'Server': Invalid 'ServerEnvConfig': 'httpsInfos' must be an object: { cert, key }`);
       }
 
       if (!('cert' in httpsInfos) || !('key' in httpsInfos)) {
-        throw new Error(`[soundworks:Server] Invalid "env.httpsInfos" config, should contain both "cert" and "key" entries`);
+        throw new TypeError(`Cannot construct 'Server':  Invalid 'ServerEnvConfig': 'httpsInfos' must contain both "cert" and "key" entries`);
       }
-      // @todo - move that to constructor
+
       if (httpsInfos.cert !== null && !fs.existsSync(httpsInfos.cert)) {
-        throw new Error(`[soundworks:Server] Invalid "env.httpsInfos" config, "cert" file not found`);
+        throw new DOMException(`Cannot construct 'Server':  Invalid 'ServerEnvConfig': 'httpsInfos.cert' file not found`, 'NotFoundError');
       }
 
       if (httpsInfos.key !== null && !fs.existsSync(httpsInfos.key)) {
-        throw new Error(`[soundworks:Server] Invalid "env.httpsInfos" config, "key" file not found`);
+        throw new DOMException(`Cannot construct 'Server':  Invalid 'ServerEnvConfig': 'httpsInfos.key' file not found`, 'NotFoundError');
       }
     }
 
     // private
+    this.#config = config;
     this.#version = VERSION;
     this.#sockets = new ServerSockets(this, { path: 'socket' });
     this.#pluginManager = new ServerPluginManager(this);
@@ -294,18 +296,19 @@ class Server {
   }
 
   /**
-   * Instance of the express router.
+   * Instance of the router if any.
    *
    * The router can be used to open new route, for example to expose a directory
    * of static assets (in default soundworks applications only the `public` is exposed).
    *
-   * @see {@link https://github.com/expressjs/express}
    * @example
    * import { Server } from '@soundworks/core/server.js';
-   * import express from 'express';
+   * import { loadConfig, configureHttpRouter } from '@soundworks/helpers/server.js';
    *
-   * // create the soundworks server instance
-   * const server = new Server(config);
+   * // create the server instance
+   * const server = new Server(loadConfig());
+   * // configure the express router provided by the helpers
+   * configureHttpRouter(server);
    *
    * // expose assets located in the `soundfiles` directory on the network
    * server.router.use('/soundfiles', express.static('soundfiles')));
@@ -316,18 +319,28 @@ class Server {
 
   set router(router) {
     this.#router = router;
+
+    if (this.httpServer) {
+      this.httpServer.on('request', router);
+    } else {
+      // register router on HTTP server when ready
+      this.onStatusChange(status => {
+        if (status === 'http-server-ready') {
+          this.httpServer.on('request', router);
+        }
+      });
+    }
   }
 
   /**
-   * Raw Node.js `http` or `https` instance
+   * Instance of the Node.js `http.Server` or `https.Server`
    *
-   * @see {@link https://nodejs.org/api/http.html}
-   * @see {@link https://nodejs.org/api/https.html}
+   * @see {@link https://nodejs.org/api/http.html#class-httpserver}
+   * @see {@link https://nodejs.org/api/https.html#class-httpsserver}
    */
   get httpServer() {
     return this.#httpServer;
   }
-
 
   /**
    * Simple key / value filesystem database with Promise based Map API.
@@ -428,7 +441,8 @@ class Server {
    */
   async getAuditState() {
     if (this.#status === 'idle') {
-      throw new Error(`[soundworks.Server] Cannot access audit state before init`);
+      // DomException InvalidAccessError
+      throw new DOMException(`Cannot execute 'getAuditState' on Server: 'init' must be called first`, 'InvalidAccessError');
     }
 
     return this.#auditState;
@@ -469,6 +483,10 @@ class Server {
    * await server.start(); // init is called implicitly
    */
   async init() {
+    if (this.#status !== 'idle') {
+      throw new DOMException(`Cannot execute 'init' on Server: Lifecycle methods must be called in following order: init, start, stop`, 'InvalidAccessError');
+    }
+
     // init `ServerStateManager` and global "audit" state
     this.#stateManager[kStateManagerInit](SERVER_ID, new EventEmitter());
 
@@ -520,16 +538,13 @@ class Server {
    * await server.start();
    */
   async start() {
+    // lazily call init for convenience
     if (this.#status === 'idle') {
       await this.init();
     }
 
-    if (this.#status === 'started') {
-      throw new Error(`[soundworks:Server] Cannot call "server.start()" twice`);
-    }
-
     if (this.#status !== 'inited') {
-      throw new Error(`[soundworks:Server] Cannot "server.start()" before "server.init()"`);
+      throw new DOMException(`Cannot execute 'start' on Server: Lifecycle methods must be called in following order: init, start, stop`, 'InvalidAccessError');
     }
 
     // state `ServerContextManager`
@@ -583,7 +598,7 @@ class Server {
    */
   async stop() {
     if (this.#status !== 'started') {
-      throw new Error(`[soundworks:Server] Cannot stop() before start()`);
+      throw new DOMException(`Cannot execute 'stop' on Server: Lifecycle methods must be called in following order: init, start, stop`, 'InvalidAccessError');
     }
 
     await this.#contextManager[kServerContextManagerStop]();
@@ -668,7 +683,7 @@ class Server {
       const { role, version, registeredPlugins } = payload;
 
       if (!roles.includes(role)) {
-        console.error(`[soundworks.Server] A client with invalid role ("${role}") attempted to connect`);
+        console.error(`A client with undefined role ("${role}") attempted to connect`);
 
         socket.send(CLIENT_HANDSHAKE_ERROR, {
           type: 'invalid-client-type',
@@ -822,12 +837,12 @@ class Server {
    * @private
    */
   createNamespacedDb(namespace = null) {
-    if (namespace === null || !(typeof namespace === 'string')) {
-      throw new Error(`[soundworks:Server] Invalid namespace for ".createNamespacedDb(namespace)", namespace is mandatory and should be a string`);
+    if (!isString(namespace)) {
+      throw new TypeError(`Cannot execute "createNamespacedDb(namespace)" on Server: argument 1 must be a string`);
     }
 
-    if (_dbNamespaces.has(namespace)) {
-      throw new Error(`[soundworks:Server] Invalid namespace for ".createNamespacedDb(namespace)", namespace "${namespace}" already exists`);
+    if (dbNamespaces.has(namespace)) {
+      throw new DOMException(`Cannot execute "createNamespacedDb(namespace)" on Server: namespace "${namespace}" already exists`, 'NotSupportedError');
     }
 
     // KeyvFile uses fs-extra.outputFile internally so we don't need to create

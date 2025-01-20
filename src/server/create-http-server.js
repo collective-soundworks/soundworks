@@ -13,7 +13,7 @@ import logger from '../common/logger.js';
 
 /**
  * @private
- * @return {httpServer}
+ * @return {HttpServer|HttpsServer}
  */
 export async function createHttpServer(server) {
   const serverConfig = server.config;
