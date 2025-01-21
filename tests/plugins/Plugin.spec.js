@@ -42,6 +42,38 @@ describe('# Plugin', () => {
 
       await server.stop();
     });
+
+    it('should throw if server-side plugin is registered client-side', async () => {
+      const server = new Server(config);
+      server.pluginManager.register('delay', ServerPluginDelay);
+
+      await server.start();
+      const client = new Client({ role: 'test', ...config });
+
+      let errored = false;
+      try {
+        client.pluginManager.register('delay', ServerPluginDelay);
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      await server.stop();
+      assert.isTrue(errored);
+    });
+
+    it('should throw if client-side plugin is registered server-side', async () => {
+      const server = new Server(config);
+      let errored = false;
+      try {
+        server.pluginManager.register('delay', ClientPluginDelay);
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      assert.isTrue(errored);
+    });
   });
 
   describe(`## [client] Plugin.state propagation`, () => {
