@@ -725,8 +725,12 @@ class Server {
 
       this.#onClientConnectCallbacks.forEach(callback => callback(client));
 
-      const { id, uuid } = client;
-      socket.send(CLIENT_HANDSHAKE_RESPONSE, { id, uuid, version: this.#version });
+      socket.send(CLIENT_HANDSHAKE_RESPONSE, {
+        id: client.id,
+        uuid: client.uuid,
+        token: client[kServerClientToken],
+        version: this.#version,
+      });
     });
   }
 
