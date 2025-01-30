@@ -1,10 +1,15 @@
-import { Server } from '../../src/server/index.js';
-import { Client } from '../../src/client/index.js';
+import fs from 'node:fs';
+
+import { Server, version as serverVersion } from '../../src/server/index.js';
+import { Client, version as clientVersion } from '../../src/client/index.js';
 import { kClientVersionTest } from '../../src/client/Client.js';
 
-import config from '../utils/config.js';
+import { assert } from 'chai';
 
-describe(`# Client / Server test versions discrepencies`, () => {
+import config from '../utils/config.js';
+const { version } = JSON.parse(fs.readFileSync('package.json').toString());
+
+describe(`# Client / Server test versions discrepancies`, () => {
   it(`client and server should check soundworks version used`, async () => {
     // The warning message is logged twice as both server and client will produce it
     const server = new Server(config);
@@ -19,5 +24,10 @@ describe(`# Client / Server test versions discrepencies`, () => {
     await client.start();
     await client.stop();
     await server.stop();
+  });
+
+  it('should properly export version', () => {
+    assert.equal(serverVersion, version);
+    assert.equal(clientVersion, version);
   });
 });
