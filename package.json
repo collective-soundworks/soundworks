@@ -49,7 +49,7 @@
     "test": "npx mocha tests/*/*.spec.js",
     "test:only": "npx mocha",
     "types": "rm -rf types && tsc",
-    "preversion": "node ./misc/scripts/generate-version-file.js $npm_new_version && npm run api",
+    "preversion": "node ./misc/scripts/generate-version-file.js $npm_new_version && npm run types",
     "postversion": "node ./misc/scripts/check-changelog.js && git commit -am \"$npm_new_version\" --allow-empty"
   },
   "dependencies": {
