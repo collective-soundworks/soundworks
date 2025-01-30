@@ -1,7 +1,7 @@
 export const kServerClientToken: unique symbol;
 export default ServerClient;
 /**
- * Server-side representation of a `soundworks` client.
+ * Server-side representation of a client.
  *
  * @hideconstructor
  * @see {@link Client}
@@ -37,7 +37,7 @@ declare class ServerClient {
      */
     get socket(): ServerSocket;
     /**
-     * Is set in server[kServerOnSocketConnection]
+     * Set in `server[kServerOnSocketConnection]`
      * @private
      */
     private [kServerClientToken];

@@ -10,11 +10,11 @@ export default ServerPlugin;
  * have both a client-side and a server-side part.
  *
  * See [https://soundworks.dev/guide/ecosystem](https://soundworks.dev/guide/ecosystem)
- * for more informations on the available plugins.
+ * for more information on the available plugins.
  *
  * _Creating new plugins should be considered an advanced usage._
  *
- * @extends BasePlugin
+ * @extends {BasePlugin}
  * @inheritdoc
  */
 declare class ServerPlugin extends BasePlugin {

@@ -45,7 +45,7 @@ type SharedStateParameterDescription = {
     /**
      * - When set to `false`, an update will
      * trigger the propagation of a parameter even when its value didn't change.
-     * This option provides a sort of middle ground between the default bahavior
+     * This option provides a sort of middle ground between the default behavior
      * (e.g. where only changed values are propagated) and the behavior of the `event`
      * option (which has no state per se). Hence, setting this options to `false` if
      * `event=true` makes no sens.
@@ -55,9 +55,9 @@ type SharedStateParameterDescription = {
      * - When set to `true`, an update will
      * trigger the update listeners immediately on the node that generated the update,
      * before propagating the change on the network.
-     * This option is usefull in cases the network would introduce a noticeable
+     * This option is useful in cases the network would introduce a noticeable
      * latency on the client.
-     * If for some reason the value is overriden server-side (e.g. in an `updateHook`)
+     * If for some reason the value is overridden server-side (e.g. in an `updateHook`)
      * the listeners will be called again when the "real" value is received.
      */
     immediate?: boolean;
@@ -69,7 +69,7 @@ type SharedStateParameterDescription = {
     /**
      * - When set to true, the parameter is never
      * propagated on the network (hence it is no longer a shared parameter :). This
-     * is usefull to declare some common parameter (e.g. some interface state) that
+     * is useful to declare some common parameter (e.g. some interface state) that
      * don't need to be shared but to stay in the shared state API paradigm.
      */
     local?: boolean;

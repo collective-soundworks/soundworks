@@ -47,7 +47,7 @@ declare class BasePlugin {
     /**
      * Type of the plugin, i.e. the ClassName.
      *
-     * Usefull to do perform some logic based on certain types of plugins without
+     * Useful to do perform some logic based on certain types of plugins without
      * knowing under which `id` they have been registered. (e.g. creating some generic
      * views, etc.)
      *
@@ -64,11 +64,11 @@ declare class BasePlugin {
     /**
      * Start the plugin.
      *
-     * This method is automatically called during the client or server `init()` lifecyle
+     * This method is automatically called during the client or server `init()` lifecycle
      * step. After `start()` is fulfilled the plugin should be ready to use.
      *
      * @example
-     * // server-side couterpart of a plugin that creates a dedicated global shared
+     * // server-side counterpart of a plugin that creates a dedicated global shared
      * // state on which the server-side part can attach.
      * class MyPlugin extends ServerPlugin {
      *   constructor(server, id) {
@@ -97,10 +97,10 @@ declare class BasePlugin {
     /**
      * Stop the plugin.
      *
-     * This method is automatically called during the client or server `stop()` lifecyle step.
+     * This method is automatically called during the client or server `stop()` lifecycle step.
      *
      * @example
-     * // server-side couterpart of a plugin that creates a dedicated global shared
+     * // server-side counterpart of a plugin that creates a dedicated global shared
      * // state on which the client-side part can attach.
      * class MyPlugin extends ServerPlugin {
      *   constructor(server, id) {

@@ -6,12 +6,12 @@ export default ClientPluginManager;
  * and before {@link Client#start} or {@link Server#start}
  * to be properly initialized.
  *
- * In some sitautions, you might want to register the same plugin factory several times
+ * In some situations, you might want to register the same plugin factory several times
  * using different ids (e.g. for watching several parts of the file system, etc.).
  *
  * Refer to the plugins' documentation for more precise examples, and the specific API
  * they expose. See [https://soundworks.dev/guide/ecosystem](https://soundworks.dev/guide/ecosystem)
- * for more informations on the available plugins.
+ * for more information on the available plugins.
  *
  * See {@link Client#pluginManager}
  *
@@ -55,13 +55,38 @@ export default ClientPluginManager;
  *
  * @extends BasePluginManager
  * @inheritdoc
- * @hideconstructor
+ * @template T
  */
-declare class ClientPluginManager extends BasePluginManager {
+declare class ClientPluginManager<T> extends BasePluginManager {
     /**
      * @param {Client} client - The soundworks client instance.
+     * @hideconstructor
      */
     constructor(client: Client);
+    /**
+     * Register a plugin into the manager.
+     *
+     * _A plugin must always be registered both on client-side and on server-side_
+     *
+     * Refer to the plugin documentation to check its options and proper way of
+     * registering it.
+     *
+     * @param {string} id - Unique id of the plugin. Enables the registration of the
+     *  same plugin factory under different ids.
+     * @param {T<ClientPlugin>} ctor - The client-side Class of the plugin.
+     * @param {object} [options={}] - Options to configure the plugin.
+     * @param {array} [deps=[]] - List of plugins' names the plugin depends on, i.e.
+     *  the plugin initialization will start only after the plugins it depends on are
+     *  fully started themselves.
+     * @see {@link ClientPluginManager#register}
+     * @see {@link ServerPluginManager#register}
+     * @example
+     * // client-side
+     * client.pluginManager.register('user-defined-id', pluginFactory);
+     * // server-side
+     * server.pluginManager.register('user-defined-id', pluginFactory);
+     */
+    register(id: string, ctor: T<ClientPlugin>, options?: object, deps?: any[]): void;
     /**
      * Retrieve an fully started instance of a registered plugin.
      *
@@ -78,10 +103,9 @@ declare class ClientPluginManager extends BasePluginManager {
      * in a future release._
      *
      * @param {string} id - Id of the plugin as defined when registered.
-     * @returns {Promise<ClientPlugin>}
-     * @see {@link ClientPluginManager#onStateChange}
+     * @returns {Promise<T<ClientPlugin>>}
      */
-    get(id: string): Promise<ClientPlugin>;
+    get(id: string): Promise<T<ClientPlugin>>;
 }
 import BasePluginManager from '../common/BasePluginManager.js';
 import ClientPlugin from './ClientPlugin.js';

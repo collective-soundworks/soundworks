@@ -1,15 +1,15 @@
 export const kServerContextStatus: unique symbol;
 export default ServerContext;
 /**
- * Base class to extend in order to implment the optionnal server-side counterpart
+ * Base class to extend in order to implement the optional server-side counterpart
  * of a {@link ClientContext}. If not defined, a default context will be created
  * and used by the server.
  *
  * In the `soundworks` paradigm, a client has a "role" (e.g. _player_, _controller_)
  * see {@link Client#role}) and can be in different "contexts" (e.g. different
  * part of the experience such as sections of a music piece, etc.). The
- * {@link ClientContext} and optionnal {@link ServerContext} abstractions provide
- * a simple and unified way to model these reccuring aspects of an application.
+ * {@link ClientContext} and optional {@link ServerContext} abstractions provide
+ * a simple and unified way to model these recurring aspects of an application.
  *
  * If a `ServerContext` is recognized as the server-side counterpart of a
  * {@link ClientContext}, based on their respective `name` (see {@link ClientContext#name}
@@ -17,9 +17,9 @@ export default ServerContext;
  * by the ServerContext will be executed at the beginning of the
  * {@link ClientContext#enter} and {@link ClientContext#exit} methods.
  *
- * The example above shows how soundwords handles (and guarantees) the order of
- * the `enter()` steps between the client-side and the server-side parts of the
- * context. The same goes for the `exit()` method.
+ * The example above shows how the order of  the `enter()` steps between the client-side
+ * and the server-side parts of a `context` is handled and guaranteed. The same goes for
+ * the `exit()` method.
  *
  * ```js
  * // client-side
@@ -37,10 +37,10 @@ export default ServerContext;
  *   }
  * }
  *
- * // Instanciate the context (assuming the `client.role` is 'test')
+ * // Instantiate the context (assuming the `client.role` is 'test')
  * const myContext = new MyContext(client);
  *
- * // At some point in the application, the client enters the context trigerring
+ * // At some point in the application, the client enters the context triggering
  * // the steps 1 to 5 described in the client-side and server-side `enter()`
  * // implementations. Note that the server-side `enter()` is never called manually.
  * await myContext.enter();
@@ -67,8 +67,8 @@ export default ServerContext;
 declare class ServerContext {
     /**
      * @param {Server} server - The soundworks server instance.
-     * @param {string|string[]} [roles=[]] - Optionnal list of client roles that can
-     *  use this context. In large applications, this may be usefull to guarantee
+     * @param {string|string[]} [roles=[]] - Optional list of client roles that can
+     *  use this context. In large applications, this may be useful to guarantee
      *  that a context can be consumed only by specific client roles, throwing an
      *  error if any other client role tries to use it. If empty, no access policy
      *  will be used.
@@ -100,7 +100,7 @@ declare class ServerContext {
      */
     get status(): string;
     /**
-     * Optionnal user-defined name of the context (defaults to the class name).
+     * Optional user-defined name of the context (defaults to the class name).
      *
      * The context manager will match the client-side and server-side contexts based
      * on this name. If the {@link ServerContextManager} don't find a corresponding
@@ -118,11 +118,11 @@ declare class ServerContext {
      */
     get name(): string;
     /**
-     * Start the context. This method is lazilly called when a client enters the
+     * Start the context. This method is lazily called when a client enters the
      * context for the first time (cf. ${ServerContext#enter}). If you know some
      * some heavy and/or potentially long job has to be done  when starting the context
      * (e.g. connect to a database, parsing a long file) it may be a good practice
-     * to call it explicitely.
+     * to call it explicitly.
      *
      * This method should be implemented to perform operations that are valid for the
      * whole lifetime of the context, regardless a client enters or exits the context.
@@ -157,7 +157,7 @@ declare class ServerContext {
      * Enter the context. Implement this method to define the logic that should be
      * done (e.g. creating a shared state, etc.) when a client enters the context.
      *
-     * If the context has not been started yet, the `start` method is implicitely executed.
+     * If the context has not been started yet, the `start` method is implicitly executed.
      *
      * _WARNING: this method should never be called manually._
      *

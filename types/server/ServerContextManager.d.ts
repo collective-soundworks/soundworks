@@ -12,11 +12,12 @@ export default ServerContextManager;
  *
  * _WARNING: Most of the time, you should not have to manipulate the context manager directly._
  *
- * @hideconstructor
+ * @template T
  */
-declare class ServerContextManager {
+declare class ServerContextManager<T> {
     /**
      * @param {Server} server - Instance of the soundworks server.
+     * @hideconstructor
      */
     constructor(server: Server);
     /**
@@ -24,9 +25,10 @@ declare class ServerContextManager {
      *
      * _WARNING: Most of the time, you should not have to call this method manually._
      *
-     * @param {ServerContext#name} contextName - Name of the context.
+     * @param {string} contextName - Name of the context.
+     * @return {Promise<T<ServerContext>>}
      */
-    get(contextName: any): Promise<any>;
+    get(contextName: string): Promise<T<ServerContext>>;
     /**
      * Register a context in the manager.
      * This method is called in the {@link ServerContext} constructor
@@ -65,16 +67,9 @@ declare class ServerContextManager {
      * @private
      */
     private [kServerContextManagerRemoveClient];
-    [kServerContextManagerContexts]: ContextCollection;
+    /** @private */
+    private [kServerContextManagerContexts];
     #private;
 }
-/** @private */
-declare class ContextCollection {
-    get length(): number;
-    add(context: any): void;
-    has(name: any): boolean;
-    get(name: any): any;
-    map(func: any): any[];
-    filter(func: any): any[];
-    #private;
-}
+import ServerContext from './ServerContext.js';
+import Server from './Server.js';

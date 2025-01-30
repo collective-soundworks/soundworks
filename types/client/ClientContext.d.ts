@@ -6,7 +6,7 @@ export default ClientContext;
  * In the `soundworks` paradigm, a client has a "role" (e.g. _player_, _controller_)
  * see {@link Client#role}) and can be in different "contexts" (e.g. different
  * part of the experience such as sections of a music piece, etc.). This class
- * provides a simple and unified way to model these reccuring aspects of an application.
+ * provides a simple and unified way to model these recurring aspects of an application.
  *
  * You can also think of a `Context` as a state of a state machine from which a
  * client can `enter()` or `exit()` (be aware that `soundworks` does not provide
@@ -59,7 +59,7 @@ declare class ClientContext {
      */
     get status(): "idle" | "inited" | "started" | "errored";
     /**
-     * Optionnal user-defined name of the context (defaults to the class name).
+     * Optional user-defined name of the context (defaults to the class name).
      *
      * The context manager will match the client-side and server-side contexts based
      * on this name. If the {@link ServerContextManager} don't find a corresponding
@@ -77,10 +77,10 @@ declare class ClientContext {
      */
     readonly get name(): string;
     /**
-     * Start the context. This method is lazilly called when the client enters the
+     * Start the context. This method is lazily called when the client enters the
      * context for the first time (cf. ${ClientContext#enter}). If you know some
      * some heavy and/or potentially long job has to be done  when starting the context
-     * (e.g. call to a web service) it may be a good practice to call it explicitely.
+     * (e.g. call to a web service) it may be a good practice to call it explicitly.
      *
      * This method should be implemented to perform operations that are valid for the
      * whole lifetime of the context, regardless the client enters or exits the context.
@@ -118,7 +118,7 @@ declare class ClientContext {
      * {@link ClientContext#name}), the corresponding server-side `enter()` method
      * will be executed before the returned Promise is fulfilled.
      *
-     * If the context has not been started yet, the `start` method is implicitely executed.
+     * If the context has not been started yet, the `start` method is implicitly executed.
      *
      * @returns {Promise<void>} - Promise that resolves when the context is entered.
      * @example

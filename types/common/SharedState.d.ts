@@ -24,7 +24,7 @@ export type sharedStateDeleteOnUpdateCallback = () => any;
  */
 /**
  * The `SharedState` is one of the most important and versatile abstraction provided
- * by `soundworks`. It represents a set of parameters that are synchronized accross
+ * by `soundworks`. It represents a set of parameters that are synchronized across
  * every nodes of the application (clients and server) that declared some interest
  * to the shared state.
  *
@@ -151,7 +151,7 @@ declare class SharedState {
     /**
      * Get the value of a parameter of the state.
      *
-     * Be aware that in case of 'any' typethe returned value is deeply copied.
+     * Be aware that in case of 'any' type, the returned value is deeply copied.
      * While this prevents from pollution of the state by mutating the reference,
      * this can also lead to performance issues when the parameter contains large
      * data. In such cases you should use the {@link SharedState#getUnsafe} method
@@ -168,7 +168,7 @@ declare class SharedState {
      * Get an unsafe reference to the value of a parameter of the state.
      *
      * Similar to `get` but returns a reference to the underlying value in case of
-     * `any` type. Can be usefull if the underlying value is large (e.g. sensors
+     * `any` type. Can be useful if the underlying value is large (e.g. sensors
      * recordings, etc.) and deep cloning expensive. Be aware that if changes are
      * made on the returned object, the state of your application will become
      * inconsistent.
@@ -194,7 +194,7 @@ declare class SharedState {
      * Get all the key / value pairs of the state.
      *
      * Similar to `getValues` but returns a reference to the underlying value in
-     * case of `any` type. Can be usefull if the underlying value is big (e.g.
+     * case of `any` type. Can be useful if the underlying value is big (e.g.
      * sensors recordings, etc.) and deep cloning expensive. Be aware that if
      * changes are made on the returned object, the state of your application will
      * become inconsistent.
@@ -236,13 +236,13 @@ declare class SharedState {
      *
      * All nodes attached to the state will be detached, triggering any registered
      * `onDetach` callbacks. The creator of the state will also have its own `onDelete`
-     * callback triggered. The local `onDeatch` and `onDelete` callbacks will be
+     * callback triggered. The local `onDetach` and `onDelete` callbacks will be
      * executed *before* the returned Promise resolves
      *
      * @throws Throws if the method is called by a node which is not the owner of
      * the state.
      * @example
-     * const state = await client.stateManaager.create('my-class-name');
+     * const state = await client.stateManager.create('my-class-name');
      * // later
      * await state.delete();
      */

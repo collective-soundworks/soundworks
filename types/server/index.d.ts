@@ -1,9 +1,10 @@
 export { default as Server } from "./Server.js";
+export { default as ServerPlugin } from "./ServerPlugin.js";
 export { default as ServerContext } from "./ServerContext.js";
 /**
  * The role of the client in the application.
  *
- * For browser client, this infomation is used to create the URL endpoint.
+ * For browser client, this information is used to create the URL endpoint.
  */
 export type ClientRole = string;
 export type ClientDescription = {
@@ -18,15 +19,11 @@ export type ClientDescription = {
     default?: boolean;
 };
 /**
- * Configuration object for the server.
+ * Application configuration object.
  */
-export type ServerConfig = {
+export type ServerAppConfig = {
     /**
-     * - Application configuration object.
-     */
-    app?: object;
-    /**
-     * <ClientRole, ClientDescription>} app.clients - Definition of the application clients.
+     * <ClientRole, ClientDescription>} clients - Definition of the application clients.
      */
     "": object;
     /**
@@ -37,14 +34,21 @@ export type ServerConfig = {
      * - Name of the author.
      */
     author?: string;
+};
+/**
+ * Environment configuration object.
+ */
+export type ServerEnvConfig = objecy;
+/**
+ * Configuration object for the server.
+ */
+export type ServerConfig = {
+    /**
+     * - Application configuration object.
+     */
+    app: AppConfig;
     /**
      * - Environment configuration object.
      */
-    env?: {
-        useHttps: boolean;
-        serverAddress: string;
-        port: number;
-        httpsInfos?: obj;
-        subpath?: string;
-    };
+    env: ServerEnvConfig;
 };

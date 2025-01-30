@@ -1,38 +1,3 @@
-export default SharedStateCollection;
-/**
- * Callback to execute when an update is triggered on one of the shared states
- * of the collection.
- */
-export type sharedStateCollectionOnUpdateCallback = (state: SharedState, newValues: any, oldValues: any) => any;
-/**
- * Delete the registered {@link sharedStateCollectionOnUpdateCallback} when executed.
- */
-export type sharedStateCollectionDeleteOnUpdateCallback = () => any;
-/**
- * Callback to execute when an new shared state is added to the collection
- */
-export type sharedStateCollectionOnAttachCallback = (state: SharedState) => any;
-/**
- * Delete the registered {@link sharedStateCollectionOnAttachCallback} when executed.
- */
-export type sharedStateCollectionDeleteOnAttachCallback = () => any;
-/**
- * Callback to execute when an shared state is removed from the collection, i.e.
- * has been deleted by its owner.
- */
-export type sharedStateCollectionOnDetachCallback = (state: SharedState) => any;
-/**
- * Delete the registered {@link sharedStateCollectionOnDetachCallback} when executed.
- */
-export type sharedStateCollectionDeleteOnDetachCallback = () => any;
-/**
- * Callback to execute when any state of the collection is attached, removed, or updated.
- */
-export type sharedStateCollectionOnChangeCallback = () => any;
-/**
- * Delete the registered {@link sharedStateCollectionOnChangeCallback}.
- */
-export type sharedStateCollectionDeleteOnChangeCallback = () => any;
 /**
  * Callback to execute when an update is triggered on one of the shared states
  * of the collection.
@@ -82,11 +47,47 @@ export type sharedStateCollectionDeleteOnChangeCallback = () => any;
  *
  * @callback sharedStateCollectionDeleteOnChangeCallback
  */
+export const kSharedStateCollectionInit: unique symbol;
+export default SharedStateCollection;
+/**
+ * Callback to execute when an update is triggered on one of the shared states
+ * of the collection.
+ */
+export type sharedStateCollectionOnUpdateCallback = (state: SharedState, newValues: any, oldValues: any) => any;
+/**
+ * Delete the registered {@link sharedStateCollectionOnUpdateCallback} when executed.
+ */
+export type sharedStateCollectionDeleteOnUpdateCallback = () => any;
+/**
+ * Callback to execute when an new shared state is added to the collection
+ */
+export type sharedStateCollectionOnAttachCallback = (state: SharedState) => any;
+/**
+ * Delete the registered {@link sharedStateCollectionOnAttachCallback} when executed.
+ */
+export type sharedStateCollectionDeleteOnAttachCallback = () => any;
+/**
+ * Callback to execute when an shared state is removed from the collection, i.e.
+ * has been deleted by its owner.
+ */
+export type sharedStateCollectionOnDetachCallback = (state: SharedState) => any;
+/**
+ * Delete the registered {@link sharedStateCollectionOnDetachCallback} when executed.
+ */
+export type sharedStateCollectionDeleteOnDetachCallback = () => any;
+/**
+ * Callback to execute when any state of the collection is attached, removed, or updated.
+ */
+export type sharedStateCollectionOnChangeCallback = () => any;
+/**
+ * Delete the registered {@link sharedStateCollectionOnChangeCallback}.
+ */
+export type sharedStateCollectionDeleteOnChangeCallback = () => any;
 /**
  * The `SharedStateCollection` interface represent a collection of all states
  * created from a given class name on the network.
  *
- * It can optionnaly exclude the states created by the current node.
+ * It can optionally exclude the states created by the current node.
  *
  * See {@link ClientStateManager#getCollection} and
  * {@link ServerStateManager#getCollection} for factory methods API
@@ -102,8 +103,6 @@ export type sharedStateCollectionDeleteOnChangeCallback = () => any;
  */
 declare class SharedStateCollection {
     constructor(stateManager: any, className: any, filter?: any, options?: {});
-    /** @private */
-    private _init;
     /**
      * Size of the collection, alias `size`
      * @type {number}
@@ -158,7 +157,7 @@ declare class SharedStateCollection {
      * Return the current values of all the states in the collection.
      *
      * Similar to `getValues` but returns a reference to the underlying value in
-     * case of `any` type. May be usefull if the underlying value is big (e.g.
+     * case of `any` type. May be useful if the underlying value is big (e.g.
      * sensors recordings, etc.) and deep cloning expensive. Be aware that if
      * changes are made on the returned object, the state of your application will
      * become inconsistent.
@@ -175,7 +174,7 @@ declare class SharedStateCollection {
     get(name: string): any[];
     /**
      * Similar to `get` but returns a reference to the underlying value in case of
-     * `any` type. May be usefull if the underlying value is big (e.g. sensors
+     * `any` type. May be useful if the underlying value is big (e.g. sensors
      * recordings, etc.) and deep cloning expensive. Be aware that if changes are
      * made on the returned object, the state of your application will become
      * inconsistent.
@@ -278,8 +277,8 @@ declare class SharedStateCollection {
      * the estates that pass the test implemented by the provided function (see `Array.filter`).
      *
      * @param {Function} func - A function to execute for each element in the array.
-     *  It should return a truthy to keep the element in the resulting array, and a f
-     *  alsy value otherwise.
+     *  It should return a truthy to keep the element in the resulting array, and a
+     *  falsy value otherwise.
      */
     filter(func: Function): any[];
     /**
@@ -297,6 +296,8 @@ declare class SharedStateCollection {
      * @return {}
      */
     find(func: Function): any;
+    /** @private */
+    private [kSharedStateCollectionInit];
     /**
      * Iterable API, e.g. for use in `for .. of` loops
      */

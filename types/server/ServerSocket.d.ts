@@ -20,7 +20,7 @@ declare class ServerSocket {
      */
     get sockets(): any;
     /**
-     * Reay state of the underlying socket instance.
+     * Ready state of the underlying socket instance.
      *
      * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/readyState}
      * @type {number}

@@ -80,7 +80,7 @@ declare class ParameterBag {
     /**
      * Return values of all parameters as a flat object. Similar to `getValues` but
      * returns a reference to the underlying value in case of `any` type. May be
-     * usefull if the underlying value is big (e.g. sensors recordings, etc.) and
+     * useful if the underlying value is big (e.g. sensors recordings, etc.) and
      * deep cloning expensive. Be aware that if changes are made on the returned
      * object, the state of your application will become inconsistent.
      *
@@ -97,7 +97,7 @@ declare class ParameterBag {
     get(name: string): Mixed;
     /**
      * Similar to `get` but returns a reference to the underlying value in case of
-     * `any` type. May be usefull if the underlying value is big (e.g. sensors
+     * `any` type. May be useful if the underlying value is big (e.g. sensors
      * recordings, etc.) and deep cloning expensive. Be aware that if changes are
      * made on the returned object, the state of your application will become
      * inconsistent.

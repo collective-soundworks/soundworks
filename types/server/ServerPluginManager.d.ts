@@ -9,12 +9,12 @@ export default ServerPluginManager;
  * and before {@link Client#start} or {@link Server#start}
  * to be properly initialized.
  *
- * In some sitautions, you might want to register the same plugin factory several times
+ * In some situations, you might want to register the same plugin factory several times
  * using different ids (e.g. for watching several parts of the file system, etc.).
  *
  * Refer to the plugins' documentation for more precise examples, and the specific API
  * they expose. See [https://soundworks.dev/guide/ecosystem](https://soundworks.dev/guide/ecosystem)
- * for more informations on the available plugins.
+ * for more information on the available plugins.
  *
  * ```
  * // client-side
@@ -56,9 +56,11 @@ export default ServerPluginManager;
  *
  * @extends BasePluginManager
  * @inheritdoc
- * @hideconstructor
+ * @template T
  */
-declare class ServerPluginManager extends BasePluginManager {
+declare class ServerPluginManager<T> extends BasePluginManager {
+    /** @hideconstructor */
+    constructor(server: any);
     /**
      * Register a plugin into the manager.
      *
@@ -69,7 +71,7 @@ declare class ServerPluginManager extends BasePluginManager {
      *
      * @param {string} id - Unique id of the plugin. Enables the registration of the
      *  same plugin factory under different ids.
-     * @param {Function} factory - Factory function that returns the Plugin class.
+     * @param {T<ServerPlugin>} ctor - The server-side Class of the plugin.
      * @param {object} [options={}] - Options to configure the plugin.
      * @param {array} [deps=[]] - List of plugins' names the plugin depends on, i.e.
      *  the plugin initialization will start only after the plugins it depends on are
@@ -82,7 +84,7 @@ declare class ServerPluginManager extends BasePluginManager {
      * // server-side
      * server.pluginManager.register('user-defined-id', pluginFactory);
      */
-    register(id: string, factory?: Function, options?: object, deps?: any[]): void;
+    register(id: string, ctor: T<ServerPlugin>, options?: object, deps?: any[]): void;
     /**
      * Retrieve a fully started instance of a registered plugin.
      *
@@ -96,12 +98,12 @@ declare class ServerPluginManager extends BasePluginManager {
      * on the `onStateChange` method.
      *
      * _Note: the async API is designed to enable the dynamic creation of plugins
-     * (hopefully without brealing changes) in a future release._
+     * (hopefully without breaking changes) in a future release._
      *
      * @param {ServerPlugin#id} id - Id of the plugin as defined when registered.
-     * @returns {ServerPlugin}
+     * @returns {Promise<T<ServerPlugin>>}
      */
-    get(id: any): ServerPlugin;
+    get(id: any): Promise<T<ServerPlugin>>;
     /** @private */
     private [kServerPluginManagerCheckRegisteredPlugins];
     /** @private */

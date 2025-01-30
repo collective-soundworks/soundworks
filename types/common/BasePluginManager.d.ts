@@ -34,8 +34,9 @@ declare class BasePluginManager {
      */
     get status(): "idle" | "inited" | "started" | "errored";
     /**
-     * Alias for existing plugins (i.e. plugin-scriptin), remove once updated
+     * Alias for existing plugins (i.e. plugin-scripting), remove once updated
      * @private
+     * @deprecated
      */
     private unsafeGet;
     /**
@@ -54,8 +55,16 @@ declare class BasePluginManager {
      *
      * _A plugin must always be registered both on client-side and on server-side_
      *
-     * Refer to the plugin documentation to check its options and proper way of
-     * registering it.
+     * Plugins must be registered between the instantiation of {@link Client} and {@link Server},
+     * and their respective initialization, i.e.:
+     *
+     * ```js
+     * const client = new Client(config);
+     * client.pluginManager.register('my-plugin', plugin);
+     * await client.start();
+     * ```
+     *
+     * Refer to the plugins documentation to check their configuration options and API.
      *
      * @param {string} id - Unique id of the plugin. Enables the registration of the
      *  same plugin factory under different ids.
@@ -76,7 +85,7 @@ declare class BasePluginManager {
     /**
      * Manually add a dependency to a given plugin.
      *
-     * Usefull to require a plugin within a plugin
+     * Useful to require a plugin within a plugin
      */
     addDependency(pluginId: any, dependencyId: any): void;
     /**
@@ -111,14 +120,14 @@ declare class BasePluginManager {
     /**
      * Initialize all registered plugins.
      *
-     * Executed during the `Client.init()` or `Server.init()` initialization step.
+     * Executed during the {@link Client#init} or {@link Client#stop} initialization step.
      *
      * @private
      */
     private [kPluginManagerStart];
     /** @private */
     private [kPluginManagerStop];
-    /** #private */
-    [kPluginManagerInstances]: Map<any, any>;
+    /** @private */
+    private [kPluginManagerInstances];
     #private;
 }

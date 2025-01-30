@@ -118,7 +118,7 @@ declare class ServerStateManager extends BaseStateManager {
      */
     registerSchema(className: any, classDescription: any): void;
     /**
-     * Delete a whole class of {@link ShareState}.
+     * Delete a whole class of {@link SharedState}.
      *
      * All {@link SharedState} instances created from this class will be deleted
      * as well, triggering their eventual `onDetach` and `onDelete` callbacks.
@@ -134,11 +134,11 @@ declare class ServerStateManager extends BaseStateManager {
      * Register a function for a given class of shared state class to be executed
      * when a state is created.
      *
-     * For example, this can be usefull to retrieve some initialization values stored
+     * For example, this can be useful to retrieve some initialization values stored
      * in the filesystem, given the value (e.g. a hostname) of one the parameters.
      *
      * The hook is associated to each states created from the given class name.
-     * Note that the hooks are executed server-side regarless the node on which
+     * Note that the hooks are executed server-side regardless the node on which
      * `create` has been called.
      *
      * Multiple hook can be added to the same `className`, they will be executed in
@@ -174,11 +174,11 @@ declare class ServerStateManager extends BaseStateManager {
      * Register a function for a given class of shared state class to be executed
      * when a state is deleted.
      *
-     * For example, this can be usefull to store the values of a given shared state
+     * For example, this can be useful to store the values of a given shared state
      * in the filesystem.
      *
      * The hook is associated to each states created from the given class name.
-     * Note that the hooks are executed server-side regarless the node on which
+     * Note that the hooks are executed server-side regardless the node on which
      * `delete` has been called.
      *
      * Multiple hook can be added to the same `className`, they will be executed in
@@ -214,7 +214,7 @@ declare class ServerStateManager extends BaseStateManager {
      *
      * The hook is associated to each states created from the given class name and
      * executed on each update (i.e. `state.set(updates)`). Note that the hooks are
-     * executed server-side regarless the node on which `set` has been called and
+     * executed server-side regardless the node on which `set` has been called and
      * before the call of the `onUpdate` callback of the shared state.
      *
      * Multiple hook can be added to the same `className`, they will be executed in
@@ -259,7 +259,7 @@ declare class ServerStateManager extends BaseStateManager {
      * This is automatically handled by the {@link Server} when a client connects.
      *
      * @param {number} nodeId - Unique id of the client node
-     * @param {object} transport - Transport mecanism to communicate with the
+     * @param {object} transport - Transport mechanism to communicate with the
      *  client. Must implement a basic EventEmitter API.
      *
      * @private

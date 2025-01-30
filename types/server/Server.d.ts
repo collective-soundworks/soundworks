@@ -1,16 +1,13 @@
 export const kServerOnSocketConnection: unique symbol;
-export const kServerIsProtectedRole: unique symbol;
 export const kServerIsValidConnectionToken: unique symbol;
 export const kServerOnStatusChangeCallbacks: unique symbol;
-export const kServerApplicationTemplateOptions: unique symbol;
 export default Server;
 /**
- * The `Server` class is the main entry point for the server-side of a soundworks
- * application.
+ * The `Server` class is the main entry point for soundworks server-side project.
  *
  * The `Server` instance allows to access soundworks components such as {@link ServerStateManager},
  * {@link ServerPluginManager}, {@link ServerSocket} or {@link ServerContextManager}.
- * Its is also responsible for handling the initialization lifecycles of the different
+ * Its is also responsible for handling the initialization lifecycle of the different
  * soundworks components.
  *
  * ```
@@ -32,23 +29,6 @@ export default Server;
  *
  * await server.start();
  * ```
- *
- * According to the clients definitions provided in `config.app.clients`, the
- * server will automatically create a dedicated route for each role decalting a browser
- * runtime.
- * For example, given the config object of the example above that defines two
- * different client roles for browser (i.e. `player` and `controller`):
- *
- * ```
- * config.app.clients = {
- *   player: { runtime: 'browser', default: true },
- *   controller: { runtime: 'browser' },
- * }
- * ```
- *
- * The server will listen to the following URLs:
- * - `http://127.0.0.1:8000/` for the `player` role, which is defined as the default client.
- * - `http://127.0.0.1:8000/controller` for the `controller` role.
  */
 declare class Server {
     /**
@@ -69,7 +49,7 @@ declare class Server {
      *     type: 'development',
      *     port: 8000,
      *     serverAddress: null,
-     *     subpath: '',
+     *     baseUrl: '',
      *     useHttps: false,
      *     httpsInfos: null,
      *     crossOriginIsolated: true,
@@ -90,7 +70,7 @@ declare class Server {
      */
     get version(): string;
     /**
-     * Id of the server, a constant set to -1
+     * Id of the server, a constant set to `-1`
      * @type {number}
      * @readonly
      */
@@ -101,29 +81,31 @@ declare class Server {
      * @type {'idle'|'inited'|'started'|'errored'}
      */
     get status(): "idle" | "inited" | "started" | "errored";
+    set router(router: any);
     /**
-     * Instance of the express router.
+     * Instance of the router if any.
      *
      * The router can be used to open new route, for example to expose a directory
      * of static assets (in default soundworks applications only the `public` is exposed).
      *
-     * @see {@link https://github.com/expressjs/express}
      * @example
      * import { Server } from '@soundworks/core/server.js';
-     * import express from 'express';
+     * import { loadConfig, configureHttpRouter } from '@soundworks/helpers/server.js';
      *
-     * // create the soundworks server instance
-     * const server = new Server(config);
+     * // create the server instance
+     * const server = new Server(loadConfig());
+     * // configure the express router provided by the helpers
+     * configureHttpRouter(server);
      *
      * // expose assets located in the `soundfiles` directory on the network
      * server.router.use('/soundfiles', express.static('soundfiles')));
      */
     get router(): any;
     /**
-     * Raw Node.js `http` or `https` instance
+     * Instance of the Node.js `http.Server` or `https.Server`
      *
-     * @see {@link https://nodejs.org/api/http.html}
-     * @see {@link https://nodejs.org/api/https.html}
+     * @see {@link https://nodejs.org/api/http.html#class-httpserver}
+     * @see {@link https://nodejs.org/api/https.html#class-httpsserver}
      */
     get httpServer(): any;
     /**
@@ -143,7 +125,7 @@ declare class Server {
      *
      * @type {ServerPluginManager}
      */
-    get pluginManager(): ServerPluginManager;
+    get pluginManager(): ServerPluginManager<any>;
     /**
      * Instance of the {@link ServerStateManager} class.
      *
@@ -155,18 +137,25 @@ declare class Server {
      *
      * @type {ServerContextManager}
      */
-    get contextManager(): ServerContextManager;
+    get contextManager(): ServerContextManager<any>;
     /**
-     * Register a callback to execute when status change
+     * Register a callback to execute when status change.
+     *
+     * Status are dispatched in the following order:
+     * - 'http-server-ready'
+     * - 'inited'
+     * - 'started'
+     * - 'stopped'
+     * during the lifecycle of the server. If an error occurs the 'errored' status is propagated.
      *
      * @param {function} callback
      */
-    onStatusChange(callback: Function): () => any;
+    onStatusChange(callback: Function): () => boolean;
     /**
      * Attach and retrieve the global audit state of the application.
      *
      * The audit state is a {@link SharedState} instance that keeps track of
-     * global informations about the application such as, the number of connected
+     * global information about the application such as, the number of connected
      * clients, network latency estimation, etc.
      *
      * The audit state is created by the server on start up.
@@ -188,10 +177,19 @@ declare class Server {
      * the method should be called before the {@link Server#start} method.
      *
      * What it does:
-     * - create the audit state
-     * - prepapre http(s) server and routing according to the informations
-     * declared in `config.app.clients`
-     * - initialize all registered plugins
+     * 1) Create the audit state
+     * 2) Create the HTTP(s) server
+     * 3) Initialize registered plugins
+     *
+     * Between steps 2 and 3, the 'http-server-ready' event status is dispatched so
+     * that consumer code can register its router before plugin initialization:
+     * ```js
+     * server.onStatusChange(status => {
+     *   if (status === 'http-server-ready') {
+     *     server.httpServer.on('request', router);
+     *   }
+     * });
+     * ```
      *
      * After `await server.init()` is fulfilled, the {@link Server#stateManager}
      * and all registered plugins can be safely used.
@@ -202,7 +200,7 @@ declare class Server {
      * await server.start();
      * // or implicitly called by start
      * const server = new Server(config);
-     * await server.start(); // init is called implicitely
+     * await server.start(); // init is called implicitly
      */
     init(): Promise<void>;
     /**
@@ -211,7 +209,7 @@ declare class Server {
      * method if it has not been called manually.
      *
      * What it does:
-     * - implicitely call {@link Server#init} if not done manually
+     * - implicitly call {@link Server#init} if not done manually
      * - launch the HTTP and WebSocket servers
      * - start all created contexts. To this end, you will have to call `server.init`
      * manually and instantiate the contexts between `server.init()` and `server.start()`
@@ -230,7 +228,7 @@ declare class Server {
      * the http(s) server.
      *
      * In most situations, you might not need to call this method. However, it can
-     * be usefull for unit testing or similar situations where you want to create
+     * be useful for unit testing or similar situations where you want to create
      * and delete several servers in the same process.
      *
      * @example
@@ -245,6 +243,34 @@ declare class Server {
     stop(): Promise<void>;
     onClientConnect(callback: any): () => boolean;
     onClientDisconnect(callback: any): () => boolean;
+    /** @private */
+    private isProtectedClientRole;
+    /**
+     * Generate a token to secure client connection.
+     *
+     * The token should be passed to the client-side `Client` config object, it will
+     * be internally used to check the WebSocket connection and reject it if the
+     * token is invalid.
+     */
+    generateAuthToken(req: any): string;
+    /**
+     * Check if the given client is trusted, i.e. config.env.type == 'production'
+     * and the client is protected behind a password.
+     *
+     * @param {ServerClient} client - Client to be tested
+     * @returns {boolean}
+     */
+    isTrustedClient(client: ServerClient): boolean;
+    /**
+     * Check if the token from a client is trusted, i.e. config.env.type == 'production'
+     * and the client is protected behind a password.
+     *
+     * @param {number} clientId - Id of the client
+     * @param {string} clientIp - Ip of the client
+     * @param {string} token - Token to be tested
+     * @returns {boolean}
+     */
+    isTrustedToken(clientId: number, clientIp: string, token: string): boolean;
     /**
      * Create namespaced databases for core and plugins
      * (kind of experimental API do not expose in doc for now)
@@ -255,49 +281,18 @@ declare class Server {
      */
     private createNamespacedDb;
     /**
-     * Configure the server to work _out-of-the-box_ within the soundworks application
-     * template provided by `@soundworks/create.
-     *
-     * - uses [template-literal](https://www.npmjs.com/package/template-literal) package
-     * as html templateEngine
-     * - define `.build/server/tmpl` as the directory in which html template can be
-     * found
-     * - define the `clientConfigFunction` function that return client compliant
-     * config object to be injected in the html template.
-     *
-     * Also expose two public directory:
-     * - the `public` directory which is exposed behind the root path
-     * - the `./.build/public` directory which is exposed behind the `build` path
-     *
-     * _Note: except in very rare cases (so rare that they are quite difficult to imagine),
-     * you should rely on these defaults._
+     * @deprecated
      */
     useDefaultApplicationTemplate(): void;
     /**
-     * Define custom template path, template engine, and clientConfig function.
-     * This method is proposed for very advanced use-cases and should very probably
-     * be improved. If you consider using this for some reason, please get in touch
-     * first to explain your use-case :)
+     * Socket connection callback.
+     * @private
      */
-    setCustomApplicationTemplateOptions(options: any): void;
-    /**
-     * Check if the given client is trusted, i.e. config.env.type == 'production'
-     * and the client is protected behind a password.
-     *
-     * @param {ServerClient} client - Client to be tested
-     * @returns {Boolean}
-     */
-    isTrustedClient(client: ServerClient): boolean;
-    /**
-     * Check if the token from a client is trusted, i.e. config.env.type == 'production'
-     * and the client is protected behind a password.
-     *
-     * @param {Number} clientId - Id of the client
-     * @param {Number} clientIp - Ip of the client
-     * @param {String} token - Token to be tested
-     * @returns {Boolean}
-     */
-    isTrustedToken(clientId: number, clientIp: number, token: string): boolean;
+    private [kServerOnSocketConnection];
+    /** @private */
+    private [kServerIsValidConnectionToken];
+    /** @private */
+    private [kServerOnStatusChangeCallbacks];
     #private;
 }
 import ServerSockets from './ServerSockets.js';
