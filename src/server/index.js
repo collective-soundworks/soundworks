@@ -65,3 +65,4 @@
 export { default as Server } from './Server.js';
 export { default as ServerPlugin } from './ServerPlugin.js';
 export { default as ServerContext } from './ServerContext.js';
+export { default as version } from '../common/version.js';

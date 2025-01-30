@@ -37,7 +37,7 @@ class BasePluginManager {
 
   constructor(node) {
     this.#node = node;
-    /** #private */
+    /** @private */
     this[kPluginManagerInstances] = new Map();
   }
 

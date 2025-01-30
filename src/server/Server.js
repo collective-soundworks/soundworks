@@ -234,7 +234,7 @@ class Server {
     this.#contextManager = new ServerContextManager(this);
     this.#status = 'idle';
     this.#db = this.createNamespacedDb('core');
-    // protected
+    /** @private */
     this[kServerOnStatusChangeCallbacks] = new Set();
 
     // register audit state schema
@@ -278,7 +278,7 @@ class Server {
   }
 
   /**
-   * Id of the server, a constant set to -1
+   * Id of the server, a constant set to `-1`
    * @type {number}
    * @readonly
    */
@@ -498,8 +498,13 @@ class Server {
 
     // backward compatibility for `useDefaultApplicationTemplate`
     if (this.#useDefaultApplicationTemplate === true) {
-      const { configureHttpRouter } = await import('@soundworks/helpers/server.js');
-      configureHttpRouter(this);
+      try {
+        const { configureHttpRouter } = await import('@soundworks/helpers/server.js');
+        configureHttpRouter(this);
+      } catch (err) {
+        logger.warn('Could not apply patch for deprecated `useDefaultApplicationTemplate` method. Please use `configureHttpRouter` from helpers instead.');
+        throw err;
+      }
     }
 
     // create HTTP(S) SERVER

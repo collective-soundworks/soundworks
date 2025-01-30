@@ -70,7 +70,7 @@ class ContextCollection {
  *
  * _WARNING: Most of the time, you should not have to manipulate the context manager directly._
  *
- * @hideconstructor
+ * @template T
  */
 class ServerContextManager {
   #server = null;
@@ -79,6 +79,7 @@ class ServerContextManager {
 
   /**
    * @param {Server} server - Instance of the soundworks server.
+   * @hideconstructor
    */
   constructor(server) {
     if (!(server instanceof Server)) {
@@ -86,7 +87,7 @@ class ServerContextManager {
     }
 
     this.#server = server;
-
+    /** @private */
     this[kServerContextManagerContexts] = new ContextCollection();
   }
 
@@ -250,7 +251,8 @@ class ServerContextManager {
    *
    * _WARNING: Most of the time, you should not have to call this method manually._
    *
-   * @param {ServerContext#name} contextName - Name of the context.
+   * @param {string} contextName - Name of the context.
+   * @return {Promise<T<ServerContext>>}
    */
   async get(contextName) {
     if (!this[kServerContextManagerContexts].has(contextName)) {

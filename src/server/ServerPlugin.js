@@ -15,7 +15,7 @@ import BasePlugin from '../common/BasePlugin.js';
  *
  * _Creating new plugins should be considered an advanced usage._
  *
- * @extends BasePlugin
+ * @extends {BasePlugin}
  * @inheritdoc
  */
 class ServerPlugin extends BasePlugin {

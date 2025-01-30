@@ -62,9 +62,10 @@ export const kServerPluginManagerRemoveClient = Symbol('soundworks:server-plugin
  *
  * @extends BasePluginManager
  * @inheritdoc
- * @hideconstructor
+ * @template T
  */
 class ServerPluginManager extends BasePluginManager {
+  /** @hideconstructor */
   constructor(server) {
     if (!(server instanceof Server)) {
       throw new TypeError(`Cannot construct 'ServerPluginManager': Argument 1 must be an instance of Server`);
@@ -124,7 +125,7 @@ class ServerPluginManager extends BasePluginManager {
    *
    * @param {string} id - Unique id of the plugin. Enables the registration of the
    *  same plugin factory under different ids.
-   * @param {ServerPlugin} ctor - The server-side Class of the plugin.
+   * @param {T<ServerPlugin>} ctor - The server-side Class of the plugin.
    * @param {object} [options={}] - Options to configure the plugin.
    * @param {array} [deps=[]] - List of plugins' names the plugin depends on, i.e.
    *  the plugin initialization will start only after the plugins it depends on are
@@ -140,7 +141,7 @@ class ServerPluginManager extends BasePluginManager {
   register(id, ctor, options = {}, deps = []) {
     // Note that other arguments are checked on the BasePluginManager
     if (!ctor || !(ctor.prototype instanceof ServerPlugin)) {
-      throw new TypeError(`Cannot execute 'register' on ServerPluginManager: argument 2 must be a class that extends 'ServerPlugin'`);
+      throw new TypeError(`Cannot execute 'register' on ServerPluginManager (id: ${id}): argument 2 must be a class that extends 'ServerPlugin'`);
     }
 
     super.register(id, ctor, options, deps);
@@ -162,7 +163,7 @@ class ServerPluginManager extends BasePluginManager {
    * (hopefully without breaking changes) in a future release._
    *
    * @param {ServerPlugin#id} id - Id of the plugin as defined when registered.
-   * @returns {ServerPlugin}
+   * @returns {Promise<T<ServerPlugin>>}
    */
   async get(id) {
     if (this.status !== 'started') {

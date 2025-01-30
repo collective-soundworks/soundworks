@@ -74,7 +74,6 @@ class Client {
    * @throws Will throw if the given config object is invalid.
    */
   constructor(config) {
-    console.log(config);
     if (!isPlainObject(config)) {
       throw new Error(`Cannot construct Client: argument 1 must be an object`);
     }

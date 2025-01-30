@@ -58,11 +58,12 @@ import Client from './Client.js';
  *
  * @extends BasePluginManager
  * @inheritdoc
- * @hideconstructor
+ * @template T
  */
 class ClientPluginManager extends BasePluginManager {
   /**
    * @param {Client} client - The soundworks client instance.
+   * @hideconstructor
    */
   constructor(client) {
     if (!(client instanceof Client)) {
@@ -82,7 +83,7 @@ class ClientPluginManager extends BasePluginManager {
    *
    * @param {string} id - Unique id of the plugin. Enables the registration of the
    *  same plugin factory under different ids.
-   * @param {ClientPlugin} ctor - The client-side Class of the plugin.
+   * @param {T<ClientPlugin>} ctor - The client-side Class of the plugin.
    * @param {object} [options={}] - Options to configure the plugin.
    * @param {array} [deps=[]] - List of plugins' names the plugin depends on, i.e.
    *  the plugin initialization will start only after the plugins it depends on are
@@ -120,8 +121,7 @@ class ClientPluginManager extends BasePluginManager {
    * in a future release._
    *
    * @param {string} id - Id of the plugin as defined when registered.
-   * @returns {Promise<ClientPlugin>}
-   * @see {@link ClientPluginManager#onStateChange}
+   * @returns {Promise<T<ClientPlugin>>}
    */
   async get(id) {
     if (this.status !== 'started') {
