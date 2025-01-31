@@ -1,6 +1,8 @@
-import BasePluginManager from '../common/BasePluginManager.js';
-import ClientPlugin from './ClientPlugin.js';
 import Client from './Client.js';
+import BasePluginManager from '../common/BasePluginManager.js';
+import ClientPlugin, {
+  kClientPluginName,
+} from './ClientPlugin.js';
 
 /**
  * The `PluginManager` allows to register and retrieve `soundworks` plugins.
@@ -98,7 +100,7 @@ class ClientPluginManager extends BasePluginManager {
    */
   register(id, ctor, options = {}, deps = []) {
     // Note that other arguments are checked on the BasePluginManager
-    if (!ctor || !(ctor.prototype instanceof ClientPlugin)) {
+    if (!ctor || ctor[kClientPluginName] !== 'ClientPlugin') {
       throw new TypeError(`Cannot execute 'register' on ClientPluginManager: argument 2 must be a class that extends 'ClientPlugin'`);
     }
 

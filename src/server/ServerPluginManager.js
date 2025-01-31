@@ -1,8 +1,10 @@
+import Server from './Server.js';
 import BasePluginManager, {
   kPluginManagerInstances,
 } from '../common/BasePluginManager.js';
-import ServerPlugin from './ServerPlugin.js';
-import Server from './Server.js';
+import ServerPlugin, {
+  kServerPluginName,
+} from './ServerPlugin.js';
 
 export const kServerPluginManagerCheckRegisteredPlugins = Symbol('soundworks:server-plugin-manager-check-registered-plugins');
 export const kServerPluginManagerAddClient = Symbol('soundworks:server-plugin-manager-add-client');
@@ -140,7 +142,7 @@ class ServerPluginManager extends BasePluginManager {
    */
   register(id, ctor, options = {}, deps = []) {
     // Note that other arguments are checked on the BasePluginManager
-    if (!ctor || !(ctor.prototype instanceof ServerPlugin)) {
+    if (!ctor || ctor[kServerPluginName] !== 'ServerPlugin') {
       throw new TypeError(`Cannot execute 'register' on ServerPluginManager (id: ${id}): argument 2 must be a class that extends 'ServerPlugin'`);
     }
 

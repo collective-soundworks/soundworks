@@ -1,5 +1,7 @@
 import BasePlugin from '../common/BasePlugin.js';
 
+export const kClientPluginName = Symbol.for('soundworks:client-plugin-name');
+
 /**
  * Callback executed when the plugin state is updated.
  *
@@ -31,12 +33,16 @@ import BasePlugin from '../common/BasePlugin.js';
  * @extends BasePlugin
  * @inheritdoc
  */
-class ClientPlugin extends BasePlugin {
+export default class ClientPlugin extends BasePlugin {
+  // Note: we need this workaround in plugin tests, because the test app and
+  // the tested plugin will import different versions of ServerPlugin
+  static [kClientPluginName] = 'ClientPlugin';
+
   #client = null;
+
   /**
    * @param {Client} client - A soundworks client instance.
-   * @param {string} id - User defined id of the plugin as defined in
-   *  {@link ClientPluginManager#register}.
+   * @param {string} id - User defined id of the plugin as defined in {@link ClientPluginManager#register}.
    */
   constructor(client, id) {
     super(id);
@@ -67,5 +73,3 @@ class ClientPlugin extends BasePlugin {
   //  */
   // async deactivate() {}
 }
-
-export default ClientPlugin;

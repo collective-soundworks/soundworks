@@ -58,12 +58,12 @@ describe(`# PluginManagerClient`, () => {
       if (!errored) { assert.fail('should fail'); }
     });
 
-    it(`should throw if second argument is not an Plugin factory`, () => {
-      function factory(Plugin) { return {}; }
+    it(`should throw if second argument does not extend ClientPlugin`, () => {
+      class Test {}
 
       let errored = false;
       try {
-        client.pluginManager.register('plugin-id', factory);
+        client.pluginManager.register('plugin-id', Test);
       } catch(err) {
         console.log(err.message);
         errored = true;

@@ -24,7 +24,7 @@ describe(`# ServerPluginManager`, () => {
     });
   });
 
-  describe(`## register(id, pluginFactory)`, () => {
+  describe(`## register(id, PluginCtor)`, () => {
     let server;
 
     beforeEach(() => {
@@ -42,12 +42,12 @@ describe(`# ServerPluginManager`, () => {
       if (!errored) { assert.fail('should fail'); }
     });
 
-    it(`should throw if second argument is not an Plugin factory`, () => {
-      function factory(Plugin) { return {}; }
+    it(`should throw if second argument does not extend ServerPlugin`, () => {
+      class Test {}
 
       let errored = false;
       try {
-        server.pluginManager.register('plugin-name', factory);
+        server.pluginManager.register('plugin-name', Test);
       } catch(err) {
         console.log(err.message);
         errored = true;

@@ -1,5 +1,7 @@
 import BasePlugin from '../common/BasePlugin.js';
 
+export const kServerPluginName = Symbol.for('soundworks:server-plugin-name');
+
 /**
  * Base class to extend in order to create the server-side counterpart of a
  * `soundworks` plugin.
@@ -18,14 +20,17 @@ import BasePlugin from '../common/BasePlugin.js';
  * @extends {BasePlugin}
  * @inheritdoc
  */
-class ServerPlugin extends BasePlugin {
+export default class ServerPlugin extends BasePlugin {
+  // Note: we need this workaround in plugin tests, because the test app and
+  // the tested plugin will import different versions of ServerPlugin
+  static [kServerPluginName] = 'ServerPlugin';
+
   #server = null;
   #clients = new Set();
 
   /**
    * @param {Server} server - The soundworks server instance.
-   * @param {string} id - User defined id of the plugin as defined in
-   *  {@link ServerPluginManager#register}.
+   * @param {string} id - User defined id of the plugin as defined in {@link ServerPluginManager#register}.
    */
   constructor(server, id) {
     super(id);
@@ -72,5 +77,3 @@ class ServerPlugin extends BasePlugin {
     this.#clients.delete(client);
   }
 }
-
-export default ServerPlugin;
