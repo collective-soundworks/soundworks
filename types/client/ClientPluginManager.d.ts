@@ -108,5 +108,4 @@ declare class ClientPluginManager<T> extends BasePluginManager {
     get(id: string): Promise<T<ClientPlugin>>;
 }
 import BasePluginManager from '../common/BasePluginManager.js';
-import ClientPlugin from './ClientPlugin.js';
 import Client from './Client.js';

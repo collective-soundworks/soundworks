@@ -112,4 +112,3 @@ declare class ServerPluginManager<T> extends BasePluginManager {
     private [kServerPluginManagerRemoveClient];
 }
 import BasePluginManager from '../common/BasePluginManager.js';
-import ServerPlugin from './ServerPlugin.js';

@@ -1,8 +1,4 @@
-export default ClientPlugin;
-/**
- * ~onStateChangeCallback
- */
-export type ClientPlugin = (#state: ClientPlugin) => any;
+export const kClientPluginName: unique symbol;
 /**
  * Callback executed when the plugin state is updated.
  *
@@ -32,11 +28,11 @@ export type ClientPlugin = (#state: ClientPlugin) => any;
  * @extends BasePlugin
  * @inheritdoc
  */
-declare class ClientPlugin extends BasePlugin {
+export default class ClientPlugin extends BasePlugin {
+    static [kClientPluginName]: string;
     /**
      * @param {Client} client - A soundworks client instance.
-     * @param {string} id - User defined id of the plugin as defined in
-     *  {@link ClientPluginManager#register}.
+     * @param {string} id - User defined id of the plugin as defined in {@link ClientPluginManager#register}.
      */
     constructor(client: Client, id: string);
     /**
@@ -48,4 +44,8 @@ declare class ClientPlugin extends BasePlugin {
     get client(): Client;
     #private;
 }
+/**
+ * ~onStateChangeCallback
+ */
+export type ClientPlugin = (#state: ClientPlugin) => any;
 import BasePlugin from '../common/BasePlugin.js';
