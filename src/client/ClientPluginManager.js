@@ -1,8 +1,6 @@
 import Client from './Client.js';
 import BasePluginManager from '../common/BasePluginManager.js';
-import ClientPlugin, {
-  kClientPluginName,
-} from './ClientPlugin.js';
+import { kClientPluginName } from './ClientPlugin.js';
 
 /**
  * The `PluginManager` allows to register and retrieve `soundworks` plugins.

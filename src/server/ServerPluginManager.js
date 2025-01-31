@@ -2,9 +2,7 @@ import Server from './Server.js';
 import BasePluginManager, {
   kPluginManagerInstances,
 } from '../common/BasePluginManager.js';
-import ServerPlugin, {
-  kServerPluginName,
-} from './ServerPlugin.js';
+import { kServerPluginName } from './ServerPlugin.js';
 
 export const kServerPluginManagerCheckRegisteredPlugins = Symbol('soundworks:server-plugin-manager-check-registered-plugins');
 export const kServerPluginManagerAddClient = Symbol('soundworks:server-plugin-manager-add-client');
