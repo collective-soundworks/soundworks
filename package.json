@@ -47,9 +47,10 @@
     "doc": "npm run types && rm -rf docs && jsdoc -c .jsdoc --verbose && cp -R misc/assets docs/",
     "lint": "npx eslint src",
     "test": "npx mocha tests/*/*.spec.js",
+    "test:ci": "npx mocha tests/*/*.spec.js --ci",
     "test:only": "npx mocha",
     "types": "rm -rf types && tsc",
-    "preversion": "node ./misc/scripts/generate-version-file.js $npm_new_version && npm run types",
+    "preversion": "npm run lint && npm run test && node ./misc/scripts/generate-version-file.js $npm_new_version && npm run types",
     "postversion": "node ./misc/scripts/check-changelog.js && git commit -am \"$npm_new_version\" --allow-empty"
   },
   "dependencies": {
