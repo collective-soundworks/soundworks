@@ -5,9 +5,9 @@ misc
 .github
 .data
 
-.jsdoc.json
+.jsdoc
 .editorconfig
-.eslintrc.json
+eslint.config.js
 tsconfig.json
 
 __*

@@ -1,6 +1,7 @@
 import merge from 'lodash/merge.js';
 
-export const kBasePluginStatus = Symbol('soundworks:base-plugin-status');
+// Notes: we use Symbol.for because we need to override this in helpers test
+export const kBasePluginStatus = Symbol.for('soundworks:base-plugin-status');
 
 /**
  * Callback executed when the plugin state is updated.
