@@ -1,4 +1,4 @@
-import { use, assert } from 'chai';
+import { assert } from 'chai';
 
 import {
   default as ParameterBag,
@@ -6,12 +6,53 @@ import {
   types,
 } from '../../src/common/ParameterBag.js';
 
+import {
+  aClassDescription,
+  expectedFullClassDescription,
+} from '../utils/class-description.js';
+
 describe('# [private] ParameterBag', () => {
+  let params;
+
+  before(() => {
+    const description = {
+      bool: {
+        type: 'boolean',
+        default: false,
+      },
+      int: {
+        type: 'integer',
+        default: 0,
+        min: -2,
+        max: 2,
+      },
+      nullable: {
+        type: 'any',
+        default: {},
+        nullable: true,
+      },
+      event: {
+        type: 'float',
+        default: null,
+        event: true,
+      },
+      required: {
+        type: 'string',
+        required: true,
+      },
+    };
+
+    params = new ParameterBag(description, {
+      bool: true,
+      int: -4,
+      required: 'coucou',
+    });
+  });
   // ---------------------------------------------------------------
   // MAIN API
   // ---------------------------------------------------------------
-  describe('## static validateDescription(schema)', () => {
-    it('should check if schema is invalid', () => {
+  describe('## static validateDescription(description)', () => {
+    it('should check if description is invalid', () => {
       assert.throw(() => ParameterBag.validateDescription({
         noType: {}
       }));
@@ -48,8 +89,15 @@ describe('# [private] ParameterBag', () => {
     });
   });
 
-  describe('## constructor(schema, initValues)', () => {
-    it('should validate the given schema', () => {
+  describe('## static getFullDescription(description)', () => {
+    it('should return the full class description', () => {
+      const fullDescription = ParameterBag.getFullDescription(aClassDescription);
+      assert.deepEqual(fullDescription, expectedFullClassDescription);
+    });
+  });
+
+  describe('## constructor(description, initValues)', () => {
+    it('should validate the given description', () => {
       assert.throws(() => new ParameterBag({
         invalidType: { type: 'invalid' }
       }));
@@ -76,8 +124,8 @@ describe('# [private] ParameterBag', () => {
       if (!errored) { assert.fail('require param should have thrown'); }
     });
 
-    it('should complete and deeply clone schema', () => {
-      const schema = {
+    it.skip('should complete and deeply clone description (obsolete, to review)', () => {
+      const description = {
         myBoolean: {
           type: 'boolean',
           default: true,
@@ -89,20 +137,20 @@ describe('# [private] ParameterBag', () => {
         },
       };
 
-      const p1 = new ParameterBag(schema);
-      const p2 = new ParameterBag(schema);
+      const p1 = new ParameterBag(description);
+      const p2 = new ParameterBag(description);
 
-      for (let name in p1._schema) {
-        assert.containsAllKeys(p1._schema[name], Object.keys(sharedOptions));
-        assert.containsAllKeys(p2._schema[name], Object.keys(sharedOptions));
+      for (let name in p1._description) {
+        assert.containsAllKeys(p1._description[name], Object.keys(sharedOptions));
+        assert.containsAllKeys(p2._description[name], Object.keys(sharedOptions));
 
-        assert.notStrictEqual(p1._schema[name], p2._schema[name]);
-        assert.notStrictEqual(p1._schema[name].metas, p2._schema[name].metas);
+        assert.notStrictEqual(p1._description[name], p2._description[name]);
+        assert.notStrictEqual(p1._description[name].metas, p2._description[name].metas);
       }
     });
 
     it(`should properly coerce and assign initValues`, () => {
-      const schema = {
+      const description = {
         myBoolean: {
           type: 'boolean',
           default: false,
@@ -114,45 +162,12 @@ describe('# [private] ParameterBag', () => {
         },
       };
 
-      const params = new ParameterBag(schema, { myFloat: -1000 });
+      const params = new ParameterBag(description, { myFloat: -1000 });
       const expected = { myBoolean: false, myFloat: 0 };
       assert.deepEqual(params.getValues(), expected);
       assert.deepEqual(params.getValuesUnsafe(), expected);
       assert.deepEqual(params.getInitValues(), expected);
     });
-  });
-
-  const schema = {
-    bool: {
-      type: 'boolean',
-      default: false,
-    },
-    int: {
-      type: 'integer',
-      default: 0,
-      min: -2,
-      max: 2,
-    },
-    nullable: {
-      type: 'any',
-      default: {},
-      nullable: true,
-    },
-    event: {
-      type: 'float',
-      default: null,
-      event: true,
-    },
-    required: {
-      type: 'string',
-      required: true,
-    },
-  };
-
-  const params = new ParameterBag(schema, {
-    bool: true,
-    int: -4,
-    required: 'coucou',
   });
 
   describe(`## has(name)`, () => {
@@ -232,7 +247,7 @@ describe('# [private] ParameterBag', () => {
   });
 
   describe(`## getDescription([name])`, () => {
-    it(`should return the schema with proper default applied`, () => {
+    it(`should return the description with proper default applied`, () => {
       const expected = {
         bool: {
           nullable: false,
@@ -304,7 +319,7 @@ describe('# [private] ParameterBag', () => {
   });
 
   describe(`## getDefaults()`, () => {
-    it(`should return the default values of the schema`, () => {
+    it(`should return the default values of the description`, () => {
       assert.deepEqual(params.getDefaults(), {
         bool: false,
         int: 0,

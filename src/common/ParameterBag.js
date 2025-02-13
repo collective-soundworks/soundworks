@@ -165,27 +165,10 @@ class ParameterBag {
     }
   }
 
-  #description = {};
-  #values = {};
+  static getFullDescription(description) {
+    const fullDescription = cloneDeep(description);
 
-  constructor(description, initValues = {}) {
-    if (!isPlainObject(description)) {
-      throw new TypeError(`Cannot construct ParameterBag: argument 1 must be an object`);
-    }
-
-    description = cloneDeep(description);
-    initValues = cloneDeep(initValues);
-
-    ParameterBag.validateDescription(description);
-
-    // make sure initValues make sens according to the given description
-    for (let name in initValues) {
-      if (!Object.prototype.hasOwnProperty.call(description, name)) {
-        throw new ReferenceError(`Invalid init value for parameter '${name}': Parameter does not exists`);
-      }
-    }
-
-    for (let [name, def] of Object.entries(description)) {
+    for (let [name, def] of Object.entries(fullDescription)) {
       if (types[def.type].sanitizeDescription) {
         def = types[def.type].sanitizeDescription(def);
       }
@@ -199,6 +182,37 @@ class ParameterBag {
         def.default = null;
       }
 
+      if (def.required === true) {
+        def.default = null;
+      }
+
+      fullDescription[name] = def;
+    }
+
+    return fullDescription;
+  }
+
+  #description = {};
+  #values = {};
+
+  constructor(description, initValues = {}) {
+    if (!isPlainObject(description)) {
+      throw new TypeError(`Cannot construct ParameterBag: argument 1 must be an object`);
+    }
+
+    ParameterBag.validateDescription(description);
+
+    description = ParameterBag.getFullDescription(description);
+    initValues = cloneDeep(initValues);
+
+    // make sure initValues make sens according to the given description
+    for (let name in initValues) {
+      if (!Object.prototype.hasOwnProperty.call(description, name)) {
+        throw new ReferenceError(`Invalid init value for parameter '${name}': Parameter does not exists`);
+      }
+    }
+
+    for (let [name, def] of Object.entries(description)) {
       if (def.required === true) {
         // throw if value is not given in init values
         if (initValues[name] === undefined || initValues[name] === null) {
@@ -216,13 +230,11 @@ class ParameterBag {
         initValue = def.default;
       }
 
-
       this.#description[name] = def;
       // coerce init value and store in definition
-      initValue = this.set(name, initValue)[0];
-
-      this.#description[name].initValue = initValue;
-      this.#values[name] = initValue;
+      const coercedInitValue = this.set(name, initValue)[0];
+      this.#description[name].initValue = coercedInitValue;
+      this.#values[name] = coercedInitValue;
     }
   }
 

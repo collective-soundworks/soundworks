@@ -6,7 +6,12 @@ import { Client } from '../../src/client/index.js';
 import { BATCHED_TRANSPORT_CHANNEL } from '../../src/common/constants.js';
 
 import config from '../utils/config.js';
-import { a, aExpectedDescription, b } from '../utils/class-description.js';
+import {
+  a,
+  b,
+  aClassDescription,
+  expectedFullClassDescription,
+} from '../utils/class-description.js';
 
 describe(`# SharedStateCollection`, () => {
   let server;
@@ -19,6 +24,7 @@ describe(`# SharedStateCollection`, () => {
     server = new Server(config);
     server.stateManager.defineClass('a', a);
     server.stateManager.defineClass('b', b);
+    server.stateManager.defineClass('aClassDescription', aClassDescription);
     await server.start();
 
     // ---------------------------------------------------
@@ -169,9 +175,9 @@ describe(`# SharedStateCollection`, () => {
 
   describe(`## getDescription()`, () => {
     it(`should return the class description`, async () => {
-      const collection = await clients[0].stateManager.getCollection('a');
+      const collection = await clients[0].stateManager.getCollection('aClassDescription');
       const description = collection.getDescription();
-      assert.deepEqual(description, aExpectedDescription);
+      assert.deepEqual(description, expectedFullClassDescription);
 
       await collection.detach();
     });

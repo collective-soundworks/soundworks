@@ -29,7 +29,7 @@ describe('# PromiseStore', () => {
   });
 
   describe('## reject(reqId)', () => {
-    it('should fail with meaningfull error if reqId does not exists', () => {
+    it('should fail with meaningful error if reqId does not exists', () => {
       const store = new PromiseStore('test');
 
       let errored = false;

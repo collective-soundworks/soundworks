@@ -4,70 +4,74 @@ import { Server } from '../../src/server/index.js';
 import { Client } from '../../src/client/index.js';
 
 import config from '../utils/config.js';
-import { a, aExpectedDescription } from '../utils/class-description.js';
+import {
+  aClassDescription,
+  expectedFullClassDescription,
+  expectedInstanceFullClassDescription,
+} from '../utils/class-description.js';
 
 describe('from v4.0.0-alpha.29', () => {
   describe('# deprecated API', () => {
     it('SharedState#schemaName', async () => {
       const server = new Server(config);
-      server.stateManager.defineClass('a', a);
+      server.stateManager.defineClass('aClassDescription', aClassDescription);
       await server.start();
 
-      const state = await server.stateManager.create('a');
-      assert.equal(state.className, 'a'); // actual
-      assert.equal(state.schemaName, 'a'); // deprecated
-      server.stateManager.deleteClass('a');
+      const state = await server.stateManager.create('aClassDescription', { required: true });
+      assert.equal(state.className, 'aClassDescription'); // actual
+      assert.equal(state.schemaName, 'aClassDescription'); // deprecated
+      server.stateManager.deleteClass('aClassDescription');
       await server.stop();
     });
 
     it('SharedStateCollection#schemaName', async () => {
       const server = new Server(config);
-      server.stateManager.defineClass('a', a);
+      server.stateManager.defineClass('aClassDescription', aClassDescription);
       await server.start();
 
-      const collection = await server.stateManager.getCollection('a');
-      assert.equal(collection.className, 'a'); // actual
-      assert.equal(collection.schemaName, 'a'); // deprecated
-      server.stateManager.deleteClass('a');
+      const collection = await server.stateManager.getCollection('aClassDescription');
+      assert.equal(collection.className, 'aClassDescription'); // actual
+      assert.equal(collection.schemaName, 'aClassDescription'); // deprecated
+      server.stateManager.deleteClass('aClassDescription');
       await server.stop();
     });
 
     it('SharedState#getSchema(name = null)', async () => {
       const server = new Server(config);
-      server.stateManager.defineClass('a', a);
+      server.stateManager.defineClass('aClassDescription', aClassDescription);
       await server.start();
 
-      const state = await server.stateManager.create('a');
-      assert.deepEqual(state.getDescription(), aExpectedDescription); // actual
-      assert.deepEqual(state.getSchema(), aExpectedDescription); // deprecated
-      server.stateManager.deleteClass('a');
+      const state = await server.stateManager.create('aClassDescription', { required: true });
+      assert.deepEqual(state.getDescription(), expectedInstanceFullClassDescription); // actual
+      assert.deepEqual(state.getSchema(), expectedInstanceFullClassDescription); // deprecated
+      server.stateManager.deleteClass('aClassDescription');
       await server.stop();
     });
 
     it('SharedStateCollection#getSchema(name = null)', async () => {
       const server = new Server(config);
-      server.stateManager.defineClass('a', a);
+      server.stateManager.defineClass('aClassDescription', aClassDescription);
       await server.start();
 
-      const collection = await server.stateManager.getCollection('a');
-      assert.deepEqual(collection.getDescription(), aExpectedDescription); // actual
-      assert.deepEqual(collection.getSchema(), aExpectedDescription); // deprecated
-      server.stateManager.deleteClass('a');
+      const collection = await server.stateManager.getCollection('aClassDescription');
+      assert.deepEqual(collection.getDescription(), expectedFullClassDescription); // actual
+      assert.deepEqual(collection.getSchema(), expectedFullClassDescription); // deprecated
+      server.stateManager.deleteClass('aClassDescription');
       await server.stop();
     });
 
     it('StateManager#getSchema()', async () => {
       const server = new Server(config);
-      server.stateManager.defineClass('a', a);
+      server.stateManager.defineClass('aClassDescription', aClassDescription);
       await server.start();
 
-      const classDescription = await server.stateManager.getClassDescription('a'); // actual
-      assert.deepEqual(classDescription, aExpectedDescription);
+      const classDescription = await server.stateManager.getClassDescription('aClassDescription'); // actual
+      assert.deepEqual(classDescription, expectedFullClassDescription);
 
-      const schema = await server.stateManager.getSchema('a'); // deprecated
-      assert.deepEqual(schema, aExpectedDescription);
+      const schema = await server.stateManager.getSchema('aClassDescription'); // deprecated
+      assert.deepEqual(schema, expectedFullClassDescription);
 
-      server.stateManager.deleteClass('a');
+      server.stateManager.deleteClass('aClassDescription');
       await server.stop();
     });
 
@@ -136,11 +140,11 @@ describe('from v4.0.0-alpha.29', () => {
   describe('# removed API', () => {
     it('SharedState#set(updates, context)', async () => {
       const server = new Server(config);
-      server.stateManager.defineClass('a', a);
+      server.stateManager.defineClass('aClassDescription', aClassDescription);
       await server.start();
 
       let errored = false;
-      const state = await server.stateManager.create('a');
+      const state = await server.stateManager.create('aClassDescription', { required: true });
       try {
         await state.set({}, {});
       } catch (err) {

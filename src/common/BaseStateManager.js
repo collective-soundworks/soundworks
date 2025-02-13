@@ -236,12 +236,13 @@ class BaseStateManager {
     this[kStateManagerClient].transport.addListener(
       GET_CLASS_DESCRIPTION_RESPONSE,
       (reqId, className, classDescription) => {
+        const fullDescription = ParameterBag.getFullDescription(classDescription);
+
         if (!this.#cachedClasses.has(className)) {
-          this.#cachedClasses.set(className, classDescription);
+          this.#cachedClasses.set(className, fullDescription);
         }
-        // This cannot throw as the SharedState class has already been registered
-        const parameterBag = new ParameterBag(classDescription);
-        this.#promiseStore.resolve(reqId, parameterBag.getDescription());
+
+        this.#promiseStore.resolve(reqId, fullDescription);
       },
     );
 
@@ -268,10 +269,7 @@ class BaseStateManager {
     }
 
     if (this.#cachedClasses.has(className)) {
-      const classDescription = this.#cachedClasses.get(className);
-      // This cannot throw as the SharedState class has already been registered
-      const parameterBag = new ParameterBag(classDescription);
-      return parameterBag.getDescription();
+      return this.#cachedClasses.get(className);
     }
 
     return new Promise((resolve, reject) => {

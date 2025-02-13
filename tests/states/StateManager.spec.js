@@ -13,7 +13,12 @@ import {
 import SharedState from '../../src/common/SharedState.js';
 
 import config from '../utils/config.js';
-import { a, aExpectedDescription, b } from '../utils/class-description.js';
+import {
+  a,
+  b,
+  aClassDescription,
+  expectedFullClassDescription,
+} from '../utils/class-description.js';
 
 describe(`# StateManager`, () => {
   let server;
@@ -26,6 +31,7 @@ describe(`# StateManager`, () => {
     server = new Server(config);
     server.stateManager.defineClass('a', a);
     server.stateManager.defineClass('b', b);
+    server.stateManager.defineClass('aClassDescription', aClassDescription);
 
     await server.start();
 
@@ -73,11 +79,6 @@ describe(`# StateManager`, () => {
       assert.isTrue(errored);
     });
 
-    it(`should return the description`, async () => {
-      const description = await client.stateManager.getClassDescription('a');
-      assert.deepEqual(description, aExpectedDescription);
-    });
-
     it(`should throw if given name does not exists`, async () => {
       let errored = false;
 
@@ -91,6 +92,16 @@ describe(`# StateManager`, () => {
       if (!errored) {
         assert.fail('should have thrown');
       }
+    });
+
+    it(`client should return the description`, async () => {
+      const description = await client.stateManager.getClassDescription('aClassDescription');
+      assert.deepEqual(description, expectedFullClassDescription);
+    });
+
+    it(`server should return the description`, async () => {
+      const description = await server.stateManager.getClassDescription('aClassDescription');
+      assert.deepEqual(description, expectedFullClassDescription);
     });
   });
 
