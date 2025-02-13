@@ -120,7 +120,7 @@ class ServerSockets {
   }
 
   /**
-   * Remove given socket from all rooms.
+   * Delete given socket.
    * @private
    */
   [kSocketsDeleteSocket](socket) {
