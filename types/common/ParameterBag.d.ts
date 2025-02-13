@@ -62,6 +62,7 @@ export default ParameterBag;
 /** @private */
 declare class ParameterBag {
     static validateDescription(description: any): void;
+    static getFullDescription(description: any): any;
     constructor(description: any, initValues?: {});
     /**
      * Define if the parameter exists.

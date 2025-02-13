@@ -32,7 +32,7 @@ declare class ServerSockets {
      */
     private [kSocketsStop];
     /**
-     * Remove given socket from all rooms.
+     * Delete given socket.
      * @private
      */
     private [kSocketsDeleteSocket];
