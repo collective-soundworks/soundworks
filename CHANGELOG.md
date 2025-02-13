@@ -1,3 +1,7 @@
+## v5.0.3 - 2025-02-13
+
+- Fix: unexpected error when getting description of shared state class with required parameter
+
 ## v5.0.0 - 2025-01-30
 
 ### Breaking
