@@ -471,21 +471,21 @@ class ServerStateManager extends BaseStateManager {
    */
   defineClass(className, classDescription) {
     if (!isString(className)) {
-      throw new TypeError(`Cannot execute 'defineClass' on ServerStateManager: argument 1 must be of type SharedStateClassName`);
+      throw new TypeError(`Cannot execute 'defineClass' (${className}) on ServerStateManager: argument 1 must be of type SharedStateClassName`);
     }
 
     if (!isPlainObject(classDescription)) {
-      throw new TypeError(`Cannot execute 'defineClass' on ServerStateManager: argument 2 must be of type SharedStateClassDescription`);
+      throw new TypeError(`Cannot execute 'defineClass' (${className}) on ServerStateManager: argument 2 must be of type SharedStateClassDescription`);
     }
 
     if (this.#classes.has(className)) {
-      throw new DOMException(`Cannot execute 'defineClass' on ServerStateManager: SharedState class '${className}' is already defined`, 'NotSupportedError');
+      throw new DOMException(`Cannot execute 'defineClass'(${className})  on ServerStateManager: SharedState class '${className}' is already defined`, 'NotSupportedError');
     }
 
     try {
       ParameterBag.validateDescription(classDescription);
     } catch (err) {
-      throw new TypeError(`Cannot execute 'defineClass' on ServerStateManager: ${err.message}`);
+      throw new TypeError(`Cannot execute 'defineClass' (${className}) on ServerStateManager: ${err.message}`);
     }
 
     this.#classes.set(className, clonedeep(classDescription));
@@ -586,11 +586,11 @@ class ServerStateManager extends BaseStateManager {
    */
   registerCreateHook(className, createHook) {
     if (!this.#classes.has(className)) {
-      throw new TypeError(`Cannot execute 'registerCreateHook' on BaseStateManager: SharedState class '${className}' is not defined`);
+      throw new TypeError(`Cannot execute 'registerCreateHook' (${className}) on BaseStateManager: SharedState class '${className}' is not defined`);
     }
 
     if (!isFunction(createHook)) {
-      throw new TypeError(`Cannot execute 'registerCreateHook' on BaseStateManager: argument 2 must be a function`);
+      throw new TypeError(`Cannot execute 'registerCreateHook' (${className}) on BaseStateManager: argument 2 must be a function`);
     }
 
     const hooks = this.#createHooksByClassName.get(className);
@@ -634,11 +634,11 @@ class ServerStateManager extends BaseStateManager {
    */
   registerDeleteHook(className, deleteHook) {
     if (!this.#classes.has(className)) {
-      throw new TypeError(`Cannot execute 'registerDeleteHook' on BaseStateManager: SharedState class '${className}' is not defined`);
+      throw new TypeError(`Cannot execute 'registerDeleteHook' (${className}) on BaseStateManager: SharedState class '${className}' is not defined`);
     }
 
     if (!isFunction(deleteHook)) {
-      throw new TypeError(`Cannot execute 'registerDeleteHook' on BaseStateManager: argument 2 must be a function`);
+      throw new TypeError(`Cannot execute 'registerDeleteHook' (${className}) on BaseStateManager: argument 2 must be a function`);
     }
 
     const hooks = this.#deleteHooksByClassName.get(className);
@@ -689,11 +689,11 @@ class ServerStateManager extends BaseStateManager {
    */
   registerUpdateHook(className, updateHook) {
     if (!this.#classes.has(className)) {
-      throw new TypeError(`Cannot execute 'registerUpdateHook' on BaseStateManager: SharedState class '${className}' is not defined`);
+      throw new TypeError(`Cannot execute 'registerUpdateHook' (${className}) on BaseStateManager: SharedState class '${className}' is not defined`);
     }
 
     if (!isFunction(updateHook)) {
-      throw new TypeError(`Cannot execute 'registerUpdateHook' on BaseStateManager: argument 2 must be a function`);
+      throw new TypeError(`Cannot execute 'registerUpdateHook' (${className}) on BaseStateManager: argument 2 must be a function`);
     }
 
     const hooks = this.#updateHooksByClassName.get(className);
