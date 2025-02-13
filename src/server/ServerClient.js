@@ -1,7 +1,7 @@
-import { idGenerator } from '@ircam/sc-utils';
+import { counter } from '@ircam/sc-utils';
 import { v4 as uuid } from 'uuid';
 
-const generateId = idGenerator();
+const generateId = counter();
 
 export const kServerClientToken = Symbol('soundworks:server-client-token');
 
@@ -23,7 +23,7 @@ class ServerClient {
    */
   constructor(role, socket) {
     this.#role = role;
-    this.#id = generateId.next().value;
+    this.#id = generateId();
     this.#uuid = uuid();
     this.#socket = socket;
 
