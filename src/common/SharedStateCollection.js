@@ -472,6 +472,30 @@ class SharedStateCollection {
   }
 
   /**
+   * Execute a user-supplied "reducer" callback function on each element of the collection,
+   * in order, passing in the return value from the calculation on the preceding element.
+   * The final result of running the reducer across all elements of the array is a single value.
+   *
+   * @template T
+   * @param {Function} func - A function to execute for each element in the array.
+   *  Its return value becomes the value of the accumulator parameter on the next
+   *  invocation of callbackFn. For the last invocation, the return value becomes
+   *  the return value of reduce(). The function is called with the following arguments:
+   * @param {T} initialValue - A value to which accumulator is initialized the first
+   *  time the callback is called. If initialValue is specified, callbackFn starts
+   *  executing with the first value in the array as currentValue.
+   * @return {T}
+   */
+  reduce(func, initialValue) {
+    // compared to the native Array.reduce method, initial Value is mandatory
+    if (arguments.length < 0) {
+      throw new Error(`Cannot execute 'reduce' on 'SharedStateCollection: argument 2 is not defined`);
+    }
+
+    return this.#states.reduce(func, initialValue);
+  }
+
+  /**
    * Iterable API, e.g. for use in `for .. of` loops
    */
   [Symbol.iterator]() {
