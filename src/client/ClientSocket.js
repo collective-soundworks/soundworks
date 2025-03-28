@@ -61,13 +61,21 @@ class ClientSocket {
       path = `${this.#config.env.baseUrl}/${path}`;
     }
 
-    const protocol = this.#config.env.useHttps ? 'wss:' : 'ws:';
     const port = this.#config.env.port;
+    let protocol = this.#config.env.useHttps ? 'wss:' : 'ws:';
     let serverAddress;
     let webSocketOptions;
 
     if (isBrowser()) {
       const hostname = window.location.hostname;
+      // ## Hotfix - 20250428
+      // when running behind an https proxy (e.g. nginx) `useHttps` can be false
+      // but we need to open the socket in secure protocol
+      // This tends to confirm that we need more granularity with this config
+      // stuff, there are too much weird edge cases to handle
+      if (this.#config.env.useHttps === false && window.location.protocol === 'https:') {
+        protocol = 'wss:';
+      }
 
       if (this.#config.env.serverAddress === '') {
         serverAddress = hostname;
