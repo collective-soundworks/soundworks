@@ -1,6 +1,10 @@
-## v5.0.4 - 2025-04-28
+## v5.1.1 - 2025-04-28
 
 - Hotfix: run behind https proxy
+
+## v5.1.0 - 2025-02-19
+
+- Feat: add SharedStateCollection reduce
 
 ## v5.0.3 - 2025-02-13
 
