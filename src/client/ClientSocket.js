@@ -61,7 +61,7 @@ class ClientSocket {
       path = `${this.#config.env.baseUrl}/${path}`;
     }
 
-    const port = this.#config.env.port;
+    let port = this.#config.env.port;
     let protocol = this.#config.env.useHttps ? 'wss:' : 'ws:';
     let serverAddress;
     let webSocketOptions;
@@ -75,6 +75,7 @@ class ClientSocket {
       // stuff, there are too much weird edge cases to handle
       if (this.#config.env.useHttps === false && window.location.protocol === 'https:') {
         protocol = 'wss:';
+        port = 443;
       }
 
       if (this.#config.env.serverAddress === '') {
