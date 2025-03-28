@@ -1,3 +1,7 @@
+## v5.0.4 - 2025-04-28
+
+- Hotfix: run behind https proxy
+
 ## v5.0.3 - 2025-02-13
 
 - Fix: unexpected error when getting description of shared state class with required parameter
