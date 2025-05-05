@@ -348,6 +348,19 @@ describe(`# StateManager`, () => {
       assert.equal(observeCalled, false);
       unobserve();
     });
+
+    it(`should be able to recreate a class with the same name`, async () => {
+      server.stateManager.defineClass('recreate-class', a);
+      const state1 = await server.stateManager.create('recreate-class');
+      // console.log(state1.getValues());
+      assert.deepEqual(state1.getValues(), { bool: false, int: 0 })
+      // delete class
+      server.stateManager.deleteClass('recreate-class');
+      server.stateManager.defineClass('recreate-class', b);
+      const state2 = await server.stateManager.create('recreate-class');
+      assert.deepEqual(state2.getValues(), { bool: true, int: 20 });
+
+    });
   });
 
   describe('## observe(callback) => Promise<unobserve>', async () => {

@@ -49,7 +49,6 @@ export const kStateManagerClient = Symbol('soundworks:state-manager-client');
 /** @private */
 class BaseStateManager {
   #statesById = new Map();
-  #cachedClasses = new Map(); // <className, definition>
   #observeListeners = new Set(); // Set <[observedClassName, callback, options]>
   #observeRequestCallbacks = new Map(); // Map <reqId, [observedClassName, callback, options]>
   #promiseStore = null;
@@ -100,15 +99,6 @@ class BaseStateManager {
     this[kStateManagerClient].transport.addListener(
       CREATE_RESPONSE,
       (reqId, stateId, instanceId, className, classDescription, initValues) => {
-        // cache class description to save some bandwidth
-        // @note: when we make the class dynamic, we will need some mechanism to
-        // invalidate the cached description
-        if (!this.#cachedClasses.has(className)) {
-          this.#cachedClasses.set(className, classDescription);
-        }
-
-        classDescription = this.#cachedClasses.get(className);
-
         const state = new SharedState({
           manager: this,
           className,
@@ -136,15 +126,6 @@ class BaseStateManager {
     this[kStateManagerClient].transport.addListener(
       ATTACH_RESPONSE,
       (reqId, stateId, instanceId, className, classDescription, currentValues, filter) => {
-        // cache class description to save some bandwidth
-        // @note: when we make the class dynamic, we will need some mechanism to
-        // invalidate the cached description
-        if (!this.#cachedClasses.has(className)) {
-          this.#cachedClasses.set(className, classDescription);
-        }
-
-        classDescription = this.#cachedClasses.get(className);
-
         const state = new SharedState({
           manager: this,
           className,
@@ -225,9 +206,11 @@ class BaseStateManager {
 
     // ---------------------------------------------
     // Clear cache when a shared state class is deleted
+    // note 2025-05-05: this has been removed because it could create concurrency issues
+    // cf. `should be able to recreate a class with the same name` test
     // ---------------------------------------------
     this[kStateManagerClient].transport.addListener(DELETE_SHARED_STATE_CLASS, className => {
-      this.#cachedClasses.delete(className);
+      // nothing to do
     });
 
     // ---------------------------------------------
@@ -235,13 +218,8 @@ class BaseStateManager {
     // ---------------------------------------------
     this[kStateManagerClient].transport.addListener(
       GET_CLASS_DESCRIPTION_RESPONSE,
-      (reqId, className, classDescription) => {
+      (reqId, _className, classDescription) => {
         const fullDescription = ParameterBag.getFullDescription(classDescription);
-
-        if (!this.#cachedClasses.has(className)) {
-          this.#cachedClasses.set(className, fullDescription);
-        }
-
         this.#promiseStore.resolve(reqId, fullDescription);
       },
     );
@@ -266,10 +244,6 @@ class BaseStateManager {
   async getClassDescription(className) {
     if (this.#status !== 'inited') {
       throw new DOMException(`Cannot execute 'getClassDescription' on BaseStateManager: BaseStateManager is not inited`, 'InvalidStateError');
-    }
-
-    if (this.#cachedClasses.has(className)) {
-      return this.#cachedClasses.get(className);
     }
 
     return new Promise((resolve, reject) => {
@@ -302,8 +276,7 @@ class BaseStateManager {
 
     return new Promise((resolve, reject) => {
       const reqId = this.#promiseStore.add(resolve, reject, 'BaseStateManager#create');
-      const requireDescription = this.#cachedClasses.has(className) ? false : true;
-      this[kStateManagerClient].transport.emit(CREATE_REQUEST, reqId, className, requireDescription, initValues);
+      this[kStateManagerClient].transport.emit(CREATE_REQUEST, reqId, className, initValues);
     });
   }
 
@@ -411,8 +384,7 @@ class BaseStateManager {
 
     return new Promise((resolve, reject) => {
       const reqId = this.#promiseStore.add(resolve, reject, 'BaseStateManager#attach');
-      const requireDescription = this.#cachedClasses.has(className) ? false : true;
-      this[kStateManagerClient].transport.emit(ATTACH_REQUEST, reqId, className, stateId, requireDescription, filter);
+      this[kStateManagerClient].transport.emit(ATTACH_REQUEST, reqId, className, stateId, filter);
     });
   }
 

@@ -206,7 +206,7 @@ class ServerStateManager extends BaseStateManager {
     // ---------------------------------------------
     client.transport.addListener(
       CREATE_REQUEST,
-      async (reqId, className, requireDescription, initValues = {}) => {
+      async (reqId, className, initValues = {}) => {
         if (this.#classes.has(className)) {
           try {
             const classDescription = this.#classes.get(className);
@@ -243,7 +243,6 @@ class ServerStateManager extends BaseStateManager {
             this.#sharedStatePrivateById.set(stateId, state);
 
             const currentValues = state.parameters.getValues();
-            const classDescriptionOption = requireDescription ? classDescription : null;
 
             client.transport.emit(
               CREATE_RESPONSE,
@@ -251,7 +250,7 @@ class ServerStateManager extends BaseStateManager {
               stateId,
               instanceId,
               className,
-              classDescriptionOption,
+              classDescription,
               currentValues,
             );
 
@@ -278,7 +277,7 @@ class ServerStateManager extends BaseStateManager {
     // ---------------------------------------------
     client.transport.addListener(
       ATTACH_REQUEST,
-      (reqId, className, stateId = null, requireDescription = true, filter = null) => {
+      (reqId, className, stateId = null, filter = null) => {
         if (this.#classes.has(className)) {
           let state = null;
 
@@ -305,7 +304,6 @@ class ServerStateManager extends BaseStateManager {
             const isOwner = false;
             const currentValues = state.parameters.getValues();
             const classDescription = this.#classes.get(className);
-            const classDescriptionOption = requireDescription ? classDescription : null;
 
             // if filter given, check that all filter entries are valid class keys
             // @todo - improve error reporting: report invalid filters
@@ -327,7 +325,7 @@ class ServerStateManager extends BaseStateManager {
               state.id,
               instanceId,
               className,
-              classDescriptionOption,
+              classDescription,
               currentValues,
               filter,
             );
