@@ -546,6 +546,16 @@ class ServerStateManager extends BaseStateManager {
   }
 
   /**
+   * Check wether a {@link SharedState} is defined or not, given its {@link SharedStateClassName}
+   *
+   * @param {SharedStateClassName} className - Name of the shared state class to delete.
+   * @returns {boolean}
+   */
+  isClassDefined(className) {
+    return this.#classes.has(className);
+  }
+
+  /**
    * Register a function for a given class of shared state class to be executed
    * when a state is created.
    *

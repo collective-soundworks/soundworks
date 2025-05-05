@@ -59,6 +59,18 @@ describe(`# StateManager`, () => {
     });
   });
 
+
+  describe('## [server] isClassDefined(className)', () => {
+    it('should return false if class is not defined', () => {
+      assert.isFalse(server.stateManager.isClassDefined('does-not-exist'));
+    });
+
+    it('should return true if class is defined', () => {
+      server.stateManager.defineClass('does-exist', a);
+      assert.isTrue(server.stateManager.isClassDefined('does-exist'));
+    });
+  });
+
   describe(`## getClassDescription(className)`, () => {
     it(`should throw if node is not inited`, async () => {
       const localConfig = structuredClone(config);
