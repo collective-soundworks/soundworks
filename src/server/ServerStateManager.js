@@ -19,7 +19,7 @@ import {
   OBSERVE_ERROR,
   OBSERVE_NOTIFICATION,
   UNOBSERVE_NOTIFICATION,
-  DELETE_SHARED_STATE_CLASS,
+  // DELETE_SHARED_STATE_CLASS,
   GET_CLASS_DESCRIPTION_REQUEST,
   GET_CLASS_DESCRIPTION_RESPONSE,
   GET_CLASS_DESCRIPTION_ERROR,
@@ -523,10 +523,14 @@ class ServerStateManager extends BaseStateManager {
       }
     }
 
-    // clear class cache of all connected clients
-    for (let client of this[kStateManagerClientsByNodeId].values()) {
-      client.transport.emit(`${DELETE_SHARED_STATE_CLASS}`, className);
-    }
+    // ---------------------------------------------
+    // note 2025-05-05: client-side caching of class descriptions has been removed
+    // because it could create concurrency issues
+    // cf. `should be able to recreate a class with the same name` unit test
+    // ---------------------------------------------
+    // for (let client of this[kStateManagerClientsByNodeId].values()) {
+    //   client.transport.emit(`${DELETE_SHARED_STATE_CLASS}`, className);
+    // }
 
     this.#classes.delete(className);
     // delete registered hooks
