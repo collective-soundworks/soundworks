@@ -159,6 +159,54 @@ describe('# SharedState', () => {
         await state.delete();
       }
     });
+
+    it.only('should not throw if the state is deleted (1)', async () => {
+      const state = await server.stateManager.create('a');
+      const attached = await client.stateManager.attach('a');
+
+      let thenFlag = false;
+      let catchFlag = false;
+      let finallyFlag = false;
+
+      attached.set('bool', true)
+        .then(() => thenFlag = true)
+        .catch(err => catchFlag = true)
+        .finally(() => finallyFlag = true);
+
+      // delete state immediately
+      state.delete();
+      await delay(20);
+
+      assert.isFalse(thenFlag, 'then should not be executed');
+      assert.isFalse(catchFlag, 'catch should not be executed');
+      assert.isTrue(finallyFlag, 'finally should be executed');
+    });
+
+    it.only('should not throw if the state is deleted (2)', async () => {
+      const state = await server.stateManager.create('a');
+      const attached = await client.stateManager.attach('a');
+
+      let thenFlag = false;
+      let catchFlag = false;
+      let finallyFlag = false;
+
+      const promise = attached.set('bool', true);
+
+      state.delete();
+
+      try {
+        await promise;
+        thenFlag = true;
+      } catch (err) {
+        catchFlag = true;
+      } finally {
+        finallyFlag = true;
+      }
+
+      assert.isFalse(thenFlag, 'then should not be executed');
+      assert.isFalse(catchFlag, 'catch should not be executed');
+      assert.isTrue(finallyFlag, 'finally should be executed');
+    });
   });
 
   describe('## get(name) - ## getValues()', () => {
