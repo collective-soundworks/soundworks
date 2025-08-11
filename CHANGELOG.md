@@ -1,3 +1,12 @@
+## v5.2.1 - 2025-08-11
+
+- Fix: Use CancelablePromise to cancel pending promise rather than reject when a state is deleted
+
+## v5.2.0 - 2025-05-05
+
+- Feat: add ServerStateManager#isClassDefined method
+- Fix: Remove class description cache mechanism to avoid possible concurrency issues when recreating a SharedStateClass with same name
+
 ## v5.1.1 - 2025-04-28
 
 - Hotfix: run behind https proxy

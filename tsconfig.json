@@ -16,7 +16,9 @@
     "outDir": "types",
     // go to js file when using IDE functions like
     // "Go to Definition" in VSCode
-    "declarationMap": false
+    "declarationMap": false,
+    // do not check dependencies
+    "skipLibCheck": true
   },
 
   // https://github.com/TypeStrong/typedoc/issues/643
