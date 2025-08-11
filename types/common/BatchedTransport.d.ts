@@ -1,10 +1,6 @@
 export default BatchedTransport;
 /**
- * This class proxies transports given the SharedStateManager to batch messages
- *
- * @param {number} [options.wait=0] - Wait for given number of milliseconds
- *  for stacking messages before emitting on the network. If 0 is given, network
- *  message is emitted on next microtask
+ * This class proxies transports, i.e. WebSockets, to batch message sends
  * @private
  */
 declare class BatchedTransport {

@@ -18,7 +18,25 @@ export type ClientAppConfig = {
 /**
  * Environment configuration object.
  */
-export type ClientEnvConfig = objecy;
+export type ClientEnvConfig = {
+    /**
+     * - Port on which the server is listening.
+     */
+    port: number;
+    /**
+     * - Domain name or IP of the server.
+     * Mandatory when node clients are declared
+     */
+    serverAddress: string;
+    /**
+     * - Define is the server run in http or in https.
+     */
+    useHttps: boolean;
+    /**
+     * - If running behind a proxy, base URL of the application.
+     */
+    baseUrl?: string;
+};
 /**
  * Configuration object for a client running in a browser runtime.
  */
