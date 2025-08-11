@@ -11,7 +11,7 @@ export default class PromiseStore {
     this.generateId = counter();
   }
 
-  createPromise(type) {
+  createPromise() {
     const id = this.generateId();
     let resolve, reject;
 
@@ -20,7 +20,7 @@ export default class PromiseStore {
       reject = rejectFunc;
     });
 
-    this.store.set(id, { promise, resolve, reject, type });
+    this.store.set(id, { promise, resolve, reject });
 
     return { id, promise };
   }
@@ -62,8 +62,7 @@ export default class PromiseStore {
   // cancel all pending request
   flush() {
     for (let [_id, entry] of this.store) {
-      const { promise, type } = entry;
-      promise.cancel();
+      entry.promise.cancel();
     }
 
     this.store.clear();

@@ -555,7 +555,7 @@ class SharedState {
     updates = sharedParams;
 
     // go through server-side normal behavior
-    const { id: reqId, promise } = this[kSharedStatePromiseStore].createPromise('SharedState#set');
+    const { id: reqId, promise } = this[kSharedStatePromiseStore].createPromise();
     if (forwardParams) {
       this[kSharedStatePromiseStore].associateResolveData(reqId, forwardParams);
     }
@@ -713,11 +713,11 @@ class SharedState {
     this.#onUpdateCallbacks.clear();
 
     if (this.#isOwner) {
-      const { id: reqId, promise } = this[kSharedStatePromiseStore].createPromise('SharedState#delete');
+      const { id: reqId, promise } = this[kSharedStatePromiseStore].createPromise();
       this.#client.transport.emit(`${DELETE_REQUEST}-${this.#id}-${this.#instanceId}`, reqId);
       return promise;
     } else {
-      const { id: reqId, promise } = this[kSharedStatePromiseStore].createPromise('SharedState#detach');
+      const { id: reqId, promise } = this[kSharedStatePromiseStore].createPromise();
       this.#client.transport.emit(`${DETACH_REQUEST}-${this.#id}-${this.#instanceId}`, reqId);
       return promise;
     }

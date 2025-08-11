@@ -244,7 +244,7 @@ class BaseStateManager {
       throw new DOMException(`Cannot execute 'getClassDescription' on BaseStateManager: BaseStateManager is not inited`, 'InvalidStateError');
     }
 
-    const { id: reqId, promise } = this.#promiseStore.createPromise('BaseStateManager#getClassDescription');
+    const { id: reqId, promise } = this.#promiseStore.createPromise();
     this[kStateManagerClient].transport.emit(GET_CLASS_DESCRIPTION_REQUEST, reqId, className);
 
     return promise;
@@ -272,7 +272,7 @@ class BaseStateManager {
       throw new DOMException(`Cannot execute 'create' on BaseStateManager: BaseStateManager is not inited`, 'InvalidStateError');
     }
 
-    const { id: reqId, promise } = this.#promiseStore.createPromise('BaseStateManager#create');
+    const { id: reqId, promise } = this.#promiseStore.createPromise();
     this[kStateManagerClient].transport.emit(CREATE_REQUEST, reqId, className, initValues);
 
     return promise;
@@ -380,7 +380,7 @@ class BaseStateManager {
       }
     }
 
-    const { id: reqId, promise } = this.#promiseStore.createPromise('BaseStateManager#attach');
+    const { id: reqId, promise } = this.#promiseStore.createPromise();
     this[kStateManagerClient].transport.emit(ATTACH_REQUEST, reqId, className, stateId, filter);
 
     return promise;
@@ -562,7 +562,7 @@ class BaseStateManager {
     }
 
     // resend request to get updated list of states
-    const { id: reqId, promise } = this.#promiseStore.createPromise('BaseStateManager#observe');
+    const { id: reqId, promise } = this.#promiseStore.createPromise();
     // store the callback for execution on the response. the returned Promise
     // is fulfilled once callback has been executed with each existing states
     const observeInfos = [observedClassName, callback, options];
