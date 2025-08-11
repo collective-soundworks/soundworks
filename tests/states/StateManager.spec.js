@@ -240,8 +240,7 @@ describe(`# StateManager`, () => {
       for (let state of [a0, a1, a2]) {
         for (let i = 1; i <= 100; i++) {
           await state.set({ int: i });
-          // no need to wait for propagation eveything is synchronous server-side,
-
+          // no need to wait for propagation everything is synchronous server-side,
           assert.equal(a0.get('int'), i);
           assert.equal(a1.get('int'), i);
           assert.equal(a2.get('int'), i);
@@ -661,7 +660,7 @@ describe(`# StateManager`, () => {
       await b2.delete();
     });
 
-    it(`should thow if given schema name does not exists`, async () => {
+    it(`should throw if given schema name does not exists`, async () => {
       let errored = false;
 
       try {
@@ -1205,7 +1204,7 @@ describe(`# StateManager`, () => {
       }
     });
 
-    it('should apply several hooks in registation order', async () => {
+    it('should apply several hooks in registration order', async () => {
       server.stateManager.defineClass('hooked', hookSchema);
       server.stateManager.registerUpdateHook('hooked', (updates, currentValues) => {
         return { ...updates, value: 'ok-1' };
@@ -1322,7 +1321,7 @@ describe(`# StateManager`, () => {
             value: 'ok',
           };
         }
-        // implicitely return undefined on test-2
+        // implicitly return undefined on test-2
       });
 
       const h = await server.stateManager.create('hooked');

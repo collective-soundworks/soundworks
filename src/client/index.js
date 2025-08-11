@@ -18,7 +18,7 @@
  * Environment configuration object.
  *
  * @typedef ClientEnvConfig
- * @type {objecy}
+ * @type {object}
  * @property {number} env.port - Port on which the server is listening.
  * @property {string} env.serverAddress - Domain name or IP of the server.
  *  Mandatory when node clients are declared

@@ -214,10 +214,10 @@ class ClientContext {
 
     // we need the try/catch block to change the promise rejection into proper error
     try {
-      await new Promise((resolve, reject) => {
-        const reqId = promiseStore.add(resolve, reject, 'ClientContext#enter');
-        this.#client.socket.send(CONTEXT_ENTER_REQUEST, reqId, this.name);
-      });
+      const { id: reqId, promise } = promiseStore.createPromise();
+      this.#client.socket.send(CONTEXT_ENTER_REQUEST, reqId, this.name);
+
+      await promise;
     } catch (err) {
       throw new Error(err);
     }
@@ -248,10 +248,10 @@ class ClientContext {
   async exit() {
     // we need the try/catch block to change the promise rejection into proper error
     try {
-      await new Promise((resolve, reject) => {
-        const reqId = promiseStore.add(resolve, reject, 'ClientContext#exit');
-        this.#client.socket.send(CONTEXT_EXIT_REQUEST, reqId, this.name);
-      });
+      const { id: reqId, promise } = promiseStore.createPromise();
+      this.#client.socket.send(CONTEXT_EXIT_REQUEST, reqId, this.name);
+
+      await promise;
     } catch (err) {
       throw new Error(err);
     }

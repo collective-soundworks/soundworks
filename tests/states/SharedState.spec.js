@@ -159,6 +159,68 @@ describe('# SharedState', () => {
         await state.delete();
       }
     });
+
+    it('should not throw if the state is deleted (1)', async () => {
+      const state = await server.stateManager.create('a');
+      const attached = await client.stateManager.attach('a');
+
+      let thenFlag = false;
+      let catchFlag = false;
+      let afterFlag = false;
+
+      // we don't await here, so that we can delete the state in between
+      attached.set('bool', true)
+        .then(() => thenFlag = true)
+        .catch(err => catchFlag = true)
+        .finally(() => afterFlag = true, true);
+
+      // afterFlag = true;
+      // delete state immediately
+      state.delete();
+      await delay(20);
+
+      assert.isFalse(thenFlag, 'then should not be executed');
+      assert.isFalse(catchFlag, 'catch should not be executed');
+      assert.isFalse(afterFlag, 'finally should not be executed');
+    });
+
+    it('should not throw if the state is deleted (2)', async () => {
+      return new Promise(async resolve => {;
+        const state = await server.stateManager.create('a');
+        const attached = await client.stateManager.attach('a');
+
+        let thenFlag = false;
+        let catchFlag = false;
+        let afterBlock = false;
+
+        // we don't await here, so that we can delete the state in between
+        const promise = attached.set('bool', true);
+
+        state.delete();
+
+        // let's check afterward that anything has been executed...
+        // as cancel() will stop the execution of the whole block
+        setTimeout(() => {
+          assert.isFalse(thenFlag, 'then should not be executed');
+          assert.isFalse(catchFlag, 'catch should not be executed');
+          assert.isFalse(afterBlock, 'after try / catch block should not be executed');
+          resolve();
+        }, 100);
+
+        try {
+          await promise;
+          thenFlag = true;
+        } catch (err) {
+          catchFlag = true;
+        }
+
+        afterBlock = true;
+      })
+
+      // // } finally {
+      // //   finallyFlag = true;
+      // // }
+    });
   });
 
   describe('## get(name) - ## getValues()', () => {
@@ -501,29 +563,35 @@ describe('# SharedState', () => {
   });
 
   describe(`## Race conditions`, () => {
-    it(`should flush pending requests when state is deleted / detached`, async () => {
-      const aCreated = await server.stateManager.create('a');
-      const aAttached = await client.stateManager.attach('a');
+    it(`should properly flush pending requests when state is deleted`, async () => {
+      return new Promise(async resolve => {
+        const aCreated = await server.stateManager.create('a');
+        const aAttached = await client.stateManager.attach('a');
 
-      // - DELETE_REQUEST sent by `aCreated` is received first on the
-      // SharedStatePrivate which deletes all its listeners.
-      // - Concurrently DETACH_REQUEST is sent by `aAttached` but cannot have a response,
-      // - Flush pending requests on `aAttached` when DELETE_NOTIFICATION is received
+        // - DELETE_REQUEST sent by `aCreated` is received first on the
+        // SharedStatePrivate which deletes all its listeners.
+        // - Concurrently DETACH_REQUEST is sent by `aAttached` but cannot have a response,
+        // - Flush pending requests on `aAttached` when DELETE_NOTIFICATION is received
 
-      aCreated.delete();
+        aCreated.delete();
 
-      let errored = false;
+        let errored = false;
+        let afterAwait = false;
 
-      try {
-        await aAttached.detach();
-      } catch (err) {
-        console.log(err.message);
-        errored = true;
-      }
+        setTimeout(() => {
+          assert.isFalse(afterAwait, 'pending request should be cancelled');
+          assert.isFalse(errored, 'flushing pending requests should not throw');
+          resolve();
+        }, 50);
 
-      if (!errored) {
-        assert.fail('should have thrown');
-      }
+        try {
+          await aAttached.set({ bool: true });
+          afterAwait = true;
+        } catch (err) {
+          console.log(err.message);
+          errored = true;
+        }
+      });
     });
   });
 });

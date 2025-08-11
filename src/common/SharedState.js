@@ -555,10 +555,13 @@ class SharedState {
     updates = sharedParams;
 
     // go through server-side normal behavior
-    return new Promise((resolve, reject) => {
-      const reqId = this[kSharedStatePromiseStore].add(resolve, reject, 'SharedState#set', forwardParams);
-      this.#client.transport.emit(`${UPDATE_REQUEST}-${this.#id}-${this.#instanceId}`, reqId, updates);
-    });
+    const { id: reqId, promise } = this[kSharedStatePromiseStore].createPromise();
+    if (forwardParams) {
+      this[kSharedStatePromiseStore].associateResolveData(reqId, forwardParams);
+    }
+    this.#client.transport.emit(`${UPDATE_REQUEST}-${this.#id}-${this.#instanceId}`, reqId, updates);
+
+    return promise;
   }
 
   /**
@@ -710,15 +713,13 @@ class SharedState {
     this.#onUpdateCallbacks.clear();
 
     if (this.#isOwner) {
-      return new Promise((resolve, reject) => {
-        const reqId = this[kSharedStatePromiseStore].add(resolve, reject, 'SharedState#delete');
-        this.#client.transport.emit(`${DELETE_REQUEST}-${this.#id}-${this.#instanceId}`, reqId);
-      });
+      const { id: reqId, promise } = this[kSharedStatePromiseStore].createPromise();
+      this.#client.transport.emit(`${DELETE_REQUEST}-${this.#id}-${this.#instanceId}`, reqId);
+      return promise;
     } else {
-      return new Promise((resolve, reject) => {
-        const reqId = this[kSharedStatePromiseStore].add(resolve, reject, 'SharedState#detach');
-        this.#client.transport.emit(`${DETACH_REQUEST}-${this.#id}-${this.#instanceId}`, reqId);
-      });
+      const { id: reqId, promise } = this[kSharedStatePromiseStore].createPromise();
+      this.#client.transport.emit(`${DETACH_REQUEST}-${this.#id}-${this.#instanceId}`, reqId);
+      return promise;
     }
   }
 
