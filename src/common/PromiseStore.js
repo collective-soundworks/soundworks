@@ -1,52 +1,69 @@
-import { idGenerator } from '@ircam/sc-utils';
+import { counter } from '@ircam/sc-utils';
+// common js module...
+import cancelable from 'cancelable-promise';
+const { CancelablePromise } = cancelable;
 
 /** @private */
 export default class PromiseStore {
   constructor(name) {
     this.name = name;
     this.store = new Map();
-    this.generateRequestId = idGenerator();
+    this.generateId = counter();
   }
 
-  add(resolve, reject, type, localParams) {
-    const reqId = this.generateRequestId.next().value;
-    this.store.set(reqId, { resolve, reject, type, localParams });
+  createPromise(type) {
+    const id = this.generateId();
+    let resolve, reject;
 
-    return reqId;
+    const promise = new CancelablePromise((resolveFunc, rejectFunc) => {
+      resolve = resolveFunc;
+      reject = rejectFunc;
+    });
+
+    this.store.set(id, { promise, resolve, reject, type });
+
+    return { id, promise };
   }
 
-  resolve(reqId, data) {
-    if (this.store.has(reqId)) {
-      const { resolve, localParams } = this.store.get(reqId);
-      this.store.delete(reqId);
+  // associate data to merge within the data given when calling `resolve`
+  // cf. SharedState#set
+  associateResolveData(id, associatedData) {
+    const stored = this.store.get(id);
+    stored.associatedData = associatedData;
+  }
+
+  resolve(id, data) {
+    if (this.store.has(id)) {
+      const { resolve, associatedData } = this.store.get(id);
+      this.store.delete(id);
 
       // re-merge local params into network response
-      if (localParams !== undefined) {
-        Object.assign(data, localParams);
+      if (associatedData !== undefined) {
+        Object.assign(data, associatedData);
       }
 
       resolve(data);
     } else {
-      throw new ReferenceError(`Cannot resolve request id (${reqId}): id does not exist`);
+      throw new ReferenceError(`Cannot resolve request id (${id}): id does not exist`);
     }
   }
 
-  reject(reqId, msg) {
-    if (this.store.has(reqId)) {
-      const { reject } = this.store.get(reqId);
-      this.store.delete(reqId);
+  reject(id, msg) {
+    if (this.store.has(id)) {
+      const { reject } = this.store.get(id);
+      this.store.delete(id);
 
       reject(new Error(msg));
     } else {
-      throw new ReferenceError(`Cannot resolve request id (${reqId}): id does not exist`);
+      throw new ReferenceError(`Cannot resolve request id (${id}): id does not exist`);
     }
   }
 
-  // reject all pending request
+  // cancel all pending request
   flush() {
-    for (let [_reqId, entry] of this.store) {
-      const { reject, type } = entry;
-      reject(new Error(`Discard promise '${type}'`));
+    for (let [_id, entry] of this.store) {
+      const { promise, type } = entry;
+      promise.cancel();
     }
 
     this.store.clear();

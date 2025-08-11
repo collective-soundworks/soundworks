@@ -244,10 +244,10 @@ class BaseStateManager {
       throw new DOMException(`Cannot execute 'getClassDescription' on BaseStateManager: BaseStateManager is not inited`, 'InvalidStateError');
     }
 
-    return new Promise((resolve, reject) => {
-      const reqId = this.#promiseStore.add(resolve, reject, 'BaseStateManager#getClassDescription');
-      this[kStateManagerClient].transport.emit(GET_CLASS_DESCRIPTION_REQUEST, reqId, className);
-    });
+    const { id: reqId, promise } = this.#promiseStore.createPromise('BaseStateManager#getClassDescription');
+    this[kStateManagerClient].transport.emit(GET_CLASS_DESCRIPTION_REQUEST, reqId, className);
+
+    return promise;
   }
 
   /**
@@ -272,10 +272,10 @@ class BaseStateManager {
       throw new DOMException(`Cannot execute 'create' on BaseStateManager: BaseStateManager is not inited`, 'InvalidStateError');
     }
 
-    return new Promise((resolve, reject) => {
-      const reqId = this.#promiseStore.add(resolve, reject, 'BaseStateManager#create');
-      this[kStateManagerClient].transport.emit(CREATE_REQUEST, reqId, className, initValues);
-    });
+    const { id: reqId, promise } = this.#promiseStore.createPromise('BaseStateManager#create');
+    this[kStateManagerClient].transport.emit(CREATE_REQUEST, reqId, className, initValues);
+
+    return promise;
   }
 
   /**
@@ -380,10 +380,10 @@ class BaseStateManager {
       }
     }
 
-    return new Promise((resolve, reject) => {
-      const reqId = this.#promiseStore.add(resolve, reject, 'BaseStateManager#attach');
-      this[kStateManagerClient].transport.emit(ATTACH_REQUEST, reqId, className, stateId, filter);
-    });
+    const { id: reqId, promise } = this.#promiseStore.createPromise('BaseStateManager#attach');
+    this[kStateManagerClient].transport.emit(ATTACH_REQUEST, reqId, className, stateId, filter);
+
+    return promise;
   }
 
   /**
@@ -562,33 +562,33 @@ class BaseStateManager {
     }
 
     // resend request to get updated list of states
-    return new Promise((resolve, reject) => {
-      const reqId = this.#promiseStore.add(resolve, reject, 'BaseStateManager#observe');
-      // store the callback for execution on the response. the returned Promise
-      // is fulfilled once callback has been executed with each existing states
-      const observeInfos = [observedClassName, callback, options];
-      this.#observeRequestCallbacks.set(reqId, observeInfos);
+    const { id: reqId, promise } = this.#promiseStore.createPromise('BaseStateManager#observe');
+    // store the callback for execution on the response. the returned Promise
+    // is fulfilled once callback has been executed with each existing states
+    const observeInfos = [observedClassName, callback, options];
+    this.#observeRequestCallbacks.set(reqId, observeInfos);
 
-      // NOTE: do not store in `_observeListeners` yet as it can produce race
-      // conditions, e.g.:
-      // ```
-      // await client.stateManager.observe(async (className, stateId, nodeId) => {});
-      // // client now receives OBSERVE_NOTIFICATIONS
-      // await otherClient.stateManager.create('a');
-      // // second observer added in between
-      // client.stateManager.observe(async (className, stateId, nodeId) => {});
-      // ````
-      // OBSERVE_NOTIFICATION is received before the OBSERVE_RESPONSE, then the
-      // second observer is called twice:
-      // - OBSERVE_RESPONSE 1 []
-      // - OBSERVE_NOTIFICATION [ 'a', 1, 0 ]
-      // - OBSERVE_NOTIFICATION [ 'a', 1, 0 ] // this should not happen
-      // - OBSERVE_RESPONSE 1 [ [ 'a', 1, 0 ] ]
-      //
-      // cf. unit test `observe should properly behave in race condition`
+    // NOTE: do not store in `_observeListeners` yet as it can produce race
+    // conditions, e.g.:
+    // ```
+    // await client.stateManager.observe(async (className, stateId, nodeId) => {});
+    // // client now receives OBSERVE_NOTIFICATIONS
+    // await otherClient.stateManager.create('a');
+    // // second observer added in between
+    // client.stateManager.observe(async (className, stateId, nodeId) => {});
+    // ````
+    // OBSERVE_NOTIFICATION is received before the OBSERVE_RESPONSE, then the
+    // second observer is called twice:
+    // - OBSERVE_RESPONSE 1 []
+    // - OBSERVE_NOTIFICATION [ 'a', 1, 0 ]
+    // - OBSERVE_NOTIFICATION [ 'a', 1, 0 ] // this should not happen
+    // - OBSERVE_RESPONSE 1 [ [ 'a', 1, 0 ] ]
+    //
+    // cf. unit test `observe should properly behave in race condition`
 
-      this[kStateManagerClient].transport.emit(OBSERVE_REQUEST, reqId, observedClassName);
-    });
+    this[kStateManagerClient].transport.emit(OBSERVE_REQUEST, reqId, observedClassName);
+
+    return promise;
   }
 
   /**
