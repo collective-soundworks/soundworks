@@ -482,6 +482,10 @@ class Server {
    * await server.start(); // init is called implicitly
    */
   async init() {
+    if (this.#status === 'inited') {
+      throw new DOMException(`Cannot execute 'init' twice on Server: Lifecycle methods must be called in following order: init, start, stop`, 'InvalidAccessError');
+    }
+
     if (this.#status !== 'idle') {
       throw new DOMException(`Cannot execute 'init' on Server: Lifecycle methods must be called in following order: init, start, stop`, 'InvalidAccessError');
     }
@@ -547,6 +551,10 @@ class Server {
       await this.init();
     }
 
+    if (this.#status === 'started') {
+      throw new DOMException(`Cannot execute 'start' twice on Server: Lifecycle methods must be called in following order: init, start, stop`, 'InvalidAccessError');
+    }
+
     if (this.#status !== 'inited') {
       throw new DOMException(`Cannot execute 'start' on Server: Lifecycle methods must be called in following order: init, start, stop`, 'InvalidAccessError');
     }
@@ -601,6 +609,10 @@ class Server {
    * await server.stop();
    */
   async stop() {
+    if (this.#status === 'stopped') {
+      throw new DOMException(`Cannot execute 'stop' twice on Server: Lifecycle methods must be called in following order: init, start, stop`, 'InvalidAccessError');
+    }
+
     if (this.#status !== 'started') {
       throw new DOMException(`Cannot execute 'stop' on Server: Lifecycle methods must be called in following order: init, start, stop`, 'InvalidAccessError');
     }

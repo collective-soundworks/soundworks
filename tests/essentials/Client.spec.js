@@ -55,6 +55,25 @@ describe('# Client', () => {
   });
 
   describe(`## await client.init()`, () => {
+    it(`should throw if called twice`, async () => {
+      const server = new Server(config);
+      await server.start();
+
+      const client = new Client({ role: 'test', ...config });
+      await client.init();
+
+      let errored = false;
+      try {
+        await client.init();
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      await server.stop();
+      assert.isTrue(errored);
+    });
+
     it(`should open the sockets`, async () => {
       const server = new Server(config);
       await server.init();
@@ -172,6 +191,25 @@ describe('# Client', () => {
   });
 
   describe(`## await client.start()`, () => {
+    it(`should throw if called twice`, async () => {
+      const server = new Server(config);
+      await server.start();
+
+      const client = new Client({ role: 'test', ...config });
+      await client.start();
+
+      let errored = false;
+      try {
+        await client.start();
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      await server.stop();
+      assert.isTrue(errored);
+    });
+
     it(`should throw if called before init()`, async () => {
       const server = new Server(config);
       await server.init();
@@ -215,6 +253,26 @@ describe('# Client', () => {
   });
 
   describe(`## await client.stop()`, () => {
+    it(`should throw if called twice`, async () => {
+      const server = new Server(config);
+      await server.start();
+
+      const client = new Client({ role: 'test', ...config });
+      await client.start();
+      await client.stop();
+
+      let errored = false;
+      try {
+        await client.stop();
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      await server.stop();
+      assert.isTrue(errored);
+    });
+
     it(`should throw if called before start()`, async () => {
       const server = new Server(config);
       await server.init();

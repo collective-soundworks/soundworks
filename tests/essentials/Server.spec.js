@@ -141,6 +141,21 @@ describe('# Server', () => {
   });
 
   describe(`## await server.init()`, () => {
+    it(`should throw if called twice`, async () => {
+      const server = new Server(config);
+      await server.init();
+
+      let errored = false;
+      try {
+        await server.init();
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      assert.isTrue(errored);
+    });
+
     it(`should throw if invalid https cert file given`, async function() {
       const envPathname = path.join(__dirname, '.env');
 
@@ -287,6 +302,22 @@ describe('# Server', () => {
   });
 
   describe(`## await server.start()`, () => {
+    it(`should throw if called twice`, async () => {
+      const server = new Server(config);
+      await server.start();
+
+      let errored = false;
+      try {
+        await server.start();
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      await server.stop();
+      assert.isTrue(errored);
+    });
+
     it(`should launch the server (http)`, async () => {
       const server = new Server(config);
       await server.init();
@@ -394,6 +425,22 @@ describe('# Server', () => {
   });
 
   describe('## await server.stop()', () => {
+    it(`should throw if called twice`, async () => {
+      const server = new Server(config);
+      await server.start();
+      await server.stop();
+
+      let errored = false;
+      try {
+        await server.stop();
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      assert.isTrue(errored);
+    });
+
     it('should throw if stop() is called before start()', async () => {
       const server = new Server(config);
 
