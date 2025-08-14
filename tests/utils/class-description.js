@@ -56,6 +56,7 @@ export const expectedFullClassDescription = {
     "nullable": false,
     "required": false,
     "type": "boolean",
+    "acknowledge": true,
   },
   "int": {
     "default": 0,
@@ -69,6 +70,7 @@ export const expectedFullClassDescription = {
     "required": false,
     "step": 1,
     "type": "integer",
+    "acknowledge": true,
   },
   "required": {
     "default": null,
@@ -79,6 +81,7 @@ export const expectedFullClassDescription = {
     "nullable": false,
     "required": true,
     "type": "boolean",
+    "acknowledge": true,
   },
 };
 
@@ -94,6 +97,7 @@ export const expectedInstanceFullClassDescription = {
     "nullable": false,
     "required": false,
     "type": "boolean",
+    "acknowledge": true,
   },
   "int": {
     "default": 0,
@@ -108,6 +112,7 @@ export const expectedInstanceFullClassDescription = {
     "required": false,
     "step": 1,
     "type": "integer",
+    "acknowledge": true,
   },
   "required": {
     "default": true,
@@ -119,5 +124,6 @@ export const expectedInstanceFullClassDescription = {
     "nullable": false,
     "required": true,
     "type": "boolean",
+    "acknowledge": true,
   },
 };

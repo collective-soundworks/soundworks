@@ -258,7 +258,8 @@ describe('# [private] ParameterBag', () => {
           immediate: false,
           type: 'boolean',
           default: false,
-          initValue: true
+          initValue: true,
+          acknowledge: true,
         },
         int: {
           nullable: false,
@@ -271,7 +272,8 @@ describe('# [private] ParameterBag', () => {
           max: 2,
           type: 'integer',
           default: 0,
-          initValue: -2
+          initValue: -2,
+          acknowledge: true,
         },
         nullable: {
           nullable: true,
@@ -282,7 +284,8 @@ describe('# [private] ParameterBag', () => {
           immediate: false,
           type: 'any',
           default: {},
-          initValue: {}
+          initValue: {},
+          acknowledge: true,
         },
         event: {
           nullable: true,
@@ -295,7 +298,8 @@ describe('# [private] ParameterBag', () => {
           max: Infinity,
           type: 'float',
           default: null,
-          initValue: null
+          initValue: null,
+          acknowledge: true,
         },
         required: {
           nullable: false,
@@ -306,7 +310,8 @@ describe('# [private] ParameterBag', () => {
           immediate: false,
           type: 'string',
           default: 'coucou',
-          initValue: 'coucou'
+          initValue: 'coucou',
+          acknowledge: true,
         }
       };
 

@@ -43,9 +43,14 @@ type SharedStateParameterDescription = {
      */
     event?: boolean;
     /**
+     * - When set to true, the parameter must be
+     * provided at the creation of the shared state.
+     */
+    required?: boolean;
+    /**
      * - When set to `false`, an update will
      * trigger the propagation of a parameter even when its value didn't change.
-     * This option provides a sort of middle ground between the default behavior
+     * This modifier provides a sort of middle ground between the default behavior
      * (e.g. where only changed values are propagated) and the behavior of the `event`
      * option (which has no state per se). Hence, setting this options to `false` if
      * `event=true` makes no sens.
@@ -54,25 +59,31 @@ type SharedStateParameterDescription = {
     /**
      * - When set to `true`, an update will
      * trigger the update listeners immediately on the node that generated the update,
-     * before propagating the change on the network.
-     * This option is useful in cases the network would introduce a noticeable
-     * latency on the client.
+     * before propagating the change on the network. This modifier is useful in cases
+     * the network would introduce a noticeable latency on the client.
      * If for some reason the value is overridden server-side (e.g. in an `updateHook`)
      * the listeners will be called again when the "real" value is received.
+     * Setting this modifier to `true` will trigger the `onUpdate` callback synchronously
+     * according to the `set` call.
      */
     immediate?: boolean;
-    /**
-     * - When set to true, the parameter must be
-     * provided in the initialization values when the state is created.
-     */
-    required?: boolean;
     /**
      * - When set to true, the parameter is never
      * propagated on the network (hence it is no longer a shared parameter :). This
      * is useful to declare some common parameter (e.g. some interface state) that
      * don't need to be shared but to stay in the shared state API paradigm.
+     * Setting this modifier to `true` will trigger the `onUpdate` callback synchronously
+     * according to the `set` call.
      */
     local?: boolean;
+    /**
+     * - When set to false, the acknowledgement
+     * is never sent back to the shared state that initiated an update. This can be
+     * useful to e.g. stream values to the network, but can lead to invalid state.
+     * Setting this modifier to `true` will trigger the `onUpdate` callback synchronously
+     * according to the `set` call.
+     */
+    acknowledge?: boolean;
     /**
      * - Minimum value of the parameter. Only applies
      * for `integer` and `float` types.

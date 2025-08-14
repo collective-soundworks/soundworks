@@ -12,6 +12,7 @@ export const sharedOptions = {
   metas: {},
   filterChange: true,
   immediate: false,
+  acknowledge: true,
 };
 
 export const types = {
