@@ -760,7 +760,7 @@ class SharedState {
 
       return this.detach();
     } else {
-      throw new DOMException(`Cannot execute 'delete' on SharedState (${this.#className}): SharedState (${this.#id}) is not owned by this node. Use 'SharedState#detach' instead`, 'NotSupportedError');
+      throw new DOMException(`Cannot execute 'delete' on SharedState (${this.#className}): This instance is attached and not owned. Use 'SharedState#detach' instead`, 'NotSupportedError');
     }
   }
 
@@ -828,6 +828,10 @@ class SharedState {
    * @param {Function} callback - Callback to execute when the state is deleted.
    */
   onDelete(callback) {
+    if (!this.#isOwner) {
+      throw new DOMException(`Cannot execute 'onDelete' on SharedState (${this.#className}): This instance is attached and not owned. Use 'SharedState#onDetach' instead`, 'NotSupportedError');
+    }
+
     this.#onDeleteCallbacks.add(callback);
     return () => this.#onDeleteCallbacks.delete(callback);
   }
