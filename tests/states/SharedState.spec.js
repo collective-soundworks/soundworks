@@ -471,19 +471,30 @@ describe('# SharedState', () => {
       }
     });
 
-    it('should call state.onDetach but not on onDelete if not owner', async () => {
+    it('should throw when calling state.onDelete if not owner', async () => {
+      const _ = await server.stateManager.create('a');
+      const b = await server.stateManager.attach('a');
+
+      let errored = false;
+      try {
+        // b is not owner, this should throw
+        b.onDelete(() => {});
+      } catch (err) {
+        errored = true;
+      }
+
+      assert.isTrue(errored);
+    });
+
+    it('should call state.onDetach if not owner', async () => {
       const a0 = await server.stateManager.create('a');
       const a1 = await server.stateManager.attach('a', a0.id);
 
       let onDetachCalled = false;
-      let onDeleteCalled = false;
       a1.onDetach(() => onDetachCalled = true);
-      a1.onDelete(() => onDeleteCalled = true);
 
       await a0.delete();
-
       assert.equal(onDetachCalled, true);
-      assert.equal(onDeleteCalled, false);
     });
 
     it('should call state.onDetach and state.onDelete if owner', async () => {
@@ -502,21 +513,6 @@ describe('# SharedState', () => {
 
       assert.equal(onDetachCalled, true);
       assert.equal(onDeleteCalled, true);
-    });
-
-    it('should throw when calling state.onDelete if not owner', async () => {
-      const _ = await server.stateManager.create('a');
-      const b = await server.stateManager.attach('a');
-
-      let errored = false;
-      try {
-        // b is not owner, this should throw
-        b.onDelete(() => {});
-      } catch (err) {
-        errored = true;
-      }
-
-      assert.isTrue(errored);
     });
 
     it('should call state.onDetach and state.onDelete before delete() promise resolves', async () => {

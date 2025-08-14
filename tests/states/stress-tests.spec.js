@@ -71,7 +71,7 @@ describe('# SharedStates - Stress test', () => {
         await global.set({ int: i });
       }
 
-      // proagate value from clients
+      // propagate value from clients
       attached.forEach(state => {
         const expected = { int: 1 };
         const unsubscribe = state.onUpdate(values => {
@@ -89,14 +89,10 @@ describe('# SharedStates - Stress test', () => {
       }
 
       const detachCalled = new Array(100);
-      const deleteCalled = new Array(100);
       detachCalled.fill(false);
-      deleteCalled.fill(false);
 
       attached.forEach((state, index) => {
         state.onDetach(() => detachCalled[index] = true);
-        // onDelete is not called on attached states
-        state.onDelete(() => deleteCalled[index] = true);
       });
 
       // detach half clients and update
@@ -132,8 +128,7 @@ describe('# SharedStates - Stress test', () => {
       // wait for message propagation
       await delay(100);
 
-      detachCalled.forEach((value, index) => assert.equal(value, true));
-      deleteCalled.forEach((value, index) => assert.equal(value, false));
+      detachCalled.forEach(value => assert.equal(value, true));
     });
 
     it(`should keep message order in case of modification by the server in the subscribe callback (1)`, async () => {

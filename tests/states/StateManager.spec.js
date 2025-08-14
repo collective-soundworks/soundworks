@@ -303,19 +303,24 @@ describe(`# StateManager`, () => {
 
       return new Promise(async (resolve, reject) => {
         const detachCalled = [false, false, false, false];
-        const deleteCalled = [false, false, false, false];
+        const deleteCalled = [false, false];
 
-        [a0, a1, b0, b1].forEach((state, index) => {
+        [a0, b0].forEach((state, index) => {
           state.onDetach(() => detachCalled[index] = true);
           state.onDelete(() => deleteCalled[index] = true);
+        });
+
+        [a1, b1].forEach((state, index) => {
+          state.onDetach(() => detachCalled[index + 2] = true);
+          // onDelete throws on attached state
+          // state.onDelete(() => deleteCalled[index] = true);
         });
 
         server.stateManager.deleteClass('a-delete');
 
         setTimeout(() => {
           assert.deepEqual([true, true, true, true], detachCalled);
-          // onDelete is not called on attached state
-          assert.deepEqual([true, false, true, false], deleteCalled);
+          assert.deepEqual([true, true], deleteCalled);
           resolve();
         }, 200);
       });
