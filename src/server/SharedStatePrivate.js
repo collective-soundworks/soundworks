@@ -16,23 +16,46 @@ import {
 } from '../server/ServerStateManager.js';
 
 /**
- * Filter update object according to filter list.
+ * Filter update object according to a given white list.
  * Return identity is filter is null
  * @param {object} updates
- * @param {array|null} filter
+ * @param {array|null} whiteList
  * @private
  */
-function filterUpdates(updates, filter) {
-  if (filter === null) {
+function whiteListFilterUpdates(updates, whiteList) {
+  if (whiteList === null) {
     return updates;
   }
 
-  return filter.reduce((acc, key) => {
+  return whiteList.reduce((acc, key) => {
     if (key in updates) {
       acc[key] = updates[key];
     }
     return acc;
   }, {});
+}
+
+/**
+ * Filter update object according to a given black list.
+ * Return identity is filter is null
+ * @param {object} updates
+ * @param {array|null} filter
+ * @private
+ */
+function blackListFilterUpdates(updates, blackList) {
+  if (blackList === null) {
+    return updates;
+  }
+  // create a shallow copy so we can have multiple filters applied on same source
+  const filtered = Object.assign({}, updates);
+
+  blackList.forEach(key => {
+    if (key in updates) {
+      delete filtered[key];
+    }
+  });
+
+  return filtered;
 }
 
 export const kSharedStatePrivateAttachClient = Symbol('soundworks:shared-state-private-attach-client');
@@ -122,13 +145,13 @@ class SharedStatePrivate {
 
       if (hookAborted === false) {
         let acknowledgedUpdates = {};
-        let hasUpdates = false;
+        let acknowledgeFilter = [];
 
         for (let name in updates) {
           const [newValue, changed] = this.#parameters.set(name, updates[name]);
           // if `filterChange` is set to `false` we don't check if the value
           // has been changed or not, it is always propagated to client states
-          const { event, filterChange } = this.#parameters.getDescription(name);
+          const { event, filterChange, acknowledge } = this.#parameters.getDescription(name);
 
           // if event type reset internal value to null
           if (event) {
@@ -137,11 +160,14 @@ class SharedStatePrivate {
 
           if ((filterChange && changed) || !filterChange) {
             acknowledgedUpdates[name] = newValue;
-            hasUpdates = true;
+
+            if (acknowledge === false) {
+              acknowledgeFilter.push(name);
+            }
           }
         }
 
-        if (hasUpdates) {
+        if (Object.keys(acknowledgedUpdates).length > 0) {
           // Normal case
           //
           // We need to handle cases where:
@@ -161,25 +187,29 @@ class SharedStatePrivate {
           //
           // @note - instanceId correspond to unique remote state id
 
+          // - Apply acknowledge filter on `acknowledgedUpdates`
+          // - We don't need to apply the regular filter on update request, they are blocked client-side
+          const requesterFilteredUpdates = blackListFilterUpdates(acknowledgedUpdates, acknowledgeFilter);
+
           // propagate RESPONSE to the client that originates the request if not the server
           if (client.id !== -1) {
-            // no need to filter updates on requested, is blocked on client-side
-            client.transport.emit(
-              `${UPDATE_RESPONSE}-${this.id}-${instanceId}`,
-              reqId,
-              acknowledgedUpdates,
-            );
+            // propagate only if there something left after applying the acknowledge filter
+            if (Object.keys(requesterFilteredUpdates).length > 0) {
+              client.transport.emit(
+                `${UPDATE_RESPONSE}-${this.id}-${instanceId}`,
+                reqId,
+                requesterFilteredUpdates,
+              );
+            };
           }
 
-          // propagate NOTIFICATION to all attached clients except server
+          // propagate NOTIFICATION to all peer states except on server-side
           for (let [peerInstanceId, clientInfos] of this.#attachedClients) {
-            const peer = clientInfos.client;
+            const { client: peer, filter } = clientInfos;
 
             if (instanceId !== peerInstanceId && peer.id !== -1) {
-              const filter = clientInfos.filter;
-              const filteredUpdates = filterUpdates(acknowledgedUpdates, filter);
-
-              // propagate only if there something left after applying the filter
+              const filteredUpdates = whiteListFilterUpdates(acknowledgedUpdates, filter);
+              // propagate only if there something left after applying the white list filter
               if (Object.keys(filteredUpdates).length > 0) {
                 peer.transport.emit(
                   `${UPDATE_NOTIFICATION}-${this.id}-${peerInstanceId}`,
@@ -191,22 +221,23 @@ class SharedStatePrivate {
 
           // propagate RESPONSE to server if it is the requester
           if (client.id === -1) {
-            // no need to filter updates on requested, is blocked on client-side
-            client.transport.emit(
-              `${UPDATE_RESPONSE}-${this.id}-${instanceId}`,
-              reqId,
-              acknowledgedUpdates,
-            );
+            // propagate only if there something left after applying the acknowledge filter
+            if (Object.keys(requesterFilteredUpdates).length > 0) {
+              client.transport.emit(
+                `${UPDATE_RESPONSE}-${this.id}-${instanceId}`,
+                reqId,
+                requesterFilteredUpdates,
+              );
+            }
           }
 
-          // propagate NOTIFICATION to other state attached on the server
+          // propagate NOTIFICATION to all peer states on the server-side
           for (let [peerInstanceId, clientInfos] of this.#attachedClients) {
-            const peer = clientInfos.client;
+            const { client: peer, filter } = clientInfos;
 
             if (instanceId !== peerInstanceId && peer.id === -1) {
-              const filter = clientInfos.filter;
-              const filteredUpdates = filterUpdates(acknowledgedUpdates, filter);
-
+              const filteredUpdates = whiteListFilterUpdates(acknowledgedUpdates, filter);
+              // propagate only if there something left after applying the white list filter
               if (Object.keys(filteredUpdates).length > 0) {
                 peer.transport.emit(
                   `${UPDATE_NOTIFICATION}-${this.id}-${peerInstanceId}`,
@@ -216,8 +247,7 @@ class SharedStatePrivate {
             }
           }
         } else {
-          // propagate back to the requester that the update has been aborted
-          // ignore all other attached clients.
+          // propagate back to the requester that the update has been aborted, ignore all peers
           client.transport.emit(`${UPDATE_ABORT}-${this.id}-${instanceId}`, reqId, updates);
         }
       } else {

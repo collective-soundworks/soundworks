@@ -465,31 +465,31 @@ class SharedState {
 
     const newValues = {};
     const oldValues = {};
-    const localParams = {};
-    const sharedParams = {};
+    const locallyResolvedParam = {};
+    const networkPropagatedParams = {};
     let hasLocalParam = false;
-    let hasSharedParam = false;
-    let forwardParams = undefined;
-    let propagateNow = false;
+    let hasRegularSharedParam = false;
+    let hasNonAcknowledgedParams = false;
+    let syncedOnUpdate = false;
 
     for (let name in updates) {
-      // Try to coerce value early, so that eventual errors are triggered early
-      // on the node requesting the update, and not only on the server side
-      // This throws if name does not exists
+      // Try to coerce value now, so that eventual errors are triggered early
+      // on the node requesting the update and not only on the server side.
       try {
+        // This also throws if name does not exists
         this.#parameters.coerceValue(name, updates[name]);
       } catch (err) {
         throw new TypeError(`Cannot execute 'set' on SharedState (${this.#className}): ${err.message}`);
       }
 
-      // Check that name is in filter list, if any
+      // Make sure that given name is in filter white list (if any)
       if (this.#filter !== null) {
         if (!this.#filter.includes(name)) {
           throw new DOMException(`Cannot execute 'set' on SharedState (${this.#className}): Parameter '${name}' is not in white list`, 'NotSupportedError');
         }
       }
 
-      // `immediate` option behavior
+      // ### `immediate` modifier behavior
       //
       // If immediate=true
       //  - call listeners if value changed
@@ -501,7 +501,7 @@ class SharedState {
       //  - if the node is initiator of the update (UPDATE_RESPONSE), (re-)check
       //    to prevent execute the listeners twice
 
-      // `local` option behavior
+      // ### `local` modifier behavior
       //
       // - If the `updates` object only contains local variables, we can call the
       // update listeners and return a fulfilled promise immediately
@@ -510,9 +510,19 @@ class SharedState {
       // response, call update listeners with server response and resolve promise with
       // the full payload, i.e. reintegrating the local params in the resolve payload
 
-      const { local, immediate, filterChange, event } = this.#parameters.getDescription(name);
+      // ### `acknowledge` modifier behavior
+      //
+      // Same as immediate, but no feedback from server
 
-      if (immediate || local) {
+      const {
+        local,
+        immediate,
+        filterChange,
+        event,
+        acknowledge,
+      } = this.#parameters.getDescription(name);
+
+      if (immediate || local || acknowledge === false) {
         const oldValue = this.#parameters.get(name);
         const [newValue, changed] = this.#parameters.set(name, updates[name]);
 
@@ -520,46 +530,50 @@ class SharedState {
         if (changed || filterChange === false || event) {
           oldValues[name] = oldValue;
           newValues[name] = newValue;
-          propagateNow = true;
+          syncedOnUpdate = true;
         }
       }
 
-      // define params that must go through network or not
       if (local) {
+        // these don't go to the network
         hasLocalParam = true;
-        // get sanitize value for fulfilling promise
-        localParams[name] = this.#parameters.get(name);
+        locallyResolvedParam[name] = this.#parameters.get(name);
+      } else if (acknowledge === false) {
+        // these go to the network but don't receive an ack
+        // they are both locally forwarded and network propagated then
+        hasNonAcknowledgedParams = true;
+        locallyResolvedParam[name] = this.#parameters.get(name);
+        networkPropagatedParams[name] = updates[name];
       } else {
-        // note that immediate are shared params too
-        hasSharedParam = true;
-        sharedParams[name] = updates[name];
+        // note that immediate params are shared and acknowledged
+        hasRegularSharedParam = true;
+        networkPropagatedParams[name] = updates[name];
       }
     }
 
-    // propagate immediate params if changed
-    if (propagateNow) {
+    // params that trigger a synced onUpdate call: immediate, local, non-acknowledged
+    if (syncedOnUpdate) {
       this.#onUpdateCallbacks.forEach(listener => listener(newValues, oldValues));
     }
 
-    // check if we can resolve immediately or if we need to go through network
-    if (hasLocalParam) {
-      if (!hasSharedParam) {
-        return Promise.resolve(localParams);
-      } else {
-        // store local params to fulfill promise with all values, see PromiseStore
-        forwardParams = localParams;
-      }
+    // if we only have local params, we can resolve immediately
+    if (hasLocalParam && !hasNonAcknowledgedParams && !hasRegularSharedParam) {
+      return Promise.resolve(locallyResolvedParam);
     }
-
-    // override updates to be shared on network without local params
-    updates = sharedParams;
 
     // go through server-side normal behavior
     const { id: reqId, promise } = this[kSharedStatePromiseStore].createPromise();
-    if (forwardParams) {
-      this[kSharedStatePromiseStore].associateResolveData(reqId, forwardParams);
+    // store local params that should be re-merged w/ regular ones
+    if (Object.keys(locallyResolvedParam).length > 0) {
+      this[kSharedStatePromiseStore].associateResolveData(reqId, locallyResolvedParam);
     }
-    this.#client.transport.emit(`${UPDATE_REQUEST}-${this.#id}-${this.#instanceId}`, reqId, updates);
+
+    this.#client.transport.emit(`${UPDATE_REQUEST}-${this.#id}-${this.#instanceId}`, reqId, networkPropagatedParams);
+
+    // if we don't have regular shared params, we can resolve now
+    if (!hasRegularSharedParam) {
+      this[kSharedStatePromiseStore].resolve(reqId, {});
+    }
 
     return promise;
   }

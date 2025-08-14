@@ -493,6 +493,7 @@ describe('# SharedStateParameterDescription', () => {
       try {
         result = await owned.set(expected);
       } catch (err) {
+        throw err;
       }
       assert.deepEqual(result, expected);
       // 1 - for state create request
@@ -561,10 +562,76 @@ describe('# SharedStateParameterDescription', () => {
       await client.stop();
       await server.stop();
     });
+
+    it('[acknowledge=false]', async () => {
+      const localConfig = structuredClone(config);
+      localConfig.env.port = 8082;
+      const server = new Server(localConfig);
+      await server.start();
+
+      server.stateManager.defineClass('local-test', {
+        acknowledge: {
+          type: 'integer',
+          default: 0,
+          acknowledge: false,
+        },
+      });
+
+      const client1 = new Client({ role: 'test', ...localConfig });
+      await client1.start();
+
+      const client2 = new Client({ role: 'test', ...localConfig });
+      await client2.start();
+
+      const state1 = await client1.stateManager.create('local-test');
+      const state2 = await client2.stateManager.attach('local-test');
+
+      let feedbackReceived = false;
+      // check we don't receive the feedback when set is called
+      client1.socket.addListener(BATCHED_TRANSPORT_CHANNEL, values => {
+        feedbackReceived = true;
+        console.log(BATCHED_TRANSPORT_CHANNEL, JSON.stringify(values, null, 2));
+      });
+
+      // check value is properly propagated
+      let onUpdateNotificationReceived = false;
+      state2.onUpdate(updates => {
+        onUpdateNotificationReceived = true;
+        assert.deepEqual(updates, { acknowledge: 1 });
+      });
+
+      // - behavior similar to `immediate=true`
+      // - should be called synchronously
+      let initiatorOnUpdateCalled = false;
+      state1.onUpdate(updates => {
+        assert.deepEqual(updates, { acknowledge: 1 });
+        initiatorOnUpdateCalled = true;
+      });
+
+      const setPromise = state1.set({ acknowledge: 1 });
+      // assert onUpdate is called synchronously
+      assert.isTrue(initiatorOnUpdateCalled, 'onUpdate called');
+
+      const updates = await setPromise;
+      assert.deepEqual(updates, { acknowledge: 1 });
+
+      await delay(50);
+
+      assert.isFalse(feedbackReceived, 'ack received by initiator');
+      assert.isTrue(onUpdateNotificationReceived, 'update received by peer');
+
+      await client1.stop();
+      await client2.stop();
+      await server.stop();
+    });
+
+    it('[acknowledge=false] mixed with regular params', () => {
+
+    });
   });
 
   // Regression Test
-  // when min and max are explicitely set to Infinity values, the schema is stringified
+  // when min and max are explicitly set to Infinity values, the schema is stringified
   // when sent over the network, provoking Infinity to be transformed to `null`
   //
   // JSON.parse({ a: Infinity });
