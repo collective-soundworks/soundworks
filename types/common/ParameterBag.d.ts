@@ -5,6 +5,7 @@ export namespace sharedOptions {
     let metas: {};
     let filterChange: boolean;
     let immediate: boolean;
+    let acknowledge: boolean;
 }
 export namespace types {
     export namespace boolean {
