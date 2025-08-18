@@ -2973,6 +2973,45 @@ When <code>true</code>, <code>nullable</code> is automatically set to <code>true
 
         <tr>
             
+                <td class="name"><code>required</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>false</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>When set to true, the parameter must be
+provided at the creation of the shared state.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
                 <td class="name"><code>filterChange</code></td>
             
 
@@ -3006,7 +3045,7 @@ When <code>true</code>, <code>nullable</code> is automatically set to <code>true
 
             <td class="description last"><p>When set to <code>false</code>, an update will
 trigger the propagation of a parameter even when its value didn't change.
-This option provides a sort of middle ground between the default behavior
+This modifier provides a sort of middle ground between the default behavior
 (e.g. where only changed values are propagated) and the behavior of the <code>event</code>
 option (which has no state per se). Hence, setting this options to <code>false</code> if
 <code>event=true</code> makes no sens.</p></td>
@@ -3049,50 +3088,12 @@ option (which has no state per se). Hence, setting this options to <code>false</
 
             <td class="description last"><p>When set to <code>true</code>, an update will
 trigger the update listeners immediately on the node that generated the update,
-before propagating the change on the network.
-This option is useful in cases the network would introduce a noticeable
-latency on the client.
+before propagating the change on the network. This modifier is useful in cases
+the network would introduce a noticeable latency on the client.
 If for some reason the value is overridden server-side (e.g. in an <code>updateHook</code>)
-the listeners will be called again when the &quot;real&quot; value is received.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>required</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    <code>false</code>
-                
-                </td>
-            
-
-            <td class="description last"><p>When set to true, the parameter must be
-provided in the initialization values when the state is created.</p></td>
+the listeners will be called again when the &quot;real&quot; value is received.
+Setting this modifier to <code>true</code> will trigger the <code>onUpdate</code> callback synchronously
+according to the <code>set</code> call.</p></td>
         </tr>
 
     
@@ -3133,7 +3134,51 @@ provided in the initialization values when the state is created.</p></td>
             <td class="description last"><p>When set to true, the parameter is never
 propagated on the network (hence it is no longer a shared parameter :). This
 is useful to declare some common parameter (e.g. some interface state) that
-don't need to be shared but to stay in the shared state API paradigm.</p></td>
+don't need to be shared but to stay in the shared state API paradigm.
+Setting this modifier to <code>true</code> will trigger the <code>onUpdate</code> callback synchronously
+according to the <code>set</code> call.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>acknowledge</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>true</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>When set to false, the acknowledgement
+is never sent back to the shared state that initiated an update. This can be
+useful to e.g. stream values to the network, but can lead to invalid state.
+Setting this modifier to <code>true</code> will trigger the <code>onUpdate</code> callback synchronously
+according to the <code>set</code> call.</p></td>
         </tr>
 
     
@@ -5731,7 +5776,7 @@ from the list of observer.</p></li></ul></dd>
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.4</a> on Mon Aug 11 2025 15:08:18 GMT+0000 (Coordinated Universal Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.4</a> on Mon Aug 18 2025 08:48:22 GMT+0000 (Coordinated Universal Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>
