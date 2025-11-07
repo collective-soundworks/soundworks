@@ -231,6 +231,17 @@ class BaseStateManager {
   }
 
   /**
+   * Validates the given class description.
+   *
+   * @throws Throws if the class description is invalid
+   * @param {*} classDescription
+   * @returns undefined
+   */
+  validateClassDescription(classDescription) {
+    return ParameterBag.validateDescription(classDescription)
+  }
+
+  /**
    * Return a class description from a given class name
    *
    * @param {SharedStateClassName} className - Name of the shared state class.

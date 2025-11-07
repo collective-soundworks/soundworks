@@ -46,6 +46,39 @@ describe(`# StateManager`, () => {
     server.stop();
   });
 
+  describe(`## validateClassDescription(classDescription)`, () => {
+    it(`should throw if invalid class description given`, async () => {
+      const localConfig = structuredClone(config);
+      localConfig.env.port = 8082;
+
+      const server = new Server(config);
+      let errored = false;
+
+      try {
+        server.stateManager.validateClassDescription({
+          a: { type: 'unknown' },
+        });
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      assert.isTrue(errored);
+    });
+
+    it(`should not throw if valid class description given`, async () => {
+      const localConfig = structuredClone(config);
+      localConfig.env.port = 8082;
+
+      const server = new Server(config);
+      server.stateManager.validateClassDescription({
+        a: { type: 'integer', default: 0 },
+      });
+
+      assert.isTrue(true);
+    });
+  });
+
   describe('## [server] defineClass(className, definition)', () => {
     it('should throw if reusing same schema name', () => {
       assert.throws(() => {
