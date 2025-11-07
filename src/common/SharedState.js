@@ -214,11 +214,19 @@ class SharedState {
         this.#clearTransport();
 
         for (let callback of this.#onDetachCallbacks) {
-          await callback();
+          try {
+            await callback();
+          } catch (err) {
+            console.log(err.message);
+          }
         }
 
         for (let callback of this.#onDeleteCallbacks) {
-          await callback();
+          try {
+            await callback();
+          } catch (err) {
+            console.log(err.message);
+          }
         }
 
         this.#onDetachCallbacks.clear();
@@ -240,7 +248,11 @@ class SharedState {
         this.#clearTransport();
 
         for (let callback of this.#onDetachCallbacks) {
-          await callback();
+          try {
+            await callback();
+          } catch (err) {
+            console.log(err.message);
+          }
         }
 
         this.#onDetachCallbacks.clear();
