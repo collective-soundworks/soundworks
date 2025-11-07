@@ -238,7 +238,7 @@ class BaseStateManager {
    * @returns undefined
    */
   validateClassDescription(classDescription) {
-    return ParameterBag.validateDescription(classDescription)
+    return ParameterBag.validateDescription(classDescription);
   }
 
   /**
