@@ -127,6 +127,9 @@ class SharedStatePrivate {
       // apply registered hooks
       const hooks = this.#manager[kServerStateManagerGetUpdateHooks](this.className);
       const values = this.#parameters.getValues();
+      // make sur we don't propagate back to requester param that are marked as `acknowledge=false`
+      const acknowledgeFilter = this.#parameters.getParamListByDescriptor('acknowledge', false);
+
       let hookAborted = false;
 
       // cf. https://github.com/collective-soundworks/soundworks/issues/45
@@ -145,13 +148,12 @@ class SharedStatePrivate {
 
       if (hookAborted === false) {
         let acknowledgedUpdates = {};
-        let acknowledgeFilter = [];
 
         for (let name in updates) {
           const [newValue, changed] = this.#parameters.set(name, updates[name]);
           // if `filterChange` is set to `false` we don't check if the value
           // has been changed or not, it is always propagated to client states
-          const { event, filterChange, acknowledge } = this.#parameters.getDescription(name);
+          const { event, filterChange } = this.#parameters.getDescription(name);
 
           // if event type reset internal value to null
           if (event) {
@@ -160,10 +162,6 @@ class SharedStatePrivate {
 
           if ((filterChange && changed) || !filterChange) {
             acknowledgedUpdates[name] = newValue;
-
-            if (acknowledge === false) {
-              acknowledgeFilter.push(name);
-            }
           }
         }
 
@@ -247,18 +245,27 @@ class SharedStatePrivate {
             }
           }
         } else {
-          // propagate back to the requester that the update has been aborted, ignore all peers
-          client.transport.emit(`${UPDATE_ABORT}-${this.id}-${instanceId}`, reqId, updates);
+          // @note - abort messages are only sent back to requester
+          const requesterFilteredUpdates = blackListFilterUpdates(updates, acknowledgeFilter);
+
+          if (Object.keys(requesterFilteredUpdates).length > 0) {
+            // propagate back to the requester that the update has been aborted, ignore all peers
+            client.transport.emit(`${UPDATE_ABORT}-${this.id}-${instanceId}`, reqId, requesterFilteredUpdates);
+          }
         }
       } else {
-        // retrieve values from inner state (also handle immediate appropriately)
-        const oldValues = {};
+        // @note - abort messages are only sent back to requester
+        // explicitly aborted by hook (return `null`), send back current values to requester
+        const currentValues = {};
 
         for (let name in updates) {
-          oldValues[name] = this.#parameters.get(name);
+          currentValues[name] = this.#parameters.get(name);
         }
-        // aborted by hook (updates have been overridden to {})
-        client.transport.emit(`${UPDATE_ABORT}-${this.id}-${instanceId}`, reqId, oldValues);
+
+        const requesterFilteredUpdates = blackListFilterUpdates(currentValues, acknowledgeFilter);
+        if (Object.keys(requesterFilteredUpdates).length > 0) {
+          client.transport.emit(`${UPDATE_ABORT}-${this.id}-${instanceId}`, reqId, requesterFilteredUpdates);
+        }
       }
     });
 

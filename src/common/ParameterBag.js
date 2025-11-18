@@ -430,6 +430,19 @@ class ParameterBag {
 
     return defaults;
   }
+
+  // @todo - should cache result
+  getParamListByDescriptor(descriptorName, descriptorValue) {
+    const result = [];
+
+    for (let [name, def] of Object.entries(this.#description)) {
+      if (def[descriptorName] === descriptorValue) {
+        result.push(name);
+      }
+    }
+
+    return result;
+  }
 }
 
 export default ParameterBag;

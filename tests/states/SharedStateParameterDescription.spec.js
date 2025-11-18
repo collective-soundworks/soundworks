@@ -569,7 +569,7 @@ describe('# SharedStateParameterDescription', () => {
       const server = new Server(localConfig);
       await server.start();
 
-      server.stateManager.defineClass('local-test', {
+      server.stateManager.defineClass('acknowledge-test', {
         acknowledge: {
           type: 'integer',
           default: 0,
@@ -583,8 +583,8 @@ describe('# SharedStateParameterDescription', () => {
       const client2 = new Client({ role: 'test', ...localConfig });
       await client2.start();
 
-      const state1 = await client1.stateManager.create('local-test');
-      const state2 = await client2.stateManager.attach('local-test');
+      const state1 = await client1.stateManager.create('acknowledge-test');
+      const state2 = await client2.stateManager.attach('acknowledge-test');
 
       let feedbackReceived = false;
       // check we don't receive the feedback when set is called
@@ -625,7 +625,66 @@ describe('# SharedStateParameterDescription', () => {
       await server.stop();
     });
 
-    it('[acknowledge=false] mixed with regular params', () => {
+    it('[acknowledge=false] do not propagate back UPDATE_ABORT - no change', async () => {
+      server.stateManager.defineClass('acknowledge-test', {
+        acknowledge: {
+          type: 'integer',
+          default: 0,
+          acknowledge: false,
+        },
+      });
+
+      // @todo - this needs to be simplified somehow
+      // maybe introduce an `client.onError` method?
+      let errored = false;
+      function onError(err) {
+        console.log(err);
+        errored = true;
+      }
+
+      process.addListener('unhandledRejection', onError);
+
+      const state1 = await client1.stateManager.create('acknowledge-test');
+      await state1.set('acknowledge', 1);
+      await state1.set('acknowledge', 1);
+      await delay(100);
+
+      process.removeListener('unhandledRejection', onError);
+      assert.isFalse(errored);
+    });
+
+    it('[acknowledge=false] do not propagate back UPDATE_ABORT - hook aborted', async () => {
+      server.stateManager.defineClass('acknowledge-test', {
+        acknowledge: {
+          type: 'integer',
+          default: 0,
+          acknowledge: false,
+        },
+      });
+
+      server.stateManager.registerUpdateHook('acknowledge-test', updates => {
+        return null;
+      });
+
+      // @todo - this needs to be simplified somehow
+      // maybe introduce an `client.onError` method?
+      let errored = false;
+      function onError(err) {
+        console.log(err);
+        errored = true;
+      }
+
+      process.addListener('unhandledRejection', onError);
+
+      const state1 = await client1.stateManager.create('acknowledge-test');
+      await state1.set('acknowledge', 1);
+      await delay(100);
+
+      process.removeListener('unhandledRejection', onError);
+      assert.isFalse(errored);
+    });
+
+    it.skip('[acknowledge=false] mixed with regular params', () => {
 
     });
   });
