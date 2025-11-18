@@ -138,5 +138,6 @@ declare class ParameterBag {
     getDescription(name?: any): object;
     getInitValues(): {};
     getDefaults(): {};
+    getParamListByDescriptor(descriptorName: any, descriptorValue: any): string[];
     #private;
 }
