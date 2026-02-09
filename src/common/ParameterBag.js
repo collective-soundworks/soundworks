@@ -169,7 +169,7 @@ class ParameterBag {
         try {
           types[def.type].coerceFunction(name, def, def.default);
         } catch (err) {
-          throw new TypeError(`Invalid ParameterDescription for param "${name}": ${err.message}`)
+          throw new TypeError(`Invalid ParameterDescription for param "${name}": ${err.message}`);
         }
       }
     }
