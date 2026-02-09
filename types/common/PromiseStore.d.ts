@@ -13,3 +13,4 @@ export default class PromiseStore {
     reject(id: any, msg: any): void;
     flush(): void;
 }
+//# sourceMappingURL=PromiseStore.d.ts.map

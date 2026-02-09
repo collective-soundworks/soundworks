@@ -54,3 +54,4 @@ export type ClientConfig = {
      */
     env: ClientEnvConfig;
 };
+//# sourceMappingURL=index.d.ts.map

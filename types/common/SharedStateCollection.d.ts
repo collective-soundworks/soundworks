@@ -325,3 +325,4 @@ declare class SharedStateCollection {
     };
     #private;
 }
+//# sourceMappingURL=SharedStateCollection.d.ts.map

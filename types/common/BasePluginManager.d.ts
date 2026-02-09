@@ -131,3 +131,4 @@ declare class BasePluginManager {
     private [kPluginManagerInstances];
     #private;
 }
+//# sourceMappingURL=BasePluginManager.d.ts.map

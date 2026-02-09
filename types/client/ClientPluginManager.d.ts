@@ -109,3 +109,4 @@ declare class ClientPluginManager<T> extends BasePluginManager {
 }
 import BasePluginManager from '../common/BasePluginManager.js';
 import Client from './Client.js';
+//# sourceMappingURL=ClientPluginManager.d.ts.map

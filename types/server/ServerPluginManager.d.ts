@@ -112,3 +112,4 @@ declare class ServerPluginManager<T> extends BasePluginManager {
     private [kServerPluginManagerRemoveClient];
 }
 import BasePluginManager from '../common/BasePluginManager.js';
+//# sourceMappingURL=ServerPluginManager.d.ts.map

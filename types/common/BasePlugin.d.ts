@@ -154,3 +154,4 @@ declare class BasePlugin {
     private [kBasePluginStatus];
     #private;
 }
+//# sourceMappingURL=BasePlugin.d.ts.map

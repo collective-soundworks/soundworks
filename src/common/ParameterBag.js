@@ -160,9 +160,18 @@ class ParameterBag {
             throw new TypeError(`Invalid ParameterDescription for param ${name}: 'default' property is set and not null while the parameter definition is declared as 'event' or 'required'`);
           }
         } else if (!Object.prototype.hasOwnProperty.call(def, key)) {
-          throw new TypeError(`Invalid ParameterDescription for param "${name}"; property '${key}' key is required`);
+          throw new TypeError(`Invalid ParameterDescription for param "${name}": property '${key}' key is required`);
         }
       });
+
+      // check given default value if any
+      if ('default' in def && def.default !== null) {
+        try {
+          types[def.type].coerceFunction(name, def, def.default);
+        } catch (err) {
+          throw new TypeError(`Invalid ParameterDescription for param "${name}": ${err.message}`)
+        }
+      }
     }
   }
 

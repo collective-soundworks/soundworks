@@ -21,3 +21,4 @@ declare class SharedStatePrivate {
     [kSharedStatePrivateDetachClient](instanceId: any, client: any): void;
     #private;
 }
+//# sourceMappingURL=SharedStatePrivate.d.ts.map

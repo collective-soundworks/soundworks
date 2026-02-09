@@ -11,3 +11,4 @@ declare class BatchedTransport {
     removeAllListeners(channel?: any): void;
     #private;
 }
+//# sourceMappingURL=BatchedTransport.d.ts.map

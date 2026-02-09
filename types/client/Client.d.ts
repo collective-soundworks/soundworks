@@ -217,3 +217,4 @@ import ClientSocket from './ClientSocket.js';
 import ClientContextManager from './ClientContextManager.js';
 import ClientPluginManager from './ClientPluginManager.js';
 import ClientStateManager from './ClientStateManager.js';
+//# sourceMappingURL=Client.d.ts.map

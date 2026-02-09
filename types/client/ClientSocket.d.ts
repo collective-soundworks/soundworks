@@ -74,3 +74,4 @@ declare class ClientSocket {
     private [kSocketTerminate];
     #private;
 }
+//# sourceMappingURL=ClientSocket.d.ts.map

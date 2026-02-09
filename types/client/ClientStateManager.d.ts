@@ -67,3 +67,4 @@ export type ClientStateManager = () => any;
 declare class ClientStateManager extends BaseStateManager {
 }
 import BaseStateManager from '../common/BaseStateManager.js';
+//# sourceMappingURL=ClientStateManager.d.ts.map

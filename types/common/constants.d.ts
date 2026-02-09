@@ -40,3 +40,4 @@ export const CLIENT_HANDSHAKE_RESPONSE: "cl:h:res";
 export const CLIENT_HANDSHAKE_ERROR: "cl:h:err";
 export const AUDIT_STATE_NAME: "p:s:audit";
 export const PRIVATE_STATES: string[];
+//# sourceMappingURL=constants.d.ts.map

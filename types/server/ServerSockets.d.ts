@@ -40,3 +40,4 @@ declare class ServerSockets {
     [kSocketsDebugPreventHeartBeat]: boolean;
     #private;
 }
+//# sourceMappingURL=ServerSockets.d.ts.map

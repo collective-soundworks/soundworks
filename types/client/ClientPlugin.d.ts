@@ -49,3 +49,4 @@ export default class ClientPlugin extends BasePlugin {
  */
 export type ClientPlugin = (#state: ClientPlugin) => any;
 import BasePlugin from '../common/BasePlugin.js';
+//# sourceMappingURL=ClientPlugin.d.ts.map

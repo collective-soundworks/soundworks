@@ -24,3 +24,4 @@ declare namespace _default {
     }
 }
 export default _default;
+//# sourceMappingURL=audit-state-class-description.d.ts.map

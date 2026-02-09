@@ -104,3 +104,4 @@ type SharedStateParameterDescription = {
      */
     metas?: object;
 };
+//# sourceMappingURL=shared-state-types.d.ts.map

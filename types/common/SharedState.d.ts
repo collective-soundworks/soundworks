@@ -289,3 +289,4 @@ declare class SharedState {
     private [kSharedStatePromiseStore];
     #private;
 }
+//# sourceMappingURL=SharedState.d.ts.map

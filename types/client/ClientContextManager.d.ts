@@ -40,3 +40,4 @@ declare class ClientContextManager {
     private [kClientContextManagerStop];
     #private;
 }
+//# sourceMappingURL=ClientContextManager.d.ts.map

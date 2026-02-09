@@ -16,3 +16,4 @@ declare namespace logger {
     function removed(oldAPI: any, hint: any, lastSupportedVersion: any): never;
     function httpsCertsInfos(httpsCertsInfos: any): void;
 }
+//# sourceMappingURL=logger.d.ts.map

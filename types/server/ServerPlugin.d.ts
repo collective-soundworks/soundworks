@@ -55,3 +55,4 @@ export default class ServerPlugin extends BasePlugin {
     #private;
 }
 import BasePlugin from '../common/BasePlugin.js';
+//# sourceMappingURL=ServerPlugin.d.ts.map

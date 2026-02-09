@@ -16,7 +16,7 @@
     "outDir": "types",
     // go to js file when using IDE functions like
     // "Go to Definition" in VSCode
-    "declarationMap": false,
+    "declarationMap": true,
     // do not check dependencies
     "skipLibCheck": true
   },

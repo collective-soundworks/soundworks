@@ -254,3 +254,4 @@ declare class BaseStateManager {
 }
 import SharedState from './SharedState.js';
 import SharedStateCollection from './SharedStateCollection.js';
+//# sourceMappingURL=BaseStateManager.d.ts.map
