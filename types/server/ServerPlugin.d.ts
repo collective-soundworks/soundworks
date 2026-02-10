@@ -56,5 +56,4 @@ declare class ServerPlugin extends BasePlugin {
     #private;
 }
 import BasePlugin from '../common/BasePlugin.js';
-import Server from './Server.js';
 //# sourceMappingURL=ServerPlugin.d.ts.map
