@@ -1,3 +1,21 @@
+## v5.4.2 - 2026-02-10
+
+- Chore: upgrade API documentation system
+
+## v5.4.1 - 2025-11-18
+
+- Fix: do to not send abort message to requester when acknowledge is false
+
+## v5.4.0 - 2025-11-07
+
+- Feat: expose `BaseStateManager.validateClassDescription` method
+- Feat: implement acknowledge modifier for shared state parameters
+
+## v5.3.0 - 2025-08-14
+
+- Fix: add try / catch block around detach and delete callbacks
+- Fix: throw if calling `SharedState#onDelete` on attached instance
+
 ## v5.2.1 - 2025-08-11
 
 - Fix: Use CancelablePromise to cancel pending promise rather than reject when a state is deleted
