@@ -20,11 +20,14 @@ function hideAllButCurrent(){
             });
         }
     });
-    
+
     //only current page (if it exists) should be opened
     var file = window.location.pathname.split("/").pop().replace(/\.html/, '');
     document.querySelectorAll("nav > ul > li > a").forEach(function(parent) {
-        var href = parent.attributes.href.value.replace(/\.html/, '');
+        var href = parent.attributes.href.value
+            .replace(/\.html/, '')
+            .split('#')[0];
+        console.log(file, href);
         if (file === href) {
             if (parent.parentNode.parentNode.className.indexOf("collapse_top") !== -1) {
                 parent.parentNode.parentNode.style.display = "block";

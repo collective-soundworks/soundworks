@@ -65,6 +65,10 @@ a:hover, a:active {
   color: #767676;
 }
 
+p a, p a:hover, p a:active  {
+  text-decoration: underline;
+}
+
 nav > ul > li > a {
   color: #282922;
   margin-top: 10px;
