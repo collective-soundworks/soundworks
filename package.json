@@ -68,7 +68,7 @@
   },
   "devDependencies": {
     "@ircam/eslint-config": "^2.0.1",
-    "@ircam/jsdoc-template": "^1.0.0",
+    "@ircam/jsdoc-template": "^1.1.0",
     "chai": "^5.1.1",
     "dotenv": "^16.4.5",
     "eslint": "^9.18.0",

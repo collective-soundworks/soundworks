@@ -1,4 +1,9 @@
 export const kClientPluginName: unique symbol;
+export default ClientPlugin;
+/**
+ * ~onStateChangeCallback
+ */
+export type ClientPlugin = (#state: ClientPlugin) => any;
 /**
  * Callback executed when the plugin state is updated.
  *
@@ -28,7 +33,7 @@ export const kClientPluginName: unique symbol;
  * @extends BasePlugin
  * @inheritdoc
  */
-export default class ClientPlugin extends BasePlugin {
+declare class ClientPlugin extends BasePlugin {
     static [kClientPluginName]: string;
     /**
      * @param {Client} client - A soundworks client instance.
@@ -44,9 +49,5 @@ export default class ClientPlugin extends BasePlugin {
     get client(): Client;
     #private;
 }
-/**
- * ~onStateChangeCallback
- */
-export type ClientPlugin = (#state: ClientPlugin) => any;
 import BasePlugin from '../common/BasePlugin.js';
 //# sourceMappingURL=ClientPlugin.d.ts.map

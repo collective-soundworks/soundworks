@@ -20,7 +20,7 @@ export const kServerPluginName = Symbol.for('soundworks:server-plugin-name');
  * @extends {BasePlugin}
  * @inheritdoc
  */
-export default class ServerPlugin extends BasePlugin {
+class ServerPlugin extends BasePlugin {
   // Note: we need this workaround in plugin tests, because the test app and
   // the tested plugin will import different versions of ServerPlugin
   static [kServerPluginName] = 'ServerPlugin';
@@ -77,3 +77,5 @@ export default class ServerPlugin extends BasePlugin {
     this.#clients.delete(client);
   }
 }
+
+export default ServerPlugin;

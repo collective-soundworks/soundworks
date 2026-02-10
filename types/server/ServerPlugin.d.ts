@@ -1,4 +1,5 @@
 export const kServerPluginName: unique symbol;
+export default ServerPlugin;
 /**
  * Base class to extend in order to create the server-side counterpart of a
  * `soundworks` plugin.
@@ -17,7 +18,7 @@ export const kServerPluginName: unique symbol;
  * @extends {BasePlugin}
  * @inheritdoc
  */
-export default class ServerPlugin extends BasePlugin {
+declare class ServerPlugin extends BasePlugin {
     static [kServerPluginName]: string;
     /**
      * @param {Server} server - The soundworks server instance.
@@ -55,4 +56,5 @@ export default class ServerPlugin extends BasePlugin {
     #private;
 }
 import BasePlugin from '../common/BasePlugin.js';
+import Server from './Server.js';
 //# sourceMappingURL=ServerPlugin.d.ts.map
