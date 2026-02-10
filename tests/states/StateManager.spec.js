@@ -78,16 +78,16 @@ describe(`# StateManager`, () => {
       assert.isTrue(true);
     });
 
-    it.only(`should validate given default value`, async () => {
+    it(`should validate given default value`, async () => {
       const localConfig = structuredClone(config);
       localConfig.env.port = 8082;
-
       const server = new Server(config);
-      server.stateManager.validateClassDescription({
-        a: { type: 'integer', default: true },
-      });
 
-      assert.isTrue(true);
+      assert.throws(() => {
+        server.stateManager.validateClassDescription({
+          a: { type: 'integer', default: true },
+        });
+      })
     });
   });
 
