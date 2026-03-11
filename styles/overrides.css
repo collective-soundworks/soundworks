@@ -183,6 +183,7 @@ span.param-type, .params td .param-type, .param-type dd {
 /* block code */
 .prettyprint {
   border-radius: 2px;
+  padding: 0;
 }
 .prettyprint code {
   font-size: 12px;
