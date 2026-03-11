@@ -13,7 +13,7 @@ import {
 import chalk from 'chalk';
 import Keyv from 'keyv';
 import { KeyvFile } from 'keyv-file';
-import merge from 'lodash/merge.js';
+import _ from 'lodash';
 
 import auditClassDescription from './audit-state-class-description.js';
 import {
@@ -159,7 +159,7 @@ class Server {
       throw new TypeError(`Cannot construct 'Server': Parameter 1 must be an object`);
     }
 
-    config = merge({}, DEFAULT_CONFIG, config);
+    config = _.merge({}, DEFAULT_CONFIG, config);
 
     // ---------------------------------------------------------------------
     // Deprecation checks for config
