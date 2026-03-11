@@ -1,2 +1,2 @@
 // [WARNING] This file is generated, do not edit
-export default '5.4.3-alpha.0';
+export default '5.4.3';
