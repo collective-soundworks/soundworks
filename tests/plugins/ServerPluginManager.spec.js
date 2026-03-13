@@ -547,7 +547,7 @@ describe(`# ServerPluginManager`, () => {
       // delay-1 --> delay-2 --|
 
       // accepted error in delay-plugin timeouts (in ms)
-      const TIMEOUT_ERROR = 15.;
+      const TIMEOUT_ERROR = 50; // this is huge, but windows runners on github actions seem to be quite slow
       const server = new Server(config);
 
       server.pluginManager.register('delay-1', ServerPluginDelay, {
@@ -598,7 +598,7 @@ describe(`# ServerPluginManager`, () => {
       // delay-3 --------------+--> delay-4 --|
 
       // accepted error in delay-plugin timeouts (in ms)
-      const TIMEOUT_ERROR = 15.;
+      const TIMEOUT_ERROR = 50; // this is huge, but windows runners on github actions seem to be quite slow
       const server = new Server(config);
 
       server.pluginManager.register('delay-1', ServerPluginDelay, {
