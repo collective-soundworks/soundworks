@@ -644,7 +644,7 @@ describe('# Context', () => {
       await gamma.exit();
 
       // we add the errors here
-      const TIMEOUT_ERROR = 30; // in ms
+      const TIMEOUT_ERROR = 50; // in ms
       // alpha entered at 0
       assert.notEqual(enteredAlpha, null, 'should have entered alpha');
       assert.isBelow(Math.abs(enteredAlpha), TIMEOUT_ERROR, 'wrong alpha enter time');

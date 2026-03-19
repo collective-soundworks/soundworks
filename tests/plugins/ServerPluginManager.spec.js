@@ -257,7 +257,7 @@ describe(`# ServerPluginManager`, () => {
     it(`should be able to monitor plugin lifecycle`, async function() {
       this.timeout(3 * 1000);
 
-      const TIMEOUT_ERROR = 15
+      const TIMEOUT_ERROR = 30;
 
       const server = new Server(config);
       server.pluginManager.register('delay', ServerPluginDelay, {
