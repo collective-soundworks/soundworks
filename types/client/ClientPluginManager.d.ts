@@ -86,7 +86,7 @@ declare class ClientPluginManager<T> extends BasePluginManager {
      * // server-side
      * server.pluginManager.register('user-defined-id', pluginFactory);
      */
-    register(id: string, ctor: T<ClientPlugin>, options?: object, deps?: any[]): void;
+    register(id: string, ctor: T<ClientPlugin>, options?: object, deps?: array): void;
     /**
      * Retrieve an fully started instance of a registered plugin.
      *

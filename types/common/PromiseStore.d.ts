@@ -3,7 +3,7 @@ export default class PromiseStore {
     constructor(name: any);
     name: any;
     store: Map<any, any>;
-    generateId: any;
+    generateId: Function;
     createPromise(): {
         id: any;
         promise: any;

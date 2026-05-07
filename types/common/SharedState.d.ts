@@ -3,7 +3,7 @@ export default SharedState;
 /**
  * Callback executed when updates are applied on a {@link SharedState}.
  */
-export type sharedStateOnUpdateCallback = (newValues: any, oldValues: any) => any;
+export type sharedStateOnUpdateCallback = (newValues: Object, oldValues: Object) => any;
 /**
  * Delete the registered {@link sharedStateOnUpdateCallback}.
  */
@@ -124,7 +124,7 @@ declare class SharedState {
     /**
      * @deprecated Use {@link SharedState#getDescription} instead.
      */
-    getSchema(paramName?: any): any;
+    getSchema(paramName?: null): any;
     /**
      * Update the values of the state.
      *
@@ -135,7 +135,7 @@ declare class SharedState {
      * @param {object} updates - Key / value pairs of updates to apply to the state.
      * @returns {Promise<Object>} - Promise to the (coerced) updates.
      */
-    set(updates: object): Promise<any>;
+    set(updates: object): Promise<Object>;
     /**
      * Update the values of the state.
      *
@@ -147,7 +147,7 @@ declare class SharedState {
      * @param {*} value - Value of the parameter.
      * @returns {Promise<Object>} - Promise to the (coerced) updates.
      */
-    set(name: SharedStateParameterName, value: any): Promise<any>;
+    set(name: SharedStateParameterName, value: any): Promise<Object>;
     /**
      * Get the value of a parameter of the state.
      *

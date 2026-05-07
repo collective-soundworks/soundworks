@@ -81,7 +81,7 @@ declare class Server {
      * @type {'idle'|'inited'|'started'|'errored'}
      */
     get status(): "idle" | "inited" | "started" | "errored";
-    set router(router: any);
+    set router(router: null);
     /**
      * Instance of the router if any.
      *
@@ -100,20 +100,20 @@ declare class Server {
      * // expose assets located in the `soundfiles` directory on the network
      * server.router.use('/soundfiles', express.static('soundfiles')));
      */
-    get router(): any;
+    get router(): null;
     /**
      * Instance of the Node.js `http.Server` or `https.Server`
      *
      * @see {@link https://nodejs.org/api/http.html#class-httpserver}
      * @see {@link https://nodejs.org/api/https.html#class-httpsserver}
      */
-    get httpServer(): any;
+    get httpServer(): null;
     /**
      * Simple key / value filesystem database with Promise based Map API.
      *
      * Basically a tiny wrapper around the {@link https://github.com/lukechilds/keyv} package.
      */
-    get db(): any;
+    get db(): null;
     /**
      * Instance of the {@link ServerSockets} class.
      *
@@ -252,7 +252,7 @@ declare class Server {
      * be internally used to check the WebSocket connection and reject it if the
      * token is invalid.
      */
-    generateAuthToken(req: any): string;
+    generateAuthToken(req: any): any;
     /**
      * Check if the given client is trusted, i.e. config.env.type == 'production'
      * and the client is protected behind a password.

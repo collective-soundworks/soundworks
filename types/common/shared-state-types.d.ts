@@ -35,18 +35,18 @@ type SharedStateParameterDescription = {
      * - Defines if the parameter is nullable.
      * When `true` the parameter `default` is set to `null`.
      */
-    nullable?: boolean;
+    nullable?: boolean | undefined;
     /**
      * - Define if the parameter is a volatile, i.e.
      * its value only exists on an update and is set back to `null` after propagation.
      * When `true`, `nullable` is automatically set to `true` and `default` to `null`.
      */
-    event?: boolean;
+    event?: boolean | undefined;
     /**
      * - When set to true, the parameter must be
      * provided at the creation of the shared state.
      */
-    required?: boolean;
+    required?: boolean | undefined;
     /**
      * - When set to `false`, an update will
      * trigger the propagation of a parameter even when its value didn't change.
@@ -55,7 +55,7 @@ type SharedStateParameterDescription = {
      * option (which has no state per se). Hence, setting this options to `false` if
      * `event=true` makes no sens.
      */
-    filterChange?: boolean;
+    filterChange?: boolean | undefined;
     /**
      * - When set to `true`, an update will
      * trigger the update listeners immediately on the node that generated the update,
@@ -66,7 +66,7 @@ type SharedStateParameterDescription = {
      * Setting this modifier to `true` will trigger the `onUpdate` callback synchronously
      * according to the `set` call.
      */
-    immediate?: boolean;
+    immediate?: boolean | undefined;
     /**
      * - When set to true, the parameter is never
      * propagated on the network (hence it is no longer a shared parameter :). This
@@ -75,7 +75,7 @@ type SharedStateParameterDescription = {
      * Setting this modifier to `true` will trigger the `onUpdate` callback synchronously
      * according to the `set` call.
      */
-    local?: boolean;
+    local?: boolean | undefined;
     /**
      * - When set to false, the acknowledgement
      * is never sent back to the shared state that initiated an update. This can be
@@ -83,25 +83,25 @@ type SharedStateParameterDescription = {
      * Setting this modifier to `true` will trigger the `onUpdate` callback synchronously
      * according to the `set` call.
      */
-    acknowledge?: boolean;
+    acknowledge?: boolean | undefined;
     /**
      * - Minimum value of the parameter. Only applies
      * for `integer` and `float` types.
      */
-    min?: number;
+    min?: number | undefined;
     /**
      * - Maximum value of the parameter. Only applies
      * for `integer` and `float` types.
      */
-    max?: number;
+    max?: number | undefined;
     /**
      * - Possible values of the parameter. Only applies and
      * mandatory for `enum` type.
      */
-    list?: Array<any>;
+    list?: any[] | undefined;
     /**
      * - Optional metadata of the parameter.
      */
-    metas?: object;
+    metas?: object | undefined;
 };
 //# sourceMappingURL=shared-state-types.d.ts.map

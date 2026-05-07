@@ -81,7 +81,7 @@ declare class BasePluginManager {
      * // server-side
      * server.pluginManager.register('user-defined-id', pluginFactory);
      */
-    register(id: string, ctor: Function, options?: object, deps?: any[]): void;
+    register(id: string, ctor: Function, options?: object, deps?: array): void;
     /**
      * Manually add a dependency to a given plugin.
      *

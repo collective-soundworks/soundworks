@@ -76,7 +76,7 @@
     "mocha": "^11.7.5",
     "puppeteer": "^24.39.0",
     "tcp-ping": "^0.1.1",
-    "typescript": "^5.9.3"
+    "typescript": "^6.0.2"
   },
   "optionalDependencies": {
     "bufferutil": "^4.1.0",

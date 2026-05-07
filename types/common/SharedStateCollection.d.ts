@@ -53,7 +53,7 @@ export default SharedStateCollection;
  * Callback to execute when an update is triggered on one of the shared states
  * of the collection.
  */
-export type sharedStateCollectionOnUpdateCallback = (state: SharedState, newValues: any, oldValues: any) => any;
+export type sharedStateCollectionOnUpdateCallback = (state: SharedState, newValues: Object, oldValues: Object) => any;
 /**
  * Delete the registered {@link sharedStateCollectionOnUpdateCallback} when executed.
  */
@@ -102,7 +102,7 @@ export type sharedStateCollectionDeleteOnChangeCallback = () => any;
  * @hideconstructor
  */
 declare class SharedStateCollection {
-    constructor(stateManager: any, className: any, filter?: any, options?: {});
+    constructor(stateManager: any, className: any, filter?: null, options?: {});
     /**
      * Size of the collection, alias `size`
      * @type {number}
@@ -126,7 +126,7 @@ declare class SharedStateCollection {
     /**
      * @deprecated Use {@link SharedStateCollection#getDescription} instead.
      */
-    getSchema(paramName?: any): any;
+    getSchema(paramName?: null): any;
     /**
      * Return the underlying {@link SharedStateClassDescription} or the
      * {@link SharedStateParameterDescription} if `paramName` is given.
@@ -152,7 +152,7 @@ declare class SharedStateCollection {
      * Return the current values of all the states in the collection.
      * @return {Object[]}
      */
-    getValues(): any[];
+    getValues(): Object[];
     /**
      * Return the current values of all the states in the collection.
      *
@@ -164,7 +164,7 @@ declare class SharedStateCollection {
      *
      * @return {Object[]}
      */
-    getValuesUnsafe(): any[];
+    getValuesUnsafe(): Object[];
     /**
      * Return the current param value of all the states in the collection.
      *
@@ -193,7 +193,7 @@ declare class SharedStateCollection {
      * @param {object} updates - key / value pairs of updates to apply to the collection.
      * @returns {Promise<Array<Object>>} - Promise to the list of (coerced) updates.
      */
-    set(updates: object): Promise<Array<any>>;
+    set(updates: object): Promise<Array<Object>>;
     /**
      * Update all states of the collection with given values.
      *
@@ -205,7 +205,7 @@ declare class SharedStateCollection {
      * @param {*} value - Value of the parameter.
      * @returns {Promise<Array<Object>>} - Promise to the list of (coerced) updates.
      */
-    set(name: SharedStateParameterName, value: any): Promise<Array<any>>;
+    set(name: SharedStateParameterName, value: any): Promise<Array<Object>>;
     /**
      * Register a function to execute when any shared state of the collection is updated.
      *
