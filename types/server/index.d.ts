@@ -17,7 +17,7 @@ export type ClientDescription = {
      * - For browser client, define is the client should be
      * accessible at the default / root HTTP endpoint
      */
-    default?: boolean;
+    default?: boolean | undefined;
 };
 /**
  * Application configuration object.
@@ -30,11 +30,11 @@ export type ServerAppConfig = {
     /**
      * - Name of the application.
      */
-    name?: string;
+    name?: string | undefined;
     /**
      * - Name of the author.
      */
-    author?: string;
+    author?: string | undefined;
 };
 /**
  * Environment configuration object.

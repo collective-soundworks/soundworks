@@ -18,7 +18,7 @@ declare class ServerSocket {
     /**
      * Reference to the @link{ServerSockets} instance.
      */
-    get sockets(): any;
+    get sockets(): null;
     /**
      * Ready state of the underlying socket instance.
      *

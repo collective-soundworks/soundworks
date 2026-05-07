@@ -9,11 +9,11 @@ export type ClientAppConfig = {
     /**
      * - Name of the application.
      */
-    name?: string;
+    name?: string | undefined;
     /**
      * - Name of the author.
      */
-    author?: string;
+    author?: string | undefined;
 };
 /**
  * Environment configuration object.
@@ -35,7 +35,7 @@ export type ClientEnvConfig = {
     /**
      * - If running behind a proxy, base URL of the application.
      */
-    baseUrl?: string;
+    baseUrl?: string | undefined;
 };
 /**
  * Configuration object for a client running in a browser runtime.

@@ -12,7 +12,7 @@ export namespace types {
         let required_1: string[];
         export { required_1 as required };
         export const defaultOptions: any;
-        export function coerceFunction(name: any, def: any, value: any): boolean;
+        export function coerceFunction(name: any, def: any, value: any): value is true;
     }
     export namespace string {
         let required_2: string[];
@@ -135,7 +135,7 @@ declare class ParameterBag {
     /**
      * @return {object}
      */
-    getDescription(name?: any): object;
+    getDescription(name?: null): object;
     getInitValues(): {};
     getDefaults(): {};
     getParamListByDescriptor(descriptorName: any, descriptorValue: any): string[];

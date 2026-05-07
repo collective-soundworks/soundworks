@@ -10,12 +10,12 @@ export default SharedStatePrivate;
  */
 declare class SharedStatePrivate {
     constructor(manager: any, className: any, classDefinition: any, id: any, initValues?: {});
-    get id(): any;
-    get className(): any;
-    get creatorId(): any;
-    get creatorInstanceId(): any;
+    get id(): null;
+    get className(): null;
+    get creatorId(): null;
+    get creatorInstanceId(): null;
     get attachedClients(): Map<any, any>;
-    get parameters(): any;
+    get parameters(): null;
     [kSharedStatePrivateGetValues](): any;
     [kSharedStatePrivateAttachClient](instanceId: any, client: any, isOwner: any, filter: any): void;
     [kSharedStatePrivateDetachClient](instanceId: any, client: any): void;

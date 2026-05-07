@@ -8,7 +8,7 @@ declare class BatchedTransport {
     addListener(channel: any, callback: any): void;
     emit(channel: any, ...args: any[]): Promise<void>;
     removeListener(channel: any, callback: any): void;
-    removeAllListeners(channel?: any): void;
+    removeAllListeners(channel?: null): void;
     #private;
 }
 //# sourceMappingURL=BatchedTransport.d.ts.map
