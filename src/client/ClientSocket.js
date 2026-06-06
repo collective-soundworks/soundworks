@@ -274,6 +274,13 @@ class ClientSocket {
       this.#listeners.delete(channel);
     }
   }
+
+  /**
+   * Close the socket, will dispatch the close event. For debug testing purpose
+   */
+  close() {
+    this.#socket.close();
+  }
 }
 
 export default ClientSocket;
