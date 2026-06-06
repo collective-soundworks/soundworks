@@ -62,6 +62,10 @@ declare class ClientSocket {
      */
     removeAllListeners(channel?: string): void;
     /**
+     * Close the socket, will dispatch the close event. For debug testing purpose
+     */
+    close(): void;
+    /**
      * Removes all listeners and immediately close the two sockets. Is automatically
      * called on `client.stop()`
      *
