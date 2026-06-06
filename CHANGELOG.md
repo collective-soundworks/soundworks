@@ -1,3 +1,7 @@
+## v5.5.0 - 2026-02-10
+
+- Chore: upgrade API documentation system
+
 ## v5.4.2 - 2026-02-10
 
 - Chore: upgrade API documentation system
