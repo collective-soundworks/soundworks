@@ -41,7 +41,7 @@
     "distributed-system"
   ],
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=22.0.0"
   },
   "scripts": {
     "doc": "npm run types && rm -rf docs && jsdoc -c .jsdoc --verbose && cp -R misc/assets docs/",
