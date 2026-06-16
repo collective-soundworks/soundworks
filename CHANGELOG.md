@@ -1,6 +1,7 @@
-## v5.5.0 - 2026-02-10
+## v5.5.0 - 2026-06-10
 
-- Chore: upgrade API documentation system
+- CI: move to node 24
+- ClientSocket: expose `close` method for testing purposes
 
 ## v5.4.2 - 2026-02-10
 
