@@ -1,5 +1,5 @@
 import cloneDeep from 'lodash/cloneDeep.js';
-import equal from 'fast-deep-equal';
+import { dequal } from 'dequal/lite';
 
 import {
   isPlainObject,
@@ -369,7 +369,7 @@ class ParameterBag {
   set(name, value) {
     value = this.coerceValue(name, value);
     const currentValue = this.#values[name];
-    const updated = !equal(currentValue, value);
+    const updated = !dequal(currentValue, value);
 
     // we store a deep copy of the object as we don't want the client to be able
     // to modify our underlying data, which leads to unexpected behavior where the
