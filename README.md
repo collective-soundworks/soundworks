@@ -42,6 +42,12 @@ Note that the `@soundworks/core` package is automatically installed when creatin
 npm install @soundworks/core
 ```
 
+## Developement Notes
+
+### Windows
+
+On windows machine, tests may fail when run in node.js command line, due to `openssl` not being found. This is fixed when run with git command line.
+
 ## Share with Us
 
 If you made an application using **soundworks** please let us know here: https://github.com/collective-soundworks/soundworks/discussions/61

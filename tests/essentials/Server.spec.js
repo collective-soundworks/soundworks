@@ -11,7 +11,7 @@ import dotenv from 'dotenv';
 import tcpp from 'tcp-ping';
 
 import { Server, ServerContext, ServerPlugin } from '../../src/server/index.js';
-import { Client, ClientPlugin } from '../../src/client/index.js';
+import { Client } from '../../src/client/index.js';
 
 import {
   kServerOnStatusChangeCallbacks,
@@ -221,7 +221,7 @@ describe('# Server', () => {
       selfSignedConfig.env.useHttps = true;
       selfSignedConfig.env.httpsInfos = {
         cert: null,
-        key: null, // this is invalid
+        key: null,
       };
 
       const server = new Server(selfSignedConfig);
