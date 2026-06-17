@@ -1,4 +1,4 @@
-import coloredLogger from '#logs/colored-logger.js';
+import coloredLogger from '#isomorphic/colored-logger.js';
 
 export default {
   versionDiscrepancies(clientRole, clientVersion, serverVersion) {

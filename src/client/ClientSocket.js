@@ -1,6 +1,6 @@
 import { isBrowser } from '@ircam/sc-utils';
-import WebSocket from 'isomorphic-ws';
 
+import WebSocket from '#isomorphic/web-socket.js';
 import {
   PING_MESSAGE,
   PONG_MESSAGE,

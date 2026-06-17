@@ -25,9 +25,13 @@
     }
   },
   "imports": {
-    "#logs/colored-logger.js": {
-      "module": "./src/common/logs/colored-logger.browser.js",
-      "node": "./src/common/logs/colored-logger.node.js"
+    "#isomorphic/colored-logger.js": {
+      "module": "./src/common/isomorphic/colored-logger.browser.js",
+      "node": "./src/common/isomorphic/colored-logger.node.js"
+    },
+    "#isomorphic/web-socket.js": {
+      "module": "./src/common/isomorphic/web-socket.browser.js",
+      "node": "./src/common/isomorphic/web-socket.node.js"
     }
   },
   "repository": {
@@ -63,7 +67,6 @@
     "@ircam/sc-utils": "^1.13.0",
     "cancelable-promise": "^4.3.1",
     "fast-deep-equal": "^3.1.3",
-    "isomorphic-ws": "^5.0.0",
     "keyv": "^5.6.0",
     "keyv-file": "^5.3.3",
     "lodash": "^4.17.23",
