@@ -23,7 +23,10 @@ import {
   CLIENT_HANDSHAKE_ERROR,
   AUDIT_STATE_NAME,
 } from '../common/constants.js';
-import logger from '../common/logger.js';
+
+import gatedLogger from '../common/logs/gated-logger.js';
+import warnings from '../common/logs/warnings.js';
+
 import VERSION from '../common/version.js';
 
 // for testing purposes
@@ -132,7 +135,7 @@ class Client {
 
     this[kClientOnStatusChangeCallbacks] = new Set();
 
-    logger.configure(!!config.env.verbose);
+    gatedLogger.verbose = !!this.#config.env.verbose;
   }
 
   /**
@@ -209,7 +212,7 @@ class Client {
    * @deprecated Use {@link Client#runtime} instead.
    */
   get target() {
-    logger.deprecated('Client#target', 'Client#runtime', '4.0.0-alpha.29');
+    warnings.deprecated('Client#target', 'Client#runtime', '4.0.0-alpha.29');
     return this.runtime;
   }
 
@@ -335,7 +338,7 @@ class Client {
           this.#token = token;
 
           if (version !== this.#version) {
-            logger.warnVersionDiscrepancies(this.#role, this.#version, version);
+            warnings.versionDiscrepancies(this.#role, this.#version, version);
           }
 
           resolve();

@@ -32,7 +32,7 @@ import SharedStatePrivate, {
   kSharedStatePrivateGetValues,
 } from './SharedStatePrivate.js';
 
-import logger from '../common/logger.js';
+import warnings from '../common/logs/warnings.js';
 
 
 const generateStateId = counter();
@@ -497,7 +497,7 @@ class ServerStateManager extends BaseStateManager {
    * @deprecated Use {@link ServerStateManager#defineClass} instead.
    */
   registerSchema(className, classDescription) {
-    logger.deprecated('ServerStateManager#registerSchema', 'ServerStateManager#defineClass', '4.0.0-alpha.29');
+    warnings.deprecated('ServerStateManager#registerSchema', 'ServerStateManager#defineClass', '4.0.0-alpha.29');
     this.defineClass(className, classDescription);
   }
 
@@ -543,7 +543,7 @@ class ServerStateManager extends BaseStateManager {
    * @deprecated Use {@link ServerStateManager#defineClass} instead.
    */
   deleteSchema(className) {
-    logger.deprecated('ServerStateManager#deleteSchema', 'ServerStateManager#deleteClass', '4.0.0-alpha.29');
+    warnings.deprecated('ServerStateManager#deleteSchema', 'ServerStateManager#deleteClass', '4.0.0-alpha.29');
     this.deleteClass(className);
   }
 

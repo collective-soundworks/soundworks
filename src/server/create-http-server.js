@@ -1,32 +1,26 @@
-import http from 'node:http';
-import https from 'node:https';
-import fs from 'node:fs';
 import {
   X509Certificate,
   createPrivateKey,
 } from 'node:crypto';
+import fs from 'node:fs';
+import http from 'node:http';
+import https from 'node:https';
+import os from 'node:os';
+import {
+  styleText,
+} from 'node:util';
 
 import pem from 'pem';
-import equal from 'fast-deep-equal';
 
-import logger from '../common/logger.js';
-
-/**
- * @private
- * @return {HttpServer|HttpsServer}
- */
-export async function createHttpServer(server) {
-  const serverConfig = server.config;
-
-  if (serverConfig.env.useHttps !== true) {
-    return http.createServer();
-  }
-
+async function createHttpsServer(server) {
   // https is more tricky
-  const httpsInfos = serverConfig.env.httpsInfos;
+  const httpsInfos = server.config.env.httpsInfos;
   let useSelfSigned = false;
 
-  if (!httpsInfos || equal(httpsInfos, { cert: null, key: null })) {
+  if (!httpsInfos
+    || !fs.existsSync(httpsInfos.cert)
+    || !fs.existsSync(httpsInfos.key)
+  ) {
     useSelfSigned = true;
   }
 
@@ -77,7 +71,7 @@ export async function createHttpServer(server) {
 
       httpsServer = https.createServer({ key, cert });
     } catch (err) {
-      logger.error(`
+      console.error(`
 Invalid certificate files, please check your:
 - key file: ${httpsInfos.key}
 - cert file: ${httpsInfos.cert}
@@ -112,7 +106,7 @@ Invalid certificate files, please check your:
         await server.db.set('httpsCert', cert);
         await server.db.set('httpsKey', key);
       } catch (err) {
-        logger.error(err.stack);
+        console.error(err.stack);
         throw err;
       }
     }
@@ -121,7 +115,65 @@ Invalid certificate files, please check your:
     httpsServer = https.createServer({ cert, key });
   }
 
-  logger.httpsCertsInfos(httpsCertsInfos);
+  // Log certificate information, just be verbose
+  console.log(styleText('cyan', `https certificates infos`));
+
+  if (httpsCertsInfos.selfSigned) {
+    console.warn(styleText('yellow', `    -------------------------------------------`));
+    console.warn(styleText('yellow', `    > USING SELF-SIGNED CERTIFICATE.           `));
+    console.warn(styleText('yellow', `    users will face a unsafe web page warning  `));
+    console.warn(styleText('yellow', `    -------------------------------------------`));
+  } else {
+    console.log(`    valid from: ${httpsCertsInfos.validFrom}`);
+    console.log(`    valid to:   ${httpsCertsInfos.validTo}`);
+
+    if (!httpsCertsInfos.isValid) {
+      console.error(styleText('red', `    -------------------------------------------`));
+      console.error(styleText('red', `    > INVALID CERTIFICATE                      `));
+      console.error(styleText('red', `    i.e. you pretend to be safe but you are not`));
+      console.error(styleText('red', `    -------------------------------------------`));
+    } else {
+      if (httpsCertsInfos.daysRemaining < 5) {
+        console.log(styleText('red', `    > CERTIFICATE IS VALID... BUT ONLY ${httpsCertsInfos.daysRemaining} DAYS LEFT, PLEASE CONSIDER UPDATING YOUR CERTS!`));
+      } else if (httpsCertsInfos.daysRemaining < 15) {
+        console.log(styleText('yellow', `    > CERTIFICATE IS VALID - only ${httpsCertsInfos.daysRemaining} days left, be careful...`));
+      } else {
+        console.log(styleText('green', `    > CERTIFICATE IS VALID (${httpsCertsInfos.daysRemaining} days left)`));
+      }
+    }
+  }
 
   return httpsServer;
+}
+
+/**
+ * @private
+ * @return {HttpServer|HttpsServer}
+ */
+export async function createHttpServer(server) {
+  const serverConfig = server.config;
+
+  const httpServer = serverConfig.env.useHttps !== true
+    ? http.createServer()
+    : await createHttpsServer(server);
+
+  return httpServer;
+}
+
+export function logServerInfos(envConfig) {
+  const protocol = envConfig.useHttps ? 'https' : 'http';
+  const port = envConfig.port;
+  const interfaces = os.networkInterfaces();
+
+  console.log(styleText('cyan', `${protocol} server listening on`));
+
+  Object.keys(interfaces).forEach(dev => {
+    interfaces[dev].forEach(details => {
+      if (details.family === 'IPv4') {
+        console.log(`    ${protocol}://${details.address}:${styleText('green', `${port}`)}`);
+      }
+    });
+  });
+
+  console.log(`\n> press "${styleText('bold', 'Ctrl + C')}" to exit`);
 }

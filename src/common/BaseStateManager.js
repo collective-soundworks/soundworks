@@ -1,4 +1,9 @@
-import { isString, isFunction, isPlainObject } from '@ircam/sc-utils';
+import {
+  isString,
+  isFunction,
+  isPlainObject,
+} from '@ircam/sc-utils';
+
 import SharedState from './SharedState.js';
 import SharedStateCollection, {
   kSharedStateCollectionInit,
@@ -23,7 +28,7 @@ import {
   GET_CLASS_DESCRIPTION_RESPONSE,
   GET_CLASS_DESCRIPTION_ERROR,
 } from './constants.js';
-import logger from './logger.js';
+import warnings from './logs/warnings.js';
 
 export const kStateManagerInit = Symbol('soundworks:state-manager-init');
 export const kStateManagerDeleteState = Symbol('soundworks:state-manager-delete-state');
@@ -265,7 +270,7 @@ class BaseStateManager {
    * @deprecated Use {@link BaseStateManager#getClassDescription} instead.
    */
   async getSchema(className) {
-    logger.deprecated('BaseStateManager#getSchema', 'BaseStateManager#getClassDescription', '4.0.0-alpha.29');
+    warnings.deprecated('BaseStateManager#getSchema', 'BaseStateManager#getClassDescription', '4.0.0-alpha.29');
     return this.getClassDescription(className);
   }
 
