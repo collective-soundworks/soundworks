@@ -4,7 +4,7 @@ import {
   kBasePluginStatus,
 } from './BasePlugin.js';
 
-import logger from './logger.js';
+import gatedLogger from './logs/gated-logger.js';
 
 export const kPluginManagerStart = Symbol('soundworks:plugin-manager-start');
 export const kPluginManagerStop = Symbol('soundworks:plugin-manager-stop');
@@ -64,7 +64,7 @@ class BasePluginManager {
    * @private
    */
   async [kPluginManagerStart]() {
-    logger.title('starting registered plugins');
+    gatedLogger.title('starting registered plugins');
 
     if (this.#status !== 'idle') {
       throw new DOMException(`Cannot execute 'kPluginManagerStart' on BasePluginManager: Lifecycle methods must be called in following order: kPluginManagerStart, kPluginManagerStop`, 'InvalidAccessError');

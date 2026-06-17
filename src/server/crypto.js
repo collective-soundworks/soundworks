@@ -1,11 +1,10 @@
 import crypto from 'node:crypto';
-import { v4 as uuidv4 } from 'uuid';
 
 // adapted from https://dev.to/jobizil/encrypt-and-decrypt-data-in-nodejs-using-aes-256-cbc-2l6d
 // generate a new key and init vector each time the server restart, we don't need
 // any persistency here
-const secretKey = uuidv4();
-const secretIv = uuidv4();
+const secretKey = crypto.randomUUID();
+const secretIv = crypto.randomUUID();
 const encryptionMethod = 'aes-256-cbc';
 
 const key = crypto

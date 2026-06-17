@@ -1,5 +1,9 @@
-import { counter, isString, isPlainObject, isFunction } from '@ircam/sc-utils';
-import clonedeep from 'lodash/cloneDeep.js';
+import {
+  counter,
+  isString,
+  isPlainObject,
+  isFunction,
+} from '@ircam/sc-utils';
 
 import BaseStateManager, {
   kStateManagerInit,
@@ -32,7 +36,7 @@ import SharedStatePrivate, {
   kSharedStatePrivateGetValues,
 } from './SharedStatePrivate.js';
 
-import logger from '../common/logger.js';
+import warnings from '../common/logs/warnings.js';
 
 
 const generateStateId = counter();
@@ -486,7 +490,7 @@ class ServerStateManager extends BaseStateManager {
       throw new TypeError(`Cannot execute 'defineClass' (${className}) on ServerStateManager: ${err.message}`);
     }
 
-    this.#classes.set(className, clonedeep(classDescription));
+    this.#classes.set(className, structuredClone(classDescription));
     // create hooks list
     this.#createHooksByClassName.set(className, new Set());
     this.#updateHooksByClassName.set(className, new Set());
@@ -497,7 +501,7 @@ class ServerStateManager extends BaseStateManager {
    * @deprecated Use {@link ServerStateManager#defineClass} instead.
    */
   registerSchema(className, classDescription) {
-    logger.deprecated('ServerStateManager#registerSchema', 'ServerStateManager#defineClass', '4.0.0-alpha.29');
+    warnings.deprecated('ServerStateManager#registerSchema', 'ServerStateManager#defineClass', '4.0.0-alpha.29');
     this.defineClass(className, classDescription);
   }
 
@@ -543,7 +547,7 @@ class ServerStateManager extends BaseStateManager {
    * @deprecated Use {@link ServerStateManager#defineClass} instead.
    */
   deleteSchema(className) {
-    logger.deprecated('ServerStateManager#deleteSchema', 'ServerStateManager#deleteClass', '4.0.0-alpha.29');
+    warnings.deprecated('ServerStateManager#deleteSchema', 'ServerStateManager#deleteClass', '4.0.0-alpha.29');
     this.deleteClass(className);
   }
 

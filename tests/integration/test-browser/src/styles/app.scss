@@ -1,3 +1,5 @@
+@use "../../node_modules/@soundworks/helpers/sass/normalize";
+
 :root {
   --sw-background-color: #000000;
   --sw-medium-background-color: #121212;
@@ -15,6 +17,7 @@ html, body {
   min-height: 100vh;
   background-color: var(--sw-background-color);
   color: var(--sw-font-color);
+  margin: 0;
 }
 
 html {
@@ -24,6 +27,7 @@ html {
 body {
   display: flex;
   flex-wrap: wrap;
+  flex-direction: column;
 }
 
 * {

@@ -1,8 +1,6 @@
 import EventEmitter from 'node:events';
 import fs from 'node:fs';
 import path from 'node:path';
-import os from 'node:os';
-
 
 import {
   isPlainObject,
@@ -10,10 +8,12 @@ import {
   counter,
   getTime,
 } from '@ircam/sc-utils';
-import chalk from 'chalk';
 import Keyv from 'keyv';
 import { KeyvFile } from 'keyv-file';
-import _ from 'lodash';
+import { defu } from 'defu';
+
+import gatedLogger from '../common/logs/gated-logger.js';
+import warnings from '../common/logs/warnings.js';
 
 import auditClassDescription from './audit-state-class-description.js';
 import {
@@ -22,6 +22,7 @@ import {
 } from './crypto.js';
 import {
   createHttpServer,
+  logServerInfos,
 } from './create-http-server.js';
 import ServerClient, {
   kServerClientToken,
@@ -57,7 +58,6 @@ import ServerSockets, {
   kSocketsStart,
   kSocketsStop,
 } from './ServerSockets.js';
-import logger from '../common/logger.js';
 import {
   SERVER_ID,
   CLIENT_HANDSHAKE_REQUEST,
@@ -159,7 +159,7 @@ class Server {
       throw new TypeError(`Cannot construct 'Server': Parameter 1 must be an object`);
     }
 
-    config = _.merge({}, DEFAULT_CONFIG, config);
+    config = defu(config, DEFAULT_CONFIG);
 
     // ---------------------------------------------------------------------
     // Deprecation checks for config
@@ -170,7 +170,7 @@ class Server {
       const clientConfig = config.app.clients[role];
 
       if (clientConfig.target) {
-        logger.deprecated('ClientDescription#target', 'ClientDescription#runtime (or run `npx soundworks --upgrade-config` to upgrade your config files)', '4.0.0-alpha.29');
+        warnings.deprecated('ClientDescription#target', 'ClientDescription#runtime (or run `npx soundworks --upgrade-config` to upgrade your config files)', '4.0.0-alpha.29');
         clientConfig.runtime = clientConfig.target;
         delete clientConfig.target;
       }
@@ -178,7 +178,7 @@ class Server {
 
     // `env.subpath` to `env.baseUrl`
     if ('subpath' in config.env) {
-      logger.deprecated('ServerConfig#subpath', 'ServerConfig#baseUrl (or run `npx soundworks --upgrade-config` to upgrade your config files)', '4.0.0-alpha.29');
+      warnings.deprecated('ServerConfig#subpath', 'ServerConfig#baseUrl (or run `npx soundworks --upgrade-config` to upgrade your config files)', '4.0.0-alpha.29');
       config.env.baseUrl = config.env.subpath;
       delete config.env.subpath;
     }
@@ -240,7 +240,7 @@ class Server {
     // register audit state schema
     this.#stateManager.defineClass(AUDIT_STATE_NAME, auditClassDescription);
 
-    logger.configure(this.#config.env.verbose);
+    gatedLogger.verbose = !!this.#config.env.verbose;
   }
 
   /**
@@ -506,7 +506,7 @@ class Server {
         const { configureHttpRouter } = await import('@soundworks/helpers/server.js');
         configureHttpRouter(this);
       } catch (err) {
-        logger.warn('Could not apply patch for deprecated `useDefaultApplicationTemplate` method. Please use `configureHttpRouter` from helpers instead.');
+        console.warn('Could not apply patch for deprecated `useDefaultApplicationTemplate` method. Please use `configureHttpRouter` from helpers instead.');
         throw err;
       }
     }
@@ -516,7 +516,7 @@ class Server {
       this.#httpServer = await createHttpServer(this);
       await this.#dispatchStatus('http-server-ready');
     } catch (err) {
-      logger.error(err.message);
+      console.error(err.message);
       await this.#dispatchStatus('errored');
       throw err;
     }
@@ -564,31 +564,19 @@ class Server {
     // start `SocketServer`
     await this.#sockets[kSocketsStart]();
     // start httpServer
-    return new Promise(resolve => {
-      const port = this.#config.env.port;
-      const protocol = this.#config.env.useHttps ? 'https' : 'http';
-      const interfaces = os.networkInterfaces();
+    const { promise, resolve } = Promise.withResolvers();
 
-      this.#httpServer.listen(port, async () => {
-        logger.title(`${protocol} server listening on`);
+    this.#httpServer.listen(this.#config.env.port, async () => {
+      if (this.#config.env.verbose) {
+        logServerInfos(this.#config.env);
+      }
 
-        Object.keys(interfaces).forEach(dev => {
-          interfaces[dev].forEach(details => {
-            if (details.family === 'IPv4') {
-              logger.ip(protocol, details.address, port);
-            }
-          });
-        });
+      await this.#dispatchStatus('started');
 
-        await this.#dispatchStatus('started');
-
-        if (this.#config.env.type === 'development') {
-          logger.log(`\n> press "${chalk.bold('Ctrl + C')}" to exit`);
-        }
-
-        resolve();
-      });
+      resolve();
     });
+
+    return promise;
   }
 
   /**
@@ -709,7 +697,7 @@ class Server {
       }
 
       if (version !== this.#version) {
-        logger.warnVersionDiscrepancies(role, version, this.#version);
+        warnings.versionDiscrepancies(role, version, this.#version);
       }
 
       try {
@@ -872,7 +860,7 @@ class Server {
     // @note - keyv-file doesn't seems to works
     const store = new KeyvFile({ filename });
     const db = new Keyv({ namespace, store });
-    db.on('error', err => logger.error(`[soundworks:Server] db ${namespace} error: ${err}`));
+    db.on('error', err => console.error(`namespaced db ("${namespace}") error:`, err));
 
     return db;
   }
@@ -881,7 +869,7 @@ class Server {
    * @deprecated
    */
   useDefaultApplicationTemplate() {
-    logger.deprecated('Server#useDefaultApplicationTemplate', '`configureHttpRouter(server)` from the `@soundworks/helpers/server.js` package', '4.0.0-alpha.29');
+    warnings.deprecated('Server#useDefaultApplicationTemplate', '`configureHttpRouter(server)` from the `@soundworks/helpers/server.js` package', '4.0.0-alpha.29');
     this.#useDefaultApplicationTemplate = true;
   }
 }

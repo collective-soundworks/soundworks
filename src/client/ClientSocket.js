@@ -1,11 +1,10 @@
 import { isBrowser } from '@ircam/sc-utils';
-import WebSocket from 'isomorphic-ws';
 
+import WebSocket from '#isomorphic/web-socket.js';
 import {
   PING_MESSAGE,
   PONG_MESSAGE,
 } from '../common/constants.js';
-import logger from '../common/logger.js';
 import {
   packStringMessage,
   unpackStringMessage,
@@ -167,7 +166,7 @@ class ClientSocket {
 
           if (e.error) {
             const msg = `ClientSocket error - code: ${e.error.code}, message: ${e.error.message}`;
-            logger.log(msg);
+            console.log(msg);
           }
 
           // Try to reconnect in all cases. Note that if the socket has been connected,

@@ -1,0 +1,6 @@
+name: test-browser
+author: ""
+clients:
+  player:
+    runtime: browser
+    default: true

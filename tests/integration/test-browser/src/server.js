@@ -1,8 +1,8 @@
 import '@soundworks/helpers/polyfills.js';
-import { Server } from '@soundworks/core/server.js';
+import '@soundworks/helpers/catch-unhandled-errors.js';
+import { loadConfig, configureHttpRouter } from '@soundworks/helpers/server.js';
 
-import { loadConfig } from '../utils/load-config.js';
-import '../utils/catch-unhandled-errors.js';
+import { Server } from '../../../../src/server/index.js';
 
 // - General documentation: https://soundworks.dev/
 // - API documentation:     https://soundworks.dev/api
@@ -18,16 +18,9 @@ console.log(`
 --------------------------------------------------------
 `);
 
-/**
- * Create the soundworks server
- */
 const server = new Server(config);
-// configure the server for usage within this application template
-server.useDefaultApplicationTemplate();
+configureHttpRouter(server);
 
-/**
- * Register plugins and schemas
- */
 server.stateManager.defineClass('globals', {
   done: {
     type: 'boolean',
@@ -37,16 +30,12 @@ server.stateManager.defineClass('globals', {
   },
 });
 
-/**
- * Launch application (init plugins, http server, etc.)
- */
 await server.start();
 
 const globals = await server.stateManager.create('globals');
 
 globals.onUpdate(updates => {
-  // console.log(JSON.stringify(updates));
-
+  console.log(updates);
   // forward updates to main process
   if (process.send !== undefined) {
     process.send(JSON.stringify(updates));

@@ -21,7 +21,7 @@ import {
   kStateManagerDeleteState,
 } from './BaseStateManager.js';
 
-import logger from './logger.js';
+import warnings from './logs/warnings.js';
 
 // for testing purposes
 export const kSharedStatePromiseStore = Symbol('soundworks:shared-state-promise-store');
@@ -291,7 +291,7 @@ class SharedState {
    * @deprecated Use {@link SharedState#className} instead.
    */
   get schemaName() {
-    logger.deprecated('SharedState#schemaName', 'SharedState#className', '4.0.0-alpha.29');
+    warnings.deprecated('SharedState#schemaName', 'SharedState#className', '4.0.0-alpha.29');
     return this.className;
   }
 
@@ -397,7 +397,7 @@ class SharedState {
    * @deprecated Use {@link SharedState#getDescription} instead.
    */
   getSchema(paramName = null) {
-    logger.deprecated('SharedState#getSchema', 'SharedState#getDescription', '4.0.0-alpha.29');
+    warnings.deprecated('SharedState#getSchema', 'SharedState#getDescription', '4.0.0-alpha.29');
     return this.getDescription(paramName);
   }
 
@@ -466,7 +466,7 @@ class SharedState {
     }
 
     if (isPlainObject(arguments[0]) && isPlainObject(arguments[1])) {
-      logger.removed('`context` argument in SharedState.set(updates, context)', 'a regular parameter configured with `event=true`', '4.0.0-alpha.29');
+      warnings.removed('`context` argument in SharedState.set(updates, context)', 'a regular parameter configured with `event=true`', '4.0.0-alpha.29');
     }
 
     if (arguments.length === 2 && isString(updates)) {

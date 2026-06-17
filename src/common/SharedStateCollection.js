@@ -1,4 +1,4 @@
-import logger from './logger.js';
+import warnings from './logs/warnings.js';
 
 /**
  * Callback to execute when an update is triggered on one of the shared states
@@ -163,7 +163,7 @@ class SharedStateCollection {
    * @deprecated Use {@link SharedStateCollection#className} instead.
    */
   get schemaName() {
-    logger.deprecated('SharedStateCollection#schemaName', 'SharedStateCollection#className', '4.0.0-alpha.29');
+    warnings.deprecated('SharedStateCollection#schemaName', 'SharedStateCollection#className', '4.0.0-alpha.29');
     return this.className;
   }
 
@@ -171,7 +171,7 @@ class SharedStateCollection {
    * @deprecated Use {@link SharedStateCollection#getDescription} instead.
    */
   getSchema(paramName = null) {
-    logger.deprecated('SharedStateCollection#getSchema', 'SharedStateCollection#getDescription', '4.0.0-alpha.29');
+    warnings.deprecated('SharedStateCollection#getSchema', 'SharedStateCollection#getDescription', '4.0.0-alpha.29');
     return this.getDescription(paramName);
   }
 
