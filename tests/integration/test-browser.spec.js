@@ -10,7 +10,7 @@ const __dirname = path.dirname(__filename);
 
 const appPath = path.join(__dirname, 'test-browser');
 
-describe.skip('Browser client integration (install, build, start)', () => {
+describe('Browser client integration (install, build, start)', () => {
   it(`should install deps`, async function() {
     this.timeout(60 * 1000);
 
@@ -84,7 +84,7 @@ describe.skip('Browser client integration (install, build, start)', () => {
 
     // delete node modules first
     await new Promise(async (resolve, reject) => {
-      const serverIndex = path.join(appPath, '.build', 'server', 'index.js');
+      const serverIndex = path.join(appPath, '.build', 'server.js');
       const forked = fork(serverIndex, { cwd: appPath });
       let browser;
       let page;

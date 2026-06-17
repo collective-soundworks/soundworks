@@ -1,11 +1,11 @@
-# transpiled files and dependencies
+# build files and dependencies
 /node_modules
-# application build files
 .build
 .data
 
-# ignore all environement config files
-/config/env/*
+# ignore all environment config files except default
+/config/env-*
+!/config/env-default.yaml
 
 # junk files
 package-lock.json

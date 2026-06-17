@@ -1,5 +1,4 @@
 import { assert }  from 'chai';
-import merge from 'lodash/merge.js';
 import { delay } from '@ircam/sc-utils';
 
 import { Server, ServerContext, ServerPlugin } from '../../src/server/index.js';
@@ -168,7 +167,7 @@ describe('# Client', () => {
     });
 
     it(`[node only] should connect to localhost if serverAddress is empty`, async () => {
-      const emptyConfig = merge({}, config);
+      const emptyConfig = structuredClone(config);
       emptyConfig.env.serverAddress = '';
 
       const server = new Server(emptyConfig);

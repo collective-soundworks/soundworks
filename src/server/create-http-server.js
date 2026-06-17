@@ -102,6 +102,7 @@ Invalid certificate files, please check your:
 
         cert = result.cert;
         key = result.key;
+        console.log(cert, key);
         // store the generated certs to reuse on next start
         await server.db.set('httpsCert', cert);
         await server.db.set('httpsKey', key);

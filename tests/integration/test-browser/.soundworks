@@ -1,5 +1,7 @@
 {
-  "name": "browser-integration",
-  "eslint": true,
-  "language": "js"
+  "configFormat": "yaml",
+  "name": "test-browser",
+  "createVersion": "6.0.1",
+  "template": "js",
+  "templatePackage": "@soundworks/create"
 }

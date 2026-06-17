@@ -8,7 +8,6 @@ import { Server as HttpServer } from 'node:http';
 import { delay } from '@ircam/sc-utils';
 import { assert } from 'chai';
 import dotenv from 'dotenv';
-import _ from 'lodash';
 import tcpp from 'tcp-ping';
 
 import { Server, ServerContext, ServerPlugin } from '../../src/server/index.js';
@@ -40,7 +39,7 @@ describe('# Server', () => {
     });
 
     it(`should throw if no ClientDescription is defined in config`, () => {
-      const wrongConfig = _.merge({}, config);
+      const wrongConfig = structuredClone(config);
       wrongConfig.app.clients = {};
 
       let errored = false;
@@ -56,7 +55,7 @@ describe('# Server', () => {
     });
 
     it(`should throw if ClientDescription does not define a runtime`, () => {
-      const wrongConfig = _.merge({}, config);
+      const wrongConfig = structuredClone(config);
       wrongConfig.app.clients = { test: {} };
 
       let errored = false;
@@ -72,7 +71,7 @@ describe('# Server', () => {
     });
 
     it(`should throw if httpsInfos is not null or object`, () => {
-      const wrongConfig = _.merge({}, config);
+      const wrongConfig = structuredClone(config);
       wrongConfig.env.useHttps = true;
       wrongConfig.env.httpsInfos = 42;
 
@@ -89,7 +88,7 @@ describe('# Server', () => {
     });
 
     it(`should throw if httpsInfos is badly formatted`, () => {
-      const wrongConfig = _.merge({}, config);
+      const wrongConfig = structuredClone(config);
       wrongConfig.env.useHttps = true;
       wrongConfig.env.httpsInfos = { cert: 'dummy' };
 
@@ -106,7 +105,7 @@ describe('# Server', () => {
     });
 
     it(`should throw if httpsInfos.cert does not exists`, () => {
-      const wrongConfig = _.merge({}, config);
+      const wrongConfig = structuredClone(config);
       wrongConfig.env.useHttps = true;
       wrongConfig.env.httpsInfos = { cert: 'dummy.pem', key: 'dummy.pem' };
 
@@ -123,7 +122,7 @@ describe('# Server', () => {
     });
 
     it(`should throw if httpsInfos.key does not exists`, () => {
-      const wrongConfig = _.merge({}, config);
+      const wrongConfig = structuredClone(config);
       wrongConfig.env.useHttps = true;
       wrongConfig.env.httpsInfos = { cert: __filename, key: 'dummy.pem' };
 
@@ -168,7 +167,7 @@ describe('# Server', () => {
       const envBuffer = fs.readFileSync(envPathname);
       const env = dotenv.parse(envBuffer);
 
-      const wrongConfig = _.merge({}, config);
+      const wrongConfig = structuredClone(config);
       wrongConfig.env.useHttps = true;
       wrongConfig.env.httpsInfos = {
         cert: __filename, // this is an invalid cert file
@@ -198,7 +197,7 @@ describe('# Server', () => {
       const envBuffer = fs.readFileSync(envPathname);
       const env = dotenv.parse(envBuffer);
 
-      const wrongConfig = _.merge({}, config);
+      const wrongConfig = structuredClone(config);
       wrongConfig.env.useHttps = true;
       wrongConfig.env.httpsInfos = {
         cert: env.HTTPS_CERT,
@@ -218,7 +217,7 @@ describe('# Server', () => {
     });
 
     it(`should use self-signed certificates if both cert and key file are null`, async () => {
-      const selfSignedConfig = _.merge({}, config);
+      const selfSignedConfig = structuredClone(config);
       selfSignedConfig.env.useHttps = true;
       selfSignedConfig.env.httpsInfos = {
         cert: null,
@@ -238,7 +237,7 @@ describe('# Server', () => {
         this.skip();
       }
 
-      const selfSignedConfig = _.merge({}, config);
+      const selfSignedConfig = structuredClone(config);
       selfSignedConfig.env.useHttps = true;
 
       const server = new Server(selfSignedConfig);
@@ -269,7 +268,7 @@ describe('# Server', () => {
       const envBuffer = fs.readFileSync(envPathname);
       const env = dotenv.parse(envBuffer);
 
-      const httpsConfig = _.merge({}, config);
+      const httpsConfig = structuredClone(config);
       httpsConfig.env.useHttps = true;
       httpsConfig.env.httpsInfos = {
         key: env.HTTPS_KEY,
@@ -290,7 +289,7 @@ describe('# Server', () => {
         this.skip();
       }
 
-      const httpsConfig = _.merge({}, config);
+      const httpsConfig = structuredClone(config);
       httpsConfig.env.useHttps = true;
       httpsConfig.env.httpsInfos = null;
 
@@ -351,7 +350,7 @@ describe('# Server', () => {
         this.skip();
       }
 
-      const selfSignedConfig = _.merge({}, config);
+      const selfSignedConfig = structuredClone(config);
       selfSignedConfig.env.useHttps = true;
 
       const server = new Server(selfSignedConfig);
@@ -393,7 +392,7 @@ describe('# Server', () => {
       const envBuffer = fs.readFileSync(envPathname);
       const env = dotenv.parse(envBuffer);
 
-      const httpsConfigs = _.merge({}, config);
+      const httpsConfigs = structuredClone(config);
       httpsConfigs.env.useHttps = true;
       httpsConfigs.env.httpsInfos = {
         cert: env.HTTPS_CERT,
