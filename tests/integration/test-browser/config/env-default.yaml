@@ -1,5 +1,5 @@
 type: development
-port: 8000
+port: 8082
 serverAddress: ''
 useHttps: false
 httpsInfos:

@@ -10,7 +10,7 @@ import {
   styleText,
 } from 'node:util';
 
-import pem from 'pem';
+import selfsigned from 'selfsigned';
 
 async function createHttpsServer(server) {
   // https is more tricky
@@ -80,32 +80,21 @@ Invalid certificate files, please check your:
       throw err;
     }
   } else {
+
     // generate self signed certs or reused already existing ones
     let cert = await server.db.get('httpsCert');
     let key = await server.db.get('httpsKey');
 
     if (!cert || !key) {
       try {
-        const result = await new Promise((resolve, reject) => {
-          pem.createCertificate({ days: 1, selfSigned: true }, async (err, keys) => {
-            if (err) {
-              reject(err);
-              return;
-            }
-
-            resolve({
-              cert: keys.certificate,
-              key: keys.serviceKey,
-            });
-          });
-        });
+        const result = await selfsigned.generate(null);
 
         cert = result.cert;
-        key = result.key;
-        console.log(cert, key);
+        key = result.private;
+
         // store the generated certs to reuse on next start
-        await server.db.set('httpsCert', cert);
-        await server.db.set('httpsKey', key);
+        await server.db.set('httpsCert', cert); // -----BEGIN CERTIFICATE-----
+        await server.db.set('httpsKey', key); // -----BEGIN RSA PRIVATE KEY-----
       } catch (err) {
         console.error(err.stack);
         throw err;

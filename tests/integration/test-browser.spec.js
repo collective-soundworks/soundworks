@@ -10,7 +10,7 @@ const __dirname = path.dirname(__filename);
 
 const appPath = path.join(__dirname, 'test-browser');
 
-describe('Browser client integration (install, build, start)', () => {
+describe('## Browser client integration (install, build, start)', () => {
   it(`should install deps`, async function() {
     this.timeout(60 * 1000);
 
@@ -93,7 +93,7 @@ describe('Browser client integration (install, build, start)', () => {
         if (msg === 'soundworks:server:started') {
           browser = await puppeteer.launch();
           page = await browser.newPage();
-          await page.goto('http://127.0.0.1:8000');
+          await page.goto('http://127.0.0.1:8082');
         } else {
           try {
             const event = JSON.parse(msg);
