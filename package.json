@@ -68,7 +68,6 @@
     "keyv-file": "^5.3.3",
     "lodash": "^4.17.23",
     "pem": "^1.14.8",
-    "uuid": "^13.0.0",
     "ws": "^8.19.0"
   },
   "devDependencies": {
@@ -78,7 +77,7 @@
     "dotenv": "^17.3.1",
     "eslint": "^10.0.3",
     "jsdoc": "^4.0.5",
-    "mocha": "^11.7.5",
+    "mocha": "^11.7.6",
     "puppeteer": "^24.39.0",
     "tcp-ping": "^0.1.1",
     "typescript": "^6.0.2"

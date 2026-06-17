@@ -1,5 +1,9 @@
-import { counter } from '@ircam/sc-utils';
-import { v4 as uuid } from 'uuid';
+import crypto from 'node:crypto';
+
+import {
+  counter,
+} from '@ircam/sc-utils';
+
 
 const generateId = counter();
 
@@ -24,7 +28,7 @@ class ServerClient {
   constructor(role, socket) {
     this.#role = role;
     this.#id = generateId();
-    this.#uuid = uuid();
+    this.#uuid = crypto.randomUUID();
     this.#socket = socket;
 
     /**
