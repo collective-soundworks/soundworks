@@ -1,5 +1,9 @@
-import { counter, isString, isPlainObject, isFunction } from '@ircam/sc-utils';
-import clonedeep from 'lodash/cloneDeep.js';
+import {
+  counter,
+  isString,
+  isPlainObject,
+  isFunction,
+} from '@ircam/sc-utils';
 
 import BaseStateManager, {
   kStateManagerInit,
@@ -486,7 +490,7 @@ class ServerStateManager extends BaseStateManager {
       throw new TypeError(`Cannot execute 'defineClass' (${className}) on ServerStateManager: ${err.message}`);
     }
 
-    this.#classes.set(className, clonedeep(classDescription));
+    this.#classes.set(className, structuredClone(classDescription));
     // create hooks list
     this.#createHooksByClassName.set(className, new Set());
     this.#updateHooksByClassName.set(className, new Set());

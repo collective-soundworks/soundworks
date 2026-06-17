@@ -1,9 +1,9 @@
-import cloneDeep from 'lodash/cloneDeep.js';
-import { dequal } from 'dequal/lite';
-
 import {
   isPlainObject,
 } from '@ircam/sc-utils';
+import {
+  dequal,
+} from 'dequal/lite';
 
 export const sharedOptions = {
   nullable: false,
@@ -19,7 +19,7 @@ export const types = {
   boolean: {
     required: ['default'],
     get defaultOptions() {
-      return Object.assign(cloneDeep(sharedOptions), {});
+      return Object.assign(structuredClone(sharedOptions), {});
     },
     coerceFunction: (name, def, value) => {
       if (typeof value !== 'boolean') {
@@ -32,7 +32,7 @@ export const types = {
   string: {
     required: ['default'],
     get defaultOptions() {
-      return Object.assign(cloneDeep(sharedOptions), {});
+      return Object.assign(structuredClone(sharedOptions), {});
     },
     coerceFunction: (name, def, value) => {
       if (typeof value !== 'string') {
@@ -45,7 +45,7 @@ export const types = {
   integer: {
     required: ['default'],
     get defaultOptions() {
-      return Object.assign(cloneDeep(sharedOptions), {
+      return Object.assign(structuredClone(sharedOptions), {
         min: -Infinity,
         max: +Infinity,
       });
@@ -78,7 +78,7 @@ export const types = {
   float: {
     required: ['default'],
     get defaultOptions() {
-      return Object.assign(cloneDeep(sharedOptions), {
+      return Object.assign(structuredClone(sharedOptions), {
         min: -Infinity,
         max: +Infinity,
       });
@@ -111,7 +111,7 @@ export const types = {
   enum: {
     required: ['default', 'list'],
     get defaultOptions() {
-      return Object.assign(cloneDeep(sharedOptions), {});
+      return Object.assign(structuredClone(sharedOptions), {});
     },
     coerceFunction: (name, def, value) => {
       if (def.list.indexOf(value) === -1) {
@@ -125,7 +125,7 @@ export const types = {
   any: {
     required: ['default'],
     get defaultOptions() {
-      return Object.assign(cloneDeep(sharedOptions), {});
+      return Object.assign(structuredClone(sharedOptions), {});
     },
     coerceFunction: (name, def, value) => {
       // no check as it can have any type...
@@ -176,7 +176,7 @@ class ParameterBag {
   }
 
   static getFullDescription(description) {
-    const fullDescription = cloneDeep(description);
+    const fullDescription = structuredClone(description);
 
     for (let [name, def] of Object.entries(fullDescription)) {
       if (types[def.type].sanitizeDescription) {
@@ -213,7 +213,7 @@ class ParameterBag {
     ParameterBag.validateDescription(description);
 
     description = ParameterBag.getFullDescription(description);
-    initValues = cloneDeep(initValues);
+    initValues = structuredClone(initValues);
 
     // make sure initValues make sens according to the given description
     for (let name in initValues) {
@@ -308,7 +308,7 @@ class ParameterBag {
     if (this.#description[name].type === 'any') {
       // we return a deep copy of the object as we don't want the client code to
       // be able to modify our underlying data.
-      return cloneDeep(this.#values[name]);
+      return structuredClone(this.#values[name]);
     } else {
       return this.#values[name];
     }
@@ -377,7 +377,7 @@ class ParameterBag {
     // @see tests/common.state-manager.spec.js
     // 'should copy stored value for "any" type to have a predictable behavior'
     if (this.#description[name].type === 'any') {
-      value = cloneDeep(value);
+      value = structuredClone(value);
     }
 
     this.#values[name] = value;

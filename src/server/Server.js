@@ -10,7 +10,7 @@ import {
 } from '@ircam/sc-utils';
 import Keyv from 'keyv';
 import { KeyvFile } from 'keyv-file';
-import _ from 'lodash';
+import { defu } from 'defu';
 
 import gatedLogger from '../common/logs/gated-logger.js';
 import warnings from '../common/logs/warnings.js';
@@ -159,7 +159,7 @@ class Server {
       throw new TypeError(`Cannot construct 'Server': Parameter 1 must be an object`);
     }
 
-    config = _.merge({}, DEFAULT_CONFIG, config);
+    config = defu(config, DEFAULT_CONFIG);
 
     // ---------------------------------------------------------------------
     // Deprecation checks for config

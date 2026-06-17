@@ -1,4 +1,4 @@
-import merge from 'lodash/merge.js';
+import { defu } from 'defu';
 
 // Notes: we use Symbol.for because we need to override this in helpers test
 export const kBasePluginStatus = Symbol.for('soundworks:base-plugin-status');
@@ -171,7 +171,7 @@ class BasePlugin {
    * @see {@link BasePluginManager#onStateChange}
    */
   propagateStateChange(updates) {
-    this.state = merge(this.state, updates);
+    this.state = defu(updates, this.state);
     this.#onStateChangeCallbacks.forEach(callback => callback(this.state));
   }
 }
