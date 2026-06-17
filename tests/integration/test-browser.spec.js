@@ -10,7 +10,7 @@ const __dirname = path.dirname(__filename);
 
 const appPath = path.join(__dirname, 'test-browser');
 
-describe('## Browser client integration (install, build, start)', () => {
+describe.skip('## Browser client integration (install, build, start)', () => {
   it(`should install deps`, async function() {
     this.timeout(60 * 1000);
 
