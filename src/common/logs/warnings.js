@@ -33,4 +33,4 @@ dependencies on both your server and clients.
     const msg = `"${oldAPI}" has been removed (last supported version: ${lastSupportedVersion}), please use "${hint}" instead.`;
     throw new Error(msg);
   },
-}
+};
