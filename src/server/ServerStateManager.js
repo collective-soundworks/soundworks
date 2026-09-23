@@ -205,194 +205,11 @@ class ServerStateManager extends BaseStateManager {
 
     this[kStateManagerClientsByNodeId].set(nodeId, client);
 
-    // ---------------------------------------------
-    // CREATE
-    // ---------------------------------------------
-    client.transport.addListener(
-      CREATE_REQUEST,
-      async (reqId, className, initValues = {}) => {
-        if (this.#classes.has(className)) {
-          try {
-            const classDescription = this.#classes.get(className);
-            const stateId = generateStateId();
-            const instanceId = instanceIdGenerator();
-
-            // apply create hooks on init values
-            const hooks = this.#createHooksByClassName.get(className);
-            let hookAborted = false;
-
-            for (let hook of hooks.values()) {
-              const result = await hook(initValues);
-
-              if (result === null) { // explicit abort
-                hookAborted = true;
-                break;
-              } else if (result === undefined) { // implicit continue
-                continue;
-              } else {
-                initValues = result;
-              }
-            }
-
-            if (hookAborted) {
-              throw new Error(`A 'serverStateManagerCreateHook' explicitly aborted state creation of class '${className}' by returning 'null'`);
-            }
-
-            const state = new SharedStatePrivate(this, className, classDescription, stateId, initValues);
-            // attach client to the state as owner
-            const isOwner = true;
-            const filter = null;
-            state[kSharedStatePrivateAttachClient](instanceId, client, isOwner, filter);
-
-            this.#sharedStatePrivateById.set(stateId, state);
-
-            const currentValues = state.parameters.getValues();
-
-            client.transport.emit(
-              CREATE_RESPONSE,
-              reqId,
-              stateId,
-              instanceId,
-              className,
-              classDescription,
-              currentValues,
-            );
-
-            const isObservable = this.#isObservableState(state);
-
-            if (isObservable) {
-              this.#observers.forEach(observer => {
-                observer.transport.emit(OBSERVE_NOTIFICATION, className, stateId, nodeId);
-              });
-            }
-          } catch (err) {
-            const msg = `${err.message}`;
-            client.transport.emit(CREATE_ERROR, reqId, msg);
-          }
-        } else {
-          const msg = `Undefined SharedStateClassName '${className}'`;
-          client.transport.emit(CREATE_ERROR, reqId, msg);
-        }
-      },
-    );
-
-    // ---------------------------------------------
-    // ATTACH (when creator, is attached by default)
-    // ---------------------------------------------
-    client.transport.addListener(
-      ATTACH_REQUEST,
-      (reqId, className, stateId = null, filter = null) => {
-        if (this.#classes.has(className)) {
-          let state = null;
-
-          if (stateId !== null && this.#sharedStatePrivateById.has(stateId)) {
-            state = this.#sharedStatePrivateById.get(stateId);
-          } else if (stateId === null) {
-            // if no `stateId` given, we try to find the first state with the given
-            // `className` in the list, this allow a client to attach to a global
-            // state created by the server (or some persistent client) without
-            // having to know the `stateId` (e.g. some global state...)
-            for (let existingState of this.#sharedStatePrivateById.values()) {
-              if (existingState.className === className) {
-                state = existingState;
-                break;
-              }
-            }
-          }
-
-          if (state !== null) {
-            // @note - we use a unique remote id to allow a client to attach
-            // several times to the same state.
-            // i.e. same state -> several remote attach on the same node
-            const instanceId = instanceIdGenerator();
-            const isOwner = false;
-            const currentValues = state.parameters.getValues();
-            const classDescription = this.#classes.get(className);
-
-            // if filter given, check that all filter entries are valid class keys
-            // @todo - improve error reporting: report invalid filters
-            if (filter !== null) {
-              const keys = Object.keys(classDescription);
-              const isValid = filter.reduce((acc, key) => acc && keys.includes(key), true);
-
-              if (!isValid) {
-                const msg = `Invalid filter (${filter.join(', ')}) for class '${className}'`;
-                return client.transport.emit(ATTACH_ERROR, reqId, msg);
-              }
-            }
-
-            state[kSharedStatePrivateAttachClient](instanceId, client, isOwner, filter);
-
-            client.transport.emit(
-              ATTACH_RESPONSE,
-              reqId,
-              state.id,
-              instanceId,
-              className,
-              classDescription,
-              currentValues,
-              filter,
-            );
-
-          } else {
-            const msg = `No existing state for class "${className}" with stateId: "${stateId}"`;
-            client.transport.emit(ATTACH_ERROR, reqId, msg);
-          }
-        } else {
-          const msg = `Undefined SharedStateClassName '${className}'`;
-          client.transport.emit(ATTACH_ERROR, reqId, msg);
-        }
-      },
-    );
-
-    // ---------------------------------------------
-    // OBSERVE PEERS (be notified when a state is created, lazy)
-    // ---------------------------------------------
-    client.transport.addListener(OBSERVE_REQUEST, (reqId, observedClassName) => {
-      if (observedClassName === null || this.#classes.has(observedClassName)) {
-        const list = [];
-
-        this.#sharedStatePrivateById.forEach(state => {
-          const isObservable = this.#isObservableState(state);
-
-          if (isObservable) {
-            const { className, id, creatorId } = state;
-            list.push([className, id, creatorId]);
-          }
-        });
-
-        // add client to observers first because if some synchronous server side
-        // callback throws, the client would never be added to the list
-        this.#observers.add(client);
-
-        client.transport.emit(OBSERVE_RESPONSE, reqId, ...list);
-      } else {
-        const msg = `Undefined SharedStateClassName '${observedClassName}'`;
-        client.transport.emit(OBSERVE_ERROR, reqId, msg);
-      }
-    });
-
-    client.transport.addListener(UNOBSERVE_NOTIFICATION, () => {
-      this.#observers.delete(client);
-    });
-
-    // ---------------------------------------------
-    // GET CLASS DESCRIPTION
-    // ---------------------------------------------
-    client.transport.addListener(GET_CLASS_DESCRIPTION_REQUEST, (reqId, className) => {
-      if (this.#classes.has(className)) {
-        const classDescription = this.#classes.get(className);
-        client.transport.emit(
-          GET_CLASS_DESCRIPTION_RESPONSE,
-          reqId,
-          className,
-          classDescription,
-        );
-      } else {
-        const msg = `Undefined SharedStateClassName '${className}'`;
-        client.transport.emit(GET_CLASS_DESCRIPTION_ERROR, reqId, msg);
-      }
-    });
+    client.transport.addListener(CREATE_REQUEST, this.#onCreateRequest(client));
+    client.transport.addListener(ATTACH_REQUEST, this.#onAttachRequest(client));
+    client.transport.addListener(OBSERVE_REQUEST, this.#onObserveRequest(client));
+    client.transport.addListener(UNOBSERVE_NOTIFICATION, this.#onUnobserveNotification(client));
+    client.transport.addListener(GET_CLASS_DESCRIPTION_REQUEST, this.#onClassDescriptionRequest(client));
   }
 
   /**
@@ -448,6 +265,197 @@ class ServerStateManager extends BaseStateManager {
     return !PRIVATE_STATES.includes(state.className);
   }
 
+  #onCreateRequest = client => {
+    return async (reqId, className, initValues = {}) => {
+      if (!this.#classes.has(className)) {
+        const msg = `Undefined SharedStateClassName '${className}'`;
+        client.transport.emit(CREATE_ERROR, reqId, msg);
+        return;
+      }
+
+      try {
+        const classDescription = this.#classes.get(className);
+        const stateId = generateStateId();
+        const instanceId = instanceIdGenerator();
+
+        // apply create hooks on init values
+        const hooks = this.#createHooksByClassName.get(className);
+        let hookAborted = false;
+
+        for (let hook of hooks.values()) {
+          const result = await hook(initValues);
+
+          if (result === null) { // explicit abort
+            hookAborted = true;
+            break;
+          } else if (result === undefined) { // implicit continue
+            continue;
+          } else {
+            initValues = result;
+          }
+        }
+
+        if (hookAborted) {
+          throw new Error(`A 'serverStateManagerCreateHook' explicitly aborted state creation of class '${className}' by returning 'null'`);
+        }
+
+        const state = new SharedStatePrivate(this, className, classDescription, stateId, initValues);
+        // attach client to the state as owner
+        const isOwner = true;
+        const filter = null;
+        state[kSharedStatePrivateAttachClient](instanceId, client, isOwner, filter);
+
+        this.#sharedStatePrivateById.set(stateId, state);
+
+        const currentValues = state.parameters.getValues();
+
+        client.transport.emit(
+          CREATE_RESPONSE,
+          reqId,
+          stateId,
+          instanceId,
+          className,
+          classDescription,
+          currentValues,
+        );
+
+        const isObservable = this.#isObservableState(state);
+
+        if (isObservable) {
+          this.#observers.forEach(observer => {
+            observer.transport.emit(OBSERVE_NOTIFICATION, className, stateId, client.id);
+          });
+        }
+      } catch (err) {
+        client.transport.emit(CREATE_ERROR, reqId, err.message);
+      }
+    };
+  };
+
+  #onAttachRequest = client => {
+    return (reqId, className, stateId = null, filter = null) => {
+      if (!this.#classes.has(className)) {
+        const msg = `Undefined SharedStateClassName '${className}'`;
+        client.transport.emit(ATTACH_ERROR, reqId, msg);
+        return;
+      }
+
+      let state = null;
+
+      if (stateId !== null && this.#sharedStatePrivateById.has(stateId)) {
+        state = this.#sharedStatePrivateById.get(stateId);
+      } else if (stateId === null) {
+        // if no `stateId` given, we try to find the first state with the given
+        // `className` in the list, this allow a client to attach to a global
+        // state created by the server (or some persistent client) without
+        // having to know the `stateId` (e.g. some global state...)
+        for (let existingState of this.#sharedStatePrivateById.values()) {
+          if (existingState.className === className) {
+            state = existingState;
+            break;
+          }
+        }
+      }
+
+      if (state !== null) {
+        // @note - we use a unique remote id to allow a client to attach
+        // several times to the same state.
+        // i.e. same state -> several remote attach on the same node
+        const instanceId = instanceIdGenerator();
+        const isOwner = false;
+        const currentValues = state.parameters.getValues();
+        const classDescription = this.#classes.get(className);
+
+        // if filter given, check that all filter entries are valid class keys
+        // @todo - improve error reporting: report invalid filters
+        if (filter !== null) {
+          const keys = Object.keys(classDescription);
+          const isValid = filter.reduce((acc, key) => acc && keys.includes(key), true);
+
+          if (!isValid) {
+            const msg = `Invalid filter (${filter.join(', ')}) for class '${className}'`;
+            return client.transport.emit(ATTACH_ERROR, reqId, msg);
+          }
+        }
+
+        state[kSharedStatePrivateAttachClient](instanceId, client, isOwner, filter);
+
+        client.transport.emit(
+          ATTACH_RESPONSE,
+          reqId,
+          state.id,
+          instanceId,
+          className,
+          classDescription,
+          currentValues,
+          filter,
+        );
+
+      } else {
+        const msg = `No existing state for class "${className}" with stateId: "${stateId}"`;
+        client.transport.emit(ATTACH_ERROR, reqId, msg);
+      }
+    };
+  };
+
+  /**
+   * @todo - Something seems to be wrong here. If a client observe different classes,
+   * what happens if it unobserve one of them.
+   * Looks to be tested cf. `should properly behave with several observers`
+   * but the logic is not clear, the should be documented properly
+   */
+  #onObserveRequest = client => {
+    // Note that `observedClassName` is only handled client-side, this allows
+    // to have several observe in parallel without much bookkeeping at the price
+    // of not minimizing network load
+    return (reqId, observedClassName) => {
+      if (observedClassName === null || this.#classes.has(observedClassName)) {
+        const list = [];
+
+        this.#sharedStatePrivateById.forEach(state => {
+          const isObservable = this.#isObservableState(state);
+
+          if (isObservable) {
+            const { className, id, creatorId } = state;
+            list.push([className, id, creatorId]);
+          }
+        });
+
+        // Add client to observers first because if some synchronous server side
+        // callback throws, the client would never be added to the list
+        this.#observers.add(client);
+
+        client.transport.emit(OBSERVE_RESPONSE, reqId, ...list);
+      } else {
+        const msg = `Undefined SharedStateClassName '${observedClassName}'`;
+        client.transport.emit(OBSERVE_ERROR, reqId, msg);
+      }
+    };
+  };
+
+  #onUnobserveNotification = client => {
+    return () => this.#observers.delete(client);
+  }
+
+  #onClassDescriptionRequest = client => {
+    return (reqId, className) => {
+      if (!this.#classes.has(className)) {
+        const msg = `Undefined SharedStateClassName '${className}'`;
+        client.transport.emit(GET_CLASS_DESCRIPTION_ERROR, reqId, msg);
+        return;
+      }
+
+      const classDescription = this.#classes.get(className);
+
+      client.transport.emit(
+        GET_CLASS_DESCRIPTION_RESPONSE,
+        reqId,
+        className,
+        classDescription,
+      );
+    }
+  }
+
   /**
    * Define a generic class from which {@link SharedState}s can be created.
    *
@@ -498,14 +506,6 @@ class ServerStateManager extends BaseStateManager {
   }
 
   /**
-   * @deprecated Use {@link ServerStateManager#defineClass} instead.
-   */
-  registerSchema(className, classDescription) {
-    warnings.deprecated('ServerStateManager#registerSchema', 'ServerStateManager#defineClass', '4.0.0-alpha.29');
-    this.defineClass(className, classDescription);
-  }
-
-  /**
    * Delete a whole class of {@link SharedState}.
    *
    * All {@link SharedState} instances created from this class will be deleted
@@ -541,14 +541,6 @@ class ServerStateManager extends BaseStateManager {
     this.#createHooksByClassName.delete(className);
     this.#updateHooksByClassName.delete(className);
     this.#deleteHooksByClassName.delete(className);
-  }
-
-  /**
-   * @deprecated Use {@link ServerStateManager#defineClass} instead.
-   */
-  deleteSchema(className) {
-    warnings.deprecated('ServerStateManager#deleteSchema', 'ServerStateManager#deleteClass', '4.0.0-alpha.29');
-    this.deleteClass(className);
   }
 
   /**
@@ -717,6 +709,27 @@ class ServerStateManager extends BaseStateManager {
 
     return () => hooks.delete(updateHook);
   }
+
+  // ---------------------------------------------------------------------------
+  // DEPRECATED
+  // ---------------------------------------------------------------------------
+
+  /**
+   * @deprecated Use {@link ServerStateManager#defineClass} instead.
+   */
+  registerSchema(className, classDescription) {
+    warnings.deprecated('ServerStateManager#registerSchema', 'ServerStateManager#defineClass', '4.0.0-alpha.29');
+    this.defineClass(className, classDescription);
+  }
+
+  /**
+   * @deprecated Use {@link ServerStateManager#defineClass} instead.
+   */
+  deleteSchema(className) {
+    warnings.deprecated('ServerStateManager#deleteSchema', 'ServerStateManager#deleteClass', '4.0.0-alpha.29');
+    this.deleteClass(className);
+  }
+
 }
 
 export default ServerStateManager;

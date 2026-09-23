@@ -98,116 +98,18 @@ class BaseStateManager {
     const batchedTransport = new BatchedTransport(transport);
     this[kStateManagerClient] = { id, transport: batchedTransport };
 
-    // ---------------------------------------------
-    // CREATE
-    // ---------------------------------------------
-    this[kStateManagerClient].transport.addListener(
-      CREATE_RESPONSE,
-      (reqId, stateId, instanceId, className, classDescription, initValues) => {
-        const state = new SharedState({
-          manager: this,
-          className,
-          classDescription,
-          stateId,
-          instanceId,
-          isOwner: true,
-          initValues,
-          filter: null, // owner cannot filter parameters
-        });
+    this[kStateManagerClient].transport.addListener(CREATE_RESPONSE, this.#createResolve);
+    this[kStateManagerClient].transport.addListener(CREATE_ERROR, this.#createReject);
 
-        this.#statesById.set(state.id, state);
-        this.#promiseStore.resolve(reqId, state);
-      },
-    );
+    this[kStateManagerClient].transport.addListener(ATTACH_RESPONSE, this.#attachResolve);
+    this[kStateManagerClient].transport.addListener(ATTACH_ERROR, this.#attachReject);
 
-    this[kStateManagerClient].transport.addListener(CREATE_ERROR, (reqId, msg) => {
-      msg = `Cannot execute 'create' on BaseStateManager: ${msg}`;
-      this.#promiseStore.reject(reqId, msg);
-    });
+    this[kStateManagerClient].transport.addListener(OBSERVE_RESPONSE, this.#observeResolve);
+    this[kStateManagerClient].transport.addListener(OBSERVE_ERROR, this.#observeReject);
+    this[kStateManagerClient].transport.addListener(OBSERVE_NOTIFICATION, this.#observeNotify);
 
-    // ---------------------------------------------
-    // ATTACH (when creator, is attached by default)
-    // ---------------------------------------------
-    this[kStateManagerClient].transport.addListener(
-      ATTACH_RESPONSE,
-      (reqId, stateId, instanceId, className, classDescription, currentValues, filter) => {
-        const state = new SharedState({
-          manager: this,
-          className,
-          classDescription,
-          stateId,
-          instanceId,
-          isOwner: false,
-          initValues: currentValues,
-          filter,
-        });
-
-        this.#statesById.set(state.id, state);
-        this.#promiseStore.resolve(reqId, state);
-      },
-    );
-
-    this[kStateManagerClient].transport.addListener(ATTACH_ERROR, (reqId, msg) => {
-      msg = `Cannot execute 'attach' on BaseStateManager: ${msg}`;
-      this.#promiseStore.reject(reqId, msg);
-    });
-
-    // ---------------------------------------------
-    // OBSERVE PEERS (be notified when a state is created, lazy)
-    // ---------------------------------------------
-    this[kStateManagerClient].transport.addListener(OBSERVE_RESPONSE, async (reqId, ...list) => {
-      // retrieve the callback that have been stored in `observe()` to make sure
-      // we don't call another callback that may have been registered earlier.
-      const observeInfos = this.#observeRequestCallbacks.get(reqId);
-      const [observedClassName, callback, options] = observeInfos;
-      // move observeInfos from `_observeRequestCallbacks` to `_observeListeners`
-      // to guarantee future order of execution
-      this.#observeRequestCallbacks.delete(reqId);
-      this.#observeListeners.add(observeInfos);
-
-      const promises = list.map(([className, stateId, nodeId]) => {
-        const filter = this.#filterObserve(observedClassName, className, nodeId, options);
-
-        if (!filter) {
-          return callback(className, stateId, nodeId);
-        } else {
-          return Promise.resolve();
-        }
-      });
-
-      await Promise.all(promises);
-
-      const unsubscribe = () => {
-        this.#observeListeners.delete(observeInfos);
-        // no more listeners, we can stop receiving notifications from the server
-        if (this.#observeListeners.size === 0) {
-          this[kStateManagerClient].transport.emit(UNOBSERVE_NOTIFICATION);
-        }
-      };
-
-      this.#promiseStore.resolve(reqId, unsubscribe);
-    });
-
-    // Observe error occur if observed class name does not exists
-    this[kStateManagerClient].transport.addListener(OBSERVE_ERROR, (reqId, msg) => {
-      msg = `Cannot execute 'observe' on BaseStateManager: ${msg}`;
-      this.#observeRequestCallbacks.delete(reqId);
-      this.#promiseStore.reject(reqId, msg);
-    });
-
-    this[kStateManagerClient].transport.addListener(
-      OBSERVE_NOTIFICATION,
-      (className, stateId, nodeId) => {
-        this.#observeListeners.forEach(observeInfos => {
-          const [observedClassName, callback, options] = observeInfos;
-          const filter = this.#filterObserve(observedClassName, className, nodeId, options);
-
-          if (!filter) {
-            callback(className, stateId, nodeId);
-          }
-        });
-      },
-    );
+    this[kStateManagerClient].transport.addListener(GET_CLASS_DESCRIPTION_RESPONSE, this.#getClassDescriptionResolve);
+    this[kStateManagerClient].transport.addListener(GET_CLASS_DESCRIPTION_ERROR, this.#getClassDescriptionReject);
 
     // ---------------------------------------------
     // note 2025-05-05: caching of class descriptions has been removed because it
@@ -215,22 +117,6 @@ class BaseStateManager {
     // cf. `should be able to recreate a class with the same name` unit test
     // ---------------------------------------------
     // this[kStateManagerClient].transport.addListener(DELETE_SHARED_STATE_CLASS, _className => {});
-
-    // ---------------------------------------------
-    // Get class description
-    // ---------------------------------------------
-    this[kStateManagerClient].transport.addListener(
-      GET_CLASS_DESCRIPTION_RESPONSE,
-      (reqId, _className, classDescription) => {
-        const fullDescription = ParameterBag.getFullDescription(classDescription);
-        this.#promiseStore.resolve(reqId, fullDescription);
-      },
-    );
-
-    this[kStateManagerClient].transport.addListener(GET_CLASS_DESCRIPTION_ERROR, (reqId, msg) => {
-      msg = `Cannot execute 'getClassDescription' on BaseStateManager: ${msg}`;
-      this.#promiseStore.reject(reqId, msg);
-    });
 
     this.#status = 'inited';
   }
@@ -266,13 +152,15 @@ class BaseStateManager {
     return promise;
   }
 
-  /**
-   * @deprecated Use {@link BaseStateManager#getClassDescription} instead.
-   */
-  async getSchema(className) {
-    warnings.deprecated('BaseStateManager#getSchema', 'BaseStateManager#getClassDescription', '4.0.0-alpha.29');
-    return this.getClassDescription(className);
-  }
+  #getClassDescriptionResolve = (reqId, _className, classDescription) => {
+    const fullDescription = ParameterBag.getFullDescription(classDescription);
+    this.#promiseStore.resolve(reqId, fullDescription);
+  };
+
+  #getClassDescriptionReject = (reqId, msg) => {
+    msg = `Cannot execute 'getClassDescription' on BaseStateManager: ${msg}`;
+    this.#promiseStore.reject(reqId, msg);
+  };
 
   /**
    * Create a {@link SharedState} instance from a registered class.
@@ -293,6 +181,27 @@ class BaseStateManager {
 
     return promise;
   }
+
+  #createResolve = (reqId, stateId, instanceId, className, classDescription, initValues) => {
+    const state = new SharedState({
+      manager: this,
+      className,
+      classDescription,
+      stateId,
+      instanceId,
+      isOwner: true,
+      initValues,
+      filter: null, // owner cannot filter parameters
+    });
+
+    this.#statesById.set(state.id, state);
+    this.#promiseStore.resolve(reqId, state);
+  };
+
+  #createReject = (reqId, msg) => {
+    msg = `Cannot execute 'create' on BaseStateManager: ${msg}`;
+    this.#promiseStore.reject(reqId, msg);
+  };
 
   /**
    * Attach to an existing {@link SharedState} instance.
@@ -402,6 +311,27 @@ class BaseStateManager {
     return promise;
   }
 
+  #attachResolve = (reqId, stateId, instanceId, className, classDescription, currentValues, filter) => {
+    const state = new SharedState({
+      manager: this,
+      className,
+      classDescription,
+      stateId,
+      instanceId,
+      isOwner: false,
+      initValues: currentValues,
+      filter,
+    });
+
+    this.#statesById.set(state.id, state);
+    this.#promiseStore.resolve(reqId, state);
+  };
+
+  #attachReject = (reqId, msg) => {
+    msg = `Cannot execute 'attach' on BaseStateManager: ${msg}`;
+    this.#promiseStore.reject(reqId, msg);
+  };
+
   /**
    * Observe all the {@link SharedState} instances that are created on the network.
    *
@@ -437,7 +367,7 @@ class BaseStateManager {
    * @param {stateManagerObserveCallback} callback - Function to execute when a
    *   new {@link SharedState} is created on the network.
    * @param {object} options - Options.
-   * @param {boolean} options.excludeLocal=false - If set to true, exclude states
+   * @param {boolean} [options.excludeLocal=false] - If set to true, exclude states
    *   created by the same node from the collection.
    * @example
    * client.stateManager.observe(async (className, stateId) => {
@@ -456,7 +386,7 @@ class BaseStateManager {
    * @param {stateManagerObserveCallback} callback - Function to execute when a
    *   new {@link SharedState} is created on the network.
    * @param {object} options - Options.
-   * @param {boolean} options.excludeLocal=false - If set to true, exclude states
+   * @param {boolean} [options.excludeLocal=false] - If set to true, exclude states
    *   created by the same node from the collection.
    * @example
    * client.stateManager.observe('my-shared-state-class', async (className, stateId) => {
@@ -607,6 +537,56 @@ class BaseStateManager {
     return promise;
   }
 
+  #observeResolve = async (reqId, ...list) => {
+    // retrieve the callback that have been stored in `observe()` to make sure
+    // we don't call another callback that may have been registered earlier.
+    const observeInfos = this.#observeRequestCallbacks.get(reqId);
+    const [observedClassName, callback, options] = observeInfos;
+    // move observeInfos from `_observeRequestCallbacks` to `_observeListeners`
+    // to guarantee future order of execution
+    this.#observeRequestCallbacks.delete(reqId);
+    this.#observeListeners.add(observeInfos);
+
+    const promises = list.map(([className, stateId, nodeId]) => {
+      const filter = this.#filterObserve(observedClassName, className, nodeId, options);
+
+      if (!filter) {
+        return callback(className, stateId, nodeId);
+      } else {
+        return Promise.resolve();
+      }
+    });
+
+    await Promise.all(promises);
+
+    const unsubscribe = () => {
+      this.#observeListeners.delete(observeInfos);
+      // no more listeners, we can stop receiving notifications from the server
+      if (this.#observeListeners.size === 0) {
+        this[kStateManagerClient].transport.emit(UNOBSERVE_NOTIFICATION);
+      }
+    };
+
+    this.#promiseStore.resolve(reqId, unsubscribe);
+  };
+
+  #observeReject = (reqId, msg) => {
+    msg = `Cannot execute 'observe' on BaseStateManager: ${msg}`;
+    this.#observeRequestCallbacks.delete(reqId);
+    this.#promiseStore.reject(reqId, msg);
+  };
+
+  #observeNotify = (className, stateId, nodeId) => {
+    this.#observeListeners.forEach(observeInfos => {
+      const [observedClassName, callback, options] = observeInfos;
+      const filter = this.#filterObserve(observedClassName, className, nodeId, options);
+
+      if (!filter) {
+        callback(className, stateId, nodeId);
+      }
+    });
+  };
+
   /**
    * Returns a collection of all the states created from a given shared state class.
    *
@@ -724,6 +704,17 @@ class BaseStateManager {
     }
 
     return collection;
+  }
+
+  // ---------------------------------------------------------------------------
+  // DEPRECATED
+  // ---------------------------------------------------------------------------
+  /**
+   * @deprecated Use {@link BaseStateManager#getClassDescription} instead.
+   */
+  async getSchema(className) {
+    warnings.deprecated('BaseStateManager#getSchema', 'BaseStateManager#getClassDescription', '4.0.0-alpha.29');
+    return this.getClassDescription(className);
   }
 }
 
