@@ -44,6 +44,8 @@ export const GET_CLASS_DESCRIPTION_REQUEST = 's:s:req';
 export const GET_CLASS_DESCRIPTION_RESPONSE = 's:s:res';
 export const GET_CLASS_DESCRIPTION_ERROR = 's:s:err';
 
+export const HAS_SIBLINGS_NOTIFICATION = 's:hs:not';
+
 // context channels
 export const CONTEXT_ENTER_REQUEST = 'c:en:req';
 export const CONTEXT_ENTER_RESPONSE = 'c:en:res';

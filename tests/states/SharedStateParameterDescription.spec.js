@@ -684,8 +684,50 @@ describe('# SharedStateParameterDescription', () => {
       assert.isFalse(errored);
     });
 
-    it.skip('[acknowledge=false] mixed with regular params', () => {
+    it('[acknowledge=false] does not propagate on the network when no siblings attached', async () => {
+      const localConfig = structuredClone(config);
+      localConfig.env.port = 8082;
+      const server = new Server(localConfig);
+      await server.start();
 
+      server.stateManager.defineClass('acknowledge-test', {
+        acknowledge: {
+          type: 'integer',
+          default: 0,
+          acknowledge: false,
+        },
+      });
+
+      const client = new Client({ role: 'test', ...localConfig });
+      await client.start();
+
+      let networkPropagated = false;
+      let locallyPropagated = false;
+
+      server.sockets.forEach(socket => {
+        socket.addListener('message', (msg) => {
+          let [_, args] = JSON.parse(msg); // batch transport
+
+          args.forEach(([value]) => {
+            const [chan, _] = value;
+            if (chan.startsWith('s:u:req')) {
+              networkPropagated = true;
+            }
+          });
+        });
+      });
+
+      const state = await client.stateManager.create('acknowledge-test');
+      state.onUpdate(updates => locallyPropagated = true);
+
+      await state.set({ acknowledge: 42 });
+      await delay(100);
+
+      assert.equal(networkPropagated, false, 'should not propagate to network');
+      assert.equal(locallyPropagated, true, 'should propagate locally');
+
+      await client.stop();
+      await server.stop();
     });
   });
 

@@ -32,6 +32,37 @@ describe('# SharedState', () => {
     server.stop();
   });
 
+  describe(`## hasSiblings`, () => {
+    it(`should flag if an attached state exists on the net work`, async () => {
+      const owned = await server.stateManager.create('a');
+      assert.equal(owned.hasSiblings, false);
+
+      const attached = await client.stateManager.attach('a');
+      assert.equal(attached.hasSiblings, true);
+      await delay(50); // order is not guaranteed
+      assert.equal(owned.hasSiblings, true);
+
+      await attached.detach();
+      await delay(50); // order is not guaranteed
+      assert.equal(owned.hasSiblings, false);
+    });
+
+    it(`should flag attached as false if owner deleted`, async () => {
+      const owned = await server.stateManager.create('a');
+      assert.equal(owned.hasSiblings, false);
+
+      const attached = await client.stateManager.attach('a');
+      assert.equal(attached.hasSiblings, true);
+      await delay(50); // order is not guaranteed
+      assert.equal(owned.hasSiblings, true);
+
+      await owned.delete();
+      await delay(50); // order is not guaranteed
+      assert.equal(attached.hasSiblings, false);
+      assert.equal(owned.hasSiblings, false);
+    });
+  });
+
   describe('## async set(updates) => updates', () => {
     it('should throw if first argument is not an object', async () => {
       const a = await server.stateManager.create('a');

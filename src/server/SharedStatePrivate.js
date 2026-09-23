@@ -9,6 +9,7 @@ import {
   UPDATE_RESPONSE,
   UPDATE_ABORT,
   UPDATE_NOTIFICATION,
+  HAS_SIBLINGS_NOTIFICATION,
 } from '../common/constants.js';
 import {
   kServerStateManagerDeletePrivateState,
@@ -297,6 +298,8 @@ class SharedStatePrivate {
         this[kSharedStatePrivateDetachClient](instanceId, client);
         client.transport.emit(`${DETACH_RESPONSE}-${this.id}-${instanceId}`, reqId);
       });
+
+      this.#updateHasSiblings();
     }
   }
 
@@ -306,6 +309,22 @@ class SharedStatePrivate {
     client.transport.removeAllListeners(`${UPDATE_REQUEST}-${this.id}-${instanceId}`);
     client.transport.removeAllListeners(`${DELETE_REQUEST}-${this.id}-${instanceId}`);
     client.transport.removeAllListeners(`${DETACH_REQUEST}-${this.id}-${instanceId}`);
+
+    this.#updateHasSiblings();
+  }
+
+  /**
+   * Update hasSiblings property on owner
+   */
+  #updateHasSiblings() {
+    for (let [instanceId, clientInfos] of this.attachedClients) {
+      const { client, isOwner } = clientInfos;
+
+      if (isOwner) {
+        const hasSiblings = this.attachedClients.size > 1;
+        client.transport.emit(`${HAS_SIBLINGS_NOTIFICATION}-${this.id}-${instanceId}`, hasSiblings);
+      }
+    }
   }
 }
 

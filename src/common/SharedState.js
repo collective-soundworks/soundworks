@@ -14,6 +14,7 @@ import {
   UPDATE_RESPONSE,
   UPDATE_ABORT,
   UPDATE_NOTIFICATION,
+  HAS_SIBLINGS_NOTIFICATION,
 } from './constants.js';
 
 import {
@@ -108,6 +109,8 @@ class SharedState {
   #filter = null;
   // true is the state has been detached or deleted
   #detached = false;
+  // only valid for owners
+  #hasSiblings = false;
   #parameters = null;
   #onUpdateCallbacks = new Set();
   #onDetachCallbacks = new Set();
@@ -182,6 +185,8 @@ class SharedState {
     // state has been deleted by its creator or the class has been deleted
     // ---------------------------------------------
     this.#client.transport.addListener(`${DELETE_NOTIFICATION}-${this.#id}-${this.#instanceId}`, async () => {
+      this.#detached = true;
+
       this.#manager[kStateManagerDeleteState](this.#id);
       this.#clearTransport();
 
@@ -237,6 +242,10 @@ class SharedState {
 
       this.#client.transport.addListener(`${DELETE_ERROR}-${this.#id}`, (reqId, msg) => {
         this[kSharedStatePromiseStore].reject(reqId, msg);
+      });
+
+      this.#client.transport.addListener(`${HAS_SIBLINGS_NOTIFICATION}-${this.#id}-${this.#instanceId}`, hasSiblings => {
+        this.#hasSiblings = hasSiblings;
       });
 
     } else {
@@ -301,6 +310,24 @@ class SharedState {
    */
   get isOwner() {
     return this.#isOwner;
+  }
+
+  /**
+   * Indicates if the node as siblings, i.e. if several versions of the same state
+   * exists on the network
+   * Always return true if the state instance is attached
+   * @type {Boolean}
+   */
+  get hasSiblings() {
+    if (this.#detached) {
+      return false;
+    }
+
+    if (!this.isOwner) {
+      return true;
+    }
+
+    return this.#hasSiblings;
   }
 
   #clearTransport() {
@@ -551,11 +578,14 @@ class SharedState {
         hasLocalParam = true;
         locallyResolvedParam[name] = this.#parameters.get(name);
       } else if (acknowledge === false) {
-        // these go to the network but don't receive an ack
-        // they are both locally forwarded and network propagated then
+        // when acknowledge is false, e.g. streaming values, values are
+        // propagated on the network only if hasSiblings is true
         hasNonAcknowledgedParams = true;
         locallyResolvedParam[name] = this.#parameters.get(name);
-        networkPropagatedParams[name] = updates[name];
+        // propagate only if there is an attached state somewhere
+        if (this.hasSiblings) {
+          networkPropagatedParams[name] = updates[name];
+        }
       } else {
         // note that immediate params are shared and acknowledged
         hasRegularSharedParam = true;
@@ -580,7 +610,9 @@ class SharedState {
       this[kSharedStatePromiseStore].associateResolveData(reqId, locallyResolvedParam);
     }
 
-    this.#client.transport.emit(`${UPDATE_REQUEST}-${this.#id}-${this.#instanceId}`, reqId, networkPropagatedParams);
+    if (Object.keys(networkPropagatedParams).length > 0) {
+      this.#client.transport.emit(`${UPDATE_REQUEST}-${this.#id}-${this.#instanceId}`, reqId, networkPropagatedParams);
+    }
 
     // if we don't have regular shared params, we can resolve now
     if (!hasRegularSharedParam) {
