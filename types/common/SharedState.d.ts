@@ -109,6 +109,13 @@ declare class SharedState {
      */
     get isOwner(): boolean;
     /**
+     * Indicates if the node as siblings, i.e. if several versions of the same state
+     * exists on the network
+     * Always return true if the state instance is attached
+     * @type {Boolean}
+     */
+    get hasSiblings(): boolean;
+    /**
      * Return the underlying {@link SharedStateClassDescription} or the
      * {@link SharedStateParameterDescription} if `paramName` is given.
      *
