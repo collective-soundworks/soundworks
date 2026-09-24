@@ -67,21 +67,6 @@ class BaseStateManager {
   }
 
   /** @private */
-  #filterObserve(observedClassName, className, creatorId, options) {
-    let filter = true;
-
-    if (observedClassName === null || observedClassName === className) {
-      filter = false;
-    }
-    // filter state created by client if excludeLocal is true
-    if (options.excludeLocal === true && creatorId === this[kStateManagerClient].id) {
-      filter = true;
-    }
-
-    return filter;
-  }
-
-  /** @private */
   [kStateManagerDeleteState](stateId) {
     this.#statesById.delete(stateId);
   }
@@ -98,18 +83,18 @@ class BaseStateManager {
     const batchedTransport = new BatchedTransport(transport);
     this[kStateManagerClient] = { id, transport: batchedTransport };
 
-    this[kStateManagerClient].transport.addListener(CREATE_RESPONSE, this.#createResolve);
-    this[kStateManagerClient].transport.addListener(CREATE_ERROR, this.#createReject);
+    this[kStateManagerClient].transport.addListener(CREATE_RESPONSE, this.#onCreateRequest);
+    this[kStateManagerClient].transport.addListener(CREATE_ERROR, this.#onCreateError);
 
-    this[kStateManagerClient].transport.addListener(ATTACH_RESPONSE, this.#attachResolve);
-    this[kStateManagerClient].transport.addListener(ATTACH_ERROR, this.#attachReject);
+    this[kStateManagerClient].transport.addListener(ATTACH_RESPONSE, this.#onAttachResponse);
+    this[kStateManagerClient].transport.addListener(ATTACH_ERROR, this.#onAttachError);
 
-    this[kStateManagerClient].transport.addListener(OBSERVE_RESPONSE, this.#observeResolve);
-    this[kStateManagerClient].transport.addListener(OBSERVE_ERROR, this.#observeReject);
-    this[kStateManagerClient].transport.addListener(OBSERVE_NOTIFICATION, this.#observeNotify);
+    this[kStateManagerClient].transport.addListener(OBSERVE_RESPONSE, this.#onObserveResponse);
+    this[kStateManagerClient].transport.addListener(OBSERVE_ERROR, this.#onObserveError);
+    this[kStateManagerClient].transport.addListener(OBSERVE_NOTIFICATION, this.#onObserveNotification);
 
-    this[kStateManagerClient].transport.addListener(GET_CLASS_DESCRIPTION_RESPONSE, this.#getClassDescriptionResolve);
-    this[kStateManagerClient].transport.addListener(GET_CLASS_DESCRIPTION_ERROR, this.#getClassDescriptionReject);
+    this[kStateManagerClient].transport.addListener(GET_CLASS_DESCRIPTION_RESPONSE, this.#onGetClassDescriptionResponse);
+    this[kStateManagerClient].transport.addListener(GET_CLASS_DESCRIPTION_ERROR, this.#onGetClassDescriptionError);
 
     // ---------------------------------------------
     // note 2025-05-05: caching of class descriptions has been removed because it
@@ -152,12 +137,12 @@ class BaseStateManager {
     return promise;
   }
 
-  #getClassDescriptionResolve = (reqId, _className, classDescription) => {
+  #onGetClassDescriptionResponse = (reqId, _className, classDescription) => {
     const fullDescription = ParameterBag.getFullDescription(classDescription);
     this.#promiseStore.resolve(reqId, fullDescription);
   };
 
-  #getClassDescriptionReject = (reqId, msg) => {
+  #onGetClassDescriptionError = (reqId, msg) => {
     msg = `Cannot execute 'getClassDescription' on BaseStateManager: ${msg}`;
     this.#promiseStore.reject(reqId, msg);
   };
@@ -182,7 +167,7 @@ class BaseStateManager {
     return promise;
   }
 
-  #createResolve = (reqId, stateId, instanceId, className, classDescription, initValues) => {
+  #onCreateRequest = (reqId, stateId, instanceId, className, classDescription, initValues) => {
     const state = new SharedState({
       manager: this,
       className,
@@ -198,7 +183,7 @@ class BaseStateManager {
     this.#promiseStore.resolve(reqId, state);
   };
 
-  #createReject = (reqId, msg) => {
+  #onCreateError = (reqId, msg) => {
     msg = `Cannot execute 'create' on BaseStateManager: ${msg}`;
     this.#promiseStore.reject(reqId, msg);
   };
@@ -311,7 +296,7 @@ class BaseStateManager {
     return promise;
   }
 
-  #attachResolve = (reqId, stateId, instanceId, className, classDescription, currentValues, filter) => {
+  #onAttachResponse = (reqId, stateId, instanceId, className, classDescription, currentValues, filter) => {
     const state = new SharedState({
       manager: this,
       className,
@@ -327,7 +312,7 @@ class BaseStateManager {
     this.#promiseStore.resolve(reqId, state);
   };
 
-  #attachReject = (reqId, msg) => {
+  #onAttachError = (reqId, msg) => {
     msg = `Cannot execute 'attach' on BaseStateManager: ${msg}`;
     this.#promiseStore.reject(reqId, msg);
   };
@@ -537,7 +522,23 @@ class BaseStateManager {
     return promise;
   }
 
-  #observeResolve = async (reqId, ...list) => {
+  /** @private */
+  #filterObserve(observedClassName, className, ownerId, options) {
+    let filter = true;
+
+    if (observedClassName === null || observedClassName === className) {
+      filter = false;
+    }
+    // filter states created by this client if excludeLocal is true
+    if (options.excludeLocal === true && ownerId === this[kStateManagerClient].id) {
+      filter = true;
+    }
+
+    return filter;
+  }
+
+  /** @private */
+  #onObserveResponse = async (reqId, ...list) => {
     // retrieve the callback that have been stored in `observe()` to make sure
     // we don't call another callback that may have been registered earlier.
     const observeInfos = this.#observeRequestCallbacks.get(reqId);
@@ -547,11 +548,11 @@ class BaseStateManager {
     this.#observeRequestCallbacks.delete(reqId);
     this.#observeListeners.add(observeInfos);
 
-    const promises = list.map(([className, stateId, nodeId]) => {
-      const filter = this.#filterObserve(observedClassName, className, nodeId, options);
+    const promises = list.map(([className, stateId, ownerId]) => {
+      const filter = this.#filterObserve(observedClassName, className, ownerId, options);
 
       if (!filter) {
-        return callback(className, stateId, nodeId);
+        return callback(className, stateId, ownerId);
       } else {
         return Promise.resolve();
       }
@@ -570,19 +571,21 @@ class BaseStateManager {
     this.#promiseStore.resolve(reqId, unsubscribe);
   };
 
-  #observeReject = (reqId, msg) => {
+  /** @private */
+  #onObserveError = (reqId, msg) => {
     msg = `Cannot execute 'observe' on BaseStateManager: ${msg}`;
     this.#observeRequestCallbacks.delete(reqId);
     this.#promiseStore.reject(reqId, msg);
   };
 
-  #observeNotify = (className, stateId, nodeId) => {
+  /** @private */
+  #onObserveNotification = (className, stateId, ownerId) => {
     this.#observeListeners.forEach(observeInfos => {
       const [observedClassName, callback, options] = observeInfos;
-      const filter = this.#filterObserve(observedClassName, className, nodeId, options);
+      const filter = this.#filterObserve(observedClassName, className, ownerId, options);
 
       if (!filter) {
-        callback(className, stateId, nodeId);
+        callback(className, stateId, ownerId);
       }
     });
   };

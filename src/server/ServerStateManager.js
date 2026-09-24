@@ -213,9 +213,9 @@ class ServerStateManager extends BaseStateManager {
   }
 
   /**
-   * Remove a client from the manager. Clean all created or attached states.
+   * Remove a client from the manager and clean all related states.
    *
-   * This is automatically handled by the {@link Server} when a client disconnects.
+   * This method is automatically called by the {@link Server} when a client disconnects.
    *
    * @param {number} nodeId - Id of the client node, as given in
    *  {@link client.StateManager}
@@ -223,41 +223,36 @@ class ServerStateManager extends BaseStateManager {
    * @private
    */
   [kServerStateManagerRemoveClient](nodeId) {
-    for (let [_id, state] of this.#sharedStatePrivateById.entries()) {
-      let deleteState = false;
-
-      // define if the client is the creator of the state, in which case
-      // everybody must delete it
-      for (let [instanceId, clientInfos] of state.attachedClients) {
-        const attachedClient = clientInfos.client;
-
-        if (nodeId === attachedClient.id && instanceId === state.creatorInstanceId) {
-          deleteState = true;
-        }
-      }
-
-      for (let [instanceId, clientInfos] of state.attachedClients) {
-        const attachedClient = clientInfos.client;
-
-        if (nodeId === attachedClient.id) {
-          state[kSharedStatePrivateDetachClient](instanceId, attachedClient);
-        }
-
-        if (deleteState) {
-          if (instanceId !== state.creatorInstanceId) {
-            // send notification to other attached nodes
-            attachedClient.transport.emit(`${DELETE_NOTIFICATION}-${state.id}-${instanceId}`);
-          }
-
-          this[kServerStateManagerDeletePrivateState](state);
-        }
-      }
-    }
-
-    // if is an observer, delete it
+    // remove from observers
     const client = this[kStateManagerClientsByNodeId].get(nodeId);
     this.#observers.delete(client);
+    // delete from client list
     this[kStateManagerClientsByNodeId].delete(nodeId);
+
+    // loop through all states to clean them
+    for (let state of this.#sharedStatePrivateById.values()) {
+      let shouldDelete = nodeId === state.ownerId;
+
+      // loop through clients of this state
+      for (let [instanceId, clientInfos] of state.attachedClients) {
+        const { client, isOwner } = clientInfos;
+
+        // if client is the disconnected one, remove from the state known clients
+        if (nodeId === client.id) {
+          state[kSharedStatePrivateDetachClient](instanceId, client);
+        }
+
+        // notify client of state deletion if not owner
+        if (shouldDelete && !isOwner) {
+          client.transport.emit(`${DELETE_NOTIFICATION}-${state.id}-${instanceId}`);
+        }
+      }
+
+      if (shouldDelete) {
+        // clean private state
+        this[kServerStateManagerDeletePrivateState](state);
+      }
+    }
   }
 
   #isObservableState(state) {
@@ -416,8 +411,8 @@ class ServerStateManager extends BaseStateManager {
           const isObservable = this.#isObservableState(state);
 
           if (isObservable) {
-            const { className, id, creatorId } = state;
-            list.push([className, id, creatorId]);
+            const { className, id, ownerId } = state;
+            list.push([className, id, ownerId]);
           }
         });
 

@@ -107,9 +107,7 @@ class SharedState {
   #client = null;
   #manager = null;
   #filter = null;
-  // true is the state has been detached or deleted
   #detached = false;
-  // only valid for owners
   #hasSiblings = false;
   #parameters = null;
   #onUpdateCallbacks = new Set();
@@ -208,7 +206,6 @@ class SharedState {
       this.#onDeleteCallbacks.clear();
       this[kSharedStatePromiseStore].flush();
     });
-
 
     if (this.#isOwner) {
       // ---------------------------------------------
@@ -418,14 +415,6 @@ class SharedState {
     } catch (err) {
       throw new ReferenceError(`Cannot execute 'getDescription' on SharedState: ${err.message}`);
     }
-  }
-
-  /**
-   * @deprecated Use {@link SharedState#getDescription} instead.
-   */
-  getSchema(paramName = null) {
-    warnings.deprecated('SharedState#getSchema', 'SharedState#getDescription', '4.0.0-alpha.29');
-    return this.getDescription(paramName);
   }
 
   /**
@@ -879,6 +868,19 @@ class SharedState {
     this.#onDeleteCallbacks.add(callback);
     return () => this.#onDeleteCallbacks.delete(callback);
   }
+
+  // ---------------------------------------------------------------------------
+  // DEPRECATED
+  // ---------------------------------------------------------------------------
+
+  /**
+   * @deprecated Use {@link SharedState#getDescription} instead.
+   */
+  getSchema(paramName = null) {
+    warnings.deprecated('SharedState#getSchema', 'SharedState#getDescription', '4.0.0-alpha.29');
+    return this.getDescription(paramName);
+  }
+
 }
 
 export default SharedState;
