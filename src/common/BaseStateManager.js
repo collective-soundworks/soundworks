@@ -23,7 +23,6 @@ import {
   OBSERVE_ERROR,
   OBSERVE_NOTIFICATION,
   UNOBSERVE_NOTIFICATION,
-  // DELETE_SHARED_STATE_CLASS,
   GET_CLASS_DESCRIPTION_REQUEST,
   GET_CLASS_DESCRIPTION_RESPONSE,
   GET_CLASS_DESCRIPTION_ERROR,
@@ -32,8 +31,10 @@ import warnings from './logs/warnings.js';
 
 export const kStateManagerInit = Symbol('soundworks:state-manager-init');
 export const kStateManagerDeleteState = Symbol('soundworks:state-manager-delete-state');
+export const kPendingSharedStateConstructionData = Symbol('soundworks:state-manager-pending-shared-state-construction-data');
 // for testing purposes
 export const kStateManagerClient = Symbol('soundworks:state-manager-client');
+
 
 /**
  * Callback executed when a state is created on the network.
@@ -83,7 +84,7 @@ class BaseStateManager {
     const batchedTransport = new BatchedTransport(transport);
     this[kStateManagerClient] = { id, transport: batchedTransport };
 
-    this[kStateManagerClient].transport.addListener(CREATE_RESPONSE, this.#onCreateRequest);
+    this[kStateManagerClient].transport.addListener(CREATE_RESPONSE, this.#onCreateResponse);
     this[kStateManagerClient].transport.addListener(CREATE_ERROR, this.#onCreateError);
 
     this[kStateManagerClient].transport.addListener(ATTACH_RESPONSE, this.#onAttachResponse);
@@ -104,6 +105,29 @@ class BaseStateManager {
     // this[kStateManagerClient].transport.addListener(DELETE_SHARED_STATE_CLASS, _className => {});
 
     this.#status = 'inited';
+  }
+
+  // This pattern allows to have a clean SharedState constructor signature for  which
+  // which will provide a cleaner user facing API when derived.
+  // cf. instantiation pattern from AudioWorkletProcessor
+  // <https://webaudio.github.io/web-audio-api/#AudioWorkletProcessor-instantiation>
+  #buildSharedState(options) {
+    globalThis[kPendingSharedStateConstructionData] = {
+      manager: this,
+      className: options.className,
+      classDescription: options.classDescription,
+      stateId: options.stateId,
+      instanceId: options.instanceId,
+      isOwner: options.isOwner,
+      initValues: options.initValues,
+      filter: options.filter,
+    };
+
+    const state = new SharedState();
+    // cleanup global scope
+    delete globalThis[kPendingSharedStateConstructionData];
+
+    return state;
   }
 
   /**
@@ -167,9 +191,8 @@ class BaseStateManager {
     return promise;
   }
 
-  #onCreateRequest = (reqId, stateId, instanceId, className, classDescription, initValues) => {
-    const state = new SharedState({
-      manager: this,
+  #onCreateResponse = (reqId, stateId, instanceId, className, classDescription, initValues) => {
+    const state = this.#buildSharedState({
       className,
       classDescription,
       stateId,
@@ -297,7 +320,7 @@ class BaseStateManager {
   }
 
   #onAttachResponse = (reqId, stateId, instanceId, className, classDescription, currentValues, filter) => {
-    const state = new SharedState({
+    const state = this.#buildSharedState({
       manager: this,
       className,
       classDescription,

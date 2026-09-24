@@ -20,6 +20,7 @@ import {
 import {
   kStateManagerClient,
   kStateManagerDeleteState,
+  kPendingSharedStateConstructionData,
 } from './BaseStateManager.js';
 
 import warnings from './logs/warnings.js';
@@ -114,26 +115,22 @@ class SharedState {
   #onDetachCallbacks = new Set();
   #onDeleteCallbacks = new Set();
 
-  constructor({
-    stateId,
-    instanceId,
-    className,
-    classDescription,
-    isOwner,
-    manager,
-    initValues,
-    filter,
-  }) {
-    this.#manager = manager;
-    this.#client = manager[kStateManagerClient];
-    this.#className = className;
-    this.#id = stateId;
-    this.#instanceId = instanceId;
-    this.#isOwner = isOwner; // may be any node
-    this.#filter = filter;
+  constructor() {
+    // cf. BaseStateManager#buildSharedState to get the whole pattern
+    // rationale is to have a clean constructor API for derived classes
+    this.#manager = globalThis[kPendingSharedStateConstructionData].manager;
+    this.#client = globalThis[kPendingSharedStateConstructionData].manager[kStateManagerClient];
+    this.#className = globalThis[kPendingSharedStateConstructionData].className;
+    this.#id = globalThis[kPendingSharedStateConstructionData].stateId;
+    this.#instanceId =globalThis[kPendingSharedStateConstructionData]. instanceId;
+    this.#isOwner = globalThis[kPendingSharedStateConstructionData].isOwner; // may be any node
+    this.#filter = globalThis[kPendingSharedStateConstructionData].filter;
 
     try {
-      this.#parameters = new ParameterBag(classDescription, initValues);
+      this.#parameters = new ParameterBag(
+        globalThis[kPendingSharedStateConstructionData].classDescription,
+        globalThis[kPendingSharedStateConstructionData].initValues,
+      );
     } catch (err) {
       throw new Error(`Cannot construct 'SharedState': ${err.message}`);
     }
@@ -156,8 +153,10 @@ class SharedState {
     }
   }
 
-  #clearTransport() {
-    // remove listeners
+  #cleanup() {
+    this.#detached = true;
+    this.#manager[kStateManagerDeleteState](this.#id);
+
     this.#client.transport.removeAllListeners(`${UPDATE_RESPONSE}-${this.#id}-${this.#instanceId}`);
     this.#client.transport.removeAllListeners(`${UPDATE_NOTIFICATION}-${this.#id}-${this.#instanceId}`);
     this.#client.transport.removeAllListeners(`${UPDATE_ABORT}-${this.#id}-${this.#instanceId}`);
@@ -188,8 +187,7 @@ class SharedState {
   };
 
   #onDetachResponse = async (reqId) => {
-    this.#manager[kStateManagerDeleteState](this.#id);
-    this.#clearTransport();
+    this.#cleanup();
 
     for (let callback of this.#onDetachCallbacks) {
       try {
@@ -213,8 +211,7 @@ class SharedState {
   };
 
   #onDeleteResponse = async (reqId) => {
-    this.#manager[kStateManagerDeleteState](this.#id);
-    this.#clearTransport();
+    this.#cleanup();
 
     for (let callback of this.#onDetachCallbacks) {
       try {
@@ -243,10 +240,7 @@ class SharedState {
   };
 
   #onDeleteNotification = async () => {
-    this.#detached = true;
-
-    this.#manager[kStateManagerDeleteState](this.#id);
-    this.#clearTransport();
+    this.#cleanup();
 
     for (let callback of this.#onDetachCallbacks) {
       try {
