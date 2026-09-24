@@ -324,7 +324,7 @@ class SharedStatePrivate {
       this[kSharedStatePrivateDetachClient](instanceId, client);
       client.transport.emit(`${DETACH_RESPONSE}-${this.id}-${instanceId}`, reqId);
     };
-  }
+  };
 }
 
 export default SharedStatePrivate;

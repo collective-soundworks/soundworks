@@ -430,7 +430,7 @@ class ServerStateManager extends BaseStateManager {
 
   #onUnobserveNotification = client => {
     return () => this.#observers.delete(client);
-  }
+  };
 
   #onClassDescriptionRequest = client => {
     return (reqId, className) => {
@@ -448,8 +448,8 @@ class ServerStateManager extends BaseStateManager {
         className,
         classDescription,
       );
-    }
-  }
+    };
+  };
 
   /**
    * Define a generic class from which {@link SharedState}s can be created.
