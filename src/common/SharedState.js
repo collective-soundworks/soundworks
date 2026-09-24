@@ -141,190 +141,19 @@ class SharedState {
     /** @private */
     this[kSharedStatePromiseStore] = new PromiseStore(this.constructor.name);
 
-    // add listener for state updates
-    this.#client.transport.addListener(`${UPDATE_RESPONSE}-${this.#id}-${this.#instanceId}`, async (reqId, updates) => {
-      const updated = await this.#commit(updates, true, true);
-      this[kSharedStatePromiseStore].resolve(reqId, updated);
-    });
-
-    // retrieve values but do not propagate to subscriptions
-    this.#client.transport.addListener(`${UPDATE_ABORT}-${this.#id}-${this.#instanceId}`, async (reqId, updates) => {
-      const updated = await this.#commit(updates, false, true);
-      this[kSharedStatePromiseStore].resolve(reqId, updated);
-    });
-
-    this.#client.transport.addListener(`${UPDATE_NOTIFICATION}-${this.#id}-${this.#instanceId}`, async (updates) => {
-      // https://github.com/collective-soundworks/soundworks/issues/18
-      //
-      // # note: 2002-10-03
-      //
-      // `setTimeout(async () => this.#commit(updates, true, false));`
-      // appears to be the only way to push the update commit in the next event
-      // cycle so that `attach` can resolve before the update notification is
-      // actually dispatched. The alternative:
-      // `Promise.resolve().then(() => this.#commit(updates, true, false))``
-      // does not behave as expected...
-      //
-      // However this breaks the reliability of:
-      // ```
-      // /* given a0, a1 and a2 being 3 similar attached states */
-      // await state.set({ int: i });
-      //
-      // assert.equal(a0.get('int'), i);
-      // assert.equal(a1.get('int'), i);
-      // assert.equal(a2.get('int'), i);
-      // ```
-      // which is far more important than the edge case reported in the issue
-      // therefore this wont be fixed for now
-      this.#commit(updates, true, false);
-    });
-
-    // ---------------------------------------------
-    // state has been deleted by its creator or the class has been deleted
-    // ---------------------------------------------
-    this.#client.transport.addListener(`${DELETE_NOTIFICATION}-${this.#id}-${this.#instanceId}`, async () => {
-      this.#detached = true;
-
-      this.#manager[kStateManagerDeleteState](this.#id);
-      this.#clearTransport();
-
-      for (let callback of this.#onDetachCallbacks) {
-        try {
-          await callback();
-        } catch (err) {
-          console.error(err.message);
-        }
-      }
-
-      if (this.#isOwner) {
-        for (let callback of this.#onDeleteCallbacks) {
-          await callback();
-        }
-      }
-
-      this.#onDetachCallbacks.clear();
-      this.#onDeleteCallbacks.clear();
-      this[kSharedStatePromiseStore].flush();
-    });
+    this.#client.transport.addListener(`${UPDATE_RESPONSE}-${this.#id}-${this.#instanceId}`, this.#onUpdateResponse);
+    this.#client.transport.addListener(`${UPDATE_ABORT}-${this.#id}-${this.#instanceId}`, this.#onUpdateAbort);
+    this.#client.transport.addListener(`${UPDATE_NOTIFICATION}-${this.#id}-${this.#instanceId}`, this.#onUpdateNotification);
+    this.#client.transport.addListener(`${DELETE_NOTIFICATION}-${this.#id}-${this.#instanceId}`, this.#onDeleteNotification);
 
     if (this.#isOwner) {
-      // ---------------------------------------------
-      // the creator has called `.delete()`
-      // ---------------------------------------------
-      this.#client.transport.addListener(`${DELETE_RESPONSE}-${this.#id}-${this.#instanceId}`, async (reqId) => {
-        this.#manager[kStateManagerDeleteState](this.#id);
-        this.#clearTransport();
-
-        for (let callback of this.#onDetachCallbacks) {
-          try {
-            await callback();
-          } catch (err) {
-            console.log(err.message);
-          }
-        }
-
-        for (let callback of this.#onDeleteCallbacks) {
-          try {
-            await callback();
-          } catch (err) {
-            console.log(err.message);
-          }
-        }
-
-        this.#onDetachCallbacks.clear();
-        this.#onDeleteCallbacks.clear();
-        this[kSharedStatePromiseStore].resolve(reqId, this);
-        this[kSharedStatePromiseStore].flush();
-      });
-
-      this.#client.transport.addListener(`${DELETE_ERROR}-${this.#id}`, (reqId, msg) => {
-        this[kSharedStatePromiseStore].reject(reqId, msg);
-      });
-
-      this.#client.transport.addListener(`${HAS_SIBLINGS_NOTIFICATION}-${this.#id}-${this.#instanceId}`, hasSiblings => {
-        this.#hasSiblings = hasSiblings;
-      });
-
+      this.#client.transport.addListener(`${DELETE_RESPONSE}-${this.#id}-${this.#instanceId}`, this.#onDeleteResponse);
+      this.#client.transport.addListener(`${DELETE_ERROR}-${this.#id}`, this.#onDeleteError);
+      this.#client.transport.addListener(`${HAS_SIBLINGS_NOTIFICATION}-${this.#id}-${this.#instanceId}`, this.#onHasSiblingsNotification);
     } else {
-      // ---------------------------------------------
-      // the attached node has called `.detach()`
-      // ---------------------------------------------
-      this.#client.transport.addListener(`${DETACH_RESPONSE}-${this.#id}-${this.#instanceId}`, async (reqId) => {
-        this.#manager[kStateManagerDeleteState](this.#id);
-        this.#clearTransport();
-
-        for (let callback of this.#onDetachCallbacks) {
-          try {
-            await callback();
-          } catch (err) {
-            console.log(err.message);
-          }
-        }
-
-        this.#onDetachCallbacks.clear();
-        this.#onDeleteCallbacks.clear();
-        this[kSharedStatePromiseStore].resolve(reqId, this);
-        this[kSharedStatePromiseStore].flush();
-      });
-
-      // the state does not exists anymore in the server (should not happen)
-      this.#client.transport.addListener(`${DETACH_ERROR}-${this.#id}`, (reqId, msg) => {
-        this.#onDetachCallbacks.clear();
-        this.#onDeleteCallbacks.clear();
-        this[kSharedStatePromiseStore].reject(reqId, msg);
-        this[kSharedStatePromiseStore].flush();
-      });
+      this.#client.transport.addListener(`${DETACH_RESPONSE}-${this.#id}-${this.#instanceId}`, this.#onDetachResponse);
+      this.#client.transport.addListener(`${DETACH_ERROR}-${this.#id}`, this.#onDetachError);
     }
-  }
-
-  /**
-   * Id of the state
-   * @type {Number}
-   */
-  get id() {
-    return this.#id;
-  }
-
-  /**
-   * Name of the underlying {@link SharedState} class.
-   * @type {String}
-   */
-  get className() {
-    return this.#className;
-  }
-
-  /**
-   * @deprecated Use {@link SharedState#className} instead.
-   */
-  get schemaName() {
-    warnings.deprecated('SharedState#schemaName', 'SharedState#className', '4.0.0-alpha.29');
-    return this.className;
-  }
-
-  /**
-   * Indicates if the node is the owner of the state, i.e. if it created the state.
-   * @type {Boolean}
-   */
-  get isOwner() {
-    return this.#isOwner;
-  }
-
-  /**
-   * Indicates if the node as siblings, i.e. if several versions of the same state
-   * exists on the network
-   * Always return true if the state instance is attached
-   * @type {Boolean}
-   */
-  get hasSiblings() {
-    if (this.#detached) {
-      return false;
-    }
-
-    if (!this.isOwner) {
-      return true;
-    }
-
-    return this.#hasSiblings;
   }
 
   #clearTransport() {
@@ -337,11 +166,110 @@ class SharedState {
     if (this.#isOwner) {
       this.#client.transport.removeAllListeners(`${DELETE_RESPONSE}-${this.#id}-${this.#instanceId}`);
       this.#client.transport.removeAllListeners(`${DELETE_ERROR}-${this.#id}-${this.#instanceId}`);
+      this.#client.transport.removeAllListeners(`${HAS_SIBLINGS_NOTIFICATION}-${this.#id}-${this.#instanceId}`);
     } else {
       this.#client.transport.removeAllListeners(`${DETACH_RESPONSE}-${this.#id}-${this.#instanceId}`);
       this.#client.transport.removeAllListeners(`${DETACH_ERROR}-${this.#id}-${this.#instanceId}`);
     }
   }
+
+  #onUpdateResponse = async (reqId, updates) => {
+    const updated = await this.#commit(updates, true, true);
+    this[kSharedStatePromiseStore].resolve(reqId, updated);
+  };
+
+  #onUpdateAbort = async (reqId, updates) => {
+    const updated = await this.#commit(updates, false, true);
+    this[kSharedStatePromiseStore].resolve(reqId, updated);
+  };
+
+  #onUpdateNotification = updates => {
+    this.#commit(updates, true, false);
+  };
+
+  #onDetachResponse = async (reqId) => {
+    this.#manager[kStateManagerDeleteState](this.#id);
+    this.#clearTransport();
+
+    for (let callback of this.#onDetachCallbacks) {
+      try {
+        await callback();
+      } catch (err) {
+        console.log(err.message);
+      }
+    }
+
+    this.#onDetachCallbacks.clear();
+    this.#onDeleteCallbacks.clear();
+    this[kSharedStatePromiseStore].resolve(reqId, this);
+    this[kSharedStatePromiseStore].flush();
+  };
+
+  #onDetachError = (reqId, msg) => {
+    this.#onDetachCallbacks.clear();
+    this.#onDeleteCallbacks.clear();
+    this[kSharedStatePromiseStore].reject(reqId, msg);
+    this[kSharedStatePromiseStore].flush();
+  };
+
+  #onDeleteResponse = async (reqId) => {
+    this.#manager[kStateManagerDeleteState](this.#id);
+    this.#clearTransport();
+
+    for (let callback of this.#onDetachCallbacks) {
+      try {
+        await callback();
+      } catch (err) {
+        console.log(err.message);
+      }
+    }
+
+    for (let callback of this.#onDeleteCallbacks) {
+      try {
+        await callback();
+      } catch (err) {
+        console.log(err.message);
+      }
+    }
+
+    this.#onDetachCallbacks.clear();
+    this.#onDeleteCallbacks.clear();
+    this[kSharedStatePromiseStore].resolve(reqId, this);
+    this[kSharedStatePromiseStore].flush();
+  };
+
+  #onDeleteError = (reqId, msg) => {
+    this[kSharedStatePromiseStore].reject(reqId, msg);
+  };
+
+  #onDeleteNotification = async () => {
+    this.#detached = true;
+
+    this.#manager[kStateManagerDeleteState](this.#id);
+    this.#clearTransport();
+
+    for (let callback of this.#onDetachCallbacks) {
+      try {
+        await callback();
+      } catch (err) {
+        console.error(err.message);
+      }
+    }
+
+    if (this.#isOwner) {
+      for (let callback of this.#onDeleteCallbacks) {
+        await callback();
+      }
+    }
+
+    this.#onDetachCallbacks.clear();
+    this.#onDeleteCallbacks.clear();
+    this[kSharedStatePromiseStore].flush();
+  };
+
+  #onHasSiblingsNotification = hasSiblings => {
+    this.#hasSiblings = hasSiblings;
+  };
 
   async #commit(updates, propagate = true, initiator = false) {
     const newValues = {};
@@ -395,6 +323,56 @@ class SharedState {
     }
 
     return newValues;
+  }
+
+  /**
+   * Id of the state
+   * @type {Number}
+   */
+  get id() {
+    return this.#id;
+  }
+
+  /**
+   * Name of the underlying {@link SharedState} class.
+   * @type {String}
+   */
+  get className() {
+    return this.#className;
+  }
+
+  /**
+   * @deprecated Use {@link SharedState#className} instead.
+   */
+  get schemaName() {
+    warnings.deprecated('SharedState#schemaName', 'SharedState#className', '4.0.0-alpha.29');
+    return this.className;
+  }
+
+  /**
+   * Indicates if the node is the owner of the state, i.e. if it created the state.
+   * @type {Boolean}
+   */
+  get isOwner() {
+    return this.#isOwner;
+  }
+
+  /**
+   * Indicates if the node as siblings, i.e. if several versions of the same state
+   * exists on the network
+   * Always return true if the state instance is attached
+   * @type {Boolean}
+   */
+  get hasSiblings() {
+    if (this.#detached) {
+      return false;
+    }
+
+    if (!this.isOwner) {
+      return true;
+    }
+
+    return this.#hasSiblings;
   }
 
   /**
