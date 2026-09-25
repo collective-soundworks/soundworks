@@ -328,7 +328,7 @@ class ServerStateManager extends BaseStateManager {
   };
 
   #onAttachRequest = client => {
-    return (reqId, className, stateId = null, filter = null) => {
+    return (reqId, className, stateId = null, options = null) => {
       if (!this.#classes.has(className)) {
         const msg = `Undefined SharedStateClassName '${className}'`;
         client.transport.emit(ATTACH_ERROR, reqId, msg);
@@ -361,19 +361,27 @@ class ServerStateManager extends BaseStateManager {
         const currentValues = state.parameters.getValues();
         const classDescription = this.#classes.get(className);
 
-        // if filter given, check that all filter entries are valid class keys
-        // @todo - improve error reporting: report invalid filters
-        if (filter !== null) {
-          const keys = Object.keys(classDescription);
-          const isValid = filter.reduce((acc, key) => acc && keys.includes(key), true);
+        // If filters are defined, check that all given values are valid param names
+        // Note that we need the class description, so it can't be done client-side
+        if (options !== null) {
+          const classParams = Object.keys(classDescription);
 
-          if (!isValid) {
-            const msg = `Invalid filter (${filter.join(', ')}) for class '${className}'`;
-            return client.transport.emit(ATTACH_ERROR, reqId, msg);
+          for (let filterName of ['whiteList', 'backList']) {
+            if (!options[filterName]) {
+              continue;
+            }
+
+            const list = options[filterName];
+            const invalid = list.filter(paramName => !classParams.includes(paramName));
+
+            if (invalid.length > 0) {
+              const msg = `Invalid filter (${invalid.join(', ')}) for shared state class '${className}'`;
+              return client.transport.emit(ATTACH_ERROR, reqId, msg);
+            }
           }
         }
 
-        state[kSharedStatePrivateAttachClient](instanceId, client, isOwner, filter);
+        state[kSharedStatePrivateAttachClient](instanceId, client, isOwner, options);
 
         client.transport.emit(
           ATTACH_RESPONSE,
@@ -383,7 +391,7 @@ class ServerStateManager extends BaseStateManager {
           className,
           classDescription,
           currentValues,
-          filter,
+          options,
         );
 
       } else {

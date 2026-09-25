@@ -265,7 +265,7 @@ class BaseStateManager {
    * - `stateManager.attach(className, stateId, filter)`
    *
    * @param {SharedStateClassName} className - Name of the class.
-   * @param {number|string[]} [stateIdOrFilter] - Id of the state to attach to. If `null`,
+   * @param {number|string[]} [stateIdOrOptions] - Id of the state to attach to. If `null`,
    *  attach to the first state found with the given class name (useful for
    *  globally shared states owned by the server).
    * @param {string[]} [filter] - List of parameters of interest in the
@@ -275,7 +275,7 @@ class BaseStateManager {
    * @example
    * const state = await client.stateManager.attach('my-class');
    */
-  async attach(className, stateIdOrFilter = null, filter = null) {
+  async attach(className, stateIdOrOptions = null, options = null) {
     if (this.#status !== 'inited') {
       throw new DOMException(`Cannot execute 'attach' on BaseStateManager: BaseStateManager is not inited`, 'InvalidStateError');
     }
@@ -287,34 +287,46 @@ class BaseStateManager {
     }
 
     if (arguments.length === 2) {
-      if (stateIdOrFilter === null) {
+      if (stateIdOrOptions === null) {
         stateId = null;
-        filter = null;
-      } else if (Number.isFinite(stateIdOrFilter)) {
-        stateId = stateIdOrFilter;
-        filter = null;
-      } else if (Array.isArray(stateIdOrFilter)) {
+        options = null;
+      } else if (Number.isFinite(stateIdOrOptions)) {
+        stateId = stateIdOrOptions;
+        options = null;
+      } else if (Array.isArray(stateIdOrOptions)) {
+        // backward compatibility for legacy filter array argument
+        // @todo - add deprecation message
         stateId = null;
-        filter = stateIdOrFilter;
+        options = { whiteList: stateIdOrOptions };
+      } else if (isPlainObject(stateIdOrOptions)) {
+        stateId = null;
+        options = stateIdOrOptions;
       } else {
-        throw new TypeError(`Cannot execute 'attach' on BaseStateManager: argument 2 must be either null, a number or an array`);
+        throw new TypeError(`Cannot execute 'attach' on BaseStateManager: argument 2 must be either null, a number or an object`);
       }
     }
 
     if (arguments.length === 3) {
-      stateId = stateIdOrFilter;
+      stateId = stateIdOrOptions;
 
       if (stateId !== null && !Number.isFinite(stateId)) {
         throw new TypeError(`Cannot execute 'attach' on BaseStateManager: argument 2 must be either null or a number`);
       }
 
-      if (filter !== null && !Array.isArray(filter)) {
-        throw new TypeError(`Cannot execute 'attach' on BaseStateManager: argument 3 must be either null or an array`);
+      if (options !== null) {
+        if (Array.isArray(options)) {
+          // backward compatibility for legacy filter array argument
+          // @todo - add deprecation message
+          options = { whiteList: options };
+        } else if (!isPlainObject(options)) {
+          throw new TypeError(`Cannot execute 'attach' on BaseStateManager: argument 3 must be either null or an object`);
+        }
+        // keep option object as is
       }
     }
 
     const { id: reqId, promise } = this.#promiseStore.createPromise();
-    this[kStateManagerClient].transport.emit(ATTACH_REQUEST, reqId, className, stateId, filter);
+    this[kStateManagerClient].transport.emit(ATTACH_REQUEST, reqId, className, stateId, options);
 
     return promise;
   }

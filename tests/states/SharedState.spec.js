@@ -32,7 +32,7 @@ describe('# SharedState', () => {
     server.stop();
   });
 
-  describe(`## hasSiblings`, () => {
+  describe(`## get hasSiblings()`, () => {
     it(`should flag if an attached state exists on the net work`, async () => {
       const owned = await server.stateManager.create('a');
       assert.equal(owned.hasSiblings, false);
@@ -328,8 +328,8 @@ describe('# SharedState', () => {
     });
   });
 
-  describe('## onUpdate((newValues, oldValues[, context = null]) => {}[, executeListener=false]) => unsubscribe', () => {
-    it('should properly execute listeners', async () => {
+  describe('## onUpdate((newValues, oldValues) => {}[, executeListener=false]) => unsubscribe', () => {
+    it('should properly execute listeners (1: server owner && client attached branches)', async () => {
       return new Promise(async (resolve, reject) => {
         const state = await server.stateManager.create('a');
         const attached = await client.stateManager.attach('a', state.id);
@@ -374,9 +374,59 @@ describe('# SharedState', () => {
 
         await state.set({ bool: true, int: 42 });
         await state.set({ bool: false, int: 76 });
-
         await Promise.all([statePromise, attachedPromise]);
+        await state.delete();
 
+        resolve();
+      });
+    });
+
+    it('should properly execute listeners (2: client owner && server attached branches)', async () => {
+      return new Promise(async (resolve, reject) => {
+        const state = await client.stateManager.create('a');
+        const attached = await server.stateManager.attach('a', state.id);
+
+        const statePromise = new Promise((resolve) => {
+          let step = 0;
+
+          state.onUpdate((newValues, oldValues) => {
+            if (step === 0) {
+              assert.deepEqual(newValues, { bool: true, int: 42 });
+              assert.deepEqual(oldValues, { bool: false, int: 0 });
+            } else if (step === 1) {
+              assert.deepEqual(newValues, { bool: false, int: 76 });
+              assert.deepEqual(oldValues, { bool: true, int: 42 });
+              resolve();
+            } else {
+              reject('something wrong happened');
+            }
+
+            step += 1;
+          });
+        });
+
+        const attachedPromise = new Promise((resolve) => {
+          let step = 0;
+
+          attached.onUpdate((newValues, oldValues) => {
+            if (step === 0) {
+              assert.deepEqual(newValues, { bool: true, int: 42 });
+              assert.deepEqual(oldValues, { bool: false, int: 0 });
+            } else if (step === 1) {
+              assert.deepEqual(newValues, { bool: false, int: 76 });
+              assert.deepEqual(oldValues, { bool: true, int: 42 });
+              resolve();
+            } else {
+              reject('something wrong happened');
+            }
+
+            step += 1;
+          });
+        });
+
+        await state.set({ bool: true, int: 42 });
+        await state.set({ bool: false, int: 76 });
+        await Promise.all([statePromise, attachedPromise]);
         await state.delete();
 
         resolve();
@@ -675,7 +725,16 @@ describe('# SharedState - filtered attached state', () => {
   });
 
   describe(`## attach() [overload]`, () => {
-    it(`should support attach(className, filter)`, async () => {
+    it(`should support attach(className, options)`, async () => {
+      const owned = await server.stateManager.create('filtered');
+      const attached = await client.stateManager.attach('filtered', {
+        whiteList: ['bool', 'string'],
+      });
+
+      assert.equal(attached.id, owned.id);
+    });
+
+    it(`should support attach(className, filter) - (legacy)`, async () => {
       const owned = await server.stateManager.create('filtered');
       const attached = await client.stateManager.attach('filtered', ['bool', 'string']);
 
@@ -683,6 +742,15 @@ describe('# SharedState - filtered attached state', () => {
     });
 
     it(`should support attach(className, stateId, filter)`, async () => {
+      const owned = await server.stateManager.create('filtered');
+      const attached = await client.stateManager.attach('filtered', owned.id, {
+        blackList: ['bool', 'string'],
+      });
+
+      assert.equal(attached.id, owned.id);
+    });
+
+    it(`should support attach(className, stateId, filter) - (legacy)`, async () => {
       const owned = await server.stateManager.create('filtered');
       const attached = await client.stateManager.attach('filtered', owned.id, ['bool', 'string']);
 
@@ -726,135 +794,172 @@ describe('# SharedState - filtered attached state', () => {
   });
 
   describe(`## async set(updates)`, () => {
-    it(`should throw early if trying to set modify a param which is not filtered`, async () => {
-      const filter = ['bool', 'string'];
-      const owned = await server.stateManager.create('filtered');
-      const attached = await client.stateManager.attach('filtered', filter);
-      let onUpdateCalled = false;
-      let errored = false;
+    [
+      ['whiteList', { whiteList: ['bool', 'string'] }],
+      ['blackList', { blackList: ['int'] }],
+      ['legacy', ['bool', 'string']],
+    ].forEach(([name, filter]) => {
+      it(`should throw if trying to set a filtered param: ${name}`, async () => {
+        const owned = await server.stateManager.create('filtered');
+        const attached = await client.stateManager.attach('filtered', filter);
+        let onUpdateCalled = false;
+        let errored = false;
 
-      owned.onUpdate(() => onUpdateCalled = true);
+        owned.onUpdate(() => onUpdateCalled = true);
 
-      try {
-        await attached.set({ int: 42 });
-      } catch (err) {
-        console.log(err.message);
-        errored = true;
-      }
+        try {
+          await attached.set({ int: 42 });
+        } catch (err) {
+          console.log(err.message);
+          errored = true;
+        }
 
-      await delay(20);
+        await delay(20);
 
-      assert.isTrue(errored);
-      assert.isFalse(onUpdateCalled);
+        assert.isTrue(errored);
+        assert.isFalse(onUpdateCalled);
+      });
     });
   });
 
   describe(`## get(name)`, () => {
-    it(`should throw if trying to access a param which is not filtered`, async () => {
-      const filter = ['bool', 'string'];
-      const owned = await server.stateManager.create('filtered');
-      const attached = await client.stateManager.attach('filtered', filter);
-      let errored = false;
+    [
+      ['whiteList', { whiteList: ['bool', 'string'] }],
+      ['blackList', { blackList: ['int'] }],
+      ['legacy', ['bool', 'string']],
+    ].forEach(([name, filter]) => {
+      it(`should throw if trying to access a filtered param: ${name}`, async () => {
+        const owned = await server.stateManager.create('filtered');
+        const attached = await client.stateManager.attach('filtered', filter);
+        let errored = false;
 
-      try {
-        await attached.get('int');
-      } catch (err) {
-        console.log(err.message);
-        errored = true;
-      }
+        try {
+          await attached.get('int');
+        } catch (err) {
+          console.log(err.message);
+          errored = true;
+        }
 
-      await delay(20);
+        await delay(20);
 
-      assert.isTrue(errored);
-    });
+        assert.isTrue(errored);
+      });
+    });;
   });
 
   describe(`## onUpdate(callback)`, () => {
-    it(`should propagate only filtered keys`, async () => {
-      const filter = ['bool', 'string'];
-      const owned = await server.stateManager.create('filtered');
-      const attached = await client.stateManager.attach('filtered', filter);
-      const expected = { bool: true, int: 1, string: 'b' };
+    [
+      ['whiteList', { whiteList: ['bool', 'string'] }],
+      ['blackList', { blackList: ['int'] }],
+      ['legacy', ['bool', 'string']],
+    ].forEach(([name, filter]) => {
 
-      owned.onUpdate(updates => {
-        assert.deepEqual(updates, expected);
+      it(`should propagate only filtered keys: ${name}`, async () => {
+        const owned = await server.stateManager.create('filtered');
+        const attached = await client.stateManager.attach('filtered', filter);
+        const expected = { bool: true, int: 1, string: 'b' };
+
+        owned.onUpdate(updates => {
+          assert.deepEqual(updates, expected);
+        });
+
+        attached.onUpdate(updates => {
+          assert.deepEqual(Object.keys(updates), filter);
+        });
+
+        await owned.set(expected);
+        await delay(20);
       });
 
-      attached.onUpdate(updates => {
-        assert.deepEqual(Object.keys(updates), filter);
+      it(`should not propagate if filtered updates is empty object: ${name}`, async () => {
+        const owned = await server.stateManager.create('filtered');
+        const attached = await client.stateManager.attach('filtered', owned.id, filter);
+        const expected = { int: 1 };
+        let callbackExecuted = false;
+        let batchedResponses = 0;
+
+        client.socket.addListener(BATCHED_TRANSPORT_CHANNEL, (args) => {
+          batchedResponses += 1;
+        });
+
+        owned.onUpdate(updates => {
+          assert.deepEqual(updates, expected);
+        });
+
+        attached.onUpdate(updates => {
+          callbackExecuted = true;
+        });
+
+        await owned.set(expected);
+        await delay(20);
+
+        assert.isFalse(callbackExecuted);
+        assert.equal(batchedResponses, 0);
       });
 
-      await owned.set(expected);
-      await delay(20);
-    });
-
-    it(`should not propagate if filtered updates is empty object`, async () => {
-      const filter = ['bool', 'string'];
-      const owned = await server.stateManager.create('filtered');
-      const attached = await client.stateManager.attach('filtered', owned.id, filter);
-      const expected = { int: 1 };
-      let callbackExecuted = false;
-      let batchedResponses = 0;
-
-      client.socket.addListener(BATCHED_TRANSPORT_CHANNEL, (args) => {
-        batchedResponses += 1;
-      });
-
-      owned.onUpdate(updates => {
-        assert.deepEqual(updates, expected);
-      });
-
-      attached.onUpdate(updates => {
-        callbackExecuted = true;
-      });
-
-      await owned.set(expected);
-      await delay(20);
-
-      assert.isFalse(callbackExecuted);
-      assert.equal(batchedResponses, 0);
     });
   });
 
   describe(`## getUnsafe(name)`, () => {
-    it(`should throw if trying to access a param which is not filtered`, async () => {
-      const filter = ['bool', 'string'];
-      const owned = await server.stateManager.create('filtered');
-      const attached = await client.stateManager.attach('filtered', filter);
-      let errored = false;
+    [
+      ['whiteList', { whiteList: ['bool', 'string'] }],
+      ['blackList', { blackList: ['int'] }],
+      ['legacy', ['bool', 'string']],
+    ].forEach(([name, filter]) => {
 
-      try {
-        await attached.get('int');
-      } catch (err) {
-        console.log(err.message);
-        errored = true;
-      }
+      it(`should throw if trying to access a param which is not filtered: ${name}`, async () => {
+        const owned = await server.stateManager.create('filtered');
+        const attached = await client.stateManager.attach('filtered', filter);
+        let errored = false;
 
-      await delay(20);
+        try {
+          await attached.get('int');
+        } catch (err) {
+          console.log(err.message);
+          errored = true;
+        }
 
-      assert.isTrue(errored);
+        await delay(20);
+
+        assert.isTrue(errored);
+      });
+
     });
   });
 
   describe(`## getValues()`, () => {
-    it(`should return a filtered object`, async () => {
-      const filter = ['bool', 'string'];
-      const owned = await server.stateManager.create('filtered');
-      const attached = await client.stateManager.attach('filtered', filter);
+    [
+      ['whiteList', { whiteList: ['bool', 'string'] }],
+      ['blackList', { blackList: ['int'] }],
+      ['legacy', ['bool', 'string']],
+    ].forEach(([name, filter]) => {
 
-      const values = attached.getValues();
-      assert.deepEqual(values, { bool: false, string: 'a' });
+      it(`should return a filtered object: ${name}`, async () => {
+        const owned = await server.stateManager.create('filtered');
+        const attached = await client.stateManager.attach('filtered', filter);
+
+        const values = attached.getValues();
+        assert.deepEqual(values, { bool: false, string: 'a' });
+      });
+
     });
   });
 
   describe(`## getValuesUnsafe()`, () => {
-    it(`should return a filtered object`, async () => {
-      const filter = ['bool', 'string'];
-      const owned = await server.stateManager.create('filtered');
-      const attached = await client.stateManager.attach('filtered', filter);
+    [
+      ['whiteList', { whiteList: ['bool', 'string'] }],
+      ['blackList', { blackList: ['int'] }],
+      ['legacy', ['bool', 'string']],
+    ].forEach(([name, filter]) => {
 
-      const values = attached.getValues();
-      assert.deepEqual(values, { bool: false, string: 'a' });
+      it(`should return a filtered object: ${name}`, async () => {
+        const owned = await server.stateManager.create('filtered');
+        const attached = await client.stateManager.attach('filtered', filter);
+
+        const values = attached.getValues();
+        assert.deepEqual(values, { bool: false, string: 'a' });
+      });
+
     });
   });
 });

@@ -24,7 +24,7 @@ import {
  * @private
  */
 function whiteListFilterUpdates(updates, whiteList) {
-  if (whiteList === null) {
+  if (!Array.isArray(whiteList)) {
     return updates;
   }
 
@@ -44,7 +44,7 @@ function whiteListFilterUpdates(updates, whiteList) {
  * @private
  */
 function blackListFilterUpdates(updates, blackList) {
-  if (blackList === null) {
+  if (!Array.isArray(blackList)) {
     return updates;
   }
   // create a shallow copy so we can have multiple filters applied on same source
@@ -57,6 +57,22 @@ function blackListFilterUpdates(updates, blackList) {
   });
 
   return filtered;
+}
+
+function applyFilters(updates, options) {
+  if (options === null) {
+    return updates;
+  }
+
+  const { whiteList, blackList } = options;
+  // precedence to white list
+  if (Array.isArray(whiteList)) {
+    updates = whiteListFilterUpdates(updates, whiteList);
+  } else if (Array.isArray(blackList)) {
+    updates = blackListFilterUpdates(updates, blackList);
+  }
+
+  return updates;
 }
 
 export const kSharedStatePrivateAttachClient = Symbol('soundworks:shared-state-private-attach-client');
@@ -109,12 +125,12 @@ class SharedStatePrivate {
     return this.#parameters.getValues();
   }
 
-  [kSharedStatePrivateAttachClient](instanceId, client, isOwner, filter) {
+  [kSharedStatePrivateAttachClient](instanceId, client, isOwner, options) {
     if (isOwner) {
       this.#ownerId = client.id;
     }
 
-    const clientInfos = { client, isOwner, filter };
+    const clientInfos = { client, isOwner, options };
     this.#attachedClients.set(instanceId, clientInfos);
 
     client.transport.addListener(`${UPDATE_REQUEST}-${this.id}-${instanceId}`, this.#onUpdateRequest(instanceId, client));
@@ -213,8 +229,9 @@ class SharedStatePrivate {
           //
           // @note - instanceId correspond to unique remote state id
 
-          // - Apply acknowledge filter on `acknowledgedUpdates`
-          // - We don't need to apply the regular filter on update request, they are blocked client-side
+          // Apply acknowledge filter on `acknowledgedUpdates`
+          // Note that, We don't need to apply the whiteList / blackList filters
+          // for the requester, as they are blocked early on client-side
           const requesterFilteredUpdates = blackListFilterUpdates(acknowledgedUpdates, acknowledgeFilter);
 
           // propagate RESPONSE to the client that originates the request if not the server
@@ -231,11 +248,12 @@ class SharedStatePrivate {
 
           // propagate NOTIFICATION to all peer states except on server-side
           for (let [peerInstanceId, clientInfos] of this.#attachedClients) {
-            const { client: peer, filter } = clientInfos;
+            const { client: peer, options } = clientInfos;
 
             if (instanceId !== peerInstanceId && peer.id !== -1) {
-              const filteredUpdates = whiteListFilterUpdates(acknowledgedUpdates, filter);
-              // propagate only if there something left after applying the white list filter
+              const filteredUpdates = applyFilters(acknowledgedUpdates, options);
+
+              // propagate only if there something left after applying the whiteList/blackList filters
               if (Object.keys(filteredUpdates).length > 0) {
                 peer.transport.emit(
                   `${UPDATE_NOTIFICATION}-${this.id}-${peerInstanceId}`,
@@ -259,11 +277,12 @@ class SharedStatePrivate {
 
           // propagate NOTIFICATION to all peer states on the server-side
           for (let [peerInstanceId, clientInfos] of this.#attachedClients) {
-            const { client: peer, filter } = clientInfos;
+            const { client: peer, options } = clientInfos;
 
             if (instanceId !== peerInstanceId && peer.id === -1) {
-              const filteredUpdates = whiteListFilterUpdates(acknowledgedUpdates, filter);
-              // propagate only if there something left after applying the white list filter
+              const filteredUpdates = applyFilters(acknowledgedUpdates, options);
+
+              // propagate only if there something left after applying the whiteList/blackList filters
               if (Object.keys(filteredUpdates).length > 0) {
                 peer.transport.emit(
                   `${UPDATE_NOTIFICATION}-${this.id}-${peerInstanceId}`,

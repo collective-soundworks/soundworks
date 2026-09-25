@@ -265,6 +265,38 @@ class SharedState {
     this.#hasSiblings = hasSiblings;
   };
 
+  #checkParamNameAgainstFilters(paramName) {
+    if (this.#filter === null) {
+      return;
+    }
+
+    const { whiteList, blackList } = this.#filter;
+
+    if (whiteList && !whiteList.includes(paramName)) {
+      throw new Error(`Parameter '${paramName}' is not in white list`);
+    } else if (blackList && blackList.includes(paramName)) {
+      throw new Error(`Parameter '${paramName}' is in black list`);
+    }
+  }
+
+  #sanitizeValuesAgainstFilters(values) {
+    if (this.#filter === null) {
+      return values;
+    }
+
+    const { whiteList, blackList } = this.#filter;
+
+    for (let name in values) {
+      if (whiteList && !whiteList.includes(name)) {
+        delete values[name];
+      } else if (blackList && blackList.includes(name)) {
+        delete values[name];
+      }
+    }
+
+    return values;
+  }
+
   async #commit(updates, propagate = true, initiator = false) {
     const newValues = {};
     const oldValues = {};
@@ -473,6 +505,12 @@ class SharedState {
     let syncedOnUpdate = false;
 
     for (let name in updates) {
+      // Throw early if some param is blacklisted or not whitelisted
+      try {
+        this.#checkParamNameAgainstFilters(name);
+      } catch (err) {
+        throw new DOMException(`Cannot execute 'set' on SharedState (${this.#className}): ${err.message}`, 'NotSupportedError');
+      }
       // Try to coerce value now, so that eventual errors are triggered early
       // on the node requesting the update and not only on the server side.
       try {
@@ -480,13 +518,6 @@ class SharedState {
         this.#parameters.coerceValue(name, updates[name]);
       } catch (err) {
         throw new TypeError(`Cannot execute 'set' on SharedState (${this.#className}): ${err.message}`);
-      }
-
-      // Make sure that given name is in filter white list (if any)
-      if (this.#filter !== null) {
-        if (!this.#filter.includes(name)) {
-          throw new DOMException(`Cannot execute 'set' on SharedState (${this.#className}): Parameter '${name}' is not in white list`, 'NotSupportedError');
-        }
       }
 
       // ### `immediate` modifier behavior
@@ -603,10 +634,11 @@ class SharedState {
       throw new ReferenceError(`Cannot execute 'get' on SharedState (${this.#className}): Parameter '${name}' is not defined`);
     }
 
-    if (this.#filter !== null) {
-      if (!this.#filter.includes(name)) {
-        throw new DOMException(`Cannot execute 'get' on SharedState (${this.#className}): Parameter '${name}' is not in white list`, 'NotSupportedError');
-      }
+    // Throw early if some param is blacklisted or not whitelisted
+    try {
+      this.#checkParamNameAgainstFilters(name);
+    } catch (err) {
+      throw new DOMException(`Cannot execute 'get' on SharedState (${this.#className}): ${err.message}`, 'NotSupportedError');
     }
 
     return this.#parameters.get(name);
@@ -632,10 +664,11 @@ class SharedState {
       throw new ReferenceError(`Cannot execute 'getUnsafe' on SharedState (${this.#className}): Parameter '${name}' is not defined`);
     }
 
-    if (this.#filter !== null) {
-      if (!this.#filter.includes(name)) {
-        throw new DOMException(`Cannot execute 'getUnsafe' on SharedState (${this.#className}): Parameter '${name}' is not in white list`, 'NotSupportedError');
-      }
+    // Throw early if some param is blacklisted or not whitelisted
+    try {
+      this.#checkParamNameAgainstFilters(name);
+    } catch (err) {
+      throw new DOMException(`Cannot execute 'getUnsafe' on SharedState (${this.#className}): ${err.message}`, 'NotSupportedError');
     }
 
     return this.#parameters.getUnsafe(name);
@@ -652,16 +685,7 @@ class SharedState {
    */
   getValues() {
     const values = this.#parameters.getValues();
-
-    if (this.#filter !== null) {
-      for (let name in values) {
-        if (!this.#filter.includes(name)) {
-          delete values[name];
-        }
-      }
-    }
-
-    return values;
+    return this.#sanitizeValuesAgainstFilters(values);
   }
 
   /**
@@ -679,16 +703,7 @@ class SharedState {
    */
   getValuesUnsafe() {
     const values = this.#parameters.getValuesUnsafe();
-
-    if (this.#filter !== null) {
-      for (let name in values) {
-        if (!this.#filter.includes(name)) {
-          delete values[name];
-        }
-      }
-    }
-
-    return values;
+    return this.#sanitizeValuesAgainstFilters(values);
   }
 
   /**
