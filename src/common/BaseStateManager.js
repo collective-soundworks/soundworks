@@ -300,7 +300,11 @@ class BaseStateManager {
         options = null;
       } else if (Array.isArray(stateIdOrOptions)) {
         // backward compatibility for legacy filter array argument
-        // @todo - add deprecation message
+        warnings.deprecated(
+          'argument `filter: string[]` of BaseStateManager#attach',
+          'argument `options { whiteList: string[] }`',
+          '5.6.0',
+        );
         stateId = null;
         options = { whiteList: stateIdOrOptions };
       } else if (isPlainObject(stateIdOrOptions)) {
@@ -321,7 +325,11 @@ class BaseStateManager {
       if (options !== null) {
         if (Array.isArray(options)) {
           // backward compatibility for legacy filter array argument
-          // @todo - add deprecation message
+          warnings.deprecated(
+            'argument `filter: string[]` of BaseStateManager#attach',
+            'argument `options { whiteList: string[] }`',
+            '5.6.0',
+          );
           options = { whiteList: options };
         } else if (!isPlainObject(options)) {
           throw new TypeError(`Cannot execute 'attach' on BaseStateManager: argument 3 must be either null or an object`);
