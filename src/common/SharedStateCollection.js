@@ -1,5 +1,9 @@
 import warnings from './logs/warnings.js';
 
+import {
+  checkValidFilters,
+} from './BaseStateManager.js';
+
 /**
  * Callback to execute when an update is triggered on one of the shared states
  * of the collection.
@@ -80,8 +84,8 @@ export const kSharedStateCollectionInit = Symbol('soundworks:shared-state-collec
 class SharedStateCollection {
   #stateManager = null;
   #className = null;
-  #filter = null;
   #options = null;
+  #excludeLocal = null;
   #classDescription = null;
   #states = [];
   #onUpdateCallbacks = new Set();
@@ -90,30 +94,24 @@ class SharedStateCollection {
   #onChangeCallbacks = new Set();
   #unobserve = null;
 
-  constructor(stateManager, className, filter = null, options = {}) {
+  constructor(stateManager, className, options = {}) {
     this.#stateManager = stateManager;
     this.#className = className;
-    this.#filter = filter;
-    this.#options = Object.assign({ excludeLocal: false }, options);
+    this.#options = {
+      whiteList: options.whiteList ?? null,
+      blackList: options.blackList ?? null,
+    };
+    this.#excludeLocal = options.excludeLocal ?? false;
   }
 
   /** @private */
   async [kSharedStateCollectionInit]() {
     this.#classDescription = await this.#stateManager.getClassDescription(this.#className);
-
-    // if filter is set, check that it contains only valid param names
-    if (this.#filter !== null) {
-      const keys = Object.keys(this.#classDescription);
-
-      for (let filter of this.#filter) {
-        if (!keys.includes(filter)) {
-          throw new ReferenceError(`Invalid filter key (${filter}) for class "${this.#className}"`);
-        }
-      }
-    }
+    // this is catch by `getCollection`
+    checkValidFilters(this.#options, this.#className, this.#classDescription);
 
     this.#unobserve = await this.#stateManager.observe(this.#className, async (className, stateId) => {
-      const state = await this.#stateManager.attach(className, stateId, this.#filter);
+      const state = await this.#stateManager.attach(className, stateId, this.#options);
       this.#states.push(state);
 
       state.onDetach(() => {
@@ -131,7 +129,7 @@ class SharedStateCollection {
 
       this.#onAttachCallbacks.forEach(callback => callback(state));
       this.#onChangeCallbacks.forEach(callback => callback());
-    }, this.#options);
+    }, { excludeLocal: this.#excludeLocal });
   }
 
   /**

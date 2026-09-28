@@ -569,8 +569,42 @@ describe('# SharedStateCollection - filtered collection', () => {
     server.stop();
   });
 
-  describe(`## getCollection(className, filter)`, () => {
-    it(`should throw if filter contains invalid keys`, async () => {
+  describe(`## getCollection(className, options)`, () => {
+    it(`should throw if filter contains invalid keys - whiteList`, async () => {
+      const owned1 = await clients[0].stateManager.create('filtered');
+      const owned2 = await clients[1].stateManager.create('filtered');
+      let errored = false;
+
+      try {
+        const attached = await clients[2].stateManager.getCollection('filtered', {
+          whiteList: ['invalid', 'toto']
+        });
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      assert.isTrue(errored);
+    });
+
+    it(`should throw if filter contains invalid keys - backList`, async () => {
+      const owned1 = await clients[0].stateManager.create('filtered');
+      const owned2 = await clients[1].stateManager.create('filtered');
+      let errored = false;
+
+      try {
+        const attached = await clients[2].stateManager.getCollection('filtered', {
+          whiteList: ['invalid', 'toto']
+        });
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      assert.isTrue(errored);
+    });
+
+    it(`should throw if filter contains invalid keys (legacy)`, async () => {
       const owned1 = await clients[0].stateManager.create('filtered');
       const owned2 = await clients[1].stateManager.create('filtered');
       let errored = false;
@@ -585,164 +619,243 @@ describe('# SharedStateCollection - filtered collection', () => {
       assert.isTrue(errored);
     });
 
-    it(`should return valid collection`, async () => {
+    it(`should return valid collection - whiteList`, async () => {
+      const owned1 = await clients[0].stateManager.create('filtered');
+      const owned2 = await clients[1].stateManager.create('filtered');
+      const attached = await clients[2].stateManager.getCollection('filtered', {
+        whiteList: ['bool', 'string'],
+      });
+
+      assert.equal(attached.size, 2);
+    });
+
+    it(`should return valid collection - backList`, async () => {
+      const owned1 = await clients[0].stateManager.create('filtered');
+      const owned2 = await clients[1].stateManager.create('filtered');
+      const attached = await clients[2].stateManager.getCollection('filtered', {
+        backList: ['bool', 'string'],
+      });
+
+      assert.equal(attached.size, 2);
+    });
+
+    it(`should return valid collection (legacy)`, async () => {
       const owned1 = await clients[0].stateManager.create('filtered');
       const owned2 = await clients[1].stateManager.create('filtered');
       const attached = await clients[2].stateManager.getCollection('filtered', ['bool', 'string']);
 
       assert.equal(attached.size, 2);
     });
+
+    it(`should exclude state created on same node - whiteList`, async () => {
+      const owned1 = await clients[0].stateManager.create('filtered');
+      const owned2 = await clients[1].stateManager.create('filtered');
+      const attached = await clients[1].stateManager.getCollection('filtered', {
+        whiteList: ['bool', 'string'],
+        excludeLocal: true,
+      });
+
+      assert.equal(attached.size, 1);
+    });
+
+    it(`should exclude state created on same node - backList`, async () => {
+      const owned1 = await clients[0].stateManager.create('filtered');
+      const owned2 = await clients[1].stateManager.create('filtered');
+      const attached = await clients[1].stateManager.getCollection('filtered', {
+        backList: ['bool', 'string'],
+        excludeLocal: true,
+      });
+
+      assert.equal(attached.size, 1);
+    });
+
+    it(`should exclude state created on same node (legacy)`, async () => {
+      const owned1 = await clients[0].stateManager.create('filtered');
+      const owned2 = await clients[1].stateManager.create('filtered');
+      const attached = await clients[1].stateManager.getCollection('filtered', ['bool'],  { excludeLocal: true });
+
+      assert.equal(attached.length, 1);
+    });
   });
 
   describe(`## onUpdate(callback)`, () => {
-    it(`should propagate only filtered keys`, async () => {
-      const filter = ['bool', 'string'];
-      const owned1 = await clients[0].stateManager.create('filtered');
-      const owned2 = await clients[1].stateManager.create('filtered');
-      const attached = await clients[2].stateManager.getCollection('filtered', filter);
-      const expected = { bool: true, int: 1, string: 'b' };
+    [
+      ['whiteList', { whiteList: ['bool', 'string'] }],
+      ['blackList', { blackList: ['int'] }],
+      ['legacy', ['bool', 'string']],
+    ].forEach(([name, filter]) => {
+      it(`should propagate only filtered keys - ${name}`, async () => {
+        const owned1 = await clients[0].stateManager.create('filtered');
+        const owned2 = await clients[1].stateManager.create('filtered');
+        const attached = await clients[2].stateManager.getCollection('filtered', filter);
+        const expected = { bool: true, int: 1, string: 'b' };
 
-      owned1.onUpdate(updates => {
-        assert.deepEqual(updates, expected);
+        owned1.onUpdate(updates => {
+          assert.deepEqual(updates, expected);
+        });
+
+        attached.onUpdate((state, updates) => {
+          assert.deepEqual(Object.keys(updates), filter);
+        });
+
+        await owned1.set(expected);
+        await delay(20);
       });
 
-      attached.onUpdate((state, updates) => {
-        assert.deepEqual(Object.keys(updates), filter);
+      it(`should not propagate if filtered updates is empty object - ${name}`, async () => {
+        const owned1 = await clients[0].stateManager.create('filtered');
+        const owned2 = await clients[1].stateManager.create('filtered');
+        const attached = await clients[2].stateManager.getCollection('filtered', filter);
+        const expected = { int: 1 };
+        let batchedResponses = 0;
+        let callbackExecuted = false;
+
+        clients[2].socket.addListener(BATCHED_TRANSPORT_CHANNEL, (args) => {
+          batchedResponses += 1;
+        });
+
+        owned1.onUpdate(updates => {
+          assert.deepEqual(updates, expected);
+        });
+
+        attached.onUpdate((state, updates) => {
+          callbackExecuted = true;
+        });
+
+        await owned1.set(expected);
+        await delay(20);
+
+        assert.isFalse(callbackExecuted);
+        assert.equal(batchedResponses, 0);
       });
-
-      await owned1.set(expected);
-      await delay(20);
-    });
-
-    it(`should not propagate if filtered updates is empty object`, async () => {
-      const filter = ['bool', 'string'];
-      const owned1 = await clients[0].stateManager.create('filtered');
-      const owned2 = await clients[1].stateManager.create('filtered');
-      const attached = await clients[2].stateManager.getCollection('filtered', filter);
-      const expected = { int: 1 };
-      let batchedResponses = 0;
-      let callbackExecuted = false;
-
-      clients[2].socket.addListener(BATCHED_TRANSPORT_CHANNEL, (args) => {
-        batchedResponses += 1;
-      });
-
-      owned1.onUpdate(updates => {
-        assert.deepEqual(updates, expected);
-      });
-
-      attached.onUpdate((state, updates) => {
-        callbackExecuted = true;
-      });
-
-      await owned1.set(expected);
-      await delay(20);
-
-      assert.isFalse(callbackExecuted);
-      assert.equal(batchedResponses, 0);
     });
   });
 
   describe(`## set(updates)`, () => {
-    it(`should throw early if trying to set modify a param which is not filtered`, async () => {
-      const filter = ['bool', 'string'];
-      const owned1 = await clients[0].stateManager.create('filtered');
-      const owned2 = await clients[1].stateManager.create('filtered');
-      const attached = await clients[2].stateManager.getCollection('filtered', filter);
-      let onUpdateCalled = false;
-      let errored = false;
+    [
+      ['whiteList', { whiteList: ['bool', 'string'] }],
+      ['blackList', { blackList: ['int'] }],
+      ['legacy', ['bool', 'string']],
+    ].forEach(([name, filter]) => {
+      it(`should throw early if trying to set modify a param which is not filtered - ${name}`, async () => {
+        const owned1 = await clients[0].stateManager.create('filtered');
+        const owned2 = await clients[1].stateManager.create('filtered');
+        const attached = await clients[2].stateManager.getCollection('filtered', filter);
+        let onUpdateCalled = false;
+        let errored = false;
 
-      owned1.onUpdate(() => onUpdateCalled = true);
+        owned1.onUpdate(() => onUpdateCalled = true);
 
-      try {
-        await attached.set({ int: 42 });
-      } catch (err) {
-        console.log(err.message);
-        errored = true;
-      }
+        try {
+          await attached.set({ int: 42 });
+        } catch (err) {
+          console.log(err.message);
+          errored = true;
+        }
 
-      await delay(20);
+        await delay(20);
 
-      assert.isTrue(errored);
-      assert.isFalse(onUpdateCalled);
+        assert.isTrue(errored);
+        assert.isFalse(onUpdateCalled);
+      });
     });
   });
 
   describe(`## get(name)`, () => {
-    it(`should throw if trying to access a param which is not filtered`, async () => {
-      const filter = ['bool', 'string'];
-      const owned1 = await clients[0].stateManager.create('filtered');
-      const owned2 = await clients[1].stateManager.create('filtered');
-      const attached = await clients[2].stateManager.getCollection('filtered', filter);
-      let errored = false;
+    [
+      ['whiteList', { whiteList: ['bool', 'string'] }],
+      ['blackList', { blackList: ['int'] }],
+      ['legacy', ['bool', 'string']],
+    ].forEach(([name, filter]) => {
+      it(`should throw if trying to access a param which is not filtered - ${name}`, async () => {
+        const owned1 = await clients[0].stateManager.create('filtered');
+        const owned2 = await clients[1].stateManager.create('filtered');
+        const attached = await clients[2].stateManager.getCollection('filtered', filter);
+        let errored = false;
 
-      try {
-        await attached.get('int');
-      } catch (err) {
-        console.log(err.message);
-        errored = true;
-      }
+        try {
+          await attached.get('int');
+        } catch (err) {
+          console.log(err.message);
+          errored = true;
+        }
 
-      await delay(20);
+        await delay(20);
 
-      assert.isTrue(errored);
+        assert.isTrue(errored);
+      });
     });
   });
 
   describe(`## getUnsafe(name)`, () => {
-    it(`should throw if trying to access a param which is not filtered`, async () => {
-      const filter = ['bool', 'string'];
-      const owned1 = await clients[0].stateManager.create('filtered');
-      const owned2 = await clients[1].stateManager.create('filtered');
-      const attached = await clients[2].stateManager.getCollection('filtered', filter);
-      let errored = false;
+    [
+      ['whiteList', { whiteList: ['bool', 'string'] }],
+      ['blackList', { blackList: ['int'] }],
+      ['legacy', ['bool', 'string']],
+    ].forEach(([name, filter]) => {
+      it(`should throw if trying to access a param which is not filtered - ${name}`, async () => {
+        const owned1 = await clients[0].stateManager.create('filtered');
+        const owned2 = await clients[1].stateManager.create('filtered');
+        const attached = await clients[2].stateManager.getCollection('filtered', filter);
+        let errored = false;
 
-      try {
-        await attached.getUnsafe('int');
-      } catch (err) {
-        console.log(err.message);
-        errored = true;
-      }
+        try {
+          await attached.getUnsafe('int');
+        } catch (err) {
+          console.log(err.message);
+          errored = true;
+        }
 
-      await delay(20);
+        await delay(20);
 
-      assert.isTrue(errored);
+        assert.isTrue(errored);
+      });
     });
   });
 
   describe(`## getValues()`, () => {
-    it(`should return a filtered object`, async () => {
-      const filter = ['bool', 'string'];
-      const owned1 = await clients[0].stateManager.create('filtered');
-      const owned2 = await clients[1].stateManager.create('filtered');
-      const attached = await clients[2].stateManager.getCollection('filtered', filter);
+    [
+      ['whiteList', { whiteList: ['bool', 'string'] }],
+      ['blackList', { blackList: ['int'] }],
+      ['legacy', ['bool', 'string']],
+    ].forEach(([name, filter]) => {
+      it(`should return a filtered object - ${name}`, async () => {
+        const owned1 = await clients[0].stateManager.create('filtered');
+        const owned2 = await clients[1].stateManager.create('filtered');
+        const attached = await clients[2].stateManager.getCollection('filtered', filter);
 
-      await owned1.set({ bool: true });
-      await delay(20);
+        await owned1.set({ bool: true });
+        await delay(20);
 
-      const values = attached.getValues();
-      assert.deepEqual(values, [
-        { bool: true, string: 'a' },
-        { bool: false, string: 'a' },
-      ]);
+        const values = attached.getValues();
+        assert.deepEqual(values, [
+          { bool: true, string: 'a' },
+          { bool: false, string: 'a' },
+        ]);
+      });
     });
   });
 
   describe(`## getValuesUnsafe()`, () => {
-    it(`should return a filtered object`, async () => {
-      const filter = ['bool', 'string'];
-      const owned1 = await clients[0].stateManager.create('filtered');
-      const owned2 = await clients[1].stateManager.create('filtered');
-      const attached = await clients[2].stateManager.getCollection('filtered', filter);
+    [
+      ['whiteList', { whiteList: ['bool', 'string'] }],
+      ['blackList', { blackList: ['int'] }],
+      ['legacy', ['bool', 'string']],
+    ].forEach(([name, filter]) => {
+      it(`should return a filtered object - ${name}`, async () => {
+        const owned1 = await clients[0].stateManager.create('filtered');
+        const owned2 = await clients[1].stateManager.create('filtered');
+        const attached = await clients[2].stateManager.getCollection('filtered', filter);
 
-      await owned1.set({ bool: true });
-      await delay(20);
+        await owned1.set({ bool: true });
+        await delay(20);
 
-      const values = attached.getValuesUnsafe();
-      assert.deepEqual(values, [
-        { bool: true, string: 'a' },
-        { bool: false, string: 'a' },
-      ]);
+        const values = attached.getValuesUnsafe();
+        assert.deepEqual(values, [
+          { bool: true, string: 'a' },
+          { bool: false, string: 'a' },
+        ]);
+      });
     });
   });
 });

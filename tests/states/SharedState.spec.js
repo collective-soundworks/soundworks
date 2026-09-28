@@ -741,7 +741,7 @@ describe('# SharedState - filtered attached state', () => {
       assert.equal(attached.id, owned.id);
     });
 
-    it(`should support attach(className, stateId, filter)`, async () => {
+    it(`should support attach(className, stateId, options)`, async () => {
       const owned = await server.stateManager.create('filtered');
       const attached = await client.stateManager.attach('filtered', owned.id, {
         blackList: ['bool', 'string'],

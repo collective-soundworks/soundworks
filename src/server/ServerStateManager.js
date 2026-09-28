@@ -7,6 +7,7 @@ import {
 
 import BaseStateManager, {
   kStateManagerInit,
+  checkValidFilters,
 } from '../common/BaseStateManager.js';
 import BatchedTransport from '../common/BatchedTransport.js';
 import ParameterBag from '../common/ParameterBag.js';
@@ -362,22 +363,14 @@ class ServerStateManager extends BaseStateManager {
         const classDescription = this.#classes.get(className);
 
         // If filters are defined, check that all given values are valid param names
-        // Note that we need the class description, so it can't be done client-side
+        // Note that we need the class description, so it's more efficient to check here
+        // to avoid a network roundtrip
         if (options !== null) {
-          const classParams = Object.keys(classDescription);
 
-          for (let filterName of ['whiteList', 'backList']) {
-            if (!options[filterName]) {
-              continue;
-            }
-
-            const list = options[filterName];
-            const invalid = list.filter(paramName => !classParams.includes(paramName));
-
-            if (invalid.length > 0) {
-              const msg = `Invalid filter (${invalid.join(', ')}) for shared state class '${className}'`;
-              return client.transport.emit(ATTACH_ERROR, reqId, msg);
-            }
+          try {
+            checkValidFilters(options, className, classDescription);
+          } catch (err) {
+            return client.transport.emit(ATTACH_ERROR, reqId, err.message);
           }
         }
 

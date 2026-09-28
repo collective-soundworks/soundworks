@@ -35,6 +35,28 @@ export const kPendingSharedStateConstructionData = Symbol('soundworks:state-mana
 // for testing purposes
 export const kStateManagerClient = Symbol('soundworks:state-manager-client');
 
+/**
+ * Check that given filters match the class description
+ * Used in ServerStateManager and SharedStateCollection
+ * @private
+ */
+export function checkValidFilters(options, className, classDescription) {
+  const classParams = Object.keys(classDescription);
+
+  for (let filterName of ['whiteList', 'backList']) {
+    if (!options[filterName]) {
+      continue;
+    }
+
+    const list = options[filterName];
+    const invalid = list.filter(paramName => !classParams.includes(paramName));
+
+    if (invalid.length > 0) {
+      const msg = `Invalid filter (${invalid.join(', ')}) for shared state class '${className}'`;
+      throw new Error(msg);
+    }
+  }
+}
 
 /**
  * Callback executed when a state is created on the network.
@@ -239,7 +261,7 @@ class BaseStateManager {
    * @param {SharedStateClassName} className - Name of the class.
    * @param {Object} [options={}]
    * @param {string[]} [options.whiteList] - White list of parameter names to track (as precedence over `blackList`).
-   * @param {sintrg[]} [options.blackList] - Black list of parameter names to ignore.
+   * @param {string[]} [options.blackList] - Black list of parameter names to ignore.
    * @returns {Promise<SharedState>}
    *
    * @example
@@ -253,7 +275,7 @@ class BaseStateManager {
    * @param {number} stateId - Id of the state
    * @param {object} [options={}]
    * @param {string[]} [options.whiteList] - White list of parameter names to track (as precedence over `blackList`).
-   * @param {sintrg[]} [options.blackList] - Black list of parameter names to ignore.
+   * @param {string[]} [options.blackList] - Black list of parameter names to ignore.
    * @returns {Promise<SharedState>}
    *
    * @example
@@ -265,16 +287,16 @@ class BaseStateManager {
    * Alternative signatures:
    * - `stateManager.attach(className)`
    * - `stateManager.attach(className, stateId)`
-   * - `stateManager.attach(className, filter)`
-   * - `stateManager.attach(className, stateId, filter)`
+   * - `stateManager.attach(className, options)`
+   * - `stateManager.attach(className, stateId, options)`
    *
    * @param {SharedStateClassName} className - Name of the class.
-   * @param {number|object} [stateIdOrOptions] - Id of the state to attach to. If `null`,
+   * @param {number} [stateId] - Id of the state to attach to. If `null`,
    *  attach to the first state found with the given class name (useful for
    *  globally shared states owned by the server).
    * @param {object} [options={}]
    * @param {string[]} [options.whiteList] - White list of parameter names to track (as precedence over `blackList`).
-   * @param {sintrg[]} [options.blackList] - Black list of parameter names to ignore.
+   * @param {string[]} [options.blackList] - Black list of parameter names to ignore.
    * @returns {Promise<SharedState>}
    *
    * @example
@@ -653,62 +675,38 @@ class BaseStateManager {
    *
    * @overload
    * @param {SharedStateClassName} className - Name of the shared state class.
-   * @param {SharedStateParameterName[]} filter - Filter parameter of interest for each
-   *  state of the collection.
-   * @returns {Promise<SharedStateCollection>}
-   *
-   * @example
-   * const collection = await client.stateManager.getCollection(className, ['my-param']);
-   */
-  /**
-   * Returns a collection of all the states created from a given shared state class.
-   *
-   * @overload
-   * @param {SharedStateClassName} className - Name of the shared state class.
-   * @param {object} options - Options.
-   * @param {boolean} options.excludeLocal=false - If set to true, exclude states
+   * @param {object} [options={}] - Options.
+   * @param {boolean} [options.excludeLocal=false] - If set to true, exclude states
    *  created by the same node from the collection.
+   * @param {string[]} [options.whiteList] - White list of parameter names to track (as precedence over `blackList`).
+   * @param {string[]} [options.blackList] - Black list of parameter names to ignore.
    * @returns {Promise<SharedStateCollection>}
    *
    * @example
-   * const collection = await client.stateManager.getCollection(className, { excludeLocal: true });
-   */
-  /**
-   * Returns a collection of all the states created from a given shared state class.
-   *
-   * @overload
-   * @param {SharedStateClassName} className - Name of the shared state class.
-   * @param {SharedStateParameterName[]} filter - Filter parameter of interest for each
-   *  state of the collection.
-   * @param {object} options - Options.
-   * @param {boolean} options.excludeLocal=false - If set to true, exclude states
-   *  created by the same node from the collection.
-   * @returns {Promise<SharedStateCollection>}
-   *
-   * @example
-   * const collection = await client.stateManager.getCollection(className, ['my-param'], { excludeLocal: true });
+   * const collection = await client.stateManager.getCollection(className, {
+   *   blackList: ['my-param'],
+   *   excludeLocal: true,
+   * });
    */
   /**
    * Returns a collection of all the states created from a given shared state class.
    *
    * Alternative signatures:
    * - `stateManager.getCollection(className)`
-   * - `stateManager.getCollection(className, filter)`
    * - `stateManager.getCollection(className, options)`
-   * - `stateManager.getCollection(className, filter, options)`
    *
    * @param {SharedStateClassName} className - Name of the shared state class.
-   * @param {array|null} [filter=null] - Filter parameter of interest for each
-   *  state of the collection. If set to `null`, no filter applied.
    * @param {object} [options={}] - Options.
    * @param {boolean} [options.excludeLocal=false] - If set to true, exclude states
    *  created by the same node from the collection.
+   * @param {string[]} [options.whiteList] - White list of parameter names to track (as precedence over `blackList`).
+   * @param {string[]} [options.blackList] - Black list of parameter names to ignore.
    * @returns {Promise<SharedStateCollection>}
    *
    * @example
    * const collection = await client.stateManager.getCollection(className);
    */
-  async getCollection(className, filterOrOptions = null, options = {}) {
+  async getCollection(className, options = {}) {
     if (this.#status !== 'inited') {
       throw new DOMException(`Cannot execute 'getCollection' on BaseStateManager: BaseStateManager is not inited`, 'InvalidStateError');
     }
@@ -717,36 +715,45 @@ class BaseStateManager {
       throw new TypeError(`Cannot execute 'getCollection' on BaseStateManager: Argument 1 should be a string"`);
     }
 
-    let filter;
-
     if (arguments.length === 2) {
-      if (filterOrOptions === null) {
-        filter = null;
-        options = null;
-      } else if (Array.isArray(filterOrOptions)) {
-        filter = filterOrOptions;
-        options = {};
-      } else if (typeof filterOrOptions === 'object') {
-        filter = null;
-        options = filterOrOptions;
-      } else {
-        throw new TypeError(`Cannot execute 'getCollection' on BaseStateManager: Argument 2 should be either null, an array or an object"`);
+      if (Array.isArray(options)) {
+        // backward compatibility for legacy filter array argument
+        warnings.deprecated(
+          'argument `filter: string[]` of BaseStateManager#getCollection',
+          'argument `options { whiteList: string[] }`',
+          '5.6.0',
+        );
+
+        options = { whiteList: options };
+      } else if (!isPlainObject(options)) {
+        throw new TypeError(`Cannot execute 'getCollection' on BaseStateManager: Argument 2 should be either null or an object"`);
       }
     }
 
+    // backward compatibility for legacy filter array argument
     if (arguments.length === 3) {
-      filter = filterOrOptions;
+      // backward compatibility for legacy filter array argument
+      warnings.deprecated(
+        'argument `filter: string[]` of BaseStateManager#getCollection',
+        'argument `options { whiteList: string[] }`',
+        '5.6.0',
+      );
+
+      const filter = options;
+      options = arguments[2];
 
       if (filter !== null && !Array.isArray(filter)) {
         throw new TypeError(`Cannot execute 'getCollection' on BaseStateManager: Argument 2 should be either an array or null"`);
       }
 
-      if (options === null || typeof options !== 'object') {
+      if (options === null || !isPlainObject(options)) {
         throw new TypeError(`Cannot execute 'getCollection' on BaseStateManager: Argument 3 should be either an object"`);
       }
+
+      options.whiteList = filter;
     }
 
-    const collection = new SharedStateCollection(this, className, filter, options);
+    const collection = new SharedStateCollection(this, className, options);
 
     try {
       await collection[kSharedStateCollectionInit]();
