@@ -12,12 +12,11 @@ declare class SharedStatePrivate {
     constructor(manager: any, className: any, classDefinition: any, id: any, initValues?: {});
     get id(): null;
     get className(): null;
-    get creatorId(): null;
-    get creatorInstanceId(): null;
+    get ownerId(): null;
     get attachedClients(): Map<any, any>;
     get parameters(): null;
     [kSharedStatePrivateGetValues](): any;
-    [kSharedStatePrivateAttachClient](instanceId: any, client: any, isOwner: any, filter: any): void;
+    [kSharedStatePrivateAttachClient](instanceId: any, client: any, isOwner: any, options: any): void;
     [kSharedStatePrivateDetachClient](instanceId: any, client: any): void;
     #private;
 }

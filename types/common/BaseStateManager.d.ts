@@ -1,5 +1,6 @@
 export const kStateManagerInit: unique symbol;
 export const kStateManagerDeleteState: unique symbol;
+export const kPendingSharedStateConstructionData: unique symbol;
 export const kStateManagerClient: unique symbol;
 export default BaseStateManager;
 /**
@@ -47,10 +48,6 @@ declare class BaseStateManager {
      */
     getClassDescription(className: SharedStateClassName): SharedStateClassDescription;
     /**
-     * @deprecated Use {@link BaseStateManager#getClassDescription} instead.
-     */
-    getSchema(className: any): Promise<any>;
-    /**
      * Create a {@link SharedState} instance from a registered class.
      *
      * @param {SharedStateClassName} className - Name of the class.
@@ -90,13 +87,18 @@ declare class BaseStateManager {
      *
      * @overload
      * @param {SharedStateClassName} className - Name of the class.
-     * @param {string[]} filter - List of parameters of interest
+     * @param {Object} [options={}]
+     * @param {string[]} [options.whiteList] - White list of parameter names to track (as precedence over `blackList`).
+     * @param {sintrg[]} [options.blackList] - Black list of parameter names to ignore.
      * @returns {Promise<SharedState>}
      *
      * @example
      * const state = await client.stateManager.attach('my-class', ['some-param']);
      */
-    attach(className: SharedStateClassName, filter: string[]): Promise<SharedState>;
+    attach(className: SharedStateClassName, options?: {
+        whiteList?: string[] | undefined;
+        blackList?: sintrg[] | undefined;
+    } | undefined): Promise<SharedState>;
     /**
      * Attach to an existing {@link SharedState} instance.
      *
@@ -147,7 +149,7 @@ declare class BaseStateManager {
      * @param {stateManagerObserveCallback} callback - Function to execute when a
      *   new {@link SharedState} is created on the network.
      * @param {object} options - Options.
-     * @param {boolean} options.excludeLocal=false - If set to true, exclude states
+     * @param {boolean} [options.excludeLocal=false] - If set to true, exclude states
      *   created by the same node from the collection.
      * @example
      * client.stateManager.observe(async (className, stateId) => {
@@ -157,7 +159,7 @@ declare class BaseStateManager {
      * }, { excludeLocal: true });
      */
     observe(callback: stateManagerObserveCallback, options: {
-        excludeLocal: boolean;
+        excludeLocal?: boolean | undefined;
     }): any;
     /**
      * Observe all the {@link SharedState} instances of given {@link SharedStateClassName}
@@ -169,7 +171,7 @@ declare class BaseStateManager {
      * @param {stateManagerObserveCallback} callback - Function to execute when a
      *   new {@link SharedState} is created on the network.
      * @param {object} options - Options.
-     * @param {boolean} options.excludeLocal=false - If set to true, exclude states
+     * @param {boolean} [options.excludeLocal=false] - If set to true, exclude states
      *   created by the same node from the collection.
      * @example
      * client.stateManager.observe('my-shared-state-class', async (className, stateId) => {
@@ -177,7 +179,7 @@ declare class BaseStateManager {
      * }, { excludeLocal: true });
      */
     observe(className: SharedStateClassName, callback: stateManagerObserveCallback, options: {
-        excludeLocal: boolean;
+        excludeLocal?: boolean | undefined;
     }): any;
     /**
      * Returns a collection of all the states created from a given shared state class.
@@ -237,6 +239,10 @@ declare class BaseStateManager {
     getCollection(className: SharedStateClassName, filter: SharedStateParameterName[], options: {
         excludeLocal: boolean;
     }): Promise<SharedStateCollection>;
+    /**
+     * @deprecated Use {@link BaseStateManager#getClassDescription} instead.
+     */
+    getSchema(className: any): Promise<any>;
     /** @private */
     private [kStateManagerDeleteState];
     /**

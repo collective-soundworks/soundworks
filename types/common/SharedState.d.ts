@@ -79,16 +79,6 @@ export type sharedStateDeleteOnUpdateCallback = () => any;
  * ```
  */
 declare class SharedState {
-    constructor({ stateId, instanceId, className, classDescription, isOwner, manager, initValues, filter, }: {
-        stateId: any;
-        instanceId: any;
-        className: any;
-        classDescription: any;
-        isOwner: any;
-        manager: any;
-        initValues: any;
-        filter: any;
-    });
     /**
      * Id of the state
      * @type {Number}
@@ -128,10 +118,6 @@ declare class SharedState {
      * const paramDescription = state.getDescription('my-param');
      */
     getDescription(paramName?: string): SharedStateClassDescription | SharedStateParameterDescription;
-    /**
-     * @deprecated Use {@link SharedState#getDescription} instead.
-     */
-    getSchema(paramName?: null): any;
     /**
      * Update the values of the state.
      *
@@ -292,6 +278,10 @@ declare class SharedState {
      * @param {Function} callback - Callback to execute when the state is deleted.
      */
     onDelete(callback: Function): () => boolean;
+    /**
+     * @deprecated Use {@link SharedState#getDescription} instead.
+     */
+    getSchema(paramName?: null): any;
     /** @private */
     private [kSharedStatePromiseStore];
     #private;

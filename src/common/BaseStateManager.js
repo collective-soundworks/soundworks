@@ -237,7 +237,9 @@ class BaseStateManager {
    *
    * @overload
    * @param {SharedStateClassName} className - Name of the class.
-   * @param {string[]} filter - List of parameters of interest
+   * @param {Object} [options={}]
+   * @param {string[]} [options.whiteList] - White list of parameter names to track (as precedence over `blackList`).
+   * @param {sintrg[]} [options.blackList] - Black list of parameter names to ignore.
    * @returns {Promise<SharedState>}
    *
    * @example
@@ -249,7 +251,9 @@ class BaseStateManager {
    * @overload
    * @param {SharedStateClassName} className - Name of the class.
    * @param {number} stateId - Id of the state
-   * @param {string[]} filter - List of parameters of interest
+   * @param {object} [options={}]
+   * @param {string[]} [options.whiteList] - White list of parameter names to track (as precedence over `blackList`).
+   * @param {sintrg[]} [options.blackList] - Black list of parameter names to ignore.
    * @returns {Promise<SharedState>}
    *
    * @example
@@ -265,11 +269,12 @@ class BaseStateManager {
    * - `stateManager.attach(className, stateId, filter)`
    *
    * @param {SharedStateClassName} className - Name of the class.
-   * @param {number|string[]} [stateIdOrOptions] - Id of the state to attach to. If `null`,
+   * @param {number|object} [stateIdOrOptions] - Id of the state to attach to. If `null`,
    *  attach to the first state found with the given class name (useful for
    *  globally shared states owned by the server).
-   * @param {string[]} [filter] - List of parameters of interest in the
-   *  returned state. If set to `null`, no filter is applied.
+   * @param {object} [options={}]
+   * @param {string[]} [options.whiteList] - White list of parameter names to track (as precedence over `blackList`).
+   * @param {sintrg[]} [options.blackList] - Black list of parameter names to ignore.
    * @returns {Promise<SharedState>}
    *
    * @example
