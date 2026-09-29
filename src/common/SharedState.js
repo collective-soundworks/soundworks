@@ -1,4 +1,8 @@
-import { isPlainObject, isString } from '@ircam/sc-utils';
+import {
+  isPlainObject,
+  isString,
+  isFunction,
+} from '@ircam/sc-utils';
 
 import ParameterBag from './ParameterBag.js';
 import PromiseStore from './PromiseStore.js';
@@ -326,18 +330,13 @@ class SharedState {
       oldValues[name] = oldValue;
     }
 
-    // if the `UPDATE_REQUEST` as been aborted by the server, do not propagate
-    let promises = [];
-
+    // do not propagate if the `UPDATE_REQUEST` as been aborted by the server.
     if (propagate && Object.keys(newValues).length > 0) {
-      this.#onUpdateCallbacks.forEach(listener => {
-        promises.push(listener(newValues, oldValues));
-      });
+      const callbackPromises = this.#executeUpdateCallbacks(newValues, oldValues);
+      // on a given client, `await state.set(update)` resolves after all
+      // update callbacks have themselves resolved
+      await Promise.all(callbackPromises);
     }
-
-    // on a given client, `await state.set(update)` resolves after all
-    // update callbacks have themselves resolved
-    await Promise.all(promises);
 
     // reset events to null after propagation of all listeners
     for (let name in newValues) {
@@ -349,6 +348,27 @@ class SharedState {
     }
 
     return newValues;
+  }
+
+  #executeUpdateCallbacks(newValues, oldValues) {
+    let promises = [];
+
+    this.#onUpdateCallbacks.forEach(listenerPayload => {
+      let somePromise = this.#executeUpdateCallback(listenerPayload, newValues, oldValues);
+      promises.push(somePromise);
+    });
+
+    return promises;
+  }
+
+  #executeUpdateCallback(listenerPayload, newValues, oldValues) {
+    const { paramName, listener, unsubscribe } = listenerPayload;
+
+    if (paramName === null) {
+      return listener(newValues, oldValues);
+    } else if (paramName in newValues) {
+      return listener(newValues[paramName], oldValues[paramName]);
+    }
   }
 
   /**
@@ -585,9 +605,9 @@ class SharedState {
       }
     }
 
-    // params that trigger a synced onUpdate call: immediate, local, non-acknowledged
+    // params that trigger a synced onUpdate call are: immediate, local, non-acknowledged
     if (syncedOnUpdate) {
-      this.#onUpdateCallbacks.forEach(listener => listener(newValues, oldValues));
+      this.#executeUpdateCallbacks(newValues, oldValues);
     }
 
     // if we only have local params, we can resolve immediately
@@ -804,8 +824,79 @@ class SharedState {
    * // later
    * unsubscribe();
    */
-  onUpdate(listener, executeListener = false) {
-    this.#onUpdateCallbacks.add(listener);
+  onUpdate(paramNameOrListener, listenerOrExecuteCallback, someExecuteListener = false) {
+    let paramName;
+    let listener;
+    let executeListener;
+
+    // updateUpdate(listener)
+    if (arguments.length === 1) {
+      if (!isFunction(paramNameOrListener)) {
+        throw new TypeError(`Cannot execute 'onUpdate(listener)' on SharedState (overload resolution failed): listener must be a function`);
+      }
+
+      paramName = null;
+      listener = paramNameOrListener;
+      executeListener = false;
+    }
+
+    // updateUpdate(paramName, listener)
+    // updateUpdate(listener, executeListener)
+    if (arguments.length === 2) {
+      if (isString(paramNameOrListener)) {
+        if (!isFunction(listenerOrExecuteCallback)) {
+          throw new TypeError(`Cannot execute 'onUpdate(paramName, listener)' on SharedState (overload resolution failed): listener must be a function`);
+        }
+
+        paramName = paramNameOrListener;
+        listener = listenerOrExecuteCallback;
+        executeListener = false;
+
+      } else if (isFunction(paramNameOrListener)) {
+        if (typeof listenerOrExecuteCallback !== 'boolean') {
+          throw new TypeError(`Cannot execute 'onUpdate(callback, executeListener)' on SharedState (overload resolution failed): executeListener must be a boolean`);
+        }
+
+        paramName = null;
+        listener = paramNameOrListener;
+        executeListener = listenerOrExecuteCallback;
+      } else {
+        throw new TypeError(`Cannot execute 'onUpdate' on SharedState (overload resolution failed): possible signatures 'onUpdate(paramName, listener)' or 'onUpdate(listener, executeListener)'`);
+      }
+    }
+
+    // onUpdate(paramName, listener, executeListener)
+    if (arguments.length === 3) {
+      if (!isString(paramNameOrListener)) {
+        throw new TypeError(`Cannot execute 'onUpdate(paramName, listener, executeListener)' on SharedState (overload resolution failed): paramName must be a string`);
+      }
+
+      if (!isFunction(listenerOrExecuteCallback)) {
+        throw new TypeError(`Cannot execute 'onUpdate(paramName, listener, executeListener)' on SharedState (overload resolution failed): listener must be a function`);
+      }
+
+      if (typeof someExecuteListener !== 'boolean') {
+        throw new TypeError(`Cannot execute 'onUpdate(paramName, listener, executeListener)' on SharedState (overload resolution failed): executeListener must be a boolean`);
+      }
+
+      paramName = paramNameOrListener;
+      listener = listenerOrExecuteCallback;
+      executeListener = someExecuteListener;
+    }
+
+    // @todo - check that paramName exists in description
+    if (paramName !== null) {
+      try {
+        this.getDescription(paramName);
+      } catch (err) {
+        throw new ReferenceError(`Cannot execute 'onUpdate' on SharedState: parameter '${paramName}' does not exists`);
+      }
+    }
+
+    const listenerPayload = { paramName, listener };
+    this.#onUpdateCallbacks.add(listenerPayload);
+    // create unsubscribe and add to payload, to pass it back to the listeners as argument
+    listenerPayload.unsubscribe = () => this.#onUpdateCallbacks.delete(listenerPayload);
 
     if (executeListener === true) {
       const currentValues = this.getValues();
@@ -819,12 +910,10 @@ class SharedState {
         }
       }
 
-      listener(currentValues, {});
+      this.#executeUpdateCallback(listenerPayload, currentValues, {});
     }
 
-    return () => {
-      this.#onUpdateCallbacks.delete(listener);
-    };
+    return listenerPayload.unsubscribe;
   }
 
   /**

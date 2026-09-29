@@ -247,10 +247,6 @@ describe('# SharedState', () => {
 
         afterBlock = true;
       })
-
-      // // } finally {
-      // //   finallyFlag = true;
-      // // }
     });
   });
 
@@ -325,6 +321,125 @@ describe('# SharedState', () => {
       const ref2 = a.getValuesUnsafe();
 
       assert.equal(ref1.ref, ref2.ref);
+    });
+  });
+
+  describe('## onUpdate - checkParams', () => {
+    it('onUpdate(listener) - wrong arguments', async () => {
+      const state = await server.stateManager.create('a');
+      let errored = false;
+      try {
+        state.onUpdate(null);
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      assert.equal(errored, true);
+    });
+
+    it('onUpdate(listener) - correct arguments (sync function)', async () => {
+      const state = await server.stateManager.create('a');
+      let errored = false;
+      try {
+        state.onUpdate(() => {});
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      assert.equal(errored, false);
+    });
+
+    it('onUpdate(listener) - correct arguments (async function)', async () => {
+      const state = await server.stateManager.create('a');
+      let errored = false;
+      try {
+        state.onUpdate(async () => {});
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      assert.equal(errored, false);
+    });
+
+    it('onUpdate(name, listener) | onUpdate(listener, executeListener) - argument 0 is neither a string or a function', async () => {
+      const state = await server.stateManager.create('a');
+      let errored = false;
+      try {
+        state.onUpdate(NaN, true);
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      assert.equal(errored, true);
+    });
+
+    it('onUpdate(name, listener) - argument 1 is not a function', async () => {
+      const state = await server.stateManager.create('a');
+      let errored = false;
+      try {
+        state.onUpdate('int', true);
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      assert.equal(errored, true);
+    });
+
+    it('onUpdate(name, listener) - correct arguments', async () => {
+      const state = await server.stateManager.create('a');
+      let errored = false;
+      try {
+        state.onUpdate('int', () => {});
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      assert.equal(errored, false);
+    });
+
+    it('onUpdate(listener, executeListener) - argument 1 is not a function', async () => {
+      const state = await server.stateManager.create('a');
+      let errored = false;
+      try {
+        state.onUpdate(async () => {}, NaN);
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      assert.equal(errored, true);
+    });
+
+    it('onUpdate(listener, executeListener) - correct arguments', async () => {
+      const state = await server.stateManager.create('a');
+      let errored = false;
+      try {
+        state.onUpdate(() => {}, true);
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      assert.equal(errored, false);
+    });
+
+    it('onUpdate(name, listener) - param is not in description', async () => {
+      const state = await server.stateManager.create('a');
+      let errored = false;
+      try {
+        state.onUpdate('niap', () => {});
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      assert.equal(errored, true);
     });
   });
 
@@ -437,9 +552,9 @@ describe('# SharedState', () => {
       const a = await server.stateManager.create('a');
 
       let onUpdateCalled = false;
-      const unsubsribe = a.onUpdate(updates => onUpdateCalled = true);
+      const unsubscribe = a.onUpdate(updates => onUpdateCalled = true);
 
-      unsubsribe();
+      unsubscribe();
 
       await a.set({ int: 1 });
       await delay(10);
@@ -452,7 +567,7 @@ describe('# SharedState', () => {
       const a = await server.stateManager.create('a');
 
       let onUpdateCalled = false;
-      const unsubsribe = a.onUpdate(updates => { onUpdateCalled = true; }, false);
+      a.onUpdate(updates => { onUpdateCalled = true; }, false);
 
       await delay(10);
 
@@ -464,7 +579,7 @@ describe('# SharedState', () => {
       const a = await server.stateManager.create('a');
 
       let onUpdateCalled = false;
-      const unsubsribe = a.onUpdate((newValues, oldValues) => {
+      a.onUpdate((newValues, oldValues) => {
         onUpdateCalled = true;
         assert.deepEqual(newValues, { bool: false, int: 0 });
         assert.deepEqual(oldValues, {});
@@ -525,6 +640,38 @@ describe('# SharedState', () => {
       assert.equal(state.get('any').num, 1);
 
       assert.equal(numCalled, 2);
+    });
+  });
+
+  describe('## onUpdate(paramName, (newValue, oldValue) => {}[, executeListener=false]) => unsubscribe', () => {
+    it('should work properly', async () => {
+      const a = await server.stateManager.create('a');
+      let expectedNewValue = null;
+      let expectedOldValue = null;
+
+      a.onUpdate('int', (newValue, oldValue) => {
+        expectedNewValue = newValue;
+        expectedOldValue = oldValue;
+      });
+
+      await a.set('int', 42);
+
+      assert.equal(expectedNewValue, 42);
+      assert.equal(expectedOldValue, 0);
+    });
+
+    it('should work properly - execute true', async () => {
+      const a = await server.stateManager.create('a');
+      let executed = false;
+      let expected = null;
+
+      a.onUpdate('int', (newValue, oldValue) => {
+        assert.equal(newValue, 0);
+        assert.equal(oldValue, undefined);
+        executed = true;
+      }, true);
+
+      assert.isTrue(executed);
     });
   });
 

@@ -40,7 +40,7 @@ describe('# SharedStateParameterDescription', () => {
   });
 
   describe('## Behavioural options', () => {
-    it('default options [event=false, filterChange=true, immediate=false] should behave correctly', async () => {
+    it('default options [event=false, filterChange=true, immediate=false] should behave correctly (1)', async () => {
       const a = await server.stateManager.create('a');
       let counter = 0;
 
@@ -63,7 +63,30 @@ describe('# SharedStateParameterDescription', () => {
       await a.delete();
     });
 
-    it('[event=true] should behave correctly', async () => {
+    it('default options [event=false, filterChange=true, immediate=false] should behave correctly (2)', async () => {
+      const a = await server.stateManager.create('a');
+      let counter = 0;
+
+      a.onUpdate('bool', value => {
+        try {
+          assert.deepEqual(value, true);
+          counter += 1;
+        } catch(err) {
+          reject(err);
+        }
+      });
+
+      await a.set('bool', true);
+      await a.set('bool', true);
+      await a.set('bool', true);
+
+      await new Promise(resolve => setTimeout(resolve, 200));
+      assert.equal(counter, 1);
+
+      await a.delete();
+    });
+
+    it('[event=true] should behave correctly (1)', async () => {
       return new Promise(async (resolve, reject) => {
         server.stateManager.defineClass('event-test', {
           value: {
@@ -113,7 +136,57 @@ describe('# SharedStateParameterDescription', () => {
       });
     });
 
-    it('[filterChange=false] should behave correctly', async () => {
+    it('[event=true] should behave correctly (2)', async () => {
+      return new Promise(async (resolve, reject) => {
+        server.stateManager.defineClass('event-test', {
+          value: {
+            type: 'boolean',
+            event: true,
+          }
+        });
+        const state = await server.stateManager.create('event-test');
+        const numEvents = 5;
+        let counter = 0;
+
+        assert.equal(state.get('value'), null);
+
+        // should be able to read if called from a subscription
+        function readInSubscribe() {
+          assert.equal(state.get('value'), true);
+        }
+
+        state.onUpdate('value', value => {
+          try {
+            assert.deepEqual(value, true);
+            readInSubscribe();
+            counter += 1;
+          } catch(err) {
+            reject(err);
+          }
+        });
+
+        let updates;
+        for (let i = 0; i < numEvents; i++) {
+          updates = await state.set({ value: true });
+          // returned updates object has the proper value
+          assert.deepEqual(updates, { value: true });
+          // but value is null if read from state
+          assert.equal(state.get('value'), null);
+          updates = null;
+        }
+
+        // client-side
+        const clientState = await client1.stateManager.attach('event-test');
+        assert.equal(clientState.get('value'), null);
+
+        setTimeout(() => {
+          assert.equal(counter, numEvents);
+          resolve();
+        }, 100);
+      });
+    });
+
+    it('[filterChange=false] should behave correctly (1)', async () => {
       return new Promise(async (resolve, reject) => {
         server.stateManager.defineClass('filter-change-test', {
           value: {
@@ -154,7 +227,44 @@ describe('# SharedStateParameterDescription', () => {
       });
     });
 
-    it('[immediate=true] (w/ [event=false, filterChange=true]) should behave correctly', async () => {
+    it('[filterChange=false] should behave correctly (2)', async () => {
+      return new Promise(async (resolve, reject) => {
+        server.stateManager.defineClass('filter-change-test', {
+          value: {
+            type: 'boolean',
+            default: true,
+            filterChange: false,
+          }
+        });
+
+        const state = await server.stateManager.create('filter-change-test');
+        const numCalls = 5;
+        let counter = 0;
+
+        state.onUpdate('value', value => {
+          try {
+            assert.deepEqual(value, true);
+            counter += 1;
+          } catch(err) {
+            reject(err);
+          }
+        });
+
+        for (let i = 0; i < numCalls; i++) {
+          await state.set({ value: true });
+          // contrary to `event` the value is still stored into the state
+          assert.equal(state.get('value'), true);
+        }
+
+
+        setTimeout(() => {
+            assert.equal(counter, numCalls);
+            resolve();
+        }, 100);
+      });
+    });
+
+    it('[immediate=true] (w/ [event=false, filterChange=true]) should behave correctly (1)', async () => {
       return new Promise(async (resolve, reject) => {
         server.stateManager.defineClass('immediate-test', {
           immediateValue: {
@@ -276,6 +386,8 @@ describe('# SharedStateParameterDescription', () => {
         Promise.all([statePromise, attachedPromise]).then(() => resolve());
       });
     });
+
+    // @todo - implement other tests with onUpdate(paramName, callback);
 
     it('[immediate=true, event=true] should behave correctly', async () => {
       return new Promise(async (resolve, reject) => {
