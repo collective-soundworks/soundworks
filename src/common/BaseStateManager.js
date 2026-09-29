@@ -35,28 +35,6 @@ export const kPendingSharedStateConstructionData = Symbol('soundworks:state-mana
 // for testing purposes
 export const kStateManagerClient = Symbol('soundworks:state-manager-client');
 
-/**
- * Check that given filters match the class description
- * Used in ServerStateManager and SharedStateCollection
- * @private
- */
-export function checkValidFilters(options, className, classDescription) {
-  const classParams = Object.keys(classDescription);
-
-  for (let filterName of ['whiteList', 'backList']) {
-    if (!options[filterName]) {
-      continue;
-    }
-
-    const list = options[filterName];
-    const invalid = list.filter(paramName => !classParams.includes(paramName));
-
-    if (invalid.length > 0) {
-      const msg = `Invalid filter (${invalid.join(', ')}) for shared state class '${className}'`;
-      throw new Error(msg);
-    }
-  }
-}
 
 /**
  * Callback executed when a state is created on the network.

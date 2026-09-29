@@ -307,11 +307,11 @@ describe(`# SharedStateCollection`, () => {
       await state0.set({ bool: true });
       await delay(50);
       // should be propagated to everyone
-      assert.equal(state0.get('bool'), true);
-      assert.equal(state1.get('bool'), false);
-      assert.equal(attached0.get('bool'), true);
-      assert.equal(attached1.get('bool'), false);
-      assert.isTrue(onUpdateCalled);
+      assert.equal(state0.get('bool'), true, 'state0 should be true');
+      assert.equal(state1.get('bool'), false, 'state1 should be false');
+      assert.equal(attached0.get('bool'), true, 'attached0 should be true');
+      assert.equal(attached1.get('bool'), false, 'attached1 should be false');
+      assert.isTrue(onUpdateCalled, 'callback should have been called');
 
       await collection.detach();
 
@@ -320,8 +320,145 @@ describe(`# SharedStateCollection`, () => {
     });
   });
 
+  describe('## onUpdate - checkParams', () => {
+    it('onUpdate(listener) - wrong arguments', async () => {
+      const state = await clients[0].stateManager.create('a');
+      const collection = await clients[1].stateManager.getCollection('a');
+      let errored = false;
+
+      try {
+        collection.onUpdate(null);
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      assert.equal(errored, true);
+    });
+
+    it('onUpdate(listener) - correct arguments (sync function)', async () => {
+      const state = await clients[0].stateManager.create('a');
+      const collection = await clients[1].stateManager.getCollection('a');
+      let errored = false;
+
+      try {
+        collection.onUpdate(() => {});
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      assert.equal(errored, false);
+    });
+
+    it('onUpdate(listener) - correct arguments (async function)', async () => {
+      const state = await clients[0].stateManager.create('a');
+      const collection = await clients[1].stateManager.getCollection('a');
+      let errored = false;
+
+      try {
+        collection.onUpdate(async () => {});
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      assert.equal(errored, false);
+    });
+
+    it('onUpdate(name, listener) | onUpdate(listener, executeListener) - argument 0 is neither a string or a function', async () => {
+      const state = await clients[0].stateManager.create('a');
+      const collection = await clients[1].stateManager.getCollection('a');
+      let errored = false;
+
+      try {
+        collection.onUpdate(NaN, true);
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      assert.equal(errored, true);
+    });
+
+    it('onUpdate(name, listener) - argument 1 is not a function', async () => {
+      const state = await clients[0].stateManager.create('a');
+      const collection = await clients[1].stateManager.getCollection('a');
+      let errored = false;
+
+      try {
+        collection.onUpdate('int', true);
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      assert.equal(errored, true);
+    });
+
+    it('onUpdate(name, listener) - correct arguments', async () => {
+      const state = await clients[0].stateManager.create('a');
+      const collection = await clients[1].stateManager.getCollection('a');
+      let errored = false;
+
+      try {
+        collection.onUpdate('int', () => {});
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      assert.equal(errored, false);
+    });
+
+    it('onUpdate(listener, executeListener) - argument 1 is not a function', async () => {
+      const state = await clients[0].stateManager.create('a');
+      const collection = await clients[1].stateManager.getCollection('a');
+      let errored = false;
+
+      try {
+        collection.onUpdate(async () => {}, NaN);
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      assert.equal(errored, true);
+    });
+
+    it('onUpdate(listener, executeListener) - correct arguments', async () => {
+      const state = await clients[0].stateManager.create('a');
+      const collection = await clients[1].stateManager.getCollection('a');
+      let errored = false;
+
+      try {
+        collection.onUpdate(() => {}, true);
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      assert.equal(errored, false);
+    });
+
+    it('onUpdate(name, listener) - param is not in description', async () => {
+      const state = await clients[0].stateManager.create('a');
+      const collection = await clients[1].stateManager.getCollection('a');
+      let errored = false;
+
+      try {
+        collection.onUpdate('niap', () => {});
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      assert.equal(errored, true);
+    });
+  });
+
   describe(`## onUpdate(callback)`, () => {
-    it(`should properly call onUpdate with state and updates as arguments`, async () => {
+    it(`should properly call onUpdate with state and updates as arguments (1)`, async () => {
       const state = await clients[0].stateManager.create('a');
       const collection = await clients[1].stateManager.getCollection('a');
 
@@ -346,15 +483,41 @@ describe(`# SharedStateCollection`, () => {
       await delay(50);
     });
 
-    it('should not propagate event parameters on first call if `executeListener=true`', async () => {
+    it(`should properly call onUpdate with state and updates as arguments (2)`, async () => {
+      const state = await clients[0].stateManager.create('a');
+      const collection = await clients[1].stateManager.getCollection('a');
+
+      let onUpdateCalled = false;
+
+      collection.onUpdate('int', (_, value) => {
+        onUpdateCalled = true;
+
+        assert.equal(s.id, state.id); // same reference
+        assert.equal(s.get('int'), 42);
+        assert.equal(value, 42);
+      });
+
+      await state.set({ int: 42 });
+      await delay(50);
+
+      if (onUpdateCalled === false) {
+        assert.fail('onUpdate should have been called');
+      }
+
+      await state.delete();
+      await delay(50);
+    });
+
+    it('should not propagate event parameters on first call if `executeListener=true` (1)', async () => {
       server.stateManager.defineClass('with-event', {
         bool: { type: 'boolean', event: true, },
         int: { type: 'integer', default: 20, },
       });
+
       const state = await server.stateManager.create('with-event');
       const collection = await server.stateManager.getCollection('with-event');
-
       let onUpdateCalled = false;
+
       collection.onUpdate((state, newValues, oldValues) => {
         onUpdateCalled = true;
         assert.deepEqual(newValues, { int: 20 });
@@ -364,6 +527,35 @@ describe(`# SharedStateCollection`, () => {
       await delay(10);
 
       assert.equal(onUpdateCalled, true);
+      server.stateManager.deleteClass('with-event');
+    });
+
+    it('should not propagate event parameters on first call if `executeListener=true` (2)', async () => {
+      server.stateManager.defineClass('with-event', {
+        bool: { type: 'boolean', event: true, },
+        int: { type: 'integer', default: 20, },
+      });
+
+      const state = await server.stateManager.create('with-event');
+      const collection = await server.stateManager.getCollection('with-event');
+
+      let onUpdateCalled = false;
+      let eventOnUpdateCalled = false;
+
+      collection.onUpdate('int', (state, value, oldValue) => {
+        onUpdateCalled = true;
+        assert.deepEqual(value, 20);
+        assert.deepEqual(oldValue, undefined);
+      }, true);
+
+      collection.onUpdate('bool', (state, value, oldValue) => {
+        eventOnUpdateCalled = true;
+      }, true);
+
+      await delay(10);
+
+      assert.equal(onUpdateCalled, true);
+      assert.equal(eventOnUpdateCalled, false);
       server.stateManager.deleteClass('with-event');
     });
 

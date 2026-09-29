@@ -7,8 +7,10 @@ import {
 
 import BaseStateManager, {
   kStateManagerInit,
-  checkValidFilters,
 } from '../common/BaseStateManager.js';
+import {
+  checkValidFilters,
+} from '../common/shared-state-utils.js';
 import BatchedTransport from '../common/BatchedTransport.js';
 import ParameterBag from '../common/ParameterBag.js';
 import {

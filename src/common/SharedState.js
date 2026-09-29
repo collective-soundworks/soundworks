@@ -1,7 +1,6 @@
 import {
   isPlainObject,
   isString,
-  isFunction,
 } from '@ircam/sc-utils';
 
 import ParameterBag from './ParameterBag.js';
@@ -26,6 +25,10 @@ import {
   kStateManagerDeleteState,
   kPendingSharedStateConstructionData,
 } from './BaseStateManager.js';
+
+import {
+  sanitizeOnUpdateParams,
+} from './shared-state-utils.js';
 
 import warnings from './logs/warnings.js';
 
@@ -805,8 +808,42 @@ class SharedState {
   }
 
   /**
+   * Subscribe to any updates in the state.
+   *
+   * @overload
+   * @param {sharedStateOnUpdateCallback} callback
+   *  Callback to execute when an update is applied on the state.
+   * @param {Boolean} [executeListener=false] - Execute the callback immediately
+   *  with current state values. Note that `oldValues` will be set to `{}`.
+   * @returns {sharedStateDeleteOnUpdateCallback}
+   * @example
+   * state.onUpdate(updates => {
+   *   // ...
+   * });
+   */
+  /**
+   * Subscribe to updates in the state filtered by a given parameter name.
+   *
+   * @overload
+   * @param {SharedStateParameterName} paramName
+   * @param {sharedStateOnUpdateCallback} callback
+   *  Callback to execute when an update is applied on the state.
+   * @param {Boolean} [executeListener=false] - Execute the callback immediately
+   *  with current state values. Note that `oldValues` will be set to `{}`.
+   * @returns {sharedStateDeleteOnUpdateCallback}
+   * @example
+   * state.onUpdate('my-param', myValue => {
+   *   // ...
+   * });
+   */
+  /**
    * Subscribe to state updates.
    *
+   * Alternative signatures:
+   * - `state.onUpdate(callback, executeListener)`
+   * - `state.onUpdate(paramName, callback, executeListener)`
+   *
+   * @param {SharedStateParameterName} paramName
    * @param {sharedStateOnUpdateCallback} callback
    *  Callback to execute when an update is applied on the state.
    * @param {Boolean} [executeListener=false] - Execute the callback immediately
@@ -824,74 +861,8 @@ class SharedState {
    * // later
    * unsubscribe();
    */
-  onUpdate(paramNameOrListener, listenerOrExecuteCallback, someExecuteListener = false) {
-    let paramName;
-    let listener;
-    let executeListener;
-
-    // updateUpdate(listener)
-    if (arguments.length === 1) {
-      if (!isFunction(paramNameOrListener)) {
-        throw new TypeError(`Cannot execute 'onUpdate(listener)' on SharedState (overload resolution failed): listener must be a function`);
-      }
-
-      paramName = null;
-      listener = paramNameOrListener;
-      executeListener = false;
-    }
-
-    // updateUpdate(paramName, listener)
-    // updateUpdate(listener, executeListener)
-    if (arguments.length === 2) {
-      if (isString(paramNameOrListener)) {
-        if (!isFunction(listenerOrExecuteCallback)) {
-          throw new TypeError(`Cannot execute 'onUpdate(paramName, listener)' on SharedState (overload resolution failed): listener must be a function`);
-        }
-
-        paramName = paramNameOrListener;
-        listener = listenerOrExecuteCallback;
-        executeListener = false;
-
-      } else if (isFunction(paramNameOrListener)) {
-        if (typeof listenerOrExecuteCallback !== 'boolean') {
-          throw new TypeError(`Cannot execute 'onUpdate(callback, executeListener)' on SharedState (overload resolution failed): executeListener must be a boolean`);
-        }
-
-        paramName = null;
-        listener = paramNameOrListener;
-        executeListener = listenerOrExecuteCallback;
-      } else {
-        throw new TypeError(`Cannot execute 'onUpdate' on SharedState (overload resolution failed): possible signatures 'onUpdate(paramName, listener)' or 'onUpdate(listener, executeListener)'`);
-      }
-    }
-
-    // onUpdate(paramName, listener, executeListener)
-    if (arguments.length === 3) {
-      if (!isString(paramNameOrListener)) {
-        throw new TypeError(`Cannot execute 'onUpdate(paramName, listener, executeListener)' on SharedState (overload resolution failed): paramName must be a string`);
-      }
-
-      if (!isFunction(listenerOrExecuteCallback)) {
-        throw new TypeError(`Cannot execute 'onUpdate(paramName, listener, executeListener)' on SharedState (overload resolution failed): listener must be a function`);
-      }
-
-      if (typeof someExecuteListener !== 'boolean') {
-        throw new TypeError(`Cannot execute 'onUpdate(paramName, listener, executeListener)' on SharedState (overload resolution failed): executeListener must be a boolean`);
-      }
-
-      paramName = paramNameOrListener;
-      listener = listenerOrExecuteCallback;
-      executeListener = someExecuteListener;
-    }
-
-    // @todo - check that paramName exists in description
-    if (paramName !== null) {
-      try {
-        this.getDescription(paramName);
-      } catch (err) {
-        throw new ReferenceError(`Cannot execute 'onUpdate' on SharedState: parameter '${paramName}' does not exists`);
-      }
-    }
+  onUpdate(...args) {
+    const { paramName, listener, executeListener } = sanitizeOnUpdateParams(this, ...args);
 
     const listenerPayload = { paramName, listener };
     this.#onUpdateCallbacks.add(listenerPayload);

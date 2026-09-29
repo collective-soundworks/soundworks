@@ -2,7 +2,8 @@ import warnings from './logs/warnings.js';
 
 import {
   checkValidFilters,
-} from './BaseStateManager.js';
+  sanitizeOnUpdateParams,
+} from './shared-state-utils.js';
 
 /**
  * Callback to execute when an update is triggered on one of the shared states
@@ -112,6 +113,7 @@ class SharedStateCollection {
 
     this.#unobserve = await this.#stateManager.observe(this.#className, async (className, stateId) => {
       const state = await this.#stateManager.attach(className, stateId, this.#options);
+
       this.#states.push(state);
 
       state.onDetach(() => {
@@ -123,13 +125,26 @@ class SharedStateCollection {
       });
 
       state.onUpdate((newValues, oldValues) => {
-        this.#onUpdateCallbacks.forEach(callback => callback(state, newValues, oldValues));
+        this.#onUpdateCallbacks.forEach(listenerPayload => {
+          this.#executeUpdateCallback(state, listenerPayload, newValues, oldValues);
+        });
+
         this.#onChangeCallbacks.forEach(callback => callback());
       });
 
       this.#onAttachCallbacks.forEach(callback => callback(state));
       this.#onChangeCallbacks.forEach(callback => callback());
     }, { excludeLocal: this.#excludeLocal });
+  }
+
+  #executeUpdateCallback(state, listenerPayload, newValues, oldValues) {
+    const { paramName, listener, unsubscribe } = listenerPayload;
+
+    if (paramName === null) {
+      return listener(state, newValues, oldValues);
+    } else if (paramName in newValues) {
+      return listener(state, newValues[paramName], oldValues[paramName]);
+    }
   }
 
   /**
@@ -308,8 +323,9 @@ class SharedStateCollection {
   }
 
   /**
-   * Register a function to execute when any shared state of the collection is updated.
+   * Subscribe to any updates in the collection.
    *
+   * @overload
    * @param {sharedStateCollectionOnUpdateCallback}
    *  callback - Callback to execute when an update is applied on a state.
    * @param {Boolean} [executeListener=false] - Execute the callback immediately
@@ -317,28 +333,60 @@ class SharedStateCollection {
    * @returns {sharedStateCollectionDeleteOnUpdateCallback} - Function that delete
    *  the registered listener when executed.
    */
-  onUpdate(callback, executeListener = false) {
-    this.#onUpdateCallbacks.add(callback);
+  /**
+   * Subscribe to updates in the collection filtered by a given parameter name.
+   *
+   * @overload
+   * @param {SharedStateParameterName} paramName
+   * @param {sharedStateCollectionOnUpdateCallback}
+   *  callback - Callback to execute when an update is applied on a state.
+   * @param {Boolean} [executeListener=false] - Execute the callback immediately
+   *  with current state values. Note that `oldValues` will be set to `{}`.
+   * @returns {sharedStateCollectionDeleteOnUpdateCallback} - Function that delete
+   *  the registered listener when executed.
+   */
+  /**
+   * Register a function to execute when any shared state of the collection is updated.
+   *
+   * Alternative signatures:
+   * - `collection.onUpdate(callback, executeListener)`
+   * - `collection.onUpdate(paramName, callback, executeListener)`
+   *
+   * @param {SharedStateParameterName} paramName
+   * @param {sharedStateCollectionOnUpdateCallback}
+   *  callback - Callback to execute when an update is applied on a state.
+   * @param {Boolean} [executeListener=false] - Execute the callback immediately
+   *  with current state values. Note that `oldValues` will be set to `{}`.
+   * @returns {sharedStateCollectionDeleteOnUpdateCallback} - Function that delete
+   *  the registered listener when executed.
+   */
+  onUpdate(...args) {
+    const { paramName, listener, executeListener } = sanitizeOnUpdateParams(this, ...args);
+
+    const listenerPayload = { paramName, listener };
+    this.#onUpdateCallbacks.add(listenerPayload);
+    // create unsubscribe and add to payload, to pass it back to the listeners as argument
+    listenerPayload.unsubscribe = () => this.#onUpdateCallbacks.delete(listenerPayload);
 
     if (executeListener === true) {
       // filter `event: true` parameters from currentValues, having them here is
       // misleading as we are in the context of a callback, not from an active read
-      const description = this.getDescription();
+      const classDescription = this.getDescription();
 
       this.#states.forEach(state => {
         const currentValues = state.getValues();
 
-        for (let name in description) {
-          if (description[name].event === true) {
+        for (let name in classDescription) {
+          if (classDescription[name].event === true) {
             delete currentValues[name];
           }
         }
 
-        callback(state, currentValues, {});
+        this.#executeUpdateCallback(state, listenerPayload, currentValues, {});
       });
     }
 
-    return () => this.#onUpdateCallbacks.delete(callback);
+    return listenerPayload.unsubscribe;
   }
 
   /**
