@@ -39,10 +39,14 @@ export const kSharedStatePromiseStore = Symbol('soundworks:shared-state-promise-
  * Callback executed when updates are applied on a {@link SharedState}.
  *
  * @callback sharedStateOnUpdateCallback
- * @param {Object} newValues - Key / value pairs of the updates that have been
- *  applied to the state.
- * @param {Object} oldValues - Key / value pairs of the updated params before
- *  the updates has been applied to the state.
+ * @param {Object|any} newValues - Key / value pairs of the updates that have been
+ *  applied to the state, or single value if the callback has been registered against
+ *  a parameter name filter.
+ * @param {Object|any} oldValues - Key / value pairs of the updated params before
+ *  the updates has been applied to the state, or single value if the callback has been
+ *  registered against a parameter name filter.
+ * @param {sharedStateDeleteOnUpdateCallback} unsubscribe - Reference to unsubscribe
+ *  function returned by the `SharedState#onUpdate` method.
  */
 
 /**
@@ -368,9 +372,9 @@ class SharedState {
     const { paramName, listener, unsubscribe } = listenerPayload;
 
     if (paramName === null) {
-      return listener(newValues, oldValues);
+      return listener(newValues, oldValues, unsubscribe);
     } else if (paramName in newValues) {
-      return listener(newValues[paramName], oldValues[paramName]);
+      return listener(newValues[paramName], oldValues[paramName], unsubscribe);
     }
   }
 

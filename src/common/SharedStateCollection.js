@@ -11,10 +11,14 @@ import {
  *
  * @callback sharedStateCollectionOnUpdateCallback
  * @param {SharedState} state - The shared state instance that triggered the update.
- * @param {Object} newValues - Key / value pairs of the updates that have been
- *  applied to the state.
- * @param {Object} oldValues - Key / value pairs of the updated params before
- *  the updates has been applied to the state.
+ * @param {Object|any} newValues - Key / value pairs of the updates that have been
+ *  applied to the state, or single value if the callback has been registered against
+ *  a parameter name filter.
+ * @param {Object|any} oldValues - Key / value pairs of the updated params before
+ *  the updates has been applied to the state, or single value if the callback has been
+ *  registered against a parameter name filter.
+ * @param {sharedStateCollectionDeleteOnUpdateCallback} unsubscribe - Reference to unsubscribe
+ *  function returned by the `SharedStateCollection#onUpdate` method.
  */
 
 /**
@@ -141,9 +145,9 @@ class SharedStateCollection {
     const { paramName, listener, unsubscribe } = listenerPayload;
 
     if (paramName === null) {
-      return listener(state, newValues, oldValues);
+      return listener(state, newValues, oldValues, unsubscribe);
     } else if (paramName in newValues) {
-      return listener(state, newValues[paramName], oldValues[paramName]);
+      return listener(state, newValues[paramName], oldValues[paramName], unsubscribe);
     }
   }
 

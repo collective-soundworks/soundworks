@@ -559,6 +559,81 @@ describe(`# SharedStateCollection`, () => {
       server.stateManager.deleteClass('with-event');
     });
 
+    it(`should return working unsubscribe() function (1)`, async () => {
+      const owned1 = await clients[0].stateManager.create('a');
+      const owned2 = await clients[1].stateManager.create('a');
+      const attached = await clients[2].stateManager.getCollection('a');
+
+      let onUpdateCalled = false;
+      const unsubscribe = attached.onUpdate(_ => onUpdateCalled = true);
+
+      unsubscribe();
+
+      await owned1.set({ int: 1 });
+
+      assert.equal(onUpdateCalled, false);
+    });
+
+    it(`should return working unsubscribe() function (2)`, async () => {
+      const owned1 = await clients[0].stateManager.create('a');
+      const owned2 = await clients[1].stateManager.create('a');
+      const attached = await clients[2].stateManager.getCollection('a');
+
+      let onUpdateCalled = false;
+      const unsubscribe = attached.onUpdate('int', _ => onUpdateCalled = true);
+
+      unsubscribe();
+
+      await owned1.set({ int: 1 });
+
+      assert.equal(onUpdateCalled, false);
+    });
+
+    it(`should pass the unsubscribe function to callback (1)`, async () => {
+      const owned1 = await clients[0].stateManager.create('a');
+      const owned2 = await clients[1].stateManager.create('a');
+      const attached = await clients[2].stateManager.getCollection('a');
+
+      let onUpdateCount = 0;
+
+      attached.onUpdate((state, updates, oldValues, unsubscribe) => {
+        onUpdateCount += 1;
+        try {
+          unsubscribe();
+        } catch (err) {
+          console.log(err.message);
+        }
+      });
+
+      await owned1.set({ int: 1 });
+      await owned2.set({ int: 2 });
+      await delay(100);
+
+      assert.equal(onUpdateCount, 1);
+    });
+
+    it(`should pass the unsubscribe function to callback (2)`, async () => {
+      const owned1 = await clients[0].stateManager.create('a');
+      const owned2 = await clients[1].stateManager.create('a');
+      const attached = await clients[2].stateManager.getCollection('a');
+
+      let onUpdateCount = 0;
+
+      attached.onUpdate('int', (state, updates, oldValues, unsubscribe) => {
+        onUpdateCount += 1;
+        try {
+          unsubscribe();
+        } catch (err) {
+          console.log(err.message);
+        }
+      });
+
+      await owned1.set({ int: 1 });
+      await owned2.set({ int: 2 });
+      await delay(100);
+
+      assert.equal(onUpdateCount, 1);
+    });
   });
 
   describe(`## onAttach(callback)`, () => {

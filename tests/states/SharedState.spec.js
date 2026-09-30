@@ -557,9 +557,25 @@ describe('# SharedState', () => {
       unsubscribe();
 
       await a.set({ int: 1 });
-      await delay(10);
 
       assert.equal(onUpdateCalled, false);
+      await a.delete();
+    });
+
+    it(`should pass the unsubscribe function to callback`, async () => {
+      const a = await server.stateManager.create('a');
+
+      let onUpdateCount = 0;
+
+      a.onUpdate((updates, oldValues, unsubscribe) => {
+        onUpdateCount += 1;
+        unsubscribe();
+      });
+
+      await a.set({ int: 1 });
+      await a.set({ int: 2 });
+
+      assert.equal(onUpdateCount, 1);
       await a.delete();
     });
 
@@ -672,6 +688,37 @@ describe('# SharedState', () => {
       }, true);
 
       assert.isTrue(executed);
+    });
+
+    it(`should return working unsubscribe() function`, async () => {
+      const a = await server.stateManager.create('a');
+
+      let onUpdateCalled = false;
+      const unsubscribe = a.onUpdate('int', updates => onUpdateCalled = true);
+
+      unsubscribe();
+
+      await a.set({ int: 1 });
+
+      assert.equal(onUpdateCalled, false);
+      await a.delete();
+    });
+
+    it(`should pass the unsubscribe function to callback`, async () => {
+      const a = await server.stateManager.create('a');
+
+      let onUpdateCount = 0;
+
+      a.onUpdate('int', (updates, oldValues, unsubscribe) => {
+        onUpdateCount += 1;
+        unsubscribe();
+      });
+
+      await a.set({ int: 1 });
+      await a.set({ int: 2 });
+
+      assert.equal(onUpdateCount, 1);
+      await a.delete();
     });
   });
 
