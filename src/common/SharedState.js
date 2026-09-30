@@ -125,6 +125,7 @@ class SharedState {
   #onUpdateCallbacks = new Set();
   #onDetachCallbacks = new Set();
   #onDeleteCallbacks = new Set();
+  #waitForConditions = new Set();
 
   constructor() {
     // cf. BaseStateManager#buildSharedState to get the whole pattern
@@ -186,15 +187,18 @@ class SharedState {
   #onUpdateResponse = async (reqId, updates) => {
     const updated = await this.#commit(updates, true, true);
     this[kSharedStatePromiseStore].resolve(reqId, updated);
+    this.#checkPendingWaitForConditions();
   };
 
   #onUpdateAbort = async (reqId, updates) => {
     const updated = await this.#commit(updates, false, true);
     this[kSharedStatePromiseStore].resolve(reqId, updated);
+    this.#checkPendingWaitForConditions();
   };
 
   #onUpdateNotification = updates => {
     this.#commit(updates, true, false);
+    this.#checkPendingWaitForConditions();
   };
 
   #onDetachResponse = async (reqId) => {
@@ -376,6 +380,27 @@ class SharedState {
     } else if (paramName in newValues) {
       return listener(newValues[paramName], oldValues[paramName], unsubscribe);
     }
+  }
+
+  #checkPendingWaitForConditions() {
+    const values = this.getValuesUnsafe();
+
+    this.#waitForConditions.forEach(payload => {
+      const { resolve, reject, condition } = payload;
+      let match = true;
+
+      for (let [key, value] of Object.entries(condition)) {
+        if (values[key] !== value) {
+          match = false;
+        }
+      }
+
+      // all keys in values matches the condition
+      if (match) {
+        this.#waitForConditions.delete(payload);
+        resolve();
+      }
+    });
   }
 
   /**
@@ -918,6 +943,51 @@ class SharedState {
 
     this.#onDeleteCallbacks.add(callback);
     return () => this.#onDeleteCallbacks.delete(callback);
+  }
+
+  /**
+   * Wait for a given condition in the state of the SharedState instance.
+   * If the state watches the condition when `waitFor` is called, the promise is
+   * resolved immediately.
+   *
+   * @param {object} condition - Condition to be meet in the state for the
+   *  returned promise to resolve.
+   * @param {object} condition - Timeout (in milliseconds) that trigger the rejection
+   *  of the returned promise.
+   * @return {Promise}
+   */
+  waitFor(condition, timeout = null) {
+    if (!isPlainObject(condition)) {
+      throw new TypeError(`Cannot execute 'waitFor' on SharedState: argument 0 must be an object`);
+    }
+
+    if (timeout !== null && (!Number.isFinite(timeout) || timeout <= 0)) {
+      throw new TypeError(`Cannot execute 'waitFor' on SharedState: optional argument 1 must be a finite strictly positive number`);
+    }
+
+    // @todo - check condition keys are not filtered, this could never resolve
+    const descriptionKeys = Object.keys(this.getDescription());
+    const conditionKeys = Object.keys(condition);
+    const diff = conditionKeys.filter(key => !descriptionKeys.includes(key));
+
+    if (diff.length > 0) {
+      throw new ReferenceError(`Cannot execute 'waitFor' on SharedState: condition contains keys (${diff.join(', ')}) that are not declared in class description`);
+    }
+
+    const { promise, resolve, reject } = Promise.withResolvers();
+    const payload = { resolve, reject, condition };
+
+    if (timeout !== null) {
+      payload.timeoutId = setTimeout(() => {
+        this.#waitForConditions.delete(payload);
+        reject();
+      }, timeout);
+    }
+
+    this.#waitForConditions.add(payload);
+    this.#checkPendingWaitForConditions();
+
+    return promise;
   }
 
   // ---------------------------------------------------------------------------

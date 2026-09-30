@@ -848,6 +848,121 @@ describe('# SharedState', () => {
     });
   });
 
+  describe(`## waitFor(condition, timeout) -> Promise`, () => {
+    it(`should throw if condition is not an object`, async () => {
+      const a = await server.stateManager.create('a');
+      let errored = false;
+
+      try {
+        a.waitFor('niap')
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      assert.equal(errored, true);
+    });
+
+    it(`should throw if condition does not match class description`, async () => {
+      const a = await server.stateManager.create('a');
+      let errored = false;
+
+      try {
+        a.waitFor({ niap: true, toto: 42 });
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      assert.equal(errored, true);
+    });
+
+    it(`should throw if timeout is not null and not strictly positive number (1)`, async () => {
+      const a = await server.stateManager.create('a');
+      let errored = false;
+
+      try {
+        a.waitFor({ int: 1 }, -1);
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      assert.equal(errored, true);
+    });
+
+    it(`should throw if timeout is not null and not strictly positive number (2)`, async () => {
+      const a = await server.stateManager.create('a');
+      let errored = false;
+
+      try {
+        a.waitFor({ int: 1 }, NaN);
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      assert.equal(errored, true);
+    });
+
+    it(`should throw if timeout is not null and not strictly positive number (3)`, async () => {
+      const a = await server.stateManager.create('a');
+      let errored = false;
+
+      try {
+        a.waitFor({ int: 1 }, 'coucou');
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      assert.equal(errored, true);
+    });
+
+    it(`should resolve when condition is met - simple condition`, async () => {
+      const a = await server.stateManager.create('a');
+
+      let waitForResolved = false;
+      a.waitFor({ int: 2 }).then(() => waitForResolved = true);
+
+      await a.set({ int: 2 })
+
+      assert.equal(waitForResolved, true);
+    });
+
+    it(`should resolve when condition is met - complex condition`, async () => {
+      const owned = await server.stateManager.create('a');
+      const attached = await client.stateManager.attach('a');
+
+      let waitForResolved = false;
+      owned.waitFor({ int: 2, bool: true }).then(() => waitForResolved = true);
+
+      await owned.set({ int: 2 });
+      await attached.set({ bool: true });
+
+      assert.equal(waitForResolved, true);
+    });
+
+    it(`should resolve when condition is met - resolve immediately`, async () => {
+      const owned = await server.stateManager.create('a');
+      await owned.waitFor({ int: 0, bool: false });
+      assert.isOk('passed');
+    });
+
+    it(`should reject when timeout is met`, async () => {
+      const owned = await server.stateManager.create('a');
+      let rejected = false;
+
+      try {
+        await owned.waitFor({ int: 2 }, 10);
+      } catch {
+        rejected = true;
+      }
+
+      assert.equal(rejected, true);
+    });
+  });
+
   describe(`## Race conditions`, () => {
     it(`should properly flush pending requests when state is deleted`, async () => {
       return new Promise(async resolve => {
