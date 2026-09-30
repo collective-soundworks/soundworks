@@ -1,5 +1,4 @@
 import {
-  isPlainObject,
   isString,
   isFunction,
 } from '@ircam/sc-utils';
@@ -70,7 +69,7 @@ export function sanitizeOnUpdateParams(caller, paramNameOrListener, listenerOrEx
   if (paramName !== null) {
     try {
       caller.getDescription(paramName);
-    } catch (err) {
+    } catch {
       throw new ReferenceError(`Cannot execute 'onUpdate' on ${className}: parameter '${paramName}' does not exists`);
     }
   }
