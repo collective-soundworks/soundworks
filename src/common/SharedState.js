@@ -386,7 +386,7 @@ class SharedState {
     const values = this.getValuesUnsafe();
 
     this.#waitForConditions.forEach(payload => {
-      const { resolve, reject, condition } = payload;
+      const { resolve, condition, timeoutId } = payload;
       let match = true;
 
       for (let [key, value] of Object.entries(condition)) {
@@ -395,8 +395,8 @@ class SharedState {
         }
       }
 
-      // all keys in values matches the condition
       if (match) {
+        clearTimeout(timeoutId);
         this.#waitForConditions.delete(payload);
         resolve();
       }
@@ -950,6 +950,9 @@ class SharedState {
    * If the state watches the condition when `waitFor` is called, the promise is
    * resolved immediately.
    *
+   * @note - mark as private until tested in real-world
+   *
+   * @private
    * @param {object} condition - Condition to be meet in the state for the
    *  returned promise to resolve.
    * @param {object} condition - Timeout (in milliseconds) that trigger the rejection
@@ -975,7 +978,7 @@ class SharedState {
     }
 
     const { promise, resolve, reject } = Promise.withResolvers();
-    const payload = { resolve, reject, condition };
+    const payload = { resolve, condition };
 
     if (timeout !== null) {
       payload.timeoutId = setTimeout(() => {
