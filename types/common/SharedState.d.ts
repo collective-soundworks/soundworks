@@ -3,7 +3,7 @@ export default SharedState;
 /**
  * Callback executed when updates are applied on a {@link SharedState}.
  */
-export type sharedStateOnUpdateCallback = (newValues: Object, oldValues: Object) => any;
+export type sharedStateOnUpdateCallback = (newValues: Object | any, oldValues: Object | any, unsubscribe: sharedStateDeleteOnUpdateCallback) => any;
 /**
  * Delete the registered {@link sharedStateOnUpdateCallback}.
  */
@@ -12,10 +12,14 @@ export type sharedStateDeleteOnUpdateCallback = () => any;
  * Callback executed when updates are applied on a {@link SharedState}.
  *
  * @callback sharedStateOnUpdateCallback
- * @param {Object} newValues - Key / value pairs of the updates that have been
- *  applied to the state.
- * @param {Object} oldValues - Key / value pairs of the updated params before
- *  the updates has been applied to the state.
+ * @param {Object|any} newValues - Key / value pairs of the updates that have been
+ *  applied to the state, or single value if the callback has been registered against
+ *  a parameter name filter.
+ * @param {Object|any} oldValues - Key / value pairs of the updated params before
+ *  the updates has been applied to the state, or single value if the callback has been
+ *  registered against a parameter name filter.
+ * @param {sharedStateDeleteOnUpdateCallback} unsubscribe - Reference to unsubscribe
+ *  function returned by the `SharedState#onUpdate` method.
  */
 /**
  * Delete the registered {@link sharedStateOnUpdateCallback}.
@@ -241,26 +245,36 @@ declare class SharedState {
      */
     delete(): Promise<any>;
     /**
-     * Subscribe to state updates.
+     * Subscribe to any updates in the state.
      *
+     * @overload
      * @param {sharedStateOnUpdateCallback} callback
      *  Callback to execute when an update is applied on the state.
      * @param {Boolean} [executeListener=false] - Execute the callback immediately
      *  with current state values. Note that `oldValues` will be set to `{}`.
      * @returns {sharedStateDeleteOnUpdateCallback}
      * @example
-     * const unsubscribe = state.onUpdate(async (newValues, oldValues) =>  {
-     *   for (let [key, value] of Object.entries(newValues)) {
-     *      switch (key) {
-     *        // do something
-     *      }
-     *   }
+     * state.onUpdate(updates => {
+     *   // ...
      * });
-     *
-     * // later
-     * unsubscribe();
      */
-    onUpdate(listener: any, executeListener?: boolean): sharedStateDeleteOnUpdateCallback;
+    onUpdate(callback: sharedStateOnUpdateCallback, executeListener?: boolean | undefined): sharedStateDeleteOnUpdateCallback;
+    /**
+     * Subscribe to updates in the state filtered by a given parameter name.
+     *
+     * @overload
+     * @param {SharedStateParameterName} paramName
+     * @param {sharedStateOnUpdateCallback} callback
+     *  Callback to execute when an update is applied on the state.
+     * @param {Boolean} [executeListener=false] - Execute the callback immediately
+     *  with current state values. Note that `oldValues` will be set to `{}`.
+     * @returns {sharedStateDeleteOnUpdateCallback}
+     * @example
+     * state.onUpdate('my-param', myValue => {
+     *   // ...
+     * });
+     */
+    onUpdate(paramName: SharedStateParameterName, callback: sharedStateOnUpdateCallback, executeListener?: boolean | undefined): sharedStateDeleteOnUpdateCallback;
     /**
      * Register a function to execute when detaching from the state. The function
      * will be executed before the `detach` promise resolves.
@@ -278,6 +292,21 @@ declare class SharedState {
      * @param {Function} callback - Callback to execute when the state is deleted.
      */
     onDelete(callback: Function): () => boolean;
+    /**
+     * Wait for a given condition in the state of the SharedState instance.
+     * If the state watches the condition when `waitFor` is called, the promise is
+     * resolved immediately.
+     *
+     * @note - mark as private until tested in real-world
+     *
+     * @private
+     * @param {object} condition - Condition to be meet in the state for the
+     *  returned promise to resolve.
+     * @param {object} condition - Timeout (in milliseconds) that trigger the rejection
+     *  of the returned promise.
+     * @return {Promise}
+     */
+    private waitFor;
     /**
      * @deprecated Use {@link SharedState#getDescription} instead.
      */

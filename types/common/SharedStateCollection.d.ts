@@ -4,10 +4,14 @@
  *
  * @callback sharedStateCollectionOnUpdateCallback
  * @param {SharedState} state - The shared state instance that triggered the update.
- * @param {Object} newValues - Key / value pairs of the updates that have been
- *  applied to the state.
- * @param {Object} oldValues - Key / value pairs of the updated params before
- *  the updates has been applied to the state.
+ * @param {Object|any} newValues - Key / value pairs of the updates that have been
+ *  applied to the state, or single value if the callback has been registered against
+ *  a parameter name filter.
+ * @param {Object|any} oldValues - Key / value pairs of the updated params before
+ *  the updates has been applied to the state, or single value if the callback has been
+ *  registered against a parameter name filter.
+ * @param {sharedStateCollectionDeleteOnUpdateCallback} unsubscribe - Reference to unsubscribe
+ *  function returned by the `SharedStateCollection#onUpdate` method.
  */
 /**
  * Delete the registered {@link sharedStateCollectionOnUpdateCallback} when executed.
@@ -53,7 +57,7 @@ export default SharedStateCollection;
  * Callback to execute when an update is triggered on one of the shared states
  * of the collection.
  */
-export type sharedStateCollectionOnUpdateCallback = (state: SharedState, newValues: Object, oldValues: Object) => any;
+export type sharedStateCollectionOnUpdateCallback = (state: SharedState, newValues: Object | any, oldValues: Object | any, unsubscribe: sharedStateCollectionDeleteOnUpdateCallback) => any;
 /**
  * Delete the registered {@link sharedStateCollectionOnUpdateCallback} when executed.
  */
@@ -102,7 +106,7 @@ export type sharedStateCollectionDeleteOnChangeCallback = () => any;
  * @hideconstructor
  */
 declare class SharedStateCollection {
-    constructor(stateManager: any, className: any, filter?: null, options?: {});
+    constructor(stateManager: any, className: any, options?: {});
     /**
      * Size of the collection, alias `size`
      * @type {number}
@@ -207,8 +211,9 @@ declare class SharedStateCollection {
      */
     set(name: SharedStateParameterName, value: any): Promise<Array<Object>>;
     /**
-     * Register a function to execute when any shared state of the collection is updated.
+     * Subscribe to any updates in the collection.
      *
+     * @overload
      * @param {sharedStateCollectionOnUpdateCallback}
      *  callback - Callback to execute when an update is applied on a state.
      * @param {Boolean} [executeListener=false] - Execute the callback immediately
@@ -216,7 +221,20 @@ declare class SharedStateCollection {
      * @returns {sharedStateCollectionDeleteOnUpdateCallback} - Function that delete
      *  the registered listener when executed.
      */
-    onUpdate(callback: sharedStateCollectionOnUpdateCallback, executeListener?: boolean): sharedStateCollectionDeleteOnUpdateCallback;
+    onUpdate(callback: sharedStateCollectionOnUpdateCallback, executeListener?: boolean | undefined): sharedStateCollectionDeleteOnUpdateCallback;
+    /**
+     * Subscribe to updates in the collection filtered by a given parameter name.
+     *
+     * @overload
+     * @param {SharedStateParameterName} paramName
+     * @param {sharedStateCollectionOnUpdateCallback}
+     *  callback - Callback to execute when an update is applied on a state.
+     * @param {Boolean} [executeListener=false] - Execute the callback immediately
+     *  with current state values. Note that `oldValues` will be set to `{}`.
+     * @returns {sharedStateCollectionDeleteOnUpdateCallback} - Function that delete
+     *  the registered listener when executed.
+     */
+    onUpdate(paramName: SharedStateParameterName, callback: sharedStateCollectionOnUpdateCallback, executeListener?: boolean | undefined): sharedStateCollectionDeleteOnUpdateCallback;
     /**
      * Register a function to execute when a shared state is attached to the collection,
      * i.e. when a node creates a new state from same {@link SharedState} class.

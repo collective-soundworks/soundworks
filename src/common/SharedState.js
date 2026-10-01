@@ -129,7 +129,7 @@ class SharedState {
 
   constructor() {
     // cf. BaseStateManager#buildSharedState to get the whole pattern
-    // rationale is to have a clean constructor API for derived classes
+    // rationale is to have a clean constructor API for future derived classes
     this.#manager = globalThis[kPendingSharedStateConstructionData].manager;
     this.#client = globalThis[kPendingSharedStateConstructionData].manager[kStateManagerClient];
     this.#className = globalThis[kPendingSharedStateConstructionData].className;
@@ -144,7 +144,7 @@ class SharedState {
         globalThis[kPendingSharedStateConstructionData].initValues,
       );
     } catch (err) {
-      throw new Error(`Cannot construct 'SharedState': ${err.message}`);
+      throw new Error(`Cannot construct 'SharedState' (${this.#className}): ${err.message}`);
     }
 
     /** @private */
