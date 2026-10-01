@@ -114,10 +114,6 @@ declare class ServerStateManager extends BaseStateManager {
      */
     defineClass(className: SharedStateClassName, classDescription: SharedStateClassDescription): void;
     /**
-     * @deprecated Use {@link ServerStateManager#defineClass} instead.
-     */
-    registerSchema(className: any, classDescription: any): void;
-    /**
      * Delete a whole class of {@link SharedState}.
      *
      * All {@link SharedState} instances created from this class will be deleted
@@ -126,10 +122,6 @@ declare class ServerStateManager extends BaseStateManager {
      * @param {SharedStateClassName} className - Name of the shared state class to delete.
      */
     deleteClass(className: SharedStateClassName): void;
-    /**
-     * @deprecated Use {@link ServerStateManager#defineClass} instead.
-     */
-    deleteSchema(className: any): void;
     /**
      * Check wether a {@link SharedState} is defined or not, given its {@link SharedStateClassName}
      *
@@ -252,6 +244,14 @@ declare class ServerStateManager extends BaseStateManager {
      * assert.deepEqual(result, { value: 'test', numUpdates: 1 });
      */
     registerUpdateHook(className: string, updateHook: serverStateManagerUpdateHook): Function;
+    /**
+     * @deprecated Use {@link ServerStateManager#defineClass} instead.
+     */
+    registerSchema(className: any, classDescription: any): void;
+    /**
+     * @deprecated Use {@link ServerStateManager#defineClass} instead.
+     */
+    deleteSchema(className: any): void;
     /** @private */
     private [kStateManagerInit];
     /** @private */
@@ -273,9 +273,9 @@ declare class ServerStateManager extends BaseStateManager {
      */
     private [kServerStateManagerAddClient];
     /**
-     * Remove a client from the manager. Clean all created or attached states.
+     * Remove a client from the manager and clean all related states.
      *
-     * This is automatically handled by the {@link Server} when a client disconnects.
+     * This method is automatically called by the {@link Server} when a client disconnects.
      *
      * @param {number} nodeId - Id of the client node, as given in
      *  {@link client.StateManager}

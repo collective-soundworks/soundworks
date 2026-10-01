@@ -24,7 +24,7 @@ import {
  * @private
  */
 function whiteListFilterUpdates(updates, whiteList) {
-  if (whiteList === null) {
+  if (!Array.isArray(whiteList)) {
     return updates;
   }
 
@@ -44,7 +44,7 @@ function whiteListFilterUpdates(updates, whiteList) {
  * @private
  */
 function blackListFilterUpdates(updates, blackList) {
-  if (blackList === null) {
+  if (!Array.isArray(blackList)) {
     return updates;
   }
   // create a shallow copy so we can have multiple filters applied on same source
@@ -57,6 +57,22 @@ function blackListFilterUpdates(updates, blackList) {
   });
 
   return filtered;
+}
+
+function applyFilters(updates, options) {
+  if (options === null) {
+    return updates;
+  }
+
+  const { whiteList, blackList } = options;
+  // precedence to white list
+  if (Array.isArray(whiteList)) {
+    updates = whiteListFilterUpdates(updates, whiteList);
+  } else if (Array.isArray(blackList)) {
+    updates = blackListFilterUpdates(updates, blackList);
+  }
+
+  return updates;
 }
 
 export const kSharedStatePrivateAttachClient = Symbol('soundworks:shared-state-private-attach-client');
@@ -74,8 +90,7 @@ class SharedStatePrivate {
   #className = null;
   #manager = null;
   #parameters = null;
-  #creatorId = null;
-  #creatorInstanceId = null;
+  #ownerId = null;
   #attachedClients = new Map();
 
   constructor(manager, className, classDefinition, id, initValues = {}) {
@@ -94,12 +109,8 @@ class SharedStatePrivate {
     return this.#className;
   }
 
-  get creatorId() {
-    return this.#creatorId;
-  }
-
-  get creatorInstanceId() {
-    return this.#creatorInstanceId;
+  get ownerId() {
+    return this.#ownerId;
   }
 
   get attachedClients() {
@@ -114,21 +125,53 @@ class SharedStatePrivate {
     return this.#parameters.getValues();
   }
 
-  [kSharedStatePrivateAttachClient](instanceId, client, isOwner, filter) {
-    const clientInfos = { client, isOwner, filter };
-    this.#attachedClients.set(instanceId, clientInfos);
-
+  [kSharedStatePrivateAttachClient](instanceId, client, isOwner, options) {
     if (isOwner) {
-      this.#creatorId = client.id;
-      this.#creatorInstanceId = instanceId;
+      this.#ownerId = client.id;
     }
 
-    // attach client listeners
-    client.transport.addListener(`${UPDATE_REQUEST}-${this.id}-${instanceId}`, async (reqId, updates) => {
-      // apply registered hooks
+    const clientInfos = { client, isOwner, options };
+    this.#attachedClients.set(instanceId, clientInfos);
+
+    client.transport.addListener(`${UPDATE_REQUEST}-${this.id}-${instanceId}`, this.#onUpdateRequest(instanceId, client));
+
+    if (isOwner) {
+      client.transport.addListener(`${DELETE_REQUEST}-${this.id}-${instanceId}`, this.#onDeleteRequest);
+    } else {
+      client.transport.addListener(`${DETACH_REQUEST}-${this.id}-${instanceId}`, this.#onDetachRequest(instanceId, client));
+      this.#updateHasSiblings();
+    }
+  }
+
+  [kSharedStatePrivateDetachClient](instanceId, client) {
+    this.#attachedClients.delete(instanceId);
+
+    client.transport.removeAllListeners(`${UPDATE_REQUEST}-${this.id}-${instanceId}`);
+    client.transport.removeAllListeners(`${DELETE_REQUEST}-${this.id}-${instanceId}`);
+    client.transport.removeAllListeners(`${DETACH_REQUEST}-${this.id}-${instanceId}`);
+
+    this.#updateHasSiblings();
+  }
+
+  /**
+   * Update hasSiblings property on owner
+   */
+  #updateHasSiblings() {
+    for (let [instanceId, clientInfos] of this.attachedClients) {
+      const { client, isOwner } = clientInfos;
+
+      if (isOwner) {
+        const hasSiblings = this.attachedClients.size > 1;
+        client.transport.emit(`${HAS_SIBLINGS_NOTIFICATION}-${this.id}-${instanceId}`, hasSiblings);
+      }
+    }
+  }
+
+  #onUpdateRequest = (instanceId, client) => {
+    return async (reqId, updates) => {
       const hooks = this.#manager[kServerStateManagerGetUpdateHooks](this.className);
       const values = this.#parameters.getValues();
-      // make sur we don't propagate back to requester param that are marked as `acknowledge=false`
+      // Do not propagate back to the requester, params that are marked as `acknowledge=false`
       const acknowledgeFilter = this.#parameters.getParamListByDescriptor('acknowledge', false);
 
       let hookAborted = false;
@@ -186,8 +229,9 @@ class SharedStatePrivate {
           //
           // @note - instanceId correspond to unique remote state id
 
-          // - Apply acknowledge filter on `acknowledgedUpdates`
-          // - We don't need to apply the regular filter on update request, they are blocked client-side
+          // Apply acknowledge filter on `acknowledgedUpdates`
+          // Note that, We don't need to apply the whiteList / blackList filters
+          // for the requester, as they are blocked early on client-side
           const requesterFilteredUpdates = blackListFilterUpdates(acknowledgedUpdates, acknowledgeFilter);
 
           // propagate RESPONSE to the client that originates the request if not the server
@@ -204,11 +248,12 @@ class SharedStatePrivate {
 
           // propagate NOTIFICATION to all peer states except on server-side
           for (let [peerInstanceId, clientInfos] of this.#attachedClients) {
-            const { client: peer, filter } = clientInfos;
+            const { client: peer, options } = clientInfos;
 
             if (instanceId !== peerInstanceId && peer.id !== -1) {
-              const filteredUpdates = whiteListFilterUpdates(acknowledgedUpdates, filter);
-              // propagate only if there something left after applying the white list filter
+              const filteredUpdates = applyFilters(acknowledgedUpdates, options);
+
+              // propagate only if there something left after applying the whiteList/blackList filters
               if (Object.keys(filteredUpdates).length > 0) {
                 peer.transport.emit(
                   `${UPDATE_NOTIFICATION}-${this.id}-${peerInstanceId}`,
@@ -232,11 +277,12 @@ class SharedStatePrivate {
 
           // propagate NOTIFICATION to all peer states on the server-side
           for (let [peerInstanceId, clientInfos] of this.#attachedClients) {
-            const { client: peer, filter } = clientInfos;
+            const { client: peer, options } = clientInfos;
 
             if (instanceId !== peerInstanceId && peer.id === -1) {
-              const filteredUpdates = whiteListFilterUpdates(acknowledgedUpdates, filter);
-              // propagate only if there something left after applying the white list filter
+              const filteredUpdates = applyFilters(acknowledgedUpdates, options);
+
+              // propagate only if there something left after applying the whiteList/blackList filters
               if (Object.keys(filteredUpdates).length > 0) {
                 peer.transport.emit(
                   `${UPDATE_NOTIFICATION}-${this.id}-${peerInstanceId}`,
@@ -254,9 +300,9 @@ class SharedStatePrivate {
             client.transport.emit(`${UPDATE_ABORT}-${this.id}-${instanceId}`, reqId, requesterFilteredUpdates);
           }
         }
-      } else {
-        // @note - abort messages are only sent back to requester
-        // explicitly aborted by hook (return `null`), send back current values to requester
+      } else { // hookAborted === true
+        // when explicitly aborted by a hook (return `null`), we only send
+        // back the current values to the requester
         const currentValues = {};
 
         for (let name in updates) {
@@ -268,64 +314,36 @@ class SharedStatePrivate {
           client.transport.emit(`${UPDATE_ABORT}-${this.id}-${instanceId}`, reqId, requesterFilteredUpdates);
         }
       }
-    });
+    };
+  };
 
-    if (isOwner) {
-      // delete only if creator
-      client.transport.addListener(`${DELETE_REQUEST}-${this.id}-${instanceId}`, async reqId => {
-        // make sure hooks have been called when `delete()` fulfills
-        await this.#manager[kServerStateManagerDeletePrivateState](this);
-        // --------------------------------------------------------------------
-        // WARNING - MAKE SURE WE DON'T HAVE PROBLEM W/ THAT
-        // --------------------------------------------------------------------
-        // @todo - propagate server-side last, because if a subscription function sends a
-        // message to a client, network messages order are kept coherent
-        // this._subscriptions.forEach(func => func(updated));
-        for (let [instanceId, clientInfos] of this.#attachedClients) {
-          const attached = clientInfos.client;
-          this[kSharedStatePrivateDetachClient](instanceId, attached);
-
-          if (instanceId === this.#creatorInstanceId) {
-            attached.transport.emit(`${DELETE_RESPONSE}-${this.id}-${instanceId}`, reqId);
-          } else {
-            attached.transport.emit(`${DELETE_NOTIFICATION}-${this.id}-${instanceId}`);
-          }
-        }
-      });
-    } else {
-      // detach only if not creator
-      client.transport.addListener(`${DETACH_REQUEST}-${this.id}-${instanceId}`, (reqId) => {
-        this[kSharedStatePrivateDetachClient](instanceId, client);
-        client.transport.emit(`${DETACH_RESPONSE}-${this.id}-${instanceId}`, reqId);
-      });
-
-      this.#updateHasSiblings();
-    }
-  }
-
-  [kSharedStatePrivateDetachClient](instanceId, client) {
-    this.#attachedClients.delete(instanceId);
-    // delete listeners
-    client.transport.removeAllListeners(`${UPDATE_REQUEST}-${this.id}-${instanceId}`);
-    client.transport.removeAllListeners(`${DELETE_REQUEST}-${this.id}-${instanceId}`);
-    client.transport.removeAllListeners(`${DETACH_REQUEST}-${this.id}-${instanceId}`);
-
-    this.#updateHasSiblings();
-  }
-
-  /**
-   * Update hasSiblings property on owner
-   */
-  #updateHasSiblings() {
-    for (let [instanceId, clientInfos] of this.attachedClients) {
+  #onDeleteRequest = async reqId => {
+    // make sure hooks have been called when `delete()` fulfills
+    await this.#manager[kServerStateManagerDeletePrivateState](this);
+    // --------------------------------------------------------------------
+    // WARNING - MAKE SURE WE DON'T HAVE PROBLEM W/ THAT
+    // --------------------------------------------------------------------
+    // @todo - propagate server-side last, because if a subscription function sends a
+    // message to a client, network messages order are kept coherent
+    // this._subscriptions.forEach(func => func(updated));
+    for (let [instanceId, clientInfos] of this.#attachedClients) {
       const { client, isOwner } = clientInfos;
+      this[kSharedStatePrivateDetachClient](instanceId, client);
 
       if (isOwner) {
-        const hasSiblings = this.attachedClients.size > 1;
-        client.transport.emit(`${HAS_SIBLINGS_NOTIFICATION}-${this.id}-${instanceId}`, hasSiblings);
+        client.transport.emit(`${DELETE_RESPONSE}-${this.id}-${instanceId}`, reqId);
+      } else {
+        client.transport.emit(`${DELETE_NOTIFICATION}-${this.id}-${instanceId}`);
       }
     }
-  }
+  };
+
+  #onDetachRequest = (instanceId, client) => {
+    return reqId => {
+      this[kSharedStatePrivateDetachClient](instanceId, client);
+      client.transport.emit(`${DETACH_RESPONSE}-${this.id}-${instanceId}`, reqId);
+    };
+  };
 }
 
 export default SharedStatePrivate;

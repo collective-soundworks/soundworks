@@ -23,7 +23,6 @@ import {
   OBSERVE_ERROR,
   OBSERVE_NOTIFICATION,
   UNOBSERVE_NOTIFICATION,
-  // DELETE_SHARED_STATE_CLASS,
   GET_CLASS_DESCRIPTION_REQUEST,
   GET_CLASS_DESCRIPTION_RESPONSE,
   GET_CLASS_DESCRIPTION_ERROR,
@@ -32,8 +31,10 @@ import warnings from './logs/warnings.js';
 
 export const kStateManagerInit = Symbol('soundworks:state-manager-init');
 export const kStateManagerDeleteState = Symbol('soundworks:state-manager-delete-state');
+export const kPendingSharedStateConstructionData = Symbol('soundworks:state-manager-pending-shared-state-construction-data');
 // for testing purposes
 export const kStateManagerClient = Symbol('soundworks:state-manager-client');
+
 
 /**
  * Callback executed when a state is created on the network.
@@ -67,21 +68,6 @@ class BaseStateManager {
   }
 
   /** @private */
-  #filterObserve(observedClassName, className, creatorId, options) {
-    let filter = true;
-
-    if (observedClassName === null || observedClassName === className) {
-      filter = false;
-    }
-    // filter state created by client if excludeLocal is true
-    if (options.excludeLocal === true && creatorId === this[kStateManagerClient].id) {
-      filter = true;
-    }
-
-    return filter;
-  }
-
-  /** @private */
   [kStateManagerDeleteState](stateId) {
     this.#statesById.delete(stateId);
   }
@@ -98,116 +84,18 @@ class BaseStateManager {
     const batchedTransport = new BatchedTransport(transport);
     this[kStateManagerClient] = { id, transport: batchedTransport };
 
-    // ---------------------------------------------
-    // CREATE
-    // ---------------------------------------------
-    this[kStateManagerClient].transport.addListener(
-      CREATE_RESPONSE,
-      (reqId, stateId, instanceId, className, classDescription, initValues) => {
-        const state = new SharedState({
-          manager: this,
-          className,
-          classDescription,
-          stateId,
-          instanceId,
-          isOwner: true,
-          initValues,
-          filter: null, // owner cannot filter parameters
-        });
+    this[kStateManagerClient].transport.addListener(CREATE_RESPONSE, this.#onCreateResponse);
+    this[kStateManagerClient].transport.addListener(CREATE_ERROR, this.#onCreateError);
 
-        this.#statesById.set(state.id, state);
-        this.#promiseStore.resolve(reqId, state);
-      },
-    );
+    this[kStateManagerClient].transport.addListener(ATTACH_RESPONSE, this.#onAttachResponse);
+    this[kStateManagerClient].transport.addListener(ATTACH_ERROR, this.#onAttachError);
 
-    this[kStateManagerClient].transport.addListener(CREATE_ERROR, (reqId, msg) => {
-      msg = `Cannot execute 'create' on BaseStateManager: ${msg}`;
-      this.#promiseStore.reject(reqId, msg);
-    });
+    this[kStateManagerClient].transport.addListener(OBSERVE_RESPONSE, this.#onObserveResponse);
+    this[kStateManagerClient].transport.addListener(OBSERVE_ERROR, this.#onObserveError);
+    this[kStateManagerClient].transport.addListener(OBSERVE_NOTIFICATION, this.#onObserveNotification);
 
-    // ---------------------------------------------
-    // ATTACH (when creator, is attached by default)
-    // ---------------------------------------------
-    this[kStateManagerClient].transport.addListener(
-      ATTACH_RESPONSE,
-      (reqId, stateId, instanceId, className, classDescription, currentValues, filter) => {
-        const state = new SharedState({
-          manager: this,
-          className,
-          classDescription,
-          stateId,
-          instanceId,
-          isOwner: false,
-          initValues: currentValues,
-          filter,
-        });
-
-        this.#statesById.set(state.id, state);
-        this.#promiseStore.resolve(reqId, state);
-      },
-    );
-
-    this[kStateManagerClient].transport.addListener(ATTACH_ERROR, (reqId, msg) => {
-      msg = `Cannot execute 'attach' on BaseStateManager: ${msg}`;
-      this.#promiseStore.reject(reqId, msg);
-    });
-
-    // ---------------------------------------------
-    // OBSERVE PEERS (be notified when a state is created, lazy)
-    // ---------------------------------------------
-    this[kStateManagerClient].transport.addListener(OBSERVE_RESPONSE, async (reqId, ...list) => {
-      // retrieve the callback that have been stored in `observe()` to make sure
-      // we don't call another callback that may have been registered earlier.
-      const observeInfos = this.#observeRequestCallbacks.get(reqId);
-      const [observedClassName, callback, options] = observeInfos;
-      // move observeInfos from `_observeRequestCallbacks` to `_observeListeners`
-      // to guarantee future order of execution
-      this.#observeRequestCallbacks.delete(reqId);
-      this.#observeListeners.add(observeInfos);
-
-      const promises = list.map(([className, stateId, nodeId]) => {
-        const filter = this.#filterObserve(observedClassName, className, nodeId, options);
-
-        if (!filter) {
-          return callback(className, stateId, nodeId);
-        } else {
-          return Promise.resolve();
-        }
-      });
-
-      await Promise.all(promises);
-
-      const unsubscribe = () => {
-        this.#observeListeners.delete(observeInfos);
-        // no more listeners, we can stop receiving notifications from the server
-        if (this.#observeListeners.size === 0) {
-          this[kStateManagerClient].transport.emit(UNOBSERVE_NOTIFICATION);
-        }
-      };
-
-      this.#promiseStore.resolve(reqId, unsubscribe);
-    });
-
-    // Observe error occur if observed class name does not exists
-    this[kStateManagerClient].transport.addListener(OBSERVE_ERROR, (reqId, msg) => {
-      msg = `Cannot execute 'observe' on BaseStateManager: ${msg}`;
-      this.#observeRequestCallbacks.delete(reqId);
-      this.#promiseStore.reject(reqId, msg);
-    });
-
-    this[kStateManagerClient].transport.addListener(
-      OBSERVE_NOTIFICATION,
-      (className, stateId, nodeId) => {
-        this.#observeListeners.forEach(observeInfos => {
-          const [observedClassName, callback, options] = observeInfos;
-          const filter = this.#filterObserve(observedClassName, className, nodeId, options);
-
-          if (!filter) {
-            callback(className, stateId, nodeId);
-          }
-        });
-      },
-    );
+    this[kStateManagerClient].transport.addListener(GET_CLASS_DESCRIPTION_RESPONSE, this.#onGetClassDescriptionResponse);
+    this[kStateManagerClient].transport.addListener(GET_CLASS_DESCRIPTION_ERROR, this.#onGetClassDescriptionError);
 
     // ---------------------------------------------
     // note 2025-05-05: caching of class descriptions has been removed because it
@@ -216,23 +104,30 @@ class BaseStateManager {
     // ---------------------------------------------
     // this[kStateManagerClient].transport.addListener(DELETE_SHARED_STATE_CLASS, _className => {});
 
-    // ---------------------------------------------
-    // Get class description
-    // ---------------------------------------------
-    this[kStateManagerClient].transport.addListener(
-      GET_CLASS_DESCRIPTION_RESPONSE,
-      (reqId, _className, classDescription) => {
-        const fullDescription = ParameterBag.getFullDescription(classDescription);
-        this.#promiseStore.resolve(reqId, fullDescription);
-      },
-    );
-
-    this[kStateManagerClient].transport.addListener(GET_CLASS_DESCRIPTION_ERROR, (reqId, msg) => {
-      msg = `Cannot execute 'getClassDescription' on BaseStateManager: ${msg}`;
-      this.#promiseStore.reject(reqId, msg);
-    });
-
     this.#status = 'inited';
+  }
+
+  // This pattern allows to have a clean SharedState constructor signature for  which
+  // which will provide a cleaner user facing API when derived.
+  // cf. instantiation pattern from AudioWorkletProcessor
+  // <https://webaudio.github.io/web-audio-api/#AudioWorkletProcessor-instantiation>
+  #buildSharedState(options) {
+    globalThis[kPendingSharedStateConstructionData] = {
+      manager: this,
+      className: options.className,
+      classDescription: options.classDescription,
+      stateId: options.stateId,
+      instanceId: options.instanceId,
+      isOwner: options.isOwner,
+      initValues: options.initValues,
+      filter: options.filter,
+    };
+
+    const state = new SharedState();
+    // cleanup global scope
+    delete globalThis[kPendingSharedStateConstructionData];
+
+    return state;
   }
 
   /**
@@ -266,13 +161,15 @@ class BaseStateManager {
     return promise;
   }
 
-  /**
-   * @deprecated Use {@link BaseStateManager#getClassDescription} instead.
-   */
-  async getSchema(className) {
-    warnings.deprecated('BaseStateManager#getSchema', 'BaseStateManager#getClassDescription', '4.0.0-alpha.29');
-    return this.getClassDescription(className);
-  }
+  #onGetClassDescriptionResponse = (reqId, _className, classDescription) => {
+    const fullDescription = ParameterBag.getFullDescription(classDescription);
+    this.#promiseStore.resolve(reqId, fullDescription);
+  };
+
+  #onGetClassDescriptionError = (reqId, msg) => {
+    msg = `Cannot execute 'getClassDescription' on BaseStateManager: ${msg}`;
+    this.#promiseStore.reject(reqId, msg);
+  };
 
   /**
    * Create a {@link SharedState} instance from a registered class.
@@ -293,6 +190,26 @@ class BaseStateManager {
 
     return promise;
   }
+
+  #onCreateResponse = (reqId, stateId, instanceId, className, classDescription, initValues) => {
+    const state = this.#buildSharedState({
+      className,
+      classDescription,
+      stateId,
+      instanceId,
+      isOwner: true,
+      initValues,
+      filter: null, // owner cannot filter parameters
+    });
+
+    this.#statesById.set(state.id, state);
+    this.#promiseStore.resolve(reqId, state);
+  };
+
+  #onCreateError = (reqId, msg) => {
+    msg = `Cannot execute 'create' on BaseStateManager: ${msg}`;
+    this.#promiseStore.reject(reqId, msg);
+  };
 
   /**
    * Attach to an existing {@link SharedState} instance.
@@ -320,7 +237,9 @@ class BaseStateManager {
    *
    * @overload
    * @param {SharedStateClassName} className - Name of the class.
-   * @param {string[]} filter - List of parameters of interest
+   * @param {Object} [options={}]
+   * @param {string[]} [options.whiteList] - White list of parameter names to track (as precedence over `blackList`).
+   * @param {string[]} [options.blackList] - Black list of parameter names to ignore.
    * @returns {Promise<SharedState>}
    *
    * @example
@@ -332,7 +251,9 @@ class BaseStateManager {
    * @overload
    * @param {SharedStateClassName} className - Name of the class.
    * @param {number} stateId - Id of the state
-   * @param {string[]} filter - List of parameters of interest
+   * @param {object} [options={}]
+   * @param {string[]} [options.whiteList] - White list of parameter names to track (as precedence over `blackList`).
+   * @param {string[]} [options.blackList] - Black list of parameter names to ignore.
    * @returns {Promise<SharedState>}
    *
    * @example
@@ -344,21 +265,22 @@ class BaseStateManager {
    * Alternative signatures:
    * - `stateManager.attach(className)`
    * - `stateManager.attach(className, stateId)`
-   * - `stateManager.attach(className, filter)`
-   * - `stateManager.attach(className, stateId, filter)`
+   * - `stateManager.attach(className, options)`
+   * - `stateManager.attach(className, stateId, options)`
    *
    * @param {SharedStateClassName} className - Name of the class.
-   * @param {number|string[]} [stateIdOrFilter] - Id of the state to attach to. If `null`,
+   * @param {number} [stateId] - Id of the state to attach to. If `null`,
    *  attach to the first state found with the given class name (useful for
    *  globally shared states owned by the server).
-   * @param {string[]} [filter] - List of parameters of interest in the
-   *  returned state. If set to `null`, no filter is applied.
+   * @param {object} [options={}]
+   * @param {string[]} [options.whiteList] - White list of parameter names to track (as precedence over `blackList`).
+   * @param {string[]} [options.blackList] - Black list of parameter names to ignore.
    * @returns {Promise<SharedState>}
    *
    * @example
    * const state = await client.stateManager.attach('my-class');
    */
-  async attach(className, stateIdOrFilter = null, filter = null) {
+  async attach(className, stateIdOrOptions = null, options = null) {
     if (this.#status !== 'inited') {
       throw new DOMException(`Cannot execute 'attach' on BaseStateManager: BaseStateManager is not inited`, 'InvalidStateError');
     }
@@ -370,37 +292,78 @@ class BaseStateManager {
     }
 
     if (arguments.length === 2) {
-      if (stateIdOrFilter === null) {
+      if (stateIdOrOptions === null) {
         stateId = null;
-        filter = null;
-      } else if (Number.isFinite(stateIdOrFilter)) {
-        stateId = stateIdOrFilter;
-        filter = null;
-      } else if (Array.isArray(stateIdOrFilter)) {
+        options = null;
+      } else if (Number.isFinite(stateIdOrOptions)) {
+        stateId = stateIdOrOptions;
+        options = null;
+      } else if (Array.isArray(stateIdOrOptions)) {
+        // backward compatibility for legacy filter array argument
+        warnings.deprecated(
+          'argument `filter: string[]` of BaseStateManager#attach',
+          'argument `options { whiteList: string[] }`',
+          '5.6.0',
+        );
         stateId = null;
-        filter = stateIdOrFilter;
+        options = { whiteList: stateIdOrOptions };
+      } else if (isPlainObject(stateIdOrOptions)) {
+        stateId = null;
+        options = stateIdOrOptions;
       } else {
-        throw new TypeError(`Cannot execute 'attach' on BaseStateManager: argument 2 must be either null, a number or an array`);
+        throw new TypeError(`Cannot execute 'attach' on BaseStateManager: argument 2 must be either null, a number or an object`);
       }
     }
 
     if (arguments.length === 3) {
-      stateId = stateIdOrFilter;
+      stateId = stateIdOrOptions;
 
       if (stateId !== null && !Number.isFinite(stateId)) {
         throw new TypeError(`Cannot execute 'attach' on BaseStateManager: argument 2 must be either null or a number`);
       }
 
-      if (filter !== null && !Array.isArray(filter)) {
-        throw new TypeError(`Cannot execute 'attach' on BaseStateManager: argument 3 must be either null or an array`);
+      if (options !== null) {
+        if (Array.isArray(options)) {
+          // backward compatibility for legacy filter array argument
+          warnings.deprecated(
+            'argument `filter: string[]` of BaseStateManager#attach',
+            'argument `options { whiteList: string[] }`',
+            '5.6.0',
+          );
+          options = { whiteList: options };
+        } else if (!isPlainObject(options)) {
+          throw new TypeError(`Cannot execute 'attach' on BaseStateManager: argument 3 must be either null or an object`);
+        }
+        // keep option object as is
       }
     }
 
     const { id: reqId, promise } = this.#promiseStore.createPromise();
-    this[kStateManagerClient].transport.emit(ATTACH_REQUEST, reqId, className, stateId, filter);
+    this[kStateManagerClient].transport.emit(ATTACH_REQUEST, reqId, className, stateId, options);
 
     return promise;
   }
+
+  #onAttachResponse = (reqId, stateId, instanceId, className, classDescription, currentValues, filter) => {
+    const state = this.#buildSharedState({
+      manager: this,
+      className,
+      classDescription,
+      stateId,
+      instanceId,
+      isOwner: false,
+      initValues: currentValues,
+      filter,
+    });
+
+    this.#statesById.set(state.id, state);
+    this.#promiseStore.resolve(reqId, state);
+  };
+
+  #onAttachError = (reqId, msg) => {
+    msg = `Cannot execute 'attach' on BaseStateManager: ${msg}`;
+    this.#promiseStore.reject(reqId, msg);
+  };
 
   /**
    * Observe all the {@link SharedState} instances that are created on the network.
@@ -437,7 +400,7 @@ class BaseStateManager {
    * @param {stateManagerObserveCallback} callback - Function to execute when a
    *   new {@link SharedState} is created on the network.
    * @param {object} options - Options.
-   * @param {boolean} options.excludeLocal=false - If set to true, exclude states
+   * @param {boolean} [options.excludeLocal=false] - If set to true, exclude states
    *   created by the same node from the collection.
    * @example
    * client.stateManager.observe(async (className, stateId) => {
@@ -456,7 +419,7 @@ class BaseStateManager {
    * @param {stateManagerObserveCallback} callback - Function to execute when a
    *   new {@link SharedState} is created on the network.
    * @param {object} options - Options.
-   * @param {boolean} options.excludeLocal=false - If set to true, exclude states
+   * @param {boolean} [options.excludeLocal=false] - If set to true, exclude states
    *   created by the same node from the collection.
    * @example
    * client.stateManager.observe('my-shared-state-class', async (className, stateId) => {
@@ -607,6 +570,74 @@ class BaseStateManager {
     return promise;
   }
 
+  /** @private */
+  #filterObserve(observedClassName, className, ownerId, options) {
+    let filter = true;
+
+    if (observedClassName === null || observedClassName === className) {
+      filter = false;
+    }
+    // filter states created by this client if excludeLocal is true
+    if (options.excludeLocal === true && ownerId === this[kStateManagerClient].id) {
+      filter = true;
+    }
+
+    return filter;
+  }
+
+  /** @private */
+  #onObserveResponse = async (reqId, ...list) => {
+    // retrieve the callback that have been stored in `observe()` to make sure
+    // we don't call another callback that may have been registered earlier.
+    const observeInfos = this.#observeRequestCallbacks.get(reqId);
+    const [observedClassName, callback, options] = observeInfos;
+    // move observeInfos from `_observeRequestCallbacks` to `_observeListeners`
+    // to guarantee future order of execution
+    this.#observeRequestCallbacks.delete(reqId);
+    this.#observeListeners.add(observeInfos);
+
+    const promises = list.map(([className, stateId, ownerId]) => {
+      const filter = this.#filterObserve(observedClassName, className, ownerId, options);
+
+      if (!filter) {
+        return callback(className, stateId, ownerId);
+      } else {
+        return Promise.resolve();
+      }
+    });
+
+    await Promise.all(promises);
+
+    const unsubscribe = () => {
+      this.#observeListeners.delete(observeInfos);
+      // no more listeners, we can stop receiving notifications from the server
+      if (this.#observeListeners.size === 0) {
+        this[kStateManagerClient].transport.emit(UNOBSERVE_NOTIFICATION);
+      }
+    };
+
+    this.#promiseStore.resolve(reqId, unsubscribe);
+  };
+
+  /** @private */
+  #onObserveError = (reqId, msg) => {
+    msg = `Cannot execute 'observe' on BaseStateManager: ${msg}`;
+    this.#observeRequestCallbacks.delete(reqId);
+    this.#promiseStore.reject(reqId, msg);
+  };
+
+  /** @private */
+  #onObserveNotification = (className, stateId, ownerId) => {
+    this.#observeListeners.forEach(observeInfos => {
+      const [observedClassName, callback, options] = observeInfos;
+      const filter = this.#filterObserve(observedClassName, className, ownerId, options);
+
+      if (!filter) {
+        callback(className, stateId, ownerId);
+      }
+    });
+  };
+
   /**
    * Returns a collection of all the states created from a given shared state class.
    *
@@ -622,62 +653,38 @@ class BaseStateManager {
    *
    * @overload
    * @param {SharedStateClassName} className - Name of the shared state class.
-   * @param {SharedStateParameterName[]} filter - Filter parameter of interest for each
-   *  state of the collection.
-   * @returns {Promise<SharedStateCollection>}
-   *
-   * @example
-   * const collection = await client.stateManager.getCollection(className, ['my-param']);
-   */
-  /**
-   * Returns a collection of all the states created from a given shared state class.
-   *
-   * @overload
-   * @param {SharedStateClassName} className - Name of the shared state class.
-   * @param {object} options - Options.
-   * @param {boolean} options.excludeLocal=false - If set to true, exclude states
+   * @param {object} [options={}] - Options.
+   * @param {boolean} [options.excludeLocal=false] - If set to true, exclude states
    *  created by the same node from the collection.
+   * @param {string[]} [options.whiteList] - White list of parameter names to track (as precedence over `blackList`).
+   * @param {string[]} [options.blackList] - Black list of parameter names to ignore.
    * @returns {Promise<SharedStateCollection>}
    *
    * @example
-   * const collection = await client.stateManager.getCollection(className, { excludeLocal: true });
-   */
-  /**
-   * Returns a collection of all the states created from a given shared state class.
-   *
-   * @overload
-   * @param {SharedStateClassName} className - Name of the shared state class.
-   * @param {SharedStateParameterName[]} filter - Filter parameter of interest for each
-   *  state of the collection.
-   * @param {object} options - Options.
-   * @param {boolean} options.excludeLocal=false - If set to true, exclude states
-   *  created by the same node from the collection.
-   * @returns {Promise<SharedStateCollection>}
-   *
-   * @example
-   * const collection = await client.stateManager.getCollection(className, ['my-param'], { excludeLocal: true });
+   * const collection = await client.stateManager.getCollection(className, {
+   *   blackList: ['my-param'],
+   *   excludeLocal: true,
+   * });
    */
   /**
    * Returns a collection of all the states created from a given shared state class.
    *
    * Alternative signatures:
    * - `stateManager.getCollection(className)`
-   * - `stateManager.getCollection(className, filter)`
    * - `stateManager.getCollection(className, options)`
-   * - `stateManager.getCollection(className, filter, options)`
    *
    * @param {SharedStateClassName} className - Name of the shared state class.
-   * @param {array|null} [filter=null] - Filter parameter of interest for each
-   *  state of the collection. If set to `null`, no filter applied.
    * @param {object} [options={}] - Options.
    * @param {boolean} [options.excludeLocal=false] - If set to true, exclude states
    *  created by the same node from the collection.
+   * @param {string[]} [options.whiteList] - White list of parameter names to track (as precedence over `blackList`).
+   * @param {string[]} [options.blackList] - Black list of parameter names to ignore.
    * @returns {Promise<SharedStateCollection>}
    *
    * @example
    * const collection = await client.stateManager.getCollection(className);
    */
-  async getCollection(className, filterOrOptions = null, options = {}) {
+  async getCollection(className, options = {}) {
     if (this.#status !== 'inited') {
       throw new DOMException(`Cannot execute 'getCollection' on BaseStateManager: BaseStateManager is not inited`, 'InvalidStateError');
     }
@@ -686,36 +693,45 @@ class BaseStateManager {
       throw new TypeError(`Cannot execute 'getCollection' on BaseStateManager: Argument 1 should be a string"`);
     }
 
-    let filter;
-
     if (arguments.length === 2) {
-      if (filterOrOptions === null) {
-        filter = null;
-        options = null;
-      } else if (Array.isArray(filterOrOptions)) {
-        filter = filterOrOptions;
-        options = {};
-      } else if (typeof filterOrOptions === 'object') {
-        filter = null;
-        options = filterOrOptions;
-      } else {
-        throw new TypeError(`Cannot execute 'getCollection' on BaseStateManager: Argument 2 should be either null, an array or an object"`);
+      if (Array.isArray(options)) {
+        // backward compatibility for legacy filter array argument
+        warnings.deprecated(
+          'argument `filter: string[]` of BaseStateManager#getCollection',
+          'argument `options { whiteList: string[] }`',
+          '5.6.0',
+        );
+
+        options = { whiteList: options };
+      } else if (!isPlainObject(options)) {
+        throw new TypeError(`Cannot execute 'getCollection' on BaseStateManager: Argument 2 should be either null or an object"`);
       }
     }
 
+    // backward compatibility for legacy filter array argument
     if (arguments.length === 3) {
-      filter = filterOrOptions;
+      // backward compatibility for legacy filter array argument
+      warnings.deprecated(
+        'argument `filter: string[]` of BaseStateManager#getCollection',
+        'argument `options { whiteList: string[] }`',
+        '5.6.0',
+      );
+
+      const filter = options;
+      options = arguments[2];
 
       if (filter !== null && !Array.isArray(filter)) {
         throw new TypeError(`Cannot execute 'getCollection' on BaseStateManager: Argument 2 should be either an array or null"`);
       }
 
-      if (options === null || typeof options !== 'object') {
+      if (options === null || !isPlainObject(options)) {
         throw new TypeError(`Cannot execute 'getCollection' on BaseStateManager: Argument 3 should be either an object"`);
       }
+
+      options.whiteList = filter;
     }
 
-    const collection = new SharedStateCollection(this, className, filter, options);
+    const collection = new SharedStateCollection(this, className, options);
 
     try {
       await collection[kSharedStateCollectionInit]();
@@ -724,6 +740,17 @@ class BaseStateManager {
     }
 
     return collection;
+  }
+
+  // ---------------------------------------------------------------------------
+  // DEPRECATED
+  // ---------------------------------------------------------------------------
+  /**
+   * @deprecated Use {@link BaseStateManager#getClassDescription} instead.
+   */
+  async getSchema(className) {
+    warnings.deprecated('BaseStateManager#getSchema', 'BaseStateManager#getClassDescription', '4.0.0-alpha.29');
+    return this.getClassDescription(className);
   }
 }
 

@@ -8,8 +8,11 @@ import {
   OBSERVE_NOTIFICATION,
 } from '../../src/common/constants.js';
 import {
-  kStateManagerClient
+  kStateManagerClient,
 } from '../../src/common/BaseStateManager.js';
+import {
+  kServerStateManagerRemoveClient,
+} from '../../src/server/ServerStateManager.js';
 import SharedState from '../../src/common/SharedState.js';
 
 import config from '../utils/config.js';
@@ -794,6 +797,60 @@ describe(`# StateManager`, () => {
 
       assert.isTrue(errored);
     });
+  });
+
+  describe(`## [server] kServerStateManagerRemoveClient - i.e. client disconnect`, () => {
+    let client2;
+
+    beforeEach(async () => {
+      client2 = new Client({ role: 'test', ...config });
+      await client2.start();
+    });
+
+    afterEach(async () => {
+      await client2.stop();
+    });
+
+    it(`client disconnect should behave well (1) - owner disconnects`, async () => {
+      const owned = await client.stateManager.create('a');
+      const attached = await client2.stateManager.attach('a');
+
+      let ownedDeleteCalled = false;
+      let ownedDetachCalled = false;
+      let attachedDetachCalled = false;
+
+      owned.onDelete(() => ownedDeleteCalled = true);
+      owned.onDetach(() => ownedDetachCalled = true);
+      attached.onDetach(() => attachedDetachCalled = true);
+
+      await server.stateManager[kServerStateManagerRemoveClient](client.id);
+      await delay(50);
+
+      assert.equal(ownedDeleteCalled, false);
+      assert.equal(ownedDetachCalled, false);
+      assert.equal(attachedDetachCalled, true);
+    });
+
+    it(`client disconnect should behave well (1) - attached disconnects`, async () => {
+      const owned = await client.stateManager.create('a');
+      const attached = await client2.stateManager.attach('a');
+
+      let ownedDeleteCalled = false;
+      let ownedDetachCalled = false;
+      let attachedDetachCalled = false;
+
+      owned.onDelete(() => ownedDeleteCalled = true);
+      owned.onDetach(() => ownedDetachCalled = true);
+      attached.onDetach(() => attachedDetachCalled = true);
+
+      await server.stateManager[kServerStateManagerRemoveClient](client2.id);
+      await delay(50);
+
+      assert.equal(ownedDeleteCalled, false);
+      assert.equal(ownedDetachCalled, false);
+      assert.equal(attachedDetachCalled, false);
+    });
+
   });
 
   describe(`## [server] registerCreateHook(className, createHook)`, () => {

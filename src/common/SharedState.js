@@ -1,4 +1,7 @@
-import { isPlainObject, isString } from '@ircam/sc-utils';
+import {
+  isPlainObject,
+  isString,
+} from '@ircam/sc-utils';
 
 import ParameterBag from './ParameterBag.js';
 import PromiseStore from './PromiseStore.js';
@@ -20,7 +23,12 @@ import {
 import {
   kStateManagerClient,
   kStateManagerDeleteState,
+  kPendingSharedStateConstructionData,
 } from './BaseStateManager.js';
+
+import {
+  sanitizeOnUpdateParams,
+} from './shared-state-utils.js';
 
 import warnings from './logs/warnings.js';
 
@@ -31,10 +39,14 @@ export const kSharedStatePromiseStore = Symbol('soundworks:shared-state-promise-
  * Callback executed when updates are applied on a {@link SharedState}.
  *
  * @callback sharedStateOnUpdateCallback
- * @param {Object} newValues - Key / value pairs of the updates that have been
- *  applied to the state.
- * @param {Object} oldValues - Key / value pairs of the updated params before
- *  the updates has been applied to the state.
+ * @param {Object|any} newValues - Key / value pairs of the updates that have been
+ *  applied to the state, or single value if the callback has been registered against
+ *  a parameter name filter.
+ * @param {Object|any} oldValues - Key / value pairs of the updated params before
+ *  the updates has been applied to the state, or single value if the callback has been
+ *  registered against a parameter name filter.
+ * @param {sharedStateDeleteOnUpdateCallback} unsubscribe - Reference to unsubscribe
+ *  function returned by the `SharedState#onUpdate` method.
  */
 
 /**
@@ -107,177 +119,288 @@ class SharedState {
   #client = null;
   #manager = null;
   #filter = null;
-  // true is the state has been detached or deleted
   #detached = false;
-  // only valid for owners
   #hasSiblings = false;
   #parameters = null;
   #onUpdateCallbacks = new Set();
   #onDetachCallbacks = new Set();
   #onDeleteCallbacks = new Set();
+  #waitForConditions = new Set();
 
-  constructor({
-    stateId,
-    instanceId,
-    className,
-    classDescription,
-    isOwner,
-    manager,
-    initValues,
-    filter,
-  }) {
-    this.#manager = manager;
-    this.#client = manager[kStateManagerClient];
-    this.#className = className;
-    this.#id = stateId;
-    this.#instanceId = instanceId;
-    this.#isOwner = isOwner; // may be any node
-    this.#filter = filter;
+  constructor() {
+    // cf. BaseStateManager#buildSharedState to get the whole pattern
+    // rationale is to have a clean constructor API for future derived classes
+    this.#manager = globalThis[kPendingSharedStateConstructionData].manager;
+    this.#client = globalThis[kPendingSharedStateConstructionData].manager[kStateManagerClient];
+    this.#className = globalThis[kPendingSharedStateConstructionData].className;
+    this.#id = globalThis[kPendingSharedStateConstructionData].stateId;
+    this.#instanceId =globalThis[kPendingSharedStateConstructionData]. instanceId;
+    this.#isOwner = globalThis[kPendingSharedStateConstructionData].isOwner; // may be any node
+    this.#filter = globalThis[kPendingSharedStateConstructionData].filter;
 
     try {
-      this.#parameters = new ParameterBag(classDescription, initValues);
+      this.#parameters = new ParameterBag(
+        globalThis[kPendingSharedStateConstructionData].classDescription,
+        globalThis[kPendingSharedStateConstructionData].initValues,
+      );
     } catch (err) {
-      throw new Error(`Cannot construct 'SharedState': ${err.message}`);
+      throw new Error(`Cannot construct 'SharedState' (${this.#className}): ${err.message}`);
     }
 
     /** @private */
     this[kSharedStatePromiseStore] = new PromiseStore(this.constructor.name);
 
-    // add listener for state updates
-    this.#client.transport.addListener(`${UPDATE_RESPONSE}-${this.#id}-${this.#instanceId}`, async (reqId, updates) => {
-      const updated = await this.#commit(updates, true, true);
-      this[kSharedStatePromiseStore].resolve(reqId, updated);
-    });
-
-    // retrieve values but do not propagate to subscriptions
-    this.#client.transport.addListener(`${UPDATE_ABORT}-${this.#id}-${this.#instanceId}`, async (reqId, updates) => {
-      const updated = await this.#commit(updates, false, true);
-      this[kSharedStatePromiseStore].resolve(reqId, updated);
-    });
-
-    this.#client.transport.addListener(`${UPDATE_NOTIFICATION}-${this.#id}-${this.#instanceId}`, async (updates) => {
-      // https://github.com/collective-soundworks/soundworks/issues/18
-      //
-      // # note: 2002-10-03
-      //
-      // `setTimeout(async () => this.#commit(updates, true, false));`
-      // appears to be the only way to push the update commit in the next event
-      // cycle so that `attach` can resolve before the update notification is
-      // actually dispatched. The alternative:
-      // `Promise.resolve().then(() => this.#commit(updates, true, false))``
-      // does not behave as expected...
-      //
-      // However this breaks the reliability of:
-      // ```
-      // /* given a0, a1 and a2 being 3 similar attached states */
-      // await state.set({ int: i });
-      //
-      // assert.equal(a0.get('int'), i);
-      // assert.equal(a1.get('int'), i);
-      // assert.equal(a2.get('int'), i);
-      // ```
-      // which is far more important than the edge case reported in the issue
-      // therefore this wont be fixed for now
-      this.#commit(updates, true, false);
-    });
-
-    // ---------------------------------------------
-    // state has been deleted by its creator or the class has been deleted
-    // ---------------------------------------------
-    this.#client.transport.addListener(`${DELETE_NOTIFICATION}-${this.#id}-${this.#instanceId}`, async () => {
-      this.#detached = true;
-
-      this.#manager[kStateManagerDeleteState](this.#id);
-      this.#clearTransport();
-
-      for (let callback of this.#onDetachCallbacks) {
-        try {
-          await callback();
-        } catch (err) {
-          console.error(err.message);
-        }
-      }
-
-      if (this.#isOwner) {
-        for (let callback of this.#onDeleteCallbacks) {
-          await callback();
-        }
-      }
-
-      this.#onDetachCallbacks.clear();
-      this.#onDeleteCallbacks.clear();
-      this[kSharedStatePromiseStore].flush();
-    });
-
+    this.#client.transport.addListener(`${UPDATE_RESPONSE}-${this.#id}-${this.#instanceId}`, this.#onUpdateResponse);
+    this.#client.transport.addListener(`${UPDATE_ABORT}-${this.#id}-${this.#instanceId}`, this.#onUpdateAbort);
+    this.#client.transport.addListener(`${UPDATE_NOTIFICATION}-${this.#id}-${this.#instanceId}`, this.#onUpdateNotification);
+    this.#client.transport.addListener(`${DELETE_NOTIFICATION}-${this.#id}-${this.#instanceId}`, this.#onDeleteNotification);
 
     if (this.#isOwner) {
-      // ---------------------------------------------
-      // the creator has called `.delete()`
-      // ---------------------------------------------
-      this.#client.transport.addListener(`${DELETE_RESPONSE}-${this.#id}-${this.#instanceId}`, async (reqId) => {
-        this.#manager[kStateManagerDeleteState](this.#id);
-        this.#clearTransport();
-
-        for (let callback of this.#onDetachCallbacks) {
-          try {
-            await callback();
-          } catch (err) {
-            console.log(err.message);
-          }
-        }
-
-        for (let callback of this.#onDeleteCallbacks) {
-          try {
-            await callback();
-          } catch (err) {
-            console.log(err.message);
-          }
-        }
-
-        this.#onDetachCallbacks.clear();
-        this.#onDeleteCallbacks.clear();
-        this[kSharedStatePromiseStore].resolve(reqId, this);
-        this[kSharedStatePromiseStore].flush();
-      });
-
-      this.#client.transport.addListener(`${DELETE_ERROR}-${this.#id}`, (reqId, msg) => {
-        this[kSharedStatePromiseStore].reject(reqId, msg);
-      });
-
-      this.#client.transport.addListener(`${HAS_SIBLINGS_NOTIFICATION}-${this.#id}-${this.#instanceId}`, hasSiblings => {
-        this.#hasSiblings = hasSiblings;
-      });
-
+      this.#client.transport.addListener(`${DELETE_RESPONSE}-${this.#id}-${this.#instanceId}`, this.#onDeleteResponse);
+      this.#client.transport.addListener(`${DELETE_ERROR}-${this.#id}`, this.#onDeleteError);
+      this.#client.transport.addListener(`${HAS_SIBLINGS_NOTIFICATION}-${this.#id}-${this.#instanceId}`, this.#onHasSiblingsNotification);
     } else {
-      // ---------------------------------------------
-      // the attached node has called `.detach()`
-      // ---------------------------------------------
-      this.#client.transport.addListener(`${DETACH_RESPONSE}-${this.#id}-${this.#instanceId}`, async (reqId) => {
-        this.#manager[kStateManagerDeleteState](this.#id);
-        this.#clearTransport();
-
-        for (let callback of this.#onDetachCallbacks) {
-          try {
-            await callback();
-          } catch (err) {
-            console.log(err.message);
-          }
-        }
-
-        this.#onDetachCallbacks.clear();
-        this.#onDeleteCallbacks.clear();
-        this[kSharedStatePromiseStore].resolve(reqId, this);
-        this[kSharedStatePromiseStore].flush();
-      });
-
-      // the state does not exists anymore in the server (should not happen)
-      this.#client.transport.addListener(`${DETACH_ERROR}-${this.#id}`, (reqId, msg) => {
-        this.#onDetachCallbacks.clear();
-        this.#onDeleteCallbacks.clear();
-        this[kSharedStatePromiseStore].reject(reqId, msg);
-        this[kSharedStatePromiseStore].flush();
-      });
+      this.#client.transport.addListener(`${DETACH_RESPONSE}-${this.#id}-${this.#instanceId}`, this.#onDetachResponse);
+      this.#client.transport.addListener(`${DETACH_ERROR}-${this.#id}`, this.#onDetachError);
     }
+  }
+
+  #cleanup() {
+    this.#detached = true;
+    this.#manager[kStateManagerDeleteState](this.#id);
+
+    this.#client.transport.removeAllListeners(`${UPDATE_RESPONSE}-${this.#id}-${this.#instanceId}`);
+    this.#client.transport.removeAllListeners(`${UPDATE_NOTIFICATION}-${this.#id}-${this.#instanceId}`);
+    this.#client.transport.removeAllListeners(`${UPDATE_ABORT}-${this.#id}-${this.#instanceId}`);
+    this.#client.transport.removeAllListeners(`${DELETE_NOTIFICATION}-${this.#id}-${this.#instanceId}`);
+
+    if (this.#isOwner) {
+      this.#client.transport.removeAllListeners(`${DELETE_RESPONSE}-${this.#id}-${this.#instanceId}`);
+      this.#client.transport.removeAllListeners(`${DELETE_ERROR}-${this.#id}-${this.#instanceId}`);
+      this.#client.transport.removeAllListeners(`${HAS_SIBLINGS_NOTIFICATION}-${this.#id}-${this.#instanceId}`);
+    } else {
+      this.#client.transport.removeAllListeners(`${DETACH_RESPONSE}-${this.#id}-${this.#instanceId}`);
+      this.#client.transport.removeAllListeners(`${DETACH_ERROR}-${this.#id}-${this.#instanceId}`);
+    }
+  }
+
+  #onUpdateResponse = async (reqId, updates) => {
+    const updated = await this.#commit(updates, true, true);
+    this[kSharedStatePromiseStore].resolve(reqId, updated);
+    this.#checkPendingWaitForConditions();
+  };
+
+  #onUpdateAbort = async (reqId, updates) => {
+    const updated = await this.#commit(updates, false, true);
+    this[kSharedStatePromiseStore].resolve(reqId, updated);
+    this.#checkPendingWaitForConditions();
+  };
+
+  #onUpdateNotification = updates => {
+    this.#commit(updates, true, false);
+    this.#checkPendingWaitForConditions();
+  };
+
+  #onDetachResponse = async (reqId) => {
+    this.#cleanup();
+
+    for (let callback of this.#onDetachCallbacks) {
+      try {
+        await callback();
+      } catch (err) {
+        console.log(err.message);
+      }
+    }
+
+    this.#onDetachCallbacks.clear();
+    this.#onDeleteCallbacks.clear();
+    this[kSharedStatePromiseStore].resolve(reqId, this);
+    this[kSharedStatePromiseStore].flush();
+  };
+
+  #onDetachError = (reqId, msg) => {
+    this.#onDetachCallbacks.clear();
+    this.#onDeleteCallbacks.clear();
+    this[kSharedStatePromiseStore].reject(reqId, msg);
+    this[kSharedStatePromiseStore].flush();
+  };
+
+  #onDeleteResponse = async (reqId) => {
+    this.#cleanup();
+
+    for (let callback of this.#onDetachCallbacks) {
+      try {
+        await callback();
+      } catch (err) {
+        console.log(err.message);
+      }
+    }
+
+    for (let callback of this.#onDeleteCallbacks) {
+      try {
+        await callback();
+      } catch (err) {
+        console.log(err.message);
+      }
+    }
+
+    this.#onDetachCallbacks.clear();
+    this.#onDeleteCallbacks.clear();
+    this[kSharedStatePromiseStore].resolve(reqId, this);
+    this[kSharedStatePromiseStore].flush();
+  };
+
+  #onDeleteError = (reqId, msg) => {
+    this[kSharedStatePromiseStore].reject(reqId, msg);
+  };
+
+  #onDeleteNotification = async () => {
+    this.#cleanup();
+
+    for (let callback of this.#onDetachCallbacks) {
+      try {
+        await callback();
+      } catch (err) {
+        console.error(err.message);
+      }
+    }
+
+    if (this.#isOwner) {
+      for (let callback of this.#onDeleteCallbacks) {
+        await callback();
+      }
+    }
+
+    this.#onDetachCallbacks.clear();
+    this.#onDeleteCallbacks.clear();
+    this[kSharedStatePromiseStore].flush();
+  };
+
+  #onHasSiblingsNotification = hasSiblings => {
+    this.#hasSiblings = hasSiblings;
+  };
+
+  #checkParamNameAgainstFilters(paramName) {
+    if (this.#filter === null) {
+      return;
+    }
+
+    const { whiteList, blackList } = this.#filter;
+
+    if (whiteList && !whiteList.includes(paramName)) {
+      throw new Error(`Parameter '${paramName}' is not in white list`);
+    } else if (blackList && blackList.includes(paramName)) {
+      throw new Error(`Parameter '${paramName}' is in black list`);
+    }
+  }
+
+  #sanitizeValuesAgainstFilters(values) {
+    if (this.#filter === null) {
+      return values;
+    }
+
+    const { whiteList, blackList } = this.#filter;
+
+    for (let name in values) {
+      if (whiteList && !whiteList.includes(name)) {
+        delete values[name];
+      } else if (blackList && blackList.includes(name)) {
+        delete values[name];
+      }
+    }
+
+    return values;
+  }
+
+  async #commit(updates, propagate = true, initiator = false) {
+    const newValues = {};
+    const oldValues = {};
+
+    for (let name in updates) {
+      const { immediate, event } = this.#parameters.getDescription(name);
+      // @note 20211209 - we had an issue here server-side, because if the value
+      // is an object or an array, the reference is shared by everybody, therefore
+      // `changed` is always false and the new value is never propagated...
+      // FIXED - `state.get` now returns a deep copy when `type` is `any`
+      const oldValue = this.#parameters.get(name);
+      const [newValue, changed] = this.#parameters.set(name, updates[name]);
+
+      // handle immediate stuff
+      if (initiator && immediate) {
+        // @note - we don't need to check filterChange here because the value
+        // has been updated in parameters on the `set` side so can rely on `changed`
+        // to avoid retrigger listeners.
+        // If the value has been overridden by the server, `changed` will true
+        // anyway so it should behave correctly.
+        if (!changed || event) {
+          continue;
+        }
+      }
+
+      newValues[name] = newValue;
+      oldValues[name] = oldValue;
+    }
+
+    // do not propagate if the `UPDATE_REQUEST` as been aborted by the server.
+    if (propagate && Object.keys(newValues).length > 0) {
+      const callbackPromises = this.#executeUpdateCallbacks(newValues, oldValues);
+      // on a given client, `await state.set(update)` resolves after all
+      // update callbacks have themselves resolved
+      await Promise.all(callbackPromises);
+    }
+
+    // reset events to null after propagation of all listeners
+    for (let name in newValues) {
+      const { event } = this.#parameters.getDescription(name);
+
+      if (event) {
+        this.#parameters.set(name, null);
+      }
+    }
+
+    return newValues;
+  }
+
+  #executeUpdateCallbacks(newValues, oldValues) {
+    let promises = [];
+
+    this.#onUpdateCallbacks.forEach(listenerPayload => {
+      let somePromise = this.#executeUpdateCallback(listenerPayload, newValues, oldValues);
+      promises.push(somePromise);
+    });
+
+    return promises;
+  }
+
+  #executeUpdateCallback(listenerPayload, newValues, oldValues) {
+    const { paramName, listener, unsubscribe } = listenerPayload;
+
+    if (paramName === null) {
+      return listener(newValues, oldValues, unsubscribe);
+    } else if (paramName in newValues) {
+      return listener(newValues[paramName], oldValues[paramName], unsubscribe);
+    }
+  }
+
+  #checkPendingWaitForConditions() {
+    const values = this.getValuesUnsafe();
+
+    this.#waitForConditions.forEach(payload => {
+      const { resolve, condition, timeoutId } = payload;
+      let match = true;
+
+      for (let [key, value] of Object.entries(condition)) {
+        if (values[key] !== value) {
+          match = false;
+        }
+      }
+
+      if (match) {
+        clearTimeout(timeoutId);
+        this.#waitForConditions.delete(payload);
+        resolve();
+      }
+    });
   }
 
   /**
@@ -330,76 +453,6 @@ class SharedState {
     return this.#hasSiblings;
   }
 
-  #clearTransport() {
-    // remove listeners
-    this.#client.transport.removeAllListeners(`${UPDATE_RESPONSE}-${this.#id}-${this.#instanceId}`);
-    this.#client.transport.removeAllListeners(`${UPDATE_NOTIFICATION}-${this.#id}-${this.#instanceId}`);
-    this.#client.transport.removeAllListeners(`${UPDATE_ABORT}-${this.#id}-${this.#instanceId}`);
-    this.#client.transport.removeAllListeners(`${DELETE_NOTIFICATION}-${this.#id}-${this.#instanceId}`);
-
-    if (this.#isOwner) {
-      this.#client.transport.removeAllListeners(`${DELETE_RESPONSE}-${this.#id}-${this.#instanceId}`);
-      this.#client.transport.removeAllListeners(`${DELETE_ERROR}-${this.#id}-${this.#instanceId}`);
-    } else {
-      this.#client.transport.removeAllListeners(`${DETACH_RESPONSE}-${this.#id}-${this.#instanceId}`);
-      this.#client.transport.removeAllListeners(`${DETACH_ERROR}-${this.#id}-${this.#instanceId}`);
-    }
-  }
-
-  async #commit(updates, propagate = true, initiator = false) {
-    const newValues = {};
-    const oldValues = {};
-
-    for (let name in updates) {
-      const { immediate, event } = this.#parameters.getDescription(name);
-      // @note 20211209 - we had an issue here server-side, because if the value
-      // is an object or an array, the reference is shared by everybody, therefore
-      // `changed` is always false and the new value is never propagated...
-      // FIXED - `state.get` now returns a deep copy when `type` is `any`
-      const oldValue = this.#parameters.get(name);
-      const [newValue, changed] = this.#parameters.set(name, updates[name]);
-
-      // handle immediate stuff
-      if (initiator && immediate) {
-        // @note - we don't need to check filterChange here because the value
-        // has been updated in parameters on the `set` side so can rely on `changed`
-        // to avoid retrigger listeners.
-        // If the value has been overridden by the server, `changed` will true
-        // anyway so it should behave correctly.
-        if (!changed || event) {
-          continue;
-        }
-      }
-
-      newValues[name] = newValue;
-      oldValues[name] = oldValue;
-    }
-
-    // if the `UPDATE_REQUEST` as been aborted by the server, do not propagate
-    let promises = [];
-
-    if (propagate && Object.keys(newValues).length > 0) {
-      this.#onUpdateCallbacks.forEach(listener => {
-        promises.push(listener(newValues, oldValues));
-      });
-    }
-
-    // on a given client, `await state.set(update)` resolves after all
-    // update callbacks have themselves resolved
-    await Promise.all(promises);
-
-    // reset events to null after propagation of all listeners
-    for (let name in newValues) {
-      const { event } = this.#parameters.getDescription(name);
-
-      if (event) {
-        this.#parameters.set(name, null);
-      }
-    }
-
-    return newValues;
-  }
-
   /**
    * Return the underlying {@link SharedStateClassDescription} or the
    * {@link SharedStateParameterDescription} if `paramName` is given.
@@ -418,14 +471,6 @@ class SharedState {
     } catch (err) {
       throw new ReferenceError(`Cannot execute 'getDescription' on SharedState: ${err.message}`);
     }
-  }
-
-  /**
-   * @deprecated Use {@link SharedState#getDescription} instead.
-   */
-  getSchema(paramName = null) {
-    warnings.deprecated('SharedState#getSchema', 'SharedState#getDescription', '4.0.0-alpha.29');
-    return this.getDescription(paramName);
   }
 
   /**
@@ -512,6 +557,12 @@ class SharedState {
     let syncedOnUpdate = false;
 
     for (let name in updates) {
+      // Throw early if some param is blacklisted or not whitelisted
+      try {
+        this.#checkParamNameAgainstFilters(name);
+      } catch (err) {
+        throw new DOMException(`Cannot execute 'set' on SharedState (${this.#className}): ${err.message}`, 'NotSupportedError');
+      }
       // Try to coerce value now, so that eventual errors are triggered early
       // on the node requesting the update and not only on the server side.
       try {
@@ -519,13 +570,6 @@ class SharedState {
         this.#parameters.coerceValue(name, updates[name]);
       } catch (err) {
         throw new TypeError(`Cannot execute 'set' on SharedState (${this.#className}): ${err.message}`);
-      }
-
-      // Make sure that given name is in filter white list (if any)
-      if (this.#filter !== null) {
-        if (!this.#filter.includes(name)) {
-          throw new DOMException(`Cannot execute 'set' on SharedState (${this.#className}): Parameter '${name}' is not in white list`, 'NotSupportedError');
-        }
       }
 
       // ### `immediate` modifier behavior
@@ -593,9 +637,9 @@ class SharedState {
       }
     }
 
-    // params that trigger a synced onUpdate call: immediate, local, non-acknowledged
+    // params that trigger a synced onUpdate call are: immediate, local, non-acknowledged
     if (syncedOnUpdate) {
-      this.#onUpdateCallbacks.forEach(listener => listener(newValues, oldValues));
+      this.#executeUpdateCallbacks(newValues, oldValues);
     }
 
     // if we only have local params, we can resolve immediately
@@ -642,10 +686,11 @@ class SharedState {
       throw new ReferenceError(`Cannot execute 'get' on SharedState (${this.#className}): Parameter '${name}' is not defined`);
     }
 
-    if (this.#filter !== null) {
-      if (!this.#filter.includes(name)) {
-        throw new DOMException(`Cannot execute 'get' on SharedState (${this.#className}): Parameter '${name}' is not in white list`, 'NotSupportedError');
-      }
+    // Throw early if some param is blacklisted or not whitelisted
+    try {
+      this.#checkParamNameAgainstFilters(name);
+    } catch (err) {
+      throw new DOMException(`Cannot execute 'get' on SharedState (${this.#className}): ${err.message}`, 'NotSupportedError');
     }
 
     return this.#parameters.get(name);
@@ -671,10 +716,11 @@ class SharedState {
       throw new ReferenceError(`Cannot execute 'getUnsafe' on SharedState (${this.#className}): Parameter '${name}' is not defined`);
     }
 
-    if (this.#filter !== null) {
-      if (!this.#filter.includes(name)) {
-        throw new DOMException(`Cannot execute 'getUnsafe' on SharedState (${this.#className}): Parameter '${name}' is not in white list`, 'NotSupportedError');
-      }
+    // Throw early if some param is blacklisted or not whitelisted
+    try {
+      this.#checkParamNameAgainstFilters(name);
+    } catch (err) {
+      throw new DOMException(`Cannot execute 'getUnsafe' on SharedState (${this.#className}): ${err.message}`, 'NotSupportedError');
     }
 
     return this.#parameters.getUnsafe(name);
@@ -691,16 +737,7 @@ class SharedState {
    */
   getValues() {
     const values = this.#parameters.getValues();
-
-    if (this.#filter !== null) {
-      for (let name in values) {
-        if (!this.#filter.includes(name)) {
-          delete values[name];
-        }
-      }
-    }
-
-    return values;
+    return this.#sanitizeValuesAgainstFilters(values);
   }
 
   /**
@@ -718,16 +755,7 @@ class SharedState {
    */
   getValuesUnsafe() {
     const values = this.#parameters.getValuesUnsafe();
-
-    if (this.#filter !== null) {
-      for (let name in values) {
-        if (!this.#filter.includes(name)) {
-          delete values[name];
-        }
-      }
-    }
-
-    return values;
+    return this.#sanitizeValuesAgainstFilters(values);
   }
 
   /**
@@ -809,8 +837,42 @@ class SharedState {
   }
 
   /**
+   * Subscribe to any updates in the state.
+   *
+   * @overload
+   * @param {sharedStateOnUpdateCallback} callback
+   *  Callback to execute when an update is applied on the state.
+   * @param {Boolean} [executeListener=false] - Execute the callback immediately
+   *  with current state values. Note that `oldValues` will be set to `{}`.
+   * @returns {sharedStateDeleteOnUpdateCallback}
+   * @example
+   * state.onUpdate(updates => {
+   *   // ...
+   * });
+   */
+  /**
+   * Subscribe to updates in the state filtered by a given parameter name.
+   *
+   * @overload
+   * @param {SharedStateParameterName} paramName
+   * @param {sharedStateOnUpdateCallback} callback
+   *  Callback to execute when an update is applied on the state.
+   * @param {Boolean} [executeListener=false] - Execute the callback immediately
+   *  with current state values. Note that `oldValues` will be set to `{}`.
+   * @returns {sharedStateDeleteOnUpdateCallback}
+   * @example
+   * state.onUpdate('my-param', myValue => {
+   *   // ...
+   * });
+   */
+  /**
    * Subscribe to state updates.
    *
+   * Alternative signatures:
+   * - `state.onUpdate(callback, executeListener)`
+   * - `state.onUpdate(paramName, callback, executeListener)`
+   *
+   * @param {SharedStateParameterName} paramName
    * @param {sharedStateOnUpdateCallback} callback
    *  Callback to execute when an update is applied on the state.
    * @param {Boolean} [executeListener=false] - Execute the callback immediately
@@ -828,8 +890,13 @@ class SharedState {
    * // later
    * unsubscribe();
    */
-  onUpdate(listener, executeListener = false) {
-    this.#onUpdateCallbacks.add(listener);
+  onUpdate(...args) {
+    const { paramName, listener, executeListener } = sanitizeOnUpdateParams(this, ...args);
+
+    const listenerPayload = { paramName, listener };
+    this.#onUpdateCallbacks.add(listenerPayload);
+    // create unsubscribe and add to payload, to pass it back to the listeners as argument
+    listenerPayload.unsubscribe = () => this.#onUpdateCallbacks.delete(listenerPayload);
 
     if (executeListener === true) {
       const currentValues = this.getValues();
@@ -843,12 +910,10 @@ class SharedState {
         }
       }
 
-      listener(currentValues, {});
+      this.#executeUpdateCallback(listenerPayload, currentValues, {});
     }
 
-    return () => {
-      this.#onUpdateCallbacks.delete(listener);
-    };
+    return listenerPayload.unsubscribe;
   }
 
   /**
@@ -879,6 +944,67 @@ class SharedState {
     this.#onDeleteCallbacks.add(callback);
     return () => this.#onDeleteCallbacks.delete(callback);
   }
+
+  /**
+   * Wait for a given condition in the state of the SharedState instance.
+   * If the state watches the condition when `waitFor` is called, the promise is
+   * resolved immediately.
+   *
+   * @note - mark as private until tested in real-world
+   *
+   * @private
+   * @param {object} condition - Condition to be meet in the state for the
+   *  returned promise to resolve.
+   * @param {object} condition - Timeout (in milliseconds) that trigger the rejection
+   *  of the returned promise.
+   * @return {Promise}
+   */
+  waitFor(condition, timeout = null) {
+    if (!isPlainObject(condition)) {
+      throw new TypeError(`Cannot execute 'waitFor' on SharedState: argument 0 must be an object`);
+    }
+
+    if (timeout !== null && (!Number.isFinite(timeout) || timeout <= 0)) {
+      throw new TypeError(`Cannot execute 'waitFor' on SharedState: optional argument 1 must be a finite strictly positive number`);
+    }
+
+    // @todo - check condition keys are not filtered, this could never resolve
+    const descriptionKeys = Object.keys(this.getDescription());
+    const conditionKeys = Object.keys(condition);
+    const diff = conditionKeys.filter(key => !descriptionKeys.includes(key));
+
+    if (diff.length > 0) {
+      throw new ReferenceError(`Cannot execute 'waitFor' on SharedState: condition contains keys (${diff.join(', ')}) that are not declared in class description`);
+    }
+
+    const { promise, resolve, reject } = Promise.withResolvers();
+    const payload = { resolve, condition };
+
+    if (timeout !== null) {
+      payload.timeoutId = setTimeout(() => {
+        this.#waitForConditions.delete(payload);
+        reject();
+      }, timeout);
+    }
+
+    this.#waitForConditions.add(payload);
+    this.#checkPendingWaitForConditions();
+
+    return promise;
+  }
+
+  // ---------------------------------------------------------------------------
+  // DEPRECATED
+  // ---------------------------------------------------------------------------
+
+  /**
+   * @deprecated Use {@link SharedState#getDescription} instead.
+   */
+  getSchema(paramName = null) {
+    warnings.deprecated('SharedState#getSchema', 'SharedState#getDescription', '4.0.0-alpha.29');
+    return this.getDescription(paramName);
+  }
+
 }
 
 export default SharedState;

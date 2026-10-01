@@ -1,3 +1,16 @@
+# CHANGELOG
+
+## v5.7.0 - 2026-10-01
+
+- Refactor: SharedState callback and instantiation
+- Feat: introduce blackList and whiteList filters on SharedState and SharedStateCollection (backward compatible)
+- Feat: introduce SharedState#onUpdate(paramName, listener) and SharedStateCollection#onUpdate(paramName, listener) signature (backward compatible)
+- Feat: introduce experimental SharedState#waitFor(condition, timeout) method
+
+## v5.6.0 - 2026-09-23
+
+- Feat: do not propagate values when acknowledge is false and state has no siblings
+
 ## v5.5.0 - 2026-06-10
 
 - CI: move to node 24

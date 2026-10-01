@@ -1,5 +1,6 @@
 export const kStateManagerInit: unique symbol;
 export const kStateManagerDeleteState: unique symbol;
+export const kPendingSharedStateConstructionData: unique symbol;
 export const kStateManagerClient: unique symbol;
 export default BaseStateManager;
 /**
@@ -47,10 +48,6 @@ declare class BaseStateManager {
      */
     getClassDescription(className: SharedStateClassName): SharedStateClassDescription;
     /**
-     * @deprecated Use {@link BaseStateManager#getClassDescription} instead.
-     */
-    getSchema(className: any): Promise<any>;
-    /**
      * Create a {@link SharedState} instance from a registered class.
      *
      * @param {SharedStateClassName} className - Name of the class.
@@ -90,26 +87,36 @@ declare class BaseStateManager {
      *
      * @overload
      * @param {SharedStateClassName} className - Name of the class.
-     * @param {string[]} filter - List of parameters of interest
+     * @param {Object} [options={}]
+     * @param {string[]} [options.whiteList] - White list of parameter names to track (as precedence over `blackList`).
+     * @param {string[]} [options.blackList] - Black list of parameter names to ignore.
      * @returns {Promise<SharedState>}
      *
      * @example
      * const state = await client.stateManager.attach('my-class', ['some-param']);
      */
-    attach(className: SharedStateClassName, filter: string[]): Promise<SharedState>;
+    attach(className: SharedStateClassName, options?: {
+        whiteList?: string[] | undefined;
+        blackList?: string[] | undefined;
+    } | undefined): Promise<SharedState>;
     /**
      * Attach to an existing {@link SharedState} instance.
      *
      * @overload
      * @param {SharedStateClassName} className - Name of the class.
      * @param {number} stateId - Id of the state
-     * @param {string[]} filter - List of parameters of interest
+     * @param {object} [options={}]
+     * @param {string[]} [options.whiteList] - White list of parameter names to track (as precedence over `blackList`).
+     * @param {string[]} [options.blackList] - Black list of parameter names to ignore.
      * @returns {Promise<SharedState>}
      *
      * @example
      * const state = await client.stateManager.attach('my-class', stateId, ['some-param']);
      */
-    attach(className: SharedStateClassName, stateId: number, filter: string[]): Promise<SharedState>;
+    attach(className: SharedStateClassName, stateId: number, options?: {
+        whiteList?: string[] | undefined;
+        blackList?: string[] | undefined;
+    } | undefined): Promise<SharedState>;
     /**
      * Observe all the {@link SharedState} instances that are created on the network.
      *
@@ -147,7 +154,7 @@ declare class BaseStateManager {
      * @param {stateManagerObserveCallback} callback - Function to execute when a
      *   new {@link SharedState} is created on the network.
      * @param {object} options - Options.
-     * @param {boolean} options.excludeLocal=false - If set to true, exclude states
+     * @param {boolean} [options.excludeLocal=false] - If set to true, exclude states
      *   created by the same node from the collection.
      * @example
      * client.stateManager.observe(async (className, stateId) => {
@@ -157,7 +164,7 @@ declare class BaseStateManager {
      * }, { excludeLocal: true });
      */
     observe(callback: stateManagerObserveCallback, options: {
-        excludeLocal: boolean;
+        excludeLocal?: boolean | undefined;
     }): any;
     /**
      * Observe all the {@link SharedState} instances of given {@link SharedStateClassName}
@@ -169,7 +176,7 @@ declare class BaseStateManager {
      * @param {stateManagerObserveCallback} callback - Function to execute when a
      *   new {@link SharedState} is created on the network.
      * @param {object} options - Options.
-     * @param {boolean} options.excludeLocal=false - If set to true, exclude states
+     * @param {boolean} [options.excludeLocal=false] - If set to true, exclude states
      *   created by the same node from the collection.
      * @example
      * client.stateManager.observe('my-shared-state-class', async (className, stateId) => {
@@ -177,7 +184,7 @@ declare class BaseStateManager {
      * }, { excludeLocal: true });
      */
     observe(className: SharedStateClassName, callback: stateManagerObserveCallback, options: {
-        excludeLocal: boolean;
+        excludeLocal?: boolean | undefined;
     }): any;
     /**
      * Returns a collection of all the states created from a given shared state class.
@@ -195,48 +202,28 @@ declare class BaseStateManager {
      *
      * @overload
      * @param {SharedStateClassName} className - Name of the shared state class.
-     * @param {SharedStateParameterName[]} filter - Filter parameter of interest for each
-     *  state of the collection.
-     * @returns {Promise<SharedStateCollection>}
-     *
-     * @example
-     * const collection = await client.stateManager.getCollection(className, ['my-param']);
-     */
-    getCollection(className: SharedStateClassName, filter: SharedStateParameterName[]): Promise<SharedStateCollection>;
-    /**
-     * Returns a collection of all the states created from a given shared state class.
-     *
-     * @overload
-     * @param {SharedStateClassName} className - Name of the shared state class.
-     * @param {object} options - Options.
-     * @param {boolean} options.excludeLocal=false - If set to true, exclude states
+     * @param {object} [options={}] - Options.
+     * @param {boolean} [options.excludeLocal=false] - If set to true, exclude states
      *  created by the same node from the collection.
+     * @param {string[]} [options.whiteList] - White list of parameter names to track (as precedence over `blackList`).
+     * @param {string[]} [options.blackList] - Black list of parameter names to ignore.
      * @returns {Promise<SharedStateCollection>}
      *
      * @example
-     * const collection = await client.stateManager.getCollection(className, { excludeLocal: true });
+     * const collection = await client.stateManager.getCollection(className, {
+     *   blackList: ['my-param'],
+     *   excludeLocal: true,
+     * });
      */
-    getCollection(className: SharedStateClassName, options: {
-        excludeLocal: boolean;
-    }): Promise<SharedStateCollection>;
+    getCollection(className: SharedStateClassName, options?: {
+        excludeLocal?: boolean | undefined;
+        whiteList?: string[] | undefined;
+        blackList?: string[] | undefined;
+    } | undefined): Promise<SharedStateCollection>;
     /**
-     * Returns a collection of all the states created from a given shared state class.
-     *
-     * @overload
-     * @param {SharedStateClassName} className - Name of the shared state class.
-     * @param {SharedStateParameterName[]} filter - Filter parameter of interest for each
-     *  state of the collection.
-     * @param {object} options - Options.
-     * @param {boolean} options.excludeLocal=false - If set to true, exclude states
-     *  created by the same node from the collection.
-     * @returns {Promise<SharedStateCollection>}
-     *
-     * @example
-     * const collection = await client.stateManager.getCollection(className, ['my-param'], { excludeLocal: true });
+     * @deprecated Use {@link BaseStateManager#getClassDescription} instead.
      */
-    getCollection(className: SharedStateClassName, filter: SharedStateParameterName[], options: {
-        excludeLocal: boolean;
-    }): Promise<SharedStateCollection>;
+    getSchema(className: any): Promise<any>;
     /** @private */
     private [kStateManagerDeleteState];
     /**
