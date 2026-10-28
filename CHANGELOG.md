@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v5.8.0 - 2026-10-01
+
+- Feat: SharedState#WaitFor accept arbitrary function as condition
+
 ## v5.7.0 - 2026-10-01
 
 - Refactor: SharedState callback and instantiation
