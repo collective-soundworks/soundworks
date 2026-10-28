@@ -943,6 +943,21 @@ describe('# SharedState', () => {
       assert.equal(waitForResolved, true);
     });
 
+    it.only(`should resolve when condition is met - function`, async () => {
+      const owned = await server.stateManager.create('a');
+      const attached = await client.stateManager.attach('a');
+
+      let waitForResolved = false;
+      owned.waitFor(values => {
+        return values.int === 2 && values.bool === true;
+      }).then(() => waitForResolved = true);
+
+      await owned.set({ int: 2 });
+      await attached.set({ bool: true });
+
+      assert.equal(waitForResolved, true);
+    });
+
     it(`should resolve when condition is met - resolve immediately`, async () => {
       const owned = await server.stateManager.create('a');
       await owned.waitFor({ int: 0, bool: false });

@@ -1,6 +1,7 @@
 import {
   isPlainObject,
   isString,
+  isFunction,
 } from '@ircam/sc-utils';
 
 import ParameterBag from './ParameterBag.js';
@@ -383,19 +384,25 @@ class SharedState {
   }
 
   #checkPendingWaitForConditions() {
-    const values = this.getValuesUnsafe();
+    const values = this.getValues();
 
     this.#waitForConditions.forEach(payload => {
       const { resolve, condition, timeoutId } = payload;
-      let match = true;
+      let match;
 
-      for (let [key, value] of Object.entries(condition)) {
-        if (values[key] !== value) {
-          match = false;
+      if (isFunction(condition)) {
+        match = condition(values);
+      } else {
+        match = true;
+
+        for (let [key, value] of Object.entries(condition)) {
+          if (values[key] !== value) {
+            match = false;
+          }
         }
       }
 
-      if (match) {
+      if (match === true) {
         clearTimeout(timeoutId);
         this.#waitForConditions.delete(payload);
         resolve();
@@ -954,14 +961,16 @@ class SharedState {
    *
    * @private
    * @param {object} condition - Condition to be meet in the state for the
-   *  returned promise to resolve.
-   * @param {object} condition - Timeout (in milliseconds) that trigger the rejection
+   *  returned promise to resolve. The condition is either a function which returns
+   *  `true` when the condition is met or an object that describe a desired state
+   *  of a subset the `SharedState` values.
+   * @param {object} timeout - Timeout (in milliseconds) that trigger the rejection
    *  of the returned promise.
    * @return {Promise}
    */
   waitFor(condition, timeout = null) {
-    if (!isPlainObject(condition)) {
-      throw new TypeError(`Cannot execute 'waitFor' on SharedState: argument 0 must be an object`);
+    if (!isPlainObject(condition) && !isFunction(condition)) {
+      throw new TypeError(`Cannot execute 'waitFor' on SharedState: argument 0 must be either a function or an object`);
     }
 
     if (timeout !== null && (!Number.isFinite(timeout) || timeout <= 0)) {
