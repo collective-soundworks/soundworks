@@ -943,7 +943,7 @@ describe('# SharedState', () => {
       assert.equal(waitForResolved, true);
     });
 
-    it.only(`should resolve when condition is met - function`, async () => {
+    it(`should resolve when condition is met - function`, async () => {
       const owned = await server.stateManager.create('a');
       const attached = await client.stateManager.attach('a');
 
