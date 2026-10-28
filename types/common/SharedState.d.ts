@@ -301,8 +301,10 @@ declare class SharedState {
      *
      * @private
      * @param {object} condition - Condition to be meet in the state for the
-     *  returned promise to resolve.
-     * @param {object} condition - Timeout (in milliseconds) that trigger the rejection
+     *  returned promise to resolve. The condition is either a function which returns
+     *  `true` when the condition is met or an object that describe a desired state
+     *  of a subset the `SharedState` values.
+     * @param {object} timeout - Timeout (in milliseconds) that trigger the rejection
      *  of the returned promise.
      * @return {Promise}
      */
