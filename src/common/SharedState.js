@@ -700,6 +700,10 @@ class SharedState {
    * const value = state.get('paramName');
    */
   get(name) {
+    if (arguments.length > 1) {
+      throw new TypeError(`Cannot execute 'get' on SharedState (${this.#className}): Method called with two arguments while it accepts only 1 argument`);
+    }
+
     if (!this.#parameters.has(name)) {
       throw new ReferenceError(`Cannot execute 'get' on SharedState (${this.#className}): Parameter '${name}' is not defined`);
     }
@@ -730,6 +734,10 @@ class SharedState {
    * const value = state.getUnsafe('paramName');
    */
   getUnsafe(name) {
+    if (arguments.length > 1) {
+      throw new TypeError(`Cannot execute 'getUnsafe' on SharedState (${this.#className}): Method called with two arguments while it accepts only 1 argument`);
+    }
+
     if (!this.#parameters.has(name)) {
       throw new ReferenceError(`Cannot execute 'getUnsafe' on SharedState (${this.#className}): Parameter '${name}' is not defined`);
     }

@@ -251,6 +251,20 @@ describe('# SharedState', () => {
   });
 
   describe('## get(name) - ## getValues()', () => {
+    it(`get(name) should throw if if called with more than 1 arguments (often "set" misspelling)`, async () => {
+      const state = await server.stateManager.create('a');
+      let errored = false;
+
+      try {
+        await state.get('int', 23);
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      assert.equal(errored, true, 'calling get with 2 arguments should have thrown');
+    });
+
     it('get(name) `any` type should be a deep copy', async() => {
       server.stateManager.defineClass('any', {
         ref: {
@@ -289,7 +303,21 @@ describe('# SharedState', () => {
   });
 
   describe('## getUnsafe(name) - state.getValuesUnsafe()', () => {
-    it('get(name) `any` type should be a reference', async() => {
+    it(`getUnsafe(name) should throw if if called with more than 1 arguments (often "set" misspelling)`, async () => {
+      const state = await server.stateManager.create('a');
+      let errored = false;
+
+      try {
+        await state.getUnsafe('int', 23);
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      assert.equal(errored, true, 'calling get with 2 arguments should have thrown');
+    });
+
+    it('getUnsafe(name) `any` type should be a reference', async() => {
       server.stateManager.defineClass('any-unsafe', {
         ref: {
           type: 'any',
