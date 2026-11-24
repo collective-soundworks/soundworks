@@ -86,7 +86,7 @@ export function sanitizeOnUpdateParams(caller, paramNameOrListener, listenerOrEx
 export function checkValidFilters(options, className, classDescription) {
   const classParams = Object.keys(classDescription);
 
-  for (let filterName of ['whiteList', 'backList']) {
+  for (let filterName of ['whiteList', 'blackList']) {
     if (!options[filterName]) {
       continue;
     }
@@ -95,7 +95,7 @@ export function checkValidFilters(options, className, classDescription) {
     const invalid = list.filter(paramName => !classParams.includes(paramName));
 
     if (invalid.length > 0) {
-      const msg = `Invalid filter (${invalid.join(', ')}) for shared state class '${className}'`;
+      const msg = `Invalid ${filterName} options: some parameters (${invalid.join(', ')}) are undefined in '${className}' class description`;
       throw new Error(msg);
     }
   }

@@ -136,6 +136,38 @@ describe(`# SharedStateCollection`, () => {
         assert.fail('should have failed');
       }
     });
+
+    it.only(`should throw if whiteList contains invalid keys`, async () => {
+      const owned = await server.stateManager.create('a');
+      let errored = false;
+
+      try {
+        const attached = await clients[0].stateManager.getCollection('a', {
+          whiteList: ['invalid', 'toto'],
+        });
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      assert.isTrue(errored);
+    });
+
+    it.only(`should throw if backList contains invalid keys`, async () => {
+      const owned = await server.stateManager.create('a');
+      let errored = false;
+
+      try {
+        const attached = await clients[0].stateManager.getCollection('a', {
+          blackList: ['invalid', 'toto'],
+        });
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      assert.isTrue(errored);
+    });
   });
 
   describe(`## size (alias length)`, async () => {

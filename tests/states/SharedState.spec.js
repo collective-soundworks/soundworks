@@ -1130,7 +1130,39 @@ describe('# SharedState - filtered attached state', () => {
       assert.equal(attached.id, owned.id);
     });
 
-    it(`should throw if filter contains invalid keys`, async () => {
+    it.only(`should throw if whiteList contains invalid keys`, async () => {
+      const owned = await server.stateManager.create('filtered');
+      let errored = false;
+
+      try {
+        const attached = await client.stateManager.attach('filtered', {
+          whiteList: ['invalid', 'toto'],
+        });
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      assert.isTrue(errored);
+    });
+
+    it.only(`should throw if backList contains invalid keys`, async () => {
+      const owned = await server.stateManager.create('filtered');
+      let errored = false;
+
+      try {
+        const attached = await client.stateManager.attach('filtered', {
+          blackList: ['invalid', 'toto'],
+        });
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      assert.isTrue(errored);
+    });
+
+    it(`(legacy) should throw if filter contains invalid keys`, async () => {
       const owned = await server.stateManager.create('filtered');
       let errored = false;
 
