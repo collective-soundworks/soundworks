@@ -109,7 +109,7 @@ class BaseStateManager {
 
   // This pattern allows to have a clean SharedState constructor signature for  which
   // which will provide a cleaner user facing API when derived.
-  // cf. instantiation pattern from AudioWorkletProcessor
+  // @note: mimic instantiation pattern from AudioWorkletProcessor
   // <https://webaudio.github.io/web-audio-api/#AudioWorkletProcessor-instantiation>
   #buildSharedState(options) {
     globalThis[kPendingSharedStateConstructionData] = {

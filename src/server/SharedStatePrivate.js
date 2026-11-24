@@ -157,12 +157,54 @@ class SharedStatePrivate {
    * Update hasSiblings property on owner
    */
   #updateHasSiblings() {
+    const description = this.#parameters.getDescription();
+    const propagateNonAcknowledgedParams = {};
+
+    for (let name in description) {
+      if (description[name].acknowledge === false) {
+        // set to true, if at least 1 of the attached client shows interested
+        // i.e. if param is not in blackList or in whiteList
+        propagateNonAcknowledgedParams[name] = false;
+      }
+    }
+
+    const nonAcknowledgedParamKeys = Object.keys(propagateNonAcknowledgedParams);
+
+    // check all non-owner attached clients to check if one of them is
+    // interested by non-acknowledged parameters
+    for (let [_, clientInfos] of this.attachedClients) {
+      const { isOwner, options } = clientInfos;
+
+      if (!isOwner) {
+        if (options && Array.isArray(options.whiteList)) {
+          nonAcknowledgedParamKeys.forEach(key => {
+            // param is in whiteList of non-owner attached state, must be propagated
+            if (options.whiteList.includes(key)) {
+              propagateNonAcknowledgedParams[key] = true;
+            }
+          });
+        } else if (options && Array.isArray(options.blackList)) {
+          nonAcknowledgedParamKeys.forEach(key => {
+            // param is not backList of non-owner attached state, must be propagated
+            if (!options.blackList.includes(key)) {
+              propagateNonAcknowledgedParams[key] = true;
+            }
+          });
+        } else {
+          // no black list and no white list, all params should be propagated
+          nonAcknowledgedParamKeys.forEach(key => {
+            propagateNonAcknowledgedParams[key] = true;
+          });
+        }
+      }
+    }
+
     for (let [instanceId, clientInfos] of this.attachedClients) {
       const { client, isOwner } = clientInfos;
 
       if (isOwner) {
         const hasSiblings = this.attachedClients.size > 1;
-        client.transport.emit(`${HAS_SIBLINGS_NOTIFICATION}-${this.id}-${instanceId}`, hasSiblings);
+        client.transport.emit(`${HAS_SIBLINGS_NOTIFICATION}-${this.id}-${instanceId}`, hasSiblings, propagateNonAcknowledgedParams);
       }
     }
   }

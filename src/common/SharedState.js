@@ -122,6 +122,8 @@ class SharedState {
   #filter = null;
   #detached = false;
   #hasSiblings = false;
+  // define if the owner should propagate non acknowledged params
+  #propagateNonAcknowledgedParams = {};
   #parameters = null;
   #onUpdateCallbacks = new Set();
   #onDetachCallbacks = new Set();
@@ -160,6 +162,14 @@ class SharedState {
       this.#client.transport.addListener(`${DELETE_RESPONSE}-${this.#id}-${this.#instanceId}`, this.#onDeleteResponse);
       this.#client.transport.addListener(`${DELETE_ERROR}-${this.#id}`, this.#onDeleteError);
       this.#client.transport.addListener(`${HAS_SIBLINGS_NOTIFICATION}-${this.#id}-${this.#instanceId}`, this.#onHasSiblingsNotification);
+
+      // init all acknowledge=false parameters as not propagating on the network
+      const description = this.#parameters.getDescription();
+      for (let name in description) {
+        if (description[name].acknowledge === false) {
+          this.#propagateNonAcknowledgedParams[name] = false;
+        }
+      }
     } else {
       this.#client.transport.addListener(`${DETACH_RESPONSE}-${this.#id}-${this.#instanceId}`, this.#onDetachResponse);
       this.#client.transport.addListener(`${DETACH_ERROR}-${this.#id}`, this.#onDetachError);
@@ -277,8 +287,9 @@ class SharedState {
     this[kSharedStatePromiseStore].flush();
   };
 
-  #onHasSiblingsNotification = hasSiblings => {
+  #onHasSiblingsNotification = (hasSiblings, propagateNonAcknowledgedParams) => {
     this.#hasSiblings = hasSiblings;
+    this.#propagateNonAcknowledgedParams = propagateNonAcknowledgedParams;
   };
 
   #checkParamNameAgainstFilters(paramName) {
@@ -633,8 +644,8 @@ class SharedState {
         // propagated on the network only if hasSiblings is true
         hasNonAcknowledgedParams = true;
         locallyResolvedParam[name] = this.#parameters.get(name);
-        // propagate only if there is an attached state somewhere
-        if (this.hasSiblings) {
+        // propagate only if there is an interested attached state somewhere
+        if (this.#propagateNonAcknowledgedParams[name] === true) {
           networkPropagatedParams[name] = updates[name];
         }
       } else {

@@ -2,7 +2,7 @@
 
 ## v5.8.0 - 2026-10-01
 
-- Feat: SharedState#WaitFor accept arbitrary function as condition
+- Feat: SharedState#waitFor accept arbitrary function as condition
 
 ## v5.7.0 - 2026-10-01
 

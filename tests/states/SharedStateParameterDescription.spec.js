@@ -841,7 +841,266 @@ describe('# SharedStateParameterDescription', () => {
       await client.stop();
       await server.stop();
     });
+
+    it('[acknowledge=false] does not propagate on the network if in sibling backList', async () => {
+      const localConfig = structuredClone(config);
+      localConfig.env.port = 8082;
+      const server = new Server(localConfig);
+      await server.start();
+
+      server.stateManager.defineClass('acknowledge-test', {
+        acknowledge: {
+          type: 'integer',
+          default: 0,
+          acknowledge: false,
+        },
+      });
+
+      const client = new Client({ role: 'test', ...localConfig });
+      await client.start();
+
+      const client2 = new Client({ role: 'test', ...localConfig });
+      await client2.start();
+
+      let networkPropagated = false;
+      let locallyPropagated = false;
+
+      server.sockets.forEach(socket => {
+        socket.addListener('message', (msg) => {
+          let [_, args] = JSON.parse(msg); // batch transport
+
+          args.forEach(([value]) => {
+            const [chan, _] = value;
+            if (chan.startsWith('s:u:req')) {
+              networkPropagated = true;
+            }
+          });
+        });
+      });
+
+      const state = await client.stateManager.create('acknowledge-test');
+      state.onUpdate(updates => locallyPropagated = true);
+
+      const attached = await client2.stateManager.attach('acknowledge-test', {
+        blackList: ['acknowledge'],
+      });
+
+      await state.set({ acknowledge: 42 });
+      await delay(50);
+
+      assert.equal(networkPropagated, false, 'should not propagate to network');
+      assert.equal(locallyPropagated, true, 'should propagate locally');
+
+      await client.stop();
+      await server.stop();
+    });
+
+
+    it('[acknowledge=false] does not propagate on the network if not in sibling whiteList', async () => {
+      const localConfig = structuredClone(config);
+      localConfig.env.port = 8082;
+      const server = new Server(localConfig);
+      await server.start();
+
+      server.stateManager.defineClass('acknowledge-test', {
+        acknowledge: {
+          type: 'integer',
+          default: 0,
+          acknowledge: false,
+        },
+        other: {
+          type: 'boolean',
+          default: true,
+        },
+      });
+
+      const client = new Client({ role: 'test', ...localConfig });
+      await client.start();
+
+      const client2 = new Client({ role: 'test', ...localConfig });
+      await client2.start();
+
+      let networkPropagated = false;
+      let locallyPropagated = false;
+
+      server.sockets.forEach(socket => {
+        socket.addListener('message', (msg) => {
+          let [_, args] = JSON.parse(msg); // batch transport
+
+          args.forEach(([value]) => {
+            const [chan, _] = value;
+            if (chan.startsWith('s:u:req')) {
+              networkPropagated = true;
+            }
+          });
+        });
+      });
+
+      const state = await client.stateManager.create('acknowledge-test');
+      state.onUpdate(updates => locallyPropagated = true);
+
+      const attached = await client2.stateManager.attach('acknowledge-test', {
+        whiteList: ['other'],
+      });
+
+      await state.set({ acknowledge: 42 });
+      await delay(50);
+
+      assert.equal(networkPropagated, false, 'should not propagate to network');
+      assert.equal(locallyPropagated, true, 'should propagate locally');
+
+      // make sure other params are propagated
+      await state.set({ other: false });
+      await delay(50);
+      assert.isFalse(attached.get('other'), false);
+
+      await client.stop();
+      await server.stop();
+    });
+
+    it('[acknowledge=false] 2 non acknowledged params, only one does not propagate on the network if in sibling backList', async () => {
+      const localConfig = structuredClone(config);
+      localConfig.env.port = 8082;
+      const server = new Server(localConfig);
+      await server.start();
+
+      server.stateManager.defineClass('acknowledge-test', {
+        acknowledge: {
+          type: 'integer',
+          default: 0,
+          acknowledge: false,
+        },
+        acknowledge2: {
+          type: 'integer',
+          default: 0,
+          acknowledge: false,
+        },
+      });
+
+      const client = new Client({ role: 'test', ...localConfig });
+      await client.start();
+
+      const client2 = new Client({ role: 'test', ...localConfig });
+      await client2.start();
+
+      let networkPropagated = false;
+      let locallyPropagated = false;
+      let acknowledge2Propagated = false;
+
+      server.sockets.forEach(socket => {
+        socket.addListener('message', (msg) => {
+          let [_, args] = JSON.parse(msg); // batch transport
+
+          args.forEach(([value]) => {
+            const [chan, _] = value;
+            if (chan.startsWith('s:u:req')) {
+              networkPropagated = true;
+            }
+          });
+        });
+      });
+
+      const state = await client.stateManager.create('acknowledge-test');
+      state.onUpdate(updates => locallyPropagated = true);
+
+      const attached = await client2.stateManager.attach('acknowledge-test', {
+        blackList: ['acknowledge'],
+      });
+
+      await state.set({ acknowledge: 42 });
+      await delay(50);
+
+      assert.equal(networkPropagated, false, 'should not propagate to network');
+      assert.equal(locallyPropagated, true, 'should propagate locally');
+
+      // acknowledge2 is properly propagated
+      attached.onUpdate('acknowledge2', value => {
+        assert.equal(value, 9);
+        acknowledge2Propagated = true;
+      });
+      await state.set('acknowledge2', 9);
+      await delay(50);
+
+
+      assert.equal(networkPropagated, true, 'acknowledge2 should have propagated to network');
+      assert.equal(acknowledge2Propagated, true, 'acknowledge2 should have propagated to attached client');
+
+      await client.stop();
+      await server.stop();
+    });
+
+    it('[acknowledge=false] 2 non acknowledged params, only one does propagate on the network if in sibling whiteList', async () => {
+      const localConfig = structuredClone(config);
+      localConfig.env.port = 8082;
+      const server = new Server(localConfig);
+      await server.start();
+
+      server.stateManager.defineClass('acknowledge-test', {
+        acknowledge: {
+          type: 'integer',
+          default: 0,
+          acknowledge: false,
+        },
+        acknowledge2: {
+          type: 'integer',
+          default: 0,
+          acknowledge: false,
+        },
+      });
+
+      const client = new Client({ role: 'test', ...localConfig });
+      await client.start();
+
+      const client2 = new Client({ role: 'test', ...localConfig });
+      await client2.start();
+
+      let networkPropagated = false;
+      let locallyPropagated = false;
+      let acknowledge2Propagated = false;
+
+      server.sockets.forEach(socket => {
+        socket.addListener('message', (msg) => {
+          let [_, args] = JSON.parse(msg); // batch transport
+
+          args.forEach(([value]) => {
+            const [chan, _] = value;
+            if (chan.startsWith('s:u:req')) {
+              networkPropagated = true;
+            }
+          });
+        });
+      });
+
+      const state = await client.stateManager.create('acknowledge-test');
+      state.onUpdate(updates => locallyPropagated = true);
+
+      const attached = await client2.stateManager.attach('acknowledge-test', {
+        whiteList: ['acknowledge2'],
+      });
+
+      await state.set({ acknowledge: 42 });
+      await delay(50);
+
+      assert.equal(networkPropagated, false, 'should not propagate to network');
+      assert.equal(locallyPropagated, true, 'should propagate locally');
+
+      // acknowledge2 is properly propagated
+      attached.onUpdate('acknowledge2', value => {
+        assert.equal(value, 9);
+        acknowledge2Propagated = true;
+      });
+      await state.set('acknowledge2', 9);
+      await delay(50);
+
+
+      assert.equal(networkPropagated, true, 'acknowledge2 should have propagated to network');
+      assert.equal(acknowledge2Propagated, true, 'acknowledge2 should have propagated to attached client');
+
+      await client.stop();
+      await server.stop();
+    });
   });
+
 
   // Regression Test
   // when min and max are explicitly set to Infinity values, the schema is stringified
