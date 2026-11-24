@@ -81,16 +81,26 @@ describe(`# StateManager`, () => {
       assert.isTrue(true);
     });
 
-    it(`should validate given default value`, async () => {
-      const localConfig = structuredClone(config);
-      localConfig.env.port = 8082;
-      const server = new Server(config);
+    [
+      ['integer', 3.12],
+      ['integer', 'coucou'],
+      ['integer', true],
+      ['float', 'coucou'],
+      ['float', true],
+      ['string', 3.14],
+      ['string', true],
+    ].forEach(([type, defaultValue]) => {
+      it.only(`should validate given default value (${type})`, async () => {
+        const localConfig = structuredClone(config);
+        localConfig.env.port = 8082;
+        const server = new Server(config);
 
-      assert.throws(() => {
-        server.stateManager.validateClassDescription({
-          a: { type: 'integer', default: true },
+        assert.throws(() => {
+          server.stateManager.validateClassDescription({
+            a: { type, default: defaultValue },
+          });
         });
-      })
+      });
     });
   });
 
