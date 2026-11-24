@@ -25,7 +25,6 @@ const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
 describe('# Server', () => {
   describe(`## new Server(config)`, () => {
     it(`should throw if invalid config object`, () => {
-
       let errored = false;
       try {
         const server = new Server();
@@ -38,9 +37,27 @@ describe('# Server', () => {
       }
     });
 
-    it(`should throw if no ClientDescription is defined in config`, () => {
+    it(`should throw if no ClientDescription found in config`, () => {
       const wrongConfig = structuredClone(config);
       wrongConfig.app.clients = {};
+
+      let errored = false;
+      try {
+        const server = new Server(wrongConfig);
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+      if (!errored) {
+        assert.fail('should have thrown');
+      }
+    });
+
+    it(`should throw if ClientRole is "server" (reserved to the server...)`, () => {
+      const wrongConfig = structuredClone(config);
+      wrongConfig.app.clients = {
+        server: { runtime: 'browser' },
+      };
 
       let errored = false;
       try {

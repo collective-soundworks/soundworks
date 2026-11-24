@@ -167,6 +167,10 @@ class Server {
 
     // `target` renamed to `runtime`
     for (let role in config.app.clients) {
+      if (role === 'server') {
+        throw new TypeError('Cannot construct "Server": Invalid ClientRole "server", this role is reserved to the server');
+      }
+
       const clientConfig = config.app.clients[role];
 
       if (clientConfig.target) {
@@ -275,6 +279,24 @@ class Server {
    */
   get version() {
     return this.#version;
+  }
+
+  /**
+   * Runtime platform (for consistency with Client API), returns the 'node' constant
+   *
+   * @type {'node'}
+   */
+  get runtime() {
+    return 'node';
+  }
+
+  /**
+   * Role of the server (for consistency with Client API), returns the 'server' constant
+   *
+   * @type {'server'}
+   */
+  get role() {
+    return 'server';
   }
 
   /**

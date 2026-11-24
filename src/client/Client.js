@@ -148,6 +148,15 @@ class Client {
   }
 
   /**
+   * Runtime platform on which the client is executed, i.e. 'browser' or 'node'.
+   *
+   * @type {'node'|'browser'}
+   */
+  get runtime() {
+    return this.#runtime;
+  }
+
+  /**
    * Role of the client in the application.
    *
    * @type {string}
@@ -197,15 +206,6 @@ class Client {
    */
   get token() {
     return this.#token;
-  }
-
-  /**
-   * Runtime platform on which the client is executed, i.e. 'browser' or 'node'.
-   *
-   * @type {'node'|'browser'}
-   */
-  get runtime() {
-    return this.#runtime;
   }
 
   /**
