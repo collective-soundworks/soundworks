@@ -90,7 +90,7 @@ describe(`# StateManager`, () => {
       ['string', 3.14],
       ['string', true],
     ].forEach(([type, defaultValue]) => {
-      it.only(`should validate given default value (${type})`, async () => {
+      it(`should validate given default value (${type})`, async () => {
         const localConfig = structuredClone(config);
         localConfig.env.port = 8082;
         const server = new Server(config);

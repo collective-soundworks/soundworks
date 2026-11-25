@@ -1130,7 +1130,7 @@ describe('# SharedState - filtered attached state', () => {
       assert.equal(attached.id, owned.id);
     });
 
-    it.only(`should throw if whiteList contains invalid keys`, async () => {
+    it(`should throw if whiteList contains invalid keys`, async () => {
       const owned = await server.stateManager.create('filtered');
       let errored = false;
 
@@ -1146,7 +1146,7 @@ describe('# SharedState - filtered attached state', () => {
       assert.isTrue(errored);
     });
 
-    it.only(`should throw if backList contains invalid keys`, async () => {
+    it(`should throw if backList contains invalid keys`, async () => {
       const owned = await server.stateManager.create('filtered');
       let errored = false;
 

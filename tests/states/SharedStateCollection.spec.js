@@ -137,7 +137,7 @@ describe(`# SharedStateCollection`, () => {
       }
     });
 
-    it.only(`should throw if whiteList contains invalid keys`, async () => {
+    it(`should throw if whiteList contains invalid keys`, async () => {
       const owned = await server.stateManager.create('a');
       let errored = false;
 
@@ -153,7 +153,7 @@ describe(`# SharedStateCollection`, () => {
       assert.isTrue(errored);
     });
 
-    it.only(`should throw if backList contains invalid keys`, async () => {
+    it(`should throw if backList contains invalid keys`, async () => {
       const owned = await server.stateManager.create('a');
       let errored = false;
 
