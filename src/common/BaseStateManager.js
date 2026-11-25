@@ -4,7 +4,9 @@ import {
   isPlainObject,
 } from '@ircam/sc-utils';
 
-import SharedState from './SharedState.js';
+import SharedState, {
+  kSharedStateFinalize,
+} from './SharedState.js';
 import SharedStateCollection, {
   kSharedStateCollectionInit,
 } from './SharedStateCollection.js';
@@ -32,6 +34,8 @@ import warnings from './logs/warnings.js';
 export const kStateManagerInit = Symbol('soundworks:state-manager-init');
 export const kStateManagerDeleteState = Symbol('soundworks:state-manager-delete-state');
 export const kPendingSharedStateConstructionData = Symbol('soundworks:state-manager-pending-shared-state-construction-data');
+export const kStateManagerCreateRequest = Symbol('soundworks:state-manager-create-request');
+export const kStateManagerAttachRequest = Symbol('soundworks:state-manager-attach-request');
 // for testing purposes
 export const kStateManagerClient = Symbol('soundworks:state-manager-client');
 
@@ -112,22 +116,22 @@ class BaseStateManager {
   // @note: mimic instantiation pattern from AudioWorkletProcessor
   // <https://webaudio.github.io/web-audio-api/#AudioWorkletProcessor-instantiation>
   #buildSharedState(options) {
-    globalThis[kPendingSharedStateConstructionData] = {
-      manager: this,
-      className: options.className,
-      classDescription: options.classDescription,
-      stateId: options.stateId,
-      instanceId: options.instanceId,
-      isOwner: options.isOwner,
-      initValues: options.initValues,
-      filter: options.filter,
-    };
+    // globalThis[kPendingSharedStateConstructionData] = {
+    //   manager: this,
+    //   className: options.className,
+    //   classDescription: options.classDescription,
+    //   stateId: options.stateId,
+    //   instanceId: options.instanceId,
+    //   isOwner: options.isOwner,
+    //   initValues: options.initValues,
+    //   filter: options.filter,
+    // };
 
-    const state = new SharedState();
-    // cleanup global scope
-    delete globalThis[kPendingSharedStateConstructionData];
+    // const state = new SharedState(this, options.className);
+    // // cleanup global scope
+    // delete globalThis[kPendingSharedStateConstructionData];
 
-    return state;
+    // return state;
   }
 
   /**
@@ -185,24 +189,33 @@ class BaseStateManager {
       throw new DOMException(`Cannot execute 'create' on BaseStateManager: BaseStateManager is not inited`, 'InvalidStateError');
     }
 
-    const { id: reqId, promise } = this.#promiseStore.createPromise();
-    this[kStateManagerClient].transport.emit(CREATE_REQUEST, reqId, className, initValues);
+    const state = new SharedState(this, className);
+    return state.create(initValues);
+  }
+
+  [kStateManagerCreateRequest](state, initValues) {
+    const { id: reqId, promise } = this.#promiseStore.createPromise(state);
+    this[kStateManagerClient].transport.emit(CREATE_REQUEST, reqId, state.className, initValues);
 
     return promise;
   }
 
-  #onCreateResponse = (reqId, stateId, instanceId, className, classDescription, initValues) => {
-    const state = this.#buildSharedState({
-      className,
+  #onCreateResponse = async (reqId, stateId, instanceId, className, classDescription, initValues) => {
+    const state = this.#promiseStore.getPayload(reqId);
+
+    state[kSharedStateFinalize]({
+      isOwner: true,
       classDescription,
       stateId,
       instanceId,
-      isOwner: true,
       initValues,
       filter: null, // owner cannot filter parameters
     });
 
     this.#statesById.set(state.id, state);
+    // lifecycle method
+    await state.connectedCallback();
+    // resolve promise
     this.#promiseStore.resolve(reqId, state);
   };
 
@@ -285,69 +298,25 @@ class BaseStateManager {
       throw new DOMException(`Cannot execute 'attach' on BaseStateManager: BaseStateManager is not inited`, 'InvalidStateError');
     }
 
-    let stateId = null;
-
     if (!isString(className)) {
       throw new TypeError(`Cannot execute 'attach' on BaseStateManager: argument 1 must be a string`);
     }
 
-    if (arguments.length === 2) {
-      if (stateIdOrOptions === null) {
-        stateId = null;
-        options = null;
-      } else if (Number.isFinite(stateIdOrOptions)) {
-        stateId = stateIdOrOptions;
-        options = null;
-      } else if (Array.isArray(stateIdOrOptions)) {
-        // backward compatibility for legacy filter array argument
-        warnings.deprecated(
-          'argument `filter: string[]` of BaseStateManager#attach',
-          'argument `options { whiteList: string[] }`',
-          '5.6.0',
-        );
-        stateId = null;
-        options = { whiteList: stateIdOrOptions };
-      } else if (isPlainObject(stateIdOrOptions)) {
-        stateId = null;
-        options = stateIdOrOptions;
-      } else {
-        throw new TypeError(`Cannot execute 'attach' on BaseStateManager: argument 2 must be either null, a number or an object`);
-      }
-    }
+    const state = new SharedState(this, className);
+    return state.attach(stateIdOrOptions, options);
+  }
 
-    if (arguments.length === 3) {
-      stateId = stateIdOrOptions;
-
-      if (stateId !== null && !Number.isFinite(stateId)) {
-        throw new TypeError(`Cannot execute 'attach' on BaseStateManager: argument 2 must be either null or a number`);
-      }
-
-      if (options !== null) {
-        if (Array.isArray(options)) {
-          // backward compatibility for legacy filter array argument
-          warnings.deprecated(
-            'argument `filter: string[]` of BaseStateManager#attach',
-            'argument `options { whiteList: string[] }`',
-            '5.6.0',
-          );
-          options = { whiteList: options };
-        } else if (!isPlainObject(options)) {
-          throw new TypeError(`Cannot execute 'attach' on BaseStateManager: argument 3 must be either null or an object`);
-        }
-        // keep option object as is
-      }
-    }
-
-    const { id: reqId, promise } = this.#promiseStore.createPromise();
-    this[kStateManagerClient].transport.emit(ATTACH_REQUEST, reqId, className, stateId, options);
+  [kStateManagerAttachRequest](state, stateId, options) {
+    const { id: reqId, promise } = this.#promiseStore.createPromise(state);
+    this[kStateManagerClient].transport.emit(ATTACH_REQUEST, reqId, state.className, stateId, options);
 
     return promise;
   }
 
   #onAttachResponse = (reqId, stateId, instanceId, className, classDescription, currentValues, filter) => {
-    const state = this.#buildSharedState({
-      manager: this,
-      className,
+    const state = this.#promiseStore.getPayload(reqId);
+
+    state[kSharedStateFinalize]({
       classDescription,
       stateId,
       instanceId,

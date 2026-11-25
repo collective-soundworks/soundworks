@@ -24,7 +24,8 @@ import {
 import {
   kStateManagerClient,
   kStateManagerDeleteState,
-  kPendingSharedStateConstructionData,
+  kStateManagerCreateRequest,
+  kStateManagerAttachRequest,
 } from './BaseStateManager.js';
 
 import {
@@ -33,6 +34,8 @@ import {
 
 import warnings from './logs/warnings.js';
 
+// BaseStateManager
+export const kSharedStateFinalize = Symbol('soundworks:shared-state-finalize')
 // for testing purposes
 export const kSharedStatePromiseStore = Symbol('soundworks:shared-state-promise-store');
 
@@ -130,28 +133,93 @@ class SharedState {
   #onDeleteCallbacks = new Set();
   #waitForConditions = new Set();
 
-  constructor() {
-    // cf. BaseStateManager#buildSharedState to get the whole pattern
-    // rationale is to have a clean constructor API for future derived classes
-    this.#manager = globalThis[kPendingSharedStateConstructionData].manager;
-    this.#client = globalThis[kPendingSharedStateConstructionData].manager[kStateManagerClient];
-    this.#className = globalThis[kPendingSharedStateConstructionData].className;
-    this.#id = globalThis[kPendingSharedStateConstructionData].stateId;
-    this.#instanceId = globalThis[kPendingSharedStateConstructionData].instanceId;
-    this.#isOwner = globalThis[kPendingSharedStateConstructionData].isOwner; // may be any node
-    this.#filter = globalThis[kPendingSharedStateConstructionData].filter;
+  constructor(node, className) {
+    // @todo - clean up, could be done more elegantly
+    let manager;
+
+    if (node[kStateManagerClient]) {
+      // legacy `node.stateManager.create()` factory pattern
+      manager = node;
+    } else {
+      // `new SharedState(node)` API
+      if (!node.stateManager) {
+        throw new TypeError('Cannot construct SharedState: argument 1 must be either a Client or a Server instance');
+      }
+
+      manager = node.stateManager;
+    }
+
+    if (!isString(className)) {
+      throw new TypeError('Cannot construct SharedState: argument 2 must be a string');
+    }
+
+    this.#manager = manager;
+    this.#client = manager[kStateManagerClient];
+    this.#className = className;
+
+    this[kSharedStatePromiseStore] = new PromiseStore(this.constructor.name);
+  }
+
+  /**
+   * Create a new instance of SharedState from the associated ClassDescription.
+   *
+   * @param {object} initValues
+   * @returns {Promise<SharedState>} this
+   */
+  create(initValues = {}) {
+    return this.#manager[kStateManagerCreateRequest](this, initValues);
+  }
+
+  /**
+   * Attach to an existing instance of the associated ClassDescription.
+   *
+   * @param {*} stateId
+   * @param {*} options
+   * @returns
+   */
+  attach(stateIdOrOptions = null, options = null) {
+    let stateId;
+
+    if (stateIdOrOptions === null || Number.isInteger(stateIdOrOptions)) {
+      stateId = stateIdOrOptions;
+    } else {
+      stateId = null;
+      options = stateIdOrOptions;
+    }
+
+    if (Array.isArray(options)) {
+      // backward compatibility for legacy filter array argument
+      warnings.deprecated(
+        'argument `filter: string[]` of BaseStateManager#attach',
+        'argument `options { whiteList: string[] }`',
+        '5.6.0',
+      );
+
+      options = { whiteList: options };
+    }
+
+    if (stateId !== null && !Number.isInteger(stateId)) {
+      throw new Error(`Invalid stateId ${stateId}`)
+    }
+
+    if (options !== null && !isPlainObject(options)) {
+      throw new Error(`Invalid options`)
+    }
+
+    return this.#manager[kStateManagerAttachRequest](this, stateId, options);
+  }
+
+  [kSharedStateFinalize](data) {
+    this.#isOwner = data.isOwner; // may be any node
+    this.#id = data.stateId;
+    this.#instanceId = data.instanceId;
+    this.#filter = data.filter;
 
     try {
-      this.#parameters = new ParameterBag(
-        globalThis[kPendingSharedStateConstructionData].classDescription,
-        globalThis[kPendingSharedStateConstructionData].initValues,
-      );
+      this.#parameters = new ParameterBag(data.classDescription, data.initValues);
     } catch (err) {
       throw new Error(`Cannot construct 'SharedState' (${this.#className}): ${err.message}`);
     }
-
-    /** @private */
-    this[kSharedStatePromiseStore] = new PromiseStore(this.constructor.name);
 
     this.#client.transport.addListener(`${UPDATE_RESPONSE}-${this.#id}-${this.#instanceId}`, this.#onUpdateResponse);
     this.#client.transport.addListener(`${UPDATE_NOTIFICATION}-${this.#id}-${this.#instanceId}`, this.#onUpdateNotification);
@@ -176,26 +244,33 @@ class SharedState {
     }
   }
 
+  // lifecycle methods
+  /**
+   * The `connectedCallback` lifecycle method is called at the end of either
+   * `create` or `attach` method, just before they resolve themselves.
+   * This lifecycle method is executed when the state is finalized and ready to use.
+   * @private
+   */
+  async connectedCallback() {}
+  /** @private */
+  async disconnectedCallback() {}
+
   #cleanup() {
     this.#detached = true;
     this.#manager[kStateManagerDeleteState](this.#id);
 
-    try {
-      this.#client.transport.removeListener(`${UPDATE_RESPONSE}-${this.#id}-${this.#instanceId}`, this.#onUpdateResponse);
-      this.#client.transport.removeListener(`${UPDATE_NOTIFICATION}-${this.#id}-${this.#instanceId}`, this.#onUpdateNotification);
-      this.#client.transport.removeListener(`${UPDATE_ABORT}-${this.#id}-${this.#instanceId}`, this.#onUpdateAbort);
-      this.#client.transport.removeListener(`${DELETE_NOTIFICATION}-${this.#id}-${this.#instanceId}`, this.#onDeleteNotification);
+    this.#client.transport.removeListener(`${UPDATE_RESPONSE}-${this.#id}-${this.#instanceId}`, this.#onUpdateResponse);
+    this.#client.transport.removeListener(`${UPDATE_NOTIFICATION}-${this.#id}-${this.#instanceId}`, this.#onUpdateNotification);
+    this.#client.transport.removeListener(`${UPDATE_ABORT}-${this.#id}-${this.#instanceId}`, this.#onUpdateAbort);
+    this.#client.transport.removeListener(`${DELETE_NOTIFICATION}-${this.#id}-${this.#instanceId}`, this.#onDeleteNotification);
 
-      if (this.#isOwner) {
-        this.#client.transport.removeListener(`${DELETE_RESPONSE}-${this.#id}-${this.#instanceId}`, this.#onDeleteResponse);
-        this.#client.transport.removeListener(`${DELETE_ERROR}-${this.#id}-${this.#instanceId}`, this.#onDeleteError);
-        this.#client.transport.removeListener(`${HAS_SIBLINGS_NOTIFICATION}-${this.#id}-${this.#instanceId}`, this.#onHasSiblingsNotification);
-      } else {
-        this.#client.transport.removeListener(`${DETACH_RESPONSE}-${this.#id}-${this.#instanceId}`, this.#onDetachResponse);
-        this.#client.transport.removeListener(`${DETACH_ERROR}-${this.#id}-${this.#instanceId}`, this.#onDetachError);
-      }
-    } catch (err) {
-      console.log(err);
+    if (this.#isOwner) {
+      this.#client.transport.removeListener(`${DELETE_RESPONSE}-${this.#id}-${this.#instanceId}`, this.#onDeleteResponse);
+      this.#client.transport.removeListener(`${DELETE_ERROR}-${this.#id}-${this.#instanceId}`, this.#onDeleteError);
+      this.#client.transport.removeListener(`${HAS_SIBLINGS_NOTIFICATION}-${this.#id}-${this.#instanceId}`, this.#onHasSiblingsNotification);
+    } else {
+      this.#client.transport.removeListener(`${DETACH_RESPONSE}-${this.#id}-${this.#instanceId}`, this.#onDetachResponse);
+      this.#client.transport.removeListener(`${DETACH_ERROR}-${this.#id}-${this.#instanceId}`, this.#onDetachError);
     }
   }
 

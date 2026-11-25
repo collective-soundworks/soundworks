@@ -11,7 +11,7 @@ export default class PromiseStore {
     this.generateId = counter();
   }
 
-  createPromise() {
+  createPromise(payload) {
     const id = this.generateId();
     let resolve, reject;
 
@@ -20,16 +20,26 @@ export default class PromiseStore {
       reject = rejectFunc;
     });
 
-    this.store.set(id, { promise, resolve, reject });
+    this.store.set(id, { promise, resolve, reject, payload });
 
     return { id, promise };
   }
 
+  // @todo - use createPromise(data);
   // associate data to merge within the data given when calling `resolve`
   // cf. SharedState#set
   associateResolveData(id, associatedData) {
     const stored = this.store.get(id);
     stored.associatedData = associatedData;
+  }
+
+  getPayload(id) {
+    if (this.store.has(id)) {
+      const { payload } = this.store.get(id);
+      return payload;
+    } else {
+      throw new ReferenceError(`Cannot execute "getPayload" on PromiseStore: request id (${id}) does not exist`);
+    }
   }
 
   resolve(id, data) {

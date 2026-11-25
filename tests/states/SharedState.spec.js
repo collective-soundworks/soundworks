@@ -1130,6 +1130,22 @@ describe('# SharedState - filtered attached state', () => {
       assert.equal(attached.id, owned.id);
     });
 
+    it(`should throw if options is not an object`, async () => {
+      const owned = await server.stateManager.create('filtered');
+      let errored = false;
+
+      try {
+        const attached = await client.stateManager.attach('filtered', {
+          whiteList: ['invalid', 'toto'],
+        });
+      } catch (err) {
+        console.log(err.message);
+        errored = true;
+      }
+
+      assert.isTrue(errored);
+    });
+
     it(`should throw if whiteList contains invalid keys`, async () => {
       const owned = await server.stateManager.create('filtered');
       let errored = false;
