@@ -39,3 +39,5 @@ export { default as Client } from './Client.js';
 export { default as ClientPlugin } from './ClientPlugin.js';
 export { default as ClientContext } from './ClientContext.js';
 export { default as version } from '../common/version.js';
+
+export { default as SharedState } from '../common/SharedState.js';

@@ -50,12 +50,13 @@ class BatchedTransport {
   }
 
   removeListener(channel, callback) {
-    if (!this.#listeners.has(channel)) {
+    if (this.#listeners.has(channel)) {
       const callbacks = this.#listeners.get(channel);
       callbacks.delete(callback);
     }
   }
 
+  // @note - used in `SharedStatePrivate`
   removeAllListeners(channel = null) {
     if (channel === null) {
       this.#listeners.clear();

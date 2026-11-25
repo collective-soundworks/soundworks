@@ -368,7 +368,7 @@ class Client {
     this.#stateManager[kStateManagerInit](this.id, {
       emit: this.#socket.send.bind(this.#socket), // need to alias this
       addListener: this.#socket.addListener.bind(this.#socket),
-      removeAllListeners: this.#socket.removeAllListeners.bind(this.#socket),
+      removeListener: this.#socket.removeListener.bind(this.#socket),
     });
 
     await this.#pluginManager[kPluginManagerStart]();

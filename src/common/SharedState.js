@@ -137,7 +137,7 @@ class SharedState {
     this.#client = globalThis[kPendingSharedStateConstructionData].manager[kStateManagerClient];
     this.#className = globalThis[kPendingSharedStateConstructionData].className;
     this.#id = globalThis[kPendingSharedStateConstructionData].stateId;
-    this.#instanceId =globalThis[kPendingSharedStateConstructionData]. instanceId;
+    this.#instanceId = globalThis[kPendingSharedStateConstructionData].instanceId;
     this.#isOwner = globalThis[kPendingSharedStateConstructionData].isOwner; // may be any node
     this.#filter = globalThis[kPendingSharedStateConstructionData].filter;
 
@@ -154,8 +154,8 @@ class SharedState {
     this[kSharedStatePromiseStore] = new PromiseStore(this.constructor.name);
 
     this.#client.transport.addListener(`${UPDATE_RESPONSE}-${this.#id}-${this.#instanceId}`, this.#onUpdateResponse);
-    this.#client.transport.addListener(`${UPDATE_ABORT}-${this.#id}-${this.#instanceId}`, this.#onUpdateAbort);
     this.#client.transport.addListener(`${UPDATE_NOTIFICATION}-${this.#id}-${this.#instanceId}`, this.#onUpdateNotification);
+    this.#client.transport.addListener(`${UPDATE_ABORT}-${this.#id}-${this.#instanceId}`, this.#onUpdateAbort);
     this.#client.transport.addListener(`${DELETE_NOTIFICATION}-${this.#id}-${this.#instanceId}`, this.#onDeleteNotification);
 
     if (this.#isOwner) {
@@ -180,18 +180,22 @@ class SharedState {
     this.#detached = true;
     this.#manager[kStateManagerDeleteState](this.#id);
 
-    this.#client.transport.removeAllListeners(`${UPDATE_RESPONSE}-${this.#id}-${this.#instanceId}`);
-    this.#client.transport.removeAllListeners(`${UPDATE_NOTIFICATION}-${this.#id}-${this.#instanceId}`);
-    this.#client.transport.removeAllListeners(`${UPDATE_ABORT}-${this.#id}-${this.#instanceId}`);
-    this.#client.transport.removeAllListeners(`${DELETE_NOTIFICATION}-${this.#id}-${this.#instanceId}`);
+    try {
+      this.#client.transport.removeListener(`${UPDATE_RESPONSE}-${this.#id}-${this.#instanceId}`, this.#onUpdateResponse);
+      this.#client.transport.removeListener(`${UPDATE_NOTIFICATION}-${this.#id}-${this.#instanceId}`, this.#onUpdateNotification);
+      this.#client.transport.removeListener(`${UPDATE_ABORT}-${this.#id}-${this.#instanceId}`, this.#onUpdateAbort);
+      this.#client.transport.removeListener(`${DELETE_NOTIFICATION}-${this.#id}-${this.#instanceId}`, this.#onDeleteNotification);
 
-    if (this.#isOwner) {
-      this.#client.transport.removeAllListeners(`${DELETE_RESPONSE}-${this.#id}-${this.#instanceId}`);
-      this.#client.transport.removeAllListeners(`${DELETE_ERROR}-${this.#id}-${this.#instanceId}`);
-      this.#client.transport.removeAllListeners(`${HAS_SIBLINGS_NOTIFICATION}-${this.#id}-${this.#instanceId}`);
-    } else {
-      this.#client.transport.removeAllListeners(`${DETACH_RESPONSE}-${this.#id}-${this.#instanceId}`);
-      this.#client.transport.removeAllListeners(`${DETACH_ERROR}-${this.#id}-${this.#instanceId}`);
+      if (this.#isOwner) {
+        this.#client.transport.removeListener(`${DELETE_RESPONSE}-${this.#id}-${this.#instanceId}`, this.#onDeleteResponse);
+        this.#client.transport.removeListener(`${DELETE_ERROR}-${this.#id}-${this.#instanceId}`, this.#onDeleteError);
+        this.#client.transport.removeListener(`${HAS_SIBLINGS_NOTIFICATION}-${this.#id}-${this.#instanceId}`, this.#onHasSiblingsNotification);
+      } else {
+        this.#client.transport.removeListener(`${DETACH_RESPONSE}-${this.#id}-${this.#instanceId}`, this.#onDetachResponse);
+        this.#client.transport.removeListener(`${DETACH_ERROR}-${this.#id}-${this.#instanceId}`, this.#onDetachError);
+      }
+    } catch (err) {
+      console.log(err);
     }
   }
 
