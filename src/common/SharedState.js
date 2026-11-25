@@ -35,7 +35,7 @@ import {
 import warnings from './logs/warnings.js';
 
 // BaseStateManager
-export const kSharedStateFinalize = Symbol('soundworks:shared-state-finalize')
+export const kSharedStateFinalize = Symbol('soundworks:shared-state-finalize');
 // for testing purposes
 export const kSharedStatePromiseStore = Symbol('soundworks:shared-state-promise-store');
 
@@ -199,11 +199,11 @@ class SharedState {
     }
 
     if (stateId !== null && !Number.isInteger(stateId)) {
-      throw new Error(`Invalid stateId ${stateId}`)
+      throw new Error(`Cannot execute "attach" on SharedState (${this.className}): Invalid stateId (${stateId}), stateId must be null or a positive integer`);
     }
 
     if (options !== null && !isPlainObject(options)) {
-      throw new Error(`Invalid options`)
+      throw new Error(`Cannot execute "attach" on SharedState (${this.className}): Invalid options (${options}), stateId must be null an object`);
     }
 
     return this.#manager[kStateManagerAttachRequest](this, stateId, options);

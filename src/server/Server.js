@@ -80,7 +80,7 @@ const DEFAULT_CONFIG = {
     baseUrl: '',
     crossOriginIsolated: true,
     verbose: true,
-     // prevent creating AuditState, set to true for debug and testing
+    // prevent creating AuditState, set to true for debug and testing
     noInternalState: false,
   },
   app: {
