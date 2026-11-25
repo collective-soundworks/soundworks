@@ -33,7 +33,6 @@ import warnings from './logs/warnings.js';
 
 export const kStateManagerInit = Symbol('soundworks:state-manager-init');
 export const kStateManagerDeleteState = Symbol('soundworks:state-manager-delete-state');
-export const kPendingSharedStateConstructionData = Symbol('soundworks:state-manager-pending-shared-state-construction-data');
 export const kStateManagerCreateRequest = Symbol('soundworks:state-manager-create-request');
 export const kStateManagerAttachRequest = Symbol('soundworks:state-manager-attach-request');
 // for testing purposes
@@ -111,29 +110,6 @@ class BaseStateManager {
     this.#status = 'inited';
   }
 
-  // This pattern allows to have a clean SharedState constructor signature for  which
-  // which will provide a cleaner user facing API when derived.
-  // @note: mimic instantiation pattern from AudioWorkletProcessor
-  // <https://webaudio.github.io/web-audio-api/#AudioWorkletProcessor-instantiation>
-  #buildSharedState(options) {
-    // globalThis[kPendingSharedStateConstructionData] = {
-    //   manager: this,
-    //   className: options.className,
-    //   classDescription: options.classDescription,
-    //   stateId: options.stateId,
-    //   instanceId: options.instanceId,
-    //   isOwner: options.isOwner,
-    //   initValues: options.initValues,
-    //   filter: options.filter,
-    // };
-
-    // const state = new SharedState(this, options.className);
-    // // cleanup global scope
-    // delete globalThis[kPendingSharedStateConstructionData];
-
-    // return state;
-  }
-
   /**
    * Validates the given class description.
    *
@@ -193,6 +169,7 @@ class BaseStateManager {
     return state.create(initValues);
   }
 
+  /** @private */
   [kStateManagerCreateRequest](state, initValues) {
     const { id: reqId, promise } = this.#promiseStore.createPromise(state);
     this[kStateManagerClient].transport.emit(CREATE_REQUEST, reqId, state.className, initValues);
@@ -306,6 +283,7 @@ class BaseStateManager {
     return state.attach(stateIdOrOptions, options);
   }
 
+  /** @private */
   [kStateManagerAttachRequest](state, stateId, options) {
     const { id: reqId, promise } = this.#promiseStore.createPromise(state);
     this[kStateManagerClient].transport.emit(ATTACH_REQUEST, reqId, state.className, stateId, options);

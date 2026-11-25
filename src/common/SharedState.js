@@ -209,6 +209,7 @@ class SharedState {
     return this.#manager[kStateManagerAttachRequest](this, stateId, options);
   }
 
+  /** @private */
   [kSharedStateFinalize](data) {
     this.#isOwner = data.isOwner; // may be any node
     this.#id = data.stateId;
