@@ -58,17 +58,19 @@ class ServerSockets {
 
     const auditState = await this.#server.getAuditState();
 
-    auditState.onUpdate(updates => {
-      if ('averageNetworkLatencyWindow' in updates || 'averageNetworkLatencyPeriod' in updates) {
-        this[kSocketsLatencyStatsWorker].postMessage({
-          type: 'config',
-          value: {
-            averageLatencyWindow: updates.averageNetworkLatencyWindow,
-            averageLatencyPeriod: updates.averageNetworkLatencyPeriod,
-          },
-        });
-      }
-    }, true);
+    if (auditState) {
+      auditState.onUpdate(updates => {
+        if ('averageNetworkLatencyWindow' in updates || 'averageNetworkLatencyPeriod' in updates) {
+          this[kSocketsLatencyStatsWorker].postMessage({
+            type: 'config',
+            value: {
+              averageLatencyWindow: updates.averageNetworkLatencyWindow,
+              averageLatencyPeriod: updates.averageNetworkLatencyPeriod,
+            },
+          });
+        }
+      }, true);
+    }
 
     this[kSocketsLatencyStatsWorker].on('message', msg => {
       if (msg.type === 'computed-average-latency') {

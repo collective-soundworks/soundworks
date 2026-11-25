@@ -80,6 +80,8 @@ const DEFAULT_CONFIG = {
     baseUrl: '',
     crossOriginIsolated: true,
     verbose: true,
+     // prevent creating AuditState, set to true for debug and testing
+    noInternalState: false,
   },
   app: {
     name: 'soundworks',
@@ -520,7 +522,9 @@ class Server {
       numClients[name] = 0;
     }
 
-    this.#auditState = await this.#stateManager.create(AUDIT_STATE_NAME, { numClients });
+    if (this.config.env.noInternalState === false) {
+      this.#auditState = await this.#stateManager.create(AUDIT_STATE_NAME, { numClients });
+    }
 
     // backward compatibility for `useDefaultApplicationTemplate`
     if (this.#useDefaultApplicationTemplate === true) {
@@ -676,9 +680,11 @@ class Server {
       // cleanup if role is valid and client finished handshake
       if (roles.includes(role) && this.#stateManager[kServerStateManagerHasClient](client.id)) {
         // decrement audit state counter
-        const numClients = this.#auditState.get('numClients');
-        numClients[role] -= 1;
-        this.#auditState.set({ numClients });
+        if (this.#auditState) {
+          const numClients = this.#auditState.get('numClients');
+          numClients[role] -= 1;
+          this.#auditState.set({ numClients });
+        }
 
         // delete token
         if (this.#trustedClients.has(client)) {
@@ -733,9 +739,11 @@ class Server {
       }
 
       // increment audit state
-      const numClients = this.#auditState.get('numClients');
-      numClients[role] += 1;
-      this.#auditState.set({ numClients });
+      if (this.#auditState) {
+        const numClients = this.#auditState.get('numClients');
+        numClients[role] += 1;
+        this.#auditState.set({ numClients });
+      }
 
       const transport = {
         emit: client.socket.send.bind(client.socket),
